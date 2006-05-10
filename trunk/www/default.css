@@ -1,0 +1,300 @@
+html, body {
+    background: url("images/bg.png") 0 0 fixed;
+    padding: 0;
+    margin: 0;
+}
+
+body, td, div {
+    font-size: 9pt;
+    font-family: "Bitstream Vera Sans Mono", monospace;
+}
+
+div.purp {
+    background: url("images/bg3.png") 0 0 fixed;
+    padding: 3px;
+}
+
+div.purp_bdr {
+    margin: 0;
+    border: 1px solid #a888fc;
+    padding: 6px;
+    color: #a888fc;
+}
+
+div.purp_bdr td {
+    color: #a888fc;
+}
+
+div img {
+    border: 0px;
+    margin: 0px;
+}
+
+.teal {
+    background: url("images/bg2.png") 0 0 fixed;
+    padding: 3px;
+    text-align: center;
+    display: block;
+}
+
+.teal a {
+    margin: 0;
+    display: block;
+    border: 1px solid #2c889c;
+    padding: 3px;
+    color: #2c889c;
+    height: 12px;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.teal a img {
+    display: none;
+}
+
+a#sb_news {
+    background-image: url("images/sidebar/lo.news.png");
+}
+
+a#sb_news:hover {
+    background-image: url("images/sidebar/hi.news.png");
+}
+
+a#sb_about {
+    background-image: url("images/sidebar/lo.about.png");
+}
+
+a#sb_about:hover {
+    background-image: url("images/sidebar/hi.about.png");
+}
+
+a#sb_ss {
+    background-image: url("images/sidebar/lo.ss.png");
+}
+
+a#sb_ss:hover {
+    background-image: url("images/sidebar/hi.ss.png");
+}
+
+a#sb_dl {
+    background-image: url("images/sidebar/lo.dl.png");
+}
+
+a#sb_dl:hover {
+    background-image: url("images/sidebar/hi.dl.png");
+}
+
+a#sb_dev {
+    background-image: url("images/sidebar/lo.dev.png");
+}
+
+a#sb_dev:hover {
+    background-image: url("images/sidebar/hi.dev.png");
+}
+
+a#sb_ff {
+    background-image: url("images/sidebar/lo.ff.png");
+}
+
+a#sb_ff:hover {
+    background-image: url("images/sidebar/hi.ff.png");
+}
+
+a#sb_links {
+    background-image: url("images/sidebar/lo.links.png");
+}
+
+a#sb_links:hover {
+    background-image: url("images/sidebar/hi.links.png");
+}
+
+.teal a:hover {
+    border: 1px solid #00fcfc;
+    color: #00fcfc;
+}
+
+div.clock {
+    background: url("images/bg3.png") 0 0 fixed;
+    padding: 1px;
+}
+
+div.clock_bdr {
+    margin: 0;
+    border: 1px solid #a888fc;
+    padding: 2px;
+    color: #a888fc;
+    line-height: 0;
+}
+
+img {
+    margin: 0px;
+    padding: 0px;
+    border: 0px;
+}
+
+div#time {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 116px;
+}
+
+div#date {
+    position: absolute;
+    top: 3px;
+    left: 125px;
+    width: 91px;
+}
+
+div#links {
+    margin: 0;
+    padding: 0;
+}
+
+ul#linklist {
+    margin: 0;
+    padding: 0;
+    list-style-type: none;
+}
+
+ul#linklist li {
+    margin-bottom: 3px;
+    width: 100%;
+}
+
+div#logo {
+    position: absolute;
+    top: 21px;
+    left: 3px;
+    width: 240px;
+    text-align: center;
+    line-height: 0;
+}
+
+div#sidebar {
+    position: absolute;
+    top: 67px;
+    left: 3px;
+    width: 240px;
+    padding: 0;
+}
+
+div#titlebar {
+    position: absolute;
+    top: 21px;
+    left: 252px;
+    right: 3px;
+    text-align: center;
+    line-height: 0;
+}
+
+div#content {
+    margin: 67px 3px 3px 252px;
+}
+
+a {
+    text-decoration: none;
+}
+
+a:link, a:visited {
+    color: #00fcfc;
+}
+
+hr {
+    background-color: #a888fc;
+    height: 1px;
+    border: 0;
+    margin: 1em;
+}
+
+.left_algn {
+    text-align: left;
+}
+
+.rght_algn {
+    text-align: right;
+}
+
+.cent_algn {
+    text-align: center;
+}
+
+.warning {
+    font-weight: bold;
+    color: white;
+    padding: 3px;
+    background-color: red;
+    border: 2px solid white;
+    text-align: center;
+    margin: 0;
+    margin-bottom: 1em;
+}
+
+pre, div.caption, div.teal_on_purp, div.footer, div.w3bar, table#ff {
+    background: url("images/bg4.png") 0 0 fixed;
+    margin: 0;
+    padding: 2px;
+    color: #00fcfc;
+}
+
+div.caption {
+    text-align: center;
+}
+
+div.w3bar {
+    line-height: 0;
+}
+
+div.footer {
+    padding: 0;
+    margin-top: 3px;
+    text-align: center;
+    font-size: x-small;
+}
+
+table {
+    width: 100%;
+}
+
+table.screenshots td, table#ff td {
+    width: 33%;
+    vertical-align: top;
+}
+
+table#ff td {
+    color: #00fcfc;
+}
+
+table#screenshots td {
+    text-align: center;
+}
+
+p {
+    margin: 0;
+    margin-bottom: 1em;
+    text-indent: 1em;
+}
+
+p.indent {
+    margin: 0;
+    margin-bottom: 1em;
+    padding-left: 1em;
+    text-indent: 0;
+}
+
+table#ff {
+    border: 1px solid #00fcfc;
+    padding: 0;
+}
+
+table#ff td {
+    border: 1px solid #00fcfc;
+}
+
+.head {
+    font-weight: bold;
+}
+
+table + p {
+    padding-top: 1em;
+}
