@@ -1,7 +1,18 @@
 <project name="FreeSynd" default="compile" basedir=".">
+    <!-- Additional task/type includes - we need the cpp tasks from ant-contrib -->
     <taskdef resource="cpptasks.tasks"/>
     <typedef resource="cpptasks.types"/>
+    <taskdef name="doxygen" classname="org.doxygen.tools.DoxygenTask"/>
 
+    <!-- Project properties -->
+    <property name="target" value="freesynd"/>
+
+    <property name="src" location="./src"/>
+    <property name="build" location="./build"/>
+    <property name="dist" location="./dist"/>
+    <property name="apidocs" location="./apidocs"/>
+
+    <!-- Additional compiler/links flags -->
     <exec outputproperty="sdlcflags" executable="sdl-config">
         <arg line="--cflags"/>
     </exec>
@@ -10,17 +21,18 @@
         <arg line="--libs"/>
     </exec>
 
-    <property name="src" location="src"/>
-    <property name="build" location="build"/>
-    <property name="dist" location="dist"/>
-    <property name="target" value="freesynd"/>
-
+    <!-- Target preparation -->
     <target name="prep-build">
         <tstamp/>
         <mkdir dir="${build}"/>
         <mkdir dir="${dist}"/>
     </target>
 
+    <target name="prep-apidocs">
+        <mkdir dir="${apidocs}"/>
+    </target>
+
+    <!-- Project targets -->
     <target name="compile" depends="prep-build">
         <cc outfile="${dist}/${target}" objdir="${build}"
             debug="true" optimize="none">
@@ -40,5 +52,10 @@
     <target name="clean">
         <delete dir="${build}"/>
         <delete dir="${dist}"/>
+        <delete dir="${apidocs}"/>
+    </target>
+
+    <target name="apidocs" depends="prep-apidocs">
+        <doxygen configFilename="Doxyfile"/>
     </target>
 </project>
