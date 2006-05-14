@@ -1,0 +1,44 @@
+<project name="FreeSynd" default="compile" basedir=".">
+    <taskdef resource="cpptasks.tasks"/>
+    <typedef resource="cpptasks.types"/>
+
+    <exec outputproperty="sdlcflags" executable="sdl-config">
+        <arg line="--cflags"/>
+    </exec>
+
+    <exec outputproperty="sdllibs" executable="sdl-config">
+        <arg line="--libs"/>
+    </exec>
+
+    <property name="src" location="src"/>
+    <property name="build" location="build"/>
+    <property name="dist" location="dist"/>
+    <property name="target" value="freesynd"/>
+
+    <target name="prep-build">
+        <tstamp/>
+        <mkdir dir="${build}"/>
+        <mkdir dir="${dist}"/>
+    </target>
+
+    <target name="compile" depends="prep-build">
+        <cc outfile="${dist}/${target}" objdir="${build}"
+            debug="true" optimize="none">
+            <fileset dir="${src}">
+                <include name="**/*.cpp"/>
+            </fileset>
+
+            <libset libs="stdc++" type="shared"/>
+
+            <compilerarg value="${sdlcflags}"/>
+            <linker>
+                <linkerparam value="${sdllibs}"/>
+            </linker>
+        </cc>
+    </target>
+
+    <target name="clean">
+        <delete dir="${build}"/>
+        <delete dir="${dist}"/>
+    </target>
+</project>
