@@ -1,0 +1,303 @@
+000	empty
+001	empty
+002	empty
+003	empty
+004	empty
+005	
+006	ramp: se bright
+007	ramp: se darkening
+
+008	ramp: se dark
+009	ramp: sw dark
+010	ramp: sw darkening
+011	ramp: sw bright
+012	ok
+013	ok
+014	ok
+015	
+
+016	
+017	
+018	ok
+019	ok
+020	ok
+021	ok
+022	ok
+023	ok
+
+024	ok
+025	ok
+026	ok
+027	ok
+028	ok
+029	ok
+030	ok
+031	ok
+
+032	ok
+033	ok
+034	lamp: on, ne
+035	ok
+036	ok
+037	ok
+038	ok
+039	ok
+
+040	ok
+041	ok
+042	ok
+043	ok
+044	ok
+045	ok
+046	ok
+047	roof-1/2: ne walkable?
+
+048	roof-1/2: se walkable?
+049	roof-1/2: sw walkable?
+050	roof-1/2: nw walkable?
+051	roof-3/4: e walkable?
+052	roof-3/4: s walkable?
+053	roof-3/4: w walkable?
+054	roof-3/4: n walkable?
+055	roof-1/1: walkable?
+
+056	roof-1/4: -n
+057	roof-1/4: -w
+058	roof-1/4: -s
+059	roof-1/4: -e
+060	roof-slant nw
+061	roof-slant ne
+062	roof-slant sw
+063	roof-slant se
+
+064	roof-slant2 top: e
+065	roof-slant2 top: s
+066	roof-slant2 top: w
+067	roof-slant2 top: n
+068	roof-slant2 bottom: s
+069	roof-slant2 bottom: w
+070	roof-slant2 bottom: n
+071	roof-slant2 bottom: e
+
+072	ok
+073	ok
+074	ok
+075	ok
+076	ok
+077	ramp: ne dark
+078	ok
+079	ok
+
+080	ok?
+081	ok?
+082	slant: sw
+083	slant: se
+084	slant: ne
+085	slant: nw
+086	corner n
+087	corner s
+
+088	corner w
+089	corner e
+090	glass turret
+091	
+092	
+093	glass turret
+094	
+095	
+
+096	glass turret
+097	beam
+098	beam
+099	beam
+100	ok
+101	ok
+102	ok
+103	ok
+
+104	ok
+105	ok
+106	ok
+107	ok
+108	ok
+109	ok
+110	ok
+111	ok
+
+112	ok
+113	ok
+114	ok
+115	ok
+116	ok
+117	ok
+118	ok
+119	ok
+
+120	ok
+121	ok
+122	ok
+123	ok
+124	ok
+125	ok
+126	ok
+127	ramp: nw dark
+
+128	?
+129	?
+130	fence: nw
+131	fence: ne
+132	fence: se
+133	fence: sw
+134	fence: nw+ne
+135	fence: ne+se
+
+136	fence: sw+nw
+137	fence: se+sw
+138	fence: nw+se
+139	fence: sw+ne
+140	lamp: on, nw
+141	
+142	
+143	
+
+144	
+145	ok
+146	
+147	
+148	
+149	ok
+150	
+151	
+
+152	
+153	ok
+154	
+155	
+156	ok
+157	ok
+158	ok
+159	ok
+
+160	ok
+161	ok
+162	ok
+163	ok
+164	ok
+165	ok
+166	ok
+167	ok
+
+168	ok
+169	ok
+170	ok
+171	ok
+172	ok
+173	ok
+174	ok
+175	ok
+
+176	ok
+177	ok
+178	stairs: ne
+179	stairs: nw
+180	
+181	
+182	
+183	
+
+184	
+185	
+186	
+187	
+188	
+189	
+190	
+191	
+
+192	
+193	
+194	ok
+195	ok
+196	ok
+197	ok
+198	ok
+199	ok
+
+200	ok
+201	ok
+202	ok
+203	ok
+204	ok
+205	ok
+206	ok
+207	ok
+
+208	ok
+209	ok?
+210	ok
+211	ok
+212	ok
+213	ok
+214	ok
+215	ok
+
+216	
+217	
+218	ok
+219	ok
+220	ok
+221	ok
+222	
+223	
+
+224	
+225	ok?
+226	ok?
+227	ok
+228	ramp: ne darkening
+229	
+230	
+231	
+
+232	
+233	
+234	
+235	
+236	
+237	
+238	
+239	
+
+240	lamp on, sw
+241	lamp on, se
+242	lamp off, sw
+243	lamp off, se
+244	
+245	
+246	
+247	
+
+248	ok
+249	
+250	
+251	ok
+252	ok
+253	ramp: nw darkening
+254	ramp: nw bright
+255	ramp: ne bright
+----
+006     ramp: se bright
+007     ramp: se darkening
+008     ramp: se dark
+
+009     ramp: sw dark
+010     ramp: sw darkening
+011     ramp: sw bright
+
+255     ramp: ne bright
+228     ramp: ne darkening
+077     ramp: ne dark
+
+253     ramp: nw darkening
+254     ramp: nw bright
+127     ramp: nw dark

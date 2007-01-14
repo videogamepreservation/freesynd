@@ -1,0 +1,217 @@
+Sprites:
+  Characters are two tiles tall.
+  Width, count:
+    16   1520
+    32    160
+    64    119
+  Aha! I should stripe these. (One surface per width, like the tiles.)
+  Colors! Change the palette and blit. (Not possible everywhere?)
+
+Maps:
+  I should make these into lua objects.
+  Split Gaia into a tile part and a map part?
+  Rotation other than theta = -45deg!
+    Requires some new tiles.
+      Most are rotationally independent,
+       Some are duplicated; ramps, lamps, rails, roof, roads.
+      Some, inexplicably, are neither: Stairs, 128-129, 244-245, 222-224,...
+  Non-retarded display method.
+  Breaks for sprite drawing.
+    Fortunately, there's a reasonably good way to do this. Record what tile
+    they're in, and sort the list. When map coords XXYYZZ come up, we make
+    a quick side trip.
+  Sectioned maps.
+    This would be very cool, the world could be huge. Large memory
+    footprint would not be a problem either, since you can't traverse the
+    map section before I load the neighbour on that side from disk.
+  Water! Animated tiles.
+
+
+Pathfinding:
+  Only relevant for the map. Ergo, make link very explicit.
+  Tactical valuation for path cost
+    Corner detection
+      Corners visible from here.
+      Dichotomize open ground / tangled ground
+    Precomputed sweet-spots
+    path-nearest unseen tile
+    furthest line-of-sight seen tile
+
+Agents / Trees are people too / Scripting.
+  "Dancing" should be at least possible in some kind of playground mode.
+  TileAt(mx,my,mz) (done)
+  Coordinated movement
+  View arcs and detection
+
+
+void old_blit_map(/*struct Map *M, */ Sint16 wx, Sint16 wy)
+{
+  Sint16 mx, my, mz;
+  Sint16 sx, sy;
+  Uint8  *w;
+
+  LX=wx; LY=wy; /* SAVE THIS. */
+
+  Sint16 tlx = (SM_x(tlX, tlY) + wx) & ~0x1f;
+  Sint16 brx = (SM_x(brX, brY) + wx) & ~0x1f;
+  Sint16 tly = (SM_y(tlX, tlY) + wy) & ~0x1f;
+  Sint16 bry = (SM_y(brX, brY) + wy) & ~0x1f;
+  Sint16 ceil= 12 * MAP;
+
+  for     ( mx = tlx;  mx < brx;  mx += MAP ) {
+    for   ( my = tly;  my < bry;  my += MAP ) {
+      for ( mz =   0;  mz < ceil; mz += MAP ) {
+	sx = MS_x(mx-wx, my-wy, mz);
+	sy = MS_y(mx-wx, my-wy, mz);
+	if(sx > -64 && sx < 320 && sy > -48 && sy < 200) {
+	  w = tile_ref(M, mx, my, mz);
+	  if(w && *w > 5) blit_tile(sx, sy, *w);
+	}
+      }
+    }
+  }
+#if DEBUG
+  printf("from %d,%d to %d,%d\n", tlx / 32, tly / 32, brx / 32, bry / 32);
+#endif
+}
+extern Uint16 blit_frame(Uint16 x, Uint16 y, Uint16 a, Uint16 f);
+
+void blit_map_v2(/*struct Map *M, */ Sint16 wx, Sint16 wy)
+{
+  Sint16 sx, sy;
+  Uint8  *w = NULL;
+
+
+  wx -= SM_x(width/2, height/2);
+  wy -= SM_y(width/2, height/2);
+
+  LX=wx; LY=wy; /* SAVE THESE. (wtf?)*/
+  
+  /* sub-tile scroll */
+  /* adjustment      */
+  sx = -MS_x(SUB(wx), SUB(wy), 0) - 64;
+  sy = -MS_y(SUB(wx), SUB(wy), 0) - 16;
+
+  wx /= MAP; wy /= MAP;
+
+  Sint8 x=0, y=0, z=0;
+  Sint16 xl, yl, zf;
+  xl = SM_x(width,        0) / MAP + 2;
+  yl = SM_y(    0, 2*height) / MAP + M->zs + 3;
+
+  for     ( y = 0 ; y <   yl ; y++) {    /* far to near */
+    for   ( z = 0 ; z < M->zs; z++) {    /* bottom to top,shifted */
+      for ( x = 0 ; x <   xl ; x++) {    /* left to right */
+	/*
+	w = raw_ref(M, wx+x+(y/2)+(y&1), wy-x+(y/2), z);
+	if(w != NULL && *w > 5)
+	  blit_tile(sx+64*x+(32*(y&1)), sy+16*y-16*z, *w);
+	if( ((wx+x+(y/2)+(y&1))<<16) + ((wy-x+(y/2))<<8) + z == 0x532801)
+	  blit_frame(sx+64*x+(32*(y&1))+32, sy+16*y-16*z, 9, 1);
+	*/
+      }
+    }
+  }
+}
+
+
+/* Original embarrassing comment */
+/* Ok, time for decisions.  Uint16 is not enough for 1 / 256:th of tiles.
+ * Just pixel-perfect on  the other  hand  has  some nice  characteristics:
+ * scr( 32,  16 )  ~=  map( 0,  45.25 )  is  off  by  only  half  a  percent.
+ * 128 per tile would mean that largest 2x1 dims acceptable would be 362x181.
+ * Which would be ok, but not spectacular. ( For that we just dynamically load
+ * original - style  map  as  sections  and  use  Uint32  coordinates . . . )
+ *
+ * But wait! There's more! Drawing NNN tiles per update feels like a bad idea
+ * even if most are blank. ( Survivable,  sure,  but  not  evilly  elegant. )
+ * So. What to do? Well, tiles have a hexagonal outline, but *subtiles* are
+ * square. If  they  where  first  divided  into  three  classes:  transparent,
+ * (ignored, for all intents and purposes) opaque, (which completely determine
+ * the face of the subtile in screen-space.) and finally, semi-transparent, or
+ * "messy".
+ *
+ * Though it is a mite difficult to imagine parallel projections, consider
+ * screen-space subdivided into 32x16 (subtile) sections. Each subtile frame
+ * cuts a neat (and traversable) path through the map array. I propose to
+ * construct a drawlist for each subtile in turn. If information on the subs
+ * was further enhanced with information on half-subs filled, this could be
+ * used to reliably halt traversal. Since subs are perfectly aligned in screen-
+ * space, this can now be drawn, regardless of its neighbours.
+ *
+ * Additionally, redrawings could be further slashed by maintaining state for
+ * the last two frames and using it to (a) scroll by screen-to-screen blit,
+ * and (b) redraw subtiles overdrawn by sprites. If instead of scaling graphics
+ * up, we allow a far larger viewport ...
+ */
+
+
+
+
+/* Rationale / test: (try pasting into python...)
+# If there was no transparency, we could just:
+# while(--i) y |= (x >> p2c4[i]) & (1<< i);
+# And if we had negative shifts...
+
+# curious effects:
+l = [31,  22,  13,   4,
+     26,  17,   8,  -1,
+     21,  12,   3,  -6,
+     16,   7,  -2, -11,
+     11,   2,  -7, -16,
+     +6,  -3, -12, -21,
+     +1,  -8, -17, -26,
+     -4, -13, -22, -31]
+
+[ a-b for a,b in zip(l, [0]+l) ]
+
+
+# first byte ok:
+x = 0x80808080; y=0
+y |= (x >> 31) & (1<< 0);
+y |= (x >> 22) & (1<< 1);
+y |= (x >> 13) & (1<< 2);
+y |= (x >>  4) & (1<< 3);
+hex(y)
+x = 0x40404040; y=0
+y |= (x >> 26) & (1<< 4);
+y |= (x >> 17) & (1<< 5);
+y |= (x >>  8) & (1<< 6);
+y |= (x <<  1) & (1<< 7);
+hex(y)
+
+# the rest continues as in l
+
+/*
+  Uint32 y = 0; (* Yes. This is fugly. It picks out each nybble in turn. *)
+
+  if(t&  1) y|=(x>>31)&(1<< 0)|(x>>22)&(1<< 1)|(x>>13)&(1<< 2)|(x>> 4)&(1<< 3);
+  if(t&  2) y|=(x>>26)&(1<< 4)|(x>>17)&(1<< 5)|(x>> 8)&(1<< 6)|(x<< 1)&(1<< 7);
+  if(t&  4) y|=(x>>21)&(1<< 8)|(x>>12)&(1<< 9)|(x>> 3)&(1<<10)|(x<< 6)&(1<<11);
+  if(t&  8) y|=(x>>16)&(1<<12)|(x>> 7)&(1<<13)|(x<< 2)&(1<<14)|(x<<11)&(1<<15);
+  if(t& 16) y|=(x>>11)&(1<<16)|(x>> 2)&(1<<17)|(x<< 7)&(1<<18)|(x<<16)&(1<<19);
+  if(t& 32) y|=(x>> 6)&(1<<20)|(x<< 3)&(1<<21)|(x<<12)&(1<<22)|(x<<21)&(1<<23);
+  if(t& 64) y|=(x>> 1)&(1<<24)|(x<< 8)&(1<<25)|(x<<17)&(1<<26)|(x<<26)&(1<<27);
+  if(t&128) y|=(x<< 4)&(1<<28)|(x<<13)&(1<<29)|(x<<22)&(1<<30)|(x<<31)&(1<<31);
+
+  return y;
+
+  (* Shift/data-style *)
+Uint8 p2c4[] = { 31,  22,  13,   4,
+		 26,  17,   8,  -1,
+		 21,  12,   3,  -6,
+		 16,   7,  -2, -11,
+
+		 11,   2,  -7, -16,
+		 +6,  -3, -12, -21,
+		 +1,  -8, -17, -26,
+		 -4, -13, -22, -31 };
+
+static Uint32 planar2chunky4(Uint32 x)
+{
+  Uint32 y = 0;
+  Uint8  i = 32;
+  while(--i) y |= (z >> p2c4[i]) & (1<< i);
+  return y;
+}
+*/
