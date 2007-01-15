@@ -10,7 +10,7 @@
 //#include "uenuku.h"
 #include "chronos.h"
 #include "siren.h"
-#include "fliplayer.h"
+#include "scheherazade.h"
 #include "gaia.h"
 #include "avatar.h"
 #include "nyarlathotep.h"
@@ -23,13 +23,10 @@ static int I=32;
 int init_uenuku(void);
 
 
-/*
-  App
+/* App
    + major mode, input mapping
    + Lua state
  */
-
-//void   (*master_event_loop)(void);
 
 char * error = NULL;
 
