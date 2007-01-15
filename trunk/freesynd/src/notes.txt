@@ -15,8 +15,8 @@ Maps:
       Most are rotationally independent,
        Some are duplicated; ramps, lamps, rails, roof, roads.
       Some, inexplicably, are neither: Stairs, 128-129, 244-245, 222-224,...
-  Non-retarded display method.
-  Breaks for sprite drawing.
+  **Non-retarded display method. done
+  **Breaks for sprite drawing. done
     Fortunately, there's a reasonably good way to do this. Record what tile
     they're in, and sort the list. When map coords XXYYZZ come up, we make
     a quick side trip.
@@ -26,20 +26,21 @@ Maps:
     map section before I load the neighbour on that side from disk.
   Water! Animated tiles.
 
-
 Pathfinding:
   Only relevant for the map. Ergo, make link very explicit.
+    Map->pathfinding?
   Tactical valuation for path cost
     Corner detection
       Corners visible from here.
       Dichotomize open ground / tangled ground
-    Precomputed sweet-spots
+    Precomputed/predefined sweet-spots
     path-nearest unseen tile
     furthest line-of-sight seen tile
 
 Agents / Trees are people too / Scripting.
-  "Dancing" should be at least possible in some kind of playground mode.
-  TileAt(mx,my,mz) (done)
+  **"Dancing" should be at least possible in some kind of playground mode.
+    Dancing is now technically possible. Not convenient, mind.
+  **TileAt(mx,my,mz). done.
   Coordinated movement
   View arcs and detection
 

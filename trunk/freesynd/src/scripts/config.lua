@@ -8,31 +8,36 @@
 flake = 1;
 rot=1;
 
-floor = math.floor
-round = function(x, y) return math.floor(x/y)*y end
-
-sprsort =
-   function(a, b)
+floor   = math.floor
+round   = function(x, y) return math.floor(x/y)*y end
+sprsort = function(a, b) -- {{{
       --local ax, ay, az = floor(a.x/32), floor(a.y/32), floor(a.z/32)
       --local bx, by, bz = floor(b.x/32), floor(b.y/32), floor(b.z/32)
       if     a.z ~= b.z     then do return      a.z  <  b.z      end end
       if a.x+a.y ~= b.x+b.y then do return (a.x+a.y) < (b.x+b.y) end end
       if a.x-a.y ~= b.x-b.y then do return (a.x-a.y) < (b.x-b.y) end end
-   end
-
-
-glom =
-   function(x,y,z)
-      return ( math.floor(z/32) * 65536 +
-	       math.floor(y/32) *   256 +
-	       math.floor(x/32) *     1  )
-      end
-
-	      
+   end -- }}}
+glom    = function(x,y,z) -- {{{
+  return ( math.floor(z/32) * 65536 +
+	   math.floor(y/32) *   256 +
+	   math.floor(x/32) *     1  )
+  end -- }}}
 
 sprites = {
    [glom(668, 2700, 64)]={ { x=668, y=2700, z=64, a=12, f=0 }, },
-   [glom(670, 2800, 64)]={ { x=670, y=2800, z=64, a=10, f=0 }, }
+   [glom(670, 2800, 64)]={ { x=670, y=2800, z=64, a=10, f=0 }, },
+   add = function(o, s)
+      local l = o[glom(s.x, s.y, s.z)] or {}
+      table.insert(l, s)
+      table.sort(l, sprsort)
+      o[glom(s.x, s.y, s.z)] = l
+   end,
+   rem = function(o, s)
+     local t = o[glom(s.x, s.y, s.z)] or {}
+     for i,v in ipairs(t) do
+       if v == s then table.remove(t, i) end
+     end
+   end
 }
 
 do
@@ -47,7 +52,7 @@ do
    local no_i_roll = function() ii=0; end
 
    if mus then 
-      local M = mus('music/crystalhammer.mod')
+      local M = mus('music/mod.synintro')
       print('M =', M)
       local Mp = false
       pla = function() if Mp then M:stop() else M:play() end Mp = not Mp end
@@ -55,14 +60,29 @@ do
       pla = function() print('sorry, no music') end
    end
 
+   cp_theta = 0
+   cp_sprite = { x=668, y=2700, z=64, a=9, f=0 }
+   sprites:add(cp_sprite)
+   function circlepanic()
+      local xc, yc = 668, 2700
+      cp_theta = (cp_theta + 0.13) % (2*math.pi)
+      sprites:rem(cp_sprite)
+      cp_sprite.x, cp_sprite.y = xc+32*math.cos(cp_theta),yc+32*math.sin(cp_theta)
+      cp_sprite.a = 16-floor(cp_theta * 8 / (2*math.pi))
+      --print(cp_sprite.x, cp_sprite.y, cp_sprite.a, cp_sprite.f)
+      sprites:add(cp_sprite)
+   end
+
+
    add_ped =
       function(b, x, y)
 	 local mx, my = scr_to_map(x, y);
 	 local x, y, z = mx-mx%1, my-my%1, 64
-	 local l = sprites[glom(x, y, z)] or {}
-	 table.insert(l, { x=x, y=y, z=z, a=k, f=0 })
-	 table.sort(l, sprsort)
-         sprites[glom(x, y, z)] = l
+	 sprites:add{ x=x, y=y, z=z, a=k, f=0 }
+	 --local l = sprites[glom(x, y, z)] or {}
+	 --table.insert(l, { x=x, y=y, z=z, a=k, f=0 })
+	 --table.sort(l, sprsort)
+         --sprites[glom(x, y, z)] = l
       end
 
    local ll,rr,uu,dd = 0,0,0,0
@@ -80,18 +100,12 @@ do
    local frame =
       function()
 	 if wob then wobble() end
-	 if false then
-	    i = i - uu*16 - ll*8
-	    i = i + dd*16 + rr*8
-	    j = j - uu*16 + ll*8
-	    j = j + dd*16 - rr*8
-	 else
-	    i = i - uu*2*k - ll*1*k
-	    i = i + dd*2*k + rr*1*k
-	    j = j - uu*2*k + ll*1*k
-	    j = j + dd*2*k - rr*1*k
-	 end
+	 i = i - uu*2*k - ll*1*k
+	 i = i + dd*2*k + rr*1*k
+	 j = j - uu*2*k + ll*1*k
+	 j = j + dd*2*k - rr*1*k
 	 k = k + ii
+	 circlepanic()
       end
 
    common_input = {
@@ -131,8 +145,14 @@ do
 	 printf("bottom right: %4d,%4d  %%  %5.2f,%5.2f", brx, bry, bx,by)
 	 printf("i,j,k, = %f %f %f\n", i, j, k)
 	 print('x','y','a','f','+','-')
-	 for i,v in ipairs(sprites) do
-	    print(v.x, v.y, v.a, v.f, v.x+v.y, v.y-v.x)
+         local i,j,v,w
+	 for i,v in pairs(sprites) do
+            print('-- ',i,v)
+            if type(v) == 'table' then
+              for j,w in ipairs(v) do
+	         print(w.x, w.y, w.a, w.f, w.x+w.y, w.y-w.x)
+	      end
+            end
 	 end
       end
 
