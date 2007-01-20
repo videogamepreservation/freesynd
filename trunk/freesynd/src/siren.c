@@ -1,13 +1,5 @@
-#include "SDL.h"
+#include "common.h"
 #include "SDL_mixer.h"
-#include "lua.h"
-#include "lauxlib.h"
-
-#include "hugin.h"
-#include "munin.h"
-#include "narcissus.h"
-
-extern char * error;
 
 int    frequency = MIX_DEFAULT_FREQUENCY;
 Uint16 format    = MIX_DEFAULT_FORMAT;

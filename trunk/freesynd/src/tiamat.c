@@ -1,19 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include "SDL.h"
-#include "lua.h"
-#include "lauxlib.h"
-
-#include "hugin.h"
-#include "munin.h"
-#include "narcissus.h"
-//#include "uenuku.h"
-#include "chronos.h"
-#include "siren.h"
-#include "scheherazade.h"
-#include "gaia.h"
-#include "avatar.h"
-#include "nyarlathotep.h"
+#include "common.h"
 
 #define Q 0x7FFFFFFFu /* Cheap old-school random. Thank you, Big Blue */
 #define IBM (I=(16807*(I%127773))-(I/127773)*2836,I+=(I<Q+1)? Q:0)

@@ -1,10 +1,5 @@
 #include <stdlib.h>
-
-#include "lua.h"
-#include "lauxlib.h"
-#include "lualib.h"
-
-extern char * error;
+#include "common.h"
 
 lua_State *L = NULL;
 
@@ -60,7 +55,7 @@ void set_str(struct lua_State *L, const char *n, const char *s)
   lua_pushstring(L, s); lua_setfield(L, LUA_GLOBALSINDEX, n);
 }
 
-void debug_lua_table(struct lua_State *L, char ind)
+void debug_lua_table(struct lua_State *L, int ind)
 {
   if(ind > 4) return;
   printf("%*s{\n", ind, "");

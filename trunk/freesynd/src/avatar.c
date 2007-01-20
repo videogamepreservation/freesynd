@@ -1,7 +1,4 @@
-#include "SDL.h"
-#include "narcissus.h"
-#include "uenuku.h"
-#include "munin.h" /* Inhale file */
+#include "common.h"
 
 struct SpriteAnim {
   Uint16 b; /* begin    */
@@ -65,6 +62,35 @@ Uint16 blit_frame(Uint16 x, Uint16 y, Uint16 a, Uint16 f)
     else            blit_sprite(x + SF->f[c].x, SF->f[c].y+y, -SF->f[c].s);
 
   return SA->a[f].n == SI->I[a];
+}
+
+Uint8 do_sprites(Uint32 k, Uint16 sx, Uint16 sy)
+{
+  Sint16 i = 0, x, y, a, f;
+
+  if(lua_gettop(L) && lua_istable(L, -1)) {
+    lua_pushnumber(L, k); //GLOM(mx, my, mz));
+    lua_gettable(L, -2);
+
+    if(lua_istable(L, -1)) {
+      foreach(L, -1) {
+	if(!lua_istable(L, -1)) { printf("non-mo in cell-list\n"); continue; }
+
+	x = get_int(L, -1, "x", 0);
+	y = get_int(L, -1, "y", 0);
+	a = get_int(L, -1, "a", 1);
+	f = get_int(L, -1, "f", 0);
+	f = (blit_frame(sx + MS_x(SUB(x), SUB(y), 0),
+			sy + MS_y(SUB(x), SUB(y), 0), a, f))? f = 0: f+1;
+	lua_pushnumber(L, f);
+	lua_setfield(L, -2, "f");
+      }
+      i = 1;
+    } else i = 0;
+    lua_pop(L, 1);
+  }
+  if(lua_gettop(L) != 1) debug_lua_stack(L, "do_sprite");
+  return i;
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

@@ -1,8 +1,4 @@
-#include "SDL.h"
-#include "hugin.h"
-
-extern struct lua_State *L;
-extern char * error;
+#include "common.h"
 
 SDL_Surface * screen_surface = NULL;
 #if 0

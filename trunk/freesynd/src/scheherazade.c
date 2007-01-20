@@ -1,15 +1,10 @@
+#include "common.h"
+/*
 #include <stdlib.h>
 #include <stdio.h>
 #include <assert.h>
 #include <string.h>
-#include "SDL.h"
-#include "lua.h"
-#include "lauxlib.h"
-
-#include "chronos.h"
-#include "narcissus.h"
-#include "munin.h"
-#include "nyarlathotep.h"
+*/
 
 #include "fli_format.h"
 

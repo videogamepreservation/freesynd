@@ -1,5 +1,4 @@
-
-#include "SDL_video.h"
+#include "common.h"
 
 static const Uint16 colsize = 3*sizeof(Uint8);
 static const Uint16 palsize = 256*3*sizeof(Uint8);

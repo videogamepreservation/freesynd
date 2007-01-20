@@ -1,10 +1,6 @@
-#include "SDL.h"
-#include "lua.h"
-#include "lauxlib.h"
+#include "common.h"
 
 static const char *META = "rw_meta";
-
-extern struct lua_State *L;
 
 struct rw {
   struct SDL_RWops *F;
@@ -113,7 +109,7 @@ Uint16 SDL_ReadLE8(SDL_RWops *src)
   return x;
 }
 
-Uint16 (*SDL_ReadBE8)(SDL_RWops *src) = SDL_ReadLE8;
+/* Uint16 (*SDL_ReadBE8)(SDL_RWops *src) = SDL_ReadLE8; */
 
 void file_debug(struct SDL_RWops *F)
 {

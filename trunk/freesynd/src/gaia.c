@@ -1,12 +1,5 @@
-#include "SDL.h"
-#include "lua.h"
-#include "lauxlib.h"
+#include "common.h"
 
-#include "narcissus.h" /* REV8, CreateZSurface */
-#include "munin.h"
-#include "hugin.h"
-
-extern struct SDL_Surface *screen_surface;
 static const Uint8 off[6][2] = { 00,00, 00,16, 00,32, 32,00, 32,16, 32,32, };
 
 static struct SDL_Surface *subtiles;
@@ -54,8 +47,6 @@ static int load_subtiles(struct SDL_RWops *F, Uint8 *z, Uint16 c)
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#define MAP 32
-
 struct Map {
   Uint32 xs, ys, zs;
   union {
@@ -68,17 +59,20 @@ static struct Map *M;
 
 Uint8 *tile_ref(struct Map *M, Uint16 x, Uint16 y, Uint16 z)
 {
-  x /= MAP; y /= MAP; z /= MAP;
+  x /= SCALE; y /= SCALE; z /= SCALE;
   if(x >= M->xs || y >= M->ys || z >= M->zs) return NULL;
   return &M->m[ M->l[ y*M->xs + x ] ] + z;
 }
 
-Uint8 *raw_ref(struct Map *M, Uint16 x, Uint16 y, Uint16 z)
+static Uint8 *raw_ref(struct Map *M, Uint16 x, Uint16 y, Uint16 z)
 {
   if(x >= M->xs || y >= M->ys || z >= M->zs) return NULL;
   return &M->m[ M->l[ y*M->xs + x ] ] + z;
 }
 
+/* FIXME: Make maps work like films; objectify.
+   Also, consider unpacking array... so we can edit!
+*/
 void load_map(struct SDL_RWops *F)
 {
   Uint32 s, x, y, z;
@@ -126,7 +120,7 @@ int map_new(struct lua_State *L)
 
       for(x = 0; x < M->xs; x++)
 	for(y = 0; y < M->ys; y++)
-	  if((t = tile_ref(M, x*MAP,y*MAP,z*MAP))==NULL)
+	  if((t = tile_ref(M, x*SCALE,y*SCALE,z*SCALE))==NULL)
 	    return printf("%d,%d,%d\thas no reference!\n", x, y, z) * 0;
 	  else
 	    if( ((void*)t - (void*) M) > s)
@@ -178,7 +172,7 @@ int map_new(struct lua_State *L)
       |              12.5*sqrt(2)/4 |
       +--                         --+
 
-  Putting it all toghether we get
+  Putting it all toghether we get just
                   +-      -+
                   | 32 -32 |
   T = C * B * A = |        |
@@ -213,52 +207,8 @@ int map_new(struct lua_State *L)
 
 \************************************************************************/
 
-#define MS_x(x,y,z) ( ( 2*(x) - 2*(y) + 0*(z) ) / 2)
-#define MS_y(x,y,z) ( ( 1*(x) + 1*(y) - 1*(z) ) / 2)
-#define SM_x(x,y)   ( ( 1*(x) + 2*(y) ) / 2 )
-#define SM_y(x,y)   ( (-1*(x) + 2*(y) ) / 2 )
-#define TILE(x) ((x) & ~(MAP-1))
-#define SUB(x)  ((x) % MAP)
 
 static Sint16 LX, LY; /* LAST DRAWN HERE */
-
-#define W 64
-#define H 32
-
-extern struct lua_State *L;
-
-#define GLOM(x,y,z) ((z << 16) + (y << 8) + (x << 0))
-
-/* TODO: Move to AVATAR
- */
-static Uint8 do_sprites(Uint32 k, Uint16 sx, Uint16 sy)
-{
-  Sint16 i = 0, x, y, a, f;
-
-  if(lua_gettop(L) && lua_istable(L, -1)) {
-    lua_pushnumber(L, k); //GLOM(mx, my, mz));
-    lua_gettable(L, -2);
-
-    if(lua_istable(L, -1)) {
-      foreach(L, -1) {
-	if(!lua_istable(L, -1)) { printf("non-mo in cell-list\n"); continue; }
-
-	x = get_int(L, -1, "x", 0);
-	y = get_int(L, -1, "y", 0);
-	a = get_int(L, -1, "a", 1);
-	f = get_int(L, -1, "f", 0);
-	f = (blit_frame(sx + MS_x(SUB(x), SUB(y), 0),
-			sy + MS_y(SUB(x), SUB(y), 0), a, f))? f = 0: f+1;
-	lua_pushnumber(L, f);
-	lua_setfield(L, -2, "f");
-      }
-      i = 1;
-    } else i = 0;
-    lua_pop(L, 1);
-  }
-  if(lua_gettop(L) != 1) debug_lua_stack(L, "do_sprite");
-  return i;
-}
 
 void blit_map(/*struct Map *M, */ Sint16 wx, Sint16 wy)
 {
@@ -268,12 +218,12 @@ void blit_map(/*struct Map *M, */ Sint16 wx, Sint16 wy)
   wx -= SM_x(width/2, height/2);
   wy -= SM_y(width/2, height/2);
 
-  LX=wx+MAP; LY=wy; /* SAVE THESE. (+wtf?)*/
+  LX=wx+SCALE; LY=wy; /* SAVE THESE. (+W to avoid jaggies on the left.)*/
 
   sx = -MS_x(SUB(wx), SUB(wy), 0)-W;  /* sub-tile scroll */
   sy = -MS_y(SUB(wx), SUB(wy), 0);    /* adjustment      */
 
-  wx /= MAP; wy /= MAP;
+  wx /= SCALE; wy /= SCALE;
 
   Uint32 q = ~0;
 
@@ -282,8 +232,8 @@ void blit_map(/*struct Map *M, */ Sint16 wx, Sint16 wy)
 
   Sint8 x=0, y=0, z=0;
   Sint16 xl, yl, zf;
-  xl = SM_x(width,        0) / MAP + 2;
-  yl = SM_y(    0, 2*height) / MAP + M->zs + 3;
+  xl = SM_x(width,        0) / SCALE + 2;         /* +2,+3 to avoid jaggies */
+  yl = SM_y(    0, 2*height) / SCALE + M->zs + 3;
 
   for   ( y = 0 ; y <   yl ; y++) {    /* far to near   */
   for   ( z = 0 ; z < M->zs; z++) {    /* bottom to top */
@@ -300,18 +250,13 @@ void blit_map(/*struct Map *M, */ Sint16 wx, Sint16 wy)
     if(w != NULL && *w > 5)
       blit_tile(qx, qy, *w);
 
-    do_sprites(GLOM(mx, my, z), qx+32, qy+16);
-    
+    do_sprites(GLOM(mx, my, z), qx+32, qy+16); /* offset 'cos of jaggie-adj */
 
   } } } /* for for for */
   lua_pop(L, 1);
   if(lua_gettop(L)) debug_lua_stack(L, "bmap<");
 }
 
-/*
-  #define SZMx(x,y)   ( ( 1*(x) + 2*(y) ) / 2 )
-  #define SZMy(x,y)   ( (-1*(x) + 2*(y) ) / 2 )
-*/
 int point_at(struct lua_State *L) /* Harder than it seemed. */
 {
   Sint16 x, y, z, mx, my;
@@ -326,9 +271,7 @@ int point_at(struct lua_State *L) /* Harder than it seemed. */
   for(z = M->zs; --z >= 0 && (!p || *p < 5);) {
     mx = SM_x(x, y + z*H/2)+LX;
     my = SM_y(x, y + z*H/2)+LY;
-    p = tile_ref(M, mx, my, z*MAP);
-    /*printf("z: %2d mx: %d my:%d mz:%3d : %d\n",
-      z, mx, my, z*MAP, (p)? *p: -1);*/
+    p = tile_ref(M, mx, my, z*SCALE);
   }
   if(p == NULL) {
     lua_pushnumber(L, -1);
@@ -429,10 +372,10 @@ int init_gaia(void)
 
   SDL_RWclose(F);
 
-  F = SDL_RWFromFile("maps/map05.dat","r");
+  F = SDL_RWFromFile("data/map05.dat","r");
   load_map(F);
 
-  lua_pushnumber(L, MAP);
+  lua_pushnumber(L, SCALE);
   lua_setfield(L, LUA_GLOBALSINDEX, "scale");
   lua_register(L, "scr_to_map", scr_to_map);
   lua_register(L, "map_to_scr", map_to_scr);

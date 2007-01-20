@@ -1,11 +1,9 @@
-#include "SDL.h"
-
-extern        char *        error;
+#include "common.h"
 
 int frame_number = 0;
+int frame_time   = 0;
 
 static        SDL_TimerID   timer_id = (SDL_TimerID) 0;
-static        int           frame_time   = 0;
 static struct SDL_UserEvent ue       = { SDL_USEREVENT+1, 0, NULL, NULL };
 
 static Uint32 push_frame_event(Uint32 ival, void *p)

@@ -1,8 +1,4 @@
-#include "SDL.h"
-#include "lua.h"
-#include "lauxlib.h"
-
-#include "hugin.h"
+#include "common.h"
 
 /*
  *  Main loop is basically an event dispatcher.
@@ -10,8 +6,6 @@
  *  Should it return the old fun when registering a new one?
  *
  */
-typedef void(*framefunc_t)(void);
-/*typedef void(*mode_ends_t)(void);*/
 
 #define FRAMEEVENT (SDL_USEREVENT+1)
 #define MUSICENDED (SDL_USEREVENT+2)
