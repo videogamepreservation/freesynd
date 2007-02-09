@@ -1,10 +1,4 @@
 
-
---M = mus('music/crystalhammer.mod');
---v = M:volume(40);
---M:play();
-
-
 flake = 1;
 rot=1;
 
@@ -37,6 +31,15 @@ sprites = {
      for i,v in ipairs(t) do
        if v == s then table.remove(t, i) end
      end
+   end,
+   iter = function(o)
+     return coroutine.wrap(function()
+       for k,v in pairs(sprites) do
+         if type(v) == 'table' then
+	   for l,w in pairs(v) do coroutine.yield(w) end
+         end
+       end
+     end)
    end
 }
 
@@ -60,29 +63,26 @@ do
       pla = function() print('sorry, no music') end
    end
 
+   function rad2dir(r) return (15-floor((r * 4 - 0.25) / math.pi)) % 8 end
+
    cp_theta = 0
    cp_sprite = { x=668, y=2700, z=64, a=9, f=0 }
    sprites:add(cp_sprite)
    function circlepanic()
-      local xc, yc = 668, 2700
-      cp_theta = (cp_theta + 0.13) % (2*math.pi)
+      local xc, yc, r = 668, 2700, 32
+      cp_theta = (cp_theta + 0.12) % (2*math.pi)
       sprites:rem(cp_sprite)
-      cp_sprite.x, cp_sprite.y = xc+32*math.cos(cp_theta),yc+32*math.sin(cp_theta)
-      cp_sprite.a = 16-floor(cp_theta * 8 / (2*math.pi))
-      --print(cp_sprite.x, cp_sprite.y, cp_sprite.a, cp_sprite.f)
+      cp_sprite.x = xc+r*math.cos(cp_theta)
+      cp_sprite.y = yc+r*math.sin(cp_theta)
+      cp_sprite.a = Agent.Minigun[Walk + (k % 2)] + rad2dir(cp_theta)
       sprites:add(cp_sprite)
    end
-
 
    add_ped =
       function(b, x, y)
 	 local mx, my = scr_to_map(x, y);
 	 local x, y, z = mx-mx%1, my-my%1, 64
 	 sprites:add{ x=x, y=y, z=z, a=k, f=0 }
-	 --local l = sprites[glom(x, y, z)] or {}
-	 --table.insert(l, { x=x, y=y, z=z, a=k, f=0 })
-	 --table.sort(l, sprsort)
-         --sprites[glom(x, y, z)] = l
       end
 
    local ll,rr,uu,dd = 0,0,0,0
@@ -107,14 +107,6 @@ do
 	 k = k + ii
 	 circlepanic()
       end
-
-   common_input = {
-      [    '__index' ] = common_input,
-      [  sdlk.F12    ] = function() v=v+1; M:vol(v) end,
-      [  sdlk.F11    ] = function() v=v-1; M:vol(v) end,
-      [  sdlk.ESCAPE ] = quit,
-   }
-   common_input.__index = common_input
 
    local click_info =
       function(b, x, y)
@@ -146,15 +138,19 @@ do
 	 printf("i,j,k, = %f %f %f\n", i, j, k)
 	 print('x','y','a','f','+','-')
          local i,j,v,w
-	 for i,v in pairs(sprites) do
-            print('-- ',i,v)
-            if type(v) == 'table' then
-              for j,w in ipairs(v) do
-	         print(w.x, w.y, w.a, w.f, w.x+w.y, w.y-w.x)
-	      end
-            end
+	 for w in sprites.iter() do
+	    printf("%7.2f %7.2f %7d %7d %7.2f %7.2f",
+		   w.x, w.y, w.a, w.f, w.x+w.y, w.y-w.x)
 	 end
       end
+
+   common_input = {
+      [    '__index' ] = common_input,
+      [  sdlk.F12    ] = function() v=v+1; M:vol(v) end,
+      [  sdlk.F11    ] = function() v=v-1; M:vol(v) end,
+      [  sdlk.ESCAPE ] = quit,
+   }
+   common_input.__index = common_input
 
    flake_input = {
       [      1       ] = click_info,
@@ -207,5 +203,6 @@ do
 
 end
 
-print('  +  script ok')
 
+print('  +  script ok')
+---- END ----

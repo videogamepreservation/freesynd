@@ -100,6 +100,10 @@ void debug_lua_table(struct lua_State *L, int ind);
 void debug_lua_stack(struct lua_State *L, const char *n);
 
 #define foreach(L, ix) for(lua_pushnil(L); lua_next(L, ix-1); lua_pop(L, 1))
+#define bug_str(L, ix) \
+  ((lua_type(L, ix) == LUA_TSTRING)? \
+   lua_tostring(L, ix):              \
+   lua_typename(L, lua_type(L, ix)))
 
 /* munin */
 

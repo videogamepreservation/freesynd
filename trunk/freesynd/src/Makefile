@@ -9,3 +9,7 @@ tiamat: gaia.o avatar.o nyarlathotep.o uenuku.o
 
 clean:
 	$(RM) *.o app *~
+
+lt: lt.o hugin.o
+
+*.o: common.h

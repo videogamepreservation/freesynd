@@ -38,6 +38,9 @@ static struct SpriteVector     *SN;  /* normal sprites */
 static struct SpriteVector     *SM;  /* mirror sprites */
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+static const char *SPRLIB = "sprlib_meta";
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 void blit_sprite(const Uint16 x, const Uint16 y, Sint16 i)
 {
   struct SDL_Rect      R = { 0, 0, 0, 0 };
@@ -104,68 +107,70 @@ static void unblk1(Uint8 *z, const Uint8 *p)
 			!!(p[4] & 1 << i) << 3   );
 }
 
-int load_sprite(struct SpriteVector * SN, struct SpriteVector * SM,
-		struct SpriteFile   *  Q, const int i, const void *p)
+int load_sprite(struct SDL_Surface ** SN, struct SDL_Surface ** SM,
+		struct SprTab * T, const void *p)
 {
   struct SDL_Surface *Z, *Y;
   struct SDL_Rect R = { 0, 0, 0, 0 };
   Uint8 *z, x, y;
 
-  R.w = CEIL8(Q->s[i].w), R.h = Q->s[i].h;
+  R.w = CEIL8(T->w), R.h = T->h;
 
   if(!R.w || !R.h || !(Z = CreateZSurface(R.w, R.h))) return 0;
 
   z = Z->pixels;
   memset(z, 255, R.w * R.h);
-  p += Q->s[i].o;
+  p += T->o;
 
   for(y = 0; y < R.h; y++)
     for(x = 0; x < R.w; x += 8, p += 5)
       unblk1( &z[ R.w * y + x ], p);
 
-  SN->s[i] = Z;
+  *SN = Z;
 
-  if((Y = CreateZSurface(R.w, R.h)) == NULL)
-    printf("Error when creating mirrored sprite: %s", SDL_GetError());
-  else { 
-    Uint8 *q; /* Mirror */
+  if(SM) {
+    if((Y = CreateZSurface(R.w, R.h)) == NULL)
+      printf("Error when creating mirrored sprite: %s", SDL_GetError());
+    else { 
+      Uint8 *q; /* Mirror */
 
-    z = Z->pixels;
-    q = Y->pixels;
-    for(y = 0; y < R.h; y++)
-      for(x = 0; x < R.w; x++)
-	q[y*R.w+x] = z[(y+1)*R.w-x-1];
+      z = Z->pixels;
+      q = Y->pixels;
+      for(y = 0; y < R.h; y++)
+	for(x = 0; x < R.w; x++)
+	  q[y*R.w+x] = z[(y+1)*R.w-x-1];
 
-    SM->s[i] = Y;
+      *SM = Y;
+    }
   }
 
   return 1;
 }
 
-load_rle_sprite(struct SpriteVector * SN, struct SpriteVector * SM,
-		struct SpriteFile   *  Q, const int i, const void *p)
+load_rle_sprite(struct SDL_Surface ** SN, struct SDL_Surface ** SM,
+		struct SprTab * T, const void *p)
 {
   struct SDL_Surface *Z, *Y;
   struct SDL_Rect R = { 0, 0, 0, 0 };
   Uint8 *z, x, y;
   Sint16 r;
 
-  R.w = CEIL8(Q->s[i].w), R.h = Q->s[i].h;
+  R.w = CEIL8(T->w), R.h = T->h;
 
   if(!R.w || !R.h || !(Z = CreateZSurface(R.w, R.h))) {
-    if(!R.w) printf("  -  sprite %d has width  zero.\n", i);
-    if(!R.h) printf("  -  sprite %d has height zero.\n", i);
-    if(!Z)   printf("  -  couldn't createZsurface for sprite %d.\n", i);
+    if(!R.w) printf("  -  sprite has width  zero.\n");
+    if(!R.h) printf("  -  sprite has height zero.\n");
+    if(!Z)   printf("  -  couldn't createZsurface for sprite.\n");
     return 0;
   }
 
   z = Z->pixels;
   memset(z, 255, R.w * R.h);
-  p += Q->s[i].o;
+  p += T->o;
 
   for(x = y = 0, r = 1; y < R.h; y++, x=0) {
     r = *((Sint8 *) p++);
-    while(r && x < Q->s[i].w) {
+    while(r && x < T->w) {
       if( r > 0 ) memcpy( &z[ R.w * y + x ],   p, r = +r), p += r;
       if( r < 0 ) memset( &z[ R.w * y + x ], 255, r = -r);
       x += r;
@@ -174,24 +179,66 @@ load_rle_sprite(struct SpriteVector * SN, struct SpriteVector * SM,
   }
 
   SDL_SetColors(Z, get_pal("data/mselect.pal"), 0, 256);
-  SN->s[i] = Z;
+  *SN = Z;
 
-  if((Y = CreateZSurface(R.w, R.h)) == NULL)
-    printf("Error when creating mirrored sprite: %s", SDL_GetError());
-  else { 
-    Uint8 *q; /* Mirror */
+  if(SM) {
+    if((Y = CreateZSurface(R.w, R.h)) == NULL)
+      printf("Error when creating mirrored sprite: %s", SDL_GetError());
+    else { 
+      Uint8 *q; /* Mirror */
 
-    z = Z->pixels;
-    q = Y->pixels;
-    for(y = 0; y < R.h; y++)
-      for(x = 0; x < R.w; x++)
-	q[y*R.w+x] = z[(y+1)*R.w-x-1];
+      z = Z->pixels;
+      q = Y->pixels;
+      for(y = 0; y < R.h; y++)
+	for(x = 0; x < R.w; x++)
+	  q[y*R.w+x] = z[(y+1)*R.w-x-1];
 
-    SDL_SetColors(Y, get_pal("data/mselect.pal"), 0, 256);
-    SM->s[i] = Y;
+      SDL_SetColors(Y, get_pal("data/mselect.pal"), 0, 256);
+      *SM = Y;
+    }
   }
 
   return 1;
+}
+
+int sprlib_new(struct lua_State *L)
+{
+  struct { Uint32 n; Uint8 p[1]; } *p;
+  struct SpriteFile *Q;
+  const char *s;
+  int x, i;
+
+  s = lua_tostring(L, 1);
+  lua_pushvalue(L, 1); lua_pushstring(L, ".tab"); lua_concat(L, 2);
+  lua_pushvalue(L, 1); lua_pushstring(L, ".dat"); lua_concat(L, 2);
+  /* S: N, ???, N.dat, N.tab */
+  Q = inhale_file(lua_tostring(L, -2), sizeof(struct SprTab), 0);
+  p = inhale_file(lua_tostring(L, -1), 1, 0);
+  lua_pop(L, 2);
+  /* S: N, ???, */
+
+  if(!Q || !p) {
+    printf("Error allocating memory to load sprite library \"%s\"\n", s);
+    return 0;
+  }
+
+  lua_newtable(L); luaL_getmetatable(L, SPRLIB); lua_setmetatable(L, -2);
+  /* S: N, ???, {SPRLIB} */
+
+  /*if(load_rle_sprite(SN, SM, Q, i, p->p))*/
+  for(x = i = 0; i <  Q->n; i++) {
+    SDL_Surface *sn, *sm;
+
+    if(load_sprite(&sn, &sn, &(Q->s[i]), p->p)) {
+      lua_pushlightuserdata(L, sn); lua_rawseti(L, -2,  i);
+      lua_pushlightuserdata(L, sm); lua_rawseti(L, -2, -i);
+      x++;
+    }
+  }
+
+  printf("  +  %d of %d sprite images loaded from \"%s\"\n", x, Q->n, s);
+  free(Q);
+  free(p);
 }
 
 
@@ -224,7 +271,7 @@ int init_avatar(void)
 
     /*if(load_rle_sprite(SN, SM, Q, i, p->p))*/
     for(x = i = 0; i <  Q->n; i++)
-      if(load_sprite(SN, SM, Q, i, p->p))
+      if(load_sprite(&(SN->s[i]), &(SM->s[i]), &(Q->s[i]), p->p))
 	SM->n = SN->n = i+1, x++;
 
     printf("  +  %d of %d sprite images loaded\n", x, Q->n);
@@ -261,6 +308,14 @@ int init_avatar(void)
     for(i = 0; i < SI->n; i++)
       if(SI->I[i] > SA->n)
 	abend("AnimIndex refers beyond array bounds!");
+
+    /*
+    for(i = 1; i < SI->n; i++) {
+      for(x = i; !SI->I[x] && x < SI->n; x++);
+      if(x >= SI->n) break;
+      if(x != i) SI->I[i] = SI->I[x], SI->I[x] = 0;
+    }
+    */
 
     printf("  +  %d elements in animation index loaded\n", SI->n);
   }

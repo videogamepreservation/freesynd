@@ -61,26 +61,12 @@ void debug_lua_table(struct lua_State *L, int ind)
   printf("%*s{\n", ind, "");
   ind += 2;
 
-  /* table is in the stack at index 't' */
-  lua_pushnil(L);  /* first key */
-  while (lua_next(L, -2) != 0) {
+  foreach(L, -1)
+    printf("%*s%s - %s\n", ind, "", bug_str(L, -2), bug_str(L, -1));
 
-    /* uses 'key' (at index -2) and 'value' (at index -1) */
-    printf("%*s%s - %s\n", ind, "",
+  /* recursive too dangerous. */
+  /*if(lua_type(L, -1) == LUA_TTABLE) debug_lua_table(L, ind);*/
 
-	   (lua_type(L, -2) == LUA_TSTRING)?
-	   lua_tostring(L, -2): 
-	   lua_typename(L, lua_type(L, -2)),
-
-	   (lua_type(L, -1) == LUA_TSTRING)?
-	   lua_tostring(L, -1): 
-	   lua_typename(L, lua_type(L, -1)));
-
-    if(lua_type(L, -1) == LUA_TTABLE) debug_lua_table(L, ind);
-
-    /* removes 'value'; keeps 'key' for next iteration */
-    lua_pop(L, 1);
-  }
   printf("%*s}\n", ind -= 2, "");
 }
 
@@ -123,15 +109,19 @@ int init_hugin(void)
   lua_setfield(L, LUA_GLOBALSINDEX, "restricted");
 
   if(luaL_dofile(L, "scripts/gaoler.lua"))
-     printf("gaoler: %d\n", lua_tostring(L, -1)), lua_pop(L, 1);
+     printf("gaoler:  %d\n", lua_tostring(L, -1)), lua_pop(L, 1);
 
   if(luaL_dofile(L, "scripts/sdlkeys.lua"))
-     printf("sdlk:   %d\n", lua_tostring(L, -1)), lua_pop(L, 1);
+     printf("sdlk:    %d\n", lua_tostring(L, -1)), lua_pop(L, 1);
 
-  /* DANGEROUS: RECURSIVE... */
-  /* lua_pushvalue(L, LUA_REGISTRYINDEX);
-     lua_pop(L, 1);
-     debug_lua_table(L, 2); */
+  if(luaL_dofile(L, "scripts/sprites.lua"))
+     printf("sprites: %d\n", lua_tostring(L, -1)), lua_pop(L, 1);
+
+  /*
+  lua_pushvalue(L, LUA_REGISTRYINDEX);
+  debug_lua_table(L, 2);
+  lua_pop(L, 1);
+  */
 
   return 1;
 }

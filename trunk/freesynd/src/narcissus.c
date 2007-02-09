@@ -2,8 +2,10 @@
 
 SDL_Surface * screen_surface = NULL;
 #if 0
+/*
 int           width          = 320;
 int           height         = 200;
+*/
 #else
 int           width          = 640;
 int           height         = 400;
