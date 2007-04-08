@@ -253,6 +253,7 @@ int fli_gc(struct lua_State *L)
   luaL_argcheck(L, Z, 1, "Expected an FLI animation");
   SDL_FreeSurface(Z->S);
   luaL_unref(L, LUA_REGISTRYINDEX, Z->R);
+  printf("gc:ing fli('%s') @ %p\n", Z->N, Z);
   return 0;
 }
 
@@ -287,7 +288,7 @@ int fli_rewind(struct lua_State *L)
 
 static struct luaL_Reg fli_meta[] = {
   "new",    fli_new,
-  "gc",     fli_gc,
+  "__gc",   fli_gc,
   "rewind", fli_rewind,
   "play",   fli_play,
   "stop",   fli_stop,

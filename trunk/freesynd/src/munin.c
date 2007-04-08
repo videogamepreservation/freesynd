@@ -41,10 +41,13 @@ int rw_new(struct lua_State *L)
 
 int rw_gc(struct lua_State *L)
 {
-  struct SDL_RWops *rw = luaL_checkudata(L, 1, META);
+  struct rw *rw = luaL_checkudata(L, 1, META);
 
   luaL_argcheck(L, rw, 1, "Expected an rw");
-  SDL_RWclose(rw);
+  SDL_RWclose(rw->F);
+  luaL_dostring(L, "bug and bug.munin");
+  if lua_toboolean(L, -1) printf("gc:ing rw('%s') @ %p\n", rw->N, rw);
+  lua_pop(L, 1);
   return 0;
 }
 
@@ -59,7 +62,7 @@ int rw_rew(struct lua_State *L)
 
 static struct luaL_Reg rw_meta[] = {
   "new",    rw_new,
-  "gc",     rw_gc,
+  "__gc",   rw_gc,
   "rewind", rw_rew,
   0, 0,
 };
