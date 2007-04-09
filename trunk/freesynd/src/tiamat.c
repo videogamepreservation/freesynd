@@ -60,8 +60,6 @@ void the_flake_show(void)
 {
   int x, y;
 
-  SDL_FillRect(screen_surface, NULL, 0x00000000);
-
   int i, j;
 
   i = get_num(L, "i");
@@ -69,12 +67,13 @@ void the_flake_show(void)
 
   k = get_num(L, "k");
 
-  blit_map(i, j);
+  //blit_map(i, j);
 
   if(blit_frame(160, 160, k, f)) f = 0; else f++;
   //blit_sprite(160, 160, k);
 
   SDL_Flip(screen_surface);
+  SDL_FillRect(screen_surface, NULL, 0x00000000);
 
   if(!get_num(L, "flake"))
     exit_mode();

@@ -3,6 +3,13 @@
 #include "lualib.h"
 #include "lauxlib.h"
 
+#define BUG(L, n) ({ \
+  luaL_dostring(L, "return bug and bug." n); \
+  int x = lua_tointeger(L, -1); \
+  lua_pop(L, 1); \
+  x; \
+})
+
 #define REV32(x) ({                                        \
   int n=x;                                                 \
   n = ((n >>  1) & 0x55555555) | ((n <<  1) & 0xaaaaaaaa); \

@@ -4,7 +4,7 @@ static const char *META = "rw_meta";
 
 struct rw {
   struct SDL_RWops *F;
-  char              N[1];
+  char              N[0];
 };
 
 int is_rw(struct lua_State *L, int i)
@@ -28,7 +28,7 @@ int rw_new(struct lua_State *L)
 	lua_setmetatable(L, 2);
 	rw->F = F;
 	strcpy(rw->N, s);
-	printf("rw ok: '%s'\n", s);
+	if(BUG(L, "munin")) printf("+ rw('%s') @ %p\n", s, rw);
 	return 1;
       }
       lua_pop(L, 1);
@@ -45,9 +45,7 @@ int rw_gc(struct lua_State *L)
 
   luaL_argcheck(L, rw, 1, "Expected an rw");
   SDL_RWclose(rw->F);
-  luaL_dostring(L, "bug and bug.munin");
-  if lua_toboolean(L, -1) printf("gc:ing rw('%s') @ %p\n", rw->N, rw);
-  lua_pop(L, 1);
+  if(BUG(L, "munin")) printf("- rw('%s') @ %p\n", rw->N, rw);
   return 0;
 }
 

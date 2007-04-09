@@ -1,6 +1,13 @@
 
+bug = {
+   -- munin = 0,
+   scheherazade = 1, gaia = 1, keycall = 1, music = 1, frame = 1,
+}
+
 flake = 1;
 rot=1;
+
+Map = map(rw('data/map04.dat'))
 
 floor   = math.floor
 round   = function(x, y) return math.floor(x/y)*y end
@@ -80,7 +87,7 @@ do
 
    add_ped =
       function(b, x, y)
-	 local mx, my = scr_to_map(x, y);
+	 local mx, my = s2m(x, y);
 	 local x, y, z = mx-mx%1, my-my%1, 64
 	 sprites:add{ x=x, y=y, z=z, a=k, f=0 }
       end
@@ -99,6 +106,7 @@ do
 
    local frame =
       function()
+	 Map:draw(i, j)
 	 if wob then wobble() end
 	 i = i - uu*2*k - ll*1*k
 	 i = i + dd*2*k + rr*1*k
@@ -110,7 +118,7 @@ do
 
    local click_info =
       function(b, x, y)
-	 local mx, my = scr_to_map(x, y);
+	 local mx, my = s2m(x, y);
 	 printf('camera at %d,%d~(%d,%d) '..
 		'click s(%d,%d) '..
 		   'click on m(%d,%d)~(%d,%d)',
@@ -128,9 +136,9 @@ do
       end
    local info_fun =
       function()
-	 local tlx, tly = scr_to_map(0, 0)
+	 local tlx, tly = s2m(0, 0)
 	 local tx,  ty  = tlx / scale, tly / scale
-	 local brx, bry = scr_to_map(320, 200)
+	 local brx, bry = s2m(320, 200)
 	 local bx,  by  = brx / scale, bry / scale
 	 local q = tlx - brx
 	 printf("top left:     %4d,%4d  %%  %5.2f,%5.2f", tlx, tly, tx,ty)
@@ -168,12 +176,12 @@ do
       [  -sdlk.k     ] = no_i_roll,
       [  -sdlk.i     ] = no_i_roll,
       [  -sdlk.j     ] = no_i_roll,
+      [   sdlk.g     ] = function() printf("%d",collectgarbage()) end,
       [     'frame'  ] = frame,
       [   sdlk['0']  ] = function() i,j = 0,0 end,
       [  sdlk.RETURN ] = function()
 			    --film = fli(rw('film/intro.dat'))
-			    film = fli(rw('film/mselect.dat'))
-			    film:play();
+			    fli(rw('film/mselect.dat')):play();
 			 end,
       [  sdlk.m      ] = pla,
       [  sdlk.a      ] = function() i,j = i-(i%scale), j-(j%scale) end,
@@ -187,6 +195,14 @@ do
       [ -sdlk.UP     ] = function() uu = 0; end,
       [  sdlk.DOWN   ] = function() dd = 1; end,
       [ -sdlk.DOWN   ] = function() dd = 0; end,
+      [  sdlk.b      ] =
+	 function()
+	    local z = map(rw('data/map03.dat'))
+	 end,
+      [  sdlk.v      ] =
+	 function()
+	    local z = snd(rw('bequietga.wav')):play()
+	 end
    }
    setmetatable(flake_input, common_input)
 

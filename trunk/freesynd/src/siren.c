@@ -29,6 +29,7 @@ int snd_new(struct lua_State *L)
       S->ch = -1;
       luaL_getmetatable(L, SND_META);
       lua_setmetatable(L, 2);
+      if(BUG(L, "snd")) printf("+ snd('%s') @ %p\n", rw->N, S);
       return 1;
     } else
       printf("snd_new: %s\n", SDL_GetError());
@@ -43,6 +44,7 @@ int snd_gc(struct lua_State *L)
 
   if(S->ch >= 0) Mix_HaltChannel(S->ch);
   Mix_FreeChunk(S->mc);
+  if(BUG(L, "snd")) printf("- snd @ %p\n", S);
   return 0;
 }
 
@@ -98,7 +100,7 @@ int snd_volume(struct lua_State *L)
 
 static struct luaL_Reg snd_meta[] = {
   "new",    snd_new,
-  "gc",     snd_gc,
+  "__gc",     snd_gc,
   "play",   snd_play,
   "stop",   snd_stop,
   "pause",  snd_pause,
@@ -123,10 +125,11 @@ int mus_new(struct lua_State *L)
     if((*M = Mix_LoadMUS(name))) {
       luaL_getmetatable(L, MUS_META);
       lua_setmetatable(L, 2);
+      if(BUG(L, "music")) printf("+ music('%s') @ %p\n", name, M);
       return 1;
     }
   }
-  printf("music_new: %s\n", SDL_GetError());
+  printf("music ko '%s'\n", SDL_GetError());
   return 0;
 }
 
@@ -135,7 +138,7 @@ int mus_gc(struct lua_State *L)
   Mix_Music **M = luaL_checkudata(L, 1, MUS_META);
   luaL_argcheck(L, *M, 1, "Expected a music object");
 
-  printf("music_gc\n");
+  if(BUG(L, "music")) printf("- music @ %p\n", M);
   Mix_HaltMusic();
   Mix_FreeMusic(*M);
   return 0;
@@ -219,7 +222,7 @@ int mus_seek(struct lua_State *L)
 
 static struct luaL_Reg mus_meta[] = {
   "new",    mus_new,
-  "gc",     mus_gc,
+  "__gc",     mus_gc,
   "play",   mus_play,
   "stop",   mus_stop,
   "pause",  mus_pause,

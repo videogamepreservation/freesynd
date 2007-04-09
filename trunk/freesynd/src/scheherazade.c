@@ -47,7 +47,7 @@ static void decode_delta_flc(struct FLI *Z)
       case pktcnt: k  =  op;           break;
       case undef:                      break;
       case skip:   l += -(Sint16) op;  break;
-      case last: /* Never actually happens. Least not in intro.dat. */
+      case last: /* Never actually happens. At least not in intro.dat. */
 	*( (Uint8 *)(Z->S->pixels) + l * Z->w + Z->h -1) = op & 0xFF;
 	break;
       }
@@ -217,28 +217,27 @@ int fli_new(struct lua_State *L)
 {
   struct rwops *rw;
   struct FliHeader h;
-  struct FLI *fli;
+  struct FLI *Z;
 
   luaL_argcheck(L, is_rw(L, 1), 1, "Expected an rw");
   rw = lua_touserdata(L, 1);
 
-  if((fli = lua_newuserdata(L, sizeof(struct FLI)))) {
+  if((Z = lua_newuserdata(L, sizeof(struct FLI)))) {
     if(fli_readheader(rw->F, &h)) {
-      if((fli->S = SDL_CreateRGBSurface(SDL_SWSURFACE,
+      if((Z->S = SDL_CreateRGBSurface(SDL_SWSURFACE,
 					h.width, h.height, 8,
 					0,0,0,0))) {
         lua_pushvalue(L, 1);
-	fli->F = rw->F;
-	fli->N = rw->N;
-	fli->R = luaL_ref(L, LUA_REGISTRYINDEX);
-	fli->w = h.width;
-	fli->h = h.height;
-	fli->n = h.numFrames;
-	fli->f = 0;
-	printf("%s : (%dx%d) (%d/%d)\n",
-	       fli->N,
-	       fli->w, fli->h,
-	       fli->f, fli->n);
+	Z->F = rw->F;
+	Z->N = strdup(rw->N);
+	Z->R = luaL_ref(L, LUA_REGISTRYINDEX);
+	Z->w = h.width;
+	Z->h = h.height;
+	Z->n = h.numFrames;
+	Z->f = 0;
+	if(BUG(L, "scheherazade"))
+	  printf("+ fli('%s') @ %p : (%dx%d) (%d/%d)\n",
+		 Z->N, Z, Z->w, Z->h, Z->f, Z->n);
 	luaL_getmetatable(L, META);
 	lua_setmetatable(L, 2);
 	return 1;
@@ -253,7 +252,8 @@ int fli_gc(struct lua_State *L)
   luaL_argcheck(L, Z, 1, "Expected an FLI animation");
   SDL_FreeSurface(Z->S);
   luaL_unref(L, LUA_REGISTRYINDEX, Z->R);
-  printf("gc:ing fli('%s') @ %p\n", Z->N, Z);
+  if(BUG(L, "scheherazade")) printf("- fli('%s') @ %p\n", Z->N, Z);
+  free((char *) Z->N);
   return 0;
 }
 

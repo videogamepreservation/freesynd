@@ -77,7 +77,7 @@ static void keycall(const union SDL_Event *e)
   if(k > 10) lua_pushnumber(L, e->key.keysym.unicode), lua_pushnil(L);
   else       lua_pushnumber(L, e->button.x), lua_pushnumber(L, e->button.y);
 
-  if(lua_pcall(L, 3, 0, 0))
+  if(lua_pcall(L, 3, 0, 0) && BUG(L, "keycall"))
     printf("keycall: \"%s\"\n", lua_tostring(L, -1)), lua_pop(L, 1);
 }
 
@@ -100,7 +100,7 @@ static void music_ended(void)
   lua_pushstring(L, "music");
   if(!get_input_fun(L)) return;
 
-  if(lua_pcall(L, 0, 0, 0))
+  if(lua_pcall(L, 0, 0, 0) && BUG(L, "music"))
     printf("music: \"%s\"\n", lua_tostring(L, -1)), lua_pop(L, 1);
 }
 
@@ -108,7 +108,7 @@ static void do_frame(void)
 {
   lua_pushstring(L, "frame");
   if(get_input_fun(L))
-    if(lua_pcall(L, 0, 0, 0))
+    if(lua_pcall(L, 0, 0, 0) && BUG(L, "frame"))
       printf("frame: \"%s\"\n", lua_tostring(L, -1)), lua_pop(L, 1);
 
   if(frame) frame();
