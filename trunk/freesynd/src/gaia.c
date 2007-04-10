@@ -1,6 +1,6 @@
 #include "common.h"
 
-static const char *META = "map_meta";
+static const char *META = "map";
 
 static const Uint8 off[6][2] = { 00,00, 00,16, 00,32, 32,00, 32,16, 32,32, };
 
@@ -61,8 +61,6 @@ struct Map {
   };
 };
 
-static struct Map *M;
-
 Uint8 *tile_ref(struct Map *M, Uint16 x, Uint16 y, Uint16 z)
 {
   x /= SCALE; y /= SCALE; z /= SCALE;
@@ -74,40 +72,6 @@ static Uint8 *raw_ref(struct Map *M, Uint16 x, Uint16 y, Uint16 z)
 {
   if(x >= M->xs || y >= M->ys || z >= M->zs) return NULL;
   return &M->m[ M->l[ y*M->xs + x ] ] + z;
-}
-
-/* FIXME: Make maps work like films; objectify.
-   Also, consider unpacking array... so we can edit!
-*/
-void load_map(struct SDL_RWops *F)
-{
-  Uint32 s, x, y, z;
-
-  s = SDL_RWseek(F, 0, SEEK_END), SDL_RWseek(F, 0, SEEK_SET);
-
-  M = malloc(s);
-  if(!M) {
-    printf("Couldn't allocate memory for map.\n");
-    exit(5);
-  }
-  SDL_RWread(F, &M->xs, s, 1);
-
-  printf("  +  %d x %d x %d map loaded\n", M->xs, M->ys, M->zs, s);
-
-  {             /* Verify tile_refs */
-    Uint8 *t;
-    z = M->zs-1;
-
-    for(x = 0; x < M->xs; x++)
-      for(y = 0; y < M->ys; y++)
-	if((t = raw_ref(M, x, y, z)) == NULL)
-	  printf("%d,%d,%d\tno reference\n", x, y, z);
-	else
-	  if( ((void*)t - (void*)M->m) > s)
-	    printf("%d,%d,%d\treferences beyond array"
-		   " %p %p %d\n",
-		   x, y, z, M, t, t - M->m);
-  }
 }
 
 /************************************************************************\
@@ -183,106 +147,7 @@ void load_map(struct SDL_RWops *F)
 
 \************************************************************************/
 
-
 static Sint16 LX, LY; /* LAST DRAWN HERE */
-
-void blit_map(/*struct Map *M, */ Sint16 wx, Sint16 wy)
-{
-  Sint16 sx=0, sy=0;
-  Uint8  *w = NULL;
-
-  return;
-
-  wx -= SM_x(width/2, height/2);
-  wy -= SM_y(width/2, height/2);
-
-  LX=wx+SCALE; LY=wy; /* SAVE THESE. (+W to avoid jaggies on the left.)*/
-
-  sx = -MS_x(SUB(wx), SUB(wy), 0)-W;  /* sub-tile scroll */
-  sy = -MS_y(SUB(wx), SUB(wy), 0);    /* adjustment      */
-
-  wx /= SCALE; wy /= SCALE;
-
-  Uint32 q = ~0;
-
-  if(lua_gettop(L)) debug_lua_stack(L, "bmap>");
-  lua_getfield(L, LUA_GLOBALSINDEX, "sprites");
-
-  Sint8 x=0, y=0, z=0;
-  Sint16 xl, yl, zf;
-  xl = SM_x(width,        0) / SCALE + 2;         /* +2,+3 to avoid jaggies */
-  yl = SM_y(    0, 2*height) / SCALE + M->zs + 3;
-
-  for   ( y = 0 ; y <   yl ; y++) {    /* far to near   */
-  for   ( z = 0 ; z < M->zs; z++) {    /* bottom to top */
-  for   ( x = 0 ; x <   xl ; x++) {    /* left to right */
-    Uint16 mx, my, qx, qy;
-    mx = wx+x+(y/2)+(y&1);
-    my = wy-x+(y/2);
-
-    w = raw_ref(M, mx, my, z);
-
-    qx = sx+64*x+(32*(y&1));
-    qy = sy+16*y-16*z;
-
-    if(w != NULL && *w > 5)
-      blit_tile(qx, qy, *w);
-
-    do_sprites(GLOM(mx, my, z), qx+32, qy+16); /* offset 'cos of jaggie-adj */
-
-  } } } /* for for for */
-  lua_pop(L, 1);
-  if(lua_gettop(L)) debug_lua_stack(L, "bmap<");
-}
-
-int point_at(struct lua_State *L) /* Harder than it seemed. */
-{
-  Sint16 x, y, z, mx, my;
-  Uint8 *p = NULL;
-
-  luaL_argcheck(L, lua_isnumber(L, 1), 1, "Expected x coordinate");
-  luaL_argcheck(L, lua_isnumber(L, 2), 2, "Expected y coordinate");
-  x = lua_tonumber(L, 1);
-  y = lua_tonumber(L, 2);
-
-  /* Ok, now we shift x,y and ask for the  z=0 intercept. */
-  for(z = M->zs; --z >= 0 && (!p || *p < 5);) {
-    mx = SM_x(x, y + z*H/2)+LX;
-    my = SM_y(x, y + z*H/2)+LY;
-    p = tile_ref(M, mx, my, z*SCALE);
-  }
-  if(p == NULL) {
-    lua_pushnumber(L, -1);
-    lua_pushnumber(L, -1);
-    lua_pushnumber(L, -1);
-    lua_pushnumber(L, -1);
-  } else {
-    lua_pushnumber(L, mx);
-    lua_pushnumber(L, my);
-    lua_pushnumber(L,  z);
-    lua_pushnumber(L, *p);
-  }
-  return 4;
-}
-
-int tile_at(struct lua_State *L)
-{
-  Sint32 x, y, z;
-  Uint8 *p;
-
-  luaL_argcheck(L, lua_isnumber(L, 1), 1, "Expected x coordinate");
-  luaL_argcheck(L, lua_isnumber(L, 2), 2, "Expected y coordinate");
-  x = lua_tonumber(L, 1);
-  y = lua_tonumber(L, 2);
-  z = (lua_isnumber(L, 3))?
-      lua_tonumber(L, 3): 0;
-
-  if((p = tile_ref(M, x, y, z)) != NULL)
-    lua_pushnumber(L, *p);
-  else
-    lua_pushnumber(L, -1);
-  return 1;
-}
 
 int s2m(struct lua_State *L)
 {
@@ -435,7 +300,7 @@ int map_new(struct lua_State *L)
 
   s = SDL_RWseek(rw->F, 0, SEEK_END), SDL_RWseek(rw->F, 0, SEEK_SET);
 
-  if((M = lua_newuserdata(L, s + strlen(rw->N)+1)) != NULL) {
+  if((M = lua_newuserdata(L, s + strlen(rw->N)+1 + sizeof(char *))) != NULL) {
     if(SDL_RWread(rw->F, &M->xs, s, 1)) {
 
       luaL_getmetatable(L, META);
@@ -453,8 +318,8 @@ int map_new(struct lua_State *L)
 	      return printf("%d,%d,%d\treferences beyond array"
 			    " %p %p %d\n",
 			    x, y, z,
-			    M, t, t - M->m) * 0;
-      M->N = (void *) M + s;
+			    M, t, t - &M->xs) * 0;
+      M->N = (void *) &(M->xs) + s;
       strcpy(M->N, rw->N);
 
       printf("  +  %d x %d x %d map loaded (%d)\n", M->xs, M->ys, M->zs, s);
@@ -521,31 +386,11 @@ int init_gaia(void)
 
   SDL_RWclose(F);
 
-  F = SDL_RWFromFile("data/map05.dat","r");
-  load_map(F);
-
-  debug_lua_stack(L, "gaia_init");
-
-  lua_pushnumber(L, SCALE);
-  lua_setfield(L, LUA_GLOBALSINDEX, "scale");
+  lua_pushnumber(L, SCALE); lua_setfield(L, LUA_GLOBALSINDEX, "scale");
   lua_register(L, "s2m", s2m);
   lua_register(L, "m2s", m2s);
-  lua_register(L, "tile_at", tile_at);
-  lua_register(L, "point_at", point_at);
 
-  debug_lua_stack(L, "gaia_init A ");
-
-  luaL_newmetatable(L, META);
-  luaL_register(L, NULL, map_meta);
-  //lua_pushvalue(L, -1);
-  lua_setfield(L, -1, "__index");
-  //lua_pop(L, 1);
-
-  debug_lua_stack(L, "gaia_init B ");
-
-  lua_register(L, "map", map_new);
-
-  debug_lua_stack(L, "gaia_init C ");
+  REG_CLASS(L, map);
 
   return subtiles != NULL;
 }

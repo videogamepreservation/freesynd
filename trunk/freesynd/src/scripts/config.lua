@@ -124,12 +124,12 @@ do
 		   'click on m(%d,%d)~(%d,%d)',
 		i, j, i/scale, j/scale, x, y, mx, my, mx/scale, my/scale);
 	 local mz
-	 mx, my, mz, t = point_at(x, y)
+	 mx, my, mz, t = Map:pt_at(x, y)
 	 printf('%d %d %d ~ (%d,%d): %d', mx, my, mz, mx/scale, my/scale, t)
 	 local s='tilestack:'
 	 local i, t
 	 for i=0,11 do
-	    t = tile_at(mx, my, i * scale)
+	    t = Map:tile_at(mx, my, i * scale)
 	    s = (s..' '..string.format('%d', t))
 	 end
 	 print(s..'\n')
@@ -151,6 +151,8 @@ do
 		   w.x, w.y, w.a, w.f, w.x+w.y, w.y-w.x)
 	 end
       end
+
+   zonk = 1
 
    common_input = {
       [    '__index' ] = common_input,
@@ -197,7 +199,8 @@ do
       [ -sdlk.DOWN   ] = function() dd = 0; end,
       [  sdlk.b      ] =
 	 function()
-	    local z = map(rw('data/map03.dat'))
+	    zonk = zonk + 1
+	    Map = map(rw(string.format('data/map%02d.dat', zonk)))
 	 end,
       [  sdlk.v      ] =
 	 function()
