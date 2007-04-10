@@ -1,6 +1,6 @@
 #include "common.h"
 
-static const char *META = "rw_meta";
+static const char *META = "rw";
 
 struct rw {
   struct SDL_RWops *F;
@@ -69,14 +69,7 @@ int init_munin()
 {
   printf("Munin script-accessible storage module.\n");
 
-  lua_pushstring(L, META);
-  lua_newtable(L);
-  lua_pushstring(L, "__index");
-  lua_pushvalue(L, -2);
-  lua_settable(L, -3);
-  luaL_register(L, NULL, rw_meta);
-  lua_settable(L, LUA_REGISTRYINDEX);
-  lua_register(L, "rw", rw_new);
+  REG_CLASS(L, rw);
   return 1;
 }
 

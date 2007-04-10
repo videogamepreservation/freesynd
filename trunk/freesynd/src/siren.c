@@ -8,8 +8,8 @@ int    chunksize = 1024;
 /* ("http://osdl.sourceforge.net/OSDL/OSDL-0.3/src/doc/web/main/docume"
     "ntation/rendering/SDL-audio.html") */
 
-static const char *SND_META = "snd_meta";
-static const char *MUS_META = "mus_meta";
+static const char *SND_META = "snd";
+static const char *MUS_META = "mus";
 
 struct Sound {
   Mix_Chunk *mc;
@@ -100,7 +100,7 @@ int snd_volume(struct lua_State *L)
 
 static struct luaL_Reg snd_meta[] = {
   "new",    snd_new,
-  "__gc",     snd_gc,
+  "__gc",   snd_gc,
   "play",   snd_play,
   "stop",   snd_stop,
   "pause",  snd_pause,
@@ -222,7 +222,7 @@ int mus_seek(struct lua_State *L)
 
 static struct luaL_Reg mus_meta[] = {
   "new",    mus_new,
-  "__gc",     mus_gc,
+  "__gc",   mus_gc,
   "play",   mus_play,
   "stop",   mus_stop,
   "pause",  mus_pause,
@@ -251,25 +251,8 @@ int init_siren(void)
     return 0;
   }
 
-  {
-    lua_pushstring(L, SND_META);
-    lua_newtable(L);
-    lua_pushstring(L, "__index");
-    lua_pushvalue(L, -2);
-    lua_settable(L, -3);
-    luaL_register(L, NULL, snd_meta);
-    lua_settable(L, LUA_REGISTRYINDEX);
-    lua_register(L, "snd", snd_new);
-
-    lua_pushstring(L, MUS_META);
-    lua_newtable(L);
-    lua_pushstring(L, "__index");
-    lua_pushvalue(L, -2);
-    lua_settable(L, -3);
-    luaL_register(L, NULL, mus_meta);
-    lua_settable(L, LUA_REGISTRYINDEX);
-    lua_register(L, "mus", mus_new);
-  }
+  REG_CLASS(L, snd);
+  REG_CLASS(L, mus);
 
   return 1;
 }

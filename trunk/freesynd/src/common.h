@@ -10,6 +10,13 @@
   x; \
 })
 
+#define REG_CLASS(L, n) \
+    ( luaL_newmetatable(L, #n), \
+      luaL_register(L, NULL, n##_meta), \
+      lua_setfield(L, -1, "__index"), \
+      lua_register(L, #n, n##_new) )
+
+
 #define REV32(x) ({                                        \
   int n=x;                                                 \
   n = ((n >>  1) & 0x55555555) | ((n <<  1) & 0xaaaaaaaa); \

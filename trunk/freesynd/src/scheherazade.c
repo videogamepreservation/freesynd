@@ -13,7 +13,7 @@ extern int run_main_loop;
 extern struct lua_State *L;
 extern void (*master_event_loop)(void);
 
-static const char *META = "fli_meta";
+static const char *META = "fli";
 
 struct FLI {
   struct SDL_Color    P[256];
@@ -297,13 +297,6 @@ static struct luaL_Reg fli_meta[] = {
 
 int init_fliplayer(void)
 {
-  lua_pushstring(L, META);
-  lua_newtable(L);
-  lua_pushstring(L, "__index");
-  lua_pushvalue(L, -2);
-  lua_settable(L, -3);
-  luaL_register(L, NULL, fli_meta);
-  lua_settable(L, LUA_REGISTRYINDEX);
-  lua_register(L, "fli", fli_new);
+  REG_CLASS(L, fli);
   return 1;
 }
