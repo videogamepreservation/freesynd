@@ -7,13 +7,13 @@ bug = {
 flake = 1;
 rot=1;
 
+
+zonk = 1
 Map = map(rw('data/map04.dat'))
 
 floor   = math.floor
 round   = function(x, y) return math.floor(x/y)*y end
 sprsort = function(a, b) -- {{{
-      --local ax, ay, az = floor(a.x/32), floor(a.y/32), floor(a.z/32)
-      --local bx, by, bz = floor(b.x/32), floor(b.y/32), floor(b.z/32)
       if     a.z ~= b.z     then do return      a.z  <  b.z      end end
       if a.x+a.y ~= b.x+b.y then do return (a.x+a.y) < (b.x+b.y) end end
       if a.x-a.y ~= b.x-b.y then do return (a.x-a.y) < (b.x-b.y) end end
@@ -152,8 +152,6 @@ do
 	 end
       end
 
-   zonk = 1
-
    common_input = {
       [    '__index' ] = common_input,
       [  sdlk.F12    ] = function() v=v+1; M:vol(v) end,
@@ -199,8 +197,19 @@ do
       [ -sdlk.DOWN   ] = function() dd = 0; end,
       [  sdlk.b      ] =
 	 function()
-	    zonk = zonk + 1
-	    Map = map(rw(string.format('data/map%02d.dat', zonk)))
+	    while true do
+	       zonk = ( zonk + 1 ) % 100
+	       local fnoo = rw(string.format('data/map%02d.dat', zonk))
+	       if fnoo then Map = map(fnoo) return end
+	    end
+	 end,
+      [  sdlk.n      ] =
+	 function()
+	    while true do
+	       zonk = ( zonk + 99 ) % 100
+	       local fnoo = rw(string.format('data/map%02d.dat', zonk))
+	       if fnoo then Map = map(fnoo) return end
+	    end
 	 end,
       [  sdlk.v      ] =
 	 function()

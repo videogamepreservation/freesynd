@@ -112,11 +112,12 @@ int load_sprite(struct SDL_Surface ** SN, struct SDL_Surface ** SM,
 {
   struct SDL_Surface *Z, *Y;
   struct SDL_Rect R = { 0, 0, 0, 0 };
+  struct SDL_Color *pal = get_pal("data/hpal01.dat");
   Uint8 *z, x, y;
 
   R.w = CEIL8(T->w), R.h = T->h;
 
-  if(!R.w || !R.h || !(Z = CreateZSurface(R.w, R.h))) return 0;
+  if(!R.w || !R.h || !(Z = CreateZSurface(pal, R.w, R.h))) return 0;
 
   z = Z->pixels;
   memset(z, 255, R.w * R.h);
@@ -129,7 +130,7 @@ int load_sprite(struct SDL_Surface ** SN, struct SDL_Surface ** SM,
   *SN = Z;
 
   if(SM) {
-    if((Y = CreateZSurface(R.w, R.h)) == NULL)
+    if((Y = CreateZSurface(pal, R.w, R.h)) == NULL)
       printf("Error when creating mirrored sprite: %s", SDL_GetError());
     else { 
       Uint8 *q; /* Mirror */
@@ -152,12 +153,13 @@ load_rle_sprite(struct SDL_Surface ** SN, struct SDL_Surface ** SM,
 {
   struct SDL_Surface *Z, *Y;
   struct SDL_Rect R = { 0, 0, 0, 0 };
+  struct SDL_Color *pal = get_pal("data/mselect.pal");
   Uint8 *z, x, y;
   Sint16 r;
 
   R.w = CEIL8(T->w), R.h = T->h;
 
-  if(!R.w || !R.h || !(Z = CreateZSurface(R.w, R.h))) {
+  if(!R.w || !R.h || !(Z = CreateZSurface(pal, R.w, R.h))) {
     if(!R.w) printf("  -  sprite has width  zero.\n");
     if(!R.h) printf("  -  sprite has height zero.\n");
     if(!Z)   printf("  -  couldn't createZsurface for sprite.\n");
@@ -178,11 +180,10 @@ load_rle_sprite(struct SDL_Surface ** SN, struct SDL_Surface ** SM,
     }
   }
 
-  SDL_SetColors(Z, get_pal("data/mselect.pal"), 0, 256);
   *SN = Z;
 
   if(SM) {
-    if((Y = CreateZSurface(R.w, R.h)) == NULL)
+    if((Y = CreateZSurface(pal, R.w, R.h)) == NULL)
       printf("Error when creating mirrored sprite: %s", SDL_GetError());
     else { 
       Uint8 *q; /* Mirror */
@@ -193,7 +194,6 @@ load_rle_sprite(struct SDL_Surface ** SN, struct SDL_Surface ** SM,
 	for(x = 0; x < R.w; x++)
 	  q[y*R.w+x] = z[(y+1)*R.w-x-1];
 
-      SDL_SetColors(Y, get_pal("data/mselect.pal"), 0, 256);
       *SM = Y;
     }
   }

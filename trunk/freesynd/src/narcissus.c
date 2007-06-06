@@ -24,13 +24,13 @@ struct SDL_Color tile_palette[] = {
 
 /*****************************************************************************/
 
-SDL_Surface *CreateZSurface(Uint16 w, Uint16 h)
+SDL_Surface *CreateZSurface(struct SDL_Color *p, Uint16 w, Uint16 h)
 {
   struct SDL_Surface *Z;
   
   if((Z = SDL_CreateRGBSurface(SDL_HWSURFACE|SDL_SRCCOLORKEY,w,h,8,0,0,0,0))) {
     SDL_SetColorKey(Z, SDL_SRCCOLORKEY, 255);
-    SDL_SetColors(Z, tile_palette, 0, 16);
+    SDL_SetColors(Z, p, 0, 16);
   }
   return Z;
 }

@@ -60,7 +60,7 @@ extern        int           width;
 extern        int           height;
 extern        int           depth;
 
-struct SDL_Surface *CreateZSurface(Uint16 w, Uint16 h);
+struct SDL_Surface *CreateZSurface(SDL_Color *pal, Uint16 w, Uint16 h);
 
 void sdl_version(const char *n,
                  const struct SDL_version *c,

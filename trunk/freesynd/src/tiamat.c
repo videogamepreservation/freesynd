@@ -36,7 +36,7 @@ int init_snow(void)
   SDL_Color c;
   int i;
 
-  snow = CreateZSurface(320, 200);
+  snow = CreateZSurface(&c, 320, 200);
   for(i=0; i < 255; i++) {
     c.r = c.g = c.b =  i;
     SDL_SetColors(snow, &c, i, 1);

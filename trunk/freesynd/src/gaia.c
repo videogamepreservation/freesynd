@@ -209,8 +209,8 @@ int map_draw(struct lua_State *L)
   xl = SM_x(width,        0) / SCALE + 2;         /* +2,+3 to avoid jaggies */
   yl = SM_y(    0, 2*height) / SCALE + M->zs + 3;
 
-  for   ( y = 0 ; y <   yl ; y++) {    /* far to near   */
   for   ( z = 0 ; z < M->zs; z++) {    /* bottom to top */
+  for   ( y = 0 ; y <   yl ; y++) {    /* far to near   */
   for   ( x = 0 ; x <   xl ; x++) {    /* left to right */
     Uint16 mx, my, qx, qy;
     mx = wx+x+(y/2)+(y&1);
@@ -314,11 +314,11 @@ int map_new(struct lua_State *L)
 	  if((t = tile_ref(M, x*SCALE,y*SCALE,z*SCALE))==NULL)
 	    return printf("%d,%d,%d\thas no reference!\n", x, y, z) * 0;
 	  else
-	    if( ((void*) t - (void*) &M->xs) > s)
+	    if( ((void*) t - (void*) &(M->xs)) > s)
 	      return printf("%d,%d,%d\treferences beyond array"
 			    " %p %p %d\n",
 			    x, y, z,
-			    M, t, t - &M->xs) * 0;
+			    M, t, t - (Uint8 *) &(M->xs)) * 0;
       M->N = (void *) &(M->xs) + s;
       strcpy(M->N, rw->N);
 
@@ -371,7 +371,7 @@ int init_gaia(void)
   printf("Gaia tile module:\n  +  %d unique subtiles.\n", x);
   x++;
   
-  if(!(Z = CreateZSurface(32,16*x)) )
+  if(!(Z = CreateZSurface(get_pal("data/hpal01.dat"), 32,16*x)) )
     SDL_RWclose(F), abend(0);
 
   load_subtiles(F, Z->pixels, x);
