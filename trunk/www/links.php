@@ -28,6 +28,27 @@
 
 $title = 'Links'; require_once 'include/common.php'; ?>
 
+<h3>Syndicate</h3>
+
+<ul>
+<li>
+<a href="http://syndicate.lubie.org">Syndicate fansite</a>
+- with many interesting information about Syndicate series.
+</li>
+<li>
+<a href="http://syndicate.acornarcade.com">Syndicate walkthrough</a>
+- with Syndicate-like interface
+</li>
+<li>
+<a href="http://desyndicate.pbwiki.com">http://desyndicate.pbwiki.com</a>
+- A collaborative effort to decode Syndicate data files
+</li>
+<li>
+<a href="http://icculus.org/libsyndicate/">libsyndicate</a>
+- this project aims to provide an interface to the Syndicate data files
+</li>
+</ul>
+
 <h3>FreeSynd</h3>
 
 <p class="indent"><a href="http://sourceforge.net/projects/freesynd/">Project Page</a> -
