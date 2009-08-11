@@ -1,0 +1,21 @@
+Microsoft Visual Studio Solution File, Format Version 8.00
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "freesynd", "freesynd7.vcproj", "{06A13B8D-86A3-420F-B704-7BC25BD59527}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfiguration) = preSolution
+		Debug = Debug
+		Release = Release
+	EndGlobalSection
+	GlobalSection(ProjectConfiguration) = postSolution
+		{06A13B8D-86A3-420F-B704-7BC25BD59527}.Debug.ActiveCfg = Debug|Win32
+		{06A13B8D-86A3-420F-B704-7BC25BD59527}.Debug.Build.0 = Debug|Win32
+		{06A13B8D-86A3-420F-B704-7BC25BD59527}.Release.ActiveCfg = Release|Win32
+		{06A13B8D-86A3-420F-B704-7BC25BD59527}.Release.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+	EndGlobalSection
+	GlobalSection(ExtensibilityAddIns) = postSolution
+	EndGlobalSection
+EndGlobal
