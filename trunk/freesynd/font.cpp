@@ -26,15 +26,13 @@
 #include "font.h"
 #include "screen.h"
 
-void Font::setSpriteManager(SpriteManager * sprites, int offset, char base)
-{
+void Font::setSpriteManager(SpriteManager *sprites, int offset, char base) {
     sprites_ = sprites;
     offset_ = offset;
     base_ = base;
 }
 
-void Font::drawText(int x, int y, const char *text, bool x2)
-{
+void Font::drawText(int x, int y, const char *text, bool x2) {
     int sc = x2 ? 2 : 1;
     int ox = x;
     for (const char *c = text; *c; ++c) {
@@ -62,14 +60,12 @@ void Font::drawText(int x, int y, const char *text, bool x2)
     }
 }
 
-int Font::textWidth(const char *text, bool x2)
-{
+int Font::textWidth(const char *text, bool x2) {
     int sc = x2 ? 2 : 1;
     int x = 0;
     for (const char *c = text; *c; ++c) {
         if (*c == ' ') {
-            x += sprites_->sprite('A' - base_ + offset_)->width() * sc -
-                sc;
+            x += sprites_->sprite('A' - base_ + offset_)->width() * sc - sc;
             continue;
         }
         Sprite *s = sprites_->sprite(*c - base_ + offset_);
@@ -80,59 +76,57 @@ int Font::textWidth(const char *text, bool x2)
     return x;
 }
 
-int Font::textHeight(bool x2)
-{
+int Font::textHeight(bool x2) {
     int sc = x2 ? 2 : 1;
     return sprites_->sprite('A' - base_ + offset_)->height() * sc;
 }
 
-HChar::HChar():width_(0), height_(0), bits_(0)
-{
+HChar::HChar():width_(0), height_(0), bits_(0) {
 }
 
-HChar::~HChar()
-{
+HChar::~HChar() {
     if (bits_)
         delete[] bits_;
 }
 
-void HChar::set(int w, int h, uint8 * data)
-{
+void HChar::set(int w, int h, uint8 *data) {
     width_ = w;
     height_ = h;
     if (data) {
         int stride = w < 9 ? 1 : 2;
         bits_ = new bool[width_ * height_];
-        for (int y = 0; y < height_; y++)
-            for (int x = 0; x < width_; x++)
+        for (int y = 0; y < height_; y++) {
+            for (int x = 0; x < width_; x++) {
                 if (data[y * stride + (x / 8)] & (128 >> (x % 8)))
                     bits_[width_ * y + x] = true;
                 else
                     bits_[width_ * y + x] = false;
+            }
+        }
     }
 }
 
-int HChar::draw(int x, int y, uint8 color)
-{
+int HChar::draw(int x, int y, uint8 color) {
     if (bits_) {
-        for (int j = 0; j < height_; j++)
-            for (int i = 0; i < width_; i++)
+        for (int j = 0; j < height_; j++) {
+            for (int i = 0; i < width_; i++) {
                 if (bits_[width_ * j + i])
                     g_Screen.setPixel(x + i, y + j, color);
+            }
+        }
     }
     return width_;
 }
 
-HFont::HFont()
-{
+HFont::HFont() {
+
 }
 
-HFont::~HFont()
-{
+HFont::~HFont() {
+
 }
 
-void HFont::load()
-{
+void HFont::load() {
     int size;
     uint8 *data = File::loadFile("hfnt01.dat", size);
     for (int i = 0; i < 128; i++) {
@@ -148,12 +142,11 @@ void HFont::load()
     delete[] data;
 }
 
-void HFont::drawText(int x, int y, const char *str, uint8 color)
-{
+void HFont::drawText(int x, int y, const char *str, uint8 color) {
     while (*str) {
-        if (characters.find(*str) != characters.end()) {
+        if (characters.find(*str) != characters.end())
             x += characters[*str].draw(x, y, color);
-        }
+
         str++;
     }
 }

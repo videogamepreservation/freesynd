@@ -27,12 +27,11 @@
 #include <assert.h>
 #include "app.h"
 
-AgentManager::AgentManager()
-{
+AgentManager::AgentManager() {
+
 }
 
-AgentManager::~AgentManager()
-{
+AgentManager::~AgentManager() {
     for (unsigned int i = 0; i != agents_.size(); ++i)
         delete agents_[i];
 }
@@ -110,22 +109,19 @@ const char *g_AgentNames[] = {
     0
 };
 
-void AgentManager::loadAgents()
-{
-
+void AgentManager::loadAgents() {
     for (int i = 0; g_AgentNames[i]; i++) {
         agents_.push_back(new Agent(g_AgentNames[i], true));
         agents_.push_back(new Agent(g_AgentNames[i], false));
     }
 }
 
-void AgentManager::reset()
-{
+void AgentManager::reset() {
     for (unsigned int i = 0; i < agents_.size(); i++) {
         agents_[i]->setHealth(255);
         agents_[i]->clearSlots();
         agents_[i]->removeAllWeapons();
-        agents_[i]->addWeapon(g_App.weapons().findWeapon("PISTOL")->
-                              createInstance());
+        agents_[i]->addWeapon(
+                g_App.weapons().findWeapon("PISTOL")->createInstance());
     }
 }

@@ -37,18 +37,15 @@ name_(w_name), small_icon_(smallIcon), big_icon_(bigIcon), cost_(w_cost),
 ammo_(w_ammo), range_(w_range), shot_(w_shot), anim_(w_anim), rank_(w_rank),
 idx_(w_idx), sample_(w_sample) {}
 
-void Weapon::drawSmallIcon(int x, int y)
-{
+void Weapon::drawSmallIcon(int x, int y) {
     g_App.menuSprites().drawSpriteXYZ(small_icon_, x, y, 0, false, true);
 }
 
-void Weapon::drawBigIcon(int x, int y)
-{
+void Weapon::drawBigIcon(int x, int y) {
     g_App.menuSprites().drawSpriteXYZ(big_icon_, x, y, 0, false, true);
 }
 
-void Weapon::drawInfo(int x, int y)
-{
+void Weapon::drawInfo(int x, int y) {
     char tmp[100];
     g_App.fonts().drawText(x, y, name_.c_str(), 0, false);
     sprintf(tmp, "COST   :%d", cost_);
@@ -74,31 +71,26 @@ void Weapon::drawInfo(int x, int y)
     }
 }
 
-Sound *Weapon::sound()
-{
+Sound *Weapon::sound() {
 	return g_App.gameSounds().sound(sample_);
 }
 
-WeaponInstance *Weapon::createInstance()
-{
+WeaponInstance *Weapon::createInstance() {
     return new WeaponInstance(this);
 }
 
 WeaponInstance::WeaponInstance(Weapon * w) : Weapon(*w), MapObject(-1),
-        ammo_remaining_(w->ammo())
-{
+        ammo_remaining_(w->ammo()) {
 }
 
-bool WeaponInstance::animate(int elapsed)
-{
+bool WeaponInstance::animate(int elapsed) {
     if (map_ == -1)
         return false;
 
     return MapObject::animate(elapsed);
 }
 
-void WeaponInstance::draw(int x, int y)
-{
+void WeaponInstance::draw(int x, int y) {
     addOffs(x, y);
     g_App.gameSprites().drawFrame(anim_, frame_, x, y);
 }

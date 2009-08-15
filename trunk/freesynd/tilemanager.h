@@ -22,6 +22,9 @@
  *                                                                      *
  ************************************************************************/
 
+#ifndef TILEMANAGER_H
+#define TILEMANAGER_H
+
 #include "common.h"
 #include "tile.h"
 
@@ -29,17 +32,17 @@
  * Tile manager class.
  */
 class TileManager {
-  public:
+public:
     TileManager();
     bool loadTiles(uint8 *tileData);
     bool drawTileTo(uint8 *screen, int swidth, int sheight, int tileNum,
             int x, int y, bool clear = false);
 
-    bool loaded() {
-        return tilesLoaded_ > 0;
-    }
+    bool loaded() { return tilesLoaded_ > 0; }
 
-  protected:
+protected:
     int tilesLoaded_;
     Tile tile_[NUMtile_S];
 };
+
+#endif

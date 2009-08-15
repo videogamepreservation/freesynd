@@ -22,6 +22,9 @@
  *                                                                      *
  ************************************************************************/
 
+#ifndef MAP_H
+#define MAP_H
+
 #include "common.h"
 
 #define NUM_MAPS               59
@@ -35,7 +38,7 @@ class TileManager;
  * Map helper class.
  */
 class MapHelper {
-  public:
+public:
     virtual ~ MapHelper() {}
     virtual void drawAt(int tilex, int tiley, int tilez, int x, int y,
             int scrollX, int scrollY) = 0;
@@ -45,44 +48,34 @@ class MapHelper {
  * Map class.
  */
 class Map {
-  public:
+public:
     Map(TileManager *tileManager);
     ~Map();
+
     bool loadMap(uint8 *mapData);
     void draw(int scrollX, int scrollY, MapHelper *helper = 0);
 
-    int width() {
-        return map_width_;
-    }
-
-    int height() {
-        return map_height_;
-    }
+    int width() { return map_width_; }
+    int height() { return map_height_; }
 
     int tileToScreenX(int x, int y, int z, int pX, int pY);
     int tileToScreenY(int x, int y, int z, int pX, int pY);
     int screenToTileX(int x, int y, int &ox);
     int screenToTileY(int x, int y, int &oy);
 
-    int maxX() {
-        return max_x_;
-    }
-
-    int maxY() {
-        return max_y_;
-    }
-
-    int maxZ() {
-        return max_z_;
-    }
+    int maxX() { return max_x_; }
+    int maxY() { return max_y_; }
+    int maxZ() { return max_z_; }
 
     int maxZAt(int x, int y);
     int tileAt(int x, int y, int z);
     bool stairsAt(int x, int y, int z);
 
-  protected:
+protected:
     int max_x_, max_y_, max_z_;
     uint8 *map_data_;
     TileManager *tile_manager_;
     int map_width_, map_height_;
 };
+
+#endif

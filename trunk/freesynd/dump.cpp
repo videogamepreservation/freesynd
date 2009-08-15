@@ -8,7 +8,7 @@
 
 
 class App : public Singleton<App> {
-  public:
+public:
     App();
 };
 
@@ -23,8 +23,7 @@ int highest_row = -10000;
 int lowest_col = 10000;
 int highest_col = -10000;
 
-int write_png(int a, int f = -1)
-{
+int write_png(int a, int f = -1) {
     char tmp[100];
 
     if (f != -1)
@@ -75,14 +74,12 @@ int write_png(int a, int f = -1)
     return 0;
 }
 
-void clear_screen()
-{
+void clear_screen() {
     for (int i = 0; i < screen_height; i++)
         memset(screen_data[i], 255, screen_width);
 }
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
     App *app = new App();
     Screen *screen = new Screen(GAME_SCREEN_WIDTH, GAME_SCREEN_HEIGHT);
     GameSpriteManager sprites;
@@ -143,21 +140,20 @@ int main(int argc, char **argv)
     return 0;
 }
 
-App::App()
-{
+App::App() {
+
 }
 
-Screen::Screen(int width, int height)
-{
+Screen::Screen(int width, int height) {
+
 }
 
-Screen::~Screen()
-{
+Screen::~Screen() {
+
 }
 
-void Screen::blit(int x, int y, int width, int height, const uint8 * pixeldata,
-        bool flipped, int stride)
-{
+void Screen::blit(int x, int y, int width, int height, const uint8 *pixeldata,
+        bool flipped, int stride) {
     width_ = screen_width;
     height_ = screen_height;
 
@@ -206,6 +202,6 @@ void Screen::blit(int x, int y, int width, int height, const uint8 * pixeldata,
 }
 
 void Screen::scale2x(int x, int y, int width, int height,
-        const uint8 *pixeldata, int stride, bool transp)
-{
+        const uint8 *pixeldata, int stride, bool transp) {
+
 }

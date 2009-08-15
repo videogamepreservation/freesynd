@@ -22,15 +22,20 @@
  *                                                                      *
  ************************************************************************/
 
+#ifndef LOADSAVEMENU_H
+#define LOADSAVEMENU_H
+
 /*!
  * Load/Save Menu class.
  */
 class LoadSaveMenu : public Menu {
-  public:
+public:
     LoadSaveMenu(MenuManager *m);
 
     void handleShow() {}
     void handleOption(Key key) {}
 
-  protected:
+protected:
 };
+
+#endif

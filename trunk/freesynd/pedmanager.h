@@ -23,6 +23,9 @@
  *                                                                      *
  ************************************************************************/
 
+#ifndef PEDMANAGER_H
+#define PEDMANAGER_H
+
 #include "common.h"
 #include "ped.h"
 #include <vector>
@@ -31,15 +34,13 @@
  * Pedestrians manager class.
  */
 class PedManager {
-  public:
+public:
     PedManager();
     ~PedManager();
 
     void loadPeds();
 
-    int numPeds() {
-        return peds_.size();
-    }
+    int numPeds() { return peds_.size(); }
 
     Ped *ped(int n) {
         assert(n < (int) peds_.size());
@@ -48,6 +49,8 @@ class PedManager {
 
     PedInstance *loadInstance(uint8 *data, int map);
 
-  protected:
+protected:
     std::vector<Ped *> peds_;
 };
+
+#endif

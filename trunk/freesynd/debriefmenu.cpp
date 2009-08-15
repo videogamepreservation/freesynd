@@ -29,14 +29,12 @@
 #include "debriefmenu.h"
 
 DebriefMenu::DebriefMenu(MenuManager *m) : Menu(m, "debrief", "mdebrief.dat",
-     "mdeout.dat")
-{
+     "mdeout.dat") {
     addStatic(100, 35, "MISSION DEBRIEFING", 3, true);
     addOption(43, 352, "ACCEPT", 1, KEY_F5, "map");
     addOption(535, 352, "MENU", 1, KEY_F6, "main");
 }
 
-void DebriefMenu::handleShow()
-{
+void DebriefMenu::handleShow() {
     g_Screen.drawLogo(18, 14, g_App.logo(), g_App.logoColour());
 }

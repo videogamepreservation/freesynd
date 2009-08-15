@@ -23,6 +23,9 @@
  *                                                                      *
  ************************************************************************/
 
+#ifndef MENUMANAGER_H
+#define MENUMANAGER_H
+
 #include "common.h"
 #include "menu.h"
 #include <string>
@@ -46,14 +49,12 @@ class LogoutMenu;
  * Menu manager class.
  */
 class MenuManager {
-  public:
+public:
     MenuManager();
     ~MenuManager();
     void createAllMenus();
 
-    void addMenu(Menu *m) {
-        menus_[m->name()] = m;
-    }
+    void addMenu(Menu *m) { menus_[m->name()] = m; }
 
     void handleTick(int elapsed) {
         if (current_)
@@ -62,16 +63,14 @@ class MenuManager {
 
     void changeCurrentMenu(const char *name);
 
-    bool showingMenu() {
-        return current_ != NULL;
-    }
+    bool showingMenu() { return current_ != NULL; }
 
     void keyEvent(Key key, KeyMod mod, bool pressed);
     void mouseMotionEvent(int x, int y, int state);
     void mouseDownEvent(int x, int y, int button);
     void mouseUpEvent(int x, int y, int button);
 
-  protected:
+protected:
     std::map<std::string, Menu *> menus_;
     Menu *current_;
 
@@ -89,3 +88,5 @@ class MenuManager {
     Menu *menu_miss_lose_;
     LogoutMenu *menu_logout_;
 };
+
+#endif

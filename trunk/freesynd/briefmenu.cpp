@@ -41,8 +41,7 @@ int g_MissionNumbers[50] = {
 BriefMenu::BriefMenu(MenuManager * m, MapMenu * mapMenu) :
 Menu(m, "brief", "mbrief.dat", "mbrieout.dat"), map_menu_(mapMenu),
 orig_pixels_(0), cur_miss_(0), start_line_(0), info_level_(1),
-enhance_level_(0), mission_(0)
-{
+enhance_level_(0), mission_(0) {
     addStatic(148, 35, "MISSION BRIEF", 3, true);
     addOption(538, 118, "INFO", 1, KEY_F1, NULL);
     addOption(518, 169, "ENHANCE", 1, KEY_F2, NULL);
@@ -54,23 +53,24 @@ enhance_level_(0), mission_(0)
     setParentMenu("map");
 }
 
-BriefMenu::~BriefMenu()
-{
+BriefMenu::~BriefMenu() {
     if (orig_pixels_)
         delete[] orig_pixels_;
+
     if (mission_)
         delete mission_;
 }
 
-void BriefMenu::handleShow()
-{
+void BriefMenu::handleShow() {
     if (orig_pixels_ == 0) {
         orig_pixels_ = new uint8[GAME_SCREEN_WIDTH * GAME_SCREEN_HEIGHT];
         memcpy(orig_pixels_, g_Screen.pixels(),
                GAME_SCREEN_WIDTH * GAME_SCREEN_HEIGHT);
-    } else
+    }
+    else {
         g_Screen.blit(0, 0, 500, 340, orig_pixels_, false,
                       GAME_SCREEN_WIDTH);
+    }
 
     g_Screen.drawLogo(18, 14, g_App.logo(), g_App.logoColour());
 
@@ -83,40 +83,52 @@ void BriefMenu::handleShow()
         char *mbriefing = strdup(mission_->briefing());
         char *miss = mbriefing;
         char *nextline = miss - 1;
+
         do
             nextline = strchr(nextline + 1, '\x0a');
-        while (nextline
-               && (nextline[0] != '\x0a' || nextline[1] != '\x0a'));
+        while (nextline && (nextline[0] != '\x0a' || nextline[1] != '\x0a'));
+
         int line_count = 0;
         int lvls = 0;
+
         do {
             if (nextline) {
                 char *tmp = new char[nextline - miss + 1];
+
                 do {
                     memcpy(tmp, miss, nextline - miss);
                     tmp[nextline - miss] = 0;
                     nextline--;
                 } while (g_App.fonts().textWidth(tmp, 1) > 470);
+
                 delete[] tmp;
                 nextline++;
+
                 while (nextline[0] != '\x0a' && nextline[0] != ' '
-                       && nextline[0] != 0)
+                       && nextline[0] != 0) {
                     nextline--;
+                }
             }
+
             if (*miss == '|') {
                 lvls++;
+
                 if (lvls > info_level_) {
                     hideOption(KEY_F6);
                     break;
                 }
+
                 nextline = miss + 1;
-            } else {
+            }
+            else {
                 if (line_count >= start_line_) {
                     char tmp = 0;
+
                     if (nextline) {
                         tmp = *nextline;
                         *nextline = 0;
                     }
+
                     g_App.fonts().drawText(24,
                                            88 + (line_count -
                                                  start_line_) * 16, miss,
@@ -124,32 +136,41 @@ void BriefMenu::handleShow()
                     if (nextline)
                         *nextline = tmp;
                 }
+
                 line_count++;
             }
             if (nextline && nextline[0] == '\x0a') {
                 miss = nextline + 2;
+
                 if (line_count != 14)
                     line_count++;
-            } else
+            }
+            else
                 miss = nextline;
+
             if (miss && *miss) {
                 nextline = miss - 1;
+
                 do
                     nextline = strchr(nextline + 1, '\x0a');
                 while (nextline
-                       && (nextline[0] != '\x0a'
-                           || nextline[1] != '\x0a'));
+                        && (nextline[0] != '\x0a' || nextline[1] != '\x0a'));
+
                 if (*miss == ' ')
                     miss++;
+
                 if (nextline == NULL)
                     nextline = miss + strlen(miss);
+
                 while (strchr(miss, '\x0a')
-                       && strchr(miss, '\x0a') < nextline)
+                       && strchr(miss, '\x0a') < nextline) {
                     *strchr(miss, '\x0a') = ' ';
-            } else {
-                hideOption(KEY_F6);
+                }
             }
+            else
+                hideOption(KEY_F6);
         } while (miss && *miss && line_count < start_line_ + 14);
+
         free(mbriefing);        // using free because we strdup()'d to get this
     }
     // TODO: draw briefing minimap
@@ -167,15 +188,18 @@ void BriefMenu::handleShow()
     g_Screen.blit(538, 140, 100, 30,
                   orig_pixels_ + 538 + 140 * GAME_SCREEN_WIDTH, false,
                   GAME_SCREEN_WIDTH);
+
     if (info_level_ < 3) {
         sprintf(tmp, "%d", mission_->infoCost(info_level_));
         g_App.fonts().drawText(560 - g_App.fonts().textWidth(tmp, 1) / 2,
                                140, tmp, 1, false);
     }
+
     // write cost for more enhance
     g_Screen.blit(538, 195, 100, 30,
                   orig_pixels_ + 538 + 195 * GAME_SCREEN_WIDTH, false,
                   GAME_SCREEN_WIDTH);
+
     if (enhance_level_ < 3) {
         sprintf(tmp, "%d", mission_->enhanceCost(enhance_level_));
         g_App.fonts().drawText(560 - g_App.fonts().textWidth(tmp, 1) / 2,
@@ -183,17 +207,17 @@ void BriefMenu::handleShow()
     }
 }
 
-void BriefMenu::handleOption(Key key)
-{
+void BriefMenu::handleOption(Key key) {
     if (key == KEY_F1) {
         if (info_level_ < 3) {
-            g_App.setMoney(g_App.money() -
-                           mission_->infoCost(info_level_));
+            g_App.setMoney(g_App.money() - mission_->infoCost(info_level_));
             info_level_++;
         }
+
         showOption(KEY_F6);
         show(false);
     }
+
     if (key == KEY_F2) {
         if (enhance_level_ < 3) {
             g_App.setMoney(g_App.money() -
@@ -202,13 +226,16 @@ void BriefMenu::handleOption(Key key)
         }
         show(false);
     }
+
     if (key == KEY_F6) {
         start_line_ += 14;
         showOption(KEY_F7);
         show(false);
     }
+
     if (key == KEY_F7) {
         start_line_ -= 14;
+
         if (start_line_ <= 0) {
             start_line_ = 0;
             hideOption(KEY_F7);

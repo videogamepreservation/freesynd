@@ -23,6 +23,9 @@
  *                                                                      *
  ************************************************************************/
 
+#ifndef WEAPON_H
+#define WEAPON_H
+
 #include <string>
 #include "ped.h"
 #include "mapobject.h"
@@ -34,56 +37,36 @@ class WeaponInstance;
  * Weapon class.
  */
 class Weapon {
-  public:
+public:
     Weapon(const char *w_name, int smallIcon, int bigIcon, int w_cost,
             int w_ammo, int w_range, int w_shot, int w_rank, int w_anim,
             Ped::WeaponIndex w_idx, Sound::InGameSample w_sample);
 
-    const char *name() {
-        return name_.c_str();
-    }
+    const char *name() { return name_.c_str(); }
 
     void drawSmallIcon(int x, int y);
     void drawBigIcon(int x, int y);
     void drawInfo(int x, int y);
 
-    int cost() {
-        return cost_;
-    }
-
-    int ammo() {
-        return ammo_;
-    }
-
-    int range() {
-        return range_;
-    }
-
-    int shot() {
-        return shot_;
-    }
-
-    int rank() {
-        return rank_;
-    }
+    int cost() { return cost_; }
+    int ammo() { return ammo_; }
+    int range() { return range_; }
+    int shot() { return shot_; }
+    int rank() { return rank_; }
 
     int selector() {
         return small_icon_ == 28 ? 1618 : small_icon_ - 14 + 1602;
     }
 
-    Ped::WeaponIndex index() {
-        return idx_;
-    }
+    Ped::WeaponIndex index() { return idx_; }
 
     Sound *sound();
 
     WeaponInstance *createInstance();
 
-    bool operator==(Weapon weapon) {
-        return this->idx_ == weapon.index();
-    }
+    bool operator==(Weapon weapon) { return this->idx_ == weapon.index(); }
 
-  protected:
+protected:
     std::string name_;
     int small_icon_, big_icon_;
     int cost_, ammo_, range_, shot_;
@@ -97,20 +80,17 @@ class Weapon {
  * Weapon instance class.
  */
 class WeaponInstance : public Weapon, public MapObject {
-  public:
+public:
     WeaponInstance(Weapon *w);
 
-    int ammoRemaining() {
-        return ammo_remaining_;
-    }
-
-    void setAmmoRemaining(int n) {
-        ammo_remaining_ = n;
-    }
+    int ammoRemaining() { return ammo_remaining_; }
+    void setAmmoRemaining(int n) {  ammo_remaining_ = n; }
 
     bool animate(int elapsed);
     void draw(int x, int y);
 
-  protected:
+protected:
     int ammo_remaining_;
 };
+
+#endif

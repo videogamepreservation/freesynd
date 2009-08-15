@@ -22,6 +22,9 @@
  *                                                                      *
  ************************************************************************/
 
+#ifndef TILE_H
+#define TILE_H
+
 #include "common.h"
 
 // TODO: Convert these to const int's -- we are using C++, yes? :-)
@@ -47,13 +50,15 @@
  * Tile class.
  */
 class Tile {
-  public:
+public:
     Tile();
     bool loadTile(uint8 *tileData, uint32 offset);
     bool drawTo(uint8 *screen, int swidth, int sheight, int x, int y,
             bool clear = false);
 
-  protected:
+protected:
     uint8 tile_Data_[TILE_WIDTH * TILE_HEIGHT];
     bool all_alpha_;
 };
+
+#endif

@@ -23,6 +23,9 @@
  *                                                                      *
  ************************************************************************/
 
+#ifndef FONTMANAGER_H
+#define FONTMANAGER_H
+
 #include "common.h"
 #include "font.h"
 
@@ -32,7 +35,7 @@ class SpriteManager;
  * Font manager class.
  */
 class FontManager {
-  public:
+public:
     FontManager();
     ~FontManager();
     bool loadFont(SpriteManager *sprites, int size, bool dark, int offset = 0,
@@ -40,13 +43,15 @@ class FontManager {
     void loadWidgets(SpriteManager *sprites);
 
     void drawText(int x, int y, const char *text, int size, bool dark,
-                  bool x2 = true);
+            bool x2 = true);
     int textWidth(const char *text, int size, bool x2 = true);
     int textHeight(int size, bool x2 = true);
 
-  protected:
+protected:
     Font * dark_fonts_[4];
     Font *light_fonts_[4];
     Sprite *dark_widgets_[3];
     Sprite *light_widgets_[7];
 };
+
+#endif

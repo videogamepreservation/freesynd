@@ -27,6 +27,9 @@
  *																		*
  ************************************************************************/
 
+#ifndef MISSION_H
+#define MISSION_H
+
 #include "common.h"
 #include <string>
 #include <vector>
@@ -39,40 +42,27 @@ class Static;
 class MapHelper;
 
 /*!
- * Mission class.
+ * Contains information read from original mission data file.
  */
 class Mission : public MapHelper {
-  public:
+public:
     Mission();
     virtual ~Mission();
     bool loadMission(uint8 *missData, int size);
     bool loadLevel(uint8 *levelData);
     bool loadMap();
 
-    int map() {
-        return map_;
-    }
+    int map() { return map_; }
 
     int mapWidth();
     int mapHeight();
     int startX();
     int startY();
 
-    int minX() {
-        return min_x_;
-    }
-
-    int minY() {
-        return min_y_;
-    }
-
-    int maxX() {
-        return max_x_;
-    }
-
-    int maxY() {
-        return max_y_;
-    }
+    int minX() { return min_x_; }
+    int minY() { return min_y_; }
+    int maxX() { return max_x_; }
+    int maxY() { return max_y_; }
 
     int minScreenX();
     int minScreenY();
@@ -82,9 +72,7 @@ class Mission : public MapHelper {
     virtual void drawAt(int tilex, int tiley, int tilez, int x, int y,
             int scrollX, int scrollY);
 
-    const char *briefing() {
-        return briefing_.c_str();
-    }
+    const char *briefing() { return briefing_.c_str(); }
 
     int infoCost(int lvl) {
         assert(lvl < 3);
@@ -96,49 +84,18 @@ class Mission : public MapHelper {
         return enhance_costs_[lvl];
     }
 
-    int numPeds() {
-        return (int) peds_.size();
-    }
+    int numPeds() { return (int) peds_.size(); }
+    PedInstance *ped(int i) { return peds_[i]; }
+    int numVehicles() { return (int) vehicles_.size(); }
+    VehicleInstance *vehicle(int i) { return vehicles_[i]; }
 
-    PedInstance *ped(int i) {
-        return peds_[i];
-    }
-
-    int numVehicles() {
-        return (int) vehicles_.size();
-    }
-
-    VehicleInstance *vehicle(int i) {
-        return vehicles_[i];
-    }
-
-    int numWeapons() {
-        return (int) weapons_.size();
-    }
-
-    WeaponInstance *weapon(int i) {
-        return weapons_[i];
-    }
-
-    int numStatics() {
-        return (int) statics_.size();
-    }
-
-    Static *statics(int i) {
-        return statics_[i];
-    }
-
-    int objective() {
-        return objective_;
-    }
-
-    int objectivePed() {
-        return objective_ped_;
-    }
-
-    int objectiveVehicle() {
-        return objective_vehicle_;
-    }
+    int numWeapons() { return (int) weapons_.size(); }
+    WeaponInstance *weapon(int i) { return weapons_[i]; }
+    int numStatics() { return (int) statics_.size(); }
+    Static *statics(int i) { return statics_[i]; }
+    int objective() { return objective_; }
+    int objectivePed() { return objective_ped_; }
+    int objectiveVehicle() { return objective_vehicle_; }
 
     void start();
     bool failed();
@@ -333,3 +290,5 @@ BC 68 00 00 F0 5B B0 27 00 01 06 00 00 00 03 00 81 05 E9 00 32 00 00 00 05 16 40
     std::set<int> fast_vehicle_cache_, fast_ped_cache_, fast_weapon_cache_,
             fast_statics_cache_;
 };
+
+#endif

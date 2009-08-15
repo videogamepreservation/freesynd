@@ -22,6 +22,7 @@
  *  The full text of the license is also included in the file COPYING.  *
  *                                                                      *
  ************************************************************************/
+
 #ifndef AUDIO_H
 #define AUDIO_H
 
@@ -45,7 +46,7 @@
  * Audio configuration class.
  */
 class Audio {
-  public:
+public:
     static bool init(int frequency = MIX_DEFAULT_FREQUENCY,
                      Uint16 format = MIX_DEFAULT_FORMAT,
                      int channels = MIX_DEFAULT_CHANNELS,

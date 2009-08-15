@@ -22,6 +22,9 @@
  *                                                                      *
  ************************************************************************/
 
+#ifndef MAPMANAGER_H
+#define MAPMANAGER_H
+
 #include <map>
 #include "common.h"
 #include "map.h"
@@ -31,9 +34,10 @@
  * Map manager class.
  */
 class MapManager {
-  public:
+public:
     MapManager();
     ~MapManager();
+
     bool loadMap(int mapNum);
     bool drawMap(int mapNum, int scrollx, int scrolly, MapHelper *helper = 0);
     Map *map(int mapNum);
@@ -45,7 +49,9 @@ class MapManager {
     int screenToTileY(int mapNum, int x, int y, int &oy);
     int maxZAt(int mapNum, int x, int y);
 
-  protected:
+protected:
     std::map<int, Map *> maps_;
     TileManager tileManager_;
 };
+
+#endif

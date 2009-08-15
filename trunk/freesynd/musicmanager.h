@@ -22,6 +22,7 @@
  *  The full text of the license is also included in the file COPYING.  *
  *                                                                      *
  ************************************************************************/
+
 #ifndef MUSICMANAGER_H
 #define MUSICMANAGER_H
 
@@ -34,7 +35,7 @@ class Music;
  * Music manager class.
  */
 class MusicManager {
-  public:
+public:
     enum MusicTrack {
         TRACK_INTRO,
         TRACK_ASSASSINATE,
@@ -51,7 +52,7 @@ class MusicManager {
     void playTrack(MusicTrack track, int loops = -1);
     void stopPlayback();
 
-  protected:
+protected:
     std::vector<Music *> tracks_;
     MusicTrack current_track_;
     bool is_playing_;

@@ -54,7 +54,7 @@ typedef struct FrameTypeChunkHeader {
  * Fli Player class.
  */
 class FliPlayer {
-  public:
+public:
     FliPlayer() : fli_data_(0), offscreen_(0) {}
     virtual ~FliPlayer();
 
@@ -63,23 +63,16 @@ class FliPlayer {
     bool decodeFrame();
     void copyCurrentFrameToScreen();
 
-    int width() const {
-        return (fli_data_ ? fli_info_.width : 0);
-    }
-
-    int height() const {
-        return (fli_data_ ? fli_info_.height : 0);
-    }
+    int width() const { return fli_data_ ? fli_info_.width : 0; }
+    int height() const { return fli_data_ ? fli_info_.height : 0; }
 
     bool hasFrames() const {
-        return (fli_data_ ? fli_info_.numFrames > 0 : false);
+        return fli_data_ ? fli_info_.numFrames > 0 : false;
     }
 
-    const uint8 *offscreen() const {
-        return offscreen_;
-  }
+    const uint8 *offscreen() const { return offscreen_; }
 
-  protected:
+protected:
     bool isValidChunk(uint16 type);
     ChunkHeader readChunkHeader(uint8 *mem);
     FrameTypeChunkHeader readFrameTypeChunkHeader(ChunkHeader chunkHead,

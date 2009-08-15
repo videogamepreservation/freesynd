@@ -22,6 +22,9 @@
  *                                                                      *
  ************************************************************************/
 
+#ifndef GAMEPLAYMENU_H
+#define GAMEPLAYMENU_H
+
 class BriefMenu;
 class Mission;
 
@@ -29,12 +32,10 @@ class Mission;
  * Gameplay Menu class.
  */
 class GameplayMenu : public Menu {
-  public:
+public:
     GameplayMenu(MenuManager *m, LoadingMenu *loading, MapMenu *mapMenu);
 
-    bool isSubMenu() {
-        return false;
-    }
+    bool isSubMenu() { return false; }
 
     void handleTick(int elapsed);
     void handleShow();
@@ -44,8 +45,8 @@ class GameplayMenu : public Menu {
     void handleMouseUp(int x, int y, int button);
     void handleUnknownKey(Key key, KeyMod mod, bool pressed);
 
-  protected:
-    LoadingMenu * loading_;
+protected:
+    LoadingMenu *loading_;
     MapMenu *map_menu_;
     int tick_count_, last_animate_tick_;
     int last_motion_tick_, last_motion_x_, last_motion_y_;
@@ -73,3 +74,5 @@ class GameplayMenu : public Menu {
         return selected_agents_ & (1 << agentNo);
     }
 };
+
+#endif

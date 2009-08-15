@@ -22,6 +22,9 @@
  *                                                                      *
  ************************************************************************/
 
+#ifndef VEHICLEMANAGER_H
+#define VEHICLEMANAGER_H
+
 #include "common.h"
 #include "vehicle.h"
 #include <vector>
@@ -30,15 +33,13 @@
  * Vehicle manager class.
  */
 class VehicleManager {
-  public:
+public:
     VehicleManager();
     ~VehicleManager();
 
     void loadVehicles();
 
-    int numVehicles() {
-        return vehicles_.size();
-    }
+    int numVehicles() { return vehicles_.size(); }
 
     Vehicle *vehicle(int n) {
         assert(n < (int) vehicles_.size());
@@ -47,6 +48,8 @@ class VehicleManager {
 
     VehicleInstance *loadInstance(uint8 *data, int map);
 
-  protected:
+protected:
     std::vector<Vehicle *> vehicles_;
 };
+
+#endif

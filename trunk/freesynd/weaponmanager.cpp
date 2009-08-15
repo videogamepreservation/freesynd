@@ -27,19 +27,16 @@
 #include <assert.h>
 #include "weaponmanager.h"
 
-WeaponManager::WeaponManager()
-{
+WeaponManager::WeaponManager() {
     weapons_.reserve(14);
 }
 
-WeaponManager::~WeaponManager()
-{
+WeaponManager::~WeaponManager() {
     for (unsigned int i = 0; i != weapons_.size(); ++i)
         delete weapons_[i];
 }
 
-void WeaponManager::loadWeapons()
-{
+void WeaponManager::loadWeapons() {
     weapons_.push_back(new Weapon("PERSUADERTRON", 14, 64, 5000, -1, 256, -1,
             -1, 367, Ped::Unarmed, Sound::PERSUADE));
     weapons_.push_back(new Weapon("PISTOL", 15, 65, 0, 13, 1280, 0, 1, 368,
@@ -76,19 +73,22 @@ void WeaponManager::loadWeapons()
             -1, 381, Ped::EnergyShield, Sound::NO_SOUND));
 }
 
-Weapon *WeaponManager::findWeapon(const char *name)
-{
+Weapon *WeaponManager::findWeapon(const char *name) {
     std::string n = name;
-    for (unsigned int i = 0; i < weapons_.size(); i++)
+
+    for (unsigned int i = 0; i < weapons_.size(); i++) {
         if (n == weapons_[i]->name())
             return weapons_[i];
+    }
+
     return NULL;
 }
 
-Weapon *WeaponManager::findWeapon(Ped::WeaponIndex idx)
-{
-    for (unsigned int i = 0; i < weapons_.size(); i++)
+Weapon *WeaponManager::findWeapon(Ped::WeaponIndex idx) {
+    for (unsigned int i = 0; i < weapons_.size(); i++) {
         if (idx == weapons_[i]->index())
             return weapons_[i];
+    }
+
     return NULL;
 }

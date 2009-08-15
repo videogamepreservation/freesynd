@@ -23,8 +23,8 @@
  *                                                                      *
  ************************************************************************/
 
-#ifndef MAPOBJECT_H_
-#define MAPOBJECT_H_
+#ifndef MAPOBJECT_H
+#define MAPOBJECT_H
 
 #include <math.h>
 #include <list>
@@ -34,7 +34,7 @@
  * Map object class.
  */
 class MapObject {
-  public:
+public:
     MapObject(int m);
     virtual ~MapObject() {}
 
@@ -48,40 +48,16 @@ class MapObject {
         off_z_ = off_z;
     }
 
-    int tileX() {
-        return tile_x_;
-    }
-    void setTileX(int x) {
-        tile_x_ = x;
-    }
+    int tileX() { return tile_x_; }
+    void setTileX(int x) { tile_x_ = x; }
+    int tileY() { return tile_y_; }
+    void setTileY(int y) { tile_y_ = y; }
+    int tileZ() { return tile_z_; }
+    void setTileZ(int z) { tile_z_ = z; }
 
-    int tileY() {
-        return tile_y_;
-    }
-
-    void setTileY(int y) {
-        tile_y_ = y;
-    }
-
-    int tileZ() {
-        return tile_z_;
-    }
-
-    void setTileZ(int z) {
-        tile_z_ = z;
-    }
-
-    int offX() {
-        return off_x_;
-    }
-
-    int offY() {
-        return off_y_;
-    }
-
-    int offZ() {
-        return off_z_;
-    }
+    int offX() { return off_x_; }
+    int offY() { return off_y_; }
+    int offZ() { return off_z_; }
 
     void setOffX(int n);
     void setOffY(int n);
@@ -90,13 +66,8 @@ class MapObject {
     int screenX();
     int screenY();
 
-    virtual int map() {
-        return map_;
-    }
-
-    void setMap(int new_map) {
-        map_ = new_map;
-    }
+    virtual int map() { return map_; }
+    void setMap(int new_map) { map_ = new_map; }
 
     bool samePosition(MapObject * other) {
         return other->tile_x_ == tile_x_
@@ -107,16 +78,14 @@ class MapObject {
     }
 
     float distanceTo(MapObject *t) {
-        return sqrt((float) (t->tileX() - tileX()) *
-                    (t->tileX() - tileX()) + (t->tileY() -
-                                              tileY()) * (t->tileY() -
-                                                          tileY()) +
-                    (t->tileZ() - tileZ()) * (t->tileZ() - tileZ()));
+        return sqrt((float) (t->tileX() - tileX()) * (t->tileX() - tileX())
+                + (t->tileY() - tileY()) * (t->tileY() - tileY())
+                + (t->tileZ() - tileZ()) * (t->tileZ() - tileZ()));
     }
 
     virtual bool animate(int elapsed);
 
-  protected:
+protected:
     int tile_x_, tile_y_, tile_z_, off_x_, off_y_, off_z_;
     int map_;
     int frame_;
@@ -130,13 +99,11 @@ class MapObject {
  * Shootable map object class.
  */
 class ShootableMapObject : public MapObject {
-  public:
+public:
     ShootableMapObject(int m);
     virtual ~ShootableMapObject() {}
 
-    int health() {
-        return health_;
-    }
+    int health() { return health_; }
 
     void setHealth(int n) {
         if (n > 255)
@@ -148,9 +115,7 @@ class ShootableMapObject : public MapObject {
         health_ = n;
     }
 
-    int startHealth() {
-        return start_health_;
-    }
+    int startHealth() { return start_health_; }
 
     void setStartHealth(int n) {
         if (n > 255)
@@ -177,7 +142,7 @@ class ShootableMapObject : public MapObject {
  * Shootable movable map object class.
  */
 class ShootableMovableMapObject : public ShootableMapObject {
-  public:
+public:
     ShootableMovableMapObject(int m);
     virtual ~ShootableMovableMapObject() {}
 
@@ -215,7 +180,7 @@ class ShootableMovableMapObject : public ShootableMapObject {
 
     virtual bool animate(int elapsed);
 
-  protected:
+protected:
     int dir_;
     int speed_;
     std::list<PathNode> dest_path_;
@@ -229,12 +194,12 @@ class ShootableMovableMapObject : public ShootableMapObject {
  * Static map object class.
  */
 class Static : public MapObject {
-  public:
+public:
     static Static *loadInstance(uint8 *data, int m);
 
     virtual void draw(int x, int y) = 0;
 
-  protected:
+protected:
     Static(int m):MapObject(m) {}
     virtual ~Static() {}
 };
@@ -243,12 +208,13 @@ class Static : public MapObject {
  * Door map object class.
  */
 class Door : public Static {
-  public:
+public:
     Door(int m, int anim, int openingAnim);
     virtual ~Door() {}
+
     void draw(int x, int y);
 
-  protected:
+protected:
     int anim_, opening_anim_;
 };
 
@@ -256,12 +222,13 @@ class Door : public Static {
  * Tree map object class.
  */
 class Tree : public Static {
-  public:
+public:
     Tree(int m, int anim, int burningAnim);
     virtual ~Tree() {}
+
     void draw(int x, int y);
 
-  protected:
+protected:
     int anim_, burning_anim_;
 };
 

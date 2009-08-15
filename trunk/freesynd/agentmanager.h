@@ -22,6 +22,8 @@
  *  The full text of the license is also included in the file COPYING.  *
  *                                                                      *
  ************************************************************************/
+#ifndef AGENTMANAGER_H
+#define AGENTMANAGER_H
 
 #include "common.h"
 #include "agent.h"
@@ -33,20 +35,22 @@
  * Provides methods for managing player's agents.
  */
 class AgentManager {
-  public:
+public:
     AgentManager();
     ~AgentManager();
 
     void loadAgents();
     void reset();
 
-    int numAgents() {
-        return agents_.size();
-    } Agent *agent(int n) {
+    int numAgents() { return agents_.size(); }
+
+    Agent *agent(int n) {
         assert(n < (int) agents_.size());
         return agents_[n];
     }
 
-  protected:
-    std::vector < Agent * >agents_;
+protected:
+    std::vector<Agent *> agents_;
 };
+
+#endif

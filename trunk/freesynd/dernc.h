@@ -40,9 +40,10 @@ namespace rnc {
     };
 
     const char *const errorString(int error_code);
-    int unpackedLength(uint8 * packed_data);
-    uint16 crc(uint8 * packed_data, int packed_length);
-    int unpack(uint8 * packed_data, uint8 * unpacked_data);
+    int unpackedLength(uint8 *packed_data);
+    uint16 crc(uint8 *packed_data, int packed_length);
+    int unpack(uint8 *packed_data, uint8 *unpacked_data);
 
 }
+
 #endif

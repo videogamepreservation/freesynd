@@ -32,11 +32,12 @@
  * File class.
  */
 class File {
-  public:
+public:
     static void setPath(const char *path);
     static uint8 *loadFile(const char *filename, int &filesize);
     static FILE *loadTextFile(const char *filename);
-  private:
+
+private:
     static uint8 *loadFileToMem(const char *filename, int &filesize);
     static const char *fileFullPath(const char *filename, bool uppercase);
     static char _path[240];

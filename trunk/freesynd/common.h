@@ -54,60 +54,60 @@ typedef unsigned short uint16;
 typedef signed long int32;
 typedef unsigned long uint32;
 
-inline int ceil8(int v)
-{
+inline int ceil8(int v) {
     if (v <= 0)
         return 0;
+
     int t = 0;
+
     while (t < v)
         t += 8;
+
     return t;
 }
 
-inline uint16 READ_LE_UINT16(const uint8 * data)
-{
-    return ((data[1] << 8) | data[0]);
+inline uint16 READ_LE_UINT16(const uint8 *data) {
+    return (data[1] << 8) | data[0];
 }
 
-inline uint32 READ_LE_UINT32(const uint8 * data)
-{
-    return ((data[3] << 24) | (data[2] << 16) | (data[1] << 8) | data[0]);
+inline uint32 READ_LE_UINT32(const uint8 *data) {
+    return (data[3] << 24) | (data[2] << 16) | (data[1] << 8) | data[0];
 }
 
-inline uint16 READ_BE_UINT16(const uint8 * data)
-{
-    return ((data[0] << 8) | data[1]);
+inline uint16 READ_BE_UINT16(const uint8 *data) {
+    return (data[0] << 8) | data[1];
 }
 
-inline uint32 READ_BE_UINT32(const uint8 * data)
-{
-    return ((data[0] << 24) | (data[1] << 16) | (data[2] << 8) | data[3]);
+inline uint32 READ_BE_UINT32(const uint8 *data) {
+    return (data[0] << 24) | (data[1] << 16) | (data[2] << 8) | data[3];
 }
 
-inline uint32 mirror(uint32 value, int count)
-{
+inline uint32 mirror(uint32 value, int count) {
     uint32 top = 1 << (count - 1), bottom = 1;
+
     while (top > bottom) {
         uint32 mask = top | bottom;
         uint32 masked = value & mask;
+
         if (masked != 0 && masked != mask)
             value ^= mask;
+
         top >>= 1;
         bottom <<= 1;
     }
+
     return value;
 }
 
-inline uint32 bitValue(const uint32 value, int index)
-{
+inline uint32 bitValue(const uint32 value, int index) {
     return (value >> index) & 1;
 }
-inline bool bitSet(const uint32 value, int index)
-{
+
+inline bool bitSet(const uint32 value, int index) {
     return bitValue(value, index) == 0 ? false : true;
 }
-inline bool bitClear(const uint32 value, int index)
-{
+
+inline bool bitClear(const uint32 value, int index) {
     return !bitSet(value, index);
 }
 

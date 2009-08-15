@@ -22,6 +22,7 @@
  *  The full text of the license is also included in the file COPYING.  *
  *                                                                      *
  ************************************************************************/
+
 #ifndef SOUND_H
 #define SOUND_H
 
@@ -34,7 +35,7 @@
  * Sound class.
  */
 class Sound : public Audio {
-  public:
+public:
     Sound();
     ~Sound();
 
@@ -82,7 +83,7 @@ class Sound : public Audio {
         NO_SOUND = -1
     };
 
-  protected:
+protected:
      Mix_Chunk *sound_data_;
 };
 

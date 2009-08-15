@@ -27,8 +27,7 @@
 
 #ifdef HAVE_SDL_MIXER
 
-bool Audio::quit(void)
-{
+bool Audio::quit(void) {
     if (Mix_QuerySpec(0, 0, 0) > 0) {
         Mix_HaltMusic();
         Mix_HaltChannel(-1);
@@ -38,8 +37,7 @@ bool Audio::quit(void)
     return false;
 }
 
-bool Audio::init(int frequency, Uint16 format, int channels, int chunksize)
-{
+bool Audio::init(int frequency, Uint16 format, int channels, int chunksize) {
     if (SDL_Init(SDL_INIT_AUDIO) < 0) {
         error("Failed initialize SDL Audio module.");
         return false;
@@ -57,8 +55,7 @@ bool Audio::init(int frequency, Uint16 format, int channels, int chunksize)
     return true;
 }
 
-void Audio::error(std::string const &message)
-{
+void Audio::error(std::string const &message) {
     std::cerr << "SDL_Mixer error: " << Mix_GetError() << std::endl
         << "Message: " << message << std::endl;
 }

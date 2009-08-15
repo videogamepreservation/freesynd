@@ -22,14 +22,19 @@
  *                                                                      *
  ************************************************************************/
 
+#ifndef DEBRIEFMENU_H
+#define DEBRIEFMENU_H
+
 /*!
  * Debrief Menu class.
  */
 class DebriefMenu : public Menu {
-  public:
-    DebriefMenu(MenuManager * m);
+public:
+    DebriefMenu(MenuManager *m);
 
     void handleShow();
 
-  protected:
+protected:
 };
+
+#endif

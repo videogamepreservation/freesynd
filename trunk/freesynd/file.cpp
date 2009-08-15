@@ -34,8 +34,7 @@
 char File::_path[240] = "./data/";
 
 
-const char *File::fileFullPath(const char *filename, bool uppercase)
-{
+const char *File::fileFullPath(const char *filename, bool uppercase) {
     static char buf[256];
 
     memset(buf, 0, 256);
@@ -53,8 +52,7 @@ const char *File::fileFullPath(const char *filename, bool uppercase)
     return buf;
 }
 
-uint8 *File::loadFileToMem(const char *filename, int &filesize)
-{
+uint8 *File::loadFileToMem(const char *filename, int &filesize) {
     assert(filename);
 
     FILE *fp = fopen(fileFullPath(filename, false), "rb");      //try lowercase first
@@ -78,8 +76,7 @@ uint8 *File::loadFileToMem(const char *filename, int &filesize)
     }
 }
 
-FILE *File::loadTextFile(const char *filename)
-{
+FILE *File::loadTextFile(const char *filename) {
     assert(filename);
 
     FILE *fp = fopen(fileFullPath(filename, false), "r"); // try lowercase
@@ -89,19 +86,18 @@ FILE *File::loadTextFile(const char *filename)
     return fp;
 }
 
-void File::setPath(const char *path)
-{
+void File::setPath(const char *path) {
     if (strlen(path) < 255) {
         printf("Changing path to: '%s'\n", path);
         strcpy((char *) _path, path);
-    } else {
+    }
+    else {
         printf("Warning: path '%s' too long, using CWD\n", _path);
         strcpy((char *) _path, "./");
     }
 }
 
-uint8 *File::loadFile(const char *filename, int &filesize)
-{
+uint8 *File::loadFile(const char *filename, int &filesize) {
     uint8 *data = loadFileToMem(filename, filesize);
     if (data) {
         if (READ_BE_UINT32(data) == RNC_SIGNATURE) {    //File is RNC compressed

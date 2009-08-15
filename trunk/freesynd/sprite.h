@@ -39,7 +39,7 @@ class Sprite {
     int stride_;
     uint8 *sprite_data_;
 
-  public:
+public:
     enum Format {
         FMT_BLOCKS,
         FMT_RLE
@@ -53,13 +53,8 @@ class Sprite {
             bool rle = false);
     void draw(int x, int y, int z, bool flipped = false, bool x2 = false);
 
-    int width() const {
-        return width_;
-    }
-
-    int height() const {
-        return height_;
-    }
+    int width() const { return width_; }
+    int height() const { return height_; }
 
     void data(uint8 *spr_data) const;
 };

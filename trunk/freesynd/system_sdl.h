@@ -38,7 +38,7 @@
  * System SDL class.
  */
 class SystemSDL : public System {
-  public:
+public:
     SystemSDL(int depth = 32);
     ~SystemSDL();
 
@@ -56,7 +56,7 @@ class SystemSDL : public System {
     void useTargetCursor();
     void usePickupCursor();
 
-  protected:
+protected:
     int depth_;
     bool scale_;
 

@@ -31,20 +31,17 @@
 #include "agent.h"
 #include "weapon.h"
 
-Agent::Agent(const char *agent_name, bool male):name_(agent_name),
-male_(male), active_(true), health_(255)
-{
+Agent::Agent(const char *agent_name, bool male) : name_(agent_name),
+male_(male), active_(true), health_(255) {
     for (int i = 0; i < 6; i++)
         slots_[i] = NULL;
 }
 
-Agent::~Agent()
-{
+Agent::~Agent() {
     removeAllWeapons();
 }
 
-void Agent::removeAllWeapons()
-{
+void Agent::removeAllWeapons() {
     while (weapons_.size())
         delete removeWeapon(0);
 }

@@ -22,13 +22,18 @@
  *                                                                      *
  ************************************************************************/
 
+#ifndef MAINMENU_H
+#define MAINMENU_H
+
 /*!
  * Main Menu class.
  */
 class MainMenu : public Menu {
-  public:
+public:
     MainMenu(MenuManager *m);
 
     void handleShow();
     void handleOption(Key key);
 };
+
+#endif

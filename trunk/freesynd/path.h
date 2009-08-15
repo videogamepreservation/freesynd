@@ -32,7 +32,7 @@
  * Path node class.
  */
 class PathNode {
-  public:
+public:
     PathNode() :
         tile_x_(0), tile_y_(0), tile_z_(0), off_x_(0), off_y_(0) {}
     PathNode(int tile_x, int tile_y, int tile_z, int off_x = 128,
@@ -40,25 +40,12 @@ class PathNode {
         tile_x_(tile_x), tile_y_(tile_y), tile_z_(tile_z), off_x_(off_x),
                 off_y_(off_y) {}
 
-    int tileX() const {
-        return tile_x_;
-    }
+    int tileX() const { return tile_x_; }
+    int tileY() const { return tile_y_; }
+    int tileZ() const { return tile_z_; }
 
-    int tileY() const {
-        return tile_y_;
-    }
-
-    int tileZ() const {
-        return tile_z_;
-    }
-
-    int offX() const {
-        return off_x_;
-    }
-
-    int offY() const {
-        return off_y_;
-    }
+    int offX() const { return off_x_; }
+    int offY() const { return off_y_; }
 
     bool operator<(const PathNode &other) const {
         int a = tile_x_ | (tile_y_ << 16);
@@ -66,7 +53,7 @@ class PathNode {
         return a < b;
     }
 
-  protected:
+protected:
     int tile_x_, tile_y_, tile_z_, off_x_, off_y_;
 };
 

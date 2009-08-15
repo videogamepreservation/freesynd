@@ -22,6 +22,10 @@
  *  The full text of the license is also included in the file COPYING.  *
  *                                                                      *
  ************************************************************************/
+
+#ifndef CONFMENU_H
+#define CONFMENU_H
+
 class ChangeLogoMenu;
 class ChangeCompanyNameMenu;
 class ChangeNameMenu;
@@ -30,17 +34,19 @@ class ChangeNameMenu;
  * Configuration Menu class.
  */
 class ConfMenu : public Menu {
-  public:
-    ConfMenu(MenuManager * m);
+public:
+    ConfMenu(MenuManager *m);
     ~ConfMenu();
 
     virtual void handleShow();
 
     virtual void handleOption(Key key) {}
 
-  protected:
+protected:
     uint8 *bkg_;
     ChangeLogoMenu *submenu_logo_;
     ChangeCompanyNameMenu *submenu_company_name_;
     ChangeNameMenu *submenu_name_;
 };
+
+#endif

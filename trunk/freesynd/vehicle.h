@@ -23,6 +23,9 @@
  *                                                                      *
  ************************************************************************/
 
+#ifndef VEHICLE_H
+#define VEHICLE_H
+
 #include <string>
 #include "mapobject.h"
 
@@ -32,12 +35,10 @@ class VehicleInstance;
  * Vehicle class.
  */
 class Vehicle {
-  public:
+public:
     Vehicle(const char *vehicle_name, int first_anim);
 
-    const char *name() {
-        return name_.c_str();
-    }
+    const char *name() { return name_.c_str(); }
 
     void draw(int x, int y, int dir, int frame);
     void drawOnFire(int x, int y, int dir, int frame);
@@ -45,7 +46,7 @@ class Vehicle {
 
     VehicleInstance *createInstance(int map);
 
-  protected:
+protected:
     std::string name_;
     int anims_;
 };
@@ -54,15 +55,17 @@ class Vehicle {
  * Vehicle instance class.
  */
 class VehicleInstance : public ShootableMovableMapObject {
-  public:
+public:
     VehicleInstance(Vehicle *vehicle, int m);
     virtual ~VehicleInstance() {}
 
     bool animate(int elapsed);
     void draw(int x, int y);
 
-  protected:
+protected:
     Vehicle *vehicle_;
 
     bool walkable(int x, int y, int z);
 };
+
+#endif

@@ -16,8 +16,7 @@ int screen_height = 4000;
 png_byte **screen_data = NULL;
 png_color palette[256];
 
-int write_png(int a)
-{
+int write_png(int a) {
     char tmp[100];
     sprintf(tmp, "maps/map%i.png", a);
     FILE *fp = fopen(tmp, "wb");
@@ -63,25 +62,23 @@ int write_png(int a)
     return 0;
 }
 
-void clear_screen()
-{
+void clear_screen() {
     for (int i = 0; i < screen_height; i++)
         memset(screen_data[i], 255, screen_width);
 }
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
     App *app = new App();
     Screen *screen = new Screen(GAME_SCREEN_WIDTH, GAME_SCREEN_HEIGHT);
     MapManager maps;
 
-    screen_data = (png_byte**) calloc(1, sizeof(png_byte *) * screen_height);
+    screen_data = (png_byte **) calloc(1, sizeof(png_byte *) * screen_height);
 
     for (int i = 0; i < screen_height; i++)
-        screen_data[i] = (png_byte*)calloc(1, sizeof(png_byte) * screen_width);
+        screen_data[i] = (png_byte *)calloc(1, sizeof(png_byte) * screen_width);
 
     int palsize;
-    uint8 * pal = File::loadFile("hpal02.dat", palsize);
+    uint8 *pal = File::loadFile("hpal02.dat", palsize);
     assert(palsize == 768);
 
     for (int i = 0; i < palsize / 3; ++i) {
@@ -118,16 +115,16 @@ int main(int argc, char **argv)
     return 0;
 }
 
-App::App()
-{
+App::App() {
+
 }
 
-Screen::Screen(int width, int height)
-{
+Screen::Screen(int width, int height) {
+
 }
 
-Screen::~Screen()
-{
+Screen::~Screen() {
+
 }
 
 int Screen::gameScreenHeight() {
@@ -142,9 +139,8 @@ int Screen::gameScreenLeftMargin() {
     return 0;
 }
 
-void Screen::blit(int x, int y, int width, int height, const uint8 * pixeldata,
-        bool flipped, int stride)
-{
+void Screen::blit(int x, int y, int width, int height, const uint8 *pixeldata,
+        bool flipped, int stride) {
     width_ = screen_width;
     height_ = screen_height;
 
@@ -158,8 +154,7 @@ void Screen::blit(int x, int y, int width, int height, const uint8 * pixeldata,
     int sy = y < 0 ? -y : 0;
 
     int w = x < 0 ? x + width : x + width > width_ ? width_ - x : width;
-    int h = y < 0
-        ? y + height : y + height > height_ ? height_ - y : height;
+    int h = y < 0 ? y + height : y + height > height_ ? height_ - y : height;
 
     stride = (stride == 0 ? width : stride);
     int ofs = flipped ? w - 1 : 0;
@@ -181,6 +176,6 @@ void Screen::blit(int x, int y, int width, int height, const uint8 * pixeldata,
 }
 
 void Screen::scale2x(int x, int y, int width, int height,
-        const uint8 *pixeldata, int stride, bool transp)
-{
+        const uint8 *pixeldata, int stride, bool transp) {
+
 }

@@ -43,9 +43,10 @@ class VehicleInstance;
  * Pedestrian class.
  */
 class Ped {
-  public:
+public:
     Ped();
     virtual ~Ped() {}
+
     typedef enum {
         Unarmed,
         Pistol,
@@ -116,7 +117,7 @@ class Ped {
     void drawPickupFrame(int x, int y, int frame);
     int lastPickupFrame();
 
-  protected:
+protected:
     int stand_anims_[NUM_ANIMS];
     int walk_anims_[NUM_ANIMS];
     int stand_fire_anims_[NUM_ANIMS];
@@ -131,36 +132,25 @@ class Ped {
  * Pedestrian instance class.
  */
 class PedInstance : public ShootableMovableMapObject, public WeaponHolder {
-  public:
+public:
     PedInstance(Ped *ped, int m);
     virtual ~PedInstance() {}
 
     void draw(int x, int y, int scrollX, int scrollY);
 
-    void setFrame(int f) {
-        frame_ = f;
-    }
+    void setFrame(int f) { frame_ = f; }
 
-    void setSightRange(int new_sight_range) {
-        sight_range_ = new_sight_range;
-    }
+    void setSightRange(int new_sight_range) { sight_range_ = new_sight_range; }
 
-    int sightRange() {
-        return sight_range_;
-    }
+    int sightRange() { return sight_range_; }
 
     void showPath(int scrollX, int scrollY);
 
     void kill();
     bool animate(int elapsed, Mission *mission);
 
-    ShootableMapObject *target() {
-        return target_;
-    }
-
-    void setTarget(ShootableMapObject *t) {
-        target_ = t;
-    }
+    ShootableMapObject *target() { return target_; }
+    void setTarget(ShootableMapObject *t) { target_ = t; }
 
     void setTarget(int x, int y) {
         target_ = 0;
@@ -170,13 +160,8 @@ class PedInstance : public ShootableMovableMapObject, public WeaponHolder {
 
     void stopFiring();
 
-    int hitDamage() {
-        return hit_damage_;
-    }
-
-    void setHitDamage(int n) {
-        hit_damage_ = n;
-    }
+    int hitDamage() { return hit_damage_; }
+    void setHitDamage(int n) { hit_damage_ = n; }
 
     void inflictDamage(int d) {
         if (receive_damage_ == 0) {
@@ -188,13 +173,8 @@ class PedInstance : public ShootableMovableMapObject, public WeaponHolder {
     bool inRange(ShootableMapObject *t);
     bool inSightRange(MapObject *t);
 
-    bool isHostile() {
-        return is_hostile_;
-    }
-
-    void setHostile(bool new_hostile) {
-        is_hostile_ = new_hostile;
-    }
+    bool isHostile() { return is_hostile_; }
+    void setHostile(bool new_hostile) { is_hostile_ = new_hostile; }
 
     WeaponInstance *selectedWeapon() {
         return selected_weapon_ >= 0
@@ -202,33 +182,31 @@ class PedInstance : public ShootableMovableMapObject, public WeaponHolder {
             ? weapons_[selected_weapon_] : 0;
     }
 
-    void setSelectedWeapon(int n) {
-        selected_weapon_ = n;
-    }
+    void setSelectedWeapon(int n) { selected_weapon_ = n; }
 
     void selectNextWeapon();
     void selectBestWeapon();
     void dropWeapon(int n);
     void pickupWeapon(WeaponInstance *w);
 
-    VehicleInstance *inVehicle() {
-        return map_ == -1 ? in_vehicle_ : 0;
-    }
+    VehicleInstance *inVehicle() { return map_ == -1 ? in_vehicle_ : 0; }
 
     void putInVehicle(VehicleInstance *v);
     void leaveVehicle();
 
     int map();
 
-  protected:
+protected:
     Ped *ped_;
     bool dead_;
+
     enum {
         Firing_Not,
         Firing_Fire,
         Firing_Reload,
         Firing_Stop
     } firing_;
+
     ShootableMapObject *target_;
     int target_x_, target_y_;
     int hit_damage_;

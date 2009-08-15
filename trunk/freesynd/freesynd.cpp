@@ -52,55 +52,63 @@
 #define BLKSZ 65536
 int blocks[BLKSZ];
 
-void cleanupLeakDetection()
-{
+void cleanupLeakDetection() {
     int unfreed = 0;
     int mfreed = 0;
-    for (int i = 0; i < BLKSZ; i++)
+
+    for (int i = 0; i < BLKSZ; i++) {
         if (blocks[i] > 0) {
             unfreed++;
             printf("%x ", i);
-        } else if (blocks[i] < 0) {
+        }
+        else if (blocks[i] < 0) {
             mfreed++;
             printf("m%x ", i);
         }
+    }
+
     printf("\n%i unfreed blocks\n", unfreed);
     printf("%i multiple freed blocks\n", mfreed);
 }
 
-void initLeakDetection()
-{
+void initLeakDetection() {
     int ginits = 0;
-    for (int i = 0; i < BLKSZ; i++)
+
+    for (int i = 0; i < BLKSZ; i++) {
         if (blocks[i] > 0)
             ginits++;
         else
             assert(blocks[i] == 0);
+    }
+
     printf("%i blocks allocated before main\n", ginits);
     atexit(&cleanupLeakDetection);
 }
 
-void *operator  new(size_t n)
-{
+void *operator new(size_t n) {
     void *p = malloc(n);
     int x = ((int) p) % BLKSZ;
+
     if (x == 0x1ffff) {         // plug a reported hash in here and set a breakpoint
         printf("boo\n");
     }
+
     blocks[x]++;
     return p;
 }
 
-void operator  delete(void *p)
-{
+void operator delete(void *p) {
     if (p == 0) {
         printf("freeing NULL\n");
         return;
     }
+
     int x = ((int) p) % BLKSZ;
+
     if (x == 0x1ffff) {         // plug a reported hash in here and set a breakpoint
         printf("mboo\n");
     }
+
     blocks[x]--;
     free(p);
 }
@@ -108,14 +116,11 @@ void operator  delete(void *p)
 
 bool want_fullscreen = false;
 
-void print_usage()
-{
-    printf
-        ("usage: freesynd [-h|--help] [-p|--path path-to-data] [-f|--full-screen]\n");
+void print_usage() {
+    printf("usage: freesynd [-h|--help] [-p|--path path-to-data] [-f|--full-screen]\n");
 }
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
 #ifdef CHEAP_LEAK_DETECTION
     initLeakDetection();
 #endif
@@ -131,17 +136,19 @@ int main(int argc, char *argv[])
                 File::setPath(argv[i + 1]);
             i++;
         }
+
         if (0 == strcmp("-f", argv[i])
-            || 0 == strcmp("--full-screen", argv[i])) {
+                || 0 == strcmp("--full-screen", argv[i])) {
             want_fullscreen = true;
         }
+
         if (0 == strcmp("-h", argv[i]) || 0 == strcmp("--help", argv[i])) {
             print_usage();
             return 0;
         }
     }
 
-    std::auto_ptr < App > app(new App());
+    std::auto_ptr<App> app(new App());
 
     app->run();
 

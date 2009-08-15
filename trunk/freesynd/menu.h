@@ -21,6 +21,7 @@
  *  The full text of the license is also included in the file COPYING.  *
  *                                                                      *
  ************************************************************************/
+
 #ifndef MENU_H
 #define MENU_H
 
@@ -38,7 +39,7 @@ class MenuManager;
  * Menu text class.
  */
 class MenuText {
-  public:
+public:
     int x_, y_;
     std::string text_;
     int size_;
@@ -59,17 +60,15 @@ class MenuText {
  * Menu class.
  */
 class Menu {
-  public:
-    Menu(MenuManager * menuManager, const char *name, const char *showAnim,
+public:
+    Menu(MenuManager *menuManager, const char *name, const char *showAnim,
             const char *leaveAnim);
-    Menu(MenuManager * menuManager, const char *name, const char *parent);
+    Menu(MenuManager *menuManager, const char *name, const char *parent);
     virtual ~Menu() {}
 
-    const char *name() {
-        return name_.c_str();
-    }
+    const char *name() { return name_.c_str(); }
 
-    void setClearArea(uint8 * background, int x, int y, int w, int h) {
+    void setClearArea(uint8 *background, int x, int y, int w, int h) {
         background_ = background;
         clear_x_ = x;
         clear_y_ = y;
@@ -87,9 +86,7 @@ class Menu {
     void addOption(int x, int y, const char *text, int size, Key key,
             const char *to = NULL, bool visible = true);
 
-    void setParentMenu(const char *m) {
-        parent_menu_ = m;
-    }
+    void setParentMenu(const char *m) { parent_menu_ = m; }
 
     void keyEvent(Key key, KeyMod mod, bool pressed);
     void mouseMotionEvent(int x, int y, int state);
@@ -122,7 +119,7 @@ class Menu {
     virtual void handleShowLate() {}
     virtual void handleOption(Key key) {}
 
-  protected:
+protected:
     MenuManager *menu_manager_;
     std::string name_;
     std::string showAnim_, leaveAnim_;

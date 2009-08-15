@@ -23,14 +23,19 @@
  *                                                                      *
  ************************************************************************/
 
+#ifndef MISSWINMENU_H
+#define MISSWINMENU_H
+
 /*!
  * Mission win class.
  */
 class MissWinMenu : public Menu {
-  public:
+public:
     MissWinMenu(MenuManager *m);
 
     void handleShow();
 
-  protected:
+protected:
 };
+
+#endif

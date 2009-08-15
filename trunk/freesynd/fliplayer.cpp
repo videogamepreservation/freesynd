@@ -32,15 +32,13 @@
 #if 1 // TMN: Data for playing samples during intro video. Hardcoded from intro.exe.
 
 //#include <pshpack1.h>
-struct sample_timings
-{
+struct sample_timings {
 	int16 m0;
 	int8 m1, m2, m3, m4, m5, m6;
 };
 //#include <poppack.h>
 
-const sample_timings g_rg_sample_offsets_and_timings[] =
-{
+const sample_timings g_rg_sample_offsets_and_timings[] = {
 	{   0, 0x4C, 0x12, 0x00, 0x00, 0x00 }, // read data from FLC (0x12     (18)     bytes)
 	{   1, 0x4C, 0xB2, 0xF2, 0x08, 0x00 }, // read data from FLC (0x08f2b2 (586418) bytes)
 	{   1, 0x45, 0x00, 0x00, 0x00, 0x00 }, // load "data/isnds-0.dat"
@@ -218,14 +216,12 @@ const char *captions[] = {
 
 #endif
 
-FliPlayer::~FliPlayer()
-{
+FliPlayer::~FliPlayer() {
     if (offscreen_)
         delete[] offscreen_;
 }
 
-void FliPlayer::loadFliData(uint8 * data, bool skipable)
-{
+void FliPlayer::loadFliData(uint8 *data, bool skipable) {
     fli_data_ = data;
     skipable_ = skipable;
 
@@ -257,8 +253,7 @@ void FliPlayer::loadFliData(uint8 * data, bool skipable)
     memset(palette_, 0, sizeof(palette_));
 }
 
-bool FliPlayer::isValidChunk(uint16 type)
-{
+bool FliPlayer::isValidChunk(uint16 type) {
     //Even though it may be a valid chunk type, only return true if we know how to deal with it
     switch (type) {
     case 4:                    //COLOR_256
@@ -273,17 +268,15 @@ bool FliPlayer::isValidChunk(uint16 type)
     }
 }
 
-ChunkHeader FliPlayer::readChunkHeader(uint8 * mem)
-{
+ChunkHeader FliPlayer::readChunkHeader(uint8 * mem) {
     ChunkHeader head;
     head.size = READ_LE_UINT32(mem + 0);
     head.type = READ_LE_UINT16(mem + 4);
     return head;
 }
 
-FrameTypeChunkHeader FliPlayer::
-readFrameTypeChunkHeader(ChunkHeader chunkHead, uint8 * &mem)
-{
+FrameTypeChunkHeader FliPlayer::readFrameTypeChunkHeader(ChunkHeader chunkHead,
+        uint8 *&mem) {
     FrameTypeChunkHeader head;
 
     head.header = chunkHead;
@@ -302,8 +295,7 @@ readFrameTypeChunkHeader(ChunkHeader chunkHead, uint8 * &mem)
     return head;
 }
 
-void FliPlayer::decodeByteRun(uint8 * data)
-{
+void FliPlayer::decodeByteRun(uint8 *data) {
     uint8 *ptr = (uint8 *) offscreen_;
     while ((ptr - offscreen_) < (fli_info_.width * fli_info_.height)) {
         uint8 chunks = *data++;
@@ -329,8 +321,7 @@ void FliPlayer::decodeByteRun(uint8 * data)
 #define OP_LASTPIXEL        2
 #define OP_LINESKIPCOUNT    3
 
-void FliPlayer::decodeDeltaFLC(uint8 * data)
-{
+void FliPlayer::decodeDeltaFLC(uint8 *data) {
     uint16 linesInChunk = READ_LE_UINT16(data);
     data += 2;
     uint16 currentLine = 0;
@@ -373,7 +364,8 @@ void FliPlayer::decodeDeltaFLC(uint8 * data)
                        data, rleCount * 2);
                 data += rleCount * 2;
                 column += rleCount * 2;
-            } else if (rleCount < 0) {
+            }
+            else if (rleCount < 0) {
                 uint16 dataWord = *(uint16 *) data;
                 data += 2;
                 for (int i = 0; i < -(int16) rleCount; ++i) {
@@ -383,7 +375,8 @@ void FliPlayer::decodeDeltaFLC(uint8 * data)
                 }
 
                 column += (-(int16) rleCount) * 2;
-            } else {            // End of cutscene ?
+            }
+            else {            // End of cutscene ?
                 return;
             }
         }
@@ -395,8 +388,7 @@ void FliPlayer::decodeDeltaFLC(uint8 * data)
 
 #define FRAME_TYPE  0xF1FA
 
-bool FliPlayer::decodeFrame()
-{
+bool FliPlayer::decodeFrame() {
     FrameTypeChunkHeader frameHeader;
     ChunkHeader cHeader = readChunkHeader(fli_data_);
     do {
@@ -431,8 +423,7 @@ bool FliPlayer::decodeFrame()
 
 }
 
-void FliPlayer::setPalette(uint8 * mem)
-{
+void FliPlayer::setPalette(uint8 *mem) {
     uint16 numPackets = READ_LE_UINT16(mem);
     mem += 2;
 
@@ -442,7 +433,8 @@ void FliPlayer::setPalette(uint8 * mem)
             for (int j = 0; j < 3; ++j)
                 palette_[i * 3 + j] =
                     (mem[i * 3 + j] << 2) | (mem[i * 3 + j] & 3);
-    } else {
+    }
+    else {
         uint8 palPos = 0;
 
         while (numPackets--) {
@@ -460,14 +452,12 @@ void FliPlayer::setPalette(uint8 * mem)
     }
 }
 
-void FliPlayer::copyCurrentFrameToScreen()
-{
+void FliPlayer::copyCurrentFrameToScreen() {
     g_Screen.scale2x(0, 0, fli_info_.width, fli_info_.height, offscreen(),
                      0, false);
 }
 
-bool FliPlayer::play(bool intro)
-{
+bool FliPlayer::play(bool intro) {
     if (!fli_data_)
         return false;
 
@@ -482,23 +472,29 @@ bool FliPlayer::play(bool intro)
             break;
         copyCurrentFrameToScreen();
 
-		if (intro) {
-			static const char *caption = "";
-			for (unsigned int i = 0; g_rg_sample_offsets_and_timings[i].m0 != -1; i++)
-				if (g_rg_sample_offsets_and_timings[i].m0 > cur_frame)
-					break;
-				else if (g_rg_sample_offsets_and_timings[i].m0 == cur_frame) {
-					if (g_rg_sample_offsets_and_timings[i].m1 == 0x41)
-						g_System.delay(40 * g_rg_sample_offsets_and_timings[i].m2);
-					if (g_rg_sample_offsets_and_timings[i].m1 == 0x54)
-						caption = captions[g_rg_sample_offsets_and_timings[i].m2];
-				}
-			g_App.introFont().drawText(10, 360, caption);
-		}
-		cur_frame++;
+        if (intro) {
+            static const char *caption = "";
+            for (unsigned int i = 0;
+                    g_rg_sample_offsets_and_timings[i].m0 != -1; i++)
+                if (g_rg_sample_offsets_and_timings[i].m0 > cur_frame)
+                    break;
+                else if (g_rg_sample_offsets_and_timings[i].m0 == cur_frame) {
+                    if (g_rg_sample_offsets_and_timings[i].m1 == 0x41) {
+                        g_System.delay(
+                                40 * g_rg_sample_offsets_and_timings[i].m2);
+                    }
+
+                    if (g_rg_sample_offsets_and_timings[i].m1 == 0x54) {
+                        caption =
+                                captions[g_rg_sample_offsets_and_timings[i].m2];
+                    }
+                }
+            g_App.introFont().drawText(10, 360, caption);
+        }
+        cur_frame++;
 
         g_System.updateScreen();
-		g_System.delay(1000 / (intro ? 10 : 15));      //fps
+        g_System.delay(1000 / (intro ? 10 : 15));      //fps
     }
 
     g_App.finishedPlayingFli();

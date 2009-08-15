@@ -489,66 +489,73 @@ void GameplayMenu::handleMouseDown(int x, int y, int button)
                     && mission_->ped(i)->selectedWeapon()) {
                 if (pointing_at_ped_ != -1
                         && mission_->ped(i)->inRange(
-                                mission_->ped(pointing_at_ped_)))
+                                mission_->ped(pointing_at_ped_))) {
                     mission_->ped(i)->setTarget(
                             mission_->ped(pointing_at_ped_));
+                }
                 else if (pointing_at_vehicle_ != -1
                         && mission_->ped(i)->inRange(
-                                mission_->vehicle(pointing_at_vehicle_)))
+                                mission_->vehicle(pointing_at_vehicle_))) {
                     mission_->ped(i)->setTarget(
                             mission_->vehicle(pointing_at_vehicle_));
+                }
                 else if (pointing_at_ped_ == -1
-                        && pointing_at_vehicle_ == -1)
+                        && pointing_at_vehicle_ == -1) {
                     mission_->ped(i)->setTarget(scroll_x_ + x - 129,
                             scroll_y_ + y);
+                }
                 WeaponInstance *w = mission_->ped(i)->selectedWeapon();
                 mission_->ped(i)->setHitDamage(w->shot());
             }
     }
 
     // handle weapon selectors
-    for (int j = 0; j < 2; j++)
-        for (int i = 0; i < 4; i++)
+    for (int j = 0; j < 2; j++) {
+        for (int i = 0; i < 4; i++) {
             if (x >= 32 * i && x < 32 * i + 32
                     && y >= 46 + 44 + 10 + 46 + 44 + 15 + j * 32
-                    && y < 46 + 44 + 10 + 46 + 44 + 15 + j * 32 + 32)
-                for (int a = 0; a < 4; a++)
+                    && y < 46 + 44 + 10 + 46 + 44 + 15 + j * 32 + 32) {
+                for (int a = 0; a < 4; a++) {
                     if (isAgentSelected(a)) {
                         if (i + j * 4 < mission_->ped(a)->numWeapons()) {
                             if (button == 1) {
                                 if (mission_->ped(a)->selectedWeapon()
                                         == mission_->ped(a)->weapon(i + j * 4))
                                     mission_->ped(a)->setSelectedWeapon(-1);
-                                else
+                                else {
                                     mission_->ped(a)->setSelectedWeapon(
                                             i + j * 4);
+                                }
                             }
-                            else {
+                            else
                                 mission_->ped(a)->dropWeapon(i + j * 4);
-                            }
 
                             change = true;
                         }
                     }
+                }
+            }
+        }
+    }
 
     if (change)
         show(false);
 }
 
-void GameplayMenu::handleMouseUp(int x, int y, int button)
-{
+void GameplayMenu::handleMouseUp(int x, int y, int button) {
     if (button == 3) {
-        for (int i = 0; i < 4; i++)
+        for (int i = 0; i < 4; i++) {
             if (isAgentSelected(i)
-                    && mission_->ped(i)->selectedWeapon())
+                    && mission_->ped(i)->selectedWeapon()) {
                 mission_->ped(i)->stopFiring();
+            }
+        }
     }
 }
 
 extern int topz;
 
-void GameplayMenu::handleUnknownKey(Key key, KeyMod mod, bool pressed)
-{
+void GameplayMenu::handleUnknownKey(Key key, KeyMod mod, bool pressed) {
     bool change = false; /* indicator whether menu should be redrawn */
 
     if (key == KEY_SPACE && mission_) {
@@ -564,12 +571,10 @@ void GameplayMenu::handleUnknownKey(Key key, KeyMod mod, bool pressed)
         }
     }
 
-    if (key == KEY_LCTRL) {
+    if (key == KEY_LCTRL)
         ctrl_ = pressed;
-    }
-    else if (key == KEY_RCTRL) {
+    else if (key == KEY_RCTRL)
         ctrl_ = pressed;
-    }
 
     if (key == KEY_LALT) {
         alt_ = pressed;
@@ -660,9 +665,8 @@ void GameplayMenu::handleUnknownKey(Key key, KeyMod mod, bool pressed)
         p->animate();
     }
 
-    if (key == KEY_p) {
+    if (key == KEY_p)
         printf("%d\n", n);
-    }
 #endif
 
 #if 0
@@ -732,9 +736,8 @@ void GameplayMenu::handleUnknownKey(Key key, KeyMod mod, bool pressed)
             qanim = 0;
     }
 
-    if (key == KEY_s) {
+    if (key == KEY_s)
         qanim++;
-    }
 
     if (key == KEY_g)
         qanim -= 8;
@@ -751,20 +754,21 @@ void GameplayMenu::handleUnknownKey(Key key, KeyMod mod, bool pressed)
     if (key == KEY_SPACE)
         printf("qanim %i qframe %i\n", qanim, qframe);
 
-    if (key == KEY_t)
+    if (key == KEY_t) {
         mission_->vehicle(0)->setDirection(
                 mission_->vehicle(0)->direction() + 1);
+    }
 
-    if (key == KEY_y)
+    if (key == KEY_y) {
         mission_->vehicle(0)->setDirection(
                 mission_->vehicle(0)->direction() - 1);
+    }
 
     if (change)
         show(false);
 }
 
-void GameplayMenu::drawAgentSelectors()
-{
+void GameplayMenu::drawAgentSelectors() {
     // 64x46
     g_App.gameSprites().sprite(isAgentSelected(0) ? 1772 : 1748)->draw(
             0, 0, 0);
@@ -779,16 +783,18 @@ void GameplayMenu::drawAgentSelectors()
             64, 46 + 44 + 10, 0);
 
     // draw health bars
-    for (int a = 0; a < 4; a++)
+    for (int a = 0; a < 4; a++) {
         for (int j = 36 - 36 * mission_->ped(a)->health()
-                / mission_->ped(a)->startHealth(); j < 36; j++)
-            for (int i = 0; i < 7; i++)
+                / mission_->ped(a)->startHealth(); j < 36; j++) {
+            for (int i = 0; i < 7; i++) {
                 g_Screen.setPixel(((a % 2) == 1 ? 64 : 0) + 51 + i,
                         (a > 1 ? 46 + 44 + 10 : 0) + 6 + j, 12);
+            }
+        }
+    }
 }
 
-void GameplayMenu::drawPerformanceMeters()
-{
+void GameplayMenu::drawPerformanceMeters() {
     // 64x44
     g_App.gameSprites().sprite(isAgentSelected(0) ? 1778 : 1754)->draw(
             0, 46, 0);
@@ -803,8 +809,7 @@ void GameplayMenu::drawPerformanceMeters()
             64, 46 + 44 + 10 + 46, 0);
 }
 
-void GameplayMenu::drawSelectAllButton()
-{
+void GameplayMenu::drawSelectAllButton() {
     // 64x10
     g_App.gameSprites().sprite((selected_agents_ & 15) ==
         15 ? 1792 : 1796)->draw(0, 46 + 44, 0);
@@ -812,8 +817,7 @@ void GameplayMenu::drawSelectAllButton()
         15 ? 1793 : 1797)->draw(64, 46 + 44, 0);
 }
 
-static int drawChar(int x, int y, char ch, bool inversed)
-{
+static int drawChar(int x, int y, char ch, bool inversed) {
     if (ch == ' ')
         return 3;
 
@@ -829,8 +833,7 @@ static int drawChar(int x, int y, char ch, bool inversed)
     return s->width();
 }
 
-void GameplayMenu::drawMissionHint()
-{
+void GameplayMenu::drawMissionHint() {
     static int mission_hint_ = 0;
     mission_hint_++;
     int speed = 100;
@@ -843,22 +846,26 @@ void GameplayMenu::drawMissionHint()
     if ((((mission_hint_ / speed) % 9) % 2) == 1)
         inversed = true;
 
-    for (int j = 0; j < 14; j++)
+    for (int j = 0; j < 14; j++) {
         for (int i = 0; i < 128; i++)
             g_Screen.setPixel(i, 46 + 44 + 10 + 46 + 44 + j, 0);
+    }
 
-    for (int j = inversed ? 1 : 0; j < 7; j++)
+    for (int j = inversed ? 1 : 0; j < 7; j++) {
         for (int i = 0; i < 64; i++)
             g_Screen.setPixel(i * 2 + 1, 46 + 44 + 10 + 46 + 44 + j * 2, 8);
+    }
 
     if ((mission_hint_ / speed) % 10 == 0
-            || (mission_hint_ / speed) % 10 == 9)
+            || (mission_hint_ / speed) % 10 == 9) {
         return;
+    }
 
     if (inversed) {
-        for (int j = 0; j < 11; j++)
+        for (int j = 0; j < 11; j++) {
             for (int i = 0; i < 128; i++)
                 g_Screen.setPixel(i, 46 + 44 + 10 + 46 + 44 + j + 1, 11);
+        }
     }
 
     const char *str = "";
@@ -915,10 +922,12 @@ void GameplayMenu::drawMissionHint()
                 && (mission_hint_ / speed) % 9 < 6) {
             if (mission_->completed() || mission_->failed())
                 str = "PRESS SPACE";
-            else
-                for (int i = 0; i < 4; i++)
+            else {
+                for (int i = 0; i < 4; i++) {
                     if (mission_->ped(i)->speed())
                         str = "GOING";
+                }
+            }
         }
     }
 
@@ -934,8 +943,7 @@ void GameplayMenu::drawMissionHint()
         x += drawChar(x, 46 + 44 + 10 + 46 + 44 + 2, *str++, inversed) - 1;
 }
 
-void GameplayMenu::drawWeaponSelectors()
-{
+void GameplayMenu::drawWeaponSelectors() {
     // TODO: there should be a divider above these
     PedInstance *p = NULL;
 
@@ -1017,8 +1025,7 @@ int mcolors[] = {
     8, 8, 8, 8, 8, 8, 8, 8, 8, 8,       // 250
 };
 
-void GameplayMenu::drawMiniMap()
-{
+void GameplayMenu::drawMiniMap() {
     if (mission_ == 0)
         return;
 
@@ -1069,16 +1076,14 @@ int GameplayMenu::selectedAgentsCount() {
     return agents;
 }
 
-void GameplayMenu::selectAgent(unsigned int agentNo)
-{
+void GameplayMenu::selectAgent(unsigned int agentNo) {
     if (ctrl_)
         selected_agents_ ^= 1 << agentNo;
     else
         selected_agents_ = 1 << agentNo;
 }
 
-void GameplayMenu::selectAllAgents()
-{
+void GameplayMenu::selectAllAgents() {
     if (ctrl_) {
         selected_agents_ ^= 1;
         selected_agents_ ^= 2;

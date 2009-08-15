@@ -23,20 +23,20 @@
  *                                                                      *
  ************************************************************************/
 
+#ifndef MAPMENU_H
+#define MAPMENU_H
+
 #include <assert.h>
 
 /*!
  * Map Menu class.
  */
 class MapMenu : public Menu {
-  public:
+public:
     MapMenu(MenuManager *m);
     ~MapMenu();
 
-    uint8 currentBlk() {
-        return cur_blk_;
-    }
-
+    uint8 currentBlk() { return cur_blk_; }
     void handleTick(int elapsed);
     void handleShow();
     void handleMouseDown(int x, int y, int button);
@@ -48,7 +48,7 @@ class MapMenu : public Menu {
         blk_colours_[n] = c;
     }
 
-  protected:
+protected:
     int mapblk_size_;
     uint8 *mapblk_data_;
     uint8 *orig_pixels_;
@@ -58,3 +58,5 @@ class MapMenu : public Menu {
 
     void drawSelector();
 };
+
+#endif

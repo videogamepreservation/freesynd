@@ -23,6 +23,9 @@
  *                                                                      *
  ************************************************************************/
 
+#ifndef WEAPONMANAGER_H
+#define WEAPONMANAGER_H
+
 #include "common.h"
 #include "weapon.h"
 #include "ped.h"
@@ -32,15 +35,13 @@
  * Weapon manager class.
  */
 class WeaponManager {
-  public:
+public:
     WeaponManager();
     ~WeaponManager();
 
     void loadWeapons();
 
-    int numWeapons() {
-        return weapons_.size();
-    }
+    int numWeapons() { return weapons_.size(); }
 
     Weapon *weapon(int n) {
         assert(n < (int) weapons_.size());
@@ -50,6 +51,8 @@ class WeaponManager {
     Weapon *findWeapon(const char *name);
     Weapon *findWeapon(Ped::WeaponIndex idx);
 
-  protected:
+protected:
     std::vector<Weapon *> weapons_;
 };
+
+#endif

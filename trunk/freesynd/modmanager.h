@@ -22,6 +22,9 @@
  *                                                                      *
  ************************************************************************/
 
+#ifndef MODMANAGER_H
+#define MODMANAGER_H
+
 #include "common.h"
 #include "mod.h"
 #include <vector>
@@ -30,7 +33,7 @@
  * Modifications manager class.
  */
 class ModManager {
-  public:
+public:
     ModManager();
     ~ModManager();
 
@@ -42,6 +45,8 @@ class ModManager {
         return mods_[slot + (version - 1) * 6];
     }
 
-  protected:
+protected:
      std::vector<Mod *> mods_;
 };
+
+#endif

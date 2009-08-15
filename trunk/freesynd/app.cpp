@@ -44,10 +44,8 @@
 #include "screen.h"
 #include "audio.h"
 
-App::App()
-:  running_(true), playingFli_(false)
-    , skipFli_(false),
-screen_(new Screen(GAME_SCREEN_WIDTH, GAME_SCREEN_HEIGHT))
+App::App(): running_(true), playingFli_(false),
+skipFli_(false), screen_(new Screen(GAME_SCREEN_WIDTH, GAME_SCREEN_HEIGHT))
 #ifdef SYSTEM_SDL
     , system_(new SystemSDL())
 #else
@@ -66,21 +64,21 @@ screen_(new Screen(GAME_SCREEN_WIDTH, GAME_SCREEN_HEIGHT))
     reset();
 }
 
-App::~App()
-{
+App::~App() {
+
 }
 
-void App::cheatRepeatOrCompleteMission()
-{
+void App::cheatRepeatOrCompleteMission() {
     // TODO: Implement cheatRepeatOrCompleteMission()
 }
 
-void App::cheatWeaponsAndMods()
-{
+void App::cheatWeaponsAndMods() {
     available_weapons_.clear();
     available_mods_.clear();
+
     for (int i = 0; i < weapons_.numWeapons(); i++)
         available_weapons_.push_back(weapons_.weapon(i));
+
     for (int i = 0; i < 6; i++) {
         available_mods_.push_back(mods_.mod(i));
         available_mods_.push_back(mods_.mod(i, 2));
@@ -88,8 +86,7 @@ void App::cheatWeaponsAndMods()
     }
 }
 
-void App::cheatEquipAllMods()
-{
+void App::cheatEquipAllMods() {
     for (unsigned int agent = 0; agent < agents_recruited_.size(); agent++) {
         agents_recruited_[agent]->clearSlots();
         for (unsigned int i = 0; i < 6; i++) {
@@ -99,91 +96,87 @@ void App::cheatEquipAllMods()
     }
 }
 
-void App::cheatAnyMission()
-{
+void App::cheatAnyMission() {
     // TODO: Implement cheatAnyMission()
 }
 
-void App::cheatResurrectAgents()
-{
+void App::cheatResurrectAgents() {
     // TODO: Implement cheatResurrectAgents()
 }
 
-void App::cheatOwnAllCountries()
-{
+void App::cheatOwnAllCountries() {
     // TODO: Implement cheatOwnAllCountries()
 }
 
-void App::cheatAccelerateTime()
-{
+void App::cheatAccelerateTime() {
     // TODO: Implement cheatAccelerateTime()
 }
 
-void App::cheatFemaleRecruits()
-{
+void App::cheatFemaleRecruits() {
     agents_recruited_.clear();
 
-    std::set < std::string > names;
+    std::set<std::string> names;
     while (agents_recruited_.size() < 18) {
         Agent *a = agents_.agent(rand() % agents_.numAgents());
+
         if (names.find(a->name()) == names.end() && !a->isMale()) {
             agents_recruited_.push_back(a);
             names.insert(a->name());
         }
     }
+
     for (int i = 0; i < 4; i++)
         team_members_[i] = agents_recruited_[i];
 }
 
-void App::cheatEquipFancyWeapons()
-{
+void App::cheatEquipFancyWeapons() {
     for (unsigned int i = 0; i < agents_recruited_.size(); i++) {
         agents_recruited_[i]->removeAllWeapons();
-        agents_recruited_[i]->addWeapon(weapons_.findWeapon("MINI-GUN")->
-                                        createInstance());
-        agents_recruited_[i]->addWeapon(weapons_.findWeapon("MINI-GUN")->
-                                        createInstance());
-        agents_recruited_[i]->addWeapon(weapons_.
-                                        findWeapon("PERSUADERTRON")->
-                                        createInstance());
-        agents_recruited_[i]->addWeapon(weapons_.findWeapon("TIME BOMB")->
-                                        createInstance());
-        agents_recruited_[i]->addWeapon(weapons_.
-                                        findWeapon("ENERGY SHIELD")->
-                                        createInstance());
-        agents_recruited_[i]->addWeapon(weapons_.
-                                        findWeapon("ENERGY SHIELD")->
-                                        createInstance());
-        agents_recruited_[i]->addWeapon(weapons_.findWeapon("LASER")->
-                                        createInstance());
-        agents_recruited_[i]->addWeapon(weapons_.findWeapon("LASER")->
-                                        createInstance());
+        agents_recruited_[i]->addWeapon(
+                weapons_.findWeapon("MINI-GUN")->createInstance());
+        agents_recruited_[i]->addWeapon(
+                weapons_.findWeapon("MINI-GUN")->createInstance());
+        agents_recruited_[i]->addWeapon(
+                weapons_.findWeapon("PERSUADERTRON")->createInstance());
+        agents_recruited_[i]->addWeapon(
+                weapons_.findWeapon("TIME BOMB")->createInstance());
+        agents_recruited_[i]->addWeapon(
+                weapons_.findWeapon("ENERGY SHIELD")->createInstance());
+        agents_recruited_[i]->addWeapon(
+                weapons_.findWeapon("ENERGY SHIELD")->createInstance());
+        agents_recruited_[i]->addWeapon(
+                weapons_.findWeapon("LASER")->createInstance());
+        agents_recruited_[i]->addWeapon(
+                weapons_.findWeapon("LASER")->createInstance());
     }
 }
 
-void App::setCompanyName(const char *name)
-{
+void App::setCompanyName(const char *name) {
     company_name_ = name;
 
     // Repeat mission with previously obtained items, press 'C' or 'Ctrl-C'
     // to instantly complete a mission
-    if (company_name_ == "DO IT AGAIN") {
+    if (company_name_ == "DO IT AGAIN")
         cheatRepeatOrCompleteMission();
-    } else if (company_name_ == "NUK THEM") {
+    else if (company_name_ == "NUK THEM") {
         // Select any mission, resurrect dead agents
         cheatAnyMission();
         cheatResurrectAgents();
-    } else if (company_name_ == "OWN THEM") {
+    }
+    else if (company_name_ == "OWN THEM") {
         // Own all countries
         cheatOwnAllCountries();
-    } else if (company_name_ == "ROB A BANK") {
+    }
+    else if (company_name_ == "ROB A BANK") {
         // $100 000 000 in funds
         cheatFunds();
-    } else if (company_name_ == "TO THE TOP") {
+    }
+    else if (company_name_ == "TO THE TOP") {
         // $100 000 000 in funds, select any mission
         cheatFunds();
         cheatAnyMission();
-    } else if (company_name_ == "COOPER TEAM") {
+    }
+    else if (company_name_ == "COOPER TEAM") {
         // $100 000 000 in funds, select any mission, all weapons and mods
         cheatFemaleRecruits();
         cheatFunds();
@@ -191,14 +184,14 @@ void App::setCompanyName(const char *name)
         cheatWeaponsAndMods();
         cheatEquipAllMods();
         cheatEquipFancyWeapons();
-    } else if (company_name_ == "WATCH THE CLOCK") {
+    }
+    else if (company_name_ == "WATCH THE CLOCK") {
         // Accelerate time for faster research completion
         cheatAccelerateTime();
     }
 }
 
-void App::reset()
-{
+void App::reset() {
     logo_ = 0;
     logo_colour_ = 6;
     money_ = 30000;
@@ -207,14 +200,16 @@ void App::reset()
 
     agents_recruited_.clear();
 
-    std::set < std::string > names;
+    std::set<std::string> names;
     while (agents_recruited_.size() < 8) {
         Agent *a = agents_.agent(rand() % agents_.numAgents());
+
         if (names.find(a->name()) == names.end()) {
             agents_recruited_.push_back(a);
             names.insert(a->name());
         }
     }
+
     for (int i = 0; i < 4; i++)
         team_members_[i] = agents_recruited_[i];
 
@@ -231,8 +226,7 @@ void App::reset()
 //    cheatEquipAllMods();
 }
 
-void App::keyEvent(Key & key, KeyMod & mod, bool pressed)
-{
+void App::keyEvent(Key & key, KeyMod & mod, bool pressed) {
     if (!pressed && key != KEY_LCTRL && key != KEY_RCTRL
         && key != KEY_LALT)
         return;
@@ -260,52 +254,50 @@ void App::keyEvent(Key & key, KeyMod & mod, bool pressed)
     }
 }
 
-void App::mouseDownEvent(int x, int y, int button)
-{
+void App::mouseDownEvent(int x, int y, int button) {
     if (menus_.showingMenu()) {
         menus_.mouseDownEvent(x, y, button);
         return;
     }
 }
 
-void App::mouseUpEvent(int x, int y, int button)
-{
+void App::mouseUpEvent(int x, int y, int button) {
     if (menus_.showingMenu()) {
         menus_.mouseUpEvent(x, y, button);
         return;
     }
 }
 
-void App::mouseMotionEvent(int x, int y, int state)
-{
+void App::mouseMotionEvent(int x, int y, int state) {
     if (menus_.showingMenu()) {
         menus_.mouseMotionEvent(x, y, state);
         return;
     }
 }
 
-void App::waitForKeyPress()
-{
+void App::waitForKeyPress() {
     playingFli_ = true;
     skipFli_ = false;
+
     while (running_ && !skipFli_)
         system_->handleEvents();
+
     playingFli_ = false;
 }
 
-void App::setPalette(const char *fname, bool sixbit)
-{
+void App::setPalette(const char *fname, bool sixbit) {
     int size;
     uint8 *data = File::loadFile(fname, size);
+
     if (sixbit)
         system_->setPalette6b3(data);
     else
         system_->setPalette8b3(data);
+
     delete[] data;
 }
 
-void App::run()
-{
+void App::run() {
     int size = 0, tabSize = 0;
     uint8 *data, *tabData;
 

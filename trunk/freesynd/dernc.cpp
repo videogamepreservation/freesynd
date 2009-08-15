@@ -25,7 +25,6 @@
 #include "dernc.h"
 
 namespace RNC_INTERNAL {
-
     struct BitStream {
         uint32 bit_buffer;      // Holds between 16 and 32 bits
         int bit_count;          // How many bits does bitbuf hold?
@@ -56,12 +55,12 @@ namespace RNC_INTERNAL {
         } is_crc_setup = true;
     }
 
-    uint32 bitPeek(BitStream & bit_stream, uint32 mask) {
-        return bit_stream.bit_buffer & mask;
+    uint32 bitPeek(BitStream &bit_stream, uint32 mask) {
+        return bit_stream.bit_buffer &mask;
     }
 
-    static void bitAdvance(BitStream & bit_stream, int count,
-                           uint8 * &packed_data) {
+    static void bitAdvance(BitStream &bit_stream, int count,
+            uint8 *&packed_data) {
         bit_stream.bit_buffer >>= count;
         bit_stream.bit_count -= count;
         if (bit_stream.bit_count < 16) {
@@ -72,15 +71,15 @@ namespace RNC_INTERNAL {
         }
     }
 
-    uint32 bitRead(BitStream & bit_stream, uint32 mask, int count,
-                   uint8 * &packed_data) {
+    uint32 bitRead(BitStream &bit_stream, uint32 mask, int count,
+            uint8 *&packed_data) {
         uint32 result = bitPeek(bit_stream, mask);
         bitAdvance(bit_stream, count, packed_data);
         return result;
     }
 
-    void readHuffmanTable(HuffmanTable & huffman_table,
-                          BitStream & bit_stream, uint8 * &packed_data) {
+    void readHuffmanTable(HuffmanTable &huffman_table,
+            BitStream &bit_stream, uint8 *&packed_data) {
         int count = bitRead(bit_stream, 0x1f, 5, packed_data);
         if (!count)
             return;
@@ -111,8 +110,8 @@ namespace RNC_INTERNAL {
         huffman_table.node_count = node_count;
     }
 
-    int readHuffmanData(HuffmanTable & huffman_table,
-                        BitStream & bit_stream, uint8 * &packed_data) {
+    int readHuffmanData(HuffmanTable &huffman_table,
+            BitStream &bit_stream, uint8 *&packed_data) {
         int i;
         uint32 mask;
 
@@ -139,12 +138,12 @@ namespace RNC_INTERNAL {
         return result;
     }
 
-    void bitReadInit(BitStream & bit_stream, uint8 * &packed_data) {
+    void bitReadInit(BitStream &bit_stream, uint8 *&packed_data) {
         bit_stream.bit_buffer = READ_LE_UINT16(packed_data);
         bit_stream.bit_count = 16;
     }
 
-    void bitReadFix(BitStream & bit_stream, uint8 * &packed_data) {
+    void bitReadFix(BitStream &bit_stream, uint8 *&packed_data) {
         bit_stream.bit_count -= 16;
         // Remove the top 16 bits
         bit_stream.bit_buffer &= (1 << bit_stream.bit_count) - 1;
@@ -156,8 +155,7 @@ namespace RNC_INTERNAL {
 
 }
 
-const char *const rnc::errorString(int error_code)
-{
+const char *const rnc::errorString(int error_code) {
     using namespace RNC_INTERNAL;
 
     static const char *const errors[] = {
@@ -176,8 +174,7 @@ const char *const rnc::errorString(int error_code)
                   0 ? 0 : (error_code > maxError ? maxError : error_code)];
 }
 
-int rnc::unpackedLength(uint8 * packed_data)
-{
+int rnc::unpackedLength(uint8 *packed_data) {
     using namespace RNC_INTERNAL;
 
     if (READ_BE_UINT32(packed_data) != RNC_SIGNATURE)
@@ -186,8 +183,7 @@ int rnc::unpackedLength(uint8 * packed_data)
     return READ_BE_UINT32(packed_data + 4);
 }
 
-uint16 rnc::crc(uint8 * data, int data_length)
-{
+uint16 rnc::crc(uint8 *data, int data_length) {
     using namespace RNC_INTERNAL;
     if (!is_crc_setup)
         setupCRCTable();
@@ -201,8 +197,7 @@ uint16 rnc::crc(uint8 * data, int data_length)
     return result;
 }
 
-int rnc::unpack(uint8 * packed_data, uint8 * unpacked_data)
-{
+int rnc::unpack(uint8 *packed_data, uint8 *unpacked_data) {
     using namespace RNC_INTERNAL;
 
     if (READ_BE_UINT32(packed_data) != RNC_SIGNATURE)

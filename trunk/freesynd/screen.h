@@ -31,23 +31,15 @@
  * Screen class.
  */
 class Screen : public Singleton<Screen> {
-  public:
+public:
     explicit Screen(int width, int height);
     ~Screen();
 
     void clear(uint8 color = 0);
 
-    const uint8 *pixels() const {
-        return pixels_;
-    }
-
-    bool dirty() {
-        return dirty_;
-    }
-
-    void clearDirty() {
-        dirty_ = false;
-    }
+    const uint8 *pixels() const { return pixels_; }
+    bool dirty() { return dirty_; }
+    void clearDirty() { dirty_ = false; }
 
     void blit(int x, int y, int width, int height, const uint8 *pixeldata,
             bool flipped = false, int stride = 0);
@@ -67,7 +59,7 @@ class Screen : public Singleton<Screen> {
     int gameScreenWidth();
     int gameScreenLeftMargin();
 
-  protected:
+protected:
     int width_;
     int height_;
     uint8 *pixels_;

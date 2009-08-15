@@ -22,17 +22,20 @@
  *                                                                      *
  ************************************************************************/
 
+#ifndef RESEARCHMENU_H
+#define RESEARCHMENU_H
+
 /*!
  * Research class.
  */
 class ResearchMenu : public Menu {
-  public:
-    ResearchMenu(MenuManager * m);
+public:
+    ResearchMenu(MenuManager *m);
     void handleShow();
     void handleShowLate();
     void handleOption(Key key);
 
-  protected:
+protected:
     int tab_;
     uint8 *orig_pixels_;
     int sel_weapon_, sel_field_, sel_mod_;
@@ -50,3 +53,5 @@ class ResearchMenu : public Menu {
     void addWeaponOptions();
     void addModOptions();
 };
+
+#endif

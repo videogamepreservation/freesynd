@@ -30,7 +30,7 @@
 template<typename T> class Singleton {
     static T *singleton_;
 
-  public:
+public:
     Singleton() {
         assert(!singleton_);
         singleton_ = static_cast<T *> (this);

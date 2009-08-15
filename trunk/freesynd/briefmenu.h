@@ -23,6 +23,9 @@
  *                                                                      *
  ************************************************************************/
 
+#ifndef BRIEFMENU_H
+#define BRIEFMENU_H
+
 class MapMenu;
 class Mission;
 
@@ -30,18 +33,15 @@ class Mission;
  * Brief Menu class.
  */
 class BriefMenu : public Menu {
-  public:
+public:
     BriefMenu(MenuManager *m, MapMenu *mapMenu);
     ~BriefMenu();
 
     void handleShow();
     void handleOption(Key key);
+    Mission *mission() { return mission_; }
 
-    Mission *mission() {
-        return mission_;
-    }
-
-  protected:
+protected:
     MapMenu *map_menu_;
     uint8 *orig_pixels_;
     int cur_miss_;
@@ -50,3 +50,5 @@ class BriefMenu : public Menu {
     int enhance_level_;
     Mission *mission_;
 };
+
+#endif

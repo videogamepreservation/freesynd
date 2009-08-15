@@ -22,6 +22,7 @@
  *  The full text of the license is also included in the file COPYING.  *
  *                                                                      *
  ************************************************************************/
+
 #ifndef SOUNDMANAGER_H
 #define SOUNDMANAGER_H
 
@@ -34,7 +35,7 @@ class Sound;
  * Sound manager class.
  */
 class SoundManager {
-  public:
+public:
     enum SampleSet {
         SAMPLES_INTRO,
         SAMPLES_GAME
@@ -47,7 +48,7 @@ class SoundManager {
     Sound *sound(Sound::InGameSample sample);
     void loadSounds(SampleSet set);
 
-  protected:
+protected:
     bool loadSounds(uint8 *tabData, int tabSize, uint8 *soundData);
 
     const int tabentry_startoffset_;

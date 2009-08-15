@@ -33,7 +33,7 @@
  * Font class.
  */
 class Font {
-  public:
+public:
     Font() {}
     virtual ~Font() {}
 
@@ -43,14 +43,14 @@ class Font {
     int textWidth(const char *text, bool x2 = true);
     int textHeight(bool x2 = true);
 
-  protected:
+protected:
     SpriteManager *sprites_;
     int offset_;
     char base_;
 };
 
 class HChar {
-  public:
+public:
     HChar();
     ~HChar();
 
@@ -58,14 +58,14 @@ class HChar {
 
     int draw(int x, int y, uint8 color);
 
-  protected:
+protected:
     int width_;
     int height_;
     bool *bits_;
 };
 
 class HFont {
-  public:
+public:
     HFont();
     ~HFont();
 
@@ -73,7 +73,7 @@ class HFont {
 
     void drawText(int x, int y, const char *str, uint8 color);
 
-  protected:
+protected:
     std::map<char, HChar> characters;
 };
 

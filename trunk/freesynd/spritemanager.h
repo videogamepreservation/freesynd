@@ -32,19 +32,14 @@
  * Sprite manager class.
  */
 class SpriteManager {
-  public:
+public:
     SpriteManager();
     virtual ~SpriteManager();
 
     void clear();
 
-    bool loaded() {
-        return sprite_count_ != 0;
-    }
-
-    int spriteCount() {
-        return sprite_count_;
-    }
+    bool loaded() { return sprite_count_ != 0; }
+    int spriteCount() { return sprite_count_; }
 
     bool loadSprites(uint8 * tabData, int tabSize, uint8 *spriteData,
             bool rle = false);
@@ -52,7 +47,7 @@ class SpriteManager {
     bool drawSpriteXYZ(int spriteNum, int x, int y, int z, bool flipped = false,
             bool x2 = false);
 
-  protected:
+protected:
     Sprite *sprites_;
     int sprite_count_;
 };
@@ -61,7 +56,7 @@ class SpriteManager {
  * Game sprite frame class.
  */
 class GameSpriteFrame {
-  public:
+public:
     GameSpriteFrame() : first_element_(0), width_(0), height_(0), flags_(0),
             next_frame_(0) {}
     int first_element_;
@@ -74,7 +69,7 @@ class GameSpriteFrame {
  * Game sprite frame element class.
  */
 class GameSpriteFrameElement {
-  public:
+public:
     GameSpriteFrameElement() : sprite_(0), off_x_(0), off_y_(0),
             flipped_(false), next_element_(0) {}
     int sprite_;
@@ -87,21 +82,19 @@ class GameSpriteFrameElement {
  * Game sprite class.
  */
 class GameSpriteManager : public SpriteManager {
-  public:
+public:
     GameSpriteManager();
     virtual ~GameSpriteManager();
 
     void load();
 
-    int numAnims() {
-        return (int) index_.size();
-    }
+    int numAnims() { return (int) index_.size(); }
 
     bool drawFrame(int animNum, int frameNum, int x, int y);
     bool lastFrame(int animNum, int frameNum);
     int lastFrame(int animNum);
 
-  protected:
+protected:
     std::vector<int> index_;
     std::vector<GameSpriteFrame> frames_;
     std::vector<GameSpriteFrameElement> elements_;

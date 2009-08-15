@@ -22,6 +22,8 @@
  *  The full text of the license is also included in the file COPYING.  *
  *                                                                      *
  ************************************************************************/
+#ifndef AGENT_H
+#define AGENT_H
 
 #include "common.h"
 #include "weaponholder.h"
@@ -39,33 +41,18 @@ class WeaponInstance;
 #define SLOT_BRAIN 0
 
 /*!
- * Agent class.
  * Stores information about agent health, weapons inventory and modifications.
  */
 class Agent : public WeaponHolder {
-  public:
+public:
     Agent(const char *agent_name, bool male);
     ~Agent();
 
-    const char *name() {
-        return name_.c_str();
-    }
-
-    bool isMale() {
-        return male_;
-    }
-
-    bool isActive() {
-        return active_;
-    }
-
-    void setActive(bool a) {
-        active_ = a;
-    }
-
-    int health() {
-        return health_;
-    }
+    const char *name() { return name_.c_str(); }
+    bool isMale() { return male_; }
+    bool isActive() { return active_; }
+    void setActive(bool a) { active_ = a; }
+    int health() { return health_; }
 
     void setHealth(int n) {
         if (n > 255)
@@ -91,10 +78,12 @@ class Agent : public WeaponHolder {
 
     void removeAllWeapons();
 
-  protected:
+protected:
     std::string name_;
     bool male_;
     bool active_;
     int health_;
     Mod *slots_[6];
 };
+
+#endif

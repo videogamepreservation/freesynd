@@ -23,14 +23,19 @@
  *                                                                      *
  ************************************************************************/
 
+#ifndef MISSLOSEMENU_H
+#define MISSLOSEMENU_H
+
 /*!
  * Mission lose menu class.
  */
 class MissLoseMenu : public Menu {
-  public:
-    MissLoseMenu(MenuManager * m);
+public:
+    MissLoseMenu(MenuManager *m);
 
     void handleShow();
 
-  protected:
+protected:
 };
+
+#endif

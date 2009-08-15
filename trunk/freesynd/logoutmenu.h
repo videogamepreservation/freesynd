@@ -22,6 +22,7 @@
  *  The full text of the license is also included in the file COPYING.  *
  *                                                                      *
  ************************************************************************/
+
 #ifndef LOGOUTMENU_H
 #define LOGOUTMENU_H
 
@@ -31,16 +32,13 @@
  * Logout Menu class.
  */
 class LogoutMenu : public Menu {
-  public:
+public:
     LogoutMenu(MenuManager *m);
 
-    bool isSubMenu() {
-        return false;
-    }
-
+    bool isSubMenu() { return false; }
     void handleTick(int elapsed);
 
-  protected:
+protected:
     int tick_count_;
 };
 

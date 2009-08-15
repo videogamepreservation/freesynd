@@ -34,13 +34,11 @@ class WeaponInstance;
  * Weapon holder class.
  */
 class WeaponHolder {
-  public:
+public:
     WeaponHolder() {}
     virtual ~WeaponHolder() {}
 
-    int numWeapons() {
-        return weapons_.size();
-    }
+    int numWeapons() { return weapons_.size(); }
 
     WeaponInstance *weapon(int n) {
         assert(n < (int) weapons_.size());
@@ -66,7 +64,7 @@ class WeaponHolder {
         return w;
     }
 
-  protected:
+protected:
     std::vector<WeaponInstance *> weapons_;
 };
 

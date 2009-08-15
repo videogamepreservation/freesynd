@@ -22,6 +22,9 @@
  *                                                                      *
  ************************************************************************/
 
+#ifndef MISSIONMANAGER_H
+#define MISSIONMANAGER_H
+
 #include "common.h"
 #include <map>
 
@@ -29,12 +32,15 @@ class Mission;
 
 /*!
  * Mission manager class.
+ * Stores information about all missions.
  */
 class MissionManager {
-  public:
+public:
     MissionManager();
     Mission *loadMission(int n);
 
-  protected:
+protected:
      std::map<int, Mission *> missions_;
 };
+
+#endif

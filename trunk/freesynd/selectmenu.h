@@ -23,11 +23,14 @@
  *                                                                      *
  ************************************************************************/
 
+#ifndef SELECTMENU_H
+#define SELECTMENU_H
+
 /*!
  * Select Menu class.
  */
 class SelectMenu : public Menu {
-  public:
+public:
     SelectMenu(MenuManager *m);
     ~SelectMenu();
 
@@ -37,7 +40,7 @@ class SelectMenu : public Menu {
     void handleMouseDown(int x, int y, int button);
     void handleOption(Key key);
 
-  protected:
+protected:
     uint8 *orig_pixels_;
     int tab_;
     int cur_agent_;
@@ -60,3 +63,5 @@ class SelectMenu : public Menu {
 
     void toggleAgent(int n);
 };
+
+#endif
