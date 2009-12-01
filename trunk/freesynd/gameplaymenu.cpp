@@ -424,8 +424,8 @@ void GameplayMenu::handleMouseDown(int x, int y, int button)
                         scroll_y_ + y, oy);
 
             int spred = 64;
-            for (int i = 0; i < 4; i++)
-                if (isAgentSelected(i))
+            for (int i = 0; i < 4; i++) {
+                if (isAgentSelected(i)) {
                     if (pointing_at_weapon_ != -1) {
                         mission_->ped(i)->pickupWeapon(
                                 mission_->weapon(pointing_at_weapon_));
@@ -481,6 +481,8 @@ void GameplayMenu::handleMouseDown(int x, int y, int button)
                                     ox - spred, oy - spred, 320);
                         }
                     }
+                }
+            }
         }
     }
     else if (button == 3) {

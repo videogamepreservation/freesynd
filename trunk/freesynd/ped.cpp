@@ -599,12 +599,12 @@ bool PedInstance::inSightRange(MapObject *t) {
 void PedInstance::selectNextWeapon() {
     int nextWeapon = -1;
 
-    Weapon *selectedWeapon = (Weapon *) weapon(selected_weapon_);
+    Weapon *curSelectedWeapon = (Weapon *) weapon(selected_weapon_);
 
-    if (selectedWeapon)
+    if (curSelectedWeapon)
         for (int i = numWeapons() - 1; i >=0 && nextWeapon == -1; i--)
             if (i != selected_weapon_
-                    && *((Weapon *) weapon(i)) == *selectedWeapon
+                    && *((Weapon *) weapon(i)) == *curSelectedWeapon
                     && weapon(i)->ammoRemaining())
                 nextWeapon = i;
 

@@ -27,7 +27,7 @@
 
 // All available key codes
 // (This is a direct copy of the SDLKey enum)
-typedef enum Key {
+enum Key {
 /* GP2X button mapping */
     VK_UP = 0,
     VK_UP_LEFT = 1,
@@ -297,7 +297,7 @@ typedef enum Key {
 
 // Valid key modifiers
 // (Again, a direct copy of the SDLMod enum)
-typedef enum KeyMod {
+enum KeyMod {
     KMD_NONE = 0x0000,
     KMD_LSHIFT = 0x0001,
     KMD_RSHIFT = 0x0002,
