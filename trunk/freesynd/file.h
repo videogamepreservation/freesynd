@@ -5,6 +5,7 @@
  *   Copyright (C) 2005  Stuart Binge  <skbinge@gmail.com>              *
  *   Copyright (C) 2005  Joost Peters  <joostp@users.sourceforge.net>   *
  *   Copyright (C) 2006  Trent Waddington <qg@biodome.org>              *
+ *   Copyright (C) 2010  Benoit Blancard <benblan@users.sourceforge.net>*
  *                                                                      *
  *    This program is free software;  you can redistribute it and / or  *
  *  modify it  under the  terms of the  GNU General  Public License as  *
@@ -36,10 +37,11 @@ public:
     static void setPath(const char *path);
     static uint8 *loadFile(const char *filename, int &filesize);
     static FILE *loadTextFile(const char *filename);
+    //! Returns the full path of the given resource using the current root path.
+    static const char *fileFullPath(const char *filename, bool uppercase);
 
 private:
     static uint8 *loadFileToMem(const char *filename, int &filesize);
-    static const char *fileFullPath(const char *filename, bool uppercase);
     static char _path[240];
 };
 

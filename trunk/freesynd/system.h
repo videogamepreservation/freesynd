@@ -5,6 +5,7 @@
  *   Copyright (C) 2005  Stuart Binge  <skbinge@gmail.com>              *
  *   Copyright (C) 2005  Joost Peters  <joostp@users.sourceforge.net>   *
  *   Copyright (C) 2006  Trent Waddington <qg@biodome.org>              *
+ *   Copyright (C) 2010  Benoit Blancard <benblan@users.sourceforge.net>*
  *                                                                      *
  *    This program is free software;  you can redistribute it and / or  *
  *  modify it  under the  terms of the  GNU General  Public License as  *
@@ -27,10 +28,11 @@
 
 #include "common.h"
 
-// This file contains the abstract interface that all systems/ports should implement.
-
 class Sprite;
 
+/*! 
+ * Abstract interface that all systems/ports should implement.
+ */
 struct System : public Singleton<System> {
     virtual ~System() {}
     virtual void updateScreen() = 0;
@@ -41,8 +43,16 @@ struct System : public Singleton<System> {
     virtual void setPalette8b3(const uint8 *pal, int cols = 256) = 0;
     virtual void setColor(uint8 index, uint8 r, uint8 g, uint8 b) = 0;
 
+    //! Hides the mouse cursor.
     virtual void hideCursor() = 0;
+    //! Shows the mouse cursor.
     virtual void showCursor() = 0;
+    //! Use the cursor for the menu screen
+    /*!
+     * The menu cursor is the cursor used when dealing
+     * with game menus.
+     */
+    virtual void useMenuCursor() = 0;
     virtual void usePointerCursor() = 0;
     virtual void useTargetCursor() = 0;
     virtual void usePickupCursor() = 0;

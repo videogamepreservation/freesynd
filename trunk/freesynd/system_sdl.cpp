@@ -5,6 +5,7 @@
  *   Copyright (C) 2005  Stuart Binge  <skbinge@gmail.com>              *
  *   Copyright (C) 2005  Joost Peters  <joostp@users.sourceforge.net>   *
  *   Copyright (C) 2006  Trent Waddington <qg@biodome.org>              *
+ *   Copyright (C) 2010  Benoit Blancard <benblan@users.sourceforge.net>*
  *                                                                      *
  *    This program is free software;  you can redistribute it and / or  *
  *  modify it  under the  terms of the  GNU General  Public License as  *
@@ -27,9 +28,14 @@
 #include "app.h"
 #include "audio.h"
 #include "config.h"
+#include "file.h"
+
+#include "SDL_image.h"
 
 extern bool want_fullscreen;
 SDL_Joystick *joy = NULL;
+
+const int SystemSDL::CURSOR_WIDTH = 24;
 
 SystemSDL::SystemSDL(int depth)
 :depth_(depth)
@@ -73,21 +79,45 @@ SystemSDL::SystemSDL(int depth)
     temp_surf_ =
         SDL_CreateRGBSurface(SDL_SWSURFACE, GAME_SCREEN_WIDTH,
                              GAME_SCREEN_HEIGHT, 8, 0, 0, 0, 0);
+
 #endif
+
+    cursor_surf_ = NULL;
+    // Init SDL_Image library
+    int sdl_img_flags = IMG_INIT_PNG;
+    int initted = IMG_Init(sdl_img_flags);
+    if ( (initted&sdl_img_flags) != sdl_img_flags) {
+        printf("Failed to init SDL_Image : %s\n", IMG_GetError());
+    } else {
+        // Load the cursor sprites
+        if (loadCursorSprites()) {
+            // Cursor movement is managed by the application
+            SDL_ShowCursor(SDL_DISABLE);
+        }
+        // At first the cursor is hidden
+        hideCursor();
+        useMenuCursor();
+    }
 }
 
 SystemSDL::~SystemSDL()
 {
     SDL_FreeSurface(temp_surf_);
+    SDL_FreeSurface(cursor_surf_);
+
 #ifdef HAVE_SDL_MIXER
     Audio::quit();
 #endif
+
+    // Destroy SDL_Image Lib
+    IMG_Quit();
+
     SDL_Quit();
 }
 
 void SystemSDL::updateScreen()
 {
-    if (g_Screen.dirty()) {
+    if (g_Screen.dirty()|| (cursor_visible_ && update_cursor_)) {
         SDL_LockSurface(temp_surf_);
 #ifdef GP2X
         const uint8 *pixeldata = g_Screen.pixels();
@@ -109,6 +139,16 @@ void SystemSDL::updateScreen()
         g_Screen.clearDirty();
 
         SDL_BlitSurface(temp_surf_, NULL, screen_surf_, NULL);
+        
+        if (cursor_visible_) {
+            SDL_Rect dst;
+
+            dst.x = cursor_x_ - cursor_hs_x_;
+            dst.y = cursor_y_ - cursor_hs_y_;
+            SDL_BlitSurface(cursor_surf_, &cursor_rect_, screen_surf_, &dst);
+            update_cursor_ = false;
+        }
+
         SDL_Flip(screen_surf_);
     }
 }
@@ -147,6 +187,9 @@ void SystemSDL::handleEvents()
             break;
 
         case SDL_MOUSEMOTION:
+            update_cursor_ = true;
+            cursor_x_ = event.motion.x;
+            cursor_y_ = event.motion.y;
             g_App.mouseMotionEvent(event.motion.x, event.motion.y,
                                    event.motion.state);
             break;
@@ -220,134 +263,76 @@ void SystemSDL::setColor(uint8 index, uint8 r, uint8 g, uint8 b)
     SDL_SetColors(temp_surf_, &color, index, 1);
 }
 
+/*!
+ * This method uses the SDL_Image library to load a file called
+ * cursors/cursors.png under the root path.
+ * The file is loaded into the cursor surface.
+ * \returns False if the loading has failed. If it's the case, 
+ * cursor_surf_ will be NULL.
+ */
+bool SystemSDL::loadCursorSprites()
+{
+    cursor_rect_.w = cursor_rect_.h = CURSOR_WIDTH;
+
+    cursor_surf_ = IMG_Load(File::fileFullPath("cursors/cursors.png", false));
+
+    if (!cursor_surf_) {
+        printf("Cannot load cursors image: %s\n", IMG_GetError());
+        return false;
+    }
+
+    return true;
+}
+
 void SystemSDL::hideCursor()
 {
-    // ya gotta wonder why SDL_ShowCursor is so complicated.
-    if (SDL_ShowCursor(-1))
+    if (cursor_surf_ != NULL) {
+        cursor_visible_ = false;
+    } else {
+        // Custom cursor surface doesn't
+        // exists so use the default SDL Cursor
         SDL_ShowCursor(SDL_DISABLE);
+    }
 }
 
 void SystemSDL::showCursor()
 {
-    if (!SDL_ShowCursor(-1))
+    if (cursor_surf_ != NULL) {
+        cursor_visible_ = true;
+    } else {
+        // Custom cursor surface doesn't
+        // exists so use the default SDL Cursor
         SDL_ShowCursor(SDL_ENABLE);
+    }
 }
 
-static SDL_Cursor *origCursor = NULL;
+void SystemSDL::useMenuCursor()
+{
+    update_cursor_ = true;
+    cursor_rect_.x = cursor_rect_.y = 0;
+    cursor_hs_x_ = cursor_hs_y_ = 0;
+}
 
 void SystemSDL::usePointerCursor()
 {
-    SDL_SetCursor(origCursor);
+    update_cursor_ = true;
+    cursor_rect_.x = 24;
+    cursor_rect_.y = 0;
+    cursor_hs_x_ = cursor_hs_y_ = 0;
 }
 
 void SystemSDL::useTargetCursor()
 {
-    static SDL_Cursor *targetCursor = NULL;
-
-    if (targetCursor == NULL) {
-        int b = 0;
-        int w = 12;
-        int t = 255;
-        // TODO: be nice to use the real sprite, but I can't find it.
-        uint8 target[21 * 21] = {
-            t, t, t, t, t, t, t, t, t, t, b, t, t, t, t, t, t, t, t, t, t,
-            t, t, t, t, t, t, t, t, t, b, w, b, t, t, t, t, t, t, t, t, t,
-            t, t, t, t, t, t, t, t, b, b, w, b, b, t, t, t, t, t, t, t, t,
-            t, t, t, t, t, t, b, b, w, w, w, w, w, b, b, t, t, t, t, t, t,
-            t, t, t, t, t, b, w, w, b, b, w, b, b, w, w, b, t, t, t, t, t,
-            t, t, t, t, b, w, b, b, t, b, w, b, t, b, b, w, b, t, t, t, t,
-            t, t, t, b, w, b, t, t, t, b, w, b, t, t, t, b, w, b, t, t, t,
-            t, t, t, b, w, b, t, t, t, b, t, b, t, t, t, b, w, b, t, t, t,
-            t, t, b, w, b, t, t, t, t, t, t, t, t, t, t, t, b, w, b, t, t,
-            t, b, b, w, b, b, b, b, t, t, t, t, t, b, b, b, b, w, b, b, t,
-            b, w, w, w, w, w, w, t, t, t, t, t, t, t, w, w, w, w, w, w, b,
-            t, b, b, w, b, b, b, b, t, t, t, t, t, b, b, b, b, w, b, b, t,
-            t, t, b, w, b, t, t, t, t, t, t, t, t, t, t, t, b, w, b, t, t,
-            t, t, t, b, w, b, t, t, t, b, t, b, t, t, t, b, w, b, t, t, t,
-            t, t, t, b, w, b, t, t, t, b, w, b, t, t, t, b, w, b, t, t, t,
-            t, t, t, t, b, w, b, b, t, b, w, b, t, b, b, w, b, t, t, t, t,
-            t, t, t, t, t, b, w, w, b, b, w, b, b, w, w, b, t, t, t, t, t,
-            t, t, t, t, t, t, b, b, w, w, w, w, w, b, b, t, t, t, t, t, t,
-            t, t, t, t, t, t, t, t, b, b, w, b, b, t, t, t, t, t, t, t, t,
-            t, t, t, t, t, t, t, t, t, b, w, b, t, t, t, t, t, t, t, t, t,
-            t, t, t, t, t, t, t, t, t, t, b, t, t, t, t, t, t, t, t, t, t,
-        };
-
-        uint8 data[4 * 32], mask[4 * 32];
-        memset(data, 0, sizeof(data));
-        memset(mask, 0, sizeof(mask));
-        for (int j = 0; j < 32; j++)
-            for (int i = 0; i < 32; i++) {
-                if (j < 6 || i < 6 || j >= 26 || i >= 26)
-                    continue;
-                if (target[(i - 6) + (j - 6) * 21] == t)
-                    continue;
-                if (target[(i - 6) + (j - 6) * 21] == b)
-                    data[(i / 8) + j * 4] |= 128 >> (i % 8);
-                mask[(i / 8) + j * 4] |= 128 >> (i % 8);
-            }
-
-        if (origCursor == NULL)
-            origCursor = SDL_GetCursor();
-        targetCursor =
-            SDL_CreateCursor(data, mask, 32, 32, 6 + 11, 6 + 11);
-    }
-
-    SDL_SetCursor(targetCursor);
+    update_cursor_ = true;
+    cursor_rect_.x = 48;
+    cursor_rect_.y = 0;
+    cursor_hs_x_ = cursor_hs_y_ = 10;
 }
 
 void SystemSDL::usePickupCursor()
 {
-    static SDL_Cursor *pickupCursor = NULL;
-
-    if (pickupCursor == NULL) {
-        int b = 0;
-        int w = 12;
-        int t = 255;
-        // TODO: be nice to use the real sprite, but I can't find it.
-        uint8 pickup[21 * 21] = {
-            t, t, t, t, b, b, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t,
-            t, t, t, b, w, w, b, b, t, t, t, t, t, t, t, t, t, t, t, t, t,
-            t, t, t, t, b, b, w, w, b, b, t, t, t, t, t, t, t, t, t, t, t,
-            t, b, t, t, t, t, b, b, w, w, b, b, t, t, t, t, t, t, t, t, t,
-            b, w, b, t, t, t, t, t, b, b, w, w, b, b, t, t, t, t, t, t, t,
-            b, w, b, t, t, t, t, t, t, t, b, w, w, w, b, t, t, t, t, t, t,
-            t, b, w, b, t, t, t, t, t, t, t, b, w, w, w, b, t, t, t, t, t,
-            t, b, w, b, t, t, t, t, t, t, t, t, b, w, w, b, t, t, t, t, t,
-            t, t, b, w, b, t, t, t, t, t, t, b, w, w, w, b, t, t, t, t, t,
-            t, t, b, w, b, t, t, t, t, t, b, b, b, w, w, b, t, t, t, t, t,
-            t, t, t, b, w, b, t, t, t, b, w, w, w, w, w, b, t, t, t, t, t,
-            t, t, t, b, w, w, b, t, b, b, w, w, b, w, b, b, t, t, t, t, t,
-            t, t, t, t, b, w, w, b, w, b, w, b, b, w, b, t, t, t, t, t, t,
-            t, t, t, t, b, w, w, w, w, w, w, w, w, w, b, t, t, t, t, t, t,
-            t, t, t, t, t, b, w, w, w, w, w, b, b, b, t, t, t, t, t, t, t,
-            t, t, t, t, t, b, b, b, b, b, b, b, t, t, t, t, t, t, t, t, t,
-            t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t,
-            t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t,
-            t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t,
-            t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t,
-            t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t,
-        };
-
-        uint8 data[4 * 32], mask[4 * 32];
-        memset(data, 0, sizeof(data));
-        memset(mask, 0, sizeof(mask));
-        for (int j = 0; j < 32; j++)
-            for (int i = 0; i < 32; i++) {
-                if (j < 6 || i < 6 || j >= 26 || i >= 26)
-                    continue;
-                if (pickup[(i - 6) + (j - 6) * 21] == t)
-                    continue;
-                if (pickup[(i - 6) + (j - 6) * 21] == b)
-                    data[(i / 8) + j * 4] |= 128 >> (i % 8);
-                mask[(i / 8) + j * 4] |= 128 >> (i % 8);
-            }
-
-        if (origCursor == NULL)
-            origCursor = SDL_GetCursor();
-        pickupCursor =
-            SDL_CreateCursor(data, mask, 32, 32, 6 + 11, 6 + 11);
-    }
-
-    SDL_SetCursor(pickupCursor);
+    update_cursor_ = true;
+    cursor_rect_.x = 0;
+    cursor_rect_.y = 24;
+    cursor_hs_x_ = cursor_hs_y_ = 2;
 }

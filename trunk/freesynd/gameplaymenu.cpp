@@ -7,6 +7,7 @@
  *   Copyright (C) 2006  Trent Waddington <qg@biodome.org>              *
  *   Copyright (C) 2006  Tarjei Knapstad <tarjei.knapstad@gmail.com>    *
  *   Copyright (C) 2007  Davor Ocelic <docelic@mail.inet.hr>			*
+ *   Copyright (C) 2010  Benoit Blancard <benblan@users.sourceforge.net>*
  *                                                                      *
  *    This program is free software;  you can redistribute it and / or  *
  *  modify it  under the  terms of the  GNU General  Public License as  *
@@ -268,7 +269,8 @@ void GameplayMenu::handleShow()
 
 void GameplayMenu::handleLeave()
 {
-    g_System.usePointerCursor();
+    // TODO : just hide the cursor here. Menu cursor will be set by next menu
+    g_System.useMenuCursor();
     g_App.setPalette("mselect.pal");
     mission_->end();
     mission_ = NULL;

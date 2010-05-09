@@ -5,6 +5,7 @@
  *   Copyright (C) 2005  Stuart Binge  <skbinge@gmail.com>              *
  *   Copyright (C) 2005  Joost Peters  <joostp@users.sourceforge.net>   *
  *   Copyright (C) 2006  Trent Waddington <qg@biodome.org>              *
+ *   Copyright (C) 2010  Benoit Blancard <benblan@users.sourceforge.net>*
  *                                                                      *
  *    This program is free software;  you can redistribute it and / or  *
  *  modify it  under the  terms of the  GNU General  Public License as  *
@@ -33,7 +34,14 @@
 
 char File::_path[240] = "./data/";
 
-
+/*!
+ * The methods returns a new pointer to a string composed of the root path
+ * and given file name. The absolute file name cannot exceed 256 caracters.
+ * No control is made on the result format or file existence.
+ * \param filename The relative path to a file.
+ * \param uppercase If true, the resulting string will uppercased.
+ * \see setPath()
+ */
 const char *File::fileFullPath(const char *filename, bool uppercase) {
     static char buf[256];
 
