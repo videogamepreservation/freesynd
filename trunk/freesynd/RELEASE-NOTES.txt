@@ -1,0 +1,29 @@
+FreeSynd 0.3 : Release Notes
+----------------------------
+
+Description
+-----------
+This is a prelimary release for testing and development purposes.  
+
+Changes
+-------
+  * Cursors are now available in a png file
+  * music files (ogg and mp3) have been moved to data/music
+
+Known issues with this release
+------------------------------
+  * Agent AI is not operational.
+  * No trees the map.
+  * The minimap is not complete.
+  * Tax collection and other functionality of the world map are not done.
+  * PathFinding is buggy
+  * Mission debriefing is not operational
+
+History
+-------
+
+  v0.2
+  ----
+    * The first level is "playable".
+    * Most of the menus are complete and functional.
+    * Sound and music are operational.

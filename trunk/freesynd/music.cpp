@@ -24,6 +24,7 @@
  ************************************************************************/
 
 #include "music.h"
+#include "file.h"
 
 #ifdef HAVE_SDL_MIXER
 Music::Music():music_data_(NULL),rw_(NULL)
@@ -99,7 +100,7 @@ bool Music::loadMusic(uint8 * musicData, int size)
 
 bool Music::loadMusicFile(const char *fname)
 {
-	Mix_Music *newmusic = Mix_LoadMUS(fname);
+	Mix_Music *newmusic = Mix_LoadMUS(File::fileFullPath(fname, false));
 
 	if (!newmusic) {
         error("Failed loading music from file");

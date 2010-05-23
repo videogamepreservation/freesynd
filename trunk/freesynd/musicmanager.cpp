@@ -62,9 +62,9 @@ void MusicManager::loadMusic()
 #if USE_INTRO_MP3
     tracks_.push_back(new Music);
 #if USE_OGG_INSTEAD_OF_MP3
-	tracks_.back()->loadMusicFile("intro.ogg");
+	tracks_.back()->loadMusicFile("music/intro.ogg");
 #else
-	tracks_.back()->loadMusicFile("intro.mp3");
+	tracks_.back()->loadMusicFile("music/intro.mp3");
 #endif
 #else
     data = File::loadFile("INTRO.XMI", size);
@@ -83,9 +83,9 @@ void MusicManager::loadMusic()
 #if USE_ASSASSINATE_MP3
 			tracks_.push_back(new Music);
 #if USE_OGG_INSTEAD_OF_MP3
-			tracks_.back()->loadMusicFile("assassinate.ogg");
+			tracks_.back()->loadMusicFile("music/assassinate.ogg");
 #else
-			tracks_.back()->loadMusicFile("assassinate.mp3");
+			tracks_.back()->loadMusicFile("music/assassinate.mp3");
 #endif
 #else
 			tracks_.push_back(new Music);

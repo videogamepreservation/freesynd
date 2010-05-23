@@ -1,4 +1,4 @@
-Building FreeSynd using Microsoft Visual C++ 2008
+Building FreeSynd using Dev-C++ 4.9.9.2
 
 Copyright (C) 2010 Benoit Blancard.
 
@@ -29,8 +29,8 @@ List of required DLL to run freesynd (see dll in the libs directory)
 	
 How to build:
 ------------
-1) On the main menu, select "File | Open Solution".
-   Open "projects\visualc9\freesynd.sln".
+1) Select "File | Open Project...".
+   Open "projects\dev-cpp\FreeSynd.dev".
    
 2) Set the appropriate macros :
 * dynamic macros : those macros are settable in the project properties
@@ -49,21 +49,13 @@ How to build:
 	                or original file
 	USE_OGG_INSTEAD_OF_MP3 : tells whether to play mp3 or ogg files
 
-2) Select "Build | Configuration Manager...".
-   Choose the configuration you wish to build.
-
-3) Select "Build | Clean Solution".
-
-4) Select "Build | Build Solution".
+2) Select "Run | Compile".
 
 
 How to run the game
 ---------------
-1) Copy the required DLL to the Debug/Release directory
+1) Copy the required DLL to the Debug/Release directory, if not already done
 
-2) In the project properties, set the working directory to the directory 
-   containing the data directory
-   
-3) Select "Debug | Run".
+2) Select "Run | Execute".
 
 
