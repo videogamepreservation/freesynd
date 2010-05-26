@@ -5,6 +5,7 @@
  *   Copyright (C) 2005  Stuart Binge  <skbinge@gmail.com>              *
  *   Copyright (C) 2005  Joost Peters  <joostp@users.sourceforge.net>   *
  *   Copyright (C) 2006  Trent Waddington <qg@biodome.org>              *
+ *   Copyright (C) 2010  Benoit Blancard <benblan@users.sourceforge.net>*
  *                                                                      *
  *    This program is free software;  you can redistribute it and / or  *
  *  modify it  under the  terms of the  GNU General  Public License as  *
@@ -30,6 +31,7 @@
 #include "common.h"
 #include "file.h"
 #include "app.h"
+#include "utils/log.h"
 
 #ifdef _WIN32
 #include <windows.h>
@@ -148,9 +150,19 @@ int main(int argc, char *argv[]) {
         }
     }
 
+#ifdef _DEBUG
+    // Initialize log
+    Log::initialize(Log::k_FLG_ALL, "game.log");
+#endif
+
     std::auto_ptr<App> app(new App());
 
     app->run();
+
+#ifdef _DEBUG
+    // Close log
+    Log::close();
+#endif
 
     return 0;
 }

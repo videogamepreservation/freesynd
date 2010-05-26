@@ -5,6 +5,7 @@
  *   Copyright (C) 2005  Stuart Binge  <skbinge@gmail.com>              *
  *   Copyright (C) 2005  Joost Peters  <joostp@users.sourceforge.net>   *
  *   Copyright (C) 2006  Trent Waddington <qg@biodome.org>              *
+ *   Copyright (C) 2010  Benoit Blancard <benblan@users.sourceforge.net>*
  *                                                                      *
  *    This program is free software;  you can redistribute it and / or  *
  *  modify it  under the  terms of the  GNU General  Public License as  *
@@ -43,6 +44,7 @@
 #include "spritemanager.h"
 #include "screen.h"
 #include "audio.h"
+#include "utils/log.h"
 
 App::App(): running_(true), playingFli_(false),
 skipFli_(false), screen_(new Screen(GAME_SCREEN_WIDTH, GAME_SCREEN_HEIGHT))
@@ -301,16 +303,18 @@ void App::run() {
     int size = 0, tabSize = 0;
     uint8 *data, *tabData;
 
+    LOG(Log::k_FLG_GFX, "App", "run", ("Loading resource for the intro"))
     // this font is for the intro
     tabData = File::loadFile("mfnt-0.tab", tabSize);
     data = File::loadFile("mfnt-0.dat", size);
-    printf("Loading %d sprites from mfnt-0.dat\n", tabSize / 6);
     intro_font_sprites_.loadSprites(tabData, tabSize, data, true);
+    LOG(Log::k_FLG_GFX, "App", "run", ("%d sprites loaded from mfnt-0.dat", tabSize / 6))
     delete[] tabData;
     delete[] data;
     intro_font_.setSpriteManager(&intro_font_sprites_, 1);
 
     // play intro
+    LOG(Log::k_FLG_GFX, "App", "run", ("Playing the intro"))
     FliPlayer fliPlayer;
     data = File::loadFile("intro.dat", size);
     fliPlayer.loadFliData(data);
@@ -333,10 +337,10 @@ void App::run() {
     delete[] data;
 
     // load mspr-0 sprites
-    // TODO: cursor is sprite 63
+    LOG(Log::k_FLG_GFX, "App", "run", ("Loading sprites from mspr-0.dat ..."))
     tabData = File::loadFile("mspr-0.tab", tabSize);
     data = File::loadFile("mspr-0.dat", size);
-    printf("Loading %d sprites from mspr-0.dat\n", tabSize / 6);
+    LOG(Log::k_FLG_GFX, "App", "run", ("%d sprites loaded", tabSize / 6))
     menu_sprites_.loadSprites(tabData, tabSize, data, true);
     delete[] tabData;
     delete[] data;

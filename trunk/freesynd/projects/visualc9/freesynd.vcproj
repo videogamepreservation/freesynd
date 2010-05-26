@@ -189,63 +189,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\audio.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\briefmenu.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\confmenu.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\debriefmenu.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\dernc.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\file.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\fliplayer.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\font.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\fontmanager.cpp"
-				>
-			</File>
-			<File
 				RelativePath="..\..\freesynd.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\gameplaymenu.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\loadingmenu.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\loadsavemenu.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\logoutmenu.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\mainmenu.cpp"
 				>
 			</File>
 			<File
@@ -257,19 +201,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\mapmenu.cpp"
-				>
-			</File>
-			<File
 				RelativePath="..\..\mapobject.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\menu.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\menumanager.cpp"
 				>
 			</File>
 			<File
@@ -281,27 +213,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\misslosemenu.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\misswinmenu.cpp"
-				>
-			</File>
-			<File
 				RelativePath="..\..\mod.cpp"
 				>
 			</File>
 			<File
 				RelativePath="..\..\modmanager.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\music.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\musicmanager.cpp"
 				>
 			</File>
 			<File
@@ -313,43 +229,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\researchmenu.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\screen.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\selectmenu.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\sound.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\soundmanager.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\sprite.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\spritemanager.cpp"
-				>
-			</File>
-			<File
 				RelativePath="..\..\system_sdl.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\tile.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\tilemanager.cpp"
 				>
 			</File>
 			<File
@@ -368,10 +248,150 @@
 				RelativePath="..\..\weaponmanager.cpp"
 				>
 			</File>
-			<File
-				RelativePath="..\..\xmidi.cpp"
+			<Filter
+				Name="menus"
 				>
-			</File>
+				<File
+					RelativePath="..\..\briefmenu.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\confmenu.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\debriefmenu.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\gameplaymenu.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\loadingmenu.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\loadsavemenu.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\logoutmenu.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\mainmenu.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\mapmenu.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\menu.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\menumanager.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\misslosemenu.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\misswinmenu.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\researchmenu.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\selectmenu.cpp"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="utils"
+				>
+				<File
+					RelativePath="..\..\dernc.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\file.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\utils\log.cpp"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="sound"
+				>
+				<File
+					RelativePath="..\..\audio.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\music.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\musicmanager.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\sound.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\soundmanager.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\xmidi.cpp"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="gfx"
+				>
+				<File
+					RelativePath="..\..\fliplayer.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\font.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\fontmanager.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\screen.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\sprite.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\spritemanager.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\tile.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\tilemanager.cpp"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Fichiers d&apos;en-tête"
@@ -391,14 +411,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\audio.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\briefmenu.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\common.h"
 				>
 			</File>
@@ -407,55 +419,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\confmenu.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\debriefmenu.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\dernc.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\file.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\fliplayer.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\font.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\fontmanager.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\gameplaymenu.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\keys.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\loadingmenu.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\loadsavemenu.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\logoutmenu.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\mainmenu.h"
 				>
 			</File>
 			<File
@@ -467,19 +431,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\mapmenu.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\mapobject.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\menu.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\menumanager.h"
 				>
 			</File>
 			<File
@@ -491,27 +443,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\misslosemenu.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\misswinmenu.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\mod.h"
 				>
 			</File>
 			<File
 				RelativePath="..\..\modmanager.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\music.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\musicmanager.h"
 				>
 			</File>
 			<File
@@ -527,35 +463,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\researchmenu.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\screen.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\selectmenu.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\singleton.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\sound.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\soundmanager.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\sprite.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\spritemanager.h"
 				>
 			</File>
 			<File
@@ -564,14 +472,6 @@
 			</File>
 			<File
 				RelativePath="..\..\system_sdl.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\tile.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\tilemanager.h"
 				>
 			</File>
 			<File
@@ -594,10 +494,150 @@
 				RelativePath="..\..\weaponmanager.h"
 				>
 			</File>
-			<File
-				RelativePath="..\..\xmidi.h"
+			<Filter
+				Name="menus"
 				>
-			</File>
+				<File
+					RelativePath="..\..\briefmenu.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\confmenu.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\debriefmenu.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\gameplaymenu.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\loadingmenu.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\loadsavemenu.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\logoutmenu.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\mainmenu.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\mapmenu.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\menu.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\menumanager.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\misslosemenu.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\misswinmenu.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\researchmenu.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\selectmenu.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="utils"
+				>
+				<File
+					RelativePath="..\..\dernc.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\file.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\utils\log.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="sound"
+				>
+				<File
+					RelativePath="..\..\audio.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\music.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\musicmanager.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\sound.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\soundmanager.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\xmidi.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="gfx"
+				>
+				<File
+					RelativePath="..\..\fliplayer.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\font.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\fontmanager.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\screen.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\sprite.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\spritemanager.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\tile.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\tilemanager.h"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Fichiers de ressources"

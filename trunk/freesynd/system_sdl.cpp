@@ -38,8 +38,7 @@ SDL_Joystick *joy = NULL;
 const int SystemSDL::CURSOR_WIDTH = 24;
 
 SystemSDL::SystemSDL(int depth)
-:depth_(depth)
-{
+:depth_(depth) {
     if (SDL_Init(SDL_INIT_VIDEO
 #ifdef GP2X
                  | SDL_INIT_JOYSTICK
@@ -65,7 +64,7 @@ SystemSDL::SystemSDL(int depth)
     Audio::init();
 #endif
 
-    // TODO: maybe use double buffering?
+    // TODO(nobody): maybe use double buffering?
 #ifdef GP2X
     screen_surf_ = SDL_SetVideoMode(320, 240, 16, SDL_SWSURFACE);
     temp_surf_ =
@@ -86,7 +85,7 @@ SystemSDL::SystemSDL(int depth)
     // Init SDL_Image library
     int sdl_img_flags = IMG_INIT_PNG;
     int initted = IMG_Init(sdl_img_flags);
-    if ( (initted&sdl_img_flags) != sdl_img_flags) {
+    if ( (initted & sdl_img_flags) != sdl_img_flags ) {
         printf("Failed to init SDL_Image : %s\n", IMG_GetError());
     } else {
         // Load the cursor sprites
@@ -100,8 +99,7 @@ SystemSDL::SystemSDL(int depth)
     }
 }
 
-SystemSDL::~SystemSDL()
-{
+SystemSDL::~SystemSDL() {
     SDL_FreeSurface(temp_surf_);
     SDL_FreeSurface(cursor_surf_);
 
@@ -115,8 +113,7 @@ SystemSDL::~SystemSDL()
     SDL_Quit();
 }
 
-void SystemSDL::updateScreen()
-{
+void SystemSDL::updateScreen() {
     if (g_Screen.dirty()|| (cursor_visible_ && update_cursor_)) {
         SDL_LockSurface(temp_surf_);
 #ifdef GP2X
@@ -139,7 +136,7 @@ void SystemSDL::updateScreen()
         g_Screen.clearDirty();
 
         SDL_BlitSurface(temp_surf_, NULL, screen_surf_, NULL);
-        
+
         if (cursor_visible_) {
             SDL_Rect dst;
 
@@ -153,8 +150,7 @@ void SystemSDL::updateScreen()
     }
 }
 
-void SystemSDL::handleEvents()
-{
+void SystemSDL::handleEvents() {
     static SDL_Event event;
     Key key;
     KeyMod keyMod;
@@ -204,18 +200,15 @@ void SystemSDL::handleEvents()
     }
 }
 
-void SystemSDL::delay(int msec)
-{
+void SystemSDL::delay(int msec) {
     SDL_Delay(msec);
 }
 
-bool like(int a, int b)
-{
+bool like(int a, int b) {
     return a == b || a == b - 1 || a == b + 1;
 }
 
-void SystemSDL::setPalette6b3(const uint8 * pal, int cols)
-{
+void SystemSDL::setPalette6b3(const uint8 * pal, int cols) {
     static SDL_Color palette[256];
 
     for (int i = 0; i < cols; ++i) {
@@ -239,8 +232,7 @@ void SystemSDL::setPalette6b3(const uint8 * pal, int cols)
     SDL_SetColors(temp_surf_, palette, 0, cols);
 }
 
-void SystemSDL::setPalette8b3(const uint8 * pal, int cols)
-{
+void SystemSDL::setPalette8b3(const uint8 * pal, int cols) {
     static SDL_Color palette[256];
 
     for (int i = 0; i < cols; ++i) {
@@ -252,8 +244,7 @@ void SystemSDL::setPalette8b3(const uint8 * pal, int cols)
     SDL_SetColors(temp_surf_, palette, 0, cols);
 }
 
-void SystemSDL::setColor(uint8 index, uint8 r, uint8 g, uint8 b)
-{
+void SystemSDL::setColor(uint8 index, uint8 r, uint8 g, uint8 b) {
     static SDL_Color color;
 
     color.r = r;
@@ -267,11 +258,10 @@ void SystemSDL::setColor(uint8 index, uint8 r, uint8 g, uint8 b)
  * This method uses the SDL_Image library to load a file called
  * cursors/cursors.png under the root path.
  * The file is loaded into the cursor surface.
- * \returns False if the loading has failed. If it's the case, 
+ * \return False if the loading has failed. If it's the case, 
  * cursor_surf_ will be NULL.
  */
-bool SystemSDL::loadCursorSprites()
-{
+bool SystemSDL::loadCursorSprites() {
     cursor_rect_.w = cursor_rect_.h = CURSOR_WIDTH;
 
     cursor_surf_ = IMG_Load(File::fileFullPath("cursors/cursors.png", false));
@@ -284,8 +274,7 @@ bool SystemSDL::loadCursorSprites()
     return true;
 }
 
-void SystemSDL::hideCursor()
-{
+void SystemSDL::hideCursor() {
     if (cursor_surf_ != NULL) {
         cursor_visible_ = false;
     } else {
@@ -295,8 +284,7 @@ void SystemSDL::hideCursor()
     }
 }
 
-void SystemSDL::showCursor()
-{
+void SystemSDL::showCursor() {
     if (cursor_surf_ != NULL) {
         cursor_visible_ = true;
     } else {
@@ -306,31 +294,27 @@ void SystemSDL::showCursor()
     }
 }
 
-void SystemSDL::useMenuCursor()
-{
+void SystemSDL::useMenuCursor() {
     update_cursor_ = true;
     cursor_rect_.x = cursor_rect_.y = 0;
     cursor_hs_x_ = cursor_hs_y_ = 0;
 }
 
-void SystemSDL::usePointerCursor()
-{
+void SystemSDL::usePointerCursor() {
     update_cursor_ = true;
     cursor_rect_.x = 24;
     cursor_rect_.y = 0;
     cursor_hs_x_ = cursor_hs_y_ = 0;
 }
 
-void SystemSDL::useTargetCursor()
-{
+void SystemSDL::useTargetCursor() {
     update_cursor_ = true;
     cursor_rect_.x = 48;
     cursor_rect_.y = 0;
     cursor_hs_x_ = cursor_hs_y_ = 10;
 }
 
-void SystemSDL::usePickupCursor()
-{
+void SystemSDL::usePickupCursor() {
     update_cursor_ = true;
     cursor_rect_.x = 0;
     cursor_rect_.y = 24;

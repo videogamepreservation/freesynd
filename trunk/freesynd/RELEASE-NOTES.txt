@@ -10,6 +10,10 @@ Changes
   * Cursors are now available in a png file
   * music files (ogg and mp3) have been moved to data/music
 
+Fixed Bugs
+----------
+  * 
+
 Known issues with this release
 ------------------------------
   * Agent AI is not operational.
