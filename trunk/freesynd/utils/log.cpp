@@ -86,7 +86,7 @@ bool Log::initialize(int mask, const char *filename) {
 
     // try to open the log file only if logging has been enabled
     if (logMask_ != k_FLG_NONE) {
-#ifdef WIN32
+#ifdef WIN_SECURE
         if ((fopen_s(&logfile_, filename, "w")) != 0) {
             logfile_ = NULL;
         }

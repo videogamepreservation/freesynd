@@ -35,8 +35,10 @@ How to build:
 2) Set the appropriate macros :
 * dynamic macros : those macros are settable in the project properties
 	_WIN32 / WIN32 : used to specify it's a WinNt platform (mandatory)
-    DEBUG : used in the Debug configuration (for example for logging)
-	SYSTEM_SDL : used to specify the implementation of the System interface. 
+        DEBUG : used in the Debug configuration (for example for logging)
+        WIN_SECURE : used to switch between standard lib functions and
+                     secure ones (only in Windows with VS)
+	SYSTEM_SDL : used to specify the implementation of the System interface.
                  For now, this is the only implementation
 	GP2X : used to build for the GP2X platform
 	CHEAP_LEAK_DETECTION : set to debug memory leaks
