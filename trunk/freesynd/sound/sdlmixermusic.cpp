@@ -6,6 +6,7 @@
  *   Copyright (C) 2005  Joost Peters  <joostp@users.sourceforge.net>   *
  *   Copyright (C) 2006  Trent Waddington <qg@biodome.org>              *
  *   Copyright (C) 2006  Tarjei Knapstad <tarjei.knapstad@gmail.com>    *
+ *   Copyright (C) 2010  Benoit Blancard <benblan@users.sourceforge.net>*
  *                                                                      *
  *    This program is free software;  you can redistribute it and / or  *
  *  modify it  under the  terms of the  GNU General  Public License as  *
@@ -23,15 +24,34 @@
  *                                                                      *
  ************************************************************************/
 
-#include "music.h"
-#include "file.h"
+#include "../config.h"
+#include "../audio.h"
 
 #ifdef HAVE_SDL_MIXER
-Music::Music():music_data_(NULL),rw_(NULL)
+
+#include "../file.h"
+#include "sdlmixermusic.h"
+
+#ifdef _WIN32
+#include <SDL.h>
+#include <SDL_mixer.h>
+#else
+#include <SDL/SDL.h>
+#include <SDL/SDL_mixer.h>
+#endif
+
+/*!
+ * Class constructor.
+ */
+SdlMixerMusic::SdlMixerMusic():music_data_(NULL),rw_(NULL)
 {
 }
 
-Music::~Music()
+/*!
+ * Class destructor.
+ * Free the music data if it was allocated.
+ */
+SdlMixerMusic::~SdlMixerMusic()
 {
     if (music_data_) {
         Mix_FreeMusic(music_data_);
@@ -41,23 +61,39 @@ Music::~Music()
         SDL_FreeRW(rw_);
 }
 
-void Music::play(int loops) const
+/*!
+ * Plays the music a number of times.
+ * \param loops The number of times music is played.
+ */
+void SdlMixerMusic::play(int loops) const
 {
     Mix_PlayMusic(music_data_, loops);
 }
 
-void Music::playFadeIn(int loops, int ms) const
+/*!
+ * Plays the music with a fade in.
+ * \param loops The number of times music is played.
+ * \param ms The length in milliseconds of the fade in.
+ */
+void SdlMixerMusic::playFadeIn(int loops, int ms) const
 {
     Mix_FadeInMusic(music_data_, loops, ms);
 }
 
-void Music::stop() const
+/*!
+ * Stops the music from playing.
+ */
+void SdlMixerMusic::stop() const
 {
     Mix_HaltMusic();
     Mix_RewindMusic();
 }
 
-void Music::stopFadeOut(int ms) const
+/*!
+ * Stops the music with a fadeout.
+ * \param ms The length in milliseconds of the fade out.
+ */
+void SdlMixerMusic::stopFadeOut(int ms) const
 {
     while (!Mix_FadeOutMusic(ms) && Mix_PlayingMusic()) {
         SDL_Delay(100);
@@ -65,22 +101,23 @@ void Music::stopFadeOut(int ms) const
     Mix_RewindMusic();
 }
 
-void Music::setVolume(int volume)
-{
-    Mix_VolumeMusic(volume);
-}
-
-bool Music::loadMusic(uint8 * musicData, int size)
+/*!
+ * Loads the music from the given data.
+ * \param musicdata The data from original resource
+ * \param size The size of the data.
+ * \return true if the music was loaded.
+ */
+bool SdlMixerMusic::loadMusic(uint8 * musicData, int size)
 {
     SDL_RWops *rw = SDL_RWFromMem(musicData, size);
     if (!rw) {
-        error("Failed creating SDL_RW buffer from memory");
+        Audio::error("SdlMixerMusic", "loadMusic", "Failed creating SDL_RW buffer from memory");
         return false;
     }
     Mix_Music *newmusic = Mix_LoadMUS_RW(rw);
 
     if (!newmusic) {
-        error("Failed loading music from SDL_RW buffer");
+        Audio::error("SdlMixerMusic", "loadMusic", "Failed loading music from SDL_RW buffer");
         SDL_FreeRW(rw);
         return false;
     }
@@ -98,12 +135,17 @@ bool Music::loadMusic(uint8 * musicData, int size)
     return true;
 }
 
-bool Music::loadMusicFile(const char *fname)
+/*!
+ * Loads the music from the given file.
+ * \param musicdata The name of the file.
+ * \return true if the music was loaded.
+ */
+bool SdlMixerMusic::loadMusicFile(const char *fname)
 {
 	Mix_Music *newmusic = Mix_LoadMUS(File::fileFullPath(fname, false));
 
 	if (!newmusic) {
-        error("Failed loading music from file");
+        Audio::error("SdlMixerMusic", "loadMusicFile", "Failed loading music from file");
         return false;
 	}
     if (music_data_)

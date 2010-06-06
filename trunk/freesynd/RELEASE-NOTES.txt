@@ -8,7 +8,8 @@ This is a prelimary release for testing and development purposes.
 Changes
 -------
   * Cursors are now available in a png file
-  * music files (ogg and mp3) have been moved to data/music
+  * Music files (ogg and mp3) have been moved to data/music
+  * Ability to turn music and sound on/off during a game
 
 Fixed Bugs
 ----------

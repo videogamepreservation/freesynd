@@ -395,7 +395,7 @@ void App::run() {
     waitForKeyPress();
 
     // play the groovy menu startup anim
-	g_App.gameSounds().sound(Sound::MENU_UP)->play();
+	g_App.gameSounds().play(snd::MENU_UP);
     data = File::loadFile("mscrenup.dat", size);
     fliPlayer.loadFliData(data);
     fliPlayer.play();

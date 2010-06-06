@@ -301,8 +301,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
         firing_ = PedInstance::Firing_Fire;
         updated = true;
 
-        if (selectedWeapon()->sound())
-            selectedWeapon()->sound()->play();
+        selectedWeapon()->playSound();
     }
 
     if (weapon_idx == Ped::Unarmed || weapon_idx == Ped::MedKit)

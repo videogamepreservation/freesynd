@@ -336,15 +336,15 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\music.cpp"
-					>
-				</File>
-				<File
 					RelativePath="..\..\musicmanager.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\sound.cpp"
+					RelativePath="..\..\sound\sdlmixermusic.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\sound\sdlmixersound.cpp"
 					>
 				</File>
 				<File
@@ -587,6 +587,14 @@
 				</File>
 				<File
 					RelativePath="..\..\musicmanager.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\sound\sdlmixermusic.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\sound\sdlmixersound.h"
 					>
 				</File>
 				<File

@@ -768,6 +768,14 @@ void GameplayMenu::handleUnknownKey(Key key, KeyMod mod, bool pressed) {
                 mission_->vehicle(0)->direction() - 1);
     }
 
+    if (key == KEY_F1) {
+        g_App.music().toggleMusic();
+    }
+
+    if (key == KEY_F2) {
+        g_App.gameSounds().toggleSound();
+    }
+
     if (change)
         show(false);
 }
@@ -906,7 +914,7 @@ void GameplayMenu::drawMissionHint() {
         if (mission_->failed()) {
             if (!completed_) {
                 completed_ = true;
-                g_App.gameSounds().sound(Sound::SPEECH_MISSION_FAILED)->play();
+                g_App.gameSounds().play(snd::SPEECH_MISSION_FAILED);
             }
 
             str = "MISSION FAILED";
@@ -915,8 +923,7 @@ void GameplayMenu::drawMissionHint() {
         if (mission_->completed()) {
             if (!completed_) {
                 completed_ = true;
-                g_App.gameSounds().sound(Sound::SPEECH_MISSION_COMPLETED)->
-                        play();
+                g_App.gameSounds().play(snd::SPEECH_MISSION_COMPLETED);
             }
 
             str = "MISSION COMPLETE";

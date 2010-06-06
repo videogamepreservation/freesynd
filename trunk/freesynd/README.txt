@@ -47,6 +47,11 @@ When running the game, the following arguments can be used on the command line:
  * -h | --help : displays the list of available options
  * -f | --fullscreen : runs the game in fullscreen mode
  * -p | --path : sets the absolute path to the data directory.
+ 
+In Game commands
+----------------
+ * F1 : turns music on/off
+ * F2 : turns game sounds on/off
 
 Contact
 -------

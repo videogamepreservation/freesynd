@@ -32,7 +32,7 @@
 
 Weapon::Weapon(const char *w_name, int smallIcon, int bigIcon, int w_cost,
         int w_ammo, int w_range, int w_shot, int w_rank, int w_anim,
-        Ped::WeaponIndex w_idx, Sound::InGameSample w_sample) :
+        Ped::WeaponIndex w_idx, snd::InGameSample w_sample) :
 name_(w_name), small_icon_(smallIcon), big_icon_(bigIcon), cost_(w_cost),
 ammo_(w_ammo), range_(w_range), shot_(w_shot), anim_(w_anim), rank_(w_rank),
 idx_(w_idx), sample_(w_sample) {}
@@ -71,8 +71,11 @@ void Weapon::drawInfo(int x, int y) {
     }
 }
 
-Sound *Weapon::sound() {
-	return g_App.gameSounds().sound(sample_);
+/*!
+ * Plays the sound associated with that weapon.
+ */
+void Weapon::playSound() {
+    g_App.gameSounds().play(sample_);
 }
 
 WeaponInstance *Weapon::createInstance() {

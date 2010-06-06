@@ -67,6 +67,8 @@ class Log {
     static const int k_FLG_IO;
     /*! This flag enables logging relatives to the game IA.*/
     static const int k_FLG_GAME;
+    /*! This flag enables logging relatives to the sound system.*/
+    static const int k_FLG_SND;
 
     //! Log initialization.
     static bool initialize(int mask, const char *filename);

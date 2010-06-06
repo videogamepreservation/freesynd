@@ -6,6 +6,7 @@
  *   Copyright (C) 2005  Joost Peters  <joostp@users.sourceforge.net>   *
  *   Copyright (C) 2006  Trent Waddington <qg@biodome.org>              *
  *   Copyright (C) 2006  Tarjei Knapstad <tarjei.knapstad@gmail.com>    *
+ *   Copyright (C) 2010  Benoit Blancard <benblan@users.sourceforge.net>*
  *                                                                      *
  *    This program is free software;  you can redistribute it and / or  *
  *  modify it  under the  terms of the  GNU General  Public License as  *
@@ -23,37 +24,35 @@
  *                                                                      *
  ************************************************************************/
 
-#include "music.h"
+#include "config.h"
+#include "audio.h"
 #include "musicmanager.h"
 #include "xmidi.h"
-#include "config.h"
 #include "file.h"
-
-#ifndef HAVE_SDL_MIXER_1_2_7
-#ifdef _WIN32
-#pragma message("Music playback requires SDL_mixer 1.2.7 or later to function")
-#else
-#warning "Music playback requires SDL_mixer 1.2.7 or later to function"
-#endif
-#endif
+#include "utils/log.h"
 
 MusicManager::MusicManager():is_playing_(false)
 {
+    // -1 means music is not mute
+    // other value stores music volume before mute
+    volumeBeforeMute_ = -1;
 }
 
 MusicManager::~MusicManager()
 {
-#ifdef HAVE_SDL_MIXER_1_2_7
     for (unsigned int i = 0; i < tracks_.size(); ++i) {
         delete tracks_[i];
     }
     tracks_.clear();
-#endif
 }
 
 void MusicManager::loadMusic()
 {
-#ifdef HAVE_SDL_MIXER_1_2_7
+    // If audio has not been initialized -> do nothing
+    if (!Audio::isInitialized()) {
+        return;
+    }
+
     XMidi xmidi;
     std::vector < XMidi::Midi > tracks;
     int size;
@@ -97,25 +96,52 @@ void MusicManager::loadMusic()
 		}
     }
     delete[] data;
-#endif
 }
 
 void MusicManager::playTrack(MusicTrack track, int loops)
 {
-#ifdef HAVE_SDL_MIXER_1_2_7
-    if (is_playing_) {
-        tracks_.at(current_track_)->stopFadeOut();
+    if (Audio::isInitialized()) {
+        if (is_playing_) {
+            tracks_.at(current_track_)->stopFadeOut();
+        }
+        tracks_.at(track)->play(loops);
+        current_track_ = track;
+        is_playing_ = true;
     }
-    tracks_.at(track)->play(loops);
-    current_track_ = track;
-    is_playing_ = true;
-#endif
 }
 
 void MusicManager::stopPlayback()
 {
-#ifdef HAVE_SDL_MIXER_1_2_7
-    tracks_.at(current_track_)->stop();
-    is_playing_ = false;
-#endif
+    if (Audio::isInitialized()) {
+        tracks_.at(current_track_)->stop();
+        is_playing_ = false;
+    }
+}
+
+void MusicManager::setVolume(int volume) {
+    Audio::setMusicVolume(volume);
+}
+
+int MusicManager::getVolume() {
+    return Audio::getMusicVolume();
+}
+
+/*!
+ * Turns the music on/off.
+ * The method watches for the value of field volumeBeforeMute_ :
+ *  - if it's value is -1 : then music volume is on. So the method
+ *    saves the level into volumeBeforeMute_ and sets the volume to zero
+ *  - else it means volume is mute so the methods restores the original
+ *    volume level.
+ */
+void MusicManager::toggleMusic() {
+    if (volumeBeforeMute_ == -1) {
+        volumeBeforeMute_ = Audio::getMusicVolume();
+        LOG(Log::k_FLG_SND, "MusicManager", "toggleMusic", ("Turning music off : %d", volumeBeforeMute_))
+        Audio::setMusicVolume(0);
+    } else {
+        LOG(Log::k_FLG_SND, "MusicManager", "toggleMusic", ("Turning music on : %d", volumeBeforeMute_))
+        Audio::setMusicVolume(volumeBeforeMute_);
+        volumeBeforeMute_ = -1;
+    }
 }

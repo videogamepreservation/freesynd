@@ -2,10 +2,7 @@
  *                                                                      *
  *  FreeSynd - a remake of the classic Bullfrog game "Syndicate".       *
  *                                                                      *
- *   Copyright (C) 2005  Stuart Binge  <skbinge@gmail.com>              *
- *   Copyright (C) 2005  Joost Peters  <joostp@users.sourceforge.net>   *
- *   Copyright (C) 2006  Trent Waddington <qg@biodome.org>              *
- *   Copyright (C) 2006  Tarjei Knapstad <tarjei.knapstad@gmail.com>    *
+ *   Copyright (C) 2010  Benoit Blancard <benblan@users.sourceforge.net>*
  *                                                                      *
  *    This program is free software;  you can redistribute it and / or  *
  *  modify it  under the  terms of the  GNU General  Public License as  *
@@ -23,64 +20,45 @@
  *                                                                      *
  ************************************************************************/
 
-#include "sound.h"
+#ifndef SDLMIXERSOUND_H_
+#define SDLMIXERSOUND_H_
+
+#include "../common.h"
 
 #ifdef HAVE_SDL_MIXER
 
-Sound::Sound():sound_data_(NULL)
-{
-}
+#ifdef _WIN32
+#include <SDL_mixer.h>
+#else
+#include <SDL/SDL_mixer.h>
+#endif
 
-Sound::~Sound()
-{
-    if (sound_data_) {
-        Mix_FreeChunk(sound_data_);
-    }
-}
+//! Sound implementation using Sdl_Mixer.
+/*!
+ * This class is an implementation of the sound system
+ * using the Sdl_Mixer library.
+ */
+class SdlMixerSound {
+public:
+    //! Class constructor 
+    SdlMixerSound();
+    //! Class destructor 
+    ~SdlMixerSound();
 
+    //! Plays the sound a number a time
+    void play(int loops = 0, int channel = 0) const;
+    //! Stops the sound
+    void stop(int channel = 0) const;
+    //! Sets the sample volume
+    bool setVolume(int volume);
+    //! Loads the sample from memory
+    bool loadSound(uint8 *soundData, uint32 size);
 
+protected:
+    /*! The sdl structure that stores sound data.*/
+    Mix_Chunk *sound_data_;
+};
 
-void Sound::play(int loops) const
-{
-    int ret = Mix_PlayChannel(0, sound_data_, loops);
-    if (ret < 0) {
-        error("Failed to play sound on channel 0.");
-    }
-}
+#endif  // HAVE_SDL_MIXER
 
-void Sound::stop() const
-{
-    Mix_HaltChannel(0);
-}
-
-bool Sound::setVolume(int volume)
-{
-    int ret = Mix_VolumeChunk(sound_data_, volume);
-    if (ret < 0) {
-        error("Failed setting volume on Sound.");
-        return false;
-    }
-    return true;
-}
-
-
-bool Sound::loadSound(uint8 * soundData, uint32 size)
-{
-    SDL_RWops *rw = SDL_RWFromMem(soundData, size);
-    if (!rw) {
-        error("Failed creating SDL_RW buffer from memory");
-        return false;
-    }
-    Mix_Chunk *newsound = Mix_LoadWAV_RW(rw, 1);
-
-    if (!newsound) {
-        error("Failed loading sound from SDL_RW buffer");
-        return false;
-    }
-    if (sound_data_ != 0)
-        Mix_FreeChunk(sound_data_);
-    sound_data_ = newsound;
-    return true;
-}
-
-#endif                          // HAVE_SDL_MIXER
+#endif  // SDLMIXERSOUND_H_

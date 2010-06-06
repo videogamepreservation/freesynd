@@ -6,6 +6,7 @@
  *   Copyright (C) 2005  Joost Peters  <joostp@users.sourceforge.net>   *
  *   Copyright (C) 2006  Trent Waddington <qg@biodome.org>              *
  *   Copyright (C) 2006  Tarjei Knapstad <tarjei.knapstad@gmail.com>    *
+ *   Copyright (C) 2010  Benoit Blancard <benblan@users.sourceforge.net>*
  *                                                                      *
  *    This program is free software;  you can redistribute it and / or  *
  *  modify it  under the  terms of the  GNU General  Public License as  *
@@ -27,25 +28,13 @@
 #define SOUND_H
 
 #include "common.h"
-#include "audio.h"
+#include "config.h"
 
-#ifdef HAVE_SDL_MIXER
-
-/*!
- * Sound class.
- */
-class Sound : public Audio {
-public:
-    Sound();
-    ~Sound();
-
-    void play(int loops = 0) const;
-    void stop() const;
-    bool setVolume(int volume);
-    bool loadSound(uint8 *soundData, uint32 size);
-
-	// These enum values match the indices in the vector containing the samples
-    // so don't mess up the order in which they are in.
+namespace snd {
+    /*! 
+     * These enum values match the indices in the vector containing the samples
+     * so don't mess up the order in which they are in.
+     */
     enum InGameSample {
 		SHOTGUN = 0,
         PISTOL,
@@ -83,10 +72,31 @@ public:
         NO_SOUND = -1
     };
 
-protected:
-     Mix_Chunk *sound_data_;
+}
+
+#ifdef HAVE_SDL_MIXER
+
+// Load the SDL_Mixer implementation
+#include "sound/sdlmixersound.h"
+
+// This macro is used to hide the implementation class
+#define Sound SdlMixerSound
+
+#else
+
+//! Default implementation for the sound.
+/*!
+ * This class is a dummy implementation. It does nothing.
+ */
+class DefaultSound {
+public:
+    void play(int loops = 0) const {;}
+    void stop() const {;}
+    bool setVolume(int volume) { return true; }
+    bool loadSound(uint8 *soundData, uint32 size) { return true; }
 };
 
-#endif                          // HAVE_SDL_MIXER
+#define Sound DefaultSound
 
-#endif
+#endif  // HAVE_SDL_MIXER
+#endif  // SOUND_H

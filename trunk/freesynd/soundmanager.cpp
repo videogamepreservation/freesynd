@@ -6,6 +6,7 @@
  *   Copyright (C) 2005  Joost Peters  <joostp@users.sourceforge.net>   *
  *   Copyright (C) 2006  Trent Waddington <qg@biodome.org>              *
  *   Copyright (C) 2006  Tarjei Knapstad <tarjei.knapstad@gmail.com>    *
+ *   Copyright (C) 2010  Benoit Blancard <benblan@users.sourceforge.net>*
  *                                                                      *
  *    This program is free software;  you can redistribute it and / or  *
  *  modify it  under the  terms of the  GNU General  Public License as  *
@@ -23,13 +24,15 @@
  *                                                                      *
  ************************************************************************/
 
-#include "sound.h"
 #include "soundmanager.h"
 #include "file.h"
 #include "config.h"
+#include "audio.h"
+#include "utils/log.h"
 
 SoundManager::SoundManager():tabentry_startoffset_(58), tabentry_offset_(32)
 {
+    volumeBeforeMute_ = -1;
 }
 
 SoundManager::~SoundManager()
@@ -40,14 +43,9 @@ SoundManager::~SoundManager()
 	}
 }
 
-Sound *SoundManager::sound(int n)
+Sound *SoundManager::sound(snd::InGameSample sample)
 {
-    return sounds_.at(n);
-}
-
-Sound *SoundManager::sound(Sound::InGameSample sample)
-{
-	if (sample == Sound::NO_SOUND)
+    if (sample == snd::NO_SOUND)
 		return NULL;
     return sounds_.at(sample);
 }
@@ -55,7 +53,6 @@ Sound *SoundManager::sound(Sound::InGameSample sample)
 
 void SoundManager::loadSounds(SampleSet set)
 {
-#ifdef HAVE_SDL_MIXER
     int tabSize, size;
     uint8 *tabData, *data;
     switch (set) {
@@ -90,13 +87,11 @@ void SoundManager::loadSounds(SampleSet set)
     default:
         break;
     }
-#endif
 }
 
 bool SoundManager::loadSounds(uint8 * tabData, int tabSize,
                               uint8 * soundData)
 {
-#ifdef HAVE_SDL_MIXER
     assert(tabData);
     assert(soundData);
     tabData += tabentry_startoffset_;
@@ -111,7 +106,7 @@ bool SoundManager::loadSounds(uint8 * tabData, int tabSize,
         // Samples with size < 144 are bogus
         if (soundsize > 144) {
             ++soundnum;
-            sounds_.push_back(new Sound());
+            sounds_.push_back(new Sound);
             uint8 *sample = new uint8[soundsize];
             memcpy(sample, soundData, soundsize);
             sounds_.back()->loadSound(sample, soundsize);
@@ -122,7 +117,55 @@ bool SoundManager::loadSounds(uint8 * tabData, int tabSize,
         tabData += tabentry_offset_;
     }
     return true;
-#else
-    return false;
-#endif
+}
+
+/*!
+ *
+ */
+void SoundManager::play(snd::InGameSample sample, int loops) {
+    Sound *pSound = sound(sample);
+
+    if (pSound) {
+        // All menu sounds are played on channel 1 else on channel 0
+        pSound->play(loops, sample >= snd::MENU_UP ? 1 : 0);
+    }
+}
+
+/*!
+ *
+ */
+void SoundManager::stop(snd::InGameSample sample) {
+    Sound *pSound = sound(sample);
+
+    if (pSound) {
+        pSound->stop(sample >= snd::MENU_UP ? 1 : 0);
+    }
+}
+
+void SoundManager::setVolume(int volume) {
+    Audio::setSoundVolume(volume);
+}
+
+int SoundManager::getVolume() {
+    return Audio::getSoundVolume();
+}
+
+/*!
+ * Turns the music on/off.
+ * The method watches for the value of field volumeBeforeMute_ :
+ *  - if it's value is -1 : then music volume is on. So the method
+ *    saves the level into volumeBeforeMute_ and sets the volume to zero
+ *  - else it means volume is mute so the methods restores the original
+ *    volume level.
+ */
+void SoundManager::toggleSound() {
+    if (volumeBeforeMute_ == -1) {
+        volumeBeforeMute_ = Audio::getSoundVolume();
+        LOG(Log::k_FLG_SND, "SoundManager", "toggleSound", ("Turning sound off : %d", volumeBeforeMute_))
+        Audio::setSoundVolume(0);
+    } else {
+        LOG(Log::k_FLG_SND, "SoundManager", "toggleSound", ("Turning sound on : %d", volumeBeforeMute_))
+        Audio::setSoundVolume(volumeBeforeMute_);
+        volumeBeforeMute_ = -1;
+    }
 }

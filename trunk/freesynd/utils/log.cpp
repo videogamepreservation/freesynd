@@ -38,8 +38,9 @@ const int Log::k_FLG_INFO = 0x00000001;
 const int Log::k_FLG_UI   = 0x00000002;
 const int Log::k_FLG_GFX  = 0x00000004;
 const int Log::k_FLG_MEM  = 0x00000008;
-const int Log::k_FLG_IO   = 0x00000016;
-const int Log::k_FLG_GAME = 0x00000032;
+const int Log::k_FLG_IO   = 0x00000010;
+const int Log::k_FLG_GAME = 0x00000020;
+const int Log::k_FLG_SND  = 0x00000040;
 
 // the log file
 FILE *Log::logfile_ = NULL;
@@ -67,6 +68,8 @@ const char * Log::typeToStr(int type) {
             return "IO   ";
         case k_FLG_GAME:
             return "GAME ";
+        case k_FLG_SND:
+            return "SOUND";
         default :
             return "UNKWN";
     }

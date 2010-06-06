@@ -2,10 +2,6 @@
  *                                                                      *
  *  FreeSynd - a remake of the classic Bullfrog game "Syndicate".       *
  *                                                                      *
- *   Copyright (C) 2005  Stuart Binge  <skbinge@gmail.com>              *
- *   Copyright (C) 2005  Joost Peters  <joostp@users.sourceforge.net>   *
- *   Copyright (C) 2006  Trent Waddington <qg@biodome.org>              *
- *   Copyright (C) 2006  Tarjei Knapstad <tarjei.knapstad@gmail.com>    *
  *   Copyright (C) 2010  Benoit Blancard <benblan@users.sourceforge.net>*
  *                                                                      *
  *    This program is free software;  you can redistribute it and / or  *
@@ -24,63 +20,37 @@
  *                                                                      *
  ************************************************************************/
 
-#ifndef MUSIC_H
-#define MUSIC_H
-
-#include "config.h"
-#include "common.h"
+#ifndef SDLMIXERMUSIC_H
+#define SDLMIXERMUSIC_H
 
 #ifdef HAVE_SDL_MIXER
 
-// Load the SDL_Mixer implementation
-#include "sound/sdlmixermusic.h"
-
-// This macro is used to hide the implementation class
-#define Music SdlMixerMusic
-
+#ifdef _WIN32
+#include <SDL_mixer.h>
 #else
+#include <SDL/SDL_mixer.h>
+#endif
 
 /*!
- * Dummy implementation of music.
+ * Implementation of music using SDL_Mixer.
  */
-class DefaultMusic {
+class SdlMixerMusic {
   public:
-    //! Play the music
-    /*! 
-     * \param loops = -1 means play forever
-     */
-      void play(int loops = -1) const {;}
-      //! Plays the music with a fade in.
-    /*!
-     * \param loops
-     * \param ms
-     */
-      void playFadeIn(int loops = -1, int ms = 200) const {;}
-      //! Stops the music
-    /*!
-     *
-     */
-      void stop() const {;}
-      //! Stops the music with a fade out.
-    /*!
-     * \param ms
-     */
-      void stopFadeOut(int ms = 200) const {;}
-      //! Loads the music from the given data.
-    /*!
-     * \param musicData
-     * \param size
-     */
-      bool loadMusic(uint8 *musicData, int size) { return true; }
-      //! Loads the music from the given file.
-    /*!
-     * \param fname
-     */
-      bool loadMusicFile(const char *fname) { return true;}
-};
+    SdlMixerMusic();
+    ~SdlMixerMusic();
 
-#define Music DefaultMusic
+    void play(int loops = -1) const;
+    void playFadeIn(int loops = -1, int ms = 200) const;
+    void stop() const;
+    void stopFadeOut(int ms = 200) const;
+    bool loadMusic(uint8 *musicData, int size);
+    bool loadMusicFile(const char *fname);
+
+  protected:
+    Mix_Music *music_data_;
+    SDL_RWops *rw_;
+};
 
 #endif  // HAVE_SDL_MIXER
 
-#endif  // MUSIC_H
+#endif  //SDLMIXERMUSIC_H

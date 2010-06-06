@@ -40,7 +40,7 @@ class Weapon {
 public:
     Weapon(const char *w_name, int smallIcon, int bigIcon, int w_cost,
             int w_ammo, int w_range, int w_shot, int w_rank, int w_anim,
-            Ped::WeaponIndex w_idx, Sound::InGameSample w_sample);
+            Ped::WeaponIndex w_idx, snd::InGameSample w_sample);
 
     const char *name() { return name_.c_str(); }
 
@@ -60,7 +60,8 @@ public:
 
     Ped::WeaponIndex index() { return idx_; }
 
-    Sound *sound();
+    //! Plays the weapon's sound.
+    void playSound();
 
     WeaponInstance *createInstance();
 
@@ -73,7 +74,7 @@ protected:
     int anim_;
     int rank_;  //!> weapon rank
     Ped::WeaponIndex idx_;
-    Sound::InGameSample sample_;
+    snd::InGameSample sample_;
 };
 
 /*!

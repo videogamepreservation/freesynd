@@ -6,6 +6,7 @@
  *   Copyright (C) 2005  Joost Peters  <joostp@users.sourceforge.net>   *
  *   Copyright (C) 2006  Trent Waddington <qg@biodome.org>              *
  *   Copyright (C) 2006  Tarjei Knapstad <tarjei.knapstad@gmail.com>    *
+ *   Copyright (C) 2010  Benoit Blancard <benblan@users.sourceforge.net>*
  *                                                                      *
  *    This program is free software;  you can redistribute it and / or  *
  *  modify it  under the  terms of the  GNU General  Public License as  *
@@ -26,35 +27,76 @@
 #ifndef AUDIO_H
 #define AUDIO_H
 
-#ifdef _WIN32
-#include <SDL.h>
-#else
-#include <SDL/SDL.h>
-#endif
-#include <string>
 #include "common.h"
-#include "config.h"
 
-#ifdef HAVE_SDL_MIXER
-#ifdef _WIN32
-#include <SDL_mixer.h>
-#else
-#include <SDL/SDL_mixer.h>
-#endif
+#include <string>
 
+//! Abstraction of the sound subsystem.
 /*!
- * Audio configuration class.
+ * This class defines the interface to the real audio subsystem.
+ * At this date, there are 2 implementations : a dummy one that does nothing
+ * and an implementation using SDL_Mixer.<br/>
+ * The Audio class is used to initialize and destroy the audio system, and
+ * offers common API to access the underlying implementation.
  */
 class Audio {
-public:
-    static bool init(int frequency = MIX_DEFAULT_FREQUENCY,
-                     Uint16 format = MIX_DEFAULT_FORMAT,
-                     int channels = MIX_DEFAULT_CHANNELS,
-                     int chunksize = 1024);
-    static bool quit();
-    static void error(std::string const &message);
-};
 
-#endif                          // HAVE_SDL_MIXER
+    /*!
+     * A list of supported frequencies.
+     */
+    enum EFrequency {
+        FRQ_DEFAULT = 0,
+        FRQ_11025 = 1,
+        FRQ_22050 = 2,
+        FRQ_44100 = 3
+    };
+
+    /*!
+     * A list of supported formats.
+     */
+    enum EFormat {
+        FMT_DEFAULT = 0
+    };
+
+    /*!
+     * A list of supported channels (mono or stereo).
+     */
+    enum EChannel {
+        CHN_DEFAULT = 0,
+        MONO = 1,
+        STEREO = 2
+    };
+
+public:
+    //! Initialize the audio underneath implementation
+    static bool init(EFrequency frequency = FRQ_DEFAULT,
+                     EFormat format = FMT_DEFAULT,
+                     EChannel channels = CHN_DEFAULT,
+                     int chunksize = 1024);
+
+    //! Returns true if the audio system has been initialized with success
+    static bool isInitialized() { return initialized_; }
+    //! Terminates the audio system
+    static bool quit();
+    //! Logs the given message
+    static void error(const char *from, const char *meth, std::string const &message);
+
+    //! Returns the maximum volume possible
+    static int getMaxVolume();
+
+    //! Sets the music volume to the given level
+    static void setMusicVolume(int volume);
+    //! Returns the music volume
+    static int getMusicVolume();
+
+    //! Sets the sound volume on the given channel to the given level
+    static void setSoundVolume(int volume, int channel = 0);
+    //! Returns the sound volume of the given channel
+    static int getSoundVolume(int channel = 0);
+
+private:
+    /*! True if the audio system has been initialized with success.*/
+    static bool initialized_;
+};
 
 #endif

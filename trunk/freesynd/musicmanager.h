@@ -6,6 +6,7 @@
  *   Copyright (C) 2005  Joost Peters  <joostp@users.sourceforge.net>   *
  *   Copyright (C) 2006  Trent Waddington <qg@biodome.org>              *
  *   Copyright (C) 2006  Tarjei Knapstad <tarjei.knapstad@gmail.com>    *
+ *   Copyright (C) 2010  Benoit Blancard <benblan@users.sourceforge.net>*
  *                                                                      *
  *    This program is free software;  you can redistribute it and / or  *
  *  modify it  under the  terms of the  GNU General  Public License as  *
@@ -27,9 +28,9 @@
 #define MUSICMANAGER_H
 
 #include "common.h"
-#include <vector>
+#include "music.h"
 
-class Music;
+#include <vector>
 
 /*!
  * Music manager class.
@@ -51,11 +52,22 @@ public:
     void loadMusic();
     void playTrack(MusicTrack track, int loops = -1);
     void stopPlayback();
+    //! Sets the music volume to the given level
+    void setVolume(int volume);
+    //! Returns the current volume
+    int getVolume();
+    //! Mute / unmute the music
+    void toggleMusic();
 
 protected:
     std::vector<Music *> tracks_;
     MusicTrack current_track_;
     bool is_playing_;
+    /*! 
+     * Saves the volume level before a mute so
+     * we can restore it after a unmute.
+     */
+    int volumeBeforeMute_;
 };
 
 #endif

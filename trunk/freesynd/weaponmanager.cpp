@@ -38,31 +38,31 @@ WeaponManager::~WeaponManager() {
 
 void WeaponManager::loadWeapons() {
     weapons_.push_back(new Weapon("PERSUADERTRON", 14, 64, 5000, -1, 256, -1,
-            -1, 367, Ped::Unarmed, Sound::PERSUADE));
+            -1, 367, Ped::Unarmed, snd::PERSUADE));
     weapons_.push_back(new Weapon("PISTOL", 15, 65, 0, 13, 1280, 0, 1, 368,
-            Ped::Pistol, Sound::PISTOL));
+            Ped::Pistol, snd::PISTOL));
     weapons_.push_back(new Weapon("GAUSS GUN", 16, 66, 50000, 3, 5120, 15000, 0,
-            369, Ped::Gauss, Sound::GAUSSGUN));
+            369, Ped::Gauss, snd::GAUSSGUN));
     weapons_.push_back(new Weapon("SHOTGUN", 17, 67, 250, 12, 1024, 2, 370, 2,
-            Ped::Shotgun, Sound::SHOTGUN));
+            Ped::Shotgun, snd::SHOTGUN));
     weapons_.push_back(new Weapon("UZI", 18, 68, 750, 50, 1792, 2, 5, 371,
-            Ped::Uzi, Sound::UZI));
+            Ped::Uzi, snd::UZI));
     weapons_.push_back(new Weapon("MINI-GUN", 19, 69, 10000, 500, 2304, 10, 6,
-            372, Ped::Minigun, Sound::MINIGUN));
+            372, Ped::Minigun, snd::MINIGUN));
     weapons_.push_back(new Weapon("LASER", 20, 70, 35000, 5, 4096, 2000, 373, 7,
-            Ped::Laser, Sound::LASER));
+            Ped::Laser, snd::LASER));
     weapons_.push_back(new Weapon("FLAMER", 21, 71, 1500, 1000, 512, 1, 4, 374,
-            Ped::Flamer, Sound::FLAME));
+            Ped::Flamer, snd::FLAME));
     weapons_.push_back(new Weapon("LONG RANGE", 22, 72, 1000, 30, 6144, 2, 3,
-            375, Ped::LongRange, Sound::LONGRANGE));
+            375, Ped::LongRange, snd::LONGRANGE));
     weapons_.push_back(new Weapon("SCANNER", 23, 73, 500, -1, 4096, -1, -1, 376,
-            Ped::Unarmed, Sound::NO_SOUND));
+            Ped::Unarmed, snd::NO_SOUND));
     weapons_.push_back(new Weapon("MEDIKIT", 24, 74, 500, 1, 256, 1, -1, 377,
-            Ped::MedKit, Sound::NO_SOUND));
+            Ped::MedKit, snd::NO_SOUND));
     weapons_.push_back(new Weapon("TIME BOMB", 25, 75, 25000, -1, 1000, -1, -1,
-            378, Ped::Unarmed, Sound::TIMEBOMB));
+            378, Ped::Unarmed, snd::TIMEBOMB));
     weapons_.push_back(new Weapon("ACCESS CARD", 26, 76, 1000, -1, 256, -1, -1,
-            379, Ped::Unarmed, Sound::NO_SOUND));
+            379, Ped::Unarmed, snd::NO_SOUND));
     /* NOTE: small icon 27 exists and looks like an N with an arrow above it.
        the corresponding large icon is actually the "all" button on the
        select menu.  It would appear Bullfrog was going to have another
@@ -70,7 +70,7 @@ void WeaponManager::loadWeapons() {
        icon space to implement the all button.
      */
     weapons_.push_back(new Weapon("ENERGY SHIELD", 28, 78, 8000, 200, 768, 15,
-            -1, 381, Ped::EnergyShield, Sound::NO_SOUND));
+            -1, 381, Ped::EnergyShield, snd::NO_SOUND));
 }
 
 Weapon *WeaponManager::findWeapon(const char *name) {

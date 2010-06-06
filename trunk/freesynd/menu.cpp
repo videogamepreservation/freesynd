@@ -102,7 +102,7 @@ void Menu::leave(bool playAnim)
         int size;
         data = File::loadFile(leaveAnim_.c_str(), size);
         fliPlayer.loadFliData(data);
-		g_App.gameSounds().sound(Sound::MENU_CHANGE)->play();
+		g_App.gameSounds().play(snd::MENU_CHANGE);
         fliPlayer.play();
         delete[] data;
     }

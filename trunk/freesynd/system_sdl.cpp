@@ -29,6 +29,7 @@
 #include "audio.h"
 #include "config.h"
 #include "file.h"
+#include "utils/log.h"
 
 #include "SDL_image.h"
 
@@ -60,9 +61,10 @@ SystemSDL::SystemSDL(int depth)
 
     SDL_WM_SetCaption("FreeSynd", NULL);
 
-#ifdef HAVE_SDL_MIXER
-    Audio::init();
-#endif
+    // Audio initialisation
+    if (!Audio::init()) {
+        LOG(Log::k_FLG_SND, "SystemSDL", "Init", ("Couldn't initialize Sound System : no sound will be played."))
+    }
 
     // TODO(nobody): maybe use double buffering?
 #ifdef GP2X

@@ -155,7 +155,9 @@ int main(int argc, char *argv[]) {
     Log::initialize(Log::k_FLG_ALL, "game.log");
 #endif
 
+    LOG(Log::k_FLG_INFO, "Main", "main", ("Initializing application..."))
     std::auto_ptr<App> app(new App());
+    LOG(Log::k_FLG_INFO, "Main", "main", ("Initializing application completed"))
 
     app->run();
 

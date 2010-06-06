@@ -6,6 +6,7 @@
  *   Copyright (C) 2005  Joost Peters  <joostp@users.sourceforge.net>   *
  *   Copyright (C) 2006  Trent Waddington <qg@biodome.org>              *
  *   Copyright (C) 2006  Tarjei Knapstad <tarjei.knapstad@gmail.com>    *
+ *   Copyright (C) 2010  Benoit Blancard <benblan@users.sourceforge.net>*
  *                                                                      *
  *    This program is free software;  you can redistribute it and / or  *
  *  modify it  under the  terms of the  GNU General  Public License as  *
@@ -27,9 +28,9 @@
 #define SOUNDMANAGER_H
 
 #include "common.h"
-#include <vector>
+#include "sound.h"
 
-class Sound;
+#include <vector>
 
 /*!
  * Sound manager class.
@@ -44,16 +45,32 @@ public:
     SoundManager();
     ~SoundManager();
 
-    Sound *sound(int n);
-    Sound *sound(Sound::InGameSample sample);
     void loadSounds(SampleSet set);
 
+    //! Plays the sound a number a time
+    void play(snd::InGameSample sample, int loops = 0);
+    //! Stops the sound
+    void stop(snd::InGameSample sample);
+
+    //! Sets the music volume to the given level
+    void setVolume(int volume);
+    //! Returns the current volume
+    int getVolume();
+    //! Mute / unmute the music
+    void toggleSound();
+
 protected:
+    Sound *sound(snd::InGameSample sample);
     bool loadSounds(uint8 *tabData, int tabSize, uint8 *soundData);
 
     const int tabentry_startoffset_;
     const int tabentry_offset_;
     std::vector<Sound *> sounds_;
+    /*! 
+     * Saves the volume level before a mute so
+     * we can restore it after a unmute.
+     */
+    int volumeBeforeMute_;
 };
 
 #endif
