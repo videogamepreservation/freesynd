@@ -6,6 +6,7 @@
  *   Copyright (C) 2005  Joost Peters  <joostp@users.sourceforge.net>   *
  *   Copyright (C) 2006  Trent Waddington <qg@biodome.org>              *
  *   Copyright (C) 2006  Tarjei Knapstad <tarjei.knapstad@gmail.com>    *
+ *   Copyright (C) 2010  Benoit Blancard <benblan@users.sourceforge.net>*
  *                                                                      *
  *    This program is free software;  you can redistribute it and / or  *
  *  modify it  under the  terms of the  GNU General  Public License as  *
@@ -59,6 +60,11 @@ class App : public Singleton < App > {
     std::vector<Agent *> agents_recruited_;
     std::vector<Weapon *> available_weapons_;
     std::vector<Mod *> available_mods_;
+    /*! Stores the index of the current selected
+     * region on the mission map.<br/>
+     * It corresponds to the index of the g_MissionNumbers table.
+     */
+    uint8 curr_blk_;
 
     bool running_, playingFli_, skipFli_;
     std::auto_ptr<Screen> screen_;
@@ -226,6 +232,17 @@ class App : public Singleton < App > {
     Mod *availableMod(int n) {
         return available_mods_[n];
     }
+
+    /*!
+     * Returns the index of the current selected region on mission map.
+     */
+    uint8 currentBlk() { return curr_blk_; }
+
+    /*!
+     * Sets the index of the current selected region on mission map.
+     * \param index The region index
+     */
+    void currentBlk(uint8 index) { if (index >= 0 && index < 50) curr_blk_ = index; }
 
     void run();
     void reset();

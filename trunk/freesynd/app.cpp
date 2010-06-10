@@ -54,6 +54,7 @@ skipFli_(false), screen_(new Screen(GAME_SCREEN_WIDTH, GAME_SCREEN_HEIGHT))
 #error A suitable System object has not been defined!
 #endif
 {
+    curr_blk_ = 9; // By default, the index of West Europe
     agents_.loadAgents();
     weapons_.loadWeapons();
     mods_.loadMods();
@@ -299,29 +300,38 @@ void App::setPalette(const char *fname, bool sixbit) {
     delete[] data;
 }
 
+// This variable is defined in freesynd.cpp
+// TODO : use a general structure to holds init parameters
+extern int start_mission;
+
 void App::run() {
     int size = 0, tabSize = 0;
     uint8 *data, *tabData;
 
-    LOG(Log::k_FLG_GFX, "App", "run", ("Loading resource for the intro"))
-    // this font is for the intro
-    tabData = File::loadFile("mfnt-0.tab", tabSize);
-    data = File::loadFile("mfnt-0.dat", size);
-    intro_font_sprites_.loadSprites(tabData, tabSize, data, true);
-    LOG(Log::k_FLG_GFX, "App", "run", ("%d sprites loaded from mfnt-0.dat", tabSize / 6))
-    delete[] tabData;
-    delete[] data;
-    intro_font_.setSpriteManager(&intro_font_sprites_, 1);
-
-    // play intro
-    LOG(Log::k_FLG_GFX, "App", "run", ("Playing the intro"))
     FliPlayer fliPlayer;
-    data = File::loadFile("intro.dat", size);
-    fliPlayer.loadFliData(data);
-    music().playTrack(MusicManager::TRACK_INTRO);
-    fliPlayer.play(true);
-    music().stopPlayback();
-    delete[] data;
+
+    // TODO : add a config file to keep the info that the intro is played
+    // only the first time the game is run
+    if (start_mission == -1) {
+        LOG(Log::k_FLG_GFX, "App", "run", ("Loading resource for the intro"))
+        // this font is for the intro
+        tabData = File::loadFile("mfnt-0.tab", tabSize);
+        data = File::loadFile("mfnt-0.dat", size);
+        intro_font_sprites_.loadSprites(tabData, tabSize, data, true);
+        LOG(Log::k_FLG_GFX, "App", "run", ("%d sprites loaded from mfnt-0.dat", tabSize / 6))
+        delete[] tabData;
+        delete[] data;
+        intro_font_.setSpriteManager(&intro_font_sprites_, 1);
+
+        // play intro
+        LOG(Log::k_FLG_GFX, "App", "run", ("Playing the intro"))
+        data = File::loadFile("intro.dat", size);
+        fliPlayer.loadFliData(data);
+        music().playTrack(MusicManager::TRACK_INTRO);
+        fliPlayer.play(true);
+        music().stopPlayback();
+        delete[] data;
+    }
 
     // load palette
     data = File::loadFile("hpal01.dat", size);
@@ -387,21 +397,36 @@ void App::run() {
     // load palette
     setPalette("mselect.pal");
 
-    // play title
-    data = File::loadFile("mtitle.dat", size);
-    fliPlayer.loadFliData(data);
-    fliPlayer.play();
-    delete[] data;
-    waitForKeyPress();
+    if (start_mission == -1) {
+        // play title
+        data = File::loadFile("mtitle.dat", size);
+        fliPlayer.loadFliData(data);
+        fliPlayer.play();
+        delete[] data;
+        waitForKeyPress();
 
-    // play the groovy menu startup anim
-	g_App.gameSounds().play(snd::MENU_UP);
-    data = File::loadFile("mscrenup.dat", size);
-    fliPlayer.loadFliData(data);
-    fliPlayer.play();
-    delete[] data;
+        // play the groovy menu startup anim
+	    g_App.gameSounds().play(snd::MENU_UP);
+        data = File::loadFile("mscrenup.dat", size);
+        fliPlayer.loadFliData(data);
+        fliPlayer.play();
+        delete[] data;
+    }
 
     menus_.createAllMenus();
+
+    if (start_mission == -1) {
+        // Regular scenario : start with the main menu
+        menus_.changeCurrentMenu("main");
+    } else {
+        // Debug scenario : start directly with the brief menu
+        // in the given mission
+        currentBlk(start_mission);
+        menus_.changeCurrentMenu("brief");
+        // show the cursor because at first it's hidden
+        // and normally it's the main menu which shows it
+        g_System.showCursor();
+    }
 
     int lasttick = SDL_GetTicks();
     while (running_) {

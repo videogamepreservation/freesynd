@@ -6,6 +6,7 @@
  *   Copyright (C) 2005  Joost Peters  <joostp@users.sourceforge.net>   *
  *   Copyright (C) 2006  Trent Waddington <qg@biodome.org>              *
  *   Copyright (C) 2006  Tarjei Knapstad <tarjei.knapstad@gmail.com>    *
+ *   Copyright (C) 2010  Benoit Blancard <benblan@users.sourceforge.net>*
  *                                                                      *
  *    This program is free software;  you can redistribute it and / or  *
  *  modify it  under the  terms of the  GNU General  Public License as  *
@@ -123,8 +124,13 @@ void MenuManager::mouseUpEvent(int x, int y, int button)
         current_->mouseUpEvent(x, y, button);
 }
 
+/*!
+ * Creates all the menus used in the application.
+ */
 void MenuManager::createAllMenus()
 {
+    // TODO : only creates the first menu
+    // and creates menus on first access
     menu_main_ = new MainMenu(this);
 
     menu_conf_ = new ConfMenu(this);
@@ -139,8 +145,6 @@ void MenuManager::createAllMenus()
     menu_miss_win_ = new MissWinMenu(this);
     menu_miss_lose_ = new MissLoseMenu(this);
     menu_logout_ = new LogoutMenu(this);
-
-    changeCurrentMenu("main");
 
     // still to go:  mendlose.dat, mendwin.dat
 }

@@ -117,6 +117,7 @@ void operator delete(void *p) {
 #endif
 
 bool want_fullscreen = false;
+int  start_mission = -1;
 
 void print_usage() {
     printf("usage: freesynd [-h|--help] [-p|--path path-to-data] [-f|--full-screen]\n");
@@ -148,6 +149,20 @@ int main(int argc, char *argv[]) {
             print_usage();
             return 0;
         }
+
+#ifdef _DEBUG
+        // This parameter is used in debug phase to accelerate the starting
+        // of a game and to jump directly to a mission
+        // Note : the argument is the index of the block in the structure g_MissionNumbers 
+        // as defined in briefmenu.cpp and not the mission number itself.
+        if (0 == strcmp("-m", argv[i]) || 0 == strcmp("--mission", argv[i])) {
+            int mission = atoi(argv[i + 1]);
+            if (mission >= 0 && mission < 50) {
+                start_mission = mission;
+            }
+            i++;
+        }
+#endif
     }
 
 #ifdef _DEBUG

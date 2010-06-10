@@ -6,6 +6,7 @@
  *   Copyright (C) 2005  Joost Peters  <joostp@users.sourceforge.net>   *
  *   Copyright (C) 2006  Trent Waddington <qg@biodome.org>              *
  *   Copyright (C) 2006  Tarjei Knapstad <tarjei.knapstad@gmail.com>    *
+ *   Copyright (C) 2010  Benoit Blancard <benblan@users.sourceforge.net>*
  *                                                                      *
  *    This program is free software;  you can redistribute it and / or  *
  *  modify it  under the  terms of the  GNU General  Public License as  *
@@ -28,15 +29,16 @@
 
 #include <assert.h>
 
+//! Displays the mission selection map.
 /*!
- * Map Menu class.
+ * This menu displays a world map on which the player
+ * selects the next mission to play.
  */
 class MapMenu : public Menu {
 public:
     MapMenu(MenuManager *m);
     ~MapMenu();
 
-    uint8 currentBlk() { return cur_blk_; }
     void handleTick(int elapsed);
     void handleShow();
     void handleMouseDown(int x, int y, int button);
@@ -53,7 +55,6 @@ protected:
     uint8 *mapblk_data_;
     uint8 *orig_pixels_;
     uint8 blk_colours_[50];
-    uint8 cur_blk_;
     int tick_count_;
 
     void drawSelector();

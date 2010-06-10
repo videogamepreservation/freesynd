@@ -6,6 +6,7 @@
  *   Copyright (C) 2005  Joost Peters  <joostp@users.sourceforge.net>   *
  *   Copyright (C) 2006  Trent Waddington <qg@biodome.org>              *
  *   Copyright (C) 2006  Tarjei Knapstad <tarjei.knapstad@gmail.com>    *
+ *   Copyright (C) 2010  Benoit Blancard <benblan@users.sourceforge.net>*
  *                                                                      *
  *    This program is free software;  you can redistribute it and / or  *
  *  modify it  under the  terms of the  GNU General  Public License as  *
@@ -97,9 +98,13 @@ struct Block {
 
 extern int g_Colours[8];
 
+/*!
+ * Class constructor.
+ * \param m The menu manager.
+ */
 MapMenu::MapMenu(MenuManager * m)
 :  Menu(m, "map", "mmap.dat", "mmapout.dat"),
-mapblk_data_(NULL), orig_pixels_(NULL), cur_blk_(9), tick_count_(0)
+mapblk_data_(NULL), orig_pixels_(NULL), tick_count_(0)
 {
     addOption(53, 352, "BRIEF", 1, KEY_F4, "brief");
     addOption(535, 352, "MENU", 1, KEY_F5, "main");
@@ -137,10 +142,16 @@ void MapMenu::handleTick(int elapsed)
     }
 }
 
+/*!
+ * Utility method to draw the mission selector on the map
+ * depending on the current selection.<br/>
+ * The selector consists of the player logo inside a box and
+ * a line that links the logo to the selected region.
+ */
 void MapMenu::drawSelector()
 {
-    int logo_x = g_Blocks[cur_blk_].logo_pos.x;
-    int logo_y = g_Blocks[cur_blk_].logo_pos.y;
+    int logo_x = g_Blocks[g_App.currentBlk()].logo_pos.x;
+    int logo_y = g_Blocks[g_App.currentBlk()].logo_pos.y;
     g_Screen.drawLogo(logo_x, logo_y, g_App.logo(), g_App.logoColour(),
                       true);
 
@@ -158,10 +169,10 @@ void MapMenu::drawSelector()
     g_Screen.scale2x(logo_x - 2, logo_y - 2, 18, 18, box);
 
     // Draw line between country and logobox
-    int blk_line_end_x = g_Blocks[cur_blk_].line_end.x;
-    int blk_line_end_y = g_Blocks[cur_blk_].line_end.y;
-    int blk_line_start_x = g_Blocks[cur_blk_].line_start.x;
-    int blk_line_start_y = g_Blocks[cur_blk_].line_start.y;
+    int blk_line_end_x = g_Blocks[g_App.currentBlk()].line_end.x;
+    int blk_line_end_y = g_Blocks[g_App.currentBlk()].line_end.y;
+    int blk_line_start_x = g_Blocks[g_App.currentBlk()].line_start.x;
+    int blk_line_start_y = g_Blocks[g_App.currentBlk()].line_start.y;
     g_Screen.drawLine(blk_line_start_x, blk_line_start_y, blk_line_end_x,
                       blk_line_end_y, 252, 5, tick_count_ % 10);
     g_Screen.drawLine(blk_line_start_x, blk_line_start_y - 1,
@@ -201,8 +212,8 @@ void MapMenu::handleShow()
     // Draw country info
     // TODO: Grab countryinfo and display it
     char tmp[100];
-    g_App.fonts().drawText(268, 312, g_Blocks[cur_blk_].name, 0, false);  // countryname
-    sprintf(tmp, "%i", g_Blocks[cur_blk_].population);
+    g_App.fonts().drawText(268, 312, g_Blocks[g_App.currentBlk()].name, 0, false);  // countryname
+    sprintf(tmp, "%i", g_Blocks[g_App.currentBlk()].population);
     g_App.fonts().drawText(268, 332, tmp, 0, false);    // pop
     // if (owns_ountry) {
     // TODO: Add tax adjustment buttons
@@ -221,7 +232,7 @@ void MapMenu::handleMouseDown(int x, int y, int button)
             if (mapblk_data_
                 [i * 64 * 44 + (y - g_Blocks[i].pos.y) / 2 * 64 +
                  (x - g_Blocks[i].pos.x) / 2] != 0) {
-                cur_blk_ = i;
+                g_App.currentBlk(i);
                 handleShow();
                 return;
             }
@@ -236,10 +247,10 @@ void MapMenu::handleOption(Key key)
 void MapMenu::handleUnknownKey(Key key, KeyMod mod, bool pressed)
 {
     if (key == KEY_0)
-        cur_blk_ = 0;
-    if (key == KEY_LEFT && cur_blk_ > 0)
-        cur_blk_--;
-    if (key == KEY_RIGHT && cur_blk_ < 49)
-        cur_blk_++;
+        g_App.currentBlk(0);
+    if (key == KEY_LEFT && g_App.currentBlk() > 0)
+        g_App.currentBlk(g_App.currentBlk() - 1);
+    if (key == KEY_RIGHT && g_App.currentBlk() < 49)
+        g_App.currentBlk(g_App.currentBlk() + 1);
     show(false);
 }

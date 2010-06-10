@@ -48,10 +48,20 @@ When running the game, the following arguments can be used on the command line:
  * -f | --fullscreen : runs the game in fullscreen mode
  * -p | --path : sets the absolute path to the data directory.
  
-In Game commands
-----------------
- * F1 : turns music on/off
- * F2 : turns game sounds on/off
+Commands
+--------
+- Mission Selection :
+ * 0   : Puts the selector on first mission
+ * Left: Puts the selector on the next mission
+ * Right : Puts the selector on the previous mission
+ 
+- In game :
+ * F1  : Turns music on/off
+ * F2  : Turns game sounds on/off
+ * 1-4 : Numeric key selects the corresponding agent
+ * 0   : Key 0 cycles between current selection and all 4 agents.
+ * Ctrl + 0 : Inverts selection.
+ * Ctrl + Left Click : sets a waypoint for the selected agents
 
 Contact
 -------

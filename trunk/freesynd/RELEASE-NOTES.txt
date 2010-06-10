@@ -10,6 +10,8 @@ Changes
   * Cursors are now available in a png file
   * Music files (ogg and mp3) have been moved to data/music
   * Ability to turn music and sound on/off during a game
+  * In debug mode, adds the -m argument to start directly the
+    game on a given mission
 
 Fixed Bugs
 ----------

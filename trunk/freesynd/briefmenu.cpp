@@ -75,7 +75,7 @@ void BriefMenu::handleShow() {
     g_Screen.drawLogo(18, 14, g_App.logo(), g_App.logoColour());
 
     // grab mission info
-    cur_miss_ = g_MissionNumbers[map_menu_->currentBlk()];
+    cur_miss_ = g_MissionNumbers[g_App.currentBlk()];
     mission_ = g_App.missions().loadMission(cur_miss_);
 
     // write briefing
