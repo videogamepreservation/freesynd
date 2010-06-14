@@ -22,12 +22,7 @@
 
 #include "log.h"
 
-#ifdef _WIN32
 #include <stdarg.h>
-#else
-#include <varargs.h>
-#endif
-
 #include <stdlib.h>
 #include <fstream>
 #include <iostream>
