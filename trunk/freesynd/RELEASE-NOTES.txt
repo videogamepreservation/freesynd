@@ -15,7 +15,7 @@ Changes
 
 Fixed Bugs
 ----------
-  * 
+  * 3005280 : Dropped weapon does not appear on the ground
 
 Known issues with this release
 ------------------------------

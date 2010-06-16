@@ -248,6 +248,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
             w->setTileZ(tile_z_);
             w->setOffX(off_x_);
             w->setOffY(off_y_);
+	    w->setOffZ(off_z_);
             putdown_weapon_ = 0;
             return true;
         }
