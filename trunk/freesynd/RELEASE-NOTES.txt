@@ -15,6 +15,8 @@ Changes
 
 Fixed Bugs
 ----------
+  * 3017274 : When an agent kills a moving enemy, this enemy
+			  keeps on moving to his destination.
   * 3005280 : Dropped weapon does not appear on the ground
 
 Known issues with this release

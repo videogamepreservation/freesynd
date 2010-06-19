@@ -124,10 +124,6 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
     }
 
     if (health_ <= 0) {
-        target_ = 0;
-        target_x_ = target_y_ = -1;
-        speed_ = 0;
-        clearDestination();
         while (numWeapons())
             dropWeapon(0);
     }
@@ -314,8 +310,13 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
         if (receive_damage_ && frame_ == ped_->lastHitFrame(dir_) + 1) {
             health_ -= receive_damage_;
 
-            if (health_ < 0)
+            if (health_ <= 0){
                 health_ = 0;
+                target_ = 0;
+                target_x_ = target_y_ = -1;
+                speed_ = 0;
+                clearDestination();
+            }
 
             receive_damage_ = 0;
             frame_ = 0;
