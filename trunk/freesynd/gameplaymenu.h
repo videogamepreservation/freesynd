@@ -53,6 +53,7 @@ protected:
     Mission *mission_;
     int scroll_x_, scroll_y_;
     unsigned int selected_agents_;
+    unsigned int selectable_agents_;
     bool ctrl_, alt_;
     int pointing_at_ped_, pointing_at_vehicle_, pointing_at_weapon_;
     int mm_tx_, mm_ty_;
@@ -71,7 +72,7 @@ protected:
     void selectAllAgents();
 
     bool isAgentSelected(unsigned int agentNo) {
-        return selected_agents_ & (1 << agentNo);
+        return (selected_agents_ & (1 << agentNo))!=0;
     }
 };
 

@@ -204,11 +204,18 @@ void GameplayMenu::handleShow()
         }
 
         selected_agents_ = 0;
+        selectable_agents_ = 0;
 
         for (int i = 0; i < 4; i++)
             if (mission_->ped(i)) {
-                selected_agents_ = 1 << i;
-                break;
+                if(mission_->ped(i)->isAsAgent() == PedInstance::Agent_Active){
+                    selectable_agents_ |= 1 << i;
+                }
+            }
+        for (int i = 0; i < 4; i++)
+            if ((selectable_agents_ & (1 << i)) != 0) {
+                    selected_agents_ = 1 << i;
+                    break;
             }
     }
 
@@ -374,23 +381,31 @@ void GameplayMenu::handleMouseDown(int x, int y, int button)
         if (x < 128) {
             if (y < 42) {
                 if (x < 64) {
-                    selectAgent(0);
-                    change = true;
+                    if ((selectable_agents_ & (1 << 0)) != 0) {
+                        selectAgent(0);
+                        change = true;
+                    }
                 }
                 else {
-                    selectAgent(1);
-                    change = true;
+                    if ((selectable_agents_ & (1 << 1)) != 0) {
+                        selectAgent(1);
+                        change = true;
+                    }
                 }
             }
 
             if (y >= 42 + 48 + 10 && y < 42 + 48 + 10 + 42) {
                 if (x < 64) {
-                    selectAgent(2);
-                    change = true;
+                    if ((selectable_agents_ & (1 << 2)) != 0) {
+                        selectAgent(2);
+                        change = true;
+                    }
                 }
                 else {
-                    selectAgent(3);
-                    change = true;
+                    if ((selectable_agents_ & (1 << 3)) != 0) {
+                        selectAgent(3);
+                        change = true;
+                    }
                 }
             }
 
@@ -611,20 +626,28 @@ void GameplayMenu::handleUnknownKey(Key key, KeyMod mod, bool pressed) {
         change = true;
     }
     else if (key == KEY_1 || key == KEY_KP1) {
-        selectAgent(0);
-        change = true;
+        if ((selectable_agents_ & (1 << 0)) != 0) {
+            selectAgent(0);
+            change = true;
+        }
     }
     else if (key == KEY_2 || key == KEY_KP2) {
-        selectAgent(1);
-        change = true;
+        if ((selectable_agents_ & (1 << 1)) != 0) {
+            selectAgent(1);
+            change = true;
+        }
     }
     else if (key == KEY_3 || key == KEY_KP3) {
-        selectAgent(2);
-        change = true;
+        if ((selectable_agents_ & (1 << 2)) != 0) {
+            selectAgent(2);
+            change = true;
+        }
     }
     else if (key == KEY_4 || key == KEY_KP4) {
-        selectAgent(3);
-        change = true;
+        if ((selectable_agents_ & (1 << 3)) != 0) {
+            selectAgent(3);
+            change = true;
+        }
     }
 
 #if 0
@@ -1096,15 +1119,19 @@ void GameplayMenu::selectAgent(unsigned int agentNo) {
 
 void GameplayMenu::selectAllAgents() {
     if (ctrl_) {
-        selected_agents_ ^= 1;
-        selected_agents_ ^= 2;
-        selected_agents_ ^= 4;
-        selected_agents_ ^= 8;
+        if ((selectable_agents_ & (1 << 0)) != 0)
+            selected_agents_ ^= 1;
+        if ((selectable_agents_ & (1 << 1)) != 0)
+            selected_agents_ ^= 2;
+        if ((selectable_agents_ & (1 << 2)) != 0)
+            selected_agents_ ^= 4;
+        if ((selectable_agents_ & (1 << 3)) != 0)
+            selected_agents_ ^= 8;
     }
     else {
-        if ((selected_agents_ & 15) == 15)
+        if ((selected_agents_ & selectable_agents_) == selectable_agents_)
             selected_agents_ = selected_agents_ >> 4;
         else
-            selected_agents_ = (selected_agents_ << 4) | 15;
+            selected_agents_ = (selected_agents_ << 4) | selectable_agents_;
     }
 }

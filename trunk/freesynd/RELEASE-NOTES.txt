@@ -12,6 +12,7 @@ Changes
   * Ability to turn music and sound on/off during a game
   * In debug mode, adds the -m argument to start directly the
     game on a given mission
+  * Fixed agents selection in gameplay menu
 
 Fixed Bugs
 ----------
