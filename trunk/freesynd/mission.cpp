@@ -425,16 +425,22 @@ void Mission::start()
 {
     for (int i = 0; i < 4; i++)
         if (g_App.teamMember(i)) {
-            peds_[i]->setHealth(g_App.teamMember(i)->health() *
+            if(g_App.teamMember(i)->isActive()){
+                peds_[i]->setHealth(g_App.teamMember(i)->health() *
                                 peds_[i]->health() / 255);
-            while (g_App.teamMember(i)->numWeapons()) {
-                WeaponInstance *wi = g_App.teamMember(i)->removeWeapon(0);
-                weapons_.push_back(wi);
-                peds_[i]->addWeapon(wi);
+                while (g_App.teamMember(i)->numWeapons()) {
+                    WeaponInstance *wi = g_App.teamMember(i)->removeWeapon(0);
+                    weapons_.push_back(wi);
+                    peds_[i]->addWeapon(wi);
+                }
+                peds_[i]->setAsAgent(PedInstance::Agent_Active);
+            }else{
+                peds_[i]->setHealth(-1);
+                peds_[i]->setAsAgent(PedInstance::Agent_Non_Active);
             }
         } else {
-            delete peds_[i];
-            peds_[i] = 0;
+            peds_[i]->setHealth(-1);
+            peds_[i]->setAsAgent(PedInstance::Agent_Non_Active);
         }
 }
 

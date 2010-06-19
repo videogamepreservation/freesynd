@@ -116,6 +116,9 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
     Ped::WeaponIndex weapon_idx =
         selectedWeapon()? selectedWeapon()->index() : Ped::Unarmed;
 
+    if (is_an_agent_ == PedInstance::Agent_Non_Active)
+        return true;
+
     if (weapon_idx == Ped::MedKit && selectedWeapon()->ammoRemaining()
             && health_ < start_health_) {
         health_ = start_health_;
@@ -413,6 +416,9 @@ void PedInstance::showPath(int scrollX, int scrollY) {
     int px = screenX();
     int py = screenY();
 
+    if (is_an_agent_ == PedInstance::Agent_Non_Active)
+        return;
+
     for (std::list<PathNode>::iterator it = dest_path_.begin();
             it != dest_path_.end(); it++) {
         PathNode & d = *it;
@@ -454,10 +460,15 @@ PedInstance::PedInstance(Ped *ped, int m) : ShootableMovableMapObject(m),
 ped_(ped), firing_(PedInstance::Firing_Not), target_(NULL), target_x_(-1),
 target_y_(-1), hit_damage_(0), receive_damage_(0), sight_range_(0),
 is_hostile_(false), reload_count_(0), selected_weapon_(-1),
-pickup_weapon_(0), putdown_weapon_(0), in_vehicle_(0) {
+pickup_weapon_(0), putdown_weapon_(0), in_vehicle_(0),
+is_an_agent_(PedInstance::Not_Agent){
 }
 
 void PedInstance::draw(int x, int y, int scrollX, int scrollY) {
+
+    if (is_an_agent_ == PedInstance::Agent_Non_Active)
+        return;
+
     Ped::WeaponIndex weapon_idx =
         selectedWeapon() ? selectedWeapon()->index() : Ped::Unarmed;
     addOffs(x, y);

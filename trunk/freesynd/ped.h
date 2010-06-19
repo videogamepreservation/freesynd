@@ -167,6 +167,9 @@ public:
         if (receive_damage_ == 0) {
             receive_damage_ = d;
             frame_ = 0;
+        }else{
+            if(health_ > 0)
+                receive_damage_ += d;
         }
     }
 
@@ -194,6 +197,15 @@ public:
     void putInVehicle(VehicleInstance *v);
     void leaveVehicle();
 
+    enum {
+        Not_Agent,
+        Agent_Non_Active,
+        Agent_Active
+    } ped_enum_;
+
+    void setAsAgent(int set_agent_as) { is_an_agent_ = set_agent_as; }
+    int isAsAgent() { return is_an_agent_; }
+
     int map();
 
 protected:
@@ -217,6 +229,7 @@ protected:
     int selected_weapon_;
     WeaponInstance *pickup_weapon_, *putdown_weapon_;
     VehicleInstance *in_vehicle_;
+    int is_an_agent_;
 
     bool walkable(int x, int y, int z);
 };

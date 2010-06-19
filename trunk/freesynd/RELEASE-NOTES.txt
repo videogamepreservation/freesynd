@@ -15,6 +15,7 @@ Changes
 
 Fixed Bugs
 ----------
+  * 3005276 : Absent agent can drop weapon in a mission
   * 1744508 : Dead Agents still move if given a pickup-weapon
 			  or enter-car command.
   * 2661069 : On game screen when clicking on the screen to move
