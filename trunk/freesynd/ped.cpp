@@ -204,8 +204,9 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
             return true;
         }
         else {
-            setDestination(in_vehicle_->tileX(), in_vehicle_->tileY(), 0,
-                    in_vehicle_->offX(), in_vehicle_->offY(), 320);
+            if(health_ > 0)
+                setDestination(in_vehicle_->tileX(), in_vehicle_->tileY(), 0,
+                        in_vehicle_->offX(), in_vehicle_->offY(), 320);
         }
     }
 
@@ -227,9 +228,11 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                 return true;
             }
         }
-        else
-            setDestination(pickup_weapon_->tileX(), pickup_weapon_->tileY(), 0,
-                    pickup_weapon_->offX(), pickup_weapon_->offY(), 320);
+        else{
+            if(health_ > 0)
+                setDestination(pickup_weapon_->tileX(), pickup_weapon_->tileY(), 0,
+                        pickup_weapon_->offX(), pickup_weapon_->offY(), 320);
+        }
     }
 
     if (putdown_weapon_) {

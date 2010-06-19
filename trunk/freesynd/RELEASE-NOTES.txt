@@ -15,6 +15,8 @@ Changes
 
 Fixed Bugs
 ----------
+  * 1744508 : Dead Agents still move if given a pickup-weapon
+			  or enter-car command.
   * 2661069 : On game screen when clicking on the screen to move
               agent(s) selected coordinates are not exactly the
               same that expected.
