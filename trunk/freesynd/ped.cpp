@@ -619,7 +619,7 @@ void PedInstance::selectNextWeapon() {
     if (curSelectedWeapon)
         for (int i = numWeapons() - 1; i >=0 && nextWeapon == -1; i--)
             if (i != selected_weapon_
-                    && *((Weapon *) weapon(i)) == *curSelectedWeapon
+                    && weapon(i)->rank() == curSelectedWeapon->rank()
                     && weapon(i)->ammoRemaining())
                 nextWeapon = i;
 

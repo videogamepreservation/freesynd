@@ -43,13 +43,13 @@ void WeaponManager::loadWeapons() {
             Ped::Pistol, snd::PISTOL));
     weapons_.push_back(new Weapon("GAUSS GUN", 16, 66, 50000, 3, 5120, 15000, 0,
             369, Ped::Gauss, snd::GAUSSGUN));
-    weapons_.push_back(new Weapon("SHOTGUN", 17, 67, 250, 12, 1024, 2, 370, 2,
+    weapons_.push_back(new Weapon("SHOTGUN", 17, 67, 250, 12, 1024, 2, 2, 370,
             Ped::Shotgun, snd::SHOTGUN));
     weapons_.push_back(new Weapon("UZI", 18, 68, 750, 50, 1792, 2, 5, 371,
             Ped::Uzi, snd::UZI));
     weapons_.push_back(new Weapon("MINI-GUN", 19, 69, 10000, 500, 2304, 10, 6,
             372, Ped::Minigun, snd::MINIGUN));
-    weapons_.push_back(new Weapon("LASER", 20, 70, 35000, 5, 4096, 2000, 373, 7,
+    weapons_.push_back(new Weapon("LASER", 20, 70, 35000, 5, 4096, 2000, 7, 373,
             Ped::Laser, snd::LASER));
     weapons_.push_back(new Weapon("FLAMER", 21, 71, 1500, 1000, 512, 1, 4, 374,
             Ped::Flamer, snd::FLAME));
