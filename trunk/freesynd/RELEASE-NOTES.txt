@@ -15,6 +15,7 @@ Changes
   * Fixed agents selection in gameplay menu
   * Fixed ranks for weapons, as in some weapons variable data
     "w_rank" took place of variable "w_anim"
+  * Rewritten animation for people
 
 Fixed Bugs
 ----------

@@ -103,12 +103,14 @@ public:
             WeaponIndex weapon = Unarmed);
     bool drawWalkFrame(int x, int y, int dir, int frame,
             WeaponIndex weapon = Unarmed);
+    int lastStandFrame(int dir, int frame, WeaponIndex weapon);
+    int lastWalkFrame(int dir, int frame, WeaponIndex weapon);
     bool drawStandFireFrame(int x, int y, int dir, int frame,
             WeaponIndex weapon);
     bool drawWalkFireFrame(int x, int y, int dir, int frame,
             WeaponIndex weapon);
-    bool lastStandFireFrame(int dir, int frame, WeaponIndex weapon);
-    bool lastWalkFireFrame(int dir, int frame, WeaponIndex weapon);
+    int lastStandFireFrame(int dir, int frame, WeaponIndex weapon);
+    int lastWalkFireFrame(int dir, int frame, WeaponIndex weapon);
     bool drawDieFrame(int x, int y, int frame);
     int lastDieFrame();
     void drawDeadFrame(int x, int y, int frame);
@@ -135,6 +137,19 @@ class PedInstance : public ShootableMovableMapObject, public WeaponHolder {
 public:
     PedInstance(Ped *ped, int m);
     virtual ~PedInstance() {}
+
+    typedef enum {
+        NoAnimation,
+        HitAnim,
+        DieAnim,
+        DeadAnim,
+        PickupAnim,
+        PutdownAnim,
+        WalkAnim,
+        StandAnim,
+        WalkFireAnim,
+        StandFireAnim,
+    }AnimationDrawn;
 
     void draw(int x, int y, int scrollX, int scrollY);
 
@@ -164,6 +179,15 @@ public:
     void setHitDamage(int n) { hit_damage_ = n; }
 
     void inflictDamage(int d) {
+        /*
+        if(health_ > 0){
+            if (receive_damage_ == 0) {
+                receive_damage_ = d;
+                frame_ = 0;
+            }else{
+                receive_damage_ += d;
+            }
+        }*/
         if (receive_damage_ == 0) {
             receive_damage_ = d;
             frame_ = 0;
@@ -190,6 +214,7 @@ public:
     void selectNextWeapon();
     void selectBestWeapon();
     void dropWeapon(int n);
+    void dropAllWeapons();
     void pickupWeapon(WeaponInstance *w);
 
     VehicleInstance *inVehicle() { return map_ == -1 ? in_vehicle_ : 0; }
@@ -197,16 +222,19 @@ public:
     void putInVehicle(VehicleInstance *v);
     void leaveVehicle();
 
-    enum {
+    typedef enum {
         Not_Agent,
         Agent_Non_Active,
         Agent_Active
-    } ped_enum_;
+    } ped_enum;
 
     void setAsAgent(int set_agent_as) { is_an_agent_ = set_agent_as; }
     int isAsAgent() { return is_an_agent_; }
 
     int map();
+    AnimationDrawn getDrawnAnim();
+    void setDrawnAnim(AnimationDrawn drawn_anim);
+    int draw_timeout_;
 
 protected:
     Ped *ped_;
@@ -219,6 +247,7 @@ protected:
         Firing_Stop
     } firing_;
 
+    AnimationDrawn drawn_anim_;
     ShootableMapObject *target_;
     int target_x_, target_y_;
     int hit_damage_;
