@@ -386,8 +386,8 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                 setDrawnAnim(PedInstance::StandFireAnim);
 
             {
-                if (target_ && target_->health() > 0){
-                    target_->inflictDamage(hit_damage_ + 1);
+                if (target_ && target_->health() > 0 && hit_damage_){
+                    target_->inflictDamage(hit_damage_);
                     hit_damage_ = 0;
                 }
 

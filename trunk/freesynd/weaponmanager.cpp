@@ -37,9 +37,9 @@ WeaponManager::~WeaponManager() {
 }
 
 void WeaponManager::loadWeapons() {
-    weapons_.push_back(new Weapon("PERSUADERTRON", 14, 64, 5000, -1, 256, -1,
+    weapons_.push_back(new Weapon("PERSUADERTRON", 14, 64, 5000, -1, 256, 0,
             -1, 367, Ped::Unarmed, snd::PERSUADE));
-    weapons_.push_back(new Weapon("PISTOL", 15, 65, 0, 13, 1280, 0, 1, 368,
+    weapons_.push_back(new Weapon("PISTOL", 15, 65, 0, 13, 1280, 1, 1, 368,
             Ped::Pistol, snd::PISTOL));
     weapons_.push_back(new Weapon("GAUSS GUN", 16, 66, 50000, 3, 5120, 15000, 0,
             369, Ped::Gauss, snd::GAUSSGUN));
@@ -55,13 +55,13 @@ void WeaponManager::loadWeapons() {
             Ped::Flamer, snd::FLAME));
     weapons_.push_back(new Weapon("LONG RANGE", 22, 72, 1000, 30, 6144, 2, 3,
             375, Ped::LongRange, snd::LONGRANGE));
-    weapons_.push_back(new Weapon("SCANNER", 23, 73, 500, -1, 4096, -1, -1, 376,
+    weapons_.push_back(new Weapon("SCANNER", 23, 73, 500, -1, 4096, 0, -1, 376,
             Ped::Unarmed, snd::NO_SOUND));
-    weapons_.push_back(new Weapon("MEDIKIT", 24, 74, 500, 1, 256, 1, -1, 377,
+    weapons_.push_back(new Weapon("MEDIKIT", 24, 74, 500, 1, 256, 0, -1, 377,
             Ped::MedKit, snd::NO_SOUND));
-    weapons_.push_back(new Weapon("TIME BOMB", 25, 75, 25000, -1, 1000, -1, -1,
+    weapons_.push_back(new Weapon("TIME BOMB", 25, 75, 25000, -1, 1000, 0, -1,
             378, Ped::Unarmed, snd::TIMEBOMB));
-    weapons_.push_back(new Weapon("ACCESS CARD", 26, 76, 1000, -1, 256, -1, -1,
+    weapons_.push_back(new Weapon("ACCESS CARD", 26, 76, 1000, -1, 256, 0, -1,
             379, Ped::Unarmed, snd::NO_SOUND));
     /* NOTE: small icon 27 exists and looks like an N with an arrow above it.
        the corresponding large icon is actually the "all" button on the
