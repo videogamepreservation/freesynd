@@ -441,41 +441,66 @@ Static *Static::loadInstance(uint8 * data, int m)
     Mission::LEVELDATA_STATICS * gamdata =
         (Mission::LEVELDATA_STATICS *) data;
     Static *s = 0;
-    if (gamdata->unkn4 == 0x35) {
+
+    switch(gamdata->unkn4){
+    case 0x35:
         if (gamdata->unkn6 == 0x6e)
             s = new Door(m, 1078, 1080);
         else if (gamdata->unkn6 == 0x63)
             s = new Door(m, 1077, 1079);
         else
             printf("unknown door 35 xx %02x\n", gamdata->unkn6);
-    }
-    if (gamdata->unkn4 == 0x4d) {
+        break;
+    case 0x4d:
         if (gamdata->unkn6 == 0x8a)
             s = new Door(m, 1101, 1103);
         else
             printf("unknown door 4d xx %02x\n", gamdata->unkn6);
-    }
-    if (gamdata->unkn4 == 0x3d) {
+        break;
+    case 0x3d:
         if (gamdata->unkn6 == 0x73)
             s = new Door(m, 1085, 1087);
         else if (gamdata->unkn6 == 0x75)
             s = new Door(m, 1086, 1088);
         else
             printf("unknown door 3d %02x\n", gamdata->unkn6);
-    }
-    if (gamdata->unkn4 == 0x45) {
+        break;
+    case 0x45:
         if (gamdata->unkn6 == 0x7e)
             s = new Door(m, 1093, 1095);
         else if (gamdata->unkn6 == 0x85)
             s = new Door(m, 1094, 1096);
         else
             printf("unknown door 45 %02x\n", gamdata->unkn6);
-    }
-    if (gamdata->unkn4 == 0x25) {
+        break;
+    case 0x25:
         if (gamdata->unkn6 == 0x7c)
             s = new Door(m, 1110, 1112);
         else
             printf("unknown door 25 %02x\n", gamdata->unkn6);
+        break;
+    case 0x01:
+        if (gamdata->unkn6 == 0x74)
+            s = new Tree(m, 227, 228);
+        else
+            printf("unknown tree 01 %02x\n", gamdata->unkn6);
+        break;
+    case 0x02:
+        if (gamdata->unkn6 == 0x79)
+            s = new Tree(m, 230, 231);
+        else
+            printf("unknown tree 02 %02x\n", gamdata->unkn6);
+        break;
+    case 0x03:
+        if (gamdata->unkn6 == 0x81)
+            s = new Tree(m, 233, 234);
+        else
+            printf("unknown tree 03 %02x\n", gamdata->unkn6);
+        break;
+    default:
+        if(gamdata->unkn4!=0)//this is for debug
+        printf("unknown obj %02x xx %02x xx %02x\n", gamdata->unkn4,gamdata->unkn5,gamdata->unkn6);
+        break;
     }
     if (!s && gamdata->unkn5 == 4) {
         //printf("looks like a missing door: %02x %02x\n", gamdata->unkn4, gamdata->unkn6);
@@ -486,6 +511,7 @@ Static *Static::loadInstance(uint8 * data, int m)
                        gamdata->mapposz[1], gamdata->mapposx[0],
                        gamdata->mapposy[0], gamdata->mapposz[0]);
     }
+
     return s;
 }
 

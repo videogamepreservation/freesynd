@@ -16,6 +16,7 @@ Changes
   * Fixed ranks for weapons, as in some weapons variable data
     "w_rank" took place of variable "w_anim"
   * Rewritten animation for people
+  * Added trees
 
 Fixed Bugs
 ----------
@@ -34,11 +35,11 @@ Fixed Bugs
 Known issues with this release
 ------------------------------
   * Agent AI is not operational.
-  * No trees the map.
   * The minimap is not complete.
   * Tax collection and other functionality of the world map are not done.
   * PathFinding is buggy
   * Mission debriefing is not operational
+  * No animation for trees, doors
 
 History
 -------
