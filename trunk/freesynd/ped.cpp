@@ -329,6 +329,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
             }
         }
 
+        setHitDamage(selectedWeapon()->shot());
         firing_ = PedInstance::Firing_Fire;
         updated = true;
 
@@ -346,6 +347,10 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
         }
         else
             setDrawnAnim(PedInstance::StandAnim);
+
+        if (selectedWeapon())
+            if (selectedWeapon()->ammoRemaining() == 0)
+                selectNextWeapon();
     }
     if (firing_ != PedInstance::Firing_Not || updated || health_ <= 0
             || receive_damage_ || pickup_weapon_ || putdown_weapon_) {
@@ -385,29 +390,24 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
             else
                 setDrawnAnim(PedInstance::StandFireAnim);
 
-            {
-                if (target_ && target_->health() > 0 && hit_damage_){
-                    target_->inflictDamage(hit_damage_);
-                    hit_damage_ = 0;
-                }
+            if (target_ && target_->health() > 0 && hit_damage_){
+                target_->inflictDamage(hit_damage_);
+                hit_damage_ = 0;
+            }
 
-                if (selectedWeapon()->ammoRemaining() > 0) {
-                    selectedWeapon()->setAmmoRemaining(
-                            selectedWeapon()->ammoRemaining() - 1);
-                }
+            if (selectedWeapon()->ammoRemaining() > 0) {
+                selectedWeapon()->setAmmoRemaining(
+                        selectedWeapon()->ammoRemaining() - 1);
+            }
 
-                if (selectedWeapon()->ammoRemaining() == 0)
-                    selectNextWeapon();
+            // last frame, still firing, reload
+            if (firing_ == PedInstance::Firing_Fire)
+                firing_ = PedInstance::Firing_Reload;
 
-                // last frame, still firing, reload
-                if (firing_ == PedInstance::Firing_Fire)
-                    firing_ = PedInstance::Firing_Reload;
-
-                if (firing_ == PedInstance::Firing_Stop) {
-                    firing_ = PedInstance::Firing_Not;
-                    target_ = 0;
-                    target_x_ = target_y_ = -1;
-                }
+            if (firing_ == PedInstance::Firing_Stop) {
+                firing_ = PedInstance::Firing_Not;
+                target_ = 0;
+                target_x_ = target_y_ = -1;
             }
         }
         return true;
@@ -558,7 +558,7 @@ void PedInstance::draw(int x, int y, int scrollX, int scrollY) {
                     required = 50;
 
                 if (reload_count_ >= required) {
-                    firing_ = PedInstance::Firing_Fire;
+                    firing_ = PedInstance::Firing_Not;
                     reload_count_ = 0;
                 }
             }
@@ -574,7 +574,7 @@ void PedInstance::draw(int x, int y, int scrollX, int scrollY) {
                     required = 50;
 
                 if (reload_count_ >= required) {
-                    firing_ = PedInstance::Firing_Fire;
+                    firing_ = PedInstance::Firing_Not;
                     reload_count_ = 0;
                 }
             }
