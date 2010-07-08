@@ -355,22 +355,22 @@ bool ShootableMovableMapObject::animate(int elapsed)
         } else {
             // TODO: this needs tweaking
             int fuzz = 16;
-            if (ady < aty - fuzz) {
-                if (adx < atx - fuzz)
+            if (ady < (aty - fuzz)) {
+                if (adx < (atx - fuzz))
                     dir_ = 5;
-                else if (adx > atx + fuzz)
+                else if (adx > (atx + fuzz))
                     dir_ = 3;
                 else
                     dir_ = 4;
             } else if (abs(ady - aty) < fuzz) {
-                if (adx < atx - fuzz)
+                if (adx < (atx - fuzz))
                     dir_ = 6;
-                else if (adx > atx + fuzz)
+                else if (adx > (atx + fuzz))
                     dir_ = 2;
             } else {
-                if (adx < atx - fuzz)
+                if (adx < (atx - fuzz))
                     dir_ = 7;
-                else if (adx > atx + fuzz)
+                else if (adx > (atx + fuzz))
                     dir_ = 1;
                 else
                     dir_ = 0;
@@ -380,6 +380,12 @@ bool ShootableMovableMapObject::animate(int elapsed)
             int d =
                 (int) sqrt((float) (adx - atx) * (adx - atx) +
                            (ady - aty) * (ady - aty));
+            if (d < 32) {
+                d = 32;
+                // TODO: this fix is for forward/back bug
+                // find better solution if it is not fixed by this
+            }
+
             if (abs(adx - atx) > 0)
                 dx = (adx - atx) * (speed_ * elapsed / 1000) / d;
             if (abs(ady - aty) > 0)

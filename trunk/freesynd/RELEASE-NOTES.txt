@@ -17,6 +17,7 @@ Changes
     "w_rank" took place of variable "w_anim"
   * Rewritten animation for people
   * Added trees
+  * Small fix to "path walking"
 
 Fixed Bugs
 ----------
