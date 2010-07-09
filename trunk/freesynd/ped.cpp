@@ -247,6 +247,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                 setDrawnAnim(PedInstance::StandAnim);
         }
         draw_timeout_ = 0;
+        return true;
     }
     if (pickup_weapon_) {
         if (samePosition(pickup_weapon_)) {
@@ -378,14 +379,15 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                 health_ = -1;
                 frame_ = 0;
                 setDrawnAnim(PedInstance::DeadAnim);
+                draw_timeout_ = 0;
             }
 
         if ((firing_ == PedInstance::Firing_Fire
                 || firing_ == PedInstance::Firing_Stop)
                 && health_ > 0) {
 
+            draw_timeout_ = 0;
             if (speed_){
-                draw_timeout_ = 1;
                 setDrawnAnim(PedInstance::WalkFireAnim);
             }
             else
