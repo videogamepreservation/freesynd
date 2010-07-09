@@ -380,16 +380,16 @@ bool ShootableMovableMapObject::animate(int elapsed)
             int d =
                 (int) sqrt((float) (adx - atx) * (adx - atx) +
                            (ady - aty) * (ady - aty));
-            if (d < 32) {
-                d = 32;
-                // TODO: this fix is for forward/back bug
-                // find better solution if it is not fixed by this
-            }
 
             if (abs(adx - atx) > 0)
                 dx = (adx - atx) * (speed_ * elapsed / 1000) / d;
             if (abs(ady - aty) > 0)
                 dy = (ady - aty) * (speed_ * elapsed / 1000) / d;
+
+            if (abs(dx) > abs(adx - atx))
+                dx = (adx - atx);
+            if (abs(dy) > abs(ady - aty))
+                dy = (ady - aty);
 
             if (updatePlacement(off_x_ + dx, off_y_ + dy) ||
                 updatePlacement(off_x_, off_y_ + dy) ||
