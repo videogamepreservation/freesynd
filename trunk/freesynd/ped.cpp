@@ -246,6 +246,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
             }else
                 setDrawnAnim(PedInstance::StandAnim);
         }
+        draw_timeout_ = 0;
     }
     if (pickup_weapon_) {
         if (samePosition(pickup_weapon_)) {
@@ -341,7 +342,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
 
     if ((firing_ == PedInstance::Firing_Reload
             || firing_ == PedInstance::Firing_Not)
-            && health_ > 0) {
+            && health_ > 0 && draw_timeout_ == 0) {
         if(speed_){
             setDrawnAnim(PedInstance::WalkAnim);
         }
@@ -371,7 +372,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
 
             receive_damage_ = 0;
             frame_ = 0;
-            draw_timeout_ = 0;
+            draw_timeout_ = 1;
         }else
             if (health_ == 0) {
                 health_ = -1;
@@ -506,7 +507,8 @@ ped_(ped), firing_(PedInstance::Firing_Not), target_(NULL), target_x_(-1),
 target_y_(-1), hit_damage_(0), receive_damage_(0), sight_range_(0),
 is_hostile_(false), reload_count_(0), selected_weapon_(-1),
 pickup_weapon_(0), putdown_weapon_(0), in_vehicle_(0),
-is_an_agent_(PedInstance::Not_Agent), drawn_anim_ (PedInstance::StandAnim){
+is_an_agent_(PedInstance::Not_Agent), drawn_anim_ (PedInstance::StandAnim),
+draw_timeout_(0){
 }
 
 void PedInstance::draw(int x, int y, int scrollX, int scrollY) {
