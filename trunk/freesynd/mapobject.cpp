@@ -353,26 +353,27 @@ bool ShootableMovableMapObject::animate(int elapsed)
                 speed_ = 0;
             updated = true;
         } else {
-            // TODO: this needs tweaking
+
+            // TODO: something better?
             int fuzz = 16;
             if (ady < (aty - fuzz)) {
                 if (adx < (atx - fuzz))
                     dir_ = 5;
                 else if (adx > (atx + fuzz))
                     dir_ = 3;
-                else
+                else if (adx < (atx + fuzz))
                     dir_ = 4;
             } else if (abs(ady - aty) < fuzz) {
                 if (adx < (atx - fuzz))
                     dir_ = 6;
                 else if (adx > (atx + fuzz))
                     dir_ = 2;
-            } else {
+            } else if (abs(ady - aty) > fuzz) {
                 if (adx < (atx - fuzz))
                     dir_ = 7;
                 else if (adx > (atx + fuzz))
                     dir_ = 1;
-                else
+                else if (adx < (atx + fuzz))
                     dir_ = 0;
             }
 
