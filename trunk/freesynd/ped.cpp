@@ -299,7 +299,8 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
     }
 
     if (target_x_ != -1 && target_y_ != -1
-            && firing_ == PedInstance::Firing_Not) {
+            && firing_ == PedInstance::Firing_Not
+            && selectedWeapon()->ammoRemaining()) {
         int stx = screenX() + 30;
         int sty = screenY() - 4;
 
@@ -354,6 +355,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
             if (selectedWeapon()->ammoRemaining() == 0)
                 selectNextWeapon();
     }
+
     if (firing_ != PedInstance::Firing_Not || updated || health_ <= 0
             || receive_damage_ || pickup_weapon_ || putdown_weapon_) {
         MapObject::animate(elapsed);
@@ -704,7 +706,8 @@ void PedInstance::selectBestWeapon() {
             bestWeaponRank = weapon(i)->rank();
         }
 
-    selected_weapon_ = bestWeapon;
+    if(bestWeapon != -1)
+        selected_weapon_ = bestWeapon;
 }
 
 void PedInstance::dropWeapon(int n) {
