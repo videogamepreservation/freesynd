@@ -179,7 +179,7 @@ public:
     void setHitDamage(int n) { hit_damage_ = n; }
 
     void inflictDamage(int d) {
-        /*
+
         if(health_ > 0){
             if (receive_damage_ == 0) {
                 receive_damage_ = d;
@@ -187,13 +187,6 @@ public:
             }else{
                 receive_damage_ += d;
             }
-        }*/
-        if (receive_damage_ == 0) {
-            receive_damage_ = d;
-            frame_ = 0;
-        }else{
-            if(health_ > 0)
-                receive_damage_ += d;
         }
     }
 
