@@ -291,8 +291,14 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
 
     if (target_) {
         if (inRange(target_)) {
-            target_x_ = target_->screenX();
-            target_y_ = target_->screenY();
+            if(target_->health() > 0) {
+                target_x_ = target_->screenX();
+                target_y_ = target_->screenY();
+            } else {
+                target_ = NULL;
+                target_x_ = -1;
+                target_y_ = -1;
+            }
         }
         else {
             stopFiring();
