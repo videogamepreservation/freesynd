@@ -82,7 +82,11 @@ void Screen::blit(int x, int y, int width, int height,
 
     for (int j = 0; j < h; ++j) {
         uint8 *d = pixels_ + (dy + j) * width_ + dx + ofs;
-        const uint8 *s = pixeldata + (sy + j) * stride + sx;
+        const uint8 *s;
+        if(flipped)
+            s = pixeldata + (sy + j) * stride + sx + (width-w);
+        else
+            s = pixeldata + (sy + j) * stride + sx;
 
         for (int i = 0; i < w; ++i) {
             uint8 c = *s++;

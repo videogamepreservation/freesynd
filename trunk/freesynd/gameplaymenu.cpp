@@ -15,7 +15,7 @@
  *  License, or (at your option) any later version.                     *
  *                                                                      *
  *    This program is  distributed in the hope that it will be useful,  *
- *but WITHOUT  ANY WARRANTY;without even  the impliedwarranty of  *
+ *  but WITHOUT  ANY WARRANTY;without even  the impliedwarranty of      *
  *  MERCHANTABILITY  or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU  *
  *  General Public License for more details.                            *
  *                                                                      *
@@ -119,15 +119,6 @@ void GameplayMenu::handleTick(int elapsed)
             change |= mission_->statics(i)->animate(diff);
     }
 
-    for (int i = 0; i < 4; i++)
-        if (mission_->ped(i) && mission_->ped(i)->selectedWeapon()) {
-            WeaponInstance *w = mission_->ped(i)->selectedWeapon();
-
-            if (w->ammoRemaining() == 0) {
-                mission_->ped(i)->selectNextWeapon();
-            }
-        }
-
     if (change) {
         show(false);
         // force pointing_at_ped / vehicle to update
@@ -220,13 +211,13 @@ void GameplayMenu::handleShow()
     }
 
     g_Screen.clear(0);
+    mission_->drawMap(scroll_x_, scroll_y_);
     drawAgentSelectors();
     drawPerformanceMeters();
     drawSelectAllButton();
     drawMissionHint();
     drawWeaponSelectors();
     drawMiniMap();
-    mission_->drawMap(scroll_x_, scroll_y_);
 
     if (ctrl_) {
         if (isAgentSelected(0))
@@ -827,6 +818,12 @@ void GameplayMenu::drawAgentSelectors() {
             }
         }
     }
+
+    //draw animtaion within selectors
+    mission_->ped(0)->drawSelectorAnim(32,38);
+    mission_->ped(1)->drawSelectorAnim(96,38);
+    mission_->ped(2)->drawSelectorAnim(32,138);
+    mission_->ped(3)->drawSelectorAnim(96,138);
 }
 
 void GameplayMenu::drawPerformanceMeters() {
@@ -852,7 +849,7 @@ void GameplayMenu::drawSelectAllButton() {
         15 ? 1793 : 1797)->draw(64, 46 + 44, 0);
 }
 
-static int drawChar(int x, int y, char ch, bool inversed) {
+static int drawChar(int x, int y, char ch, uint8 color) {
     if (ch == ' ')
         return 3;
 
@@ -861,7 +858,7 @@ static int drawChar(int x, int y, char ch, bool inversed) {
     s->data(data);
 
     for (int i = 0; i < s->width() * s->height(); i++)
-        data[i] = (data[i] == 252 ? (inversed ? 0 : 11) : 255);
+        data[i] = (data[i] == 252 ? color : 255);
 
     g_Screen.blit(x, y, s->width(), s->height(), data);
     delete[] data;
@@ -871,97 +868,101 @@ static int drawChar(int x, int y, char ch, bool inversed) {
 void GameplayMenu::drawMissionHint() {
     static int mission_hint_ = 0;
     mission_hint_++;
-    int speed = 100;
 
-    if ((mission_hint_ % speed) != 0)
-        return;
+    g_App.gameSprites().sprite(1798)->draw(
+        0, 46 + 44 + 10 + 46 + 44 - 1, 0);
+    g_App.gameSprites().sprite(1799)->draw(
+        64, 46 + 44 + 10 + 46 + 44 - 1, 0);
 
     bool inversed = false;
 
-    if ((((mission_hint_ / speed) % 9) % 2) == 1)
-        inversed = true;
-
-    for (int j = 0; j < 14; j++) {
-        for (int i = 0; i < 128; i++)
-            g_Screen.setPixel(i, 46 + 44 + 10 + 46 + 44 + j, 0);
-    }
-
-    for (int j = inversed ? 1 : 0; j < 7; j++) {
-        for (int i = 0; i < 64; i++)
-            g_Screen.setPixel(i * 2 + 1, 46 + 44 + 10 + 46 + 44 + j * 2, 8);
-    }
-
-    if ((mission_hint_ / speed) % 10 == 0
-            || (mission_hint_ / speed) % 10 == 9) {
-        return;
-    }
-
-    if (inversed) {
-        for (int j = 0; j < 11; j++) {
-            for (int i = 0; i < 128; i++)
-                g_Screen.setPixel(i, 46 + 44 + 10 + 46 + 44 + j + 1, 11);
-        }
-    }
-
     const char *str = "";
 
-    if (mission_) {
-        // TODO: check these
-        switch (mission_->objective()) {
-        case 1:
-            str = "PERSUADE";
-            break;
-        case 2:
-            str = "ASSASSINATE";
-            break;
-        case 3:
-            str = "PROTECT";
-            break;
-        case 5:
-            str = "GET WEAPON";
-            break;
-        case 10:
-        case 11:
-            str = "ELIMINATE";
-            break;
-        case 14:
-            str = "RESCUE";
-            break;
-        case 15:
-            str = "USE VEHICLE";
-            break;
-        default:
-            break;
-        }
+    uint8 txtColor;
 
-        if (mission_->failed()) {
-            if (!completed_) {
-                completed_ = true;
-                g_App.gameSounds().play(snd::SPEECH_MISSION_FAILED);
-            }
+    if ((mission_hint_ > 20 && mission_hint_ < 41)
+        ||(mission_hint_ > 60)) {
 
-            str = "MISSION FAILED";
-        }
-
-        if (mission_->completed()) {
-            if (!completed_) {
-                completed_ = true;
-                g_App.gameSounds().play(snd::SPEECH_MISSION_COMPLETED);
-            }
-
-            str = "MISSION COMPLETE";
-        }
-
-        if ((mission_hint_ / speed) % 9 > 3
-                && (mission_hint_ / speed) % 9 < 6) {
-            if (mission_->completed() || mission_->failed())
-                str = "PRESS SPACE";
-            else {
-                for (int i = 0; i < 4; i++) {
-                    if (mission_->ped(i)->speed())
-                        str = "GOING";
+        for (int i = 0; i < 4; i++) {
+            if (isAgentSelected(i)){
+                if (mission_->ped(i)->speed()) {
+                    str = "GOING";
+                }
+                if (mission_->ped(i)->wePickupWeapon()) {
+                    str = "PICKUP WEAPON";
+                }
+                if (mission_->ped(i)->getDrawnAnim() == PedInstance::HitAnim) {
+                    str = "HIT BY BULLET";
                 }
             }
+        }
+        txtColor = 14;
+
+        if (mission_hint_ > 79) {
+            mission_hint_ = 0;
+            return;
+        }
+    } else {
+
+        inversed = (mission_hint_ % 5) > 2;
+        txtColor = inversed ? 0 : 11;
+
+        if (inversed) {
+            for (int j = 0; j < 11; j++) {
+                for (int i = 0; i < 128; i++)
+                    g_Screen.setPixel(i, 46 + 44 + 10 + 46 + 44 + j , 11);
+            }
+        }
+
+        if (mission_) {
+            // TODO: check these
+            switch (mission_->objective()) {
+            case 1:
+                str = "PERSUADE";
+                break;
+            case 2:
+                str = "ASSASSINATE";
+                break;
+            case 3:
+                str = "PROTECT";
+                break;
+            case 5:
+                str = "GET WEAPON";
+                break;
+            case 10:
+            case 11:
+                str = "ELIMINATE";
+                break;
+            case 14:
+                str = "RESCUE";
+                break;
+            case 15:
+                str = "USE VEHICLE";
+                break;
+            default:
+                break;
+            }
+
+            if (mission_->failed()) {
+                if (!completed_) {
+                    completed_ = true;
+                    g_App.gameSounds().play(snd::SPEECH_MISSION_FAILED);
+                }
+
+                str = "MISSION FAILED";
+            }
+
+            if (mission_->completed()) {
+                if (!completed_) {
+                    completed_ = true;
+                    g_App.gameSounds().play(snd::SPEECH_MISSION_COMPLETED);
+                }
+
+                str = "MISSION COMPLETE";
+            }
+
+            if (mission_->completed() || mission_->failed())
+                str = "PRESS SPACE";
         }
     }
 
@@ -974,11 +975,10 @@ void GameplayMenu::drawMissionHint() {
     x = 64 - x / 2;
 
     while (*str)
-        x += drawChar(x, 46 + 44 + 10 + 46 + 44 + 2, *str++, inversed) - 1;
+        x += drawChar(x, 46 + 44 + 10 + 46 + 44 + 2 - 1, *str++, txtColor) - 1;
 }
 
 void GameplayMenu::drawWeaponSelectors() {
-    // TODO: there should be a divider above these
     PedInstance *p = NULL;
 
     if (isAgentSelected(3))
@@ -1008,7 +1008,7 @@ void GameplayMenu::drawWeaponSelectors() {
                     s += 40;
 
                 g_App.gameSprites().sprite(s)->draw(
-                        32 * i, 46 + 44 + 10 + 46 + 44 + 15 + j * 32, 0);
+                        32 * i, 2 + 46 + 44 + 10 + 46 + 44 + 15 + j * 32, 0);
 
                 // draw ammo bars
                 if (w) {
@@ -1023,7 +1023,7 @@ void GameplayMenu::drawWeaponSelectors() {
                         for (int k = 0; k < 5; k++)
                             g_Screen.setPixel(32 * i + 3 + m,
                                     46 + 44 + 10 + 46 + 44 + 15 + j * 32 + 23
-                                        + k,
+                                        + k + 2,
                                     12);
                 }
             }
@@ -1063,7 +1063,7 @@ void GameplayMenu::drawMiniMap() {
     if (mission_ == 0)
         return;
 
-    int sy = 46 + 44 + 10 + 46 + 44 + 15 + 2 * 32;
+    int sy = 46 + 44 + 10 + 46 + 44 + 15 + 2 * 32 + 2;
 
     int ox, oy;
     int tx = g_App.maps().map(mission_->map())->screenToTileX(
@@ -1077,6 +1077,7 @@ void GameplayMenu::drawMiniMap() {
         if (isAgentSelected(i)) {
             tx = mission_->ped(i)->tileX();
             ty = mission_->ped(i)->tileY();
+            break;
         }
 
     tx -= 8;

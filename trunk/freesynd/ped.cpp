@@ -123,6 +123,7 @@ int Ped::lastPickupFrame() {
     return g_App.gameSprites().lastFrame(pickup_anim_);
 }
 
+
 bool PedInstance::animate(int elapsed, Mission *mission) {
     bool updated = false;
     Ped::WeaponIndex weapon_idx =
@@ -608,6 +609,48 @@ void PedInstance::draw(int x, int y, int scrollX, int scrollY) {
     }*/
 }
 
+void PedInstance::drawSelectorAnim(int x, int y) {
+
+    if (is_an_agent_ == PedInstance::Agent_Non_Active)
+        return;
+
+    Ped::WeaponIndex weapon_idx =
+        selectedWeapon() ? selectedWeapon()->index() : Ped::Unarmed;
+
+    switch(getDrawnAnim()){
+        case PedInstance::HitAnim:
+            ped_->drawHitFrame(x, y, dir_, frame_);
+            break;
+        case PedInstance::DieAnim:
+            ped_->drawDieFrame(x, y, frame_);
+            break;
+        case PedInstance::DeadAnim:
+            ped_->drawDeadFrame(x, y, frame_);
+            break;
+        case PedInstance::PickupAnim:
+            ped_->drawPickupFrame(x, y, frame_);
+            break;
+        case PedInstance::PutdownAnim:
+            ped_->drawPickupFrame(x, y, frame_);
+            break;
+        case PedInstance::WalkAnim:
+            ped_->drawWalkFrame(x, y, dir_, frame_, weapon_idx);
+            break;
+        case PedInstance::StandAnim:
+            ped_->drawStandFrame(x, y, dir_, frame_, weapon_idx);
+            break;
+        case PedInstance::WalkFireAnim:
+            ped_->drawWalkFireFrame(x, y, dir_, frame_, weapon_idx);
+            break;
+        case PedInstance::StandFireAnim:
+            ped_->drawStandFireFrame(x, y, dir_, frame_, weapon_idx);
+            break;
+        case PedInstance::NoAnimation:
+            printf("hmm NoAnimation\n");
+            break;
+    }
+}
+
 bool PedInstance::inRange(ShootableMapObject *t) {
     if (selectedWeapon() == 0)
         return false;
@@ -757,6 +800,10 @@ void PedInstance::pickupWeapon(WeaponInstance * w) {
 
     pickup_weapon_ = w;
     frame_ = 0;
+}
+
+bool PedInstance::wePickupWeapon() {
+    return pickup_weapon_ != 0;
 }
 
 void PedInstance::putInVehicle(VehicleInstance * v) {

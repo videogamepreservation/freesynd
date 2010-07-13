@@ -163,6 +163,7 @@ public:
 
     void kill();
     bool animate(int elapsed, Mission *mission);
+    void drawSelectorAnim(int x, int y);
 
     ShootableMapObject *target() { return target_; }
     void setTarget(ShootableMapObject *t) { target_ = t; }
@@ -209,6 +210,7 @@ public:
     void dropWeapon(int n);
     void dropAllWeapons();
     void pickupWeapon(WeaponInstance *w);
+    bool wePickupWeapon();
 
     VehicleInstance *inVehicle() { return map_ == -1 ? in_vehicle_ : 0; }
 

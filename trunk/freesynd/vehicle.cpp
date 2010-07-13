@@ -77,7 +77,7 @@ void VehicleInstance::draw(int x, int y)
     addOffs(x, y);
 
     // ensure on map
-    if (x < 129 || y < 0)
+    if (x < 90 || y < -20)
         return;
 
     if (health_ == 0)

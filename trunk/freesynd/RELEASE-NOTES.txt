@@ -18,9 +18,13 @@ Changes
   * Rewritten animation for people
   * Added trees
   * Small fix to "path walking"
+  * Added animation to selectors
+  * Added divider between selectors and weapons
+  * Mission message system changed, added few new
 
 Fixed Bugs
 ----------
+  * 1565270 : Graphical glitches with cars
   * 2661059 : Automatic selecting next weapon after running 
               out of ammo
   * 3005276 : Absent agent can drop weapon in a mission
