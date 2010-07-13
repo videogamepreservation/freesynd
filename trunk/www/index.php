@@ -1,49 +1,38 @@
-<?php
-
-/************************************************************************
- *                                                                      *
- *  FreeSynd - a remake of the classic Bullfrog game "Syndicate".       *
- *                                                                      *
- *   Copyright (C) 2005,2006                                            *
- *      Stuart Bingë  <skbinge@gmail.com>                               *
- *      Joost Peters  <joostp@users.sourceforge.net>                    *
- *                                                                      *
- *    This program is free software;  you can redistribute it and / or  *
- *  modify it  under the  terms of the  GNU General  Public License as  *
- *  published by the Free Software Foundation; either version 2 of the  *
- *  License, or (at your option) any later version.                     *
- *                                                                      *
- *    This program is  distributed in the hope that it will be useful,  *
- *  but WITHOUT  ANY WARRANTY;  without even  the implied  warranty of  *
- *  MERCHANTABILITY  or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU  *
- *  General Public License for more details.                            *
- *                                                                      *
- *    You can view the GNU  General Public License, online, at the GNU  *
- *  project's  web  site;  see <http://www.gnu.org/licenses/gpl.html>.  *
- *  The full text of the license is also included in the file COPYING.  *
- *                                                                      *
- ************************************************************************/
-
-// $Id$
-
-$title = 'News'; require_once 'include/common.php';
+<?php $title = 'News'; require_once 'include/common.php';
 
 // The newsItem() signature is newsItem($title, $content, $submitter, $date);
 
 newsItem(
-    'New development push',
-"We're currently gearing up for a renewed development effort in order to get
-this project on track and hopefully get an initial release out the door. This
-updated website is a first step - all existing content has been revised, the
-interface has been streamlined, and the file format documentation has been
-significantly updated. Expect more soon!
+    'Now with sound',
+"After some <a href=\"http://quantumg.blogspot.com/2007/04/freesynd-version-02-released.html\">battles</a> FreeSynd now has almost all the sounds from the original game functional.  This is cause for release 0.2.  You can <a href=\"https://sourceforge.net/project/showfiles.php?group_id=93282\">download it here.</a>  If you would prefer to get the source from CVS, use the tag: release_0_2.
 
-Currently we've documented the map tile format for Syndicate and the sprite
-format for both Syndicate and Syndicate Wars. We'll be constantly updating this
-with additional formats - there are still several that we know the format of
-that need documenting.",
-    'Stuart',
-    '2005-01-31'
-);
+There's been a number of new people contributing code, and that's great.  If you would like to try your hand at some reverse engineering, implement some features or fix some bugs, we're here to help.",
+    'Trent Waddington',
+    '2007-04-24');
 
-printFooter();
+newsItem(
+    'First level now playable',
+"I hearby declare that the first level of FreeSynd is now playable.  To celebrate this milestone I have made release 0.1.  You can <a href=\"https://sourceforge.net/project/showfiles.php?group_id=93282\">download it here.</a>  This is an all-in-one package.  It includes: binaries for Linux, binaries for Windows, source code and all the required data files.  If you would prefer to get the source from CVS, use the tag: release_0_1.  
+
+We still need lots of help.  If you find a bug, please report it in the <a href=\"http://sourceforge.net/tracker/?group_id=93282\">bug tracker</a>.  If you can run the original game in <a href=\"http://dosbox.sourceforge.net/\">dosbox</a>, have a go at figuring out what particular bytes in the GAME??.DAT files do (you'll need to <a href=\"http://rtfm.insomnia.org/~qg/dernc.exe\">decompress</a> it first).  If you can program in C++, check out the source code, fix some bugs or implement some features.",
+    'Trent Waddington',
+    '2006-12-21');
+
+newsItem(
+    'Progress',
+"Believe it or not, development has started again.  Open Source is a funny
+thing, sometimes people get so excited about what they can do that they don't
+do anything.  Other times they find they are just overcomitted and can not seem
+to find the time to do anything significant.  I like to think that every little
+bit counts, so here's my little bit.  In the last couple of days I have
+implemented all the menus which one could say make up half the game.  I've also
+written a map renderer, so soon we can start on the other half of the game.
+However, if I get distracted by work, family, or other projects, I expect
+someone else to pick up where I left off.  Let's aim for a 2013 release date,
+20 years to the day of the original game's release date!",
+    'Trent Waddington',
+    '2006-09-06');
+
+include_once('../htdocs-include/testInclude.php');
+
+printFooter(); ?>

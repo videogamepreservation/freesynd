@@ -1,32 +1,4 @@
-<?php
-
-/************************************************************************
- *                                                                      *
- *  FreeSynd - a remake of the classic Bullfrog game "Syndicate".       *
- *                                                                      *
- *   Copyright (C) 2005,2006                                            *
- *      Stuart Bingë  <skbinge@gmail.com>                               *
- *      Joost Peters  <joostp@users.sourceforge.net>                    *
- *                                                                      *
- *    This program is free software;  you can redistribute it and / or  *
- *  modify it  under the  terms of the  GNU General  Public License as  *
- *  published by the Free Software Foundation; either version 2 of the  *
- *  License, or (at your option) any later version.                     *
- *                                                                      *
- *    This program is  distributed in the hope that it will be useful,  *
- *  but WITHOUT  ANY WARRANTY;  without even  the implied  warranty of  *
- *  MERCHANTABILITY  or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU  *
- *  General Public License for more details.                            *
- *                                                                      *
- *    You can view the GNU  General Public License, online, at the GNU  *
- *  project's  web  site;  see <http://www.gnu.org/licenses/gpl.html>.  *
- *  The full text of the license is also included in the file COPYING.  *
- *                                                                      *
- ************************************************************************/
-
-// $Id$
-
-$title = 'About'; require_once 'include/common.php'; ?>
+<?php $title = 'About'; require_once 'include/common.php'; ?>
 
 <h3>GREETINGS, OPERATIVE. WELCOME TO THE FREESYND PROJECT.</h3>
 
@@ -37,9 +9,9 @@ GPL</a>ed reimplementation of the classic Bullfrog game, Syndicate.</p>
 ELECTRONIC ARTS AND/OR BULLFROG ENTERTAINMENT.<br />
 SYNDICATE and BULLFROG are trademarks of Electronic Arts. SYNDICATE is
 Copyright &copy; 1994 Electronic Arts. SYNDICATE WARS is Copyright &copy; 1997
-Electronic Arts.<br /> Please note that an original copy of Syndicate is
+Electronic Arts.<br /> <!-- Please note that an original copy of Syndicate is
 required to use FreeSynd; we do not redistribute the original data files here,
-and we won't make an exception for you - so don't bother asking.</div>
+and we won't make an exception for you - so don't bother asking. --> </div>
 
 <h3>Project Communication</h3>
 <p>There are two main forms of communication used by the FreeSynd team - IRC
@@ -103,9 +75,11 @@ spread the influence of the Syndicates across the globe.</p>
 
 <p>(listed in alphabetical order)</p>
 
-<a href="mailto:omicron-Please.Dont.Spam@mighty.co.za">Stuart Bing&euml;</a>
+<a href="mailto:skbinge@gmail.com">Stuart Bing&euml;</a>
 (Developer)<br />
 <a href="mailto:j-Please.Dont.Spam@7fc1.org">Joost Peters</a>
+(Developer)<br />
+<a href="mailto:qg@biodome.org">Trent Waddington</a>
 (Developer)<br />
 
 <?php printFooter(); ?>

@@ -49,7 +49,7 @@ function getFileSize($file)
 function newsItem($title, $content, $submitter, $date)
 {
     echo '<h3>' . htmlentities($title) . "</h3>\n";
-    echo '<p>' . implode("</p>\n<p>", explode("\n\n", htmlentities($content)))
+    echo '<p>' . implode("</p>\n<p>", explode("\n\n", $content))
         . "</p>\n";
     echo '<div class="rght_algn"><b> -- ' . htmlentities($submitter)
         . '</b><br />' . htmlentities($date) . "</div>\n\n";

@@ -1,32 +1,4 @@
-<?php
-
-/************************************************************************
- *                                                                      *
- *  FreeSynd - a remake of the classic Bullfrog game "Syndicate".       *
- *                                                                      *
- *   Copyright (C) 2005,2006                                            *
- *      Stuart Bingë  <skbinge@gmail.com>                               *
- *      Joost Peters  <joostp@users.sourceforge.net>                    *
- *                                                                      *
- *    This program is free software;  you can redistribute it and / or  *
- *  modify it  under the  terms of the  GNU General  Public License as  *
- *  published by the Free Software Foundation; either version 2 of the  *
- *  License, or (at your option) any later version.                     *
- *                                                                      *
- *    This program is  distributed in the hope that it will be useful,  *
- *  but WITHOUT  ANY WARRANTY;  without even  the implied  warranty of  *
- *  MERCHANTABILITY  or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU  *
- *  General Public License for more details.                            *
- *                                                                      *
- *    You can view the GNU  General Public License, online, at the GNU  *
- *  project's  web  site;  see <http://www.gnu.org/licenses/gpl.html>.  *
- *  The full text of the license is also included in the file COPYING.  *
- *                                                                      *
- ************************************************************************/
-
-// $Id$
-
-$title = 'File Formats'; require_once 'include/common.php'; ?>
+<?php $title = 'File Formats'; require_once 'include/common.php'; ?>
 
 <h2>Contents</h2>
 
@@ -47,6 +19,8 @@ $title = 'File Formats'; require_once 'include/common.php'; ?>
 <hr />
 
 <h2><a name="synd">Syndicate File Formats</a></h2>
+
+<p>Below is some information that was helpful in the beginning of the project.  Drawing of maps and units and animations is mostly complete now.  Understanding of the GAME??.DAT files is not nearly as complete but is progessing steadily.</p>
 
 <h3><a name="synd_tile">Map Tile Graphics</a></h3>
 
