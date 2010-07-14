@@ -33,6 +33,7 @@ public:
     MainMenu(MenuManager *m);
 
     void handleShow();
+    void handleLeave();
     void handleOption(Key key);
 };
 

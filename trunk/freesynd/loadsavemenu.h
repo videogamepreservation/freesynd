@@ -32,7 +32,9 @@ class LoadSaveMenu : public Menu {
 public:
     LoadSaveMenu(MenuManager *m);
 
-    void handleShow() {}
+    void handleShow();
+    void handleLeave();
+
     void handleOption(Key key) {}
 
 protected:

@@ -35,3 +35,12 @@ LoadSaveMenu::LoadSaveMenu(MenuManager * m):Menu(m, "loadsave", "mlosa.dat",
     addOption(535, 352, "MENU", 1, KEY_F5, "main");
     setParentMenu("main");
 }
+
+void LoadSaveMenu::handleShow()
+{
+    g_System.showCursor();
+}
+
+void LoadSaveMenu::handleLeave() {
+    g_System.hideCursor();
+}

@@ -22,6 +22,7 @@ Changes
   * Added divider between selectors and weapons
   * Mission message system changed, added few new
   * It was possible to shoot dead, fixed
+  * Small fix to mouse display during menus switch
 
 Fixed Bugs
 ----------

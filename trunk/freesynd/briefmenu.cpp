@@ -205,6 +205,12 @@ void BriefMenu::handleShow() {
         g_App.fonts().drawText(560 - g_App.fonts().textWidth(tmp, 1) / 2,
                                195, tmp, 1, false);
     }
+
+    g_System.showCursor();
+}
+
+void BriefMenu::handleLeave() {
+    g_System.hideCursor();
 }
 
 void BriefMenu::handleOption(Key key) {

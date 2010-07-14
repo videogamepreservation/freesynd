@@ -222,6 +222,12 @@ void MapMenu::handleShow()
     strcpy(tmp, "");
     g_App.fonts().drawText(268, 360, tmp, 0, false);    // own
     // }
+
+    g_System.showCursor();
+}
+
+void MapMenu::handleLeave() {
+    g_System.hideCursor();
 }
 
 void MapMenu::handleMouseDown(int x, int y, int button)

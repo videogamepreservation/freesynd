@@ -33,6 +33,7 @@ public:
     DebriefMenu(MenuManager *m);
 
     void handleShow();
+    void handleLeave();
 
 protected:
 };

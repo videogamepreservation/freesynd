@@ -33,6 +33,7 @@ public:
     ResearchMenu(MenuManager *m);
     void handleShow();
     void handleShowLate();
+    void handleLeave();
     void handleOption(Key key);
 
 protected:

@@ -273,4 +273,10 @@ void ConfMenu::handleShow() {
         g_Screen.scale2x(28, 112, 120, 10, bkg_ + 14 + 56 * 320, 320);
         g_App.fonts().drawText(28, 112, g_App.yourName(), 1, false);
     }
+
+    g_System.showCursor();
+}
+
+void ConfMenu::handleLeave() {
+    //g_System.hideCursor();
 }

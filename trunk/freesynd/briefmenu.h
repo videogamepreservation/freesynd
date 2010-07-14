@@ -38,6 +38,7 @@ public:
     ~BriefMenu();
 
     void handleShow();
+    void handleLeave();
     void handleOption(Key key);
     Mission *mission() { return mission_; }
 

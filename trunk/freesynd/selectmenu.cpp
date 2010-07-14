@@ -429,6 +429,8 @@ void SelectMenu::handleShow()
         for (int i = g_App.numRecruits(); i < 18; i++)
             g_App.fonts().drawText(520, 124 + i * 12, "EMPTY", 0, true);
     }
+
+    g_System.showCursor();
 }
 
 void SelectMenu::handleShowLate()
@@ -436,6 +438,10 @@ void SelectMenu::handleShowLate()
     g_App.fonts().drawText(52, 268, "TEAM", 1, tab_ != 0);
     g_App.fonts().drawText(52, 296, "MODS", 1, tab_ != 1);
     g_App.fonts().drawText(52, 324, "EQUIP", 1, tab_ != 2);
+}
+
+void SelectMenu::handleLeave() {
+    g_System.hideCursor();
 }
 
 void SelectMenu::toggleAgent(int n)

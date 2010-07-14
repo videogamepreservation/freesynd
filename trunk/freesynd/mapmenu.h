@@ -41,6 +41,7 @@ public:
 
     void handleTick(int elapsed);
     void handleShow();
+    void handleLeave();
     void handleMouseDown(int x, int y, int button);
     void handleOption(Key key);
     void handleUnknownKey(Key key, KeyMod mod, bool pressed);

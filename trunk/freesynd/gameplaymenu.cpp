@@ -208,6 +208,9 @@ void GameplayMenu::handleShow()
                     selected_agents_ = 1 << i;
                     break;
             }
+
+        g_System.usePointerCursor();
+        g_System.showCursor();
     }
 
     g_Screen.clear(0);
@@ -267,8 +270,7 @@ void GameplayMenu::handleShow()
 
 void GameplayMenu::handleLeave()
 {
-    // TODO : just hide the cursor here. Menu cursor will be set by next menu
-    g_System.useMenuCursor();
+    g_System.hideCursor();
     g_App.setPalette("mselect.pal");
     mission_->end();
     mission_ = NULL;

@@ -192,6 +192,12 @@ void ResearchMenu::handleShow()
         g_Screen.scale2x(18, 158, sizeof(ldata), 1, ldata);
         g_Screen.scale2x(18, 182, sizeof(ldata), 1, ldata);
     }
+
+    g_System.showCursor();
+}
+
+void ResearchMenu::handleLeave() {
+    g_System.hideCursor();
 }
 
 void ResearchMenu::handleOption(Key key)

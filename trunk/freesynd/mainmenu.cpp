@@ -48,6 +48,10 @@ void MainMenu::handleShow()
     g_System.showCursor();
 }
 
+void MainMenu::handleLeave() {
+    g_System.hideCursor();
+}
+
 void MainMenu::handleOption(Key key)
 {
     if (key == KEY_F4)

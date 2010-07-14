@@ -37,4 +37,11 @@ DebriefMenu::DebriefMenu(MenuManager *m) : Menu(m, "debrief", "mdebrief.dat",
 
 void DebriefMenu::handleShow() {
     g_Screen.drawLogo(18, 14, g_App.logo(), g_App.logoColour());
+
+    g_System.useMenuCursor();
+    g_System.showCursor();
+}
+
+void DebriefMenu::handleLeave() {
+    g_System.hideCursor();
 }
