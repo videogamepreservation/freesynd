@@ -453,10 +453,12 @@ void GameplayMenu::handleMouseDown(int x, int y, int button)
                     else if (mission_->ped(i)->inVehicle()) {
                         if (ctrl_)
                             mission_->ped(i)->inVehicle()->
-                                addDestination(tx, ty, 0, ox, oy, 320);
+                                addDestination(tx, ty, 0,
+                                128, 128, 320);
                         else
                             mission_->ped(i)->inVehicle()->
-                                setDestination(tx, ty, 0, ox, oy, 320);
+                                setDestination(tx, ty, 0, 
+                                128, 128, 320);
                     }
                     else {
                         if (ctrl_)
@@ -485,8 +487,8 @@ void GameplayMenu::handleMouseDown(int x, int y, int button)
 
                                 //this should be romoved if non-tile
                                 //position needed
-                                ox = 62 + 128 * (i % 2);
-                                oy = 62 + 128 * (i >> 1);
+                                ox = 63 + 128 * (i % 2);
+                                oy = 63 + 128 * (i >> 1);
                             }
 
                             mission_->ped(i)->setDestination(tx, ty, 0,
