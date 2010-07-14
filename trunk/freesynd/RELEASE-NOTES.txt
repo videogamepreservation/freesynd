@@ -23,6 +23,7 @@ Changes
   * Mission message system changed, added few new
   * It was possible to shoot dead, fixed
   * Small fix to mouse display during menus switch
+  * Group positioning is now like in original, on dest reached
 
 Fixed Bugs
 ----------

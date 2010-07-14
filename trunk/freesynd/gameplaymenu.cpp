@@ -433,7 +433,6 @@ void GameplayMenu::handleMouseDown(int x, int y, int button)
                 g_App.maps().screenToTileY(mission_->map(), scroll_x_ + x - 129,
                         scroll_y_ + y, oy);
 
-            int spred = 64;
             for (int i = 0; i < 4; i++) {
                 if (isAgentSelected(i)) {
                     if (pointing_at_weapon_ != -1) {
@@ -462,33 +461,36 @@ void GameplayMenu::handleMouseDown(int x, int y, int button)
                     else {
                         if (ctrl_)
                             mission_->ped(i)->addDestination(tx, ty, 0,
-                                    ox - spred, oy - spred, 320);
+                                    ox, oy, 320);
                         else {
                             if (selectedAgentsCount() > 1) {
-                                int dx = (i % 2) * (i - 2) * 16;
-                                int dy = ((i + 1) % 2) * (i - 1) * 8;
+                                //TODO: current group position is like
+                                // in original this can make non-tile
+                                // oriented
+                                //int dx = (i % 2) * (i - 2) * 16;
+                                //int dy = ((i + 1) % 2) * (i - 1) * 8;
 
+                                int dx = 0; int dy = 0;
                                 int offset_x = scroll_x_ + x - 129;
                                 int offset_y = scroll_y_ + y;
 
-                                // find center of tile
-                                offset_x = offset_x - (offset_x % TILE_WIDTH)
-                                        + TILE_WIDTH / 2;
-                                offset_y = offset_y - (offset_y % TILE_HEIGHT)
-                                        + TILE_HEIGHT / 2;
-
                                 tx = g_App.maps().screenToTileX(
                                         mission_->map(),
-                                        offset_x + dx,
-                                        offset_y + dy, ox);
+                                        offset_x,
+                                        offset_y, ox);
                                 ty = g_App.maps().screenToTileY(
                                         mission_->map(),
-                                        offset_x + dx,
-                                        offset_y + dy, oy);
-                            }
+                                        offset_x,
+                                        offset_y, oy);
 
+                                //this should be romoved if non-tile
+                                //position needed
+                                ox = 62 + 128 * (i % 2);
+                                oy = 62 + 128 * (i >> 1);
+                            }
+                            printf("%i y %i\n",ox,oy);
                             mission_->ped(i)->setDestination(tx, ty, 0,
-                                    ox - spred, oy - spred, 320);
+                                    ox, oy, 320);
                         }
                     }
                 }

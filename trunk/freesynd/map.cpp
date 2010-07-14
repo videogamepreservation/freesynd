@@ -95,7 +95,7 @@ int Map::tileToScreenY(int x, int y, int z, int pX, int pY)
 
 int Map::screenToTileX(int x, int y, int &ox)
 {
-    x -= (map_width_ / 2 + TILE_WIDTH / 2 - TILE_WIDTH / 4);
+    x -= (map_width_ / 2 + TILE_WIDTH / 2);
     // x now equals fx * TILE_WIDTH / 2 - fy * TILE_WIDTH / 2
     // which equals TILE_WIDTH/2 * (fx - fy)
     y -= max_z_ * TILE_HEIGHT / 3;
@@ -113,7 +113,7 @@ int Map::screenToTileX(int x, int y, int &ox)
 
 int Map::screenToTileY(int x, int y, int &oy)
 {
-    x -= (map_width_ / 2 + TILE_WIDTH / 2 + TILE_WIDTH / 4);
+    x -= (map_width_ / 2 + TILE_WIDTH / 2);
     y -= max_z_ * TILE_HEIGHT / 3;
 //    y += mz;
     float dx = (float) x / (TILE_WIDTH / 2);
