@@ -1094,11 +1094,14 @@ void GameplayMenu::drawMiniMap() {
             int t =
                 g_App.maps().map(mission_->map())->tileAt(tx + i, ty + j, 1);
 
+            uint8 ground[8 * 8];
             if (t > 5) {
-                uint8 ground[8 * 8];
                 memset(ground, mcolors[t], sizeof(ground));
                 g_Screen.blit(i * 8, j * 8 + sy, 8, 8, ground);
                 // TODO: needs work
+            } else {
+                memset(ground, 0, sizeof(ground));
+                g_Screen.blit(i * 8, j * 8 + sy, 8, 8, ground);
             }
         }
 
