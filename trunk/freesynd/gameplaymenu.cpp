@@ -488,7 +488,7 @@ void GameplayMenu::handleMouseDown(int x, int y, int button)
                                 ox = 62 + 128 * (i % 2);
                                 oy = 62 + 128 * (i >> 1);
                             }
-                            printf("%i y %i\n",ox,oy);
+
                             mission_->ped(i)->setDestination(tx, ty, 0,
                                     ox, oy, 320);
                         }
