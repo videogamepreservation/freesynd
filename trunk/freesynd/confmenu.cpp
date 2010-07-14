@@ -52,6 +52,8 @@ public:
 
         g_Screen.scale2x(283, 122, 68, 13, data);
         g_Screen.scale2x(468, 122, 68, 13, data);
+
+        g_System.showCursor();
     }
 
 protected:
@@ -278,5 +280,5 @@ void ConfMenu::handleShow() {
 }
 
 void ConfMenu::handleLeave() {
-    //g_System.hideCursor();
+    g_System.hideCursor();
 }
