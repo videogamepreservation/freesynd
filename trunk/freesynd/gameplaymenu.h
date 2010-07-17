@@ -50,6 +50,7 @@ protected:
     MapMenu *map_menu_;
     int tick_count_, last_animate_tick_;
     int last_motion_tick_, last_motion_x_, last_motion_y_;
+    int mission_hint_ticks_,mission_hint_;
     Mission *mission_;
     int scroll_x_, scroll_y_;
     unsigned int selected_agents_;
@@ -62,7 +63,7 @@ protected:
     void drawAgentSelectors();
     void drawPerformanceMeters();
     void drawSelectAllButton();
-    void drawMissionHint();
+    void drawMissionHint(int elapsed);
     void drawWeaponSelectors();
     void drawMiniMap();
     bool isScrollLegal(int newScrollX, int newScrollY);

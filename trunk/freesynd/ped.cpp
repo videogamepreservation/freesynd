@@ -232,7 +232,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
         clearDestination();
         speed_ = 0;
     }
-    if( draw_timeout_ > 4 ) {
+    if( draw_timeout_ > 11 ) {
         if(getDrawnAnim() == PedInstance::PickupAnim
                 || getDrawnAnim() == PedInstance::PutdownAnim) {
             if(speed_) {
@@ -249,6 +249,15 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
         }
         draw_timeout_ = 0;
         return true;
+    } else {
+        if(getDrawnAnim() == PedInstance::PickupAnim
+                || getDrawnAnim() == PedInstance::PutdownAnim) {
+            if(draw_timeout_ % 4 == 0)
+                frame_ = ped_->lastPickupFrame() + 3;
+            draw_timeout_++;
+        }
+        if(getDrawnAnim() == PedInstance::HitAnim)
+            draw_timeout_++;
     }
     if (pickup_weapon_) {
         if (samePosition(pickup_weapon_)) {
@@ -307,7 +316,8 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
 
     if (target_x_ != -1 && target_y_ != -1
             && firing_ == PedInstance::Firing_Not
-            && selectedWeapon()->ammoRemaining()) {
+            && (selectedWeapon()
+            && selectedWeapon()->ammoRemaining())) {
         int stx = screenX() + 30;
         int sty = screenY() - 4;
 
@@ -361,6 +371,19 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
         if (selectedWeapon())
             if (selectedWeapon()->ammoRemaining() == 0)
                 selectNextWeapon();
+    }
+    if (firing_ == PedInstance::Firing_Reload) {
+        reload_count_++;
+        int required = 1;
+
+        if (weapon_idx == Ped::Pistol
+                || weapon_idx == Ped::Shotgun)
+            required = 50;
+
+        if (reload_count_ >= required) {
+            firing_ = PedInstance::Firing_Not;
+            reload_count_ = 0;
+        }
     }
 
     if (firing_ != PedInstance::Firing_Not || updated || health_ <= 0
@@ -543,7 +566,6 @@ void PedInstance::draw(int x, int y, int scrollX, int scrollY) {
 
     switch(getDrawnAnim()){
         case PedInstance::HitAnim:
-            draw_timeout_++;
             ped_->drawHitFrame(x, y, dir_, frame_);
             break;
         case PedInstance::DieAnim:
@@ -553,44 +575,16 @@ void PedInstance::draw(int x, int y, int scrollX, int scrollY) {
             ped_->drawDeadFrame(x, y, frame_);
             break;
         case PedInstance::PickupAnim:
-            draw_timeout_++;
             ped_->drawPickupFrame(x, y, frame_);
             break;
         case PedInstance::PutdownAnim:
-            draw_timeout_++;
             ped_->drawPickupFrame(x, y, frame_);
             break;
         case PedInstance::WalkAnim:
             ped_->drawWalkFrame(x, y, dir_, frame_, weapon_idx);
-            if (firing_ == PedInstance::Firing_Reload) {
-                reload_count_++;
-                int required = 1;
-
-                if (weapon_idx == Ped::Pistol
-                        || weapon_idx == Ped::Shotgun)
-                    required = 50;
-
-                if (reload_count_ >= required) {
-                    firing_ = PedInstance::Firing_Not;
-                    reload_count_ = 0;
-                }
-            }
             break;
         case PedInstance::StandAnim:
             ped_->drawStandFrame(x, y, dir_, frame_, weapon_idx);
-            if (firing_ == PedInstance::Firing_Reload) {
-                reload_count_++;
-                int required = 1;
-
-                if (weapon_idx == Ped::Pistol
-                        || weapon_idx == Ped::Shotgun)
-                    required = 50;
-
-                if (reload_count_ >= required) {
-                    firing_ = PedInstance::Firing_Not;
-                    reload_count_ = 0;
-                }
-            }
             break;
         case PedInstance::WalkFireAnim:
             ped_->drawWalkFireFrame(x, y, dir_, frame_, weapon_idx);

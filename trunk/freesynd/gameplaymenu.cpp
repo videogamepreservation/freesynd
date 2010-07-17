@@ -41,8 +41,9 @@ GameplayMenu::GameplayMenu(MenuManager *m, LoadingMenu *loading,
 Menu(m, "Gameplay", "", ""), loading_(loading), map_menu_(mapMenu),
 tick_count_(0), last_animate_tick_(0), last_motion_tick_(0),
 last_motion_x_(320), last_motion_y_(240), mission_(0), scroll_x_(0),
-scroll_y_(0), selected_agents_(1), ctrl_(false), alt_(false),
-pointing_at_ped_(-1), pointing_at_vehicle_(-1)
+scroll_y_(0), selected_agents_(0), ctrl_(false), alt_(false),
+pointing_at_ped_(-1), pointing_at_vehicle_(-1), 
+mission_hint_ticks_(0), mission_hint_(0)
 {
     setParentMenu("debrief");
 }
@@ -125,7 +126,7 @@ void GameplayMenu::handleTick(int elapsed)
         handleMouseMotion(last_motion_x_, last_motion_y_, 0);
     }
 
-    drawMissionHint();
+    drawMissionHint(elapsed);
 }
 
 bool GameplayMenu::isScrollLegal(int newScrollX, int newScrollY)
@@ -218,7 +219,7 @@ void GameplayMenu::handleShow()
     drawAgentSelectors();
     drawPerformanceMeters();
     drawSelectAllButton();
-    drawMissionHint();
+//    drawMissionHint(0);
     drawWeaponSelectors();
     drawMiniMap();
 
@@ -871,14 +872,18 @@ static int drawChar(int x, int y, char ch, uint8 color) {
     return s->width();
 }
 
-void GameplayMenu::drawMissionHint() {
-    static int mission_hint_ = 0;
-    mission_hint_++;
+void GameplayMenu::drawMissionHint(int elapsed) {
+
+    elapsed += mission_hint_ticks_;
+    int inc = elapsed / 45;
+    mission_hint_ticks_ = elapsed % 45;
 
     g_App.gameSprites().sprite(1798)->draw(
         0, 46 + 44 + 10 + 46 + 44 - 1, 0);
     g_App.gameSprites().sprite(1799)->draw(
         64, 46 + 44 + 10 + 46 + 44 - 1, 0);
+
+    mission_hint_ += inc;
 
     bool inversed = false;
 
@@ -887,7 +892,7 @@ void GameplayMenu::drawMissionHint() {
     uint8 txtColor;
 
     if ((mission_hint_ > 20 && mission_hint_ < 41)
-        ||(mission_hint_ > 60)) {
+        ||(mission_hint_ > 61)) {
 
         for (int i = 0; i < 4; i++) {
             if (isAgentSelected(i)){
