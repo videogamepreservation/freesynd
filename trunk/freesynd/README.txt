@@ -1,5 +1,5 @@
 
-FreeSynd 0.3
+FreeSynd 0.4
 ------------
 
 FreeSynd is a free cross-platform reimplementation of the classic Bullfrog 
@@ -69,6 +69,3 @@ Contact
 If you find a bug or would like to help the development of FreeSynd, please 
 stop by the sourceforge project bug tracker, drop us an email or visit the
 forums.
-
-QuantumG <qg@biodome.org>
-
