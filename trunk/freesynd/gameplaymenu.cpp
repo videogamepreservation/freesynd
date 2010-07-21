@@ -894,12 +894,14 @@ void GameplayMenu::drawMissionHint(int elapsed) {
     uint8 txtColor;
 
     if ((mission_hint_ > 20 && mission_hint_ < 41)
-        ||(mission_hint_ > 61)) {
+        ||(mission_hint_ > 60)) {
 
         for (int i = 0; i < 4; i++) {
             if (isAgentSelected(i)){
                 if (mission_->ped(i)->speed()) {
                     str = "GOING";
+                } else {
+                    str = "OBSERVING";
                 }
                 if (mission_->ped(i)->wePickupWeapon()) {
                     str = "PICKUP WEAPON";
