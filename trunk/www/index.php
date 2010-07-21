@@ -3,6 +3,15 @@
 // The newsItem() signature is newsItem($title, $content, $submitter, $date);
 
 newsItem(
+    'New v0.3 release',
+	"Freesynd is still alive! A new developpment release is available from <a href=\"https://sourceforge.net/project/showfiles.php?group_id=93282\">sourceforge</a>. This v0.3 release contains mainly bug fixes and 
+	minor evolutions but it's still a step toward the v1.0. 
+	
+	Please try it and report any bug in the project bug tracker.",
+    'Benoit Blancard',
+    '2010-07-21');
+	
+newsItem(
     'Now with sound',
 "After some <a href=\"http://quantumg.blogspot.com/2007/04/freesynd-version-02-released.html\">battles</a> FreeSynd now has almost all the sounds from the original game functional.  This is cause for release 0.2.  You can <a href=\"https://sourceforge.net/project/showfiles.php?group_id=93282\">download it here.</a>  If you would prefer to get the source from CVS, use the tag: release_0_2.
 
