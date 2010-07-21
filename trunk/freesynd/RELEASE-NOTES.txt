@@ -7,7 +7,7 @@ This is a prelimary release for testing and development purposes.
 
 Changes
 -------
-  * 
+  * Minimap drawing is fixed, should be better now
 
 Fixed Bugs
 ----------

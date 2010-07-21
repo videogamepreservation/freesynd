@@ -106,6 +106,8 @@ class App : public Singleton < App > {
     App();
     virtual ~App();
 
+    uint8 walkdata_[256];
+
     SpriteManager &menuSprites() {
         return menu_sprites_;
     }

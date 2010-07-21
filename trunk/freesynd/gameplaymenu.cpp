@@ -178,6 +178,8 @@ int qanim = 1085, qframe = 0;
 void GameplayMenu::handleShow()
 {
     if (mission_ == NULL) {
+        int size = 0;
+        //TODO:this is walkdata find better place for init
         mission_ = loading_->mission();
         mission_->start();
         completed_ = false;
@@ -826,7 +828,7 @@ void GameplayMenu::drawAgentSelectors() {
         }
     }
 
-    //draw animtaion within selectors
+    //draw animation within selectors
     mission_->ped(0)->drawSelectorAnim(32,38);
     mission_->ped(1)->drawSelectorAnim(96,38);
     mission_->ped(2)->drawSelectorAnim(32,138);
@@ -1041,33 +1043,11 @@ void GameplayMenu::drawWeaponSelectors() {
     }
 }
 
-int mcolors[] = {
-    0, 0, 0, 0, 0, 8, 8, 8, 8, 8,       // 0
-    8, 8, 8, 8, 8, 8, 8, 8, 8, 8,       // 10
-    8, 8, 8, 8, 8, 8, 8, 8, 8, 8,       // 20
-    8, 8, 8, 8, 8, 8, 8, 8, 8, 8,       // 30
-    8, 15, 8, 8, 8, 8, 8, 8, 8, 8,      // 40
-    8, 8, 8, 8, 8, 8, 8, 8, 8, 8,       // 50
-    8, 8, 8, 8, 8, 8, 8, 8, 8, 8,       // 60
-    8, 8, 8, 8, 8, 8, 8, 8, 8, 8,       // 70
-    8, 8, 8, 8, 8, 8, 8, 8, 8, 8,       // 80
-    8, 8, 8, 8, 8, 8, 8, 8, 8, 8,       // 90
-    8, 8, 8, 8, 8, 8, 8, 8, 8, 8,       // 100
-    8, 8, 8, 8, 8, 8, 8, 8, 8, 8,       // 110
-    8, 8, 8, 8, 8, 7, 8, 8, 8, 8,       // 120
-    8, 8, 8, 8, 8, 8, 8, 8, 8, 8,       // 130
-    8, 8, 8, 8, 8, 8, 8, 8, 8, 8,       // 140
-    8, 8, 8, 8, 8, 8, 8, 8, 8, 8,       // 150
-    8, 8, 8, 8, 8, 8, 8, 8, 8, 8,       // 160
-    8, 8, 8, 8, 8, 8, 8, 8, 8, 8,       // 170
-    8, 8, 8, 8, 8, 8, 8, 8, 8, 8,       // 180
-    8, 8, 8, 8, 8, 8, 8, 8, 8, 8,       // 190
-    8, 8, 8, 8, 8, 8, 8, 8, 8, 8,       // 200
-    8, 8, 8, 8, 8, 8, 8, 8, 8, 8,       // 210
-    8, 8, 8, 8, 8, 8, 8, 8, 8, 8,       // 220
-    8, 8, 8, 8, 8, 8, 8, 8, 8, 8,       // 230
-    8, 8, 8, 8, 8, 8, 8, 8, 8, 8,       // 240
-    8, 8, 8, 8, 8, 8, 8, 8, 8, 8,       // 250
+int mcolors_[] = {
+    8,  7,  7,  7,
+    7,  7,  2,  2,
+    2,  2,  0, 15,
+   15, 15, 15,  2,
 };
 
 void GameplayMenu::drawMiniMap() {
@@ -1099,17 +1079,11 @@ void GameplayMenu::drawMiniMap() {
     for (int j = 0; j < 16; j++)
         for (int i = 0; i < 16; i++) {
             int t =
-                g_App.maps().map(mission_->map())->tileAt(tx + i, ty + j, 1);
+                g_App.maps().map(mission_->map())->tileAt(tx + i, ty + j, 0);
 
             uint8 ground[8 * 8];
-            if (t > 5) {
-                memset(ground, mcolors[t], sizeof(ground));
-                g_Screen.blit(i * 8, j * 8 + sy, 8, 8, ground);
-                // TODO: needs work
-            } else {
-                memset(ground, 0, sizeof(ground));
-                g_Screen.blit(i * 8, j * 8 + sy, 8, 8, ground);
-            }
+            memset(ground, mcolors_[g_App.walkdata_[t]], sizeof(ground));
+            g_Screen.blit(i * 8, j * 8 + sy, 8, 8, ground);
         }
 
     // TODO: draw icons for units, weapons, etc

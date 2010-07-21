@@ -387,11 +387,10 @@ void App::run() {
         waitForKeyPress();
     exit(1);
 #endif
-
+    //this is walk data
     // load "col01"
-    // TODO: what's this for?
     data = File::loadFile("col01.dat", size);
-    g_Screen.scale2x(0, 0, 16, 16, data);
+    memcpy(walkdata_,data,256);
     delete[] data;
 
     // load palette
