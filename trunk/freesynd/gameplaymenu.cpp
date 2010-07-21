@@ -1048,8 +1048,8 @@ void GameplayMenu::drawWeaponSelectors() {
 int mcolors_[] = {
     8,  7,  7,  7,
     7,  7, 10, 10,
-   10, 10,  0, 15,
-   15, 15, 15,  6,
+   10, 10,  0, 10,
+   15, 15, 10, 10,
 };
 
 void GameplayMenu::drawMiniMap() {
