@@ -1047,9 +1047,9 @@ void GameplayMenu::drawWeaponSelectors() {
 
 int mcolors_[] = {
     8,  7,  7,  7,
-    7,  7,  2,  2,
-    2,  2,  0, 15,
-   15, 15, 15,  2,
+    7,  7, 10, 10,
+   10, 10,  0, 15,
+   15, 15, 15,  6,
 };
 
 void GameplayMenu::drawMiniMap() {
@@ -1088,7 +1088,7 @@ void GameplayMenu::drawMiniMap() {
             g_Screen.blit(i * 8, j * 8 + sy, 8, 8, ground);
         }
 
-    // TODO: draw icons for units, weapons, etc
+        // TODO: draw icons for units, weapons, etc
 }
 
 int GameplayMenu::selectedAgentsCount() {
