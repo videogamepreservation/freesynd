@@ -36,71 +36,54 @@
 #include <windows.h>
 #endif
 
+// The number of pixel of a scroll
+const int SCROLL_STEP = 16;
+
 GameplayMenu::GameplayMenu(MenuManager *m, LoadingMenu *loading,
         MapMenu *mapMenu) :
 Menu(m, "Gameplay", "", ""), loading_(loading), map_menu_(mapMenu),
 tick_count_(0), last_animate_tick_(0), last_motion_tick_(0),
-last_motion_x_(320), last_motion_y_(240), mission_(0), scroll_x_(0),
-scroll_y_(0), selected_agents_(0), ctrl_(false), alt_(false),
+last_motion_x_(320), last_motion_y_(240), mission_(0), world_x_(0),
+world_y_(0), selected_agents_(0), ctrl_(false), alt_(false),
 pointing_at_ped_(-1), pointing_at_vehicle_(-1), 
 mission_hint_ticks_(0), mission_hint_(0)
 {
     setParentMenu("debrief");
+    scroll_x_ = 0;
+    scroll_y_ = 0;
 }
-
-int inc = 16;
 
 void GameplayMenu::handleTick(int elapsed)
 {
     bool change = false;
     tick_count_ += elapsed;
 
-    if (last_motion_x_ < 5) {
-        int newScrollX = scroll_x_ - inc;
+    // Scroll the map on the X axis
+    if (scroll_x_ != 0) {
+        int newWorldX = world_x_ + scroll_x_;
 
-        if (newScrollX < 0)
-            newScrollX = 0;
+        if (newWorldX < 0)
+            newWorldX = 0;
 
-        if (isScrollLegal(newScrollX, scroll_y_)) {
-            scroll_x_ = newScrollX;
+        if (isScrollLegal(newWorldX, world_y_)) {
+            world_x_ = newWorldX;
             change = true;
         }
+        scroll_x_ = 0;
     }
 
-    if (last_motion_y_ < 5) {
-        int newScrollY = scroll_y_ - inc;
+    // Scroll the map on the Y axis
+    if (scroll_y_ != 0) {
+        int newWorldY = world_y_ + scroll_y_;
 
-        if (newScrollY < 0)
-            newScrollY = 0;
+        if (newWorldY < 0)
+            newWorldY = 0;
 
-        if (isScrollLegal(scroll_x_, newScrollY)) {
-            scroll_y_ = newScrollY;
+        if (isScrollLegal(world_x_, newWorldY)) {
+            world_y_ = newWorldY;
             change = true;
         }
-    }
-
-    if (last_motion_x_ > GAME_SCREEN_WIDTH - 5) {
-        int newScrollX = scroll_x_ + inc;
-
-        if (newScrollX > mission_->mapWidth() - GAME_SCREEN_WIDTH)
-            newScrollX = mission_->mapWidth() - GAME_SCREEN_WIDTH;
-
-        if (isScrollLegal(newScrollX, scroll_y_)) {
-            scroll_x_ = newScrollX;
-            change = true;
-        }
-    }
-
-    if (last_motion_y_ > GAME_SCREEN_HEIGHT - 5) {
-        int newScrollY = scroll_y_ + inc;
-
-        if (newScrollY > mission_->mapHeight() - GAME_SCREEN_HEIGHT)
-            newScrollY = mission_->mapHeight() - GAME_SCREEN_HEIGHT;
-
-        if (isScrollLegal(scroll_x_, newScrollY)) {
-            scroll_y_ = newScrollY;
-            change = true;
-        }
+        scroll_y_ = 0;
     }
 
     if (tick_count_ - last_animate_tick_ > 33) {
@@ -188,12 +171,12 @@ void GameplayMenu::handleShow()
         // TODO: choose the right game palette.
         g_App.setPalette("hpal02.dat");
         g_Screen.clear(0);
-        scroll_x_ = mission_->startX();
-        scroll_y_ = mission_->startY();
+        world_x_ = mission_->startX();
+        world_y_ = mission_->startY();
         int count = 0;
 
-        while (!isScrollLegal(scroll_x_, scroll_y_) && count < 100) {
-            improveScroll(scroll_x_, scroll_y_);
+        while (!isScrollLegal(world_x_, world_y_) && count < 100) {
+            improveScroll(world_x_, world_y_);
             count++;
         }
 
@@ -217,7 +200,7 @@ void GameplayMenu::handleShow()
     }
 
     g_Screen.clear(0);
-    mission_->drawMap(scroll_x_, scroll_y_);
+    mission_->drawMap(world_x_, world_y_);
     drawAgentSelectors();
     drawPerformanceMeters();
     drawSelectAllButton();
@@ -227,16 +210,16 @@ void GameplayMenu::handleShow()
 
     if (ctrl_) {
         if (isAgentSelected(0))
-            mission_->ped(0)->showPath(scroll_x_, scroll_y_);
+            mission_->ped(0)->showPath(world_x_, world_y_);
 
         if (isAgentSelected(1))
-            mission_->ped(1)->showPath(scroll_x_, scroll_y_);
+            mission_->ped(1)->showPath(world_x_, world_y_);
 
         if (isAgentSelected(2))
-            mission_->ped(2)->showPath(scroll_x_, scroll_y_);
+            mission_->ped(2)->showPath(world_x_, world_y_);
 
         if (isAgentSelected(3))
-            mission_->ped(3)->showPath(scroll_x_, scroll_y_);
+            mission_->ped(3)->showPath(world_x_, world_y_);
     }
 //    g_App.gameSprites().sprite(9 * 40 + 1)->draw(0, 0, 0, false, true);
 #if 0
@@ -286,6 +269,18 @@ void GameplayMenu::handleMouseMotion(int x, int y, int state)
     last_motion_x_ = x;
     last_motion_y_ = y;
 
+    if (last_motion_x_ < 5) {
+        scroll_x_ = - SCROLL_STEP;
+    } else if (last_motion_x_ > GAME_SCREEN_WIDTH - 5) {
+        scroll_x_ = SCROLL_STEP;
+    }
+
+    if (last_motion_y_ < 5) {
+        scroll_y_ = - SCROLL_STEP;
+    } else if (last_motion_y_ > GAME_SCREEN_HEIGHT - 5) {
+        scroll_y_ = SCROLL_STEP;
+    }
+
     if (alt_)
         return;
 
@@ -296,8 +291,8 @@ void GameplayMenu::handleMouseMotion(int x, int y, int state)
         int px = p->screenX() - 20;
         int py = p->screenY() - 30;
 
-        if (x - 129 + scroll_x_ >= px && y + scroll_y_ >= py &&
-            x - 129 + scroll_x_ < px + 40 && y + scroll_y_ < py + 32) {
+        if (x - 129 + world_x_ >= px && y + world_y_ >= py &&
+            x - 129 + world_x_ < px + 40 && y + world_y_ < py + 32) {
             pointing_at_ped_ = i;
             break;
         }
@@ -310,8 +305,8 @@ void GameplayMenu::handleMouseMotion(int x, int y, int state)
         int px = v->screenX() - 20;
         int py = v->screenY() - 30;
 
-        if (x - 129 + scroll_x_ >= px && y + scroll_y_ >= py &&
-            x - 129 + scroll_x_ < px + 40 && y + scroll_y_ < py + 32) {
+        if (x - 129 + world_x_ >= px && y + world_y_ >= py &&
+            x - 129 + world_x_ < px + 40 && y + world_y_ < py + 32) {
             pointing_at_vehicle_ = i;
             break;
         }
@@ -326,8 +321,8 @@ void GameplayMenu::handleMouseMotion(int x, int y, int state)
             int px = w->screenX() - 10;
             int py = w->screenY() - 10;
 
-            if (x - 129 + scroll_x_ >= px && y + scroll_y_ >= py &&
-                x - 129 + scroll_x_ < px + 20 && y + scroll_y_ < py + 20) {
+            if (x - 129 + world_x_ >= px && y + world_y_ >= py &&
+                x - 129 + world_x_ < px + 20 && y + world_y_ < py + 20) {
                 pointing_at_weapon_ = i;
                 break;
             }
@@ -430,11 +425,11 @@ void GameplayMenu::handleMouseDown(int x, int y, int button)
         else {
             int ox, oy;
             int tx =
-                g_App.maps().screenToTileX(mission_->map(), scroll_x_ + x - 129,
-                        scroll_y_ + y, ox);
+                g_App.maps().screenToTileX(mission_->map(), world_x_ + x - 129,
+                        world_y_ + y, ox);
             int ty =
-                g_App.maps().screenToTileY(mission_->map(), scroll_x_ + x - 129,
-                        scroll_y_ + y, oy);
+                g_App.maps().screenToTileY(mission_->map(), world_x_ + x - 129,
+                        world_y_ + y, oy);
 
             for (int i = 0; i < 4; i++) {
                 if (isAgentSelected(i)) {
@@ -476,8 +471,8 @@ void GameplayMenu::handleMouseDown(int x, int y, int button)
                                 //int dy = ((i + 1) % 2) * (i - 1) * 8;
 
                                 int dx = 0; int dy = 0;
-                                int offset_x = scroll_x_ + x - 129;
-                                int offset_y = scroll_y_ + y;
+                                int offset_x = world_x_ + x - 129;
+                                int offset_y = world_y_ + y;
 
                                 tx = g_App.maps().screenToTileX(
                                         mission_->map(),
@@ -520,8 +515,8 @@ void GameplayMenu::handleMouseDown(int x, int y, int button)
                 }
                 else if (pointing_at_ped_ == -1
                         && pointing_at_vehicle_ == -1) {
-                    mission_->ped(i)->setTarget(scroll_x_ + x - 129,
-                            scroll_y_ + y);
+                    mission_->ped(i)->setTarget(world_x_ + x - 129,
+                            world_y_ + y);
                 }
                 WeaponInstance *w = mission_->ped(i)->selectedWeapon();
                 mission_->ped(i)->setHitDamage(w->shot());
@@ -577,6 +572,8 @@ extern int topz;
 void GameplayMenu::handleUnknownKey(Key key, KeyMod mod, bool pressed) {
     bool change = false; /* indicator whether menu should be redrawn */
 
+    // SPACE is pressed when the mission failed or succeeded to return
+    // to menu
     if (key == KEY_SPACE && mission_) {
         if (mission_->completed()) {
             map_menu_->setBlkColour(g_App.currentBlk(),
@@ -602,11 +599,11 @@ void GameplayMenu::handleUnknownKey(Key key, KeyMod mod, bool pressed) {
         if (pointing_at_ped_ != -1 && !alt_) {
             int ox, oy;
             int tx = g_App.maps().screenToTileX(mission_->map(),
-                    last_motion_x_ - 129 + scroll_x_,
-                    last_motion_y_ + scroll_y_, ox);
+                    last_motion_x_ - 129 + world_x_,
+                    last_motion_y_ + world_y_, ox);
             int ty = g_App.maps().screenToTileY(mission_->map(),
-                    last_motion_x_ - 129 + scroll_x_,
-                    last_motion_y_ + scroll_y_, oy);
+                    last_motion_x_ - 129 + world_x_,
+                    last_motion_y_ + world_y_, oy);
             mission_->ped(pointing_at_ped_)->setTileX(tx);
             mission_->ped(pointing_at_ped_)->setTileY(ty);
             mission_->ped(pointing_at_ped_)->setOffX(ox);
@@ -648,6 +645,29 @@ void GameplayMenu::handleUnknownKey(Key key, KeyMod mod, bool pressed) {
             selectAgent(3);
             change = true;
         }
+    }
+
+    // Scroll the map with the direction keys
+    if (key == KEY_LEFT) {
+        scroll_x_ = -SCROLL_STEP;
+    } else if (key == KEY_RIGHT) {
+        scroll_x_ = SCROLL_STEP;
+    }
+
+    if (key == KEY_UP) {
+        scroll_y_ = -SCROLL_STEP;
+    } else if (key == KEY_DOWN) {
+        scroll_y_ = SCROLL_STEP;
+    }
+
+    // Music Control
+    if (key == KEY_F1) {
+        g_App.music().toggleMusic();
+    }
+
+    // Sound Control
+    if (key == KEY_F2) {
+        g_App.gameSounds().toggleSound();
     }
 
 #if 0
@@ -723,17 +743,7 @@ void GameplayMenu::handleUnknownKey(Key key, KeyMod mod, bool pressed) {
         printf("%i\n", inc);
 #endif
 
-    if (key == KEY_LEFT)
-        mission_->ped(0)->setDirection(mission_->ped(0)->direction() + 1);
-
-    if (key == KEY_RIGHT)
-        mission_->ped(0)->setDirection(mission_->ped(0)->direction() - 1);
-
-    if (key == KEY_UP)
-        mission_->ped(0)->setSpeed(16);
-
-    if (key == KEY_DOWN)
-        mission_->ped(0)->setSpeed(0);
+#ifdef _DEBUG
 
     if (key == KEY_PAGEUP)
         mission_->ped(0)->setTileZ(mission_->ped(0)->tileZ() + 1);
@@ -742,9 +752,7 @@ void GameplayMenu::handleUnknownKey(Key key, KeyMod mod, bool pressed) {
         if (mission_->ped(0)->tileZ() > 0)
             mission_->ped(0)->setTileZ(mission_->ped(0)->tileZ() - 1);
     }
-    //if (key == KEY_SPACE)
-    //    printf("dir %i speed %i weapon %i\n", mission_->ped(0)->direction(), mission_->ped(0)->speed(), mission_->ped(0)->selectedWeapon()->index());
-
+    
     if (key == KEY_o)
         topz++;
 
@@ -791,13 +799,7 @@ void GameplayMenu::handleUnknownKey(Key key, KeyMod mod, bool pressed) {
                 mission_->vehicle(0)->direction() - 1);
     }
 
-    if (key == KEY_F1) {
-        g_App.music().toggleMusic();
-    }
-
-    if (key == KEY_F2) {
-        g_App.gameSounds().toggleSound();
-    }
+#endif //_DEBUG
 
     if (change)
         show(false);
@@ -1060,11 +1062,11 @@ void GameplayMenu::drawMiniMap() {
 
     int ox, oy;
     int tx = g_App.maps().map(mission_->map())->screenToTileX(
-            scroll_x_ + (GAME_SCREEN_WIDTH - 129) / 2,
-            scroll_y_ + GAME_SCREEN_HEIGHT / 2, ox);
+            world_x_ + (GAME_SCREEN_WIDTH - 129) / 2,
+            world_y_ + GAME_SCREEN_HEIGHT / 2, ox);
     int ty = g_App.maps().map(mission_->map())->screenToTileY(
-            scroll_x_ + (GAME_SCREEN_WIDTH - 129) / 2,
-            scroll_y_ + GAME_SCREEN_HEIGHT / 2, oy);
+            world_x_ + (GAME_SCREEN_WIDTH - 129) / 2,
+            world_y_ + GAME_SCREEN_HEIGHT / 2, oy);
 
     for (int i = 0; i < 4; i++)
         if (isAgentSelected(i)) {

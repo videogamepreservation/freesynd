@@ -46,20 +46,6 @@ public:
     void handleUnknownKey(Key key, KeyMod mod, bool pressed);
 
 protected:
-    LoadingMenu *loading_;
-    MapMenu *map_menu_;
-    int tick_count_, last_animate_tick_;
-    int last_motion_tick_, last_motion_x_, last_motion_y_;
-    int mission_hint_ticks_,mission_hint_;
-    Mission *mission_;
-    int scroll_x_, scroll_y_;
-    unsigned int selected_agents_;
-    unsigned int selectable_agents_;
-    bool ctrl_, alt_;
-    int pointing_at_ped_, pointing_at_vehicle_, pointing_at_weapon_;
-    int mm_tx_, mm_ty_;
-    bool completed_;
-
     void drawAgentSelectors();
     void drawPerformanceMeters();
     void drawSelectAllButton();
@@ -75,6 +61,28 @@ protected:
     bool isAgentSelected(unsigned int agentNo) {
         return (selected_agents_ & (1 << agentNo))!=0;
     }
+
+protected:
+    LoadingMenu *loading_;
+    MapMenu *map_menu_;
+    int tick_count_, last_animate_tick_;
+    int last_motion_tick_, last_motion_x_, last_motion_y_;
+    int mission_hint_ticks_,mission_hint_;
+    Mission *mission_;
+    /*! Holds the X coordinate of the screen origin (top left corner) in the world coordinate.*/
+    int world_x_;
+    /*! Holds the Y coordinate of the screen origin (top left corner) in the world coordinate.*/
+    int world_y_;
+    /*! Holds the amount of scroll on the X axis.*/
+    int scroll_x_;
+    /*! Holds the amount of scroll on the Y axis.*/
+    int scroll_y_;
+    unsigned int selected_agents_;
+    unsigned int selectable_agents_;
+    bool ctrl_, alt_;
+    int pointing_at_ped_, pointing_at_vehicle_, pointing_at_weapon_;
+    int mm_tx_, mm_ty_;
+    bool completed_;
 };
 
 #endif
