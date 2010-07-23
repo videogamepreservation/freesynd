@@ -9,6 +9,7 @@ Changes
 -------
   * Minimap drawing is fixed, should be better now
   * Map can be scrolled with arrow keys
+  * People, objects will not move to unwalkable surfaces.
 
 Fixed Bugs
 ----------

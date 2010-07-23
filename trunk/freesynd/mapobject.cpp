@@ -120,7 +120,8 @@ void ShootableMovableMapObject::setDestination(int x, int y, int z, int ox,
 
     dest_path_.clear();
 
-    if (map_ == -1 || health_ <= 0)
+    if (map_ == -1 || health_ <= 0
+        || !(walkable(x, y, z)))
         return;
 
     if (!walkable(tile_x_, tile_y_, tile_z_)) {

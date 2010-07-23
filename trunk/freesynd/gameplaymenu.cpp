@@ -1052,6 +1052,7 @@ int mcolors_[] = {
     7,  7, 10, 10,
    10, 10,  0, 10,
    15, 15, 10, 10,
+   0,
 };
 
 void GameplayMenu::drawMiniMap() {
@@ -1082,6 +1083,7 @@ void GameplayMenu::drawMiniMap() {
 
     for (int j = 0; j < 16; j++)
         for (int i = 0; i < 16; i++) {
+            // TODO: still needs tweaking
             int t =
                 g_App.maps().map(mission_->map())->tileAt(tx + i, ty + j, 0);
 

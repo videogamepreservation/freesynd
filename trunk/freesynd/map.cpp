@@ -26,6 +26,7 @@
 #include <string.h>
 #include <assert.h>
 
+#include "app.h"
 #include "screen.h"
 #include "map.h"
 #include "tilemanager.h"
@@ -152,7 +153,8 @@ int Map::tileAt(int x, int y, int z)
 
 bool Map::stairsAt(int x, int y, int z)
 {
-    return tileAt(x, y, z) == 178 || tileAt(x, y, z) == 179;
+    uint8 isStairs = g_App.walkdata_[tileAt(x, y, z)];
+    return  isStairs > 0 && isStairs < 5;
 }
 
 
