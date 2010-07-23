@@ -204,7 +204,7 @@ void GameplayMenu::handleShow()
     drawAgentSelectors();
     drawPerformanceMeters();
     drawSelectAllButton();
-//    drawMissionHint(0);
+    drawMissionHint(0);
     drawWeaponSelectors();
     drawMiniMap();
 
