@@ -832,11 +832,12 @@ bool PedInstance::walkable(int x, int y, int z) {
     if (m->stairsAt(x, y, z) || m->stairsAt(x, y, z + 1))
         return true;
 
-    //printf(" %i\n",g_App.walkdata_[m->tileAt(x, y, z)]);
-    return g_App.walkdata_[m->tileAt(x, y, z)] != 0x0C
-        && g_App.walkdata_[m->tileAt(x, y, z)] != 0x10
-        && g_App.walkdata_[m->tileAt(x, y, z)] != 0x0
-        && m->tileAt(x, y, z + 1) < 5;
+    uint8 thisTile = m->tileAt(x, y, z);
+    //printf(" %i : %i : %i\n",g_App.walkdata_[m->tileAt(x, y, z)],z,m->tileAt(x, y, z + 1));
+    return g_App.walkdata_[thisTile] != 0x0C
+        && g_App.walkdata_[thisTile] != 0x10
+        && g_App.walkdata_[thisTile] != 0x0
+        && g_App.walkdata_[m->tileAt(x, y, z + 1)] != 5;
 }
 
 PedInstance::AnimationDrawn PedInstance::getDrawnAnim() {
