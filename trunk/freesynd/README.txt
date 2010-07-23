@@ -62,6 +62,7 @@ Commands
  * 0   : Key 0 cycles between current selection and all 4 agents.
  * Ctrl + 0 : Inverts selection.
  * Ctrl + Left Click : sets a waypoint for the selected agents
+ * Left,Right,Up, down : scrolls the map
 
 Contact
 -------

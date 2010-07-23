@@ -52,6 +52,8 @@ protected:
     void drawMissionHint(int elapsed);
     void drawWeaponSelectors();
     void drawMiniMap();
+    //! Scroll the map vertically or horizontally.
+    bool scroll();
     bool isScrollLegal(int newScrollX, int newScrollY);
     void improveScroll(int &newScrollX, int &newScrollY);
     int selectedAgentsCount();

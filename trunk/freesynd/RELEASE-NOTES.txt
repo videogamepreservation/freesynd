@@ -8,7 +8,7 @@ This is a prelimary release for testing and development purposes.
 Changes
 -------
   * Minimap drawing is fixed, should be better now
-  * Map can be scrolled with arrow keys
+  * Map can be scrolled with arrow keys and scrolling is like original game
   * People, objects will not move to unwalkable surfaces
   * When weapon is dropped while moving, ped will stop moving
 

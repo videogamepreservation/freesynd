@@ -53,36 +53,193 @@ mission_hint_ticks_(0), mission_hint_(0)
     scroll_y_ = 0;
 }
 
+/*!
+ * Scroll the map vertically or horizontally.
+ * Each map has a min and max value for the world origin coords and this
+ * method moves that point between those limits. If scrolling hits the
+ * map border, the scrolling is made along that border.
+ * \return True is a scroll is made
+ */
+bool GameplayMenu::scroll() {
+    bool change = false;
+    int ox, oy; // unused
+
+    if (scroll_x_ != 0) {
+        int newWorldX = world_x_ + scroll_x_;
+
+        int tx =
+            g_App.maps().screenToTileX(mission_->map(), newWorldX, world_y_, ox);
+        int ty =
+            g_App.maps().screenToTileY(mission_->map(), newWorldX, world_y_, oy);
+
+        // Scroll to the right
+        if (scroll_x_ > 0) {
+            if (ty < mission_->minY()) {
+                // we hit the upper right border of the map
+                // so we scroll down until the far right corner
+                int newWorldY = world_y_ + SCROLL_STEP;
+                newWorldX += SCROLL_STEP;
+                tx = g_App.maps().screenToTileX(mission_->map(), newWorldX, newWorldY, ox);
+                ty = g_App.maps().screenToTileY(mission_->map(), newWorldX, newWorldY, oy);
+
+                if (ty < mission_->minY() || tx > mission_->maxX()) {
+                    // We hit the corner so don't scroll
+                    return false;
+                } else {
+                    world_x_ = newWorldX;
+                    world_y_ = newWorldY;
+                    change = true;
+                }
+            } else if (tx > mission_->maxX()) {
+                // we hit the lower right border of the map
+                // so we scroll up until the far right corner
+                int newWorldY = world_y_ - SCROLL_STEP;
+                newWorldX += SCROLL_STEP;
+                tx = g_App.maps().screenToTileX(mission_->map(), newWorldX, newWorldY, ox);
+                ty = g_App.maps().screenToTileY(mission_->map(), newWorldX, newWorldY, oy);
+
+                if (ty < mission_->minY() || tx > mission_->maxX()) {
+                    return false;
+                } else {
+                    world_x_ = newWorldX;
+                    world_y_ = newWorldY;
+                    change = true;
+                }
+            } else {
+                // This is a regular right scroll
+                world_x_ = newWorldX;
+                change = true;
+            }
+
+        } else if (scroll_x_ < 0) { // Scroll to the left
+            if (tx < mission_->minX()) {
+                // we hit the upper left border of the map
+                // so we scroll down until the far left corner
+                int newWorldY = world_y_ + SCROLL_STEP;
+                newWorldX -= SCROLL_STEP;
+                tx = g_App.maps().screenToTileX(mission_->map(), newWorldX, newWorldY, ox);
+                ty = g_App.maps().screenToTileY(mission_->map(), newWorldX, newWorldY, oy);
+
+                if (tx < mission_->minX() || ty > mission_->maxY()) {
+                    return false;
+                } else {
+                    world_x_ = newWorldX;
+                    world_y_ = newWorldY;
+                    change = true;
+                }
+            } else if (ty > mission_->maxY()) {
+                // we hit the lower left border of the map
+                // so we scroll up until the far left corner
+                int newWorldY = world_y_ - SCROLL_STEP;
+                newWorldX -= SCROLL_STEP;
+                tx = g_App.maps().screenToTileX(mission_->map(), newWorldX, newWorldY, ox);
+                ty = g_App.maps().screenToTileY(mission_->map(), newWorldX, newWorldY, oy);
+
+                if (tx < mission_->minX() || ty > mission_->maxY()) {
+                    return false;
+                } else {
+                    world_x_ = newWorldX;
+                    world_y_ = newWorldY;
+                    change = true;
+                }
+            } else {
+                world_x_ = newWorldX;
+                change = true;
+            }
+        }
+    }
+
+    if (scroll_y_ != 0) {
+        int newWorldY = world_y_ + scroll_y_;
+
+        int tx =
+            g_App.maps().screenToTileX(mission_->map(), world_x_, newWorldY, ox);
+        int ty =
+            g_App.maps().screenToTileY(mission_->map(), world_x_, newWorldY, oy);
+
+        // Scroll down
+        if (scroll_y_ > 0) {
+            if (tx > mission_->maxX()) {
+                // we hit the lower right border of the map
+                // so we scroll down until the lower corner
+                int newWorldX = world_x_ - 2*SCROLL_STEP;
+                tx = g_App.maps().screenToTileX(mission_->map(), newWorldX, newWorldY, ox);
+                ty = g_App.maps().screenToTileY(mission_->map(), newWorldX, newWorldY, oy);
+
+                if (ty > mission_->maxY() || tx > mission_->maxX()) {
+                    return false;
+                } else {
+                    world_x_ = newWorldX;
+                    world_y_ = newWorldY;
+                    change = true;
+                }
+            } else if (ty > mission_->maxY()) {
+                // we hit the lower left border of the map
+                // so we scroll down until the lower corner
+                int newWorldX = world_x_ + 2*SCROLL_STEP;
+                tx = g_App.maps().screenToTileX(mission_->map(), newWorldX, newWorldY, ox);
+                ty = g_App.maps().screenToTileY(mission_->map(), newWorldX, newWorldY, oy);
+
+                if (ty > mission_->maxY() || tx > mission_->maxX()) {
+                    return false;
+                } else {
+                    world_x_ = newWorldX;
+                    world_y_ = newWorldY;
+                    change = true;
+                }
+            } else {
+                world_y_ = newWorldY;
+                change = true;
+            }
+
+        } else if (scroll_y_ < 0) { // Scroll up
+            if (tx < mission_->minX()) {
+                // we hit the upper right border of the map
+                // so we scroll up until the upper corner
+                int newWorldX = world_x_ + 2*SCROLL_STEP;
+                tx = g_App.maps().screenToTileX(mission_->map(), newWorldX, newWorldY, ox);
+                ty = g_App.maps().screenToTileY(mission_->map(), newWorldX, newWorldY, oy);
+
+                if (ty < mission_->minY() || tx < mission_->minX()) {
+                    return false;
+                } else {
+                    world_x_ = newWorldX;
+                    world_y_ = newWorldY;
+                    change = true;
+                }
+            } else if (ty < mission_->minY()) {
+                // we hit the upper left border of the map
+                // so we scroll up until the upper corner
+                int newWorldX = world_x_ - 2*SCROLL_STEP;
+                tx = g_App.maps().screenToTileX(mission_->map(), newWorldX, newWorldY, ox);
+                ty = g_App.maps().screenToTileY(mission_->map(), newWorldX, newWorldY, oy);
+
+                if (ty < mission_->minY() || tx < mission_->minX()) {
+                    return false;
+                } else {
+                    world_x_ = newWorldX;
+                    world_y_ = newWorldY;
+                    change = true;
+                }
+            } else {
+                world_y_ = newWorldY;
+                change = true;
+            }
+        }
+    }
+
+    return change;
+}
+
 void GameplayMenu::handleTick(int elapsed)
 {
     bool change = false;
     tick_count_ += elapsed;
 
-    // Scroll the map on the X axis
-    if (scroll_x_ != 0) {
-        int newWorldX = world_x_ + scroll_x_;
-
-        if (newWorldX < 0)
-            newWorldX = 0;
-
-        if (isScrollLegal(newWorldX, world_y_)) {
-            world_x_ = newWorldX;
-            change = true;
-        }
+    // Scroll the map
+    if (scroll_x_ != 0 || scroll_y_ != 0) {
+        change = scroll();
         scroll_x_ = 0;
-    }
-
-    // Scroll the map on the Y axis
-    if (scroll_y_ != 0) {
-        int newWorldY = world_y_ + scroll_y_;
-
-        if (newWorldY < 0)
-            newWorldY = 0;
-
-        if (isScrollLegal(world_x_, newWorldY)) {
-            world_y_ = newWorldY;
-            change = true;
-        }
         scroll_y_ = 0;
     }
 
