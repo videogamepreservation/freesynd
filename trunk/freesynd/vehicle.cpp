@@ -90,6 +90,7 @@ void VehicleInstance::draw(int x, int y)
 
 bool VehicleInstance::walkable(int x, int y, int z)
 {
-    return g_App.maps().map(map())->tileAt(x, y, z) > 100;
-    //return g_App.maps().map(map())->tileAt(x, y, z) > 5 && g_App.maps().map(map())->tileAt(x, y, z + 1) <= 5;
+    uint8 isRoad = g_App.walkdata_[g_App.maps().map(map())->tileAt(x, y, z)];
+
+    return  (isRoad == 0x0B || (isRoad > 0x05 && isRoad < 0x0A));
 }
