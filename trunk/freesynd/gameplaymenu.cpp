@@ -161,8 +161,6 @@ int qanim = 1085, qframe = 0;
 void GameplayMenu::handleShow()
 {
     if (mission_ == NULL) {
-        int size = 0;
-        //TODO:this is walkdata find better place for init
         mission_ = loading_->mission();
         mission_->start();
         completed_ = false;

@@ -292,6 +292,10 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
             frame_ = ped_->lastPickupFrame();
             setDrawnAnim(PedInstance::PutdownAnim);
             draw_timeout_ = 1;
+            if(speed() != 0){
+                clearDestination();
+                setSpeed(0);
+            }
             return true;
         }
     }
