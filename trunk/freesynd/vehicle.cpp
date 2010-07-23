@@ -90,7 +90,28 @@ void VehicleInstance::draw(int x, int y)
 
 bool VehicleInstance::walkable(int x, int y, int z)
 {
-    uint8 isRoad = g_App.walkdata_[g_App.maps().map(map())->tileAt(x, y, z)];
+    uint8 thisTile = g_App.maps().map(map())->tileAt(x, y, z);
+    uint8 isRoad = g_App.walkdata_[thisTile];
 
-    return  (isRoad == 0x0B || (isRoad > 0x05 && isRoad < 0x0A));
+    if(thisTile == 80) {
+        uint8 nearTile = g_App.walkdata_[g_App.maps().map(map())->tileAt(x, y - 1, z)];
+        if(nearTile < 0x06 || nearTile > 0x09)
+            return false;
+        nearTile = g_App.walkdata_[g_App.maps().map(map())->tileAt(x, y + 1, z)];
+        if(nearTile < 0x06 || nearTile > 0x09)
+            return false;
+    }
+    if(thisTile == 81) {
+        uint8 nearTile = g_App.walkdata_[g_App.maps().map(map())->tileAt(x - 1, y, z)];
+        if(nearTile < 0x06 || nearTile > 0x09)
+            return false;
+        nearTile = g_App.walkdata_[g_App.maps().map(map())->tileAt(x + 1, y, z)];
+        if(nearTile < 0x06 || nearTile > 0x09)
+            return false;
+    }
+    if(thisTile == 72) {
+        return false;
+    }
+    return  (isRoad == 0x0B || isRoad == 0x0E
+        || (isRoad > 0x05 && isRoad < 0x0A));
 }
