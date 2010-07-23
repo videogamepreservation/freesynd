@@ -125,38 +125,54 @@ void ShootableMovableMapObject::setDestination(int x, int y, int z, int ox,
         return;
 
     if (!walkable(tile_x_, tile_y_, tile_z_)) {
+        float dBest = 100000, dCur;
+        int xBest,yBest;
         // we got somewhere we shouldn't, we need to find somewhere that is walkable
         for (int j = 0; j < 5; j++)
             for (int i = 0; i < 5; i++)
                 if (walkable(tile_x_ + i, tile_y_ + j, tile_z_)) {
-                    tile_x_ = tile_x_ + i;
-                    tile_y_ = tile_y_ + j;
-                    goto gotwalkable;
+                    dCur = sqrt((float)(i*i + j*j));
+                    if(dCur < dBest) {
+                        xBest = tile_x_ + i;
+                        yBest = tile_y_ + j;
+                        dBest = dCur;
+                    }
                 }
         for (int j = 0; j < 5; j++)
             for (int i = 0; i > -5; --i)
                 if (walkable(tile_x_ + i, tile_y_ + j, tile_z_)) {
-                    tile_x_ = tile_x_ + i;
-                    tile_y_ = tile_y_ + j;
-                    goto gotwalkable;
+                    dCur = sqrt((float)(i*i + j*j));
+                    if(dCur < dBest) {
+                        xBest = tile_x_ + i;
+                        yBest = tile_y_ + j;
+                        dBest = dCur;
+                    }
                 }
         for (int j = 0; j > -5; --j)
             for (int i = 0; i > -5; --i)
                 if (walkable(tile_x_ + i, tile_y_ + j, tile_z_)) {
-                    tile_x_ = tile_x_ + i;
-                    tile_y_ = tile_y_ + j;
-                    goto gotwalkable;
+                    dCur = sqrt((float)(i*i + j*j));
+                    if(dCur < dBest) {
+                        xBest = tile_x_ + i;
+                        yBest = tile_y_ + j;
+                    }
                 }
         for (int j = 0; j > -5; --j)
             for (int i = 0; i < 5; i++)
                 if (walkable(tile_x_ + i, tile_y_ + j, tile_z_)) {
-                    tile_x_ = tile_x_ + i;
-                    tile_y_ = tile_y_ + j;
-                    goto gotwalkable;
+                    dCur = sqrt((float)(i*i + j*j));
+                    if(dCur < dBest) {
+                        xBest = tile_x_ + i;
+                        yBest = tile_y_ + j;
+                        dBest = dCur;
+                    }
                 }
-        return;
-      gotwalkable:
-        ;
+        if(dBest == 100000)
+            return;
+        else {
+            tile_x_ = xBest;
+            tile_y_ = yBest;
+        }
     }
 
     PathNode closest;
