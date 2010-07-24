@@ -63,7 +63,7 @@ vehicle_(vehicle)
 
 bool VehicleInstance::animate(int elapsed)
 {
-    bool updated = ShootableMovableMapObject::movementV(elapsed);
+    bool updated = movementV(elapsed);
 
     if (health_ <= start_health_) {
         return MapObject::animate(elapsed);

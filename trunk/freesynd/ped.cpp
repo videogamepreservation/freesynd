@@ -300,7 +300,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
         }
     }
 
-    updated = ShootableMovableMapObject::movementP(elapsed);
+    updated = movementP(elapsed);
 
     if (target_) {
         if (inRange(target_)) {
