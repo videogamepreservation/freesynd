@@ -170,7 +170,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                 if (mission->ped(i)->health() > 0
                         && inSightRange(mission->ped(i))) {
                     if (dest_path_.size() == 0)
-                        setDestination(mission->ped(i)->tileX(),
+                        setDestinationP(mission->ped(i)->tileX(),
                                        mission->ped(i)->tileY(),
                                        mission->ped(i)->tileZ());
                     break;
@@ -222,7 +222,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
         }
         else {
             if(health_ > 0)
-                setDestination(in_vehicle_->tileX(), in_vehicle_->tileY(), 0,
+                setDestinationP(in_vehicle_->tileX(), in_vehicle_->tileY(), 0,
                         in_vehicle_->offX(), in_vehicle_->offY(), 320);
         }
     }
@@ -273,7 +273,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
         }
         else{
             if(health_ > 0)
-                setDestination(pickup_weapon_->tileX(), pickup_weapon_->tileY(), 0,
+                setDestinationP(pickup_weapon_->tileX(), pickup_weapon_->tileY(), 0,
                         pickup_weapon_->offX(), pickup_weapon_->offY(), 320);
         }
     }
@@ -300,7 +300,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
         }
     }
 
-    updated = ShootableMovableMapObject::animate(elapsed);
+    updated = ShootableMovableMapObject::movementP(elapsed);
 
     if (target_) {
         if (inRange(target_)) {

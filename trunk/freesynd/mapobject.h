@@ -171,14 +171,19 @@ public:
         speed_ = new_speed;
     }
 
-    void setDestination(int x, int y, int z, int ox = 128, int oy = 128,
+    void setDestinationP(int x, int y, int z, int ox = 128, int oy = 128,
+            int new_speed = 160);
+
+    void setDestinationV(int x, int y, int z, int ox = 128, int oy = 128,
             int new_speed = 160);
 
     void clearDestination() {
         dest_path_.clear();
     }
 
-    virtual bool animate(int elapsed);
+    bool movementP(int elapsed);
+
+    bool movementV(int elapsed);
 
 protected:
     int dir_;
