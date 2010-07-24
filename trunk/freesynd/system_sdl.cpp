@@ -61,6 +61,9 @@ SystemSDL::SystemSDL(int depth)
 
     SDL_WM_SetCaption("FreeSynd", NULL);
 
+    // Keyboard init
+    SDL_EnableKeyRepeat(80, 40);
+
     // Audio initialisation
     if (!Audio::init()) {
         LOG(Log::k_FLG_SND, "SystemSDL", "Init", ("Couldn't initialize Sound System : no sound will be played."))
