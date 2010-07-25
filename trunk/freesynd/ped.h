@@ -229,6 +229,11 @@ public:
     int map();
     AnimationDrawn getDrawnAnim();
     void setDrawnAnim(AnimationDrawn drawn_anim);
+
+    void setDestinationP(int x, int y, int z, int ox = 128, int oy = 128,
+            int new_speed = 160);
+    bool movementP(int elapsed);
+
     int draw_timeout_;
 
 protected:

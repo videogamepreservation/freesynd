@@ -28,6 +28,7 @@
 
 #include <string>
 #include "mapobject.h"
+#include "path.h"
 
 class VehicleInstance;
 
@@ -62,10 +63,16 @@ public:
     bool animate(int elapsed);
     void draw(int x, int y);
 
+    void setDestinationV(int x, int y, int z, int ox = 128, int oy = 128,
+            int new_speed = 160);
+    bool movementV(int elapsed);
+
 protected:
     Vehicle *vehicle_;
 
     bool walkable(int x, int y, int z);
+    int tileDir(int x, int y, int z);
+    bool dirWalkable(PathNode *p, int x, int y, int z);
 };
 
 #endif

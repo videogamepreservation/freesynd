@@ -171,19 +171,9 @@ public:
         speed_ = new_speed;
     }
 
-    void setDestinationP(int x, int y, int z, int ox = 128, int oy = 128,
-            int new_speed = 160);
-
-    void setDestinationV(int x, int y, int z, int ox = 128, int oy = 128,
-            int new_speed = 160);
-
     void clearDestination() {
         dest_path_.clear();
     }
-
-    bool movementP(int elapsed);
-
-    bool movementV(int elapsed);
 
 protected:
     int dir_;
