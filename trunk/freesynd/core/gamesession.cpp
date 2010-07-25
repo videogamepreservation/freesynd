@@ -2,9 +2,7 @@
  *                                                                      *
  *  FreeSynd - a remake of the classic Bullfrog game "Syndicate".       *
  *                                                                      *
- *   Copyright (C) 2005  Stuart Binge  <skbinge@gmail.com>              *
- *   Copyright (C) 2005  Joost Peters  <joostp@users.sourceforge.net>   *
- *   Copyright (C) 2006  Trent Waddington <qg@biodome.org>              *
+ *   Copyright (C) 2010  Benoit Blancard <benblan@users.sourceforge.net>*
  *                                                                      *
  *    This program is free software;  you can redistribute it and / or  *
  *  modify it  under the  terms of the  GNU General  Public License as  *
@@ -22,26 +20,20 @@
  *                                                                      *
  ************************************************************************/
 
-#include <stdio.h>
-#include <assert.h>
-#include "app.h"
-#include "file.h"
-#include "debriefmenu.h"
+#include "gamesession.h"
 
-DebriefMenu::DebriefMenu(MenuManager *m) : Menu(m, "debrief", "mdebrief.dat",
-     "mdeout.dat") {
-    addStatic(100, 35, "MISSION DEBRIEFING", 3, true);
-    addOption(43, 352, "ACCEPT", 1, KEY_F5, "map");
-    addOption(535, 352, "MENU", 1, KEY_F6, "main");
+GameSession::GameSession() {
+    reset();
 }
 
-void DebriefMenu::handleShow() {
-    g_Screen.drawLogo(18, 14, g_App.getGameSession().getLogo(), g_App.getGameSession().getLogoColour());
-
-    g_System.useMenuCursor();
-    g_System.showCursor();
+GameSession::~GameSession() {
+    reset();
 }
 
-void DebriefMenu::handleLeave() {
-    g_System.hideCursor();
+void GameSession::reset() {
+    logo_ = 0;
+    logo_colour_ = 6;
+    company_name_.clear();
+    username_.clear();
+    money_ = 30000;
 }

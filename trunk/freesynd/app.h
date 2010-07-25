@@ -46,16 +46,14 @@
 #include "pedmanager.h"
 #include "soundmanager.h"
 #include "musicmanager.h"
+#include "core/gamesession.h"
 
 /*!
  * Application class.
  * Used for managing game settings and workflows.
  */
 class App : public Singleton < App > {
-    int logo_, logo_colour_;
-    int money_;
-    std::string company_name_;
-    std::string your_name_;
+    GameSession session_;
     Agent *team_members_[4];
     std::vector<Agent *> agents_recruited_;
     std::vector<Weapon *> available_weapons_;
@@ -89,7 +87,7 @@ class App : public Singleton < App > {
     MusicManager music_;
 
     void cheatFunds() {
-        money_ = 100000000;
+        session_.setMoney(100000000);
     }
 
     void cheatRepeatOrCompleteMission();
@@ -107,6 +105,12 @@ class App : public Singleton < App > {
     virtual ~App();
 
     uint8 walkdata_[256];
+
+    void setCheatCode(const char *name);
+
+    GameSession &getGameSession() {
+        return session_;
+    }
 
     SpriteManager &menuSprites() {
         return menu_sprites_;
@@ -162,44 +166,6 @@ class App : public Singleton < App > {
 
     MusicManager &music() {
         return music_;
-    }
-
-    int logo() const {
-        return logo_;
-    }
-
-    int logoColour() const {
-        return logo_colour_;
-    }
-
-    void setLogo(int new_logo) {
-        logo_ = new_logo;
-    }
-
-    void setLogoColour(int colour) {
-        logo_colour_ = colour;
-    }
-
-    const char *companyName() const {
-        return company_name_.c_str();
-    }
-
-    const char *yourName() const {
-        return your_name_.c_str();
-    }
-
-    void setCompanyName(const char *name);
-
-    void setYourName(const char *name) {
-        your_name_ = name;
-    }
-
-    int money() const {
-        return money_;
-    }
-
-    void setMoney(int m) {
-        money_ = m;
     }
 
     Agent *teamMember(int n) {

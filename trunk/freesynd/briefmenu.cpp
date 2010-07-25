@@ -72,7 +72,7 @@ void BriefMenu::handleShow() {
                       GAME_SCREEN_WIDTH);
     }
 
-    g_Screen.drawLogo(18, 14, g_App.logo(), g_App.logoColour());
+    g_Screen.drawLogo(18, 14, g_App.getGameSession().getLogo(), g_App.getGameSession().getLogoColour());
 
     // grab mission info
     cur_miss_ = g_MissionNumbers[g_App.currentBlk()];
@@ -180,7 +180,7 @@ void BriefMenu::handleShow() {
     g_Screen.blit(502, 87, 125, 30,
                   orig_pixels_ + 502 + 87 * GAME_SCREEN_WIDTH, false,
                   GAME_SCREEN_WIDTH);
-    sprintf(tmp, "%d", g_App.money());
+    sprintf(tmp, "%d", g_App.getGameSession().getMoney());
     g_App.fonts().drawText(560 - g_App.fonts().textWidth(tmp, 1) / 2, 87,
                            tmp, 1, false);
 
@@ -216,7 +216,7 @@ void BriefMenu::handleLeave() {
 void BriefMenu::handleOption(Key key) {
     if (key == KEY_F1) {
         if (info_level_ < 3) {
-            g_App.setMoney(g_App.money() - mission_->infoCost(info_level_));
+            g_App.getGameSession().setMoney(g_App.getGameSession().getMoney() - mission_->infoCost(info_level_));
             info_level_++;
         }
 
@@ -226,7 +226,7 @@ void BriefMenu::handleOption(Key key) {
 
     if (key == KEY_F2) {
         if (enhance_level_ < 3) {
-            g_App.setMoney(g_App.money() -
+            g_App.getGameSession().setMoney(g_App.getGameSession().getMoney() -
                            mission_->enhanceCost(enhance_level_));
             enhance_level_++;
         }

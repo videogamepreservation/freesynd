@@ -154,32 +154,31 @@ void App::cheatEquipFancyWeapons() {
     }
 }
 
-void App::setCompanyName(const char *name) {
-    company_name_ = name;
-
+void App::setCheatCode(const char *name) {
+    
     // Repeat mission with previously obtained items, press 'C' or 'Ctrl-C'
     // to instantly complete a mission
-    if (company_name_ == "DO IT AGAIN")
+    if (name == "DO IT AGAIN")
         cheatRepeatOrCompleteMission();
-    else if (company_name_ == "NUK THEM") {
+    else if (name == "NUK THEM") {
         // Select any mission, resurrect dead agents
         cheatAnyMission();
         cheatResurrectAgents();
     }
-    else if (company_name_ == "OWN THEM") {
+    else if (name == "OWN THEM") {
         // Own all countries
         cheatOwnAllCountries();
     }
-    else if (company_name_ == "ROB A BANK") {
+    else if (name == "ROB A BANK") {
         // $100 000 000 in funds
         cheatFunds();
     }
-    else if (company_name_ == "TO THE TOP") {
+    else if (name == "TO THE TOP") {
         // $100 000 000 in funds, select any mission
         cheatFunds();
         cheatAnyMission();
     }
-    else if (company_name_ == "COOPER TEAM") {
+    else if (name == "COOPER TEAM") {
         // $100 000 000 in funds, select any mission, all weapons and mods
         cheatFemaleRecruits();
         cheatFunds();
@@ -188,16 +187,14 @@ void App::setCompanyName(const char *name) {
         cheatEquipAllMods();
         cheatEquipFancyWeapons();
     }
-    else if (company_name_ == "WATCH THE CLOCK") {
+    else if (name == "WATCH THE CLOCK") {
         // Accelerate time for faster research completion
         cheatAccelerateTime();
     }
 }
 
 void App::reset() {
-    logo_ = 0;
-    logo_colour_ = 6;
-    money_ = 30000;
+    session_.reset();
 
     agents_.reset();
 

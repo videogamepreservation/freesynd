@@ -392,6 +392,14 @@
 					>
 				</File>
 			</Filter>
+			<Filter
+				Name="core"
+				>
+				<File
+					RelativePath="..\..\core\gamesession.cpp"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Fichiers d&apos;en-tête"
@@ -643,6 +651,14 @@
 				</File>
 				<File
 					RelativePath="..\..\tilemanager.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="core"
+				>
+				<File
+					RelativePath="..\..\core\gamesession.h"
 					>
 				</File>
 			</Filter>

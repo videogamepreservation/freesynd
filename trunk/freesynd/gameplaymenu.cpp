@@ -732,7 +732,7 @@ void GameplayMenu::handleUnknownKey(Key key, KeyMod mod, bool pressed) {
     if (key == KEY_SPACE && mission_) {
         if (mission_->completed()) {
             map_menu_->setBlkColour(g_App.currentBlk(),
-                    g_App.logoColour());
+                    g_App.getGameSession().getLogoColour());
             menu_manager_->changeCurrentMenu("misswin");
             return;
         }

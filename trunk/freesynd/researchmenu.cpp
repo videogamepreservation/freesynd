@@ -152,14 +152,14 @@ void ResearchMenu::handleShow()
                       orig_pixels_ + 145, false, GAME_SCREEN_WIDTH);
     }
 
-    g_Screen.drawLogo(18, 14, g_App.logo(), g_App.logoColour());
+    g_Screen.drawLogo(18, 14, g_App.getGameSession().getLogo(), g_App.getGameSession().getLogoColour());
 
     // write money
     char tmp[100];
     g_Screen.blit(538, 87, 100, 30,
                   orig_pixels_ + 538 + 87 * GAME_SCREEN_WIDTH, false,
                   GAME_SCREEN_WIDTH);
-    sprintf(tmp, "%d", g_App.money());
+    sprintf(tmp, "%d", g_App.getGameSession().getMoney());
     g_App.fonts().drawText(560 - g_App.fonts().textWidth(tmp, 1) / 2, 87,
                            tmp, 1, false);
 

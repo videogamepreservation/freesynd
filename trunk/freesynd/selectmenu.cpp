@@ -312,14 +312,14 @@ void SelectMenu::handleShow()
                       orig_pixels_ + 145, false, GAME_SCREEN_WIDTH);
     }
 
-    g_Screen.drawLogo(18, 14, g_App.logo(), g_App.logoColour());
+    g_Screen.drawLogo(18, 14, g_App.getGameSession().getLogo(), g_App.getGameSession().getLogoColour());
 
     // write money
     char tmp[100];
     g_Screen.blit(538, 87, 100, 30,
                   orig_pixels_ + 538 + 87 * GAME_SCREEN_WIDTH, false,
                   GAME_SCREEN_WIDTH);
-    sprintf(tmp, "%d", g_App.money());
+    sprintf(tmp, "%d", g_App.getGameSession().getMoney());
     g_App.fonts().drawText(560 - g_App.fonts().textWidth(tmp, 1) / 2, 87,
                            tmp, 1, false);
 
@@ -597,15 +597,15 @@ void SelectMenu::handleOption(Key key)
             for (int n = 0; n < 4; n++) {
                 Agent *selected = g_App.teamMember(n);
                 if (selected->numWeapons() < 8
-                    && g_App.money() >= w->cost()) {
-                    g_App.setMoney(g_App.money() - w->cost());
+                    && g_App.getGameSession().getMoney() >= w->cost()) {
+                    g_App.getGameSession().setMoney(g_App.getGameSession().getMoney() - w->cost());
                     selected->addWeapon(w->createInstance());
                 }
             }
         } else {
             Agent *selected = g_App.teamMember(cur_agent_);
-            if (selected->numWeapons() < 8 && g_App.money() >= w->cost()) {
-                g_App.setMoney(g_App.money() - w->cost());
+            if (selected->numWeapons() < 8 && g_App.getGameSession().getMoney() >= w->cost()) {
+                g_App.getGameSession().setMoney(g_App.getGameSession().getMoney() - w->cost());
                 selected->addWeapon(w->createInstance());
             }
         }
@@ -618,18 +618,18 @@ void SelectMenu::handleOption(Key key)
                 Agent *selected = g_App.teamMember(n);
                 if ((selected->slot(m->slot()) == NULL
                      || selected->slot(m->slot())->cost() < m->cost())
-                    && g_App.money() >= m->cost()) {
+                    && g_App.getGameSession().getMoney() >= m->cost()) {
                     selected->setSlot(m->slot(), m);
-                    g_App.setMoney(g_App.money() - m->cost());
+                    g_App.getGameSession().setMoney(g_App.getGameSession().getMoney() - m->cost());
                 }
             }
         } else {
             Agent *selected = g_App.teamMember(cur_agent_);
             if ((selected->slot(m->slot()) == NULL
                  || selected->slot(m->slot())->cost() < m->cost())
-                && g_App.money() >= m->cost()) {
+                && g_App.getGameSession().getMoney() >= m->cost()) {
                 selected->setSlot(m->slot(), m);
-                g_App.setMoney(g_App.money() - m->cost());
+                g_App.getGameSession().setMoney(g_App.getGameSession().getMoney() - m->cost());
             }
         }
         sel_mod_ = 0;
@@ -641,7 +641,7 @@ void SelectMenu::handleOption(Key key)
     if (key == KEY_F9 && sel_weapon_inst_) {
         Agent *selected = g_App.teamMember(cur_agent_);
         WeaponInstance *w = selected->removeWeapon(sel_weapon_inst_ - 1);
-        g_App.setMoney(g_App.money() + w->cost());
+        g_App.getGameSession().setMoney(g_App.getGameSession().getMoney() + w->cost());
         delete w;
         sel_weapon_inst_ = 0;
         hideOption(KEY_F7);

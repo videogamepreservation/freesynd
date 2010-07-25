@@ -120,7 +120,7 @@ mapblk_data_(NULL), orig_pixels_(NULL), tick_count_(0)
         do {
             int index = rand() % (sizeof(g_Colours) / sizeof(int));
             blk_colours_[i] = g_Colours[index];
-		} while (blk_colours_[i] == g_App.logoColour());
+		} while (blk_colours_[i] == g_App.getGameSession().getLogoColour());
     }
 }
 
@@ -152,7 +152,7 @@ void MapMenu::drawSelector()
 {
     int logo_x = g_Blocks[g_App.currentBlk()].logo_pos.x;
     int logo_y = g_Blocks[g_App.currentBlk()].logo_pos.y;
-    g_Screen.drawLogo(logo_x, logo_y, g_App.logo(), g_App.logoColour(),
+    g_Screen.drawLogo(logo_x, logo_y, g_App.getGameSession().getLogo(), g_App.getGameSession().getLogoColour(),
                       true);
 
     // Draw box enclosing logo

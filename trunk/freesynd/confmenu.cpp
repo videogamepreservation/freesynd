@@ -65,7 +65,7 @@ int g_Colours[8] = { 6, 7, 14, 3, 11, 12, 13, 15 };
 class ChangeLogoMenu : public CommonConfSubMenu {
 public:
     ChangeLogoMenu(MenuManager *m, uint8 *bkg, ConfMenu *confMenu) :
-    CommonConfSubMenu(m, "changeLogo", bkg, confMenu), logo_(g_App.logo()),
+    CommonConfSubMenu(m, "changeLogo", bkg, confMenu), logo_(g_App.getGameSession().getLogo()),
     colour_(0) {
         setClearArea(bkg_, 283, 28, 328, 120);
         addStatic(299, 32, "CHANGE COLOUR AND LOGO", 1, false);
@@ -79,7 +79,7 @@ public:
         addOption(501, 127, "CANCEL", 1, KEY_F6, "conf");
 
         for (unsigned int i = 0; i < sizeof(g_Colours) / sizeof(int); i++) {
-            if (g_Colours[i] == g_App.logoColour())
+            if (g_Colours[i] == g_App.getGameSession().getLogoColour())
                 colour_ = i;
         }
     }
@@ -127,8 +127,8 @@ public:
         }
 
         if (key == KEY_F5) {
-            g_App.setLogo(logo_);
-            g_App.setLogoColour(g_Colours[colour_]);
+            g_App.getGameSession().setLogo(logo_);
+            g_App.getGameSession().setLogoColour(g_Colours[colour_]);
         }
     }
 
@@ -214,12 +214,14 @@ public:
         addStatic(320, 32, "CHANGE COMPANY NAME", 1, false);
         addOption(340, 127, "OK", 1, KEY_F5, "conf");
         addOption(501, 127, "CANCEL", 1, KEY_F6, "conf");
-        name_value_ = g_App.companyName();
+        name_value_ = g_App.getGameSession().getCompanyName();
     }
 
     virtual void handleOption(Key key) {
-        if (key == KEY_F5)
-            g_App.setCompanyName(name_value_.c_str());
+        if (key == KEY_F5) {
+            g_App.getGameSession().setCompanyName(name_value_.c_str());
+            g_App.setCheatCode(name_value_.c_str());
+        }
     }
 };
 
@@ -231,12 +233,12 @@ public:
         addStatic(350, 32, "ENTER YOUR NAME", 1, false);
         addOption(340, 127, "OK", 1, KEY_F5, "conf");
         addOption(501, 127, "CANCEL", 1, KEY_F6, "conf");
-        name_value_ = g_App.yourName();
+        name_value_ = g_App.getGameSession().getUserName();
     }
 
     virtual void handleOption(Key key) {
         if (key == KEY_F5)
-            g_App.setYourName(name_value_.c_str());
+            g_App.getGameSession().setUserName(name_value_.c_str());
     }
 };
 
@@ -264,16 +266,16 @@ ConfMenu::~ConfMenu() {
 }
 
 void ConfMenu::handleShow() {
-    g_Screen.drawLogo(28, 22, g_App.logo(), g_App.logoColour());
+    g_Screen.drawLogo(28, 22, g_App.getGameSession().getLogo(), g_App.getGameSession().getLogoColour());
 
-    if (*g_App.companyName()) {
+    if (*g_App.getGameSession().getCompanyName()) {
         g_Screen.scale2x(28, 90, 120, 10, bkg_ + 14 + 45 * 320, 320);
-        g_App.fonts().drawText(28, 90, g_App.companyName(), 1, false);
+        g_App.fonts().drawText(28, 90, g_App.getGameSession().getCompanyName(), 1, false);
     }
 
-    if (*g_App.yourName()) {
+    if (*g_App.getGameSession().getUserName()) {
         g_Screen.scale2x(28, 112, 120, 10, bkg_ + 14 + 56 * 320, 320);
-        g_App.fonts().drawText(28, 112, g_App.yourName(), 1, false);
+        g_App.fonts().drawText(28, 112, g_App.getGameSession().getUserName(), 1, false);
     }
 
     g_System.showCursor();
