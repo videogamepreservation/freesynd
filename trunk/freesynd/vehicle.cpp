@@ -125,16 +125,16 @@ int VehicleInstance::tileDir(int x, int y, int z) {
 
     switch(g_App.maps().map(map())->tileAt(x, y, z)){
         case 106:
-            dir = (0)|(0xFFFFFF00);
+            dir = (0)|(2<<8)|(6<<24)|(0x00FF0000);
             break;
         case 107:
-            dir = (4<<16)|(0xFF00FFFF);
+            dir = (2<<8)|(4<<16)|(6<<24)|(0x000000FF);
             break;
         case 108:
-            dir = (2<<8)|(0xFFFF00FF);
+            dir = (0)|(2<<8)|(4<<16)|(0xFF000000);
             break;
         case 109:
-            dir = (6<<24)|(0x00FFFFFF);
+            dir = (0)|(4<<16)|(6<<24)|(0x0000FF00);
             break;
         case 110:
             dir = (0) | (2<<8)|(0xFFFF0000);
@@ -187,21 +187,21 @@ bool VehicleInstance::dirWalkable(PathNode *p, int x, int y, int z) {
     if (dirStart == 0xFFFFFFFF || dirEnd == 0xFFFFFFFF)
         return true;
 
-    if ((dirStart >> 24) != 0x0F && (dirEnd >> 24) != 0x0F)
-        if ((dirStart >> 24) == (dirEnd >> 24))
-            if((p->tileX() - x) == 1 && (y - p->tileY()) == 0)
+    if (((dirStart & 0xFF000000) != 0xFF000000)
+        || ((dirEnd & 0xFF000000) != 0xFF000000))
+        if ((dirStart & 0xFF000000) == (dirEnd & 0xFF000000))
                 return true;
-    if ((dirStart >> 16) != 0x0F && (dirEnd >> 16) != 0x0F)
-        if ((dirStart >> 16) == (dirEnd >> 16))
-            if((p->tileY() - y) == 1 && (x - p->tileX()) == 0)
+    if (((dirStart & 0x00FF0000) != 0x00FF0000)
+        || ((dirEnd & 0x00FF0000) != 0x00FF0000))
+        if ((dirStart & 0x00FF0000) == (dirEnd & 0x00FF0000))
                 return true;
-    if ((dirStart >> 8) != 0x0F && (dirEnd >> 8) != 0x0F)
-        if ((dirStart >> 8) == (dirEnd >> 8))
-            if((x - p->tileX()) == 1 && (y - p->tileY()) == 0)
+    if (((dirStart & 0x0000FF00) != 0x0000FF00)
+        || ((dirEnd & 0x0000FF00) != 0x0000FF00))
+        if ((dirStart & 0x0000FF00) == (dirEnd & 0x0000FF00))
                 return true;
-    if ((dirStart & 0xFF) != 0x0F && (dirEnd & 0xFF) != 0x0F)
-        if ((dirStart & 0xFF) == (dirEnd & 0xFF))
-            if((y - p->tileY()) == 1 && (x - p->tileX()) == 0)
+    if (((dirStart & 0x000000FF) != 0x000000FF)
+        || ((dirEnd & 0x000000FF) != 0x000000FF))
+        if ((dirStart & 0x000000FF) == (dirEnd & 0x000000FF))
                 return true;
 
     return false;
@@ -322,10 +322,14 @@ void VehicleInstance::setDestinationV(int x, int y, int z, int ox,
         }
 
         std::list < PathNode > neighbours;
+        int goodDir = tileDir(p.tileX(), p.tileY(), p.tileZ());
+
         if (p.tileX() > 0) {
-            if (dirWalkable(&p,p.tileX() - 1, p.tileY(), p.tileZ()))
+            if (dirWalkable(&p,p.tileX() - 1, p.tileY(), p.tileZ())
+                && ((goodDir & 0xFF000000) == 0x06000000 || goodDir == 0xFFFFFFFF))
                 neighbours.
                     push_back(PathNode(p.tileX() - 1, p.tileY(), p.tileZ()));
+            /*
             if (p.tileY() > 0) {
                 // check for fences
                 if (dirWalkable(&p,p.tileX() - 1, p.tileY(), p.tileZ()) &&
@@ -344,11 +348,14 @@ void VehicleInstance::setDestinationV(int x, int y, int z, int ox,
                                   (p.tileX() - 1, p.tileY() + 1,
                                    p.tileZ()));
             }
+            */
         }
         if (p.tileX() < g_App.maps().map(map())->maxX()) {
-            if (dirWalkable(&p,p.tileX() + 1, p.tileY(), p.tileZ()))
+            if (dirWalkable(&p,p.tileX() + 1, p.tileY(), p.tileZ())
+                && ((goodDir & 0x0000FF00) == 0x00000200 || goodDir == 0xFFFFFFFF))
                 neighbours.
                     push_back(PathNode(p.tileX() + 1, p.tileY(), p.tileZ()));
+            /*
             if (p.tileY() > 0) {
                 // check for fences
                 if (dirWalkable(&p,p.tileX() + 1, p.tileY(), p.tileZ()) &&
@@ -367,13 +374,16 @@ void VehicleInstance::setDestinationV(int x, int y, int z, int ox,
                                   (p.tileX() + 1, p.tileY() + 1,
                                    p.tileZ()));
             }
+            */
         }
         if (p.tileY() > 0)
-            if (dirWalkable(&p,p.tileX(), p.tileY() - 1, p.tileZ()))
+            if (dirWalkable(&p,p.tileX(), p.tileY() - 1, p.tileZ())
+                && ((goodDir & 0x00FF0000) == 0x00040000 || goodDir == 0xFFFFFFFF))
                 neighbours.
                     push_back(PathNode(p.tileX(), p.tileY() - 1, p.tileZ()));
         if (p.tileY() < g_App.maps().map(map())->maxY())
-            if (dirWalkable(&p,p.tileX(), p.tileY() + 1, p.tileZ()))
+            if (dirWalkable(&p,p.tileX(), p.tileY() + 1, p.tileZ())
+                && ((goodDir & 0x000000FF) == 0x0 || goodDir == 0xFFFFFFFF))
                 neighbours.
                     push_back(PathNode(p.tileX(), p.tileY() + 1, p.tileZ()));
 
