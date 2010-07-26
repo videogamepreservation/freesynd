@@ -53,6 +53,9 @@ public:
         return a < b;
     }
 
+    void setOffX(int x) { off_x_ = x; }
+    void setOffY(int y) { off_y_ = y; }
+
 protected:
     int tile_x_, tile_y_, tile_z_, off_x_, off_y_;
 };

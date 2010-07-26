@@ -126,15 +126,39 @@ int VehicleInstance::tileDir(int x, int y, int z) {
     switch(g_App.maps().map(map())->tileAt(x, y, z)){
         case 106:
             dir = (0)|(2<<8)|(6<<24)|(0x00FF0000);
+
+            if(g_App.maps().map(map())->tileAt(x + 1, y - 1, z) != 118)
+                dir |= 0x00FFFF00;
+            if(g_App.maps().map(map())->tileAt(x + 1, y + 1, z) != 118)
+                dir |= 0xFFFF0000;
+
             break;
         case 107:
             dir = (2<<8)|(4<<16)|(6<<24)|(0x000000FF);
+
+            if(g_App.maps().map(map())->tileAt(x - 1, y - 1, z) != 118)
+                dir |= 0xFF0000FF;
+            if(g_App.maps().map(map())->tileAt(x - 1, y + 1, z) != 118)
+                dir |= 0x0000FFFF;
+
             break;
         case 108:
             dir = (0)|(2<<8)|(4<<16)|(0xFF000000);
+
+            if(g_App.maps().map(map())->tileAt(x + 1, y - 1, z) != 118)
+                dir |= 0xFF0000FF;
+            if(g_App.maps().map(map())->tileAt(x - 1, y - 1, z) != 118)
+                dir |= 0xFFFF0000;
+
             break;
         case 109:
             dir = (0)|(4<<16)|(6<<24)|(0x0000FF00);
+
+            if(g_App.maps().map(map())->tileAt(x + 1, y + 1, z) != 118)
+                dir |= 0x0000FFFF;
+            if(g_App.maps().map(map())->tileAt(x - 1, y + 1, z) != 118)
+                dir |= 0x00FFFF00;
+
             break;
         case 110:
             dir = (0) | (2<<8)|(0xFFFF0000);
@@ -163,14 +187,6 @@ int VehicleInstance::tileDir(int x, int y, int z) {
         case 123:
             dir = (2<<8)|(4<<16)|(0xFF0000FF);
             break;
-            /*
-        case 225:
-            dir = (2<<8)|(4<<16)|(0xFF0000FF);
-            break;
-        case 226:
-            dir = (2<<8)|(4<<16)|(0xFF0000FF);
-            break;
-            */
         default:
             dir = 0xFFFFFFFF;
     }
@@ -182,6 +198,7 @@ bool VehicleInstance::dirWalkable(PathNode *p, int x, int y, int z) {
 
     if(!(walkable(x,y,z)))
         return false;
+
     int dirStart = tileDir(p->tileX(),p->tileY(),p->tileZ());
     int dirEnd = tileDir(x,y,z);
     if (dirStart == 0xFFFFFFFF || dirEnd == 0xFFFFFFFF)
@@ -329,58 +346,21 @@ void VehicleInstance::setDestinationV(int x, int y, int z, int ox,
                 && ((goodDir & 0xFF000000) == 0x06000000 || goodDir == 0xFFFFFFFF))
                 neighbours.
                     push_back(PathNode(p.tileX() - 1, p.tileY(), p.tileZ()));
-            /*
-            if (p.tileY() > 0) {
-                // check for fences
-                if (dirWalkable(&p,p.tileX() - 1, p.tileY(), p.tileZ()) &&
-                    dirWalkable(&p,p.tileX(), p.tileY() - 1, p.tileZ()))
-                    neighbours.
-                        push_back(PathNode
-                                  (p.tileX() - 1, p.tileY() - 1,
-                                   p.tileZ()));
-            }
-            if (p.tileY() < g_App.maps().map(map())->maxY()) {
-                // check for fences
-                if (dirWalkable(&p,p.tileX() - 1, p.tileY(), p.tileZ()) &&
-                    dirWalkable(&p,p.tileX(), p.tileY() + 1, p.tileZ()))
-                    neighbours.
-                        push_back(PathNode
-                                  (p.tileX() - 1, p.tileY() + 1,
-                                   p.tileZ()));
-            }
-            */
         }
+
         if (p.tileX() < g_App.maps().map(map())->maxX()) {
             if (dirWalkable(&p,p.tileX() + 1, p.tileY(), p.tileZ())
                 && ((goodDir & 0x0000FF00) == 0x00000200 || goodDir == 0xFFFFFFFF))
                 neighbours.
                     push_back(PathNode(p.tileX() + 1, p.tileY(), p.tileZ()));
-            /*
-            if (p.tileY() > 0) {
-                // check for fences
-                if (dirWalkable(&p,p.tileX() + 1, p.tileY(), p.tileZ()) &&
-                    dirWalkable(&p,p.tileX(), p.tileY() - 1, p.tileZ()))
-                    neighbours.
-                        push_back(PathNode
-                                  (p.tileX() + 1, p.tileY() - 1,
-                                   p.tileZ()));
-            }
-            if (p.tileY() < g_App.maps().map(map())->maxY()) {
-                // check for fences
-                if (dirWalkable(&p,p.tileX() + 1, p.tileY(), p.tileZ()) &&
-                    dirWalkable(&p,p.tileX(), p.tileY() + 1, p.tileZ()))
-                    neighbours.
-                        push_back(PathNode
-                                  (p.tileX() + 1, p.tileY() + 1,
-                                   p.tileZ()));
-            }
-            */
         }
+
         if (p.tileY() > 0)
             if (dirWalkable(&p,p.tileX(), p.tileY() - 1, p.tileZ())
                 && ((goodDir & 0x00FF0000) == 0x00040000 || goodDir == 0xFFFFFFFF))
                 neighbours.
                     push_back(PathNode(p.tileX(), p.tileY() - 1, p.tileZ()));
+
         if (p.tileY() < g_App.maps().map(map())->maxY())
             if (dirWalkable(&p,p.tileX(), p.tileY() + 1, p.tileZ())
                 && ((goodDir & 0x000000FF) == 0x0 || goodDir == 0xFFFFFFFF))
@@ -405,6 +385,24 @@ bool VehicleInstance::movementV(int elapsed)
     bool updated = false;
 
     if (!dest_path_.empty()) {
+/*
+        if(walkable(dest_path_.front().tileX(),dest_path_.front().tileY(),dest_path_.front().tileZ()))
+            switch(dir_) {
+                case 0:
+                    dest_path_.front().setOffX(200);
+                    break;
+                case 2:
+                    dest_path_.front().setOffY(55);
+                    break;
+                case 4:
+                    dest_path_.front().setOffX(55);
+                    break;
+                case 6:
+                    dest_path_.front().setOffY(200);
+                    break;
+            }
+            */
+
         int adx =
             dest_path_.front().tileX() * 256 + dest_path_.front().offX();
         int ady =
@@ -473,40 +471,8 @@ bool VehicleInstance::movementV(int elapsed)
             updated = true;
         }
     } else if (speed_) {
-        int dx = 0, dy = 0;
-        switch (dir_) {
-        case 0:
-            dy = speed_;
-            break;
-        case 1:
-            dy = speed_;
-            dx = speed_;
-            break;
-        case 2:
-            dx = speed_;
-            break;
-        case 3:
-            dy = -speed_;
-            dx = speed_;
-            break;
-        case 4:
-            dy = -speed_;
-            break;
-        case 5:
-            dy = -speed_;
-            dx = -speed_;
-            break;
-        case 6:
-            dx = -speed_;
-            break;
-        case 7:
-            dy = speed_;
-            dx = -speed_;
-            break;
-        }
-
-        updatePlacement(off_x_ + dx, off_y_ + dy);
-        updated = true;
+        printf("Destination Unknown, full speed driving = %i ... doing full stop\n", speed_);
+        speed_ = 0;
     }
 
     return updated;
