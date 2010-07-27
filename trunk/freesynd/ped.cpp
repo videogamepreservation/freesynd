@@ -1094,9 +1094,7 @@ bool PedInstance::movementP(int elapsed)
             if (abs(dy) > abs(ady - aty))
                 dy = (ady - aty);
 
-            if (updatePlacement(off_x_ + dx, off_y_ + dy) ||
-                updatePlacement(off_x_, off_y_ + dy) ||
-                updatePlacement(off_x_ + dx, off_y_)) {
+            if (updatePlacement(off_x_ + dx, off_y_ + dy)) {
                 ;
             } else {
                 // TODO: avoid obstacles.
@@ -1106,40 +1104,8 @@ bool PedInstance::movementP(int elapsed)
             updated = true;
         }
     } else if (speed_) {
-        int dx = 0, dy = 0;
-        switch (dir_) {
-        case 0:
-            dy = speed_;
-            break;
-        case 1:
-            dy = speed_;
-            dx = speed_;
-            break;
-        case 2:
-            dx = speed_;
-            break;
-        case 3:
-            dy = -speed_;
-            dx = speed_;
-            break;
-        case 4:
-            dy = -speed_;
-            break;
-        case 5:
-            dy = -speed_;
-            dx = -speed_;
-            break;
-        case 6:
-            dx = -speed_;
-            break;
-        case 7:
-            dy = speed_;
-            dx = -speed_;
-            break;
-        }
-
-        updatePlacement(off_x_ + dx, off_y_ + dy);
-        updated = true;
+        printf("Running speed %i, destination unknown\n", speed_);
+        speed_ = 0;
     }
 
     return updated;

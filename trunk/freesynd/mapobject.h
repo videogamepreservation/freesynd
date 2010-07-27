@@ -204,40 +204,40 @@ protected:
  */
 class Door : public Static {
 public:
-    Door(int m, int anim, int openingAnim);
+    Door(int m, int anim, int closingAnim, int openAnim, int openingAnim);
     virtual ~Door() {}
 
     void draw(int x, int y);
 
 protected:
-    int anim_, opening_anim_;
+    int anim_, closing_anim_, open_anim_, opening_anim_;
 };
 
 /*!
- * DoubleDoor map object class.
+ * LargeDoor map object class.
  */
-class DoubleDoor : public Static {
+class LargeDoor : public Static {
 public:
-    DoubleDoor(int m, int anim, int openingAnim);
-    virtual ~DoubleDoor() {}
+    LargeDoor(int m, int anim, int closingAnim, int openingAnim);
+    virtual ~LargeDoor() {}
 
     void draw(int x, int y);
 
 protected:
-    int anim_, opening_anim_;
+    int anim_, closing_anim_, opening_anim_;
 };
 /*!
  * Tree map object class.
  */
 class Tree : public Static {
 public:
-    Tree(int m, int anim, int burningAnim);
+    Tree(int m, int anim, int burningAnim, int damagedAnim);
     virtual ~Tree() {}
 
     void draw(int x, int y);
 
 protected:
-    int anim_, burning_anim_;
+    int anim_, burning_anim_, damaged_anim_;
 };
 
 /*!
@@ -259,7 +259,7 @@ protected:
  */
 class EtcObj : public Static {
 public:
-    EtcObj(int m, int anim, int breakingAnim , int damagedAnim);
+    EtcObj(int m, int anim, int burningAnim , int damagedAnim);
     virtual ~EtcObj() {}
 
     void draw(int x, int y);

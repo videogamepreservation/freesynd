@@ -11,6 +11,8 @@ Changes
   * Map can be scrolled with arrow keys and scrolling is like original game
   * People, objects will not move to unwalkable surfaces
   * When weapon is dropped while moving, ped will stop moving
+  * Static objects: added 4 windows, large doors, added 2 animations
+  	to doors, 1 animation to trees
 
 Fixed Bugs
 ----------
