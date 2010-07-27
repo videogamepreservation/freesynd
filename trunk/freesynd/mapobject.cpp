@@ -25,7 +25,9 @@
 
 #include "common.h"
 #include "app.h"
-
+#ifdef SYSTEM_SDL
+#include "system_sdl.h"
+#endif
 MapObject::MapObject(int m):map_(m), frame_(0), elapsed_carry_(0),
 frames_per_sec_(15)
 {
@@ -177,6 +179,27 @@ Static *Static::loadInstance(uint8 * data, int m)
     Static *s = 0;
 
     switch(gamdata->unkn4){
+    case 0x0:
+        switch(gamdata->unkn6){
+            //small windows, open/closed
+            case 0x5f:
+                s = new WindowObj(m, 551, 555, 557);
+                break;
+            case 0x5e:
+                s = new WindowObj(m, 550, 555, 557);
+                break;
+            case 0x6f:
+                s = new WindowObj(m, 552, 555, 557);
+                break;
+            case 0x6e:
+                s = new WindowObj(m, 553, 555, 557);
+                break;
+
+            // crosroad thing
+            case 0x19:
+                break;
+        }
+        break;
     case 0x35:
         if (gamdata->unkn6 == 0x6e)
             s = new Door(m, 1078, 1080);
@@ -232,15 +255,24 @@ Static *Static::loadInstance(uint8 * data, int m)
             printf("unknown tree 03 %02x\n", gamdata->unkn6);
         break;
     default:
-        if(gamdata->unkn4!=0)//this is for debug
-        printf("unknown obj %02x xx %02x xx %02x\n", gamdata->unkn4,gamdata->unkn5,gamdata->unkn6);
         break;
     }
-    if (!s && gamdata->unkn5 == 4) {
-        //printf("looks like a missing door: %02x %02x\n", gamdata->unkn4, gamdata->unkn6);
+    /*
+    if(!s && (gamdata->unkn4==0 && (gamdata->unkn5!=0 || gamdata->unkn6!=0))){//this is for debug
+        printf("unknown obj %02x xx %02x xx %02x\n", gamdata->unkn4,gamdata->unkn5,gamdata->unkn6);
+        printf("x is %i, xoff is %i ==", gamdata->mapposx[1], gamdata->mapposx[0]);
+        printf("y is %i, yoff is %i ==", gamdata->mapposy[1], gamdata->mapposy[0]);
+        printf("z is %i, zoff is %i\n", gamdata->mapposz[1], gamdata->mapposz[0]);
     }
+    */
+
     if (s) {
-        //printf("z is %i, zoff is %i\n", gamdata->mapposz[1], gamdata->mapposz[0]);
+        /*
+        printf("d %x ==",gamdata->unkn4);
+        printf("x is %i, xoff is %i ==", gamdata->mapposx[1], gamdata->mapposx[0]);
+        printf("y is %i, yoff is %i ==", gamdata->mapposy[1], gamdata->mapposy[0]);
+        printf("z is %i, zoff is %i\n", gamdata->mapposz[1], gamdata->mapposz[0]);
+        */
         s->setPosition(gamdata->mapposx[1], gamdata->mapposy[1],
                        gamdata->mapposz[1], gamdata->mapposx[0],
                        gamdata->mapposy[0], gamdata->mapposz[0]);
@@ -260,12 +292,45 @@ void Door::draw(int x, int y)
     g_App.gameSprites().drawFrame(anim_, frame_, x, y);
 }
 
+DoubleDoor::DoubleDoor(int m, int anim, int openingAnim):Static(m), anim_(anim),
+opening_anim_(openingAnim)
+{
+}
+
+void DoubleDoor::draw(int x, int y)
+{
+    addOffs(x, y);
+    g_App.gameSprites().drawFrame(anim_, frame_, x, y);
+}
+
 Tree::Tree(int m, int anim, int burningAnim):Static(m), anim_(anim),
 burning_anim_(burningAnim)
 {
 }
 
 void Tree::draw(int x, int y)
+{
+    addOffs(x, y);
+    g_App.gameSprites().drawFrame(anim_, frame_, x, y);
+}
+
+WindowObj::WindowObj(int m, int anim, int breakingAnim, int damagedAnim):Static(m),
+anim_(anim), breaking_anim_(breakingAnim), damaged_anim_(damagedAnim)
+{
+}
+
+void WindowObj::draw(int x, int y)
+{
+    addOffs(x, y);
+    g_App.gameSprites().drawFrame(anim_, frame_, x, y);
+}
+
+EtcObj::EtcObj(int m, int anim, int burningAnim , int damagedAnim):Static(m),
+anim_(anim), burning_anim_(burningAnim), damaged_anim_(damagedAnim)
+{
+}
+
+void EtcObj::draw(int x, int y)
 {
     addOffs(x, y);
     g_App.gameSprites().drawFrame(anim_, frame_, x, y);

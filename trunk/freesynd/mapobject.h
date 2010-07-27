@@ -214,6 +214,19 @@ protected:
 };
 
 /*!
+ * DoubleDoor map object class.
+ */
+class DoubleDoor : public Static {
+public:
+    DoubleDoor(int m, int anim, int openingAnim);
+    virtual ~DoubleDoor() {}
+
+    void draw(int x, int y);
+
+protected:
+    int anim_, opening_anim_;
+};
+/*!
  * Tree map object class.
  */
 class Tree : public Static {
@@ -225,6 +238,34 @@ public:
 
 protected:
     int anim_, burning_anim_;
+};
+
+/*!
+ * Window map object class.
+ */
+class WindowObj : public Static {
+public:
+    WindowObj(int m, int anim, int breakingAnim , int damagedAnim);
+    virtual ~WindowObj() {}
+
+    void draw(int x, int y);
+
+protected:
+    int anim_, breaking_anim_, damaged_anim_;
+};
+
+/*!
+ * EtcObj map object class.
+ */
+class EtcObj : public Static {
+public:
+    EtcObj(int m, int anim, int breakingAnim , int damagedAnim);
+    virtual ~EtcObj() {}
+
+    void draw(int x, int y);
+
+protected:
+    int anim_, burning_anim_, damaged_anim_;
 };
 
 #endif
