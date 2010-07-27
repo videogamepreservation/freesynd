@@ -124,6 +124,18 @@ int VehicleInstance::tileDir(int x, int y, int z) {
     int dir = 0;
 
     switch(g_App.maps().map(map())->tileAt(x, y, z)){
+        case 80:
+            if(g_App.maps().map(map())->tileAt(x + 1, y, z) == 80)
+                dir = (0)|(0xFFFFFF00);
+            if(g_App.maps().map(map())->tileAt(x - 1, y, z) == 80)
+                dir = (4<<16)|(0xFF00FFFF);
+            break;
+        case 81:
+            if(g_App.maps().map(map())->tileAt(x, y + 1, z) == 81)
+                dir = (2<<8)|(0xFFFF00FF);
+            if(g_App.maps().map(map())->tileAt(x, y - 1, z) == 81)
+                dir = (6<<24)|(0x00FFFFFF);
+            break;
         case 106:
             dir = (0)|(2<<8)|(6<<24)|(0x00FF0000);
 
@@ -167,13 +179,10 @@ int VehicleInstance::tileDir(int x, int y, int z) {
             dir = (0) | (6<<24)|(0x00FFFF00);
             break;
         case 112:
-            dir = (4<<16)|(2<<8)|(0xFF0000FF);
+            dir = (2<<8)|(4<<16)|(0xFF0000FF);
             break;
         case 113:
             dir = (4<<16)|(6<<24)|(0x0000FFFF);
-            break;
-        case 119:
-            dir = 0xFFFFFFFF;
             break;
         case 120:
             dir = (0)|(2<<8)|(0xFFFF0000);
@@ -186,6 +195,18 @@ int VehicleInstance::tileDir(int x, int y, int z) {
             break;
         case 123:
             dir = (2<<8)|(4<<16)|(0xFF0000FF);
+            break;
+        case 225:
+            if(g_App.walkdata_[g_App.maps().map(map())->tileAt(x + 1, y, z)] == 0x0E)
+                dir = (0)|(0xFFFFFF00);
+            if(g_App.walkdata_[g_App.maps().map(map())->tileAt(x - 1, y, z)] == 0x0E)
+                dir = (4<<16)|(0xFF00FFFF);
+            break;
+        case 226:
+            if(g_App.walkdata_[g_App.maps().map(map())->tileAt(x, y - 1, z)] == 0x0E)
+                dir = (2<<8)|(0xFFFF00FF);
+            if(g_App.walkdata_[g_App.maps().map(map())->tileAt(x, y + 1, z)] == 0x0E)
+                dir = (6<<24)|(0x00FFFFFF);
             break;
         default:
             dir = 0xFFFFFFFF;
@@ -377,7 +398,40 @@ void VehicleInstance::setDestinationV(int x, int y, int z, int ox,
             }
     }
 
-    speed_ = new_speed;
+    if(!dest_path_.empty()) {
+        // Adjusting offsets for correct positioning
+        speed_ = new_speed;
+        for(std::list < PathNode >::iterator it = dest_path_.begin();
+            it != dest_path_.end(); it++) {
+
+            switch(tileDir(it->tileX(), it->tileY(), it->tileZ())) {
+                case 0xFFFFFF00:
+                case 0xFFFF0200:
+                    it->setOffX(200);
+                    it->setOffY(55);
+                    break;
+                case 0xFFFF02FF:
+                case 0xFF04FFFF:
+                case 0xFF0402FF:
+                    it->setOffX(55);
+                    it->setOffY(55);
+                    break;
+                case 0x06FFFFFF:
+                case 0x0604FFFF:
+                    it->setOffX(55);
+                    it->setOffY(200);
+                    break;
+                case 0x06FFFF00:
+                    it->setOffX(200);
+                    it->setOffY(200);
+                    break;
+                default:
+                    printf("hmm tileDir %X\n",tileDir(it->tileX(), it->tileY(), it->tileZ()));
+                    break;
+            }
+
+        }
+    }
 }
 
 bool VehicleInstance::movementV(int elapsed)
@@ -385,24 +439,7 @@ bool VehicleInstance::movementV(int elapsed)
     bool updated = false;
 
     if (!dest_path_.empty()) {
-/*
-        if(walkable(dest_path_.front().tileX(),dest_path_.front().tileY(),dest_path_.front().tileZ()))
-            switch(dir_) {
-                case 0:
-                    dest_path_.front().setOffX(200);
-                    break;
-                case 2:
-                    dest_path_.front().setOffY(55);
-                    break;
-                case 4:
-                    dest_path_.front().setOffX(55);
-                    break;
-                case 6:
-                    dest_path_.front().setOffY(200);
-                    break;
-            }
-            */
-
+        // TODO: add here door checking
         int adx =
             dest_path_.front().tileX() * 256 + dest_path_.front().offX();
         int ady =
@@ -459,9 +496,7 @@ bool VehicleInstance::movementV(int elapsed)
             if (abs(dy) > abs(ady - aty))
                 dy = (ady - aty);
 
-            if (updatePlacement(off_x_ + dx, off_y_ + dy) ||
-                updatePlacement(off_x_, off_y_ + dy) ||
-                updatePlacement(off_x_ + dx, off_y_)) {
+            if (updatePlacement(off_x_ + dx, off_y_ + dy)) {
                 ;
             } else {
                 // TODO: avoid obstacles.
