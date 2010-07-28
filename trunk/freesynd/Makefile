@@ -20,22 +20,26 @@ DUMP_OBJS = dump.o spritemanager.o sprite.o file.o dernc.o
 DUMPMAPS_TARGET = dumpmaps
 DUMPMAPS_OBJS = dumpmaps.o mapmanager.o map.o tilemanager.o tile.o file.o dernc.o
 
-DIRS	= utils sound
+DIRS	= utils sound core
 OBJS = $(SRC:.cpp=.o)
 SND_OBJ	= sound/sdlmixermusic.o sound/sdlmixersound.o
 UTL_OBJ	= utils/log.o
+CORE_OBJ= core/gamesession.o
 DEPS = $(SRC:.cpp=.d)
 
 all: $(TARGET) $(DUMP_TARGET) $(DUMPMAPS_TARGET)
 
-$(TARGET): $(UTL_OBJ) $(SND_OBJ) $(OBJS)
-	$(CXX) $(LDFLAGS) -o $@ $(OBJS) $(SND_OBJ) $(UTL_OBJ) $(LIBS)
+$(TARGET): $(CORE_OBJ) $(UTL_OBJ) $(SND_OBJ) $(OBJS)
+	$(CXX) $(LDFLAGS) -o $@ $(OBJS) $(SND_OBJ) $(UTL_OBJ) $(CORE_OBJ) $(LIBS)
 
 $(DUMP_TARGET): $(DUMP_OBJS)
 	$(CXX) $(LDFLAGS) -o $@ $(DUMP_OBJS) -lpng
 
 $(DUMPMAPS_TARGET): $(DUMPMAPS_OBJS)
 	$(CXX) $(LDFLAGS) -o $@ $(DUMPMAPS_OBJS) -lpng
+
+$(CORE_OBJ): force_look
+	cd core;  $(MAKE) $(MFLAGS)
 
 $(SND_OBJ): force_look
 	cd utils; $(MAKE) $(MFLAGS)
