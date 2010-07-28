@@ -177,6 +177,7 @@ Static *Static::loadInstance(uint8 * data, int m)
     Mission::LEVELDATA_STATICS * gamdata =
         (Mission::LEVELDATA_STATICS *) data;
     Static *s = 0;
+    uint16 firstAnim = READ_LE_UINT16(gamdata->firstAnim);
 
     switch(gamdata->unkn4){
     case 0x0:
@@ -208,7 +209,8 @@ Static *Static::loadInstance(uint8 * data, int m)
                 s = new LargeDoor(m, 395, 396, 397);
                 break;
             default:
-                printf("unknown obj =0= xx %02x\n", gamdata->unkn6);
+                if(gamdata->unkn5!=0 || gamdata->unkn6!=0)
+                    printf("unknown obj =0= xx %02x\n", gamdata->unkn6);
         }
         break;
     case 0x35:

@@ -173,12 +173,11 @@ public:
         uint8 mapposz[2];
         uint8 unkn3;            // seems to be set to 4 or 6
         uint8 zero[3];
-        uint8 unkn4;            // 35, 4D, 35, 00, 01
-        uint8 unkn5;            // 04, 00
-        uint8 unkn6;            // 6E, 8A, 63, 73, 5F, 74
-        uint8 unkn7;            // 12, 07, 05
-        uint8 unkn8;            // 36, 4D, 35, 3D, 27, E3
-        uint8 unkn9;            // 04, 02, 00
+        uint8 unkn4;            // type of object
+        uint8 unkn5;            // maybe higher byte
+        uint8 unkn6;            // sub - type of object
+        uint8 unkn7;            // higher byte?
+        uint8 firstAnim[2];     // objects first animation
         uint8 unkn10;           // 28 or 32
         uint8 zero1[3];
         uint8 unkn11;           // seems to be set to 5
