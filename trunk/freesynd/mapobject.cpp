@@ -278,7 +278,12 @@ Static *Static::loadInstance(uint8 * data, int m)
         printf("z is %i, zoff is %i\n", gamdata->mapposz[1], gamdata->mapposz[0]);
     }
     */
-
+    /*
+    if(gamdata->unkn4!=0 && gamdata->unkn5!=0 && gamdata->unkn6 != 0)
+        if (!s) {
+            s = new EtcObj(m, firstAnim, firstAnim + 1, firstAnim +2);
+        }
+    */
     if (s) {
         /*
         printf("d %x ==",gamdata->unkn4);
