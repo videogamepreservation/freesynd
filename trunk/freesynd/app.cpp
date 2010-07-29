@@ -158,27 +158,27 @@ void App::setCheatCode(const char *name) {
     
     // Repeat mission with previously obtained items, press 'C' or 'Ctrl-C'
     // to instantly complete a mission
-    if (name == "DO IT AGAIN")
+    if (!strcmp(name, "DO IT AGAIN"))
         cheatRepeatOrCompleteMission();
-    else if (name == "NUK THEM") {
+    else if (!strcmp(name, "NUK THEM")) {
         // Select any mission, resurrect dead agents
         cheatAnyMission();
         cheatResurrectAgents();
     }
-    else if (name == "OWN THEM") {
+    else if (!strcmp(name, "OWN THEM")) {
         // Own all countries
         cheatOwnAllCountries();
     }
-    else if (name == "ROB A BANK") {
+    else if (!strcmp(name, "ROB A BANK")) {
         // $100 000 000 in funds
         cheatFunds();
     }
-    else if (name == "TO THE TOP") {
+    else if (!strcmp(name, "TO THE TOP")) {
         // $100 000 000 in funds, select any mission
         cheatFunds();
         cheatAnyMission();
     }
-    else if (name == "COOPER TEAM") {
+    else if (!strcmp(name, "COOPER TEAM")) {
         // $100 000 000 in funds, select any mission, all weapons and mods
         cheatFemaleRecruits();
         cheatFunds();
@@ -187,7 +187,7 @@ void App::setCheatCode(const char *name) {
         cheatEquipAllMods();
         cheatEquipFancyWeapons();
     }
-    else if (name == "WATCH THE CLOCK") {
+    else if (!strcmp(name, "WATCH THE CLOCK")) {
         // Accelerate time for faster research completion
         cheatAccelerateTime();
     }
