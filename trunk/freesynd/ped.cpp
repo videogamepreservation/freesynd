@@ -541,12 +541,12 @@ void PedInstance::showPath(int scrollX, int scrollY) {
 }
 
 PedInstance::PedInstance(Ped *ped, int m) : ShootableMovableMapObject(m),
-ped_(ped), firing_(PedInstance::Firing_Not), target_(NULL), target_x_(-1),
+draw_timeout_(0), ped_(ped), firing_(PedInstance::Firing_Not),
+drawn_anim_(PedInstance::StandAnim), target_(NULL), target_x_(-1),
 target_y_(-1), hit_damage_(0), receive_damage_(0), sight_range_(0),
 is_hostile_(false), reload_count_(0), selected_weapon_(-1),
 pickup_weapon_(0), putdown_weapon_(0), in_vehicle_(0),
-is_an_agent_(PedInstance::Not_Agent), drawn_anim_ (PedInstance::StandAnim),
-draw_timeout_(0){
+is_an_agent_(PedInstance::Not_Agent) {
 }
 
 void PedInstance::draw(int x, int y, int scrollX, int scrollY) {

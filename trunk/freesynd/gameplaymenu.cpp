@@ -43,10 +43,10 @@ GameplayMenu::GameplayMenu(MenuManager *m, LoadingMenu *loading,
         MapMenu *mapMenu) :
 Menu(m, "Gameplay", "", ""), loading_(loading), map_menu_(mapMenu),
 tick_count_(0), last_animate_tick_(0), last_motion_tick_(0),
-last_motion_x_(320), last_motion_y_(240), mission_(0), world_x_(0),
+last_motion_x_(320), last_motion_y_(240), mission_hint_ticks_(0), 
+mission_hint_(0), mission_(0), world_x_(0),
 world_y_(0), selected_agents_(0), ctrl_(false), alt_(false),
-pointing_at_ped_(-1), pointing_at_vehicle_(-1), 
-mission_hint_ticks_(0), mission_hint_(0)
+pointing_at_ped_(-1), pointing_at_vehicle_(-1) 
 {
     setParentMenu("debrief");
     scroll_x_ = 0;
