@@ -29,7 +29,7 @@
 #include "system_sdl.h"
 #endif
 MapObject::MapObject(int m):map_(m), frame_(0), elapsed_carry_(0),
-frames_per_sec_(15)
+frames_per_sec_(15), sub_type_(0)
 {
 }
 
@@ -174,6 +174,7 @@ bool ShootableMovableMapObject::updatePlacement(int nOffX, int nOffY)
 
 Static *Static::loadInstance(uint8 * data, int m)
 {
+    // TODO: Add unknown objects, adjust animation for etcObj
     Mission::LEVELDATA_STATICS * gamdata =
         (Mission::LEVELDATA_STATICS *) data;
     Static *s = 0;
@@ -270,6 +271,7 @@ Static *Static::loadInstance(uint8 * data, int m)
         s->setPosition(gamdata->mapposx[1], gamdata->mapposy[1],
                        gamdata->mapposz[1], gamdata->mapposx[0],
                        gamdata->mapposy[0], gamdata->mapposz[0]);
+        s->setSubType(gamdata->subType);
     }
 
     return s;

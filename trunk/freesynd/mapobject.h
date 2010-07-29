@@ -85,12 +85,16 @@ public:
 
     virtual bool animate(int elapsed);
 
+    void setSubType(int objSubType) { sub_type_ = objSubType; }
+    int getSubType() { return sub_type_; }
+
 protected:
     int tile_x_, tile_y_, tile_z_, off_x_, off_y_, off_z_;
     int map_;
     int frame_;
     int elapsed_carry_;
     int frames_per_sec_;
+    int sub_type_;
 
     void addOffs(int &x, int &y);
 };
