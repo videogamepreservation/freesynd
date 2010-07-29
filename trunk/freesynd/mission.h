@@ -173,11 +173,10 @@ public:
         uint8 mapposz[2];
         uint8 unkn3;            // seems to be set to 4 or 6
         uint8 zero[3];
-        uint8 unkn4;            // these
-        uint8 unkn5;            // are animations (why they are not always present?)
-        uint8 unkn6;            // type of object
-        uint8 unkn7;            // sub - type of object?
-        uint8 firstAnim[2];     // objects first animation
+        uint8 unknAnim[2];      // animation (LE data)
+        uint8 subType;            // sub-type, for map editor maybe
+        uint8 objType;            // looks like major type
+        uint8 firstAnim[2];     // objects first animation (LE data)
         uint8 unkn10;           // 28 or 32
         uint8 zero1[3];
         uint8 unkn11;           // seems to be set to 5

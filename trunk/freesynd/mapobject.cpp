@@ -179,114 +179,90 @@ Static *Static::loadInstance(uint8 * data, int m)
     Static *s = 0;
     uint16 firstAnim = READ_LE_UINT16(gamdata->firstAnim);
 
-    switch(gamdata->unkn4){
-    case 0x0:
-        switch(gamdata->unkn6){
-            //small windows, open/closed
-            case 0x5f:
-                s = new WindowObj(m, 551, 555, 557);
-                break;
-            case 0x5e:
-                s = new WindowObj(m, 550, 555, 557);
-                break;
-            case 0x6f:
-                s = new WindowObj(m, 552, 555, 557);
-                break;
-            case 0x6e:
-                s = new WindowObj(m, 553, 555, 557);
-                break;
-
-            // crosroad thing
-            case 0x19:
-                break;
-
-            // double doors
-            // these can be locked more info needed
-            case 0x0b:
-                s = new LargeDoor(m, 392, 393, 394);
-                break;
-            case 0x14:
-                s = new LargeDoor(m, 395, 396, 397);
-                break;
-            default:
-                if(gamdata->unkn5!=0 || gamdata->unkn6!=0)
-                    printf("unknown obj =0= xx %02x\n", gamdata->unkn6);
-        }
-        break;
-    case 0x35:
-        if (gamdata->unkn6 == 0x6e)
-            s = new Door(m, 1078, 1080, 1082, 1084);
-        else if (gamdata->unkn6 == 0x63)
-            s = new Door(m, 1077, 1079, 1081, 1083);
-        else
-            printf("unknown door 35 xx %02x\n", gamdata->unkn6);
-        break;
-    case 0x4d:
-        if (gamdata->unkn6 == 0x8a)
-            s = new Door(m, 1101, 1103, 1105, 1107);
-        else
-            printf("unknown door 4d xx %02x\n", gamdata->unkn6);
-        break;
-    case 0x3d:
-        if (gamdata->unkn6 == 0x73)
-            s = new Door(m, 1085, 1087, 1089, 1091);
-        else if (gamdata->unkn6 == 0x75)
-            s = new Door(m, 1086, 1088, 1090, 1092);
-        else
-            printf("unknown door 3d %02x\n", gamdata->unkn6);
-        break;
-    case 0x45:
-        if (gamdata->unkn6 == 0x7e)
-            s = new Door(m, 1093, 1095, 1097, 1099);
-        else if (gamdata->unkn6 == 0x85)
-            s = new Door(m, 1094, 1096, 1098, 1100);
-        else
-            printf("unknown door 45 %02x\n", gamdata->unkn6);
-        break;
-    case 0x25:
-        if (gamdata->unkn6 == 0x7c)
-            s = new Door(m, 1110, 1112, 1114, 1116);
-        else
-            printf("unknown door 25 %02x\n", gamdata->unkn6);
-        break;
-    case 0x01:
-        if (gamdata->unkn6 == 0x74)
-            s = new Tree(m, 227, 228, 229);
-        else
-            printf("unknown tree 01 %02x\n", gamdata->unkn6);
-        break;
-    case 0x02:
-        if (gamdata->unkn6 == 0x79)
-            s = new Tree(m, 230, 231, 232);
-        else
-            printf("unknown tree 02 %02x\n", gamdata->unkn6);
-        break;
-    case 0x03:
-        if (gamdata->unkn6 == 0x81)
-            s = new Tree(m, 233, 234, 235);
-        else
-            printf("unknown tree 03 %02x\n", gamdata->unkn6);
-        break;
-    default:
-        break;
+    switch(gamdata->objType) {
+        case 0x05:
+            if(gamdata->subType == 0x74 || gamdata->subType == 0x79
+                || gamdata->subType == 0x81) {
+                s = new Tree(m, firstAnim, firstAnim + 1, firstAnim + 2);
+            } else {
+                printf("%02X , %02X, %i\n",gamdata->objType,gamdata->subType,firstAnim);
+                printf("x is %i, xoff is %i ==", gamdata->mapposx[1], gamdata->mapposx[0]);
+                printf("y is %i, yoff is %i ==", gamdata->mapposy[1], gamdata->mapposy[0]);
+                printf("z is %i, zoff is %i\n", gamdata->mapposz[1], gamdata->mapposz[0]);
+            }
+            break;
+        case 0x07:
+            if(gamdata->subType == 0x5E || gamdata->subType == 0x5F) {
+                s = new WindowObj(m, firstAnim, firstAnim + 4, firstAnim + 6);
+            } else {
+                printf("%02X , %02X, %i\n",gamdata->objType,gamdata->subType,firstAnim);
+                printf("x is %i, xoff is %i ==", gamdata->mapposx[1], gamdata->mapposx[0]);
+                printf("y is %i, yoff is %i ==", gamdata->mapposy[1], gamdata->mapposy[0]);
+                printf("z is %i, zoff is %i\n", gamdata->mapposz[1], gamdata->mapposz[0]);
+            }
+            break;
+        case 0x08:
+            if(gamdata->subType == 0x14 || gamdata->subType == 0x0B) {
+                s = new LargeDoor(m, firstAnim, firstAnim + 1, firstAnim + 2);
+            } else {
+                printf("%02X , %02X, %i\n",gamdata->objType,gamdata->subType,firstAnim);
+                printf("x is %i, xoff is %i ==", gamdata->mapposx[1], gamdata->mapposx[0]);
+                printf("y is %i, yoff is %i ==", gamdata->mapposy[1], gamdata->mapposy[0]);
+                printf("z is %i, zoff is %i\n", gamdata->mapposz[1], gamdata->mapposz[0]);
+            }
+            break;
+        case 0x09:
+            if(gamdata->subType == 0x9C) {
+                s = new EtcObj(m, firstAnim, firstAnim, firstAnim);
+            } else {
+                printf("%02X , %02X, %i\n",gamdata->objType,gamdata->subType,firstAnim);
+                printf("x is %i, xoff is %i ==", gamdata->mapposx[1], gamdata->mapposx[0]);
+                printf("y is %i, yoff is %i ==", gamdata->mapposy[1], gamdata->mapposy[0]);
+                printf("z is %i, zoff is %i\n", gamdata->mapposz[1], gamdata->mapposz[0]);
+            }
+            break;
+        case 0x0A:
+            if(gamdata->subType == 0x6E || gamdata->subType == 0x6F) {
+                s = new WindowObj(m, firstAnim, firstAnim + 2, firstAnim + 4);
+            } else if(gamdata->subType == 0xA5) {
+                // phone booth
+                s = new EtcObj(m, firstAnim, firstAnim, firstAnim);
+            } else {
+                printf("%02X , %02X, %i\n",gamdata->objType,gamdata->subType,firstAnim);
+                printf("x is %i, xoff is %i ==", gamdata->mapposx[1], gamdata->mapposx[0]);
+                printf("y is %i, yoff is %i ==", gamdata->mapposy[1], gamdata->mapposy[0]);
+                printf("z is %i, zoff is %i\n", gamdata->mapposz[1], gamdata->mapposz[0]);
+            }
+            break;
+        case 0x12:
+            if(gamdata->subType == 0x6E || gamdata->subType == 0x8A
+                || gamdata->subType == 0x63 || gamdata->subType == 0x73
+                || gamdata->subType == 0x7E || gamdata->subType == 0x75
+                || gamdata->subType == 0x97 || gamdata->subType == 0x7F) {
+                s = new Door(m, firstAnim, firstAnim + 2,
+                    firstAnim + 4, firstAnim + 6);
+            } else if(gamdata->subType >= 0x17 && gamdata->subType <= 0x1A) {
+                // crossroad things
+                s = new EtcObj(m, firstAnim, firstAnim, firstAnim);
+            } else {
+                printf("%02X , %02X, %i\n",gamdata->objType,gamdata->subType,firstAnim);
+                printf("x is %i, xoff is %i ==", gamdata->mapposx[1], gamdata->mapposx[0]);
+                printf("y is %i, yoff is %i ==", gamdata->mapposy[1], gamdata->mapposy[0]);
+                printf("z is %i, zoff is %i\n", gamdata->mapposz[1], gamdata->mapposz[0]);
+            }
+            break;
+        default:
+            if(gamdata->objType) {
+                printf("%02X , %02X, %i\n",gamdata->objType,gamdata->subType,firstAnim);
+                printf("x is %i, xoff is %i ==", gamdata->mapposx[1], gamdata->mapposx[0]);
+                printf("y is %i, yoff is %i ==", gamdata->mapposy[1], gamdata->mapposy[0]);
+                printf("z is %i, zoff is %i\n", gamdata->mapposz[1], gamdata->mapposz[0]);
+            }
+            break;
     }
-    /*
-    if(!s && (gamdata->unkn4==0 && (gamdata->unkn5!=0 || gamdata->unkn6!=0))){//this is for debug
-        printf("unknown obj %02x xx %02x xx %02x\n", gamdata->unkn4,gamdata->unkn5,gamdata->unkn6);
-        printf("x is %i, xoff is %i ==", gamdata->mapposx[1], gamdata->mapposx[0]);
-        printf("y is %i, yoff is %i ==", gamdata->mapposy[1], gamdata->mapposy[0]);
-        printf("z is %i, zoff is %i\n", gamdata->mapposz[1], gamdata->mapposz[0]);
-    }
-    */
-    /*
-    if(gamdata->unkn4!=0 && gamdata->unkn5!=0 && gamdata->unkn6 != 0)
-        if (!s) {
-            s = new EtcObj(m, firstAnim, firstAnim + 1, firstAnim +2);
-        }
-    */
+
     if (s) {
         /*
-        printf("d %x ==",gamdata->unkn4);
         printf("x is %i, xoff is %i ==", gamdata->mapposx[1], gamdata->mapposx[0]);
         printf("y is %i, yoff is %i ==", gamdata->mapposy[1], gamdata->mapposy[0]);
         printf("z is %i, zoff is %i\n", gamdata->mapposz[1], gamdata->mapposz[0]);

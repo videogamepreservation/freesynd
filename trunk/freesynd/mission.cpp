@@ -197,6 +197,14 @@ bool Mission::loadLevel(uint8 * levelData)
             }
         }
     }
+/*
+    // for hacking statics data
+    FILE *staticsF = fopen("statics.hex","w");
+    if (staticsF) {
+        fwrite(level_data_.statics, 1, 12000, staticsF);
+        fclose(staticsF);
+    }
+*/
 
     for (unsigned int i = 0; i < 400; i++) {
         LEVELDATA_STATICS & sref = level_data_.statics[i];

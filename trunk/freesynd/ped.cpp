@@ -863,7 +863,7 @@ void PedInstance::setDestinationP(int x, int y, int z, int ox,
 
     dest_path_.clear();
     setSpeed(0);
-    //printf("x : %i; y : %i; z : %i\n",x,y,z);
+    printf("x : %i; y : %i; z : %i\n", x, y, z);
 
     if (map_ == -1 || health_ <= 0
         || !(walkable(x, y, z)))

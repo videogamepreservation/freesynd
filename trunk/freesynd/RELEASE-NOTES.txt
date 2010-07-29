@@ -13,6 +13,8 @@ Changes
   * When weapon is dropped while moving, ped will stop moving
   * Static objects: added 4 windows, large doors, added 2 animations
   	to doors, 1 animation to trees
+  * Static objects animation setup method rewritten,
+  	animations require adjusting and add new objects correctly
 
 Fixed Bugs
 ----------
@@ -26,6 +28,7 @@ Known issues with this release
   * PathFinding is buggy
   * Mission debriefing is not operational
   * No animation for trees, doors
+  * Map drawing is buggy
 
 History
 -------
