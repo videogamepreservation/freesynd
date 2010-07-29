@@ -30,14 +30,6 @@
 #include "mapmenu.h"
 #include "briefmenu.h"
 
-int g_MissionNumbers[50] = {
-    17, 39, 8, 16, 20, 18, 22, 12, 21, 1,
-    15, 10, 9, 3, 2, 42, 5, 23, 34, 29,
-    28, 35, 6, 4, 50, 32, 24, 37, 41, 33, 38,
-    7, 48, 26, 44, 45, 27, 40, 14, 36, 46,
-    31, 13, 11, 19, 43, 49, 30, 47, 25
-};
-
 BriefMenu::BriefMenu(MenuManager * m, MapMenu * mapMenu) :
 Menu(m, "brief", "mbrief.dat", "mbrieout.dat"), map_menu_(mapMenu),
 orig_pixels_(0), cur_miss_(0), start_line_(0), info_level_(1),
@@ -72,10 +64,10 @@ void BriefMenu::handleShow() {
                       GAME_SCREEN_WIDTH);
     }
 
-    g_Screen.drawLogo(18, 14, g_App.getGameSession().getLogo(), g_App.getGameSession().getLogoColour());
+    g_Screen.drawLogo(18, 14, g_Session.getLogo(), g_Session.getLogoColour());
 
     // grab mission info
-    cur_miss_ = g_MissionNumbers[g_App.currentBlk()];
+    cur_miss_ = g_Session.getSelectedBlock().mis_id;
     mission_ = g_App.missions().loadMission(cur_miss_);
 
     // write briefing

@@ -24,6 +24,17 @@
 #define CORE_GAME_SESSION_H
 
 #include <string>
+#include <set>
+
+#include "../common.h"
+
+typedef struct Block_ {
+    const char *name;
+    int population;
+    int mis_id;
+    bool available;
+    bool finished;
+} Block;
 
 /*!
  * A holder for player data.
@@ -109,12 +120,37 @@ public:
         money_ = m;
     }
 
+    /*!
+     * Returns the index of the current selected region on map menu.
+     */
+    uint8 getSelectedBlockId() { return selected_blck_; }
+
+    /*!
+     * Sets the index of the current selected region on map menu.
+     * \param index The region index (between 0 and 49 inclusive)
+     */
+    void setSelectedBlockId(uint8 index) { if (index >= 0 && index < 50) selected_blck_ = index; }
+
+    //! Adds the given mission index to the list of finished missions.
+    Block & getBlock(uint8 index);
+
+    //! Convenience method to get the selected block
+    Block & getSelectedBlock();
+
+    //! Update state when finishing a mission
+    void completeSelectedBlock();
+
 private:
     int logo_;
     int logo_colour_;
     int money_;
     std::string company_name_;
     std::string username_;
+    /*! 
+     * Stores the index of the current selected
+     * region on the mission map.
+     */
+    uint8 selected_blck_;
 };
 
 #endif //CORE_GAME_SESSION_H

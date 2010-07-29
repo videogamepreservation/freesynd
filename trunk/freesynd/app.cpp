@@ -54,7 +54,6 @@ skipFli_(false), screen_(new Screen(GAME_SCREEN_WIDTH, GAME_SCREEN_HEIGHT))
 #error A suitable System object has not been defined!
 #endif
 {
-    curr_blk_ = 9; // By default, the index of West Europe
     agents_.loadAgents();
     weapons_.loadWeapons();
     mods_.loadMods();
@@ -417,7 +416,14 @@ void App::run() {
     } else {
         // Debug scenario : start directly with the brief menu
         // in the given mission
-        currentBlk(start_mission);
+        // First, we find the block associated with the given
+        // mission number
+        for (int i=0; i<50; i++) {
+            if (session_.getBlock(i).mis_id == start_mission) {
+                session_.setSelectedBlockId(i);
+            }
+        }
+        // Then we go to the brief menu
         menus_.changeCurrentMenu("brief");
         // show the cursor because at first it's hidden
         // and normally it's the main menu which shows it
