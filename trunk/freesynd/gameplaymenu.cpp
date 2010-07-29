@@ -356,6 +356,7 @@ void GameplayMenu::handleShow()
 
     g_Screen.clear(0);
     mission_->drawMap(world_x_, world_y_);
+    g_Screen.drawRect(0,0, 129,(GAME_SCREEN_HEIGHT - 1));
     drawAgentSelectors();
     drawPerformanceMeters();
     drawSelectAllButton();
@@ -1080,10 +1081,7 @@ void GameplayMenu::drawMissionHint(int elapsed) {
         txtColor = inversed ? 0 : 11;
 
         if (inversed) {
-            for (int j = 0; j < 11; j++) {
-                for (int i = 0; i < 128; i++)
-                    g_Screen.setPixel(i, 46 + 44 + 10 + 46 + 44 + j , 11);
-            }
+            g_Screen.drawRect(0,46 + 44 + 10 + 46 + 44, 128, 12, 11);
         }
 
         if (mission_) {
