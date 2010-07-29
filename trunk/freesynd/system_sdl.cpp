@@ -62,7 +62,7 @@ SystemSDL::SystemSDL(int depth)
     SDL_WM_SetCaption("FreeSynd", NULL);
 
     // Keyboard init
-    SDL_EnableKeyRepeat(80, 40);
+    SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY, SDL_DEFAULT_REPEAT_INTERVAL);
 
     // Audio initialisation
     if (!Audio::init()) {
