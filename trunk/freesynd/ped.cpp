@@ -221,9 +221,21 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
             return true;
         }
         else {
-            if(health_ > 0)
-                setDestinationP(in_vehicle_->tileX(), in_vehicle_->tileY(), 0,
-                        in_vehicle_->offX(), in_vehicle_->offY(), 320);
+            if(health_ > 0) {
+                if(dest_path_.empty())
+                    setDestinationP(in_vehicle_->tileX(), in_vehicle_->tileY(), 0,
+                        in_vehicle_->offX(), in_vehicle_->offY(), 0, 320);
+                else {
+                    if(dest_path_.back().tileX() != in_vehicle_->tileX()
+                        || dest_path_.back().tileY() != in_vehicle_->tileY()
+                        || dest_path_.back().tileZ() != in_vehicle_->tileZ()
+                        || dest_path_.back().offX() != in_vehicle_->offX()
+                        || dest_path_.back().offY() != in_vehicle_->offY()
+                        /*|| dest_path_.back().offZ() != in_vehicle_->offZ()*/)
+                        setDestinationP(in_vehicle_->tileX(), in_vehicle_->tileY(), 0,
+                            in_vehicle_->offX(), in_vehicle_->offY(), 0, 320);
+                }
+            }
         }
     }
 
@@ -272,9 +284,21 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
             }
         }
         else{
-            if(health_ > 0)
-                setDestinationP(pickup_weapon_->tileX(), pickup_weapon_->tileY(), 0,
-                        pickup_weapon_->offX(), pickup_weapon_->offY(), 320);
+            if(health_ > 0) {
+                if(dest_path_.empty())
+                    setDestinationP(pickup_weapon_->tileX(), pickup_weapon_->tileY(), 0,
+                        pickup_weapon_->offX(), pickup_weapon_->offY(), 0, 320);
+                else {
+                    if(dest_path_.back().tileX() != pickup_weapon_->tileX()
+                        || dest_path_.back().tileY() != pickup_weapon_->tileY()
+                        || dest_path_.back().tileZ() != pickup_weapon_->tileZ()
+                        || dest_path_.back().offX() != pickup_weapon_->offX()
+                        || dest_path_.back().offY() != pickup_weapon_->offY()
+                        || dest_path_.back().offZ() != pickup_weapon_->offZ())
+                        setDestinationP(pickup_weapon_->tileX(), pickup_weapon_->tileY(), 0,
+                            pickup_weapon_->offX(), pickup_weapon_->offY(), 0, 320);
+                }
+            }
         }
     }
 
@@ -818,6 +842,9 @@ void PedInstance::putInVehicle(VehicleInstance * v) {
 void PedInstance::leaveVehicle() {
     assert(map_ == -1 && in_vehicle_);
     map_ = in_vehicle_->map();
+    // TODO: only if driver exits this must occur
+    in_vehicle_->clearDestination();
+    in_vehicle_->setSpeed(0);
     in_vehicle_ = 0;
 }
 
@@ -854,7 +881,7 @@ void PedInstance::setDrawnAnim(PedInstance::AnimationDrawn drawn_anim) {
 }
 
 void PedInstance::setDestinationP(int x, int y, int z, int ox,
-                                               int oy, int new_speed)
+                                       int oy, int oz, int new_speed)
 {
     std::set < PathNode > open, closed;
     std::map < PathNode, PathNode > parent;

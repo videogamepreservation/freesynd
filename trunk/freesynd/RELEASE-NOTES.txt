@@ -15,6 +15,7 @@ Changes
   	to doors, 1 animation to trees
   * Static objects animation setup method rewritten,
   	animations require adjusting and add new objects correctly
+  * While vehicle was moving if ped went out, vehicle continued to move
 
 Fixed Bugs
 ----------

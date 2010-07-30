@@ -612,7 +612,7 @@ void GameplayMenu::handleMouseDown(int x, int y, int button)
                         else
                             mission_->ped(i)->inVehicle()->
                                 setDestinationV(tx, ty, 0, 
-                                128, 128, 480);
+                                128, 128, 0, 480);
                     }
                     else {
                         if (ctrl_)
@@ -646,7 +646,7 @@ void GameplayMenu::handleMouseDown(int x, int y, int button)
                             }
 
                             mission_->ped(i)->setDestinationP(tx, ty, 0,
-                                    ox, oy, 320);
+                                    ox, oy, 0, 320);
                         }
                     }
                 }

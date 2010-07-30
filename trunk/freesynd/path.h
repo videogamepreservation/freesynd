@@ -36,9 +36,9 @@ public:
     PathNode() :
         tile_x_(0), tile_y_(0), tile_z_(0), off_x_(0), off_y_(0) {}
     PathNode(int tile_x, int tile_y, int tile_z, int off_x = 128,
-            int off_y = 128) :
+            int off_y = 128, int off_z = 0) :
         tile_x_(tile_x), tile_y_(tile_y), tile_z_(tile_z), off_x_(off_x),
-                off_y_(off_y) {}
+                off_y_(off_y), off_z_(off_z) {}
 
     int tileX() const { return tile_x_; }
     int tileY() const { return tile_y_; }
@@ -46,6 +46,7 @@ public:
 
     int offX() const { return off_x_; }
     int offY() const { return off_y_; }
+    int offZ() const { return off_z_; }
 
     bool operator<(const PathNode &other) const {
         int a = tile_x_ | (tile_y_ << 16);
@@ -55,9 +56,10 @@ public:
 
     void setOffX(int x) { off_x_ = x; }
     void setOffY(int y) { off_y_ = y; }
+    void setOffZ(int z) { off_z_ = z; }
 
 protected:
-    int tile_x_, tile_y_, tile_z_, off_x_, off_y_;
+    int tile_x_, tile_y_, tile_z_, off_x_, off_y_, off_z_;
 };
 
 #endif

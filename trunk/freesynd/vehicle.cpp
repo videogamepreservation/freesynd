@@ -246,7 +246,7 @@ bool VehicleInstance::dirWalkable(PathNode *p, int x, int y, int z) {
 }
 
 void VehicleInstance::setDestinationV(int x, int y, int z, int ox,
-                                               int oy, int new_speed)
+                                       int oy, int oz, int new_speed)
 {
     std::set < PathNode > open, closed;
     std::map < PathNode, PathNode > parent;
