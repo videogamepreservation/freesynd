@@ -205,6 +205,7 @@ public:
     static Static *loadInstance(uint8 *data, int m);
 
     virtual void draw(int x, int y) = 0;
+    bool animate(int elapsed) = 0;
 
 protected:
     Static(int m):MapObject(m) {}
@@ -220,6 +221,7 @@ public:
     virtual ~Door() {}
 
     void draw(int x, int y);
+    bool animate(int elapsed) { return MapObject::animate(elapsed); }
 
 protected:
     int anim_, closing_anim_, open_anim_, opening_anim_;
@@ -234,6 +236,7 @@ public:
     virtual ~LargeDoor() {}
 
     void draw(int x, int y);
+    bool animate(int elapsed) { return MapObject::animate(elapsed); }
 
 protected:
     int anim_, closing_anim_, opening_anim_;
@@ -247,6 +250,7 @@ public:
     virtual ~Tree() {}
 
     void draw(int x, int y);
+    bool animate(int elapsed) { return MapObject::animate(elapsed); }
 
 protected:
     int anim_, burning_anim_, damaged_anim_;
@@ -261,6 +265,7 @@ public:
     virtual ~WindowObj() {}
 
     void draw(int x, int y);
+    bool animate(int elapsed) { return MapObject::animate(elapsed); }
 
 protected:
     int anim_, breaking_anim_, damaged_anim_;
@@ -275,6 +280,7 @@ public:
     virtual ~EtcObj() {}
 
     void draw(int x, int y);
+    bool animate(int elapsed) { return MapObject::animate(elapsed); }
 
 protected:
     int anim_, burning_anim_, damaged_anim_;
