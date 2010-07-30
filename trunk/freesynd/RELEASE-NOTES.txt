@@ -23,6 +23,9 @@ Fixed Bugs
     					that button is not highlighted until the mouse moves
   * 3029837 : When clicking on a menu button or hitting a key that
   						activate a button, event processing should be paused
+  * 2307181 : #include <cstdlib> missing (it was simply closed, fix 
+  						was done somewhere between 0.2 - 0.3 release and was not
+  						closed)
 
 Known issues with this release
 ------------------------------
