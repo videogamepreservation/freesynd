@@ -19,7 +19,10 @@ Changes
 
 Fixed Bugs
 ----------
-  * 0000000 : _
+  * 3029839 : When a menu appears, if the mouse cursor is on a button,
+    					that button is not highlighted until the mouse moves
+  * 3029837 : When clicking on a menu button or hitting a key that
+  						activate a button, event processing should be paused
 
 Known issues with this release
 ------------------------------

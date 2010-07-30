@@ -125,7 +125,7 @@ protected:
     std::string showAnim_, leaveAnim_;
     std::list<MenuText> statics_;
     std::map<Key, MenuText> options_;
-    bool hovering_;
+    bool hovering_, drop_events_;
     const char *parent_menu_;
     uint8 *background_;
     int clear_x_, clear_y_, clear_w_, clear_h_;

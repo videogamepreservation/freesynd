@@ -31,12 +31,16 @@
 #include "file.h"
 #include "fliplayer.h"
 #include "screen.h"
+#ifdef SYSTEM_SDL
+#include "system_sdl.h"
+#endif
 
 Menu::Menu(MenuManager * menuManager, const char *menu_name,
            const char *showAnim,
            const char *leaveAnim):menu_manager_(menuManager),
 name_(menu_name), showAnim_(showAnim), leaveAnim_(leaveAnim),
-hovering_(false), parent_menu_(NULL), background_(NULL)
+hovering_(false), parent_menu_(NULL), background_(NULL),
+drop_events_(false)
 {
     menuManager->addMenu(this);
 }
@@ -64,6 +68,7 @@ void Menu::redrawOptions()
 void Menu::show(bool playAnim)
 {
     if (showAnim_.size() && playAnim) {
+        drop_events_ = true;
         FliPlayer fliPlayer;
         uint8 *data;
         int size;
@@ -71,6 +76,7 @@ void Menu::show(bool playAnim)
         fliPlayer.loadFliData(data, false);
         fliPlayer.play();
         delete[] data;
+        drop_events_ = false;
     }
 
     if (background_) {
@@ -89,6 +95,11 @@ void Menu::show(bool playAnim)
     handleShow();
 
     redrawOptions();
+    if(playAnim) {
+        int x,y;
+        int state = SDL_GetMouseState(&x, &y);
+        mouseMotionEvent(x, y, state);
+    }
 }
 
 void Menu::leave(bool playAnim)
@@ -97,6 +108,7 @@ void Menu::leave(bool playAnim)
     handleLeave();
 
     if (leaveAnim_.size() && playAnim) {
+        drop_events_ = true;
         FliPlayer fliPlayer;
         uint8 *data;
         int size;
@@ -105,6 +117,7 @@ void Menu::leave(bool playAnim)
 		g_App.gameSounds().play(snd::MENU_CHANGE);
         fliPlayer.play();
         delete[] data;
+        drop_events_ = false;
     }
 
     if (background_) {
@@ -129,6 +142,9 @@ void Menu::addOption(int x, int y, const char *text, int size, Key key,
 
 void Menu::keyEvent(Key key, KeyMod mod, bool pressed)
 {
+    if (drop_events_)
+        return;
+
     if (key == KEY_ESCAPE) {
         menu_manager_->changeCurrentMenu(parent_menu_);
         return;
@@ -186,6 +202,9 @@ void Menu::keyEvent(Key key, KeyMod mod, bool pressed)
 
 void Menu::mouseMotionEvent(int x, int y, int state)
 {
+    if(drop_events_)
+        return;
+
     handleMouseMotion(x, y, state);
 
     if (hovering_)
@@ -210,6 +229,9 @@ void Menu::mouseMotionEvent(int x, int y, int state)
 
 void Menu::mouseDownEvent(int x, int y, int button)
 {
+    if(drop_events_)
+        return;
+
     for (std::map < Key, MenuText >::iterator it = options_.begin();
          it != options_.end(); it++) {
         MenuText & m = it->second;
@@ -229,5 +251,8 @@ void Menu::mouseDownEvent(int x, int y, int button)
 
 void Menu::mouseUpEvent(int x, int y, int button)
 {
+    if(drop_events_)
+        return;
+
     handleMouseUp(x, y, button);
 }
