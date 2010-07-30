@@ -140,6 +140,18 @@ public:
     //! Update state when finishing a mission
     void completeSelectedBlock();
 
+    //! Cheat method to enable all missions
+    void cheatEnableAllMission() { enable_all_mis_ = true; }
+
+    //! Tells if cheat mode All missions enabled is on
+    bool isAllMissionEnabled() { return enable_all_mis_; }
+
+    //! Cheat method to replay finished mission
+    void cheatReplayMission() { replay_mission_ = true; }
+
+    //! Tells if cheat mode Replay missions is on
+    bool canReplayMission() { return replay_mission_; }
+
 private:
     int logo_;
     int logo_colour_;
@@ -151,6 +163,10 @@ private:
      * region on the mission map.
      */
     uint8 selected_blck_;
+    /*! Cheat flag to tell that all missions are playable.*/
+    bool enable_all_mis_;
+    /*! Cheat flag to enable replay of finished missions. */
+    bool replay_mission_;
 };
 
 #endif //CORE_GAME_SESSION_H

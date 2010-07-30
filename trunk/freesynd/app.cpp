@@ -70,8 +70,11 @@ App::~App() {
 
 }
 
+/*!
+ * Activate cheat mode in which all completed missions can be replayed.
+ */
 void App::cheatRepeatOrCompleteMission() {
-    // TODO: Implement cheatRepeatOrCompleteMission()
+    session_.cheatReplayMission();
 }
 
 void App::cheatWeaponsAndMods() {
@@ -98,8 +101,11 @@ void App::cheatEquipAllMods() {
     }
 }
 
+/*!
+ * Activate cheat mode in which all missions are playable.
+ */
 void App::cheatAnyMission() {
-    // TODO: Implement cheatAnyMission()
+    session_.cheatEnableAllMission();
 }
 
 void App::cheatResurrectAgents() {
@@ -153,6 +159,20 @@ void App::cheatEquipFancyWeapons() {
     }
 }
 
+/*!
+ * Activate a cheat code with the given name. Possible 
+ * cheat codes are :
+ * - DO IT AGAIN : Possibility to replay a completed mission
+ * - NUK THEM : Enable all missions and resurrect dead agents
+ * - OWN THEM : All countries belong to the user
+ * - ROB A BANK : Puts $100 000 000 in funds
+ * - TO THE TOP : Puts $100 000 000 in funds and activates all missions
+ * - COOPER TEAM : $100 000 000 in funds, select any mission, all weapons 
+ *   and mods
+ * - WATCH THE CLOCK : Accelerates time
+ *
+ * \param name The name of a cheat code.
+ */
 void App::setCheatCode(const char *name) {
     
     // Repeat mission with previously obtained items, press 'C' or 'Ctrl-C'

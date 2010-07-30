@@ -133,6 +133,11 @@ int main(int argc, char *argv[]) {
 #else
     srand((unsigned) time(NULL));
 #endif
+
+    // This variable stores the index of the cheat code param on
+    // the command line
+    int cheatCodeIndex = -1;
+
     for (int i = 1; i < argc; ++i) {
         if (0 == strcmp("-p", argv[i]) || 0 == strcmp("--path", argv[i])) {
             if (argv[i + 1])
@@ -162,6 +167,15 @@ int main(int argc, char *argv[]) {
             }
             i++;
         }
+
+        // This parameter is used to specify cheat codes on command line.
+        // You can specify multiple codes using the ':' as a separator.
+        // See available cheat codes in App::setCheatCode()
+        // exemple -c "DO IT AGAIN:NUK THEM"
+        if (0 == strcmp("-c", argv[i]) || 0 == strcmp("--cheat", argv[i])) {
+            cheatCodeIndex = i + 1;
+            i++;
+        }
 #endif
     }
 
@@ -172,6 +186,19 @@ int main(int argc, char *argv[]) {
 
     LOG(Log::k_FLG_INFO, "Main", "main", ("Initializing application..."))
     std::auto_ptr<App> app(new App());
+
+    // setting the cheat codes
+    if (cheatCodeIndex != -1) {
+        char s[50];
+        strcpy(s, argv[cheatCodeIndex]);
+        char *token = strtok(s, ":");
+        while ( token != NULL ) {
+            LOG(Log::k_FLG_INFO, "Main", "main", ("Cheat code activated : %s", token))
+            app->setCheatCode(token);
+            token = strtok(NULL, ":");
+        }
+    }
+
     LOG(Log::k_FLG_INFO, "Main", "main", ("Initializing application completed"))
 
     app->run();

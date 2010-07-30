@@ -77,6 +77,8 @@ Block g_Blocks[50] = {
 
 GameSession::GameSession() {
     reset();
+    enable_all_mis_ = false;
+    replay_mission_ = false;
 }
 
 GameSession::~GameSession() {

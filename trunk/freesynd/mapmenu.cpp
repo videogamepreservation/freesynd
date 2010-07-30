@@ -198,9 +198,25 @@ void MapMenu::handleShow()
         g_Screen.blit(0, 0, GAME_SCREEN_WIDTH, 345, orig_pixels_);
     }
 
-    // hide brief menu if current selected mission is unavailable
-    if (!g_Session.getSelectedBlock().available) {
-        hideOption(KEY_F4);
+    // State of the Briefing button
+    Block blk = g_Session.getBlock(g_Session.getSelectedBlockId());
+    if (blk.finished) { // A mission is finished
+        // Brief is available only if replay mission cheat is set
+        if (g_Session.canReplayMission()) {
+            showOption(KEY_F4);
+        } else {
+            hideOption(KEY_F4);
+        }
+    } else if (!blk.available) { // A mission is not finished but unavailable
+        // Brief is available only if all missions enable cheat is set
+        if (g_Session.isAllMissionEnabled()) {
+            showOption(KEY_F4);
+        } else {
+            hideOption(KEY_F4);
+        }
+    } else {
+        // Brief is available because mission is available and not finished
+        showOption(KEY_F4);
     }
 
     for (int i = 0; i < 50; i++) {
@@ -219,7 +235,6 @@ void MapMenu::handleShow()
 
     // Draw country info
     // TODO: Grab countryinfo and display it
-    Block blk = g_Session.getBlock(g_Session.getSelectedBlockId());
     char tmp[100];
     g_App.fonts().drawText(268, 312, blk.name, 0, false);  // countryname
 #ifdef WIN_SECURE
@@ -261,12 +276,6 @@ void MapMenu::handleMouseDown(int x, int y, int button)
                  (x - g_BlocksDisplay[i].pos.x) / 2] != 0) {
                 g_Session.setSelectedBlockId(i);
 
-                // If the mission is playable, then debrief button is clickable
-                if (g_Session.getSelectedBlock().available) {
-                    showOption(KEY_F4);
-                } else {
-                    hideOption(KEY_F4);
-                }
                 handleShow();
                 return;
             }
