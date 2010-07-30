@@ -29,7 +29,7 @@
 #include "system_sdl.h"
 #endif
 MapObject::MapObject(int m):map_(m), frame_(0), elapsed_carry_(0),
-frames_per_sec_(15), sub_type_(0)
+frames_per_sec_(15), sub_type_(0), main_type_(0)
 {
 }
 

@@ -87,6 +87,14 @@ public:
 
     void setSubType(int objSubType) { sub_type_ = objSubType; }
     int getSubType() { return sub_type_; }
+    void setMainType(int objMainType) { main_type_ = objMainType; }
+    int getMainType() { return main_type_; }
+    void setFramesPerSec(int framesPerSec)
+    {
+        frames_per_sec_ = framesPerSec;
+    }
+    int getFramesPerSec() { return frames_per_sec_; }
+
 
 protected:
     int tile_x_, tile_y_, tile_z_, off_x_, off_y_, off_z_;
@@ -94,7 +102,7 @@ protected:
     int frame_;
     int elapsed_carry_;
     int frames_per_sec_;
-    int sub_type_;
+    int sub_type_, main_type_;
 
     void addOffs(int &x, int &y);
 };
