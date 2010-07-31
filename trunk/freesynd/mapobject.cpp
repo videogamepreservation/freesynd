@@ -362,7 +362,7 @@ void Door::draw(int x, int y)
     g_App.gameSprites().drawFrame(anim_, frame_, x, y);
 }
 
-bool Door::animate(int elapsed)
+bool Door::animate(int elapsed, Mission *obj)
 {
     return MapObject::animate(elapsed);
 }
@@ -378,7 +378,7 @@ void LargeDoor::draw(int x, int y)
     g_App.gameSprites().drawFrame(anim_, frame_, x, y);
 }
 
-bool LargeDoor::animate(int elapsed)
+bool LargeDoor::animate(int elapsed, Mission *obj)
 {
     return MapObject::animate(elapsed);
 }

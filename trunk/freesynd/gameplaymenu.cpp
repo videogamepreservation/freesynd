@@ -257,7 +257,7 @@ void GameplayMenu::handleTick(int elapsed)
             change |= mission_->weapon(i)->animate(diff);
 
         for (int i = 0; i < mission_->numStatics(); i++)
-            change |= mission_->statics(i)->animate(diff);
+            change |= mission_->statics(i)->animate(diff, mission_);
     }
 
     if (change) {

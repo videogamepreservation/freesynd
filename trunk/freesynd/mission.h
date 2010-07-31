@@ -31,6 +31,7 @@
 #define MISSION_H
 
 #include "common.h"
+#include "mapobject.h"
 #include <string>
 #include <vector>
 #include <set>
@@ -71,7 +72,8 @@ public:
     void drawMap(int scrollx, int scrolly);
     virtual void drawAt(int tilex, int tiley, int tilez, int x, int y,
             int scrollX, int scrollY);
-
+    virtual MapObject * findAt(int tilex, int tiley, int tilez,
+            int *majorType, int *searchIndex);
     const char *briefing() { return briefing_.c_str(); }
 
     int infoCost(int lvl) {

@@ -457,6 +457,7 @@ void Mission::start()
 bool Mission::failed()
 {
     // TODO: other ways to fail
+    assert((unsigned int)objective_ped_ >= peds_.size());
     if (objective_ == 1 && peds_[objective_ped_]->health() <= 0)
         return true;
     return false;
@@ -465,6 +466,7 @@ bool Mission::failed()
 bool Mission::completed()
 {
     // TODO: other ways to complete
+    assert((unsigned int)objective_ped_ >= peds_.size());
     if (objective_ == 2 && peds_[objective_ped_]->health() <= 0)
         return true;
     return false;
@@ -495,4 +497,10 @@ void Mission::addWeapon(WeaponInstance * w)
         if (weapons_[i] == w)
             return;
     weapons_.push_back(w);
+}
+
+MapObject * Mission::findAt(int tilex, int tiley, int tilez,
+                            int *majorType, int *searchIndex)
+{
+    return NULL;
 }
