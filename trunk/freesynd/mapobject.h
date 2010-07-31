@@ -221,7 +221,7 @@ public:
     virtual ~Door() {}
 
     void draw(int x, int y);
-    bool animate(int elapsed) { return MapObject::animate(elapsed); }
+    bool animate(int elapsed);
 
 protected:
     int anim_, closing_anim_, open_anim_, opening_anim_;
@@ -236,7 +236,7 @@ public:
     virtual ~LargeDoor() {}
 
     void draw(int x, int y);
-    bool animate(int elapsed) { return MapObject::animate(elapsed); }
+    bool animate(int elapsed);
 
 protected:
     int anim_, closing_anim_, opening_anim_;

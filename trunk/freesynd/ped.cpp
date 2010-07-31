@@ -842,6 +842,7 @@ void PedInstance::putInVehicle(VehicleInstance * v) {
 void PedInstance::leaveVehicle() {
     assert(map_ == -1 && in_vehicle_);
     map_ = in_vehicle_->map();
+
     // TODO: only if driver exits this must occur
     in_vehicle_->clearDestination();
     in_vehicle_->setSpeed(0);
@@ -890,11 +891,18 @@ void PedInstance::setDestinationP(int x, int y, int z, int ox,
 
     dest_path_.clear();
     setSpeed(0);
-    printf("x : %i; y : %i; z : %i\n", x, y, z);
+    printf("x : %i; y : %i; z : %i = = %i,%i,%i\n", x, y, z, ox, oy, oz);
 
     if (map_ == -1 || health_ <= 0
         || !(walkable(x, y, z)))
         return;
+
+    if (in_vehicle_) {
+        in_vehicle_ = 0;
+    }
+    if (pickup_weapon_) {
+        pickup_weapon_ = 0;
+    }
 
     if (!walkable(tile_x_, tile_y_, tile_z_)) {
         float dBest = 100000, dCur;
