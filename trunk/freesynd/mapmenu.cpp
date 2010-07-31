@@ -195,7 +195,7 @@ void MapMenu::handleShow()
         memcpy(orig_pixels_, g_Screen.pixels(),
                GAME_SCREEN_WIDTH * GAME_SCREEN_HEIGHT);
     } else {
-        g_Screen.blit(0, 0, GAME_SCREEN_WIDTH, 345, orig_pixels_);
+        g_Screen.blit(0, 0, GAME_SCREEN_WIDTH, GAME_SCREEN_HEIGHT, orig_pixels_);
     }
 
     // State of the Briefing button
