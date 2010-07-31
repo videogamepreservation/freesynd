@@ -500,7 +500,53 @@ void Mission::addWeapon(WeaponInstance * w)
 }
 
 MapObject * Mission::findAt(int tilex, int tiley, int tilez,
-                            int *majorType, int *searchIndex)
+                            int *majorType, int *searchIndex, bool only)
 {
+    switch(*majorType) {
+        case 0:
+            for (unsigned int i = *searchIndex; i < vehicles_.size(); i++)
+                if (vehicles_[i]->tileX() == tilex
+                    && vehicles_[i]->tileY() == tiley
+                    && vehicles_[i]->tileZ() == tilez) {
+                    *searchIndex = i;
+                    *majorType = 0;
+                    return vehicles_[i];
+                }
+            if(only)
+                return NULL;
+            *searchIndex = 0;
+        case 1:
+            for (unsigned int i = *searchIndex; i < peds_.size(); i++)
+                if (peds_[i]->tileX() == tilex && peds_[i]->tileY() == tiley
+                    && peds_[i]->tileZ() == tilez) {
+                    *searchIndex = i;
+                    *majorType = 1;
+                    return peds_[i];
+                }
+            if(only)
+                return NULL;
+            *searchIndex = 0;
+        case 2:
+            for (unsigned int i = *searchIndex; i < weapons_.size(); i++)
+                if (weapons_[i]->map() != -1 && weapons_[i]->tileX() == tilex
+                    && weapons_[i]->tileY() == tiley
+                    && weapons_[i]->tileZ() == tilez) {
+                    *searchIndex = i;
+                    *majorType = 2;
+                    return weapons_[i];
+                }
+            if(only)
+                return NULL;
+            *searchIndex = 0;
+        case 3:
+            for (unsigned int i = *searchIndex; i < statics_.size(); i++)
+                if (statics_[i]->tileX() == tilex
+                    && statics_[i]->tileY() == tiley
+                    && statics_[i]->tileZ() == tilez) {
+                    *searchIndex = i;
+                    *majorType = 3;
+                    return statics_[i];
+                }
+    }
     return NULL;
 }

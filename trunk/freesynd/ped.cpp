@@ -891,16 +891,29 @@ void PedInstance::setDestinationP(int x, int y, int z, int ox,
 
     dest_path_.clear();
     setSpeed(0);
-    printf("x : %i; y : %i; z : %i = = %i,%i,%i\n", x, y, z, ox, oy, oz);
+    printf("x : %i; y : %i; z : %i = = ox :%i, oy :%i, oz :%i\n",
+        x, y, z, ox, oy, oz);
 
     if (map_ == -1 || health_ <= 0
         || !(walkable(x, y, z)))
         return;
 
     if (in_vehicle_) {
+        if(in_vehicle_->tileX() != x
+            || in_vehicle_->tileY() != y
+            || in_vehicle_->tileZ() != z
+            || in_vehicle_->offX() != ox
+            || in_vehicle_->offY() != oy
+            || in_vehicle_->offZ() != oz)
         in_vehicle_ = 0;
     }
     if (pickup_weapon_) {
+        if(pickup_weapon_->tileX() != x
+            || pickup_weapon_->tileY() != y
+            || pickup_weapon_->tileZ() != z
+            || pickup_weapon_->offX() != ox
+            || pickup_weapon_->offY() != oy
+            || pickup_weapon_->offZ() != oz)
         pickup_weapon_ = 0;
     }
 

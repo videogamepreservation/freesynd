@@ -99,7 +99,7 @@ bool MapObject::animate(int elapsed)
     int total_elapsed = elapsed + elapsed_carry_;
     elapsed_carry_ = total_elapsed % frame_tics_;
     frame_ += (total_elapsed / frame_tics_);
-    frame_ %= 100;
+    frame_ %= frames_per_sec_ << 2;
     return true;
 }
 

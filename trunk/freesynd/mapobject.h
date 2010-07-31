@@ -213,6 +213,7 @@ public:
 protected:
     Static(int m):MapObject(m) {}
     virtual ~Static() {}
+    unsigned int state_;
 };
 
 /*!

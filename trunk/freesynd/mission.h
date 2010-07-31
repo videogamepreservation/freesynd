@@ -73,7 +73,7 @@ public:
     virtual void drawAt(int tilex, int tiley, int tilez, int x, int y,
             int scrollX, int scrollY);
     virtual MapObject * findAt(int tilex, int tiley, int tilez,
-            int *majorType, int *searchIndex);
+            int *majorType, int *searchIndex, bool only);
     const char *briefing() { return briefing_.c_str(); }
 
     int infoCost(int lvl) {
