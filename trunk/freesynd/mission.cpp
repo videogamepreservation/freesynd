@@ -201,13 +201,12 @@ bool Mission::loadLevel(uint8 * levelData)
     // for hacking statics data
     char nameS[256];
     sprintf(nameS, "statics%02X.hex", map_);
-    FILE *staticsF = fopen(nameS,"w");
+    FILE *staticsF = fopen(nameS,"wb");
     if (staticsF) {
         fwrite(level_data_.statics, 1, 12000, staticsF);
         fclose(staticsF);
     }
 */
-
 
     for (unsigned int i = 0; i < 400; i++) {
         LEVELDATA_STATICS & sref = level_data_.statics[i];
