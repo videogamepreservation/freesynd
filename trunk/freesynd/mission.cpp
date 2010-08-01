@@ -457,7 +457,7 @@ void Mission::start()
 bool Mission::failed()
 {
     // TODO: other ways to fail
-    assert((unsigned int)objective_ped_ >= peds_.size());
+    assert((unsigned int)objective_ped_ < peds_.size());
     if (objective_ == 1 && peds_[objective_ped_]->health() <= 0)
         return true;
     return false;
@@ -466,7 +466,7 @@ bool Mission::failed()
 bool Mission::completed()
 {
     // TODO: other ways to complete
-    assert((unsigned int)objective_ped_ >= peds_.size());
+    assert((unsigned int)objective_ped_ < peds_.size());
     if (objective_ == 2 && peds_[objective_ped_]->health() <= 0)
         return true;
     return false;

@@ -206,7 +206,7 @@ Static *Static::loadInstance(uint8 * data, int m)
             if(gamdata->subType == 0x14 || gamdata->subType == 0x0B) {
                 s = new LargeDoor(m, firstAnim, firstAnim + 1, firstAnim + 2);
             } else if(gamdata->subType == 0xF0) {
-                // tree in vase
+                // tree in pot
                 s = new Tree(m, firstAnim, firstAnim + 1, firstAnim + 2);
             } else {
                 printf("%02X , %02X, %i\n",gamdata->objType,gamdata->subType,firstAnim);
@@ -238,7 +238,7 @@ Static *Static::loadInstance(uint8 * data, int m)
                 // phone booth
                 s = new EtcObj(m, firstAnim, firstAnim, firstAnim);
             } else if(gamdata->subType == 0xC7) {
-                // advertisement on wall broken signal
+                // advertisement on wall bad signal
                 s = new EtcObj(m, firstAnim, firstAnim, firstAnim);
             } else {
                 printf("%02X , %02X, %i\n",gamdata->objType,gamdata->subType,firstAnim);
@@ -370,17 +370,123 @@ bool Door::animate(int elapsed, Mission *obj)
 LargeDoor::LargeDoor(int m, int anim, int closingAnim, int openingAnim):Static(m), anim_(anim),
 closing_anim_(closingAnim), opening_anim_(openingAnim)
 {
+    state_ = 2;// closed
 }
 
 void LargeDoor::draw(int x, int y)
 {
     addOffs(x, y);
-    g_App.gameSprites().drawFrame(anim_, frame_, x, y);
+    switch(state_) {
+        case 0:
+            break;
+        case 1:
+            g_App.gameSprites().drawFrame(closing_anim_, frame_, x, y);
+            break;
+        case 2:
+            g_App.gameSprites().drawFrame(anim_, frame_, x, y);
+            break;
+        case 3:
+            g_App.gameSprites().drawFrame(opening_anim_, frame_, x, y);
+            break;
+    }
 }
 
 bool LargeDoor::animate(int elapsed, Mission *obj)
 {
-    return MapObject::animate(elapsed);
+    // TODO: 
+    VehicleInstance *v = NULL;
+    int x = tileX();
+    int y = tileY();
+    int z = tileZ();
+    int mt = 0;
+    int si = 0;
+    char inc_rel, rel_inc;
+    char *i = 0, *j = 0;
+
+    bool changed = MapObject::animate(elapsed);
+    switch(state_) {
+        case 0: //open
+            if (sub_type_ == 0x14) {
+                i = &rel_inc;
+                j = &inc_rel;
+            } else if (sub_type_ == 0x0B) {
+                i = &inc_rel;
+                j = &rel_inc;
+            }
+            assert(i != 0 && j != 0);
+            *j = -1;
+            for(*i = -2; *i < 3; *i += 1) {
+                v = (VehicleInstance *)(obj->findAt(x + inc_rel,
+                    y + rel_inc,z,&mt,&si,true));
+                if (!v && state_ == 0) {
+                    state_ = state_++;
+                    frame_ = 0;
+                } else if (v){
+                    state_ = 0;
+                    break;
+                }
+            }
+            if(v)
+                break;
+            *j = 1;
+            for(*i = -2; *i < 3; *i += 1) {
+                v = (VehicleInstance *)(obj->findAt(x + inc_rel,
+                    y + rel_inc,z,&mt,&si,true));
+                if (!v && state_ == 0) {
+                    state_ = state_++;
+                    frame_ = 0;
+                } else if (v) {
+                    state_ = 0;
+                    break;
+                }
+            }
+            break;
+        case 2: //closed
+            if (sub_type_ == 0x14) {
+                i = &rel_inc;
+                j = &inc_rel;
+            } else if (sub_type_ == 0x0B) {
+                i = &inc_rel;
+                j = &rel_inc;
+            }
+            assert(i != 0 && j != 0);
+            *j = -1;
+            for(*i = -2; *i < 3; *i += 1) {
+                v = (VehicleInstance *)(obj->findAt(x + inc_rel,
+                    y + rel_inc,z,&mt,&si,true));
+                if (v) {
+                    state_ = state_++;
+                    frame_ = 0;
+                    break;
+                }
+            }
+            if(v)
+                break;
+            *j = 1;
+            for(*i = -2; *i < 3; *i += 1) {
+                v = (VehicleInstance *)(obj->findAt(x + inc_rel,
+                    y + rel_inc,z,&mt,&si,true));
+                if (v) {
+                    state_ = state_++;
+                    frame_ = 0;
+                    break;
+                }
+            }
+            break;
+        case 1: //closing
+            if (frame_ >= g_App.gameSprites().lastFrame(closing_anim_)) {
+                state_ = 2;
+                frame_ = 0;
+            }
+            break;
+        case 3: // opening
+            if (frame_ >= g_App.gameSprites().lastFrame(opening_anim_)) {
+                state_ = 0;
+                frame_ = 0;
+            }
+            break;
+    }
+    return changed;
 }
 
 Tree::Tree(int m, int anim, int burningAnim, int damagedAnim):Static(m),
