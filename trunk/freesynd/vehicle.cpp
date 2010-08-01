@@ -96,19 +96,21 @@ bool VehicleInstance::walkable(int x, int y, int z)
 
     if(thisTile == 80) {
         uint8 nearTile = g_App.walkdata_[g_App.maps().map(map())->tileAt(x, y - 1, z)];
-        if(nearTile < 0x06 || nearTile > 0x09)
+        if((nearTile < 0x06 || nearTile > 0x09) && nearTile != 0x0E)
             return false;
         nearTile = g_App.walkdata_[g_App.maps().map(map())->tileAt(x, y + 1, z)];
-        if(nearTile < 0x06 || nearTile > 0x09)
+        if((nearTile < 0x06 || nearTile > 0x09) && nearTile != 0x0E)
             return false;
+        return true;
     }
     if(thisTile == 81) {
         uint8 nearTile = g_App.walkdata_[g_App.maps().map(map())->tileAt(x - 1, y, z)];
-        if(nearTile < 0x06 || nearTile > 0x09)
+        if((nearTile < 0x06 || nearTile > 0x09) && nearTile != 0x0E)
             return false;
         nearTile = g_App.walkdata_[g_App.maps().map(map())->tileAt(x + 1, y, z)];
-        if(nearTile < 0x06 || nearTile > 0x09)
+        if((nearTile < 0x06 || nearTile > 0x09) && nearTile != 0x0E)
             return false;
+        return true;
     }
     if(thisTile == 72) {
         return false;
@@ -132,9 +134,9 @@ int VehicleInstance::tileDir(int x, int y, int z) {
                 dir = (4<<16)|(0xFF00FFFF);
             break;
         case 81:
-            if(g_App.maps().map(map())->tileAt(x, y + 1, z) == 81)
-                dir = (2<<8)|(0xFFFF00FF);
             if(g_App.maps().map(map())->tileAt(x, y - 1, z) == 81)
+                dir = (2<<8)|(0xFFFF00FF);
+            if(g_App.maps().map(map())->tileAt(x, y + 1, z) == 81)
                 dir = (6<<24)|(0x00FFFFFF);
             break;
         case 106:

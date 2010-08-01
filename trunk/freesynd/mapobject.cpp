@@ -180,6 +180,7 @@ Static *Static::loadInstance(uint8 * data, int m)
         (Mission::LEVELDATA_STATICS *) data;
     Static *s = 0;
     uint16 firstAnim = READ_LE_UINT16(gamdata->firstAnim);
+    // subtype stores direction somewhere
 
     switch(gamdata->objType) {
         case 0x05:
@@ -459,15 +460,18 @@ bool LargeDoor::animate(int elapsed, Mission *obj)
             }
             break;
         case 2: //closed
+            char sign;
             if (sub_type_ == 0x14) {
                 i = &rel_inc;
                 j = &inc_rel;
+                sign = 1;
             } else if (sub_type_ == 0x0B) {
                 i = &inc_rel;
                 j = &rel_inc;
+                sign = -1;
             }
             assert(i != 0 && j != 0);
-            *j = -1;
+            *j = -1 * sign;
             *i = -2;
             mt = 0; si = 0;
             v = (VehicleInstance *)(obj->findAt(x + inc_rel,
@@ -480,7 +484,7 @@ bool LargeDoor::animate(int elapsed, Mission *obj)
                 }
                 v->hold_on_.wayFree = 1;
             }
-            *j = 1;
+            *j = 1 * sign;
             *i = 2;
             mt = 0; si = 0;
             v = (VehicleInstance *)(obj->findAt(x + inc_rel,
