@@ -510,7 +510,7 @@ MapObject * Mission::findAt(int tilex, int tiley, int tilez,
                 if (vehicles_[i]->tileX() == tilex
                     && vehicles_[i]->tileY() == tiley
                     && vehicles_[i]->tileZ() == tilez) {
-                    *searchIndex = i;
+                    *searchIndex = i + 1;
                     *majorType = 0;
                     return vehicles_[i];
                 }
@@ -521,7 +521,7 @@ MapObject * Mission::findAt(int tilex, int tiley, int tilez,
             for (unsigned int i = *searchIndex; i < peds_.size(); i++)
                 if (peds_[i]->tileX() == tilex && peds_[i]->tileY() == tiley
                     && peds_[i]->tileZ() == tilez) {
-                    *searchIndex = i;
+                    *searchIndex = i + 1;
                     *majorType = 1;
                     return peds_[i];
                 }
@@ -533,7 +533,7 @@ MapObject * Mission::findAt(int tilex, int tiley, int tilez,
                 if (weapons_[i]->map() != -1 && weapons_[i]->tileX() == tilex
                     && weapons_[i]->tileY() == tiley
                     && weapons_[i]->tileZ() == tilez) {
-                    *searchIndex = i;
+                    *searchIndex = i + 1;
                     *majorType = 2;
                     return weapons_[i];
                 }
@@ -545,7 +545,7 @@ MapObject * Mission::findAt(int tilex, int tiley, int tilez,
                 if (statics_[i]->tileX() == tilex
                     && statics_[i]->tileY() == tiley
                     && statics_[i]->tileZ() == tilez) {
-                    *searchIndex = i;
+                    *searchIndex = i + 1;
                     *majorType = 3;
                     return statics_[i];
                 }

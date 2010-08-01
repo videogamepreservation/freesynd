@@ -103,6 +103,8 @@ public:
         int tilex;
         int tiley;
         int tilez;
+        int xadj;// these create ranges for x
+        int yadj;// and y 
     }FreeWay;
 
 

@@ -396,11 +396,12 @@ bool LargeDoor::animate(int elapsed, Mission *obj)
 {
     // TODO: there must be somewhere locked door
     VehicleInstance *v = NULL;
+    PedInstance *p = NULL;
     int x = tileX();
     int y = tileY();
     int z = tileZ();
-    int mt = 0;
-    int si = 0;
+    int mt;
+    int si;
     char inc_rel, rel_inc;
     char *i = 0, *j = 0;
     bool found = false;
@@ -418,8 +419,9 @@ bool LargeDoor::animate(int elapsed, Mission *obj)
             assert(i != 0 && j != 0);
             *j = -1;
             for(*i = -2; *i < 3; *i += 1) {
+                mt = 0; si = 0;
                 v = (VehicleInstance *)(obj->findAt(x + inc_rel,
-                    y + rel_inc,z,&mt,&si,true));
+                    y + rel_inc,z, &mt, &si, true));
                 if (!v && state_ == 0 && !found) {
                     state_ = state_++;
                     frame_ = 0;
@@ -428,10 +430,10 @@ bool LargeDoor::animate(int elapsed, Mission *obj)
                     found = true;
                     v->hold_on_.wayFree = 0;
                 }
-                mt = 0; si = 0;
             }
             *j = 1;
             for(*i = -2; *i < 3; *i += 1) {
+                mt = 0; si = 0;
                 v = (VehicleInstance *)(obj->findAt(x + inc_rel,
                     y + rel_inc,z,&mt,&si,true));
                 if (!v && state_ == 0 && !found) {
@@ -442,7 +444,18 @@ bool LargeDoor::animate(int elapsed, Mission *obj)
                     found = true;
                     v->hold_on_.wayFree = 0;
                 }
-                mt = 0; si = 0;
+            }
+            for (int a = (y - 1); a <= (y + 1); a++ ) {
+                for (int b = (x - 1); b <= (x + 1); b++) {
+                    mt = 1; si = 0;
+                    do {
+                        p = (PedInstance *)(obj->findAt(b, a, z,
+                            &mt, &si, true));
+                        if (p) {
+                            p->hold_on_.wayFree = 0;
+                        }
+                    } while (p);
+                }
             }
             break;
         case 2: //closed
@@ -456,14 +469,15 @@ bool LargeDoor::animate(int elapsed, Mission *obj)
             assert(i != 0 && j != 0);
             *j = -1;
             *i = -2;
+            mt = 0; si = 0;
             v = (VehicleInstance *)(obj->findAt(x + inc_rel,
                 y + rel_inc,z,&mt,&si,true));
             if (v) {
                 if (!found) {
                     state_ = state_++;
                     found = true;
+                    frame_ = 0;
                 }
-                frame_ = 0;
                 v->hold_on_.wayFree = 1;
             }
             *j = 1;
@@ -475,9 +489,51 @@ bool LargeDoor::animate(int elapsed, Mission *obj)
                 if (!found) {
                     state_ = state_++;
                     found = true;
+                    frame_ = 0;
                 }
-                frame_ = 0;
                 v->hold_on_.wayFree = 1;
+            }
+            *j = -1;
+            for ( *i = -1; *i <= 1; *i += 1 ) {
+                mt = 1; si = 0;
+                do {
+                    p = (PedInstance *)(obj->findAt(x + rel_inc,
+                        y + inc_rel, z, &mt, &si, true));
+                    if (p) {
+                        p->hold_on_.wayFree = 2;
+                        p->hold_on_.tilex = x;
+                        p->hold_on_.tiley = y;
+                        if (sub_type_ == 0x14) {
+                            p->hold_on_.xadj = 1;
+                            p->hold_on_.yadj = 0;
+                        } else if (sub_type_ == 0x0B) {
+                            p->hold_on_.xadj = 0;
+                            p->hold_on_.yadj = 1;
+                        }
+                        p->hold_on_.tilez = z;
+                    }
+                } while (p);
+            }
+            *j = 1;
+            for ( *i = -1; *i <= 1; *i += 1 ) {
+                mt = 1; si = 0;
+                do {
+                    p = (PedInstance *)(obj->findAt(x + rel_inc,
+                        y + inc_rel, z, &mt, &si, true));
+                    if (p) {
+                        p->hold_on_.wayFree = 2;
+                        p->hold_on_.tilex = x;
+                        p->hold_on_.tiley = y;
+                        if (sub_type_ == 0x14) {
+                            p->hold_on_.xadj = 1;
+                            p->hold_on_.yadj = 0;
+                        } else if (sub_type_ == 0x0B) {
+                            p->hold_on_.xadj = 0;
+                            p->hold_on_.yadj = 1;
+                        }
+                        p->hold_on_.tilez = z;
+                    }
+                } while (p);
             }
             break;
         case 1: //closing

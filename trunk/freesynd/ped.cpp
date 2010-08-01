@@ -1087,18 +1087,48 @@ bool PedInstance::movementP(int elapsed)
     bool updated = false;
 
     if (!dest_path_.empty()) {
+        int nxtTileX = dest_path_.front().tileX();
+        int nxtTileY = dest_path_.front().tileY();
+        int nxtTileZ = dest_path_.front().tileZ();
+        if (hold_on_.wayFree == 1) {
+            if (hold_on_.tilex == nxtTileX && hold_on_.tiley == nxtTileY
+                && hold_on_.tilez == nxtTileZ)
+                return updated;
+            else
+                hold_on_.wayFree = 0;
+        } else if (hold_on_.wayFree == 2) {
+            if (hold_on_.xadj || hold_on_.yadj) {
+                if(abs(hold_on_.tilex - nxtTileX) <= hold_on_.xadj
+                    && abs(hold_on_.tiley - nxtTileY) <= hold_on_.yadj
+                    && hold_on_.tilez == nxtTileZ) {
+                    dest_path_.clear();
+                    speed_ = 0;
+                    return updated;
+                } else
+                    hold_on_.wayFree = 0;
+            } else {
+                if (hold_on_.tilex == nxtTileX && hold_on_.tiley == nxtTileY
+                    && hold_on_.tilez == nxtTileZ) {
+                    dest_path_.clear();
+                    speed_ = 0;
+                    return updated;
+                } else
+                    hold_on_.wayFree = 0;
+            }
+        }
         int adx =
-            dest_path_.front().tileX() * 256 + dest_path_.front().offX();
+             nxtTileX * 256 + dest_path_.front().offX();
         int ady =
-            dest_path_.front().tileY() * 256 + dest_path_.front().offY();
+             nxtTileY * 256 + dest_path_.front().offY();
         int atx = tile_x_ * 256 + off_x_;
         int aty = tile_y_ * 256 + off_y_;
 
         if (abs(adx - atx) < 16 && abs(ady - aty) < 16) {
             off_y_ = dest_path_.front().offY();
             off_x_ = dest_path_.front().offX();
-            tile_y_ = dest_path_.front().tileY();
-            tile_x_ = dest_path_.front().tileX();
+            tile_z_ = nxtTileZ;
+            tile_y_ = nxtTileY;
+            tile_x_ = nxtTileX;
             dest_path_.pop_front();
             if (dest_path_.size() == 0)
                 speed_ = 0;
