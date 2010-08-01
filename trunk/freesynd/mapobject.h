@@ -97,6 +97,13 @@ public:
         frames_per_sec_ = framesPerSec;
     }
     int getFramesPerSec() { return frames_per_sec_; }
+    typedef struct{
+        // 0 - can go to this tile; 1 - wait; 2 - stop
+        char wayFree;
+        int tilex;
+        int tiley;
+        int tilez;
+    }FreeWay;
 
 
 protected:
@@ -189,6 +196,8 @@ public:
     void clearDestination() {
         dest_path_.clear();
     }
+
+    FreeWay hold_on_;
 
 protected:
     int dir_;

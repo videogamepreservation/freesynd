@@ -59,6 +59,7 @@ VehicleInstance::VehicleInstance(Vehicle * vehicle,
                                  int m):ShootableMovableMapObject(m),
 vehicle_(vehicle)
 {
+    hold_on_.wayFree = 0;
 }
 
 bool VehicleInstance::animate(int elapsed)
@@ -410,8 +411,11 @@ void VehicleInstance::setDestinationV(int x, int y, int z, int ox,
                     it->setOffX(200);
                     it->setOffY(55);
                     break;
-                case 0xFFFF02FF:
                 case 0xFF04FFFF:
+                    it->setOffX(55);
+                    it->setOffY(200);
+                    break;
+                case 0xFFFF02FF:
                 case 0xFF0402FF:
                     it->setOffX(55);
                     it->setOffY(55);
@@ -439,7 +443,13 @@ bool VehicleInstance::movementV(int elapsed)
     bool updated = false;
 
     if (!dest_path_.empty()) {
-        // TODO: add here door checking
+        if (hold_on_.wayFree == 1) {
+            return updated;
+        } else if (hold_on_.wayFree == 2){
+            dest_path_.clear();
+            speed_ = 0;
+            return updated;
+        }
         int adx =
             dest_path_.front().tileX() * 256 + dest_path_.front().offX();
         int ady =

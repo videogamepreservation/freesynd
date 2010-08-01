@@ -108,7 +108,8 @@ ShootableMapObject::ShootableMapObject(int m):MapObject(m)
 }
 
 ShootableMovableMapObject::
-ShootableMovableMapObject(int m):ShootableMapObject(m), dir_(0), speed_(0)
+ShootableMovableMapObject(int m):ShootableMapObject(m), dir_(0),
+speed_(0)
 {
 }
 
@@ -393,7 +394,7 @@ void LargeDoor::draw(int x, int y)
 
 bool LargeDoor::animate(int elapsed, Mission *obj)
 {
-    // TODO: 
+    // TODO: there must be somewhere locked door
     VehicleInstance *v = NULL;
     int x = tileX();
     int y = tileY();
@@ -402,6 +403,7 @@ bool LargeDoor::animate(int elapsed, Mission *obj)
     int si = 0;
     char inc_rel, rel_inc;
     char *i = 0, *j = 0;
+    bool found = false;
 
     bool changed = MapObject::animate(elapsed);
     switch(state_) {
@@ -418,27 +420,29 @@ bool LargeDoor::animate(int elapsed, Mission *obj)
             for(*i = -2; *i < 3; *i += 1) {
                 v = (VehicleInstance *)(obj->findAt(x + inc_rel,
                     y + rel_inc,z,&mt,&si,true));
-                if (!v && state_ == 0) {
+                if (!v && state_ == 0 && !found) {
                     state_ = state_++;
                     frame_ = 0;
                 } else if (v){
                     state_ = 0;
-                    break;
+                    found = true;
+                    v->hold_on_.wayFree = 0;
                 }
+                mt = 0; si = 0;
             }
-            if(v)
-                break;
             *j = 1;
             for(*i = -2; *i < 3; *i += 1) {
                 v = (VehicleInstance *)(obj->findAt(x + inc_rel,
                     y + rel_inc,z,&mt,&si,true));
-                if (!v && state_ == 0) {
+                if (!v && state_ == 0 && !found) {
                     state_ = state_++;
                     frame_ = 0;
-                } else if (v) {
+                } else if (v){
                     state_ = 0;
-                    break;
+                    found = true;
+                    v->hold_on_.wayFree = 0;
                 }
+                mt = 0; si = 0;
             }
             break;
         case 2: //closed
@@ -451,26 +455,29 @@ bool LargeDoor::animate(int elapsed, Mission *obj)
             }
             assert(i != 0 && j != 0);
             *j = -1;
-            for(*i = -2; *i < 3; *i += 1) {
-                v = (VehicleInstance *)(obj->findAt(x + inc_rel,
-                    y + rel_inc,z,&mt,&si,true));
-                if (v) {
+            *i = -2;
+            v = (VehicleInstance *)(obj->findAt(x + inc_rel,
+                y + rel_inc,z,&mt,&si,true));
+            if (v) {
+                if (!found) {
                     state_ = state_++;
-                    frame_ = 0;
-                    break;
+                    found = true;
                 }
+                frame_ = 0;
+                v->hold_on_.wayFree = 1;
             }
-            if(v)
-                break;
             *j = 1;
-            for(*i = -2; *i < 3; *i += 1) {
-                v = (VehicleInstance *)(obj->findAt(x + inc_rel,
-                    y + rel_inc,z,&mt,&si,true));
-                if (v) {
+            *i = 2;
+            mt = 0; si = 0;
+            v = (VehicleInstance *)(obj->findAt(x + inc_rel,
+                y + rel_inc,z,&mt,&si,true));
+            if (v) {
+                if (!found) {
                     state_ = state_++;
-                    frame_ = 0;
-                    break;
+                    found = true;
                 }
+                frame_ = 0;
+                v->hold_on_.wayFree = 1;
             }
             break;
         case 1: //closing

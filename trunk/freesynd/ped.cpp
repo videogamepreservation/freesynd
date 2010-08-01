@@ -571,6 +571,7 @@ target_y_(-1), hit_damage_(0), receive_damage_(0), sight_range_(0),
 is_hostile_(false), reload_count_(0), selected_weapon_(-1),
 pickup_weapon_(0), putdown_weapon_(0), in_vehicle_(0),
 is_an_agent_(PedInstance::Not_Agent) {
+    hold_on_.wayFree = 0;
 }
 
 void PedInstance::draw(int x, int y, int scrollX, int scrollY) {
