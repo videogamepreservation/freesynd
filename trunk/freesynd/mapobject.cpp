@@ -180,7 +180,8 @@ Static *Static::loadInstance(uint8 * data, int m)
         (Mission::LEVELDATA_STATICS *) data;
     Static *s = 0;
     uint16 firstAnim = READ_LE_UINT16(gamdata->firstAnim);
-    // subtype stores direction somewhere
+    // maybe, subtype stores direction somewhere
+    // it is easier to get type from animation then from sub-type
 
     switch(gamdata->objType) {
         case 0x05:
@@ -210,6 +211,9 @@ Static *Static::loadInstance(uint8 * data, int m)
             } else if(gamdata->subType == 0xF0) {
                 // tree in pot
                 s = new Tree(m, firstAnim, firstAnim + 1, firstAnim + 2);
+            } else if(gamdata->subType == 0xEF) {
+                // damaged window
+                s = new WindowObj(m, firstAnim, firstAnim, firstAnim);
             } else {
                 printf("%02X , %02X, %i\n",gamdata->objType,gamdata->subType,firstAnim);
                 printf("x is %i, xoff is %i ==", gamdata->mapposx[1], gamdata->mapposx[0]);
@@ -223,8 +227,16 @@ Static *Static::loadInstance(uint8 * data, int m)
                 s = new EtcObj(m, firstAnim, firstAnim, firstAnim);
             } else if(gamdata->subType == 0xDF || gamdata->subType == 0xE1
                 || gamdata->subType == 0xE8 || gamdata->subType == 0xFA
-                || gamdata->subType == 0xDA) {
-                // advertisement on wall
+                || gamdata->subType == 0xDA || gamdata->subType == 0xED
+                || gamdata->subType == 0xF0 || gamdata->subType == 0xF4
+                || gamdata->subType == 0xEC || gamdata->subType == 0xEA
+                || gamdata->subType == 0xE4 || gamdata->subType == 0xF8
+                || gamdata->subType == 0xE6 || gamdata->subType == 0xF6
+                || gamdata->subType == 0xF3 || gamdata->subType == 0xEE
+                || gamdata->subType == 0xFF || gamdata->subType == 0xF5
+                || gamdata->subType == 0xFE || gamdata->subType == 0xDC
+                || gamdata->subType == 0xE2) {
+                // advertisement on wall 570-573
                 s = new Tree(m, firstAnim, firstAnim + 1, firstAnim + 2);
             } else {
                 printf("%02X , %02X, %i\n",gamdata->objType,gamdata->subType,firstAnim);
@@ -239,8 +251,18 @@ Static *Static::loadInstance(uint8 * data, int m)
             } else if(gamdata->subType == 0xA5 || gamdata->subType == 0xA4) {
                 // phone booth
                 s = new EtcObj(m, firstAnim, firstAnim, firstAnim);
-            } else if(gamdata->subType == 0xC7) {
-                // advertisement on wall bad signal
+            } else if(gamdata->subType == 0xC7 || gamdata->subType == 0xC5
+                || gamdata->subType == 0xC6 || gamdata->subType == 0x1F
+                || gamdata->subType == 0x1E || gamdata->subType == 0x1D) {
+                // advertisement on wall bad signal 568 - 569 574 - 575
+                s = new EtcObj(m, firstAnim, firstAnim, firstAnim);
+            } else if(gamdata->subType == 0x1C || gamdata->subType == 0x03
+                || gamdata->subType == 0x18 || gamdata->subType == 0x08
+                || gamdata->subType == 0x0D || gamdata->subType == 0x07
+                || gamdata->subType == 0x01 || gamdata->subType == 0x10
+                || gamdata->subType == 0x14 || gamdata->subType == 0x17
+                || gamdata->subType == 0x0B || gamdata->subType == 0x1A) {
+                // advertisement on wall
                 s = new EtcObj(m, firstAnim, firstAnim, firstAnim);
             } else {
                 printf("%02X , %02X, %i\n",gamdata->objType,gamdata->subType,firstAnim);
@@ -250,10 +272,19 @@ Static *Static::loadInstance(uint8 * data, int m)
             }
             break;
         case 0x0B:
-            if(gamdata->subType == 0x35 || gamdata->subType == 0x36
-                || gamdata->subType == 0x47 || gamdata->subType == 0x10
-                || gamdata->subType == 0x20 || gamdata->subType == 0x46
-                || gamdata->subType == 0x44) {
+            if( (gamdata->subType >= 0x16 && gamdata->subType <= 0x19)
+                || (gamdata->subType >= 0x32 && gamdata->subType <= 0x39)
+                || (gamdata->subType >= 0x43 && gamdata->subType <= 0x47)
+                || gamdata->subType == 0x20 || gamdata->subType == 0x10
+                || gamdata->subType == 0x40 || gamdata->subType == 0x0F
+                || gamdata->subType == 0x12 || gamdata->subType == 0x0E
+                || gamdata->subType == 0x29 || gamdata->subType == 0x3B
+                || gamdata->subType == 0x0B || gamdata->subType == 0x21
+                || gamdata->subType == 0x1B || gamdata->subType == 0x25
+                || gamdata->subType == 0x14 || gamdata->subType == 0x3E
+                || gamdata->subType == 0x2A || gamdata->subType == 0x13
+                || gamdata->subType == 0x0C || gamdata->subType == 0x28
+                || gamdata->subType == 0x1E || gamdata->subType == 0x1C) {
                 // advertisement on wall
                 s = new EtcObj(m, firstAnim, firstAnim, firstAnim);
             } else {
@@ -269,19 +300,35 @@ Static *Static::loadInstance(uint8 * data, int m)
                 || gamdata->subType == 0x7E || gamdata->subType == 0x75
                 || gamdata->subType == 0x97 || gamdata->subType == 0x7F
                 || gamdata->subType == 0x96 || gamdata->subType == 0x85
-                || gamdata->subType == 0x6B/* || gamdata->subType == 0x7F*/) {
+                || gamdata->subType == 0x6B || gamdata->subType == 0x91
+                || gamdata->subType == 0x6A || gamdata->subType == 0x8B
+                || gamdata->subType == 0x9C || gamdata->subType == 0x9D
+                || gamdata->subType == 0x69 || gamdata->subType == 0x84
+                || gamdata->subType == 0x79 || gamdata->subType == 0x77
+                || gamdata->subType == 0x90 || gamdata->subType == 0x86) {
+                    // Doors 1077 - 1116
+                    // not all doors are good with implementation
+                    // some are already open
                 s = new Door(m, firstAnim, firstAnim + 2,
                     firstAnim + 4, firstAnim + 6);
             } else if(gamdata->subType >= 0x17 && gamdata->subType <= 0x1A) {
-                // crossroad things
+                // crossroad things 1040 - 1043
                 s = new EtcObj(m, firstAnim, firstAnim, firstAnim);
-            } else if(gamdata->subType == 0xE2 || gamdata->subType == 0x1C
-                || gamdata->subType == 0xF1 || gamdata->subType == 0xF8
-                || gamdata->subType == 0xFA || gamdata->subType == 0x44
-                || gamdata->subType == 0x25 || gamdata->subType == 0x4C
-                || gamdata->subType == 0xEB || gamdata->subType == 0xEF
-                || gamdata->subType == 0xED || gamdata->subType == 0x40) {
-                // blinking things
+            } else if(gamdata->subType == 0x1C || gamdata->subType == 0x23
+                || (gamdata->subType >= 0x1E && gamdata->subType <= 0x21)
+                || (gamdata->subType >= 0x25 && gamdata->subType <= 0x29)
+                || (gamdata->subType >= 0x2C && gamdata->subType <= 0x37)
+                || (gamdata->subType >= 0x39 && gamdata->subType <= 0x47)
+                || (gamdata->subType >= 0x4A && gamdata->subType <= 0x4C)
+                || (gamdata->subType >= 0x50 && gamdata->subType <= 0x5C)
+                || (gamdata->subType >= 0xE0 && gamdata->subType <= 0xE2)
+                || (gamdata->subType >= 0xE4 && gamdata->subType <= 0xE7)
+                || (gamdata->subType >= 0xE9 && gamdata->subType <= 0xFD)
+                || gamdata->subType == 0xFF || gamdata->subType == 0x4E) {
+                // neon signs 1045 - 1076
+                s = new NeonSign(m, firstAnim);
+            } else if(gamdata->subType == 0xA6 || gamdata->subType == 0xA5) {
+                // hmm 1121-1122
                 s = new EtcObj(m, firstAnim, firstAnim, firstAnim);
             } else {
                 printf("%02X , %02X, %i\n",gamdata->objType,gamdata->subType,firstAnim);
@@ -291,13 +338,24 @@ Static *Static::loadInstance(uint8 * data, int m)
             }
             break;
         case 0x13:
-            if(gamdata->subType == 0x7C || gamdata->subType == 0x0A
-                || gamdata->subType == 0x15) {
-                // blinking things
-                s = new EtcObj(m, firstAnim, firstAnim, firstAnim);
-            } else if(gamdata->subType == 0x6F || gamdata->subType == 0x75) {
-                // blinking little things
-                s = new EtcObj(m, firstAnim, firstAnim, firstAnim);
+            if(gamdata->subType == 0x1C || gamdata->subType == 0x27
+                || gamdata->subType == 0x86 || gamdata->subType == 0x83
+                || (gamdata->subType >= 0x00 && gamdata->subType <= 0x05)
+                || (gamdata->subType >= 0x07 && gamdata->subType <= 0x16)
+                || (gamdata->subType >= 0x21 && gamdata->subType <= 0x25)
+                || (gamdata->subType >= 0x2A && gamdata->subType <= 0x2E)
+                || (gamdata->subType >= 0x30 && gamdata->subType <= 0x42)
+                || (gamdata->subType >= 0x44 && gamdata->subType <= 0x4C)
+                || (gamdata->subType >= 0x4E && gamdata->subType <= 0x66)
+                || (gamdata->subType >= 0x68 && gamdata->subType <= 0x6B)
+                || (gamdata->subType >= 0x6D && gamdata->subType <= 0x70)
+                || (gamdata->subType >= 0x72 && gamdata->subType <= 0x7C)
+                || (gamdata->subType >= 0x7E && gamdata->subType <= 0x80)
+                || gamdata->subType == 0x1D || gamdata->subType == 0x89
+                || gamdata->subType == 0x28 || gamdata->subType == 0x19
+                || gamdata->subType == 0x85 || gamdata->subType == 0x1A) {
+                // neon signs 1045 - 1076 
+                s = new NeonSign(m, firstAnim);
             } else {
                 printf("%02X , %02X, %i\n",gamdata->objType,gamdata->subType,firstAnim);
                 printf("x is %i, xoff is %i ==", gamdata->mapposx[1], gamdata->mapposx[0]);
@@ -309,6 +367,10 @@ Static *Static::loadInstance(uint8 * data, int m)
             if(gamdata->subType == 0x4B) {
                 // window without light
                 s = new EtcObj(m, firstAnim, firstAnim, firstAnim);
+            } else if(gamdata->subType == 0x2B || gamdata->subType == 0x27
+                || gamdata->subType == 0x36) {
+                // window with person's shadow 1965-1968
+                s = new EtcObj(m, firstAnim, firstAnim, firstAnim);
             } else {
                 printf("%02X , %02X, %i\n",gamdata->objType,gamdata->subType,firstAnim);
                 printf("x is %i, xoff is %i ==", gamdata->mapposx[1], gamdata->mapposx[0]);
@@ -317,8 +379,12 @@ Static *Static::loadInstance(uint8 * data, int m)
             }
             break;
         case 0x21:
-            if(gamdata->subType == 0xD2) {
+            if(gamdata->subType == 0xD2 || gamdata->subType == 0xD3
+                || gamdata->subType == 0xDF || gamdata->subType == 0xD9) {//1961 - 1964 windows animated
                 // window without light
+                s = new EtcObj(m, firstAnim, firstAnim, firstAnim);
+            } else if(gamdata->subType == 0xD5) {
+                // window with person's shadow 1965-1966
                 s = new EtcObj(m, firstAnim, firstAnim, firstAnim);
             } else {
                 printf("%02X , %02X, %i\n",gamdata->objType,gamdata->subType,firstAnim);
@@ -584,6 +650,17 @@ anim_(anim), burning_anim_(burningAnim), damaged_anim_(damagedAnim)
 }
 
 void EtcObj::draw(int x, int y)
+{
+    addOffs(x, y);
+    g_App.gameSprites().drawFrame(anim_, frame_, x, y);
+}
+
+NeonSign::NeonSign(int m, int anim):Static(m),
+anim_(anim)
+{
+}
+
+void NeonSign::draw(int x, int y)
 {
     addOffs(x, y);
     g_App.gameSprites().drawFrame(anim_, frame_, x, y);

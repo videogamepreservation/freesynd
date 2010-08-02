@@ -298,4 +298,19 @@ protected:
     int anim_, burning_anim_, damaged_anim_;
 };
 
+/*!
+ * NeonSign map object class.
+ */
+class NeonSign : public Static {
+public:
+    NeonSign(int m, int anim);
+    virtual ~NeonSign() {}
+
+    void draw(int x, int y);
+
+protected:
+    int anim_;
+};
+
+
 #endif

@@ -76,7 +76,6 @@ void Menu::show(bool playAnim)
         fliPlayer.loadFliData(data, false);
         fliPlayer.play();
         delete[] data;
-        drop_events_ = false;
     }
 
     if (background_) {
@@ -96,6 +95,7 @@ void Menu::show(bool playAnim)
 
     redrawOptions();
     if(playAnim) {
+        drop_events_ = false;
         int x,y;
         int state = SDL_GetMouseState(&x, &y);
         mouseMotionEvent(x, y, state);
