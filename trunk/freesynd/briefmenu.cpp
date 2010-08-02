@@ -72,7 +72,9 @@ void BriefMenu::handleShow() {
 
     // write briefing
     if (mission_->briefing()) {
-        char *mbriefing = strdup(mission_->briefing());
+        char *mbriefing = (char *)malloc(strlen(mission_->briefing()) + 1);
+        assert(mbriefing != NULL);
+        strcpy(mbriefing, mission_->briefing());
         char *miss = mbriefing;
         char *nextline = miss - 1;
 
@@ -163,7 +165,7 @@ void BriefMenu::handleShow() {
                 hideOption(KEY_F6);
         } while (miss && *miss && line_count < start_line_ + 14);
 
-        free(mbriefing);        // using free because we strdup()'d to get this
+        free(mbriefing);        // using free because allocated this
     }
     // TODO: draw briefing minimap
 
