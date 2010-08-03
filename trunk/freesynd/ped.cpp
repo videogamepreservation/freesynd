@@ -1180,6 +1180,15 @@ bool PedInstance::movementP(int elapsed)
                 speed_ = 0;
             }
 
+            if(nxtTileX == tile_x_ && nxtTileY == tile_y_
+                && nxtTileZ == tile_z_ 
+                && dest_path_.front().offX() == off_x_
+                && dest_path_.front().offY() == off_y_
+                && dest_path_.front().offZ() == off_z_)
+                dest_path_.pop_front();
+            if (dest_path_.size() == 0)
+                speed_ = 0;
+
             updated = true;
         }
     } else if (speed_) {

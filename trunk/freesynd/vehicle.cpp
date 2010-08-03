@@ -515,6 +515,14 @@ bool VehicleInstance::movementV(int elapsed)
                 speed_ = 0;
             }
 
+            if(dest_path_.front().tileX() == tile_x_
+                && dest_path_.front().tileY() == tile_y_
+                && dest_path_.front().offX() == off_x_
+                && dest_path_.front().offY() == off_y_)
+                dest_path_.pop_front();
+            if (dest_path_.size() == 0)
+                speed_ = 0;
+
             updated = true;
         }
     } else if (speed_) {
