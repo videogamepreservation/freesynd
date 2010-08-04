@@ -111,4 +111,11 @@ inline bool bitClear(const uint32 value, int index) {
     return !bitSet(value, index);
 }
 
+// On windows use secure version of strcopy
+#ifdef WIN_SECURE
+#define STR_CPY strcpy_s
+#else
+#define STR_CPY strcpy
+#endif
+
 #endif

@@ -23,56 +23,56 @@
 #include "gamesession.h"
 
 Block g_Blocks[50] = {
-     {"ALASKA", 46000000, 17, false, false},
-    {"NORTHWEST TERRITORIES", 56000000, 39, false, false},
-    {"NORTHEAST TERRITORIES", 58000000, 8, false, false},
-    {"GREENLAND", 40000000, 16, false, false},
-    {"SCANDINAVIA", 54000000, 20, false, false},
-    {"URALS", 40000000, 18, false, false},
-    {"SIBERIA", 54000000, 22, false, false},
-    {"KAMCHATKA", 56000000, 12, false, false},
-    {"YUKON", 58000000, 21, false, false},
-    {"WESTERN EUROPE", 48000000, 1, false, false},
-    {"CENTRAL EUROPE", 50000000, 15, false, false},
-    {"EASTERN EUROPE", 52000000, 10, false, false},
-    {"KAZAKHSTAN", 42000000, 9, false, false},
-    {"MONGOLIA", 52000000, 3, false, false},
-    {"FAR EAST", 42000000, 2, false, false},
-    {"NEWFOUNDLAND", 44000000, 42, false, false},
-    {"CALIFORNIA", 46000000, 5, false, false},
-    {"ROCKIES", 56000000, 23, false, false},
-    {"MID WEST", 58000000, 34, false, false},
-    {"NEW ENGLAND", 40000000, 29, false, false},
-    {"ALGERIA", 50000000, 28, false, false},
-    {"LYBIA", 40000000, 35, false, false},
-    {"IRAQ", 50000000, 6, false, false},
-    {"IRAN", 52000000, 4, false, false},
-    {"CHINA", 54000000, 50, false, false},
-    {"COLORADO", 40000000, 32, false, false},
-    {"SOUTHERN STATES", 42000000, 24, false, false},
-    {"ATLANTIC ACCELERATOR", 44000000, 37, false, false},
-    {"MAURITANIA", 58000453, 41, false, false},
-    {"SUDAN", 43999510, 33, false, false},
-    {"ARABIA", 54000471, 38, false, false},
-    {"INDIA", 55999864, 7, false, false},
-    {"PACIFIC RIM", 57999593, 48, false, false},
-    {"MEXICO", 43999722, 26, false, false},
-    {"COLOMBIA", 45999547, 44, false, false},
-    {"NIGERIA", 48000204, 45, false, false},
-    {"ZAIRE", 57999525, 27, false, false},
-    {"KENYA", 47999574, 40, false, false},
-    {"PERU", 57999719, 14, false, false},
-    {"VENEZUALA", 40000488, 36, false, false},
-    {"BRAZIL", 41999785, 46, false, false},
-    {"SOUTH AFRICA", 48000138, 31, false, false},
-    {"MOZAMBIQUE", 45999915, 13, false, false},
-    {"WESTERN AUSTRALIA", 47999716, 11, false, false},
-    {"NORTHERN TERRITORIES", 41999837, 19, false, false},
-    {"NEW SOUTH WALES", 47999878, 43, false, false},
-    {"PARAGUAY", 58000207, 49, false, false},
-    {"ARGENTINA", 40000352, 30, false, false},
-    {"URUGUAY", 57999681, 47, false, false},
-    {"INDONESIA", 47999794, 25, false, false}
+     {"ALASKA", 46000000, 17, 30, false, false, NULL},
+    {"NORTHWEST TERRITORIES", 56000000, 39, 30, false, false, NULL},
+    {"NORTHEAST TERRITORIES", 58000000, 8, 30, false, false, NULL},
+    {"GREENLAND", 40000000, 16, 30, false, false, NULL},
+    {"SCANDINAVIA", 54000000, 20, 30, false, false, NULL},
+    {"URALS", 40000000, 18, 30, false, false, NULL},
+    {"SIBERIA", 54000000, 22, 30, false, false, NULL},
+    {"KAMCHATKA", 56000000, 12, 30, false, false, NULL},
+    {"YUKON", 58000000, 21, 30, false, false, NULL},
+    {"WESTERN EUROPE", 48000000, 1, 30, false, false, "4"},
+    {"CENTRAL EUROPE", 50000000, 15, 30, false, false, NULL},
+    {"EASTERN EUROPE", 52000000, 10, 30, false, false, NULL},
+    {"KAZAKHSTAN", 42000000, 9, 30, false, false, NULL},
+    {"MONGOLIA", 52000000, 3, 30, false, false, NULL},
+    {"FAR EAST", 42000000, 2, 30, false, false, NULL},
+    {"NEWFOUNDLAND", 44000000, 42, 30, false, false, NULL},
+    {"CALIFORNIA", 46000000, 5, 30, false, false, NULL},
+    {"ROCKIES", 56000000, 23, 30, false, false, NULL},
+    {"MID WEST", 58000000, 34, 30, false, false, NULL},
+    {"NEW ENGLAND", 40000000, 29, 30, false, false, NULL},
+    {"ALGERIA", 50000000, 28, 30, false, false, NULL},
+    {"LYBIA", 40000000, 35, 30, false, false, NULL},
+    {"IRAQ", 50000000, 6, 30, false, false, NULL},
+    {"IRAN", 52000000, 4, 30, false, false, NULL},
+    {"CHINA", 54000000, 50, 30, false, false, NULL},
+    {"COLORADO", 40000000, 32, 30, false, false, NULL},
+    {"SOUTHERN STATES", 42000000, 24, 30, false, false, NULL},
+    {"ATLANTIC ACCELERATOR", 44000000, 37, 30, false, false, NULL},
+    {"MAURITANIA", 58000453, 41, 30, false, false, NULL},
+    {"SUDAN", 43999510, 33, 30, false, false, NULL},
+    {"ARABIA", 54000471, 38, 30, false, false, NULL},
+    {"INDIA", 55999864, 7, 30, false, false, NULL},
+    {"PACIFIC RIM", 57999593, 48, 30, false, false, NULL},
+    {"MEXICO", 43999722, 26, 30, false, false, NULL},
+    {"COLOMBIA", 45999547, 44, 30, false, false, NULL},
+    {"NIGERIA", 48000204, 45, 30, false, false, NULL},
+    {"ZAIRE", 57999525, 27, 30, false, false, NULL},
+    {"KENYA", 47999574, 40, 30, false, false, NULL},
+    {"PERU", 57999719, 14, 30, false, false, NULL},
+    {"VENEZUALA", 40000488, 36, 30, false, false, NULL},
+    {"BRAZIL", 41999785, 46, 30, false, false, NULL},
+    {"SOUTH AFRICA", 48000138, 31, 30, false, false, NULL},
+    {"MOZAMBIQUE", 45999915, 13, 30, false, false, NULL},
+    {"WESTERN AUSTRALIA", 47999716, 11, 30, false, false, NULL},
+    {"NORTHERN TERRITORIES", 41999837, 19, 30, false, false, NULL},
+    {"NEW SOUTH WALES", 47999878, 43, 30, false, false, NULL},
+    {"PARAGUAY", 58000207, 49, 30, false, false, NULL},
+    {"ARGENTINA", 40000352, 30, 30, false, false, NULL},
+    {"URUGUAY", 57999681, 47, 30, false, false, NULL},
+    {"INDONESIA", 47999794, 25, 30, false, false, NULL}
 };
 
 GameSession::GameSession() {
@@ -117,9 +117,16 @@ void GameSession::completeSelectedBlock() {
     g_Blocks[selected_blck_].finished = true;
     g_Blocks[selected_blck_].available = false;
 
-    // TODO : select the next mission
-    if (selected_blck_ < 49) {
-        g_Blocks[selected_blck_ + 1].available = true;
+    // Make the next missions available
+    if (g_Blocks[selected_blck_].next != NULL) {
+        char s[50];
+        STR_CPY(s, g_Blocks[selected_blck_].next);
+        char *token = strtok(s, ":");
+        while ( token != NULL ) {
+            int id = atoi(token);
+            g_Blocks[id].available = true;
+            token = strtok(NULL, ":");
+        }
     }
 }
 

@@ -453,10 +453,10 @@ void App::run() {
     int lasttick = SDL_GetTicks();
     while (running_) {
         system_->handleEvents();
-        system_->updateScreen();
         int curtick = SDL_GetTicks();
         menus_.handleTick(curtick - lasttick);
         lasttick = curtick;
+        system_->updateScreen();
         system_->delay(1);
     }
 

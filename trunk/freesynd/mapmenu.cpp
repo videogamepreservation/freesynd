@@ -236,28 +236,33 @@ void MapMenu::handleShow()
     // Draw country info
     // TODO: Grab countryinfo and display it
     char tmp[100];
-    g_App.fonts().drawText(268, 312, blk.name, 0, false);  // countryname
+    // Country name
+    g_App.fonts().drawText(268, 312, blk.name, 0, false);
+
+    // Population
 #ifdef WIN_SECURE
     sprintf_s(tmp, 100, "%i", blk.population);
 #else
     sprintf(tmp, "%i", blk.population);
 #endif
-    g_App.fonts().drawText(268, 332, tmp, 0, false);    // pop
-    // if (owns_ountry) {
+    g_App.fonts().drawText(268, 332, tmp, 0, false);
+
     // TODO: Add tax adjustment buttons
+    if (blk.finished) {
 #ifdef WIN_SECURE
-    strcpy_s(tmp, "UNKNOWN");
+        sprintf_s(tmp, 100, "%i", blk.tax);
 #else
-    strcpy(tmp, "UNKNOWN");
+        sprintf(tmp, "%i", blk.tax);
 #endif
-    g_App.fonts().drawText(268, 346, tmp, 0, false);    // tax
-#ifdef WIN_SECURE
-    strcpy_s(tmp, "");
-#else
-    strcpy(tmp, "");
-#endif
-    g_App.fonts().drawText(268, 360, tmp, 0, false);    // own
-    // }
+    } else {
+        STR_CPY(tmp, "UNKNOWN");
+    }
+
+    g_App.fonts().drawText(268, 346, tmp, 0, false);
+
+    // Own
+    STR_CPY(tmp, "");
+    g_App.fonts().drawText(268, 360, tmp, 0, false);
 
     g_System.showCursor();
 }

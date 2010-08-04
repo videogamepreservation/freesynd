@@ -32,8 +32,11 @@ typedef struct Block_ {
     const char *name;
     int population;
     int mis_id;
+    int tax;
     bool available;
     bool finished;
+    /*! The list of blocks available after finishing this mission.*/
+    const char *next;
 } Block;
 
 /*!
