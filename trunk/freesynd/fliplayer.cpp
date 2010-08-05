@@ -34,7 +34,7 @@
 //#include <pshpack1.h>
 struct sample_timings {
 	int16 m0;
-	int8 m1, m2, m3, m4, m5, m6;
+	uint8 m1, m2, m3, m4, m5, m6;
 };
 //#include <poppack.h>
 
