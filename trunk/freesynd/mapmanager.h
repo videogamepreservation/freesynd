@@ -48,6 +48,7 @@ public:
     int screenToTileX(int mapNum, int x, int y, int &ox);
     int screenToTileY(int mapNum, int x, int y, int &oy);
     int maxZAt(int mapNum, int x, int y);
+    bool mapDimensions(int mapNum, int *x, int *y, int *z);
 
 protected:
     std::map<int, Map *> maps_;

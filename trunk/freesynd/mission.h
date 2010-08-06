@@ -72,8 +72,6 @@ public:
     void drawMap(int scrollx, int scrolly);
     virtual void drawAt(int tilex, int tiley, int tilez, int x, int y,
             int scrollX, int scrollY);
-    virtual MapObject * findAt(int tilex, int tiley, int tilez,
-            int *majorType, int *searchIndex, bool only);
     const char *briefing() { return briefing_.c_str(); }
 
     int infoCost(int lvl) {
@@ -105,6 +103,10 @@ public:
     void end();
 
     void addWeapon(WeaponInstance *w);
+    virtual MapObject * findAt(int tilex, int tiley, int tilez,
+            int *majorType, int *searchIndex, bool only);
+    bool setSurfaces();
+    void clrSurfaces();
 
     typedef struct {
         uint8 unkn10[8];
@@ -269,6 +271,29 @@ BC 68 00 00 F0 5B B0 27 00 01 06 00 00 00 03 00 81 05 E9 00 32 00 00 00 05 16 40
         /* 114075 */ LEVELDATA_UNKN11 u11[129];
         /* 116010 */
     } LEVELDATA;
+
+    typedef struct {
+        unsigned char t;
+        // tyle type
+        // 0 - tile not walkable/reachable, 1 - surface
+        // 2 - junction surface, 3 - stairs, 4 - junction stairs
+        unsigned int dir;
+        // direction
+        // tile possible directions max 0x76543210, min 0xffffffff
+        unsigned int id;
+        unsigned int idj;
+        // id of junction surface
+        unsigned char twd;
+        // tile walkable data from g_App.walkable_[]
+    }surfaceDesc;
+    surfaceDesc *mtsurfaces_; // map-tile surfaces
+
+    typedef struct {
+        unsigned int id;
+        unsigned int idj;
+    }junctionDesc;
+    std::vector<junctionDesc> junctions_; // all junctions on map
+    int mmax_x_, mmax_y_, mmax_z_;
 
   protected:
     LEVELDATA level_data_;

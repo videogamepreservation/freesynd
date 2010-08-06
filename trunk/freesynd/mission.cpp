@@ -31,7 +31,7 @@
 #include "app.h"
 
 Mission::Mission():map_(0), min_x_(0), min_y_(0), max_x_(0), max_y_(0), objective_(0),
-objective_ped_(-1), objective_vehicle_(-1)
+objective_ped_(-1), objective_vehicle_(-1), mtsurfaces_(NULL)
 {
     memset(&level_data_, 0, sizeof(level_data_));
 }
@@ -44,6 +44,7 @@ Mission::~Mission()
         delete peds_[i];
     for (unsigned int i = 0; i < weapons_.size(); i++)
         delete weapons_[i];
+    clrSurfaces();
 }
 
 #define copydata(x, y) memcpy(&level_data_.x, levelData + y, sizeof(level_data_.x))
@@ -551,4 +552,32 @@ MapObject * Mission::findAt(int tilex, int tiley, int tilez,
                 }
     }
     return NULL;
+}
+
+bool Mission::setSurfaces() {
+
+    if (!(g_App.maps().mapDimensions(map_,
+        &mmax_x_, &mmax_y_, &mmax_z_)))
+        return false;
+    mtsurfaces_ = (surfaceDesc *)malloc(mmax_x_ * mmax_y_ * mmax_z_);
+    if(mtsurfaces_ == NULL)
+        return false;
+    memset((void *)mtsurfaces_, 0, mmax_x_ * mmax_y_ * mmax_z_);
+    Map *m = g_App.maps().map(map_);
+    for (int ix = 0; ix < mmax_x_; ix++) {
+        for (int iy = 0; iy < mmax_y_; iy++) {
+            for (int iz = 0; iz < mmax_z_; iz++) {
+                mtsurfaces_[ix * iy * iz].twd =
+                    g_App.walkdata_[m->tileAt(ix, iy, iz)];
+            }
+        }
+    }
+
+    return true;
+}
+
+void Mission::clrSurfaces() {
+    if(mtsurfaces_ == NULL)
+        return;
+    junctions_.clear();
 }

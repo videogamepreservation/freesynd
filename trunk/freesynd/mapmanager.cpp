@@ -155,3 +155,19 @@ int MapManager::maxZAt(int mapNum, int x, int y)
 {
     return maps_[mapNum]->maxZAt(x, y);
 }
+
+bool MapManager::mapDimensions(int mapNum, int *x, int *y, int *z)
+{
+    //make sure the map is loaded
+    if (maps_.find(mapNum) == maps_.end()) {
+        printf("MapManager::mapDimensions: map %d not loaded!\n", mapNum);
+        return false;
+    }
+
+    Map * m = maps_[mapNum];
+    *x = m->maxX();
+    *y = m->maxY();
+    *z = m->maxZ();
+
+    return true;
+}
