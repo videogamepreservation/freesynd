@@ -801,20 +801,301 @@ bool Mission::setSurfaces() {
                     case 0x0B:
                     case 0x0E:
                     case 0x0F:
-                        if(xm >=0) {
+                        mtsurfaces_[mindx].t = m_sdSurface;
+                        if (xm >=0) {
                             indx = xm * y * z;
-                            if(mtsurfaces_[indx].t == 0
+                            if (mtsurfaces_[indx].t == 0
                                 || mtsurfaces_[indx].t == m_sdDefreq) {
-                            } else if(mtsurfaces_[indx].t == m_sdSurface) {
-                                ;
-                            } else if(mtsurfaces_[indx].t == m_sdStairs) {
+                                this_s = mtsurfaces_[indx].twd;
+                                upper_s = mtsurfaces_[xm * y * zp].twd;
+                                if (isSurface(this_s) && upper_s == 0x00) {
+                                    ;
+                                } else if (isStairs(this_s) && upper_s == 0x00) {
+                                    if (this_s != 0x03)
+                                        sdir |= 0xFFF00000;
+                                    else
+                                        mtsurfaces_[mindx].t |= m_sdJunction;
+                                } else {
+                                    mtsurfaces_[indx].t = m_sdNonwalkable;
+                                    if ((zp + 1) < mmax_z_ && upper_s == 0x04) {
+                                        if (mtsurfaces_[xm * y * (zp + 1)].twd == 0) {
+                                            mtsurfaces_[mindx].t |= m_sdJunction;
+                                            sdir |= 0xF0F00000;
+                                            if (mtsurfaces_[xm * y * (zp + 1)].t == 0) {
+                                                mtsurfaces_[indx].t = m_sdDefreq;
+                                                stodef.x = xm;
+                                                stodef.y = y;
+                                                stodef.z = zp + 1;
+                                                vtodefine.push_back(stodef);
+                                            }
+                                        } else
+                                            sdir |= 0xFFF00000;
+                                    } else
+                                        sdir |= 0xFFF00000;
+                                }
+                                if (mtsurfaces_[indx].t == 0) {
+                                    mtsurfaces_[indx].t = m_sdDefreq;
+                                    stodef.x = xm;
+                                    stodef.y = y;
+                                    stodef.z = z;
+                                    vtodefine.push_back(stodef);
+                                }
+                            } else if (mtsurfaces_[indx].t == m_sdStairs) {
                                 if (mtsurfaces_[indx].twd != 0x03)
                                     sdir |= 0xFFF00000;
-                            } else
+                                else
+                                    mtsurfaces_[mindx].t |= m_sdJunction;
+                            } else if (mtsurfaces_[indx].t != m_sdSurface)
                                 sdir |= 0xFFF00000;
-                        } else {
+                        } else
                             sdir |= 0xFFF00000;
+
+                        if (xp < mmax_x_) {
+                            indx = xp * y * z;
+                            if (mtsurfaces_[indx].t == 0
+                                || mtsurfaces_[indx].t == m_sdDefreq) {
+                                this_s = mtsurfaces_[indx].twd;
+                                upper_s = mtsurfaces_[xp * y * zp].twd;
+                                if (isSurface(this_s) && upper_s == 0x00) {
+                                    ;
+                                } else if (isStairs(this_s) && upper_s == 0x00) {
+                                    if (this_s != 0x04)
+                                        sdir |= 0x0000FFF0;
+                                    else
+                                        mtsurfaces_[mindx].t |= m_sdJunction;
+                                } else {
+                                    mtsurfaces_[indx].t = m_sdNonwalkable;
+                                    if ((zp + 1) < mmax_z_&& upper_s == 0x03) {
+                                        if (mtsurfaces_[xp * y * (zp + 1)].twd == 0) {
+                                            mtsurfaces_[mindx].t |= m_sdJunction;
+                                            sdir |= 0x0000F0F0;
+                                            if (mtsurfaces_[xp * y * (zp + 1)].t == 0) {
+                                                mtsurfaces_[indx].t = m_sdDefreq;
+                                                stodef.x = xp;
+                                                stodef.y = y;
+                                                stodef.z = zp + 1;
+                                                vtodefine.push_back(stodef);
+                                            }
+                                        } else
+                                            sdir |= 0x0000FFF0;
+                                    } else
+                                        sdir |= 0x0000FFF0;
+                                }
+                                if (mtsurfaces_[indx].t == 0) {
+                                    mtsurfaces_[indx].t = m_sdDefreq;
+                                    stodef.x = xp;
+                                    stodef.y = y;
+                                    stodef.z = z;
+                                    vtodefine.push_back(stodef);
+                                }
+                            } else if (mtsurfaces_[indx].t == m_sdStairs) {
+                                if (mtsurfaces_[indx].twd != 0x04)
+                                    sdir |= 0x0000FFF0;
+                                else
+                                    mtsurfaces_[mindx].t |= m_sdJunction;
+                            } else if (mtsurfaces_[indx].t != m_sdSurface)
+                                sdir |= 0x0000FFF0;
+                        } else
+                            sdir |= 0x0000FFF0;
+
+                        if(ym >= 0) {
+                            indx = x * ym * z;
+                            if (mtsurfaces_[indx].t == 0
+                                || mtsurfaces_[indx].t == m_sdDefreq) {
+                                this_s = mtsurfaces_[indx].twd;
+                                upper_s = mtsurfaces_[x * ym * zp].twd;
+                                if (isSurface(this_s) && upper_s == 0x00) {
+                                    ;
+                                } else if (isStairs(this_s) && upper_s == 0x00) {
+                                    if (this_s != 0x02)
+                                        sdir |= 0x00FFF000;
+                                    else
+                                        mtsurfaces_[mindx].t |= m_sdJunction;
+                                } else {
+                                    mtsurfaces_[indx].t = m_sdNonwalkable;
+                                    if ((zp + 1) < mmax_z_ && upper_s == 0x01) {
+                                        if (mtsurfaces_[x * ym * (zp + 1)].twd == 0) {
+                                            mtsurfaces_[mindx].t |= m_sdJunction;
+                                            sdir |= 0x00F0F000;
+                                            if (mtsurfaces_[x * ym * (zp + 1)].t == 0) {
+                                                mtsurfaces_[indx].t = m_sdDefreq;
+                                                stodef.x = x;
+                                                stodef.y = ym;
+                                                stodef.z = zp + 1;
+                                                vtodefine.push_back(stodef);
+                                            }
+                                        } else
+                                            sdir |= 0x00FFF000;
+                                    } else
+                                        sdir |= 0x00FFF000;
+                                }
+                                if (mtsurfaces_[indx].t == 0) {
+                                    mtsurfaces_[indx].t = m_sdDefreq;
+                                    stodef.x = x;
+                                    stodef.y = ym;
+                                    stodef.z = z;
+                                    vtodefine.push_back(stodef);
+                                }
+                            } else if(mtsurfaces_[indx].t == m_sdStairs) {
+                                if (mtsurfaces_[indx].twd != 0x02)
+                                    sdir |= 0x00FFF000;
+                                else
+                                    mtsurfaces_[mindx].t |= m_sdJunction;
+                            } else if (mtsurfaces_[indx].t != m_sdSurface)
+                                sdir |= 0x00FFF000;
+                        } else
+                            sdir |= 0x00FFF000;
+
+                        if (yp < mmax_y_) {
+                            indx = x * yp * z;
+                            if (mtsurfaces_[indx].t == 0
+                                || mtsurfaces_[indx].t == m_sdDefreq) {
+                                this_s = mtsurfaces_[indx].twd;
+                                upper_s = mtsurfaces_[x * yp * zp].twd;
+                                if (isSurface(this_s) && upper_s == 0x00) {
+                                    ;
+                                } else if (isStairs(this_s) && upper_s == 0x00) {
+                                    if (this_s != 0x01)
+                                        sdir |= 0xF00000FF;
+                                    else
+                                        mtsurfaces_[mindx].t |= m_sdJunction;
+                                } else {
+                                    mtsurfaces_[indx].t = m_sdNonwalkable;
+                                    if ((zp + 1) < mmax_z_ && upper_s == 0x02) {
+                                        if (mtsurfaces_[x * yp * (zp + 1)].twd == 0) {
+                                            mtsurfaces_[mindx].t |= m_sdJunction;
+                                            sdir |= 0xF00000F0;
+                                            if (mtsurfaces_[x * yp * (zp + 1)].t == 0) {
+                                                mtsurfaces_[indx].t = m_sdDefreq;
+                                                stodef.x = x;
+                                                stodef.y = yp;
+                                                stodef.z = zp + 1;
+                                                vtodefine.push_back(stodef);
+                                            }
+                                        } else
+                                            sdir |= 0xF00000FF;
+                                    } else
+                                        sdir |= 0xF00000FF;
+                                }
+                                if (mtsurfaces_[indx].t == 0) {
+                                    mtsurfaces_[indx].t = m_sdDefreq;
+                                    stodef.x = x;
+                                    stodef.y = yp;
+                                    stodef.z = z;
+                                    vtodefine.push_back(stodef);
+                                }
+                            } else if(mtsurfaces_[indx].t == m_sdStairs) {
+                                if (mtsurfaces_[indx].twd != 0x01)
+                                    sdir |= 0xF00000FF;
+                                else
+                                    mtsurfaces_[mindx].t |= m_sdJunction;
+                            } else if (mtsurfaces_[indx].t != m_sdSurface)
+                                sdir |= 0xF00000FF;
+                        } else
+                            sdir |= 0xF00000FF;
+
+                        // edges
+
+                        if (xm >=0) {
+                            if ( ym >= 0 && (sdir & 0x00F00000) == 0x00500000) {
+                                indx = xm * ym * z;
+                                if(mtsurfaces_[indx].t == 0
+                                    || mtsurfaces_[indx].t == m_sdDefreq) {
+                                    this_s = mtsurfaces_[indx].twd;
+                                    upper_s = mtsurfaces_[xm * ym * zp].twd;
+                                    if (isSurface(this_s) && upper_s == 0x00) {
+                                        ;
+                                    } else {
+                                        if (isSurface(this_s))
+                                            mtsurfaces_[indx].t = m_sdNonwalkable;
+                                        sdir |= 0x00F00000;
+                                    }
+                                    if(mtsurfaces_[indx].t == 0) {
+                                        mtsurfaces_[indx].t = m_sdDefreq;
+                                        stodef.x = xm;
+                                        stodef.y = ym;
+                                        stodef.z = z;
+                                        vtodefine.push_back(stodef);
+                                    }
+                                } else if(!mtsurfaces_[indx].t != m_sdSurface)
+                                    sdir |= 0x00F00000;
+                            }
+
+                            if ( yp < mmax_y_ && (sdir & 0xF0000000) == 0x70000000) {
+                                indx = xm * yp * z;
+                                if(mtsurfaces_[indx].t == 0
+                                    || mtsurfaces_[indx].t == m_sdDefreq) {
+                                    this_s = mtsurfaces_[indx].twd;
+                                    upper_s = mtsurfaces_[xm * yp * zp].twd;
+                                    if (isSurface(this_s) && upper_s == 0x00) {
+                                        ;
+                                    } else {
+                                        if (isSurface(this_s))
+                                            mtsurfaces_[indx].t = m_sdNonwalkable;
+                                        sdir |= 0xF0000000;
+                                    }
+                                    if(mtsurfaces_[indx].t == 0) {
+                                        mtsurfaces_[indx].t = m_sdDefreq;
+                                        stodef.x = xm;
+                                        stodef.y = yp;
+                                        stodef.z = z;
+                                        vtodefine.push_back(stodef);
+                                    }
+                                } else if(!mtsurfaces_[indx].t != m_sdSurface)
+                                    sdir |= 0xF0000000;
+                            }
                         }
+
+                        if (xp < mmax_x_) {
+                            if ( ym >= 0 && (sdir & 0x0000F000) == 0x00003000) {
+                                indx = xp * ym * z;
+                                if(mtsurfaces_[indx].t == 0
+                                    || mtsurfaces_[indx].t == m_sdDefreq) {
+                                    this_s = mtsurfaces_[indx].twd;
+                                    upper_s = mtsurfaces_[xp * ym * zp].twd;
+                                    if (isSurface(this_s) && upper_s == 0x00) {
+                                        ;
+                                    } else {
+                                        if (isSurface(this_s))
+                                            mtsurfaces_[indx].t = m_sdNonwalkable;
+                                        sdir |= 0x0000F000;
+                                    }
+                                    if(mtsurfaces_[indx].t == 0) {
+                                        mtsurfaces_[indx].t = m_sdDefreq;
+                                        stodef.x = xp;
+                                        stodef.y = ym;
+                                        stodef.z = z;
+                                        vtodefine.push_back(stodef);
+                                    }
+                                } else if(!mtsurfaces_[indx].t != m_sdSurface)
+                                    sdir |= 0x0000F000;
+                            }
+
+                            if ( yp < mmax_y_ && (sdir & 0x000000F0) == 0x00000010) {
+                                indx = xp * yp * z;
+                                if(mtsurfaces_[indx].t == 0
+                                    || mtsurfaces_[indx].t == m_sdDefreq) {
+                                    this_s = mtsurfaces_[indx].twd;
+                                    upper_s = mtsurfaces_[xp * yp * zp].twd;
+                                    if (isSurface(this_s) && upper_s == 0x00) {
+                                        ;
+                                    } else {
+                                        if (isSurface(this_s))
+                                            mtsurfaces_[indx].t = m_sdNonwalkable;
+                                        sdir |= 0x000000F0;
+                                    }
+                                    if(mtsurfaces_[indx].t == 0) {
+                                        mtsurfaces_[indx].t = m_sdDefreq;
+                                        stodef.x = xp;
+                                        stodef.y = yp;
+                                        stodef.z = z;
+                                        vtodefine.push_back(stodef);
+                                    }
+                                } else if(!mtsurfaces_[indx].t != m_sdSurface)
+                                    sdir |= 0x000000F0;
+                            }
+                        }
+
                         break;
                     case 0x0A:
                     case 0x0C:
