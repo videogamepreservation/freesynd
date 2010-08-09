@@ -105,6 +105,9 @@ public:
     void addWeapon(WeaponInstance *w);
     virtual MapObject * findAt(int tilex, int tiley, int tilez,
             int *majorType, int *searchIndex, bool only);
+    bool sWalkable(char thisTile, char upperTile);
+    bool isSurface(char thisTile);
+    bool isStairs(char thisTile);
     bool setSurfaces();
     void clrSurfaces();
 
@@ -275,24 +278,49 @@ BC 68 00 00 F0 5B B0 27 00 01 06 00 00 00 03 00 81 05 E9 00 32 00 00 00 05 16 40
     typedef struct {
         unsigned char t;
         // tyle type
-        // 0 - tile not walkable/reachable, 1 - surface
-        // 2 - junction surface, 3 - stairs, 4 - junction stairs
+        // 0x0 - not defined, 1b - surface, 2b - stairs,
+        // 3b - junction, 4b - definition required, 5b - non
+        // walkable/reachable
         unsigned int dir;
         // direction
-        // tile possible directions max 0x76543210, min 0xffffffff
+        // tile possible directions max 0x76543210, min 0x0
         unsigned int id;
-        unsigned int idj;
-        // id of junction surface
+        unsigned int idjl;
+        // id of junction surface/stairs lower
+        unsigned int idjh;
+        // id of junction surface/stairs higher
         unsigned char twd;
         // tile walkable data from g_App.walkable_[]
     }surfaceDesc;
     surfaceDesc *mtsurfaces_; // map-tile surfaces
 
+#define m_sdNotdefined      0
+#define m_sdSurface         1
+#define m_sdStairs          2
+#define m_sdJunction        4
+#define m_sdDefreq          8
+#define m_sdNonwalkable     16
+
+
+    typedef struct {
+        int x;
+        int y;
+        int z;
+    }toDefineXYZ;
+
     typedef struct {
         unsigned int id;
         unsigned int idj;
+        int x;
+        int y;
+        int z;
     }junctionDesc;
-    std::vector<junctionDesc> junctions_; // all junctions on map
+
+    std::vector<junctionDesc> sfjunctions_;
+    // all surface junctions on map
+    std::vector<junctionDesc> stjunctions_;
+    // all stairs junctions on map
+
     int mmax_x_, mmax_y_, mmax_z_;
 
   protected:
