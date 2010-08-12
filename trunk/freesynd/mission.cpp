@@ -577,10 +577,11 @@ bool Mission::setSurfaces() {
     if (!(g_App.maps().mapDimensions(map_,
         &mmax_x_, &mmax_y_, &mmax_z_)))
         return false;
-    mtsurfaces_ = (surfaceDesc *)malloc(mmax_x_ * mmax_y_ * mmax_z_);
+    int mmaxmult = mmax_x_ * mmax_y_ * mmax_z_;
+    mtsurfaces_ = (surfaceDesc *)malloc(mmaxmult);
     if(mtsurfaces_ == NULL)
         return false;
-    memset((void *)mtsurfaces_, 0, mmax_x_ * mmax_y_ * mmax_z_);
+    memset((void *)mtsurfaces_, 0, mmaxmult);
     Map *m = g_App.maps().map(map_);
     for (int ix = 0; ix < mmax_x_; ix++) {
         for (int iy = 0; iy < mmax_y_; iy++) {
@@ -591,18 +592,14 @@ bool Mission::setSurfaces() {
         }
     }
 
-    int id_sf = 1;
-    int id_st = 1;
-    int cur_sf = 0;
-    int cur_st = 0;
     for (unsigned int i = 0; i < peds_.size(); i++) {
         PedInstance *p = peds_[i];
         int x = p->tileX();
         int y = p->tileY();
         int z = p->tileZ() + (p->offZ() == 0 ? 0 : 1);
-        std::vector<toDefineXYZ> vtodefine;
-        if (mtsurfaces_[x * y * z].t == 0) {
+        if (mtsurfaces_[x * y * z].t == m_sdNotdefined) {
             toDefineXYZ stodef;
+            std::vector<toDefineXYZ> vtodefine;
             mtsurfaces_[x * y * z].t = m_sdDefreq;
             stodef.x = x;
             stodef.y = y;
@@ -620,77 +617,80 @@ bool Mission::setSurfaces() {
                 int xp = x + 1;
                 int yp = y + 1;
                 int zp = z + 1;
-                int mindx = x * y * z;
-                int indx = 0;
-                uint8 this_s = mtsurfaces_[mindx].twd;
+                surfaceDesc *ms = &(mtsurfaces_[x * y * z]);
+                surfaceDesc *nxts;
+                uint8 this_s = ms->twd;
                 uint8 upper_s = 0;
                 if (zp < mmax_z_) {
                     upper_s = mtsurfaces_[x * y * zp].twd;
                     if(!sWalkable(this_s,upper_s)) {
-                        mtsurfaces_[mindx].t = m_sdNonwalkable;
+                        ms->t = m_sdNonwalkable;
                         continue;
                     }
                 } else {
-                    mtsurfaces_[mindx].t = m_sdNonwalkable;
+                    ms->t = m_sdNonwalkable;
                     continue;
                 }
                 unsigned int sdir = 0x76543210;
                 switch (this_s) {
                     case 0x00:
-                        mtsurfaces_[mindx].t = m_sdNonwalkable;
+                        ms->t = m_sdNonwalkable;
                         break;
                     case 0x01:
                         sdir = 0xFFF4FFF0;
-                        mtsurfaces_[mindx].t = m_sdStairs;
+                        ms->t = m_sdStairs;
                         if (zm > 0 && yp < mmax_y_) {
-                            indx = x * yp * zm;
+                            nxts = &(mtsurfaces_[x * yp * zm]);
                             mtsurfaces_[x * y * zm].t = m_sdNonwalkable;
-                            if(mtsurfaces_[indx].t == 0
-                                || mtsurfaces_[indx].t == m_sdDefreq) {
-                                this_s = mtsurfaces_[indx].twd;
+                            if(nxts->t == m_sdNotdefined
+                                || nxts->t == m_sdDefreq) {
+                                this_s = nxts->twd;
                                 upper_s = mtsurfaces_[x * yp * z].twd;
                                 if (isSurface(this_s) || this_s == 0x01) {
                                     if(upper_s == 0x00) {
-                                        if(isSurface(this_s))
-                                            mtsurfaces_[mindx].t |= m_sdJunction;
+                                        if(isSurface(this_s)) {
+                                            sdir |= 0x0000000F;
+                                            ms->t |= m_sdJunction;
+                                        }
                                     } else {
-                                        mtsurfaces_[indx].t = m_sdNonwalkable;
+                                        nxts->t = m_sdNonwalkable;
                                         sdir |= 0x0000000F;
                                     }
                                 } else {
                                     sdir |= 0x0000000F;
                                 }
-                                if(mtsurfaces_[indx].t == 0) {
-                                    mtsurfaces_[indx].t = m_sdDefreq;
+                                if(nxts->t == m_sdNotdefined) {
+                                    nxts->t = m_sdDefreq;
                                     stodef.x = x;
                                     stodef.y = yp;
                                     stodef.z = zm;
                                     vtodefine.push_back(stodef);
                                 }
                             } else {
-                                if(mtsurfaces_[indx].t == m_sdSurface)
-                                    mtsurfaces_[mindx].t |= m_sdJunction;
-                                else if(mtsurfaces_[indx].t != m_sdStairs
-                                    && mtsurfaces_[indx].twd != 0x01)
+                                if(nxts->t == m_sdSurface)
+                                    ms->t |= m_sdJunction;
+                                else if(nxts->t != m_sdStairs
+                                    && nxts->twd != 0x01)
                                     sdir |= 0x0000000F;
                             }
                         } else
                             sdir |= 0x0000000F;
 
                         if (ym >= 0) {
-                            indx = x * ym * z;
-                            if(mtsurfaces_[indx].t == 0
-                                || mtsurfaces_[indx].t == m_sdDefreq) {
-                                this_s = mtsurfaces_[indx].twd;
+                            nxts = &(mtsurfaces_[x * ym * z]);
+                            if(nxts->t == m_sdNotdefined
+                                || nxts->t == m_sdDefreq) {
+                                this_s = nxts->twd;
                                 upper_s = mtsurfaces_[x * ym * zp].twd;
                                 if (isSurface(this_s)) {
                                     if(upper_s == 0x00) {
-                                        mtsurfaces_[mindx].t |= m_sdJunction;
+                                        sdir |= 0x000F0000;
+                                        ms->t |= m_sdJunction;
                                     } else {
-                                        mtsurfaces_[indx].t = m_sdNonwalkable;
+                                        nxts->t = m_sdNonwalkable;
                                         if(upper_s == 0x01 && (zp + 1) < mmax_z_) {
-                                            if(mtsurfaces_[x * ym * (zp + 1)].t == 0) {
-                                                if(mtsurfaces_[x * ym * zp].t == 0) {
+                                            if(mtsurfaces_[x * ym * (zp + 1)].twd == 0) {
+                                                if(mtsurfaces_[x * ym * zp].t == m_sdNotdefined) {
                                                     mtsurfaces_[x * ym * zp].t = m_sdDefreq;
                                                     stodef.x = x;
                                                     stodef.y = ym;
@@ -705,16 +705,16 @@ bool Mission::setSurfaces() {
                                 } else {
                                     sdir |= 0x000F0000;
                                 }
-                                if(mtsurfaces_[indx].t == 0) {
-                                    mtsurfaces_[indx].t = m_sdDefreq;
+                                if(nxts->t == m_sdNotdefined) {
+                                    nxts->t = m_sdDefreq;
                                     stodef.x = x;
                                     stodef.y = ym;
                                     stodef.z = z;
                                     vtodefine.push_back(stodef);
                                 }
                             } else {
-                                if(mtsurfaces_[indx].t == m_sdSurface)
-                                    mtsurfaces_[mindx].t |= m_sdJunction;
+                                if(nxts->t == m_sdSurface)
+                                    ms->t |= m_sdJunction;
                                 else
                                     sdir |= 0x000F0000;
                             }
@@ -722,27 +722,27 @@ bool Mission::setSurfaces() {
                             sdir |= 0x000F0000;
 
                         if (xm >= 0) {
-                            indx = xm * y * z;
-                            if(mtsurfaces_[indx].t == 0
-                                || mtsurfaces_[indx].t == m_sdDefreq) {
-                                this_s = mtsurfaces_[indx].twd;
+                            nxts = &(mtsurfaces_[xm * y * z]);
+                            if(nxts->t == m_sdNotdefined
+                                || nxts->t == m_sdDefreq) {
+                                this_s = nxts->twd;
                                 upper_s = mtsurfaces_[xm * y * zp].twd;
                                 if (this_s == 0x01)
                                     if (upper_s == 0x00) {
                                         sdir &= 0xF0FFFFFF;
                                         sdir |= 0x06000000;
                                     } else
-                                        mtsurfaces_[indx].t = m_sdNonwalkable;
-                                if(mtsurfaces_[indx].t == 0) {
-                                    mtsurfaces_[indx].t = m_sdDefreq;
+                                        nxts->t = m_sdNonwalkable;
+                                if(nxts->t == m_sdNotdefined) {
+                                    nxts->t = m_sdDefreq;
                                     stodef.x = xm;
                                     stodef.y = y;
                                     stodef.z = z;
                                     vtodefine.push_back(stodef);
                                 }
                             } else {
-                                if(mtsurfaces_[indx].t == m_sdStairs
-                                    && mtsurfaces_[indx].twd == 0x01) {
+                                if(nxts->t == m_sdStairs
+                                    && nxts->twd == 0x01) {
                                     sdir &= 0xF0FFFFFF;
                                     sdir |= 0x06000000;
                                 }
@@ -750,87 +750,90 @@ bool Mission::setSurfaces() {
                         }
 
                         if (xp < mmax_x_) {
-                            indx = xp * y * z;
-                            if(mtsurfaces_[indx].t == 0
-                                || mtsurfaces_[indx].t == m_sdDefreq) {
-                                this_s = mtsurfaces_[indx].twd;
+                            nxts = &(mtsurfaces_[xp * y * z]);
+                            if(nxts->t == m_sdNotdefined
+                                || nxts->t == m_sdDefreq) {
+                                this_s = nxts->twd;
                                 upper_s = mtsurfaces_[xp * y * zp].twd;
                                 if (this_s == 0x01)
                                     if (upper_s == 0x00) {
                                         sdir &= 0xFFFFF0FF;
                                         sdir |= 0x00000200;
                                     } else
-                                        mtsurfaces_[indx].t = m_sdNonwalkable;
-                                if(mtsurfaces_[indx].t == 0) {
-                                    mtsurfaces_[indx].t = m_sdDefreq;
+                                        nxts->t = m_sdNonwalkable;
+                                if(nxts->t == m_sdNotdefined) {
+                                    nxts->t = m_sdDefreq;
                                     stodef.x = xp;
                                     stodef.y = y;
                                     stodef.z = z;
                                     vtodefine.push_back(stodef);
                                 }
                             } else {
-                                if(mtsurfaces_[indx].t == m_sdStairs
-                                    && mtsurfaces_[indx].twd == 0x01) {
+                                if(nxts->t == m_sdStairs
+                                    && nxts->twd == 0x01) {
                                     sdir &= 0xFFFFF0FF;
                                     sdir |= 0x00000200;
                                 }
                             }
                         }
-                        mtsurfaces_[mindx].dir = sdir;
+                        ms->dir = sdir;
 
                         break;
                     case 0x02:
                         sdir = 0xFFF4FFF0;
-                        mtsurfaces_[mindx].t = m_sdStairs;
+                        ms->t = m_sdStairs;
                         if (zm > 0 && ym >= 0) {
-                            indx = x * ym * zm;
+                            nxts = &(mtsurfaces_[x * ym * zm]);
                             mtsurfaces_[x * y * zm].t = m_sdNonwalkable;
-                            if(mtsurfaces_[indx].t == 0
-                                || mtsurfaces_[indx].t == m_sdDefreq) {
-                                this_s = mtsurfaces_[indx].twd;
+                            if(nxts->t == m_sdNotdefined
+                                || nxts->t == m_sdDefreq) {
+                                this_s = nxts->twd;
                                 upper_s = mtsurfaces_[x * ym * z].twd;
                                 if (isSurface(this_s) || this_s == 0x02) {
                                     if(upper_s == 0x00) {
-                                        if(isSurface(this_s))
-                                            mtsurfaces_[mindx].t |= m_sdJunction;
+                                        if(isSurface(this_s)) {
+                                            sdir |= 0x000F0000;
+                                            ms->t |= m_sdJunction;
+                                        }
                                     } else {
-                                        mtsurfaces_[indx].t = m_sdNonwalkable;
+                                        nxts->t = m_sdNonwalkable;
                                         sdir |= 0x000F0000;
                                     }
                                 } else {
                                     sdir |= 0x000F0000;
                                 }
-                                if(mtsurfaces_[indx].t == 0) {
-                                    mtsurfaces_[indx].t = m_sdDefreq;
+                                if(nxts->t == m_sdNotdefined) {
+                                    nxts->t = m_sdDefreq;
                                     stodef.x = x;
                                     stodef.y = ym;
                                     stodef.z = zm;
                                     vtodefine.push_back(stodef);
                                 }
                             } else {
-                                if(mtsurfaces_[indx].t == m_sdSurface)
-                                    mtsurfaces_[mindx].t |= m_sdJunction;
-                                else if(mtsurfaces_[indx].t != m_sdStairs
-                                    && mtsurfaces_[indx].twd != 0x02)
+                                if(nxts->t == m_sdSurface)
+                                    ms->t |= m_sdJunction;
+                                else if(nxts->t != m_sdStairs
+                                    && nxts->twd != 0x02)
                                     sdir |= 0x000F0000;
                             }
                         } else
                             sdir |= 0x000F0000;
 
                         if (yp < mmax_y_) {
-                            indx = x * yp * z;
-                            if(mtsurfaces_[indx].t == 0
-                                || mtsurfaces_[indx].t == m_sdDefreq) {
-                                this_s = mtsurfaces_[indx].twd;
+                            nxts = &(mtsurfaces_[x * yp * z]);
+                            if(nxts->t == m_sdNotdefined
+                                || nxts->t == m_sdDefreq) {
+                                this_s = nxts->twd;
                                 upper_s = mtsurfaces_[x * yp * zp].twd;
                                 if (isSurface(this_s)) {
                                     if(upper_s == 0x00) {
-                                        mtsurfaces_[mindx].t |= m_sdJunction;
+                                        sdir |= 0x0000000F;
+                                        ms->t |= m_sdJunction;
                                     } else {
-                                        mtsurfaces_[indx].t = m_sdNonwalkable;
+                                        nxts->t = m_sdNonwalkable;
                                         if(upper_s == 0x02 && (zp + 1) < mmax_z_) {
-                                            if(mtsurfaces_[x * yp * (zp + 1)].t == 0) {
-                                                if(mtsurfaces_[x * yp * zp].t == 0) {
+                                            if(mtsurfaces_[x * yp * (zp + 1)].twd == 0) {
+                                                if(mtsurfaces_[x * yp * zp].t == m_sdNotdefined) {
                                                     mtsurfaces_[x * yp * zp].t = m_sdDefreq;
                                                     stodef.x = x;
                                                     stodef.y = yp;
@@ -845,16 +848,16 @@ bool Mission::setSurfaces() {
                                 } else {
                                     sdir |= 0x0000000F;
                                 }
-                                if(mtsurfaces_[indx].t == 0) {
-                                    mtsurfaces_[indx].t = m_sdDefreq;
+                                if(nxts->t == m_sdNotdefined) {
+                                    nxts->t = m_sdDefreq;
                                     stodef.x = x;
                                     stodef.y = yp;
                                     stodef.z = z;
                                     vtodefine.push_back(stodef);
                                 }
                             } else {
-                                if(mtsurfaces_[indx].t == m_sdSurface)
-                                    mtsurfaces_[mindx].t |= m_sdJunction;
+                                if(nxts->t == m_sdSurface)
+                                    ms->t |= m_sdJunction;
                                 else
                                     sdir |= 0x0000000F;
                             }
@@ -862,27 +865,27 @@ bool Mission::setSurfaces() {
                             sdir |= 0x0000000F;
 
                         if (xm >= 0) {
-                            indx = xm * y * z;
-                            if(mtsurfaces_[indx].t == 0
-                                || mtsurfaces_[indx].t == m_sdDefreq) {
-                                this_s = mtsurfaces_[indx].twd;
+                            nxts = &(mtsurfaces_[xm * y * z]);
+                            if(nxts->t == m_sdNotdefined
+                                || nxts->t == m_sdDefreq) {
+                                this_s = nxts->twd;
                                 upper_s = mtsurfaces_[xm * y * zp].twd;
                                 if (this_s == 0x02)
                                     if (upper_s == 0x00) {
                                         sdir &= 0xF0FFFFFF;
                                         sdir |= 0x06000000;
                                     } else
-                                        mtsurfaces_[indx].t = m_sdNonwalkable;
-                                if(mtsurfaces_[indx].t == 0) {
-                                    mtsurfaces_[indx].t = m_sdDefreq;
+                                        nxts->t = m_sdNonwalkable;
+                                if(nxts->t == m_sdNotdefined) {
+                                    nxts->t = m_sdDefreq;
                                     stodef.x = xm;
                                     stodef.y = y;
                                     stodef.z = z;
                                     vtodefine.push_back(stodef);
                                 }
                             } else {
-                                if(mtsurfaces_[indx].t == m_sdStairs
-                                    && mtsurfaces_[indx].twd == 0x02) {
+                                if(nxts->t == m_sdStairs
+                                    && nxts->twd == 0x02) {
                                     sdir &= 0xF0FFFFFF;
                                     sdir |= 0x06000000;
                                 }
@@ -890,87 +893,90 @@ bool Mission::setSurfaces() {
                         }
 
                         if (xp < mmax_x_) {
-                            indx = xp * y * z;
-                            if(mtsurfaces_[indx].t == 0
-                                || mtsurfaces_[indx].t == m_sdDefreq) {
-                                this_s = mtsurfaces_[indx].twd;
+                            nxts = &(mtsurfaces_[xp * y * z]);
+                            if(nxts->t == m_sdNotdefined
+                                || nxts->t == m_sdDefreq) {
+                                this_s = nxts->twd;
                                 upper_s = mtsurfaces_[xp * y * zp].twd;
                                 if (this_s == 0x02)
                                     if (upper_s == 0x00) {
                                         sdir &= 0xFFFFF0FF;
                                         sdir |= 0x00000200;
                                     } else
-                                        mtsurfaces_[indx].t = m_sdNonwalkable;
-                                if(mtsurfaces_[indx].t == 0) {
-                                    mtsurfaces_[indx].t = m_sdDefreq;
+                                        nxts->t = m_sdNonwalkable;
+                                if(nxts->t == m_sdNotdefined) {
+                                    nxts->t = m_sdDefreq;
                                     stodef.x = xp;
                                     stodef.y = y;
                                     stodef.z = z;
                                     vtodefine.push_back(stodef);
                                 }
                             } else {
-                                if(mtsurfaces_[indx].t == m_sdStairs
-                                    && mtsurfaces_[indx].twd == 0x02) {
+                                if(nxts->t == m_sdStairs
+                                    && nxts->twd == 0x02) {
                                     sdir &= 0xFFFFF0FF;
                                     sdir |= 0x00000200;
                                 }
                             }
                         }
-                        mtsurfaces_[mindx].dir = sdir;
+                        ms->dir = sdir;
 
                         break;
                     case 0x03:
                         sdir = 0xF6FFF2FF;
-                        mtsurfaces_[mindx].t = m_sdStairs;
+                        ms->t = m_sdStairs;
                         if (zm > 0 && xm >= 0) {
-                            indx = xm * y * zm;
+                            nxts = &(mtsurfaces_[xm * y * zm]);
                             mtsurfaces_[x * y * zm].t = m_sdNonwalkable;
-                            if(mtsurfaces_[indx].t == 0
-                                || mtsurfaces_[indx].t == m_sdDefreq) {
-                                this_s = mtsurfaces_[indx].twd;
+                            if(nxts->t == m_sdNotdefined
+                                || nxts->t == m_sdDefreq) {
+                                this_s = nxts->twd;
                                 upper_s = mtsurfaces_[xm * y * z].twd;
                                 if (isSurface(this_s) || this_s == 0x03) {
                                     if(upper_s == 0x00) {
-                                        if(isSurface(this_s))
-                                            mtsurfaces_[mindx].t |= m_sdJunction;
+                                        if(isSurface(this_s)) {
+                                            sdir |= 0x0F000000;
+                                            ms->t |= m_sdJunction;
+                                        }
                                     } else {
-                                        mtsurfaces_[indx].t = m_sdNonwalkable;
+                                        nxts->t = m_sdNonwalkable;
                                         sdir |= 0x0F000000;
                                     }
                                 } else {
                                     sdir |= 0x0F000000;
                                 }
-                                if(mtsurfaces_[indx].t == 0) {
-                                    mtsurfaces_[indx].t = m_sdDefreq;
+                                if(nxts->t == m_sdNotdefined) {
+                                    nxts->t = m_sdDefreq;
                                     stodef.x = xm;
                                     stodef.y = y;
                                     stodef.z = zm;
                                     vtodefine.push_back(stodef);
                                 }
                             } else {
-                                if(mtsurfaces_[indx].t == m_sdSurface)
-                                    mtsurfaces_[mindx].t |= m_sdJunction;
-                                else if(mtsurfaces_[indx].t != m_sdStairs
-                                    && mtsurfaces_[indx].twd != 0x03)
+                                if(nxts->t == m_sdSurface)
+                                    ms->t |= m_sdJunction;
+                                else if(nxts->t != m_sdStairs
+                                    && nxts->twd != 0x03)
                                     sdir |= 0x0F000000;
                             }
                         } else
                             sdir |= 0x0F000000;
 
                         if (xp < mmax_x_) {
-                            indx = xp * y * z;
-                            if(mtsurfaces_[indx].t == 0
-                                || mtsurfaces_[indx].t == m_sdDefreq) {
-                                this_s = mtsurfaces_[indx].twd;
+                            nxts = &(mtsurfaces_[xp * y * z]);
+                            if(nxts->t == m_sdNotdefined
+                                || nxts->t == m_sdDefreq) {
+                                this_s = nxts->twd;
                                 upper_s = mtsurfaces_[xp * y * zp].twd;
                                 if (isSurface(this_s)) {
                                     if(upper_s == 0x00) {
-                                        mtsurfaces_[mindx].t |= m_sdJunction;
+                                        sdir |= 0x00000F00;
+                                        ms->t |= m_sdJunction;
                                     } else {
-                                        mtsurfaces_[indx].t = m_sdNonwalkable;
+                                        nxts->t = m_sdNonwalkable;
                                         if(upper_s == 0x03 && (zp + 1) < mmax_z_) {
-                                            if(mtsurfaces_[xp * y * (zp + 1)].t == 0) {
-                                                if(mtsurfaces_[xp * y * zp].t == 0) {
+                                            if(mtsurfaces_[xp * y * (zp + 1)].twd == 0) {
+                                                if(mtsurfaces_[xp * y * zp].t == m_sdNotdefined) {
                                                     mtsurfaces_[xp * y * zp].t = m_sdDefreq;
                                                     stodef.x = xp;
                                                     stodef.y = y;
@@ -985,16 +991,16 @@ bool Mission::setSurfaces() {
                                 } else {
                                     sdir |= 0x00000F00;
                                 }
-                                if(mtsurfaces_[indx].t == 0) {
-                                    mtsurfaces_[indx].t = m_sdDefreq;
+                                if(nxts->t == m_sdNotdefined) {
+                                    nxts->t = m_sdDefreq;
                                     stodef.x = xp;
                                     stodef.y = y;
                                     stodef.z = z;
                                     vtodefine.push_back(stodef);
                                 }
                             } else {
-                                if(mtsurfaces_[indx].t == m_sdSurface)
-                                    mtsurfaces_[mindx].t |= m_sdJunction;
+                                if(nxts->t == m_sdSurface)
+                                    ms->t |= m_sdJunction;
                                 else
                                     sdir |= 0x00000F00;
                             }
@@ -1002,27 +1008,27 @@ bool Mission::setSurfaces() {
                             sdir |= 0x00000F00;
 
                         if (ym >= 0) {
-                            indx = x * ym * z;
-                            if(mtsurfaces_[indx].t == 0
-                                || mtsurfaces_[indx].t == m_sdDefreq) {
-                                this_s = mtsurfaces_[indx].twd;
+                            nxts = &(mtsurfaces_[x * ym * z]);
+                            if(nxts->t == m_sdNotdefined
+                                || nxts->t == m_sdDefreq) {
+                                this_s = nxts->twd;
                                 upper_s = mtsurfaces_[x * ym * zp].twd;
                                 if (this_s == 0x03)
                                     if (upper_s == 0x00) {
                                         sdir &= 0xFFF0FFFF;
                                         sdir |= 0x00040000;
                                     } else
-                                        mtsurfaces_[indx].t = m_sdNonwalkable;
-                                if(mtsurfaces_[indx].t == 0) {
-                                    mtsurfaces_[indx].t = m_sdDefreq;
+                                        nxts->t = m_sdNonwalkable;
+                                if(nxts->t == m_sdNotdefined) {
+                                    nxts->t = m_sdDefreq;
                                     stodef.x = x;
                                     stodef.y = ym;
                                     stodef.z = z;
                                     vtodefine.push_back(stodef);
                                 }
                             } else {
-                                if(mtsurfaces_[indx].t == m_sdStairs
-                                    && mtsurfaces_[indx].twd == 0x03) {
+                                if(nxts->t == m_sdStairs
+                                    && nxts->twd == 0x03) {
                                     sdir &= 0xFFF0FFFF;
                                     sdir |= 0x00040000;
                                 }
@@ -1030,86 +1036,89 @@ bool Mission::setSurfaces() {
                         }
 
                         if (yp < mmax_y_) {
-                            indx = x * yp * z;
-                            if(mtsurfaces_[indx].t == 0
-                                || mtsurfaces_[indx].t == m_sdDefreq) {
-                                this_s = mtsurfaces_[indx].twd;
+                            nxts = &(mtsurfaces_[x * yp * z]);
+                            if(nxts->t == m_sdNotdefined
+                                || nxts->t == m_sdDefreq) {
+                                this_s = nxts->twd;
                                 upper_s = mtsurfaces_[x * yp * zp].twd;
                                 if (this_s == 0x03)
                                     if (upper_s == 0x00) {
                                         sdir &= 0xFFFFFFF0;
                                         sdir |= 0x00000000;
                                     } else
-                                        mtsurfaces_[indx].t = m_sdNonwalkable;
-                                if(mtsurfaces_[indx].t == 0) {
-                                    mtsurfaces_[indx].t = m_sdDefreq;
+                                        nxts->t = m_sdNonwalkable;
+                                if(nxts->t == m_sdNotdefined) {
+                                    nxts->t = m_sdDefreq;
                                     stodef.x = x;
                                     stodef.y = yp;
                                     stodef.z = z;
                                     vtodefine.push_back(stodef);
                                 }
                             } else {
-                                if(mtsurfaces_[indx].t == m_sdStairs
-                                    && mtsurfaces_[indx].twd == 0x03) {
+                                if(nxts->t == m_sdStairs
+                                    && nxts->twd == 0x03) {
                                     sdir &= 0xFFFFFFF0;
                                     sdir |= 0x00000000;
                                 }
                             }
                         }
-                        mtsurfaces_[mindx].dir = sdir;
+                        ms->dir = sdir;
 
                         break;
                     case 0x04:
                         sdir = 0xF6FFF2FF;
                         if (zm > 0 && xp < mmax_x_) {
-                            indx = xp * y * zm;
+                            nxts = &(mtsurfaces_[xp * y * zm]);
                             mtsurfaces_[xp * y * zm].t = m_sdNonwalkable;
-                            if(mtsurfaces_[indx].t == 0
-                                || mtsurfaces_[indx].t == m_sdDefreq) {
-                                this_s = mtsurfaces_[indx].twd;
+                            if(nxts->t == m_sdNotdefined
+                                || nxts->t == m_sdDefreq) {
+                                this_s = nxts->twd;
                                 upper_s = mtsurfaces_[xp * y * z].twd;
                                 if (isSurface(this_s) || this_s == 0x04) {
                                     if(upper_s == 0x00) {
-                                        if(isSurface(this_s))
-                                            mtsurfaces_[mindx].t |= m_sdJunction;
+                                        if(isSurface(this_s)) {
+                                            sdir |= 0x00000F00;
+                                            ms->t |= m_sdJunction;
+                                        }
                                     } else {
-                                        mtsurfaces_[indx].t = m_sdNonwalkable;
+                                        nxts->t = m_sdNonwalkable;
                                         sdir |= 0x00000F00;
                                     }
                                 } else {
                                     sdir |= 0x00000F00;
                                 }
-                                if(mtsurfaces_[indx].t == 0) {
-                                    mtsurfaces_[indx].t = m_sdDefreq;
+                                if(nxts->t == m_sdNotdefined) {
+                                    nxts->t = m_sdDefreq;
                                     stodef.x = xp;
                                     stodef.y = y;
                                     stodef.z = zm;
                                     vtodefine.push_back(stodef);
                                 }
                             } else {
-                                if(mtsurfaces_[indx].t == m_sdSurface)
-                                    mtsurfaces_[mindx].t |= m_sdJunction;
-                                else if(mtsurfaces_[indx].t != m_sdStairs
-                                    && mtsurfaces_[indx].twd != 0x04)
+                                if(nxts->t == m_sdSurface)
+                                    ms->t |= m_sdJunction;
+                                else if(nxts->t != m_sdStairs
+                                    && nxts->twd != 0x04)
                                     sdir |= 0x00000F00;
                             }
                         } else
                             sdir |= 0x00000F00;
 
                         if (xm >= 0) {
-                            indx = xm * y * z;
-                            if(mtsurfaces_[indx].t == 0
-                                || mtsurfaces_[indx].t == m_sdDefreq) {
-                                this_s = mtsurfaces_[indx].twd;
+                            nxts = &(mtsurfaces_[xm * y * z]);
+                            if(nxts->t == m_sdNotdefined
+                                || nxts->t == m_sdDefreq) {
+                                this_s = nxts->twd;
                                 upper_s = mtsurfaces_[xm * y * zp].twd;
                                 if (isSurface(this_s)) {
                                     if(upper_s == 0x00) {
-                                        mtsurfaces_[mindx].t |= m_sdJunction;
+                                        sdir |= 0x0F000000;
+                                        ms->t |= m_sdJunction;
                                     } else {
-                                        mtsurfaces_[indx].t = m_sdNonwalkable;
+                                        nxts->t = m_sdNonwalkable;
                                         if(upper_s == 0x04 && (zp + 1) < mmax_z_) {
-                                            if(mtsurfaces_[xm * y * (zp + 1)].t == 0) {
-                                                if(mtsurfaces_[xm * y * zp].t == 0) {
+                                            if(mtsurfaces_[xm * y * (zp + 1)].twd == 0) {
+                                                if(mtsurfaces_[xm * y * zp].t == m_sdNotdefined) {
                                                     mtsurfaces_[xm * y * zp].t = m_sdDefreq;
                                                     stodef.x = xm;
                                                     stodef.y = y;
@@ -1124,16 +1133,16 @@ bool Mission::setSurfaces() {
                                 } else {
                                     sdir |= 0x0F000000;
                                 }
-                                if(mtsurfaces_[indx].t == 0) {
-                                    mtsurfaces_[indx].t = m_sdDefreq;
+                                if(nxts->t == m_sdNotdefined) {
+                                    nxts->t = m_sdDefreq;
                                     stodef.x = xm;
                                     stodef.y = y;
                                     stodef.z = z;
                                     vtodefine.push_back(stodef);
                                 }
                             } else {
-                                if(mtsurfaces_[indx].t == m_sdSurface)
-                                    mtsurfaces_[mindx].t |= m_sdJunction;
+                                if(nxts->t == m_sdSurface)
+                                    ms->t |= m_sdJunction;
                                 else
                                     sdir |= 0x0F000000;
                             }
@@ -1141,27 +1150,27 @@ bool Mission::setSurfaces() {
                             sdir |= 0x0F000000;
 
                         if (ym >= 0) {
-                            indx = x * ym * z;
-                            if(mtsurfaces_[indx].t == 0
-                                || mtsurfaces_[indx].t == m_sdDefreq) {
-                                this_s = mtsurfaces_[indx].twd;
+                            nxts = &(mtsurfaces_[x * ym * z]);
+                            if(nxts->t == m_sdNotdefined
+                                || nxts->t == m_sdDefreq) {
+                                this_s = nxts->twd;
                                 upper_s = mtsurfaces_[x * ym * zp].twd;
                                 if (this_s == 0x04)
                                     if (upper_s == 0x00) {
                                         sdir &= 0xFFF0FFFF;
                                         sdir |= 0x00040000;
                                     } else
-                                        mtsurfaces_[indx].t = m_sdNonwalkable;
-                                if(mtsurfaces_[indx].t == 0) {
-                                    mtsurfaces_[indx].t = m_sdDefreq;
+                                        nxts->t = m_sdNonwalkable;
+                                if(nxts->t == m_sdNotdefined) {
+                                    nxts->t = m_sdDefreq;
                                     stodef.x = x;
                                     stodef.y = ym;
                                     stodef.z = z;
                                     vtodefine.push_back(stodef);
                                 }
                             } else {
-                                if(mtsurfaces_[indx].t == m_sdStairs
-                                    && mtsurfaces_[indx].twd == 0x04) {
+                                if(nxts->t == m_sdStairs
+                                    && nxts->twd == 0x04) {
                                     sdir &= 0xFFF0FFFF;
                                     sdir |= 0x00040000;
                                 }
@@ -1169,33 +1178,33 @@ bool Mission::setSurfaces() {
                         }
 
                         if (yp < mmax_y_) {
-                            indx = x * yp * z;
-                            if(mtsurfaces_[indx].t == 0
-                                || mtsurfaces_[indx].t == m_sdDefreq) {
-                                this_s = mtsurfaces_[indx].twd;
+                            nxts = &(mtsurfaces_[x * yp * z]);
+                            if(nxts->t == m_sdNotdefined
+                                || nxts->t == m_sdDefreq) {
+                                this_s = nxts->twd;
                                 upper_s = mtsurfaces_[x * yp * zp].twd;
                                 if (this_s == 0x04)
                                     if (upper_s == 0x00) {
                                         sdir &= 0xFFFFFFF0;
                                         sdir |= 0x00000000;
                                     } else
-                                        mtsurfaces_[indx].t = m_sdNonwalkable;
-                                if(mtsurfaces_[indx].t == 0) {
-                                    mtsurfaces_[indx].t = m_sdDefreq;
+                                        nxts->t = m_sdNonwalkable;
+                                if(nxts->t == m_sdNotdefined) {
+                                    nxts->t = m_sdDefreq;
                                     stodef.x = x;
                                     stodef.y = yp;
                                     stodef.z = z;
                                     vtodefine.push_back(stodef);
                                 }
                             } else {
-                                if(mtsurfaces_[indx].t == m_sdStairs
-                                    && mtsurfaces_[indx].twd == 0x04) {
+                                if(nxts->t == m_sdStairs
+                                    && nxts->twd == 0x04) {
                                     sdir &= 0xFFFFFFF0;
                                     sdir |= 0x00000000;
                                 }
                             }
                         }
-                        mtsurfaces_[mindx].dir = sdir;
+                        ms->dir = sdir;
 
                         break;
                     case 0x05:
@@ -1206,12 +1215,12 @@ bool Mission::setSurfaces() {
                     case 0x0B:
                     case 0x0E:
                     case 0x0F:
-                        mtsurfaces_[mindx].t = m_sdSurface;
+                        ms->t = m_sdSurface;
                         if (xm >=0) {
-                            indx = xm * y * z;
-                            if (mtsurfaces_[indx].t == 0
-                                || mtsurfaces_[indx].t == m_sdDefreq) {
-                                this_s = mtsurfaces_[indx].twd;
+                            nxts = &(mtsurfaces_[xm * y * z]);
+                            if (nxts->t == m_sdNotdefined
+                                || nxts->t == m_sdDefreq) {
+                                this_s = nxts->twd;
                                 upper_s = mtsurfaces_[xm * y * zp].twd;
                                 if (isSurface(this_s) && upper_s == 0x00) {
                                     ;
@@ -1219,21 +1228,21 @@ bool Mission::setSurfaces() {
                                     if (this_s != 0x03)
                                         sdir |= 0xFFF00000;
                                     else {
-                                        mtsurfaces_[mindx].t |= m_sdJunction;
-                                        mtsurfaces_[mindx].idjl |= 0xF6000000;
+                                        ms->t |= m_sdJunction;
+                                        ms->idjl |= 0xF6000000;
                                     }
                                 } else {
-                                    mtsurfaces_[indx].t = m_sdNonwalkable;
+                                    nxts->t = m_sdNonwalkable;
                                     if ((zp + 1) < mmax_z_ && upper_s == 0x04) {
                                         if (mtsurfaces_[xm * y * (zp + 1)].twd == 0) {
-                                            mtsurfaces_[mindx].idjh |= 0xF6000000;
-                                            mtsurfaces_[mindx].t |= m_sdJunction;
+                                            ms->idjh |= 0xF6000000;
+                                            ms->t |= m_sdJunction;
                                             sdir |= 0xF0F00000;
-                                            if (mtsurfaces_[xm * y * (zp + 1)].t == 0) {
-                                                mtsurfaces_[indx].t = m_sdDefreq;
+                                            if (mtsurfaces_[xm * y * zp].t == m_sdNotdefined) {
+                                                mtsurfaces_[xm * y * zp].t = m_sdDefreq;
                                                 stodef.x = xm;
                                                 stodef.y = y;
-                                                stodef.z = zp + 1;
+                                                stodef.z = zp;
                                                 vtodefine.push_back(stodef);
                                             }
                                         } else
@@ -1241,30 +1250,30 @@ bool Mission::setSurfaces() {
                                     } else
                                         sdir |= 0xFFF00000;
                                 }
-                                if (mtsurfaces_[indx].t == 0) {
-                                    mtsurfaces_[indx].t = m_sdDefreq;
+                                if (nxts->t == m_sdNotdefined) {
+                                    nxts->t = m_sdDefreq;
                                     stodef.x = xm;
                                     stodef.y = y;
                                     stodef.z = z;
                                     vtodefine.push_back(stodef);
                                 }
-                            } else if (mtsurfaces_[indx].t == m_sdStairs) {
-                                if (mtsurfaces_[indx].twd != 0x03)
+                            } else if (nxts->t == m_sdStairs) {
+                                if (nxts->twd != 0x03)
                                     sdir |= 0xFFF00000;
                                 else {
-                                    mtsurfaces_[mindx].idjl |= 0xF6000000;
-                                    mtsurfaces_[mindx].t |= m_sdJunction;
+                                    ms->idjl |= 0xF6000000;
+                                    ms->t |= m_sdJunction;
                                 }
-                            } else if (mtsurfaces_[indx].t != m_sdSurface)
+                            } else if (nxts->t != m_sdSurface)
                                 sdir |= 0xFFF00000;
                         } else
                             sdir |= 0xFFF00000;
 
                         if (xp < mmax_x_) {
-                            indx = xp * y * z;
-                            if (mtsurfaces_[indx].t == 0
-                                || mtsurfaces_[indx].t == m_sdDefreq) {
-                                this_s = mtsurfaces_[indx].twd;
+                            nxts = &(mtsurfaces_[xp * y * z]);
+                            if (nxts->t == m_sdNotdefined
+                                || nxts->t == m_sdDefreq) {
+                                this_s = nxts->twd;
                                 upper_s = mtsurfaces_[xp * y * zp].twd;
                                 if (isSurface(this_s) && upper_s == 0x00) {
                                     ;
@@ -1272,21 +1281,21 @@ bool Mission::setSurfaces() {
                                     if (this_s != 0x04)
                                         sdir |= 0x0000FFF0;
                                     else {
-                                        mtsurfaces_[mindx].idjl |= 0x0000F200;
-                                        mtsurfaces_[mindx].t |= m_sdJunction;
+                                        ms->idjl |= 0x0000F200;
+                                        ms->t |= m_sdJunction;
                                     }
                                 } else {
-                                    mtsurfaces_[indx].t = m_sdNonwalkable;
+                                    nxts->t = m_sdNonwalkable;
                                     if ((zp + 1) < mmax_z_&& upper_s == 0x03) {
                                         if (mtsurfaces_[xp * y * (zp + 1)].twd == 0) {
-                                            mtsurfaces_[mindx].idjh |= 0x0000F200;
-                                            mtsurfaces_[mindx].t |= m_sdJunction;
+                                            ms->idjh |= 0x0000F200;
+                                            ms->t |= m_sdJunction;
                                             sdir |= 0x0000F0F0;
-                                            if (mtsurfaces_[xp * y * (zp + 1)].t == 0) {
-                                                mtsurfaces_[indx].t = m_sdDefreq;
+                                            if (mtsurfaces_[xp * y * zp].t == m_sdNotdefined) {
+                                                mtsurfaces_[xp * y * zp].t = m_sdDefreq;
                                                 stodef.x = xp;
                                                 stodef.y = y;
-                                                stodef.z = zp + 1;
+                                                stodef.z = zp;
                                                 vtodefine.push_back(stodef);
                                             }
                                         } else
@@ -1294,30 +1303,30 @@ bool Mission::setSurfaces() {
                                     } else
                                         sdir |= 0x0000FFF0;
                                 }
-                                if (mtsurfaces_[indx].t == 0) {
-                                    mtsurfaces_[indx].t = m_sdDefreq;
+                                if (nxts->t == m_sdNotdefined) {
+                                    nxts->t = m_sdDefreq;
                                     stodef.x = xp;
                                     stodef.y = y;
                                     stodef.z = z;
                                     vtodefine.push_back(stodef);
                                 }
-                            } else if (mtsurfaces_[indx].t == m_sdStairs) {
-                                if (mtsurfaces_[indx].twd != 0x04)
+                            } else if (nxts->t == m_sdStairs) {
+                                if (nxts->twd != 0x04)
                                     sdir |= 0x0000FFF0;
                                 else {
-                                    mtsurfaces_[mindx].idjl |= 0x0000F200;
-                                    mtsurfaces_[mindx].t |= m_sdJunction;
+                                    ms->idjl |= 0x0000F200;
+                                    ms->t |= m_sdJunction;
                                 }
-                            } else if (mtsurfaces_[indx].t != m_sdSurface)
+                            } else if (nxts->t != m_sdSurface)
                                 sdir |= 0x0000FFF0;
                         } else
                             sdir |= 0x0000FFF0;
 
                         if(ym >= 0) {
-                            indx = x * ym * z;
-                            if (mtsurfaces_[indx].t == 0
-                                || mtsurfaces_[indx].t == m_sdDefreq) {
-                                this_s = mtsurfaces_[indx].twd;
+                            nxts = &(mtsurfaces_[x * ym * z]);
+                            if (nxts->t == m_sdNotdefined
+                                || nxts->t == m_sdDefreq) {
+                                this_s = nxts->twd;
                                 upper_s = mtsurfaces_[x * ym * zp].twd;
                                 if (isSurface(this_s) && upper_s == 0x00) {
                                     ;
@@ -1325,21 +1334,21 @@ bool Mission::setSurfaces() {
                                     if (this_s != 0x02)
                                         sdir |= 0x00FFF000;
                                     else {
-                                        mtsurfaces_[mindx].idjl |= 0x00F40000;
-                                        mtsurfaces_[mindx].t |= m_sdJunction;
+                                        ms->idjl |= 0x00F40000;
+                                        ms->t |= m_sdJunction;
                                     }
                                 } else {
-                                    mtsurfaces_[indx].t = m_sdNonwalkable;
+                                    nxts->t = m_sdNonwalkable;
                                     if ((zp + 1) < mmax_z_ && upper_s == 0x01) {
                                         if (mtsurfaces_[x * ym * (zp + 1)].twd == 0) {
-                                            mtsurfaces_[mindx].idjh |= 0x00F40000;
-                                            mtsurfaces_[mindx].t |= m_sdJunction;
+                                            ms->idjh |= 0x00F40000;
+                                            ms->t |= m_sdJunction;
                                             sdir |= 0x00F0F000;
-                                            if (mtsurfaces_[x * ym * (zp + 1)].t == 0) {
-                                                mtsurfaces_[indx].t = m_sdDefreq;
+                                            if (mtsurfaces_[x * ym * zp].t == m_sdNotdefined) {
+                                                mtsurfaces_[x * ym * zp].t = m_sdDefreq;
                                                 stodef.x = x;
                                                 stodef.y = ym;
-                                                stodef.z = zp + 1;
+                                                stodef.z = zp;
                                                 vtodefine.push_back(stodef);
                                             }
                                         } else
@@ -1347,30 +1356,30 @@ bool Mission::setSurfaces() {
                                     } else
                                         sdir |= 0x00FFF000;
                                 }
-                                if (mtsurfaces_[indx].t == 0) {
-                                    mtsurfaces_[indx].t = m_sdDefreq;
+                                if (nxts->t == m_sdNotdefined) {
+                                    nxts->t = m_sdDefreq;
                                     stodef.x = x;
                                     stodef.y = ym;
                                     stodef.z = z;
                                     vtodefine.push_back(stodef);
                                 }
-                            } else if(mtsurfaces_[indx].t == m_sdStairs) {
-                                if (mtsurfaces_[indx].twd != 0x02)
+                            } else if(nxts->t == m_sdStairs) {
+                                if (nxts->twd != 0x02)
                                     sdir |= 0x00FFF000;
                                 else {
-                                    mtsurfaces_[mindx].idjl |= 0x00F40000;
-                                    mtsurfaces_[mindx].t |= m_sdJunction;
+                                    ms->idjl |= 0x00F40000;
+                                    ms->t |= m_sdJunction;
                                 }
-                            } else if (mtsurfaces_[indx].t != m_sdSurface)
+                            } else if (nxts->t != m_sdSurface)
                                 sdir |= 0x00FFF000;
                         } else
                             sdir |= 0x00FFF000;
 
                         if (yp < mmax_y_) {
-                            indx = x * yp * z;
-                            if (mtsurfaces_[indx].t == 0
-                                || mtsurfaces_[indx].t == m_sdDefreq) {
-                                this_s = mtsurfaces_[indx].twd;
+                            nxts = &(mtsurfaces_[x * yp * z]);
+                            if (nxts->t == m_sdNotdefined
+                                || nxts->t == m_sdDefreq) {
+                                this_s = nxts->twd;
                                 upper_s = mtsurfaces_[x * yp * zp].twd;
                                 if (isSurface(this_s) && upper_s == 0x00) {
                                     ;
@@ -1378,21 +1387,21 @@ bool Mission::setSurfaces() {
                                     if (this_s != 0x01)
                                         sdir |= 0xF00000FF;
                                     else {
-                                        mtsurfaces_[mindx].idjl |= 0x000000F0;
-                                        mtsurfaces_[mindx].t |= m_sdJunction;
+                                        ms->idjl |= 0x000000F0;
+                                        ms->t |= m_sdJunction;
                                     }
                                 } else {
-                                    mtsurfaces_[indx].t = m_sdNonwalkable;
+                                    nxts->t = m_sdNonwalkable;
                                     if ((zp + 1) < mmax_z_ && upper_s == 0x02) {
                                         if (mtsurfaces_[x * yp * (zp + 1)].twd == 0) {
-                                            mtsurfaces_[mindx].idjh |= 0x000000F0;
-                                            mtsurfaces_[mindx].t |= m_sdJunction;
+                                            ms->idjh |= 0x000000F0;
+                                            ms->t |= m_sdJunction;
                                             sdir |= 0xF00000F0;
-                                            if (mtsurfaces_[x * yp * (zp + 1)].t == 0) {
-                                                mtsurfaces_[indx].t = m_sdDefreq;
+                                            if (mtsurfaces_[x * yp * zp].t == m_sdNotdefined) {
+                                                mtsurfaces_[x * yp * zp].t = m_sdDefreq;
                                                 stodef.x = x;
                                                 stodef.y = yp;
-                                                stodef.z = zp + 1;
+                                                stodef.z = zp;
                                                 vtodefine.push_back(stodef);
                                             }
                                         } else
@@ -1400,21 +1409,21 @@ bool Mission::setSurfaces() {
                                     } else
                                         sdir |= 0xF00000FF;
                                 }
-                                if (mtsurfaces_[indx].t == 0) {
-                                    mtsurfaces_[indx].t = m_sdDefreq;
+                                if (nxts->t == m_sdNotdefined) {
+                                    nxts->t = m_sdDefreq;
                                     stodef.x = x;
                                     stodef.y = yp;
                                     stodef.z = z;
                                     vtodefine.push_back(stodef);
                                 }
-                            } else if(mtsurfaces_[indx].t == m_sdStairs) {
-                                if (mtsurfaces_[indx].twd != 0x01)
+                            } else if(nxts->t == m_sdStairs) {
+                                if (nxts->twd != 0x01)
                                     sdir |= 0xF00000FF;
                                 else {
-                                    mtsurfaces_[mindx].idjl |= 0x000000F0;
-                                    mtsurfaces_[mindx].t |= m_sdJunction;
+                                    ms->idjl |= 0x000000F0;
+                                    ms->t |= m_sdJunction;
                                 }
-                            } else if (mtsurfaces_[indx].t != m_sdSurface)
+                            } else if (nxts->t != m_sdSurface)
                                 sdir |= 0xF00000FF;
                         } else
                             sdir |= 0xF00000FF;
@@ -1423,118 +1432,232 @@ bool Mission::setSurfaces() {
 
                         if (xm >=0) {
                             if ( ym >= 0 && (sdir & 0x00F00000) == 0x00500000) {
-                                indx = xm * ym * z;
-                                if(mtsurfaces_[indx].t == 0
-                                    || mtsurfaces_[indx].t == m_sdDefreq) {
-                                    this_s = mtsurfaces_[indx].twd;
+                                nxts = &(mtsurfaces_[xm * ym * z]);
+                                if(nxts->t == m_sdNotdefined
+                                    || nxts->t == m_sdDefreq) {
+                                    this_s = nxts->twd;
                                     upper_s = mtsurfaces_[xm * ym * zp].twd;
                                     if (isSurface(this_s) && upper_s == 0x00) {
                                         ;
                                     } else {
                                         if (isSurface(this_s))
-                                            mtsurfaces_[indx].t = m_sdNonwalkable;
+                                            nxts->t = m_sdNonwalkable;
                                         sdir |= 0x00F00000;
                                     }
-                                    if(mtsurfaces_[indx].t == 0) {
-                                        mtsurfaces_[indx].t = m_sdDefreq;
+                                    if(nxts->t == m_sdNotdefined) {
+                                        nxts->t = m_sdDefreq;
                                         stodef.x = xm;
                                         stodef.y = ym;
                                         stodef.z = z;
                                         vtodefine.push_back(stodef);
                                     }
-                                } else if(!mtsurfaces_[indx].t != m_sdSurface)
+                                } else if(!nxts->t != m_sdSurface)
                                     sdir |= 0x00F00000;
                             }
 
                             if ( yp < mmax_y_ && (sdir & 0xF0000000) == 0x70000000) {
-                                indx = xm * yp * z;
-                                if(mtsurfaces_[indx].t == 0
-                                    || mtsurfaces_[indx].t == m_sdDefreq) {
-                                    this_s = mtsurfaces_[indx].twd;
+                                nxts = &(mtsurfaces_[xm * yp * z]);
+                                if(nxts->t == m_sdNotdefined
+                                    || nxts->t == m_sdDefreq) {
+                                    this_s = nxts->twd;
                                     upper_s = mtsurfaces_[xm * yp * zp].twd;
                                     if (isSurface(this_s) && upper_s == 0x00) {
                                         ;
                                     } else {
                                         if (isSurface(this_s))
-                                            mtsurfaces_[indx].t = m_sdNonwalkable;
+                                            nxts->t = m_sdNonwalkable;
                                         sdir |= 0xF0000000;
                                     }
-                                    if(mtsurfaces_[indx].t == 0) {
-                                        mtsurfaces_[indx].t = m_sdDefreq;
+                                    if(nxts->t == m_sdNotdefined) {
+                                        nxts->t = m_sdDefreq;
                                         stodef.x = xm;
                                         stodef.y = yp;
                                         stodef.z = z;
                                         vtodefine.push_back(stodef);
                                     }
-                                } else if(!mtsurfaces_[indx].t != m_sdSurface)
+                                } else if(!nxts->t != m_sdSurface)
                                     sdir |= 0xF0000000;
                             }
                         }
 
                         if (xp < mmax_x_) {
                             if ( ym >= 0 && (sdir & 0x0000F000) == 0x00003000) {
-                                indx = xp * ym * z;
-                                if(mtsurfaces_[indx].t == 0
-                                    || mtsurfaces_[indx].t == m_sdDefreq) {
-                                    this_s = mtsurfaces_[indx].twd;
+                                nxts = &(mtsurfaces_[xp * ym * z]);
+                                if(nxts->t == m_sdNotdefined
+                                    || nxts->t == m_sdDefreq) {
+                                    this_s = nxts->twd;
                                     upper_s = mtsurfaces_[xp * ym * zp].twd;
                                     if (isSurface(this_s) && upper_s == 0x00) {
                                         ;
                                     } else {
                                         if (isSurface(this_s))
-                                            mtsurfaces_[indx].t = m_sdNonwalkable;
+                                            nxts->t = m_sdNonwalkable;
                                         sdir |= 0x0000F000;
                                     }
-                                    if(mtsurfaces_[indx].t == 0) {
-                                        mtsurfaces_[indx].t = m_sdDefreq;
+                                    if(nxts->t == m_sdNotdefined) {
+                                        nxts->t = m_sdDefreq;
                                         stodef.x = xp;
                                         stodef.y = ym;
                                         stodef.z = z;
                                         vtodefine.push_back(stodef);
                                     }
-                                } else if(!mtsurfaces_[indx].t != m_sdSurface)
+                                } else if(!nxts->t != m_sdSurface)
                                     sdir |= 0x0000F000;
                             }
 
                             if ( yp < mmax_y_ && (sdir & 0x000000F0) == 0x00000010) {
-                                indx = xp * yp * z;
-                                if(mtsurfaces_[indx].t == 0
-                                    || mtsurfaces_[indx].t == m_sdDefreq) {
-                                    this_s = mtsurfaces_[indx].twd;
+                                nxts = &(mtsurfaces_[xp * yp * z]);
+                                if(nxts->t == m_sdNotdefined
+                                    || nxts->t == m_sdDefreq) {
+                                    this_s = nxts->twd;
                                     upper_s = mtsurfaces_[xp * yp * zp].twd;
                                     if (isSurface(this_s) && upper_s == 0x00) {
                                         ;
                                     } else {
                                         if (isSurface(this_s))
-                                            mtsurfaces_[indx].t = m_sdNonwalkable;
+                                            nxts->t = m_sdNonwalkable;
                                         sdir |= 0x000000F0;
                                     }
-                                    if(mtsurfaces_[indx].t == 0) {
-                                        mtsurfaces_[indx].t = m_sdDefreq;
+                                    if(nxts->t == m_sdNotdefined) {
+                                        nxts->t = m_sdDefreq;
                                         stodef.x = xp;
                                         stodef.y = yp;
                                         stodef.z = z;
                                         vtodefine.push_back(stodef);
                                     }
-                                } else if(!mtsurfaces_[indx].t != m_sdSurface)
+                                } else if(!nxts->t != m_sdSurface)
                                     sdir |= 0x000000F0;
                             }
                         }
-                        mtsurfaces_[mindx].dir = sdir;
+                        ms->dir = sdir;
 
                         break;
                     case 0x0A:
                     case 0x0C:
                     case 0x0D:
                     case 0x10:
-                        mtsurfaces_[mindx].t = m_sdNonwalkable;
+                        ms->t = m_sdNonwalkable;
                         break;
                 }
             } while (vtodefine.size());
-        } else
-            continue;
+        }
     }
 
+    int id_sf = 1;
+    for (int ix = 0; ix < mmax_x_; ix++) {
+        for (int iy = 0; iy < mmax_y_; iy++) {
+            for (int iz = 1; iz < mmax_z_; iz++) {
+                surfaceDesc *cs = &(mtsurfaces_[ix * iy * iz]);
+                if ((cs->t & m_sdSurface) == m_sdSurface && cs->id == 0) {
+                    toDefineXYZ stodef;
+                    std::vector<toDefineXYZ> vtodefine;
+                    cs->t |= m_sdDefreq;
+                    stodef.x = ix;
+                    stodef.y = iy;
+                    stodef.z = iz;
+                    vtodefine.push_back(stodef);
+                    do {
+                        stodef = vtodefine.back();
+                        vtodefine.pop_back();
+                        int x = stodef.x;
+                        int y = stodef.y;
+                        int z = stodef.z;
+                        cs = &(mtsurfaces_[x * y * z]);
+                        int xm = x - 1;
+                        int ym = y - 1;
+                        int xp = x + 1;
+                        int yp = y + 1;
+                        int zp = z + 1;
+                        int cdir = cs->dir;
+                        if ( (cs->t & m_sdJunction) == m_sdJunction) {
+                            if (cs->idjh != 0) {
+                                if ( (cs->idjh & 0x000000FF) == 0x000000F0) {
+                                    mtsurfaces_[x * yp * zp].idjl = id_sf;
+                                    cdir |= 0x0000000F;
+                                }
+                                if ( (cs->idjh & 0x0000F200) == 0x0000F200) {
+                                    mtsurfaces_[xp * y * zp].idjl = id_sf;
+                                    cdir |= 0x00000F00;
+                                }
+                                if ( (cs->idjh & 0x00F40000) == 0x00F40000) {
+                                    mtsurfaces_[x * ym * zp].idjl = id_sf;
+                                    cdir |= 0x000F0000;
+                                }
+                                if ( (cs->idjh & 0xF6000000) == 0xF6000000) {
+                                    mtsurfaces_[xm * y * zp].idjl = id_sf;
+                                    cdir |= 0x0F000000;
+                                }
+                            }
+                            if (cs->idjl != 0) {
+                                if ( (cs->idjl & 0x000000FF) == 0x000000F0) {
+                                    mtsurfaces_[x * yp * z].idjh = id_sf;
+                                    cdir |= 0x0000000F;
+                                }
+                                if ( (cs->idjl & 0x0000F200) == 0x0000F200) {
+                                    mtsurfaces_[xp * y * z].idjh = id_sf;
+                                    cdir |= 0x00000F00;
+                                }
+                                if ( (cs->idjl & 0x00F40000) == 0x00F40000) {
+                                    mtsurfaces_[x * ym * z].idjh = id_sf;
+                                    cdir |= 0x000F0000;
+                                }
+                                if ( (cs->idjl & 0xF6000000) == 0xF6000000) {
+                                    mtsurfaces_[xm * y * z].idjh = id_sf;
+                                    cdir |= 0x0F000000;
+                                }
+                            }
+                        }
+
+                        if ((cdir & 0x0000000F) == 0x00000000) {
+                            if (mtsurfaces_[x * yp * z].id == 0
+                                && (mtsurfaces_[x * yp * z].t
+                                & (m_sdStairs | m_sdDefreq)) == m_sdStairs) {
+                                stodef.x = x;
+                                stodef.y = yp;
+                                stodef.z = z;
+                                vtodefine.push_back(stodef);
+                            }
+                        }
+                        if ((cdir & 0x00000F00) == 0x00000200) {
+                            if (mtsurfaces_[xp * y * z].id == 0
+                                && (mtsurfaces_[xp * y * z].t
+                                & (m_sdStairs | m_sdDefreq)) == m_sdStairs) {
+                                stodef.x = xp;
+                                stodef.y = y;
+                                stodef.z = z;
+                                vtodefine.push_back(stodef);
+                            }
+                        }
+                        if ((cdir & 0x000F0000) == 0x00040000) {
+                            if (mtsurfaces_[x * ym * z].id == 0
+                                && (mtsurfaces_[x * ym * z].t
+                                & (m_sdStairs | m_sdDefreq)) == m_sdStairs) {
+                                stodef.x = x;
+                                stodef.y = ym;
+                                stodef.z = z;
+                                vtodefine.push_back(stodef);
+                            }
+                        }
+                        if ((cdir & 0x0F000000) == 0x06000000) {
+                            if (mtsurfaces_[xm * y * z].id == 0
+                                && (mtsurfaces_[xm * y * z].t
+                                & (m_sdStairs | m_sdDefreq)) == m_sdStairs) {
+                                stodef.x = xm;
+                                stodef.y = y;
+                                stodef.z = z;
+                                vtodefine.push_back(stodef);
+                            }
+                        }
+                        cs->id = id_sf;
+                        cs->t ^= m_sdDefreq;
+                    } while(vtodefine.size());
+                    id_sf++;
+                }
+            }
+        }
+    }
+
+    int id_st = 1;
     return true;
 }
 
