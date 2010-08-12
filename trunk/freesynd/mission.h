@@ -276,25 +276,26 @@ BC 68 00 00 F0 5B B0 27 00 01 06 00 00 00 03 00 81 05 E9 00 32 00 00 00 05 16 40
     } LEVELDATA;
 
     typedef struct {
-        unsigned char t;
         // tyle type
         // 0x0 - not defined, 1b - surface, 2b - stairs,
         // 3b - junction, 4b - definition required, 5b - non
         // walkable/reachable
-        unsigned int dir;
+        unsigned char t;
         // direction
         // tile possible directions max 0x76543210, min 0x0
+        unsigned int dir;
         unsigned int id;
-        unsigned int idjl;
         // id of junction surface lower
         // for surfaces this represents direction where stairs are
-        unsigned int idjh;
+        unsigned int idjl;
         // id of junction surface higher
         // for surfaces this represents direction where stairs are
-        unsigned char twd;
+        unsigned int idjh;
         // tile walkable data from g_App.walkable_[]
+        unsigned char twd;
     }surfaceDesc;
-    surfaceDesc *mtsurfaces_; // map-tile surfaces
+    // map-tile surfaces
+    surfaceDesc *mtsurfaces_;
 
 #define m_sdNotdefined      0
 #define m_sdSurface         1
@@ -312,16 +313,17 @@ BC 68 00 00 F0 5B B0 27 00 01 06 00 00 00 03 00 81 05 E9 00 32 00 00 00 05 16 40
 
     typedef struct {
         unsigned int id;
-        unsigned int idj;
+        unsigned int idjl;
+        unsigned int idjh;
         int x;
         int y;
         int z;
     }junctionDesc;
 
-    std::vector<junctionDesc> sfjunctions_;
     // all surface junctions on map
-    std::vector<junctionDesc> stjunctions_;
+    std::vector<junctionDesc> sfcjunctions_;
     // all stairs junctions on map
+    std::vector<junctionDesc> strjunctions_;
 
     int mmax_x_, mmax_y_, mmax_z_;
 
