@@ -86,11 +86,8 @@ void MapObject::setOffZ(int n)
 
 void MapObject::addOffs(int &x, int &y)
 {
-    float fx = off_x_ / 256.0f;
-    float fy = off_y_ / 256.0f;
-    float fz = off_z_ / 256.0f;
-    x += (int) ((fx - fy) * TILE_WIDTH / 2);
-    y += (int) ((fx + fy - fz) * TILE_HEIGHT / 3);
+    x += ((off_x_ - off_y_) * (TILE_WIDTH / 2)) / 256;
+    y += ((off_x_ + off_y_ - off_z_) * (TILE_HEIGHT / 3)) / 256;
 }
 
 bool MapObject::animate(int elapsed)
