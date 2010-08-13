@@ -641,7 +641,7 @@ bool Mission::setSurfaces() {
                     case 0x01:
                         sdir = 0xFFF4FFF0;
                         ms->t = m_sdStairs;
-                        if (zm > multxy && yp < multxy) {
+                        if (zm >= multxy && yp < multxy) {
                             nxts = &(mtsurfaces_[x + yp + zm]);
                             mtsurfaces_[x + y + zm].t = m_sdNonwalkable;
                             if(nxts->t == m_sdNotdefined
@@ -784,7 +784,7 @@ bool Mission::setSurfaces() {
                     case 0x02:
                         sdir = 0xFFF4FFF0;
                         ms->t = m_sdStairs;
-                        if (zm > multxy && ym >= 0) {
+                        if (zm >= multxy && ym >= 0) {
                             nxts = &(mtsurfaces_[x + ym + zm]);
                             mtsurfaces_[x + y + zm].t = m_sdNonwalkable;
                             if(nxts->t == m_sdNotdefined
@@ -927,7 +927,7 @@ bool Mission::setSurfaces() {
                     case 0x03:
                         sdir = 0xF6FFF2FF;
                         ms->t = m_sdStairs;
-                        if (zm > multxy && xm >= 0) {
+                        if (zm >= multxy && xm >= 0) {
                             nxts = &(mtsurfaces_[xm + y + zm]);
                             mtsurfaces_[x + y + zm].t = m_sdNonwalkable;
                             if(nxts->t == m_sdNotdefined
@@ -1069,7 +1069,8 @@ bool Mission::setSurfaces() {
                         break;
                     case 0x04:
                         sdir = 0xF6FFF2FF;
-                        if (zm > multxy && xp < mmax_x_) {
+                        ms->t = m_sdStairs;
+                        if (zm >= multxy && xp < mmax_x_) {
                             nxts = &(mtsurfaces_[xp + y + zm]);
                             mtsurfaces_[xp + y + zm].t = m_sdNonwalkable;
                             if(nxts->t == m_sdNotdefined
