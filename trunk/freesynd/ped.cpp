@@ -870,7 +870,7 @@ bool PedInstance::walkable(int x, int y, int z) {
     //printf(" %i : %i : %i\n",thisTile,z,upperTile);
     return thisTile != 0x0C && thisTile != 0x10 && thisTile != 0x0
         && thisTile != upperTile
-        && ((thisTile == 0x05 /*|| thisTile == 0x0D*/)
+        && ((thisTile == 0x05 || thisTile == 0x0D)
             ? upperTile == 0x0 : true);
 }
 
