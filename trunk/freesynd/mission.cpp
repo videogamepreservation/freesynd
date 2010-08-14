@@ -166,7 +166,7 @@ bool Mission::loadLevel(uint8 * levelData)
     if (objective_ == 14 || objective_ == 15)
         objective_vehicle_ = ((objective_data & 0xff) - 2) / 0x2a;
 
-    vehicles_.clear();          // TODO: free existing?
+    vehicles_.clear();
 
     for (int i = 0; i < 64; i++) {
         LEVELDATA_CARS & car = level_data_.cars[i];
@@ -180,10 +180,11 @@ bool Mission::loadLevel(uint8 * levelData)
             vehicles_.push_back(v);
     }
 
+    peds_.clear();
     for (int i = 0; i < 256; i++) {
         LEVELDATA_PEOPLE & pedref = level_data_.people[i];
-        if (pedref.unkn3 != 4)
-            continue;
+        //if (pedref.unkn3 != 4) //this type of ped is driving vehicle
+            //continue;
         PedInstance *p =
             g_App.peds().loadInstance((uint8 *) & pedref, map_);
         peds_.push_back(p);
@@ -209,6 +210,7 @@ bool Mission::loadLevel(uint8 * levelData)
     }
 */
 
+    statics_.clear();
     for (unsigned int i = 0; i < 400; i++) {
         LEVELDATA_STATICS & sref = level_data_.statics[i];
         Static *s = Static::loadInstance((uint8 *) & sref, map_);
@@ -239,6 +241,7 @@ bool Mission::loadLevel(uint8 * levelData)
          it != markers.end(); it++)
         printf("%c -> %04x\n", it->second + 'a', it->first);
 #endif
+    weapons_.clear();
 
     return true;
 }
@@ -558,7 +561,7 @@ bool Mission::sWalkable(char thisTile, char upperTile) {
 
     return thisTile != 0x0C && thisTile != 0x10 && thisTile != 0x0
         && thisTile != upperTile
-        && ((thisTile == 0x05 /*|| thisTile == 0x0D*/)
+        && ((thisTile == 0x05 || thisTile == 0x0D)
             ? upperTile == 0x0 : true)
         || (thisTile > 0x00 && thisTile < 0x05 && upperTile == 0x0);
 }
@@ -593,12 +596,15 @@ bool Mission::setSurfaces() {
             }
         }
     }
-    int debg = 0;
     for (unsigned int i = 0; i < peds_.size(); i++) {
         PedInstance *p = peds_[i];
         int x = p->tileX();
         int y = p->tileY();
         int z = p->tileZ() + (p->offZ() == 0 ? 0 : 1);
+        // there are some peds with z + 1 then maximum
+        // why it is so?
+        if (z >= mmax_z_)
+            continue;
         if (mtsurfaces_[x + y * mmax_x_ + z * multxy].t == m_sdNotdefined) {
             toDefineXYZ stodef;
             std::vector<toDefineXYZ> vtodefine;
@@ -1708,13 +1714,13 @@ bool Mission::setSurfaces() {
                         }
                     } while(vtodefine.size());
                     id_st++;
-                }
+                } else if (cst->t == m_sdNotdefined)
+                    cst->t = m_sdNonwalkable;
             }
         }
     }
-    //printf("debg %i\n", debg);
-    //printf("surface junctions %i , stair junctions %i, surfaces %i, stairs %i\n",
-    //    sfcjunctions_.size(), strjunctions_.size(), id_sf - 1, id_st - 1);
+    printf("surface junctions %i , stair junctions %i, surfaces %i, stairs %i\n",
+        sfcjunctions_.size(), strjunctions_.size(), id_sf - 1, id_st - 1);
     return true;
 }
 

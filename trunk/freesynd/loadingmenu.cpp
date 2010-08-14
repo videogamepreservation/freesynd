@@ -45,7 +45,7 @@ void LoadingMenu::handleTick(int elapsed)
             g_App.gameSprites().load();
         mission_ = brief_->mission();
         mission_->loadMap();// TODO : move this to briefmenu
-        //mission_->setSurfaces();
+        mission_->setSurfaces();
         menu_manager_->changeCurrentMenu("Gameplay");
         tick_count_ = 0;
     }

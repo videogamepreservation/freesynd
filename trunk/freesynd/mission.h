@@ -105,9 +105,6 @@ public:
     void addWeapon(WeaponInstance *w);
     virtual MapObject * findAt(int tilex, int tiley, int tilez,
             int *majorType, int *searchIndex, bool only);
-    bool sWalkable(char thisTile, char upperTile);
-    bool isSurface(char thisTile);
-    bool isStairs(char thisTile);
     bool setSurfaces();
     void clrSurfaces();
 
@@ -329,6 +326,9 @@ BC 68 00 00 F0 5B B0 27 00 01 06 00 00 00 03 00 81 05 E9 00 32 00 00 00 05 16 40
 
   protected:
     LEVELDATA level_data_;
+    bool sWalkable(char thisTile, char upperTile);
+    bool isSurface(char thisTile);
+    bool isStairs(char thisTile);
 
     // eventually all this level data will be replaced by objects like this:
     std::vector<VehicleInstance *> vehicles_;
