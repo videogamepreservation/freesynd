@@ -884,13 +884,75 @@ void PedInstance::setDrawnAnim(PedInstance::AnimationDrawn drawn_anim) {
 }
 
 double PedInstance::getDistance(int x1, int y1, int z1,
-    int x2, int y2, int z2, Mission *m) {
+                                int x2, int y2, int z2, Mission *m) {
 
-    return 0;
+    return sqrt(pow((double)(x2 - x1), 2) + pow((double)(y2 - y1), 2)
+        + pow((double)(z2 - z1), 2));
 }
 
 void PedInstance::setDestinationPNew(Mission *m, int x, int y, int z,
-    int ox, int oy, int oz, int new_speed) {
+                                     int ox, int oy, int oz, int new_speed) {
+    surfaceDesc *targetd = &(m->mtsurfaces_[x + y * m->mmax_x_ + z * m->multxy]);
+
+    if(targetd->t == m_sdNonwalkable)
+        return;
+
+    surfaceDesc *based = &(m->mtsurfaces_[tile_x_ + tile_y_ * m->mmax_x_ + tile_z_ * m->multxy]);
+    char lvlnum = 0;
+    bool found =  false;
+    std::vector <linkDesc> * lvls[32];
+    linkDesc clink, tlink;
+    clink.j.pj = based;
+    clink.j.x = tile_x_;
+    clink.j.y = tile_y_;
+    clink.j.z = tile_z_;
+    clink.n = 0;
+    clink.p = NULL;
+    std::vector <linkDesc> * curlvl = NULL;
+    std::vector <linkDesc> * parlvl = NULL;
+    std::vector <junctionDesc> sfcreached;
+    std::vector <junctionDesc> strreached;
+    switch(based->t) {
+        case (m_sdStairs | m_sdJunction):
+            strreached.push_back(clink.j);
+        case m_sdStairs:
+            clink.nt = m_sdStairs;
+            break;
+        case (m_sdSurface | m_sdJunction):
+            sfcreached.push_back(clink.j);
+        case m_sdSurface:
+            clink.nt = m_sdSurface;
+            break;
+    }
+    memset(lvls, NULL, sizeof(std::vector<linkDesc> *) * 32);
+    lvls[lvlnum] = new std::vector<linkDesc>;
+    lvls[lvlnum]->push_back(clink);
+
+    do {
+        if (lvls[lvlnum]->size() == 1) {
+            clink = lvls[lvlnum]->front();
+            if (clink.j.x == x && clink.j.y == y && clink.j.z == z) {
+                found = true;
+                break;
+            }
+        } else if (lvls[lvlnum]->size() == 0)
+            break;
+
+        if (lvlnum > 30)
+            break;
+
+        parlvl = lvls[lvlnum];
+        lvlnum++;
+        curlvl = lvls[lvlnum];
+        for(std::vector <linkDesc> ::iterator it = parlvl->begin();
+            it != parlvl->end(); it++) {
+
+            if(it->nt == m_sdStairs) {
+            } else if(it->nt == m_sdSurface) {
+            }
+        }
+    }while(1);
+
 }
 
 void PedInstance::setDestinationP(int x, int y, int z, int ox,

@@ -581,11 +581,11 @@ bool Mission::setSurfaces() {
     if (!(g_App.maps().mapDimensions(map_,
         &mmax_x_, &mmax_y_, &mmax_z_)))
         return false;
-    int mmaxmult = mmax_x_ * mmax_y_ * mmax_z_;
+    mmaxmult = mmax_x_ * mmax_y_ * mmax_z_;
     mtsurfaces_ = (surfaceDesc *)malloc(mmaxmult * sizeof(surfaceDesc));
     if(mtsurfaces_ == NULL)
         return false;
-    int multxy = mmax_x_ * mmax_y_;
+    multxy = mmax_x_ * mmax_y_;
     memset((void *)mtsurfaces_, 0, mmaxmult * sizeof(surfaceDesc));
     Map *m = g_App.maps().map(map_);
     for (int ix = 0; ix < mmax_x_; ix++) {

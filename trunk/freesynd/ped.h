@@ -230,6 +230,17 @@ public:
     AnimationDrawn getDrawnAnim();
     void setDrawnAnim(AnimationDrawn drawn_anim);
 
+    typedef struct {
+        // this junction
+        junctionDesc j;
+        // parent
+        void * p;
+        // nodes number
+        int n;
+        // next type to search (surface/stairs junction)
+        unsigned char nt;
+    }linkDesc;
+
     double getDistance(int x1, int y1, int z1,
         int x2, int y2, int z2, Mission *m);
     void setDestinationPNew(Mission *m, int x, int y, int z,
