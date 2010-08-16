@@ -32,6 +32,7 @@
 
 #include "common.h"
 #include "mapobject.h"
+#include "pathsurfaces.h"
 #include <string>
 #include <vector>
 #include <set>
@@ -272,51 +273,8 @@ BC 68 00 00 F0 5B B0 27 00 01 06 00 00 00 03 00 81 05 E9 00 32 00 00 00 05 16 40
         /* 116010 */
     } LEVELDATA;
 
-    typedef struct {
-        // tyle type
-        // 0x0 - not defined, 1b - surface, 2b - stairs,
-        // 3b - junction, 4b - definition required, 5b - non
-        // walkable/reachable
-        unsigned char t;
-        // direction
-        // tile possible directions max 0x76543210, min 0x0
-        unsigned int dir;
-        unsigned int id;
-        // id of junction surface lower
-        // for surfaces this represents direction where stairs are
-        unsigned int idjl;
-        // id of junction surface higher
-        // for surfaces this represents direction where stairs are
-        unsigned int idjh;
-        // tile walkable data from g_App.walkable_[]
-        unsigned char twd;
-    }surfaceDesc;
     // map-tile surfaces
     surfaceDesc *mtsurfaces_;
-
-#define m_sdNotdefined      0
-#define m_sdSurface         1
-#define m_sdStairs          2
-#define m_sdJunction        4
-#define m_sdDefreq          8
-#define m_sdNonwalkable     16
-
-
-    typedef struct {
-        int x;
-        int y;
-        int z;
-    }toDefineXYZ;
-
-    typedef struct {
-        unsigned int id;
-        unsigned int idjl;
-        unsigned int idjh;
-        int x;
-        int y;
-        int z;
-    }junctionDesc;
-
     // all surface junctions on map
     std::vector<junctionDesc> sfcjunctions_;
     // all stairs junctions on map

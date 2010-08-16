@@ -25,6 +25,7 @@
 
 #include "common.h"
 #include "app.h"
+#include "pathsurfaces.h"
 #include <math.h>
 
 Ped::Ped() {
@@ -882,6 +883,16 @@ void PedInstance::setDrawnAnim(PedInstance::AnimationDrawn drawn_anim) {
     drawn_anim_ = drawn_anim;
 }
 
+double PedInstance::getDistance(int x1, int y1, int z1,
+    int x2, int y2, int z2, Mission *m) {
+
+    return 0;
+}
+
+void PedInstance::setDestinationPNew(Mission *m, int x, int y, int z,
+    int ox, int oy, int oz, int new_speed) {
+}
+
 void PedInstance::setDestinationP(int x, int y, int z, int ox,
                                        int oy, int oz, int new_speed)
 {
@@ -892,6 +903,16 @@ void PedInstance::setDestinationP(int x, int y, int z, int ox,
 
     dest_path_.clear();
     setSpeed(0);
+    /*
+    printf("before x : %i; y : %i; z : %i = = ox :%i, oy :%i, oz :%i\n",
+        x, y, z, ox, oy, oz);
+    int nx = x * 256 + ox + 256 / 3;
+    x = nx / 256;
+    ox = nx % 256;
+    int ny = y * 256 + oy + 256 / 3;
+    y = ny / 256;
+    oy = ny % 256;
+    */
     printf("x : %i; y : %i; z : %i = = ox :%i, oy :%i, oz :%i\n",
         x, y, z, ox, oy, oz);
 

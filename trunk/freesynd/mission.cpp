@@ -1387,9 +1387,7 @@ bool Mission::setSurfaces() {
                         csf->t ^= m_sdDefreq;
                         if ( (csf->t & m_sdJunction) == m_sdJunction) {
                             junctionDesc jsf;
-                            jsf.id = id_sf;
-                            jsf.idjh = csf->idjh;
-                            jsf.idjl = csf->idjl;
+                            jsf.pj = csf;
                             jsf.x = x;
                             jsf.y = y / mmax_x_;
                             jsf.z = z / multxy;
@@ -1514,9 +1512,7 @@ bool Mission::setSurfaces() {
                         cst->t ^= m_sdDefreq;
                         if ( (cst->t & m_sdJunction) == m_sdJunction) {
                             junctionDesc jst;
-                            jst.id = id_st;
-                            jst.idjh = cst->idjh;
-                            jst.idjl = cst->idjl;
+                            jst.pj = cst;
                             jst.x = x;
                             jst.y = y / mmax_x_;
                             jst.z = z / multxy;

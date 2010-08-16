@@ -230,8 +230,13 @@ public:
     AnimationDrawn getDrawnAnim();
     void setDrawnAnim(AnimationDrawn drawn_anim);
 
+    double getDistance(int x1, int y1, int z1,
+        int x2, int y2, int z2, Mission *m);
+    void setDestinationPNew(Mission *m, int x, int y, int z,
+        int ox = 128, int oy = 128, int oz = 0, int new_speed = 160);
+
     void setDestinationP(int x, int y, int z, int ox = 128, int oy = 128,
-            int oz = 0,int new_speed = 160);
+            int oz = 0, int new_speed = 160);
     bool movementP(int elapsed);
 
     int draw_timeout_;
