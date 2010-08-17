@@ -890,6 +890,50 @@ double PedInstance::getDistance(int x1, int y1, int z1,
         + pow((double)(z2 - z1), 2));
 }
 
+double PedInstance::calcDistance(unsigned char lvl, toDefineXYZ posxyz,
+                                 std::vector <linkDesc> ::iterator par) {
+    double dist = 0;
+    while(lvl != 0) {
+        dist += getDistance(posxyz.x, posxyz.y, posxyz.z,
+            par->j.x, par->j.y, par->j.z, NULL);
+        posxyz.x = par->j.x;
+        posxyz.y = par->j.y;
+        posxyz.z = par->j.z;
+        par = (std::vector <linkDesc> ::iterator)(par->p);
+        lvl--;
+    }
+    return dist;
+}
+
+void PedInstance::markNodes(unsigned char lvl, unsigned char clvl,
+                            toDefineXYZ posxyz, std::vector <linkDesc> ** lvls) {
+    std::vector <linkDesc> * curlvl = lvls[clvl];
+    bool found = true;
+    while (curlvl != NULL && found) {
+        found = false;
+        for (std::vector <linkDesc> ::iterator it = curlvl->begin();
+            it != curlvl->end(); it++) {
+            if (!it->bad) {
+                if (it->pcoord.x == posxyz.x && it->pcoord.y == posxyz.y
+                    && it->pcoord.z == posxyz.z) {
+                    if (it->n != 0) {
+                        toDefineXYZ curxyz;
+                        curxyz.x = it->j.x;
+                        curxyz.y = it->j.y;
+                        curxyz.z = it->j.z;
+                        markNodes(lvl, clvl + 1, curxyz, lvls);
+                    }
+                    it->bad = true;
+                }
+            }
+        }
+        clvl++;
+        if (clvl > lvl)
+            break;
+        curlvl = lvls[clvl];
+    }
+}
+
 void PedInstance::setDestinationPNew(Mission *m, int x, int y, int z,
                                      int ox, int oy, int oz, int new_speed) {
     surfaceDesc *targetd = &(m->mtsurfaces_[x + y * m->mmax_x_ + z * m->multxy]);
@@ -898,41 +942,39 @@ void PedInstance::setDestinationPNew(Mission *m, int x, int y, int z,
         return;
 
     surfaceDesc *based = &(m->mtsurfaces_[tile_x_ + tile_y_ * m->mmax_x_ + tile_z_ * m->multxy]);
-    char lvlnum = 0;
+    unsigned char lvlnum = 0;
     bool found =  false;
     std::vector <linkDesc> * lvls[32];
-    linkDesc clink, tlink;
+    linkDesc clink;
     clink.j.pj = based;
     clink.j.x = tile_x_;
     clink.j.y = tile_y_;
     clink.j.z = tile_z_;
     clink.n = 0;
-    clink.p = NULL;
+    clink.bad = false;
     std::vector <linkDesc> * curlvl = NULL;
     std::vector <linkDesc> * parlvl = NULL;
-    std::vector <junctionDesc> sfcreached;
-    std::vector <junctionDesc> strreached;
+    std::vector <reachedDesc> sfcreached;
+    std::vector <reachedDesc> strreached;
     switch(based->t) {
         case (m_sdStairs | m_sdJunction):
-            strreached.push_back(clink.j);
         case m_sdStairs:
             clink.nt = m_sdStairs;
             break;
         case (m_sdSurface | m_sdJunction):
-            sfcreached.push_back(clink.j);
         case m_sdSurface:
             clink.nt = m_sdSurface;
             break;
     }
-    memset(lvls, NULL, sizeof(std::vector<linkDesc> *) * 32);
-    lvls[lvlnum] = new std::vector<linkDesc>;
+    memset(lvls, NULL, sizeof(std::vector <linkDesc> *) * 32);
+    lvls[lvlnum] = new std::vector <linkDesc>;
     lvls[lvlnum]->push_back(clink);
 
     do {
         if (lvls[lvlnum]->size() == 1) {
             clink = lvls[lvlnum]->front();
-            if (clink.j.x == x && clink.j.y == y && clink.j.z == z) {
-                found = true;
+            //reached surface not tile
+            if (found) {
                 break;
             }
         } else if (lvls[lvlnum]->size() == 0)
@@ -944,11 +986,82 @@ void PedInstance::setDestinationPNew(Mission *m, int x, int y, int z,
         parlvl = lvls[lvlnum];
         lvlnum++;
         curlvl = lvls[lvlnum];
-        for(std::vector <linkDesc> ::iterator it = parlvl->begin();
+        linkDesc ladd;
+        for (std::vector <linkDesc> ::iterator it = parlvl->begin();
             it != parlvl->end(); it++) {
 
-            if(it->nt == m_sdStairs) {
-            } else if(it->nt == m_sdSurface) {
+            if(it->nt == m_sdStairs && !it->bad) {
+                if ((it->j.pj->t & m_sdStairs) == m_sdStairs) {
+                    int idget = it->j.pj->id;
+                    for (std::vector <junctionDesc> ::iterator stit = m->strjunctions_.begin();
+                        stit != m->strjunctions_.end(); stit++) {
+                        bool toadd = true;
+                        if (stit->pj->id == idget) {
+                            for (std::vector <reachedDesc> ::iterator stitr = strreached.begin();
+                                stitr != strreached.end(); stitr++) {
+                                    if (stit->x == stitr->j.x && stit->y == stitr->j.y
+                                        && stit->z == stitr->j.z) {
+                                        toDefineXYZ curxyz;
+                                        curxyz.x = stit->x;
+                                        curxyz.y = stit->y;
+                                        curxyz.z = stit->z;
+                                        double dist = calcDistance (lvlnum, curxyz, it);
+                                        std::vector <linkDesc> * slvl = lvls[stitr->atlevel];
+                                        double gdist = 0;
+                                        std::vector <linkDesc> ::iterator par;
+                                        for (std::vector <linkDesc> ::iterator getit = slvl->begin();
+                                            getit != slvl->end(); getit++) {
+                                                if (getit->j.x == stit->x && getit->j.y == stit->y
+                                                    && getit->j.z == stit->z && !getit->bad) {
+                                                    par = (std::vector <linkDesc> ::iterator)(getit->p);
+                                                    gdist = calcDistance (stitr->atlevel, curxyz, par);
+                                                    if (gdist > dist) {
+                                                        getit->bad = true;
+                                                        if (stitr->atlevel != lvlnum && getit->n != 0){
+                                                            markNodes (lvlnum, stitr->atlevel, curxyz, lvls);
+                                                        }
+                                                        stitr->atlevel = lvlnum;
+                                                        ladd.bad = false;
+                                                        ladd.j = *stit;
+                                                        ladd.n = 0;
+                                                        ladd.nt = m_sdSurface;
+                                                        ladd.p = it;
+                                                        ladd.pcoord.x = it->j.x;
+                                                        ladd.pcoord.y = it->j.y;
+                                                        ladd.pcoord.z = it->j.z;
+                                                        it->n++;
+                                                        curlvl->push_back(ladd);
+                                                    }
+                                                    toadd = false;
+                                                    break;
+                                                }
+                                        }
+                                    }
+                            }
+                            if (toadd) {
+                                ladd.bad = false;
+                                ladd.j = *stit;
+                                ladd.n = 0;
+                                ladd.nt = m_sdSurface;
+                                ladd.p = it;
+                                ladd.pcoord.x = it->j.x;
+                                ladd.pcoord.y = it->j.y;
+                                ladd.pcoord.z = it->j.z;
+                                it->n++;
+                                curlvl->push_back(ladd);
+                                reachedDesc rd;
+                                rd.atlevel = lvlnum;
+                                rd.j = ladd.j;
+                                strreached.push_back(rd);
+                            }
+                        }
+                    }
+                } else {
+                }
+            } else if(it->nt == m_sdSurface && !it->bad) {
+                if ((it->j.pj->t & m_sdSurface) == m_sdSurface) {
+                } else {
+                }
             }
         }
     }while(1);

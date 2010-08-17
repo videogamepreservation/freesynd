@@ -27,8 +27,9 @@
 #define PED_H
 
 #include "common.h"
-#include "spritemanager.h"
 #include "mapobject.h"
+#include "pathsurfaces.h"
+#include "spritemanager.h"
 #include "weaponholder.h"
 #include <list>
 
@@ -230,19 +231,31 @@ public:
     AnimationDrawn getDrawnAnim();
     void setDrawnAnim(AnimationDrawn drawn_anim);
 
-    typedef struct {
+    typedef struct linkdesc{
         // this junction
         junctionDesc j;
         // parent
-        void * p;
+        std::vector <linkdesc> ::iterator p;
+        // parent coord
+        toDefineXYZ pcoord;
+        // when there is another parent but with shorter distance
+        bool bad;
         // nodes number
         int n;
         // next type to search (surface/stairs junction)
         unsigned char nt;
     }linkDesc;
+    typedef struct {
+        junctionDesc j;
+        unsigned char atlevel;
+    }reachedDesc;
 
     double getDistance(int x1, int y1, int z1,
         int x2, int y2, int z2, Mission *m);
+    double calcDistance(unsigned char lvl, toDefineXYZ posxyz,
+        std::vector <linkDesc> ::iterator par);
+    void markNodes(unsigned char lvl, unsigned char clvl,
+         toDefineXYZ posxyz, std::vector <linkDesc> ** lvls);
     void setDestinationPNew(Mission *m, int x, int y, int z,
         int ox = 128, int oy = 128, int oz = 0, int new_speed = 160);
 
