@@ -645,7 +645,7 @@ void GameplayMenu::handleMouseDown(int x, int y, int button)
                                 oy = 63 + 128 * (i >> 1);
                             }
 
-                            mission_->ped(i)->setDestinationP(tx, ty, 0,
+                            mission_->ped(i)->setDestinationP(mission_, tx, ty, 0,
                                     ox, oy, 0, 320);
                         }
                     }

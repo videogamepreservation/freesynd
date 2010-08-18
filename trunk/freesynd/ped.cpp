@@ -171,7 +171,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                 if (mission->ped(i)->health() > 0
                         && inSightRange(mission->ped(i))) {
                     if (dest_path_.size() == 0)
-                        setDestinationP(mission->ped(i)->tileX(),
+                        setDestinationP(mission, mission->ped(i)->tileX(),
                                        mission->ped(i)->tileY(),
                                        mission->ped(i)->tileZ());
                     break;
@@ -224,7 +224,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
         else {
             if(health_ > 0) {
                 if(dest_path_.empty())
-                    setDestinationP(in_vehicle_->tileX(), in_vehicle_->tileY(), 0,
+                    setDestinationP(mission ,in_vehicle_->tileX(), in_vehicle_->tileY(), 0,
                         in_vehicle_->offX(), in_vehicle_->offY(), 0, 320);
                 else {
                     if(dest_path_.back().tileX() != in_vehicle_->tileX()
@@ -233,7 +233,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                         || dest_path_.back().offX() != in_vehicle_->offX()
                         || dest_path_.back().offY() != in_vehicle_->offY()
                         /*|| dest_path_.back().offZ() != in_vehicle_->offZ()*/)
-                        setDestinationP(in_vehicle_->tileX(), in_vehicle_->tileY(), 0,
+                        setDestinationP(mission ,in_vehicle_->tileX(), in_vehicle_->tileY(), 0,
                             in_vehicle_->offX(), in_vehicle_->offY(), 0, 320);
                 }
             }
@@ -287,7 +287,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
         else{
             if(health_ > 0) {
                 if(dest_path_.empty())
-                    setDestinationP(pickup_weapon_->tileX(), pickup_weapon_->tileY(), 0,
+                    setDestinationP(mission, pickup_weapon_->tileX(), pickup_weapon_->tileY(), 0,
                         pickup_weapon_->offX(), pickup_weapon_->offY(), 0, 320);
                 else {
                     if(dest_path_.back().tileX() != pickup_weapon_->tileX()
@@ -296,7 +296,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                         || dest_path_.back().offX() != pickup_weapon_->offX()
                         || dest_path_.back().offY() != pickup_weapon_->offY()
                         || dest_path_.back().offZ() != pickup_weapon_->offZ())
-                        setDestinationP(pickup_weapon_->tileX(), pickup_weapon_->tileY(), 0,
+                        setDestinationP(mission, pickup_weapon_->tileX(), pickup_weapon_->tileY(), 0,
                             pickup_weapon_->offX(), pickup_weapon_->offY(), 0, 320);
                 }
             }
@@ -893,15 +893,14 @@ double PedInstance::getDistance(int x1, int y1, int z1,
 double PedInstance::calcDistance(unsigned short lvl, toDefineXYZ posxyz,
              std::vector <linkDesc> ::iterator par) {
     double dist = 0;
-    lvl++;
     while(lvl != 0) {
-        lvl--;
         dist += getDistance(posxyz.x, posxyz.y, posxyz.z,
             par->j.x, par->j.y, par->j.z, NULL);
         posxyz.x = par->j.x;
         posxyz.y = par->j.y;
         posxyz.z = par->j.z;
         par = (std::vector <linkDesc> ::iterator)(par->p);
+        lvl--;
     }
     dist += getDistance(posxyz.x, posxyz.y, posxyz.z,
         tile_x_, tile_y_, tile_z_, NULL);
@@ -981,13 +980,14 @@ bool PedInstance::setLvlNode(std::vector <junctionDesc> * pjunctions,
                                 ladd.j = *stit;
                                 ladd.n = 0;
                                 ladd.nt = nt;
-                                if (lvlnum > 0)
+                                if (lvlnum > 0) {
                                     ladd.p = it;
-                                ladd.pcoord.x = it->j.x;
-                                ladd.pcoord.y = it->j.y;
-                                ladd.pcoord.z = it->j.z;
+                                    ladd.pcoord.x = it->j.x;
+                                    ladd.pcoord.y = it->j.y;
+                                    ladd.pcoord.z = it->j.z;
+                                    it->n++;
+                                }
                                 ladd.destr = setreached;
-                                it->n++;
                                 lvls[lvlnum]->push_back(ladd);
                             }
                             toadd = false;
@@ -1002,13 +1002,14 @@ bool PedInstance::setLvlNode(std::vector <junctionDesc> * pjunctions,
                 ladd.j = *stit;
                 ladd.n = 0;
                 ladd.nt = nt;
-                if (lvlnum > 0)
+                if (lvlnum > 0) {
                     ladd.p = it;
-                ladd.pcoord.x = it->j.x;
-                ladd.pcoord.y = it->j.y;
-                ladd.pcoord.z = it->j.z;
+                    ladd.pcoord.x = it->j.x;
+                    ladd.pcoord.y = it->j.y;
+                    ladd.pcoord.z = it->j.z;
+                    it->n++;
+                }
                 ladd.destr = setreached;
-                it->n++;
                 lvls[lvlnum]->push_back(ladd);
                 reachedDesc rd;
                 rd.atlevel = lvlnum;
@@ -1061,6 +1062,7 @@ void PedInstance::setDestinationPNew(Mission *m, int x, int y, int z,
     }
 
     do {
+        printf("lvl processed %i\n", lvlnum);
         if (lvls[lvlnum]->size() == 0)
             break;
 
@@ -1184,6 +1186,7 @@ void PedInstance::setDestinationPNew(Mission *m, int x, int y, int z,
     double dist = 0;
     double cmpdist;
     toDefineXYZ posxyz;
+    unsigned short clvl;
     do {
         parlvl = lvls[lvlnum];
         for (std::vector <linkDesc> ::iterator it = parlvl->begin();
@@ -1197,6 +1200,7 @@ void PedInstance::setDestinationPNew(Mission *m, int x, int y, int z,
                     dist = calcDistance (lvlnum, posxyz, it->p);
                     dist += getDistance (posxyz.x, posxyz.y, posxyz.z,
                         x, y, z, NULL);
+                    clvl = lvlnum;
                 } else {
                     posxyz.x = it->j.x;
                     posxyz.y = it->j.y;
@@ -1207,18 +1211,29 @@ void PedInstance::setDestinationPNew(Mission *m, int x, int y, int z,
                     if (cmpdist < dist) {
                         dist = cmpdist;
                         reachedit = it;
+                        clvl = lvlnum;
                     }
                 }
             }
         }
+        lvlnum--;
     } while(lvlnum != 0);
+    printf("dist %i\n", (unsigned int)dist);
+    if (dist != 0) {
+        clvl++;
+        do {
+            clvl--;
+            printf("x %i, y %i, z%i\n",reachedit->j.x, reachedit->j.y, reachedit->j.z);
+            reachedit = reachedit->p;
+        }while(clvl != 0);
+    }
 
     for (unsigned short i = 0; i < MAX_LVLS_PATH; i++) {
         lvls[i] = new std::vector <linkDesc>;
     }
 }
 
-void PedInstance::setDestinationP(int x, int y, int z, int ox,
+void PedInstance::setDestinationP(Mission *m, int x, int y, int z, int ox,
                                        int oy, int oz, int new_speed)
 {
     std::set < PathNode > open, closed;
@@ -1245,6 +1260,7 @@ void PedInstance::setDestinationP(int x, int y, int z, int ox,
         || !(walkable(x, y, z)))
         return;
 
+    //setDestinationPNew(m, x, y, z + 1, ox, oy, oz, new_speed);
     if (in_vehicle_) {
         if(in_vehicle_->tileX() != x
             || in_vehicle_->tileY() != y

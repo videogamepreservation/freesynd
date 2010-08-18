@@ -266,7 +266,7 @@ public:
     void setDestinationPNew(Mission *m, int x, int y, int z,
         int ox = 128, int oy = 128, int oz = 0, int new_speed = 160);
 
-    void setDestinationP(int x, int y, int z, int ox = 128, int oy = 128,
+    void setDestinationP(Mission *m, int x, int y, int z, int ox = 128, int oy = 128,
             int oz = 0, int new_speed = 160);
     bool movementP(int elapsed);
 
