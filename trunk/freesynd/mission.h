@@ -281,7 +281,7 @@ BC 68 00 00 F0 5B B0 27 00 01 06 00 00 00 03 00 81 05 E9 00 32 00 00 00 05 16 40
     std::vector<junctionDesc> strjunctions_;
 
     int mmax_x_, mmax_y_, mmax_z_;
-    int mmaxmult, multxy;
+    int mmax_m_all, mmax_m_xy;
 
   protected:
     LEVELDATA level_data_;
