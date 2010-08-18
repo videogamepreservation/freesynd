@@ -822,6 +822,7 @@ void PedInstance::dropAllWeapons() {
         weapons_.pop_back();
 
 }
+
 void PedInstance::pickupWeapon(WeaponInstance * w) {
     assert(w->map() == map());
 
@@ -911,24 +912,24 @@ void PedInstance::markBadNodes(unsigned short lvl, unsigned short clvl,
                             toDefineXYZ posxyz, std::vector <linkDesc> ** lvls) {
     std::vector <linkDesc> * curlvl = lvls[clvl];
     bool found = true;
-    while (curlvl != NULL && found) {
+    unsigned int fastxyz = posxyz.x | (posxyz.y << 8) | (posxyz.z << 16);
+    while (curlvl != 0 && found) {
         found = false;
         for (std::vector <linkDesc> ::iterator it = curlvl->begin();
             it != curlvl->end(); it++) {
-            if (!it->bad) {
-                if (it->pcoord.x == posxyz.x && it->pcoord.y == posxyz.y
-                    && it->pcoord.z == posxyz.z) {
-                    if (it->n != 0) {
-                        toDefineXYZ curxyz;
-                        curxyz.x = it->j.x;
-                        curxyz.y = it->j.y;
-                        curxyz.z = it->j.z;
-                        markBadNodes(lvl, clvl + 1, curxyz, lvls);
-                    }
-                    it->bad = true;
-                    it->destr = false;
-                    found = true;
+            if (it->j.fastxyz == fastxyz) {
+                if (it->n != 0) {
+                    toDefineXYZ curxyz;
+                    curxyz.x = it->j.x;
+                    curxyz.y = it->j.y;
+                    curxyz.z = it->j.z;
+                    fastxyz = posxyz.x | (posxyz.y << 8) | (posxyz.z << 16);
+                    markBadNodes(lvl, clvl + 1, curxyz, lvls);
                 }
+                it->bad = true;
+                it->destr = false;
+                it->j.fastxyz |= 0xFF000000;
+                found = true;
             }
         }
         clvl++;
@@ -950,8 +951,7 @@ bool PedInstance::setLvlNode(std::vector <junctionDesc> * pjunctions,
         if (stit->pj->id == id) {
             for (std::vector <reachedDesc> ::iterator stitr = preached->begin();
                 stitr != preached->end(); stitr++) {
-                if (stit->x == stitr->j.x && stit->y == stitr->j.y
-                    && stit->z == stitr->j.z) {
+                if (stit->fastxyz == stitr->j.fastxyz) {
                     toDefineXYZ curxyz;
                     curxyz.x = stit->x;
                     curxyz.y = stit->y;
@@ -962,17 +962,17 @@ bool PedInstance::setLvlNode(std::vector <junctionDesc> * pjunctions,
                     std::vector <linkDesc> ::iterator par;
                     for (std::vector <linkDesc> ::iterator getit = slvl->begin();
                         getit != slvl->end(); getit++) {
-                        if (getit->j.x == stit->x && getit->j.y == stit->y
-                            && getit->j.z == stit->z && !getit->bad) {
+                            if (getit->j.fastxyz == stit->fastxyz) {
                             par = (std::vector <linkDesc> ::iterator)(getit->p);
                             gdist = calcDistance (stitr->atlevel, curxyz, par);
                             if (gdist > dist) {
                                 getit->bad = true;
                                 gotbad = true;
+                                getit->j.fastxyz |= 0xFF000000;
                                 if (getit->destr)
                                     getit->destr = false;
                                 if (stitr->atlevel != lvlnum && getit->n != 0){
-                                    markBadNodes (lvlnum, stitr->atlevel, curxyz, lvls);
+                                    markBadNodes (lvlnum, stitr->atlevel + 1, curxyz, lvls);
                                 }
                                 linkDesc ladd;
                                 stitr->atlevel = lvlnum;
@@ -1025,10 +1025,14 @@ void PedInstance::setDestinationPNew(Mission *m, int x, int y, int z,
                                      int ox, int oy, int oz, int new_speed) {
     surfaceDesc *targetd = &(m->mtsurfaces_[x + y * m->mmax_x_ + z * m->mmax_m_xy]);
 
-    if(targetd->t == m_sdNonwalkable)
-        return;
+    //if(targetd->t == m_sdNonwalkable)
+        //return;
 
     surfaceDesc *based = &(m->mtsurfaces_[tile_x_ + tile_y_ * m->mmax_x_ + tile_z_ * m->mmax_m_xy]);
+    printf("base %i, bt %i, target %i, tt %i\n",based->id, based->t,targetd->id,targetd->t);
+    printf("btwd %i, ttwd %i\n",based->twd, targetd->twd);
+    if(targetd->t == m_sdNonwalkable)
+        return;
     unsigned short lvlnum = 0;
     bool found =  false;
     std::vector <linkDesc> * lvls[MAX_LVLS_PATH];

@@ -201,7 +201,7 @@ void Map::draw(int scrollX, int scrollY, MapHelper * helper)
                     h * TILE_WIDTH / 2;
                 int screen_h =
                     max_z_ * TILE_HEIGHT / 3 + (w + h) * TILE_HEIGHT / 3;
-                for (int z = 1; //  z = 0 - is minimap data
+                for (int z = 0; //  z = 0 - is minimap data and mapdata
                      pass == 0 ? z < 2 : (z < max_z_ && z < topz); z++) {
                     int tile = map_data_[idx * max_z_ + z];
                     int coord_h = screen_h - ((z - 1) * TILE_HEIGHT / 3);

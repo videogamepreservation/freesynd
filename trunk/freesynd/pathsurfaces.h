@@ -63,6 +63,7 @@
         int x;
         int y;
         int z;
+        unsigned int fastxyz;
     }junctionDesc;
 
 #endif
