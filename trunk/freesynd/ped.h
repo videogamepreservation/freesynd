@@ -250,19 +250,22 @@ public:
     typedef struct {
         junctionDesc j;
         unsigned short atlevel;
+        unsigned short atindex;
+        float dist;
     }reachedDesc;
 #define MAX_LVLS_PATH     32
 
-    double getDistance(int x1, int y1, int z1,
+    float getDistance(int x1, int y1, int z1,
         int x2, int y2, int z2, Mission *m);
-    double calcDistance(unsigned short lvl, toDefineXYZ posxyz,
+    float calcDistance(unsigned short lvl, int x, int y, int z,
         std::vector <linkDesc> ::iterator par);
     void markBadNodes(unsigned short lvl, unsigned short clvl,
-         toDefineXYZ posxyz, std::vector <linkDesc> ** lvls);
-    bool setLvlNode(std::vector <junctionDesc> * pjunctions,
+         int x, int y, int z, std::vector <linkDesc> ** lvls);
+    void setLvlNode(std::vector <junctionDesc> * pjunctions,
         std::vector <linkDesc> ::iterator it, std::vector <linkDesc> ** lvls,
         std::vector <reachedDesc> * preached, unsigned short lvlnum,
-        unsigned char nt, unsigned int id, bool setreached);
+        unsigned char nt, std::vector<junctionDesc> ::iterator itstart,
+        bool setreached);
     void setDestinationPNew(Mission *m, int x, int y, int z,
         int ox = 128, int oy = 128, int oz = 0, int new_speed = 160);
 
