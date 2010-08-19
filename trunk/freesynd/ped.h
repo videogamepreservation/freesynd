@@ -264,7 +264,7 @@ public:
     void setLvlNode(std::vector <junctionDesc> * pjunctions,
         std::vector <linkDesc> ::iterator it, std::vector <linkDesc> ** lvls,
         std::vector <reachedDesc> * preached, unsigned short lvlnum,
-        unsigned char nt, std::vector<junctionDesc> ::iterator itstart,
+        unsigned char nt, int itstart,
         bool setreached);
     void setDestinationPNew(Mission *m, int x, int y, int z,
         int ox = 128, int oy = 128, int oz = 0, int new_speed = 160);

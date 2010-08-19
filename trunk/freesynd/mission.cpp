@@ -1716,23 +1716,27 @@ bool Mission::setSurfaces() {
             }
         }
     }
-    sfcitstarts_.push_back(sfcjunctions_.begin());
+    sfcitstarts_.push_back(0);
     id_sf = 0;
+    int indx = 0;
     for (std::vector<junctionDesc> ::iterator it = sfcjunctions_.begin();
         it != sfcjunctions_.end(); it++) {
         if (id_sf != it->pj->id) {
-            sfcitstarts_.push_back(it);
+            sfcitstarts_.push_back(indx);
             id_sf = it->pj->id;
         }
+        indx++;
     }
-    stritstarts_.push_back(strjunctions_.begin());
+    stritstarts_.push_back(0);
     id_st = 0;
+    indx = 0;
     for (std::vector<junctionDesc> ::iterator it = strjunctions_.begin();
         it != strjunctions_.end(); it++) {
         if (id_st != it->pj->id) {
-            stritstarts_.push_back(it);
+            stritstarts_.push_back(indx);
             id_st = it->pj->id;
         }
+        indx++;
     }
     printf("surface junctions %i , stair junctions %i, surfaces %i, stairs %i\n",
         sfcjunctions_.size(), strjunctions_.size(), id_sf - 1, id_st - 1);

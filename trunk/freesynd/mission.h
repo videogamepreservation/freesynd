@@ -279,8 +279,8 @@ BC 68 00 00 F0 5B B0 27 00 01 06 00 00 00 03 00 81 05 E9 00 32 00 00 00 05 16 40
     std::vector<junctionDesc> sfcjunctions_;
     // all stairs junctions on map
     std::vector<junctionDesc> strjunctions_;
-    std::vector<std::vector<junctionDesc> ::iterator> sfcitstarts_;
-    std::vector<std::vector<junctionDesc> ::iterator> stritstarts_;
+    std::vector<int> sfcitstarts_;
+    std::vector<int> stritstarts_;
     int mmax_x_, mmax_y_, mmax_z_;
     int mmax_m_all, mmax_m_xy;
 
