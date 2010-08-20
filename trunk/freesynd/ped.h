@@ -261,16 +261,14 @@ public:
         std::vector <linkDesc> ::iterator par);
     void markBadNodes(unsigned short lvl, unsigned short clvl,
          int x, int y, int z, std::vector <linkDesc> ** lvls);
-    void setLvlNode(std::vector <junctionDesc> * pjunctions,
-        std::vector <linkDesc> ::iterator it, std::vector <linkDesc> ** lvls,
-        std::vector <reachedDesc> * preached, unsigned short lvlnum,
-        unsigned char nt, int itstart,
-        bool setreached);
+    void setLvlNode(std::vector <linkDesc> ::iterator it,
+        std::vector <linkDesc> ** lvls, std::vector <reachedDesc> * preached,
+        unsigned short lvlnum, unsigned char nt, int itstart, bool setreached);
     void setDestinationPNew(Mission *m, int x, int y, int z,
         int ox = 128, int oy = 128, int oz = 0, int new_speed = 160);
 
-    void setDestinationP(Mission *m, int x, int y, int z, int ox = 128, int oy = 128,
-            int oz = 0, int new_speed = 160);
+    void setDestinationP(Mission *m, int x, int y, int z, int ox = 128,
+        int oy = 128, int oz = 0, int new_speed = 160);
     bool movementP(int elapsed);
 
     int draw_timeout_;

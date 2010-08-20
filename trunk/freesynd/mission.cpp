@@ -1357,6 +1357,7 @@ bool Mission::setSurfaces() {
     }
 
     int id_sf = 1;
+    sfcitstarts_.push_back(-1);
     for (int iz = 0; iz < mmax_z_; iz++) {
         for (int iy = 0; iy < mmax_y_; iy++) {
             for (int ix = 0; ix < mmax_x_; ix++) {
@@ -1475,6 +1476,7 @@ bool Mission::setSurfaces() {
                             }
                         }
                     } while(vtodefine.size());
+                    sfcitstarts_.push_back(-1);
                     id_sf++;
                 }
             }
@@ -1482,6 +1484,7 @@ bool Mission::setSurfaces() {
     }
 
     int id_st = 1;
+    stritstarts_.push_back(-1);
     for (int iz = 0; iz < mmax_z_; iz++) {
         for (int iy = 0; iy < mmax_y_; iy++) {
             for (int ix = 0; ix < mmax_x_; ix++) {
@@ -1710,36 +1713,37 @@ bool Mission::setSurfaces() {
                                 break;
                         }
                     } while(vtodefine.size());
+                    stritstarts_.push_back(-1);
                     id_st++;
                 } else if (cst->t == m_sdNotdefined)
                     cst->t = m_sdNonwalkable;
             }
         }
     }
-    sfcitstarts_.push_back(0);
+    printf("surface junctions %i , stair junctions %i, surfaces %i, stairs %i\n",
+        sfcjunctions_.size(), strjunctions_.size(), id_sf - 1, id_st - 1);
     id_sf = 0;
     int indx = 0;
     for (std::vector<junctionDesc> ::iterator it = sfcjunctions_.begin();
         it != sfcjunctions_.end(); it++) {
         if (id_sf != it->pj->id) {
-            sfcitstarts_.push_back(indx);
             id_sf = it->pj->id;
+            sfcitstarts_[id_sf] = indx;
         }
         indx++;
     }
-    stritstarts_.push_back(0);
+    printf("surfaces %i, indx %i, sfc %i\n", id_sf, indx, sfcitstarts_.size());
     id_st = 0;
     indx = 0;
     for (std::vector<junctionDesc> ::iterator it = strjunctions_.begin();
         it != strjunctions_.end(); it++) {
         if (id_st != it->pj->id) {
-            stritstarts_.push_back(indx);
             id_st = it->pj->id;
+            stritstarts_[id_st] = indx;
         }
         indx++;
     }
-    printf("surface junctions %i , stair junctions %i, surfaces %i, stairs %i\n",
-        sfcjunctions_.size(), strjunctions_.size(), id_sf - 1, id_st - 1);
+    printf("stairs %i, indx %i, sfc %i\n", id_st, indx, stritstarts_.size());
     return true;
 }
 
