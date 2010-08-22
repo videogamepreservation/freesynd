@@ -457,7 +457,6 @@ void App::run() {
         menus_.handleTick(curtick - lasttick);
         lasttick = curtick;
         system_->updateScreen();
-        system_->delay(1);
     }
 
 #ifdef GP2X

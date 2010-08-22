@@ -253,6 +253,7 @@ public:
         unsigned short atindex;
         float dist;
     }reachedDesc;
+
 #define MAX_LVLS_PATH     32
 
     float getDistance(int x1, int y1, int z1,

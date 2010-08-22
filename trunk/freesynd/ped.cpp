@@ -1009,8 +1009,7 @@ void PedInstance::setLvlNode(std::vector <linkDesc> ::iterator it,
             }
         } else
             break;
-        itstart++;
-    } while(itstart < sz);
+    } while((++itstart) < sz);
 }
 
 void PedInstance::setDestinationPNew(Mission *m, int x, int y, int z,
@@ -1045,6 +1044,7 @@ void PedInstance::setDestinationPNew(Mission *m, int x, int y, int z,
         rd.dist = 0;
         sfcreached.push_back(rd);
     }
+
     std::vector <reachedDesc> strreached;
     for (std::vector <junctionDesc> ::iterator itfill = m->strjunctions_.begin();
         itfill != m->strjunctions_.end(); itfill++) {
@@ -1055,7 +1055,8 @@ void PedInstance::setDestinationPNew(Mission *m, int x, int y, int z,
         rd.dist = 0;
         strreached.push_back(rd);
     }
-    std::vector <linkDesc> fornull;
+
+    std::vector <linkDesc> tofill;
     unsigned char targettype = targetd->t & (m_sdStairs | m_sdSurface);
     bool isreached = targetd->id == based->id
         && targettype == (based->t & (m_sdStairs | m_sdSurface));
@@ -1064,31 +1065,36 @@ void PedInstance::setDestinationPNew(Mission *m, int x, int y, int z,
         case (m_sdStairs | m_sdJunction):
         case m_sdStairs:
             // iterator here does nothing, as there is no NULL iterator
-            setLvlNode(fornull.end(), lvls, &strreached,
+            setLvlNode(tofill.end(), lvls, &strreached,
                 lvlnum, m_sdSurface, m->stritstarts_[based->id], isreached);
             break;
         case (m_sdSurface | m_sdJunction):
         case m_sdSurface:
             // iterator here does nothing, as there is no NULL iterator
-            setLvlNode(fornull.end(), lvls, &sfcreached,
+            setLvlNode(tofill.end(), lvls, &sfcreached,
                 lvlnum, m_sdStairs, m->sfcitstarts_[based->id], isreached);
             break;
     }
     printf("stime %i\n", SDL_GetTicks()%1000);
-
-    do {
+    // this variable limits finding best possible, but increases speed
+    bool destr = false;
+//~~~~~~~~~~~~~~~~~~~~~~~~~~
+checkloop___label:
+//~~~~~~~~~~~~~~~~~~~~~~~~~~
+    {
         printf("lvl processed %i, time %i, nodes %i\n", lvlnum,
             SDL_GetTicks()%1000, lvls[lvlnum]->size());
-        if (lvls[lvlnum]->size() == 0)
-            break;
+        if (lvls[lvlnum]->size() == 0 || destr)
+            goto exitloop___label;
 
         if (lvlnum > (MAX_LVLS_PATH - 2))
-            break;
+            goto exitloop___label;
 
         parlvl = lvls[lvlnum];
         lvlnum++;
+        std::vector <linkDesc> ::iterator itend = parlvl->end();
         for (std::vector <linkDesc> ::iterator it = parlvl->begin();
-            it != parlvl->end(); it++) {
+            it != itend; it++) {
             if (!it->bad && !it->destr) {
                 if (it->nt == m_sdStairs) {
 
@@ -1099,15 +1105,16 @@ void PedInstance::setDestinationPNew(Mission *m, int x, int y, int z,
                     int ym = y - m->mmax_x_;
                     int xp = x + 1;
                     int yp = y + m->mmax_x_;
-                    int zp = z + m->mmax_m_xy;
                     surfaceDesc * csf = it->j.pj;
                     if (csf->idjh != 0) {
+                        int zp = z + m->mmax_m_xy;
                         if ( (csf->idjh & 0x000000FF) == 0x000000F0) {
                             isreached = targetd->id == m->mtsurfaces_[x + yp + zp].id
                                 && targettype == m_sdStairs;
                             setLvlNode(it, lvls, &strreached, lvlnum, m_sdSurface,
                                 m->stritstarts_[m->mtsurfaces_[x + yp + zp].id],
                                 isreached);
+                            destr = destr || isreached;
                         }
                         if ( (csf->idjh & 0x0000F200) == 0x0000F200) {
                             isreached = targetd->id == m->mtsurfaces_[xp + y + zp].id
@@ -1115,6 +1122,7 @@ void PedInstance::setDestinationPNew(Mission *m, int x, int y, int z,
                             setLvlNode(it, lvls, &strreached, lvlnum, m_sdSurface,
                                 m->stritstarts_[m->mtsurfaces_[xp + y + zp].id],
                                 isreached);
+                            destr = destr || isreached;
                         }
                         if ( (csf->idjh & 0x00F40000) == 0x00F40000) {
                             isreached = targetd->id == m->mtsurfaces_[x + ym + zp].id
@@ -1122,6 +1130,7 @@ void PedInstance::setDestinationPNew(Mission *m, int x, int y, int z,
                             setLvlNode(it, lvls, &strreached, lvlnum, m_sdSurface,
                                 m->stritstarts_[m->mtsurfaces_[x + ym + zp].id],
                                 isreached);
+                            destr = destr || isreached;
                         }
                         if ( (csf->idjh & 0xF6000000) == 0xF6000000) {
                             isreached = targetd->id == m->mtsurfaces_[xm + y + zp].id
@@ -1129,6 +1138,7 @@ void PedInstance::setDestinationPNew(Mission *m, int x, int y, int z,
                             setLvlNode(it, lvls, &strreached, lvlnum, m_sdSurface,
                                 m->stritstarts_[m->mtsurfaces_[xm + y + zp].id],
                                 isreached);
+                            destr = destr || isreached;
                         }
                     }
                     if (csf->idjl != 0) {
@@ -1138,6 +1148,7 @@ void PedInstance::setDestinationPNew(Mission *m, int x, int y, int z,
                             setLvlNode(it, lvls, &strreached, lvlnum, m_sdSurface, 
                                 m->stritstarts_[m->mtsurfaces_[x + yp + z].id],
                                 isreached);
+                            destr = destr || isreached;
                         }
                         if ( (csf->idjl & 0x0000F200) == 0x0000F200) {
                             isreached = targetd->id == m->mtsurfaces_[xp + y + z].id
@@ -1145,6 +1156,7 @@ void PedInstance::setDestinationPNew(Mission *m, int x, int y, int z,
                             setLvlNode(it, lvls, &strreached, lvlnum, m_sdSurface,
                                 m->stritstarts_[m->mtsurfaces_[xp + y + z].id],
                                 isreached);
+                            destr = destr || isreached;
                         }
                         if ( (csf->idjl & 0x00F40000) == 0x00F40000) {
                             isreached = targetd->id == m->mtsurfaces_[x + ym + z].id
@@ -1152,6 +1164,7 @@ void PedInstance::setDestinationPNew(Mission *m, int x, int y, int z,
                             setLvlNode(it, lvls, &strreached, lvlnum, m_sdSurface,
                                 m->stritstarts_[m->mtsurfaces_[x + ym + z].id],
                                 isreached);
+                            destr = destr || isreached;
                         }
                         if ( (csf->idjl & 0xF6000000) == 0xF6000000) {
                             isreached = targetd->id == m->mtsurfaces_[xm + y + z].id
@@ -1159,6 +1172,7 @@ void PedInstance::setDestinationPNew(Mission *m, int x, int y, int z,
                             setLvlNode(it, lvls, &strreached, lvlnum, m_sdSurface,
                                 m->stritstarts_[m->mtsurfaces_[xm + y + z].id],
                                 isreached);
+                            destr = destr || isreached;
                         }
                     }
                 } else if(it->nt == m_sdSurface) {
@@ -1168,6 +1182,7 @@ void PedInstance::setDestinationPNew(Mission *m, int x, int y, int z,
                         setLvlNode(it, lvls, &sfcreached, lvlnum, m_sdStairs,
                             m->sfcitstarts_[it->j.pj->idjh],
                             isreached);
+                        destr = destr || isreached;
                     }
                     if (it->j.pj->idjl != 0) {
                         isreached = targetd->id == it->j.pj->idjl
@@ -1175,12 +1190,15 @@ void PedInstance::setDestinationPNew(Mission *m, int x, int y, int z,
                         setLvlNode(it, lvls, &sfcreached, lvlnum, m_sdStairs,
                             m->sfcitstarts_[it->j.pj->idjl],
                             isreached);
+                        destr = destr || isreached;
                     }
                 }
             }
         }
-    }while(1);
-
+    }goto checkloop___label;
+//~~~~~~~~~~~~~~~~~~~~~~~~~~
+exitloop___label:
+//~~~~~~~~~~~~~~~~~~~~~~~~~~
     strreached.clear();
     sfcreached.clear();
     if (lvls[0]->size() == 0) {
@@ -1193,7 +1211,7 @@ void PedInstance::setDestinationPNew(Mission *m, int x, int y, int z,
     printf("time %i\n", SDL_GetTicks()%1000);
     
     std::vector <linkDesc> ::iterator reachedit;
-    float dist = 0;
+    float dist = -1;
     float cmpdist;
     unsigned short clvl;
     do {
@@ -1201,7 +1219,7 @@ void PedInstance::setDestinationPNew(Mission *m, int x, int y, int z,
         for (std::vector <linkDesc> ::iterator it = parlvl->begin();
             it != parlvl->end(); it++) {
             if (it->destr && !it->bad) {
-                if (dist == 0) {
+                if (dist == -1) {
                     reachedit = it;
                     dist = calcDistance (lvlnum, it->j.x,
                         it->j.y, it->j.z, it->p);
@@ -1223,19 +1241,270 @@ void PedInstance::setDestinationPNew(Mission *m, int x, int y, int z,
         }
         lvlnum--;
     } while(lvlnum != 0);
-    printf("etime %i\n", SDL_GetTicks()%1000);
+    printf("best dest %i\n", SDL_GetTicks()%1000);
     printf("dist %i\n", (unsigned int)dist);
     
-    
-    if (dist != 0) {
+    if (dist != -1) {
         clvl++;
         do {
             clvl--;
             printf("x %i, y %i, z%i\n",reachedit->j.x, reachedit->j.y, reachedit->j.z);
+            tofill.push_back(*reachedit);
             reachedit = reachedit->p;
         }while(clvl != 0);
+    } else {
+        for (unsigned short i = 0; i < MAX_LVLS_PATH; i++) {
+            delete lvls[i];
+        }
+        return;
     }
-    
+
+    std::list <junctionDesc> prmj;
+    for (std::vector <linkDesc>::iterator it = tofill.begin();
+        it != tofill.end(); it++) {
+        unsigned int ids = 0;
+        unsigned char ts = 0;
+        junctionDesc toadd;
+
+        std::vector <linkDesc>::iterator fit = it + 1;
+        if (it->j.pj->t == (m_sdSurface | m_sdJunction)) {
+            prmj.push_front(it->j);
+            if (fit == tofill.end()) {
+                break;
+            } else {
+                ids = fit->j.pj->id;
+                ts = fit->j.pj->t;
+                int x = it->j.x;
+                int y = it->j.y * m->mmax_x_;
+                int z = it->j.z * m->mmax_m_xy;
+                int xm = x - 1;
+                int ym = y - m->mmax_x_;
+                int xp = x + 1;
+                int yp = y + m->mmax_x_;
+                surfaceDesc * csf = it->j.pj;
+                if (csf->idjh != 0) {
+                    int zp = z + m->mmax_m_xy;
+                    if ( (csf->idjh & 0x000000FF) == 0x000000F0) {
+                        if (m->mtsurfaces_[x + yp + zp].id == ids) {
+                            toadd.x = it->j.x;
+                            toadd.y = it->j.y + 1;
+                            toadd.z = it->j.z + 1;
+                            if (fit->j.x != toadd.x && fit->j.y != toadd.y
+                                && fit->j.z != toadd.z) {
+                                toadd.pj = &(m->mtsurfaces_[x + yp + zp]);
+                                toadd.fastxyz = toadd.x
+                                    | (toadd.y << 8) | (toadd.z << 16);
+                                prmj.push_front(toadd);
+                                continue;
+                            }
+                        }
+                    }
+                    if ( (csf->idjh & 0x0000F200) == 0x0000F200) {
+                        if (m->mtsurfaces_[xp + y + zp].id == ids) {
+                            toadd.x = it->j.x + 1;
+                            toadd.y = it->j.y;
+                            toadd.z = it->j.z + 1;
+                            if (fit->j.x != toadd.x || fit->j.y != toadd.y
+                                || fit->j.z != toadd.z) {
+                                toadd.pj = &(m->mtsurfaces_[xp + y + zp]);
+                                toadd.fastxyz = toadd.x
+                                    | (toadd.y << 8) | (toadd.z << 16);
+                                prmj.push_front(toadd);
+                                continue;
+                            }
+                        }
+                    }
+                    if ( (csf->idjh & 0x00F40000) == 0x00F40000) {
+                        if (m->mtsurfaces_[x + ym + zp].id == ids) {
+                            toadd.x = it->j.x;
+                            toadd.y = it->j.y - 1;
+                            toadd.z = it->j.z + 1;
+                            if (fit->j.x !=  toadd.x || fit->j.y !=  toadd.y
+                                || fit->j.z !=  toadd.z) {
+                                toadd.pj = &(m->mtsurfaces_[x + ym + zp]);
+                                toadd.fastxyz =  toadd.x
+                                    | ( toadd.y << 8) | ( toadd.z << 16);
+                                prmj.push_front(toadd);
+                                continue;
+                            }
+                        }
+                    }
+                    if ( (csf->idjh & 0xF6000000) == 0xF6000000) {
+                        if (m->mtsurfaces_[xm + y + zp].id == ids) {
+                            toadd.x = it->j.x - 1;
+                            toadd.y = it->j.y;
+                            toadd.z = it->j.z + 1;
+                            if (fit->j.x != toadd.x || fit->j.y != toadd.y
+                                || fit->j.z != toadd.z) {
+                                toadd.pj = &(m->mtsurfaces_[xm + y + zp]);
+                                toadd.fastxyz = toadd.x
+                                    | (toadd.y << 8) | (toadd.z << 16);
+                                prmj.push_front(toadd);
+                                continue;
+                            }
+                        }
+                    }
+                }
+                if (csf->idjl != 0) {
+                    if ( (csf->idjl & 0x000000FF) == 0x000000F0) {
+                        if (m->mtsurfaces_[x + yp + z].id == ids) {
+                            toadd.x = it->j.x;
+                            toadd.y = it->j.y + 1;
+                            toadd.z = it->j.z;
+                            if (fit->j.x != toadd.x || fit->j.y != toadd.y
+                                || fit->j.z != toadd.z) {
+                                toadd.pj = &(m->mtsurfaces_[x + yp + z]);
+                                toadd.fastxyz = toadd.x
+                                    | (toadd.y << 8) | (toadd.z << 16);
+                                prmj.push_front(toadd);
+                                continue;
+                            }
+                        }
+                    }
+                    if ( (csf->idjl & 0x0000F200) == 0x0000F200) {
+                        if (m->mtsurfaces_[xp + y + z].id == ids) {
+                            toadd.x = it->j.x + 1;
+                            toadd.y = it->j.y;
+                            toadd.z = it->j.z;
+                            if (fit->j.x != toadd.x || fit->j.y != toadd.y
+                                || fit->j.z != toadd.z) {
+                                toadd.pj = &(m->mtsurfaces_[xp + y + z]);
+                                toadd.fastxyz = toadd.x
+                                    | (toadd.y << 8) | (toadd.z << 16);
+                                prmj.push_front(toadd);
+                                continue;
+                            }
+                        }
+                    }
+                    if ( (csf->idjl & 0x00F40000) == 0x00F40000) {
+                        if (m->mtsurfaces_[x + ym + z].id == ids) {
+                            toadd.x = it->j.x;
+                            toadd.y = it->j.y - 1;
+                            toadd.z = it->j.z;
+                            if (fit->j.x !=  toadd.x || fit->j.y !=  toadd.y
+                                || fit->j.z !=  toadd.z) {
+                                toadd.pj = &(m->mtsurfaces_[x + ym + z]);
+                                toadd.fastxyz =  toadd.x
+                                    | ( toadd.y << 8) | ( toadd.z << 16);
+                                prmj.push_front(toadd);
+                                continue;
+                            }
+                        }
+                    }
+                    if ( (csf->idjl & 0xF6000000) == 0xF6000000) {
+                        if (m->mtsurfaces_[xm + y + z].id == ids) {
+                            toadd.x = it->j.x - 1;
+                            toadd.y = it->j.y;
+                            toadd.z = it->j.z;
+                            if (fit->j.x != toadd.x || fit->j.y != toadd.y
+                                || fit->j.z != toadd.z) {
+                                toadd.pj = &(m->mtsurfaces_[xm + y + z]);
+                                toadd.fastxyz = toadd.x
+                                    | (toadd.y << 8) | (toadd.z << 16);
+                                prmj.push_front(toadd);
+                            }
+                        }
+                    }
+                }
+            }
+        } else if (it->j.pj->t == (m_sdStairs | m_sdJunction)) {
+            prmj.push_front(it->j);
+            if (fit == tofill.end()) {
+                break;
+            } else {
+                ids = fit->j.pj->id;
+                ts = fit->j.pj->t;
+                int xl = -1;
+                int yl = -1;
+                int zl = -1;
+                int xh = -1;
+                int yh = -1;
+                int zh = -1;
+                switch (it->j.pj->twd) {
+                    case 0x01:
+                        if (it->j.pj->idjl == ids) {
+                            xl = it->j.x;
+                            yl = it->j.y + 1;
+                            zl = it->j.z - 1;
+                        }
+                        if (it->j.pj->idjh == ids) {
+                            xh = it->j.x;
+                            yh = it->j.y - 1;
+                            zh = it->j.z;
+                        }
+                        break;
+                    case 0x02:
+                        if (it->j.pj->idjl == ids) {
+                            xl = it->j.x;
+                            yl = it->j.y - 1;
+                            zl = it->j.z - 1;
+                        }
+                        if (it->j.pj->idjh == ids) {
+                            xh = it->j.x;
+                            yh = it->j.y + 1;
+                            zh = it->j.z;
+                        }
+                        break;
+                    case 0x03:
+                        if (it->j.pj->idjl == ids) {
+                            xl = it->j.x - 1;
+                            yl = it->j.y;
+                            zl = it->j.z - 1;
+                        }
+                        if (it->j.pj->idjh == ids) {
+                            xh = it->j.x + 1;
+                            yh = it->j.y;
+                            zh = it->j.z;
+                        }
+                        break;
+                    case 0x04:
+                        if (it->j.pj->idjl == ids) {
+                            xl = it->j.x + 1;
+                            yl = it->j.y;
+                            zl = it->j.z - 1;
+                        }
+                        if (it->j.pj->idjh == ids) {
+                            xh = it->j.x - 1;
+                            yh = it->j.y;
+                            zh = it->j.z;
+                        }
+                        break;
+                }
+                if (xl != -1) {
+                    int y = yl * m->mmax_x_;
+                    int z = zl * m->mmax_m_xy;
+                    if (fit->j.x != xl || fit->j.y != yl
+                        || fit->j.z != zl) {
+                        toadd.x = xl;
+                        toadd.y = yl;
+                        toadd.z = zl;
+                        toadd.pj = &(m->mtsurfaces_[xl + y + z]);
+                        toadd.fastxyz = xl | (yl << 8) | (zl << 16);
+                        prmj.push_front(toadd);
+                        continue;
+                    }
+                }
+                if (xh != -1) {
+                    int y = yl * m->mmax_x_;
+                    int z = zl * m->mmax_m_xy;
+                    if (fit->j.x != xh || fit->j.y != yh
+                        || fit->j.z != zh) {
+                        toadd.x = xh;
+                        toadd.y = yh;
+                        toadd.z = zh;
+                        toadd.pj = &(m->mtsurfaces_[xh + y + z]);
+                        toadd.fastxyz = xh | (yh << 8) | (zh << 16);
+                        prmj.push_front(toadd);
+                    }
+                }
+            }
+        }
+    }
+    for (std::list <junctionDesc>::iterator it = prmj.begin();
+        it != prmj.end();it++) {
+            printf("^^^ t %i, x %i, y %i, z %i ^^^\n",it->pj->t, it->x, it->y, it->z);
+    }
+    printf("linked in %i\n", SDL_GetTicks()%1000);
 
     for (unsigned short i = 0; i < MAX_LVLS_PATH; i++) {
         delete lvls[i];
@@ -1265,11 +1534,11 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z, int ox,
     printf("x : %i; y : %i; z : %i = = ox :%i, oy :%i, oz :%i\n",
         x, y, z, ox, oy, oz);
 
+    //setDestinationPNew(m, x, y, z + 1, ox, oy, oz, new_speed);
     if (map_ == -1 || health_ <= 0
         || !(walkable(x, y, z)))
         return;
 
-    //setDestinationPNew(m, x, y, z + 1, ox, oy, oz, new_speed);
     return;
     if (in_vehicle_) {
         if(in_vehicle_->tileX() != x

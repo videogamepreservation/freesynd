@@ -29,8 +29,8 @@
 #include "briefmenu.h"
 #include "loadingmenu.h"
 
-LoadingMenu::LoadingMenu(MenuManager * m, BriefMenu * brief):Menu(m, "loading", "", ""), brief_(brief), tick_count_(0),
-mission_(0)
+LoadingMenu::LoadingMenu(MenuManager * m, BriefMenu * brief):Menu(m, "loading", "", ""),
+brief_(brief), tick_count_(-500), mission_(0)
 {
     addStatic(180, 180, "LOADING GAME", 3, false);
 
@@ -40,14 +40,14 @@ mission_(0)
 void LoadingMenu::handleTick(int elapsed)
 {
     tick_count_ += elapsed;
-    if (tick_count_ > 100) {
+    if (tick_count_ >= 100) {
         if (!g_App.gameSprites().loaded())
             g_App.gameSprites().load();
         mission_ = brief_->mission();
         mission_->loadMap();// TODO : move this to briefmenu
         mission_->setSurfaces();
         menu_manager_->changeCurrentMenu("Gameplay");
-        tick_count_ = 0;
+        tick_count_ = -500;
     }
     assert(tick_count_ < 100);
 }

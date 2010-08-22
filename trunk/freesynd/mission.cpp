@@ -1392,6 +1392,7 @@ bool Mission::setSurfaces() {
                             jsf.y = y / mmax_x_;
                             jsf.z = z / mmax_m_xy;
                             jsf.fastxyz = jsf.x | (jsf.y << 8) | (jsf.z << 16);
+                            csf->indx = sfcjunctions_.size();
                             sfcjunctions_.push_back(jsf);
                             if (csf->idjh != 0) {
                                 if ( (csf->idjh & 0x000000FF) == 0x000000F0) {
@@ -1519,6 +1520,7 @@ bool Mission::setSurfaces() {
                             jst.x = x;
                             jst.y = y / mmax_x_;
                             jst.z = z / mmax_m_xy;
+                            cst->indx = strjunctions_.size();
                             strjunctions_.push_back(jst);
                             jst.fastxyz = jst.x | (jst.y << 8) | (jst.z << 16);
                             //printf("x %i y %i z %i\n", x, y/mmax_x_, z/mmax_m_xy);

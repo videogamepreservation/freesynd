@@ -356,7 +356,7 @@ void GameplayMenu::handleShow()
 
     g_Screen.clear(0);
     mission_->drawMap(world_x_, world_y_);
-    g_Screen.drawRect(0,0, 129,(GAME_SCREEN_HEIGHT - 1));
+    g_Screen.drawRect(0,0, 129, GAME_SCREEN_HEIGHT);
     drawAgentSelectors();
     drawPerformanceMeters();
     drawSelectAllButton();

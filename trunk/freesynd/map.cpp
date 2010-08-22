@@ -83,8 +83,8 @@ int Map::tileToScreenX(int x, int y, int z, int pX, int pY)
 {
     float fx = x + pX / scalexPx;
     float fy = y + pY / scalexPy;
-    return (int) (map_width_ / 2 + fx * TILE_WIDTH / 2 -
-                  fy * TILE_WIDTH / 2) + TILE_WIDTH / 2;
+    return (int) (map_width_ / 2 + (fx - fy) * TILE_WIDTH / 2
+                  + TILE_WIDTH / 2);
 }
 
 int Map::tileToScreenY(int x, int y, int z, int pX, int pY)

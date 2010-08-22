@@ -43,6 +43,8 @@
         unsigned int idjh;
         // tile walkable data from g_App.walkable_[]
         unsigned char twd;
+        // index of junction inside its vector
+        unsigned int indx;
     }surfaceDesc;
 
     #define m_sdNotdefined      0
