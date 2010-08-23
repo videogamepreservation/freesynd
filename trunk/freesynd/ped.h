@@ -265,6 +265,8 @@ public:
     void setLvlNode(std::vector <linkDesc> ::iterator it,
         std::vector <linkDesc> ** lvls, std::vector <reachedDesc> * preached,
         unsigned short lvlnum, unsigned char nt, int itstart, bool setreached);
+    void getPathAtSurfaceP(Mission *m, int x, int y, int z, int ox = 128,
+        int oy = 128, int oz = 0);
     void setDestinationPNew(Mission *m, int x, int y, int z,
         int ox = 128, int oy = 128, int oz = 0, int new_speed = 160);
 

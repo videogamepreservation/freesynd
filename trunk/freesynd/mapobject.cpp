@@ -139,7 +139,7 @@ bool ShootableMovableMapObject::updatePlacement(int nOffX, int nOffY)
     }
 
     Map *m = g_App.maps().map(map());
-
+/*
     if (!walkable(tile_x_, tile_y_, tile_z_)
         && m->stairsAt(oTileX, oTileY, tile_z_ + 1)) {
         tile_z_++;
@@ -167,7 +167,7 @@ bool ShootableMovableMapObject::updatePlacement(int nOffX, int nOffY)
     if (m->stairsAt(tile_x_, tile_y_, tile_z_ + 1)) {
         //off_z_ = -off_x_;
     }
-
+*/
     return true;
 }
 

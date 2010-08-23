@@ -1014,9 +1014,12 @@ void PedInstance::setLvlNode(std::vector <linkDesc> ::iterator it,
 
 void PedInstance::setDestinationPNew(Mission *m, int x, int y, int z,
                                      int ox, int oy, int oz, int new_speed) {
+    dest_path_.clear();
+    setSpeed(0);
+
     surfaceDesc *targetd = &(m->mtsurfaces_[x + y * m->mmax_x_ + z * m->mmax_m_xy]);
 
-    //if(targetd->t == m_sdNonwalkable)
+    //if(targetd->t == m_sdNonwalkable || map_ == -1 || health_ <= 0)
         //return;
 
     surfaceDesc *based = &(m->mtsurfaces_[tile_x_ + tile_y_ * m->mmax_x_ + tile_z_ * m->mmax_m_xy]);
@@ -1025,8 +1028,40 @@ void PedInstance::setDestinationPNew(Mission *m, int x, int y, int z,
 
     printf("base pos: x %i; y %i; z %i, ox %i, oy %i, oz %i\n",
         tile_x_, tile_y_, tile_z_, off_x_, off_y_, off_z_);
-    if(targetd->t == m_sdNonwalkable)
+    if(targetd->t == m_sdNonwalkable || map_ == -1 || health_ <= 0)
         return;
+    if(based->t == m_sdNonwalkable) {
+        printf("Movement from nonwalkable postion\n");
+        return;
+    }
+
+    if (in_vehicle_) {
+        if(in_vehicle_->tileX() != x
+            || in_vehicle_->tileY() != y
+            || in_vehicle_->tileZ() != z
+            || in_vehicle_->offX() != ox
+            || in_vehicle_->offY() != oy
+            || in_vehicle_->offZ() != oz)
+        in_vehicle_ = 0;
+    }
+    if (pickup_weapon_) {
+        if(pickup_weapon_->tileX() != x
+            || pickup_weapon_->tileY() != y
+            || pickup_weapon_->tileZ() != z
+            || pickup_weapon_->offX() != ox
+            || pickup_weapon_->offY() != oy
+            || pickup_weapon_->offZ() != oz)
+        pickup_weapon_ = 0;
+    }
+
+    if ((based->t & m_sdSurface) == m_sdSurface
+        && (targetd->t & m_sdSurface) == m_sdSurface)
+        if (targetd->id == based->id) {
+            getPathAtSurfaceP(m, x, y, z, ox, oy, oz);
+            speed_ = new_speed;
+            return;
+        }
+    return;
     unsigned short lvlnum = 0;
 
     std::vector <linkDesc> * lvls[MAX_LVLS_PATH];
@@ -1508,59 +1543,135 @@ exitloop___label:
     }
     printf("linked in %i\n", SDL_GetTicks()%1000);
 
+    speed_ = new_speed;
     for (unsigned short i = 0; i < MAX_LVLS_PATH; i++) {
         delete lvls[i];
     }
 }
 
-void PedInstance::setDestinationP(Mission *m, int x, int y, int z, int ox,
-                                       int oy, int oz, int new_speed)
+
+void PedInstance::getPathAtSurfaceP(Mission *m, int x, int y, int z, int ox,
+                                       int oy, int oz)
 {
     std::set < PathNode > open, closed;
     std::map < PathNode, PathNode > parent;
 
-    z = tile_z_;
+    PathNode closest;
+    float closest_dist = 100000;
 
-    dest_path_.clear();
-    setSpeed(0);
+    open.insert(PathNode(tile_x_, tile_y_, tile_z_, off_x_, off_y_,off_z_));
+    int watchDog = 2000;
+    while (!open.empty()) {
+        watchDog--;
+        float dist = 100000;
+        PathNode p;
+        std::set < PathNode >::iterator pit;
+        for (std::set < PathNode >::iterator it = open.begin();
+             it != open.end(); it++) {
+            float d =
+                sqrt((float) (x - it->tileX()) * (x - it->tileX()) +
+                     (y - it->tileY()) * (y - it->tileY()));
+            if (d < dist) {
+                dist = d;
+                p = *it;
+                pit = it;       // it cannot be const_iterator because of this assign
+            }
+        }
+        if (dist < closest_dist) {
+            closest = p;
+            closest_dist = dist;
+        }
+        //printf("found best dist %f in %i nodes\n", dist, open.size());
+        open.erase(pit);
+        closed.insert(p);
+
+        if ((p.tileX() == x && p.tileY() == y && p.tileZ() == z)
+            || watchDog < 0) {
+            if (watchDog < 0) {
+                p = closest;
+                dest_path_.
+                    push_front(PathNode
+                               (p.tileX(), p.tileY(), p.tileZ(), ox, oy, oz));
+            } else
+                dest_path_.push_front(PathNode(x, y, z, ox, oy, oz));
+            while (parent.find(p) != parent.end()) {
+                p = parent[p];
+                if (p.tileX() == tile_x_ && p.tileY() == tile_y_
+                    && p.tileZ() == tile_z_)
+                    break;
+                dest_path_.push_front(p);
+            }
+            break;
+        }
+
+        std::list < PathNode > neighbours;
+        surfaceDesc *csf = &(m->mtsurfaces_[p.tileX() + p.tileY() * m->mmax_x_
+            + p.tileZ() * m->mmax_m_xy]);
+
+        if ((csf->dir & 0x0000000F) == 0x00000000)
+            neighbours.push_back(PathNode (p.tileX(), p.tileY() + 1,
+                   p.tileZ()));
+        if ((csf->dir & 0x00000010) == 0x00000010)
+            neighbours.push_back(PathNode (p.tileX() + 1, p.tileY() + 1,
+                   p.tileZ()));
+        if ((csf->dir & 0x00000200) == 0x00000200)
+            neighbours.push_back(PathNode (p.tileX() + 1, p.tileY(),
+                   p.tileZ()));
+        if ((csf->dir & 0x00003000) == 0x00003000)
+            neighbours.push_back(PathNode (p.tileX() + 1, p.tileY() - 1,
+                   p.tileZ()));
+        if ((csf->dir & 0x00040000) == 0x00040000)
+            neighbours.push_back(PathNode (p.tileX(), p.tileY() - 1,
+                   p.tileZ()));
+        if ((csf->dir & 0x00500000) == 0x00500000)
+            neighbours.push_back(PathNode (p.tileX() - 1, p.tileY() - 1,
+                   p.tileZ()));
+        if ((csf->dir & 0x06000000) == 0x06000000)
+            neighbours.push_back(PathNode (p.tileX() - 1, p.tileY(),
+                   p.tileZ()));
+        if ((csf->dir & 0x70000000) == 0x70000000)
+            neighbours.push_back(PathNode (p.tileX() - 1, p.tileY() + 1,
+                   p.tileZ()));
+
+
+        for (std::list < PathNode >::iterator it = neighbours.begin();
+             it != neighbours.end(); it++)
+            if (open.find(*it) == open.end()
+                && closed.find(*it) == closed.end()) {
+                parent[*it] = p;
+                open.insert(*it);
+            }
+    }
+    /*
+    for (std::list<PathNode>::iterator it = dest_path_.begin();
+        it != dest_path_.end(); it++) {
+        printf("z = %i\n", it->tileZ());
+    }
+    */
+}
+
+
+void PedInstance::setDestinationP(Mission *m, int x, int y, int z, int ox,
+                                       int oy, int oz, int new_speed)
+{
+    z = tile_z_;
     /*
     printf("before x : %i; y : %i; z : %i = = ox :%i, oy :%i, oz :%i\n",
         x, y, z, ox, oy, oz);
-    int nx = x * 256 + ox + 256 / 3;
+    int nx = x * 256 + ox + z * 256 / 3;
     x = nx / 256;
     ox = nx % 256;
-    int ny = y * 256 + oy + 256 / 3;
+    int ny = y * 256 + oy + z * 256 / 3;
     y = ny / 256;
     oy = ny % 256;
     */
-    printf("x : %i; y : %i; z : %i = = ox :%i, oy :%i, oz :%i\n",
+    printf("target x : %i; y : %i; z : %i = = ox :%i, oy :%i, oz :%i\n",
         x, y, z, ox, oy, oz);
 
-    setDestinationPNew(m, x, y, z + 1, ox, oy, oz, new_speed);
-    if (map_ == -1 || health_ <= 0
-        || !(walkable(x, y, z)))
-        return;
+    setDestinationPNew(m, x, y, z, ox, oy, oz, new_speed);
 
     return;
-    if (in_vehicle_) {
-        if(in_vehicle_->tileX() != x
-            || in_vehicle_->tileY() != y
-            || in_vehicle_->tileZ() != z
-            || in_vehicle_->offX() != ox
-            || in_vehicle_->offY() != oy
-            || in_vehicle_->offZ() != oz)
-        in_vehicle_ = 0;
-    }
-    if (pickup_weapon_) {
-        if(pickup_weapon_->tileX() != x
-            || pickup_weapon_->tileY() != y
-            || pickup_weapon_->tileZ() != z
-            || pickup_weapon_->offX() != ox
-            || pickup_weapon_->offY() != oy
-            || pickup_weapon_->offZ() != oz)
-        pickup_weapon_ = 0;
-    }
-
+/* maybe this will be used in future
     if (!walkable(tile_x_, tile_y_, tile_z_)) {
         float dBest = 100000, dCur;
         int xBest,yBest;
@@ -1611,118 +1722,7 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z, int ox,
             tile_y_ = yBest;
         }
     }
-
-    PathNode closest;
-    float closest_dist = 100000;
-
-    open.insert(PathNode(tile_x_, tile_y_, tile_z_, off_x_, off_y_));
-    int watchDog = 3000;
-    while (!open.empty()) {
-        watchDog--;
-        float dist = 100000;
-        PathNode p;
-        std::set < PathNode >::iterator pit;
-        for (std::set < PathNode >::iterator it = open.begin();
-             it != open.end(); it++) {
-            float d =
-                sqrt((float) (x - it->tileX()) * (x - it->tileX()) +
-                     (y - it->tileY()) * (y - it->tileY()));
-            if (d < dist) {
-                dist = d;
-                p = *it;
-                pit = it;       // it cannot be const_iterator because of this assign
-            }
-        }
-        if (dist < closest_dist) {
-            closest = p;
-            closest_dist = dist;
-        }
-        //printf("found best dist %f in %i nodes\n", dist, open.size());
-        open.erase(pit);
-        closed.insert(p);
-
-        if ((p.tileX() == x && p.tileY() == y && p.tileZ() == z)
-            || watchDog < 0) {
-            if (watchDog < 0) {
-                p = closest;
-                dest_path_.
-                    push_front(PathNode
-                               (p.tileX(), p.tileY(), p.tileZ(), ox, oy));
-            } else
-                dest_path_.push_front(PathNode(x, y, z, ox, oy));
-            while (parent.find(p) != parent.end()) {
-                p = parent[p];
-                if (p.tileX() == tile_x_ && p.tileY() == tile_y_
-                    && p.tileZ() == tile_z_)
-                    break;
-                dest_path_.push_front(p);
-            }
-            break;
-        }
-
-        std::list < PathNode > neighbours;
-        if (p.tileX() > 0) {
-            neighbours.
-                push_back(PathNode(p.tileX() - 1, p.tileY(), p.tileZ()));
-            if (p.tileY() > 0) {
-                // check for fences
-                if (walkable(p.tileX() - 1, p.tileY(), p.tileZ()) &&
-                    walkable(p.tileX(), p.tileY() - 1, p.tileZ()))
-                    neighbours.
-                        push_back(PathNode
-                                  (p.tileX() - 1, p.tileY() - 1,
-                                   p.tileZ()));
-            }
-            if (p.tileY() < g_App.maps().map(map())->maxY()) {
-                // check for fences
-                if (walkable(p.tileX() - 1, p.tileY(), p.tileZ()) &&
-                    walkable(p.tileX(), p.tileY() + 1, p.tileZ()))
-                    neighbours.
-                        push_back(PathNode
-                                  (p.tileX() - 1, p.tileY() + 1,
-                                   p.tileZ()));
-            }
-        }
-        if (p.tileX() < g_App.maps().map(map())->maxX()) {
-            neighbours.
-                push_back(PathNode(p.tileX() + 1, p.tileY(), p.tileZ()));
-            if (p.tileY() > 0) {
-                // check for fences
-                if (walkable(p.tileX() + 1, p.tileY(), p.tileZ()) &&
-                    walkable(p.tileX(), p.tileY() - 1, p.tileZ()))
-                    neighbours.
-                        push_back(PathNode
-                                  (p.tileX() + 1, p.tileY() - 1,
-                                   p.tileZ()));
-            }
-            if (p.tileY() < g_App.maps().map(map())->maxY()) {
-                // check for fences
-                if (walkable(p.tileX() + 1, p.tileY(), p.tileZ()) &&
-                    walkable(p.tileX(), p.tileY() + 1, p.tileZ()))
-                    neighbours.
-                        push_back(PathNode
-                                  (p.tileX() + 1, p.tileY() + 1,
-                                   p.tileZ()));
-            }
-        }
-        if (p.tileY() > 0)
-            neighbours.
-                push_back(PathNode(p.tileX(), p.tileY() - 1, p.tileZ()));
-        if (p.tileY() < g_App.maps().map(map())->maxY())
-            neighbours.
-                push_back(PathNode(p.tileX(), p.tileY() + 1, p.tileZ()));
-
-        for (std::list < PathNode >::iterator it = neighbours.begin();
-             it != neighbours.end(); it++)
-            if (walkable(it->tileX(), it->tileY(), it->tileZ())
-                && open.find(*it) == open.end()
-                && closed.find(*it) == closed.end()) {
-                parent[*it] = p;
-                open.insert(*it);
-            }
-    }
-
-    speed_ = new_speed;
+*/
 }
 
 bool PedInstance::movementP(int elapsed)
@@ -1835,7 +1835,7 @@ bool PedInstance::movementP(int elapsed)
             updated = true;
         }
     } else if (speed_) {
-        printf("Running speed %i, destination unknown\n", speed_);
+        printf("Running at speed %i, destination unknown\n", speed_);
         speed_ = 0;
     }
 
