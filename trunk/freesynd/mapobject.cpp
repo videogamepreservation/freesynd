@@ -52,7 +52,7 @@ void MapObject::setOffX(int n)
         off_x_ += 256;
         tile_x_--;
     }
-    while (off_x_ > 256) {
+    while (off_x_ > 255) {
         off_x_ -= 256;
         tile_x_++;
     }
@@ -65,7 +65,7 @@ void MapObject::setOffY(int n)
         off_y_ += 256;
         tile_y_--;
     }
-    while (off_y_ > 256) {
+    while (off_y_ > 255) {
         off_y_ -= 256;
         tile_y_++;
     }
@@ -75,11 +75,11 @@ void MapObject::setOffZ(int n)
 {
     off_z_ = n;
     while (off_z_ < 0) {
-        off_z_ += 256;
+        off_z_ += 128;
         tile_z_--;
     }
-    while (off_z_ > 256) {
-        off_z_ -= 256;
+    while (off_z_ > 127) {
+        off_z_ -= 128;
         tile_z_++;
     }
 }
@@ -87,7 +87,8 @@ void MapObject::setOffZ(int n)
 void MapObject::addOffs(int &x, int &y)
 {
     x += ((off_x_ - off_y_) * (TILE_WIDTH / 2)) / 256;
-    y += ((off_x_ + off_y_ - off_z_) * (TILE_HEIGHT / 3)) / 256;
+    y += ((off_x_ + off_y_) * (TILE_HEIGHT / 3)) / 256;
+    y -= (off_z_ * (TILE_HEIGHT / 3)) / 128;
 }
 
 bool MapObject::animate(int elapsed)
@@ -124,7 +125,7 @@ bool ShootableMovableMapObject::updatePlacement(int nOffX, int nOffY)
         off_x_ += 256;
         tile_x_--;
     }
-    while (off_x_ >= 256) {
+    while (off_x_ > 255) {
         off_x_ -= 256;
         tile_x_++;
     }
@@ -132,7 +133,7 @@ bool ShootableMovableMapObject::updatePlacement(int nOffX, int nOffY)
         off_y_ += 256;
         tile_y_--;
     }
-    while (off_y_ >= 256) {
+    while (off_y_ > 255) {
         off_y_ -= 256;
         tile_y_++;
     }
@@ -406,9 +407,10 @@ Static *Static::loadInstance(uint8 * data, int m)
         printf("y is %i, yoff is %i ==", gamdata->mapposy[1], gamdata->mapposy[0]);
         printf("z is %i, zoff is %i\n", gamdata->mapposz[1], gamdata->mapposz[0]);
         */
+        int z = ((gamdata->mapposz[0] & 0x80) == 0 ? gamdata->mapposz[1]: gamdata->mapposz[1] << 1 );
         s->setPosition(gamdata->mapposx[1], gamdata->mapposy[1],
-                       gamdata->mapposz[1], gamdata->mapposx[0],
-                       gamdata->mapposy[0], gamdata->mapposz[0]);
+                       z, gamdata->mapposx[0],
+                       gamdata->mapposy[0], gamdata->mapposz[0] & 0x7F);
         s->setSubType(gamdata->subType);
     }
 

@@ -1023,6 +1023,8 @@ void PedInstance::setDestinationPNew(Mission *m, int x, int y, int z,
     printf("base %i, bt %i, target %i, tt %i\n",based->id, based->t,targetd->id,targetd->t);
     printf("btwd %i, ttwd %i\n",based->twd, targetd->twd);
 
+    printf("base pos: x %i; y %i; z %i, ox %i, oy %i, oz %i\n",
+        tile_x_, tile_y_, tile_z_, off_x_, off_y_, off_z_);
     if(targetd->t == m_sdNonwalkable)
         return;
     unsigned short lvlnum = 0;
@@ -1485,8 +1487,8 @@ exitloop___label:
                     }
                 }
                 if (xh != -1) {
-                    int y = yl * m->mmax_x_;
-                    int z = zl * m->mmax_m_xy;
+                    int y = yh * m->mmax_x_;
+                    int z = zh * m->mmax_m_xy;
                     if (fit->j.x != xh || fit->j.y != yh
                         || fit->j.z != zh) {
                         toadd.x = xh;
@@ -1534,7 +1536,7 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z, int ox,
     printf("x : %i; y : %i; z : %i = = ox :%i, oy :%i, oz :%i\n",
         x, y, z, ox, oy, oz);
 
-    //setDestinationPNew(m, x, y, z + 1, ox, oy, oz, new_speed);
+    setDestinationPNew(m, x, y, z + 1, ox, oy, oz, new_speed);
     if (map_ == -1 || health_ <= 0
         || !(walkable(x, y, z)))
         return;

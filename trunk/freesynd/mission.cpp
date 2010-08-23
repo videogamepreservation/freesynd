@@ -600,8 +600,6 @@ bool Mission::setSurfaces() {
         int x = p->tileX();
         int y = p->tileY();
         int z = p->tileZ() + (p->offZ() == 0 ? 0 : 1);
-        // there are some peds with z + 1 then maximum
-        // why it is so?
         if (z >= mmax_z_)
             continue;
         if (mtsurfaces_[x + y * mmax_x_ + z * mmax_m_xy].t == m_sdNotdefined) {
@@ -1523,10 +1521,7 @@ bool Mission::setSurfaces() {
                             cst->indx = strjunctions_.size();
                             strjunctions_.push_back(jst);
                             jst.fastxyz = jst.x | (jst.y << 8) | (jst.z << 16);
-                            //printf("x %i y %i z %i\n", x, y/mmax_x_, z/mmax_m_xy);
-                            //printf("twd %i\n",cst->twd);
                         }
-                        //printf("id %X ; id %X\n",cst->idjh,cst->idjl);
 
                         switch (cst->twd) {
                             case 0x01:

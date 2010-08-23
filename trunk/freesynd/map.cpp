@@ -137,7 +137,10 @@ int Map::maxZAt(int x, int y)
             mz = z;
         }
     }
-    return mz;
+    // TODO: disabling this thing causes a lot of speed drain
+    // find a better for such optimization, not all objects are drawn
+    // that is why I disabled it
+    return max_z_ - 1;
 }
 
 int Map::tileAt(int x, int y, int z)
