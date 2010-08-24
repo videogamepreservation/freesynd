@@ -246,6 +246,8 @@ public:
         int n;
         // next type to search (surface/stairs junction)
         unsigned char nt;
+        // parents ID
+        unsigned int pid;
     }linkDesc;
     typedef struct {
         junctionDesc j;
@@ -264,7 +266,8 @@ public:
          int x, int y, int z, std::vector <linkDesc> ** lvls);
     void setLvlNode(std::vector <linkDesc> ::iterator it,
         std::vector <linkDesc> ** lvls, std::vector <reachedDesc> * preached,
-        unsigned short lvlnum, unsigned char nt, int itstart, bool setreached);
+        unsigned short lvlnum, unsigned char nt, int itstart, bool setreached,
+        unsigned int pid);
     void setDestinationPNew(Mission *m, int x, int y, int z,
         int ox = 128, int oy = 128, int oz = 0, int new_speed = 160);
     void getPathAtStairsP(Mission *m, std::list<PathNode> *new_path,

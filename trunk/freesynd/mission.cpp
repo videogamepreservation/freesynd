@@ -1130,7 +1130,7 @@ bool Mission::setSurfaces() {
                                 }
                             } else {
                                 nxts->t = m_sdNonwalkable;
-                                if ((zp + mmax_m_xy) < mmax_m_all&& upper_s == 0x03) {
+                                if ((zp + mmax_m_xy) < mmax_m_all && upper_s == 0x03) {
                                     if (sWalkable(upper_s, mtsurfaces_[xp + y + (zp + mmax_m_xy)].twd)) {
                                         ms->idjh |= 0x0000F200;
                                         ms->t |= m_sdJunction;
