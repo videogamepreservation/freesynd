@@ -710,12 +710,13 @@ bool Mission::setSurfaces() {
                             nxts = &(mtsurfaces_[xm + y + z]);
                             this_s = nxts->twd;
                             upper_s = mtsurfaces_[xm + y + zp].twd;
-                            if (this_s == 0x01)
+                            if (this_s == 0x01) {
                                 if (sWalkable(this_s, upper_s)) {
                                     sdir &= 0xF0FFFFFF;
                                     sdir |= 0x06000000;
                                 } else
                                     nxts->t = m_sdNonwalkable;
+                            }
                             if(nxts->t == m_sdNotdefined) {
                                 nxts->t = m_sdDefreq;
                                 stodef.x = xm;
@@ -729,12 +730,13 @@ bool Mission::setSurfaces() {
                             nxts = &(mtsurfaces_[xp + y + z]);
                             this_s = nxts->twd;
                             upper_s = mtsurfaces_[xp + y + zp].twd;
-                            if (this_s == 0x01)
+                            if (this_s == 0x01) {
                                 if (sWalkable(this_s, upper_s)) {
                                     sdir &= 0xFFFFF0FF;
                                     sdir |= 0x00000200;
                                 } else
                                     nxts->t = m_sdNonwalkable;
+                            }
                             if(nxts->t == m_sdNotdefined) {
                                 nxts->t = m_sdDefreq;
                                 stodef.x = xp;
@@ -814,12 +816,13 @@ bool Mission::setSurfaces() {
                             nxts = &(mtsurfaces_[xm + y + z]);
                             this_s = nxts->twd;
                             upper_s = mtsurfaces_[xm + y + zp].twd;
-                            if (this_s == 0x02)
+                            if (this_s == 0x02) {
                                 if (sWalkable(this_s, upper_s)) {
                                     sdir &= 0xF0FFFFFF;
                                     sdir |= 0x06000000;
                                 } else
                                     nxts->t = m_sdNonwalkable;
+                            }
                             if(nxts->t == m_sdNotdefined) {
                                 nxts->t = m_sdDefreq;
                                 stodef.x = xm;
@@ -833,12 +836,13 @@ bool Mission::setSurfaces() {
                             nxts = &(mtsurfaces_[xp + y + z]);
                             this_s = nxts->twd;
                             upper_s = mtsurfaces_[xp + y + zp].twd;
-                            if (this_s == 0x02)
+                            if (this_s == 0x02) {
                                 if (sWalkable(this_s, upper_s)) {
                                     sdir &= 0xFFFFF0FF;
                                     sdir |= 0x00000200;
                                 } else
                                     nxts->t = m_sdNonwalkable;
+                            }
                             if(nxts->t == m_sdNotdefined) {
                                 nxts->t = m_sdDefreq;
                                 stodef.x = xp;
@@ -918,12 +922,13 @@ bool Mission::setSurfaces() {
                             nxts = &(mtsurfaces_[x + ym + z]);
                             this_s = nxts->twd;
                             upper_s = mtsurfaces_[x + ym + zp].twd;
-                            if (this_s == 0x03)
+                            if (this_s == 0x03) {
                                 if (sWalkable(this_s, upper_s)) {
                                     sdir &= 0xFFF0FFFF;
                                     sdir |= 0x00040000;
                                 } else
                                     nxts->t = m_sdNonwalkable;
+                            }
                             if(nxts->t == m_sdNotdefined) {
                                 nxts->t = m_sdDefreq;
                                 stodef.x = x;
@@ -1022,12 +1027,13 @@ bool Mission::setSurfaces() {
                             nxts = &(mtsurfaces_[x + ym + z]);
                             this_s = nxts->twd;
                             upper_s = mtsurfaces_[x + ym + zp].twd;
-                            if (this_s == 0x04)
+                            if (this_s == 0x04) {
                                 if (sWalkable(this_s, upper_s)) {
                                     sdir &= 0xFFF0FFFF;
                                     sdir |= 0x00040000;
                                 } else
                                     nxts->t = m_sdNonwalkable;
+                            }
                             if(nxts->t == m_sdNotdefined) {
                                 nxts->t = m_sdDefreq;
                                 stodef.x = x;
@@ -1041,12 +1047,13 @@ bool Mission::setSurfaces() {
                             nxts = &(mtsurfaces_[x + yp + z]);
                             this_s = nxts->twd;
                             upper_s = mtsurfaces_[x + yp + zp].twd;
-                            if (this_s == 0x04)
+                            if (this_s == 0x04) {
                                 if (sWalkable(this_s, upper_s)) {
                                     sdir &= 0xFFFFFFF0;
                                     sdir |= 0x00000000;
                                 } else
                                     nxts->t = m_sdNonwalkable;
+                            }
                             if(nxts->t == m_sdNotdefined) {
                                 nxts->t = m_sdDefreq;
                                 stodef.x = x;
@@ -1469,7 +1476,8 @@ bool Mission::setSurfaces() {
                     } while(vtodefine.size());
                     sfcitstarts_.push_back(-1);
                     id_sf++;
-                }
+                }else if (csf->t == m_sdNotdefined)
+                    csf->t = m_sdNonwalkable;
             }
         }
     }

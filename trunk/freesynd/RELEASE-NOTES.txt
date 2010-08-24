@@ -26,7 +26,8 @@ Fixed Bugs
   * 2307181 : #include <cstdlib> missing (it was simply closed, fix 
   						was done somewhere between 0.2 - 0.3 release and was not
   						closed)
-  * 3052202 : cppcheck warnings and errors(only third error is important)
+  * 3052202 : cppcheck warnings and errors(only third error is important)(tlh2000)
+  * 3052210 : fixed warnings and resource leak(tlh2000)
 
 Known issues with this release
 ------------------------------
