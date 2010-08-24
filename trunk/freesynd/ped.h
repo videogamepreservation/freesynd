@@ -257,7 +257,7 @@ public:
 #define MAX_LVLS_PATH     32
 
     float getDistance(int x1, int y1, int z1,
-        int x2, int y2, int z2, Mission *m);
+        int x2, int y2, int z2);
     float calcDistance(unsigned short lvl, int x, int y, int z,
         std::vector <linkDesc> ::iterator par);
     void markBadNodes(unsigned short lvl, unsigned short clvl,

@@ -216,9 +216,8 @@ void Map::draw(int scrollX, int scrollY, MapHelper * helper)
                         scrollY + g_Screen.gameScreenHeight() + 128) {
                         bool helpOnly = (pass == 1 && z <= 1);
                         if (helpOnly
-                            || tile_manager_->drawTileTo(buf, TILE_WIDTH,
-                                                         TILE_HEIGHT, tile,
-                                                         0, 0, true)) {
+                            || (tile == 0 ? false : tile_manager_->drawTileTo(buf, TILE_WIDTH,
+                                             TILE_HEIGHT, tile, 0, 0, true))) {
                             int dx = 0, dy = 0;
                             if (screen_w - scrollX < 0)
                                 dx = -(screen_w - scrollX);

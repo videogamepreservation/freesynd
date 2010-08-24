@@ -210,6 +210,10 @@ PedInstance *PedManager::loadInstance(uint8 * data, int map)
         kind = 0;
     }
 
+    if (gamdata->mapposx[0] == 0 && gamdata->mapposx[0] == 0
+        && gamdata->mapposz[0] == 0)
+    return NULL;
+
     PedInstance *newped = peds_[kind]->createInstance(map);
     newped->setStartHealth(hp);
     newped->setHealth(hp);

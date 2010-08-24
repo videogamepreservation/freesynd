@@ -187,8 +187,8 @@ bool Mission::loadLevel(uint8 * levelData)
             //continue;
         PedInstance *p =
             g_App.peds().loadInstance((uint8 *) & pedref, map_);
-        peds_.push_back(p);
         if (p) {
+            peds_.push_back(p);
             if (p->isHostile()) {
                 Weapon *w = g_App.weapons().findWeapon(Ped::Pistol);
                 if (w) {

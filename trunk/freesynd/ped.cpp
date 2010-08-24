@@ -888,7 +888,7 @@ void PedInstance::setDrawnAnim(PedInstance::AnimationDrawn drawn_anim) {
 }
 
 float PedInstance::getDistance(int x1, int y1, int z1,
-                                int x2, int y2, int z2, Mission *m) {
+                                int x2, int y2, int z2) {
                                     
     return sqrt((float)((x2 - x1) * (x2 - x1)) + (float)((y2 - y1) * (y2 - y1))
         + (float)((z2 - z1) * (z2 - z1)));
@@ -899,7 +899,7 @@ float PedInstance::calcDistance(unsigned short lvl, int x, int y, int z,
     float dist = 0;
     while(lvl != 0) {
         dist += getDistance(x, y, z,
-            par->j.x, par->j.y, par->j.z, NULL);
+            par->j.x, par->j.y, par->j.z);
         x = par->j.x;
         y = par->j.y;
         z = par->j.z;
@@ -907,7 +907,7 @@ float PedInstance::calcDistance(unsigned short lvl, int x, int y, int z,
         lvl--;
     }
     dist += getDistance(x, y, z,
-        tile_x_, tile_y_, tile_z_, NULL);
+        tile_x_, tile_y_, tile_z_);
     return dist;
 }
 
@@ -1274,13 +1274,13 @@ exitloop___label:
                     dist = calcDistance (lvlnum, it->j.x,
                         it->j.y, it->j.z, it->p);
                     dist += getDistance (it->j.x, it->j.y, it->j.z,
-                        x, y, z, NULL);
+                        x, y, z);
                     clvl = lvlnum;
                 } else {
                     cmpdist = calcDistance (lvlnum, it->j.x,
                         it->j.y, it->j.z, it->p);
                     cmpdist += getDistance (it->j.x, it->j.y, it->j.z,
-                        x, y, z, NULL);
+                        x, y, z);
                     if (cmpdist < dist) {
                         dist = cmpdist;
                         reachedit = it;
@@ -1751,7 +1751,6 @@ exitloop___label:
             printf("--- x %i, y %i, z %i ---\n",it->tileX() , it->tileY(), it->tileZ());
     }
     printf("path set in %i\n", SDL_GetTicks()%1000);
-    //dest_path_.clear();
     speed_ = new_speed;
     tile_x_ = old_x;
     tile_y_ = old_y;
@@ -2014,7 +2013,7 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z, int ox,
     printf("target x : %i; y : %i; z : %i = = ox :%i, oy :%i, oz :%i\n",
         x, y, z, ox, oy, oz);
 
-    setDestinationPNew(m, x, y, z + 1, ox, oy, oz, new_speed);
+    setDestinationPNew(m, x, y, z, ox, oy, oz, new_speed);
 
     return;
 /* maybe this will be used in future

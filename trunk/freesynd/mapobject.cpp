@@ -180,6 +180,7 @@ Static *Static::loadInstance(uint8 * data, int m)
     uint16 firstAnim = READ_LE_UINT16(gamdata->firstAnim);
     // maybe, subtype stores direction somewhere
     // it is easier to get type from animation then from sub-type
+    // also looks like sub-type contains frame number for animation
 
     switch(gamdata->objType) {
         case 0x05:
@@ -305,7 +306,7 @@ Static *Static::loadInstance(uint8 * data, int m)
                 || gamdata->subType == 0x79 || gamdata->subType == 0x77
                 || gamdata->subType == 0x90 || gamdata->subType == 0x86) {
                     // Doors 1077 - 1116
-                    // not all doors are good with implementation
+                    // not all doors are good in this implementation
                     // some are already open
                 s = new Door(m, firstAnim, firstAnim + 2,
                     firstAnim + 4, firstAnim + 6);
