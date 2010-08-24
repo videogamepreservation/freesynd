@@ -469,7 +469,7 @@ bool LargeDoor::animate(int elapsed, Mission *obj)
     int z = tileZ();
     int mt;
     int si;
-    char inc_rel, rel_inc;
+    char inc_rel = 0, rel_inc = 0;
     char *i = 0, *j = 0;
     bool found = false;
 

@@ -32,6 +32,7 @@ int write_png(int a) {
 
     if (!png_ptr) {
         printf("cannot create png write struct\n");
+        fclose(fp);
         return 1;
     }
 
@@ -39,6 +40,7 @@ int write_png(int a) {
 
     if (!info_ptr) {
         printf("cannot create png info struct\n");
+        fclose(fp);
         return 1;
     }
 
