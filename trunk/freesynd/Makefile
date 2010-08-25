@@ -51,7 +51,7 @@ $(UTL_OBJ): force_look
 	$(CXX) $(CXXFLAGS) -MMD -c $< -o $*.o
 
 clean:
-	rm -f $(TARGET) *.o *.d
+	rm -f $(TARGET) $(DUMP_TARGET) $(DUMPMAPS_TARGET) *.o *.d
 	-for d in $(DIRS); do (cd $$d; $(MAKE) clean ); done
 
 force_look:
