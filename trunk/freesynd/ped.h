@@ -236,14 +236,14 @@ public:
         junctionDesc j;
         // parent
         std::vector <linkdesc> ::iterator p;
-        // parent coord
-        toDefineXYZ pcoord;
         // when there is another parent but with shorter distance
         bool bad;
         // reached destination
         bool destr;
         // nodes number
         int n;
+        // nodes start index in nxt lvl
+        int atindex;
         // next type to search (surface/stairs junction)
         unsigned char nt;
         // parents ID
@@ -252,18 +252,18 @@ public:
     typedef struct {
         junctionDesc j;
         unsigned short atlevel;
-        unsigned short atindex;
-        float dist;
+        unsigned int atindex;
+        int dist;
     }reachedDesc;
 
 #define MAX_LVLS_PATH     32
 
-    float getDistance(int x1, int y1, int z1,
+    int getDistance(int x1, int y1, int z1,
         int x2, int y2, int z2);
-    float calcDistance(unsigned short lvl, int x, int y, int z,
+    int calcDistance(unsigned short lvl, int x, int y, int z,
         std::vector <linkDesc> ::iterator par);
     void markBadNodes(unsigned short lvl, unsigned short clvl,
-         int x, int y, int z, std::vector <linkDesc> ** lvls);
+        int n, int atindex, std::vector <linkDesc> ** lvls);
     void setLvlNode(std::vector <linkDesc> ::iterator it,
         std::vector <linkDesc> ** lvls, std::vector <reachedDesc> * preached,
         unsigned short lvlnum, unsigned char nt, int itstart, bool setreached,

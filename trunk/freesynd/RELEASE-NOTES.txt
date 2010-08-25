@@ -12,20 +12,20 @@ Changes
   * People, objects will not move to unwalkable surfaces
   * When weapon is dropped while moving, ped will stop moving
   * Static objects: added 4 windows, large doors, added 2 animations
-  	to doors, 1 animation to trees
+    to doors, 1 animation to trees
   * Static objects animation setup method rewritten,
-  	animations require adjusting and add new objects correctly
+    animations require adjusting and add new objects correctly
   * While vehicle was moving if ped went out, vehicle continued to move
 
 Fixed Bugs
 ----------
   * 3029839 : When a menu appears, if the mouse cursor is on a button,
-    					that button is not highlighted until the mouse moves
+              that button is not highlighted until the mouse moves
   * 3029837 : When clicking on a menu button or hitting a key that
-  						activate a button, event processing should be paused
+              activate a button, event processing should be paused
   * 2307181 : #include <cstdlib> missing (it was simply closed, fix 
-  						was done somewhere between 0.2 - 0.3 release and was not
-  						closed)
+              was done somewhere between 0.2 - 0.3 release and was not
+              closed)
   * 3052202 : cppcheck warnings and errors(only third error is important)(tlh2000)
   * 3052210 : fixed warnings and resource leak(tlh2000)
 
@@ -71,7 +71,7 @@ History
               agent(s) selected coordinates are not exactly the
               same that expected.
   * 3017274 : When an agent kills a moving enemy, this enemy
-                        keeps on moving to his destination.
+              keeps on moving to his destination.
   * 3005280 : Dropped weapon does not appear on the ground
 
   v0.2
