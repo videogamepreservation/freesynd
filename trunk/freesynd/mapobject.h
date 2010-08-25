@@ -189,12 +189,6 @@ public:
         return speed_;
     }
 
-    void addDestination(int x, int y, int z, int ox = 128, int oy = 128,
-            int new_speed = 160) {
-        dest_path_.push_back(PathNode(x, y, z, ox, oy));
-        speed_ = new_speed;
-    }
-
     void clearDestination() {
         dest_path_.clear();
     }

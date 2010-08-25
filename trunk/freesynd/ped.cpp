@@ -1027,7 +1027,7 @@ void PedInstance::setDestinationPNew(Mission *m, int x, int y, int z,
 
     int old_z = tile_z_;
     int old_oz = off_z_;
-    tile_z_ += off_z_ == 0 ? 0 : 1;
+    tile_z_ += (off_z_ == 0 ? 0 : 1);
     off_z_ = 0;
     surfaceDesc *based = &(m->mtsurfaces_[tile_x_ + tile_y_ * m->mmax_x_ + tile_z_ * m->mmax_m_xy]);
     printf("base %i, bt %i, target %i, tt %i\n",based->id, based->t,targetd->id,targetd->t);
@@ -1067,14 +1067,38 @@ void PedInstance::setDestinationPNew(Mission *m, int x, int y, int z,
     }
 
     if ((based->t & m_sdSurface) == m_sdSurface
-        && (targetd->t & m_sdSurface) == m_sdSurface)
+        && (targetd->t & m_sdSurface) == m_sdSurface) {
         if (targetd->id == based->id) {
             getPathAtSurfaceP(m, &dest_path_, x, y, z, ox, oy, oz);
             speed_ = new_speed;
             tile_z_ = old_z;
             off_z_ = old_oz;
+            /*
+            for (std::list<PathNode>::iterator it = dest_path_.begin();
+                it != dest_path_.end(); it++) {
+                printf("sf+++ t %i, x %i, y %i, z %i +++\n",
+                    m->mtsurfaces_[it->tileX() + it->tileY() * m->mmax_x_ + it->tileZ() * m->mmax_m_xy].t,
+                    it->tileX(), it->tileY(), it->tileZ());
+            }
+            */
             return;
         }
+    } else if ((based->t & m_sdStairs) == m_sdStairs
+        && (targetd->t & m_sdStairs) == m_sdStairs) {
+            getPathAtStairsP(m, &dest_path_, x, y, z, ox, oy, oz);
+            speed_ = new_speed;
+            tile_z_ = old_z;
+            off_z_ = old_oz;
+            /*
+            for (std::list<PathNode>::iterator it = dest_path_.begin();
+                it != dest_path_.end(); it++) {
+                printf("st+++ t %i, x %i, y %i, z %i +++\n",
+                    m->mtsurfaces_[it->tileX() + it->tileY() * m->mmax_x_ + it->tileZ() * m->mmax_m_xy].t,
+                    it->tileX(), it->tileY(), it->tileZ());
+            }
+            */
+            return;
+    }
     //return;
     unsigned short lvlnum = 0;
 
@@ -2076,7 +2100,14 @@ void PedInstance::getPathAtSurfaceP(Mission *m, std::list<PathNode> *new_path,
     }
     */
 }
-
+void PedInstance::addDestinationP(Mission *m, int x, int y, int z,
+                                  int ox, int oy, int new_speed) {
+    // TODO: adding destination maybe difficult because of
+    // action currently in execution (pickup/putdown weapon, etc.)
+    z = tile_z_;
+    dest_path_.push_back(PathNode(x, y, z, ox, oy));
+    speed_ = new_speed;
+}
 
 void PedInstance::setDestinationP(Mission *m, int x, int y, int z, int ox,
                                        int oy, int oz, int new_speed)

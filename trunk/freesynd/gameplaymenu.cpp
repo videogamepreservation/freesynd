@@ -607,16 +607,16 @@ void GameplayMenu::handleMouseDown(int x, int y, int button)
                     else if (mission_->ped(i)->inVehicle()) {
                         if (ctrl_)
                             mission_->ped(i)->inVehicle()->
-                                addDestination(tx, ty, 0,
+                                addDestinationV(tx, ty, 0,
                                 128, 128, 320);
                         else
                             mission_->ped(i)->inVehicle()->
-                                setDestinationV(tx, ty, 0, 
+                                setDestinationV(mission_, tx, ty, 0, 
                                 128, 128, 0, 480);
                     }
                     else {
                         if (ctrl_)
-                            mission_->ped(i)->addDestination(tx, ty, 0,
+                            mission_->ped(i)->addDestinationP(mission_,tx, ty, 0,
                                     ox, oy, 320);
                         else {
                             if (selectedAgentsCount() > 1) {
