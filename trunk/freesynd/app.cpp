@@ -406,7 +406,15 @@ void App::run() {
     //this is walk data
     // load "col01"
     data = File::loadFile("col01.dat", size);
+    // original walk data
     memcpy(walkdata_,data,256);
+    // walkdata_ patched version
+    memcpy(walkdata_p_,data,256);
+    // little patch to enable full surface description
+    // and eliminate unnecessary data
+    walkdata_p_[0x02] = 0x00;
+    walkdata_p_[0x80] = 0x03;
+    walkdata_p_[0x81] = 0x02;
     delete[] data;
 
     // load palette

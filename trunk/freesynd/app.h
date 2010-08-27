@@ -100,6 +100,8 @@ class App : public Singleton < App > {
     virtual ~App();
 
     uint8 walkdata_[256];
+    // patched version
+    uint8 walkdata_p_[256];
 
     void setCheatCode(const char *name);
 

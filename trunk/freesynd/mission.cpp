@@ -38,6 +38,7 @@ objective_ped_(-1), objective_vehicle_(-1), mtsurfaces_(NULL)
 
 Mission::~Mission()
 {
+    // TODO: there is something wrong with destructor in Iraq mission
     for (unsigned int i = 0; i < vehicles_.size(); i++)
         delete vehicles_[i];
     for (unsigned int i = 0; i < peds_.size(); i++)
@@ -558,10 +559,10 @@ MapObject * Mission::findAt(int tilex, int tiley, int tilez,
 
 bool Mission::sWalkable(char thisTile, char upperTile) {
 
-    return thisTile != 0x0C && thisTile != 0x10 && thisTile != 0x0
-        && thisTile != upperTile
-        && ((thisTile == 0x05 || thisTile == 0x0D)
-            ? upperTile == 0x0 : true)
+    return (thisTile != upperTile
+        && (((thisTile >= 0x05 && thisTile <= 0x09) ||
+        thisTile == 0x0B || (thisTile >= 0x0D && thisTile <= 0x0F))
+            ? upperTile == 0x0 : true))
         || (thisTile > 0x00 && thisTile < 0x05 && upperTile == 0x0);
 }
 
@@ -576,6 +577,12 @@ bool Mission::isStairs(char thisTile) {
 
 bool Mission::setSurfaces() {
 
+    // NOTE: tiles walkdata type 0x0D are quiet special, and they
+    // are not handled correctly, these correction and andjustings
+    // can create additional speed drain, as such I didn't
+    // implemented them as needed. To make it possible a patch
+    // required to walkdata and a lot of changes which I don't
+    // want to do.
     clrSurfaces();
     if (!(g_App.maps().mapDimensions(map_,
         &mmax_x_, &mmax_y_, &mmax_z_)))
@@ -591,7 +598,7 @@ bool Mission::setSurfaces() {
         for (int iy = 0; iy < mmax_y_; iy++) {
             for (int iz = 0; iz < mmax_z_; iz++) {
                 mtsurfaces_[ix + iy * mmax_x_ + iz * mmax_m_xy].twd =
-                    g_App.walkdata_[m->tileAt(ix, iy, iz)];
+                    g_App.walkdata_p_[m->tileAt(ix, iy, iz)];
             }
         }
     }
@@ -626,7 +633,7 @@ bool Mission::setSurfaces() {
                 surfaceDesc *nxts;
                 uint8 this_s = ms->twd;
                 uint8 upper_s = 0;
-                if (zp < mmax_m_all) {
+                if (zp < (mmax_m_xy * (mmax_z_ - 2))) {
                     upper_s = mtsurfaces_[x + y + zp].twd;
                     if(!sWalkable(this_s, upper_s)) {
                         ms->t = m_sdNonwalkable;
@@ -1476,8 +1483,7 @@ bool Mission::setSurfaces() {
                     } while(vtodefine.size());
                     sfcitstarts_.push_back(-1);
                     id_sf++;
-                }else if (csf->t == m_sdNotdefined)
-                    csf->t = m_sdNonwalkable;
+                }
             }
         }
     }
@@ -1518,9 +1524,9 @@ bool Mission::setSurfaces() {
                             jst.x = x;
                             jst.y = y / mmax_x_;
                             jst.z = z / mmax_m_xy;
+                            jst.fastxyz = jst.x | (jst.y << 8) | (jst.z << 16);
                             cst->indx = strjunctions_.size();
                             strjunctions_.push_back(jst);
-                            jst.fastxyz = jst.x | (jst.y << 8) | (jst.z << 16);
                         }
 
                         switch (cst->twd) {
@@ -1753,4 +1759,45 @@ void Mission::clrSurfaces() {
     strjunctions_.clear();
     sfcitstarts_.clear();
     stritstarts_.clear();
+}
+
+bool Mission::getWalkable(int &x, int &y, int &z, int &ox, int &oy) {
+    bool gotit = false;
+    int bx, by, box, boy;
+    int bz = mmax_z_;
+    do{
+        bz--;
+        bx = x * 256 + ox + 128 * bz;
+        box = bx % 256;
+        bx = bx / 256;
+        by = y * 256 + oy + 128 * bz;
+        boy = by % 256;
+        by = by / 256;
+        if (bz >= mmax_z_ || bx >= mmax_x_ || by >= mmax_y_)
+            continue;
+        //printf("t %i, twd %i\n", mtsurfaces_[bx + by * mmax_x_ + bz * mmax_m_xy].t, mtsurfaces_[bx + by * mmax_x_ + bz * mmax_m_xy].twd);
+        if (mtsurfaces_[bx + by * mmax_x_ + bz * mmax_m_xy].t != m_sdNonwalkable)
+            gotit = true;
+    }while (bz != 0 && !gotit);
+    if (gotit) {
+        x = bx;
+        y = by;
+        z = bz;
+        ox = box;
+        oy = boy;
+    }
+    return gotit;
+}
+
+void Mission::adjXYZ(int &x, int &y, int &z) {
+    if (x < 0)
+        x = 0;
+    if (y < 0)
+        y = 0;
+    if (z < 0 || z >= mmax_z_)
+        z = 0;
+    if (x >= mmax_x_)
+        x = mmax_x_ - 1;
+    if (y >= mmax_y_)
+        y = mmax_y_ - 1;
 }

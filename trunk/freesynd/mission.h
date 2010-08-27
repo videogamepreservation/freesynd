@@ -108,6 +108,8 @@ public:
             int *majorType, int *searchIndex, bool only);
     bool setSurfaces();
     void clrSurfaces();
+    bool getWalkable(int &x, int &y, int &z, int &ox, int &oy);
+    void Mission::adjXYZ(int &x, int &y, int &z);
 
     typedef struct {
         uint8 unkn10[8];

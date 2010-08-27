@@ -605,19 +605,35 @@ void GameplayMenu::handleMouseDown(int x, int y, int button)
                         }
                     }
                     else if (mission_->ped(i)->inVehicle()) {
+                        int stx = tx;
+                        int sty = ty;
+                        int sox = ox;
+                        int soy = oy;
+                        stx = tx * 256 + ox + 32 * mission_->ped(i)->inVehicle()->tileZ();
+                        //sox = stx % 256;
+                        stx = stx / 256;
+                        sty = ty * 256 + oy + 32 * mission_->ped(i)->inVehicle()->tileZ();
+                        //soy = sty % 256;
+                        sty = sty / 256;
                         if (ctrl_)
                             mission_->ped(i)->inVehicle()->
-                                addDestinationV(tx, ty, 0,
-                                128, 128, 320);
+                                addDestinationV(stx, sty, 0,
+                                128, 128, 480);
                         else
                             mission_->ped(i)->inVehicle()->
-                                setDestinationV(mission_, tx, ty, 0, 
+                                setDestinationV(mission_, stx, sty, 0, 
                                 128, 128, 0, 480);
                     }
                     else {
+                        int stx = tx;
+                        int sty = ty;
+                        int stz = 0;
+                        int sox = ox;
+                        int soy = oy;
+                        mission_->getWalkable(stx, sty, stz, sox, soy);
                         if (ctrl_)
-                            mission_->ped(i)->addDestinationP(mission_,tx, ty, 0,
-                                    ox, oy, 320);
+                            mission_->ped(i)->addDestinationP(mission_,stx, sty, stz,
+                                    sox, soy, 320);
                         else {
                             if (selectedAgentsCount() > 1) {
                                 //TODO: current group position is like
@@ -626,7 +642,8 @@ void GameplayMenu::handleMouseDown(int x, int y, int button)
                                 //int dx = (i % 2) * (i - 2) * 16;
                                 //int dy = ((i + 1) % 2) * (i - 1) * 8;
 
-                                int dx = 0; int dy = 0;
+                                //int dx = 0; int dy = 0;
+                                /*
                                 int offset_x = world_x_ + x - 129;
                                 int offset_y = world_y_ + y;
 
@@ -638,15 +655,16 @@ void GameplayMenu::handleMouseDown(int x, int y, int button)
                                         mission_->map(),
                                         offset_x,
                                         offset_y, oy);
+                                */
 
                                 //this should be romoved if non-tile
                                 //position needed
-                                ox = 63 + 128 * (i % 2);
-                                oy = 63 + 128 * (i >> 1);
+                                sox = 63 + 128 * (i % 2);
+                                soy = 63 + 128 * (i >> 1);
                             }
 
-                            mission_->ped(i)->setDestinationP(mission_, tx, ty, 0,
-                                    ox, oy, 0, 320);
+                            mission_->ped(i)->setDestinationP(mission_, stx, sty, stz,
+                                    sox, soy, 0, 320);
                         }
                     }
                 }

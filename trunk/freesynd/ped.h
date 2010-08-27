@@ -248,6 +248,7 @@ public:
         unsigned char nt;
         // parents ID
         unsigned int pid;
+        int dist;
     }linkDesc;
     typedef struct {
         junctionDesc j;
@@ -268,7 +269,7 @@ public:
         std::vector <linkDesc> ** lvls, std::vector <reachedDesc> * preached,
         unsigned short lvlnum, unsigned char nt, int itstart, bool setreached,
         unsigned int pid);
-    void setDestinationPNew(Mission *m, int x, int y, int z,
+    void setDestinationP(Mission *m, int x, int y, int z,
         int ox = 128, int oy = 128, int oz = 0, int new_speed = 160);
     void getPathAtStairsP(Mission *m, std::list<PathNode> *new_path,
         int x, int y, int z, int ox = 128, int oy = 128, int oz = 0);
@@ -278,8 +279,6 @@ public:
     void addDestinationP(Mission *m, int x, int y, int z,
         int ox = 128, int oy = 128, int new_speed = 160);
 
-    void setDestinationP(Mission *m, int x, int y, int z, int ox = 128,
-        int oy = 128, int oz = 0, int new_speed = 160);
     bool movementP(int elapsed);
 
     int draw_timeout_;

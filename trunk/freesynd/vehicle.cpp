@@ -254,6 +254,7 @@ void VehicleInstance::setDestinationV(Mission *m, int x, int y, int z, int ox,
     std::set < PathNode > open, closed;
     std::map < PathNode, PathNode > parent;
 
+    m->adjXYZ(x, y, z);
     z = tile_z_;
 
     dest_path_.clear();
