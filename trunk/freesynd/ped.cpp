@@ -1005,6 +1005,7 @@ void PedInstance::setLvlNode(std::vector <linkDesc> ::iterator it,
     } while((++itstart) < sz);
 }
 
+
 void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                                      int ox, int oy, int oz, int new_speed) {
     // NOTE: Although this implementation uses single junction type at once
@@ -1912,7 +1913,8 @@ exitloop___label:
                 m->mtsurfaces_[it->tileX() + it->tileY() * m->mmax_x_ + it->tileZ() * m->mmax_m_xy].t,
                 it->tileX(), it->tileY(), it->tileZ());
     }
-    speed_ = new_speed;
+    if (dest_path_.size() != 0)
+        speed_ = new_speed;
     tile_x_ = old_x;
     tile_y_ = old_y;
     tile_z_ = old_z;
@@ -1925,6 +1927,235 @@ exitloop___label:
     printf("path set in %i.%i\n", (SDL_GetTicks() - starttime)/1000,
         (SDL_GetTicks() - starttime)%1000);
 }
+
+#if 0
+// testing
+void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
+                                     int ox, int oy, int oz, int new_speed)
+{
+    std::set < PathNode > open, closed;
+    std::map < PathNode, PathNode > parent;
+    printf("time %i.%i\n", SDL_GetTicks()/1000, SDL_GetTicks()%1000);
+
+    PathNode closest;
+    float closest_dist = 100000;
+
+    open.insert(PathNode(tile_x_, tile_y_, tile_z_, off_x_, off_y_,off_z_));
+    int watchDog = 100000000;
+    while (!open.empty()) {
+        watchDog--;
+        float dist = 100000;
+        PathNode p;
+        std::set < PathNode >::iterator pit;
+        for (std::set < PathNode >::iterator it = open.begin();
+             it != open.end(); it++) {
+            float d =
+                sqrt((float) (x - it->tileX()) * (x - it->tileX()) +
+                     (y - it->tileY()) * (y - it->tileY())
+                     + (z - it->tileZ()) * (z - it->tileZ()));
+            if (d < dist) {
+                dist = d;
+                p = *it;
+                pit = it;
+            }
+        }
+        if (dist < closest_dist) {
+            closest = p;
+            closest_dist = dist;
+        }
+        //printf("found best dist %f in %i nodes\n", dist, open.size());
+        open.erase(pit);
+        closed.insert(p);
+
+        if ((p.tileX() == x && p.tileY() == y && p.tileZ() == z)
+            || watchDog < 0) {
+            if (watchDog < 0) {
+                p = closest;
+                dest_path_.push_front(PathNode
+                           (p.tileX(), p.tileY(), p.tileZ(), ox, oy, oz));
+            } else
+                dest_path_.push_front(PathNode(x, y, z, ox, oy, oz));
+            while (parent.find(p) != parent.end()) {
+                p = parent[p];
+                if (p.tileX() == tile_x_ && p.tileY() == tile_y_
+                    && p.tileZ() == tile_z_)
+                    break;
+                dest_path_.push_front(p);
+            }
+            break;
+        }
+
+        std::list < PathNode > neighbours;
+        surfaceDesc *csp = &(m->mtsurfaces_[p.tileX() + p.tileY() * m->mmax_x_
+            + p.tileZ() * m->mmax_m_xy]);
+
+        if ((csp->t & m_sdSurface) == m_sdSurface) {
+            if ((csp->dir & 0x0000000F) == 0x00000000)
+                neighbours.push_back(PathNode (p.tileX(), p.tileY() + 1,
+                       p.tileZ()));
+            if ((csp->dir & 0x000000F0) == 0x00000010)
+                neighbours.push_back(PathNode (p.tileX() + 1, p.tileY() + 1,
+                       p.tileZ()));
+            if ((csp->dir & 0x00000F00) == 0x00000200)
+                neighbours.push_back(PathNode (p.tileX() + 1, p.tileY(),
+                       p.tileZ()));
+            if ((csp->dir & 0x0000F000) == 0x00003000)
+                neighbours.push_back(PathNode (p.tileX() + 1, p.tileY() - 1,
+                       p.tileZ()));
+            if ((csp->dir & 0x000F0000) == 0x00040000)
+                neighbours.push_back(PathNode (p.tileX(), p.tileY() - 1,
+                       p.tileZ()));
+            if ((csp->dir & 0x00F00000) == 0x00500000)
+                neighbours.push_back(PathNode (p.tileX() - 1, p.tileY() - 1,
+                       p.tileZ()));
+            if ((csp->dir & 0x0F000000) == 0x06000000)
+                neighbours.push_back(PathNode (p.tileX() - 1, p.tileY(),
+                       p.tileZ()));
+            if ((csp->dir & 0xF0000000) == 0x70000000)
+                neighbours.push_back(PathNode (p.tileX() - 1, p.tileY() + 1,
+                       p.tileZ()));
+            if (csp->idjh != 0) {
+                if ( (csp->idjh & 0x000000FF) == 0x000000F0) {
+                    neighbours.push_back(PathNode (p.tileX(), p.tileY() + 1,
+                           p.tileZ() + 1));
+                }
+                if ( (csp->idjh & 0x0000F200) == 0x0000F200) {
+                    neighbours.push_back(PathNode (p.tileX() + 1, p.tileY(),
+                           p.tileZ() + 1));
+                }
+                if ( (csp->idjh & 0x00F40000) == 0x00F40000) {
+                    neighbours.push_back(PathNode (p.tileX(), p.tileY() - 1,
+                           p.tileZ() + 1));
+                }
+                if ( (csp->idjh & 0xF6000000) == 0xF6000000) {
+                    neighbours.push_back(PathNode (p.tileX() - 1, p.tileY(),
+                           p.tileZ() + 1));
+                }
+            }
+            if (csp->idjl != 0) {
+                if ( (csp->idjl & 0x000000FF) == 0x000000F0) {
+                    neighbours.push_back(PathNode (p.tileX(), p.tileY() + 1,
+                           p.tileZ()));
+                }
+                if ( (csp->idjl & 0x0000F200) == 0x0000F200) {
+                    neighbours.push_back(PathNode (p.tileX() + 1, p.tileY(),
+                           p.tileZ()));
+                }
+                if ( (csp->idjl & 0x00F40000) == 0x00F40000) {
+                    neighbours.push_back(PathNode (p.tileX(), p.tileY() - 1,
+                           p.tileZ()));
+                }
+                if ( (csp->idjl & 0xF6000000) == 0xF6000000) {
+                    neighbours.push_back(PathNode (p.tileX() - 1, p.tileY(),
+                           p.tileZ()));
+                }
+            }
+        } else if ((csp->t & m_sdStairs) == m_sdStairs) {
+            switch (csp->twd) {
+                case 0x01:
+                    if ((csp->dir & 0x000000FF) == 0x000000F0)
+                        neighbours.push_back(PathNode (p.tileX(), p.tileY() + 1,
+                            p.tileZ() - 1));
+                    if ((csp->dir & 0x0000FF00) == 0x0000F200)
+                        neighbours.push_back(PathNode (p.tileX() + 1, p.tileY(),
+                            p.tileZ()));
+                    if ((csp->dir & 0x00FF0000) == 0x00F40000)
+                        neighbours.push_back(PathNode (p.tileX(), p.tileY() - 1,
+                            p.tileZ() + 1));
+                    if ((csp->dir & 0xFF000000) == 0xF6000000)
+                        neighbours.push_back(PathNode (p.tileX() - 1, p.tileY(),
+                            p.tileZ()));
+                    if (csp->idjl != 0) {
+                        neighbours.push_back(PathNode (p.tileX(), p.tileY() + 1,
+                               p.tileZ() - 1));
+                    }
+                    if (csp->idjh != 0) {
+                        neighbours.push_back(PathNode (p.tileX(), p.tileY() - 1,
+                               p.tileZ()));
+                    }
+                    break;
+                case 0x02:
+                    if ((csp->dir & 0x000000FF) == 0x000000F0)
+                        neighbours.push_back(PathNode (p.tileX(), p.tileY() + 1,
+                            p.tileZ() + 1));
+                    if ((csp->dir & 0x0000FF00) == 0x0000F200)
+                        neighbours.push_back(PathNode (p.tileX() + 1, p.tileY(),
+                            p.tileZ()));
+                    if ((csp->dir & 0x00FF0000) == 0x00F40000)
+                        neighbours.push_back(PathNode (p.tileX(), p.tileY() - 1,
+                            p.tileZ() - 1));
+                    if ((csp->dir & 0xFF000000) == 0xF6000000)
+                        neighbours.push_back(PathNode (p.tileX() - 1, p.tileY(),
+                            p.tileZ()));
+                    if (csp->idjl != 0) {
+                        neighbours.push_back(PathNode (p.tileX(), p.tileY() - 1,
+                               p.tileZ() - 1));
+                    }
+                    if (csp->idjh != 0) {
+                        neighbours.push_back(PathNode (p.tileX(), p.tileY() + 1,
+                               p.tileZ()));
+                    }
+                    break;
+                case 0x03:
+                    if ((csp->dir & 0x000000FF) == 0x000000F0)
+                        neighbours.push_back(PathNode (p.tileX(), p.tileY() + 1,
+                            p.tileZ()));
+                    if ((csp->dir & 0x0000FF00) == 0x0000F200)
+                        neighbours.push_back(PathNode (p.tileX() + 1, p.tileY(),
+                            p.tileZ() + 1));
+                    if ((csp->dir & 0x00FF0000) == 0x00F40000)
+                        neighbours.push_back(PathNode (p.tileX(), p.tileY() - 1,
+                            p.tileZ()));
+                    if ((csp->dir & 0xFF000000) == 0xF6000000)
+                        neighbours.push_back(PathNode (p.tileX() - 1, p.tileY(),
+                            p.tileZ() - 1));
+                    if (csp->idjl != 0) {
+                        neighbours.push_back(PathNode (p.tileX() - 1, p.tileY(),
+                               p.tileZ() - 1));
+                    }
+                    if (csp->idjh != 0) {
+                        neighbours.push_back(PathNode (p.tileX() + 1, p.tileY(),
+                               p.tileZ()));
+                    }
+                    break;
+                case 0x04:
+                    if ((csp->dir & 0x000000FF) == 0x000000F0)
+                        neighbours.push_back(PathNode (p.tileX(), p.tileY() + 1,
+                            p.tileZ()));
+                    if ((csp->dir & 0x0000FF00) == 0x0000F200)
+                        neighbours.push_back(PathNode (p.tileX() + 1, p.tileY(),
+                            p.tileZ() - 1));
+                    if ((csp->dir & 0x00FF0000) == 0x00F40000)
+                        neighbours.push_back(PathNode (p.tileX(), p.tileY() - 1,
+                            p.tileZ()));
+                    if ((csp->dir & 0xFF000000) == 0xF6000000)
+                        neighbours.push_back(PathNode (p.tileX() - 1, p.tileY(),
+                            p.tileZ() + 1));
+                    if (csp->idjl != 0) {
+                        neighbours.push_back(PathNode (p.tileX() + 1, p.tileY(),
+                               p.tileZ() - 1));
+                    }
+                    if (csp->idjh != 0) {
+                        neighbours.push_back(PathNode (p.tileX() - 1, p.tileY(),
+                               p.tileZ()));
+                    }
+                    break;
+            }
+        }
+
+        for (std::list < PathNode >::iterator it = neighbours.begin();
+             it != neighbours.end(); it++)
+            if (open.find(*it) == open.end()
+                && closed.find(*it) == closed.end()) {
+                parent[*it] = p;
+                open.insert(*it);
+            }
+    }
+    if(dest_path_.size() != 0)
+        speed_ = new_speed;
+    printf("end time %i.%i, iterations %i\n", SDL_GetTicks()/1000, SDL_GetTicks()%1000, watchDog);
+}
+#endif
 
 void PedInstance::getPathAtStairsP(Mission *m, std::list<PathNode> *new_path,
                                     int x, int y, int z, int ox, int oy, int oz)

@@ -1360,6 +1360,7 @@ bool Mission::setSurfaces() {
         }
     }
 
+    int sf_total = 0;
     int id_sf = 1;
     sfcitstarts_.push_back(-1);
     for (int iz = 0; iz < mmax_z_; iz++) {
@@ -1375,6 +1376,7 @@ bool Mission::setSurfaces() {
                     stodef.z = iz * mmax_m_xy;
                     vtodefine.push_back(stodef);
                     do {
+                        sf_total++;
                         stodef = vtodefine.back();
                         vtodefine.pop_back();
                         int x = stodef.x;
@@ -1488,6 +1490,7 @@ bool Mission::setSurfaces() {
         }
     }
 
+    int st_total = 0;
     int id_st = 1;
     stritstarts_.push_back(-1);
     for (int iz = 0; iz < mmax_z_; iz++) {
@@ -1503,6 +1506,7 @@ bool Mission::setSurfaces() {
                     stodef.z = iz * mmax_m_xy;
                     vtodefine.push_back(stodef);
                     do {
+                        st_total++;
                         stodef = vtodefine.back();
                         vtodefine.pop_back();
                         int x = stodef.x;
@@ -1747,6 +1751,7 @@ bool Mission::setSurfaces() {
         indx++;
     }
     printf("stairs %i, indx %i, sfc %i\n", id_st, indx, stritstarts_.size());
+    printf("surfaces total %i, stairs total %i\n", sf_total, st_total);
     return true;
 }
 
