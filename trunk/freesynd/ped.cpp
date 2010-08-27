@@ -1399,7 +1399,7 @@ exitloop___label:
                 if ( (csf->idjh & 0x000000FF) == 0x000000F0) {
                     csf0 = &(m->mtsurfaces_[x + yp + zp]);
                     z0 = it->j.z + 1;
-                    toadd.fastxyz = it->j.x
+                    fastxyz0 = it->j.x
                         | ((it->j.y + 1) << 8) | (z0 << 16);
                 }
                 if ( (csf->idjh & 0x0000F200) == 0x0000F200) {
@@ -1708,14 +1708,16 @@ exitloop___label:
                         tile_y_ * m->mmax_x_ + tile_z_ * m->mmax_m_xy]);
                 } else {
                     it = fit;
-                    tile_x_ = it->x;
-                    tile_y_ = it->y;
-                    tile_z_ = it->z;
-                    off_x_ = 128;
-                    off_y_ = 128;
-                    off_z_ = 0;
-                    based = &(m->mtsurfaces_[tile_x_ +
-                        tile_y_ * m->mmax_x_ + tile_z_ * m->mmax_m_xy]);
+                    if (fit != prmj.end()) {
+                        tile_x_ = it->x;
+                        tile_y_ = it->y;
+                        tile_z_ = it->z;
+                        off_x_ = 128;
+                        off_y_ = 128;
+                        off_z_ = 0;
+                        based = &(m->mtsurfaces_[tile_x_ +
+                            tile_y_ * m->mmax_x_ + tile_z_ * m->mmax_m_xy]);
+                    }
                     if (fit != prmj.end())
                         fit++;
                 }
@@ -1737,14 +1739,16 @@ exitloop___label:
                         tile_y_ * m->mmax_x_ + tile_z_ * m->mmax_m_xy]);
                 } else {
                     it = fit;
-                    tile_x_ = it->x;
-                    tile_y_ = it->y;
-                    tile_z_ = it->z;
-                    off_x_ = 128;
-                    off_y_ = 128;
-                    off_z_ = 0;
-                    based = &(m->mtsurfaces_[tile_x_ +
-                        tile_y_ * m->mmax_x_ + tile_z_ * m->mmax_m_xy]);
+                    if (fit != prmj.end()) {
+                        tile_x_ = it->x;
+                        tile_y_ = it->y;
+                        tile_z_ = it->z;
+                        off_x_ = 128;
+                        off_y_ = 128;
+                        off_z_ = 0;
+                        based = &(m->mtsurfaces_[tile_x_ +
+                            tile_y_ * m->mmax_x_ + tile_z_ * m->mmax_m_xy]);
+                    }
                     if (fit != prmj.end())
                         fit++;
                 }
@@ -1886,7 +1890,16 @@ exitloop___label:
                     tdref.setOffZ(oz);
                 }
             } else {
-                dest_path_.push_back(PathNode(x, y, z, ox, oy, oz));
+                if (tile_x_ != x || tile_y_ != y || tile_z_ != z) {
+                    if ((targetd->t & m_sdStairs) == m_sdStairs)
+                        getPathAtStairsP(m, &pathchunk, x, y, z, ox, oy, oz);
+                    if ((targetd->t & m_sdSurface) == m_sdSurface)
+                        getPathAtSurfaceP(m, &pathchunk, x, y, z, ox, oy, oz);
+                    for (std::list<PathNode>::iterator sit = pathchunk.begin();
+                        sit != pathchunk.end(); sit++)
+                        dest_path_.push_back(*sit);
+                } else
+                    dest_path_.push_back(PathNode(x, y, z, ox, oy, oz));
             }
         }
         if(it == prmj.end())
