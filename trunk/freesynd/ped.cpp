@@ -1005,7 +1005,7 @@ void PedInstance::setLvlNode(std::vector <linkDesc> ::iterator it,
     } while((++itstart) < sz);
 }
 
-
+//#if 0
 void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                                      int ox, int oy, int oz, int new_speed) {
     // NOTE: Although this implementation uses single junction type at once
@@ -1078,14 +1078,12 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
             speed_ = new_speed;
             tile_z_ = old_z;
             off_z_ = old_oz;
-            /*
-            for (std::list<PathNode>::iterator it = dest_path_.begin();
-                it != dest_path_.end(); it++) {
-                printf("sf+++ t %i, x %i, y %i, z %i +++\n",
-                    m->mtsurfaces_[it->tileX() + it->tileY() * m->mmax_x_ + it->tileZ() * m->mmax_m_xy].t,
-                    it->tileX(), it->tileY(), it->tileZ());
-            }
-            */
+            //for (std::list<PathNode>::iterator it = dest_path_.begin();
+            //    it != dest_path_.end(); it++) {
+            //    printf("sf+++ t %i, x %i, y %i, z %i +++\n",
+            //        m->mtsurfaces_[it->tileX() + it->tileY() * m->mmax_x_ + it->tileZ() * m->mmax_m_xy].t,
+            //        it->tileX(), it->tileY(), it->tileZ());
+            //}
             return;
         }
     } else if ((based->t & m_sdStairs) == m_sdStairs
@@ -1095,14 +1093,12 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
             speed_ = new_speed;
             tile_z_ = old_z;
             off_z_ = old_oz;
-            /*
-            for (std::list<PathNode>::iterator it = dest_path_.begin();
-                it != dest_path_.end(); it++) {
-                printf("st+++ t %i, x %i, y %i, z %i +++\n",
-                    m->mtsurfaces_[it->tileX() + it->tileY() * m->mmax_x_ + it->tileZ() * m->mmax_m_xy].t,
-                    it->tileX(), it->tileY(), it->tileZ());
-            }
-            */
+            //for (std::list<PathNode>::iterator it = dest_path_.begin();
+            //    it != dest_path_.end(); it++) {
+            //    printf("st+++ t %i, x %i, y %i, z %i +++\n",
+            //        m->mtsurfaces_[it->tileX() + it->tileY() * m->mmax_x_ + it->tileZ() * m->mmax_m_xy].t,
+            //        it->tileX(), it->tileY(), it->tileZ());
+            //}
             return;
         }
     }
@@ -1927,12 +1923,66 @@ exitloop___label:
     printf("path set in %i.%i\n", (SDL_GetTicks() - starttime)/1000,
         (SDL_GetTicks() - starttime)%1000);
 }
-
+//#endif
 #if 0
 // testing
 void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
-                                     int ox, int oy, int oz, int new_speed)
-{
+                                     int ox, int oy, int oz, int new_speed) {
+    m->adjXYZ(x, y, z);
+    dest_path_.clear();
+    setSpeed(0);
+    printf("target x : %i; y : %i; z : %i = = ox :%i, oy :%i, oz :%i\n",
+        x, y, z, ox, oy, oz);
+
+    surfaceDesc *targetd = &(m->mtsurfaces_[x + y * m->mmax_x_ + z * m->mmax_m_xy]);
+
+    //if(targetd->t == m_sdNonwalkable || map_ == -1 || health_ <= 0)
+        //return;
+
+    int old_z = tile_z_;
+    int old_oz = off_z_;
+    tile_z_ += (off_z_ == 0 ? 0 : 1);
+    off_z_ = 0;
+    surfaceDesc *based = &(m->mtsurfaces_[tile_x_
+        + tile_y_ * m->mmax_x_ + tile_z_ * m->mmax_m_xy]);
+
+    printf("base %i, bt %i, target %i, tt %i\n",based->id, based->t,targetd->id,targetd->t);
+    printf("btwd %i, ttwd %i\n",based->twd, targetd->twd);
+    printf("base pos: x %i; y %i; z %i, ox %i, oy %i, oz %i\n",
+        tile_x_, tile_y_, tile_z_, off_x_, off_y_, off_z_);
+
+    if(targetd->t == m_sdNonwalkable || map_ == -1 || health_ <= 0) {
+        tile_z_ = old_z;
+        off_z_ = old_oz;
+        return;
+    }
+
+    if(based->t == m_sdNonwalkable) {
+        printf("Movement from nonwalkable postion\n");
+        tile_z_ = old_z;
+        off_z_ = old_oz;
+        return;
+    }
+
+    if (in_vehicle_) {
+        if(in_vehicle_->tileX() != x
+            || in_vehicle_->tileY() != y
+            || in_vehicle_->tileZ() != z
+            || in_vehicle_->offX() != ox
+            || in_vehicle_->offY() != oy
+            || in_vehicle_->offZ() != oz)
+        in_vehicle_ = 0;
+    }
+    if (pickup_weapon_) {
+        if(pickup_weapon_->tileX() != x
+            || pickup_weapon_->tileY() != y
+            || pickup_weapon_->tileZ() != z
+            || pickup_weapon_->offX() != ox
+            || pickup_weapon_->offY() != oy
+            || pickup_weapon_->offZ() != oz)
+        pickup_weapon_ = 0;
+    }
+
     std::set < PathNode > open, closed;
     std::map < PathNode, PathNode > parent;
     printf("time %i.%i\n", SDL_GetTicks()/1000, SDL_GetTicks()%1000);
@@ -1941,10 +1991,10 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
     float closest_dist = 100000;
 
     open.insert(PathNode(tile_x_, tile_y_, tile_z_, off_x_, off_y_,off_z_));
-    int watchDog = 100000000;
+    int watchDog = 100000;
     while (!open.empty()) {
         watchDog--;
-        float dist = 100000;
+        float dist = 10000;
         PathNode p;
         std::set < PathNode >::iterator pit;
         for (std::set < PathNode >::iterator it = open.begin();

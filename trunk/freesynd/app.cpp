@@ -415,6 +415,8 @@ void App::run() {
     walkdata_p_[0x02] = 0x00;
     walkdata_p_[0x80] = 0x03;
     walkdata_p_[0x81] = 0x02;
+    walkdata_p_[0x8F] = 0x00;
+    walkdata_p_[0x93] = 0x00;
     delete[] data;
 
     // load palette
