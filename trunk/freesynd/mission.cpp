@@ -31,7 +31,7 @@
 #include "app.h"
 
 Mission::Mission():map_(0), min_x_(0), min_y_(0), max_x_(0), max_y_(0), objective_(0),
-objective_ped_(-1), objective_vehicle_(-1), mtsurfaces_(NULL)
+objective_ped_(-1), objective_vehicle_(-1), mtsurfaces_(NULL), mdpoints_(NULL)
 {
     memset(&level_data_, 0, sizeof(level_data_));
 }
@@ -589,10 +589,12 @@ bool Mission::setSurfaces() {
         return false;
     mmax_m_all = mmax_x_ * mmax_y_ * mmax_z_;
     mtsurfaces_ = (surfaceDesc *)malloc(mmax_m_all * sizeof(surfaceDesc));
-    if(mtsurfaces_ == NULL)
+    mdpoints_ = (floodPointDesc *)malloc(mmax_m_all * sizeof(floodPointDesc));
+    if(mtsurfaces_ == NULL || mdpoints_ == NULL)
         return false;
     mmax_m_xy = mmax_x_ * mmax_y_;
     memset((void *)mtsurfaces_, 0, mmax_m_all * sizeof(surfaceDesc));
+    memset((void *)mdpoints_, 0, mmax_m_all * sizeof(floodPointDesc));
     Map *m = g_App.maps().map(map_);
     for (int ix = 0; ix < mmax_x_; ix++) {
         for (int iy = 0; iy < mmax_y_; iy++) {
@@ -1752,18 +1754,24 @@ bool Mission::setSurfaces() {
     }
     printf("stairs %i, indx %i, sfc %i\n", id_st, indx, stritstarts_.size());
     printf("surfaces total %i, stairs total %i\n", sf_total, st_total);
+    printf("flood size %i\n", sizeof(floodPointDesc) * mmax_x_ * mmax_y_ * mmax_z_);
     return true;
 }
 
 void Mission::clrSurfaces() {
-    if(mtsurfaces_ == NULL)
-        return;
-    free(mtsurfaces_);
-    mtsurfaces_ = NULL;
+
     sfcjunctions_.clear();
     strjunctions_.clear();
     sfcitstarts_.clear();
     stritstarts_.clear();
+    if(mtsurfaces_ != NULL) {
+        free(mtsurfaces_);
+        mtsurfaces_ = NULL;
+    }
+    if(mdpoints_ != NULL) {
+        free(mdpoints_);
+        mdpoints_ = NULL;
+    }
 }
 
 bool Mission::getWalkable(int &x, int &y, int &z, int &ox, int &oy) {

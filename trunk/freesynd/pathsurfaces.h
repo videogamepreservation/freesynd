@@ -68,4 +68,23 @@
         unsigned int fastxyz;
     }junctionDesc;
 
+    typedef struct {
+        // 0 - not defined, 1b - base point, 2b - target point,
+        // 3b - link (when base point reaches target point or vice versa),
+        // 4b - walkable, 5b - constant, 6b - non walkable
+        unsigned char t;
+        unsigned int lvl;
+        unsigned char dirh;
+        unsigned char dirm;
+        unsigned char dirl;
+    }floodPointDesc;
+    #define m_fdNotDefined      0
+    #define m_fdBasePoint       1
+    #define m_fdTargetPoint     2
+    #define m_fdLink            4
+    #define m_fdWalkable        8
+    #define m_fdConstant        16
+    #define m_fdNonWalkable     32
+
 #endif
+

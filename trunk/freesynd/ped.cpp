@@ -1705,7 +1705,7 @@ exitloop___label:
                         tile_y_ * m->mmax_x_ + tile_z_ * m->mmax_m_xy]);
                 } else {
                     it = fit;
-                    if (fit != prmj.end()) {
+                    if (it != prmj.end()) {
                         tile_x_ = it->x;
                         tile_y_ = it->y;
                         tile_z_ = it->z;
@@ -1714,9 +1714,8 @@ exitloop___label:
                         off_z_ = 0;
                         based = &(m->mtsurfaces_[tile_x_ +
                             tile_y_ * m->mmax_x_ + tile_z_ * m->mmax_m_xy]);
-                    }
-                    if (fit != prmj.end())
                         fit++;
+                    }
                 }
             } else if ((based->t & m_sdStairs) == m_sdStairs) {
                 if (it->x != tile_x_ || it->y != tile_y_
@@ -1736,7 +1735,7 @@ exitloop___label:
                         tile_y_ * m->mmax_x_ + tile_z_ * m->mmax_m_xy]);
                 } else {
                     it = fit;
-                    if (fit != prmj.end()) {
+                    if (it != prmj.end()) {
                         tile_x_ = it->x;
                         tile_y_ = it->y;
                         tile_z_ = it->z;
@@ -1745,9 +1744,8 @@ exitloop___label:
                         off_z_ = 0;
                         based = &(m->mtsurfaces_[tile_x_ +
                             tile_y_ * m->mmax_x_ + tile_z_ * m->mmax_m_xy]);
-                    }
-                    if (fit != prmj.end())
                         fit++;
+                    }
                 }
             }
         } else {
@@ -1772,26 +1770,6 @@ exitloop___label:
                     if (dest_path_.empty()) {
                         dest_path_.push_back(PathNode(tile_x_, tile_y_,
                             tile_z_, off_x_, off_y_, off_z_));
-                        it = fit;
-                        if (fit != prmj.end()) {
-                            tile_x_ = it->x;
-                            tile_y_ = it->y;
-                            tile_z_ = it->z;
-                            off_x_ = 128;
-                            off_y_ = 128;
-                            off_z_ = 0;
-                            based = &(m->mtsurfaces_[tile_x_ +
-                                tile_y_ * m->mmax_x_ + tile_z_ * m->mmax_m_xy]);
-                            fit++;
-                        }
-                    }
-                    if (it != prmj.end()) {
-                        PathNode &dref = dest_path_.back();
-                        if (dref.tileX() != tile_x_ || dref.tileY() != tile_y_
-                            || dref.tileZ() != tile_z_) {
-                            dest_path_.push_back(PathNode(tile_x_, tile_y_,
-                                tile_z_, off_x_, off_y_, off_z_));
-                        }
                         tile_x_ = it->x;
                         tile_y_ = it->y;
                         tile_z_ = it->z;
@@ -1800,6 +1778,27 @@ exitloop___label:
                         off_z_ = 0;
                         based = &(m->mtsurfaces_[tile_x_ +
                             tile_y_ * m->mmax_x_ + tile_z_ * m->mmax_m_xy]);
+                        it = fit;
+                        if (it != prmj.end()) {
+                            fit++;
+                        }
+                    } else {
+                        if (it != prmj.end()) {
+                            PathNode &dref = dest_path_.back();
+                            if (dref.tileX() != tile_x_ || dref.tileY() != tile_y_
+                                || dref.tileZ() != tile_z_) {
+                                dest_path_.push_back(PathNode(tile_x_, tile_y_,
+                                    tile_z_, off_x_, off_y_, off_z_));
+                            }
+                            tile_x_ = it->x;
+                            tile_y_ = it->y;
+                            tile_z_ = it->z;
+                            off_x_ = 128;
+                            off_y_ = 128;
+                            off_z_ = 0;
+                            based = &(m->mtsurfaces_[tile_x_ +
+                                tile_y_ * m->mmax_x_ + tile_z_ * m->mmax_m_xy]);
+                        }
                     }
                 }
             } else if ((based->t & m_sdStairs) == m_sdStairs) {
@@ -1823,26 +1822,6 @@ exitloop___label:
                     if (dest_path_.empty()) {
                         dest_path_.push_back(PathNode(tile_x_, tile_y_,
                             tile_z_, off_x_, off_y_, off_z_));
-                        it = fit;
-                        if (fit != prmj.end()) {
-                            tile_x_ = it->x;
-                            tile_y_ = it->y;
-                            tile_z_ = it->z;
-                            off_x_ = 128;
-                            off_y_ = 128;
-                            off_z_ = 0;
-                            based = &(m->mtsurfaces_[tile_x_ +
-                                tile_y_ * m->mmax_x_ + tile_z_ * m->mmax_m_xy]);
-                            fit++;
-                        }
-                    }
-                    if (it != prmj.end()) {
-                        PathNode &dref = dest_path_.back();
-                        if (dref.tileX() != tile_x_ || dref.tileY() != tile_y_
-                            || dref.tileZ() != tile_z_) {
-                            dest_path_.push_back(PathNode(tile_x_, tile_y_,
-                                tile_z_, off_x_, off_y_, off_z_));
-                        }
                         tile_x_ = it->x;
                         tile_y_ = it->y;
                         tile_z_ = it->z;
@@ -1851,6 +1830,27 @@ exitloop___label:
                         off_z_ = 0;
                         based = &(m->mtsurfaces_[tile_x_ +
                             tile_y_ * m->mmax_x_ + tile_z_ * m->mmax_m_xy]);
+                        it = fit;
+                        if (it != prmj.end()) {
+                            fit++;
+                        }
+                    } else {
+                        if (it != prmj.end()) {
+                            PathNode &dref = dest_path_.back();
+                            if (dref.tileX() != tile_x_ || dref.tileY() != tile_y_
+                                || dref.tileZ() != tile_z_) {
+                                dest_path_.push_back(PathNode(tile_x_, tile_y_,
+                                    tile_z_, off_x_, off_y_, off_z_));
+                            }
+                            tile_x_ = it->x;
+                            tile_y_ = it->y;
+                            tile_z_ = it->z;
+                            off_x_ = 128;
+                            off_y_ = 128;
+                            off_z_ = 0;
+                            based = &(m->mtsurfaces_[tile_x_ +
+                                tile_y_ * m->mmax_x_ + tile_z_ * m->mmax_m_xy]);
+                        }
                     }
                 }
             }
@@ -1864,16 +1864,17 @@ exitloop___label:
                         dest_path_.push_back(PathNode(it->x, it->y,
                             it->z));
                     }
-                }
-                PathNode &tdref = dest_path_.back();
-                if (tdref.tileX() != x || tdref.tileY() != y
-                    || tdref.tileZ() != z) {
-                    tile_x_ = tdref.tileX();
-                    tile_y_ = tdref.tileY();
-                    tile_z_ = tdref.tileZ();
+                    tile_x_ = it->x;
+                    tile_y_ = it->y;
+                    tile_z_ = it->z;
                     off_x_ = 128;
                     off_y_ = 128;
                     off_z_ = 0;
+                    based = &(m->mtsurfaces_[tile_x_ +
+                        tile_y_ * m->mmax_x_ + tile_z_ * m->mmax_m_xy]);
+                }
+                if (tile_x_ != x || tile_y_ != y
+                    || tile_z_ != z) {
                     if ((targetd->t & m_sdStairs) == m_sdStairs)
                         getPathAtStairsP(m, &pathchunk, x, y, z, ox, oy, oz);
                     if ((targetd->t & m_sdSurface) == m_sdSurface)
@@ -1882,9 +1883,7 @@ exitloop___label:
                         sit != pathchunk.end(); sit++)
                         dest_path_.push_back(*sit);
                 } else {
-                    tdref.setOffX(ox);
-                    tdref.setOffY(oy);
-                    tdref.setOffZ(oz);
+                    dest_path_.push_back(PathNode(x, y, z, ox, oy, oz));
                 }
             } else {
                 if (tile_x_ != x || tile_y_ != y || tile_z_ != z) {
@@ -1951,6 +1950,8 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
     printf("base pos: x %i; y %i; z %i, ox %i, oy %i, oz %i\n",
         tile_x_, tile_y_, tile_z_, off_x_, off_y_, off_z_);
 
+    //printf("tt dir %x, idh %x, idl %x\n", targetd->dir, targetd->idjh, targetd->idjl);
+    return;
     if(targetd->t == m_sdNonwalkable || map_ == -1 || health_ <= 0) {
         tile_z_ = old_z;
         off_z_ = old_oz;
