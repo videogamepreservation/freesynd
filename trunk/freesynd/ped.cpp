@@ -1005,7 +1005,7 @@ void PedInstance::setLvlNode(std::vector <linkDesc> ::iterator it,
     } while((++itstart) < sz);
 }
 
-//#if 0
+#if 0
 void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                                      int ox, int oy, int oz, int new_speed) {
     // NOTE: Although this implementation uses single junction type at once
@@ -1922,9 +1922,10 @@ exitloop___label:
     printf("path set in %i.%i\n", (SDL_GetTicks() - starttime)/1000,
         (SDL_GetTicks() - starttime)%1000);
 }
-//#endif
+#endif
 #if 0
-// testing
+// this algorithm can reach a corner and stop, as such it will
+// not produce path, also path if reached is not always the shortest one
 void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                                      int ox, int oy, int oz, int new_speed) {
     m->adjXYZ(x, y, z);
@@ -1951,7 +1952,7 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
         tile_x_, tile_y_, tile_z_, off_x_, off_y_, off_z_);
 
     //printf("tt dir %x, idh %x, idl %x\n", targetd->dir, targetd->idjh, targetd->idjl);
-    return;
+    //return;
     if(targetd->t == m_sdNonwalkable || map_ == -1 || health_ <= 0) {
         tile_z_ = old_z;
         off_z_ = old_oz;
@@ -2207,6 +2208,81 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
     printf("end time %i.%i, iterations %i\n", SDL_GetTicks()/1000, SDL_GetTicks()%1000, watchDog);
 }
 #endif
+
+//#if 0
+void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
+                                     int ox, int oy, int oz, int new_speed) {
+    m->adjXYZ(x, y, z);
+    dest_path_.clear();
+    setSpeed(0);
+    printf("target x : %i; y : %i; z : %i = = ox :%i, oy :%i, oz :%i\n",
+        x, y, z, ox, oy, oz);
+
+    surfaceDesc *targetd = &(m->mtsurfaces_[x + y * m->mmax_x_ + z * m->mmax_m_xy]);
+
+    //if(targetd->t == m_sdNonwalkable || map_ == -1 || health_ <= 0)
+        //return;
+
+    int old_z = tile_z_;
+    int old_oz = off_z_;
+    tile_z_ += (off_z_ == 0 ? 0 : 1);
+    off_z_ = 0;
+    surfaceDesc *based = &(m->mtsurfaces_[tile_x_
+        + tile_y_ * m->mmax_x_ + tile_z_ * m->mmax_m_xy]);
+
+    printf("base %i, bt %i, target %i, tt %i\n",based->id, based->t,targetd->id,targetd->t);
+    printf("btwd %i, ttwd %i\n",based->twd, targetd->twd);
+    printf("base pos: x %i; y %i; z %i, ox %i, oy %i, oz %i\n",
+        tile_x_, tile_y_, tile_z_, off_x_, off_y_, off_z_);
+
+    //printf("tt dir %x, idh %x, idl %x\n", targetd->dir, targetd->idjh, targetd->idjl);
+    //return;
+    if(targetd->t == m_sdNonwalkable || map_ == -1 || health_ <= 0) {
+        tile_z_ = old_z;
+        off_z_ = old_oz;
+        return;
+    }
+
+    if(based->t == m_sdNonwalkable) {
+        printf("Movement from nonwalkable postion\n");
+        tile_z_ = old_z;
+        off_z_ = old_oz;
+        return;
+    }
+
+    if (in_vehicle_) {
+        if(in_vehicle_->tileX() != x
+            || in_vehicle_->tileY() != y
+            || in_vehicle_->tileZ() != z
+            || in_vehicle_->offX() != ox
+            || in_vehicle_->offY() != oy
+            || in_vehicle_->offZ() != oz)
+        in_vehicle_ = 0;
+    }
+    if (pickup_weapon_) {
+        if(pickup_weapon_->tileX() != x
+            || pickup_weapon_->tileY() != y
+            || pickup_weapon_->tileZ() != z
+            || pickup_weapon_->offX() != ox
+            || pickup_weapon_->offY() != oy
+            || pickup_weapon_->offZ() != oz)
+        pickup_weapon_ = 0;
+    }
+
+    floodPointDesc *mdpmirror = NULL;
+    mdpmirror = (floodPointDesc *)malloc(m->mmax_m_all * sizeof(floodPointDesc));
+    if (mdpmirror == NULL) {
+        printf("not enough memory: setDestinationP\n");
+        return;
+    }
+    memcpy(mdpmirror, m->mdpoints_, m->mmax_m_all * sizeof(floodPointDesc));
+    printf("time %i.%i\n", SDL_GetTicks()/1000, SDL_GetTicks()%1000);
+
+    if(dest_path_.size() != 0)
+        speed_ = new_speed;
+    printf("end time %i.%i\n", SDL_GetTicks()/1000, SDL_GetTicks()%1000);
+}
+//#endif
 
 void PedInstance::getPathAtStairsP(Mission *m, std::list<PathNode> *new_path,
                                     int x, int y, int z, int ox, int oy, int oz)

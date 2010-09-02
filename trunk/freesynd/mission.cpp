@@ -1755,6 +1755,129 @@ bool Mission::setSurfaces() {
     printf("stairs %i, indx %i, sfc %i\n", id_st, indx, stritstarts_.size());
     printf("surfaces total %i, stairs total %i\n", sf_total, st_total);
     printf("flood size %i\n", sizeof(floodPointDesc) * mmax_x_ * mmax_y_ * mmax_z_);
+    for (int iz = 0; iz < mmax_z_; iz++) {
+        for (int iy = 0; iy < mmax_y_; iy++) {
+            for (int ix = 0; ix < mmax_x_; ix++) {
+                unsigned int indx = ix + iy * mmax_x_ + iz * mmax_m_xy;
+                surfaceDesc *csp = &(mtsurfaces_[indx]);
+                floodPointDesc *cfpp = &(mdpoints_[indx]);
+
+                if ((csp->t & m_sdSurface) == m_sdSurface) {
+                    cfpp->t = m_fdWalkable;
+                    if ((csp->dir & 0x0000000F) == 0x00000000)
+                        cfpp->dirm |= 0x01;
+                    if ((csp->dir & 0x000000F0) == 0x00000010)
+                        cfpp->dirm |= 0x02;
+                    if ((csp->dir & 0x00000F00) == 0x00000200)
+                        cfpp->dirm |= 0x04;
+                    if ((csp->dir & 0x0000F000) == 0x00003000)
+                        cfpp->dirm |= 0x08;
+                    if ((csp->dir & 0x000F0000) == 0x00040000)
+                        cfpp->dirm |= 0x10;
+                    if ((csp->dir & 0x00F00000) == 0x00500000)
+                        cfpp->dirm |= 0x20;
+                    if ((csp->dir & 0x0F000000) == 0x06000000)
+                        cfpp->dirm |= 0x40;
+                    if ((csp->dir & 0xF0000000) == 0x70000000)
+                        cfpp->dirm |= 0x80;
+                    if (csp->idjh != 0) {
+                        if ( (csp->idjh & 0x000000FF) == 0x000000F0) {
+                            cfpp->dirh |= 0x01;
+                        }
+                        if ( (csp->idjh & 0x0000F200) == 0x0000F200) {
+                            cfpp->dirh |= 0x04;
+                        }
+                        if ( (csp->idjh & 0x00F40000) == 0x00F40000) {
+                            cfpp->dirh |= 0x10;
+                        }
+                        if ( (csp->idjh & 0xF6000000) == 0xF6000000) {
+                            cfpp->dirh |= 0x40;
+                        }
+                    }
+                    if (csp->idjl != 0) {
+                        if ( (csp->idjl & 0x000000FF) == 0x000000F0) {
+                            cfpp->dirm |= 0x01;
+                        }
+                        if ( (csp->idjl & 0x0000F200) == 0x0000F200) {
+                            cfpp->dirm |= 0x04;
+                        }
+                        if ( (csp->idjl & 0x00F40000) == 0x00F40000) {
+                            cfpp->dirm |= 0x10;
+                        }
+                        if ( (csp->idjl & 0xF6000000) == 0xF6000000) {
+                            cfpp->dirm |= 0x40;
+                        }
+                    }
+                } else if ((csp->t & m_sdStairs) == m_sdStairs) {
+                    cfpp->t = m_fdWalkable;
+                    switch (csp->twd) {
+                        case 0x01:
+                            if ((csp->dir & 0x000000FF) == 0x000000F0)
+                                cfpp->dirl |= 0x01;
+                            if ((csp->dir & 0x0000FF00) == 0x0000F200)
+                                cfpp->dirm |= 0x04;
+                            if ((csp->dir & 0x00FF0000) == 0x00F40000)
+                                cfpp->dirh |= 0x10;
+                            if ((csp->dir & 0xFF000000) == 0xF6000000)
+                                cfpp->dirm |= 0x40;
+
+                            if (csp->idjl != 0)
+                                cfpp->dirl |= 0x01;
+                            if (csp->idjh != 0)
+                                cfpp->dirm |= 0x10;
+                            break;
+                        case 0x02:
+                            if ((csp->dir & 0x000000FF) == 0x000000F0)
+                                cfpp->dirh |= 0x01;
+                            if ((csp->dir & 0x0000FF00) == 0x0000F200)
+                                cfpp->dirm |= 0x04;
+                            if ((csp->dir & 0x00FF0000) == 0x00F40000)
+                                cfpp->dirl |= 0x10;
+                            if ((csp->dir & 0xFF000000) == 0xF6000000)
+                                cfpp->dirm |= 0x40;
+
+                            if (csp->idjl != 0)
+                                cfpp->dirl |= 0x01;
+                            if (csp->idjh != 0)
+                                cfpp->dirm |= 0x10;
+                            break;
+                        case 0x03:
+                            if ((csp->dir & 0x000000FF) == 0x000000F0)
+                                cfpp->dirm |= 0x01;
+                            if ((csp->dir & 0x0000FF00) == 0x0000F200)
+                                cfpp->dirh |= 0x04;
+                            if ((csp->dir & 0x00FF0000) == 0x00F40000)
+                                cfpp->dirm |= 0x10;
+                            if ((csp->dir & 0xFF000000) == 0xF6000000)
+                                cfpp->dirl |= 0x40;
+
+                            if (csp->idjl != 0)
+                                cfpp->dirl |= 0x40;
+                            if (csp->idjh != 0)
+                                cfpp->dirm |= 0x04;
+                            break;
+                        case 0x04:
+                            if ((csp->dir & 0x000000FF) == 0x000000F0)
+                                cfpp->dirm |= 0x01;
+                            if ((csp->dir & 0x0000FF00) == 0x0000F200)
+                                cfpp->dirl |= 0x04;
+                            if ((csp->dir & 0x00FF0000) == 0x00F40000)
+                                cfpp->dirm |= 0x10;
+                            if ((csp->dir & 0xFF000000) == 0xF6000000)
+                                cfpp->dirh |= 0x40;
+
+                            if (csp->idjl != 0)
+                                cfpp->dirl |= 0x04;
+                            if (csp->idjh != 0)
+                                cfpp->dirm |= 0x40;
+                            break;
+                    }
+                } else {
+                    cfpp->t = m_fdNonWalkable;
+                }
+            }
+        }
+    }
     return true;
 }
 
