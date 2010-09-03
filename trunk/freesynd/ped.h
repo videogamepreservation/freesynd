@@ -257,6 +257,15 @@ public:
         int dist;
     }reachedDesc;
 
+    typedef struct {
+        toDefineXYZ coords;
+        floodPointDesc *p;
+    }toSetDesc;
+    typedef struct {
+        unsigned short indxs;
+        unsigned short n;
+    }lvlNodesDesc;
+
 #define MAX_LVLS_PATH     32
 
     int getDistance(int x1, int y1, int z1,

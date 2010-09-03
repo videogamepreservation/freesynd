@@ -73,7 +73,7 @@
         // 3b - link (when base point reaches target point or vice versa),
         // 4b - walkable, 5b - constant, 6b - non walkable
         unsigned char t;
-        unsigned int lvl;
+        unsigned short lvl;
         unsigned char dirh;
         unsigned char dirm;
         unsigned char dirl;

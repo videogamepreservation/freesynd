@@ -1005,7 +1005,7 @@ void PedInstance::setLvlNode(std::vector <linkDesc> ::iterator it,
     } while((++itstart) < sz);
 }
 
-#if 0
+//#if 0
 void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                                      int ox, int oy, int oz, int new_speed) {
     // NOTE: Although this implementation uses single junction type at once
@@ -1069,6 +1069,12 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
             || pickup_weapon_->offY() != oy
             || pickup_weapon_->offZ() != oz)
         pickup_weapon_ = 0;
+    }
+
+    if (tile_x_ == x && tile_y_ == y && tile_z_ == z) {
+        dest_path_.push_back(PathNode(x, y, z, ox, oy, oz));
+        speed_ = new_speed;
+        return;
     }
 
     if ((based->t & m_sdSurface) == m_sdSurface
@@ -1922,7 +1928,7 @@ exitloop___label:
     printf("path set in %i.%i\n", (SDL_GetTicks() - starttime)/1000,
         (SDL_GetTicks() - starttime)%1000);
 }
-#endif
+//#endif
 #if 0
 // this algorithm can reach a corner and stop, as such it will
 // not produce path, also path if reached is not always the shortest one
@@ -1983,6 +1989,12 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
             || pickup_weapon_->offY() != oy
             || pickup_weapon_->offZ() != oz)
         pickup_weapon_ = 0;
+    }
+
+    if (tile_x_ == x && tile_y_ == y && tile_z_ == z) {
+        dest_path_.push_back(PathNode(x, y, z, ox, oy, oz));
+        speed_ = new_speed;
+        return;
     }
 
     std::set < PathNode > open, closed;
@@ -2209,7 +2221,7 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
 }
 #endif
 
-//#if 0
+#if 0
 void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                                      int ox, int oy, int oz, int new_speed) {
     m->adjXYZ(x, y, z);
@@ -2269,6 +2281,12 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
         pickup_weapon_ = 0;
     }
 
+    if (tile_x_ == x && tile_y_ == y && tile_z_ == z) {
+        dest_path_.push_back(PathNode(x, y, z, ox, oy, oz));
+        speed_ = new_speed;
+        return;
+    }
+    printf("time %i.%i\n", SDL_GetTicks()/1000, SDL_GetTicks()%1000);
     floodPointDesc *mdpmirror = NULL;
     mdpmirror = (floodPointDesc *)malloc(m->mmax_m_all * sizeof(floodPointDesc));
     if (mdpmirror == NULL) {
@@ -2276,13 +2294,627 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
         return;
     }
     memcpy(mdpmirror, m->mdpoints_, m->mmax_m_all * sizeof(floodPointDesc));
-    printf("time %i.%i\n", SDL_GetTicks()/1000, SDL_GetTicks()%1000);
 
+    unsigned char lt;
+    unsigned short blvl = 0, tlvl = 0;
+    std::vector <toSetDesc> bv;
+    std::vector <toSetDesc> tv;
+    std::set <unsigned short> lv;
+    toSetDesc sadd;
+    floodPointDesc *pfdp;
+    pfdp = &(m->mdpoints_[tile_x_ + tile_y_ * m->mmax_x_ + tile_z_ * m->mmax_m_xy]);
+    pfdp->t |= (m_fdBasePoint | m_fdLink | m_fdConstant);
+    sadd.coords.x = tile_x_;
+    sadd.coords.y = tile_y_;
+    sadd.coords.z = tile_z_;
+    sadd.p = pfdp;
+    bv.push_back(sadd);
+    pfdp = &(m->mdpoints_[x + y * m->mmax_x_ + z * m->mmax_m_xy]);
+    pfdp->t |= (m_fdTargetPoint | m_fdLink | m_fdConstant);
+    sadd.coords.x = x;
+    sadd.coords.y = y;
+    sadd.coords.z = z;
+    sadd.p = pfdp;
+    tv.push_back(sadd);
+    lvlNodesDesc ladd;
+    ladd.indxs = 0;
+    ladd.n = 1;
+    std::vector <lvlNodesDesc> bn;
+    std::vector <lvlNodesDesc> tn;
+    bn.push_back(ladd);
+    tn.push_back(ladd);
+    bool nodeset;
+
+    do {
+        unsigned short mindx = bn[blvl].indxs + bn[blvl].n;
+        for (unsigned short i = bn[blvl].indxs; i < mindx; i++) {
+            toSetDesc bref = bv[i];
+            if (bref.p->dirh != 0) {
+                if ((bref.p->dirh & 0x01) == 0x01) {
+                    sadd.coords.x = bref.coords.x;
+                    sadd.coords.y = bref.coords.y + 1;
+                    sadd.coords.z = bref.coords.z + 1;
+                    sadd.p = &(m->mdpoints_[sadd.coords.x
+                        + sadd.coords.y * m->mmax_x_
+                        + sadd.coords.z * m->mmax_m_xy]);
+                    if (sadd.p->t == m_fdWalkable) {
+                        sadd.p->t |= m_fdBasePoint;
+                        bv.push_back(sadd);
+                    } else if ((sadd.p->t & m_fdTargetPoint) != 0){
+                        bref.p->t |= m_fdLink;
+                        sadd.p->t |= m_fdLink;
+                        lt = m_fdBasePoint;
+                        lv.insert(i);
+                    }
+                }
+                if ((bref.p->dirh & 0x04) == 0x04) {
+                    sadd.coords.x = bref.coords.x + 1;
+                    sadd.coords.y = bref.coords.y;
+                    sadd.coords.z = bref.coords.z + 1;
+                    sadd.p = &(m->mdpoints_[sadd.coords.x
+                        + sadd.coords.y * m->mmax_x_
+                        + sadd.coords.z * m->mmax_m_xy]);
+                    if (sadd.p->t == m_fdWalkable) {
+                        sadd.p->t |= m_fdBasePoint;
+                        bv.push_back(sadd);
+                    } else if ((sadd.p->t & m_fdTargetPoint) != 0){
+                        bref.p->t |= m_fdLink;
+                        sadd.p->t |= m_fdLink;
+                        lt = m_fdBasePoint;
+                        lv.insert(i);
+                    }
+                }
+                if ((bref.p->dirh & 0x10) == 0x10) {
+                    sadd.coords.x = bref.coords.x;
+                    sadd.coords.y = bref.coords.y - 1;
+                    sadd.coords.z = bref.coords.z + 1;
+                    sadd.p = &(m->mdpoints_[sadd.coords.x
+                        + sadd.coords.y * m->mmax_x_
+                        + sadd.coords.z * m->mmax_m_xy]);
+                    if (sadd.p->t == m_fdWalkable) {
+                        sadd.p->t |= m_fdBasePoint;
+                        bv.push_back(sadd);
+                    } else if ((sadd.p->t & m_fdTargetPoint) != 0){
+                        bref.p->t |= m_fdLink;
+                        sadd.p->t |= m_fdLink;
+                        lt = m_fdBasePoint;
+                        lv.insert(i);
+                    }
+                }
+                if ((bref.p->dirh & 0x40) == 0x40) {
+                    sadd.coords.x = bref.coords.x - 1;
+                    sadd.coords.y = bref.coords.y;
+                    sadd.coords.z = bref.coords.z + 1;
+                    sadd.p = &(m->mdpoints_[sadd.coords.x
+                        + sadd.coords.y * m->mmax_x_
+                        + sadd.coords.z * m->mmax_m_xy]);
+                    if (sadd.p->t == m_fdWalkable) {
+                        sadd.p->t |= m_fdBasePoint;
+                        bv.push_back(sadd);
+                    } else if ((sadd.p->t & m_fdTargetPoint) != 0){
+                        bref.p->t |= m_fdLink;
+                        sadd.p->t |= m_fdLink;
+                        lt = m_fdBasePoint;
+                        lv.insert(i);
+                    }
+                }
+            }
+            if (bref.p->dirl != 0) {
+                if ((bref.p->dirl & 0x01) == 0x01) {
+                    sadd.coords.x = bref.coords.x;
+                    sadd.coords.y = bref.coords.y + 1;
+                    sadd.coords.z = bref.coords.z - 1;
+                    sadd.p = &(m->mdpoints_[sadd.coords.x
+                        + sadd.coords.y * m->mmax_x_
+                        + sadd.coords.z * m->mmax_m_xy]);
+                    if (sadd.p->t == m_fdWalkable) {
+                        sadd.p->t |= m_fdBasePoint;
+                        bv.push_back(sadd);
+                    } else if ((sadd.p->t & m_fdTargetPoint) != 0){
+                        bref.p->t |= m_fdLink;
+                        sadd.p->t |= m_fdLink;
+                        lt = m_fdBasePoint;
+                        lv.insert(i);
+                    }
+                }
+                if ((bref.p->dirl & 0x04) == 0x04) {
+                    sadd.coords.x = bref.coords.x + 1;
+                    sadd.coords.y = bref.coords.y;
+                    sadd.coords.z = bref.coords.z - 1;
+                    sadd.p = &(m->mdpoints_[sadd.coords.x
+                        + sadd.coords.y * m->mmax_x_
+                        + sadd.coords.z * m->mmax_m_xy]);
+                    if (sadd.p->t == m_fdWalkable) {
+                        sadd.p->t |= m_fdBasePoint;
+                        bv.push_back(sadd);
+                    } else if ((sadd.p->t & m_fdTargetPoint) != 0){
+                        bref.p->t |= m_fdLink;
+                        sadd.p->t |= m_fdLink;
+                        lt = m_fdBasePoint;
+                        lv.insert(i);
+                    }
+                }
+                if ((bref.p->dirl & 0x10) == 0x10) {
+                    sadd.coords.x = bref.coords.x;
+                    sadd.coords.y = bref.coords.y - 1;
+                    sadd.coords.z = bref.coords.z - 1;
+                    sadd.p = &(m->mdpoints_[sadd.coords.x
+                        + sadd.coords.y * m->mmax_x_
+                        + sadd.coords.z * m->mmax_m_xy]);
+                    if (sadd.p->t == m_fdWalkable) {
+                        sadd.p->t |= m_fdBasePoint;
+                        bv.push_back(sadd);
+                    } else if ((sadd.p->t & m_fdTargetPoint) != 0){
+                        bref.p->t |= m_fdLink;
+                        sadd.p->t |= m_fdLink;
+                        lt = m_fdBasePoint;
+                        lv.insert(i);
+                    }
+                }
+                if ((bref.p->dirl & 0x40) == 0x40) {
+                    sadd.coords.x = bref.coords.x - 1;
+                    sadd.coords.y = bref.coords.y;
+                    sadd.coords.z = bref.coords.z - 1;
+                    sadd.p = &(m->mdpoints_[sadd.coords.x
+                        + sadd.coords.y * m->mmax_x_
+                        + sadd.coords.z * m->mmax_m_xy]);
+                    if (sadd.p->t == m_fdWalkable) {
+                        sadd.p->t |= m_fdBasePoint;
+                        bv.push_back(sadd);
+                    } else if ((sadd.p->t & m_fdTargetPoint) != 0){
+                        bref.p->t |= m_fdLink;
+                        sadd.p->t |= m_fdLink;
+                        lt = m_fdBasePoint;
+                        lv.insert(i);
+                    }
+                }
+            }
+            if (bref.p->dirm != 0) {
+                if ((bref.p->dirm & 0x01) == 0x01) {
+                    sadd.coords.x = bref.coords.x;
+                    sadd.coords.y = bref.coords.y + 1;
+                    sadd.coords.z = bref.coords.z;
+                    sadd.p = &(m->mdpoints_[sadd.coords.x
+                        + sadd.coords.y * m->mmax_x_
+                        + sadd.coords.z * m->mmax_m_xy]);
+                    if (sadd.p->t == m_fdWalkable) {
+                        sadd.p->t |= m_fdBasePoint;
+                        bv.push_back(sadd);
+                    } else if ((sadd.p->t & m_fdTargetPoint) != 0){
+                        bref.p->t |= m_fdLink;
+                        sadd.p->t |= m_fdLink;
+                        lt = m_fdBasePoint;
+                        lv.insert(i);
+                    }
+                }
+                if ((bref.p->dirm & 0x02) == 0x02) {
+                    sadd.coords.x = bref.coords.x + 1;
+                    sadd.coords.y = bref.coords.y + 1;
+                    sadd.coords.z = bref.coords.z;
+                    sadd.p = &(m->mdpoints_[sadd.coords.x
+                        + sadd.coords.y * m->mmax_x_
+                        + sadd.coords.z * m->mmax_m_xy]);
+                    if (sadd.p->t == m_fdWalkable) {
+                        sadd.p->t |= m_fdBasePoint;
+                        bv.push_back(sadd);
+                    } else if ((sadd.p->t & m_fdTargetPoint) != 0){
+                        bref.p->t |= m_fdLink;
+                        sadd.p->t |= m_fdLink;
+                        lt = m_fdBasePoint;
+                        lv.insert(i);
+                    }
+                }
+                if ((bref.p->dirm & 0x04) == 0x04) {
+                    sadd.coords.x = bref.coords.x + 1;
+                    sadd.coords.y = bref.coords.y;
+                    sadd.coords.z = bref.coords.z;
+                    sadd.p = &(m->mdpoints_[sadd.coords.x
+                        + sadd.coords.y * m->mmax_x_
+                        + sadd.coords.z * m->mmax_m_xy]);
+                    if (sadd.p->t == m_fdWalkable) {
+                        sadd.p->t |= m_fdBasePoint;
+                        bv.push_back(sadd);
+                    } else if ((sadd.p->t & m_fdTargetPoint) != 0){
+                        bref.p->t |= m_fdLink;sadd.p->t |= m_fdLink;
+                        lt = m_fdBasePoint;
+                        lv.insert(i);
+                    }
+                }
+                if ((bref.p->dirm & 0x08) == 0x08) {
+                    sadd.coords.x = bref.coords.x + 1;
+                    sadd.coords.y = bref.coords.y - 1;
+                    sadd.coords.z = bref.coords.z;
+                    sadd.p = &(m->mdpoints_[sadd.coords.x
+                        + sadd.coords.y * m->mmax_x_
+                        + sadd.coords.z * m->mmax_m_xy]);
+                    if (sadd.p->t == m_fdWalkable) {
+                        sadd.p->t |= m_fdBasePoint;
+                        bv.push_back(sadd);
+                    } else if ((sadd.p->t & m_fdTargetPoint) != 0){
+                        bref.p->t |= m_fdLink;
+                        sadd.p->t |= m_fdLink;
+                        lt = m_fdBasePoint;
+                        lv.insert(i);
+                    }
+                }
+                if ((bref.p->dirm & 0x10) == 0x10) {
+                    sadd.coords.x = bref.coords.x;
+                    sadd.coords.y = bref.coords.y - 1;
+                    sadd.coords.z = bref.coords.z;
+                    sadd.p = &(m->mdpoints_[sadd.coords.x
+                        + sadd.coords.y * m->mmax_x_
+                        + sadd.coords.z * m->mmax_m_xy]);
+                    if (sadd.p->t == m_fdWalkable) {
+                        sadd.p->t |= m_fdBasePoint;
+                        bv.push_back(sadd);
+                    } else if ((sadd.p->t & m_fdTargetPoint) != 0){
+                        bref.p->t |= m_fdLink;
+                        sadd.p->t |= m_fdLink;
+                        lt = m_fdBasePoint;
+                        lv.insert(i);
+                    }
+                }
+                if ((bref.p->dirm & 0x20) == 0x20) {
+                    sadd.coords.x = bref.coords.x - 1;
+                    sadd.coords.y = bref.coords.y - 1;
+                    sadd.coords.z = bref.coords.z;
+                    sadd.p = &(m->mdpoints_[sadd.coords.x
+                        + sadd.coords.y * m->mmax_x_
+                        + sadd.coords.z * m->mmax_m_xy]);
+                    if (sadd.p->t == m_fdWalkable) {
+                        sadd.p->t |= m_fdBasePoint;
+                        bv.push_back(sadd);
+                    } else if ((sadd.p->t & m_fdTargetPoint) != 0){
+                        bref.p->t |= m_fdLink;
+                        sadd.p->t |= m_fdLink;
+                        lt = m_fdBasePoint;
+                        lv.insert(i);
+                    }
+                }
+                if ((bref.p->dirm & 0x40) == 0x40) {
+                    sadd.coords.x = bref.coords.x - 1;
+                    sadd.coords.y = bref.coords.y;
+                    sadd.coords.z = bref.coords.z;
+                    sadd.p = &(m->mdpoints_[sadd.coords.x
+                        + sadd.coords.y * m->mmax_x_
+                        + sadd.coords.z * m->mmax_m_xy]);
+                    if (sadd.p->t == m_fdWalkable) {
+                        sadd.p->t |= m_fdBasePoint;
+                        bv.push_back(sadd);
+                    } else if ((sadd.p->t & m_fdTargetPoint) != 0){
+                        bref.p->t |= m_fdLink;
+                        sadd.p->t |= m_fdLink;
+                        lt = m_fdBasePoint;
+                        lv.insert(i);
+                    }
+                }
+                if ((bref.p->dirm & 0x80) == 0x80) {
+                    sadd.coords.x = bref.coords.x - 1;
+                    sadd.coords.y = bref.coords.y + 1;
+                    sadd.coords.z = bref.coords.z;
+                    sadd.p = &(m->mdpoints_[sadd.coords.x
+                        + sadd.coords.y * m->mmax_x_
+                        + sadd.coords.z * m->mmax_m_xy]);
+                    if (sadd.p->t == m_fdWalkable) {
+                        sadd.p->t |= m_fdBasePoint;
+                        bv.push_back(sadd);
+                    } else if ((sadd.p->t & m_fdTargetPoint) != 0){
+                        bref.p->t |= m_fdLink;
+                        sadd.p->t |= m_fdLink;
+                        lt = m_fdBasePoint;
+                        lv.insert(i);
+                    }
+                }
+            }
+        }
+        ladd.indxs = mindx;
+        ladd.n = bv.size() - mindx;
+        if (ladd.n > 0) {
+            nodeset = true;
+            bn.push_back(ladd);
+            blvl++;
+        } else
+            nodeset = false;
+        if (!(nodeset && lv.size() == 0))
+            break;
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+        mindx = tn[tlvl].indxs + tn[tlvl].n;
+        for (unsigned short i = tn[tlvl].indxs; i < mindx; i++) {
+            toSetDesc bref = tv[i];
+            if (bref.p->dirh != 0) {
+                if ((bref.p->dirh & 0x01) == 0x01) {
+                    sadd.coords.x = bref.coords.x;
+                    sadd.coords.y = bref.coords.y + 1;
+                    sadd.coords.z = bref.coords.z + 1;
+                    sadd.p = &(m->mdpoints_[sadd.coords.x
+                        + sadd.coords.y * m->mmax_x_
+                        + sadd.coords.z * m->mmax_m_xy]);
+                    if (sadd.p->t == m_fdWalkable) {
+                        sadd.p->t |= m_fdTargetPoint;
+                        tv.push_back(sadd);
+                    } else if ((sadd.p->t & m_fdBasePoint) != 0){
+                        bref.p->t |= m_fdLink;
+                        sadd.p->t |= m_fdLink;
+                        lt = m_fdTargetPoint;
+                        lv.insert(i);
+                    }
+                }
+                if ((bref.p->dirh & 0x04) == 0x04) {
+                    sadd.coords.x = bref.coords.x + 1;
+                    sadd.coords.y = bref.coords.y;
+                    sadd.coords.z = bref.coords.z + 1;
+                    sadd.p = &(m->mdpoints_[sadd.coords.x
+                        + sadd.coords.y * m->mmax_x_
+                        + sadd.coords.z * m->mmax_m_xy]);
+                    if (sadd.p->t == m_fdWalkable) {
+                        sadd.p->t |= m_fdTargetPoint;
+                        tv.push_back(sadd);
+                    } else if ((sadd.p->t & m_fdBasePoint) != 0){
+                        bref.p->t |= m_fdLink;
+                        sadd.p->t |= m_fdLink;
+                        lt = m_fdTargetPoint;
+                        lv.insert(i);
+                    }
+                }
+                if ((bref.p->dirh & 0x10) == 0x10) {
+                    sadd.coords.x = bref.coords.x;
+                    sadd.coords.y = bref.coords.y - 1;
+                    sadd.coords.z = bref.coords.z + 1;
+                    sadd.p = &(m->mdpoints_[sadd.coords.x
+                        + sadd.coords.y * m->mmax_x_
+                        + sadd.coords.z * m->mmax_m_xy]);
+                    if (sadd.p->t == m_fdWalkable) {
+                        sadd.p->t |= m_fdTargetPoint;
+                        tv.push_back(sadd);
+                    } else if ((sadd.p->t & m_fdBasePoint) != 0){
+                        bref.p->t |= m_fdLink;sadd.p->t |= m_fdLink;
+                        lt = m_fdTargetPoint;
+                        lv.insert(i);
+                    }
+                }
+                if ((bref.p->dirh & 0x40) == 0x40) {
+                    sadd.coords.x = bref.coords.x - 1;
+                    sadd.coords.y = bref.coords.y;
+                    sadd.coords.z = bref.coords.z + 1;
+                    sadd.p = &(m->mdpoints_[sadd.coords.x
+                        + sadd.coords.y * m->mmax_x_
+                        + sadd.coords.z * m->mmax_m_xy]);
+                    if (sadd.p->t == m_fdWalkable) {
+                        sadd.p->t |= m_fdTargetPoint;
+                        tv.push_back(sadd);
+                    } else if ((sadd.p->t & m_fdBasePoint) != 0){
+                        bref.p->t |= m_fdLink;
+                        sadd.p->t |= m_fdLink;
+                        lt = m_fdTargetPoint;
+                        lv.insert(i);
+                    }
+                }
+            }
+            if (bref.p->dirl != 0) {
+                if ((bref.p->dirl & 0x01) == 0x01) {
+                    sadd.coords.x = bref.coords.x;
+                    sadd.coords.y = bref.coords.y + 1;
+                    sadd.coords.z = bref.coords.z - 1;
+                    sadd.p = &(m->mdpoints_[sadd.coords.x
+                        + sadd.coords.y * m->mmax_x_
+                        + sadd.coords.z * m->mmax_m_xy]);
+                    if (sadd.p->t == m_fdWalkable) {
+                        sadd.p->t |= m_fdTargetPoint;
+                        tv.push_back(sadd);
+                    } else if ((sadd.p->t & m_fdBasePoint) != 0){
+                        bref.p->t |= m_fdLink;
+                        sadd.p->t |= m_fdLink;
+                        lt = m_fdTargetPoint;
+                        lv.insert(i);
+                    }
+                }
+                if ((bref.p->dirl & 0x04) == 0x04) {
+                    sadd.coords.x = bref.coords.x + 1;
+                    sadd.coords.y = bref.coords.y;
+                    sadd.coords.z = bref.coords.z - 1;
+                    sadd.p = &(m->mdpoints_[sadd.coords.x
+                        + sadd.coords.y * m->mmax_x_
+                        + sadd.coords.z * m->mmax_m_xy]);
+                    if (sadd.p->t == m_fdWalkable) {
+                        sadd.p->t |= m_fdTargetPoint;
+                        tv.push_back(sadd);
+                    } else if ((sadd.p->t & m_fdBasePoint) != 0){
+                        bref.p->t |= m_fdLink;sadd.p->t |= m_fdLink;
+                        lt = m_fdTargetPoint;
+                        lv.insert(i);
+                    }
+                }
+                if ((bref.p->dirl & 0x10) == 0x10) {
+                    sadd.coords.x = bref.coords.x;
+                    sadd.coords.y = bref.coords.y - 1;
+                    sadd.coords.z = bref.coords.z - 1;
+                    sadd.p = &(m->mdpoints_[sadd.coords.x
+                        + sadd.coords.y * m->mmax_x_
+                        + sadd.coords.z * m->mmax_m_xy]);
+                    if (sadd.p->t == m_fdWalkable) {
+                        sadd.p->t |= m_fdTargetPoint;
+                        tv.push_back(sadd);
+                    } else if ((sadd.p->t & m_fdBasePoint) != 0){
+                        bref.p->t |= m_fdLink;
+                        sadd.p->t |= m_fdLink;
+                        lt = m_fdTargetPoint;
+                        lv.insert(i);
+                    }
+                }
+                if ((bref.p->dirl & 0x40) == 0x40) {
+                    sadd.coords.x = bref.coords.x - 1;
+                    sadd.coords.y = bref.coords.y;
+                    sadd.coords.z = bref.coords.z - 1;
+                    sadd.p = &(m->mdpoints_[sadd.coords.x
+                        + sadd.coords.y * m->mmax_x_
+                        + sadd.coords.z * m->mmax_m_xy]);
+                    if (sadd.p->t == m_fdWalkable) {
+                        sadd.p->t |= m_fdTargetPoint;
+                        tv.push_back(sadd);
+                    } else if ((sadd.p->t & m_fdBasePoint) != 0){
+                        bref.p->t |= m_fdLink;
+                        sadd.p->t |= m_fdLink;
+                        lt = m_fdTargetPoint;
+                        lv.insert(i);
+                    }
+                }
+            }
+            if (bref.p->dirm != 0) {
+                if ((bref.p->dirm & 0x01) == 0x01) {
+                    sadd.coords.x = bref.coords.x;
+                    sadd.coords.y = bref.coords.y + 1;
+                    sadd.coords.z = bref.coords.z;
+                    sadd.p = &(m->mdpoints_[sadd.coords.x
+                        + sadd.coords.y * m->mmax_x_
+                        + sadd.coords.z * m->mmax_m_xy]);
+                    if (sadd.p->t == m_fdWalkable) {
+                        sadd.p->t |= m_fdTargetPoint;
+                        tv.push_back(sadd);
+                    } else if ((sadd.p->t & m_fdBasePoint) != 0){
+                        bref.p->t |= m_fdLink;
+                        sadd.p->t |= m_fdLink;
+                        lt = m_fdTargetPoint;
+                        lv.insert(i);
+                    }
+                }
+                if ((bref.p->dirm & 0x02) == 0x02) {
+                    sadd.coords.x = bref.coords.x + 1;
+                    sadd.coords.y = bref.coords.y + 1;
+                    sadd.coords.z = bref.coords.z;
+                    sadd.p = &(m->mdpoints_[sadd.coords.x
+                        + sadd.coords.y * m->mmax_x_
+                        + sadd.coords.z * m->mmax_m_xy]);
+                    if (sadd.p->t == m_fdWalkable) {
+                        sadd.p->t |= m_fdTargetPoint;
+                        tv.push_back(sadd);
+                    } else if ((sadd.p->t & m_fdBasePoint) != 0){
+                        bref.p->t |= m_fdLink;
+                        sadd.p->t |= m_fdLink;
+                        lt = m_fdTargetPoint;
+                        lv.insert(i);
+                    }
+                }
+                if ((bref.p->dirm & 0x04) == 0x04) {
+                    sadd.coords.x = bref.coords.x + 1;
+                    sadd.coords.y = bref.coords.y;
+                    sadd.coords.z = bref.coords.z;
+                    sadd.p = &(m->mdpoints_[sadd.coords.x
+                        + sadd.coords.y * m->mmax_x_
+                        + sadd.coords.z * m->mmax_m_xy]);
+                    if (sadd.p->t == m_fdWalkable) {
+                        sadd.p->t |= m_fdTargetPoint;
+                        tv.push_back(sadd);
+                    } else if ((sadd.p->t & m_fdBasePoint) != 0){
+                        bref.p->t |= m_fdLink;sadd.p->t |= m_fdLink;
+                        lt = m_fdTargetPoint;
+                        lv.insert(i);
+                    }
+                }
+                if ((bref.p->dirm & 0x08) == 0x08) {
+                    sadd.coords.x = bref.coords.x + 1;
+                    sadd.coords.y = bref.coords.y - 1;
+                    sadd.coords.z = bref.coords.z;
+                    sadd.p = &(m->mdpoints_[sadd.coords.x
+                        + sadd.coords.y * m->mmax_x_
+                        + sadd.coords.z * m->mmax_m_xy]);
+                    if (sadd.p->t == m_fdWalkable) {
+                        sadd.p->t |= m_fdTargetPoint;
+                        tv.push_back(sadd);
+                    } else if ((sadd.p->t & m_fdBasePoint) != 0){
+                        bref.p->t |= m_fdLink;
+                        sadd.p->t |= m_fdLink;
+                        lt = m_fdTargetPoint;
+                        lv.insert(i);
+                    }
+                }
+                if ((bref.p->dirm & 0x10) == 0x10) {
+                    sadd.coords.x = bref.coords.x;
+                    sadd.coords.y = bref.coords.y - 1;
+                    sadd.coords.z = bref.coords.z;
+                    sadd.p = &(m->mdpoints_[sadd.coords.x
+                        + sadd.coords.y * m->mmax_x_
+                        + sadd.coords.z * m->mmax_m_xy]);
+                    if (sadd.p->t == m_fdWalkable) {
+                        sadd.p->t |= m_fdTargetPoint;
+                        tv.push_back(sadd);
+                    } else if ((sadd.p->t & m_fdBasePoint) != 0){
+                        bref.p->t |= m_fdLink;
+                        sadd.p->t |= m_fdLink;
+                        lt = m_fdTargetPoint;
+                        lv.insert(i);
+                    }
+                }
+                if ((bref.p->dirm & 0x20) == 0x20) {
+                    sadd.coords.x = bref.coords.x - 1;
+                    sadd.coords.y = bref.coords.y - 1;
+                    sadd.coords.z = bref.coords.z;
+                    sadd.p = &(m->mdpoints_[sadd.coords.x
+                        + sadd.coords.y * m->mmax_x_
+                        + sadd.coords.z * m->mmax_m_xy]);
+                    if (sadd.p->t == m_fdWalkable) {
+                        sadd.p->t |= m_fdTargetPoint;
+                        tv.push_back(sadd);
+                    } else if ((sadd.p->t & m_fdBasePoint) != 0){
+                        bref.p->t |= m_fdLink;
+                        sadd.p->t |= m_fdLink;
+                        lt = m_fdTargetPoint;
+                        lv.insert(i);
+                    }
+                }
+                if ((bref.p->dirm & 0x40) == 0x40) {
+                    sadd.coords.x = bref.coords.x - 1;
+                    sadd.coords.y = bref.coords.y;
+                    sadd.coords.z = bref.coords.z;
+                    sadd.p = &(m->mdpoints_[sadd.coords.x
+                        + sadd.coords.y * m->mmax_x_
+                        + sadd.coords.z * m->mmax_m_xy]);
+                    if (sadd.p->t == m_fdWalkable) {
+                        sadd.p->t |= m_fdTargetPoint;
+                        tv.push_back(sadd);
+                    } else if ((sadd.p->t & m_fdBasePoint) != 0){
+                        bref.p->t |= m_fdLink;
+                        sadd.p->t |= m_fdLink;
+                        lt = m_fdTargetPoint;
+                        lv.insert(i);
+                    }
+                }
+                if ((bref.p->dirm & 0x80) == 0x80) {
+                    sadd.coords.x = bref.coords.x - 1;
+                    sadd.coords.y = bref.coords.y + 1;
+                    sadd.coords.z = bref.coords.z;
+                    sadd.p = &(m->mdpoints_[sadd.coords.x
+                        + sadd.coords.y * m->mmax_x_
+                        + sadd.coords.z * m->mmax_m_xy]);
+                    if (sadd.p->t == m_fdWalkable) {
+                        sadd.p->t |= m_fdTargetPoint;
+                        tv.push_back(sadd);
+                    } else if ((sadd.p->t & m_fdBasePoint) != 0){
+                        bref.p->t |= m_fdLink;
+                        sadd.p->t |= m_fdLink;
+                        lt = m_fdTargetPoint;
+                        lv.insert(i);
+                    }
+                }
+            }
+        }
+        ladd.indxs = mindx;
+        ladd.n = tv.size() - mindx;
+        if (ladd.n > 0) {
+            nodeset = true;
+            tn.push_back(ladd);
+            tlvl++;
+        } else
+            nodeset = false;
+    } while (nodeset && lv.size() == 0);
+    printf("bv %i, tv %i\n", bv.size(), tv.size());
+
+
+    free(mdpmirror);
     if(dest_path_.size() != 0)
         speed_ = new_speed;
     printf("end time %i.%i\n", SDL_GetTicks()/1000, SDL_GetTicks()%1000);
 }
-//#endif
+#endif
 
 void PedInstance::getPathAtStairsP(Mission *m, std::list<PathNode> *new_path,
                                     int x, int y, int z, int ox, int oy, int oz)

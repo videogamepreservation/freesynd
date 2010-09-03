@@ -1878,6 +1878,19 @@ bool Mission::setSurfaces() {
             }
         }
     }
+    unsigned int cw = 0;
+    for (int iz = 0; iz < mmax_z_; iz++) {
+        for (int iy = 0; iy < mmax_y_; iy++) {
+            for (int ix = 0; ix < mmax_x_; ix++) {
+                floodPointDesc *cfpp = &(mdpoints_[ix + iy * mmax_x_ + iz * mmax_m_xy]);
+
+                if ((cfpp->t & m_fdWalkable) == m_fdWalkable)
+                    cw++;
+            }
+        }
+    }
+
+    printf("flood walkables %i\n", cw);
     return true;
 }
 
