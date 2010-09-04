@@ -316,7 +316,6 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
             w->setTileZ(tile_z_);
             w->setOffX(off_x_);
             w->setOffY(off_y_);
-            w->setOffZ(off_z_);
             putdown_weapon_ = 0;
             frame_ = ped_->lastPickupFrame();
             setDrawnAnim(PedInstance::PutdownAnim);
@@ -819,7 +818,6 @@ void PedInstance::dropAllWeapons() {
         w->setTileZ(tile_z_);
         w->setOffX(off_x_);
         w->setOffY(off_y_);
-        w->setOffZ(off_z_);
     }
 
     while(weapons_.size())
@@ -942,8 +940,7 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
             || in_vehicle_->tileY() != y
             || in_vehicle_->tileZ() != z
             || in_vehicle_->offX() != ox
-            || in_vehicle_->offY() != oy
-            || in_vehicle_->offZ() != oz)
+            || in_vehicle_->offY() != oy)
         in_vehicle_ = 0;
     }
     if (pickup_weapon_) {
@@ -951,14 +948,15 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
             || pickup_weapon_->tileY() != y
             || pickup_weapon_->tileZ() != z
             || pickup_weapon_->offX() != ox
-            || pickup_weapon_->offY() != oy
-            || pickup_weapon_->offZ() != oz)
+            || pickup_weapon_->offY() != oy)
         pickup_weapon_ = 0;
     }
 
     if (tile_x_ == x && tile_y_ == y && tile_z_ == z) {
         dest_path_.push_back(PathNode(x, y, z, ox, oy, oz));
         speed_ = new_speed;
+        tile_z_ = old_z;
+        off_z_ = old_oz;
         return;
     }
     printf("time %i.%i\n", SDL_GetTicks()/1000, SDL_GetTicks()%1000);
@@ -966,6 +964,8 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
     mdpmirror = (floodPointDesc *)malloc(m->mmax_m_all * sizeof(floodPointDesc));
     if (mdpmirror == NULL) {
         printf("not enough memory: setDestinationP\n");
+        tile_z_ = old_z;
+        off_z_ = old_oz;
         return;
     }
     memcpy(mdpmirror, m->mdpoints_, m->mmax_m_all * sizeof(floodPointDesc));
@@ -1624,6 +1624,8 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
 
     if (!nodeset && lv.size() == 0) {
         free(mdpmirror);
+        tile_z_ = old_z;
+        off_z_ = old_oz;
         return;
     }
     if (blvl == bn.size())
@@ -2459,18 +2461,19 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
         }
         dest_path_.push_back(PathNode(toadd.x, toadd.y, toadd.z));
         ctile = toadd;
-        printf("x %i, y %i, z %i\n",toadd.x,toadd.y,toadd.z);
+        //printf("x %i, y %i, z %i\n",toadd.x,toadd.y,toadd.z);
     } while (tnr);
 
     if(dest_path_.size() != 0) {
         dest_path_.back().setOffX(ox);
         dest_path_.back().setOffY(oy);
-        dest_path_.back().setOffZ(oz);
     }
 
     free(mdpmirror);
     if(dest_path_.size() != 0)
         speed_ = new_speed;
+    tile_z_ = old_z;
+    off_z_ = old_oz;
     printf("end time %i.%i\n", SDL_GetTicks()/1000, SDL_GetTicks()%1000);
 }
 
@@ -2478,7 +2481,7 @@ void PedInstance::addDestinationP(Mission *m, int x, int y, int z,
                                   int ox, int oy, int new_speed) {
     // TODO: adding destination maybe difficult because of
     // action currently in execution (pickup/putdown weapon, etc.)
-    //z = tile_z_;
+    m->adjXYZ(x, y, z);
     dest_path_.push_back(PathNode(x, y, z, ox, oy));
     speed_ = new_speed;
 }
@@ -2585,8 +2588,7 @@ bool PedInstance::movementP(int elapsed)
             if(nxtTileX == tile_x_ && nxtTileY == tile_y_
                 && nxtTileZ == tile_z_ 
                 && dest_path_.front().offX() == off_x_
-                && dest_path_.front().offY() == off_y_
-                && dest_path_.front().offZ() == off_z_)
+                && dest_path_.front().offY() == off_y_)
                 dest_path_.pop_front();
             if (dest_path_.size() == 0)
                 speed_ = 0;
