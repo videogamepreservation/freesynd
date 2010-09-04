@@ -179,8 +179,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                                        mission->ped(i)->tileZ());
                     break;
                 }
-        }
-        else {
+        }else {
             if (pickup_weapon_ && pickup_weapon_->map() == -1)
                 pickup_weapon_ = 0;
 
@@ -227,16 +226,17 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
         else {
             if(health_ > 0) {
                 if(dest_path_.empty())
-                    setDestinationP(mission ,in_vehicle_->tileX(), in_vehicle_->tileY(), 0,
+                    setDestinationP(mission ,in_vehicle_->tileX(),
+                        in_vehicle_->tileY(), in_vehicle_->tileZ(),
                         in_vehicle_->offX(), in_vehicle_->offY(), 0, 320);
                 else {
                     if(dest_path_.back().tileX() != in_vehicle_->tileX()
                         || dest_path_.back().tileY() != in_vehicle_->tileY()
                         || dest_path_.back().tileZ() != in_vehicle_->tileZ()
                         || dest_path_.back().offX() != in_vehicle_->offX()
-                        || dest_path_.back().offY() != in_vehicle_->offY()
-                        /*|| dest_path_.back().offZ() != in_vehicle_->offZ()*/)
-                        setDestinationP(mission ,in_vehicle_->tileX(), in_vehicle_->tileY(), 0,
+                        || dest_path_.back().offY() != in_vehicle_->offY())
+                        setDestinationP(mission ,in_vehicle_->tileX(),
+                            in_vehicle_->tileY(), in_vehicle_->tileZ(),
                             in_vehicle_->offX(), in_vehicle_->offY(), 0, 320);
                 }
             }
@@ -290,16 +290,17 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
         else{
             if(health_ > 0) {
                 if(dest_path_.empty())
-                    setDestinationP(mission, pickup_weapon_->tileX(), pickup_weapon_->tileY(), 0,
+                    setDestinationP(mission, pickup_weapon_->tileX(),
+                        pickup_weapon_->tileY(), pickup_weapon_->tileZ(),
                         pickup_weapon_->offX(), pickup_weapon_->offY(), 0, 320);
                 else {
                     if(dest_path_.back().tileX() != pickup_weapon_->tileX()
                         || dest_path_.back().tileY() != pickup_weapon_->tileY()
                         || dest_path_.back().tileZ() != pickup_weapon_->tileZ()
                         || dest_path_.back().offX() != pickup_weapon_->offX()
-                        || dest_path_.back().offY() != pickup_weapon_->offY()
-                        || dest_path_.back().offZ() != pickup_weapon_->offZ())
-                        setDestinationP(mission, pickup_weapon_->tileX(), pickup_weapon_->tileY(), 0,
+                        || dest_path_.back().offY() != pickup_weapon_->offY())
+                        setDestinationP(mission, pickup_weapon_->tileX(),
+                            pickup_weapon_->tileY(), pickup_weapon_->tileZ(),
                             pickup_weapon_->offX(), pickup_weapon_->offY(), 0, 320);
                 }
             }

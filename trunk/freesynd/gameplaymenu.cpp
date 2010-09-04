@@ -445,7 +445,7 @@ void GameplayMenu::handleMouseMotion(int x, int y, int state)
     for (int i = 8; mission_ && i < mission_->numPeds(); i++) {
         PedInstance *p = mission_->ped(i);
         int px = p->screenX() - 20;
-        int py = p->screenY() - 30;
+        int py = p->screenY() - 10 - p->tileZ() * TILE_HEIGHT/3;
 
         if (x - 129 + world_x_ >= px && y + world_y_ >= py &&
             x - 129 + world_x_ < px + 40 && y + world_y_ < py + 32) {
@@ -459,7 +459,7 @@ void GameplayMenu::handleMouseMotion(int x, int y, int state)
     for (int i = 0; mission_ && i < mission_->numVehicles(); i++) {
         VehicleInstance *v = mission_->vehicle(i);
         int px = v->screenX() - 20;
-        int py = v->screenY() - 30;
+        int py = v->screenY() - 10 - v->tileZ() * TILE_HEIGHT/3;
 
         if (x - 129 + world_x_ >= px && y + world_y_ >= py &&
             x - 129 + world_x_ < px + 40 && y + world_y_ < py + 32) {
@@ -475,7 +475,7 @@ void GameplayMenu::handleMouseMotion(int x, int y, int state)
 
         if (w->map() != -1) {
             int px = w->screenX() - 10;
-            int py = w->screenY() - 10;
+            int py = w->screenY() - w->tileZ() * TILE_HEIGHT/3;
 
             if (x - 129 + world_x_ >= px && y + world_y_ >= py &&
                 x - 129 + world_x_ < px + 20 && y + world_y_ < py + 20) {
@@ -639,23 +639,8 @@ void GameplayMenu::handleMouseDown(int x, int y, int button)
                                 //TODO: current group position is like
                                 // in original this can make non-tile
                                 // oriented
-                                //int dx = (i % 2) * (i - 2) * 16;
-                                //int dy = ((i + 1) % 2) * (i - 1) * 8;
-
-                                //int dx = 0; int dy = 0;
-                                /*
-                                int offset_x = world_x_ + x - 129;
-                                int offset_y = world_y_ + y;
-
-                                tx = g_App.maps().screenToTileX(
-                                        mission_->map(),
-                                        offset_x,
-                                        offset_y, ox);
-                                ty = g_App.maps().screenToTileY(
-                                        mission_->map(),
-                                        offset_x,
-                                        offset_y, oy);
-                                */
+                                //int sox = (i % 2) * (i - 2) * 16;
+                                //int soy = ((i + 1) % 2) * (i - 1) * 8;
 
                                 //this should be romoved if non-tile
                                 //position needed
