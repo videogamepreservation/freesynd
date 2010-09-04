@@ -43,8 +43,6 @@
         unsigned int idjh;
         // tile walkable data from g_App.walkable_[]
         unsigned char twd;
-        // index of junction inside its vector
-        unsigned int indx;
     }surfaceDesc;
 
     #define m_sdNotdefined      0
@@ -59,14 +57,6 @@
         int y;
         int z;
     }toDefineXYZ;
-
-    typedef struct {
-        surfaceDesc *pj;
-        int x;
-        int y;
-        int z;
-        unsigned int fastxyz;
-    }junctionDesc;
 
     typedef struct {
         // 0 - not defined, 1b - base point, 2b - target point,

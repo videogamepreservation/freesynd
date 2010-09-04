@@ -1364,7 +1364,6 @@ bool Mission::setSurfaces() {
 
     int sf_total = 0;
     int id_sf = 1;
-    sfcitstarts_.push_back(-1);
     for (int iz = 0; iz < mmax_z_; iz++) {
         for (int iy = 0; iy < mmax_y_; iy++) {
             for (int ix = 0; ix < mmax_x_; ix++) {
@@ -1394,14 +1393,6 @@ bool Mission::setSurfaces() {
                         csf->id = id_sf;
                         csf->t ^= m_sdDefreq;
                         if ( (csf->t & m_sdJunction) == m_sdJunction) {
-                            junctionDesc jsf;
-                            jsf.pj = csf;
-                            jsf.x = x;
-                            jsf.y = y / mmax_x_;
-                            jsf.z = z / mmax_m_xy;
-                            jsf.fastxyz = jsf.x | (jsf.y << 8) | (jsf.z << 16);
-                            csf->indx = sfcjunctions_.size();
-                            sfcjunctions_.push_back(jsf);
                             if (csf->idjh != 0) {
                                 if ( (csf->idjh & 0x000000FF) == 0x000000F0) {
                                     mtsurfaces_[x + yp + zp].idjl = id_sf;
@@ -1485,7 +1476,6 @@ bool Mission::setSurfaces() {
                             }
                         }
                     } while(vtodefine.size());
-                    sfcitstarts_.push_back(-1);
                     id_sf++;
                 }
             }
@@ -1494,7 +1484,6 @@ bool Mission::setSurfaces() {
 
     int st_total = 0;
     int id_st = 1;
-    stritstarts_.push_back(-1);
     for (int iz = 0; iz < mmax_z_; iz++) {
         for (int iy = 0; iy < mmax_y_; iy++) {
             for (int ix = 0; ix < mmax_x_; ix++) {
@@ -1524,16 +1513,6 @@ bool Mission::setSurfaces() {
                         int cdir = cst->dir;
                         cst->id = id_st;
                         cst->t ^= m_sdDefreq;
-                        if ( (cst->t & m_sdJunction) == m_sdJunction) {
-                            junctionDesc jst;
-                            jst.pj = cst;
-                            jst.x = x;
-                            jst.y = y / mmax_x_;
-                            jst.z = z / mmax_m_xy;
-                            jst.fastxyz = jst.x | (jst.y << 8) | (jst.z << 16);
-                            cst->indx = strjunctions_.size();
-                            strjunctions_.push_back(jst);
-                        }
 
                         switch (cst->twd) {
                             case 0x01:
@@ -1722,37 +1701,13 @@ bool Mission::setSurfaces() {
                                 break;
                         }
                     } while(vtodefine.size());
-                    stritstarts_.push_back(-1);
                     id_st++;
                 } else if (cst->t == m_sdNotdefined)
                     cst->t = m_sdNonwalkable;
             }
         }
     }
-    printf("surface junctions %i , stair junctions %i, surfaces %i, stairs %i\n",
-        sfcjunctions_.size(), strjunctions_.size(), id_sf - 1, id_st - 1);
-    id_sf = 0;
-    int indx = 0;
-    for (std::vector<junctionDesc> ::iterator it = sfcjunctions_.begin();
-        it != sfcjunctions_.end(); it++) {
-        if (id_sf != it->pj->id) {
-            id_sf = it->pj->id;
-            sfcitstarts_[id_sf] = indx;
-        }
-        indx++;
-    }
-    printf("surfaces %i, indx %i, sfc %i\n", id_sf, indx, sfcitstarts_.size());
-    id_st = 0;
-    indx = 0;
-    for (std::vector<junctionDesc> ::iterator it = strjunctions_.begin();
-        it != strjunctions_.end(); it++) {
-        if (id_st != it->pj->id) {
-            id_st = it->pj->id;
-            stritstarts_[id_st] = indx;
-        }
-        indx++;
-    }
-    printf("stairs %i, indx %i, sfc %i\n", id_st, indx, stritstarts_.size());
+    printf("surfaces %i, stairs %i\n", id_sf - 1, id_st - 1);
     printf("surfaces total %i, stairs total %i\n", sf_total, st_total);
     printf("flood size %i\n", sizeof(floodPointDesc) * mmax_x_ * mmax_y_ * mmax_z_);
     for (int iz = 0; iz < mmax_z_; iz++) {
@@ -1896,10 +1851,6 @@ bool Mission::setSurfaces() {
 
 void Mission::clrSurfaces() {
 
-    sfcjunctions_.clear();
-    strjunctions_.clear();
-    sfcitstarts_.clear();
-    stritstarts_.clear();
     if(mtsurfaces_ != NULL) {
         free(mtsurfaces_);
         mtsurfaces_ = NULL;

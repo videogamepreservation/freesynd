@@ -277,12 +277,6 @@ BC 68 00 00 F0 5B B0 27 00 01 06 00 00 00 03 00 81 05 E9 00 32 00 00 00 05 16 40
 
     // map-tile surfaces
     surfaceDesc *mtsurfaces_;
-    // all surface junctions on map
-    std::vector<junctionDesc> sfcjunctions_;
-    // all stairs junctions on map
-    std::vector<junctionDesc> strjunctions_;
-    std::vector<int> sfcitstarts_;
-    std::vector<int> stritstarts_;
     // map-directions points
     floodPointDesc *mdpoints_;
     int mmax_x_, mmax_y_, mmax_z_;
