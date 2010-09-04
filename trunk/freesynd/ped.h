@@ -231,32 +231,6 @@ public:
     AnimationDrawn getDrawnAnim();
     void setDrawnAnim(AnimationDrawn drawn_anim);
 
-    typedef struct linkdesc{
-        // this junction
-        junctionDesc j;
-        // parent
-        std::vector <linkdesc> ::iterator p;
-        // when there is another parent but with shorter distance
-        bool bad;
-        // reached destination
-        bool destr;
-        // nodes number
-        int n;
-        // nodes start index in nxt lvl
-        int atindex;
-        // next type to search (surface/stairs junction)
-        unsigned char nt;
-        // parents ID
-        unsigned int pid;
-        int dist;
-    }linkDesc;
-    typedef struct {
-        junctionDesc j;
-        unsigned short atlevel;
-        unsigned int atindex;
-        int dist;
-    }reachedDesc;
-
     typedef struct {
         toDefineXYZ coords;
         floodPointDesc *p;
@@ -270,20 +244,8 @@ public:
 
     int getDistance(int x1, int y1, int z1,
         int x2, int y2, int z2);
-    int calcDistance(unsigned short lvl, int x, int y, int z,
-        std::vector <linkDesc> ::iterator par);
-    void markBadNodes(unsigned short lvl, unsigned short clvl,
-        int n, int atindex, std::vector <linkDesc> ** lvls);
-    void setLvlNode(std::vector <linkDesc> ::iterator it,
-        std::vector <linkDesc> ** lvls, std::vector <reachedDesc> * preached,
-        unsigned short lvlnum, unsigned char nt, int itstart, bool setreached,
-        unsigned int pid);
     void setDestinationP(Mission *m, int x, int y, int z,
         int ox = 128, int oy = 128, int oz = 0, int new_speed = 160);
-    void getPathAtStairsP(Mission *m, std::list<PathNode> *new_path,
-        int x, int y, int z, int ox = 128, int oy = 128, int oz = 0);
-    void getPathAtSurfaceP(Mission *m, std::list<PathNode> *new_path,
-        int x, int y, int z, int ox = 128, int oy = 128, int oz = 0);
 
     void addDestinationP(Mission *m, int x, int y, int z,
         int ox = 128, int oy = 128, int new_speed = 160);
