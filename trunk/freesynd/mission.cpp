@@ -1271,7 +1271,7 @@ bool Mission::setSurfaces() {
                                         stodef.z = z;
                                         vtodefine.push_back(stodef);
                                     }
-                                } else if(nxts->t != m_sdSurface)
+                                } else if((nxts->t & m_sdSurface) == 0)
                                     sdir |= 0x00F00000;
                             }
 
@@ -1295,7 +1295,7 @@ bool Mission::setSurfaces() {
                                         stodef.z = z;
                                         vtodefine.push_back(stodef);
                                     }
-                                } else if(nxts->t != m_sdSurface)
+                                } else if((nxts->t & m_sdSurface) == 0)
                                     sdir |= 0xF0000000;
                             }
                         }
@@ -1321,7 +1321,7 @@ bool Mission::setSurfaces() {
                                         stodef.z = z;
                                         vtodefine.push_back(stodef);
                                     }
-                                } else if(nxts->t != m_sdSurface)
+                                } else if((nxts->t & m_sdSurface) == 0)
                                     sdir |= 0x0000F000;
                             }
 
@@ -1345,7 +1345,7 @@ bool Mission::setSurfaces() {
                                         stodef.z = z;
                                         vtodefine.push_back(stodef);
                                     }
-                                } else if(nxts->t != m_sdSurface)
+                                } else if((nxts->t & m_sdSurface) == 0)
                                     sdir |= 0x000000F0;
                             }
                         }
@@ -1837,9 +1837,9 @@ bool Mission::setSurfaces() {
                                 cfpp->dirm |= 0x40;
 
                             if (csp->idjl != 0)
-                                cfpp->dirl |= 0x01;
+                                cfpp->dirl |= 0x10;
                             if (csp->idjh != 0)
-                                cfpp->dirm |= 0x10;
+                                cfpp->dirm |= 0x01;
                             break;
                         case 0x03:
                             if ((csp->dir & 0x000000FF) == 0x000000F0)
