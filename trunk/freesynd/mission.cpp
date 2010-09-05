@@ -38,7 +38,6 @@ objective_ped_(-1), objective_vehicle_(-1), mtsurfaces_(NULL), mdpoints_(NULL)
 
 Mission::~Mission()
 {
-    // TODO: there is something wrong with destructor in Iraq mission
     for (unsigned int i = 0; i < vehicles_.size(); i++)
         delete vehicles_[i];
     for (unsigned int i = 0; i < peds_.size(); i++)
@@ -1709,7 +1708,8 @@ bool Mission::setSurfaces() {
     }
     printf("surfaces %i, stairs %i\n", id_sf - 1, id_st - 1);
     printf("surfaces total %i, stairs total %i\n", sf_total, st_total);
-    printf("flood size %i\n", sizeof(floodPointDesc) * mmax_x_ * mmax_y_ * mmax_z_);
+    printf("surface data size %i\n", sizeof(surfaceDesc) * mmax_m_all);
+    printf("flood data size %i\n", sizeof(floodPointDesc) * mmax_m_all);
     for (int iz = 0; iz < mmax_z_; iz++) {
         for (int iy = 0; iy < mmax_y_; iy++) {
             for (int ix = 0; ix < mmax_x_; ix++) {

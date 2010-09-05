@@ -228,7 +228,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                 if(dest_path_.empty())
                     setDestinationP(mission ,in_vehicle_->tileX(),
                         in_vehicle_->tileY(), in_vehicle_->tileZ(),
-                        in_vehicle_->offX(), in_vehicle_->offY(), 0, 320);
+                        in_vehicle_->offX(), in_vehicle_->offY(), 320);
                 else {
                     if(dest_path_.back().tileX() != in_vehicle_->tileX()
                         || dest_path_.back().tileY() != in_vehicle_->tileY()
@@ -237,7 +237,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                         || dest_path_.back().offY() != in_vehicle_->offY())
                         setDestinationP(mission ,in_vehicle_->tileX(),
                             in_vehicle_->tileY(), in_vehicle_->tileZ(),
-                            in_vehicle_->offX(), in_vehicle_->offY(), 0, 320);
+                            in_vehicle_->offX(), in_vehicle_->offY(), 320);
                 }
             }
         }
@@ -292,7 +292,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                 if(dest_path_.empty())
                     setDestinationP(mission, pickup_weapon_->tileX(),
                         pickup_weapon_->tileY(), pickup_weapon_->tileZ(),
-                        pickup_weapon_->offX(), pickup_weapon_->offY(), 0, 320);
+                        pickup_weapon_->offX(), pickup_weapon_->offY(), 320);
                 else {
                     if(dest_path_.back().tileX() != pickup_weapon_->tileX()
                         || dest_path_.back().tileY() != pickup_weapon_->tileY()
@@ -301,7 +301,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                         || dest_path_.back().offY() != pickup_weapon_->offY())
                         setDestinationP(mission, pickup_weapon_->tileX(),
                             pickup_weapon_->tileY(), pickup_weapon_->tileZ(),
-                            pickup_weapon_->offX(), pickup_weapon_->offY(), 0, 320);
+                            pickup_weapon_->offX(), pickup_weapon_->offY(), 320);
                 }
             }
         }
@@ -350,6 +350,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
             && firing_ == PedInstance::Firing_Not
             && (selectedWeapon()
             && selectedWeapon()->ammoRemaining())) {
+        // TODO : check this, direction must be setup correctly
         int stx = screenX() + 30;
         int sty = screenY() - 4;
 
@@ -894,14 +895,14 @@ int PedInstance::getDistance(int x1, int y1, int z1,
 }
 
 void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
-                                     int ox, int oy, int oz, int new_speed) {
+                                     int ox, int oy, int new_speed) {
     // NOTE: this is a "flood" algorithm, it expands until it reaches other's
     // flood point, then it removes unrelated points
     m->adjXYZ(x, y, z);
     dest_path_.clear();
     setSpeed(0);
-    printf("target x : %i; y : %i; z : %i = = ox :%i, oy :%i, oz :%i\n",
-        x, y, z, ox, oy, oz);
+    printf("target x : %i; y : %i; z : %i = = ox :%i, oy :%i\n",
+        x, y, z, ox, oy);
 
     surfaceDesc *targetd = &(m->mtsurfaces_[x + y * m->mmax_x_ + z * m->mmax_m_xy]);
 
@@ -920,8 +921,6 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
     printf("base pos: x %i; y %i; z %i, ox %i, oy %i, oz %i\n",
         tile_x_, tile_y_, tile_z_, off_x_, off_y_, off_z_);
 
-    //printf("tt dir %x, idh %x, idl %x\n", targetd->dir, targetd->idjh, targetd->idjl);
-    //return;
     if(targetd->t == m_sdNonwalkable || map_ == -1 || health_ <= 0) {
         tile_z_ = old_z;
         off_z_ = old_oz;
@@ -953,7 +952,7 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
     }
 
     if (tile_x_ == x && tile_y_ == y && tile_z_ == z) {
-        dest_path_.push_back(PathNode(x, y, z, ox, oy, oz));
+        dest_path_.push_back(PathNode(x, y, z, ox, oy));
         speed_ = new_speed;
         tile_z_ = old_z;
         off_z_ = old_oz;
@@ -971,10 +970,9 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
     memcpy(mdpmirror, m->mdpoints_, m->mmax_m_all * sizeof(floodPointDesc));
 
     unsigned char lt;
-    unsigned short blvl = 0, tlvl = 0, nlvl;
+    unsigned short blvl = 0, tlvl = 0;
     std::vector <toSetDesc> bv;
     std::vector <toSetDesc> tv;
-    std::set <unsigned short> lv;
     toSetDesc sadd;
     floodPointDesc *pfdp;
     pfdp = &(mdpmirror[tile_x_ + tile_y_ * m->mmax_x_ + tile_z_ * m->mmax_m_xy]);
@@ -998,11 +996,11 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
     std::vector <lvlNodesDesc> tn;
     bn.push_back(ladd);
     tn.push_back(ladd);
-    bool nodeset;
+    bool nodeset, lnknr = true;
 
     do {
         unsigned short mindx = bn[blvl].indxs + bn[blvl].n;
-        nlvl = blvl + 1;
+        unsigned short nlvl = blvl + 1;
         for (unsigned short i = bn[blvl].indxs; i < mindx; i++) {
             toSetDesc bref = bv[i];
             if (bref.p->dirh != 0) {
@@ -1021,7 +1019,7 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                         bref.p->t |= m_fdLink;
                         sadd.p->t |= m_fdLink;
                         lt = m_fdBasePoint;
-                        lv.insert(i);
+                        lnknr = false;
                     }
                 }
                 if ((bref.p->dirh & 0x04) == 0x04) {
@@ -1039,7 +1037,7 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                         bref.p->t |= m_fdLink;
                         sadd.p->t |= m_fdLink;
                         lt = m_fdBasePoint;
-                        lv.insert(i);
+                        lnknr = false;
                     }
                 }
                 if ((bref.p->dirh & 0x10) == 0x10) {
@@ -1057,7 +1055,7 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                         bref.p->t |= m_fdLink;
                         sadd.p->t |= m_fdLink;
                         lt = m_fdBasePoint;
-                        lv.insert(i);
+                        lnknr = false;
                     }
                 }
                 if ((bref.p->dirh & 0x40) == 0x40) {
@@ -1075,7 +1073,7 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                         bref.p->t |= m_fdLink;
                         sadd.p->t |= m_fdLink;
                         lt = m_fdBasePoint;
-                        lv.insert(i);
+                        lnknr = false;
                     }
                 }
             }
@@ -1095,7 +1093,7 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                         bref.p->t |= m_fdLink;
                         sadd.p->t |= m_fdLink;
                         lt = m_fdBasePoint;
-                        lv.insert(i);
+                        lnknr = false;
                     }
                 }
                 if ((bref.p->dirl & 0x04) == 0x04) {
@@ -1113,7 +1111,7 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                         bref.p->t |= m_fdLink;
                         sadd.p->t |= m_fdLink;
                         lt = m_fdBasePoint;
-                        lv.insert(i);
+                        lnknr = false;
                     }
                 }
                 if ((bref.p->dirl & 0x10) == 0x10) {
@@ -1131,7 +1129,7 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                         bref.p->t |= m_fdLink;
                         sadd.p->t |= m_fdLink;
                         lt = m_fdBasePoint;
-                        lv.insert(i);
+                        lnknr = false;
                     }
                 }
                 if ((bref.p->dirl & 0x40) == 0x40) {
@@ -1149,7 +1147,7 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                         bref.p->t |= m_fdLink;
                         sadd.p->t |= m_fdLink;
                         lt = m_fdBasePoint;
-                        lv.insert(i);
+                        lnknr = false;
                     }
                 }
             }
@@ -1169,7 +1167,7 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                         bref.p->t |= m_fdLink;
                         sadd.p->t |= m_fdLink;
                         lt = m_fdBasePoint;
-                        lv.insert(i);
+                        lnknr = false;
                     }
                 }
                 if ((bref.p->dirm & 0x02) == 0x02) {
@@ -1187,7 +1185,7 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                         bref.p->t |= m_fdLink;
                         sadd.p->t |= m_fdLink;
                         lt = m_fdBasePoint;
-                        lv.insert(i);
+                        lnknr = false;
                     }
                 }
                 if ((bref.p->dirm & 0x04) == 0x04) {
@@ -1205,7 +1203,7 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                         bref.p->t |= m_fdLink;
                         sadd.p->t |= m_fdLink;
                         lt = m_fdBasePoint;
-                        lv.insert(i);
+                        lnknr = false;
                     }
                 }
                 if ((bref.p->dirm & 0x08) == 0x08) {
@@ -1223,7 +1221,7 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                         bref.p->t |= m_fdLink;
                         sadd.p->t |= m_fdLink;
                         lt = m_fdBasePoint;
-                        lv.insert(i);
+                        lnknr = false;
                     }
                 }
                 if ((bref.p->dirm & 0x10) == 0x10) {
@@ -1241,7 +1239,7 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                         bref.p->t |= m_fdLink;
                         sadd.p->t |= m_fdLink;
                         lt = m_fdBasePoint;
-                        lv.insert(i);
+                        lnknr = false;
                     }
                 }
                 if ((bref.p->dirm & 0x20) == 0x20) {
@@ -1259,7 +1257,7 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                         bref.p->t |= m_fdLink;
                         sadd.p->t |= m_fdLink;
                         lt = m_fdBasePoint;
-                        lv.insert(i);
+                        lnknr = false;
                     }
                 }
                 if ((bref.p->dirm & 0x40) == 0x40) {
@@ -1277,7 +1275,7 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                         bref.p->t |= m_fdLink;
                         sadd.p->t |= m_fdLink;
                         lt = m_fdBasePoint;
-                        lv.insert(i);
+                        lnknr = false;
                     }
                 }
                 if ((bref.p->dirm & 0x80) == 0x80) {
@@ -1295,7 +1293,7 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                         bref.p->t |= m_fdLink;
                         sadd.p->t |= m_fdLink;
                         lt = m_fdBasePoint;
-                        lv.insert(i);
+                        lnknr = false;
                     }
                 }
             }
@@ -1308,7 +1306,7 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
             blvl++;
         } else
             nodeset = false;
-        if (!(nodeset && lv.size() == 0))
+        if (!(nodeset && lnknr))
             break;
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
         mindx = tn[tlvl].indxs + tn[tlvl].n;
@@ -1331,7 +1329,7 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                         bref.p->t |= m_fdLink;
                         sadd.p->t |= m_fdLink;
                         lt = m_fdTargetPoint;
-                        lv.insert(i);
+                        lnknr = false;
                     }
                 }
                 if ((bref.p->dirh & 0x04) == 0x04) {
@@ -1349,7 +1347,7 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                         bref.p->t |= m_fdLink;
                         sadd.p->t |= m_fdLink;
                         lt = m_fdTargetPoint;
-                        lv.insert(i);
+                        lnknr = false;
                     }
                 }
                 if ((bref.p->dirh & 0x10) == 0x10) {
@@ -1367,7 +1365,7 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                         bref.p->t |= m_fdLink;
                         sadd.p->t |= m_fdLink;
                         lt = m_fdTargetPoint;
-                        lv.insert(i);
+                        lnknr = false;
                     }
                 }
                 if ((bref.p->dirh & 0x40) == 0x40) {
@@ -1385,7 +1383,7 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                         bref.p->t |= m_fdLink;
                         sadd.p->t |= m_fdLink;
                         lt = m_fdTargetPoint;
-                        lv.insert(i);
+                        lnknr = false;
                     }
                 }
             }
@@ -1405,7 +1403,7 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                         bref.p->t |= m_fdLink;
                         sadd.p->t |= m_fdLink;
                         lt = m_fdTargetPoint;
-                        lv.insert(i);
+                        lnknr = false;
                     }
                 }
                 if ((bref.p->dirl & 0x04) == 0x04) {
@@ -1423,7 +1421,7 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                         bref.p->t |= m_fdLink;
                         sadd.p->t |= m_fdLink;
                         lt = m_fdTargetPoint;
-                        lv.insert(i);
+                        lnknr = false;
                     }
                 }
                 if ((bref.p->dirl & 0x10) == 0x10) {
@@ -1441,7 +1439,7 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                         bref.p->t |= m_fdLink;
                         sadd.p->t |= m_fdLink;
                         lt = m_fdTargetPoint;
-                        lv.insert(i);
+                        lnknr = false;
                     }
                 }
                 if ((bref.p->dirl & 0x40) == 0x40) {
@@ -1459,7 +1457,7 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                         bref.p->t |= m_fdLink;
                         sadd.p->t |= m_fdLink;
                         lt = m_fdTargetPoint;
-                        lv.insert(i);
+                        lnknr = false;
                     }
                 }
             }
@@ -1479,7 +1477,7 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                         bref.p->t |= m_fdLink;
                         sadd.p->t |= m_fdLink;
                         lt = m_fdTargetPoint;
-                        lv.insert(i);
+                        lnknr = false;
                     }
                 }
                 if ((bref.p->dirm & 0x02) == 0x02) {
@@ -1497,7 +1495,7 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                         bref.p->t |= m_fdLink;
                         sadd.p->t |= m_fdLink;
                         lt = m_fdTargetPoint;
-                        lv.insert(i);
+                        lnknr = false;
                     }
                 }
                 if ((bref.p->dirm & 0x04) == 0x04) {
@@ -1515,7 +1513,7 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                         bref.p->t |= m_fdLink;
                         sadd.p->t |= m_fdLink;
                         lt = m_fdTargetPoint;
-                        lv.insert(i);
+                        lnknr = false;
                     }
                 }
                 if ((bref.p->dirm & 0x08) == 0x08) {
@@ -1533,7 +1531,7 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                         bref.p->t |= m_fdLink;
                         sadd.p->t |= m_fdLink;
                         lt = m_fdTargetPoint;
-                        lv.insert(i);
+                        lnknr = false;
                     }
                 }
                 if ((bref.p->dirm & 0x10) == 0x10) {
@@ -1551,7 +1549,7 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                         bref.p->t |= m_fdLink;
                         sadd.p->t |= m_fdLink;
                         lt = m_fdTargetPoint;
-                        lv.insert(i);
+                        lnknr = false;
                     }
                 }
                 if ((bref.p->dirm & 0x20) == 0x20) {
@@ -1569,7 +1567,7 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                         bref.p->t |= m_fdLink;
                         sadd.p->t |= m_fdLink;
                         lt = m_fdTargetPoint;
-                        lv.insert(i);
+                        lnknr = false;
                     }
                 }
                 if ((bref.p->dirm & 0x40) == 0x40) {
@@ -1587,7 +1585,7 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                         bref.p->t |= m_fdLink;
                         sadd.p->t |= m_fdLink;
                         lt = m_fdTargetPoint;
-                        lv.insert(i);
+                        lnknr = false;
                     }
                 }
                 if ((bref.p->dirm & 0x80) == 0x80) {
@@ -1605,7 +1603,7 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                         bref.p->t |= m_fdLink;
                         sadd.p->t |= m_fdLink;
                         lt = m_fdTargetPoint;
-                        lv.insert(i);
+                        lnknr = false;
                     }
                 }
             }
@@ -1618,11 +1616,11 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
             tlvl++;
         } else
             nodeset = false;
-    } while (nodeset && lv.size() == 0);
-    printf("bv %i, tv %i, lv %i\n", bv.size(), tv.size(), lv.size());
+    } while (nodeset && lnknr);
+    printf("bv %i, tv %i\n", bv.size(), tv.size());
     printf("btime %i.%i\n", SDL_GetTicks()/1000, SDL_GetTicks()%1000);
 
-    if (!nodeset && lv.size() == 0) {
+    if (!nodeset && lnknr) {
         free(mdpmirror);
         tile_z_ = old_z;
         off_z_ = old_oz;
@@ -1702,167 +1700,119 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
             bool remv = true;
             if (it->p->dirh != 0) {
                 if ((it->p->dirh & 0x01) == 0x01) {
-                    sadd.coords.x = it->coords.x;
-                    sadd.coords.y = it->coords.y + 1;
-                    sadd.coords.z = it->coords.z + 1;
-                    sadd.p = &(mdpmirror[sadd.coords.x
-                        + sadd.coords.y * m->mmax_x_
-                        + sadd.coords.z * m->mmax_m_xy]);
-                    if ((it->p->lvl + 1) == sadd.p->lvl)
+                    pfdp = &(mdpmirror[it->coords.x
+                        + (it->coords.y + 1) * m->mmax_x_
+                        + (it->coords.z + 1) * m->mmax_m_xy]);
+                    if ((it->p->lvl + 1) == pfdp->lvl)
                         remv = false;
                 }
                 if ((it->p->dirh & 0x04) == 0x04) {
-                    sadd.coords.x = it->coords.x + 1;
-                    sadd.coords.y = it->coords.y;
-                    sadd.coords.z = it->coords.z + 1;
-                    sadd.p = &(mdpmirror[sadd.coords.x
-                        + sadd.coords.y * m->mmax_x_
-                        + sadd.coords.z * m->mmax_m_xy]);
-                    if ((it->p->lvl + 1) == sadd.p->lvl)
+                    pfdp = &(mdpmirror[(it->coords.x + 1)
+                        + it->coords.y * m->mmax_x_
+                        + (it->coords.z + 1) * m->mmax_m_xy]);
+                    if ((it->p->lvl + 1) == pfdp->lvl)
                         remv = false;
                 }
                 if ((it->p->dirh & 0x10) == 0x10) {
-                    sadd.coords.x = it->coords.x;
-                    sadd.coords.y = it->coords.y - 1;
-                    sadd.coords.z = it->coords.z + 1;
-                    sadd.p = &(mdpmirror[sadd.coords.x
-                        + sadd.coords.y * m->mmax_x_
-                        + sadd.coords.z * m->mmax_m_xy]);
-                    if ((it->p->lvl + 1) == sadd.p->lvl)
+                    pfdp = &(mdpmirror[it->coords.x
+                        + (it->coords.y - 1) * m->mmax_x_
+                        + (it->coords.z + 1) * m->mmax_m_xy]);
+                    if ((it->p->lvl + 1) == pfdp->lvl)
                         remv = false;
                 }
                 if ((it->p->dirh & 0x40) == 0x40) {
-                    sadd.coords.x = it->coords.x - 1;
-                    sadd.coords.y = it->coords.y;
-                    sadd.coords.z = it->coords.z + 1;
-                    sadd.p = &(mdpmirror[sadd.coords.x
-                        + sadd.coords.y * m->mmax_x_
-                        + sadd.coords.z * m->mmax_m_xy]);
-                    if ((it->p->lvl + 1) == sadd.p->lvl)
+                    pfdp = &(mdpmirror[(it->coords.x - 1)
+                        + it->coords.y * m->mmax_x_
+                        + (it->coords.z + 1) * m->mmax_m_xy]);
+                    if ((it->p->lvl + 1) == pfdp->lvl)
                         remv = false;
                 }
             }
             if (it->p->dirl != 0) {
                 if ((it->p->dirl & 0x01) == 0x01) {
-                    sadd.coords.x = it->coords.x;
-                    sadd.coords.y = it->coords.y + 1;
-                    sadd.coords.z = it->coords.z - 1;
-                    sadd.p = &(mdpmirror[sadd.coords.x
-                        + sadd.coords.y * m->mmax_x_
-                        + sadd.coords.z * m->mmax_m_xy]);
-                    if ((it->p->lvl + 1) == sadd.p->lvl)
+                    pfdp = &(mdpmirror[it->coords.x
+                        + (it->coords.y + 1) * m->mmax_x_
+                        + (it->coords.z - 1) * m->mmax_m_xy]);
+                    if ((it->p->lvl + 1) == pfdp->lvl)
                         remv = false;
                 }
                 if ((it->p->dirl & 0x04) == 0x04) {
-                    sadd.coords.x = it->coords.x + 1;
-                    sadd.coords.y = it->coords.y;
-                    sadd.coords.z = it->coords.z - 1;
-                    sadd.p = &(mdpmirror[sadd.coords.x
-                        + sadd.coords.y * m->mmax_x_
-                        + sadd.coords.z * m->mmax_m_xy]);
-                    if ((it->p->lvl + 1) == sadd.p->lvl)
+                    pfdp = &(mdpmirror[(it->coords.x + 1)
+                        + it->coords.y * m->mmax_x_
+                        + (it->coords.z - 1) * m->mmax_m_xy]);
+                    if ((it->p->lvl + 1) == pfdp->lvl)
                         remv = false;
                 }
                 if ((it->p->dirl & 0x10) == 0x10) {
-                    sadd.coords.x = it->coords.x;
-                    sadd.coords.y = it->coords.y - 1;
-                    sadd.coords.z = it->coords.z - 1;
-                    sadd.p = &(mdpmirror[sadd.coords.x
-                        + sadd.coords.y * m->mmax_x_
-                        + sadd.coords.z * m->mmax_m_xy]);
-                    if ((it->p->lvl + 1) == sadd.p->lvl)
+                    pfdp = &(mdpmirror[(it->coords.x)
+                        + (it->coords.y - 1) * m->mmax_x_
+                        + (it->coords.z - 1) * m->mmax_m_xy]);
+                    if ((it->p->lvl + 1) == pfdp->lvl)
                         remv = false;
                 }
                 if ((it->p->dirl & 0x40) == 0x40) {
-                    sadd.coords.x = it->coords.x - 1;
-                    sadd.coords.y = it->coords.y;
-                    sadd.coords.z = it->coords.z - 1;
-                    sadd.p = &(mdpmirror[sadd.coords.x
-                        + sadd.coords.y * m->mmax_x_
-                        + sadd.coords.z * m->mmax_m_xy]);
-                    if ((it->p->lvl + 1) == sadd.p->lvl)
+                    pfdp = &(mdpmirror[(it->coords.x - 1)
+                        + it->coords.y * m->mmax_x_
+                        + (it->coords.z - 1) * m->mmax_m_xy]);
+                    if ((it->p->lvl + 1) == pfdp->lvl)
                         remv = false;
                 }
             }
             if (it->p->dirm != 0) {
                 if ((it->p->dirm & 0x01) == 0x01) {
-                    sadd.coords.x = it->coords.x;
-                    sadd.coords.y = it->coords.y + 1;
-                    sadd.coords.z = it->coords.z;
-                    sadd.p = &(mdpmirror[sadd.coords.x
-                        + sadd.coords.y * m->mmax_x_
-                        + sadd.coords.z * m->mmax_m_xy]);
-                    if ((it->p->lvl + 1) == sadd.p->lvl)
+                    pfdp = &(mdpmirror[it->coords.x
+                        + (it->coords.y + 1) * m->mmax_x_
+                        + it->coords.z * m->mmax_m_xy]);
+                    if ((it->p->lvl + 1) == pfdp->lvl)
                         remv = false;
                 }
                 if ((it->p->dirm & 0x02) == 0x02) {
-                    sadd.coords.x = it->coords.x + 1;
-                    sadd.coords.y = it->coords.y + 1;
-                    sadd.coords.z = it->coords.z;
-                    sadd.p = &(mdpmirror[sadd.coords.x
-                        + sadd.coords.y * m->mmax_x_
-                        + sadd.coords.z * m->mmax_m_xy]);
-                    if ((it->p->lvl + 1) == sadd.p->lvl)
+                    pfdp = &(mdpmirror[(it->coords.x + 1)
+                        + (it->coords.y + 1) * m->mmax_x_
+                        + it->coords.z * m->mmax_m_xy]);
+                    if ((it->p->lvl + 1) == pfdp->lvl)
                         remv = false;
                 }
                 if ((it->p->dirm & 0x04) == 0x04) {
-                    sadd.coords.x = it->coords.x + 1;
-                    sadd.coords.y = it->coords.y;
-                    sadd.coords.z = it->coords.z;
-                    sadd.p = &(mdpmirror[sadd.coords.x
-                        + sadd.coords.y * m->mmax_x_
-                        + sadd.coords.z * m->mmax_m_xy]);
-                    if ((it->p->lvl + 1) == sadd.p->lvl)
+                    pfdp = &(mdpmirror[(it->coords.x + 1)
+                        + it->coords.y * m->mmax_x_
+                        + it->coords.z * m->mmax_m_xy]);
+                    if ((it->p->lvl + 1) == pfdp->lvl)
                         remv = false;
                 }
                 if ((it->p->dirm & 0x08) == 0x08) {
-                    sadd.coords.x = it->coords.x + 1;
-                    sadd.coords.y = it->coords.y - 1;
-                    sadd.coords.z = it->coords.z;
-                    sadd.p = &(mdpmirror[sadd.coords.x
-                        + sadd.coords.y * m->mmax_x_
-                        + sadd.coords.z * m->mmax_m_xy]);
-                    if ((it->p->lvl + 1) == sadd.p->lvl)
+                    pfdp = &(mdpmirror[(it->coords.x + 1)
+                        + (it->coords.y - 1) * m->mmax_x_
+                        + it->coords.z * m->mmax_m_xy]);
+                    if ((it->p->lvl + 1) == pfdp->lvl)
                         remv = false;
                 }
                 if ((it->p->dirm & 0x10) == 0x10) {
-                    sadd.coords.x = it->coords.x;
-                    sadd.coords.y = it->coords.y - 1;
-                    sadd.coords.z = it->coords.z;
-                    sadd.p = &(mdpmirror[sadd.coords.x
-                        + sadd.coords.y * m->mmax_x_
-                        + sadd.coords.z * m->mmax_m_xy]);
-                    if ((it->p->lvl + 1) == sadd.p->lvl)
+                    pfdp = &(mdpmirror[it->coords.x
+                        + (it->coords.y - 1) * m->mmax_x_
+                        + it->coords.z * m->mmax_m_xy]);
+                    if ((it->p->lvl + 1) == pfdp->lvl)
                         remv = false;
                 }
                 if ((it->p->dirm & 0x20) == 0x20) {
-                    sadd.coords.x = it->coords.x - 1;
-                    sadd.coords.y = it->coords.y - 1;
-                    sadd.coords.z = it->coords.z;
-                    sadd.p = &(mdpmirror[sadd.coords.x
-                        + sadd.coords.y * m->mmax_x_
-                        + sadd.coords.z * m->mmax_m_xy]);
-                    if ((it->p->lvl + 1) == sadd.p->lvl)
+                    pfdp = &(mdpmirror[(it->coords.x - 1)
+                        + (it->coords.y - 1) * m->mmax_x_
+                        + it->coords.z * m->mmax_m_xy]);
+                    if ((it->p->lvl + 1) == pfdp->lvl)
                         remv = false;
                 }
                 if ((it->p->dirm & 0x40) == 0x40) {
-                    sadd.coords.x = it->coords.x - 1;
-                    sadd.coords.y = it->coords.y;
-                    sadd.coords.z = it->coords.z;
-                    sadd.p = &(mdpmirror[sadd.coords.x
-                        + sadd.coords.y * m->mmax_x_
-                        + sadd.coords.z * m->mmax_m_xy]);
-                    if ((it->p->lvl + 1) == sadd.p->lvl)
+                    pfdp = &(mdpmirror[(it->coords.x - 1)
+                        + it->coords.y * m->mmax_x_
+                        + it->coords.z * m->mmax_m_xy]);
+                    if ((it->p->lvl + 1) == pfdp->lvl)
                         remv = false;
                 }
                 if ((it->p->dirm & 0x80) == 0x80) {
-                    sadd.coords.x = it->coords.x - 1;
-                    sadd.coords.y = it->coords.y + 1;
-                    sadd.coords.z = it->coords.z;
-                    sadd.p = &(mdpmirror[sadd.coords.x
-                        + sadd.coords.y * m->mmax_x_
-                        + sadd.coords.z * m->mmax_m_xy]);
-                    if ((it->p->lvl + 1) == sadd.p->lvl)
+                    pfdp = &(mdpmirror[(it->coords.x - 1)
+                        + (it->coords.y + 1) * m->mmax_x_
+                        + it->coords.z * m->mmax_m_xy]);
+                    if ((it->p->lvl + 1) == pfdp->lvl)
                         remv = false;
                 }
             }
@@ -1883,167 +1833,119 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
             bool remv = true;
             if (it->p->dirh != 0) {
                 if ((it->p->dirh & 0x01) == 0x01) {
-                    sadd.coords.x = it->coords.x;
-                    sadd.coords.y = it->coords.y + 1;
-                    sadd.coords.z = it->coords.z + 1;
-                    sadd.p = &(mdpmirror[sadd.coords.x
-                        + sadd.coords.y * m->mmax_x_
-                        + sadd.coords.z * m->mmax_m_xy]);
-                    if ((it->p->lvl + 1) == sadd.p->lvl)
+                    pfdp = &(mdpmirror[it->coords.x
+                        + (it->coords.y + 1) * m->mmax_x_
+                        + (it->coords.z + 1) * m->mmax_m_xy]);
+                    if ((it->p->lvl + 1) == pfdp->lvl)
                         remv = false;
                 }
                 if ((it->p->dirh & 0x04) == 0x04) {
-                    sadd.coords.x = it->coords.x + 1;
-                    sadd.coords.y = it->coords.y;
-                    sadd.coords.z = it->coords.z + 1;
-                    sadd.p = &(mdpmirror[sadd.coords.x
-                        + sadd.coords.y * m->mmax_x_
-                        + sadd.coords.z * m->mmax_m_xy]);
-                    if ((it->p->lvl + 1) == sadd.p->lvl)
+                    pfdp = &(mdpmirror[(it->coords.x + 1)
+                        + it->coords.y * m->mmax_x_
+                        + (it->coords.z + 1) * m->mmax_m_xy]);
+                    if ((it->p->lvl + 1) == pfdp->lvl)
                         remv = false;
                 }
                 if ((it->p->dirh & 0x10) == 0x10) {
-                    sadd.coords.x = it->coords.x;
-                    sadd.coords.y = it->coords.y - 1;
-                    sadd.coords.z = it->coords.z + 1;
-                    sadd.p = &(mdpmirror[sadd.coords.x
-                        + sadd.coords.y * m->mmax_x_
-                        + sadd.coords.z * m->mmax_m_xy]);
-                    if ((it->p->lvl + 1) == sadd.p->lvl)
+                    pfdp = &(mdpmirror[it->coords.x
+                        + (it->coords.y - 1) * m->mmax_x_
+                        + (it->coords.z + 1) * m->mmax_m_xy]);
+                    if ((it->p->lvl + 1) == pfdp->lvl)
                         remv = false;
                 }
                 if ((it->p->dirh & 0x40) == 0x40) {
-                    sadd.coords.x = it->coords.x - 1;
-                    sadd.coords.y = it->coords.y;
-                    sadd.coords.z = it->coords.z + 1;
-                    sadd.p = &(mdpmirror[sadd.coords.x
-                        + sadd.coords.y * m->mmax_x_
-                        + sadd.coords.z * m->mmax_m_xy]);
-                    if ((it->p->lvl + 1) == sadd.p->lvl)
+                    pfdp = &(mdpmirror[(it->coords.x - 1)
+                        + it->coords.y * m->mmax_x_
+                        + (it->coords.z + 1) * m->mmax_m_xy]);
+                    if ((it->p->lvl + 1) == pfdp->lvl)
                         remv = false;
                 }
             }
             if (it->p->dirl != 0) {
                 if ((it->p->dirl & 0x01) == 0x01) {
-                    sadd.coords.x = it->coords.x;
-                    sadd.coords.y = it->coords.y + 1;
-                    sadd.coords.z = it->coords.z - 1;
-                    sadd.p = &(mdpmirror[sadd.coords.x
-                        + sadd.coords.y * m->mmax_x_
-                        + sadd.coords.z * m->mmax_m_xy]);
-                    if ((it->p->lvl + 1) == sadd.p->lvl)
+                    pfdp = &(mdpmirror[it->coords.x
+                        + (it->coords.y + 1) * m->mmax_x_
+                        + (it->coords.z - 1) * m->mmax_m_xy]);
+                    if ((it->p->lvl + 1) == pfdp->lvl)
                         remv = false;
                 }
                 if ((it->p->dirl & 0x04) == 0x04) {
-                    sadd.coords.x = it->coords.x + 1;
-                    sadd.coords.y = it->coords.y;
-                    sadd.coords.z = it->coords.z - 1;
-                    sadd.p = &(mdpmirror[sadd.coords.x
-                        + sadd.coords.y * m->mmax_x_
-                        + sadd.coords.z * m->mmax_m_xy]);
-                    if ((it->p->lvl + 1) == sadd.p->lvl)
+                    pfdp = &(mdpmirror[(it->coords.x + 1)
+                        + it->coords.y * m->mmax_x_
+                        + (it->coords.z - 1) * m->mmax_m_xy]);
+                    if ((it->p->lvl + 1) == pfdp->lvl)
                         remv = false;
                 }
                 if ((it->p->dirl & 0x10) == 0x10) {
-                    sadd.coords.x = it->coords.x;
-                    sadd.coords.y = it->coords.y - 1;
-                    sadd.coords.z = it->coords.z - 1;
-                    sadd.p = &(mdpmirror[sadd.coords.x
-                        + sadd.coords.y * m->mmax_x_
-                        + sadd.coords.z * m->mmax_m_xy]);
-                    if ((it->p->lvl + 1) == sadd.p->lvl)
+                    pfdp = &(mdpmirror[(it->coords.x)
+                        + (it->coords.y - 1) * m->mmax_x_
+                        + (it->coords.z - 1) * m->mmax_m_xy]);
+                    if ((it->p->lvl + 1) == pfdp->lvl)
                         remv = false;
                 }
                 if ((it->p->dirl & 0x40) == 0x40) {
-                    sadd.coords.x = it->coords.x - 1;
-                    sadd.coords.y = it->coords.y;
-                    sadd.coords.z = it->coords.z - 1;
-                    sadd.p = &(mdpmirror[sadd.coords.x
-                        + sadd.coords.y * m->mmax_x_
-                        + sadd.coords.z * m->mmax_m_xy]);
-                    if ((it->p->lvl + 1) == sadd.p->lvl)
+                    pfdp = &(mdpmirror[(it->coords.x - 1)
+                        + it->coords.y * m->mmax_x_
+                        + (it->coords.z - 1) * m->mmax_m_xy]);
+                    if ((it->p->lvl + 1) == pfdp->lvl)
                         remv = false;
                 }
             }
             if (it->p->dirm != 0) {
                 if ((it->p->dirm & 0x01) == 0x01) {
-                    sadd.coords.x = it->coords.x;
-                    sadd.coords.y = it->coords.y + 1;
-                    sadd.coords.z = it->coords.z;
-                    sadd.p = &(mdpmirror[sadd.coords.x
-                        + sadd.coords.y * m->mmax_x_
-                        + sadd.coords.z * m->mmax_m_xy]);
-                    if ((it->p->lvl + 1) == sadd.p->lvl)
+                    pfdp = &(mdpmirror[it->coords.x
+                        + (it->coords.y + 1) * m->mmax_x_
+                        + it->coords.z * m->mmax_m_xy]);
+                    if ((it->p->lvl + 1) == pfdp->lvl)
                         remv = false;
                 }
                 if ((it->p->dirm & 0x02) == 0x02) {
-                    sadd.coords.x = it->coords.x + 1;
-                    sadd.coords.y = it->coords.y + 1;
-                    sadd.coords.z = it->coords.z;
-                    sadd.p = &(mdpmirror[sadd.coords.x
-                        + sadd.coords.y * m->mmax_x_
-                        + sadd.coords.z * m->mmax_m_xy]);
-                    if ((it->p->lvl + 1) == sadd.p->lvl)
+                    pfdp = &(mdpmirror[(it->coords.x + 1)
+                        + (it->coords.y + 1) * m->mmax_x_
+                        + it->coords.z * m->mmax_m_xy]);
+                    if ((it->p->lvl + 1) == pfdp->lvl)
                         remv = false;
                 }
                 if ((it->p->dirm & 0x04) == 0x04) {
-                    sadd.coords.x = it->coords.x + 1;
-                    sadd.coords.y = it->coords.y;
-                    sadd.coords.z = it->coords.z;
-                    sadd.p = &(mdpmirror[sadd.coords.x
-                        + sadd.coords.y * m->mmax_x_
-                        + sadd.coords.z * m->mmax_m_xy]);
-                    if ((it->p->lvl + 1) == sadd.p->lvl)
+                    pfdp = &(mdpmirror[(it->coords.x + 1)
+                        + it->coords.y * m->mmax_x_
+                        + it->coords.z * m->mmax_m_xy]);
+                    if ((it->p->lvl + 1) == pfdp->lvl)
                         remv = false;
                 }
                 if ((it->p->dirm & 0x08) == 0x08) {
-                    sadd.coords.x = it->coords.x + 1;
-                    sadd.coords.y = it->coords.y - 1;
-                    sadd.coords.z = it->coords.z;
-                    sadd.p = &(mdpmirror[sadd.coords.x
-                        + sadd.coords.y * m->mmax_x_
-                        + sadd.coords.z * m->mmax_m_xy]);
-                    if ((it->p->lvl + 1) == sadd.p->lvl)
+                    pfdp = &(mdpmirror[(it->coords.x + 1)
+                        + (it->coords.y - 1) * m->mmax_x_
+                        + it->coords.z * m->mmax_m_xy]);
+                    if ((it->p->lvl + 1) == pfdp->lvl)
                         remv = false;
                 }
                 if ((it->p->dirm & 0x10) == 0x10) {
-                    sadd.coords.x = it->coords.x;
-                    sadd.coords.y = it->coords.y - 1;
-                    sadd.coords.z = it->coords.z;
-                    sadd.p = &(mdpmirror[sadd.coords.x
-                        + sadd.coords.y * m->mmax_x_
-                        + sadd.coords.z * m->mmax_m_xy]);
-                    if ((it->p->lvl + 1) == sadd.p->lvl)
+                    pfdp = &(mdpmirror[it->coords.x
+                        + (it->coords.y - 1) * m->mmax_x_
+                        + it->coords.z * m->mmax_m_xy]);
+                    if ((it->p->lvl + 1) == pfdp->lvl)
                         remv = false;
                 }
                 if ((it->p->dirm & 0x20) == 0x20) {
-                    sadd.coords.x = it->coords.x - 1;
-                    sadd.coords.y = it->coords.y - 1;
-                    sadd.coords.z = it->coords.z;
-                    sadd.p = &(mdpmirror[sadd.coords.x
-                        + sadd.coords.y * m->mmax_x_
-                        + sadd.coords.z * m->mmax_m_xy]);
-                    if ((it->p->lvl + 1) == sadd.p->lvl)
+                    pfdp = &(mdpmirror[(it->coords.x - 1)
+                        + (it->coords.y - 1) * m->mmax_x_
+                        + it->coords.z * m->mmax_m_xy]);
+                    if ((it->p->lvl + 1) == pfdp->lvl)
                         remv = false;
                 }
                 if ((it->p->dirm & 0x40) == 0x40) {
-                    sadd.coords.x = it->coords.x - 1;
-                    sadd.coords.y = it->coords.y;
-                    sadd.coords.z = it->coords.z;
-                    sadd.p = &(mdpmirror[sadd.coords.x
-                        + sadd.coords.y * m->mmax_x_
-                        + sadd.coords.z * m->mmax_m_xy]);
-                    if ((it->p->lvl + 1) == sadd.p->lvl)
+                    pfdp = &(mdpmirror[(it->coords.x - 1)
+                        + it->coords.y * m->mmax_x_
+                        + it->coords.z * m->mmax_m_xy]);
+                    if ((it->p->lvl + 1) == pfdp->lvl)
                         remv = false;
                 }
                 if ((it->p->dirm & 0x80) == 0x80) {
-                    sadd.coords.x = it->coords.x - 1;
-                    sadd.coords.y = it->coords.y + 1;
-                    sadd.coords.z = it->coords.z;
-                    sadd.p = &(mdpmirror[sadd.coords.x
-                        + sadd.coords.y * m->mmax_x_
-                        + sadd.coords.z * m->mmax_m_xy]);
-                    if ((it->p->lvl + 1) == sadd.p->lvl)
+                    pfdp = &(mdpmirror[(it->coords.x - 1)
+                        + (it->coords.y + 1) * m->mmax_x_
+                        + it->coords.z * m->mmax_m_xy]);
+                    if ((it->p->lvl + 1) == pfdp->lvl)
                         remv = false;
                 }
             }

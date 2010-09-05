@@ -249,7 +249,7 @@ bool VehicleInstance::dirWalkable(PathNode *p, int x, int y, int z) {
 }
 
 void VehicleInstance::setDestinationV(Mission *m, int x, int y, int z, int ox,
-                                       int oy, int oz, int new_speed)
+                                       int oy, int new_speed)
 {
     std::set < PathNode > open, closed;
     std::map < PathNode, PathNode > parent;
@@ -322,7 +322,7 @@ void VehicleInstance::setDestinationV(Mission *m, int x, int y, int z, int ox,
     float closest_dist = 100000;
 
     open.insert(PathNode(tile_x_, tile_y_, tile_z_, off_x_, off_y_));
-    int watchDog = 3000;
+    int watchDog = 1000;
     while (!open.empty()) {
         watchDog--;
         float dist = 100000;
