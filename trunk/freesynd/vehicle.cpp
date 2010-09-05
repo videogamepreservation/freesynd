@@ -462,8 +462,9 @@ bool VehicleInstance::movementV(int elapsed)
             dest_path_.front().tileY() * 256 + dest_path_.front().offY();
         int atx = tile_x_ * 256 + off_x_;
         int aty = tile_y_ * 256 + off_y_;
+        int diffx = adx - atx, diffy = ady - aty;
 
-        if (abs(adx - atx) < 16 && abs(ady - aty) < 16) {
+        if (abs(diffx) < 16 && abs(diffy) < 16) {
             off_y_ = dest_path_.front().offY();
             off_x_ = dest_path_.front().offX();
             tile_y_ = dest_path_.front().tileY();
@@ -473,7 +474,6 @@ bool VehicleInstance::movementV(int elapsed)
                 speed_ = 0;
             updated = true;
         } else {
-
             // TODO: something better?
             int fuzz = 16;
             if (ady < (aty - fuzz)) {
@@ -483,12 +483,12 @@ bool VehicleInstance::movementV(int elapsed)
                     dir_ = 3;
                 else if (adx < (atx + fuzz))
                     dir_ = 4;
-            } else if (abs(ady - aty) < fuzz) {
+            } else if (abs(diffy) < fuzz) {
                 if (adx < (atx - fuzz))
                     dir_ = 6;
                 else if (adx > (atx + fuzz))
                     dir_ = 2;
-            } else if (abs(ady - aty) > fuzz) {
+            } else if (abs(diffy) > fuzz) {
                 if (adx < (atx - fuzz))
                     dir_ = 7;
                 else if (adx > (atx + fuzz))
@@ -498,19 +498,19 @@ bool VehicleInstance::movementV(int elapsed)
             }
 
             int dx = 0, dy = 0;
-            int d =
-                (int) sqrt((float) (adx - atx) * (adx - atx) +
-                           (ady - aty) * (ady - aty));
+            float d = sqrt((float) (diffx * diffx + diffy * diffy));
 
-            if (abs(adx - atx) > 0)
-                dx = (adx - atx) * (speed_ * elapsed / 1000) / d;
-            if (abs(ady - aty) > 0)
-                dy = (ady - aty) * (speed_ * elapsed / 1000) / d;
+            if (abs(diffx) > 0)
+                // dx = diffx * (speed_ * elapsed / 1000) / d;
+                dx = (int)((diffx * (speed_ * elapsed) / d) / 1000);
+            if (abs(diffy) > 0)
+                // dy = diffy * (speed_ * elapsed / 1000) / d;
+                dy = (int)((diffy * (speed_ * elapsed) / d) / 1000);
 
-            if (abs(dx) > abs(adx - atx))
-                dx = (adx - atx);
-            if (abs(dy) > abs(ady - aty))
-                dy = (ady - aty);
+            if (abs(dx) > abs(diffx))
+                dx = diffx;
+            if (abs(dy) > abs(diffy))
+                dy = diffy;
 
             if (updatePlacement(off_x_ + dx, off_y_ + dy)) {
                 ;
