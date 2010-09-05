@@ -316,6 +316,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
             w->setTileZ(tile_z_);
             w->setOffX(off_x_);
             w->setOffY(off_y_);
+            w->setOffZ(0);
             putdown_weapon_ = 0;
             frame_ = ped_->lastPickupFrame();
             setDrawnAnim(PedInstance::PutdownAnim);
@@ -819,6 +820,7 @@ void PedInstance::dropAllWeapons() {
         w->setTileZ(tile_z_);
         w->setOffX(off_x_);
         w->setOffY(off_y_);
+        w->setOffZ(0);
     }
 
     while(weapons_.size())
