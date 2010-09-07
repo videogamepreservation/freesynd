@@ -906,30 +906,27 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
     printf("target x : %i; y : %i; z : %i = = ox :%i, oy :%i\n",
         x, y, z, ox, oy);
 
-    surfaceDesc *targetd = &(m->mtsurfaces_[x + y * m->mmax_x_ + z * m->mmax_m_xy]);
-
-    //if(targetd->t == m_sdNonwalkable || map_ == -1 || health_ <= 0)
-        //return;
+    floodPointDesc *targetd = &(m->mdpoints_[x + y * m->mmax_x_ + z * m->mmax_m_xy]);
 
     int old_z = tile_z_;
     int old_oz = off_z_;
     tile_z_ += (off_z_ == 0 ? 0 : 1);
     off_z_ = 0;
-    surfaceDesc *based = &(m->mtsurfaces_[tile_x_
+    floodPointDesc *based = &(m->mdpoints_[tile_x_
         + tile_y_ * m->mmax_x_ + tile_z_ * m->mmax_m_xy]);
 
-    printf("base %i, bt %i, target %i, tt %i\n",based->id, based->t,targetd->id,targetd->t);
-    printf("btwd %i, ttwd %i\n",based->twd, targetd->twd);
+    printf("target t %x, dirm %x ; base t %x, dirm %x\n", targetd->t,
+        targetd->dirm, based->t, based->dirm);
     printf("base pos: x %i; y %i; z %i, ox %i, oy %i, oz %i\n",
         tile_x_, tile_y_, tile_z_, off_x_, off_y_, off_z_);
 
-    if(targetd->t == m_sdNonwalkable || map_ == -1 || health_ <= 0) {
+    if(targetd->t == m_fdNonWalkable || map_ == -1 || health_ <= 0) {
         tile_z_ = old_z;
         off_z_ = old_oz;
         return;
     }
 
-    if(based->t == m_sdNonwalkable) {
+    if(based->t == m_fdNonWalkable) {
         printf("Movement from nonwalkable postion\n");
         tile_z_ = old_z;
         off_z_ = old_oz;
@@ -2126,6 +2123,8 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                         toadd = sadd.coords;
                     }
                 }
+                if ((sadd.p->t & m_fdConstant) != 0)
+                    tnr = false;
             }
             if ((pfdp->dirl & 0x10) == 0x10) {
                 sadd.coords.x = ctile.x;
@@ -2384,9 +2383,10 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
             np = false;
             ct = nt;
         }
+        printf("cx %i, y %i, z %i\n",ctile.x,ctile.y,ctile.z);
         dest_path_.push_back(PathNode(toadd.x, toadd.y, toadd.z));
         ctile = toadd;
-        //printf("x %i, y %i, z %i\n",toadd.x,toadd.y,toadd.z);
+        printf("x %i, y %i, z %i\n",toadd.x,toadd.y,toadd.z);
     } while (tnr);
 
     if(dest_path_.size() != 0) {

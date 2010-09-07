@@ -260,9 +260,9 @@ void VehicleInstance::setDestinationV(Mission *m, int x, int y, int z, int ox,
     dest_path_.clear();
     setSpeed(0);
 
-    if (m->mtsurfaces_[tile_x_ + tile_y_ * m->mmax_x_ + tile_z_ * m->mmax_m_xy].id
-        != m->mtsurfaces_[x + y * m->mmax_x_ + z * m->mmax_m_xy].id)
-        return;
+    //if (m->mtsurfaces_[tile_x_ + tile_y_ * m->mmax_x_ + tile_z_ * m->mmax_m_xy].id
+        //!= m->mtsurfaces_[x + y * m->mmax_x_ + z * m->mmax_m_xy].id)
+        //return;
     if (map_ == -1 || health_ <= 0
         || !(walkable(x, y, z)))
         return;

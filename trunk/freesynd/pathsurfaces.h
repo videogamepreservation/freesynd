@@ -26,31 +26,9 @@
 #include "common.h"
 
     typedef struct {
-        // tyle type
-        // 0x0 - not defined, 1b - surface, 2b - stairs,
-        // 3b - junction, 4b - definition required, 5b - non
-        // walkable/reachable
-        unsigned char t;
-        // direction
-        // tile possible directions max 0x76543210, min 0x0
-        unsigned int dir;
-        unsigned int id;
-        // id of junction surface lower
-        // for surfaces this represents direction where stairs are
-        unsigned int idjl;
-        // id of junction surface higher
-        // for surfaces this represents direction where stairs are
-        unsigned int idjh;
-        // tile walkable data from g_App.walkable_[]
+        // tile walkable data from g_App.walkable_p_[]
         unsigned char twd;
     }surfaceDesc;
-
-    #define m_sdNotdefined      0
-    #define m_sdSurface         1
-    #define m_sdStairs          2
-    #define m_sdJunction        4
-    #define m_sdDefreq          8
-    #define m_sdNonwalkable     16
 
     typedef struct {
         int x;
@@ -75,6 +53,7 @@
     #define m_fdWalkable        8
     #define m_fdConstant        16
     #define m_fdNonWalkable     32
+    #define m_fdDefReq          64
 
 #endif
 
