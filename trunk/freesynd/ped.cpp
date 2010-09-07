@@ -528,7 +528,7 @@ bool getOnScreen(int scrollX, int scrollY, int &x, int &y, int tx, int ty) {
 
 void PedInstance::showPath(int scrollX, int scrollY) {
     int px = screenX();
-    int py = screenY();
+    int py = screenY() - tile_z_ * TILE_HEIGHT/3 + TILE_HEIGHT/3;
 
     if (is_an_agent_ == PedInstance::Agent_Non_Active)
         return;
@@ -541,7 +541,8 @@ void PedInstance::showPath(int scrollX, int scrollY) {
                                        d.tileZ(), d.offX(), d.offY());
         int y =
             g_App.maps().tileToScreenY(map(), d.tileX(), d.tileY(),
-                                       d.tileZ(), d.offX(), d.offY());
+                                       d.tileZ(), d.offX(), d.offY())
+                                       - tile_z_ * TILE_HEIGHT/3 + TILE_HEIGHT/3;
 
         int ox = x;
         int oy = y;
@@ -2383,10 +2384,10 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
             np = false;
             ct = nt;
         }
-        printf("cx %i, y %i, z %i\n",ctile.x,ctile.y,ctile.z);
+        //printf("cx %i, y %i, z %i\n",ctile.x,ctile.y,ctile.z);
         dest_path_.push_back(PathNode(toadd.x, toadd.y, toadd.z));
         ctile = toadd;
-        printf("x %i, y %i, z %i\n",toadd.x,toadd.y,toadd.z);
+        //printf("x %i, y %i, z %i\n",toadd.x,toadd.y,toadd.z);
     } while (tnr);
 
     if(dest_path_.size() != 0) {
