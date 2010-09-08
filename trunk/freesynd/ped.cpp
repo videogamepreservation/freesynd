@@ -542,7 +542,7 @@ void PedInstance::showPath(int scrollX, int scrollY) {
         int y =
             g_App.maps().tileToScreenY(map(), d.tileX(), d.tileY(),
                                        d.tileZ(), d.offX(), d.offY())
-                                       - tile_z_ * TILE_HEIGHT/3 + TILE_HEIGHT/3;
+                                       - d.tileZ() * TILE_HEIGHT/3 + TILE_HEIGHT/3;
 
         int ox = x;
         int oy = y;
