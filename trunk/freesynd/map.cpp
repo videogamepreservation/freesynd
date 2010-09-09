@@ -232,13 +232,13 @@ void Map::draw(int scrollX, int scrollY, MapHelper * helper)
                                               buf + dx + dy * TILE_WIDTH,
                                               false, TILE_WIDTH);
                             }
+                            if (helper)
+                                helper->drawAt(w, h, z,
+                                               screen_w - scrollX + g_Screen.gameScreenLeftMargin() +
+                                               TILE_WIDTH / 2,
+                                               coord_h - scrollY, scrollX,
+                                               scrollY);
                         }
-                        if (helper)
-                            helper->drawAt(w, h, z,
-                                           screen_w - scrollX + g_Screen.gameScreenLeftMargin() +
-                                           TILE_WIDTH / 2,
-                                           coord_h - scrollY, scrollX,
-                                           scrollY);
                     }
                 }
             }
