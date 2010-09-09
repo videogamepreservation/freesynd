@@ -1968,6 +1968,7 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
     ctile.z = tile_z_;
     unsigned char ct = m_fdBasePoint;
     bool tnr = true, np = true;
+    std::vector<PathNode> cdestpath;
     do {
         unsigned char nt = ct;
         toDefineXYZ toadd;
@@ -2391,8 +2392,7 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
     } while (tnr);
 
     if(dest_path_.size() != 0) {
-        dest_path_.back().setOffX(ox);
-        dest_path_.back().setOffY(oy);
+        dest_path_.back().setOffXY(ox, oy);
     }
 
     free(mdpmirror);
