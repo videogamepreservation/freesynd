@@ -41,6 +41,8 @@
 #include "misswinmenu.h"
 #include "misslosemenu.h"
 #include "logoutmenu.h"
+#include "fliplayer.h"
+#include "system.h"
 
 MenuManager::MenuManager():current_(NULL),
 menu_main_(NULL), menu_conf_(NULL), menu_load_save_(NULL),
@@ -49,6 +51,8 @@ menu_research_(NULL), menu_loading_(NULL), menu_gameplay_(NULL),
 menu_debrief_(NULL), menu_miss_win_(NULL), menu_miss_lose_(NULL),
 menu_logout_(NULL)
 {
+    drop_events_ = false;
+    do_rendering_ = false;
 }
 
 MenuManager::~MenuManager()
@@ -81,6 +85,11 @@ MenuManager::~MenuManager()
         delete menu_logout_;
 }
 
+/*!
+ * Change the current menu with the one with the given name.
+ * Plays the transition animations between the two menus.
+ * \param name The name of the new menu.
+ */
 void MenuManager::changeCurrentMenu(const char *name)
 {
     if (name == NULL)
@@ -92,36 +101,110 @@ void MenuManager::changeCurrentMenu(const char *name)
     Menu *m = menus_[name];
     bool currentWasSubMenu = false;
     if (current_) {
+        // plays the leaving animation only if the menu
+        // is not a submenu (see confMenu)
         currentWasSubMenu = current_->isSubMenu();
-        current_->leave(!m->isSubMenu());
+        leaveMenu(current_, !m->isSubMenu());
     }
     current_ = m;
-    if (m)
-        m->show(!currentWasSubMenu);
+    if (m) {
+        showMenu(m, !currentWasSubMenu);
+    }
+}
+
+/*!
+ * Display the opening animation if the flag is true.
+  * After having played the animation, renders one time the menu.
+ * \param pMenu The menu to show.
+ * \param playAnim True if the intro can be played.
+ */
+void MenuManager::showMenu(Menu *pMenu, bool playAnim) {
+    if (pMenu->hasShowAnim() && playAnim) {
+        // Stop processing event during menu transitions
+        drop_events_ = true;
+        FliPlayer fliPlayer;
+        uint8 *data;
+        int size;
+        data = File::loadFile(pMenu->getShowAnimName(), size);
+        fliPlayer.loadFliData(data, false);
+        fliPlayer.play();
+        delete[] data;
+
+    }
+    
+    // First draw completly the menu
+    pMenu->render();
+
+    // then plot the mouse to draw the button
+    // that could be highlighted because the mouse
+    // is upon it
+    int x,y;
+    int state = g_System.getMousePos(&x, &y);
+    pMenu->mouseMotionEvent(x, y, state);
+
+    // reopen the event processing
+    drop_events_ = false;
+}
+
+/*!
+ * Displays the closing menu animation if the flag is true.
+ * Before playing animation calls Menu.handleLeave().
+ * \param pMenu The closing menu
+ * \param playAnim True to play the animation.
+ */
+void MenuManager::leaveMenu(Menu *pMenu, bool playAnim) {
+    pMenu->handleLeave();
+
+    if (pMenu->hasLeaveAnim() && playAnim) {
+        drop_events_ = true;
+        FliPlayer fliPlayer;
+        uint8 *data;
+        int size;
+        data = File::loadFile(pMenu->getLeaveAnimName(), size);
+        fliPlayer.loadFliData(data);
+		g_App.gameSounds().play(snd::MENU_CHANGE);
+        fliPlayer.play();
+        delete[] data;
+        drop_events_ = false;
+    }
+}
+
+/*!
+ * Renders the current menu if there is one 
+ * and if it needs to be refreshed.
+ */
+void MenuManager::renderMenu() {
+    if (current_ && do_rendering_) {
+        current_->render();
+        do_rendering_ = false;
+    }
 }
 
 void MenuManager::keyEvent(Key key, KeyMod mod, bool pressed)
 {
-    if (current_)
+    if (current_ && !drop_events_) {
         current_->keyEvent(key, mod, pressed);
+    }
 }
 
 void MenuManager::mouseMotionEvent(int x, int y, int state)
 {
-    if (current_)
+    if (current_ && !drop_events_)
         current_->mouseMotionEvent(x, y, state);
 }
 
 void MenuManager::mouseDownEvent(int x, int y, int button)
 {
-    if (current_)
+    if (current_ && !drop_events_) {
         current_->mouseDownEvent(x, y, button);
+    }
 }
 
 void MenuManager::mouseUpEvent(int x, int y, int button)
 {
-    if (current_)
+    if (current_ && !drop_events_) {
         current_->mouseUpEvent(x, y, button);
+    }
 }
 
 /*!

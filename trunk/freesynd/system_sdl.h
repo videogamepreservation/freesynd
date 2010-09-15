@@ -60,6 +60,9 @@ public:
     void setPalette8b3(const uint8 *pal, int cols = 256);
     void setColor(uint8 index, uint8 r, uint8 g, uint8 b);
 
+    //! Returns the mouse pointer coordinates
+    int getMousePos(int *x, int *y);
+
     void hideCursor();
     void showCursor();
     void useMenuCursor();

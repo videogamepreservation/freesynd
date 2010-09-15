@@ -261,7 +261,7 @@ void GameplayMenu::handleTick(int elapsed)
     }
 
     if (change) {
-        show(false);
+        render();
         // force pointing_at_ped / vehicle to update
         handleMouseMotion(last_motion_x_, last_motion_y_, 0);
     }
@@ -712,7 +712,7 @@ void GameplayMenu::handleMouseDown(int x, int y, int button)
     }
 
     if (change)
-        show(false);
+        render();
 }
 
 void GameplayMenu::handleMouseUp(int x, int y, int button) {
@@ -964,7 +964,7 @@ void GameplayMenu::handleUnknownKey(Key key, KeyMod mod, bool pressed) {
 #endif //_DEBUG
 
     if (change)
-        show(false);
+        render();
 }
 
 void GameplayMenu::drawAgentSelectors() {

@@ -300,5 +300,5 @@ void MapMenu::handleUnknownKey(Key key, KeyMod mod, bool pressed)
         g_Session.setSelectedBlockId(g_Session.getSelectedBlockId() - 1);
     if (key == KEY_RIGHT && g_Session.getSelectedBlockId() < 49)
         g_Session.setSelectedBlockId(g_Session.getSelectedBlockId() + 1);
-    show(false);
+    render();
 }

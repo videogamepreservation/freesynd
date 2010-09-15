@@ -34,7 +34,7 @@ MissWinMenu::MissWinMenu(MenuManager * m):Menu(m, "misswin", "mgamewin.dat",
     setParentMenu("debrief");
 }
 
-void MissWinMenu::handleShow()
+void MissWinMenu::handleTick(int elapsed)
 {
     menu_manager_->changeCurrentMenu("debrief");
 }

@@ -465,6 +465,7 @@ void App::run() {
         system_->handleEvents();
         int curtick = SDL_GetTicks();
         menus_.handleTick(curtick - lasttick);
+        menus_.renderMenu();
         lasttick = curtick;
         system_->updateScreen();
     }

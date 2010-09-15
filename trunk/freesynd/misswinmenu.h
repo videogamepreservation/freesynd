@@ -33,7 +33,7 @@ class MissWinMenu : public Menu {
 public:
     MissWinMenu(MenuManager *m);
 
-    void handleShow();
+    void handleTick(int elapsed);
 
 protected:
 };

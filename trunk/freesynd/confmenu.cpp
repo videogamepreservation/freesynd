@@ -249,6 +249,7 @@ Menu(m, "conf", "mconfup.dat", "mconfout.dat") {
     submenu_logo_ = new ChangeLogoMenu(m, bkg_, this);
     submenu_company_name_ = new ChangeCompanyNameMenu(m, bkg_, this);
     submenu_name_ = new ChangeYourNameMenu(m, bkg_, this);
+    setClearArea(bkg_, 283, 28, 328, 120);
     addStatic(299, 32, "SELECT DETAIL TO CHANGE", 1, false);
     addOption(325, 65, "\001COLOUR AND LOGO", 1, KEY_F1, "changeLogo");
     addOption(325, 90, "\001COMPANY NAME", 1, KEY_F2, "changeCompany");

@@ -28,7 +28,7 @@ Block g_Blocks[50] = {
     {"NORTHWEST TERRITORIES", 56000000, 39, 30, false, false, NULL},
     {"NORTHEAST TERRITORIES", 58000000, 8, 30, false, false, NULL},
     {"GREENLAND", 40000000, 16, 30, false, false, NULL},
-    {"SCANDINAVIA", 54000000, 20, 30, false, false, NULL},
+    {"SCANDINAVIA", 54000000, 20, 30, false, false, "10"},
     {"URALS", 40000000, 18, 30, false, false, NULL},
     {"SIBERIA", 54000000, 22, 30, false, false, NULL},
     {"KAMCHATKA", 56000000, 12, 30, false, false, NULL},

@@ -80,8 +80,11 @@ public:
         return leaveAnim_.size() == 0;
     }
 
-    void show(bool playAnim = true);
-    void leave(bool playAnim = true);
+    bool hasShowAnim() { return showAnim_.size() != 0; }
+    const char * getShowAnimName() { return showAnim_.c_str(); }
+    bool hasLeaveAnim() { return leaveAnim_.size() != 0; }
+    const char * getLeaveAnimName() { return leaveAnim_.c_str(); }
+    void render();
     void addStatic(int x, int y, const char *text, int size, bool dark);
     void addOption(int x, int y, const char *text, int size, Key key,
             const char *to = NULL, bool visible = true);
@@ -125,7 +128,7 @@ protected:
     std::string showAnim_, leaveAnim_;
     std::list<MenuText> statics_;
     std::map<Key, MenuText> options_;
-    bool hovering_, drop_events_;
+    bool hovering_;
     const char *parent_menu_;
     uint8 *background_;
     int clear_x_, clear_y_, clear_w_, clear_h_;

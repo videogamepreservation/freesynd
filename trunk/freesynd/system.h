@@ -43,6 +43,8 @@ struct System : public Singleton<System> {
     virtual void setPalette8b3(const uint8 *pal, int cols = 256) = 0;
     virtual void setColor(uint8 index, uint8 r, uint8 g, uint8 b) = 0;
 
+    //! Returns the mouse pointer coordinates
+    virtual int getMousePos(int *x, int *y) = 0;
     //! Hides the mouse cursor.
     virtual void hideCursor() = 0;
     //! Shows the mouse cursor.

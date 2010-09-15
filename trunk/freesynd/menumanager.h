@@ -61,8 +61,13 @@ public:
             current_->handleTick(elapsed);
     }
 
+    //! Switch from menu and plays the transition animation.
     void changeCurrentMenu(const char *name);
 
+    //! Displays the current menu
+    void renderMenu();
+
+    //! Returns true if a menu is being displayed
     bool showingMenu() { return current_ != NULL; }
 
     void keyEvent(Key key, KeyMod mod, bool pressed);
@@ -71,8 +76,20 @@ public:
     void mouseUpEvent(int x, int y, int button);
 
 protected:
+    //! Shows the menu opening animation
+    void showMenu(Menu *pMenu, bool playAnim);
+    //! Shows the menu closing animation
+    void leaveMenu(Menu *pMenu, bool playAnim);
+
+protected:
+    /** The list of currently loaded menus.*/
     std::map<std::string, Menu *> menus_;
+    /** The current menu being displayed.*/
     Menu *current_;
+    /** This flag prevents the input events from being processed.*/
+    bool drop_events_;
+    /** This flag indicate the current menu must be refreshed. */
+    bool do_rendering_;
 
     MainMenu *menu_main_;
     ConfMenu *menu_conf_;

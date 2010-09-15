@@ -473,11 +473,11 @@ void SelectMenu::handleMouseDown(int x, int y, int button)
                 else
                     cur_agent_ = 0;
             }
-            show(false);
+            render();
         }
         if (y > 150 && y < 162) {
             sel_all_ = !sel_all_;
-            show(false);
+            render();
         }
         if (y >= 162 && y <= 228) {
             if (x >= 82) {
@@ -491,7 +491,7 @@ void SelectMenu::handleMouseDown(int x, int y, int button)
                 else
                     cur_agent_ = 2;
             }
-            show(false);
+            render();
         }
     }
 
@@ -510,7 +510,7 @@ void SelectMenu::handleMouseDown(int x, int y, int button)
                 hideTeamList();
                 hideModsList();
                 hideEquipList();
-                show(false);
+                render();
             }
 }
 
@@ -525,7 +525,7 @@ void SelectMenu::handleOption(Key key)
         showTeamList();
         hideModsList();
         hideEquipList();
-        show(false);
+        render();
     }
     if (key == KEY_F3) {
         sel_weapon_ = sel_mod_ = sel_weapon_inst_ = 0;
@@ -536,7 +536,7 @@ void SelectMenu::handleOption(Key key)
         hideTeamList();
         showModsList();
         hideEquipList();
-        show(false);
+        render();
     }
     if (key == KEY_F4) {
         sel_weapon_ = sel_mod_ = sel_weapon_inst_ = 0;
@@ -547,7 +547,7 @@ void SelectMenu::handleOption(Key key)
         hideTeamList();
         hideModsList();
         showEquipList();
-        show(false);
+        render();
     }
     if (key >= KEY_0 && key < (Key) (KEY_0 + g_App.numRecruits())) {
         int i = key - KEY_0;
@@ -558,7 +558,7 @@ void SelectMenu::handleOption(Key key)
                 found = true;
         if (!found) {
             g_App.setTeamMember(cur_agent_, n);
-            show(false);
+            render();
         }
     }
     if (key >= KEY_a && key < (Key) (KEY_a + g_App.numAvailableMods())) {
@@ -567,7 +567,7 @@ void SelectMenu::handleOption(Key key)
         showOption(KEY_F7);
         showOption(KEY_F8);
         hideModsList();
-        show(false);
+        render();
     }
     if (key >= (Key) (KEY_a + g_App.numAvailableMods())
         && key <=
@@ -578,7 +578,7 @@ void SelectMenu::handleOption(Key key)
         showOption(KEY_F7);
         showOption(KEY_F8);
         hideEquipList();
-        show(false);
+        render();
     }
     if (key == KEY_F7) {
         sel_weapon_ = sel_mod_ = sel_weapon_inst_ = 0;
@@ -589,7 +589,7 @@ void SelectMenu::handleOption(Key key)
             showModsList();
         else
             showEquipList();
-        show(false);
+        render();
     }
     if (key == KEY_F8 && sel_weapon_) {
         Weapon *w = g_App.availableWeapon(sel_weapon_ - 1);
@@ -609,7 +609,7 @@ void SelectMenu::handleOption(Key key)
                 selected->addWeapon(w->createInstance());
             }
         }
-        show(false);
+        render();
     }
     if (key == KEY_F8 && sel_mod_) {
         Mod *m = g_App.availableMod(sel_mod_ - 1);
@@ -636,7 +636,7 @@ void SelectMenu::handleOption(Key key)
         hideOption(KEY_F7);
         hideOption(KEY_F8);
         showModsList();
-        show(false);
+        render();
     }
     if (key == KEY_F9 && sel_weapon_inst_) {
         Agent *selected = g_App.teamMember(cur_agent_);
@@ -647,6 +647,6 @@ void SelectMenu::handleOption(Key key)
         hideOption(KEY_F7);
         hideOption(KEY_F9);
         showEquipList();
-        show(false);
+        render();
     }
 }

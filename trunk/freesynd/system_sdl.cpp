@@ -279,6 +279,16 @@ bool SystemSDL::loadCursorSprites() {
     return true;
 }
 
+/*! 
+ * Returns the mouse pointer coordinates using SDL_GetMouseState. 
+ * \param x The x coordinate.
+ * \param y The y coordinate.
+ * \return See SDL_GetMouseState.
+ */
+int SystemSDL::getMousePos(int *x, int *y) {
+    return SDL_GetMouseState(x, y);
+}
+
 void SystemSDL::hideCursor() {
     if (cursor_surf_ != NULL) {
         cursor_visible_ = false;

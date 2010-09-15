@@ -215,7 +215,7 @@ void BriefMenu::handleOption(Key key) {
         }
 
         showOption(KEY_F6);
-        show(false);
+        render();
     }
 
     if (key == KEY_F2) {
@@ -224,13 +224,13 @@ void BriefMenu::handleOption(Key key) {
                            mission_->enhanceCost(enhance_level_));
             enhance_level_++;
         }
-        show(false);
+        render();
     }
 
     if (key == KEY_F6) {
         start_line_ += 14;
         showOption(KEY_F7);
-        show(false);
+        render();
     }
 
     if (key == KEY_F7) {
@@ -241,6 +241,6 @@ void BriefMenu::handleOption(Key key) {
             hideOption(KEY_F7);
         }
         showOption(KEY_F6);
-        show(false);
+        render();
     }
 }
