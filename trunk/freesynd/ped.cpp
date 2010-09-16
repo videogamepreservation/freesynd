@@ -1617,7 +1617,7 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
         } else
             nodeset = false;
     } while (nodeset && lnknr);
-    printf("bv %i, tv %i\n", bv.size(), tv.size());
+    //printf("bv %i, tv %i\n", bv.size(), tv.size());
     printf("btime %i.%i\n", SDL_GetTicks()/1000, SDL_GetTicks()%1000);
 
     if (!nodeset && lnknr) {
@@ -1689,7 +1689,7 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
         }
         tn[tlvl].n = tv.size() - tn[tlvl].indxs;
     }
-    printf("bv %i, tv %i\n", bv.size(), tv.size());
+    //printf("bv %i, tv %i\n", bv.size(), tv.size());
 
     if (blvl > 1) {
         blvl--;
@@ -1957,7 +1957,7 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
             indx--;
         } while(indx != 0);
     }
-    printf("bv %i, tv %i\n", bv.size(), tv.size());
+    //printf("bv %i, tv %i\n", bv.size(), tv.size());
     bn.clear();
     tn.clear();
     bv.clear();
@@ -2385,17 +2385,448 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
             np = false;
             ct = nt;
         }
-        //printf("cx %i, y %i, z %i\n",ctile.x,ctile.y,ctile.z);
-        dest_path_.push_back(PathNode(toadd.x, toadd.y, toadd.z));
+        cdestpath.push_back(PathNode(toadd.x, toadd.y, toadd.z));
         ctile = toadd;
-        //printf("x %i, y %i, z %i\n",toadd.x,toadd.y,toadd.z);
     } while (tnr);
 
-    if(dest_path_.size() != 0) {
-        dest_path_.back().setOffXY(ox, oy);
+    // stairs to surface, surface to stairs correction
+    if (cdestpath.size() != 0) {
+        PathNode prvpn = PathNode(tile_x_, tile_y_, tile_z_, off_x_, off_y_);
+        // TODO: use these to smoother path. later
+        //std::vector<PathNode> vsingleway;
+        //unsigned char mdir;
+        //unsigned char hl;
+        for (std::vector <PathNode>::iterator it = cdestpath.begin();
+            it != cdestpath.end(); it++) {
+            std::vector <PathNode>::iterator fit = it + 1;
+            bool modified = false;
+            unsigned char twd = m->mtsurfaces_[prvpn.tileX()
+                + prvpn.tileY() * m->mmax_x_
+                + prvpn.tileZ() * m->mmax_m_xy].twd;
+            unsigned char twdn = m->mtsurfaces_[it->tileX()
+                + it->tileY() * m->mmax_x_
+                + it->tileZ() * m->mmax_m_xy].twd;
+            char xf = prvpn.tileX() - it->tileX();
+            char yf = prvpn.tileY() - it->tileY();
+            char zf = prvpn.tileZ() - it->tileZ();
+            if (twd > 0x0 && twd < 0x05) {
+                if (twdn > 0x0 && twdn < 0x05) {
+                    dest_path_.push_back(*it);
+                } else {
+                    switch (twd) {
+                        case 0x01:
+                            if (zf == 1) {
+                                if (xf == 0) {
+                                    dest_path_.push_back(*it);
+                                    break;
+                                }
+                                if (xf == 1) {
+                                    prvpn.setOffXY(0,255);
+                                    dest_path_.push_back(prvpn);
+                                    it->setOffXY(255,255);
+                                    dest_path_.push_back(*it);
+                                    modified = true;
+                                    break;
+                                }
+                                if (xf == -1) {
+                                    prvpn.setOffXY(255,255);
+                                    dest_path_.push_back(prvpn);
+                                    it->setOffXY(0,255);
+                                    dest_path_.push_back(*it);
+                                    modified = true;
+                                    break;
+                                }
+                            }
+                            if (zf == 0) {
+                                if (xf == 0) {
+                                    dest_path_.push_back(*it);
+                                    break;
+                                }
+                                if (xf == 1) {
+                                    prvpn.setOffXY(0,0);
+                                    dest_path_.push_back(prvpn);
+                                    it->setOffXY(255,0);
+                                    dest_path_.push_back(*it);
+                                    modified = true;
+                                    break;
+                                }
+                                if (xf == -1) {
+                                    prvpn.setOffXY(255,0);
+                                    dest_path_.push_back(prvpn);
+                                    it->setOffXY(0,0);
+                                    dest_path_.push_back(*it);
+                                    modified = true;
+                                    break;
+                                }
+                            }
+                            if (zf == -1)
+                                dest_path_.push_back(*it);
+                            break;
+                        case 0x02:
+                            if (zf == 1) {
+                                if (xf == 0) {
+                                    dest_path_.push_back(*it);
+                                    break;
+                                }
+                                if (xf == 1) {
+                                    prvpn.setOffXY(0,0);
+                                    dest_path_.push_back(prvpn);
+                                    it->setOffXY(255,0);
+                                    dest_path_.push_back(*it);
+                                    modified = true;
+                                    break;
+                                }
+                                if (xf == -1) {
+                                    prvpn.setOffXY(255,0);
+                                    dest_path_.push_back(prvpn);
+                                    it->setOffXY(0,0);
+                                    dest_path_.push_back(*it);
+                                    modified = true;
+                                    break;
+                                }
+                            }
+                            if (zf == 0) {
+                                if (xf == 0) {
+                                    dest_path_.push_back(*it);
+                                    break;
+                                }
+                                if (xf == 1) {
+                                    prvpn.setOffXY(0,255);
+                                    dest_path_.push_back(prvpn);
+                                    it->setOffXY(255,255);
+                                    dest_path_.push_back(*it);
+                                    modified = true;
+                                    break;
+                                }
+                                if (xf == -1) {
+                                    prvpn.setOffXY(255,255);
+                                    dest_path_.push_back(prvpn);
+                                    it->setOffXY(0,255);
+                                    dest_path_.push_back(*it);
+                                    modified = true;
+                                    break;
+                                }
+                            }
+                            if (zf == -1)
+                                dest_path_.push_back(*it);
+                            break;
+                        case 0x03:
+                            if (zf == 1) {
+                                if (yf == 0) {
+                                    dest_path_.push_back(*it);
+                                    break;
+                                }
+                                if (yf == 1) {
+                                    prvpn.setOffXY(0,0);
+                                    dest_path_.push_back(prvpn);
+                                    it->setOffXY(0,255);
+                                    dest_path_.push_back(*it);
+                                    modified = true;
+                                    break;
+                                }
+                                if (yf == -1) {
+                                    prvpn.setOffXY(0,255);
+                                    dest_path_.push_back(prvpn);
+                                    it->setOffXY(0,0);
+                                    dest_path_.push_back(*it);
+                                    modified = true;
+                                    break;
+                                }
+                            }
+                            if (zf == 0) {
+                                if (yf == 0) {
+                                    dest_path_.push_back(*it);
+                                    break;
+                                }
+                                if (yf == 1) {
+                                    prvpn.setOffXY(255,0);
+                                    dest_path_.push_back(prvpn);
+                                    it->setOffXY(255,255);
+                                    dest_path_.push_back(*it);
+                                    modified = true;
+                                    break;
+                                }
+                                if (yf == -1) {
+                                    prvpn.setOffXY(255,255);
+                                    dest_path_.push_back(prvpn);
+                                    it->setOffXY(255,0);
+                                    dest_path_.push_back(*it);
+                                    modified = true;
+                                    break;
+                                }
+                            }
+                            if (zf == -1)
+                                dest_path_.push_back(*it);
+                            break;
+                        case 0x04:
+                            if (zf == 1) {
+                                if (yf == 0) {
+                                    dest_path_.push_back(*it);
+                                    break;
+                                }
+                                if (yf == 1) {
+                                    prvpn.setOffXY(255,0);
+                                    dest_path_.push_back(prvpn);
+                                    it->setOffXY(255,255);
+                                    dest_path_.push_back(*it);
+                                    modified = true;
+                                    break;
+                                }
+                                if (yf == -1) {
+                                    prvpn.setOffXY(255,255);
+                                    dest_path_.push_back(prvpn);
+                                    it->setOffXY(255,0);
+                                    dest_path_.push_back(*it);
+                                    modified = true;
+                                    break;
+                                }
+                            }
+                            if (zf == 0) {
+                                if (yf == 0) {
+                                    dest_path_.push_back(*it);
+                                    break;
+                                }
+                                if (yf == 1) {
+                                    prvpn.setOffXY(0,0);
+                                    dest_path_.push_back(prvpn);
+                                    it->setOffXY(0,255);
+                                    dest_path_.push_back(*it);
+                                    modified = true;
+                                    break;
+                                }
+                                if (yf == -1) {
+                                    prvpn.setOffXY(0,255);
+                                    dest_path_.push_back(prvpn);
+                                    it->setOffXY(0,0);
+                                    dest_path_.push_back(*it);
+                                    modified = true;
+                                    break;
+                                }
+                            }
+                            if (zf == -1)
+                                dest_path_.push_back(*it);
+                            break;
+                    }
+                }
+            } else {
+                if (twdn > 0x0 && twdn < 0x05) {
+                    switch (twdn) {
+                        case 0x01:
+                            if (zf == -1) {
+                                if (xf == 0) {
+                                    dest_path_.push_back(*it);
+                                    break;
+                                }
+                                if (xf == -1) {
+                                    prvpn.setOffXY(255,255);
+                                    dest_path_.push_back(prvpn);
+                                    it->setOffXY(0,255);
+                                    dest_path_.push_back(*it);
+                                    modified = true;
+                                    break;
+                                }
+                                if (xf == 1) {
+                                    prvpn.setOffXY(0,255);
+                                    dest_path_.push_back(prvpn);
+                                    it->setOffXY(255,255);
+                                    dest_path_.push_back(*it);
+                                    modified = true;
+                                    break;
+                                }
+                            }
+                            if (zf == 0) {
+                                if (xf == 0) {
+                                    dest_path_.push_back(*it);
+                                    break;
+                                }
+                                if (xf == -1) {
+                                    prvpn.setOffXY(255,0);
+                                    dest_path_.push_back(prvpn);
+                                    it->setOffXY(0,0);
+                                    dest_path_.push_back(*it);
+                                    modified = true;
+                                    break;
+                                }
+                                if (xf == 1) {
+                                    prvpn.setOffXY(0,0);
+                                    dest_path_.push_back(prvpn);
+                                    it->setOffXY(255,0);
+                                    dest_path_.push_back(*it);
+                                    modified = true;
+                                    break;
+                                }
+                            }
+                            if (zf == 1)
+                                dest_path_.push_back(*it);
+                            break;
+                        case 0x02:
+                            if (zf == -1) {
+                                if (xf == 0) {
+                                    dest_path_.push_back(*it);
+                                    break;
+                                }
+                                if (xf == -1) {
+                                    prvpn.setOffXY(255,0);
+                                    dest_path_.push_back(prvpn);
+                                    it->setOffXY(0,0);
+                                    dest_path_.push_back(*it);
+                                    modified = true;
+                                    break;
+                                }
+                                if (xf == 1) {
+                                    prvpn.setOffXY(0,0);
+                                    dest_path_.push_back(prvpn);
+                                    it->setOffXY(255,0);
+                                    dest_path_.push_back(*it);
+                                    modified = true;
+                                    break;
+                                }
+                            }
+                            if (zf == 0) {
+                                if (xf == 0) {
+                                    dest_path_.push_back(*it);
+                                    break;
+                                }
+                                if (xf == -1) {
+                                    prvpn.setOffXY(255,255);
+                                    dest_path_.push_back(prvpn);
+                                    it->setOffXY(0,255);
+                                    dest_path_.push_back(*it);
+                                    modified = true;
+                                    break;
+                                }
+                                if (xf == 1) {
+                                    prvpn.setOffXY(0,255);
+                                    dest_path_.push_back(prvpn);
+                                    it->setOffXY(255,255);
+                                    dest_path_.push_back(*it);
+                                    modified = true;
+                                    break;
+                                }
+                            }
+                            if (zf == 1)
+                                dest_path_.push_back(*it);
+                            break;
+                        case 0x03:
+                            if (zf == -1) {
+                                if (yf == 0) {
+                                    dest_path_.push_back(*it);
+                                    break;
+                                }
+                                if (yf == -1) {
+                                    prvpn.setOffXY(0,255);
+                                    dest_path_.push_back(prvpn);
+                                    it->setOffXY(0,0);
+                                    dest_path_.push_back(*it);
+                                    modified = true;
+                                    break;
+                                }
+                                if (yf == 1) {
+                                    prvpn.setOffXY(0,0);
+                                    dest_path_.push_back(prvpn);
+                                    it->setOffXY(0,255);
+                                    dest_path_.push_back(*it);
+                                    modified = true;
+                                    break;
+                                }
+                            }
+                            if (zf == 0) {
+                                if (yf == 0) {
+                                    dest_path_.push_back(*it);
+                                    break;
+                                }
+                                if (yf == -1) {
+                                    prvpn.setOffXY(255,255);
+                                    dest_path_.push_back(prvpn);
+                                    it->setOffXY(255,0);
+                                    dest_path_.push_back(*it);
+                                    modified = true;
+                                    break;
+                                }
+                                if (yf == 1) {
+                                    prvpn.setOffXY(255,0);
+                                    dest_path_.push_back(prvpn);
+                                    it->setOffXY(255,255);
+                                    dest_path_.push_back(*it);
+                                    modified = true;
+                                    break;
+                                }
+                            }
+                            if (zf == 1)
+                                dest_path_.push_back(*it);
+                            break;
+                        case 0x04:
+                            if (zf == -1) {
+                                if (yf == 0) {
+                                    dest_path_.push_back(*it);
+                                    break;
+                                }
+                                if (yf == -1) {
+                                    prvpn.setOffXY(255,255);
+                                    dest_path_.push_back(prvpn);
+                                    it->setOffXY(255,0);
+                                    dest_path_.push_back(*it);
+                                    modified = true;
+                                    break;
+                                }
+                                if (yf == 1) {
+                                    prvpn.setOffXY(255,0);
+                                    dest_path_.push_back(prvpn);
+                                    it->setOffXY(255,255);
+                                    dest_path_.push_back(*it);
+                                    modified = true;
+                                    break;
+                                }
+                            }
+                            if (zf == 0) {
+                                if (yf == 0) {
+                                    dest_path_.push_back(*it);
+                                    break;
+                                }
+                                if (yf == -1) {
+                                    prvpn.setOffXY(0,255);
+                                    dest_path_.push_back(prvpn);
+                                    it->setOffXY(0,0);
+                                    dest_path_.push_back(*it);
+                                    modified = true;
+                                    break;
+                                }
+                                if (yf == 1) {
+                                    prvpn.setOffXY(0,0);
+                                    dest_path_.push_back(prvpn);
+                                    it->setOffXY(0,255);
+                                    dest_path_.push_back(*it);
+                                    modified = true;
+                                    break;
+                                }
+                            }
+                            if (zf == 1)
+                                dest_path_.push_back(*it);
+                            break;
+                    }
+                } else {
+                    dest_path_.push_back(*it);
+                }
+            }
+            prvpn = *it;
+            if (fit == cdestpath.end()) {
+                if (modified) {
+                    dest_path_.push_back(PathNode(x,y,z,ox,oy));
+                } else {
+                    dest_path_.back().setOffXY(ox,oy);
+                }
+            }
+        }
     }
+    printf("smoothing time %i.%i\n", SDL_GetTicks()/1000, SDL_GetTicks()%1000);
 
     free(mdpmirror);
+#if 0
+    for (std::list <PathNode>::iterator it = dest_path_.begin();
+        it != dest_path_.end(); it++) {
+        printf("x %i, y %i, z %i\n", it->tileX(),it->tileY(),it->tileZ());
+    }
+#endif
     if(dest_path_.size() != 0)
         speed_ = new_speed;
     tile_z_ = old_z;

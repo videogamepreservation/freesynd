@@ -183,7 +183,7 @@ bool Mission::loadLevel(uint8 * levelData)
     peds_.clear();
     for (int i = 0; i < 256; i++) {
         LEVELDATA_PEOPLE & pedref = level_data_.people[i];
-        //if (pedref.unkn3 != 4) //this type of ped is driving vehicle
+        //if (pedref.unkn3 != 4) //this type of ped is driving vehicle or else?
             //continue;
         PedInstance *p =
             g_App.peds().loadInstance((uint8 *) & pedref, map_);
@@ -971,7 +971,7 @@ bool Mission::setSurfaces() {
                                 upper_s = mtsurfaces_[x + ym + z].twd;
                                 if (isSurface(this_s)) {
                                     if(sWalkable(this_s, upper_s)) {
-                                        sdirl |= 0x01;
+                                        sdirl |= 0x10;
                                     } else {
                                         nxtfp->t = m_fdNonWalkable;
                                     }
@@ -991,7 +991,7 @@ bool Mission::setSurfaces() {
                                 upper_s = mtsurfaces_[x + yp + z].twd;
                                 if (isSurface(this_s)) {
                                     if(sWalkable(this_s, upper_s)) {
-                                        sdirl |= 0x10;
+                                        sdirl |= 0x01;
                                     } else {
                                         nxtfp->t = m_fdNonWalkable;
                                     }
@@ -1111,7 +1111,7 @@ bool Mission::setSurfaces() {
                                 upper_s = mtsurfaces_[x + ym + z].twd;
                                 if (isSurface(this_s)) {
                                     if(sWalkable(this_s, upper_s)) {
-                                        sdirl |= 0x01;
+                                        sdirl |= 0x10;
                                     } else {
                                         nxtfp->t = m_fdNonWalkable;
                                     }
@@ -1131,7 +1131,7 @@ bool Mission::setSurfaces() {
                                 upper_s = mtsurfaces_[x + yp + z].twd;
                                 if (isSurface(this_s)) {
                                     if(sWalkable(this_s, upper_s)) {
-                                        sdirl |= 0x10;
+                                        sdirl |= 0x01;
                                     } else {
                                         nxtfp->t = m_fdNonWalkable;
                                     }
