@@ -560,14 +560,17 @@ bool Mission::sWalkable(char thisTile, char upperTile) {
 
     return (thisTile != upperTile
         && (((thisTile >= 0x05 && thisTile <= 0x09) ||
-        thisTile == 0x0B || (thisTile >= 0x0D && thisTile <= 0x0F))
-            ? upperTile == 0x0 : true))
-        || (thisTile > 0x00 && thisTile < 0x05 && upperTile == 0x0);
+        thisTile == 0x0B || (thisTile >= 0x0D && thisTile <= 0x0F)
+        || (thisTile == 0x11 || thisTile == 0x12))
+            ? (upperTile == 0x0 || upperTile == 0x10) : true))
+        || (thisTile > 0x00 && thisTile < 0x05
+        && (upperTile == 0x0 || upperTile == 0x10));
 }
 
 bool Mission::isSurface(char thisTile) {
     return (thisTile >= 0x05 && thisTile <= 0x09) ||
-        thisTile == 0x0B || (thisTile >= 0x0D && thisTile <= 0x0F);
+        thisTile == 0x0B || (thisTile >= 0x0D && thisTile <= 0x0F)
+        || (thisTile == 0x11 || thisTile == 0x12);
 }
 
 bool Mission::isStairs(char thisTile) {
@@ -582,6 +585,7 @@ bool Mission::setSurfaces() {
     // implemented them as needed. To make it possible a patch
     // required to walkdata and a lot of changes which I don't
     // want to do.
+    // 0x10 appear above walking tile where train stops
     clrSurfaces();
     if (!(g_App.maps().mapDimensions(map_,
         &mmax_x_, &mmax_y_, &mmax_z_)))
@@ -1247,7 +1251,8 @@ bool Mission::setSurfaces() {
                                 sdirmr |= (0x20 | 0x80);
                                 nxtfp->t = m_fdNonWalkable;
                                 if ((zp + mmax_m_xy) < mmax_m_all
-                                    && (upper_s == 0x01 || upper_s == 0x02 || upper_s == 0x04)) {
+                                    && (upper_s == 0x01 || upper_s == 0x02 || upper_s == 0x04
+                                    || upper_s == 0x12)) {
                                     if (sWalkable(upper_s, mtsurfaces_[xm + y + (zp + mmax_m_xy)].twd)) {
                                         sdirh |= 0x40;
                                         if (mdpoints_[xm + y + zp].t == m_fdNotDefined) {
@@ -1286,7 +1291,8 @@ bool Mission::setSurfaces() {
                                 sdirmr |= (0x02 | 0x08);
                                 nxtfp->t = m_fdNonWalkable;
                                 if ((zp + mmax_m_xy) < mmax_m_all
-                                    && (upper_s == 0x01 || upper_s == 0x02 || upper_s == 0x03)) {
+                                    && (upper_s == 0x01 || upper_s == 0x02 || upper_s == 0x03
+                                    || upper_s == 0x11)) {
                                     if (sWalkable(upper_s, mtsurfaces_[xp + y + (zp + mmax_m_xy)].twd)) {
                                         sdirh |= 0x04;
                                         if (mdpoints_[xp + y + zp].t == m_fdNotDefined) {
@@ -1325,7 +1331,8 @@ bool Mission::setSurfaces() {
                                 sdirmr |= (0x08 | 0x20);
                                 nxtfp->t = m_fdNonWalkable;
                                 if ((zp + mmax_m_xy) < mmax_m_all
-                                    && (upper_s == 0x01 || upper_s == 0x03 || upper_s == 0x04)) {
+                                    && (upper_s == 0x01 || upper_s == 0x03 || upper_s == 0x04
+                                    || upper_s == 0x11)) {
                                     if (sWalkable(upper_s, mtsurfaces_[x + ym + (zp + mmax_m_xy)].twd)) {
                                         sdirh |= 0x10;
                                         if (mdpoints_[x + ym + zp].t == m_fdNotDefined) {
@@ -1364,7 +1371,8 @@ bool Mission::setSurfaces() {
                                 sdirmr |= (0x80 | 0x02);
                                 nxtfp->t = m_fdNonWalkable;
                                 if ((zp + mmax_m_xy) < mmax_m_all
-                                    && (upper_s == 0x02 || upper_s == 0x03 || upper_s == 0x04)) {
+                                    && (upper_s == 0x02 || upper_s == 0x03 || upper_s == 0x04
+                                    || upper_s == 0x12)) {
                                     if (sWalkable(upper_s, mtsurfaces_[x + yp + (zp + mmax_m_xy)].twd)) {
                                         sdirh |= 0x01;
                                         if (mdpoints_[x + yp + zp].t == m_fdNotDefined) {
@@ -1390,7 +1398,7 @@ bool Mission::setSurfaces() {
 
                         // edges
 
-                        if (xm >=0) {
+                        if (xm >= 0) {
                             if ( ym >= 0 && (sdirm & 0x20) != 0) {
                                 nxts = &(mtsurfaces_[xm + ym + z]);
                                 nxtfp = &(mdpoints_[xm + ym + z]);
@@ -1486,6 +1494,472 @@ bool Mission::setSurfaces() {
                     case 0x0C:
                     case 0x10:
                         cfp->t = m_fdNonWalkable;
+                        break;
+                    case 0x11:
+                        cfp->t = m_fdWalkable;
+                        if (zm >= 0) {
+                            if (xm >= 0) {
+                                nxts = &(mtsurfaces_[xm + y + zm]);
+                                nxtfp = &(mdpoints_[xm + y + zm]);
+                                mdpoints_[x + y + zm].t = m_fdNonWalkable;
+                                this_s = nxts->twd;
+                                upper_s = mtsurfaces_[xm + y + z].twd;
+                                if (isSurface(this_s)) {
+                                    if(sWalkable(this_s, upper_s)) {
+                                        sdirl |= 0x40;
+                                    } else {
+                                        nxtfp->t = m_fdNonWalkable;
+                                    }
+                                }
+                                if(nxtfp->t == m_fdNotDefined) {
+                                    nxtfp->t = m_fdDefReq;
+                                    stodef.x = xm;
+                                    stodef.y = y;
+                                    stodef.z = zm;
+                                    vtodefine.push_back(stodef);
+                                }
+                            }
+                            if (ym >= 0) {
+                                nxts = &(mtsurfaces_[x + ym + zm]);
+                                nxtfp = &(mdpoints_[x + ym + zm]);
+                                this_s = nxts->twd;
+                                upper_s = mtsurfaces_[x + ym + z].twd;
+                                if (isSurface(this_s)) {
+                                    if(sWalkable(this_s, upper_s)) {
+                                        sdirl |= 0x10;
+                                    } else {
+                                        nxtfp->t = m_fdNonWalkable;
+                                    }
+                                }
+                                if(nxtfp->t == m_fdNotDefined) {
+                                    nxtfp->t = m_fdDefReq;
+                                    stodef.x = x;
+                                    stodef.y = ym;
+                                    stodef.z = zm;
+                                    vtodefine.push_back(stodef);
+                                }
+                            }
+                            if (yp < mmax_m_xy) {
+                                nxts = &(mtsurfaces_[x + yp + zm]);
+                                nxtfp = &(mdpoints_[x + yp + zm]);
+                                this_s = nxts->twd;
+                                upper_s = mtsurfaces_[x + yp + z].twd;
+                                if (isSurface(this_s)) {
+                                    if(sWalkable(this_s, upper_s)) {
+                                        sdirl |= 0x01;
+                                    } else {
+                                        nxtfp->t = m_fdNonWalkable;
+                                    }
+                                }
+                                if(nxtfp->t == m_fdNotDefined) {
+                                    nxtfp->t = m_fdDefReq;
+                                    stodef.x = x;
+                                    stodef.y = yp;
+                                    stodef.z = zm;
+                                    vtodefine.push_back(stodef);
+                                }
+                            }
+                        }
+
+                        if (xp < mmax_x_) {
+                            nxts = &(mtsurfaces_[xp + y + z]);
+                            nxtfp = &(mdpoints_[xp + y + z]);
+                            this_s = nxts->twd;
+                            upper_s = mtsurfaces_[xp + y + zp].twd;
+                            if (isSurface(this_s) && sWalkable(this_s, upper_s)) {
+                                sdirm |= (0x02 | 0x04 | 0x08);
+                            } else if (isStairs(this_s) && sWalkable(this_s, upper_s)) {
+                                sdirmr |= (0x02 | 0x08);
+                                if (this_s == 0x01 || this_s == 0x02 || this_s == 0x04){
+                                    sdirm |= 0x04;
+                                }
+                            } else {
+                                sdirmr |= (0x02 | 0x08);
+                                nxtfp->t = m_fdNonWalkable;
+                                if ((zp + mmax_m_xy) < mmax_m_all
+                                    && (upper_s == 0x01 || upper_s == 0x02 || upper_s == 0x03)) {
+                                    if (sWalkable(upper_s, mtsurfaces_[xp + y + (zp + mmax_m_xy)].twd)) {
+                                        sdirh |= 0x04;
+                                        if (mdpoints_[xp + y + zp].t == m_fdNotDefined) {
+                                            mdpoints_[xp + y + zp].t = m_fdDefReq;
+                                            stodef.x = xp;
+                                            stodef.y = y;
+                                            stodef.z = zp;
+                                            vtodefine.push_back(stodef);
+                                        }
+                                    }
+                                }
+                            }
+                            if (nxtfp->t == m_fdNotDefined) {
+                                nxtfp->t = m_fdDefReq;
+                                stodef.x = xp;
+                                stodef.y = y;
+                                stodef.z = z;
+                                vtodefine.push_back(stodef);
+                            }
+                        } else
+                            sdirmr |= (0x02 | 0x08);
+
+                        if(ym >= 0) {
+                            nxts = &(mtsurfaces_[x + ym + z]);
+                            nxtfp = &(mdpoints_[x + ym + z]);
+                            this_s = nxts->twd;
+                            upper_s = mtsurfaces_[x + ym + zp].twd;
+                            if (isSurface(this_s) && sWalkable(this_s, upper_s)) {
+                                sdirm |= (0x08 | 0x10);
+                            } else if (isStairs(this_s) && sWalkable(this_s, upper_s)) {
+                                sdirmr |= (0x08 | 0x20);
+                                if (this_s == 0x02 || this_s == 0x03 || this_s == 0x04){
+                                    sdirm |= 0x10;
+                                }
+                            } else {
+                                sdirmr |= (0x08 | 0x20);
+                                nxtfp->t = m_fdNonWalkable;
+                                if ((zp + mmax_m_xy) < mmax_m_all
+                                    && (upper_s == 0x01 || upper_s == 0x03 || upper_s == 0x04)) {
+                                    if (sWalkable(upper_s, mtsurfaces_[x + ym + (zp + mmax_m_xy)].twd)) {
+                                        sdirh |= 0x10;
+                                        if (mdpoints_[x + ym + zp].t == m_fdNotDefined) {
+                                            mdpoints_[x + ym + zp].t = m_fdDefReq;
+                                            stodef.x = x;
+                                            stodef.y = ym;
+                                            stodef.z = zp;
+                                            vtodefine.push_back(stodef);
+                                        }
+                                    }
+                                }
+                            }
+                            if (nxtfp->t == m_fdNotDefined) {
+                                nxtfp->t = m_fdDefReq;
+                                stodef.x = x;
+                                stodef.y = ym;
+                                stodef.z = z;
+                                vtodefine.push_back(stodef);
+                            }
+                        } else
+                            sdirmr |= (0x08);
+
+                        if (yp < mmax_m_xy) {
+                            nxts = &(mtsurfaces_[x + yp + z]);
+                            nxtfp = &(mdpoints_[x + yp + z]);
+                            this_s = nxts->twd;
+                            upper_s = mtsurfaces_[x + yp + zp].twd;
+                            if (isSurface(this_s) && sWalkable(this_s, upper_s)) {
+                                sdirm |= (0x01 | 0x02);
+                            } else if (isStairs(this_s) && sWalkable(this_s, upper_s)) {
+                                sdirmr |= (0x80 | 0x02);
+                                if (this_s == 0x01 || this_s == 0x03 || this_s == 0x04) {
+                                    sdirm |= 0x01;
+                                }
+                            } else {
+                                sdirmr |= (0x80 | 0x02);
+                                nxtfp->t = m_fdNonWalkable;
+                                if ((zp + mmax_m_xy) < mmax_m_all
+                                    && (upper_s == 0x02 || upper_s == 0x03 || upper_s == 0x04)) {
+                                    if (sWalkable(upper_s, mtsurfaces_[x + yp + (zp + mmax_m_xy)].twd)) {
+                                        sdirh |= 0x01;
+                                        if (mdpoints_[x + yp + zp].t == m_fdNotDefined) {
+                                            mdpoints_[x + yp + zp].t = m_fdDefReq;
+                                            stodef.x = x;
+                                            stodef.y = yp;
+                                            stodef.z = zp;
+                                            vtodefine.push_back(stodef);
+                                        }
+                                    }
+                                }
+                            }
+                            if (nxtfp->t == m_fdNotDefined) {
+                                nxtfp->t = m_fdDefReq;
+                                stodef.x = x;
+                                stodef.y = yp;
+                                stodef.z = z;
+                                vtodefine.push_back(stodef);
+                            }
+                        } else
+                            sdirmr |= (0x80 | 0x02);
+                        sdirm &= (0xFF ^ sdirmr);
+
+                        // edges
+                        if (xp < mmax_x_) {
+                            if ( ym >= 0 && (sdirm & 0x08) != 0) {
+                                nxts = &(mtsurfaces_[xp + ym + z]);
+                                nxtfp = &(mdpoints_[xp + ym + z]);
+                                this_s = nxts->twd;
+                                upper_s = mtsurfaces_[xp + ym + zp].twd;
+                                if (isSurface(this_s) && sWalkable(this_s, upper_s)) {
+                                    ;
+                                } else {
+                                    if (isSurface(this_s))
+                                        nxtfp->t = m_fdNonWalkable;
+                                    sdirm &= (0xFF ^ 0x08);
+                                }
+                                if(nxtfp->t == m_fdNotDefined) {
+                                    nxtfp->t = m_fdDefReq;
+                                    stodef.x = xp;
+                                    stodef.y = ym;
+                                    stodef.z = z;
+                                    vtodefine.push_back(stodef);
+                                }
+                            }
+
+                            if ( yp < mmax_m_xy && (sdirm & 0x02) != 0) {
+                                nxts = &(mtsurfaces_[xp + yp + z]);
+                                nxtfp = &(mdpoints_[xp + yp + z]);
+                                this_s = nxts->twd;
+                                upper_s = mtsurfaces_[xp + yp + zp].twd;
+                                if (isSurface(this_s) && sWalkable(this_s, upper_s)) {
+                                    ;
+                                } else {
+                                    if (isSurface(this_s))
+                                        nxtfp->t = m_fdNonWalkable;
+                                    sdirm &= (0xFF ^ 0x02);
+                                }
+                                if(nxtfp->t == m_fdNotDefined) {
+                                    nxtfp->t = m_fdDefReq;
+                                    stodef.x = xp;
+                                    stodef.y = yp;
+                                    stodef.z = z;
+                                    vtodefine.push_back(stodef);
+                                }
+                            }
+                        }
+                        cfp->dirm = sdirm;
+                        cfp->dirh = sdirh;
+                        cfp->dirl = sdirl;
+
+                        break;
+                    case 0x12:
+                        cfp->t = m_fdWalkable;
+                        if (zm >= 0) {
+                            if (ym >= 0) {
+                                nxts = &(mtsurfaces_[x + ym + zm]);
+                                nxtfp = &(mdpoints_[x + ym + zm]);
+                                mdpoints_[x + y + zm].t = m_fdNonWalkable;
+                                this_s = nxts->twd;
+                                upper_s = mtsurfaces_[x + ym + z].twd;
+                                if (isSurface(this_s) || this_s == 0x02) {
+                                    if(sWalkable(this_s, upper_s)) {
+                                        sdirl |= 0x10;
+                                    } else {
+                                        nxtfp->t = m_fdNonWalkable;
+                                    }
+                                }
+                                if(nxtfp->t == m_fdNotDefined) {
+                                    nxtfp->t = m_fdDefReq;
+                                    stodef.x = x;
+                                    stodef.y = ym;
+                                    stodef.z = zm;
+                                    vtodefine.push_back(stodef);
+                                }
+                            }
+                            if (xm >= 0) {
+                                nxts = &(mtsurfaces_[xm + y + zm]);
+                                nxtfp = &(mdpoints_[xm + y + zm]);
+                                this_s = nxts->twd;
+                                upper_s = mtsurfaces_[xm + y + z].twd;
+                                if (isSurface(this_s)) {
+                                    if(sWalkable(this_s, upper_s)) {
+                                        sdirl |= 0x40;
+                                    } else {
+                                        nxtfp->t = m_fdNonWalkable;
+                                    }
+                                }
+                                if(nxtfp->t == m_fdNotDefined) {
+                                    nxtfp->t = m_fdDefReq;
+                                    stodef.x = xm;
+                                    stodef.y = y;
+                                    stodef.z = zm;
+                                    vtodefine.push_back(stodef);
+                                }
+                            }
+                            if (xp < mmax_x_) {
+                                nxts = &(mtsurfaces_[xp + y + zm]);
+                                nxtfp = &(mdpoints_[xp + y + zm]);
+                                this_s = nxts->twd;
+                                upper_s = mtsurfaces_[xp + y + z].twd;
+                                if (isSurface(this_s)) {
+                                    if(sWalkable(this_s, upper_s)) {
+                                        sdirl |= 0x04;
+                                    } else {
+                                        nxtfp->t = m_fdNonWalkable;
+                                    }
+                                }
+                                if(nxtfp->t == m_fdNotDefined) {
+                                    nxtfp->t = m_fdDefReq;
+                                    stodef.x = xp;
+                                    stodef.y = y;
+                                    stodef.z = zm;
+                                    vtodefine.push_back(stodef);
+                                }
+                            }
+                        }
+
+                        if (xm >=0) {
+                            nxts = &(mtsurfaces_[xm + y + z]);
+                            nxtfp = &(mdpoints_[xm + y + z]);
+                            this_s = nxts->twd;
+                            upper_s = mtsurfaces_[xm + y + zp].twd;
+                            if (isSurface(this_s) && sWalkable(this_s, upper_s)) {
+                                sdirm |= (0x40 | 0x80);
+                            } else if (isStairs(this_s) && sWalkable(this_s, upper_s)) {
+                                sdirmr |= (0x20 | 0x80);
+                                if (this_s == 0x01 || this_s == 0x02 || this_s == 0x03){
+                                    sdirm |= 0x40;
+                                }
+                            } else {
+                                sdirmr |= (0x20 | 0x80);
+                                nxtfp->t = m_fdNonWalkable;
+                                if ((zp + mmax_m_xy) < mmax_m_all
+                                    && (upper_s == 0x01 || upper_s == 0x02 || upper_s == 0x04)) {
+                                    if (sWalkable(upper_s, mtsurfaces_[xm + y + (zp + mmax_m_xy)].twd)) {
+                                        sdirh |= 0x40;
+                                        if (mdpoints_[xm + y + zp].t == m_fdNotDefined) {
+                                            mdpoints_[xm + y + zp].t = m_fdDefReq;
+                                            stodef.x = xm;
+                                            stodef.y = y;
+                                            stodef.z = zp;
+                                            vtodefine.push_back(stodef);
+                                        }
+                                    }
+                                }
+                            }
+                            if (nxtfp->t == m_fdNotDefined) {
+                                nxtfp->t = m_fdDefReq;
+                                stodef.x = xm;
+                                stodef.y = y;
+                                stodef.z = z;
+                                vtodefine.push_back(stodef);
+                            }
+                        } else
+                            sdirmr |= (0x20 | 0x80);
+
+                        if (xp < mmax_x_) {
+                            nxts = &(mtsurfaces_[xp + y + z]);
+                            nxtfp = &(mdpoints_[xp + y + z]);
+                            this_s = nxts->twd;
+                            upper_s = mtsurfaces_[xp + y + zp].twd;
+                            if (isSurface(this_s) && sWalkable(this_s, upper_s)) {
+                                sdirm |= (0x02 | 0x04);
+                            } else if (isStairs(this_s) && sWalkable(this_s, upper_s)) {
+                                sdirmr |= (0x02 | 0x08);
+                                if (this_s == 0x01 || this_s == 0x02 || this_s == 0x04){
+                                    sdirm |= 0x04;
+                                }
+                            } else {
+                                sdirmr |= (0x02 | 0x08);
+                                nxtfp->t = m_fdNonWalkable;
+                                if ((zp + mmax_m_xy) < mmax_m_all
+                                    && (upper_s == 0x01 || upper_s == 0x02 || upper_s == 0x03)) {
+                                    if (sWalkable(upper_s, mtsurfaces_[xp + y + (zp + mmax_m_xy)].twd)) {
+                                        sdirh |= 0x04;
+                                        if (mdpoints_[xp + y + zp].t == m_fdNotDefined) {
+                                            mdpoints_[xp + y + zp].t = m_fdDefReq;
+                                            stodef.x = xp;
+                                            stodef.y = y;
+                                            stodef.z = zp;
+                                            vtodefine.push_back(stodef);
+                                        }
+                                    }
+                                }
+                            }
+                            if (nxtfp->t == m_fdNotDefined) {
+                                nxtfp->t = m_fdDefReq;
+                                stodef.x = xp;
+                                stodef.y = y;
+                                stodef.z = z;
+                                vtodefine.push_back(stodef);
+                            }
+                        } else
+                            sdirmr |= (0x02 | 0x08);
+
+                        if (yp < mmax_m_xy) {
+                            nxts = &(mtsurfaces_[x + yp + z]);
+                            nxtfp = &(mdpoints_[x + yp + z]);
+                            this_s = nxts->twd;
+                            upper_s = mtsurfaces_[x + yp + zp].twd;
+                            if (isSurface(this_s) && sWalkable(this_s, upper_s)) {
+                                sdirm |= (0x80 | 0x01 | 0x02);
+                            } else if (isStairs(this_s) && sWalkable(this_s, upper_s)) {
+                                sdirmr |= (0x80 | 0x02);
+                                if (this_s == 0x01 || this_s == 0x03 || this_s == 0x04) {
+                                    sdirm |= 0x01;
+                                }
+                            } else {
+                                sdirmr |= (0x80 | 0x02);
+                                nxtfp->t = m_fdNonWalkable;
+                                if ((zp + mmax_m_xy) < mmax_m_all
+                                    && (upper_s == 0x02 || upper_s == 0x03 || upper_s == 0x04)) {
+                                    if (sWalkable(upper_s, mtsurfaces_[x + yp + (zp + mmax_m_xy)].twd)) {
+                                        sdirh |= 0x01;
+                                        if (mdpoints_[x + yp + zp].t == m_fdNotDefined) {
+                                            mdpoints_[x + yp + zp].t = m_fdDefReq;
+                                            stodef.x = x;
+                                            stodef.y = yp;
+                                            stodef.z = zp;
+                                            vtodefine.push_back(stodef);
+                                        }
+                                    }
+                                }
+                            }
+                            if (nxtfp->t == m_fdNotDefined) {
+                                nxtfp->t = m_fdDefReq;
+                                stodef.x = x;
+                                stodef.y = yp;
+                                stodef.z = z;
+                                vtodefine.push_back(stodef);
+                            }
+                        } else
+                            sdirmr |= (0x80 | 0x02);
+                        sdirm &= (0xFF ^ sdirmr);
+
+                        // edges
+                        if (yp < mmax_m_xy) {
+                            if ( xm >= 0 && (sdirm & 0x80) != 0) {
+                                nxts = &(mtsurfaces_[xm + yp + z]);
+                                nxtfp = &(mdpoints_[xm + yp + z]);
+                                this_s = nxts->twd;
+                                upper_s = mtsurfaces_[xm + yp + zp].twd;
+                                if (isSurface(this_s) && sWalkable(this_s, upper_s)) {
+                                    ;
+                                } else {
+                                    if (isSurface(this_s))
+                                        nxtfp->t = m_fdNonWalkable;
+                                    sdirm &= (0xFF ^ 0x80);
+                                }
+                                if(nxtfp->t == m_fdNotDefined) {
+                                    nxtfp->t = m_fdDefReq;
+                                    stodef.x = xm;
+                                    stodef.y = yp;
+                                    stodef.z = z;
+                                    vtodefine.push_back(stodef);
+                                }
+                            }
+                            if (xp < mmax_x_ && (sdirm & 0x02) != 0) {
+                                nxts = &(mtsurfaces_[xp + yp + z]);
+                                nxtfp = &(mdpoints_[xp + yp + z]);
+                                this_s = nxts->twd;
+                                upper_s = mtsurfaces_[xp + yp + zp].twd;
+                                if (isSurface(this_s) && sWalkable(this_s, upper_s)) {
+                                    ;
+                                } else {
+                                    if (isSurface(this_s))
+                                        nxtfp->t = m_fdNonWalkable;
+                                    sdirm &= (0xFF ^ 0x02);
+                                }
+                                if(nxtfp->t == m_fdNotDefined) {
+                                    nxtfp->t = m_fdDefReq;
+                                    stodef.x = xp;
+                                    stodef.y = yp;
+                                    stodef.z = z;
+                                    vtodefine.push_back(stodef);
+                                }
+                            }
+                        }
+
+                        cfp->dirm = sdirm;
+                        cfp->dirh = sdirh;
+                        cfp->dirl = sdirl;
+
                         break;
                 }
             } while (vtodefine.size());

@@ -920,6 +920,11 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
         targetd->dirm, based->t, based->dirm);
     printf("base pos: x %i; y %i; z %i, ox %i, oy %i, oz %i\n",
         tile_x_, tile_y_, tile_z_, off_x_, off_y_, off_z_);
+    if ( (z + 1) < m->mmax_z_) {
+        unsigned char utwd = 
+        printf("upper twd %i\n", m->mtsurfaces_[x + y * m->mmax_x_ 
+        + (z + 1) * m->mmax_m_xy].twd);
+    }
 
     if(targetd->t == m_fdNonWalkable || map_ == -1 || health_ <= 0) {
         tile_z_ = old_z;

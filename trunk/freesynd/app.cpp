@@ -413,8 +413,8 @@ void App::run() {
     // little patch to enable full surface description
     // and eliminate unnecessary data
     walkdata_p_[0x02] = 0x00;
-    walkdata_p_[0x80] = 0x03;
-    walkdata_p_[0x81] = 0x02;
+    walkdata_p_[0x80] = 0x11;
+    walkdata_p_[0x81] = 0x12;
     walkdata_p_[0x8F] = 0x00;
     walkdata_p_[0x93] = 0x00;
     delete[] data;
