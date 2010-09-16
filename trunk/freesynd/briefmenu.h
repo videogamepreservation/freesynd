@@ -38,6 +38,7 @@ public:
     ~BriefMenu();
 
     void handleShow();
+    void handleRender();
     void handleLeave();
     void handleOption(Key key);
     Mission *mission() { return mission_; }
@@ -45,7 +46,6 @@ public:
 protected:
     MapMenu *map_menu_;
     uint8 *orig_pixels_;
-    int cur_miss_;
     int start_line_;
     int info_level_;
     int enhance_level_;

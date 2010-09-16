@@ -38,7 +38,7 @@ public:
     ConfMenu(MenuManager *m);
     ~ConfMenu();
 
-    virtual void handleShow();
+    virtual void handleRender();
     void handleLeave();
 
     virtual void handleOption(Key key) {}

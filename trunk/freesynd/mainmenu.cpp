@@ -40,7 +40,7 @@ MainMenu::MainMenu(MenuManager * m):Menu(m, "main", "moption.dat",
     addOption(208, 269, "QUIT TO DOS", 2, KEY_F5, NULL);
 }
 
-void MainMenu::handleShow()
+void MainMenu::handleRender()
 {
     // If we came from the intro, the cursor is invisible
     // otherwise, it does no harm

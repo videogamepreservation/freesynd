@@ -38,7 +38,7 @@ public:
     bool isSubMenu() { return false; }
 
     void handleTick(int elapsed);
-    void handleShow();
+    void handleRender();
     void handleLeave();
     void handleMouseMotion(int x, int y, int state);
     void handleMouseDown(int x, int y, int button);

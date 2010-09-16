@@ -52,7 +52,6 @@ menu_debrief_(NULL), menu_miss_win_(NULL), menu_miss_lose_(NULL),
 menu_logout_(NULL)
 {
     drop_events_ = false;
-    do_rendering_ = false;
 }
 
 MenuManager::~MenuManager()
@@ -131,9 +130,8 @@ void MenuManager::showMenu(Menu *pMenu, bool playAnim) {
         delete[] data;
 
     }
-    
-    // First draw completly the menu
-    pMenu->render();
+
+    pMenu->handleShow();
 
     // then plot the mouse to draw the button
     // that could be highlighted because the mouse
@@ -141,6 +139,9 @@ void MenuManager::showMenu(Menu *pMenu, bool playAnim) {
     int x,y;
     int state = g_System.getMousePos(&x, &y);
     pMenu->mouseMotionEvent(x, y, state);
+    
+    // First draw completly the menu
+    pMenu->render();
 
     // reopen the event processing
     drop_events_ = false;
@@ -174,9 +175,8 @@ void MenuManager::leaveMenu(Menu *pMenu, bool playAnim) {
  * and if it needs to be refreshed.
  */
 void MenuManager::renderMenu() {
-    if (current_ && do_rendering_) {
+    if (current_ && current_->needRendering()) {
         current_->render();
-        do_rendering_ = false;
     }
 }
 

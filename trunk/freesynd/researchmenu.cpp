@@ -135,7 +135,7 @@ void ResearchMenu::addFieldOptions()
     addOption(20, 144, g_Fields[9], 0, KEY_9, 0, false);
 }
 
-void ResearchMenu::handleShow()
+void ResearchMenu::handleRender()
 {
     if (tab_ == 1 && sel_weapon_ == 0) {
         addWeaponOptions();

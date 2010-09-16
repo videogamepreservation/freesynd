@@ -34,7 +34,7 @@ MissLoseMenu::MissLoseMenu(MenuManager * m):Menu(m, "misslose", "mlosegam.dat",
     setParentMenu("debrief");
 }
 
-void MissLoseMenu::handleShow()
+void MissLoseMenu::handleRender()
 {
     menu_manager_->changeCurrentMenu("debrief");
 }

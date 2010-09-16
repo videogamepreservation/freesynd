@@ -293,7 +293,7 @@ void SelectMenu::handleTick(int elapsed)
     }
 }
 
-void SelectMenu::handleShow()
+void SelectMenu::handleRender()
 {
     if (tab_ == 2 && sel_weapon_ == 0 && sel_weapon_inst_ == 0) {
         addModOptions();

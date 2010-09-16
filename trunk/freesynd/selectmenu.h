@@ -35,7 +35,7 @@ public:
     ~SelectMenu();
 
     void handleTick(int elapsed);
-    void handleShow();
+    void handleRender();
     void handleShowLate();
     void handleLeave();
     void handleMouseDown(int x, int y, int button);

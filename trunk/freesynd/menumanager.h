@@ -88,8 +88,6 @@ protected:
     Menu *current_;
     /** This flag prevents the input events from being processed.*/
     bool drop_events_;
-    /** This flag indicate the current menu must be refreshed. */
-    bool do_rendering_;
 
     MainMenu *menu_main_;
     ConfMenu *menu_conf_;

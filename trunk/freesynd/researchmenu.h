@@ -31,7 +31,7 @@
 class ResearchMenu : public Menu {
 public:
     ResearchMenu(MenuManager *m);
-    void handleShow();
+    void handleRender();
     void handleShowLate();
     void handleLeave();
     void handleOption(Key key);

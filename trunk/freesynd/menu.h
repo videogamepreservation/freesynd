@@ -35,24 +35,52 @@ class FontManager;
 class Menu;
 class MenuManager;
 
+//! A text widget.
 /*!
- * Menu text class.
+ * This class represents a text label.
+ * This is the base class for widget : it displays a text
+ * at a given location.
+ * A widget can be visible or not, and the text is displayed
+ * in dark or light green.
  */
 class MenuText {
 public:
     int x_, y_;
+    /*! The text to be displayed.*/
     std::string text_;
     int size_;
     bool dark_;
-    const char *to_;
     bool visible_;
 
-    MenuText() : x_(0), y_(0), text_(""), size_(0), dark_(false), to_(NULL),
+    MenuText() : x_(0), y_(0), text_(""), size_(0), dark_(false),
     visible_(true) {}
 
     MenuText(int x, int y, const char *text, int size, bool dark,
-            const char *to, bool visible):x_(x), y_(y), text_(text),
-        size_(size), dark_(dark), to_(to), visible_(visible) {
+            bool visible):x_(x), y_(y), text_(text),
+        size_(size), dark_(dark), visible_(visible) {
+    }
+
+    //! Draw the widget on screen
+    virtual void draw();
+};
+//! A button widget.
+/*!
+ * This class extends the MenuText class to represent a button on
+ * the screen. A button can lead to another screen which name is
+ * stored in the field "to".
+ */
+class Option : public MenuText {
+public:
+    /*! The name of the next menu.*/
+    const char *to_;
+
+    Option() : MenuText() {
+        to_ = NULL;
+    }
+
+    Option(int x, int y, const char *text, int size,
+            const char *to, bool visible):MenuText(x, y, text, size, true, visible) {
+        to_ = to;
     }
 };
 
@@ -84,6 +112,8 @@ public:
     const char * getShowAnimName() { return showAnim_.c_str(); }
     bool hasLeaveAnim() { return leaveAnim_.size() != 0; }
     const char * getLeaveAnimName() { return leaveAnim_.c_str(); }
+    /*! Returns true if the menu needs to be rendered. */
+    bool needRendering() { return need_rendering_; }
     void render();
     void addStatic(int x, int y, const char *text, int size, bool dark);
     void addOption(int x, int y, const char *text, int size, Key key,
@@ -117,7 +147,25 @@ public:
     virtual void handleMouseDown(int x, int y, int button) {}
     virtual void handleMouseUp(int x, int y, int button) {}
     virtual void handleMouseMotion(int x, int y, int state) {}
+
+    //! Callback function : Childs can reimplement
+    /*! 
+     * Called just after the opening animation is played (if one has
+     * been defined) and before the menu is rendered for the first time.
+     */
     virtual void handleShow() {}
+
+    //! Callback function : Childs can reimplement
+    /*! 
+     * Called each time a menu is rendered.
+     */
+    virtual void handleRender() {}
+
+    //! Callback function : Childs can reimplement
+    /*! 
+     * Called just before the closing animation is played (if one has
+     * been defined) and the menu closed.
+     */
     virtual void handleLeave() {}
     virtual void handleShowLate() {}
     virtual void handleOption(Key key) {}
@@ -127,8 +175,9 @@ protected:
     std::string name_;
     std::string showAnim_, leaveAnim_;
     std::list<MenuText> statics_;
-    std::map<Key, MenuText> options_;
-    bool hovering_;
+    std::map<Key, Option> options_;
+    /*! This flag tells whether the menu needs to be redrawn. */
+    bool need_rendering_;
     const char *parent_menu_;
     uint8 *background_;
     int clear_x_, clear_y_, clear_w_, clear_h_;

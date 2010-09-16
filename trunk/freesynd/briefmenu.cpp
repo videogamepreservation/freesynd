@@ -32,7 +32,7 @@
 
 BriefMenu::BriefMenu(MenuManager * m, MapMenu * mapMenu) :
 Menu(m, "brief", "mbrief.dat", "mbrieout.dat"), map_menu_(mapMenu),
-orig_pixels_(0), cur_miss_(0), start_line_(0), info_level_(1),
+orig_pixels_(0), start_line_(0), info_level_(1),
 enhance_level_(0), mission_(0) {
     addStatic(148, 35, "MISSION BRIEF", 3, true);
     addOption(538, 118, "INFO", 1, KEY_F1, NULL);
@@ -54,6 +54,12 @@ BriefMenu::~BriefMenu() {
 }
 
 void BriefMenu::handleShow() {
+    // grab mission info
+    int cur_miss = g_Session.getSelectedBlock().mis_id;
+    mission_ = g_App.missions().loadMission(cur_miss);
+}
+
+void BriefMenu::handleRender() {
     if (orig_pixels_ == 0) {
         orig_pixels_ = new uint8[GAME_SCREEN_WIDTH * GAME_SCREEN_HEIGHT];
         memcpy(orig_pixels_, g_Screen.pixels(),
@@ -65,10 +71,6 @@ void BriefMenu::handleShow() {
     }
 
     g_Screen.drawLogo(18, 14, g_Session.getLogo(), g_Session.getLogoColour());
-
-    // grab mission info
-    cur_miss_ = g_Session.getSelectedBlock().mis_id;
-    mission_ = g_App.missions().loadMission(cur_miss_);
 
     // write briefing
     if (mission_->briefing()) {

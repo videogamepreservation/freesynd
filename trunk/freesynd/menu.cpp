@@ -35,31 +35,43 @@
 #include "system_sdl.h"
 #endif
 
+
+/*!
+ * Draw the widget at the current position and only if it's
+ * visible.
+ * Actually, only a text is drawn (see Font). The borders are
+ * already drawn on the background image.
+ */
+void MenuText::draw() {
+    if (visible_)
+        g_App.fonts().drawText(x_, y_, text_.c_str(), size_, dark_);
+}
+
 Menu::Menu(MenuManager * menuManager, const char *menu_name,
            const char *showAnim,
            const char *leaveAnim):menu_manager_(menuManager),
 name_(menu_name), showAnim_(showAnim), leaveAnim_(leaveAnim),
-hovering_(false), parent_menu_(NULL), background_(NULL)
+parent_menu_(NULL), background_(NULL)
 {
     menuManager->addMenu(this);
+    need_rendering_ = true;
 }
 
 Menu::Menu(MenuManager * menuManager, const char *menu_name,
            const char *parent):menu_manager_(menuManager),
-name_(menu_name), showAnim_(""), leaveAnim_(""), hovering_(false),
+name_(menu_name), showAnim_(""), leaveAnim_(""),
 parent_menu_(parent), background_(NULL)
 {
     menuManager->addMenu(this);
+    need_rendering_ = true;
 }
 
 void Menu::redrawOptions()
 {
-    for (std::map < Key, MenuText >::iterator it = options_.begin();
+    for (std::map < Key, Option >::iterator it = options_.begin();
          it != options_.end(); it++) {
-        MenuText & m = it->second;
-        if (m.visible_)
-            g_App.fonts().drawText(m.x_, m.y_, m.text_.c_str(), m.size_,
-                                   m.dark_);
+        Option & m = it->second;
+        m.draw();
     }
     handleShowLate();
 }
@@ -80,22 +92,23 @@ void Menu::render()
                                m.dark_);
     }
 
-    handleShow();
+    handleRender();
 
     redrawOptions();
     
+    need_rendering_ = false;
 }
 
 void Menu::addStatic(int x, int y, const char *text, int size, bool dark)
 {
-    MenuText m(x, y, text, size, dark, NULL, true);
+    MenuText m(x, y, text, size, dark, true);
     statics_.push_back(m);
 }
 
 void Menu::addOption(int x, int y, const char *text, int size, Key key,
                      const char *to, bool visible)
 {
-    MenuText m(x, y, text, size, true, to, visible);
+    Option m(x, y, text, size, to, visible);
     options_[key] = m;
 }
 
@@ -109,7 +122,7 @@ void Menu::keyEvent(Key key, KeyMod mod, bool pressed)
 
     if (pressed) {
         std::vector < MenuText * >options_vec;
-        for (std::map < Key, MenuText >::iterator it = options_.begin();
+        for (std::map < Key, Option >::iterator it = options_.begin();
              it != options_.end(); it++)
             options_vec.push_back(&it->second);
 
@@ -140,7 +153,7 @@ void Menu::keyEvent(Key key, KeyMod mod, bool pressed)
                 render();
             }
             if (key == VK_FB || key == KEY_RETURN || key == KEY_KP_ENTER) {
-                for (std::map < Key, MenuText >::iterator it =
+                for (std::map < Key, Option >::iterator it =
                      options_.begin(); it != options_.end(); it++)
                     if (&it->second == options_vec[curOpt])
                         key = it->first;
@@ -161,12 +174,10 @@ void Menu::mouseMotionEvent(int x, int y, int state)
 {
     handleMouseMotion(x, y, state);
 
-    if (hovering_)
-        redrawOptions();
-    hovering_ = false;
-    for (std::map < Key, MenuText >::iterator it = options_.begin();
+    int id = 0;
+    for (std::map < Key, Option >::iterator it = options_.begin();
          it != options_.end(); it++) {
-        MenuText & m = it->second;
+        Option & m = it->second;
         int width = 300;
         if (m.text_.size() == 1)
             width = 30;
@@ -174,18 +185,29 @@ void Menu::mouseMotionEvent(int x, int y, int state)
             width = g_App.fonts().textWidth(m.text_.c_str(), m.size_);
         if (m.visible_ && x > m.x_ - 2 && x < m.x_ + width && y >= m.y_ - 2
             && y < m.y_ + g_App.fonts().textHeight(m.size_) - 2) {
-            g_App.fonts().drawText(m.x_, m.y_, m.text_.c_str(), m.size_,
-                                   false);
-            hovering_ = true;
+            if ( !m.dark_ ) {
+                // the button was already highlighted : don't do anything
+                break;
+            } else {
+                // The button is now highlighted
+                m.dark_ = false;
+                need_rendering_ = true;
+            }
+        } else {
+            if (!m.dark_) {
+                // The button was highlighted but not anymore : refresh
+                need_rendering_ = true;
+            }
+            m.dark_ = true;
         }
     }
 }
 
 void Menu::mouseDownEvent(int x, int y, int button)
 {
-    for (std::map < Key, MenuText >::iterator it = options_.begin();
+    for (std::map < Key, Option >::iterator it = options_.begin();
          it != options_.end(); it++) {
-        MenuText & m = it->second;
+        Option & m = it->second;
         int width = 300;
         if (m.text_.size() == 1)
             width = 30;

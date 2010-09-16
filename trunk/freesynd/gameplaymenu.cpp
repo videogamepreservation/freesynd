@@ -315,7 +315,7 @@ void GameplayMenu::improveScroll(int &newScrollX, int &newScrollY)
 
 int qanim = 1085, qframe = 0;
 
-void GameplayMenu::handleShow()
+void GameplayMenu::handleRender()
 {
     if (mission_ == NULL) {
         mission_ = loading_->mission();

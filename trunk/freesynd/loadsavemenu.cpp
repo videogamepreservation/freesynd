@@ -36,7 +36,7 @@ LoadSaveMenu::LoadSaveMenu(MenuManager * m):Menu(m, "loadsave", "mlosa.dat",
     setParentMenu("main");
 }
 
-void LoadSaveMenu::handleShow()
+void LoadSaveMenu::handleRender()
 {
     g_System.showCursor();
 }

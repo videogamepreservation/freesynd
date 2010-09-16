@@ -188,7 +188,7 @@ void MapMenu::drawSelector()
                       tick_count_ % 10 + 5);
 }
 
-void MapMenu::handleShow()
+void MapMenu::handleRender()
 {
     if (orig_pixels_ == 0) {
         orig_pixels_ = new uint8[GAME_SCREEN_WIDTH * GAME_SCREEN_HEIGHT];
@@ -281,7 +281,7 @@ void MapMenu::handleMouseDown(int x, int y, int button)
                  (x - g_BlocksDisplay[i].pos.x) / 2] != 0) {
                 g_Session.setSelectedBlockId(i);
 
-                handleShow();
+                handleRender();
                 return;
             }
         }

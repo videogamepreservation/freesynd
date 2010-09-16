@@ -33,7 +33,7 @@ class MissLoseMenu : public Menu {
 public:
     MissLoseMenu(MenuManager *m);
 
-    void handleShow();
+    void handleRender();
 
 protected:
 };

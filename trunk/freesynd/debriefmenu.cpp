@@ -35,11 +35,16 @@ DebriefMenu::DebriefMenu(MenuManager *m) : Menu(m, "debrief", "mdebrief.dat",
     addOption(535, 352, "MENU", 1, KEY_F6, "main");
 }
 
+/*!
+ * This method sets the menu cursor and shows it.
+ */
 void DebriefMenu::handleShow() {
-    g_Screen.drawLogo(18, 14, g_App.getGameSession().getLogo(), g_App.getGameSession().getLogoColour());
-
     g_System.useMenuCursor();
     g_System.showCursor();
+}
+
+void DebriefMenu::handleRender() {
+    g_Screen.drawLogo(18, 14, g_App.getGameSession().getLogo(), g_App.getGameSession().getLogoColour());
 }
 
 void DebriefMenu::handleLeave() {

@@ -40,7 +40,7 @@ public:
     ~MapMenu();
 
     void handleTick(int elapsed);
-    void handleShow();
+    void handleRender();
     void handleLeave();
     void handleMouseDown(int x, int y, int button);
     void handleOption(Key key);

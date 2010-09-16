@@ -36,7 +36,7 @@ public:
         setParentMenu("conf");
     }
 
-    virtual void handleShow() {
+    virtual void handleRender() {
         uint8 data[68 * 13];
         memset(data, 255, 68 * 13);
 
@@ -84,8 +84,8 @@ public:
         }
     }
 
-    virtual void handleShow() {
-        CommonConfSubMenu::handleShow();
+    virtual void handleRender() {
+        CommonConfSubMenu::handleRender();
         g_Screen.drawLogo(336, 55, logo_, g_Colours[colour_]);
     }
 
@@ -160,8 +160,8 @@ public:
         }
     }
 
-    virtual void handleShow() {
-        CommonConfSubMenu::handleShow();
+    virtual void handleRender() {
+        CommonConfSubMenu::handleRender();
         uint8 data[136 * 13];
         memset(data, 255, 136 * 13);
 
@@ -266,7 +266,7 @@ ConfMenu::~ConfMenu() {
     delete submenu_name_;
 }
 
-void ConfMenu::handleShow() {
+void ConfMenu::handleRender() {
     g_Screen.drawLogo(28, 22, g_App.getGameSession().getLogo(), g_App.getGameSession().getLogoColour());
 
     if (*g_App.getGameSession().getCompanyName()) {
