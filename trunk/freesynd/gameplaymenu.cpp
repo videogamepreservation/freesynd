@@ -445,7 +445,7 @@ void GameplayMenu::handleMouseMotion(int x, int y, int state)
     for (int i = 8; mission_ && i < mission_->numPeds(); i++) {
         PedInstance *p = mission_->ped(i);
         int px = p->screenX() - 20;
-        int py = p->screenY() - 10 - p->tileZ() * TILE_HEIGHT/3;
+        int py = p->screenY() - 10 - p->visZ() * TILE_HEIGHT/3;
 
         if (x - 129 + world_x_ >= px && y + world_y_ >= py &&
             x - 129 + world_x_ < px + 40 && y + world_y_ < py + 32) {
@@ -459,7 +459,7 @@ void GameplayMenu::handleMouseMotion(int x, int y, int state)
     for (int i = 0; mission_ && i < mission_->numVehicles(); i++) {
         VehicleInstance *v = mission_->vehicle(i);
         int px = v->screenX() - 20;
-        int py = v->screenY() - 10 - v->tileZ() * TILE_HEIGHT/3;
+        int py = v->screenY() - 10 - v->visZ() * TILE_HEIGHT/3;
 
         if (x - 129 + world_x_ >= px && y + world_y_ >= py &&
             x - 129 + world_x_ < px + 40 && y + world_y_ < py + 32) {
@@ -475,7 +475,7 @@ void GameplayMenu::handleMouseMotion(int x, int y, int state)
 
         if (w->map() != -1) {
             int px = w->screenX() - 10;
-            int py = w->screenY() - w->tileZ() * TILE_HEIGHT/3;
+            int py = w->screenY() - w->visZ() * TILE_HEIGHT/3;
 
             if (x - 129 + world_x_ >= px && y + world_y_ >= py &&
                 x - 129 + world_x_ < px + 20 && y + world_y_ < py + 20) {
@@ -907,8 +907,10 @@ void GameplayMenu::handleUnknownKey(Key key, KeyMod mod, bool pressed) {
 
 #ifdef _DEBUG
 
-    if (key == KEY_PAGEUP)
-        mission_->ped(0)->setTileZ(mission_->ped(0)->tileZ() + 1);
+    if (key == KEY_PAGEUP) {
+        if (mission_->ped(0)->tileZ() < mission_->mmax_z_)
+            mission_->ped(0)->setTileZ(mission_->ped(0)->tileZ() + 1);
+    }
 
     if (key == KEY_PAGEDOWN) {
         if (mission_->ped(0)->tileZ() > 0)
