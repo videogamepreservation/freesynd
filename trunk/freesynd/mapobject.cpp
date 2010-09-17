@@ -125,55 +125,30 @@ bool ShootableMovableMapObject::updatePlacement(int nOffX, int nOffY)
 
     off_x_ = nOffX;
     off_y_ = nOffY;
+    bool changed = false;
 
     while (off_x_ < 0) {
         off_x_ += 256;
         tile_x_--;
+        changed = true;
     }
     while (off_x_ > 255) {
         off_x_ -= 256;
         tile_x_++;
+        changed = true;
     }
     while (off_y_ < 0) {
         off_y_ += 256;
         tile_y_--;
+        changed = true;
     }
     while (off_y_ > 255) {
         off_y_ -= 256;
         tile_y_++;
+        changed = true;
     }
 
-    Map *m = g_App.maps().map(map());
-/*
-    if (!walkable(tile_x_, tile_y_, tile_z_)
-        && m->stairsAt(oTileX, oTileY, tile_z_ + 1)) {
-        tile_z_++;
-        if (!walkable(tile_x_, tile_y_, tile_z_))
-            tile_z_--;
-    }
-
-    if (!walkable(tile_x_, tile_y_, tile_z_)) {
-        printf("butted into %i %i\n", m->tileAt(tile_x_, tile_y_, tile_z_),
-               g_App.maps().map(map())->tileAt(tile_x_, tile_y_,
-                                               tile_z_ + 1));
-        off_x_ = oOffX;
-        off_y_ = oOffY;
-        tile_x_ = oTileX;
-        tile_y_ = oTileY;
-        return false;
-    }
-
-    if (m->stairsAt(tile_x_, tile_y_, tile_z_)) {
-        tile_z_--;
-        if (!walkable(tile_x_, tile_y_, tile_z_))
-            tile_z_++;
-    }
-
-    if (m->stairsAt(tile_x_, tile_y_, tile_z_ + 1)) {
-        //off_z_ = -off_x_;
-    }
-*/
-    return true;
+    return changed;
 }
 
 Static *Static::loadInstance(uint8 * data, int m)

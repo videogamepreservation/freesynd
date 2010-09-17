@@ -894,7 +894,7 @@ void PedInstance::setDrawnAnim(PedInstance::AnimationDrawn drawn_anim) {
 
 int PedInstance::getDistance(int x1, int y1, int z1,
                                 int x2, int y2, int z2) {
-    // It is not quiet correct, but int's are better then float + sqrt
+    // It is not quiet correct, but int is better then float + sqrt
     return (x2 - x1) * (x2 - x1)+ (y2 - y1) * (y2 - y1)
         + (z2 - z1) * (z2 - z1);
 }
