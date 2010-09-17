@@ -113,9 +113,11 @@ public:
     bool hasLeaveAnim() { return leaveAnim_.size() != 0; }
     const char * getLeaveAnimName() { return leaveAnim_.c_str(); }
     /*! Returns true if the menu needs to be rendered. */
-    bool needRendering() { return need_rendering_; }
+    bool isRenderingNeeded() { return need_rendering_; }
     void render();
-    void addStatic(int x, int y, const char *text, int size, bool dark);
+    //! Creates a new text label and returns its id
+    int addStatic(int x, int y, const char *text, int size, bool dark);
+    //! Creates a new button and returns its id
     void addOption(int x, int y, const char *text, int size, Key key,
             const char *to = NULL, bool visible = true);
 
@@ -126,20 +128,38 @@ public:
     void mouseDownEvent(int x, int y, int button);
     void mouseUpEvent(int x, int y, int button);
 
+    void setStaticText(int static_id, const char *text);
+
+    //! Hides the given button
+    /*!
+     * Search for the option mapped to the given key
+     * and disables its visible property.
+     * \param key The key associated to the option.
+     */
     void hideOption(Key key) {
         if (options_.find(key) == options_.end())
             return;
 
-        options_[key].visible_ = false;
-        redrawOptions();
+        if (options_[key].visible_) {
+            options_[key].visible_ = false;
+            needRendering();
+        }
     }
 
+    //! Shows the given button
+    /*!
+     * Search for the option mapped to the given key
+     * and enables its visible property.
+     * \param key The key associated to the option.
+     */
     void showOption(Key key) {
         if (options_.find(key) == options_.end())
             return;
 
-        options_[key].visible_ = true;
-        redrawOptions();
+        if (!options_[key].visible_) {
+            options_[key].visible_ = true;
+            needRendering();
+        }
     }
 
     virtual void handleTick(int elapsed) {}
@@ -183,6 +203,7 @@ protected:
     int clear_x_, clear_y_, clear_w_, clear_h_;
 
     void redrawOptions();
+    void needRendering() { need_rendering_ = true; }
 };
 
 #endif

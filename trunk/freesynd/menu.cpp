@@ -31,10 +31,6 @@
 #include "file.h"
 #include "fliplayer.h"
 #include "screen.h"
-#ifdef SYSTEM_SDL
-#include "system_sdl.h"
-#endif
-
 
 /*!
  * Draw the widget at the current position and only if it's
@@ -54,7 +50,7 @@ name_(menu_name), showAnim_(showAnim), leaveAnim_(leaveAnim),
 parent_menu_(NULL), background_(NULL)
 {
     menuManager->addMenu(this);
-    need_rendering_ = true;
+    needRendering();
 }
 
 Menu::Menu(MenuManager * menuManager, const char *menu_name,
@@ -63,7 +59,7 @@ name_(menu_name), showAnim_(""), leaveAnim_(""),
 parent_menu_(parent), background_(NULL)
 {
     menuManager->addMenu(this);
-    need_rendering_ = true;
+    needRendering();
 }
 
 void Menu::redrawOptions()
@@ -85,24 +81,43 @@ void Menu::render()
                          (clear_y_ / 2) * 320, 320);
     }
 
+    handleRender();
+
     for (std::list < MenuText >::iterator it = statics_.begin();
          it != statics_.end(); it++) {
         MenuText & m = *it;
-        g_App.fonts().drawText(m.x_, m.y_, m.text_.c_str(), m.size_,
-                               m.dark_);
+        m.draw();
     }
-
-    handleRender();
 
     redrawOptions();
     
     need_rendering_ = false;
 }
 
-void Menu::addStatic(int x, int y, const char *text, int size, bool dark)
+/*!
+ * 
+ */
+int Menu::addStatic(int x, int y, const char *text, int size, bool dark)
 {
     MenuText m(x, y, text, size, dark, true);
     statics_.push_back(m);
+    return statics_.size() - 1;
+}
+
+void Menu::setStaticText(int static_id, const char *text){
+    int i = 0;
+    for (std::list < MenuText >::iterator it = statics_.begin();
+         it != statics_.end(); it++) {
+        MenuText & m = *it;
+        
+        if (i == static_id) {
+            m.text_ = text;
+            needRendering();
+            return;
+        }
+
+        i++;
+    }
 }
 
 void Menu::addOption(int x, int y, const char *text, int size, Key key,
@@ -191,12 +206,12 @@ void Menu::mouseMotionEvent(int x, int y, int state)
             } else {
                 // The button is now highlighted
                 m.dark_ = false;
-                need_rendering_ = true;
+                needRendering();
             }
         } else {
             if (!m.dark_) {
                 // The button was highlighted but not anymore : refresh
-                need_rendering_ = true;
+                needRendering();
             }
             m.dark_ = true;
         }

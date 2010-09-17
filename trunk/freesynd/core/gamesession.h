@@ -28,11 +28,22 @@
 
 #include "../common.h"
 
+enum Status_Pop {
+    STAT_HAPPY
+};
+
 typedef struct Block_ {
     const char *name;
     int population;
     int mis_id;
     int tax;
+    /**! 
+     * Status of the population satisfaction. Level are
+     * - Very happy : 2
+     * - Happy : 1
+     * - Bad : 0
+     */
+    Status_Pop status;
     bool available;
     bool finished;
     /*! The list of blocks available after finishing this mission.*/

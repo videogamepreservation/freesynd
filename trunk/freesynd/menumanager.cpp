@@ -175,7 +175,7 @@ void MenuManager::leaveMenu(Menu *pMenu, bool playAnim) {
  * and if it needs to be refreshed.
  */
 void MenuManager::renderMenu() {
-    if (current_ && current_->needRendering()) {
+    if (current_ && current_->isRenderingNeeded()) {
         current_->render();
     }
 }
