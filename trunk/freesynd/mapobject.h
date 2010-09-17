@@ -57,6 +57,8 @@ public:
     void setTileY(int y) { tile_y_ = y; }
     int tileZ() { return tile_z_; }
     void setTileZ(int z) { tile_z_ = z; }
+    int visZ() { return vis_z_; }
+    void setVisZ(int z) { vis_z_ = z; }
 
     int offX() { return off_x_; }
     int offY() { return off_y_; }
@@ -109,7 +111,9 @@ public:
 
 
 protected:
-    int tile_x_, tile_y_, tile_z_, off_x_, off_y_, off_z_;
+    // vis_z_ is location used for adjusting object drawing/calculations
+    // tile_z_ represents true location for tile
+    int tile_x_, tile_y_, tile_z_, vis_z_, off_x_, off_y_, off_z_;
     int map_;
     int frame_;
     int elapsed_carry_;

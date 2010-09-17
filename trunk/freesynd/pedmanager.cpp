@@ -218,10 +218,14 @@ PedInstance *PedManager::loadInstance(uint8 * data, int map)
     newped->setStartHealth(hp);
     newped->setHealth(hp);
     int z = ((gamdata->mapposz[0] & 0x80) == 0 ? gamdata->mapposz[1]: gamdata->mapposz[1] << 1 );
+    int oz = gamdata->mapposz[0] & 0x7F;
+    newped->setVisZ(z);
+    if (oz > 0)
+        z++;
     //printf("%i %i %i %i %i %i\n", gamdata->mapposx[1], gamdata->mapposy[1], gamdata->mapposz[1], gamdata->mapposx[0], gamdata->mapposy[0], gamdata->mapposz[0]);
     newped->setPosition(gamdata->mapposx[1], gamdata->mapposy[1],
                         z, gamdata->mapposx[0],
-                        gamdata->mapposy[0], gamdata->mapposz[0] & 0x7F);
+                        gamdata->mapposy[0], oz);
     //newped->setPosition(gamdata->mapposx[1], gamdata->mapposy[1], gamdata->mapposz[1], 0, 0);
     newped->setDirection(dir);
     if (sr) {

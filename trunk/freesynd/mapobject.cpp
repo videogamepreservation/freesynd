@@ -89,6 +89,7 @@ void MapObject::addOffs(int &x, int &y)
     x += ((off_x_ - off_y_) * (TILE_WIDTH / 2)) / 256;
     y += ((off_x_ + off_y_) * (TILE_HEIGHT / 3)) / 256;
     y -= (off_z_ * (TILE_HEIGHT / 3)) / 128;
+    y += (tile_z_ - vis_z_) * TILE_HEIGHT / 3;
 }
 
 bool MapObject::animate(int elapsed)
@@ -96,9 +97,13 @@ bool MapObject::animate(int elapsed)
     int frame_tics_ = 1000 / frames_per_sec_;
     int total_elapsed = elapsed + elapsed_carry_;
     elapsed_carry_ = total_elapsed % frame_tics_;
+    int framewas = frame_;
+    bool changed = true;
     frame_ += (total_elapsed / frame_tics_);
+    if (framewas == frame_)
+        changed = false;
     frame_ %= frames_per_sec_ << 2;
-    return true;
+    return changed;
 }
 
 ShootableMapObject::ShootableMapObject(int m):MapObject(m)
@@ -409,9 +414,13 @@ Static *Static::loadInstance(uint8 * data, int m)
         printf("z is %i, zoff is %i\n", gamdata->mapposz[1], gamdata->mapposz[0]);
         */
         int z = ((gamdata->mapposz[0] & 0x80) == 0 ? gamdata->mapposz[1]: gamdata->mapposz[1] << 1 );
+        s->setVisZ(z);
+        int oz = gamdata->mapposz[0] & 0x7F;
+        if (oz > 0)
+            z++;
         s->setPosition(gamdata->mapposx[1], gamdata->mapposy[1],
                        z, gamdata->mapposx[0],
-                       gamdata->mapposy[0], gamdata->mapposz[0] & 0x7F);
+                       gamdata->mapposy[0], oz);
         s->setSubType(gamdata->subType);
     }
 

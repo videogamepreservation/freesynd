@@ -62,6 +62,7 @@ VehicleInstance *VehicleManager::loadInstance(uint8 * data, int map)
     newvehicle->setPosition(gamdata->mapposx[1], gamdata->mapposy[1],
                             gamdata->mapposz[1], gamdata->mapposx[0],
                             gamdata->mapposy[0], gamdata->mapposz[0]);
+    newvehicle->setVisZ(gamdata->mapposz[1]);
     newvehicle->setHealth(hp);
     newvehicle->setStartHealth(hp);
     newvehicle->setDirection(gamdata->currvistype - 147);

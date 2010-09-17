@@ -248,7 +248,7 @@ public:
     void addDestinationP(Mission *m, int x, int y, int z,
         int ox = 128, int oy = 128, int new_speed = 160);
 
-    bool movementP(int elapsed);
+    bool movementP(Mission *m, int elapsed);
 
     int draw_timeout_;
 

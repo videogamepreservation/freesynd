@@ -314,6 +314,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
             w->setTileX(tile_x_);
             w->setTileY(tile_y_);
             w->setTileZ(tile_z_);
+            w->setVisZ(vis_z_);
             w->setOffX(off_x_);
             w->setOffY(off_y_);
             w->setOffZ(0);
@@ -329,7 +330,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
         }
     }
 
-    updated = movementP(elapsed);
+    updated = movementP(mission, elapsed);
 
     if (target_) {
         if (inRange(target_)) {
@@ -819,6 +820,7 @@ void PedInstance::dropAllWeapons() {
         w->setTileX(tile_x_);
         w->setTileY(tile_y_);
         w->setTileZ(tile_z_);
+        w->setVisZ(vis_z_);
         w->setOffX(off_x_);
         w->setOffY(off_y_);
         w->setOffZ(0);
@@ -909,10 +911,6 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
 
     floodPointDesc *targetd = &(m->mdpoints_[x + y * m->mmax_x_ + z * m->mmax_m_xy]);
 
-    int old_z = tile_z_;
-    int old_oz = off_z_;
-    tile_z_ += (off_z_ == 0 ? 0 : 1);
-    off_z_ = 0;
     floodPointDesc *based = &(m->mdpoints_[tile_x_
         + tile_y_ * m->mmax_x_ + tile_z_ * m->mmax_m_xy]);
 
@@ -927,15 +925,11 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
     }
 
     if(targetd->t == m_fdNonWalkable || map_ == -1 || health_ <= 0) {
-        tile_z_ = old_z;
-        off_z_ = old_oz;
         return;
     }
 
     if(based->t == m_fdNonWalkable) {
         printf("Movement from nonwalkable postion\n");
-        tile_z_ = old_z;
-        off_z_ = old_oz;
         return;
     }
 
@@ -959,8 +953,6 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
     if (tile_x_ == x && tile_y_ == y && tile_z_ == z) {
         dest_path_.push_back(PathNode(x, y, z, ox, oy));
         speed_ = new_speed;
-        tile_z_ = old_z;
-        off_z_ = old_oz;
         return;
     }
     printf("time %i.%i\n", SDL_GetTicks()/1000, SDL_GetTicks()%1000);
@@ -968,8 +960,6 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
     mdpmirror = (floodPointDesc *)malloc(m->mmax_m_all * sizeof(floodPointDesc));
     if (mdpmirror == NULL) {
         printf("not enough memory: setDestinationP\n");
-        tile_z_ = old_z;
-        off_z_ = old_oz;
         return;
     }
     memcpy(mdpmirror, m->mdpoints_, m->mmax_m_all * sizeof(floodPointDesc));
@@ -1627,8 +1617,6 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
 
     if (!nodeset && lnknr) {
         free(mdpmirror);
-        tile_z_ = old_z;
-        off_z_ = old_oz;
         return;
     }
     if (blvl == bn.size())
@@ -2834,8 +2822,6 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
 #endif
     if(dest_path_.size() != 0)
         speed_ = new_speed;
-    tile_z_ = old_z;
-    off_z_ = old_oz;
     printf("end time %i.%i\n", SDL_GetTicks()/1000, SDL_GetTicks()%1000);
 }
 
@@ -2848,7 +2834,7 @@ void PedInstance::addDestinationP(Mission *m, int x, int y, int z,
     speed_ = new_speed;
 }
 
-bool PedInstance::movementP(int elapsed)
+bool PedInstance::movementP(Mission *m, int elapsed)
 {
     bool updated = false;
 
@@ -2956,6 +2942,30 @@ bool PedInstance::movementP(int elapsed)
                 speed_ = 0;
 
             updated = true;
+        }
+        unsigned char twd = m->mtsurfaces_[tile_x_ + tile_y_ * m->mmax_x_
+            + tile_z_ * m->mmax_m_xy].twd;
+        switch (twd) {
+            case 0x01:
+                vis_z_ = tile_z_ - 1;
+                off_z_ = 127 - (off_y_ >> 1);
+                break;
+            case 0x02:
+                vis_z_ = tile_z_ - 1;
+                off_z_ = off_y_ >> 1;
+                break;
+            case 0x03:
+                vis_z_ = tile_z_ - 1;
+                off_z_ = off_x_ >> 1;
+                break;
+            case 0x04:
+                vis_z_ = tile_z_ - 1;
+                off_z_ = 127 - (off_x_ >> 1);
+                break;
+            default:
+                vis_z_ = tile_z_;
+                off_z_ = 0;
+                break;
         }
     } else if (speed_) {
         printf("Running at speed %i, destination unknown\n", speed_);
