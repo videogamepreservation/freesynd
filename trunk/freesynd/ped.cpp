@@ -2925,12 +2925,18 @@ bool PedInstance::movementP(Mission *m, int elapsed)
             if (abs(dy) > abs(diffy))
                 dy = diffy;
 
+            updatePlacement(off_x_ + dx, off_y_ + dy);
+            // TODO : remove bool on return, make void?
+            // what obstacles? cars? doors are already
+            // setting stop signal, reuse it?
+#if 0
             if (updatePlacement(off_x_ + dx, off_y_ + dy)) {
                 ;
             } else {
                 // TODO: avoid obstacles.
                 speed_ = 0;
             }
+#endif
             if(nxtTileX == tile_x_ && nxtTileY == tile_y_)
                 tile_z_ = nxtTileZ;
             if(nxtTileX == tile_x_ && nxtTileY == tile_y_
