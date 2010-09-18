@@ -34,8 +34,8 @@ Block g_Blocks[50] = {
     {"KAMCHATKA", 56000000, 12, 30, STAT_HAPPY, false, false, NULL},
     {"YUKON", 58000000, 21, 30, STAT_HAPPY, false, false, NULL},
     {"WESTERN EUROPE", 48000000, 1, 30, STAT_HAPPY, false, false, "4"},
-    {"CENTRAL EUROPE", 50000000, 15, 30, STAT_HAPPY, false, false, NULL},
-    {"EASTERN EUROPE", 52000000, 10, 30, STAT_HAPPY, false, false, NULL},
+    {"CENTRAL EUROPE", 50000000, 15, 30, STAT_HAPPY, false, false, "11"},
+    {"EASTERN EUROPE", 52000000, 10, 30, STAT_HAPPY, false, false, "5"},
     {"KAZAKHSTAN", 42000000, 9, 30, STAT_HAPPY, false, false, NULL},
     {"MONGOLIA", 52000000, 3, 30, STAT_HAPPY, false, false, NULL},
     {"FAR EAST", 42000000, 2, 30, STAT_HAPPY, false, false, NULL},
@@ -101,6 +101,10 @@ void GameSession::reset() {
     }
 
     g_Blocks[selected_blck_].available = true;
+
+    time_day_ = 0;
+    time_month_ = 1;
+    time_year_ = 85;
 }
 
 Block & GameSession::getBlock(uint8 index) {
@@ -130,6 +134,20 @@ void GameSession::completeSelectedBlock() {
             g_Blocks[id].available = true;
             token = strtok(NULL, ":");
         }
+    }
+}
+
+/*!
+ * Updates the game time based on the given elapsed time.
+ * This methods computes the tax revenues, the population
+ * status and the research evolution.
+ */
+void GameSession::updateTime(int elapsed) {
+    // TODO : complete the method
+    time_day_++;
+    if (time_day_ > 23) {
+        time_day_ = 0;
+        time_month_++;
     }
 }
 

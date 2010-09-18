@@ -57,6 +57,7 @@ protected:
     static const int POP_STATIC_ID;
     static const int OWN_STATIC_ID;
     static const int TAX_VALUE_STATIC_ID;
+    static const int TIME_STATIC_ID;
 
     int mapblk_size_;
     /*! Contains the images of the differents blocks.*/
@@ -67,12 +68,17 @@ protected:
      */
     uint8 *orig_pixels_;
     uint8 blk_colours_[50];
-    int tick_count_;
+    /*! A counter for the blinking line of the selector.*/
+    int select_tick_count_;
+    /*! A counter for the game time. */
+    int time_tick_count_;
 
     //! Utility method to draw the mission selector
     void drawSelector();
     //! Utility method to update mission informations
-    void handleBlockSelected(const Block *blk);
+    void handleBlockSelected();
+    //! Update the game time display
+    void updateClock();
 };
 
 #endif

@@ -29,7 +29,12 @@
 #include "../common.h"
 
 enum Status_Pop {
-    STAT_HAPPY
+    STAT_VERY_HAPPY = 5,
+    STAT_HAPPY = 4,
+    STAT_CONTENT = 3,
+    STAT_UNHAPPY = 2,
+    STAT_DISCONTENT = 1,
+    STAT_REBEL = 0
 };
 
 typedef struct Block_ {
@@ -38,10 +43,7 @@ typedef struct Block_ {
     int mis_id;
     int tax;
     /**! 
-     * Status of the population satisfaction. Level are
-     * - Very happy : 2
-     * - Happy : 1
-     * - Bad : 0
+     * Status of the population satisfaction.
      */
     Status_Pop status;
     bool available;
@@ -135,6 +137,27 @@ public:
     }
 
     /*!
+     * Returns the current day.
+     */
+    int getDay() const {
+        return time_day_;
+    }
+
+    /*!
+     * Returns the current month.
+     */
+    int getMonth() const {
+        return time_month_;
+    }
+
+    /*!
+     * Returns the current year.
+     */
+    int getYear() const {
+        return time_year_;
+    }
+
+    /*!
      * Returns the index of the current selected region on map menu.
      */
     uint8 getSelectedBlockId() { return selected_blck_; }
@@ -166,12 +189,20 @@ public:
     //! Tells if cheat mode Replay missions is on
     bool canReplayMission() { return replay_mission_; }
 
+    void updateTime(int elapsed);
+
 private:
     int logo_;
     int logo_colour_;
     int money_;
     std::string company_name_;
     std::string username_;
+    /*! Stores the current day. */
+    int time_day_;
+    /*! Stores the current month. */
+    int time_month_;
+    /*! Stores the current year. */
+    int time_year_;
     /*! 
      * Stores the index of the current selected
      * region on the mission map.

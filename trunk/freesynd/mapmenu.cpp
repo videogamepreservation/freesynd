@@ -106,6 +106,7 @@ const int MapMenu::POP_STATIC_ID = 2;
 const int MapMenu::TAX_VALUE_STATIC_ID = 4;
 const int MapMenu::OWN_LBL_STATIC_ID = 5;
 const int MapMenu::OWN_STATIC_ID = 6;
+const int MapMenu::TIME_STATIC_ID = 7;
 
 
 /*!
@@ -114,8 +115,10 @@ const int MapMenu::OWN_STATIC_ID = 6;
  */
 MapMenu::MapMenu(MenuManager * m)
 :  Menu(m, "map", "mmap.dat", "mmapout.dat"),
-mapblk_data_(NULL), orig_pixels_(NULL), tick_count_(0)
+mapblk_data_(NULL), orig_pixels_(NULL), select_tick_count_(0)
 {
+    time_tick_count_ = 0;
+
     addOption(53, 352, "BRIEF", 1, KEY_F4, "brief");
     addOption(535, 352, "MENU", 1, KEY_F5, "main");
 
@@ -126,6 +129,8 @@ mapblk_data_(NULL), orig_pixels_(NULL), tick_count_(0)
     addStatic(268, 346, "", 0, false);       // Tax value
     addStatic(194, 360, "OWN", 1, false);       // Own name
     addStatic(268, 360, "", 0, false);          // Own status
+
+    addStatic(500, 9, "00:1:85NC", 1, false);       // Time
 
     setParentMenu("main");
 
@@ -149,17 +154,18 @@ MapMenu::~MapMenu()
 /*!
  * Update map informations depending on
  * the currently selected mission.
- * \param blk The current selected block
  */
-void MapMenu::handleBlockSelected(const Block *blk) {
-    if (blk->finished) { // A mission is finished
+void MapMenu::handleBlockSelected() {
+    Block blk = g_Session.getBlock(g_Session.getSelectedBlockId());
+
+    if (blk.finished) { // A mission is finished
         // Brief is available only if replay mission cheat is set
         if (g_Session.canReplayMission()) {
             showOption(KEY_F4);
         } else {
             hideOption(KEY_F4);
         }
-    } else if (!blk->available) { // A mission is not finished but unavailable
+    } else if (!blk.available) { // A mission is not finished but unavailable
         // Brief is available only if all missions enable cheat is set
         if (g_Session.isAllMissionEnabled()) {
             showOption(KEY_F4);
@@ -172,25 +178,40 @@ void MapMenu::handleBlockSelected(const Block *blk) {
     }
 
     // Update the country informations
-    setStaticText(COUNTRY_STATIC_ID, blk->name);
+    setStaticText(COUNTRY_STATIC_ID, blk.name);
 
     char tmp[100];
 
     // Population
 #ifdef WIN_SECURE
-    sprintf_s(tmp, 100, "%i", blk->population);
+    sprintf_s(tmp, 100, "%i", blk.population);
 #else
     sprintf(tmp, "%i", blk.population);
 #endif
     setStaticText(POP_STATIC_ID, tmp);
 
     
-    if (blk->finished) {
+    if (blk.finished) {
         // Status
         setStaticText(OWN_LBL_STATIC_ID, "STAT");
-        switch (blk->status) {
+        switch (blk.status) {
+            case STAT_VERY_HAPPY:
+                setStaticText(OWN_STATIC_ID, "VERY HAPPY");
+                break;
             case STAT_HAPPY:
                 setStaticText(OWN_STATIC_ID, "HAPPY");
+                break;
+            case STAT_CONTENT:
+                setStaticText(OWN_STATIC_ID, "CONTENT");
+                break;
+            case STAT_UNHAPPY:
+                setStaticText(OWN_STATIC_ID, "UNHAPPY");
+                break;
+            case STAT_DISCONTENT:
+                setStaticText(OWN_STATIC_ID, "DISCONTENT");
+                break;
+            case STAT_REBEL:
+                setStaticText(OWN_STATIC_ID, "REBELLIOUS");
                 break;
             default:
                 setStaticText(OWN_STATIC_ID, "UNKNOWN");
@@ -198,7 +219,7 @@ void MapMenu::handleBlockSelected(const Block *blk) {
 
         // Tax
 #ifdef WIN_SECURE
-        sprintf_s(tmp, 100, "%i", blk->tax);
+        sprintf_s(tmp, 100, "%i", blk.tax);
 #else
         sprintf(tmp, "%i", blk.tax);
 #endif
@@ -214,13 +235,36 @@ void MapMenu::handleBlockSelected(const Block *blk) {
 
 void MapMenu::handleTick(int elapsed)
 {
-    tick_count_ += elapsed;
     // This a count to refresh the blinking line of the selector
-    if (tick_count_ > 200) {
+    select_tick_count_ += elapsed;
+    if (select_tick_count_ > 200) {
         static int count = 0;
-        tick_count_ = count++;
+        select_tick_count_ = count++;
         needRendering();
     }
+
+    // This a count to refresh the game time
+    time_tick_count_ += elapsed;
+    if (time_tick_count_ > 1000) {
+        g_Session.updateTime(select_tick_count_);
+        updateClock();
+        time_tick_count_ = 0;
+    }
+}
+
+/*! 
+ * Update the game time display
+ */
+void MapMenu::updateClock() {
+    char tmp[100];
+#ifdef WIN_SECURE
+    sprintf_s(tmp, 100, "%02d:%d:%dNC", g_Session.getDay(), g_Session.getMonth(), g_Session.getYear());
+#else
+    sprintf(tmp, "%02d:%d:%dNC", g_Session.getDay(), g_Session.getMonth(), g_Session.getYear());
+#endif
+    setStaticText(TIME_STATIC_ID, tmp);
+
+    needRendering();
 }
 
 /*!
@@ -255,18 +299,18 @@ void MapMenu::drawSelector()
     int blk_line_start_x = g_BlocksDisplay[g_Session.getSelectedBlockId()].line_start.x;
     int blk_line_start_y = g_BlocksDisplay[g_Session.getSelectedBlockId()].line_start.y;
     g_Screen.drawLine(blk_line_start_x, blk_line_start_y, blk_line_end_x,
-                      blk_line_end_y, 252, 5, tick_count_ % 10);
+                      blk_line_end_y, 252, 5, select_tick_count_ % 10);
     g_Screen.drawLine(blk_line_start_x, blk_line_start_y - 1,
                       blk_line_end_x, blk_line_end_y - 1, 252, 5,
-                      tick_count_ % 10);
+                      select_tick_count_ % 10);
     g_Screen.drawLine(blk_line_start_x, blk_line_start_y, blk_line_end_x,
-                      blk_line_end_y, 4, 5, tick_count_ % 10 + 5);
+                      blk_line_end_y, 4, 5, select_tick_count_ % 10 + 5);
     g_Screen.drawLine(blk_line_start_x, blk_line_start_y - 1,
                       blk_line_end_x, blk_line_end_y - 1, 4, 5,
-                      tick_count_ % 10 + 5);
+                      select_tick_count_ % 10 + 5);
 
     // Reset the counter
-    tick_count_ = 0;
+    select_tick_count_ = 0;
 }
 
 void MapMenu::handleShow() {
@@ -280,10 +324,11 @@ void MapMenu::handleShow() {
     // Show the mouse
     g_System.showCursor();
 
-    Block blk = g_Session.getBlock(g_Session.getSelectedBlockId());
-
     // State of the briefing button
-    handleBlockSelected(&blk);
+    handleBlockSelected();
+
+    // Update the time
+    updateClock();
 }
 
 void MapMenu::handleRender()
@@ -328,8 +373,7 @@ void MapMenu::handleMouseDown(int x, int y, int button)
                      if (g_Session.getSelectedBlockId() != i) {
                         g_Session.setSelectedBlockId(i);
                         
-                        Block blk = g_Session.getBlock(g_Session.getSelectedBlockId());
-                        handleBlockSelected(&blk);
+                        handleBlockSelected();
                         needRendering();
                      }
                 return;
@@ -351,6 +395,5 @@ void MapMenu::handleUnknownKey(Key key, KeyMod mod, bool pressed)
         needRendering();
     }
 
-    Block blk = g_Session.getBlock(g_Session.getSelectedBlockId());
-    handleBlockSelected(&blk);
+    handleBlockSelected();
 }
