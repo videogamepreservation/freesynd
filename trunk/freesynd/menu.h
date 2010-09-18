@@ -60,6 +60,8 @@ public:
         size_(size), dark_(dark), visible_(visible) {
     }
 
+    virtual ~MenuText() {}
+
     //! Draw the widget on screen
     virtual void draw();
 };
@@ -82,6 +84,8 @@ public:
             const char *to, bool visible):MenuText(x, y, text, size, true, visible) {
         to_ = to;
     }
+
+    ~Option() { to_ = NULL; }
 };
 
 /*!
