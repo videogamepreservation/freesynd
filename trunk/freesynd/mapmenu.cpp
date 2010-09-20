@@ -219,9 +219,9 @@ void MapMenu::handleBlockSelected() {
 
         // Tax
 #ifdef WIN_SECURE
-        sprintf_s(tmp, 100, "%i", blk.tax);
+        sprintf_s(tmp, 100, "%i", g_Session.getTaxRevenue(blk.population, blk.tax));
 #else
-        sprintf(tmp, "%i", blk.tax);
+        sprintf(tmp, "%i", g_Session.getTaxRevenue(blk.population, blk.tax));
 #endif
         setStaticText(TAX_VALUE_STATIC_ID, tmp);
     } else {
@@ -258,9 +258,9 @@ void MapMenu::handleTick(int elapsed)
 void MapMenu::updateClock() {
     char tmp[100];
 #ifdef WIN_SECURE
-    sprintf_s(tmp, 100, "%02d:%d:%dNC", g_Session.getDay(), g_Session.getMonth(), g_Session.getYear());
+    sprintf_s(tmp, 100, "%02d:%d:%dNC", g_Session.getHour(), g_Session.getDay(), g_Session.getYear());
 #else
-    sprintf(tmp, "%02d:%d:%dNC", g_Session.getDay(), g_Session.getMonth(), g_Session.getYear());
+    sprintf(tmp, "%02d:%d:%dNC", g_Session.getHour(), g_Session.getDay(), g_Session.getYear());
 #endif
     setStaticText(TIME_STATIC_ID, tmp);
 

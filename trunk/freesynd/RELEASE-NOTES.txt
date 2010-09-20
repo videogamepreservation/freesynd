@@ -16,6 +16,7 @@ Changes
   * Static objects animation setup method rewritten,
     animations require adjusting and add new objects correctly
   * While vehicle was moving if ped went out, vehicle continued to move
+  * Game time is visible in the Map menu but not fully implemented
 
 Fixed Bugs
 ----------
@@ -28,6 +29,7 @@ Fixed Bugs
               closed)
   * 3052202 : cppcheck warnings and errors(only third error is important)(tlh2000)
   * 3052210 : fixed warnings and resource leak(tlh2000)
+  * 3005299 : Finished missions can be played again
 
 Known issues with this release
 ------------------------------

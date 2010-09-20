@@ -137,17 +137,17 @@ public:
     }
 
     /*!
+     * Returns the current hour.
+     */
+    int getHour() const {
+        return time_hour_;
+    }
+
+    /*!
      * Returns the current day.
      */
     int getDay() const {
         return time_day_;
-    }
-
-    /*!
-     * Returns the current month.
-     */
-    int getMonth() const {
-        return time_month_;
     }
 
     /*!
@@ -191,16 +191,19 @@ public:
 
     void updateTime(int elapsed);
 
+    //! Returns a revenue for a given population and rate.
+    int getTaxRevenue(int population, int rate);
+
 private:
     int logo_;
     int logo_colour_;
     int money_;
     std::string company_name_;
     std::string username_;
+    /*! Stores the current hour. */
+    int time_hour_;
     /*! Stores the current day. */
     int time_day_;
-    /*! Stores the current month. */
-    int time_month_;
     /*! Stores the current year. */
     int time_year_;
     /*! 

@@ -29,7 +29,7 @@ Block g_Blocks[50] = {
     {"NORTHEAST TERRITORIES", 58000000, 8, 30, STAT_HAPPY, false, false, NULL},
     {"GREENLAND", 40000000, 16, 30, STAT_HAPPY, false, false, NULL},
     {"SCANDINAVIA", 54000000, 20, 30, STAT_HAPPY, false, false, "10"},
-    {"URALS", 40000000, 18, 30, STAT_HAPPY, false, false, NULL},
+    {"URALS", 40000000, 18, 30, STAT_HAPPY, false, false, "6:12:13"},
     {"SIBERIA", 54000000, 22, 30, STAT_HAPPY, false, false, NULL},
     {"KAMCHATKA", 56000000, 12, 30, STAT_HAPPY, false, false, NULL},
     {"YUKON", 58000000, 21, 30, STAT_HAPPY, false, false, NULL},
@@ -102,8 +102,8 @@ void GameSession::reset() {
 
     g_Blocks[selected_blck_].available = true;
 
-    time_day_ = 0;
-    time_month_ = 1;
+    time_hour_ = 0;
+    time_day_ = 1;
     time_year_ = 85;
 }
 
@@ -131,7 +131,10 @@ void GameSession::completeSelectedBlock() {
         char *token = strtok(s, ":");
         while ( token != NULL ) {
             int id = atoi(token);
-            g_Blocks[id].available = true;
+            if (!g_Blocks[id].finished) {
+                // Make available only if the mission is not already finished
+                g_Blocks[id].available = true;
+            }
             token = strtok(NULL, ":");
         }
     }
@@ -144,11 +147,15 @@ void GameSession::completeSelectedBlock() {
  */
 void GameSession::updateTime(int elapsed) {
     // TODO : complete the method
-    time_day_++;
-    if (time_day_ > 23) {
-        time_day_ = 0;
-        time_month_++;
+    time_hour_++;
+    if (time_hour_ > 23) {
+        time_hour_ = 0;
+        time_day_++;
     }
+}
+
+int GameSession::getTaxRevenue(int population, int rate) {
+    return 0;
 }
 
 /*!
