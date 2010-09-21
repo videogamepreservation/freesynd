@@ -6,6 +6,7 @@
  *   Copyright (C) 2005  Joost Peters  <joostp@users.sourceforge.net>   *
  *   Copyright (C) 2006  Trent Waddington <qg@biodome.org>              *
  *   Copyright (C) 2006  Tarjei Knapstad <tarjei.knapstad@gmail.com>    *
+ *   Copyright (C) 2010  Bohdan Stelmakh <chamel@users.sourceforge.net> *
  *                                                                      *
  *    This program is free software;  you can redistribute it and / or  *
  *  modify it  under the  terms of the  GNU General  Public License as  *
@@ -511,14 +512,15 @@ bool VehicleInstance::movementV(int elapsed)
                 dx = diffx;
             if (abs(dy) > abs(diffy))
                 dy = diffy;
-
+            updatePlacement(off_x_ + dx, off_y_ + dy);
+#if 0
             if (updatePlacement(off_x_ + dx, off_y_ + dy)) {
                 ;
             } else {
                 // TODO: avoid obstacles.
                 speed_ = 0;
             }
-
+#endif
             if(dest_path_.front().tileX() == tile_x_
                 && dest_path_.front().tileY() == tile_y_
                 && dest_path_.front().offX() == off_x_

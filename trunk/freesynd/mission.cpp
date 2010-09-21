@@ -6,6 +6,7 @@
  *   Copyright (C) 2005  Joost Peters  <joostp@users.sourceforge.net>   *
  *   Copyright (C) 2006  Trent Waddington <qg@biodome.org>              *
  *   Copyright (C) 2006  Tarjei Knapstad <tarjei.knapstad@gmail.com>    *
+ *   Copyright (C) 2010  Bohdan Stelmakh <chamel@users.sourceforge.net> *
  *                                                                      *
  *    This program is free software;  you can redistribute it and / or  *
  *  modify it  under the  terms of the  GNU General  Public License as  *
@@ -199,7 +200,7 @@ bool Mission::loadLevel(uint8 * levelData)
             }
         }
     }
-/*
+#if 0
     // for hacking statics data
     char nameS[256];
     sprintf(nameS, "statics%02X.hex", map_);
@@ -208,7 +209,7 @@ bool Mission::loadLevel(uint8 * levelData)
         fwrite(level_data_.statics, 1, 12000, staticsF);
         fclose(staticsF);
     }
-*/
+#endif
 
     statics_.clear();
     for (unsigned int i = 0; i < 400; i++) {
@@ -608,7 +609,7 @@ bool Mission::setSurfaces() {
         }
     }
 
-    printf("surface data size %i\n", sizeof(surfaceDesc) * mmax_m_all);
+    //printf("surface data size %i\n", sizeof(surfaceDesc) * mmax_m_all);
 
     for (unsigned int i = 0; i < peds_.size(); i++) {
         PedInstance *p = peds_[i];
@@ -1965,8 +1966,7 @@ bool Mission::setSurfaces() {
             } while (vtodefine.size());
         }
     }
-    printf("flood data size %i\n", sizeof(floodPointDesc) * mmax_m_all);
-
+#if 0
     unsigned int cw = 0;
     for (int iz = 0; iz < mmax_z_; iz++) {
         for (int iy = 0; iy < mmax_y_; iy++) {
@@ -1980,6 +1980,7 @@ bool Mission::setSurfaces() {
     }
 
     printf("flood walkables %i\n", cw);
+#endif
     return true;
 }
 

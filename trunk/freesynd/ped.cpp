@@ -6,6 +6,7 @@
  *   Copyright (C) 2005  Joost Peters  <joostp@users.sourceforge.net>   *
  *   Copyright (C) 2006  Trent Waddington <qg@biodome.org>              *
  *   Copyright (C) 2006  Tarjei Knapstad <tarjei.knapstad@gmail.com>    *
+ *   Copyright (C) 2010  Bohdan Stelmakh <chamel@users.sourceforge.net> *
  *                                                                      *
  *    This program is free software;  you can redistribute it and / or  *
  *  modify it  under the  terms of the  GNU General  Public License as  *
@@ -28,9 +29,9 @@
 #include "pathsurfaces.h"
 #include <math.h>
 
-#ifdef SYSTEM_SDL
-#include "system_sdl.h"
-#endif
+//#ifdef SYSTEM_SDL
+//#include "system_sdl.h"
+//#endif
 Ped::Ped() {
     memset(stand_anims_, 0, sizeof(stand_anims_));
     memset(walk_anims_, 0, sizeof(walk_anims_));
@@ -906,16 +907,17 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
     m->adjXYZ(x, y, z);
     dest_path_.clear();
     setSpeed(0);
-    printf("target x : %i; y : %i; z : %i = = ox :%i, oy :%i\n",
-        x, y, z, ox, oy);
+    //printf("target x : %i; y : %i; z : %i = = ox :%i, oy :%i\n",
+        //x, y, z, ox, oy);
 
     floodPointDesc *targetd = &(m->mdpoints_[x + y * m->mmax_x_ + z * m->mmax_m_xy]);
 
     floodPointDesc *based = &(m->mdpoints_[tile_x_
         + tile_y_ * m->mmax_x_ + tile_z_ * m->mmax_m_xy]);
 
+#if 0
     printf("target t %x, dirm %x ; base t %x, dirm %x\n", targetd->t,
-        targetd->dirm, based->t, based->dirm);
+        //targetd->dirm, based->t, based->dirm);
     printf("base pos: x %i; y %i; z %i, ox %i, oy %i, oz %i\n",
         tile_x_, tile_y_, tile_z_, off_x_, off_y_, off_z_);
     if ( (z + 1) < m->mmax_z_) {
@@ -923,6 +925,7 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
         printf("upper twd %i\n", m->mtsurfaces_[x + y * m->mmax_x_ 
         + (z + 1) * m->mmax_m_xy].twd);
     }
+#endif
 
     if(targetd->t == m_fdNonWalkable || map_ == -1 || health_ <= 0) {
         return;
@@ -955,7 +958,7 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
         speed_ = new_speed;
         return;
     }
-    printf("time %i.%i\n", SDL_GetTicks()/1000, SDL_GetTicks()%1000);
+    //printf("time %i.%i\n", SDL_GetTicks()/1000, SDL_GetTicks()%1000);
     floodPointDesc *mdpmirror = NULL;
     mdpmirror = (floodPointDesc *)malloc(m->mmax_m_all * sizeof(floodPointDesc));
     if (mdpmirror == NULL) {
@@ -1613,7 +1616,7 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
             nodeset = false;
     } while (nodeset && lnknr);
     //printf("bv %i, tv %i\n", bv.size(), tv.size());
-    printf("btime %i.%i\n", SDL_GetTicks()/1000, SDL_GetTicks()%1000);
+    //printf("btime %i.%i\n", SDL_GetTicks()/1000, SDL_GetTicks()%1000);
 
     if (!nodeset && lnknr) {
         free(mdpmirror);
@@ -2811,7 +2814,7 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
             }
         }
     }
-    printf("smoothing time %i.%i\n", SDL_GetTicks()/1000, SDL_GetTicks()%1000);
+    //printf("smoothing time %i.%i\n", SDL_GetTicks()/1000, SDL_GetTicks()%1000);
 
     free(mdpmirror);
 #if 0
@@ -2822,7 +2825,7 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
 #endif
     if(dest_path_.size() != 0)
         speed_ = new_speed;
-    printf("end time %i.%i\n", SDL_GetTicks()/1000, SDL_GetTicks()%1000);
+    //printf("end time %i.%i\n", SDL_GetTicks()/1000, SDL_GetTicks()%1000);
 }
 
 void PedInstance::addDestinationP(Mission *m, int x, int y, int z,
@@ -2830,6 +2833,7 @@ void PedInstance::addDestinationP(Mission *m, int x, int y, int z,
     // TODO: adding destination maybe difficult because of
     // action currently in execution (pickup/putdown weapon, etc.)
     m->adjXYZ(x, y, z);
+    printf("this function is not finished!!\n");
     dest_path_.push_back(PathNode(x, y, z, ox, oy));
     speed_ = new_speed;
 }

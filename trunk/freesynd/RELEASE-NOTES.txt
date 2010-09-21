@@ -17,26 +17,28 @@ Changes
     animations require adjusting and add new objects correctly
   * While vehicle was moving if ped went out, vehicle continued to move
   * Game time is visible in the Map menu but not fully implemented
+  * People and vehicles pathdinding was rewritten
+  * Fixed highlights in select menu: was possible to highlight more then
+    one element, also weapon highlight was not working
 
 Fixed Bugs
 ----------
-  * 3029839 : When a menu appears, if the mouse cursor is on a button,
-              that button is not highlighted until the mouse moves
-  * 3029837 : When clicking on a menu button or hitting a key that
-              activate a button, event processing should be paused
+  * 3029839 : Mouse position is not used on a new Menu
+  * 3029837 : Menu animation doesn't stop mouse or keyboard events
   * 2307181 : #include <cstdlib> missing (it was simply closed, fix 
               was done somewhere between 0.2 - 0.3 release and was not
               closed)
   * 3052202 : cppcheck warnings and errors(only third error is important)(tlh2000)
   * 3052210 : fixed warnings and resource leak(tlh2000)
   * 3005299 : Finished missions can be played again
+  * 2669454 : Double highlight on weapon list in Team Selection menu
 
 Known issues with this release
 ------------------------------
   * Agent AI is not operational.
   * The minimap is not complete.
   * Tax collection and other functionality of the world map are not done.
-  * PathFinding is buggy
+  * PathFinding requires improvement
   * Mission debriefing is not operational
   * No animation for trees, doors
   * Map drawing is buggy

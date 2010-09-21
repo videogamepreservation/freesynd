@@ -198,12 +198,11 @@ void Menu::mouseMotionEvent(int x, int y, int state)
             width = 30;
         else
             width = g_App.fonts().textWidth(m.text_.c_str(), m.size_);
-        if (m.visible_ && x > m.x_ - 2 && x < m.x_ + width && y >= m.y_ - 2
+        if (m.visible_ && x > m.x_ - 2 && x < m.x_ + width && y >= m.y_
             && y < m.y_ + g_App.fonts().textHeight(m.size_) - 2) {
-            if ( !m.dark_ ) {
-                // the button was already highlighted : don't do anything
-                break;
-            } else {
+                if (m.x_ == 504 && m.y_ == 110)
+                    printf("hmm");
+            if ( m.dark_ ) {
                 // The button is now highlighted
                 m.dark_ = false;
                 needRendering();
@@ -228,7 +227,7 @@ void Menu::mouseDownEvent(int x, int y, int button)
             width = 30;
         else
             width = g_App.fonts().textWidth(m.text_.c_str(), m.size_);
-        if (m.visible_ && x > m.x_ - 2 && x < m.x_ + width && y >= m.y_ - 2
+        if (m.visible_ && x > m.x_ - 2 && x < m.x_ + width && y >= m.y_
             && y < m.y_ + g_App.fonts().textHeight(m.size_) - 2) {
             keyEvent(it->first, KMD_NONE, true);
             return;

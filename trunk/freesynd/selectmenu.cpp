@@ -295,12 +295,6 @@ void SelectMenu::handleTick(int elapsed)
 
 void SelectMenu::handleRender()
 {
-    if (tab_ == 2 && sel_weapon_ == 0 && sel_weapon_inst_ == 0) {
-        addModOptions();
-        addWeaponOptions();
-        addRecruitOptions();
-    }
-
     if (orig_pixels_ == 0) {
         orig_pixels_ = new uint8[GAME_SCREEN_WIDTH * GAME_SCREEN_HEIGHT];
         memcpy(orig_pixels_, g_Screen.pixels(),
