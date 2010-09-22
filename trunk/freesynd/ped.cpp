@@ -2390,8 +2390,8 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
         PathNode prvpn = PathNode(tile_x_, tile_y_, tile_z_, off_x_, off_y_);
         // TODO: use these to smoother path. later
         //std::vector<PathNode> vsingleway;
-        //unsigned char mdir;
-        //unsigned char hl;
+        //unsigned char mdir = 0xFF;
+        //unsigned char hl = 0xFF;
         for (std::vector <PathNode>::iterator it = cdestpath.begin();
             it != cdestpath.end(); it++) {
             std::vector <PathNode>::iterator fit = it + 1;
@@ -2809,6 +2809,24 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                 if (modified) {
                     dest_path_.push_back(PathNode(x,y,z,ox,oy));
                 } else {
+                    // untill correct smoothing implemented this
+                    // will prevent walking on non-walkable tile
+                    if (xf == -1 && yf == -1) {
+                        dest_path_.back().setOffXY(0,0);
+                        dest_path_.push_back(prvpn);
+                    }
+                    if (xf == 1 && yf == -1) {
+                        dest_path_.back().setOffXY(255,0);
+                        dest_path_.push_back(prvpn);
+                    }
+                    if (xf == 1 && yf == 1) {
+                        dest_path_.back().setOffXY(255,255);
+                        dest_path_.push_back(prvpn);
+                    }
+                    if (xf == -1 && yf == 1) {
+                        dest_path_.back().setOffXY(0,255);
+                        dest_path_.push_back(prvpn);
+                    }
                     dest_path_.back().setOffXY(ox,oy);
                 }
             }
@@ -2958,7 +2976,7 @@ bool PedInstance::movementP(Mission *m, int elapsed)
         switch (twd) {
             case 0x01:
                 vis_z_ = tile_z_ - 1;
-                off_z_ = 127 - (off_y_ >> 1);
+                off_z_ = 127 - (off_y_ / 2);
                 break;
             case 0x02:
                 vis_z_ = tile_z_ - 1;
@@ -2970,7 +2988,7 @@ bool PedInstance::movementP(Mission *m, int elapsed)
                 break;
             case 0x04:
                 vis_z_ = tile_z_ - 1;
-                off_z_ = 127 - (off_x_ >> 1);
+                off_z_ = 127 - (off_x_ / 2);
                 break;
             default:
                 vis_z_ = tile_z_;

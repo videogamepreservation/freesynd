@@ -2000,6 +2000,8 @@ bool Mission::getWalkable(int &x, int &y, int &z, int &ox, int &oy) {
     bool gotit = false;
     int bx, by, box, boy;
     int bz = mmax_z_;
+    unsigned int cindx;
+    unsigned char twd;
     do{
         bz--;
         bx = x * 256 + ox + 128 * bz;
@@ -2010,9 +2012,63 @@ bool Mission::getWalkable(int &x, int &y, int &z, int &ox, int &oy) {
         by = by / 256;
         if (bz >= mmax_z_ || bx >= mmax_x_ || by >= mmax_y_)
             continue;
-        //printf("t %i, twd %i\n", mdpoints_[bx + by * mmax_x_ + bz * mmax_m_xy].t, mtsurfaces_[bx + by * mmax_x_ + bz * mmax_m_xy].twd);
-        if (mdpoints_[bx + by * mmax_x_ + bz * mmax_m_xy].t == m_fdWalkable)
-            gotit = true;
+        cindx = bx + by * mmax_x_ + bz * mmax_m_xy;
+        if (mdpoints_[cindx].t == m_fdWalkable) {
+            twd = mtsurfaces_[cindx].twd;
+            int dx = 0;
+            int cx = 0;
+            int dy = 0;
+            int cy = 0;
+            switch (twd) {
+                case 0x01:
+                    dy = (boy * 2) / 3;
+                    //cy = (dy * 3) / 2;
+                    dx = box - dy / 2;
+                    //cx = dx + dy / 2;
+                    if (dx >= 0) {
+                        gotit = true;
+                        box = dx;
+                        boy = dy;
+                    }
+                    break;
+                case 0x02:
+                    dy = (boy - 128) * 2;
+                    //cy = (dy / 2) + 128;
+                    dx = (box + dy / 2) - 128;
+                    //cx = (dx + 128) - dy / 2;
+                    if (dy >= 0 && dx >= 0) {
+                        gotit = true;
+                        box = dx;
+                        boy = dy;
+                    }
+                    break;
+                case 0x03:
+                    dx = (box - 128) * 2;
+                    //cx = (dx / 2) + 128;
+                    dy = (boy + dx / 2) - 128;
+                    //cy = (dy + 128) - dx / 2;
+                    if (dy >= 0 && dx >= 0) {
+                        gotit = true;
+                        box = dx;
+                        boy = dy;
+                    }
+                    break;
+                case 0x04:
+                    dx = (box * 2) / 3;
+                    //cx = (dx * 3) / 2;
+                    dy = boy - dx / 2;
+                    //cy = dy + dx / 2;
+                    if (dy >= 0) {
+                        gotit = true;
+                        box = dx;
+                        boy = dy;
+                    }
+                    break;
+                default:
+                    gotit = true;
+                break;
+            }
+        }
     }while (bz != 0 && !gotit);
     if (gotit) {
         x = bx;
