@@ -768,8 +768,9 @@ bool Mission::setSurfaces() {
                             if (isSurface(this_s) || this_s == 0x01) {
                                 if (sWalkable(this_s, upper_s)) {
                                     sdirm |= 0x40;
-                                } else
+                                } else {
                                     nxtfp->t = m_fdNonWalkable;
+                                }
                             }
                             if(nxtfp->t == m_fdNotDefined) {
                                 nxtfp->t = m_fdDefReq;
@@ -788,8 +789,9 @@ bool Mission::setSurfaces() {
                             if (isSurface(this_s) || this_s == 0x01) {
                                 if (sWalkable(this_s, upper_s)) {
                                     sdirm |=0x04;
-                                } else
+                                } else {
                                     nxtfp->t = m_fdNonWalkable;
+                                }
                             }
                             if(nxtfp->t == m_fdNotDefined) {
                                 nxtfp->t = m_fdDefReq;
@@ -909,8 +911,9 @@ bool Mission::setSurfaces() {
                             if (isSurface(this_s) || this_s == 0x02) {
                                 if (sWalkable(this_s, upper_s)) {
                                     sdirm |= 0x40;
-                                } else
+                                } else {
                                     nxtfp->t = m_fdNonWalkable;
+                                }
                             }
                             if(nxtfp->t == m_fdNotDefined) {
                                 nxtfp->t = m_fdDefReq;
@@ -929,8 +932,9 @@ bool Mission::setSurfaces() {
                             if (isSurface(this_s) || this_s == 0x02) {
                                 if (sWalkable(this_s, upper_s)) {
                                     sdirm |= 0x04;
-                                } else
+                                } else {
                                     nxtfp->t = m_fdNonWalkable;
+                                }
                             }
                             if(nxtfp->t == m_fdNotDefined) {
                                 nxtfp->t = m_fdDefReq;
@@ -1050,8 +1054,9 @@ bool Mission::setSurfaces() {
                             if (isSurface(this_s) || this_s == 0x03) {
                                 if (sWalkable(this_s, upper_s)) { 
                                     sdirm |= 0x10;
-                                } else
+                                } else {
                                     nxtfp->t = m_fdNonWalkable;
+                                }
                             }
                             if(nxtfp->t == m_fdNotDefined) {
                                 nxtfp->t = m_fdDefReq;
@@ -1192,8 +1197,9 @@ bool Mission::setSurfaces() {
                             if (isSurface(this_s) || this_s == 0x04) {
                                 if (sWalkable(this_s, upper_s)) {
                                     sdirm |= 0x10;
-                                } else
+                                } else {
                                     nxtfp->t = m_fdNonWalkable;
+                                }
                             }
                             if(nxtfp->t == m_fdNotDefined) {
                                 nxtfp->t = m_fdDefReq;
@@ -1212,8 +1218,9 @@ bool Mission::setSurfaces() {
                             if (isSurface(this_s) || this_s == 0x04) {
                                 if (sWalkable(this_s, upper_s)) {
                                     sdirm |= 0x01;
-                                } else
+                                } else {
                                     nxtfp->t = m_fdNonWalkable;
+                                }
                             }
                             if(nxtfp->t == m_fdNotDefined) {
                                 nxtfp->t = m_fdDefReq;

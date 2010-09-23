@@ -20,6 +20,7 @@ Changes
   * People and vehicles pathfinding was rewritten
   * Fixed highlights in select menu: was possible to highlight more than
     one element, also weapon highlight was not working
+  * Added correct recognition for clicks on scrollable map
 
 Fixed Bugs
 ----------
