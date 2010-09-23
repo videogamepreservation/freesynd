@@ -17,8 +17,8 @@ Changes
     animations require adjusting and add new objects correctly
   * While vehicle was moving if ped went out, vehicle continued to move
   * Game time is visible in the Map menu but not fully implemented
-  * People and vehicles pathdinding was rewritten
-  * Fixed highlights in select menu: was possible to highlight more then
+  * People and vehicles pathfinding was rewritten
+  * Fixed highlights in select menu: was possible to highlight more than
     one element, also weapon highlight was not working
 
 Fixed Bugs
