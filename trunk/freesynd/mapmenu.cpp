@@ -245,7 +245,7 @@ void MapMenu::handleTick(int elapsed)
 
     // This a count to refresh the game time
     time_tick_count_ += elapsed;
-    if (time_tick_count_ > 1000) {
+    if (time_tick_count_ > 4000) {
         g_Session.updateTime(select_tick_count_);
         updateClock();
         time_tick_count_ = 0;

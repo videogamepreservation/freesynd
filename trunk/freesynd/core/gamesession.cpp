@@ -30,7 +30,7 @@ Block g_Blocks[50] = {
     {"GREENLAND", 40000000, 16, 30, STAT_HAPPY, false, false, NULL},
     {"SCANDINAVIA", 54000000, 20, 30, STAT_HAPPY, false, false, "10"},
     {"URALS", 40000000, 18, 30, STAT_HAPPY, false, false, "6:12:13"},
-    {"SIBERIA", 54000000, 22, 30, STAT_HAPPY, false, false, NULL},
+    {"SIBERIA", 54000000, 22, 30, STAT_HAPPY, false, false, "7"},
     {"KAMCHATKA", 56000000, 12, 30, STAT_HAPPY, false, false, NULL},
     {"YUKON", 58000000, 21, 30, STAT_HAPPY, false, false, NULL},
     {"WESTERN EUROPE", 48000000, 1, 30, STAT_HAPPY, false, false, "4"},

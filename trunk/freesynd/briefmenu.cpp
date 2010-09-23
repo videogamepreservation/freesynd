@@ -211,31 +211,35 @@ void BriefMenu::handleLeave() {
 
 void BriefMenu::handleOption(Key key) {
     if (key == KEY_F1) {
+        // Buy some informations
         if (info_level_ < 3) {
             g_App.getGameSession().setMoney(g_App.getGameSession().getMoney() - mission_->infoCost(info_level_));
             info_level_++;
+            needRendering();
         }
 
         showOption(KEY_F6);
-        render();
     }
 
     if (key == KEY_F2) {
+        // Buy some map enhancement
         if (enhance_level_ < 3) {
             g_App.getGameSession().setMoney(g_App.getGameSession().getMoney() -
                            mission_->enhanceCost(enhance_level_));
             enhance_level_++;
+            needRendering();
         }
-        render();
     }
 
     if (key == KEY_F6) {
+        // Next page
         start_line_ += 14;
         showOption(KEY_F7);
-        render();
+        needRendering();
     }
 
     if (key == KEY_F7) {
+        // Previous page
         start_line_ -= 14;
 
         if (start_line_ <= 0) {
@@ -243,6 +247,6 @@ void BriefMenu::handleOption(Key key) {
             hideOption(KEY_F7);
         }
         showOption(KEY_F6);
-        render();
+        needRendering();
     }
 }
