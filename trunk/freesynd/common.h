@@ -51,8 +51,8 @@ typedef unsigned char uint8;
 typedef signed short int16;
 typedef unsigned short uint16;
 
-typedef signed long int32;
-typedef unsigned long uint32;
+typedef signed int int32;
+typedef unsigned int uint32;
 
 inline int ceil8(int v) {
     if (v <= 0)
