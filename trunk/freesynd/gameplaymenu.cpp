@@ -608,8 +608,8 @@ void GameplayMenu::handleMouseDown(int x, int y, int button)
                     else if (mission_->ped(i)->inVehicle()) {
                         int stx = tx;
                         int sty = ty;
-                        int sox = ox;
-                        int soy = oy;
+                        //int sox = ox;
+                        //int soy = oy;
                         stx = tx * 256 + ox + 32 * mission_->ped(i)->inVehicle()->tileZ();
                         //sox = stx % 256;
                         stx = stx / 256;

@@ -160,7 +160,7 @@ void GameSpriteManager::load()
         delete[] data;
     }
 
-    printf("loaded %i frame elements\n", elements_.size());
+    printf("loaded %i frame elements\n", (int)elements_.size());
 
     for (unsigned int i = 0; i < elements_.size(); i++) {
         int esprite = elements_[i].sprite_;
@@ -204,7 +204,7 @@ void GameSpriteManager::load()
         delete[] data;
     }
 
-    printf("loaded %i frames\n", frames_.size());
+    printf("loaded %i frames\n", (int)frames_.size());
 
     fp = File::loadTextFile("HSTA-0.TXT");
     if (fp) {
@@ -229,7 +229,7 @@ void GameSpriteManager::load()
         delete[] data;
     }
 
-    printf("index contains %i animations\n", index_.size());
+    printf("index contains %i animations\n", (int)index_.size());
 }
 
 bool GameSpriteManager::drawFrame(int animNum, int frameNum, int x, int y)

@@ -399,9 +399,9 @@ int XMidi::readEventList (XMidiFile *xmidi, const unsigned char *stream)
 					break;
 					case META_TIME_SIG:
 					{
-						int num = stream[i+2];        // numerator of the time signature
-						int denom = 1 << stream[i+2]; // denominator of the time signature
-						int qnotes = 4 * num / denom; // number of quarter notes per beat
+						//int num = stream[i+2];        // numerator of the time signature
+						//int denom = 1 << stream[i+2]; // denominator of the time signature
+						//int qnotes = 4 * num / denom; // number of quarter notes per beat
 					}
 					break;
 					case META_KEYSIG:
@@ -760,7 +760,7 @@ bool XMidi::handleChunkTIMB(XMidiFile* xmidi, const unsigned char* stream, uint3
     stream += 2;
 
     // sanity check
-    if (timbre_count * 2 + 2 != chunksize) {
+    if ((uint32)timbre_count * 2 + 2 != chunksize) {
 	// sanity failure. Log "TIMBre chunk insanity"?
 	return false;
     }

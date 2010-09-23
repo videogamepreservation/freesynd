@@ -31,8 +31,8 @@
 #include "screen.h"
 #include "app.h"
 
-Mission::Mission():map_(0), min_x_(0), min_y_(0), max_x_(0), max_y_(0), objective_(0),
-objective_ped_(-1), objective_vehicle_(-1), mtsurfaces_(NULL), mdpoints_(NULL)
+Mission::Mission(): mtsurfaces_(NULL), mdpoints_(NULL), map_(0), min_x_(0), min_y_(0),
+max_x_(0), max_y_(0), objective_(0), objective_ped_(-1), objective_vehicle_(-1)
 {
     memset(&level_data_, 0, sizeof(level_data_));
 }
@@ -1067,11 +1067,13 @@ bool Mission::setSurfaces() {
                             nxtfp = &(mdpoints_[x + yp + z]);
                             this_s = nxts->twd;
                             upper_s = mtsurfaces_[x + yp + zp].twd;
-                            if (isSurface(this_s) || this_s == 0x03)
+                            if (isSurface(this_s) || this_s == 0x03) {
                                 if (sWalkable(this_s, upper_s)) {
                                     sdirm |= 0x01;
-                                } else
+                                } else {
                                     nxtfp->t = m_fdNonWalkable;
+                                }
+                            }
                             if(nxtfp->t == m_fdNotDefined) {
                                 nxtfp->t = m_fdDefReq;
                                 stodef.x = x;

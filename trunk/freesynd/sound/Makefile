@@ -8,7 +8,7 @@ DEPS = $(SRC:.cpp=.d)
 all: $(OBJS)
 
 .cpp.o:
-	$(CXX) $(CXXFLAGS) $(LIBS) -MMD -c $< -o $*.o
+	$(CXX) $(CXXFLAGS) -MMD -c $< -o $*.o
 
 clean:
 	rm -f *.o *.d

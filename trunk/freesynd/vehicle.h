@@ -77,7 +77,7 @@ protected:
     Vehicle *vehicle_;
 
     bool walkable(int x, int y, int z);
-    int tileDir(int x, int y, int z);
+    uint32 tileDir(int x, int y, int z);
     bool dirWalkable(PathNode *p, int x, int y, int z);
 };
 

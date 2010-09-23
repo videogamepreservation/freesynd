@@ -119,10 +119,10 @@ speed_(0)
 
 bool ShootableMovableMapObject::updatePlacement(int nOffX, int nOffY)
 {
-    int oOffX = off_x_;
-    int oOffY = off_y_;
-    int oTileX = tile_x_;
-    int oTileY = tile_y_;
+    //int oOffX = off_x_;
+    //int oOffY = off_y_;
+    //int oTileX = tile_x_;
+    //int oTileY = tile_y_;
 
     off_x_ = nOffX;
     off_y_ = nOffY;

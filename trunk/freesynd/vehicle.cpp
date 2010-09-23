@@ -124,7 +124,7 @@ bool VehicleInstance::walkable(int x, int y, int z)
         || (isRoad > 0x05 && isRoad < 0x0A));
 }
 
-int VehicleInstance::tileDir(int x, int y, int z) {
+uint32 VehicleInstance::tileDir(int x, int y, int z) {
     int dir = 0;
 
     switch(g_App.maps().map(map())->tileAt(x, y, z)){
@@ -224,8 +224,8 @@ bool VehicleInstance::dirWalkable(PathNode *p, int x, int y, int z) {
     if(!(walkable(x,y,z)))
         return false;
 
-    int dirStart = tileDir(p->tileX(),p->tileY(),p->tileZ());
-    int dirEnd = tileDir(x,y,z);
+    uint32 dirStart = tileDir(p->tileX(),p->tileY(),p->tileZ());
+    uint32 dirEnd = tileDir(x,y,z);
     if (dirStart == 0xFFFFFFFF || dirEnd == 0xFFFFFFFF)
         return true;
 
@@ -368,7 +368,7 @@ void VehicleInstance::setDestinationV(Mission *m, int x, int y, int z, int ox,
         }
 
         std::list < PathNode > neighbours;
-        int goodDir = tileDir(p.tileX(), p.tileY(), p.tileZ());
+        uint32 goodDir = tileDir(p.tileX(), p.tileY(), p.tileZ());
 
         if (p.tileX() > 0) {
             if (dirWalkable(&p,p.tileX() - 1, p.tileY(), p.tileZ())
@@ -437,7 +437,7 @@ void VehicleInstance::setDestinationV(Mission *m, int x, int y, int z, int ox,
                     it->setOffY(200);
                     break;
                 default:
-                    printf("hmm tileDir %X\n",tileDir(it->tileX(), it->tileY(), it->tileZ()));
+                    printf("hmm tileDir %X\n", (unsigned int)tileDir(it->tileX(), it->tileY(), it->tileZ()));
                     break;
             }
 

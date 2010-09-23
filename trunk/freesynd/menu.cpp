@@ -189,7 +189,7 @@ void Menu::mouseMotionEvent(int x, int y, int state)
 {
     handleMouseMotion(x, y, state);
 
-    int id = 0;
+    //int id = 0;
     for (std::map < Key, Option >::iterator it = options_.begin();
          it != options_.end(); it++) {
         Option & m = it->second;
