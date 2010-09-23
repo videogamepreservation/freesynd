@@ -2016,15 +2016,11 @@ bool Mission::getWalkable(int &x, int &y, int &z, int &ox, int &oy) {
         if (mdpoints_[cindx].t == m_fdWalkable) {
             twd = mtsurfaces_[cindx].twd;
             int dx = 0;
-            int cx = 0;
             int dy = 0;
-            int cy = 0;
             switch (twd) {
                 case 0x01:
                     dy = (boy * 2) / 3;
-                    //cy = (dy * 3) / 2;
                     dx = box - dy / 2;
-                    //cx = dx + dy / 2;
                     if (dx >= 0) {
                         gotit = true;
                         box = dx;
@@ -2045,9 +2041,7 @@ bool Mission::getWalkable(int &x, int &y, int &z, int &ox, int &oy) {
                     break;
                 case 0x02:
                     dy = (boy - 128) * 2;
-                    //cy = (dy / 2) + 128;
                     dx = (box + dy / 2) - 128;
-                    //cx = (dx + 128) - dy / 2;
                     if (dy >= 0) {
                         if (dx >= 0) {
                             if (dx < 256) {
@@ -2084,9 +2078,7 @@ bool Mission::getWalkable(int &x, int &y, int &z, int &ox, int &oy) {
                     break;
                 case 0x03:
                     dx = (box - 128) * 2;
-                    //cx = (dx / 2) + 128;
                     dy = (boy + dx / 2) - 128;
-                    //cy = (dy + 128) - dx / 2;
                     if (dx >= 0) {
                         if (dy >= 0) {
                             if (dy < 256) {
@@ -2123,9 +2115,7 @@ bool Mission::getWalkable(int &x, int &y, int &z, int &ox, int &oy) {
                     break;
                 case 0x04:
                     dx = (box * 2) / 3;
-                    //cx = (dx * 3) / 2;
                     dy = boy - dx / 2;
-                    //cy = dy + dx / 2;
                     if (dy >= 0) {
                         gotit = true;
                         box = dx;
@@ -2147,6 +2137,94 @@ bool Mission::getWalkable(int &x, int &y, int &z, int &ox, int &oy) {
                 default:
                     gotit = true;
                 break;
+            }
+        } else {
+            if (box < 128) {
+                if ((bx - 1) >= 0) {
+                    cindx = (bx - 1) + by * mmax_x_ + bz * mmax_m_xy;
+                    if (mdpoints_[cindx].t == m_fdWalkable) {
+                        int dx = 0;
+                        int dy = 0;
+                        twd = mtsurfaces_[cindx].twd;
+                        if (twd == 0x01) {
+                            dy = (boy * 2) / 3;
+                            dx = (box + 256) - dy / 2;
+                            if (dx < 256) {
+                                bx--;
+                                gotit = true;
+                                box = dx;
+                                boy = dy;
+                            }
+                        } else if (twd == 0x04) {
+                            dx = ((box + 256) * 2) / 3;
+                            dy = boy - dx / 2;
+                            if (dy >= 0) {
+                                bx--;
+                                gotit = true;
+                                box = dx;
+                                boy = dy;
+                            }
+                        }
+                    }
+                }
+            }
+            if (!gotit && boy < 128) {
+                if ((by - 1) >= 0) {
+                    cindx = bx + (by - 1) * mmax_x_ + bz * mmax_m_xy;
+                    if (mdpoints_[cindx].t == m_fdWalkable) {
+                        int dx = 0;
+                        int dy = 0;
+                        twd = mtsurfaces_[cindx].twd;
+                        if (twd == 0x01) {
+                            dy = ((boy + 256) * 2) / 3;
+                            dx = box - dy / 2;
+                            if (dx >= 0) {
+                                by--;
+                                gotit = true;
+                                box = dx;
+                                boy = dy;
+                            }
+                        } else if (twd == 0x04) {
+                            dx = (box * 2) / 3;
+                            dy = (boy + 256) - dx / 2;
+                            if (dy < 256) {
+                                by--;
+                                gotit = true;
+                                box = dx;
+                                boy = dy;
+                            }
+                        }
+                    }
+                    if(!gotit && box < 128 && (bx - 1) >= 0) {
+                        cindx--;
+                        if (mdpoints_[cindx].t == m_fdWalkable) {
+                            int dx = 0;
+                            int dy = 0;
+                            twd = mtsurfaces_[cindx].twd;
+                            if (twd == 0x01) {
+                                dy = ((boy + 256) * 2) / 3;
+                                dx = (box + 256) - dy / 2;
+                                if (dx < 256 && dy < 256) {
+                                    bx--;
+                                    by--;
+                                    gotit = true;
+                                    box = dx;
+                                    boy = dy;
+                                }
+                            } else if (twd == 0x04) {
+                                dx = ((box + 256) * 2) / 3;
+                                dy = (boy + 256) - dx / 2;
+                                if (dx < 256 && dy < 256) {
+                                    bx--;
+                                    by--;
+                                    gotit = true;
+                                    box = dx;
+                                    boy = dy;
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
     }while (bz != 0 && !gotit);
