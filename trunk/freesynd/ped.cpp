@@ -1982,9 +1982,9 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                 if ((sadd.p->t & ct) != 0) {
                     if ((ct == m_fdBasePoint && (pfdp->lvl + 1) == sadd.p->lvl)
                         || (ct == m_fdTargetPoint && (pfdp->lvl - 1) == sadd.p->lvl)) {
-                        if (2 < dist) {
+                        if (3 < dist) {
                             toadd = sadd.coords;
-                            dist = 2;
+                            dist = 3;
                         }
                     }
                 } else if(np && (sadd.p->t & (m_fdBasePoint | m_fdTargetPoint)) != 0) {
@@ -2007,9 +2007,9 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                 if ((sadd.p->t & ct) != 0) {
                     if ((ct == m_fdBasePoint && (pfdp->lvl + 1) == sadd.p->lvl)
                         || (ct == m_fdTargetPoint && (pfdp->lvl - 1) == sadd.p->lvl)) {
-                        if (2 < dist) {
+                        if (3 < dist) {
                             toadd = sadd.coords;
-                            dist = 2;
+                            dist = 3;
                         }
                     }
                 } else if(np && (sadd.p->t & (m_fdBasePoint | m_fdTargetPoint)) != 0) {
@@ -2032,9 +2032,9 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                 if ((sadd.p->t & ct) != 0) {
                     if ((ct == m_fdBasePoint && (pfdp->lvl + 1) == sadd.p->lvl)
                         || (ct == m_fdTargetPoint && (pfdp->lvl - 1) == sadd.p->lvl)) {
-                        if (2 < dist) {
+                        if (3 < dist) {
                             toadd = sadd.coords;
-                            dist = 2;
+                            dist = 3;
                         }
                     }
                 } else if(np && (sadd.p->t & (m_fdBasePoint | m_fdTargetPoint)) != 0) {
@@ -2057,9 +2057,9 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                 if ((sadd.p->t & ct) != 0) {
                     if ((ct == m_fdBasePoint && (pfdp->lvl + 1) == sadd.p->lvl)
                         || (ct == m_fdTargetPoint && (pfdp->lvl - 1) == sadd.p->lvl)) {
-                        if (2 < dist) {
+                        if (3 < dist) {
                             toadd = sadd.coords;
-                            dist = 2;
+                            dist = 3;
                         }
                     }
                 } else if(np && (sadd.p->t & (m_fdBasePoint | m_fdTargetPoint)) != 0) {
@@ -2084,9 +2084,9 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                 if ((sadd.p->t & ct) != 0) {
                     if ((ct == m_fdBasePoint && (pfdp->lvl + 1) == sadd.p->lvl)
                         || (ct == m_fdTargetPoint && (pfdp->lvl - 1) == sadd.p->lvl)) {
-                        if (2 < dist) {
+                        if (3 < dist) {
                             toadd = sadd.coords;
-                            dist = 2;
+                            dist = 3;
                         }
                     }
                 } else if(np && (sadd.p->t & (m_fdBasePoint | m_fdTargetPoint)) != 0) {
@@ -2109,9 +2109,9 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                 if ((sadd.p->t & ct) != 0) {
                     if ((ct == m_fdBasePoint && (pfdp->lvl + 1) == sadd.p->lvl)
                         || (ct == m_fdTargetPoint && (pfdp->lvl - 1) == sadd.p->lvl)) {
-                        if (2 < dist) {
+                        if (3 < dist) {
                             toadd = sadd.coords;
-                            dist = 2;
+                            dist = 3;
                         }
                     }
                 } else if(np && (sadd.p->t & (m_fdBasePoint | m_fdTargetPoint)) != 0) {
@@ -2134,9 +2134,9 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                 if ((sadd.p->t & ct) != 0) {
                     if ((ct == m_fdBasePoint && (pfdp->lvl + 1) == sadd.p->lvl)
                         || (ct == m_fdTargetPoint && (pfdp->lvl - 1) == sadd.p->lvl)) {
-                        if (2 < dist) {
+                        if (3 < dist) {
                             toadd = sadd.coords;
-                            dist = 2;
+                            dist = 3;
                         }
                     }
                 } else if(np && (sadd.p->t & (m_fdBasePoint | m_fdTargetPoint)) != 0) {
@@ -2159,9 +2159,9 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                 if ((sadd.p->t & ct) != 0) {
                     if ((ct == m_fdBasePoint && (pfdp->lvl + 1) == sadd.p->lvl)
                         || (ct == m_fdTargetPoint && (pfdp->lvl - 1) == sadd.p->lvl)) {
-                        if (2 < dist) {
+                        if (3 < dist) {
                             toadd = sadd.coords;
-                            dist = 2;
+                            dist = 3;
                         }
                     }
                 } else if(np && (sadd.p->t & (m_fdBasePoint | m_fdTargetPoint)) != 0) {
@@ -2186,16 +2186,37 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                 if ((sadd.p->t & ct) != 0) {
                     if ((ct == m_fdBasePoint && (pfdp->lvl + 1) == sadd.p->lvl)
                         || (ct == m_fdTargetPoint && (pfdp->lvl - 1) == sadd.p->lvl)) {
-                        if (1 < dist) {
-                            toadd = sadd.coords;
-                            dist = 1;
+                        unsigned char twd = m->mtsurfaces_[sadd.coords.x
+                            + sadd.coords.y * m->mmax_x_
+                            + sadd.coords.z * m->mmax_m_xy].twd;
+                        if (twd > 0x00 && twd < 0x05) {
+                            if (2 < dist) {
+                                toadd = sadd.coords;
+                                dist = 2;
+                            }
+                        } else {
+                            if (1 < dist) {
+                                toadd = sadd.coords;
+                                dist = 1;
+                            }
                         }
                     }
                 } else if(np && (sadd.p->t & (m_fdBasePoint | m_fdTargetPoint)) != 0) {
-                    if (-1 < dist) {
-                        nt = sadd.p->t & (m_fdBasePoint | m_fdTargetPoint);
-                        dist = -1;
-                        toadd = sadd.coords;
+                    unsigned char twd = m->mtsurfaces_[sadd.coords.x
+                        + sadd.coords.y * m->mmax_x_
+                        + sadd.coords.z * m->mmax_m_xy].twd;
+                    if (twd > 0x00 && twd < 0x05) {
+                        if (-1 < dist) {
+                            nt = sadd.p->t & (m_fdBasePoint | m_fdTargetPoint);
+                            dist = -1;
+                            toadd = sadd.coords;
+                        }
+                    } else {
+                        if (-2 < dist) {
+                            nt = sadd.p->t & (m_fdBasePoint | m_fdTargetPoint);
+                            dist = -2;
+                            toadd = sadd.coords;
+                        }
                     }
                 }
                 if ((sadd.p->t & m_fdConstant) != 0)
@@ -2217,9 +2238,9 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                         }
                     }
                 } else if(np && (sadd.p->t & (m_fdBasePoint | m_fdTargetPoint)) != 0) {
-                    if (0 < dist) {
+                    if (-1 < dist) {
                         nt = sadd.p->t & (m_fdBasePoint | m_fdTargetPoint);
-                        dist = 0;
+                        dist = -1;
                         toadd = sadd.coords;
                     }
                 }
@@ -2236,16 +2257,37 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                 if ((sadd.p->t & ct) != 0) {
                     if ((ct == m_fdBasePoint && (pfdp->lvl + 1) == sadd.p->lvl)
                         || (ct == m_fdTargetPoint && (pfdp->lvl - 1) == sadd.p->lvl)) {
-                        if (1 < dist) {
-                            toadd = sadd.coords;
-                            dist = 1;
+                        unsigned char twd = m->mtsurfaces_[sadd.coords.x
+                            + sadd.coords.y * m->mmax_x_
+                            + sadd.coords.z * m->mmax_m_xy].twd;
+                        if (twd > 0x00 && twd < 0x05) {
+                            if (2 < dist) {
+                                toadd = sadd.coords;
+                                dist = 2;
+                            }
+                        } else {
+                            if (1 < dist) {
+                                toadd = sadd.coords;
+                                dist = 1;
+                            }
                         }
                     }
                 } else if(np && (sadd.p->t & (m_fdBasePoint | m_fdTargetPoint)) != 0) {
-                    if (-1 < dist) {
-                        nt = sadd.p->t & (m_fdBasePoint | m_fdTargetPoint);
-                        dist = -1;
-                        toadd = sadd.coords;
+                    unsigned char twd = m->mtsurfaces_[sadd.coords.x
+                        + sadd.coords.y * m->mmax_x_
+                        + sadd.coords.z * m->mmax_m_xy].twd;
+                    if (twd > 0x00 && twd < 0x05) {
+                        if (-1 < dist) {
+                            nt = sadd.p->t & (m_fdBasePoint | m_fdTargetPoint);
+                            dist = -1;
+                            toadd = sadd.coords;
+                        }
+                    } else {
+                        if (-2 < dist) {
+                            nt = sadd.p->t & (m_fdBasePoint | m_fdTargetPoint);
+                            dist = -2;
+                            toadd = sadd.coords;
+                        }
                     }
                 }
                 if ((sadd.p->t & m_fdConstant) != 0)
@@ -2267,9 +2309,9 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                         }
                     }
                 } else if(np && (sadd.p->t & (m_fdBasePoint | m_fdTargetPoint)) != 0) {
-                    if (0 < dist) {
+                    if (-1 < dist) {
                         nt = sadd.p->t & (m_fdBasePoint | m_fdTargetPoint);
-                        dist = 0;
+                        dist = -1;
                         toadd = sadd.coords;
                     }
                 }
@@ -2286,16 +2328,37 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                 if ((sadd.p->t & ct) != 0) {
                     if ((ct == m_fdBasePoint && (pfdp->lvl + 1) == sadd.p->lvl)
                         || (ct == m_fdTargetPoint && (pfdp->lvl - 1) == sadd.p->lvl)) {
-                        if (1 < dist) {
-                            toadd = sadd.coords;
-                            dist = 1;
+                        unsigned char twd = m->mtsurfaces_[sadd.coords.x
+                            + sadd.coords.y * m->mmax_x_
+                            + sadd.coords.z * m->mmax_m_xy].twd;
+                        if (twd > 0x00 && twd < 0x05) {
+                            if (2 < dist) {
+                                toadd = sadd.coords;
+                                dist = 2;
+                            }
+                        } else {
+                            if (1 < dist) {
+                                toadd = sadd.coords;
+                                dist = 1;
+                            }
                         }
                     }
                 } else if(np && (sadd.p->t & (m_fdBasePoint | m_fdTargetPoint)) != 0) {
-                    if (-1 < dist) {
-                        nt = sadd.p->t & (m_fdBasePoint | m_fdTargetPoint);
-                        dist = 0;
-                        toadd = sadd.coords;
+                    unsigned char twd = m->mtsurfaces_[sadd.coords.x
+                        + sadd.coords.y * m->mmax_x_
+                        + sadd.coords.z * m->mmax_m_xy].twd;
+                    if (twd > 0x00 && twd < 0x05) {
+                        if (-1 < dist) {
+                            nt = sadd.p->t & (m_fdBasePoint | m_fdTargetPoint);
+                            dist = -1;
+                            toadd = sadd.coords;
+                        }
+                    } else {
+                        if (-2 < dist) {
+                            nt = sadd.p->t & (m_fdBasePoint | m_fdTargetPoint);
+                            dist = -2;
+                            toadd = sadd.coords;
+                        }
                     }
                 }
                 if ((sadd.p->t & m_fdConstant) != 0)
@@ -2317,9 +2380,9 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                         }
                     }
                 } else if(np && (sadd.p->t & (m_fdBasePoint | m_fdTargetPoint)) != 0) {
-                    if (0 < dist) {
+                    if (-1 < dist) {
                         nt = sadd.p->t & (m_fdBasePoint | m_fdTargetPoint);
-                        dist = 0;
+                        dist = -1;
                         toadd = sadd.coords;
                     }
                 }
@@ -2336,16 +2399,37 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                 if ((sadd.p->t & ct) != 0) {
                     if ((ct == m_fdBasePoint && (pfdp->lvl + 1) == sadd.p->lvl)
                         || (ct == m_fdTargetPoint && (pfdp->lvl - 1) == sadd.p->lvl)) {
-                        if (1 < dist) {
-                            toadd = sadd.coords;
-                            dist = 1;
+                        unsigned char twd = m->mtsurfaces_[sadd.coords.x
+                            + sadd.coords.y * m->mmax_x_
+                            + sadd.coords.z * m->mmax_m_xy].twd;
+                        if (twd > 0x00 && twd < 0x05) {
+                            if (2 < dist) {
+                                toadd = sadd.coords;
+                                dist = 2;
+                            }
+                        } else {
+                            if (1 < dist) {
+                                toadd = sadd.coords;
+                                dist = 1;
+                            }
                         }
                     }
                 } else if(np && (sadd.p->t & (m_fdBasePoint | m_fdTargetPoint)) != 0) {
-                    if (-1 < dist) {
-                        nt = sadd.p->t & (m_fdBasePoint | m_fdTargetPoint);
-                        dist = 0;
-                        toadd = sadd.coords;
+                    unsigned char twd = m->mtsurfaces_[sadd.coords.x
+                        + sadd.coords.y * m->mmax_x_
+                        + sadd.coords.z * m->mmax_m_xy].twd;
+                    if (twd > 0x00 && twd < 0x05) {
+                        if (-1 < dist) {
+                            nt = sadd.p->t & (m_fdBasePoint | m_fdTargetPoint);
+                            dist = -1;
+                            toadd = sadd.coords;
+                        }
+                    } else {
+                        if (-2 < dist) {
+                            nt = sadd.p->t & (m_fdBasePoint | m_fdTargetPoint);
+                            dist = -2;
+                            toadd = sadd.coords;
+                        }
                     }
                 }
                 if ((sadd.p->t & m_fdConstant) != 0)
@@ -2367,9 +2451,9 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                         }
                     }
                 } else if(np && (sadd.p->t & (m_fdBasePoint | m_fdTargetPoint)) != 0) {
-                    if (0 < dist) {
+                    if (-1 < dist) {
                         nt = sadd.p->t & (m_fdBasePoint | m_fdTargetPoint);
-                        dist = 0;
+                        dist = -1;
                         toadd = sadd.coords;
                     }
                 }
