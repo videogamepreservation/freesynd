@@ -2029,6 +2029,18 @@ bool Mission::getWalkable(int &x, int &y, int &z, int &ox, int &oy) {
                         gotit = true;
                         box = dx;
                         boy = dy;
+                    } else {
+                        if ((bx - 1) >= 0) {
+                            cindx = (bx - 1) + by * mmax_x_ + bz * mmax_m_xy;
+                            if (mdpoints_[cindx].t == m_fdWalkable) {
+                                if (mtsurfaces_[cindx].twd == 0x01) {
+                                    gotit = true;
+                                    bx--;
+                                    box = dx + 256;
+                                    boy = dy;
+                                }
+                            }
+                        }
                     }
                     break;
                 case 0x02:
@@ -2036,10 +2048,38 @@ bool Mission::getWalkable(int &x, int &y, int &z, int &ox, int &oy) {
                     //cy = (dy / 2) + 128;
                     dx = (box + dy / 2) - 128;
                     //cx = (dx + 128) - dy / 2;
-                    if (dy >= 0 && dx >= 0) {
-                        gotit = true;
-                        box = dx;
-                        boy = dy;
+                    if (dy >= 0) {
+                        if (dx >= 0) {
+                            if (dx < 256) {
+                                gotit = true;
+                                box = dx;
+                                boy = dy;
+                            } else {
+                                if ((bx + 1) < mmax_x_) {
+                                    cindx = (bx + 1) + by * mmax_x_ + bz * mmax_m_xy;
+                                    if (mdpoints_[cindx].t == m_fdWalkable) {
+                                        if (mtsurfaces_[cindx].twd == 0x02) {
+                                            gotit = true;
+                                            bx++;
+                                            box = dx - 256;
+                                            boy = dy;
+                                        }
+                                    }
+                                }
+                            }
+                        } else {
+                            if ((bx - 1) >= 0) {
+                                cindx = (bx - 1) + by * mmax_x_ + bz * mmax_m_xy;
+                                if (mdpoints_[cindx].t == m_fdWalkable) {
+                                    if (mtsurfaces_[cindx].twd == 0x02) {
+                                        gotit = true;
+                                        bx--;
+                                        box = dx + 256;
+                                        boy = dy;
+                                    }
+                                }
+                            }
+                        }
                     }
                     break;
                 case 0x03:
@@ -2047,10 +2087,38 @@ bool Mission::getWalkable(int &x, int &y, int &z, int &ox, int &oy) {
                     //cx = (dx / 2) + 128;
                     dy = (boy + dx / 2) - 128;
                     //cy = (dy + 128) - dx / 2;
-                    if (dy >= 0 && dx >= 0) {
-                        gotit = true;
-                        box = dx;
-                        boy = dy;
+                    if (dx >= 0) {
+                        if (dy >= 0) {
+                            if (dy < 256) {
+                                gotit = true;
+                                box = dx;
+                                boy = dy;
+                            } else {
+                                if ((by + 1) < mmax_y_) {
+                                    cindx = bx + (by + 1) * mmax_x_ + bz * mmax_m_xy;
+                                    if (mdpoints_[cindx].t == m_fdWalkable) {
+                                        if (mtsurfaces_[cindx].twd == 0x03) {
+                                            gotit = true;
+                                            by++;
+                                            box = dx;
+                                            boy = dy - 256;
+                                        }
+                                    }
+                                }
+                            }
+                        } else {
+                            if ((by - 1) >= 0) {
+                                cindx = bx + (by - 1) * mmax_x_ + bz * mmax_m_xy;
+                                if (mdpoints_[cindx].t == m_fdWalkable) {
+                                    if (mtsurfaces_[cindx].twd == 0x03) {
+                                        gotit = true;
+                                        by--;
+                                        box = dx;
+                                        boy = dy + 256;
+                                    }
+                                }
+                            }
+                        }
                     }
                     break;
                 case 0x04:
@@ -2062,6 +2130,18 @@ bool Mission::getWalkable(int &x, int &y, int &z, int &ox, int &oy) {
                         gotit = true;
                         box = dx;
                         boy = dy;
+                    } else {
+                        if ((by - 1) >= 0) {
+                            cindx = bx + (by - 1) * mmax_x_ + bz * mmax_m_xy;
+                            if (mdpoints_[cindx].t == m_fdWalkable) {
+                                if (mtsurfaces_[cindx].twd == 0x04) {
+                                    gotit = true;
+                                    by--;
+                                    box = dx;
+                                    boy = dy + 256;
+                                }
+                            }
+                        }
                     }
                     break;
                 default:
