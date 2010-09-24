@@ -1006,11 +1006,11 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                         + bref.coords.z * m->mmax_m_xy;
             if (bref.p->dirh != 0) {
                 if ((bref.p->dirh & 0x01) == 0x01) {
-                    sadd.coords.x = bref.coords.x;
-                    sadd.coords.y = bref.coords.y + 1;
-                    sadd.coords.z = bref.coords.z + 1;
                     sadd.p = &(mdpmirror[cindx + m->mmax_x_ + m->mmax_m_xy]);
                     if (sadd.p->t == m_fdWalkable) {
+                        sadd.coords.x = bref.coords.x;
+                        sadd.coords.y = bref.coords.y + 1;
+                        sadd.coords.z = bref.coords.z + 1;
                         sadd.p->lvl = nlvl;
                         sadd.p->t |= m_fdBasePoint;
                         bv.push_back(sadd);
@@ -1022,11 +1022,11 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                     }
                 }
                 if ((bref.p->dirh & 0x04) == 0x04) {
-                    sadd.coords.x = bref.coords.x + 1;
-                    sadd.coords.y = bref.coords.y;
-                    sadd.coords.z = bref.coords.z + 1;
                     sadd.p = &(mdpmirror[cindx + 1 + m->mmax_m_xy]);
                     if (sadd.p->t == m_fdWalkable) {
+                        sadd.coords.x = bref.coords.x + 1;
+                        sadd.coords.y = bref.coords.y;
+                        sadd.coords.z = bref.coords.z + 1;
                         sadd.p->lvl = nlvl;
                         sadd.p->t |= m_fdBasePoint;
                         bv.push_back(sadd);
@@ -1038,11 +1038,11 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                     }
                 }
                 if ((bref.p->dirh & 0x10) == 0x10) {
-                    sadd.coords.x = bref.coords.x;
-                    sadd.coords.y = bref.coords.y - 1;
-                    sadd.coords.z = bref.coords.z + 1;
                     sadd.p = &(mdpmirror[cindx - m->mmax_x_ + m->mmax_m_xy]);
                     if (sadd.p->t == m_fdWalkable) {
+                        sadd.coords.x = bref.coords.x;
+                        sadd.coords.y = bref.coords.y - 1;
+                        sadd.coords.z = bref.coords.z + 1;
                         sadd.p->lvl = nlvl;
                         sadd.p->t |= m_fdBasePoint;
                         bv.push_back(sadd);
@@ -1054,11 +1054,11 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                     }
                 }
                 if ((bref.p->dirh & 0x40) == 0x40) {
-                    sadd.coords.x = bref.coords.x - 1;
-                    sadd.coords.y = bref.coords.y;
-                    sadd.coords.z = bref.coords.z + 1;
                     sadd.p = &(mdpmirror[cindx - 1 + m->mmax_m_xy]);
                     if (sadd.p->t == m_fdWalkable) {
+                        sadd.coords.x = bref.coords.x - 1;
+                        sadd.coords.y = bref.coords.y;
+                        sadd.coords.z = bref.coords.z + 1;
                         sadd.p->lvl = nlvl;
                         sadd.p->t |= m_fdBasePoint;
                         bv.push_back(sadd);
@@ -1072,11 +1072,11 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
             }
             if (bref.p->dirl != 0) {
                 if ((bref.p->dirl & 0x01) == 0x01) {
-                    sadd.coords.x = bref.coords.x;
-                    sadd.coords.y = bref.coords.y + 1;
-                    sadd.coords.z = bref.coords.z - 1;
                     sadd.p = &(mdpmirror[cindx + m->mmax_x_ - m->mmax_m_xy]);
                     if (sadd.p->t == m_fdWalkable) {
+                        sadd.coords.x = bref.coords.x;
+                        sadd.coords.y = bref.coords.y + 1;
+                        sadd.coords.z = bref.coords.z - 1;
                         sadd.p->lvl = nlvl;
                         sadd.p->t |= m_fdBasePoint;
                         bv.push_back(sadd);
@@ -1088,11 +1088,11 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                     }
                 }
                 if ((bref.p->dirl & 0x04) == 0x04) {
-                    sadd.coords.x = bref.coords.x + 1;
-                    sadd.coords.y = bref.coords.y;
-                    sadd.coords.z = bref.coords.z - 1;
                     sadd.p = &(mdpmirror[cindx + 1 - m->mmax_m_xy]);
                     if (sadd.p->t == m_fdWalkable) {
+                        sadd.coords.x = bref.coords.x + 1;
+                        sadd.coords.y = bref.coords.y;
+                        sadd.coords.z = bref.coords.z - 1;
                         sadd.p->lvl = nlvl;
                         sadd.p->t |= m_fdBasePoint;
                         bv.push_back(sadd);
@@ -1104,11 +1104,11 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                     }
                 }
                 if ((bref.p->dirl & 0x10) == 0x10) {
-                    sadd.coords.x = bref.coords.x;
-                    sadd.coords.y = bref.coords.y - 1;
-                    sadd.coords.z = bref.coords.z - 1;
                     sadd.p = &(mdpmirror[cindx - m->mmax_x_ - m->mmax_m_xy]);
                     if (sadd.p->t == m_fdWalkable) {
+                        sadd.coords.x = bref.coords.x;
+                        sadd.coords.y = bref.coords.y - 1;
+                        sadd.coords.z = bref.coords.z - 1;
                         sadd.p->lvl = nlvl;
                         sadd.p->t |= m_fdBasePoint;
                         bv.push_back(sadd);
@@ -1120,11 +1120,11 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                     }
                 }
                 if ((bref.p->dirl & 0x40) == 0x40) {
-                    sadd.coords.x = bref.coords.x - 1;
-                    sadd.coords.y = bref.coords.y;
-                    sadd.coords.z = bref.coords.z - 1;
                     sadd.p = &(mdpmirror[cindx - 1 - m->mmax_m_xy]);
                     if (sadd.p->t == m_fdWalkable) {
+                        sadd.coords.x = bref.coords.x - 1;
+                        sadd.coords.y = bref.coords.y;
+                        sadd.coords.z = bref.coords.z - 1;
                         sadd.p->lvl = nlvl;
                         sadd.p->t |= m_fdBasePoint;
                         bv.push_back(sadd);
@@ -1138,11 +1138,11 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
             }
             if (bref.p->dirm != 0) {
                 if ((bref.p->dirm & 0x01) == 0x01) {
-                    sadd.coords.x = bref.coords.x;
-                    sadd.coords.y = bref.coords.y + 1;
-                    sadd.coords.z = bref.coords.z;
                     sadd.p = &(mdpmirror[cindx + m->mmax_x_]);
                     if (sadd.p->t == m_fdWalkable) {
+                        sadd.coords.x = bref.coords.x;
+                        sadd.coords.y = bref.coords.y + 1;
+                        sadd.coords.z = bref.coords.z;
                         sadd.p->lvl = nlvl;
                         sadd.p->t |= m_fdBasePoint;
                         bv.push_back(sadd);
@@ -1154,11 +1154,11 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                     }
                 }
                 if ((bref.p->dirm & 0x02) == 0x02) {
-                    sadd.coords.x = bref.coords.x + 1;
-                    sadd.coords.y = bref.coords.y + 1;
-                    sadd.coords.z = bref.coords.z;
                     sadd.p = &(mdpmirror[cindx + 1 + m->mmax_x_]);
                     if (sadd.p->t == m_fdWalkable) {
+                        sadd.coords.x = bref.coords.x + 1;
+                        sadd.coords.y = bref.coords.y + 1;
+                        sadd.coords.z = bref.coords.z;
                         sadd.p->lvl = nlvl;
                         sadd.p->t |= m_fdBasePoint;
                         bv.push_back(sadd);
@@ -1170,11 +1170,11 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                     }
                 }
                 if ((bref.p->dirm & 0x04) == 0x04) {
-                    sadd.coords.x = bref.coords.x + 1;
-                    sadd.coords.y = bref.coords.y;
-                    sadd.coords.z = bref.coords.z;
                     sadd.p = &(mdpmirror[cindx + 1]);
                     if (sadd.p->t == m_fdWalkable) {
+                        sadd.coords.x = bref.coords.x + 1;
+                        sadd.coords.y = bref.coords.y;
+                        sadd.coords.z = bref.coords.z;
                         sadd.p->lvl = nlvl;
                         sadd.p->t |= m_fdBasePoint;
                         bv.push_back(sadd);
@@ -1186,11 +1186,11 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                     }
                 }
                 if ((bref.p->dirm & 0x08) == 0x08) {
-                    sadd.coords.x = bref.coords.x + 1;
-                    sadd.coords.y = bref.coords.y - 1;
-                    sadd.coords.z = bref.coords.z;
                     sadd.p = &(mdpmirror[cindx + 1 - m->mmax_x_]);
                     if (sadd.p->t == m_fdWalkable) {
+                        sadd.coords.x = bref.coords.x + 1;
+                        sadd.coords.y = bref.coords.y - 1;
+                        sadd.coords.z = bref.coords.z;
                         sadd.p->lvl = nlvl;
                         sadd.p->t |= m_fdBasePoint;
                         bv.push_back(sadd);
@@ -1202,11 +1202,11 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                     }
                 }
                 if ((bref.p->dirm & 0x10) == 0x10) {
-                    sadd.coords.x = bref.coords.x;
-                    sadd.coords.y = bref.coords.y - 1;
-                    sadd.coords.z = bref.coords.z;
                     sadd.p = &(mdpmirror[cindx - m->mmax_x_]);
                     if (sadd.p->t == m_fdWalkable) {
+                        sadd.coords.x = bref.coords.x;
+                        sadd.coords.y = bref.coords.y - 1;
+                        sadd.coords.z = bref.coords.z;
                         sadd.p->lvl = nlvl;
                         sadd.p->t |= m_fdBasePoint;
                         bv.push_back(sadd);
@@ -1218,11 +1218,11 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                     }
                 }
                 if ((bref.p->dirm & 0x20) == 0x20) {
-                    sadd.coords.x = bref.coords.x - 1;
-                    sadd.coords.y = bref.coords.y - 1;
-                    sadd.coords.z = bref.coords.z;
                     sadd.p = &(mdpmirror[cindx - 1 - m->mmax_x_]);
                     if (sadd.p->t == m_fdWalkable) {
+                        sadd.coords.x = bref.coords.x - 1;
+                        sadd.coords.y = bref.coords.y - 1;
+                        sadd.coords.z = bref.coords.z;
                         sadd.p->lvl = nlvl;
                         sadd.p->t |= m_fdBasePoint;
                         bv.push_back(sadd);
@@ -1234,11 +1234,11 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                     }
                 }
                 if ((bref.p->dirm & 0x40) == 0x40) {
-                    sadd.coords.x = bref.coords.x - 1;
-                    sadd.coords.y = bref.coords.y;
-                    sadd.coords.z = bref.coords.z;
                     sadd.p = &(mdpmirror[cindx - 1]);
                     if (sadd.p->t == m_fdWalkable) {
+                        sadd.coords.x = bref.coords.x - 1;
+                        sadd.coords.y = bref.coords.y;
+                        sadd.coords.z = bref.coords.z;
                         sadd.p->lvl = nlvl;
                         sadd.p->t |= m_fdBasePoint;
                         bv.push_back(sadd);
@@ -1250,11 +1250,11 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                     }
                 }
                 if ((bref.p->dirm & 0x80) == 0x80) {
-                    sadd.coords.x = bref.coords.x - 1;
-                    sadd.coords.y = bref.coords.y + 1;
-                    sadd.coords.z = bref.coords.z;
                     sadd.p = &(mdpmirror[cindx - 1 + m->mmax_x_]);
                     if (sadd.p->t == m_fdWalkable) {
+                        sadd.coords.x = bref.coords.x - 1;
+                        sadd.coords.y = bref.coords.y + 1;
+                        sadd.coords.z = bref.coords.z;
                         sadd.p->lvl = nlvl;
                         sadd.p->t |= m_fdBasePoint;
                         bv.push_back(sadd);
@@ -1286,11 +1286,11 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                         + bref.coords.z * m->mmax_m_xy;
             if (bref.p->dirh != 0) {
                 if ((bref.p->dirh & 0x01) == 0x01) {
-                    sadd.coords.x = bref.coords.x;
-                    sadd.coords.y = bref.coords.y + 1;
-                    sadd.coords.z = bref.coords.z + 1;
                     sadd.p = &(mdpmirror[cindx + m->mmax_x_ + m->mmax_m_xy]);
                     if (sadd.p->t == m_fdWalkable) {
+                        sadd.coords.x = bref.coords.x;
+                        sadd.coords.y = bref.coords.y + 1;
+                        sadd.coords.z = bref.coords.z + 1;
                         sadd.p->lvl = nlvl;
                         sadd.p->t |= m_fdTargetPoint;
                         tv.push_back(sadd);
@@ -1302,11 +1302,11 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                     }
                 }
                 if ((bref.p->dirh & 0x04) == 0x04) {
-                    sadd.coords.x = bref.coords.x + 1;
-                    sadd.coords.y = bref.coords.y;
-                    sadd.coords.z = bref.coords.z + 1;
                     sadd.p = &(mdpmirror[cindx + 1 + m->mmax_m_xy]);
                     if (sadd.p->t == m_fdWalkable) {
+                        sadd.coords.x = bref.coords.x + 1;
+                        sadd.coords.y = bref.coords.y;
+                        sadd.coords.z = bref.coords.z + 1;
                         sadd.p->lvl = nlvl;
                         sadd.p->t |= m_fdTargetPoint;
                         tv.push_back(sadd);
@@ -1318,11 +1318,11 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                     }
                 }
                 if ((bref.p->dirh & 0x10) == 0x10) {
-                    sadd.coords.x = bref.coords.x;
-                    sadd.coords.y = bref.coords.y - 1;
-                    sadd.coords.z = bref.coords.z + 1;
                     sadd.p = &(mdpmirror[cindx - m->mmax_x_ + m->mmax_m_xy]);
                     if (sadd.p->t == m_fdWalkable) {
+                        sadd.coords.x = bref.coords.x;
+                        sadd.coords.y = bref.coords.y - 1;
+                        sadd.coords.z = bref.coords.z + 1;
                         sadd.p->lvl = nlvl;
                         sadd.p->t |= m_fdTargetPoint;
                         tv.push_back(sadd);
@@ -1334,11 +1334,11 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                     }
                 }
                 if ((bref.p->dirh & 0x40) == 0x40) {
-                    sadd.coords.x = bref.coords.x - 1;
-                    sadd.coords.y = bref.coords.y;
-                    sadd.coords.z = bref.coords.z + 1;
                     sadd.p = &(mdpmirror[cindx - 1 + m->mmax_m_xy]);
                     if (sadd.p->t == m_fdWalkable) {
+                        sadd.coords.x = bref.coords.x - 1;
+                        sadd.coords.y = bref.coords.y;
+                        sadd.coords.z = bref.coords.z + 1;
                         sadd.p->lvl = nlvl;
                         sadd.p->t |= m_fdTargetPoint;
                         tv.push_back(sadd);
@@ -1352,11 +1352,11 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
             }
             if (bref.p->dirl != 0) {
                 if ((bref.p->dirl & 0x01) == 0x01) {
-                    sadd.coords.x = bref.coords.x;
-                    sadd.coords.y = bref.coords.y + 1;
-                    sadd.coords.z = bref.coords.z - 1;
                     sadd.p = &(mdpmirror[cindx + m->mmax_x_ - m->mmax_m_xy]);
                     if (sadd.p->t == m_fdWalkable) {
+                        sadd.coords.x = bref.coords.x;
+                        sadd.coords.y = bref.coords.y + 1;
+                        sadd.coords.z = bref.coords.z - 1;
                         sadd.p->lvl = nlvl;
                         sadd.p->t |= m_fdTargetPoint;
                         tv.push_back(sadd);
@@ -1368,11 +1368,11 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                     }
                 }
                 if ((bref.p->dirl & 0x04) == 0x04) {
-                    sadd.coords.x = bref.coords.x + 1;
-                    sadd.coords.y = bref.coords.y;
-                    sadd.coords.z = bref.coords.z - 1;
                     sadd.p = &(mdpmirror[cindx + 1 - m->mmax_m_xy]);
                     if (sadd.p->t == m_fdWalkable) {
+                        sadd.coords.x = bref.coords.x + 1;
+                        sadd.coords.y = bref.coords.y;
+                        sadd.coords.z = bref.coords.z - 1;
                         sadd.p->lvl = nlvl;
                         sadd.p->t |= m_fdTargetPoint;
                         tv.push_back(sadd);
@@ -1384,11 +1384,11 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                     }
                 }
                 if ((bref.p->dirl & 0x10) == 0x10) {
-                    sadd.coords.x = bref.coords.x;
-                    sadd.coords.y = bref.coords.y - 1;
-                    sadd.coords.z = bref.coords.z - 1;
                     sadd.p = &(mdpmirror[cindx - m->mmax_x_ - m->mmax_m_xy]);
                     if (sadd.p->t == m_fdWalkable) {
+                        sadd.coords.x = bref.coords.x;
+                        sadd.coords.y = bref.coords.y - 1;
+                        sadd.coords.z = bref.coords.z - 1;
                         sadd.p->lvl = nlvl;
                         sadd.p->t |= m_fdTargetPoint;
                         tv.push_back(sadd);
@@ -1400,11 +1400,11 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                     }
                 }
                 if ((bref.p->dirl & 0x40) == 0x40) {
-                    sadd.coords.x = bref.coords.x - 1;
-                    sadd.coords.y = bref.coords.y;
-                    sadd.coords.z = bref.coords.z - 1;
                     sadd.p = &(mdpmirror[cindx - 1 - m->mmax_m_xy]);
                     if (sadd.p->t == m_fdWalkable) {
+                        sadd.coords.x = bref.coords.x - 1;
+                        sadd.coords.y = bref.coords.y;
+                        sadd.coords.z = bref.coords.z - 1;
                         sadd.p->lvl = nlvl;
                         sadd.p->t |= m_fdTargetPoint;
                         tv.push_back(sadd);
@@ -1418,11 +1418,11 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
             }
             if (bref.p->dirm != 0) {
                 if ((bref.p->dirm & 0x01) == 0x01) {
-                    sadd.coords.x = bref.coords.x;
-                    sadd.coords.y = bref.coords.y + 1;
-                    sadd.coords.z = bref.coords.z;
                     sadd.p = &(mdpmirror[cindx + m->mmax_x_]);
                     if (sadd.p->t == m_fdWalkable) {
+                        sadd.coords.x = bref.coords.x;
+                        sadd.coords.y = bref.coords.y + 1;
+                        sadd.coords.z = bref.coords.z;
                         sadd.p->lvl = nlvl;
                         sadd.p->t |= m_fdTargetPoint;
                         tv.push_back(sadd);
@@ -1434,11 +1434,11 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                     }
                 }
                 if ((bref.p->dirm & 0x02) == 0x02) {
-                    sadd.coords.x = bref.coords.x + 1;
-                    sadd.coords.y = bref.coords.y + 1;
-                    sadd.coords.z = bref.coords.z;
                     sadd.p = &(mdpmirror[cindx + 1 + m->mmax_x_]);
                     if (sadd.p->t == m_fdWalkable) {
+                        sadd.coords.x = bref.coords.x + 1;
+                        sadd.coords.y = bref.coords.y + 1;
+                        sadd.coords.z = bref.coords.z;
                         sadd.p->lvl = nlvl;
                         sadd.p->t |= m_fdTargetPoint;
                         tv.push_back(sadd);
@@ -1450,11 +1450,11 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                     }
                 }
                 if ((bref.p->dirm & 0x04) == 0x04) {
-                    sadd.coords.x = bref.coords.x + 1;
-                    sadd.coords.y = bref.coords.y;
-                    sadd.coords.z = bref.coords.z;
                     sadd.p = &(mdpmirror[cindx + 1]);
                     if (sadd.p->t == m_fdWalkable) {
+                        sadd.coords.x = bref.coords.x + 1;
+                        sadd.coords.y = bref.coords.y;
+                        sadd.coords.z = bref.coords.z;
                         sadd.p->lvl = nlvl;
                         sadd.p->t |= m_fdTargetPoint;
                         tv.push_back(sadd);
@@ -1466,11 +1466,11 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                     }
                 }
                 if ((bref.p->dirm & 0x08) == 0x08) {
-                    sadd.coords.x = bref.coords.x + 1;
-                    sadd.coords.y = bref.coords.y - 1;
-                    sadd.coords.z = bref.coords.z;
                     sadd.p = &(mdpmirror[cindx + 1 - m->mmax_x_]);
                     if (sadd.p->t == m_fdWalkable) {
+                        sadd.coords.x = bref.coords.x + 1;
+                        sadd.coords.y = bref.coords.y - 1;
+                        sadd.coords.z = bref.coords.z;
                         sadd.p->lvl = nlvl;
                         sadd.p->t |= m_fdTargetPoint;
                         tv.push_back(sadd);
@@ -1482,11 +1482,11 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                     }
                 }
                 if ((bref.p->dirm & 0x10) == 0x10) {
-                    sadd.coords.x = bref.coords.x;
-                    sadd.coords.y = bref.coords.y - 1;
-                    sadd.coords.z = bref.coords.z;
                     sadd.p = &(mdpmirror[cindx - m->mmax_x_]);
                     if (sadd.p->t == m_fdWalkable) {
+                        sadd.coords.x = bref.coords.x;
+                        sadd.coords.y = bref.coords.y - 1;
+                        sadd.coords.z = bref.coords.z;
                         sadd.p->lvl = nlvl;
                         sadd.p->t |= m_fdTargetPoint;
                         tv.push_back(sadd);
@@ -1498,11 +1498,11 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                     }
                 }
                 if ((bref.p->dirm & 0x20) == 0x20) {
-                    sadd.coords.x = bref.coords.x - 1;
-                    sadd.coords.y = bref.coords.y - 1;
-                    sadd.coords.z = bref.coords.z;
                     sadd.p = &(mdpmirror[cindx - 1 - m->mmax_x_]);
                     if (sadd.p->t == m_fdWalkable) {
+                        sadd.coords.x = bref.coords.x - 1;
+                        sadd.coords.y = bref.coords.y - 1;
+                        sadd.coords.z = bref.coords.z;
                         sadd.p->lvl = nlvl;
                         sadd.p->t |= m_fdTargetPoint;
                         tv.push_back(sadd);
@@ -1514,11 +1514,11 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                     }
                 }
                 if ((bref.p->dirm & 0x40) == 0x40) {
-                    sadd.coords.x = bref.coords.x - 1;
-                    sadd.coords.y = bref.coords.y;
-                    sadd.coords.z = bref.coords.z;
                     sadd.p = &(mdpmirror[cindx - 1]);
                     if (sadd.p->t == m_fdWalkable) {
+                        sadd.coords.x = bref.coords.x - 1;
+                        sadd.coords.y = bref.coords.y;
+                        sadd.coords.z = bref.coords.z;
                         sadd.p->lvl = nlvl;
                         sadd.p->t |= m_fdTargetPoint;
                         tv.push_back(sadd);
@@ -1530,11 +1530,11 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                     }
                 }
                 if ((bref.p->dirm & 0x80) == 0x80) {
-                    sadd.coords.x = bref.coords.x - 1;
-                    sadd.coords.y = bref.coords.y + 1;
-                    sadd.coords.z = bref.coords.z;
                     sadd.p = &(mdpmirror[cindx - 1 + m->mmax_x_]);
                     if (sadd.p->t == m_fdWalkable) {
+                        sadd.coords.x = bref.coords.x - 1;
+                        sadd.coords.y = bref.coords.y + 1;
+                        sadd.coords.z = bref.coords.z;
                         sadd.p->lvl = nlvl;
                         sadd.p->t |= m_fdTargetPoint;
                         tv.push_back(sadd);
