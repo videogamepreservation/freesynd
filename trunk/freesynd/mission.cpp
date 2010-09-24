@@ -31,8 +31,9 @@
 #include "screen.h"
 #include "app.h"
 
-Mission::Mission(): mtsurfaces_(NULL), mdpoints_(NULL), map_(0), min_x_(0), min_y_(0),
-max_x_(0), max_y_(0), objective_(0), objective_ped_(-1), objective_vehicle_(-1)
+Mission::Mission(): mtsurfaces_(NULL), mdpoints_(NULL), mdpoints_cp_(NULL),
+map_(0), min_x_(0), min_y_(0), max_x_(0), max_y_(0), objective_(0),
+objective_ped_(-1), objective_vehicle_(-1)
 {
     memset(&level_data_, 0, sizeof(level_data_));
 }
@@ -594,8 +595,11 @@ bool Mission::setSurfaces() {
     mmax_m_all = mmax_x_ * mmax_y_ * mmax_z_;
     mtsurfaces_ = (surfaceDesc *)malloc(mmax_m_all * sizeof(surfaceDesc));
     mdpoints_ = (floodPointDesc *)malloc(mmax_m_all * sizeof(floodPointDesc));
-    if(mtsurfaces_ == NULL || mdpoints_ == NULL)
+    mdpoints_cp_ = (floodPointDesc *)malloc(mmax_m_all * sizeof(floodPointDesc));
+    if(mtsurfaces_ == NULL || mdpoints_ == NULL || mdpoints_cp_ == NULL) {
+        clrSurfaces();
         return false;
+    }
     mmax_m_xy = mmax_x_ * mmax_y_;
     memset((void *)mtsurfaces_, 0, mmax_m_all * sizeof(surfaceDesc));
     memset((void *)mdpoints_, 0, mmax_m_all * sizeof(floodPointDesc));
@@ -610,6 +614,8 @@ bool Mission::setSurfaces() {
     }
 
     //printf("surface data size %i\n", sizeof(surfaceDesc) * mmax_m_all);
+    //printf("flood data size %i\n", sizeof(floodPointDesc) * mmax_m_all);
+
 
     for (unsigned int i = 0; i < peds_.size(); i++) {
         PedInstance *p = peds_[i];
@@ -2002,6 +2008,10 @@ void Mission::clrSurfaces() {
     if(mdpoints_ != NULL) {
         free(mdpoints_);
         mdpoints_ = NULL;
+    }
+    if(mdpoints_cp_ != NULL) {
+        free(mdpoints_cp_);
+        mdpoints_cp_ = NULL;
     }
 }
 

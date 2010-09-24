@@ -35,6 +35,7 @@
 #endif
 #define EXECUTION_SPEED_TIME
 #endif
+
 Ped::Ped() {
     memset(stand_anims_, 0, sizeof(stand_anims_));
     memset(walk_anims_, 0, sizeof(walk_anims_));
@@ -965,13 +966,7 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
         speed_ = new_speed;
         return;
     }
-    floodPointDesc *mdpmirror = NULL;
-    // TODO: allocate in mission.cpp and reuse?
-    mdpmirror = (floodPointDesc *)malloc(m->mmax_m_all * sizeof(floodPointDesc));
-    if (mdpmirror == NULL) {
-        printf("not enough memory: setDestinationP\n");
-        return;
-    }
+    floodPointDesc *mdpmirror = m->mdpoints_cp_;
     memcpy(mdpmirror, m->mdpoints_, m->mmax_m_all * sizeof(floodPointDesc));
 
     unsigned char lt;
@@ -979,7 +974,6 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
     // these are all tiles that belong to base and target
     std::vector <toSetDesc> bv;
     std::vector <toSetDesc> tv;
-    // hmm, too big allocations?
     bv.reserve(8192);
     tv.reserve(8192);
     // these are used for setting values through algorithm
@@ -1586,7 +1580,6 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
     printf("target defined in %i.%i\n", SDL_GetTicks()/1000, SDL_GetTicks()%1000);
 #endif
     if (!nodeset && lnknr) {
-        free(mdpmirror);
         return;
     }
     if (blvl == bn.size())
@@ -2902,7 +2895,6 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
     printf("smoothing time %i.%i\n", SDL_GetTicks()/1000, SDL_GetTicks()%1000);
 #endif
 
-    free(mdpmirror);
 #if 0
     for (std::list <PathNode>::iterator it = dest_path_.begin();
         it != dest_path_.end(); it++) {
