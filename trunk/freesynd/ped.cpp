@@ -29,7 +29,7 @@
 #include "pathsurfaces.h"
 #include <math.h>
 
-#if 1
+#if 0
 #ifdef SYSTEM_SDL
 #include "system_sdl.h"
 #endif
