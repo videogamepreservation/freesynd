@@ -29,9 +29,12 @@
 #include "pathsurfaces.h"
 #include <math.h>
 
-//#ifdef SYSTEM_SDL
-//#include "system_sdl.h"
-//#endif
+#if 1
+#ifdef SYSTEM_SDL
+#include "system_sdl.h"
+#endif
+#define EXECUTION_SPEED_TIME
+#endif
 Ped::Ped() {
     memset(stand_anims_, 0, sizeof(stand_anims_));
     memset(walk_anims_, 0, sizeof(walk_anims_));
@@ -904,8 +907,10 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                                      int ox, int oy, int new_speed) {
     // NOTE: this is a "flood" algorithm, it expands until it reaches other's
     // flood point, then it removes unrelated points
-
-    //printf("time %i.%i\n", SDL_GetTicks()/1000, SDL_GetTicks()%1000);
+#ifdef EXECUTION_SPEED_TIME
+    printf("---------------------------");
+    printf("start time %i.%i\n", SDL_GetTicks()/1000, SDL_GetTicks()%1000);
+#endif
     m->adjXYZ(x, y, z);
     dest_path_.clear();
     setSpeed(0);
@@ -971,13 +976,16 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
 
     unsigned char lt;
     unsigned short blvl = 0, tlvl = 0;
+    // these are all tiles that belong to base and target
     std::vector <toSetDesc> bv;
     std::vector <toSetDesc> tv;
     // hmm, too big allocations?
     bv.reserve(8192);
     tv.reserve(8192);
+    // these are used for setting values through algorithm
     toSetDesc sadd;
     floodPointDesc *pfdp;
+    // setup
     pfdp = &(mdpmirror[tile_x_ + tile_y_ * m->mmax_x_ + tile_z_ * m->mmax_m_xy]);
     pfdp->t |= m_fdBasePoint;
     sadd.coords.x = tile_x_;
@@ -992,9 +1000,11 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
     sadd.coords.z = z;
     sadd.p = pfdp;
     tv.push_back(sadd);
+    // for setting lvls data
     lvlNodesDesc ladd;
     ladd.indxs = 0;
     ladd.n = 1;
+    // these are number of nodes per lvl and index start for "bv" and "tv"
     std::vector <lvlNodesDesc> bn;
     std::vector <lvlNodesDesc> tn;
     bn.reserve(512);
@@ -1002,6 +1012,9 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
     bn.push_back(ladd);
     tn.push_back(ladd);
     bool nodeset, lnknr = true;
+#ifdef EXECUTION_SPEED_TIME
+    printf("data allocation/setup complete %i.%i\n", SDL_GetTicks()/1000, SDL_GetTicks()%1000);
+#endif
 
     do {
         unsigned short mindx = bn[blvl].indxs + bn[blvl].n;
@@ -1010,7 +1023,7 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
         for (unsigned short i = bn[blvl].indxs; i < mindx; i++) {
             toSetDesc bref = bv[i];
             cindx = bref.coords.x + bref.coords.y * m->mmax_x_
-                        + bref.coords.z * m->mmax_m_xy;
+                + bref.coords.z * m->mmax_m_xy;
             if (bref.p->dirh != 0) {
                 if ((bref.p->dirh & 0x01) == 0x01) {
                     sadd.p = &(mdpmirror[cindx + m->mmax_x_ + m->mmax_m_xy]);
@@ -1280,9 +1293,11 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
             nodeset = true;
             bn.push_back(ladd);
             blvl++;
-        } else
+        } else {
             nodeset = false;
-        if (!(nodeset && lnknr))
+            break;
+        }
+        if (!lnknr)
             break;
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
         mindx = tn[tlvl].indxs + tn[tlvl].n;
@@ -1290,7 +1305,7 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
         for (unsigned short i = tn[tlvl].indxs; i < mindx; i++) {
             toSetDesc bref = tv[i];
             cindx = bref.coords.x + bref.coords.y * m->mmax_x_
-                        + bref.coords.z * m->mmax_m_xy;
+                + bref.coords.z * m->mmax_m_xy;
             if (bref.p->dirh != 0) {
                 if ((bref.p->dirh & 0x01) == 0x01) {
                     sadd.p = &(mdpmirror[cindx + m->mmax_x_ + m->mmax_m_xy]);
@@ -1560,12 +1575,16 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
             nodeset = true;
             tn.push_back(ladd);
             tlvl++;
-        } else
+        } else {
             nodeset = false;
-    } while (nodeset && lnknr);
+            break;
+        }
+    } while (lnknr);
     //printf("bv %i, tv %i\n", bv.size(), tv.size());
-    //printf("target defined in %i.%i\n", SDL_GetTicks()/1000, SDL_GetTicks()%1000);
-
+#ifdef EXECUTION_SPEED_TIME
+    printf("blvl %i, tlvl %i\n",tlvl, blvl);
+    printf("target defined in %i.%i\n", SDL_GetTicks()/1000, SDL_GetTicks()%1000);
+#endif
     if (!nodeset && lnknr) {
         free(mdpmirror);
         return;
@@ -1574,6 +1593,7 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
         blvl--;
     if (tlvl == tn.size())
         tlvl--;
+    // when link is set data of nlvl is useless, that is why it is removed
     if (lt == m_fdBasePoint) {
         if (nodeset) {
             unsigned short indx = bn[blvl].indxs;
@@ -1602,6 +1622,7 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
         tlvl--;
     }
 
+    // level which created link have also non-link tiles they are useless
     if (blvl != 0) {
         unsigned short indx = bn[blvl].indxs;
         unsigned short n = bn[blvl].n;
@@ -1634,8 +1655,11 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
         tn[tlvl].n = tv.size() - tn[tlvl].indxs;
     }
     //printf("bv %i, tv %i\n", bv.size(), tv.size());
-    //printf("tops removed time %i.%i\n", SDL_GetTicks()/1000, SDL_GetTicks()%1000);
+#ifdef EXECUTION_SPEED_TIME
+    printf("tops removed time %i.%i\n", SDL_GetTicks()/1000, SDL_GetTicks()%1000);
+#endif
 
+    // tiles that have no childs are removed
     if (blvl > 1) {
         blvl--;
         unsigned short indx = bn[blvl].indxs + bn[blvl].n;
@@ -1903,11 +1927,15 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
         } while(indx != 0);
     }
     //printf("bv %i, tv %i\n", bv.size(), tv.size());
-    //printf("non-related removed time %i.%i\n", SDL_GetTicks()/1000, SDL_GetTicks()%1000);
+#ifdef EXECUTION_SPEED_TIME
+    printf("non-related removed time %i.%i\n", SDL_GetTicks()/1000, SDL_GetTicks()%1000);
+#endif
     bn.clear();
     tn.clear();
     bv.clear();
     tv.clear();
+
+    // path is created here
     toDefineXYZ ctile;
     ctile.x = tile_x_;
     ctile.y = tile_y_;
@@ -2419,7 +2447,9 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
         cdestpath.push_back(PathNode(toadd.x, toadd.y, toadd.z));
         ctile = toadd;
     } while (tnr);
-    //printf("path creation time %i.%i\n", SDL_GetTicks()/1000, SDL_GetTicks()%1000);
+#ifdef EXECUTION_SPEED_TIME
+    printf("path creation time %i.%i\n", SDL_GetTicks()/1000, SDL_GetTicks()%1000);
+#endif
 
     // stairs to surface, surface to stairs correction
     if (cdestpath.size() != 0) {
@@ -2868,7 +2898,9 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
             }
         }
     }
-    //printf("smoothing time %i.%i\n", SDL_GetTicks()/1000, SDL_GetTicks()%1000);
+#ifdef EXECUTION_SPEED_TIME
+    printf("smoothing time %i.%i\n", SDL_GetTicks()/1000, SDL_GetTicks()%1000);
+#endif
 
     free(mdpmirror);
 #if 0
@@ -2877,10 +2909,15 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
         printf("x %i, y %i, z %i\n", it->tileX(),it->tileY(),it->tileZ());
     }
 #endif
-    //dest_path_.clear();
+#ifdef EXECUTION_SPEED_TIME
+    dest_path_.clear();
+#endif
     if(dest_path_.size() != 0)
         speed_ = new_speed;
-    //printf("end time %i.%i\n", SDL_GetTicks()/1000, SDL_GetTicks()%1000);
+#ifdef EXECUTION_SPEED_TIME
+    printf("+++++++++++++++++++++++++++");
+    printf("end time %i.%i\n", SDL_GetTicks()/1000, SDL_GetTicks()%1000);
+#endif
 }
 
 void PedInstance::addDestinationP(Mission *m, int x, int y, int z,
