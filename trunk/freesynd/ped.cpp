@@ -904,6 +904,7 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                                      int ox, int oy, int new_speed) {
     // NOTE: this is a "flood" algorithm, it expands until it reaches other's
     // flood point, then it removes unrelated points
+
     //printf("time %i.%i\n", SDL_GetTicks()/1000, SDL_GetTicks()%1000);
     m->adjXYZ(x, y, z);
     dest_path_.clear();
@@ -960,6 +961,7 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
         return;
     }
     floodPointDesc *mdpmirror = NULL;
+    // TODO: allocate in mission.cpp and reuse?
     mdpmirror = (floodPointDesc *)malloc(m->mmax_m_all * sizeof(floodPointDesc));
     if (mdpmirror == NULL) {
         printf("not enough memory: setDestinationP\n");
@@ -971,6 +973,9 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
     unsigned short blvl = 0, tlvl = 0;
     std::vector <toSetDesc> bv;
     std::vector <toSetDesc> tv;
+    // hmm, too big allocations?
+    bv.reserve(8192);
+    tv.reserve(8192);
     toSetDesc sadd;
     floodPointDesc *pfdp;
     pfdp = &(mdpmirror[tile_x_ + tile_y_ * m->mmax_x_ + tile_z_ * m->mmax_m_xy]);
@@ -992,6 +997,8 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
     ladd.n = 1;
     std::vector <lvlNodesDesc> bn;
     std::vector <lvlNodesDesc> tn;
+    bn.reserve(512);
+    tn.reserve(512);
     bn.push_back(ladd);
     tn.push_back(ladd);
     bool nodeset, lnknr = true;
@@ -1908,6 +1915,7 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
     unsigned char ct = m_fdBasePoint;
     bool tnr = true, np = true;
     std::vector<PathNode> cdestpath;
+    cdestpath.reserve(256);
     do {
         unsigned char nt = ct;
         toDefineXYZ toadd;
