@@ -914,7 +914,7 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
 #endif
     m->adjXYZ(x, y, z);
     dest_path_.clear();
-    setSpeed(0);
+    speed_ = 0;
     //printf("target x : %i; y : %i; z : %i = = ox :%i, oy :%i\n",
         //x, y, z, ox, oy);
 
@@ -966,8 +966,16 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
         speed_ = new_speed;
         return;
     }
+#ifdef EXECUTION_SPEED_TIME
+    printf("directions-map copy start %i.%i\n", SDL_GetTicks()/1000, SDL_GetTicks()%1000);
+#endif
     floodPointDesc *mdpmirror = m->mdpoints_cp_;
-    memcpy(mdpmirror, m->mdpoints_, m->mmax_m_all * sizeof(floodPointDesc));
+    memcpy((void *)mdpmirror, (void *)m->mdpoints_,
+        m->mmax_m_all * sizeof(floodPointDesc));
+
+#ifdef EXECUTION_SPEED_TIME
+    printf("directions-map copy complete %i.%i\n", SDL_GetTicks()/1000, SDL_GetTicks()%1000);
+#endif
 
     unsigned char lt;
     unsigned short blvl = 0, tlvl = 0;
@@ -1577,7 +1585,7 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
     //printf("bv %i, tv %i\n", bv.size(), tv.size());
 #ifdef EXECUTION_SPEED_TIME
     printf("blvl %i, tlvl %i\n",tlvl, blvl);
-    printf("target defined in %i.%i\n", SDL_GetTicks()/1000, SDL_GetTicks()%1000);
+    printf("target reached in %i.%i\n", SDL_GetTicks()/1000, SDL_GetTicks()%1000);
 #endif
     if (!nodeset && lnknr) {
         return;
@@ -1589,26 +1597,26 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
     // when link is set data of nlvl is useless, that is why it is removed
     if (lt == m_fdBasePoint) {
         if (nodeset) {
-            unsigned short indx = bn[blvl].indxs;
             unsigned short n = bn[blvl].n;
+            std::vector <toSetDesc>::iterator it = bv.begin() + bn[blvl].indxs;
             for (unsigned short i = 0; i < n; i++) {
-                std::vector <toSetDesc>::iterator it = bv.begin() + indx;
                 it->p->t ^= m_fdBasePoint;
                 it->p->lvl = 0;
-                bv.erase(it);
+                //bv.erase(it);
+                it++;
             }
             bn.pop_back();
         }
         blvl--;
     } else {
         if (nodeset) {
-            unsigned short indx = tn[tlvl].indxs;
             unsigned short n = tn[tlvl].n;
+            std::vector <toSetDesc>::iterator it = tv.begin() + tn[tlvl].indxs;
             for (unsigned short i = 0; i < n; i++) {
-                std::vector <toSetDesc>::iterator it = tv.begin() + indx;
                 it->p->t ^= m_fdTargetPoint;
                 it->p->lvl = 0;
-                tv.erase(it);
+                //tv.erase(it);
+                it++;
             }
             tn.pop_back();
         }
@@ -1617,35 +1625,35 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
 
     // level which created link have also non-link tiles they are useless
     if (blvl != 0) {
-        unsigned short indx = bn[blvl].indxs;
         unsigned short n = bn[blvl].n;
+        unsigned short nr = 0;
+        std::vector <toSetDesc>::iterator it = bv.begin() + bn[blvl].indxs;
         for (unsigned short i = 0; i < n; i++) {
-            std::vector <toSetDesc>::iterator it = bv.begin() + indx;
             if ((it->p->t & m_fdLink) == 0) {
                 it->p->t ^= m_fdBasePoint;
                 it->p->lvl = 0;
-                bv.erase(it);
-            } else {
-                indx++;
+                //bv.erase(it);
+                nr++;
             }
+            it++;
         }
-        bn[blvl].n = bv.size() - bn[blvl].indxs;
+        bn[blvl].n -= nr;
     }
 
     if (tlvl != 0) {
-        unsigned short indx = tn[tlvl].indxs;
         unsigned short n = tn[tlvl].n;
+        unsigned short nr = 0;
+        std::vector <toSetDesc>::iterator it = tv.begin() + tn[tlvl].indxs;
         for (unsigned short i = 0; i < n; i++) {
-            std::vector <toSetDesc>::iterator it = tv.begin() + indx;
             if ((it->p->t & m_fdLink) == 0) {
                 it->p->t ^= m_fdTargetPoint;
                 it->p->lvl = 0;
-                tv.erase(it);
-            } else {
-                indx++;
+                //tv.erase(it);
+                nr++;
             }
+            it++;
         }
-        tn[tlvl].n = tv.size() - tn[tlvl].indxs;
+        tn[tlvl].n -= nr;
     }
     //printf("bv %i, tv %i\n", bv.size(), tv.size());
 #ifdef EXECUTION_SPEED_TIME
