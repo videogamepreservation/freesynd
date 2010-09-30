@@ -43,6 +43,54 @@ void MenuText::draw() {
         g_App.fonts().drawText(x_, y_, text_.c_str(), size_, dark_);
 }
 
+/*!
+ * Draw the widget at the current position and only if it's
+ * visible.
+ * Actually, only a text is drawn (see Font). The borders are
+ * already drawn on the background image.
+ */
+void Option::draw() {
+    if (visible_) {
+        int x = x_;
+        if (dark_ && dark_widget_id_ != 0) {
+            Sprite *widget = g_App.menuSprites().sprite(dark_widget_id_);
+            widget->draw(x, y_ - 4, 0, false, true);
+            x += widget->width() * 2 + 8;
+        } else if (light_widget_id_ != 0) {
+            Sprite *widget = g_App.menuSprites().sprite(light_widget_id_);
+            widget->draw(x, y_ - 4, 0, false, true);
+            x += widget->width() * 2 + 8;
+        }
+
+        g_App.fonts().drawText(x, y_, text_.c_str(), size_, dark_);
+    }
+}
+
+bool Option::isMouseOver(int x, int y) {
+    int width = 0;
+    int height = 0;
+    
+    if (dark_widget_id_ != 0) {
+        // We consider that the dark and light widget have the same size
+        Sprite *widget = g_App.menuSprites().sprite(dark_widget_id_);
+        width = widget->width() * 2;
+        height = widget->height() * 2;
+
+        if (text_.size() != 0) {
+            // This is the space between the widget and the text
+            width += 8 + g_App.fonts().textWidth(text_.c_str(), size_);
+        }
+    } else {
+        width = g_App.fonts().textWidth(text_.c_str(), size_);
+        height = g_App.fonts().textHeight(size_);
+    }
+
+    return (x > x_ - 2 && 
+            x < x_ + width && 
+            y >= y_ && 
+            y < y_ + height - 2);
+}
+
 Menu::Menu(MenuManager * menuManager, const char *menu_name,
            const char *showAnim,
            const char *leaveAnim):menu_manager_(menuManager),
@@ -121,9 +169,9 @@ void Menu::setStaticText(int static_id, const char *text){
 }
 
 void Menu::addOption(int x, int y, const char *text, int size, Key key,
-                     const char *to, bool visible)
+                     const char *to, bool visible, int dark_widget, int light_widget)
 {
-    Option m(x, y, text, size, to, visible);
+    Option m(x, y, text, size, to, visible, dark_widget, light_widget);
     options_[key] = m;
 }
 
@@ -189,21 +237,20 @@ void Menu::mouseMotionEvent(int x, int y, int state)
 {
     handleMouseMotion(x, y, state);
 
-    //int id = 0;
+    // See if the mouse is hovering a button
     for (std::map < Key, Option >::iterator it = options_.begin();
          it != options_.end(); it++) {
         Option & m = it->second;
-        int width = 300;
-        if (m.text_.size() == 1)
-            width = 30;
-        else
-            width = g_App.fonts().textWidth(m.text_.c_str(), m.size_);
-        if (m.visible_ && x > m.x_ - 2 && x < m.x_ + width && y >= m.y_
-            && y < m.y_ + g_App.fonts().textHeight(m.size_) - 2) {
-                if (m.x_ == 504 && m.y_ == 110)
-                    printf("hmm");
+
+        if (!m.visible_) {
+            // Button is not visible so it doesn't count
+            continue;
+        }
+
+        if (m.isMouseOver(x, y)) {
             if ( m.dark_ ) {
-                // The button is now highlighted
+                // The button was dark but is now highlighted
+                // since the mouse is over it
                 m.dark_ = false;
                 needRendering();
             }
@@ -222,13 +269,13 @@ void Menu::mouseDownEvent(int x, int y, int button)
     for (std::map < Key, Option >::iterator it = options_.begin();
          it != options_.end(); it++) {
         Option & m = it->second;
-        int width = 300;
-        if (m.text_.size() == 1)
-            width = 30;
-        else
-            width = g_App.fonts().textWidth(m.text_.c_str(), m.size_);
-        if (m.visible_ && x > m.x_ - 2 && x < m.x_ + width && y >= m.y_
-            && y < m.y_ + g_App.fonts().textHeight(m.size_) - 2) {
+
+        if (!m.visible_) {
+            // Button is not visible so it doesn't count
+            continue;
+        }
+
+        if (m.isMouseOver(x, y)) {
             keyEvent(it->first, KMD_NONE, true);
             return;
         }

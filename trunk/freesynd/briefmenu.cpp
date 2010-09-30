@@ -37,8 +37,8 @@ enhance_level_(0), mission_(0) {
     addStatic(148, 35, "MISSION BRIEF", 3, true);
     addOption(538, 118, "INFO", 1, KEY_F1, NULL);
     addOption(518, 169, "ENHANCE", 1, KEY_F2, NULL);
-    addOption(461, 320, "\003", 1, KEY_F6, NULL);
-    addOption(427, 320, "\002", 1, KEY_F7, NULL, false);
+    addOption(461, 320, "", 1, KEY_F6, NULL, true, Sprite::MSPR_RIGHT_ARROW2_D, Sprite::MSPR_RIGHT_ARROW2_L);
+    addOption(427, 320, "", 1, KEY_F7, NULL, false, Sprite::MSPR_LEFT_ARROW2_D, Sprite::MSPR_LEFT_ARROW2_L);
     addOption(43, 352, "ACCEPT", 1, KEY_F3, "select");
     addOption(173, 352, "MAP", 1, KEY_F4, "map");
     addOption(535, 352, "MENU", 1, KEY_F5, "main");
@@ -95,7 +95,7 @@ void BriefMenu::handleRender() {
                     memcpy(tmp, miss, nextline - miss);
                     tmp[nextline - miss] = 0;
                     nextline--;
-                } while (g_App.fonts().textWidth(tmp, 1) > 470);
+                } while (g_App.fonts().textWidth(tmp, FontManager::SIZE_2) > 470);
 
                 delete[] tmp;
                 nextline++;
@@ -128,7 +128,7 @@ void BriefMenu::handleRender() {
                     g_App.fonts().drawText(24,
                                            88 + (line_count -
                                                  start_line_) * 16, miss,
-                                           1, false);
+                                                 FontManager::SIZE_2, false);
                     if (nextline)
                         *nextline = tmp;
                 }
@@ -177,8 +177,8 @@ void BriefMenu::handleRender() {
                   orig_pixels_ + 502 + 87 * GAME_SCREEN_WIDTH, false,
                   GAME_SCREEN_WIDTH);
     sprintf(tmp, "%d", g_App.getGameSession().getMoney());
-    g_App.fonts().drawText(560 - g_App.fonts().textWidth(tmp, 1) / 2, 87,
-                           tmp, 1, false);
+    g_App.fonts().drawText(560 - g_App.fonts().textWidth(tmp, FontManager::SIZE_2) / 2, 87,
+                           tmp, FontManager::SIZE_2, false);
 
     // write cost for more info
     g_Screen.blit(538, 140, 100, 30,
@@ -187,8 +187,8 @@ void BriefMenu::handleRender() {
 
     if (info_level_ < 3) {
         sprintf(tmp, "%d", mission_->infoCost(info_level_));
-        g_App.fonts().drawText(560 - g_App.fonts().textWidth(tmp, 1) / 2,
-                               140, tmp, 1, false);
+        g_App.fonts().drawText(560 - g_App.fonts().textWidth(tmp, FontManager::SIZE_2) / 2,
+                               140, tmp, FontManager::SIZE_2, false);
     }
 
     // write cost for more enhance
@@ -198,8 +198,8 @@ void BriefMenu::handleRender() {
 
     if (enhance_level_ < 3) {
         sprintf(tmp, "%d", mission_->enhanceCost(enhance_level_));
-        g_App.fonts().drawText(560 - g_App.fonts().textWidth(tmp, 1) / 2,
-                               195, tmp, 1, false);
+        g_App.fonts().drawText(560 - g_App.fonts().textWidth(tmp, FontManager::SIZE_2) / 2,
+                               195, tmp, FontManager::SIZE_2, false);
     }
 
     g_System.showCursor();

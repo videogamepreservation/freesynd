@@ -36,22 +36,33 @@ class SpriteManager;
  */
 class FontManager {
 public:
+    /*! Size of font : 1 is the smaller.*/
+    enum EFontSize {
+        SIZE_1 = 0,
+        SIZE_2 = 1,
+        SIZE_3 = 2,
+        SIZE_4 = 3
+    };
+
     FontManager();
     ~FontManager();
-    bool loadFont(SpriteManager *sprites, int size, bool dark, int offset = 0,
+
+    bool loadFont(SpriteManager *sprites, EFontSize size, bool dark, int offset = 0,
             char base = '!');
-    void loadWidgets(SpriteManager *sprites);
 
     void drawText(int x, int y, const char *text, int size, bool dark,
             bool x2 = true);
     int textWidth(const char *text, int size, bool x2 = true);
     int textHeight(int size, bool x2 = true);
 
+    void drawText(int x, int y, const char *text, EFontSize size, bool dark,
+            bool x2 = true);
+    int textWidth(const char *text, EFontSize size, bool x2 = true);
+    int textHeight(EFontSize size, bool x2 = true);
+
 protected:
     Font * dark_fonts_[4];
     Font *light_fonts_[4];
-    Sprite *dark_widgets_[3];
-    Sprite *light_widgets_[7];
 };
 
 #endif

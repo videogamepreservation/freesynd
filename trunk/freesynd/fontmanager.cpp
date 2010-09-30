@@ -40,11 +40,11 @@ FontManager::~FontManager()
         delete light_fonts_[i];
     }
 }
-bool FontManager::loadFont(SpriteManager * sprites, int size, bool dark,
+
+bool FontManager::loadFont(SpriteManager * sprites, EFontSize size, bool dark,
                            int offset, char base)
 {
     assert(sprites);
-    assert(size < 4);
 
     if (dark) {
         dark_fonts_[size] = new Font();
@@ -57,23 +57,6 @@ bool FontManager::loadFont(SpriteManager * sprites, int size, bool dark,
     return true;
 }
 
-void FontManager::loadWidgets(SpriteManager * sprites)
-{
-    assert(sprites);
-
-    dark_widgets_[0] = sprites->sprite(7);
-    light_widgets_[0] = sprites->sprite(10);
-    dark_widgets_[1] = sprites->sprite(5);
-    light_widgets_[1] = sprites->sprite(8);
-    dark_widgets_[2] = sprites->sprite(6);
-    light_widgets_[2] = sprites->sprite(9);
-
-    light_widgets_[3] = sprites->sprite(1);
-    light_widgets_[4] = sprites->sprite(2);
-    light_widgets_[5] = sprites->sprite(3);
-    light_widgets_[6] = sprites->sprite(4);
-}
-
 void FontManager::drawText(int x, int y, const char *text, int size,
                            bool dark, bool x2)
 {
@@ -81,21 +64,11 @@ void FontManager::drawText(int x, int y, const char *text, int size,
     assert(size < 4);
     if (dark) {
         assert(dark_fonts_[size]);
-        if (*text >= '\001' && *text <= '\003') {
-            Sprite *widget = dark_widgets_[*text - 1];
-            widget->draw(x, y - 2 * sc, 0, false, true);
-            text++;
-            x += widget->width() * sc + 4 * sc;
-        }
+
         dark_fonts_[size]->drawText(x, y, text, x2);
     } else {
         assert(light_fonts_[size]);
-        if (*text >= '\001' && *text <= '\007') {
-            Sprite *widget = light_widgets_[*text - 1];
-            widget->draw(x, y - 4, 0, false, true);
-            text++;
-            x += widget->width() * sc + 4 * sc;
-        }
+
         light_fonts_[size]->drawText(x, y, text, x2);
     }
 }
@@ -106,6 +79,31 @@ int FontManager::textWidth(const char *text, int size, bool x2)
 }
 
 int FontManager::textHeight(int size, bool x2)
+{
+    return dark_fonts_[size]->textHeight(x2);
+}
+
+void FontManager::drawText(int x, int y, const char *text, EFontSize size,
+                           bool dark, bool x2)
+{
+    int sc = x2 ? 2 : 1;
+    if (dark) {
+        assert(dark_fonts_[size]);
+
+        dark_fonts_[size]->drawText(x, y, text, x2);
+    } else {
+        assert(light_fonts_[size]);
+
+        light_fonts_[size]->drawText(x, y, text, x2);
+    }
+}
+
+int FontManager::textWidth(const char *text, EFontSize size, bool x2)
+{
+    return dark_fonts_[size]->textWidth(text, x2);
+}
+
+int FontManager::textHeight(EFontSize size, bool x2)
 {
     return dark_fonts_[size]->textHeight(x2);
 }

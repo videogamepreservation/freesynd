@@ -48,6 +48,23 @@ void unpackBlocks1(const uint8 * data, uint8 * pixels)
     }
 }
 
+const int Sprite::MSPR_SELECT_1 = 1;
+const int Sprite::MSPR_SELECT_2 = 2;
+const int Sprite::MSPR_SELECT_3 = 3;
+const int Sprite::MSPR_SELECT_4 = 4;
+const int Sprite::MSPR_LEFT_ARROW_D = 5;
+const int Sprite::MSPR_LEFT_ARROW_L = 8;
+const int Sprite::MSPR_RIGHT_ARROW_D = 6;
+const int Sprite::MSPR_RIGHT_ARROW_L = 9;
+const int Sprite::MSPR_BULLET_D = 7;
+const int Sprite::MSPR_BULLET_L = 10;
+const int Sprite::MSPR_TAX_DECR = 11;
+const int Sprite::MSPR_TAX_INCR = 12;
+const int Sprite::MSPR_LEFT_ARROW2_D = 82;
+const int Sprite::MSPR_LEFT_ARROW2_L = 80;
+const int Sprite::MSPR_RIGHT_ARROW2_D = 81;
+const int Sprite::MSPR_RIGHT_ARROW2_L = 79;
+
 Sprite::Sprite()
 :  width_(0)
     , height_(0)

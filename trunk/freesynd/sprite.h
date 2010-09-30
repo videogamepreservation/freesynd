@@ -34,12 +34,46 @@ const int TABENTRY_SIZE = 6;
  * Sprite class.
  */
 class Sprite {
+
     int width_;
     int height_;
     int stride_;
     uint8 *sprite_data_;
 
 public:
+    /*! Id of sprite agent selector 1 in the menu sprite list.*/
+    static const int MSPR_SELECT_1;
+    /*! Id of sprite agent selector 2 in the menu sprite list.*/
+    static const int MSPR_SELECT_2;
+    /*! Id of sprite agent selector 3 in the menu sprite list.*/
+    static const int MSPR_SELECT_3;
+    /*! Id of sprite agent selector 4 in the menu sprite list.*/
+    static const int MSPR_SELECT_4;
+    /*! Id of sprite left arrow dark in the menu sprite list.*/
+    static const int MSPR_LEFT_ARROW_D;
+    /*! Id of sprite left arrow light in the menu sprite list.*/
+    static const int MSPR_LEFT_ARROW_L;
+    /*! Id of sprite right arrow dark in the menu sprite list.*/
+    static const int MSPR_RIGHT_ARROW_D;
+    /*! Id of sprite right arrow light in the menu sprite list.*/
+    static const int MSPR_RIGHT_ARROW_L;
+    /*! Id of sprite bullet dark in the menu sprite list.*/
+    static const int MSPR_BULLET_D;
+    /*! Id of sprite bullet light in the menu sprite list.*/
+    static const int MSPR_BULLET_L;
+    /*! Id of sprite left arrow for tax in the menu sprite list.*/
+    static const int MSPR_TAX_DECR;
+    /*! Id of sprite right arrow for tax in the menu sprite list.*/
+    static const int MSPR_TAX_INCR;
+    /*! Id of sprite left arrow dark in the menu sprite list.*/
+    static const int MSPR_LEFT_ARROW2_D;
+    /*! Id of sprite left arrow light in the menu sprite list.*/
+    static const int MSPR_LEFT_ARROW2_L;
+    /*! Id of sprite right arrow dark in the menu sprite list.*/
+    static const int MSPR_RIGHT_ARROW2_D;
+    /*! Id of sprite right arrow light in the menu sprite list.*/
+    static const int MSPR_RIGHT_ARROW2_L;
+
     enum Format {
         FMT_BLOCKS,
         FMT_RLE

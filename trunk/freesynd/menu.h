@@ -70,20 +70,43 @@ public:
  * This class extends the MenuText class to represent a button on
  * the screen. A button can lead to another screen which name is
  * stored in the field "to".
+ * It can have a widget in front of its text (like an arrow or a bullet).
  */
 class Option : public MenuText {
 public:
     /*! The name of the next menu.*/
     const char *to_;
+    /*! 
+     * The widget to display when button is dark.
+     * When id is zero, there is no widget.
+    */
+    int dark_widget_id_;
+    /*! 
+     * The widget to display when button is highlighted.
+     * When id is zero, there is no widget.
+     */
+    int light_widget_id_;
 
+    //! Constructs a new button.
     Option() : MenuText() {
         to_ = NULL;
+        dark_widget_id_ = 0;
+        light_widget_id_ = 0;
     }
 
+    //! Constructs a new button.
     Option(int x, int y, const char *text, int size,
-            const char *to, bool visible):MenuText(x, y, text, size, true, visible) {
+            const char *to, bool visible, int dark_widget = 0, int light_widget = 0) : MenuText(x, y, text, size, true, visible) {
         to_ = to;
+        dark_widget_id_ = dark_widget;
+        light_widget_id_ = light_widget;
     }
+
+    //! Draw the widget on screen
+    void draw();
+
+    //! Tells whether the pointer is over the button or not
+    bool isMouseOver(int x, int y);
 
     ~Option() { to_ = NULL; }
 };
@@ -123,7 +146,7 @@ public:
     int addStatic(int x, int y, const char *text, int size, bool dark);
     //! Creates a new button and returns its id
     void addOption(int x, int y, const char *text, int size, Key key,
-            const char *to = NULL, bool visible = true);
+            const char *to = NULL, bool visible = true, int dark_widget = 0, int light_widget = 0);
 
     void setParentMenu(const char *m) { parent_menu_ = m; }
 

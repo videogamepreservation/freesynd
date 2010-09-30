@@ -119,7 +119,7 @@ void SelectMenu::drawAgent()
     // write selected agent's name
     char tmp[100];
     sprintf(tmp, "SPECIAL AGENT %s", selected->name());
-    g_App.fonts().drawText(158, 86, tmp, 1, false);
+    g_App.fonts().drawText(158, 86, tmp, FontManager::SIZE_2, false);
 
     // TODO: mods
     int torso, arms, legs;
@@ -144,12 +144,12 @@ void SelectMenu::drawAgent()
     if (selected->slot(SLOT_LEGS)) {
         legs = selected->slot(SLOT_LEGS)->icon(selected->isMale());
         g_App.fonts().drawText(366, 250, selected->slot(SLOT_LEGS)->name(),
-                               0, false);
+                               FontManager::SIZE_1, false);
     }
     if (selected->slot(SLOT_ARMS)) {
         arms = selected->slot(SLOT_ARMS)->icon(selected->isMale());
         g_App.fonts().drawText(366, 226, selected->slot(SLOT_ARMS)->name(),
-                               0, false);
+                               FontManager::SIZE_1, false);
     }
 
     g_App.menuSprites().drawSpriteXYZ(arms, armsx, armsy, 0, false, true);
@@ -159,7 +159,7 @@ void SelectMenu::drawAgent()
     if (selected->slot(SLOT_CHEST)) {
         int chest = selected->slot(SLOT_CHEST)->icon(selected->isMale());
         g_App.fonts().drawText(366, 202,
-                               selected->slot(SLOT_CHEST)->name(), 0,
+                               selected->slot(SLOT_CHEST)->name(), FontManager::SIZE_1,
                                false);
         int chestx = 216;
         int chesty = 146;
@@ -174,7 +174,7 @@ void SelectMenu::drawAgent()
     if (selected->slot(SLOT_HEART)) {
         int heart = selected->slot(SLOT_HEART)->icon(selected->isMale());
         g_App.fonts().drawText(366, 160,
-                               selected->slot(SLOT_HEART)->name(), 0,
+                               selected->slot(SLOT_HEART)->name(), FontManager::SIZE_1,
                                false);
         g_App.menuSprites().drawSpriteXYZ(heart, 254, 166, 0, false, true);
     }
@@ -182,7 +182,7 @@ void SelectMenu::drawAgent()
     if (selected->slot(SLOT_EYES)) {
         int eyes = selected->slot(SLOT_EYES)->icon(selected->isMale());
         g_App.fonts().drawText(366, 136, selected->slot(SLOT_EYES)->name(),
-                               0, false);
+                               FontManager::SIZE_1, false);
         int eyesx = 238;
         if (!selected->isMale()) {
             eyesx += 2;
@@ -194,7 +194,7 @@ void SelectMenu::drawAgent()
     if (selected->slot(SLOT_BRAIN)) {
         int brain = selected->slot(SLOT_BRAIN)->icon(selected->isMale());
         g_App.fonts().drawText(366, 112,
-                               selected->slot(SLOT_BRAIN)->name(), 0,
+                               selected->slot(SLOT_BRAIN)->name(), FontManager::SIZE_1,
                                false);
         int brainx = 238;
         if (!selected->isMale()) {
@@ -314,8 +314,8 @@ void SelectMenu::handleRender()
                   orig_pixels_ + 538 + 87 * GAME_SCREEN_WIDTH, false,
                   GAME_SCREEN_WIDTH);
     sprintf(tmp, "%d", g_App.getGameSession().getMoney());
-    g_App.fonts().drawText(560 - g_App.fonts().textWidth(tmp, 1) / 2, 87,
-                           tmp, 1, false);
+    g_App.fonts().drawText(560 - g_App.fonts().textWidth(tmp, FontManager::SIZE_2) / 2, 87,
+                           tmp, FontManager::SIZE_2, false);
 
     // write team member icons and health
     uint8 data[4], datag[4];
@@ -327,7 +327,7 @@ void SelectMenu::handleRender()
     Agent *t4 = g_App.teamMember(3);
     if (t1) {
         if (t1->isActive()) {
-            g_App.fonts().drawText(20, 88, "\004", 1, false);
+            g_App.menuSprites().drawSpriteXYZ(Sprite::MSPR_SELECT_1, 20, 84, 0, false, true);
             for (int i = 0; i < t1->health() * 35 / 255; i++)
                 g_Screen.scale2x(68, 122 - i, 3, 1, data);
         } else {
@@ -339,7 +339,7 @@ void SelectMenu::handleRender()
     }
     if (t2) {
         if (t2->isActive()) {
-            g_App.fonts().drawText(82, 88, "\005", 1, false);
+            g_App.menuSprites().drawSpriteXYZ(Sprite::MSPR_SELECT_2, 82, 84, 0, false, true);
             for (int i = 0; i < t1->health() * 35 / 255; i++)
                 g_Screen.scale2x(132, 122 - i, 3, 1, data);
         } else {
@@ -351,7 +351,7 @@ void SelectMenu::handleRender()
     }
     if (t3) {
         if (t3->isActive()) {
-            g_App.fonts().drawText(20, 166, "\006", 1, false);
+            g_App.menuSprites().drawSpriteXYZ(Sprite::MSPR_SELECT_3, 20, 162, 0, false, true);
             for (int i = 0; i < t1->health() * 35 / 255; i++)
                 g_Screen.scale2x(68, 200 - i, 3, 1, data);
         } else {
@@ -363,7 +363,7 @@ void SelectMenu::handleRender()
     }
     if (t4) {
         if (t4->isActive()) {
-            g_App.fonts().drawText(82, 166, "\007", 1, false);
+            g_App.menuSprites().drawSpriteXYZ(Sprite::MSPR_SELECT_4, 82, 162, 0, false, true);
             for (int i = 0; i < t1->health() * 35 / 255; i++)
                 g_Screen.scale2x(132, 200 - i, 3, 1, data);
         } else {
@@ -409,7 +409,7 @@ void SelectMenu::handleRender()
     }
 
     if (tab_ == 0) {
-        g_App.fonts().drawText(504, 106, "CRYO CHAMBER", 0, false);
+        g_App.fonts().drawText(504, 106, "CRYO CHAMBER", FontManager::SIZE_1, false);
         uint8 ldata[49];
         memset(ldata, 252, sizeof(ldata));
         g_Screen.scale2x(504, 120, sizeof(ldata), 1, ldata);
@@ -417,7 +417,7 @@ void SelectMenu::handleRender()
             for (int j = 0; j < 4; j++)
                 if (g_App.teamMember(j) == g_App.recruit(i)) {
                     sprintf(tmp, "%d", j + 1);
-                    g_App.fonts().drawText(504, 124 + i * 12, tmp, 0,
+                    g_App.fonts().drawText(504, 124 + i * 12, tmp, FontManager::SIZE_1,
                                            true);
                 }
         for (int i = g_App.numRecruits(); i < 18; i++)
@@ -429,9 +429,9 @@ void SelectMenu::handleRender()
 
 void SelectMenu::handleShowLate()
 {
-    g_App.fonts().drawText(52, 268, "TEAM", 1, tab_ != 0);
-    g_App.fonts().drawText(52, 296, "MODS", 1, tab_ != 1);
-    g_App.fonts().drawText(52, 324, "EQUIP", 1, tab_ != 2);
+    g_App.fonts().drawText(52, 268, "TEAM", FontManager::SIZE_2, tab_ != 0);
+    g_App.fonts().drawText(52, 296, "MODS", FontManager::SIZE_2, tab_ != 1);
+    g_App.fonts().drawText(52, 324, "EQUIP", FontManager::SIZE_2, tab_ != 2);
 }
 
 void SelectMenu::handleLeave() {

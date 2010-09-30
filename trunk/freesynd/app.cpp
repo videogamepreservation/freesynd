@@ -371,15 +371,14 @@ void App::run() {
     menu_sprites_.loadSprites(tabData, tabSize, data, true);
     delete[] tabData;
     delete[] data;
-    fonts_.loadFont(&menu_sprites_, 3, true, 1076, 'A');
-    fonts_.loadFont(&menu_sprites_, 2, true, 802, 'A');
-    fonts_.loadFont(&menu_sprites_, 1, true, 528, 'A');
-    fonts_.loadFont(&menu_sprites_, 0, true, 254, 'A');
-    fonts_.loadFont(&menu_sprites_, 3, false, 939, 'A');
-    fonts_.loadFont(&menu_sprites_, 2, false, 665, 'A');
-    fonts_.loadFont(&menu_sprites_, 1, false, 391, 'A');
-    fonts_.loadFont(&menu_sprites_, 0, false, 117, 'A');
-    fonts_.loadWidgets(&menu_sprites_);
+    fonts_.loadFont(&menu_sprites_, FontManager::SIZE_4, true, 1076, 'A');
+    fonts_.loadFont(&menu_sprites_, FontManager::SIZE_3, true, 802, 'A');
+    fonts_.loadFont(&menu_sprites_, FontManager::SIZE_2, true, 528, 'A');
+    fonts_.loadFont(&menu_sprites_, FontManager::SIZE_1, true, 254, 'A');
+    fonts_.loadFont(&menu_sprites_, FontManager::SIZE_4, false, 939, 'A');
+    fonts_.loadFont(&menu_sprites_, FontManager::SIZE_3, false, 665, 'A');
+    fonts_.loadFont(&menu_sprites_, FontManager::SIZE_2, false, 391, 'A');
+    fonts_.loadFont(&menu_sprites_, FontManager::SIZE_1, false, 117, 'A');
     game_font_.load();
 
 #if 0
@@ -400,8 +399,8 @@ void App::run() {
         if (s->height() > my)
             my = s->height();
     }
-    while (1)
-        waitForKeyPress();
+
+    waitForKeyPress();
     exit(1);
 #endif
     //this is walk data

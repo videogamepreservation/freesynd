@@ -69,11 +69,11 @@ public:
     colour_(0) {
         setClearArea(bkg_, 283, 28, 328, 120);
         addStatic(299, 32, "CHANGE COLOUR AND LOGO", 1, false);
-        addOption(405, 65, "\002", 1, KEY_F1, NULL);
-        addOption(435, 65, "\003", 1, KEY_F2, NULL);
+        addOption(405, 65, "", 1, KEY_F1, NULL, true, Sprite::MSPR_LEFT_ARROW_D, Sprite::MSPR_LEFT_ARROW_L);
+        addOption(435, 65, "", 1, KEY_F2, NULL, true, Sprite::MSPR_RIGHT_ARROW_D, Sprite::MSPR_RIGHT_ARROW_L);
         addStatic(475, 65, "COLOUR", 1, false);
-        addOption(405, 95, "\002", 1, KEY_F3, NULL);
-        addOption(435, 95, "\003", 1, KEY_F4, NULL);
+        addOption(405, 95, "", 1, KEY_F3, NULL, true, Sprite::MSPR_LEFT_ARROW_D, Sprite::MSPR_LEFT_ARROW_L);
+        addOption(435, 95, "", 1, KEY_F4, NULL, true, Sprite::MSPR_RIGHT_ARROW_D, Sprite::MSPR_RIGHT_ARROW_L);
         addStatic(475, 95, "LOGO", 1, false);
         addOption(340, 127, "OK", 1, KEY_F5, "conf");
         addOption(501, 127, "CANCEL", 1, KEY_F6, "conf");
@@ -147,7 +147,7 @@ public:
         uint8 data[5];
         memset(data, light ? 252 : 16, 5);
         g_Screen.scale2x(315 +
-                         g_App.fonts().textWidth(name_value_.c_str(), 1),
+                         g_App.fonts().textWidth(name_value_.c_str(), FontManager::SIZE_2),
                          95, 5, 1, data);
     }
 
@@ -176,7 +176,7 @@ public:
         }
 
         g_Screen.scale2x(300, 77, 136, 13, data);
-        g_App.fonts().drawText(313, 81, name_value_.c_str(), 1, false);
+        g_App.fonts().drawText(313, 81, name_value_.c_str(), FontManager::SIZE_2, false);
         drawCaret();
     }
 
@@ -196,7 +196,7 @@ public:
         }
 
         g_Screen.scale2x(310, 80, 120, 9, bkg_ + 155 + 40 * 320, 320);
-        g_App.fonts().drawText(313, 81, name_value_.c_str(), 1, false);
+        g_App.fonts().drawText(313, 81, name_value_.c_str(), FontManager::SIZE_2, false);
         drawCaret();
     }
 
@@ -251,9 +251,9 @@ Menu(m, "conf", "mconfup.dat", "mconfout.dat") {
     submenu_name_ = new ChangeYourNameMenu(m, bkg_, this);
     setClearArea(bkg_, 283, 28, 328, 120);
     addStatic(299, 32, "SELECT DETAIL TO CHANGE", 1, false);
-    addOption(325, 65, "\001COLOUR AND LOGO", 1, KEY_F1, "changeLogo");
-    addOption(325, 90, "\001COMPANY NAME", 1, KEY_F2, "changeCompany");
-    addOption(325, 115, "\001YOUR NAME", 1, KEY_F3, "changeName");
+    addOption(325, 65, "COLOUR AND LOGO", 1, KEY_F1, "changeLogo", true, Sprite::MSPR_BULLET_D, Sprite::MSPR_BULLET_L);
+    addOption(325, 90, "COMPANY NAME", 1, KEY_F2, "changeCompany", true, Sprite::MSPR_BULLET_D, Sprite::MSPR_BULLET_L);
+    addOption(325, 115, "YOUR NAME", 1, KEY_F3, "changeName", true, Sprite::MSPR_BULLET_D, Sprite::MSPR_BULLET_L);
     addOption(43, 352, "ACCEPT", 1, KEY_F4, "main");
     addOption(535, 352, "MENU", 1, KEY_F5, "main");
     setParentMenu("main");
@@ -271,12 +271,12 @@ void ConfMenu::handleRender() {
 
     if (*g_App.getGameSession().getCompanyName()) {
         g_Screen.scale2x(28, 90, 120, 10, bkg_ + 14 + 45 * 320, 320);
-        g_App.fonts().drawText(28, 90, g_App.getGameSession().getCompanyName(), 1, false);
+        g_App.fonts().drawText(28, 90, g_App.getGameSession().getCompanyName(), FontManager::SIZE_2, false);
     }
 
     if (*g_App.getGameSession().getUserName()) {
         g_Screen.scale2x(28, 112, 120, 10, bkg_ + 14 + 56 * 320, 320);
-        g_App.fonts().drawText(28, 112, g_App.getGameSession().getUserName(), 1, false);
+        g_App.fonts().drawText(28, 112, g_App.getGameSession().getUserName(), FontManager::SIZE_2, false);
     }
 
     g_System.showCursor();
