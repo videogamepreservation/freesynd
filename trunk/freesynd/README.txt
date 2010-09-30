@@ -1,5 +1,5 @@
 
-FreeSynd 0.4
+FreeSynd 0.5
 ------------
 
 FreeSynd is a free cross-platform reimplementation of the classic Bullfrog 

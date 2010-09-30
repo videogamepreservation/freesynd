@@ -1,10 +1,34 @@
-FreeSynd 0.4 : Release Notes
+FreeSynd 0.5 : Release Notes
 ----------------------------
 
 Description
 -----------
 This is a prelimary release for testing and development purposes.  
 
+Changes
+-------
+  * 
+
+Fixed Bugs
+----------
+  * 0000000 : 
+
+Features added
+----------
+  * 0000000 : 
+
+Known issues with this release
+------------------------------
+  * Agent AI is not operational.
+  * The minimap is not complete.
+  * Tax collection and other functionality of the world map are not done.
+  * PathFinding requires improvement
+  * Mission debriefing is not operational
+  * No animation for trees, doors
+  * Map drawing is buggy
+
+History
+-------
 Changes
 -------
   * Minimap drawing is fixed, should be better now
@@ -21,9 +45,6 @@ Changes
   * Fixed highlights in select menu: was possible to highlight more than
     one element, also weapon highlight was not working
   * Added correct recognition for clicks on scrollable map
-
-Fixed Bugs
-----------
   * 3029839 : Mouse position is not used on a new Menu
   * 3029837 : Menu animation doesn't stop mouse or keyboard events
   * 2307181 : #include <cstdlib> missing (it was simply closed, fix 
@@ -33,19 +54,6 @@ Fixed Bugs
   * 3052210 : fixed warnings and resource leak(tlh2000)
   * 3005299 : Finished missions can be played again
   * 2669454 : Double highlight on weapon list in Team Selection menu
-
-Known issues with this release
-------------------------------
-  * Agent AI is not operational.
-  * The minimap is not complete.
-  * Tax collection and other functionality of the world map are not done.
-  * PathFinding requires improvement
-  * Mission debriefing is not operational
-  * No animation for trees, doors
-  * Map drawing is buggy
-
-History
--------
 
   v0.3
   ----
