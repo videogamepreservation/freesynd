@@ -1,40 +1,19 @@
 <?php $title = 'Development'; require_once 'include/common.php'; ?>
 
-<h3>Getting the code</h3>
+<h3>V0.5 Roadmap</h3>
+<p>Release v0.5 is now under development. There is no release date scheduled for now.</p>
+<h4>Bugs :</h4>
+<ul>
+<li><a href="http://sourceforge.net/tracker/?func=detail&amp;aid=3005294&amp;group_id=93282&amp;atid=603796">3005294</a> Debriefing information is not displayed after ending the mission</li>
+<li><a href="http://sourceforge.net/tracker/?func=detail&amp;aid=3031032&amp;group_id=93282&amp;atid=603796">3031032</a> Rewrite animation generation procedures</li>
+<li><a href="http://sourceforge.net/tracker/?func=detail&amp;aid=3036610&amp;group_id=93282&amp;atid=603796">3036610</a> Rewrite map drawing</li>
+<li><a href="http://sourceforge.net/tracker/?func=detail&amp;aid=3005295&amp;group_id=93282&amp;atid=603796">3005295</a> The tax rate for the region cannot altered by the player</li>
+</ul>
 
-<p>The FreeSynd CVS repository is hosted by SourceForge. To checkout a module
-from the repository simply type the following commands in your shell (press
-enter if the login command asks for a password):</p>
-
-<pre>cvs -d:pserver:anonymous@freesynd.cvs.sourceforge.net:/cvsroot/freesynd login 
-cvs -z3 -d:pserver:anonymous@freesynd.cvs.sourceforge.net:/cvsroot/freesynd co -P freesynd
-</pre>
-
-<br />
-
-<p>The available modules, and what they contain, are as follows:</p>
-
-<pre>freesynd           FreeSynd source code
-www                FreeSynd website code (which may or may not be up to date)</pre>
-
-<br />
-
-<p>Web-based CVS access is also available through SourceForge's <a
-href="http://freesynd.cvs.sourceforge.net/freesynd">ViewCVS interface</a>. You
-might also want to take a look at the <a
-href="http://sourceforge.net/projects/freesynd/">project page</a> on
-SourceForge.</p>
-<p>Please don't bother with SVN, we've yet to put anything useful in it.</p>
-
-<hr />
-
-<h3>CVS commit notifications</h3>
-<p>Developers may be interested in the following mailing list; summaries of
-all changes made to the CVS repository are posted here.</p>
-FreeSynd CVS mailing list<br />
-<small>
-(<a href="http://lists.sourceforge.net/lists/listinfo/freesynd-cvs">Subscribe/Manage</a> |
-<a href="http://sourceforge.net/mailarchive/forum.php?forum=freesynd-cvs">Archive</a>)
-</small>
+<h4>Features:</h4>
+<ul>
+<li><a href="http://sourceforge.net/tracker/?func=detail&amp;aid=3043686&amp;group_id=93282&amp;atid=603799">3043686</a> Game time</li>
+<li><a href="http://sourceforge.net/tracker/?func=detail&amp;aid=3072653&amp;group_id=93282&amp;atid=603799">3072653</a> Use libsyndicate data info</li>
+</ul>
 
 <?php printFooter(); ?>
