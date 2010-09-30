@@ -587,6 +587,11 @@ is_an_agent_(PedInstance::Not_Agent) {
     hold_on_.wayFree = 0;
 }
 
+PedInstance::~PedInstance(){
+    delete ped_;
+    dest_path_.clear();
+}
+
 void PedInstance::draw(int x, int y, int scrollX, int scrollY) {
 
     if (is_an_agent_ == PedInstance::Agent_Non_Active)

@@ -183,6 +183,17 @@ bool Mission::loadLevel(uint8 * levelData)
     }
 
     peds_.clear();
+    weapons_.clear();
+#if 1
+    // for hacking statics data
+    char nameS[256];
+    sprintf(nameS, "peds%02X.hex", map_);
+    FILE *staticsF = fopen(nameS,"wb");
+    if (staticsF) {
+        fwrite(level_data_.people, 1, 256*92, staticsF);
+        fclose(staticsF);
+    }
+#endif
     for (int i = 0; i < 256; i++) {
         LEVELDATA_PEOPLE & pedref = level_data_.people[i];
         //if (pedref.unkn3 != 4) //this type of ped is driving vehicle or else?
@@ -191,6 +202,10 @@ bool Mission::loadLevel(uint8 * levelData)
             g_App.peds().loadInstance((uint8 *) & pedref, map_);
         if (p) {
             peds_.push_back(p);
+            if (i > 7) {
+                p->setHostile(true);
+                p->setSightRange(7);
+            }
             if (p->isHostile()) {
                 Weapon *w = g_App.weapons().findWeapon(Ped::Pistol);
                 if (w) {

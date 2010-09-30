@@ -36,9 +36,9 @@
 class PedManager {
 public:
     PedManager();
-    ~PedManager();
+    virtual ~PedManager() {}
 
-    void loadPeds();
+    void setPed(Ped *pedanim, unsigned short baseAnim);
 
     int numPeds() { return peds_.size(); }
 

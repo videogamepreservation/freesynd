@@ -83,6 +83,14 @@ public:
         walk_fire_anims_[weapon] = anim;
     }
 
+    void setDieAgentAnim(int anim) {
+        die_agent_anim_ = anim;
+    }
+
+    void setDeadAgentAnim(int anim) {
+        dead_agent_anim_ = anim;
+    }
+
     void setDieAnim(int anim) {
         die_anim_ = anim;
     }
@@ -126,6 +134,8 @@ protected:
     int walk_anims_[NUM_ANIMS];
     int stand_fire_anims_[NUM_ANIMS];
     int walk_fire_anims_[NUM_ANIMS];
+    int die_agent_anim_;
+    int dead_agent_anim_;
     int die_anim_;
     int dead_anim_;
     int hit_anim_;
@@ -138,7 +148,7 @@ protected:
 class PedInstance : public ShootableMovableMapObject, public WeaponHolder {
 public:
     PedInstance(Ped *ped, int m);
-    virtual ~PedInstance() {}
+    ~PedInstance();
 
     typedef enum {
         NoAnimation,

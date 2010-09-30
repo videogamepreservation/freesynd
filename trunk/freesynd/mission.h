@@ -122,32 +122,67 @@ public:
 
     // This structure contains all people in the game, including agents
     // This struct size is 92.
+    // most 2 byte variable have little-endianess byte order(LE)
     typedef struct {
-        uint8 unkn2[4];
-        uint8 mapposx[2];
+        // (LE data)'offset + 32774' gives the offset in this
+        // file of the next object
+        uint8 offset_next[2];
+        // (LE data)'offset + 32774' gives the offset in this
+        // file of the previous object (sometimes weapon, or
+        // the next target for example ???)
+        uint8 offset_prev[2];
+        uint8 mapposx[2];  // [0] - offset, [1] - tile
         uint8 mapposy[2];
         uint8 mapposz[2];
-        uint8 unkn3;            // this bit may be connected with minimap in bottom left
-        uint8 unkn4;            // this bit is connected with control
-        uint8 unkn5[2];         // nothing changes when this changes
-        uint8 vistype[2];       // visual object type;must correspond to right type
-        uint8 currvistype[2];   // actual character picture; game changes this automaticaly after any command
-        uint8 unkn6;            // shoot distance? if this is large, computer just follows me and won't shoot until I come closer
-        uint8 unkn7[5];         // ??
-        uint8 objtype;          // object type on minimap and for computer?; 1-human, 2-car
-        uint8 unkn8[5];         // ??
-        uint8 unkn9[8];         // somewhere here is written to who the agent belongs
-        uint8 unkn10[4];
-        uint8 unkn11[4];
-        // Half of structure - 46 bytes
-        uint8 unkn12[12];
-        uint8 unkn13[13];
+        uint8 unkn1;            // this bit may be connected with minimap in bottom left
+        uint8 unkn2;            // this bit is connected with control
+        uint8 unkn3[2];         // nothing changes when this changes
+        uint8 index_base_anim[2];  //index in (HSTA-0.ANI)
+        uint8 index_current_frame[2];   //index in (HFRA-0.ANI)
+        uint8 index_current_anim[2]; // index in (HSTA-0.ANI)
+        uint8 health[2]; // something to do with amo / health
+        uint8 offset_last_enemy[2];
+        //0x01 ped; 0x02 vehicle; 0x04 weapon;
+        //0x05 object; allow to display a target, a pickup, and for minimap
+        uint8 type;
+        uint8 status;
+        //from 0xF0 to 0x10 : south = 0
+        //from 0x10 to 0x30 : south-east = 1
+        //from 0x30 to 0x50 : east = 2
+        //from 0x50 to 0x70 : east-north = 3
+        //from 0x70 to 0x90 : north = 4
+        //from 0x90 to 0xB0 : north-west = 5
+        //from 0xB0 to 0xD0 : west = 6
+        //from 0xD0 to 0xF0 : west-south = 7
+        // surface is mapped not to 360 degrees/surface, but 256 degrees/surface
+        uint8 orientation;
+        uint8 unkn4;
+        uint8 type_ped; // when 01 pedestrian, 02 agent, 04 police, 08 guard : change IA and minimap
+        uint8 unkn5[3];
+        uint8 offset_of_persuader[2];
+        uint8 unkn6[2];
+        uint8 offset_of_vehicle[2];
+        uint8 offset_scenario_1[2];
+        uint8 offset_scenario_2[2];
+        uint8 unkn7[2];
+        uint8 offset_of_vehicle_2[2]; // ??
+        uint8 goto_mapposx[2];
+        uint8 goto_mapposy[2];
+        uint8 goto_mapposz[2];
+        uint8 unkn8[6];
+        uint8 offset_equipment[2];
+        //bitmask, 0b - gender, 1-2b - leg, 3-4b - arm, 5-6b - chest
+        // 7-8b - heart, 9-10b - eye, 11-12b - brain, 13-15b - unknown
+        uint8 mods_info[2];
+        uint8 unkn9[6];
+        uint8 offset_cur_weapon[2];
+        uint8 unkn10;
         // IPA levels: white bar level,set level,exhaused level and forced level
         uint8 adrenalevels[4];
         uint8 intelilevels[4];
         uint8 perceplevels[4];
-        uint8 unkn14;           // This value is different for most objects
-        uint8 unkn101[8];       // ??
+        uint8 unkn11;           // This value is different for most objects
+        uint8 unkn12[8];       // ??
     } LEVELDATA_PEOPLE;         // total: 92 bytes
 
     // This structure contains all cars in the game, including destroyed
