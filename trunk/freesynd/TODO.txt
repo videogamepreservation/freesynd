@@ -1,0 +1,70 @@
+- Evolution of population number due to tax rate
+- Complete mission tree
+- Available missions blinking on map menu
+- MiniMap in brief menu
+- Research Menu
+- MiniMap in game : more detailed map, display peds, guns, radar focus,
+evacuation red circle
+- Mission objectives
+- Play sound in end mission animation
+- Remove debug info displayed in the console
+ - Correct identification of object types during mission load, includes
+vehicles, people, static objects, wepons, also there are sfx for weapons
+ - Objects state identification on loading phase: some of them don't start with
+first animation, some doors are already open or are openning, some blinking
+signs have different start frame; identify directions for vehicle and peds, as
+it is broke
+ - Adding properties to:
+   vehicle: max people can hold; speed per type; damage can inflict/recieve per type;
+driver; radius of damage when destroyed
+   people: add IPA levels and their modification through gameplay menu and influence
+of these levels on different properties of people - speed, inteligence, accuracy,
+viewing range(?), health recovery(?); mods properties should affect IPAs; damage
+recieved modifier, if we don't want to recalculate all the time; persuade power
+points; persuade points needed to persuade - this value will be added to agent
+that succesfully persuaded; weapon range modifier(?); accuracy modifier/property(?);
+type of damage inflicted(?)
+   weapons: type of damage/effect inflicted; destructabillity(bomb); radius of damage
+area(?) - bomb, gauss, laser;
+   static objects: damage recieve value; destructable or not
+   all: type of damage that can be inflicted - windows can break from bullets/explosion,
+but trees will burn from explosions only, people with shield vulnerable to explosions
+only
+ - indexes within group of type for vehicles/people/weapons, to be used for minimap
+drawing during briefing, they are as offsets in mission data in files, these offsets
+have different use within original game code and transforming them from offsets to
+indexes is required due to difference in realization in our project and in original
+game, we have array per type and in original all data was loaded to memory as single
+chunk which permitted to use offsets within this chunk - it is very fast method, these
+indexes can be: 1 byte for type of group + 2 bytes for index within group; or we can
+use 2 bytes, 9(10)bits will be used for index within group, bits that remain for group
+type definition, although it can be slower and create some problems in future
+ - A.L. - this one is complex
+ - pathfinding directional to be used for simulation of people walking around city
+ - damage inflicted by vehicles/weapons, variate by type of damage
+ - state of vehicles/people/objects should change correctly due to gameplay:
+   vehicles should start burning when their health is zero and stop after some time,
+same for trees, people etc - switch of state due to damage
+   damage type priority laser->explosion->burning->hit
+   during pickup/putdown/hit people are unable to do anything else untill state is
+complete
+   when somebody is inside of vehicle he should be placed outside, when vehicle is
+destroyed/burning, and damage of explosion applicated
+   change in behavior due to persuade
+   "access card" make agent become police officer
+   firing should have delay, ammo/sec(?)
+   instant damage to vehicles/people/objects, current implementation is cumulative,
+if 4 agents shoot inflicting 1 hp damage/agent at target with 2hp they will inflict
+4hp damage it is incorrect, should be implemented with boolean on return to check
+whether shooting is possible
+ - animation for people/objects need to be fixed, to correctly represent every stage
+of event/state:
+   small doors should open/close
+   windows break when shot
+   different objects burn
+ - object positioning during drawing
+ - map drawing should start from top and go down, by visual (x,y) not map (x,y),
+better to group drawing objects by Z, it can be faster, for fast searching is used
+key generated every time, this can be added and generated for object on load and on
+change respectively, will also speed up drawing as not all objects change their
+position
