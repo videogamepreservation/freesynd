@@ -1,0 +1,20 @@
+
+I use the Memshot tool because it seems that GAMEXX.DAT files are mapped 
+in memory. So if we use dosbox for running Syndicate, we can inspect the 
+dynamic of data in memory.
+
+For example :
+
+- launch dosbox and enter the level 1
+  # dosbox -conf dosbox.conf MAIN.EXE &
+- get the pid 
+  # ps -e
+- use Memshot
+  # ./MemshotFe pid GAME01.DAT [59020 [4]] 
+  # ?> s
+- move in the game
+- use Memshot
+  # ?> l
+
+The game reinit if you took the shot at the begining of the level !
+

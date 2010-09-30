@@ -1,0 +1,40 @@
+#!/bin/sh
+#
+#  ./bootstrap
+#  ./configure
+#  make 
+#  make install
+#  make clean 
+#  make distclean or make maintainer-clean
+#  ./bootstrap clean
+#
+
+case "$1" in
+'clean')
+  rm -fr *~ Makefile.in aclocal.m4 autom4te.cache/ config.guess config.sub configure depcomp install-sh ltmain.sh missing INSTALL
+  rm -fr *~ src/config.h.in
+
+  for file in `find . -name "Makefile.in"`;
+  do
+    rm -fr $file
+  done
+
+  for file in `find . -name "*~"`;
+  do
+    rm -fr $file
+  done
+
+  exit
+  ;;
+*)
+esac
+
+set -x
+
+aclocal
+libtoolize --copy --force 
+autoheader
+automake --add-missing --copy --foreign
+autoconf
+
+

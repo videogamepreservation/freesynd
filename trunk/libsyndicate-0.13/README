@@ -1,0 +1,50 @@
+#############
+ Description
+#############
+
+Summary :
+This project aims to provide an interface to the Bullfrog Syndicate data files (http://en.wikipedia.org/wiki/Syndicate_%28computer_game_series%29). This allow to extract sprites, missions properties, etc. It is written in C++ and compile on unices. This project also provide a documentation written in Latex that describe the format of files. 
+
+Origin :
+A project named freesynd (http://freesynd.sourceforge.net/) is a free implementation of the game, but the code that access data is obscure, hardly readable and maintainable. So i had the idea to develop a library that could be used by many programs (games, level editors for example), and that could provide a common interface to data.
+
+Usage :
+When hobbyist programmer want to develop their game, creating the data part is not a peace of cake. So this library allow them to concentrate on the engine and the implementation of some new features (internet game, fullscreen, etc.).
+
+Dependencies:
+The code doesn't need no any third party software. 
+There is sample code for using the library that need SDL and the original game. 
+There is a document that describe the format of the data files that need Latex and Dia. 
+The html documentation of the API needs Doxygen to compile.
+
+#######
+ Usage
+#######
+
+You should have an environment variable SYNDICATE_DATA_PATH that point to your data directory.
+# export SYNDICATE_DATA_PATH=~/Syndicate/DATA
+The data files are expected to be uppercase.
+
+For library :
+# ./configure [--enable-example] [--enable-doc-latex-pdf] [--enable-doc-latex-html] [--enable-doc-doxygen] [--enable-tool]
+# make 
+
+The --enable-example allow to compile examples and need SDL.
+
+The --enable-doc-latex-pdf allow to compile the latex doc and needs latex, dia, and other tools.
+
+The --enable-doc-latex-html compile the latex doc as html and needs hevea. 
+
+The --enable-doc-doxygen-html allow to compile the doxygen doc and needs doxygen.
+
+The --enable-tool allow to compile some tools.
+
+The --enable-all enable all :)
+
+For checking :
+# make check
+
+For example :
+# cd example 
+# make
+
