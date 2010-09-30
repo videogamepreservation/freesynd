@@ -385,9 +385,10 @@ Static *Static::loadInstance(uint8 * data, int m)
         printf("y is %i, yoff is %i ==", gamdata->mapposy[1], gamdata->mapposy[0]);
         printf("z is %i, zoff is %i\n", gamdata->mapposz[1], gamdata->mapposz[0]);
         */
-        int z = ((gamdata->mapposz[0] & 0x80) == 0 ? gamdata->mapposz[1]: gamdata->mapposz[1] << 1 );
-        s->setVisZ(z);
+        int z = READ_LE_UINT16(gamdata->mapposz) >> 7;
+        z--;
         int oz = gamdata->mapposz[0] & 0x7F;
+        s->setVisZ(z);
         if (oz > 0)
             z++;
         s->setPosition(gamdata->mapposx[1], gamdata->mapposy[1],

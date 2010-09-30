@@ -60,9 +60,15 @@ VehicleInstance *VehicleManager::loadInstance(uint8 * data, int map)
     }
 
     VehicleInstance *newvehicle = vehicles_[kind]->createInstance(map);
+    int z = READ_LE_UINT16(gamdata->mapposz) >> 7;
+    z--;
+    int oz = gamdata->mapposz[0] & 0x7F;
+    newvehicle->setVisZ(z);
+    if (oz > 0)
+        z++;
     newvehicle->setPosition(gamdata->mapposx[1], gamdata->mapposy[1],
-                            gamdata->mapposz[1], gamdata->mapposx[0],
-                            gamdata->mapposy[0], gamdata->mapposz[0]);
+                            z, gamdata->mapposx[0],
+                            gamdata->mapposy[0], oz);
     newvehicle->setVisZ(gamdata->mapposz[1]);
     newvehicle->setHealth(hp);
     newvehicle->setStartHealth(hp);

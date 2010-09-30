@@ -103,7 +103,8 @@ PedInstance *PedManager::loadInstance(uint8 * data, int map)
     PedInstance *newped = pedanim->createInstance(map);
     newped->setStartHealth(hp);
     newped->setHealth(hp);
-    int z = ((gamdata->mapposz[0] & 0x80) == 0 ? gamdata->mapposz[1]: gamdata->mapposz[1] << 1 );
+    int z = READ_LE_UINT16(gamdata->mapposz) >> 7;
+    z--;
     int oz = gamdata->mapposz[0] & 0x7F;
     newped->setVisZ(z);
     if (oz > 0)

@@ -7,7 +7,7 @@ This is a prelimary release for testing and development purposes.
 
 Changes
 -------
-  * 
+  * Correct positioning by Z axis for all objects
 
 Fixed Bugs
 ----------
