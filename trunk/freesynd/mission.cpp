@@ -184,7 +184,7 @@ bool Mission::loadLevel(uint8 * levelData)
 
     peds_.clear();
     weapons_.clear();
-#if 1
+#if 0
     // for hacking statics data
     char nameS[256];
     sprintf(nameS, "peds%02X.hex", map_);

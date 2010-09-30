@@ -89,12 +89,6 @@ PedInstance *PedManager::loadInstance(uint8 * data, int map)
     if (gamdata->type == 0)
         return NULL;
 
-#if 0
-    printf("mapposx: %i %i\n", gamdata->mapposx[0], gamdata->mapposx[1]);
-    printf("mapposy: %i %i\n", gamdata->mapposy[0], gamdata->mapposy[1]);
-    printf("mapposz: %i %i\n", gamdata->mapposz[0], gamdata->mapposz[1]);
-    printf("\n");
-#endif
     int dir = gamdata->orientation >> 5;
     int hp = 2;
 
