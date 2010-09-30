@@ -6,6 +6,8 @@
 <ul>
   <?php
   //NOTE: symbol <'> must be escaped <\'>
+  //function roadmapItem($id, $content) - id of bug/feature + short description
+  //function roadmapItemNoid($content) - description only
   roadmapItem('3005294','Debriefing information is not displayed after ending the mission');
   roadmapItem('3031032','Rewrite animation generation procedures');
   roadmapItem('3036610','Rewrite map drawing');

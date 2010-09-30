@@ -49,7 +49,7 @@ function getFileSize($file)
 function newsItem($title, $content, $submitter, $date)
 {
     echo '<h3>' . htmlentities($title) . "</h3>\n";
-    echo '<p>' . implode("</p>\n<p>", explode("\n\n", $content))
+    echo '<p>' . htmlentities(implode("</p>\n<p>", explode("\n\n", $content)))
         . "</p>\n";
     echo '<div class="rght_algn"><b> -- ' . htmlentities($submitter)
         . '</b><br />' . htmlentities($date) . "</div>\n\n";
@@ -59,7 +59,13 @@ function roadmapItem($id, $content)
 {
     echo '<li><a href="http://sourceforge.net/support/tracker.php?aid='
         . $id . '" target="_blank">'. $id . '</a> &nbsp;'
-        . implode("</p>\n<p>", explode("\n\n", $content))
+        . htmlentities(implode("</p>\n<p>", explode("\n\n", $content)))
+        . "</li>\n";
+}
+
+function roadmapItemNoid($content)
+{
+    echo '<li>' . htmlentities(implode("</p>\n<p>", explode("\n\n", $content)))
         . "</li>\n";
 }
 
