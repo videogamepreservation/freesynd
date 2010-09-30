@@ -55,6 +55,14 @@ function newsItem($title, $content, $submitter, $date)
         . '</b><br />' . htmlentities($date) . "</div>\n\n";
 }
 
+function roadmapItem($id, $content)
+{
+    echo '<li><a href="http://sourceforge.net/support/tracker.php?aid='
+        . $id . '" target="_blank">'. $id . '</a> &nbsp;'
+        . implode("</p>\n<p>", explode("\n\n", $content))
+        . "</li>\n";
+}
+
 function printStartTime()
 {
     $now = getdate();
