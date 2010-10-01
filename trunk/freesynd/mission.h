@@ -131,10 +131,13 @@ public:
         // file of the previous object (sometimes weapon, or
         // the next target for example ???)
         uint8 offset_prev[2];
-        uint8 mapposx[2];  // [0] - offset, [1] - tile
+        // [0] - offset, [1] - tile
+        uint8 mapposx[2];
         uint8 mapposy[2];
+        // to convert to our system use as uint16(LE)
+        // tile = (uint16)/128, offz =(uint16)%128 or offz = mapposz[0] & 0x1F
         uint8 mapposz[2];
-        uint8 unkn1;            // this bit may be connected with minimap in bottom left
+        uint8 unkn1;            // look mission.cpp for ref
         uint8 unkn2;            // this bit is connected with control
         uint8 unkn3[2];         // nothing changes when this changes
         uint8 index_base_anim[2];  //index in (HSTA-0.ANI)

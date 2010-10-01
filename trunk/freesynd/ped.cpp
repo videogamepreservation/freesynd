@@ -920,6 +920,8 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
     m->adjXYZ(x, y, z);
     dest_path_.clear();
     speed_ = 0;
+    if (map_ == -1 || health_ <= 0)
+        return;
     //printf("target x : %i; y : %i; z : %i = = ox :%i, oy :%i\n",
         //x, y, z, ox, oy);
 
@@ -930,7 +932,9 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
 
 #if 0
     printf("target t %x, dirm %x ; base t %x, dirm %x\n", targetd->t,
-        //targetd->dirm, based->t, based->dirm);
+        targetd->dirm, based->t, based->dirm);
+    printf("target pos: x %i; y %i; z %i, ox %i, oy %i\n",
+        x, y, z, ox, oy);
     printf("base pos: x %i; y %i; z %i, ox %i, oy %i, oz %i\n",
         tile_x_, tile_y_, tile_z_, off_x_, off_y_, off_z_);
     if ( (z + 1) < m->mmax_z_) {
@@ -945,6 +949,8 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
     }
 
     if(based->t == m_fdNonWalkable) {
+        printf("unwalk pos: x %i; y %i; z %i, ox %i, oy %i, oz %i\n",
+            tile_x_, tile_y_, tile_z_, off_x_, off_y_, off_z_);
         printf("Movement from nonwalkable postion\n");
         return;
     }

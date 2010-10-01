@@ -196,8 +196,11 @@ bool Mission::loadLevel(uint8 * levelData)
 #endif
     for (int i = 0; i < 256; i++) {
         LEVELDATA_PEOPLE & pedref = level_data_.people[i];
-        //if (pedref.unkn3 != 4) //this type of ped is driving vehicle or else?
-            //continue;
+        //pedref.unkn1 0x04 - ped is walking
+        //0x05 - ped is driving
+        //0x0D - they are not visible/present on original map, purpose?
+        if(pedref.unkn1 == 0x0D)
+            continue;
         PedInstance *p =
             g_App.peds().loadInstance((uint8 *) & pedref, map_);
         if (p) {
