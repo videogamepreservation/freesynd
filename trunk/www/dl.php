@@ -1,10 +1,14 @@
 <?php $title = 'Download'; require_once 'include/common.php'; ?>
 
-<br />
+<h3>Getting the binaries</h3>
 
-<div class="cent_algn">See the releases on <a href="https://sourceforge.net/project/showfiles.php?group_id=93282">sourceforge</a>.</div>
+<p>See the releases on <a href="https://sourceforge.net/project/showfiles.php?group_id=93282">sourceforge</a>.</p>
 
-<br />
+<b>Please note that an original copy of Syndicate is
+required to use FreeSynd; we do not redistribute the original data files here,
+and we won't make an exception for you - so don't bother asking.</b>
+
+<hr />
 
 <h3>Getting the code</h3>
 

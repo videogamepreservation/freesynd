@@ -1,4 +1,11 @@
-<?php $title = 'News'; require_once 'include/common.php';
+<?php $title = 'News'; require_once 'include/common.php'; ?>
+
+<h3>GREETINGS, OPERATIVE. WELCOME TO THE FREESYND PROJECT.</h3>
+
+<p>FreeSynd is a cross-platform, <a href="http://www.gnu.org/licenses/gpl.html">
+GPL</a>ed reimplementation of the classic Bullfrog game, Syndicate.</p>
+
+<?php
 
 // The newsItem() signature is newsItem($title, $content, $submitter, $date);
 
@@ -12,7 +19,7 @@ newsItem(
     'Benoit Blancard',
     '2010-09-27');
 
-
+	
 newsItem(
     'New v0.3 release',
 	"Freesynd is still alive! A new development release is available from <a href=\"https://sourceforge.net/project/showfiles.php?group_id=93282\">sourceforge</a>. This v0.3 release contains mainly bug fixes and 

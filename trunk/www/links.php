@@ -1,31 +1,5 @@
 <?php $title = 'Links'; require_once 'include/common.php'; ?>
 
-<h3>FreeSynd</h3>
-
-<p class="indent"><a href="http://sourceforge.net/projects/freesynd/">Project Page</a> -
-FreeSynd's SourceForge Project Page.<br />
-
-<a href="http://cvs.sourceforge.net/viewcvs.py/freesynd">ViewCVS</a> -
-Web-based access to the FreeSynd CVS repository.<br /><br />
-
-FreeSynd IRC channel<br />
-<small>
-Channel <a href="irc://irc.freenode.org/%23freesynd">#freesynd</a> on the
-FreeNode IRC network.
-</small><br /><br />
-FreeSynd User mailing list<br />
-<small>
-(<a href="http://lists.sourceforge.net/lists/listinfo/freesynd-user">Subscribe/Manage</a> |
-<a href="http://sourceforge.net/mailarchive/forum.php?forum=freesynd-user">Archive</a>)
-</small><br /><br />
-CVS commit notifications<br />
-<small>
-(<a href="http://lists.sourceforge.net/lists/listinfo/freesynd-cvs">Subscribe/Manage</a> |
-<a href="http://sourceforge.net/mailarchive/forum.php?forum=freesynd-cvs">Archive</a>)
-</small></p>
-
-<hr />
-
 <h3>Libraries</h3>
 
 <a href="http://www.libsdl.org/">SDL</a>

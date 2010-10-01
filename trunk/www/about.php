@@ -13,24 +13,6 @@ Electronic Arts.<br /> <!-- Please note that an original copy of Syndicate is
 required to use FreeSynd; we do not redistribute the original data files here,
 and we won't make an exception for you - so don't bother asking. --> </div>
 
-<h3>Project Communication</h3>
-<p>There are two main forms of communication used by the FreeSynd team - IRC
-and mailing lists. If you wish to get in contact with the team, join the
-community, or volunteer to help out with the project then fire up your
-favourite IRC or email client and make your voice heard.</p>
-FreeSynd IRC channel<br />
-<small>
-Channel <a href="irc://irc.freenode.org/%23freesynd">#freesynd</a> on the
-FreeNode IRC network.
-</small><br /><br />
-FreeSynd User mailing list<br />
-<small>
-(<a href="http://lists.sourceforge.net/lists/listinfo/freesynd-user">Subscribe/Manage</a> |
-<a href="http://sourceforge.net/mailarchive/forum.php?forum=freesynd-user">Archive</a>)
-</small>
-
-<hr />
-
 <h3>The original Syndicate introduction:</h3>
 
 <p>As the world's multinational corporations grew, their profits began to rival
@@ -70,16 +52,5 @@ back up. Teams of custom-built cyborg agents hunt down rivals and traitors, and
 spread the influence of the Syndicates across the globe.</p>
 
 <hr />
-
-<h3>The FreeSynd Team</h3>
-
-<p>(listed in alphabetical order)</p>
-
-<a href="mailto:skbinge@gmail.com">Stuart Bing&euml;</a>
-(Developer)<br />
-<a href="mailto:j-Please.Dont.Spam@7fc1.org">Joost Peters</a>
-(Developer)<br />
-<a href="mailto:qg@biodome.org">Trent Waddington</a>
-(Developer)<br />
 
 <?php printFooter(); ?>
