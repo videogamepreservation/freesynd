@@ -184,8 +184,9 @@ bool Mission::loadLevel(uint8 * levelData)
 
     peds_.clear();
     weapons_.clear();
+
 #if 0
-    // for hacking statics data
+    // for hacking peds data
     char nameS[256];
     sprintf(nameS, "peds%02X.hex", map_);
     FILE *staticsF = fopen(nameS,"wb");
@@ -194,13 +195,15 @@ bool Mission::loadLevel(uint8 * levelData)
         fclose(staticsF);
     }
 #endif
+
     for (int i = 0; i < 256; i++) {
         LEVELDATA_PEOPLE & pedref = level_data_.people[i];
-        //pedref.unkn1 0x04 - ped is walking
-        //0x05 - ped is driving
-        //0x0D - they are not visible/present on original map, purpose?
-        if(pedref.unkn1 == 0x0D)
+        if(pedref.desc == 0x0D || pedref.desc == 0x0C)
             continue;
+        if(pedref.desc != 0x04 && pedref.desc != 0x05) {
+            if(pedref.type !=0) //TODO: pedref.desc == 0 exist?
+                printf("unknown property %i\n", pedref.desc);
+        }
         PedInstance *p =
             g_App.peds().loadInstance((uint8 *) & pedref, map_);
         if (p) {

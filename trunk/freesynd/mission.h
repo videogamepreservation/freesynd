@@ -137,7 +137,12 @@ public:
         // to convert to our system use as uint16(LE)
         // tile = (uint16)/128, offz =(uint16)%128 or offz = mapposz[0] & 0x1F
         uint8 mapposz[2];
-        uint8 unkn1;            // look mission.cpp for ref
+        //0x04 - ped is walking
+        //0x05 - ped is driving
+        //0x0D - they are not visible/present on original map(on water located), purpose?
+        //0x0C - located level above possible walking surface, purpose?
+        //0x0D and 0x0C are exluded from being loaded
+        uint8 desc;
         uint8 unkn2;            // this bit is connected with control
         uint8 unkn3[2];         // nothing changes when this changes
         uint8 index_base_anim[2];  //index in (HSTA-0.ANI)
