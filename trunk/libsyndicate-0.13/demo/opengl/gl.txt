@@ -1,0 +1,345 @@
+      /*
+       *    5
+       *   /|\
+       * 1/ | \4
+       * /  |  \
+       *|\ / \ /|
+       *| /   \ |
+       *|/ \ / \|
+       * \  |  /
+       * 2\ | /3
+       *   \|/
+       *    6
+  
+       face 6 :
+       glBegin(GL_QUADS);
+       glVertex3f(0.0,  0.0,  side / 2.0);
+       glVertex3f(0.0,  side,  side / 2.0);
+       glVertex3f(side,  side,  side / 2.0);
+       glVertex3f(side,  0.0,  side / 2.0);
+       glEnd();
+
+       face 5 :
+       glBegin(GL_QUADS);
+       glVertex3f(0.0,  0.0,  0.0);
+       glVertex3f(0.0,  side, 0.0);
+       glVertex3f(side, side, 0.0);
+       glVertex3f(side, 0.0,  0.0);
+       glEnd();
+
+
+       face 3 :
+       glBegin(GL_QUADS);
+       glVertex3f(side, side, 0.0);
+       glVertex3f(side, side, side / 2.0);
+       glVertex3f(side, 0.0,  side / 2.0);
+       glVertex3f(side, 0.0,  0.0);
+       glEnd();
+
+       face 2 :
+       glBegin(GL_QUADS);
+       glVertex3f(0.0,  side, 0.0);
+       glVertex3f(0.0,  side, side / 2.0);
+       glVertex3f(side, side, side / 2.0);
+       glVertex3f(side, side, 0.0);
+       glEnd();
+
+
+      */
+      if(i == 5)
+	{ // column base
+	  glBegin(GL_QUADS);
+
+	  glVertex3f(0.0,  0.0, 0.0);
+	  glVertex3f(0.0,  1.0, 0.0);
+	  glVertex3f(1.0,  1.0, 0.0);
+	  glVertex3f(1.0,  0.0, 0.0);
+	
+	  glVertex3f(0.65,  0.65, 0.0);
+	  glVertex3f(0.65,  0.65,  -0.5);
+	  glVertex3f(0.35,  0.65,  -0.5);
+	  glVertex3f(0.35,  0.65, 0.0);
+
+	  glVertex3f(0.65,  0.65, 0.0);
+	  glVertex3f(0.65,  0.35, 0.0);
+	  glVertex3f(0.65,  0.35,  -0.5);
+	  glVertex3f(0.65,  0.65,  -0.5);
+	
+	  glVertex3f(0.65,  0.65,  -0.5);
+	  glVertex3f(0.65,  0.35,  -0.5);
+	  glVertex3f(0.35,  0.35,  -0.5);
+	  glVertex3f(0.35,  0.65,  -0.5);
+
+	  glEnd();
+	}
+      else if(i == 190)
+	{ // column base bis
+	  glBegin(GL_QUADS);
+
+	  glVertex3f(0.0,  1.0, 0.0);
+	  glVertex3f(1.0,  1.0, 0.0);
+	  glVertex3f(0.65,  0.65,  -0.25);
+	  glVertex3f(0.35,  0.65,  -0.25);
+	
+	  glVertex3f(1.0,  1.0, 0.0);
+	  glVertex3f(1.0, 0.0, 0.0);
+	  glVertex3f(0.65,  0.35,  -0.25);
+	  glVertex3f(0.65,  0.65,  -0.25);
+	
+	  glVertex3f(1.0, 0.0, 0.0);
+	  glVertex3f(0.0, 0.0, 0.0);
+	  glVertex3f(0.35,  0.35,  -0.25);
+	  glVertex3f(0.65,  0.35,  -0.25);
+	
+	  glVertex3f(0.0, 0.0, 0.0);
+	  glVertex3f(0.0, 1.0, 0.0);
+	  glVertex3f(0.35,  0.65,  -0.25);
+	  glVertex3f(0.35,  0.35,  -0.25);
+	
+
+	  glVertex3f(0.65,  0.65,  -0.25);
+	  glVertex3f(0.65,  0.65,  -0.5);
+	  glVertex3f(0.35,  0.65,  -0.5);
+	  glVertex3f(0.35,  0.65,  -0.25);
+
+	  glVertex3f(0.65,  0.65,  -0.25);
+	  glVertex3f(0.65,  0.35,  -0.25);
+	  glVertex3f(0.65,  0.35,  -0.5);
+	  glVertex3f(0.65,  0.65,  -0.5);
+	
+	  glVertex3f(0.65,  0.65,  -0.5);
+	  glVertex3f(0.65,  0.35,  -0.5);
+	  glVertex3f(0.35,  0.35,  -0.5);
+	  glVertex3f(0.35,  0.65,  -0.5);
+
+	  glEnd();
+	}
+      else if(i == 191 || i == 192 || i == 193)
+	{ // column
+	  glBegin(GL_QUADS);
+
+	  glVertex3f(0.65,  0.65, 0.0);
+	  glVertex3f(0.65,  0.65,  -0.5);
+	  glVertex3f(0.35,  0.65,  -0.5);
+	  glVertex3f(0.35,  0.65, 0.0);
+
+	  glVertex3f(0.65,  0.65, 0.0);
+	  glVertex3f(0.65,  0.35, 0.0);
+	  glVertex3f(0.65,  0.35,  -0.5);
+	  glVertex3f(0.65,  0.65,  -0.5);
+	
+	  glVertex3f(0.65,  0.65,  -0.5);
+	  glVertex3f(0.65,  0.35,  -0.5);
+	  glVertex3f(0.35,  0.35,  -0.5);
+	  glVertex3f(0.35,  0.65,  -0.5);
+
+	  glEnd();
+	}
+      else if(i == 6 || i == 7 || i == 8 || 
+	      i == 83 || 
+	      i == 140)
+	{ // slope west -> east
+	  glBegin(GL_QUADS);
+
+	  glVertex3f(0.0,  0.0, 0.0);
+	  glVertex3f(0.0,  1.0, 0.0);
+	  glVertex3f(1.0,  1.0,  -0.5);
+	  glVertex3f(1.0,  0.0,  -0.5);
+
+	  glVertex3f(1.0,  1.0, 0.0);
+	  glVertex3f(1.0,  0.0, 0.0);
+	  glVertex3f(1.0,  0.0,  -0.5);
+	  glVertex3f(1.0,  1.0,  -0.5);
+
+	  glEnd();
+	
+	  glBegin(GL_TRIANGLES);
+
+	  glVertex3f(0.0,  1.0, 0.0);
+	  glVertex3f(1.0,  1.0, 0.0);
+	  glVertex3f(1.0,  1.0,  -0.5);
+
+	  glEnd();
+	}
+      else if(i == 9 || i == 10 || i == 11 || 
+	      i == 82 ||
+	      i == 34)
+	{ // slope north -> south
+	  glBegin(GL_QUADS);
+
+	  glVertex3f(1.0, 0.0, 0.0);
+	  glVertex3f(0.0,  0.0, 0.0);
+	  glVertex3f(0.0,  1.0, -0.5);
+	  glVertex3f(1.0, 1.0, -0.5);
+	
+	  glVertex3f(1.0, 1.0,0.0);
+	  glVertex3f(1.0, 1.0, -0.5);
+	  glVertex3f(0.0,  1.0, -0.5);
+	  glVertex3f(0.0,  1.0,0.0);
+	
+	  glEnd();
+
+	  glBegin(GL_TRIANGLES);
+
+	  glVertex3f(1.0,  0.0, 0.0);
+	  glVertex3f(1.0, 1.0,  -0.5);
+	  glVertex3f(1.0, 1.0, 0.0);
+
+	  glEnd();
+	}
+      else if(i == 178 || i == 228 ||
+	      i == 240 || i == 242 || 
+	      i == 245 ||
+	      i == 255)
+	{ // slope south -> north
+	  glBegin(GL_QUADS);
+
+	  glVertex3f(0.0,  1.0, 0.0);
+	  glVertex3f(1.0, 1.0, 0.0);
+	  glVertex3f(1.0, 0.0, -0.5);
+	  glVertex3f(0.0, 0.0, -0.5);
+	
+	  glVertex3f(0.0, 0.0, -0.5);
+	  glVertex3f(1.0, 0.0, -0.5);
+	  glVertex3f(1.0, 0.0,0.0);
+	  glVertex3f(0.0, 0.0,0.0);
+
+	  glEnd();
+
+	  glBegin(GL_TRIANGLES);
+
+	  glVertex3f(1.0, 1.0, 0.0);
+	  glVertex3f(1.0,  0.0, 0.0);
+	  glVertex3f(1.0, 0.0,  -0.5);
+
+	  glEnd();
+	}
+      else if(i == 127 ||
+	      i == 179 ||
+	      i == 241 || i == 243 ||
+	      i == 244 ||
+	      i == 253 || i == 254)
+	{ // slope east -> west
+	  glBegin(GL_QUADS);
+
+	  glVertex3f(1.0, 1.0, 0.0);
+	  glVertex3f(1.0, 0.0, 0.0);
+	  glVertex3f(0.0, 0.0, -0.5);
+	  glVertex3f(0.0, 1.0, -0.5);
+	
+	  glVertex3f(0.0, 0.0, -0.5);
+	  glVertex3f(0.0, 0.0,0.0);
+	  glVertex3f(0.0, 1.0,0.0);
+	  glVertex3f(0.0, 1.0, -0.5);
+
+	  glEnd();
+
+	  glBegin(GL_TRIANGLES);
+
+	  glVertex3f(1.0, 1.0, 0.0);
+	  glVertex3f(0.0, 1.0,  -0.5);
+	  glVertex3f(0.0, 1.0,0.0);
+
+	  glEnd();
+	}
+      else if(i == 130 || i == 142 || i == 143 || i == 150 || i == 151)
+	{ // the west barrier
+	  glBegin(GL_QUADS);
+
+	  glVertex3f(0.0, 0.0, -0.5);
+	  glVertex3f(0.0, 0.0,0.0);
+	  glVertex3f(0.0, 1.0,0.0);
+	  glVertex3f(0.0, 1.0, -0.5);
+	
+	  glEnd();
+	}
+      else if(i == 131 || i == 146 || i == 147 || i == 154 || i == 155)
+	{ // the north barrier
+	  glBegin(GL_QUADS);
+
+	  glVertex3f(0.0, 0.0, -0.5);
+	  glVertex3f(1.0, 0.0, -0.5);
+	  glVertex3f(1.0, 0.0, 0.0);
+	  glVertex3f(0.0, 0.0,0.0);
+	
+	  glEnd();
+	}
+      else if(i == 132 || i == 144 || i == 152)
+	{ // the south barrier
+	  glBegin(GL_QUADS);
+
+	  glVertex3f(0.0, 1.0, -0.5);
+	  glVertex3f(0.0, 1.0,0.0);
+	  glVertex3f(1.0, 1.0, 0.0);
+	  glVertex3f(1.0, 1.0, -0.5);
+	
+	  glEnd();
+	}
+      else if(i == 133 || i == 141 || i == 148)
+	{ // the east barrier
+	  glBegin(GL_QUADS);
+
+	  glVertex3f(1.0, 0.0, -0.5);
+	  glVertex3f(1.0, 1.0, -0.5);
+	  glVertex3f(1.0, 1.0,0.0);
+	  glVertex3f(1.0, 0.0,0.0);
+	
+	  glEnd();
+	}
+      else if(i == 134)
+	{ // the west and north barrier
+	  glBegin(GL_QUADS);
+
+	  glVertex3f(0.0, 0.0, -0.5);
+	  glVertex3f(0.0, 0.0,0.0);
+	  glVertex3f(0.0, 1.0,0.0);
+	  glVertex3f(0.0, 1.0, -0.5);
+
+	  glVertex3f(0.0, 0.0, -0.5);
+	  glVertex3f(1.0, 0.0, -0.5);
+	  glVertex3f(1.0, 0.0, 0.0);
+	  glVertex3f(0.0, 0.0,0.0);
+	
+	  glEnd();
+	}
+     else if(i == 15 || i == 16)
+	{ // the big box
+	  glBegin(GL_QUADS);
+	  
+	  glVertex3f(0.0,  0.0,  -0.0);
+	  glVertex3f(0.0,  1.0, -0.0);
+	  glVertex3f(1.0, 1.0, -0.0);
+	  glVertex3f(1.0, 0.0,  -0.0);
+
+	  glVertex3f(0.0,  1.0, -0.0);
+	  glVertex3f(0.0,  1.0,0.0);
+	  glVertex3f(1.0, 1.0,0.0);
+	  glVertex3f(1.0, 1.0, -0.0);
+
+	  glVertex3f(1.0, 1.0, -0.0);
+	  glVertex3f(1.0, 1.0,0.0);
+	  glVertex3f(1.0, 0.0, 0.0);
+	  glVertex3f(1.0, 0.0,  -0.0);
+
+	  glEnd();
+	} 
+      else
+	{ // default box
+	  glBegin(GL_QUADS);
+	  /* glTexCoord2f(0.5,     -0.5); */ glVertex3f(0.0,  0.0,  -0.5);
+	  /* glTexCoord2f(0.0, 1.0/4.0); */ glVertex3f(0.0,  1.0, -0.5);
+	  /* glTexCoord2f(0.5, 2.0/4.0); */ glVertex3f(1.0, 1.0, -0.5);
+	  /* glTexCoord2f(1.0, 1.0/4.0); */ glVertex3f(1.0, 0.0,  -0.5);
+ 
+	  /* glTexCoord2f(0.0, 1.0/4.0); */ glVertex3f(0.0,  1.0, -0.5);
+	  /* glTexCoord2f(0.0, 2.0/4.0); */ glVertex3f(0.0,  1.0,0.0);
+	  /* glTexCoord2f(0.5, 3.0/4.0); */ glVertex3f(1.0, 1.0,0.0);
+	  /* glTexCoord2f(0.5, 2.0/4.0); */ glVertex3f(1.0, 1.0, -0.5);
+
+	  /* glTexCoord2f(0.5, 2.0/4.0); */ glVertex3f(1.0, 1.0, -0.5);
+	  /* glTexCoord2f(0.5, 3.0/4.0); */ glVertex3f(1.0, 1.0,0.0);
+	  /* glTexCoord2f(1.0, 2.0/4.0); */ glVertex3f(1.0, 0.0, 0.0);
+	  /* glTexCoord2f(1.0, 1.0/4.0); */ glVertex3f(1.0, 0.0,  -0.5);
+	  glEnd();
+	}
+
