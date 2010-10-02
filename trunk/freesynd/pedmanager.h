@@ -50,6 +50,8 @@ public:
     PedInstance *loadInstance(uint8 *data, int map);
 
 protected:
+    // TODO: remove this everywhere
+    // this class loads peds data and sets animation
     std::vector<Ped *> peds_;
 };
 

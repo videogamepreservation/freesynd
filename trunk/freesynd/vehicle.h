@@ -37,6 +37,8 @@ class VehicleInstance;
  */
 class Vehicle {
 public:
+    Vehicle() {}
+    virtual ~Vehicle() {}
     Vehicle(const char *vehicle_name, int first_anim);
 
     const char *name() { return name_.c_str(); }
@@ -46,10 +48,13 @@ public:
     void drawBurnt(int x, int y, int dir, int frame);
 
     VehicleInstance *createInstance(int map);
+    void setAnims(int anims) { anims_ = anims; }
+    void setAnimsBurning(int anims) { anims_burning_; }
+    void setAnimsBurnt(int anims) { anims_burnt_ = anims; }
 
 protected:
     std::string name_;
-    int anims_;
+    int anims_, anims_burning_, anims_burnt_;
 };
 
 /*!

@@ -89,6 +89,8 @@ PedInstance *PedManager::loadInstance(uint8 * data, int map)
     if (gamdata->type == 0)
         return NULL;
 
+    // TODO: correct initialization for animations
+    // require find out where current action is set in data
     int dir = gamdata->orientation >> 5;
     int hp = 2;
 

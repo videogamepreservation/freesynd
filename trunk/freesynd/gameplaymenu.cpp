@@ -610,10 +610,10 @@ void GameplayMenu::handleMouseDown(int x, int y, int button)
                         int sty = ty;
                         //int sox = ox;
                         //int soy = oy;
-                        stx = tx * 256 + ox + 32 * mission_->ped(i)->inVehicle()->tileZ();
+                        stx = tx * 256 + ox + 128 * mission_->ped(i)->inVehicle()->tileZ();
                         //sox = stx % 256;
                         stx = stx / 256;
-                        sty = ty * 256 + oy + 32 * mission_->ped(i)->inVehicle()->tileZ();
+                        sty = ty * 256 + oy + 128 * mission_->ped(i)->inVehicle()->tileZ();
                         //soy = sty % 256;
                         sty = sty / 256;
                         if (ctrl_)

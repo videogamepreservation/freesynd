@@ -58,7 +58,6 @@ skipFli_(false), screen_(new Screen(GAME_SCREEN_WIDTH, GAME_SCREEN_HEIGHT))
     agents_.loadAgents();
     weapons_.loadWeapons();
     mods_.loadMods();
-    vehicles_.loadVehicles();
     intro_sounds_.loadSounds(SoundManager::SAMPLES_INTRO);
     game_sounds_.loadSounds(SoundManager::SAMPLES_GAME);
     music_.loadMusic();

@@ -37,7 +37,7 @@ public:
     VehicleManager();
     ~VehicleManager();
 
-    void loadVehicles();
+    void setVehicle(Vehicle *vehicleanim, unsigned short baseAnim);
 
     int numVehicles() { return vehicles_.size(); }
 
@@ -49,6 +49,7 @@ public:
     VehicleInstance *loadInstance(uint8 *data, int map);
 
 protected:
+    // TODO:remove this
     std::vector<Vehicle *> vehicles_;
 };
 

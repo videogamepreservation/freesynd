@@ -138,8 +138,8 @@ public:
         // to convert to our system use as uint16(LE)
         // tile = (uint16)/128, offz =(uint16)%128 or offz = mapposz[0] & 0x1F
         uint8 mapposz[2];
-        //0x04 - ped is walking
-        //0x05 - ped is driving
+        //0x04 - ped on map
+        //0x05 - ped not on map(driving)
         //0x0D - they are not visible/present on original map(on water located), purpose?
         //0x0C - located level above possible walking surface, purpose?
         //0x0D and 0x0C are exluded from being loaded
@@ -197,25 +197,29 @@ public:
     // This structure contains all cars in the game, including destroyed
     // This struct size is 42.
     typedef struct {
-        uint8 unkn2[4];
-        uint8 mapposx[2];
-        uint8 mapposy[2];
-        uint8 mapposz[2];
-        uint8 unkn3;            // if not set to 4, there is no car
-        uint8 unkn4[5];         // somewhere here is damage made to car (filled with 122, one shot destroys car)
-        uint8 currvistype;      // actual car picture; changed automatically when car is moving
-        uint8 unkn6;            // car is not exist when not set to 6
-        uint8 unkn7[3];         // ???
-        // Half of structure - 21 bytes
-        uint8 unkn8[3];         // usually zeroes
-        uint8 status;           // Car status;2-can enter into car
-        uint8 type;             // Car type;13-standard
-        uint8 direction[4];     // direction the car is turned; setting all to 122 makes you die when exiting car (?)
-        uint8 unkn11[2];        // ??
-        uint8 unkn12[2];        // if both set to 122, there is no car
-        uint8 unkn16[6];        // usually zeroes
-        uint8 speed;            // changing this to 0 make car unable to move. The bigger, the faster car is.
-        uint8 unkn20;           // ??
+      uint8 offset_next[2];
+	  uint8 offset_prev[2];
+	  uint8 mapposx[2];
+	  uint8 mapposy[2];
+	  uint8 mapposz[2];
+      // 0x04 on map(visible)
+	  uint8 desc;
+	  uint8 unkn1;
+	  uint8 unkn2;
+	  uint8 unkn3;
+	  uint8 index_base_anim[2];
+	  uint8 index_current_frame[2];
+	  uint8 index_current_anim[2];
+	  uint8 health[2];
+	  uint8 offset_last_enemy[2];
+	  uint8 type;
+	  uint8 sub_type;
+	  uint8 orientation;
+	  uint8 unkn4;
+	  uint8 offset_of_ped; //driver
+	  uint8 unkn5[11];
+      uint8 speed;
+      uint8 unkn6;
     } LEVELDATA_CARS;           // total: 42 bytes
 
     typedef struct {

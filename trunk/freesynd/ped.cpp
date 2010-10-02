@@ -2962,6 +2962,14 @@ bool PedInstance::movementP(Mission *m, int elapsed)
                     && hold_on_.tilez == nxtTileZ) {
                     dest_path_.clear();
                     speed_ = 0;
+                    // TODO: current action drop function will be
+                    // better for this purpose
+                    if (in_vehicle_) {
+                        in_vehicle_ = 0;
+                    }
+                    if (pickup_weapon_) {
+                        pickup_weapon_ = 0;
+                    }
                     return updated;
                 } else
                     hold_on_.wayFree = 0;
@@ -2970,6 +2978,13 @@ bool PedInstance::movementP(Mission *m, int elapsed)
                     && hold_on_.tilez == nxtTileZ) {
                     dest_path_.clear();
                     speed_ = 0;
+                    // TODO: same as above
+                    if (in_vehicle_) {
+                        in_vehicle_ = 0;
+                    }
+                    if (pickup_weapon_) {
+                        pickup_weapon_ = 0;
+                    }
                     return updated;
                 } else
                     hold_on_.wayFree = 0;

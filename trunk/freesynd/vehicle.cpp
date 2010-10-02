@@ -43,17 +43,17 @@ VehicleInstance *Vehicle::createInstance(int map)
 
 void Vehicle::draw(int x, int y, int dir, int frame)
 {
-    g_App.gameSprites().drawFrame(anims_ + dir - (dir % 2), frame, x, y);
+    g_App.gameSprites().drawFrame(anims_ + (dir / 2) * 2, frame, x, y);
 }
 
 void Vehicle::drawOnFire(int x, int y, int dir, int frame)
 {
-    g_App.gameSprites().drawFrame(anims_ + 8 + dir / 2, frame, x, y);
+    g_App.gameSprites().drawFrame(anims_burning_ + dir / 2, frame, x, y);
 }
 
 void Vehicle::drawBurnt(int x, int y, int dir, int frame)
 {
-    g_App.gameSprites().drawFrame(anims_ + 12 + dir / 2, frame, x, y);
+    g_App.gameSprites().drawFrame(anims_burnt_ + dir / 2, frame, x, y);
 }
 
 VehicleInstance::VehicleInstance(Vehicle * vehicle,
@@ -412,24 +412,29 @@ void VehicleInstance::setDestinationV(Mission *m, int x, int y, int z, int ox,
         for(std::list < PathNode >::iterator it = dest_path_.begin();
             it != dest_path_.end(); it++) {
 
+            // TODO : requires testing for correct offsets per
+            // every direction, because in some part of game
+            // vehicle position on start of game can create incorrect
+            // visual representation
+            // maybe offsets depend on type or tileZ?
             switch(tileDir(it->tileX(), it->tileY(), it->tileZ())) {
                 case 0xFFFFFF00:
                 case 0xFFFF0200:
                     it->setOffX(200);
-                    it->setOffY(55);
+                    it->setOffY(32);
                     break;
                 case 0xFF04FFFF:
-                    it->setOffX(55);
+                    it->setOffX(32);
                     it->setOffY(200);
                     break;
                 case 0xFFFF02FF:
                 case 0xFF0402FF:
-                    it->setOffX(55);
-                    it->setOffY(55);
+                    it->setOffX(32);
+                    it->setOffY(32);
                     break;
                 case 0x06FFFFFF:
                 case 0x0604FFFF:
-                    it->setOffX(55);
+                    it->setOffX(32);
                     it->setOffY(200);
                     break;
                 case 0x06FFFF00:

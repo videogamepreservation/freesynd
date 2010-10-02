@@ -78,11 +78,12 @@ bool Mission::loadLevel(uint8 * levelData)
 #endif
 
     map_ = READ_LE_UINT16(level_data_.mapinfos.map);
+    printf("map to load %X\n", map_);
     min_x_ = READ_LE_UINT16(level_data_.mapinfos.min_x) / 2;
     min_y_ = READ_LE_UINT16(level_data_.mapinfos.min_y) / 2;
     max_x_ = READ_LE_UINT16(level_data_.mapinfos.max_x) / 2;
     max_y_ = READ_LE_UINT16(level_data_.mapinfos.max_y) / 2;
-    objective_ = 1;
+    objective_ = 2;
 /*
     objective_ =
         level_data_.u10.objective[0] | (level_data_.u10.objective[1] << 8);
@@ -109,11 +110,21 @@ bool Mission::loadLevel(uint8 * levelData)
 
     vehicles_.clear();
 
+#if 0
+    // for hacking vehicles data
+    char nameS[256];
+    sprintf(nameS, "vehicles%02X.hex", map_);
+    FILE *staticsF = fopen(nameS,"wb");
+    if (staticsF) {
+        fwrite(level_data_.cars, 1, 42*64, staticsF);
+        fclose(staticsF);
+    }
+
+#endif
     for (int i = 0; i < 64; i++) {
         LEVELDATA_CARS & car = level_data_.cars[i];
-        // lots of things can make a car not exist
-        if (car.unkn3 != 4 || car.unkn6 != 6
-            || (car.unkn12[0] == 122 && car.unkn12[1] == 122))
+        // car.sub_type 0x09 - train
+        if (car.type == 0x0)
             continue;
         VehicleInstance *v =
             g_App.vehicles().loadInstance((uint8 *) & car, map_);
@@ -137,7 +148,7 @@ bool Mission::loadLevel(uint8 * levelData)
 
     for (int i = 0; i < 256; i++) {
         LEVELDATA_PEOPLE & pedref = level_data_.people[i];
-        if(pedref.desc == 0x0D || pedref.desc == 0x0C)
+        if(pedref.type == 0x0 || pedref.desc == 0x0D || pedref.desc == 0x0C)
             continue;
         if(pedref.desc != 0x04 && pedref.desc != 0x05) {
             if(pedref.type !=0) //TODO: pedref.desc == 0 exist?
@@ -148,7 +159,7 @@ bool Mission::loadLevel(uint8 * levelData)
         if (p) {
             peds_.push_back(p);
             if (i > 7) {
-                p->setHostile(true);
+                //p->setHostile(true);
                 p->setSightRange(7);
             }
             if (p->isHostile()) {

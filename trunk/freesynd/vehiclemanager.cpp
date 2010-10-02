@@ -38,41 +38,34 @@ VehicleManager::~VehicleManager()
         delete vehicles_[i];
 }
 
-void VehicleManager::loadVehicles()
+void VehicleManager::setVehicle(Vehicle *vehicleanim, unsigned short baseAnim)
 {
-    vehicles_.push_back(new Vehicle("CAR", 446));
+    vehicleanim->setAnims(baseAnim);
+    vehicleanim->setAnimsBurning(baseAnim + 8);
+    vehicleanim->setAnimsBurnt(baseAnim + 12);
 }
 
 VehicleInstance *VehicleManager::loadInstance(uint8 * data, int map)
 {
     Mission::LEVELDATA_CARS * gamdata = (Mission::LEVELDATA_CARS *) data;
 
-    int kind;
-    int hp = 255;
-    switch (gamdata->type) {
-    case 13:
-        kind = 0;
-        hp = 5;
-        break;
-        // TODO: other kinds of vehicles
-    default:
-        return NULL;
-    }
+    int hp = 5;
+    int dir = gamdata->orientation >> 5;
 
-    VehicleInstance *newvehicle = vehicles_[kind]->createInstance(map);
+    Vehicle *vehicleanim = new Vehicle();
+    setVehicle(vehicleanim,
+        READ_LE_UINT32(gamdata->index_current_anim) - dir);
+    VehicleInstance *newvehicle = vehicleanim->createInstance(map);
     int z = READ_LE_UINT16(gamdata->mapposz) >> 7;
     z--;
-    int oz = gamdata->mapposz[0] & 0x7F;
     newvehicle->setVisZ(z);
-    if (oz > 0)
-        z++;
+    int oz = gamdata->mapposz[0] & 0x7F;
     newvehicle->setPosition(gamdata->mapposx[1], gamdata->mapposy[1],
                             z, gamdata->mapposx[0],
                             gamdata->mapposy[0], oz);
-    newvehicle->setVisZ(gamdata->mapposz[1]);
     newvehicle->setHealth(hp);
     newvehicle->setStartHealth(hp);
-    newvehicle->setDirection(gamdata->currvistype - 147);
+    newvehicle->setDirection(dir);
 
     return newvehicle;
 }
