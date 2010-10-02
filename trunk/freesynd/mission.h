@@ -117,7 +117,8 @@ public:
     } LEVELDATA_UNKN01;         // total: 8 bytes
 
     typedef struct {
-        uint8 objs[128][128][2];
+        // 128*128 offsets size 2 bytes(LE)
+        uint8 objs[32768];
     } LEVELDATA_MAP;            // total: 32768 bytes
 
     // This structure contains all people in the game, including agents
@@ -148,7 +149,7 @@ public:
         uint8 index_base_anim[2];  //index in (HSTA-0.ANI)
         uint8 index_current_frame[2];   //index in (HFRA-0.ANI)
         uint8 index_current_anim[2]; // index in (HSTA-0.ANI)
-        uint8 health[2]; // something to do with amo / health
+        uint8 health[2]; // this is signed short
         uint8 offset_last_enemy[2];
         //0x01 ped; 0x02 vehicle; 0x04 weapon;
         //0x05 object; allow to display a target, a pickup, and for minimap
@@ -234,75 +235,104 @@ public:
         uint8 unkn12;           // 0C, 13, 16
         uint8 unkn13;           // 40, 80, 00
         uint8 zero2[3];
-
-/*
-
-statics data from first level:
-
-00 00 00 00 D4 49 7C 34 00 01 04 00 00 00 35 04 6E 12 36 04 28 00 00 00 05 0C 40 00 00 00
-00 00 00 00 64 3C EC 30 00 01 04 00 00 00 4D 04 8A 12 4D 04 28 00 00 00 05 0C 80 00 00 00
-00 00 00 00 68 49 D8 21 00 01 04 00 00 00 35 04 63 12 35 04 32 00 00 00 05 0C 00 00 00 00
-00 00 00 00 60 40 E0 20 00 01 04 00 00 00 3D 04 73 12 3D 04 28 00 00 00 05 0C 80 00 00 00
-00 00 54 67 20 43 E0 20 80 01 06 00 00 00 00 00 5F 07 27 02 32 00 00 00 05 13 40 00 00 00
-00 00 72 67 20 43 E0 1F 80 01 06 00 00 00 00 00 5F 07 27 02 32 00 00 00 05 13 40 00 00 00
-00 00 90 67 20 43 E0 1E 80 01 06 00 00 00 00 00 5F 07 27 02 32 00 00 00 05 13 40 00 00 00
-FA 66 00 00 20 43 60 20 80 01 06 00 00 00 00 00 5F 07 27 02 32 00 00 00 05 13 40 00 00 00
-18 67 00 00 20 43 60 1F 80 01 06 00 00 00 00 00 5F 07 27 02 32 00 00 00 05 13 40 00 00 00
-36 67 00 00 20 43 60 1E 80 01 06 00 00 00 00 00 5F 07 27 02 32 00 00 00 05 13 40 00 00 00
-00 00 00 00 C8 58 08 30 00 01 06 00 00 00 01 00 74 05 E3 00 32 00 00 00 05 16 40 00 00 00
-00 00 00 00 A8 59 A8 2F 00 01 06 00 00 00 01 00 74 05 E3 00 32 00 00 00 05 16 40 00 00 00
-00 00 00 00 60 59 00 30 00 01 06 00 00 00 02 00 79 05 E6 00 32 00 00 00 05 16 40 00 00 00
-00 00 44 68 8C 59 34 2E 00 01 06 00 00 00 02 00 79 05 E6 00 32 00 00 00 05 16 40 00 00 00
-00 00 00 00 04 58 0C 2E 00 01 06 00 00 00 03 00 81 05 E9 00 32 00 00 00 05 16 40 00 00 00
-08 68 00 00 B8 59 68 2E 00 01 06 00 00 00 03 00 81 05 E9 00 32 00 00 00 05 16 40 00 00 00
-00 00 00 00 50 5A 70 2F 00 01 06 00 00 00 03 00 81 05 E9 00 32 00 00 00 05 16 40 00 00 00
-00 00 9E 68 58 5C 68 27 00 01 06 00 00 00 01 00 74 05 E3 00 32 00 00 00 05 16 40 00 00 00
-80 68 00 00 D8 5C 58 27 00 01 06 00 00 00 02 00 79 05 E6 00 32 00 00 00 05 16 40 00 00 00
-00 00 DA 68 0C 5B 04 27 00 01 06 00 00 00 02 00 79 05 E6 00 32 00 00 00 05 16 40 00 00 00
-BC 68 00 00 F0 5B B0 27 00 01 06 00 00 00 03 00 81 05 E9 00 32 00 00 00 05 16 40 00 00 00
-00 00 00 00 B8 3E 78 21 80 02 06 00 00 00 00 00 6F 0A 28 02 32 00 00 00 05 12 00 00 00 00
-00 00 00 00 38 3F 78 21 80 02 06 00 00 00 00 00 5E 07 26 02 32 00 00 00 05 13 00 00 00 00
-
-*/
-
-
-
-
     } LEVELDATA_STATICS;        // total: 30 bytes
 
     typedef struct {
-        uint8 unkn10[36];
-    } LEVELDATA_UNKN06;         // total: 36 bytes
+      uint8 offset_next[2];
+	  uint8 offset_prev[2];
+	  uint8 mapposx[2];;
+	  uint8 mapposy[2];;
+	  uint8 mapposz[2];;
+	  uint8 unkn1;
+	  uint8 unkn2;
+	  uint8 unkn3;
+	  uint8 unkn4;
+	  uint8 index_base_anim[2];
+	  uint8 index_current_frame[2];
+	  uint8 index_current_anim[2];
+      // should be used as signed short/int16
+	  uint8 nb_amos[2];
+	  uint8 unkn5[2];
+      // look peds for more info
+	  uint8 type;
+      // 0x01 persuadertron; 0x02 pistol; 0x03 gauss gun; 0x04 shotgun;
+      // 0x05 uzi; 0x06 minigun; 0x07 laser; 0x08 flamer; 0x09 long range;
+      // 0x0A scanner; 0x0B medikit; 0x0C time bomb; 0x0D access card;
+      // 0x0E invalid; 0x0F invalid; 0x10 invalid; 0x11 energy shield;
+	  uint8 sub_type;
+	  uint8 unkn6[2];
+	  uint8 offset_next_inventory[2];
+	  uint8 offset_prev_inventory[2];
+	  uint8 offset_owner[2];
+	  uint8 unkn7[2];
+    } LEVELDATA_WEAPONS;         // total: 36 bytes
 
     typedef struct {
-        uint8 unkn10[12];
-    } LEVELDATA_UNKN07;         // total: 12 bytes
+      uint8 offset_next[2];
+	  uint8 offset_prev[2];
+	  uint8 mapposx[2];
+	  uint8 mapposy[2];
+	  uint8 mapposz[2];
+	  uint8 unkn1[4];
+	  uint8 index_base_anim[2];
+	  uint8 index_current_frame[2];
+	  uint8 index_current_anim[2];
+	  uint8 unkn2[8];
+	  uint8 offset_owner[2];
+    } LEVELDATA_SFX;       // total: 30 bytes
 
     typedef struct {
-        uint8 unkn10[8];
-    } LEVELDATA_UNKN08;         // total: 8 bytes
+      uint8 next[2];
+	  uint8 offset_object[2];
+      // tile* where _i_factor, _j_factor, _k_factor
+      //i = (_i_factor < < 7) | 0x0040
+      //j = (_j_factor < < 7) | 0x0040
+      //k = (_k_factor < < 7) | 0x0000 
+	  uint8 tilex;
+	  uint8 tiley;
+      // tile = tilez << 1 or *2
+	  uint8 tilez;
+	  uint8 type;
+    } LEVELDATA_SCENARIOS;         // total: 8 bytes
 
     typedef struct {
-        uint8 unkn10[437];
-    } LEVELDATA_UNKN09;         // total: 437 bytes
+        uint8 unkn10[448];
+    } LEVELDATA_UNKN09;         // total: 448 bytes
 
     typedef struct {
-        uint8 unkn10[11];
-        uint8 map[2];
-        uint8 minx[2];
-        uint8 miny[2];
-        uint8 maxx[2];
-        uint8 maxy[2];
-        uint8 zero[4];
-        uint8 objective[2];
-        uint8 objective_data[2];
-        uint8 unkn11[14 * 9 - 11 - 18];
-    } LEVELDATA_UNKN10;         // total: 126 bytes
+      uint8 map[2];
+	  uint8 min_x[2];
+	  uint8 min_y[2];
+	  uint8 max_x[2];
+	  uint8 max_y[2];
+      //status flag is set to 1 if the mission has been successfully completed
+	  uint8 status;
+	  uint8 unkn1[3];
+    } LEVELDATA_MAPINFOS;        // total: 14 bytes
 
-    // Agents table?
     typedef struct {
-        uint8 unkn10[15];
-    } LEVELDATA_UNKN11;         // total: 15 bytes
+      // 0x00 ??? ;0x01 persuade; 0x02 assassinate; 0x03 protect;
+      // 0x05 equipment aquisition; 0x0a combat sweep (police);
+      // 0x0b combat sweep; 0x0d(0x0e(?)) raid and rescue;
+      // 0x0e(0x0f(?)) use vehicle; 0x10 evacuate
+      // if protect, the type is zero, and the next objectives are the
+      // goals, the list finish with zero and the offset of the protected item ?
+      uint8 type[2];
+      // 'offset + 32774' gives the offset in this file of the first objective
+	  uint8 offset[2];
+	  uint8 mapposx[2];
+	  uint8 mapposy[2];
+	  uint8 mapposz[2];
+      //If “protect”, the next objective are the goals and their type is zero.
+      //The list finish with zero and the offset of the protected item ?
+      //The status flag is set to 1 if the objective has to be completed
+	  uint8 status;
+	  uint8 unkn1[3];
+    } LEVELDATA_OBJECTIVES;         // total: 14 bytes
+
+    typedef struct {
+        uint8 unkn10[1896];
+    } LEVELDATA_UNKN11;         // total: 1896 bytes
 
     typedef struct {
         /*      0 */ LEVELDATA_UNKN01 u01;
@@ -310,13 +340,13 @@ BC 68 00 00 F0 5B B0 27 00 01 06 00 00 00 03 00 81 05 E9 00 32 00 00 00 05 16 40
         /*  32776 */ LEVELDATA_PEOPLE people[256];
         /*  56328 */ LEVELDATA_CARS cars[64];
         /*  59016 */ LEVELDATA_STATICS statics[400];
-        /*  71016 */ LEVELDATA_UNKN06 u06[725];
-        /*  97116 */ LEVELDATA_UNKN07 u07;
-        /*  97128 */ LEVELDATA_UNKN08 u08[2048];
+        /*  71016 */ LEVELDATA_WEAPONS weapons[512];
+        /*  89448 */ LEVELDATA_SFX sfx[256];
+        /*  97128 */ LEVELDATA_SCENARIOS scenarios[2048];
         /* 113512 */ LEVELDATA_UNKN09 u09;
-        /* 113949 */ LEVELDATA_UNKN10 u10;
-        /* 114075 */ LEVELDATA_UNKN11 u11[129];
-        /* 116010 */
+        /* 113960 */ LEVELDATA_MAPINFOS mapinfos;
+        /* 113974 */ LEVELDATA_OBJECTIVES objectives[10];
+        /* 114114 */ LEVELDATA_UNKN11 u11;
     } LEVELDATA;
 
     // map-tile surfaces
