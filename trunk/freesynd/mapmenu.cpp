@@ -107,6 +107,9 @@ const int MapMenu::TAX_VALUE_STATIC_ID = 4;
 const int MapMenu::OWN_LBL_STATIC_ID = 5;
 const int MapMenu::OWN_STATIC_ID = 6;
 const int MapMenu::TIME_STATIC_ID = 7;
+const int MapMenu::TAX_PCT_STATIC_ID = 8;
+const int MapMenu::TAX_DEC_OPT_ID = 2;
+const int MapMenu::TAX_INC_OPT_ID = 3;
 
 
 /*!
@@ -131,6 +134,11 @@ mapblk_data_(NULL), orig_pixels_(NULL), select_tick_count_(0)
     addStatic(268, 360, "", 0, false);          // Own status
 
     addStatic(500, 9, "00:1:85NC", 1, false);       // Time
+
+    // Tax cursors
+    addStatic(350, 346, "@   30%", 0, false);
+    addOption(375, 350, "", 1, KEY_MINUS, NULL, false, Sprite::MSPR_TAX_DECR, Sprite::MSPR_TAX_DECR);
+    addOption(435, 350, "", 1, KEY_PLUS, NULL, false, Sprite::MSPR_TAX_INCR, Sprite::MSPR_TAX_INCR);
 
     setParentMenu("main");
 
@@ -210,9 +218,6 @@ void MapMenu::handleBlockSelected() {
             case STAT_DISCONTENT:
                 setStaticText(OWN_STATIC_ID, "DISCONTENT");
                 break;
-            case STAT_REBEL:
-                setStaticText(OWN_STATIC_ID, "REBELLIOUS");
-                break;
             default:
                 setStaticText(OWN_STATIC_ID, "UNKNOWN");
         }
@@ -224,12 +229,37 @@ void MapMenu::handleBlockSelected() {
         sprintf(tmp, "%i", g_Session.getTaxRevenue(blk.population, blk.tax));
 #endif
         setStaticText(TAX_VALUE_STATIC_ID, tmp);
+
+        showOption(KEY_MINUS);
+        showOption(KEY_PLUS);
+
+#ifdef WIN_SECURE
+        sprintf_s(tmp, 100, "@   %d%%", blk.tax);
+#else
+        sprintf(tmp, "@   %d%%", blk.tax);
+#endif
+        setStaticText(TAX_PCT_STATIC_ID, tmp);
+
     } else {
         // Status
         setStaticText(OWN_LBL_STATIC_ID, "OWN");
         setStaticText(OWN_STATIC_ID, "");
         // Tax
-        setStaticText(TAX_VALUE_STATIC_ID, "UNKNOWN");
+        if (blk.status == STAT_REBEL) {
+            setStaticText(TAX_VALUE_STATIC_ID, "REBELLIOUS");
+#ifdef WIN_SECURE
+            sprintf_s(tmp, 100, "@   %d%%", blk.tax);
+#else
+            sprintf(tmp, "@   %d%%", blk.tax);
+#endif
+            setStaticText(TAX_PCT_STATIC_ID, tmp);
+        } else {
+            setStaticText(TAX_VALUE_STATIC_ID, "UNKNOWN");
+            setStaticText(TAX_PCT_STATIC_ID, "");
+        }
+
+        hideOption(KEY_MINUS);
+        hideOption(KEY_PLUS);
     }
 }
 
@@ -245,8 +275,9 @@ void MapMenu::handleTick(int elapsed)
 
     // This a count to refresh the game time
     time_tick_count_ += elapsed;
+    // 1 hour every 4 seconds
     if (time_tick_count_ > 4000) {
-        g_Session.updateTime(select_tick_count_);
+        g_Session.updateTime(1);
         updateClock();
         time_tick_count_ = 0;
     }
@@ -382,6 +413,20 @@ void MapMenu::handleMouseDown(int x, int y, int button)
     }
 }
 
+void MapMenu::handleOption(Key key) {
+    bool refresh = false;
+    if (key == KEY_PLUS ) {
+        refresh = g_Session.addToTaxRate(1);
+    } else if (key == KEY_MINUS ) {
+        refresh = g_Session.addToTaxRate(-1);
+    }
+
+    if (refresh) {
+        handleBlockSelected();
+        needRendering();
+    }
+}
+
 void MapMenu::handleUnknownKey(Key key, KeyMod mod, bool pressed)
 {
     if (key == KEY_0) {
@@ -393,7 +438,7 @@ void MapMenu::handleUnknownKey(Key key, KeyMod mod, bool pressed)
     } else if (key == KEY_RIGHT && g_Session.getSelectedBlockId() < 49) {
         g_Session.setSelectedBlockId(g_Session.getSelectedBlockId() + 1);
         needRendering();
-    }
+    } 
 
     handleBlockSelected();
 }

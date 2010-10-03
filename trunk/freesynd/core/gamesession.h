@@ -189,7 +189,10 @@ public:
     //! Tells if cheat mode Replay missions is on
     bool canReplayMission() { return replay_mission_; }
 
-    void updateTime(int elapsed);
+    void updateTime(int hour_elapsed);
+
+    //! Adds the given amount to the selected block tax rate.
+    bool addToTaxRate(int amount);
 
     //! Returns a revenue for a given population and rate.
     int getTaxRevenue(int population, int rate);
@@ -215,6 +218,9 @@ private:
     bool enable_all_mis_;
     /*! Cheat flag to enable replay of finished missions. */
     bool replay_mission_;
+
+    // Update population, status and returns money
+    int updateCountries();
 };
 
 #endif //CORE_GAME_SESSION_H

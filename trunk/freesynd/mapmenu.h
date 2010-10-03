@@ -44,6 +44,7 @@ public:
     void handleRender();
     void handleLeave();
     void handleMouseDown(int x, int y, int button);
+    void handleOption(Key key);
     void handleUnknownKey(Key key, KeyMod mod, bool pressed);
 
     void setBlkColour(int n, uint8 c) {
@@ -58,6 +59,9 @@ protected:
     static const int OWN_STATIC_ID;
     static const int TAX_VALUE_STATIC_ID;
     static const int TIME_STATIC_ID;
+    static const int TAX_PCT_STATIC_ID;
+    static const int TAX_INC_OPT_ID;
+    static const int TAX_DEC_OPT_ID;
 
     int mapblk_size_;
     /*! Contains the images of the differents blocks.*/

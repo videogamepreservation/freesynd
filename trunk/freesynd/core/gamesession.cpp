@@ -127,7 +127,7 @@ void GameSession::completeSelectedBlock() {
     // Make the next missions available
     if (g_Blocks[selected_blck_].next != NULL) {
         char s[50];
-        STR_CPY(s, g_Blocks[selected_blck_].next);
+        fs_strcpy(s, 50, g_Blocks[selected_blck_].next);
         char *token = strtok(s, ":");
         while ( token != NULL ) {
             int id = atoi(token);
@@ -141,35 +141,75 @@ void GameSession::completeSelectedBlock() {
 }
 
 /*!
- * Updates the game time based on the given elapsed time.
+ * Updates the game time based on the given elapsed time in hours.
  * This methods computes the tax revenues, the population
  * status and the research evolution.
+ * \param hour_elapsed The number of elapsed hour.
  */
-void GameSession::updateTime(int elapsed) {
-    // TODO : complete the method
-    time_hour_++;
+void GameSession::updateTime(int hour_elapsed) {
+    // Number of days in the 
+    int day_elapsed = hour_elapsed / 24;
+    int hour_remain = hour_elapsed % 24;
+
+    // Hour update
+    time_hour_ += hour_remain;
     if (time_hour_ > 23) {
-        time_hour_ = 0;
+        time_hour_ -= 24;
         time_day_++;
+
+        if (time_day_ > 365) {
+            time_day_ = 1;
+            time_year_++;
+        }
+
+        // Update money
+        money_ += updateCountries();
     }
+
+    if (day_elapsed != 0) {
+        for (int i=0; i<day_elapsed; i++) {
+            time_day_++;
+            if (time_day_ > 365) {
+                time_day_ = 1;
+                time_year_++;
+            }
+
+            // Update money
+            money_ += updateCountries();
+        }
+    }
+
+    printf("Money %d\n", money_);
 }
 
 int GameSession::getTaxRevenue(int population, int rate) {
-    return 0;
+    int amount = ((population / 1000000 + 1) * 1375 * rate) / 1000;
+
+    return amount;
 }
 
-/*!
- * Adds the given mission index to the list of finished missions.
- * Removes the mission from the list of available missions.
- * \param index The mission index (between 0 and 49 inclusive)
- */
-/*void GameSession::addToFinishedMissions(uint8 index) { 
-    if (index >= 0 && index < 50) {
-        finished_missions_.insert(index);
 
-        // Remove the mission from available missions
-        if (finished_missions_.find(index) != finished_missions_.end()) {
-            finished_missions_.erase(index);
+bool GameSession::addToTaxRate(int amount) {
+    int newRate = g_Blocks[selected_blck_].tax + amount;
+    
+    if (newRate <= 100 && newRate >= 0) {
+        g_Blocks[selected_blck_].tax = newRate;
+        return true;
+    }
+
+    return false;
+}
+
+int GameSession::updateCountries() {
+    int amount = 0;
+
+    for (int i=0; i < 50; i++) {
+        Block blk = g_Blocks[i];
+
+        if (blk.finished && blk.status != STAT_REBEL) {
+            amount += getTaxRevenue(blk.population, blk.tax);
         }
     }
-}*/
+
+    return amount;
+}
