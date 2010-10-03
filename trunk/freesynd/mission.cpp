@@ -228,23 +228,8 @@ bool Mission::loadMission(uint8 * missData, int size)
 
     int i = 0;
 
-    // not every number is fully correct, this trick helps
-    // without it some missions will exit with error
-    char tmpnum[30];
-    char *tmpmiss = 0;
     while (*miss != '|') {
-        memset(tmpnum, 0, 30);
-        tmpmiss = miss;
-        for(char ci = 0; ci < 30; ci++) {
-            if(*tmpmiss >= 0x30 && *tmpmiss <= 0x39) {
-                tmpnum[ci] = *tmpmiss;
-                tmpmiss++;
-            } else {
-                tmpnum[ci] = 0x0;
-                break;
-            }
-        }
-        info_costs_[i++] = atoi(tmpnum);
+        info_costs_[i++] = atoi(miss);
         miss = strchr(miss, '\n') + 1;
     }
 
@@ -252,18 +237,7 @@ bool Mission::loadMission(uint8 * missData, int size)
     i = 0;
 
     while (*miss != '|') {
-        memset(tmpnum, 0, 30);
-        tmpmiss = miss;
-        for(char ci = 0; ci < 30; ci++) {
-            if(*tmpmiss >= 0x30 && *tmpmiss <= 0x39) {
-                tmpnum[ci] = *tmpmiss;
-                tmpmiss++;
-            } else {
-                tmpnum[ci] = 0x0;
-                break;
-            }
-        }
-        enhance_costs_[i++] = atoi(tmpmiss);
+        enhance_costs_[i++] = atoi(miss);
         miss = strchr(miss, '\n') + 1;
     }
 

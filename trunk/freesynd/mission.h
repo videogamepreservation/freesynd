@@ -377,8 +377,8 @@ public:
     // TODO: enhance level require better handling of values
     // some missions have 2 info costs, some 3, enhance cost same thing
     // the total number is const = 3 it should be variable
-    int info_costs_[4];
-    int enhance_costs_[4];
+    int info_costs_[10];
+    int enhance_costs_[10];
     std::string briefing_;
     int map_, min_x_, min_y_, max_x_, max_y_;
     int objective_;
