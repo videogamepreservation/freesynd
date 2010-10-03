@@ -228,8 +228,23 @@ bool Mission::loadMission(uint8 * missData, int size)
 
     int i = 0;
 
+    // not every number is fully correct, this trick helps
+    // without it some missions will exit with error
+    char tmpnum[30];
+    char *tmpmiss = 0;
     while (*miss != '|') {
-        info_costs_[i++] = atoi(miss);
+        memset(tmpnum, 0, 30);
+        tmpmiss = miss;
+        for(char ci = 0; ci < 30; ci++) {
+            if(*tmpmiss >= 0x30 && *tmpmiss <= 0x39) {
+                tmpnum[ci] = *tmpmiss;
+                tmpmiss++;
+            } else {
+                tmpnum[ci] = 0x0;
+                break;
+            }
+        }
+        info_costs_[i++] = atoi(tmpnum);
         miss = strchr(miss, '\n') + 1;
     }
 
@@ -237,7 +252,18 @@ bool Mission::loadMission(uint8 * missData, int size)
     i = 0;
 
     while (*miss != '|') {
-        enhance_costs_[i++] = atoi(miss);
+        memset(tmpnum, 0, 30);
+        tmpmiss = miss;
+        for(char ci = 0; ci < 30; ci++) {
+            if(*tmpmiss >= 0x30 && *tmpmiss <= 0x39) {
+                tmpnum[ci] = *tmpmiss;
+                tmpmiss++;
+            } else {
+                tmpnum[ci] = 0x0;
+                break;
+            }
+        }
+        enhance_costs_[i++] = atoi(tmpmiss);
         miss = strchr(miss, '\n') + 1;
     }
 
@@ -593,7 +619,7 @@ bool Mission::setSurfaces() {
         PedInstance *p = peds_[i];
         int x = p->tileX();
         int y = p->tileY();
-        int z = p->tileZ() + (p->offZ() == 0 ? 0 : 1);
+        int z = p->tileZ();
         if (z >= mmax_z_)
             continue;
         if (mdpoints_[x + y * mmax_x_ + z * mmax_m_xy].t == m_fdNotDefined) {

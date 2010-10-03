@@ -32,7 +32,7 @@
 
 BriefMenu::BriefMenu(MenuManager * m, MapMenu * mapMenu) :
 Menu(m, "brief", "mbrief.dat", "mbrieout.dat"), map_menu_(mapMenu),
-orig_pixels_(0), start_line_(0), info_level_(1),
+orig_pixels_(0), start_line_(0), info_level_(0),
 enhance_level_(0), mission_(0) {
     addStatic(148, 35, "MISSION BRIEF", 3, true);
     addOption(538, 118, "INFO", 1, KEY_F1, NULL);

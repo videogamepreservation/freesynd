@@ -8,6 +8,9 @@ This is a prelimary release for testing and development purposes.
 Changes
 -------
   * Correct positioning by Z axis for all objects
+  * There was a bug, atoi used in LoadMission created strange behavior,
+ value was not identified if after number was letter and destructor
+ for Mission class was not able to deallocate briefing string
 
 Fixed Bugs
 ----------

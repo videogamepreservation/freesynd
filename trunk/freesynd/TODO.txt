@@ -68,3 +68,6 @@ better to group drawing objects by Z, it can be faster, for fast searching is us
 key generated every time, this can be added and generated for object on load and on
 change respectively, will also speed up drawing as not all objects change their
 position
+ - briefmenu enhance level require better handling of values some missions have 2
+info costs, some 3, enhance cost same thing, the total number is const = 3 it
+should be variable

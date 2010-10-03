@@ -63,7 +63,7 @@ protected:
 class VehicleInstance : public ShootableMovableMapObject {
 public:
     VehicleInstance(Vehicle *vehicle, int m);
-    virtual ~VehicleInstance() {}
+    virtual ~VehicleInstance() { delete vehicle_;}
 
     bool animate(int elapsed);
     void draw(int x, int y);
