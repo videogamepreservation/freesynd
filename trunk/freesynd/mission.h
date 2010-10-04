@@ -203,6 +203,7 @@ public:
 	  uint8 mapposy[2];
 	  uint8 mapposz[2];
       // 0x04 on map(visible)
+      // 0x05 not on map(hidden)
 	  uint8 desc;
 	  uint8 unkn1;
 	  uint8 unkn2;
@@ -212,7 +213,7 @@ public:
 	  uint8 index_current_anim[2];
 	  uint8 health[2];
 	  uint8 offset_last_enemy[2];
-	  uint8 type;
+	  uint8 type; // 0x02
 	  uint8 sub_type;
 	  uint8 orientation;
 	  uint8 unkn4;
@@ -223,22 +224,26 @@ public:
     } LEVELDATA_CARS;           // total: 42 bytes
 
     typedef struct {
-        uint8 unkn1[4];
-        uint8 mapposx[2];
-        uint8 mapposy[2];
-        uint8 mapposz[2];
-        uint8 unkn3;            // seems to be set to 4 or 6
-        uint8 zero[3];
-        uint8 unknAnim[2];      // animation (LE data)
-        uint8 subType;            // sub-type, for map editor maybe
-        uint8 objType;            // looks like major type
-        uint8 firstAnim[2];     // objects first animation (LE data)
-        uint8 unkn10;           // 28 or 32
-        uint8 zero1[3];
-        uint8 unkn11;           // seems to be set to 5
-        uint8 unkn12;           // 0C, 13, 16
-        uint8 unkn13;           // 40, 80, 00
-        uint8 zero2[3];
+      uint8 offset_next[2];
+	  uint8 offset_prev[2];
+	  uint8 mapposx[2];
+	  uint8 mapposy[2];
+	  uint8 mapposz[2];
+      // 0x04 - on map
+      // 0x06 - on map, but why not 0x04?
+      // 0x07 - on map(not sure), but why not 0x04?
+	  uint8 desc;
+	  uint8 unkn11;
+	  uint8 unkn12;
+	  uint8 unkn13;
+	  uint8 index_base_anim[2];
+	  uint8 index_current_frame[2];
+	  uint8 index_current_anim[2];
+	  uint8 unkn20[4];
+	  uint8 type;
+	  uint8 sub_type; // 0x0C door; 0x12 open window; 0x13 close window; 0x16 tree
+	  uint8 orientation;
+	  uint8 unkn27[3];
     } LEVELDATA_STATICS;        // total: 30 bytes
 
     typedef struct {
@@ -247,7 +252,9 @@ public:
 	  uint8 mapposx[2];;
 	  uint8 mapposy[2];;
 	  uint8 mapposz[2];;
-	  uint8 unkn1;
+      // 0x04 on map
+      // 0x05 not on map(in inventory)
+	  uint8 desc;
 	  uint8 unkn2;
 	  uint8 unkn3;
 	  uint8 unkn4;
@@ -258,7 +265,7 @@ public:
 	  uint8 nb_amos[2];
 	  uint8 unkn5[2];
       // look peds for more info
-	  uint8 type;
+	  uint8 type; // 0x04
       // 0x01 persuadertron; 0x02 pistol; 0x03 gauss gun; 0x04 shotgun;
       // 0x05 uzi; 0x06 minigun; 0x07 laser; 0x08 flamer; 0x09 long range;
       // 0x0A scanner; 0x0B medikit; 0x0C time bomb; 0x0D access card;

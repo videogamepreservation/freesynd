@@ -186,33 +186,22 @@ bool Mission::loadLevel(uint8 * levelData)
     statics_.clear();
     for (unsigned int i = 0; i < 400; i++) {
         LEVELDATA_STATICS & sref = level_data_.statics[i];
+        if(sref.desc == 0)
+            continue;
         Static *s = Static::loadInstance((uint8 *) & sref, map_);
         if (s)
             statics_.push_back(s);
     }
 
 #if 0
-    std::map < int, int >markers;
-    for (unsigned int j = 0; j < 128; j++) {
-        for (unsigned int i = 0; i < 128; i++) {
-            uint8 a = level_data_.map.objs[j][i][0];
-            uint8 b = level_data_.map.objs[j][i][1];
-            int t = (a << 8) | b;
-
-            if (t == 0)
-                printf(".");
-            else {
-                if (markers.find(t) == markers.end())
-                    markers[t] = markers.size();
-                printf("%c", markers[t] + 'a');
-            }
-        }
-        printf("\n");
+    // for hacking weapons data
+    char nameS[256];
+    sprintf(nameS, "weapons%02X.hex", map_);
+    FILE *staticsF = fopen(nameS,"wb");
+    if (staticsF) {
+        fwrite(level_data_.weapons, 1, 36*512, staticsF);
+        fclose(staticsF);
     }
-
-    for (std::map < int, int >::iterator it = markers.begin();
-         it != markers.end(); it++)
-        printf("%c -> %04x\n", it->second + 'a', it->first);
 #endif
 
     return true;
@@ -338,6 +327,7 @@ void Mission::drawMap(int scrollx, int scrolly)
             fast_weapon_cache_.insert(fastKey(weapons_[i]));
 
     fast_statics_cache_.clear();
+    // TODO: static objects don't move :))
     for (unsigned int i = 0; i < statics_.size(); i++)
         fast_statics_cache_.insert(fastKey(statics_[i]));
 
@@ -553,6 +543,9 @@ bool Mission::isStairs(char thisTile) {
 
 bool Mission::setSurfaces() {
 
+    // Description: creates map of walkable surfaces, also
+    // defines directions where movement is possible
+
     // NOTE: tiles walkdata type 0x0D are quiet special, and they
     // are not handled correctly, these correction and andjustings
     // can create additional speed drain, as such I didn't
@@ -587,7 +580,6 @@ bool Mission::setSurfaces() {
 
     //printf("surface data size %i\n", sizeof(surfaceDesc) * mmax_m_all);
     //printf("flood data size %i\n", sizeof(floodPointDesc) * mmax_m_all);
-
 
     for (unsigned int i = 0; i < peds_.size(); i++) {
         PedInstance *p = peds_[i];

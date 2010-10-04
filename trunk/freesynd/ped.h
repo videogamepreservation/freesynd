@@ -251,8 +251,6 @@ public:
         unsigned short n;
     }lvlNodesDesc;
 
-    int getDistance(int x1, int y1, int z1,
-        int x2, int y2, int z2);
     void setDestinationP(Mission *m, int x, int y, int z,
         int ox = 128, int oy = 128, int new_speed = 160);
 

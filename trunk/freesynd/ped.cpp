@@ -880,18 +880,7 @@ int PedInstance::map() {
 }
 
 bool PedInstance::walkable(int x, int y, int z) {
-    Map *m = g_App.maps().map(map());
-
-    if (m->stairsAt(x, y, z) || m->stairsAt(x, y, z + 1))
-        return true;
-
-    uint8 thisTile = g_App.walkdata_[m->tileAt(x, y, z)];
-    uint8 upperTile = g_App.walkdata_[m->tileAt(x, y, z + 1)];
-    //printf(" %i : %i : %i\n",thisTile,z,upperTile);
-    return thisTile != 0x0C && thisTile != 0x10 && thisTile != 0x0
-        && thisTile != upperTile
-        && ((thisTile == 0x05 || thisTile == 0x0D)
-            ? upperTile == 0x0 : true);
+    return true;
 }
 
 PedInstance::AnimationDrawn PedInstance::getDrawnAnim() {
@@ -900,13 +889,6 @@ PedInstance::AnimationDrawn PedInstance::getDrawnAnim() {
 
 void PedInstance::setDrawnAnim(PedInstance::AnimationDrawn drawn_anim) {
     drawn_anim_ = drawn_anim;
-}
-
-int PedInstance::getDistance(int x1, int y1, int z1,
-                                int x2, int y2, int z2) {
-    // It is not quiet correct, but int is better then float + sqrt
-    return (x2 - x1) * (x2 - x1)+ (y2 - y1) * (y2 - y1)
-        + (z2 - z1) * (z2 - z1);
 }
 
 void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
