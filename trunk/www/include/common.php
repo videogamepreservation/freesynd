@@ -55,17 +55,25 @@ function newsItem($title, $content, $submitter, $date)
         . '</b><br />' . htmlentities($date) . "</div>\n\n";
 }
 
-function roadmapItem($id, $content)
+function roadmapItem($id, $content, $done)
 {
-    echo '<li><a href="http://sourceforge.net/support/tracker.php?aid='
+    if ($done == 'yes')
+        $done = 'style = "text-decoration:line-through"';
+    else
+        $done = '';
+    echo '<li '. $done . '><a href="http://sourceforge.net/support/tracker.php?aid='
         . $id . '" target="_blank">'. $id . '</a> &nbsp;'
-        . implode("</p>\n<p>", explode("\n\n", $content))
+        . implode("<br />", explode("\n\n", $content))
         . "</li>\n";
 }
 
-function roadmapItemNoid($content)
+function roadmapItemNoid($content, $done)
 {
-    echo '<li>' . implode("</p>\n<p>", explode("\n\n", $content))
+    if ($done == 'yes')
+        $done = 'style = "text-decoration:line-through"';
+    else
+        $done = '';
+    echo '<li '. $done . '>' . implode("<br />", explode("\n\n", $content))
         . "</li>\n";
 }
 

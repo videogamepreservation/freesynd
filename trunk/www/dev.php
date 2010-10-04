@@ -46,8 +46,8 @@ SVN commit notifications<br />
 <ul>
   <?php
 
-  roadmapItem('3043686','Game time');
-  roadmapItem('3072653','Use libsyndicate data info');
+  roadmapItem('3043686','Game time','');
+  roadmapItem('3072653','Use libsyndicate data info','');
 
   ?>
 </ul>
@@ -56,12 +56,12 @@ SVN commit notifications<br />
 <ul>
   <?php
   //NOTE: symbol <'> must be escaped <\'>
-  //function roadmapItem($id, $content) - id of bug/feature + short description
-  //function roadmapItemNoid($content) - description only
-  roadmapItem('3005294','Debriefing information is not displayed after ending the mission');
-  roadmapItem('3031032','Rewrite animation generation procedures');
-  roadmapItem('3036610','Rewrite map drawing');
-  roadmapItem('3005295','The tax rate for the region cannot altered by the player');
+  //function roadmapItem($id, $content, $done) - id of bug/feature + short description + done('yes' or '')
+  //function roadmapItemNoid($content, $) - description + done('yes' or '')
+  roadmapItem('3005294','Debriefing information is not displayed after ending the mission','');
+  roadmapItem('3031032','Rewrite animation generation procedures','');
+  roadmapItem('3036610','Rewrite map drawing','');
+  roadmapItem('3005295','The tax rate for the region cannot altered by the player','');
 
   ?>
 </ul>
