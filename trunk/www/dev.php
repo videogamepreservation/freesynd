@@ -61,7 +61,7 @@ SVN commit notifications<br />
   roadmapItem('3005294','Debriefing information is not displayed after ending the mission','');
   roadmapItem('3031032','Rewrite animation generation procedures','');
   roadmapItem('3036610','Rewrite map drawing','');
-  roadmapItem('3005295','The tax rate for the region cannot altered by the player','');
+  roadmapItem('3005295','The tax rate for the region cannot altered by the player','yes');
 
   ?>
 </ul>
@@ -78,7 +78,7 @@ SVN commit notifications<br />
 (Developer)<br />
 <a href="mailto:j-Please.Dont.Spam@7fc1.org">Joost Peters</a>
 (Developer)<br />
-<a href="mailto:xxxx@users.sourceforge.net">Bohdan Stelmakh</a>
+<a href="mailto:chamel-Please.Dont.Spam@users.sourceforge.net">Bohdan Stelmakh</a>
 (Developer)<br />
 <a href="mailto:qg@biodome.org">Trent Waddington</a>
 (Developer)<br />
