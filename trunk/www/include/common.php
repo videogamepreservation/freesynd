@@ -62,7 +62,7 @@ function roadmapItem($id, $content, $done)
     else
         $done = '';
     echo '<li '. $done . '><a href="http://sourceforge.net/support/tracker.php?aid='
-        . $id . '" target="_blank">'. $id . '</a> &nbsp;'
+        . $id . '">'. $id . '</a> &nbsp;'
         . implode("<br />", explode("\n\n", $content))
         . "</li>\n";
 }
