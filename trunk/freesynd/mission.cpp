@@ -101,10 +101,10 @@ bool Mission::loadLevel(uint8 * levelData)
 
     uint16 vindx[64];
     uint16 pindx[256];
-    uint16 windx[512];
+    //uint16 windx[512];
     memset(vindx, 0xFF, 2*64);
     memset(pindx, 0xFF, 2*256);
-    memset(windx, 0xFF, 2*512);
+    //memset(windx, 0xFF, 2*512);
 
 #if 0
     // for hacking vehicles data
@@ -134,7 +134,7 @@ bool Mission::loadLevel(uint8 * levelData)
 
     peds_.clear();
 
-#if 1
+#if 0
     // for hacking peds data
     char nameSp[256];
     sprintf(nameSp, "peds%02X.hex", map_);
@@ -162,16 +162,6 @@ bool Mission::loadLevel(uint8 * levelData)
                 //p->setHostile(true);
                 p->setSightRange(7);
             }
-#if 0
-            if (p->isHostile()) {
-                Weapon *w = g_App.weapons().findWeapon(Ped::Pistol);
-                if (w) {
-                    WeaponInstance *wi = w->createInstance();
-                    weapons_.push_back(wi);
-                    p->addWeapon(wi);
-                }
-            }
-#endif
             pindx[i] = mindx;
             mindx++;
         }
@@ -197,7 +187,7 @@ bool Mission::loadLevel(uint8 * levelData)
             statics_.push_back(s);
     }
 
-#if 1
+#if 0
     // for hacking weapons data
     char nameSw[256];
     sprintf(nameSw, "weapons%02X.hex", map_);
@@ -208,21 +198,27 @@ bool Mission::loadLevel(uint8 * levelData)
     }
 #endif
     weapons_.clear();
-#if 0
     for (unsigned int i = 0; i < 512; i++) {
-        LEVELDATA_STATICS & wref = level_data_.weapons_[i];
+        LEVELDATA_WEAPONS & wref = level_data_.weapons[i];
         if(wref.desc == 0)
             continue;
         WeaponInstance *w = g_App.weapons().loadInstance((uint8 *) & wref, map_);
         if (w) {
-            uint16 
-            if () {
+            if (wref.desc == 0x05) {
+                uint16 offset_owner = READ_LE_UINT16(wref.offset_owner);
+                offset_owner = (offset_owner - 2) / 92; // 92 = ped data size
+                if (pindx[offset_owner] != 0xFFFF) {
+                    peds_[pindx[offset_owner]]->addWeapon(w);
+                    weapons_.push_back(w);
+                } else {
+                    delete w;
+                }
+            } else {
+                w->setMap(map_);
                 weapons_.push_back(w);
-                p->addWeapon(w);
             }
         }
     }
-#endif
     return true;
 }
 

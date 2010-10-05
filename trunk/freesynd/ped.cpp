@@ -835,6 +835,7 @@ void PedInstance::dropAllWeapons() {
         w->setOffX(off_x_);
         w->setOffY(off_y_);
         w->setOffZ(0);
+        n++;
     }
 
     while(weapons_.size())
