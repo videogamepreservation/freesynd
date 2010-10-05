@@ -82,6 +82,22 @@ inline uint32 READ_BE_UINT32(const uint8 *data) {
     return (data[0] << 24) | (data[1] << 16) | (data[2] << 8) | data[3];
 }
 
+inline int16 READ_LE_INT16(const uint8 *data) {
+    return (data[1] << 8) | data[0];
+}
+
+inline int32 READ_LE_INT32(const uint8 *data) {
+    return (data[3] << 24) | (data[2] << 16) | (data[1] << 8) | data[0];
+}
+
+inline int16 READ_BE_INT16(const uint8 *data) {
+    return (data[0] << 8) | data[1];
+}
+
+inline int32 READ_BE_INT32(const uint8 *data) {
+    return (data[0] << 24) | (data[1] << 16) | (data[2] << 8) | data[3];
+}
+
 inline uint32 mirror(uint32 value, int count) {
     uint32 top = 1 << (count - 1), bottom = 1;
 

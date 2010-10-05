@@ -41,6 +41,17 @@ public:
     MapObject(int m);
     virtual ~MapObject() {}
 
+    typedef enum {
+        dmg_No,
+        dmg_Bullet,
+        dmg_Laser,
+        dmg_Fire,
+        dmg_Explosion,
+        dmg_Hit,
+        dmg_Mental,
+        dmg_Heal
+    } ObjDamageType;
+
     void setPosition(int tile_x, int tile_y, int tile_z, int off_x = 0,
             int off_y = 0, int off_z = 0) {
         tile_x_ = tile_x;

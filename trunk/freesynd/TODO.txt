@@ -71,3 +71,5 @@ position
  - briefmenu enhance level require better handling of values some missions have 2
 info costs, some 3, enhance cost same thing, the total number is const = 3 it
 should be variable
+ - rewrite PedInstance::inRange it is tile based, weapons have offset like size
+range = tile*256(x,y)+off(x,y),  tile*128(z) + offz, our z is tile based

@@ -27,7 +27,6 @@
 #define WEAPON_H
 
 #include <string>
-#include "ped.h"
 #include "mapobject.h"
 #include "sound.h"
 
@@ -38,9 +37,44 @@ class WeaponInstance;
  */
 class Weapon {
 public:
+
+    WeaponInstance *createInstance();
+    typedef enum {
+        Unknown,
+        Persuadatron,
+        Pistol,
+        Minigun,
+        Flamer,
+        LongRange,
+        EnergyShield,
+        Uzi,
+        Laser,
+        GaussGun,
+        Shotgun,
+        MediKit,
+        Scanner,
+        AccessCard,
+        TimeBomb
+    } WeaponType;
+
+    typedef enum {
+        Unarmed_Anim,
+        Pistol_Anim,
+        Minigun_Anim,
+        Flamer_Anim,
+        LongRange_Anim,
+        EnergyShield_Anim,
+        Uzi_Anim,
+        Laser_Anim,
+        Gauss_Anim,
+        Shotgun_Anim,
+        MedKit_Anim,
+    } WeaponAnimIndex;
+
     Weapon(const char *w_name, int smallIcon, int bigIcon, int w_cost,
             int w_ammo, int w_range, int w_shot, int w_rank, int w_anim,
-            Ped::WeaponIndex w_idx, snd::InGameSample w_sample);
+            WeaponAnimIndex w_idx, snd::InGameSample w_sample,
+            WeaponType w_type, MapObject::ObjDamageType w_dmg_type);
 
     const char *name() { return name_.c_str(); }
 
@@ -58,14 +92,13 @@ public:
         return small_icon_ == 28 ? 1618 : small_icon_ - 14 + 1602;
     }
 
-    Ped::WeaponIndex index() { return idx_; }
+    WeaponAnimIndex index() { return idx_; }
+    WeaponType getType() { return type_; }
 
     //! Plays the weapon's sound.
     void playSound();
 
-    WeaponInstance *createInstance();
-
-    bool operator==(Weapon weapon) { return this->idx_ == weapon.index(); }
+    bool operator==(Weapon weapon) { return this->type_ == weapon.getType(); }
 
 protected:
     std::string name_;
@@ -73,7 +106,9 @@ protected:
     int cost_, ammo_, range_, shot_;
     int anim_;
     int rank_;  //!> weapon rank
-    Ped::WeaponIndex idx_;
+    WeaponType type_;
+    MapObject::ObjDamageType dmg_type_;
+    WeaponAnimIndex idx_;
     snd::InGameSample sample_;
 };
 

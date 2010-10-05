@@ -49,7 +49,9 @@ public:
     }
 
     Weapon *findWeapon(const char *name);
-    Weapon *findWeapon(Ped::WeaponIndex idx);
+    Weapon *findWeapon(Weapon::WeaponType wt);
+
+    WeaponInstance *loadInstance(uint8 *data, int map);
 
 protected:
     std::vector<Weapon *> weapons_;

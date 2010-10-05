@@ -66,17 +66,6 @@ bool Mission::loadLevel(uint8 * levelData)
     copydata(objectives, 113974);
     copydata(u11, 114114);
 
-#if 0
-    uint8 *data = (uint8 *) & level_data_;
-    for (int i = 6; i < 0x8000; i++)
-        if (data[i] != 0) {
-            printf("%04X: ", i);
-            for (; data[i]; i++)
-                printf("%02X ", data[i]);
-            printf("\n");
-        }
-#endif
-
     map_ = READ_LE_UINT16(level_data_.mapinfos.map);
     printf("map to load %X\n", map_);
     min_x_ = READ_LE_UINT16(level_data_.mapinfos.min_x) / 2;
@@ -110,17 +99,25 @@ bool Mission::loadLevel(uint8 * levelData)
 
     vehicles_.clear();
 
+    uint16 vindx[64];
+    uint16 pindx[256];
+    uint16 windx[512];
+    memset(vindx, 0xFF, 2*64);
+    memset(pindx, 0xFF, 2*256);
+    memset(windx, 0xFF, 2*512);
+
 #if 0
     // for hacking vehicles data
-    char nameS[256];
-    sprintf(nameS, "vehicles%02X.hex", map_);
-    FILE *staticsF = fopen(nameS,"wb");
-    if (staticsF) {
-        fwrite(level_data_.cars, 1, 42*64, staticsF);
-        fclose(staticsF);
+    char nameSv[256];
+    sprintf(nameSv, "vehicles%02X.hex", map_);
+    FILE *staticsFv = fopen(nameSv,"wb");
+    if (staticsFv) {
+        fwrite(level_data_.cars, 1, 42*64, staticsFv);
+        fclose(staticsFv);
     }
 
 #endif
+    uint16 mindx = 0;
     for (int i = 0; i < 64; i++) {
         LEVELDATA_CARS & car = level_data_.cars[i];
         // car.sub_type 0x09 - train
@@ -128,24 +125,27 @@ bool Mission::loadLevel(uint8 * levelData)
             continue;
         VehicleInstance *v =
             g_App.vehicles().loadInstance((uint8 *) & car, map_);
-        if (v)
+        if (v) {
             vehicles_.push_back(v);
+            vindx[i] = mindx;
+            mindx++;
+        }
     }
 
     peds_.clear();
-    weapons_.clear();
 
-#if 0
+#if 1
     // for hacking peds data
-    char nameS[256];
-    sprintf(nameS, "peds%02X.hex", map_);
-    FILE *staticsF = fopen(nameS,"wb");
-    if (staticsF) {
-        fwrite(level_data_.people, 1, 256*92, staticsF);
-        fclose(staticsF);
+    char nameSp[256];
+    sprintf(nameSp, "peds%02X.hex", map_);
+    FILE *staticsFp = fopen(nameSp,"wb");
+    if (staticsFp) {
+        fwrite(level_data_.people, 1, 256*92, staticsFp);
+        fclose(staticsFp);
     }
 #endif
 
+    mindx = 0;
     for (int i = 0; i < 256; i++) {
         LEVELDATA_PEOPLE & pedref = level_data_.people[i];
         if(pedref.type == 0x0 || pedref.desc == 0x0D || pedref.desc == 0x0C)
@@ -162,6 +162,7 @@ bool Mission::loadLevel(uint8 * levelData)
                 //p->setHostile(true);
                 p->setSightRange(7);
             }
+#if 0
             if (p->isHostile()) {
                 Weapon *w = g_App.weapons().findWeapon(Ped::Pistol);
                 if (w) {
@@ -170,16 +171,19 @@ bool Mission::loadLevel(uint8 * levelData)
                     p->addWeapon(wi);
                 }
             }
+#endif
+            pindx[i] = mindx;
+            mindx++;
         }
     }
 #if 0
     // for hacking statics data
-    char nameS[256];
-    sprintf(nameS, "statics%02X.hex", map_);
-    FILE *staticsF = fopen(nameS,"wb");
-    if (staticsF) {
-        fwrite(level_data_.statics, 1, 12000, staticsF);
-        fclose(staticsF);
+    char nameSs[256];
+    sprintf(nameSs, "statics%02X.hex", map_);
+    FILE *staticsFs = fopen(nameSs,"wb");
+    if (staticsFs) {
+        fwrite(level_data_.statics, 1, 12000, staticsFs);
+        fclose(staticsFs);
     }
 #endif
 
@@ -193,17 +197,32 @@ bool Mission::loadLevel(uint8 * levelData)
             statics_.push_back(s);
     }
 
-#if 0
+#if 1
     // for hacking weapons data
-    char nameS[256];
-    sprintf(nameS, "weapons%02X.hex", map_);
-    FILE *staticsF = fopen(nameS,"wb");
-    if (staticsF) {
-        fwrite(level_data_.weapons, 1, 36*512, staticsF);
-        fclose(staticsF);
+    char nameSw[256];
+    sprintf(nameSw, "weapons%02X.hex", map_);
+    FILE *staticsFw = fopen(nameSw,"wb");
+    if (staticsFw) {
+        fwrite(level_data_.weapons, 1, 36*512, staticsFw);
+        fclose(staticsFw);
     }
 #endif
-
+    weapons_.clear();
+#if 0
+    for (unsigned int i = 0; i < 512; i++) {
+        LEVELDATA_STATICS & wref = level_data_.weapons_[i];
+        if(wref.desc == 0)
+            continue;
+        WeaponInstance *w = g_App.weapons().loadInstance((uint8 *) & wref, map_);
+        if (w) {
+            uint16 
+            if () {
+                weapons_.push_back(w);
+                p->addWeapon(w);
+            }
+        }
+    }
+#endif
     return true;
 }
 

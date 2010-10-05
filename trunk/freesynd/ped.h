@@ -32,6 +32,7 @@
 #include "pathsurfaces.h"
 #include "spritemanager.h"
 #include "weaponholder.h"
+#include "weapon.h"
 #include <list>
 
 class WeaponInstance;
@@ -49,36 +50,22 @@ public:
     Ped();
     virtual ~Ped() {}
 
-    typedef enum {
-        Unarmed,
-        Pistol,
-        Minigun,
-        Flamer,
-        LongRange,
-        EnergyShield,
-        Uzi,
-        Laser,
-        Gauss,
-        Shotgun,
-        MedKit,
-    } WeaponIndex;
-
-    void setStandAnim(WeaponIndex weapon, int anim) {
+    void setStandAnim(Weapon::WeaponAnimIndex weapon, int anim) {
         assert(weapon < NUM_ANIMS);
         stand_anims_[weapon] = anim;
     }
 
-    void setWalkAnim(WeaponIndex weapon, int anim) {
+    void setWalkAnim(Weapon::WeaponAnimIndex weapon, int anim) {
         assert(weapon < NUM_ANIMS);
         walk_anims_[weapon] = anim;
     }
 
-    void setStandFireAnim(WeaponIndex weapon, int anim) {
+    void setStandFireAnim(Weapon::WeaponAnimIndex weapon, int anim) {
         assert(weapon < NUM_ANIMS);
         stand_fire_anims_[weapon] = anim;
     }
 
-    void setWalkFireAnim(WeaponIndex weapon, int anim) {
+    void setWalkFireAnim(Weapon::WeaponAnimIndex weapon, int anim) {
         assert(weapon < NUM_ANIMS);
         walk_fire_anims_[weapon] = anim;
     }
@@ -110,17 +97,17 @@ public:
     PedInstance *createInstance(int map);
 
     bool drawStandFrame(int x, int y, int dir, int frame,
-            WeaponIndex weapon = Unarmed);
+            Weapon::WeaponAnimIndex weapon = Weapon::Unarmed_Anim);
     bool drawWalkFrame(int x, int y, int dir, int frame,
-            WeaponIndex weapon = Unarmed);
-    int lastStandFrame(int dir, int frame, WeaponIndex weapon);
-    int lastWalkFrame(int dir, int frame, WeaponIndex weapon);
+            Weapon::WeaponAnimIndex weapon = Weapon::Unarmed_Anim);
+    int lastStandFrame(int dir, int frame, Weapon::WeaponAnimIndex weapon);
+    int lastWalkFrame(int dir, int frame, Weapon::WeaponAnimIndex weapon);
     bool drawStandFireFrame(int x, int y, int dir, int frame,
-            WeaponIndex weapon);
+            Weapon::WeaponAnimIndex weapon);
     bool drawWalkFireFrame(int x, int y, int dir, int frame,
-            WeaponIndex weapon);
-    int lastStandFireFrame(int dir, int frame, WeaponIndex weapon);
-    int lastWalkFireFrame(int dir, int frame, WeaponIndex weapon);
+            Weapon::WeaponAnimIndex weapon);
+    int lastStandFireFrame(int dir, int frame, Weapon::WeaponAnimIndex weapon);
+    int lastWalkFireFrame(int dir, int frame, Weapon::WeaponAnimIndex weapon);
     bool drawDieFrame(int x, int y, int frame);
     int lastDieFrame();
     void drawDeadFrame(int x, int y, int frame);

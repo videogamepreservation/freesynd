@@ -43,57 +43,57 @@ Ped::Ped() {
     memset(walk_fire_anims_, 0, sizeof(walk_fire_anims_));
 }
 
-bool Ped::drawStandFrame(int x, int y, int dir, int frame, WeaponIndex weapon) {
-    if (weapon == MedKit)
-        weapon = Unarmed;
+bool Ped::drawStandFrame(int x, int y, int dir, int frame, Weapon::WeaponAnimIndex weapon) {
+    /*if (weapon == MedKit)
+        weapon = Weapon::Unarmed_Anim;*/
 
     assert(weapon < NUM_ANIMS);
     return g_App.gameSprites().drawFrame(
             stand_anims_[weapon] + dir, frame, x, y);
 }
 
-bool Ped::drawWalkFrame(int x, int y, int dir, int frame, WeaponIndex weapon) {
-    if (weapon == MedKit)
-        weapon = Unarmed;
+bool Ped::drawWalkFrame(int x, int y, int dir, int frame, Weapon::WeaponAnimIndex weapon) {
+    /*if (weapon == MedKit)
+        weapon = Weapon::Unarmed_Anim;*/
 
     assert(weapon < NUM_ANIMS);
     return g_App.gameSprites().drawFrame(
             walk_anims_[weapon] + dir, frame, x, y);
 }
 
-int Ped::lastStandFrame(int dir, int frame, WeaponIndex weapon) {
+int Ped::lastStandFrame(int dir, int frame, Weapon::WeaponAnimIndex weapon) {
     assert(weapon != 0 && weapon < NUM_ANIMS);
     return g_App.gameSprites().lastFrame(
             stand_anims_[weapon] + dir, frame);
 }
 
-int Ped::lastWalkFrame(int dir, int frame, WeaponIndex weapon) {
+int Ped::lastWalkFrame(int dir, int frame, Weapon::WeaponAnimIndex weapon) {
     assert(weapon != 0 && weapon < NUM_ANIMS);
     return g_App.gameSprites().lastFrame(walk_anims_[weapon] + dir, frame);
 }
 
 
 bool Ped::drawStandFireFrame(int x, int y, int dir, int frame,
-        WeaponIndex weapon) {
+        Weapon::WeaponAnimIndex weapon) {
     assert(weapon != 0 && weapon < NUM_ANIMS);
     return g_App.gameSprites().drawFrame(
             stand_fire_anims_[weapon] + dir, frame, x, y);
 }
 
 bool Ped::drawWalkFireFrame(int x, int y, int dir, int frame,
-        WeaponIndex weapon) {
+        Weapon::WeaponAnimIndex weapon) {
     assert(weapon != 0 && weapon < NUM_ANIMS);
     return g_App.gameSprites().drawFrame(
             walk_fire_anims_[weapon] + dir, frame, x, y);
 }
 
-int Ped::lastStandFireFrame(int dir, int frame, WeaponIndex weapon) {
+int Ped::lastStandFireFrame(int dir, int frame, Weapon::WeaponAnimIndex weapon) {
     assert(weapon != 0 && weapon < NUM_ANIMS);
     return g_App.gameSprites().lastFrame(
             stand_fire_anims_[weapon] + dir, frame);
 }
 
-int Ped::lastWalkFireFrame(int dir, int frame, WeaponIndex weapon) {
+int Ped::lastWalkFireFrame(int dir, int frame, Weapon::WeaponAnimIndex weapon) {
     assert(weapon != 0 && weapon < NUM_ANIMS);
     return g_App.gameSprites().lastFrame(walk_fire_anims_[weapon] + dir, frame);
 }
@@ -135,13 +135,13 @@ int Ped::lastPickupFrame() {
 
 bool PedInstance::animate(int elapsed, Mission *mission) {
     bool updated = false;
-    Ped::WeaponIndex weapon_idx =
-        selectedWeapon()? selectedWeapon()->index() : Ped::Unarmed;
+    Weapon::WeaponAnimIndex weapon_idx =
+        selectedWeapon()? selectedWeapon()->index() : Weapon::Unarmed_Anim;
 
     if (is_an_agent_ == PedInstance::Agent_Non_Active)
         return true;
 
-    if (weapon_idx == Ped::MedKit && selectedWeapon()->ammoRemaining()
+    if (weapon_idx == Weapon::MedKit_Anim && selectedWeapon()->ammoRemaining()
             && health_ < start_health_) {
         health_ = start_health_;
         selectedWeapon()->setAmmoRemaining(0);
@@ -396,7 +396,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
         selectedWeapon()->playSound();
     }
 
-    if (weapon_idx == Ped::Unarmed || weapon_idx == Ped::MedKit)
+    if (weapon_idx == Weapon::Unarmed_Anim)
         firing_ = PedInstance::Firing_Not;
 
     if ((firing_ == PedInstance::Firing_Reload
@@ -416,8 +416,8 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
         reload_count_++;
         int required = 1;
 
-        if (weapon_idx == Ped::Pistol
-                || weapon_idx == Ped::Shotgun)
+        if (weapon_idx == Weapon::Pistol_Anim
+                || weapon_idx == Weapon::Shotgun_Anim)
             required = 50;
 
         if (reload_count_ >= required) {
@@ -597,8 +597,8 @@ void PedInstance::draw(int x, int y, int scrollX, int scrollY) {
     if (is_an_agent_ == PedInstance::Agent_Non_Active)
         return;
 
-    Ped::WeaponIndex weapon_idx =
-        selectedWeapon() ? selectedWeapon()->index() : Ped::Unarmed;
+    Weapon::WeaponAnimIndex weapon_idx =
+        selectedWeapon() ? selectedWeapon()->index() : Weapon::Unarmed_Anim;
     addOffs(x, y);
 
     // ensure on map
@@ -661,8 +661,8 @@ void PedInstance::drawSelectorAnim(int x, int y) {
     if (is_an_agent_ == PedInstance::Agent_Non_Active)
         return;
 
-    Ped::WeaponIndex weapon_idx =
-        selectedWeapon() ? selectedWeapon()->index() : Ped::Unarmed;
+    Weapon::WeaponAnimIndex weapon_idx =
+        selectedWeapon() ? selectedWeapon()->index() : Weapon::Unarmed_Anim;
 
     switch(getDrawnAnim()){
         case PedInstance::HitAnim:
@@ -701,9 +701,10 @@ void PedInstance::drawSelectorAnim(int x, int y) {
 bool PedInstance::inRange(ShootableMapObject *t) {
     if (selectedWeapon() == 0)
         return false;
-
+/*
     int maxr;
     // TODO: this should be in Weapon
+
     switch (selectedWeapon()->index()) {
     case Ped::Pistol:
         maxr = 5;
@@ -755,7 +756,7 @@ bool PedInstance::inRange(ShootableMapObject *t) {
         sx += (t->tileX() - tileX()) / d;
         sy += (t->tileY() - tileY()) / d;
     }
-
+*/
     return true;
 }
 

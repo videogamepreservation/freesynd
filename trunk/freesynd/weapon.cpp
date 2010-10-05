@@ -32,10 +32,11 @@
 
 Weapon::Weapon(const char *w_name, int smallIcon, int bigIcon, int w_cost,
         int w_ammo, int w_range, int w_shot, int w_rank, int w_anim,
-        Ped::WeaponIndex w_idx, snd::InGameSample w_sample) :
+        Weapon::WeaponAnimIndex w_idx, snd::InGameSample w_sample,
+        WeaponType w_type, MapObject::ObjDamageType w_dmg_type) :
 name_(w_name), small_icon_(smallIcon), big_icon_(bigIcon), cost_(w_cost),
 ammo_(w_ammo), range_(w_range), shot_(w_shot), anim_(w_anim), rank_(w_rank),
-idx_(w_idx), sample_(w_sample) {}
+idx_(w_idx), sample_(w_sample), type_(w_type), dmg_type_(w_dmg_type) {}
 
 void Weapon::drawSmallIcon(int x, int y) {
     g_App.menuSprites().drawSpriteXYZ(small_icon_, x, y, 0, false, true);

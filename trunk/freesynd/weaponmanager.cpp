@@ -25,6 +25,7 @@
 
 #include <stdio.h>
 #include <assert.h>
+#include "app.h"
 #include "weaponmanager.h"
 
 WeaponManager::WeaponManager() {
@@ -38,31 +39,41 @@ WeaponManager::~WeaponManager() {
 
 void WeaponManager::loadWeapons() {
     weapons_.push_back(new Weapon("PERSUADERTRON", 14, 64, 5000, -1, 256, 0,
-            -1, 367, Ped::Unarmed, snd::PERSUADE));
+        -1, 367, Weapon::Unarmed_Anim, snd::PERSUADE, Weapon::Persuadatron,
+        MapObject::dmg_Mental));
     weapons_.push_back(new Weapon("PISTOL", 15, 65, 0, 13, 1280, 1, 1, 368,
-            Ped::Pistol, snd::PISTOL));
+        Weapon::Pistol_Anim, snd::PISTOL, Weapon::Pistol,
+        MapObject::dmg_Bullet));
     weapons_.push_back(new Weapon("GAUSS GUN", 16, 66, 50000, 3, 5120, 15000, 0,
-            369, Ped::Gauss, snd::GAUSSGUN));
+        369, Weapon::Gauss_Anim, snd::GAUSSGUN, Weapon::GaussGun,
+        MapObject::dmg_Explosion));
     weapons_.push_back(new Weapon("SHOTGUN", 17, 67, 250, 12, 1024, 2, 2, 370,
-            Ped::Shotgun, snd::SHOTGUN));
+        Weapon::Shotgun_Anim, snd::SHOTGUN, Weapon::Shotgun,
+        MapObject::dmg_Bullet));
     weapons_.push_back(new Weapon("UZI", 18, 68, 750, 50, 1792, 2, 5, 371,
-            Ped::Uzi, snd::UZI));
+        Weapon::Uzi_Anim, snd::UZI, Weapon::Uzi, MapObject::dmg_Bullet));
     weapons_.push_back(new Weapon("MINI-GUN", 19, 69, 10000, 500, 2304, 10, 6,
-            372, Ped::Minigun, snd::MINIGUN));
+        372, Weapon::Minigun_Anim, snd::MINIGUN, Weapon::Minigun,
+        MapObject::dmg_Bullet));
     weapons_.push_back(new Weapon("LASER", 20, 70, 35000, 5, 4096, 2000, 7, 373,
-            Ped::Laser, snd::LASER));
+        Weapon::Laser_Anim, snd::LASER, Weapon::Laser, MapObject::dmg_Laser));
     weapons_.push_back(new Weapon("FLAMER", 21, 71, 1500, 1000, 512, 1, 4, 374,
-            Ped::Flamer, snd::FLAME));
+        Weapon::Flamer_Anim, snd::FLAME, Weapon::Flamer, MapObject::dmg_Fire));
     weapons_.push_back(new Weapon("LONG RANGE", 22, 72, 1000, 30, 6144, 2, 3,
-            375, Ped::LongRange, snd::LONGRANGE));
+        375, Weapon::LongRange_Anim, snd::LONGRANGE, Weapon::LongRange,
+        MapObject::dmg_Bullet));
     weapons_.push_back(new Weapon("SCANNER", 23, 73, 500, -1, 4096, 0, -1, 376,
-            Ped::Unarmed, snd::NO_SOUND));
+        Weapon::Unarmed_Anim, snd::NO_SOUND, Weapon::Scanner,
+        MapObject::dmg_No));
     weapons_.push_back(new Weapon("MEDIKIT", 24, 74, 500, 1, 256, 0, -1, 377,
-            Ped::MedKit, snd::NO_SOUND));
+        Weapon::Unarmed_Anim, snd::NO_SOUND, Weapon::MediKit,
+        MapObject::dmg_Heal));
     weapons_.push_back(new Weapon("TIME BOMB", 25, 75, 25000, -1, 1000, 0, -1,
-            378, Ped::Unarmed, snd::TIMEBOMB));
+        378, Weapon::Unarmed_Anim, snd::TIMEBOMB, Weapon::TimeBomb,
+        MapObject::dmg_Explosion));
     weapons_.push_back(new Weapon("ACCESS CARD", 26, 76, 1000, -1, 256, 0, -1,
-            379, Ped::Unarmed, snd::NO_SOUND));
+        379, Weapon::Unarmed_Anim, snd::NO_SOUND, Weapon::AccessCard,
+        MapObject::dmg_No));
     /* NOTE: small icon 27 exists and looks like an N with an arrow above it.
        the corresponding large icon is actually the "all" button on the
        select menu.  It would appear Bullfrog was going to have another
@@ -70,7 +81,8 @@ void WeaponManager::loadWeapons() {
        icon space to implement the all button.
      */
     weapons_.push_back(new Weapon("ENERGY SHIELD", 28, 78, 8000, 200, 768, 15,
-            -1, 381, Ped::EnergyShield, snd::NO_SOUND));
+        -1, 381, Weapon::EnergyShield_Anim, snd::NO_SOUND,
+        Weapon::EnergyShield, MapObject::dmg_No));
 }
 
 Weapon *WeaponManager::findWeapon(const char *name) {
@@ -84,10 +96,81 @@ Weapon *WeaponManager::findWeapon(const char *name) {
     return NULL;
 }
 
-Weapon *WeaponManager::findWeapon(Ped::WeaponIndex idx) {
+Weapon *WeaponManager::findWeapon(Weapon::WeaponType wt) {
     for (unsigned int i = 0; i < weapons_.size(); i++) {
-        if (idx == weapons_[i]->index())
+        if (wt == weapons_[i]->getType())
             return weapons_[i];
+    }
+
+    return NULL;
+}
+
+WeaponInstance *WeaponManager::loadInstance(uint8 * data, int map)
+{
+    Mission::LEVELDATA_WEAPONS * gamdata =
+        (Mission::LEVELDATA_WEAPONS *) data;
+    Weapon *w = 0;
+
+    switch (gamdata->sub_type) {
+        case 0x01:
+            w = findWeapon(Weapon::Persuadatron);
+            break;
+        case 0x02:
+            w = findWeapon(Weapon::Pistol);
+            break;
+        case 0x03:
+            w = findWeapon(Weapon::GaussGun);
+            break;
+        case 0x04:
+            w = findWeapon(Weapon::Shotgun);
+            break;
+        case 0x05:
+            w = findWeapon(Weapon::Uzi);
+            break;
+        case 0x06:
+            w = findWeapon(Weapon::Minigun);
+            break;
+        case 0x07:
+            w = findWeapon(Weapon::Laser);
+            break;
+        case 0x08:
+            w = findWeapon(Weapon::Flamer);
+            break;
+        case 0x09:
+            w = findWeapon(Weapon::LongRange);
+            break;
+        case 0x0A:
+            w = findWeapon(Weapon::Scanner);
+            break;
+        case 0x0B:
+            w = findWeapon(Weapon::MediKit);
+            break;
+        case 0x0C:
+            w = findWeapon(Weapon::TimeBomb);
+            break;
+        case 0x0D:
+            w = findWeapon(Weapon::AccessCard);
+            break;
+        case 0x11:
+            w = findWeapon(Weapon::EnergyShield);
+            break;
+        default:
+            break;
+    }
+    if (w) {
+        WeaponInstance *wi = w->createInstance();
+        wi->setAmmoRemaining(READ_LE_INT16(gamdata->nb_amos));
+        int z = READ_LE_UINT16(gamdata->mapposz) >> 7;
+        z--;
+        int oz = gamdata->mapposz[0] & 0x7F;
+        wi->setVisZ(z);
+        if (oz > 0)
+            z++;
+        //printf("x %i y %i z %i ox %i oy %i oz %i\n", gamdata->mapposx[1], gamdata->mapposy[1], z, gamdata->mapposx[0], gamdata->mapposy[0], oz);
+        wi->setPosition(gamdata->mapposx[1], gamdata->mapposy[1],
+                            z, gamdata->mapposx[0],
+                            gamdata->mapposy[0], oz);
+        return wi;
     }
 
     return NULL;
