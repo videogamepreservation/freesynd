@@ -40,31 +40,9 @@ SVN commit notifications<br />
 
 <hr />
 
-<h2>V0.5 Roadmap</h2>
-<p><b>2010-09-30</b> : Release v0.5 is now under development. There is no release date scheduled for now.</p>
-<h4>Features:</h4>
-<ul>
-  <?php
+<h2>Roadmap</h2>
 
-  roadmapItem('3043686','Game time','');
-  roadmapItem('3072653','Use libsyndicate data info','');
-
-  ?>
-</ul>
-
-<h4>Bugs :</h4>
-<ul>
-  <?php
-  //NOTE: symbol <'> must be escaped <\'>
-  //function roadmapItem($id, $content, $done) - id of bug/feature + short description + done('yes' or '')
-  //function roadmapItemNoid($content, $) - description + done('yes' or '')
-  roadmapItem('3005294','Debriefing information is not displayed after ending the mission','');
-  roadmapItem('3031032','Rewrite animation generation procedures','');
-  roadmapItem('3036610','Rewrite map drawing','');
-  roadmapItem('3005295','The tax rate for the region cannot altered by the player','yes');
-
-  ?>
-</ul>
+<?php printRoadMap() ?>
 
 <hr />
 

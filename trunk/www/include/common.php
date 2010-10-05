@@ -46,6 +46,10 @@ function getFileSize($file)
    return round($size, 1) . ' ' . trim(substr(' KMGT', $si, 1)) . 'B';
 }
 
+function getLinkToIssue($id, $label) {
+	return '<a href="http://sourceforge.net/support/tracker.php?aid=' . $id . '" target="_blank">'. $label . '</a>';
+}
+
 function newsItem($title, $content, $submitter, $date)
 {
     echo '<h3>' . htmlentities($title) . "</h3>\n";
@@ -55,26 +59,55 @@ function newsItem($title, $content, $submitter, $date)
         . '</b><br />' . htmlentities($date) . "</div>\n\n";
 }
 
-function roadmapItem($id, $content, $done)
+function roadmapItem($id, $content, $status)
 {
-    if ($done == 'yes')
-        $done = 'style = "text-decoration:line-through"';
-    else
-        $done = '';
-    echo '<li '. $done . '><a href="http://sourceforge.net/support/tracker.php?aid='
-        . $id . '">'. $id . '</a> &nbsp;'
-        . implode("<br />", explode("\n\n", $content))
-        . "</li>\n";
+	$statusLabel = '';
+	$style = '';
+	
+	switch( (String) $status) {
+    case 'D': // Item completed
+		$statusLabel = '(Done)';
+        $style = ' style = "text-decoration:line-through"';
+        break;
+	case 'P': // Item postponed
+		$statusLabel = '(Postponed)';
+		$style = ' style = "text-decoration:line-through"';
+		break;
+	case 'C': // item canceled
+		$statusLabel = '(Canceled)';
+		$style = ' style = "text-decoration:line-through"';
+		break;
+    }
+	
+	echo '<li><span' . $style . '>' . getLinkToIssue($id, $id) . '&nbsp;' . $content . '</span>&nbsp;' . $statusLabel . "</li>\n";
 }
 
-function roadmapItemNoid($content, $done)
-{
-    if ($done == 'yes')
-        $done = 'style = "text-decoration:line-through"';
-    else
-        $done = '';
-    echo '<li '. $done . '>' . implode("<br />", explode("\n\n", $content))
-        . "</li>\n";
+function printRoadMap() {
+	if (file_exists('data/roadmap.xml')) {
+		$xml = simplexml_load_file('data/roadmap.xml');
+		
+		echo "<p><b>" . $xml->date . "</b> : " . $xml->status . "</p>\n";
+		
+		echo "<h4>Features:</h4>\n";
+		echo " <ul>\n";
+		
+		foreach ($xml->features->feature as $feat) {
+			roadmapItem($feat['id'], $feat, $feat['status']);
+		}
+
+		echo " </ul>\n";
+
+		echo "<h4>Bugs :</h4>\n";
+		echo " <ul>\n";
+		
+		foreach ($xml->bugs->bug as $bug) {
+			roadmapItem($bug['id'], $bug, $bug['status']);
+		}
+
+		echo " </ul>\n";
+	} else {
+		echo "No roadmap defined.\n";
+	}
 }
 
 function printStartTime()
