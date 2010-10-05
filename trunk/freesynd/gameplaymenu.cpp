@@ -1193,6 +1193,8 @@ void GameplayMenu::drawWeaponSelectors() {
                 if (w) {
                     int n;
 
+                    if (w->ammo() == -1)
+                        continue;
                     if (w->ammo() == 0)
                         n = 25;
                     else
