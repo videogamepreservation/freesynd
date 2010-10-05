@@ -37,6 +37,13 @@ enum Status_Pop {
     STAT_REBEL = 0
 };
 
+enum Status_Blk {
+    BLK_UNAVAIL = 0,
+    BLK_AVAIL = 1,
+    BLK_FINISHED = 2,
+    BLK_REBEL = 3
+};
+
 typedef struct Block_ {
     const char *name;
     int population;
@@ -45,9 +52,11 @@ typedef struct Block_ {
     /**! 
      * Status of the population satisfaction.
      */
-    Status_Pop status;
-    bool available;
-    bool finished;
+    Status_Pop popStatus;
+    /**
+     * Tells whether the mission can be played or is finished.
+     */
+    Status_Blk status;
     /*! The list of blocks available after finishing this mission.*/
     const char *next;
 } Block;

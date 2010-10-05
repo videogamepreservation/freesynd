@@ -166,14 +166,14 @@ MapMenu::~MapMenu()
 void MapMenu::handleBlockSelected() {
     Block blk = g_Session.getBlock(g_Session.getSelectedBlockId());
 
-    if (blk.finished) { // A mission is finished
+    if (blk.status == BLK_FINISHED) { // A mission is finished
         // Brief is available only if replay mission cheat is set
         if (g_Session.canReplayMission()) {
             showOption(KEY_F4);
         } else {
             hideOption(KEY_F4);
         }
-    } else if (!blk.available) { // A mission is not finished but unavailable
+    } else if (blk.status == BLK_UNAVAIL) { // A mission is unavailable
         // Brief is available only if all missions enable cheat is set
         if (g_Session.isAllMissionEnabled()) {
             showOption(KEY_F4);
@@ -181,7 +181,7 @@ void MapMenu::handleBlockSelected() {
             hideOption(KEY_F4);
         }
     } else {
-        // Brief is available because mission is available and not finished
+        // Brief is available because mission is either available or on rebellion
         showOption(KEY_F4);
     }
 
@@ -198,11 +198,11 @@ void MapMenu::handleBlockSelected() {
 #endif
     setStaticText(POP_STATIC_ID, tmp);
 
-    
-    if (blk.finished) {
+    // Mission is finished
+    if (blk.status == BLK_FINISHED) {
         // Status
         setStaticText(OWN_LBL_STATIC_ID, "STAT");
-        switch (blk.status) {
+        switch (blk.popStatus) {
             case STAT_VERY_HAPPY:
                 setStaticText(OWN_STATIC_ID, "VERY HAPPY");
                 break;
@@ -245,7 +245,7 @@ void MapMenu::handleBlockSelected() {
         setStaticText(OWN_LBL_STATIC_ID, "OWN");
         setStaticText(OWN_STATIC_ID, "");
         // Tax
-        if (blk.status == STAT_REBEL) {
+        if (blk.status == BLK_REBEL) {
             setStaticText(TAX_VALUE_STATIC_ID, "REBELLIOUS");
 #ifdef WIN_SECURE
             sprintf_s(tmp, 100, "@   %d%%", blk.tax);

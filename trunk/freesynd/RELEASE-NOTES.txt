@@ -13,7 +13,7 @@ Changes
 
 Fixed Bugs
 ----------
-  * 0000000 : 
+  * 3005295 : The tax rate for the region cannot be altered by player
 
 Features added
 ----------
@@ -31,8 +31,8 @@ Known issues with this release
 
 History
 -------
-Changes
--------
+ v0.4
+ ----
   * Minimap drawing is fixed, should be better now
   * Map can be scrolled with arrow keys and scrolling is like original game
   * People, objects will not move to unwalkable surfaces
