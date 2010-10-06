@@ -47,7 +47,7 @@ function getFileSize($file)
 }
 
 function getLinkToIssue($id, $label) {
-	return '<a href="http://sourceforge.net/support/tracker.php?aid=' . $id . '" target="_blank">'. $label . '</a>';
+	return '<a href="http://sourceforge.net/support/tracker.php?aid=' . $id . '">'. $label . '</a>';
 }
 
 function newsItem($title, $content, $submitter, $date)
