@@ -38,12 +38,14 @@ void PedManager::setPed(Ped *pedanim, unsigned short baseAnim)
     pedanim->setWalkAnim(Weapon::Unarmed_Anim, 8 + baseAnim);
     pedanim->setStandAnim(Weapon::EnergyShield_Anim, 16 + baseAnim);
     pedanim->setStandAnim(Weapon::Pistol_Anim, 24 + baseAnim);
+    pedanim->setStandAnim(Weapon::Uzi_Anim, 24 + baseAnim);
     pedanim->setStandAnim(Weapon::Shotgun_Anim, 24 + baseAnim);
     pedanim->setStandAnim(Weapon::Minigun_Anim, 32 + baseAnim);
     pedanim->setStandAnim(Weapon::Flamer_Anim, 40 + baseAnim);
     pedanim->setStandAnim(Weapon::LongRange_Anim, 48 + baseAnim);
     pedanim->setWalkAnim(Weapon::EnergyShield_Anim, 56 + baseAnim);
     pedanim->setWalkAnim(Weapon::Pistol_Anim, 64 + baseAnim);
+    pedanim->setWalkAnim(Weapon::Uzi_Anim, 64 + baseAnim);
     pedanim->setWalkAnim(Weapon::Shotgun_Anim, 64 + baseAnim);
     pedanim->setWalkAnim(Weapon::Minigun_Anim, 72 + baseAnim);
     pedanim->setWalkAnim(Weapon::Flamer_Anim, 80 + baseAnim);

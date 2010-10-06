@@ -113,10 +113,10 @@ public:
     void adjXYZ(int &x, int &y, int &z);
 
     typedef struct {
-        uint8 unkn10[8];
+        uint8 unkn10[6];
     } LEVELDATA_UNKN01;         // total: 8 bytes
 
-    typedef struct {
+    typedef struct {// was not able to verify correctness
         // 128*128 offsets size 2 bytes(LE)
         uint8 objs[32768];
     } LEVELDATA_MAP;            // total: 32768 bytes
@@ -149,7 +149,7 @@ public:
         uint8 index_base_anim[2];  //index in (HSTA-0.ANI)
         uint8 index_current_frame[2];   //index in (HFRA-0.ANI)
         uint8 index_current_anim[2]; // index in (HSTA-0.ANI)
-        uint8 health[2]; // this is signed short
+        uint8 unkn20[2];
         uint8 offset_last_enemy[2];
         //0x01 ped; 0x02 vehicle; 0x04 weapon;
         //0x05 object; allow to display a target, a pickup, and for minimap
@@ -191,7 +191,7 @@ public:
         uint8 intelilevels[4];
         uint8 perceplevels[4];
         uint8 unkn11;           // This value is different for most objects
-        uint8 unkn12[8];       // ??
+        uint8 unkn12[8]; 
     } LEVELDATA_PEOPLE;         // total: 92 bytes
 
     // This structure contains all cars in the game, including destroyed
@@ -211,7 +211,7 @@ public:
 	  uint8 index_base_anim[2];
 	  uint8 index_current_frame[2];
 	  uint8 index_current_anim[2];
-	  uint8 health[2];
+	  uint8 unkn10[2];
 	  uint8 offset_last_enemy[2];
 	  uint8 type; // 0x02
 	  uint8 sub_type;
@@ -241,7 +241,8 @@ public:
 	  uint8 index_current_anim[2];
 	  uint8 unkn20[4];
 	  uint8 type;
-	  uint8 sub_type; // 0x0C door; 0x12 open window; 0x13 close window; 0x16 tree
+      // more info mapobject.cpp
+	  uint8 sub_type;
 	  uint8 orientation;
 	  uint8 unkn27[3];
     } LEVELDATA_STATICS;        // total: 30 bytes
@@ -261,9 +262,7 @@ public:
 	  uint8 index_base_anim[2];
 	  uint8 index_current_frame[2];
 	  uint8 index_current_anim[2];
-      // should be used as signed short/int16
-	  uint8 nb_amos[2];
-	  uint8 unkn5[2];
+	  uint8 unkn5[4];
       // look peds for more info
 	  uint8 type; // 0x04
       // 0x01 persuadertron; 0x02 pistol; 0x03 gauss gun; 0x04 shotgun;
@@ -278,7 +277,7 @@ public:
 	  uint8 unkn7[2];
     } LEVELDATA_WEAPONS;         // total: 36 bytes
 
-    typedef struct {
+    typedef struct {// was not able to verify correctness
       uint8 offset_next[2];
 	  uint8 offset_prev[2];
 	  uint8 mapposx[2];
@@ -292,7 +291,7 @@ public:
 	  uint8 offset_owner[2];
     } LEVELDATA_SFX;       // total: 30 bytes
 
-    typedef struct {
+    typedef struct {// was not able to verify correctness
       uint8 next[2];
 	  uint8 offset_object[2];
       // tile* where _i_factor, _j_factor, _k_factor
@@ -321,7 +320,7 @@ public:
 	  uint8 unkn1[3];
     } LEVELDATA_MAPINFOS;        // total: 14 bytes
 
-    typedef struct {
+    typedef struct {// 7 or less objectives(?)
       // 0x00 ??? ;0x01 persuade; 0x02 assassinate; 0x03 protect;
       // 0x05 equipment aquisition; 0x0a combat sweep (police);
       // 0x0b combat sweep; 0x0d(0x0e(?)) raid and rescue;
@@ -347,12 +346,13 @@ public:
 
     typedef struct {
         /*      0 */ LEVELDATA_UNKN01 u01;
-        /*      8 */ LEVELDATA_MAP map;
-        /*  32776 */ LEVELDATA_PEOPLE people[256];
-        /*  56328 */ LEVELDATA_CARS cars[64];
-        /*  59016 */ LEVELDATA_STATICS statics[400];
-        /*  71016 */ LEVELDATA_WEAPONS weapons[512];
-        /*  89448 */ LEVELDATA_SFX sfx[256];
+        /*      6 */ LEVELDATA_MAP map;
+        /*  32774 0x0*/ uint8 offset_ref[2];
+        /*  32776 0x02*/ LEVELDATA_PEOPLE people[256];
+        /*  56328 0x5C02*/ LEVELDATA_CARS cars[64];
+        /*  59016 0x6682*/ LEVELDATA_STATICS statics[400];
+        /*  71016 0x9562*/ LEVELDATA_WEAPONS weapons[512];
+        /*  89448 0xDD62*/ LEVELDATA_SFX sfx[256];
         /*  97128 */ LEVELDATA_SCENARIOS scenarios[2048];
         /* 113512 */ LEVELDATA_UNKN09 u09;
         /* 113960 */ LEVELDATA_MAPINFOS mapinfos;

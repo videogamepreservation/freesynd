@@ -159,7 +159,7 @@ WeaponInstance *WeaponManager::loadInstance(uint8 * data, int map)
     }
     if (w) {
         WeaponInstance *wi = w->createInstance();
-        wi->setAmmoRemaining(READ_LE_INT16(gamdata->nb_amos));
+        wi->setAmmoRemaining(wi->ammo());
         int z = READ_LE_UINT16(gamdata->mapposz) >> 7;
         z--;
         int oz = gamdata->mapposz[0] & 0x7F;

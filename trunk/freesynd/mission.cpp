@@ -54,7 +54,8 @@ Mission::~Mission()
 bool Mission::loadLevel(uint8 * levelData)
 {
     copydata(u01, 0);
-    copydata(map, 8);
+    copydata(map, 6);
+    copydata(offset_ref, 32774);
     copydata(people, 32776);
     copydata(cars, 56328);
     copydata(statics, 59016);
@@ -73,7 +74,7 @@ bool Mission::loadLevel(uint8 * levelData)
     max_x_ = READ_LE_UINT16(level_data_.mapinfos.max_x) / 2;
     max_y_ = READ_LE_UINT16(level_data_.mapinfos.max_y) / 2;
     objective_ = 2;
-/*
+/* objective data not 10, 7 or less
     objective_ =
         level_data_.u10.objective[0] | (level_data_.u10.objective[1] << 8);
     int objective_data =
@@ -207,7 +208,7 @@ bool Mission::loadLevel(uint8 * levelData)
             if (wref.desc == 0x05) {
                 uint16 offset_owner = READ_LE_UINT16(wref.offset_owner);
                 offset_owner = (offset_owner - 2) / 92; // 92 = ped data size
-                if (pindx[offset_owner] != 0xFFFF) {
+                if (offset_owner > 7 && pindx[offset_owner] != 0xFFFF) {
                     peds_[pindx[offset_owner]]->addWeapon(w);
                     weapons_.push_back(w);
                 } else {
