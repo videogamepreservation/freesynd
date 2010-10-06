@@ -60,7 +60,6 @@ bool FontManager::loadFont(SpriteManager * sprites, EFontSize size, bool dark,
 void FontManager::drawText(int x, int y, const char *text, int size,
                            bool dark, bool x2)
 {
-    int sc = x2 ? 2 : 1;
     assert(size < 4);
     if (dark) {
         assert(dark_fonts_[size]);
@@ -86,7 +85,6 @@ int FontManager::textHeight(int size, bool x2)
 void FontManager::drawText(int x, int y, const char *text, EFontSize size,
                            bool dark, bool x2)
 {
-    int sc = x2 ? 2 : 1;
     if (dark) {
         assert(dark_fonts_[size]);
 

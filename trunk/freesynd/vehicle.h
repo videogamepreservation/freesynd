@@ -49,7 +49,7 @@ public:
 
     VehicleInstance *createInstance(int map);
     void setAnims(int anims) { anims_ = anims; }
-    void setAnimsBurning(int anims) { anims_burning_; }
+    void setAnimsBurning(int anims) { anims_burning_ = anims; }
     void setAnimsBurnt(int anims) { anims_burnt_ = anims; }
 
 protected:
