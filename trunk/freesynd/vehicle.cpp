@@ -57,8 +57,8 @@ void Vehicle::drawBurnt(int x, int y, int dir, int frame)
 }
 
 VehicleInstance::VehicleInstance(Vehicle * vehicle,
-                                 int m):ShootableMovableMapObject(m),
-vehicle_(vehicle)
+                         int m):ShootableMovableMapObject(m),
+                         vehicle_(vehicle), vehicle_driver_(NULL)
 {
     hold_on_.wayFree = 0;
 }
@@ -67,6 +67,15 @@ bool VehicleInstance::animate(int elapsed)
 {
     bool updated = movementV(elapsed);
 
+    if (health_ <= 0) {
+        vehicle_driver_ = 0;
+        for (std::set <PedInstance *> ::iterator it = all_passengers_.begin();
+            it != all_passengers_.end(); it++) {
+                //TODO: inflict damage on explosion
+                (*it)->leaveVehicle();
+        }
+        all_passengers_.clear();
+    }
     if (health_ <= start_health_) {
         return MapObject::animate(elapsed);
     }

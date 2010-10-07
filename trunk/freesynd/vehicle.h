@@ -78,8 +78,31 @@ public:
             int new_speed = 160);
     bool movementV(int elapsed);
 
+    PedInstance *getDriver(void) {
+        return vehicle_driver_;
+    }
+    void setDriver(PedInstance *vehicleDriver) {
+        if (vehicle_driver_ == 0)
+            vehicle_driver_ = vehicleDriver;
+        all_passengers_.insert(vehicleDriver);
+    }
+    void removeDriver(PedInstance *vehicleDriver) {
+        if (vehicle_driver_ == vehicleDriver) {
+            vehicle_driver_ = 0;
+            clearDestination();
+            setSpeed(0);
+        }
+        all_passengers_.erase(all_passengers_.find(vehicleDriver));
+    }
+    void forceSetDriver(PedInstance *vehicleDriver) {
+        vehicle_driver_ = vehicleDriver;
+        all_passengers_.insert(vehicleDriver);
+    }
+
 protected:
     Vehicle *vehicle_;
+    PedInstance *vehicle_driver_;
+    std::set <PedInstance *> all_passengers_;
 
     bool walkable(int x, int y, int z);
     uint32 tileDir(int x, int y, int z);

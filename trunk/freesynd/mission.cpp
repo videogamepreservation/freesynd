@@ -102,10 +102,10 @@ bool Mission::loadLevel(uint8 * levelData)
 
     uint16 vindx[64];
     uint16 pindx[256];
-    //uint16 windx[512];
+    uint16 driverindx[256];
     memset(vindx, 0xFF, 2*64);
     memset(pindx, 0xFF, 2*256);
-    //memset(windx, 0xFF, 2*512);
+    memset(driverindx, 0xFF, 2*256);
 
 #if 0
     // for hacking vehicles data
@@ -129,6 +129,9 @@ bool Mission::loadLevel(uint8 * levelData)
         if (v) {
             vehicles_.push_back(v);
             vindx[i] = mindx;
+            if (car.offset_of_driver != 0) {
+                driverindx[(car.offset_of_driver - 2) / 92] = mindx;
+            }
             mindx++;
         }
     }
@@ -158,6 +161,24 @@ bool Mission::loadLevel(uint8 * levelData)
         PedInstance *p =
             g_App.peds().loadInstance((uint8 *) & pedref, map_);
         if (p) {
+            if (pedref.desc == 0x05) {
+                if (driverindx[i] != 0xFFFF) {
+                    p->putInVehicle(vehicles_[driverindx[i]]);
+                    p->setMap(-1);
+                    vehicles_[driverindx[i]]->forceSetDriver(p);
+                } else {
+                    uint16 vin = READ_LE_UINT16(pedref.offset_of_vehicle);
+                    if (vin != 0) {
+                        vin = (vin - 0x5C02) / 42; // 42 vehicle data size
+                        vin = vindx[vin];
+                        if (vin != 0xFFFF) {
+                            p->putInVehicle(vehicles_[vin]);
+                            p->setMap(-1);
+                            vehicles_[vin]->setDriver(p);
+                        }
+                    }
+                }
+            }
             peds_.push_back(p);
             if (i > 7) {
                 //p->setHostile(true);
@@ -207,10 +228,15 @@ bool Mission::loadLevel(uint8 * levelData)
         if (w) {
             if (wref.desc == 0x05) {
                 uint16 offset_owner = READ_LE_UINT16(wref.offset_owner);
-                offset_owner = (offset_owner - 2) / 92; // 92 = ped data size
-                if (offset_owner > 7 && pindx[offset_owner] != 0xFFFF) {
-                    peds_[pindx[offset_owner]]->addWeapon(w);
-                    weapons_.push_back(w);
+                if (offset_owner != 0) {
+                    offset_owner = (offset_owner - 2) / 92; // 92 = ped data size
+                    if (offset_owner > 7 && pindx[offset_owner] != 0xFFFF) {
+                        // TODO: correct weapons for enemy agents
+                        peds_[pindx[offset_owner]]->addWeapon(w);
+                        weapons_.push_back(w);
+                    } else {
+                        delete w;
+                    }
                 } else {
                     delete w;
                 }

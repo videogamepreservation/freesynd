@@ -12,11 +12,10 @@ evacuation red circle
 vehicles, people, static objects, wepons, also there are sfx for weapons
  - Objects state identification on loading phase: some of them don't start with
 first animation, some doors are already open or are openning, some blinking
-signs have different start frame; identify directions for vehicle and peds, as
-it is broke
+signs have different start frame
  - Adding properties to:
    vehicle: max people can hold; speed per type; damage can inflict/recieve per type;
-driver; radius of damage when destroyed
+radius of damage when destroyed
    people: add IPA levels and their modification through gameplay menu and influence
 of these levels on different properties of people - speed, inteligence, accuracy,
 viewing range(?), health recovery(?); mods properties should affect IPAs; damage
@@ -48,8 +47,7 @@ same for trees, people etc - switch of state due to damage
    damage type priority laser->explosion->burning->hit
    during pickup/putdown/hit people are unable to do anything else untill state is
 complete
-   when somebody is inside of vehicle he should be placed outside, when vehicle is
-destroyed/burning, and damage of explosion applicated
+   when vehicle is destroyed, explosion should create damage to all in range
    change in behavior due to persuade
    "access card" make agent become police officer
    firing should have delay, ammo/sec(?)
@@ -73,3 +71,5 @@ info costs, some 3, enhance cost same thing, the total number is const = 3 it
 should be variable
  - rewrite PedInstance::inRange it is tile based, weapons have offset like size
 range = tile*256(x,y)+off(x,y),  tile*128(z) + offz, our z is tile based
+ - set weapons for enemy agents, because in gamedata weapons are not the same as
+in original gameplay or are not present at all

@@ -593,39 +593,40 @@ void GameplayMenu::handleMouseDown(int x, int y, int button)
                     if (pointing_at_weapon_ != -1) {
                         mission_->ped(i)->pickupWeapon(
                                 mission_->weapon(pointing_at_weapon_));
-                    }
-                    else if (pointing_at_vehicle_ != -1) {
-                        if (mission_->ped(i)->inVehicle())
+                    } else if (pointing_at_vehicle_ != -1) {
+                        if (mission_->ped(i)->inVehicle()) {;
+                            mission_->ped(i)->inVehicle()->removeDriver(mission_->ped(i));
                             mission_->ped(i)->leaveVehicle();
-                        else {
+                        } else {
                             if (mission_->vehicle(pointing_at_vehicle_)->
                                     health() > 0)
                                 mission_->ped(i)->putInVehicle(
                                         mission_->vehicle(
                                                 pointing_at_vehicle_));
                         }
-                    }
-                    else if (mission_->ped(i)->inVehicle()) {
-                        int stx = tx;
-                        int sty = ty;
-                        //int sox = ox;
-                        //int soy = oy;
-                        stx = tx * 256 + ox + 128 * mission_->ped(i)->inVehicle()->tileZ();
-                        //sox = stx % 256;
-                        stx = stx / 256;
-                        sty = ty * 256 + oy + 128 * mission_->ped(i)->inVehicle()->tileZ();
-                        //soy = sty % 256;
-                        sty = sty / 256;
-                        if (ctrl_)
-                            mission_->ped(i)->inVehicle()->
-                                addDestinationV(stx, sty, 0,
-                                128, 128, 480);
-                        else
-                            mission_->ped(i)->inVehicle()->
-                                setDestinationV(mission_, stx, sty, 0, 
-                                128, 128, 480);
-                    }
-                    else {
+                    } else if (mission_->ped(i)->inVehicle()) {
+                        if (mission_->ped(i)
+                            == mission_->ped(i)->inVehicle()->getDriver()) {
+                            int stx = tx;
+                            int sty = ty;
+                            //int sox = ox;
+                            //int soy = oy;
+                            stx = tx * 256 + ox + 128 * mission_->ped(i)->inVehicle()->tileZ();
+                            //sox = stx % 256;
+                            stx = stx / 256;
+                            sty = ty * 256 + oy + 128 * mission_->ped(i)->inVehicle()->tileZ();
+                            //soy = sty % 256;
+                            sty = sty / 256;
+                            if (ctrl_)
+                                mission_->ped(i)->inVehicle()->
+                                    addDestinationV(stx, sty, 0,
+                                    128, 128, 480);
+                            else
+                                mission_->ped(i)->inVehicle()->
+                                    setDestinationV(mission_, stx, sty, 0, 
+                                    128, 128, 480);
+                        }
+                    } else {
                         int stx = tx;
                         int sty = ty;
                         int stz = 0;

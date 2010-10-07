@@ -223,12 +223,11 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
             tile_z_ = in_vehicle_->tileZ();
             off_x_ = in_vehicle_->offX();
             off_y_ = in_vehicle_->offY();
-        }
-        else if (samePosition(in_vehicle_)) {
+        }else if (samePosition(in_vehicle_)) {
             map_ = -1;
+            in_vehicle_->setDriver(this);
             return true;
-        }
-        else {
+        } else {
             if(health_ > 0) {
                 if(dest_path_.empty())
                     setDestinationP(mission ,in_vehicle_->tileX(),
@@ -865,10 +864,6 @@ void PedInstance::putInVehicle(VehicleInstance * v) {
 void PedInstance::leaveVehicle() {
     assert(map_ == -1 && in_vehicle_);
     map_ = in_vehicle_->map();
-
-    // TODO: only if driver exits this must occur
-    in_vehicle_->clearDestination();
-    in_vehicle_->setSpeed(0);
     in_vehicle_ = 0;
 }
 

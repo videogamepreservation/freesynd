@@ -115,6 +115,15 @@ PedInstance *PedManager::loadInstance(uint8 * data, int map)
                         z, gamdata->mapposx[0],
                         gamdata->mapposy[0], oz);
     newped->setDirection(dir);
+    newped->setMainType(gamdata->type_ped);
+    newped->setMainType(gamdata->status);
+
+    newped->setAllAdrenaLevels(gamdata->adrena_amount,
+        gamdata->adrena_dependency, gamdata->adrena_effect);
+    newped->setAllInteliLevels(gamdata->inteli_amount,
+        gamdata->inteli_dependency, gamdata->inteli_effect);
+    newped->setAllPercepLevels(gamdata->percep_amount,
+        gamdata->percep_dependency, gamdata->percep_effect);
 
     return newped;
 }

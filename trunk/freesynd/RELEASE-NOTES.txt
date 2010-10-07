@@ -10,6 +10,12 @@ Changes
   * Correct positioning by Z axis for all objects
   * Bug, too small space allocated for enhance/info cost values, destructor
  for Mission class was not able to deallocate briefing string
+  * Vehicles have people set inside
+  * Only driver is able to drive vehicle
+  * If vehicle is destroyed people leave it
+  * People are armed, but enemy agents are not armed correctly
+  * In missions, at start, where weapons are on floor, weapons should be
+  visible now
 
 Fixed Bugs
 ----------

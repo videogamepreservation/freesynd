@@ -248,6 +248,24 @@ public:
 
     int draw_timeout_;
 
+    void setAllAdrenaLevels(uint8 amount, uint8 depend, uint8 effect) {
+        lvl_percep_amount_ = amount;
+        lvl_percep_dependency_ = depend;
+        lvl_percep_effect_ = effect;
+    }
+
+    void setAllInteliLevels(uint8 amount, uint8 depend, uint8 effect) {
+        lvl_percep_amount_ = amount;
+        lvl_percep_dependency_ = depend;
+        lvl_percep_effect_ = effect;
+    }
+
+    void setAllPercepLevels(uint8 amount, uint8 depend, uint8 effect) {
+        lvl_percep_amount_ = amount;
+        lvl_percep_dependency_ = depend;
+        lvl_percep_effect_ = effect;
+    }
+
 protected:
     Ped *ped_;
     bool dead_;
@@ -271,6 +289,21 @@ protected:
     WeaponInstance *pickup_weapon_, *putdown_weapon_;
     VehicleInstance *in_vehicle_;
     int is_an_agent_;
+    // IPA levels: white bar level,set level,exhaused level and forced level
+    //uint8 lvl_adrena_reserve_;
+    uint8 lvl_adrena_amount_;
+    uint8 lvl_adrena_dependency_;
+    uint8 lvl_adrena_effect_;
+
+    //uint8 lvl_inteli_reserve_;
+    uint8 lvl_inteli_amount_;
+    uint8 lvl_inteli_dependency_;
+    uint8 lvl_inteli_effect_;
+
+    //uint8 lvl_percep_reserve_;
+    uint8 lvl_percep_amount_;
+    uint8 lvl_percep_dependency_;
+    uint8 lvl_percep_effect_;
 
     bool walkable(int x, int y, int z);
 };
