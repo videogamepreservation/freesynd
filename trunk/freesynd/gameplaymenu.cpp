@@ -533,8 +533,7 @@ void GameplayMenu::handleMouseDown(int x, int y, int button)
                         selectAgent(0);
                         change = true;
                     }
-                }
-                else {
+                } else {
                     if ((selectable_agents_ & (1 << 1)) != 0) {
                         selectAgent(1);
                         change = true;
@@ -548,8 +547,7 @@ void GameplayMenu::handleMouseDown(int x, int y, int button)
                         selectAgent(2);
                         change = true;
                     }
-                }
-                else {
+                } else {
                     if ((selectable_agents_ & (1 << 3)) != 0) {
                         selectAgent(3);
                         change = true;
@@ -564,7 +562,8 @@ void GameplayMenu::handleMouseDown(int x, int y, int button)
                 selectAllAgents();
                 change = true;
             }
-
+#if 0
+            // TODO: click on minimap requires fixing
             int sy = 46 + 44 + 10 + 46 + 44 + 15 + 2 * 32;
 
             if (y > sy) {
@@ -578,8 +577,8 @@ void GameplayMenu::handleMouseDown(int x, int y, int button)
                             printf("%i\n", t);
                         }
             }
-        }
-        else {
+#endif
+        } else {
             int ox, oy;
             int tx =
                 g_App.maps().screenToTileX(mission_->map(), world_x_ + x - 129,
@@ -657,55 +656,57 @@ void GameplayMenu::handleMouseDown(int x, int y, int button)
                 }
             }
         }
-    }
-    else if (button == 3) {
-        for (int i = 0; i < 4; i++)
-            if (isAgentSelected(i)
-                    && mission_->ped(i)->selectedWeapon()) {
-                if (pointing_at_ped_ != -1
-                        && mission_->ped(i)->inRange(
-                                mission_->ped(pointing_at_ped_))) {
-                    mission_->ped(i)->setTarget(
-                            mission_->ped(pointing_at_ped_));
+    } else if (button == 3) {
+        if (x >= 129) {
+            for (int i = 0; i < 4; i++)
+                if (isAgentSelected(i)
+                        && mission_->ped(i)->selectedWeapon()) {
+                    if (pointing_at_ped_ != -1
+                            && mission_->ped(i)->inRange(
+                                    mission_->ped(pointing_at_ped_))) {
+                        mission_->ped(i)->setTarget(
+                                mission_->ped(pointing_at_ped_));
+                    }
+                    else if (pointing_at_vehicle_ != -1
+                            && mission_->ped(i)->inRange(
+                                    mission_->vehicle(pointing_at_vehicle_))) {
+                        mission_->ped(i)->setTarget(
+                                mission_->vehicle(pointing_at_vehicle_));
+                    }
+                    else if (pointing_at_ped_ == -1
+                            && pointing_at_vehicle_ == -1) {
+                        mission_->ped(i)->setTarget(world_x_ + x - 129,
+                                world_y_ + y);
+                    }
+                    WeaponInstance *w = mission_->ped(i)->selectedWeapon();
+                    mission_->ped(i)->setHitDamage(w->shot());
                 }
-                else if (pointing_at_vehicle_ != -1
-                        && mission_->ped(i)->inRange(
-                                mission_->vehicle(pointing_at_vehicle_))) {
-                    mission_->ped(i)->setTarget(
-                            mission_->vehicle(pointing_at_vehicle_));
-                }
-                else if (pointing_at_ped_ == -1
-                        && pointing_at_vehicle_ == -1) {
-                    mission_->ped(i)->setTarget(world_x_ + x - 129,
-                            world_y_ + y);
-                }
-                WeaponInstance *w = mission_->ped(i)->selectedWeapon();
-                mission_->ped(i)->setHitDamage(w->shot());
-            }
+        }
     }
 
     // handle weapon selectors
-    for (int j = 0; j < 2; j++) {
-        for (int i = 0; i < 4; i++) {
-            if (x >= 32 * i && x < 32 * i + 32
-                    && y >= 46 + 44 + 10 + 46 + 44 + 15 + j * 32
-                    && y < 46 + 44 + 10 + 46 + 44 + 15 + j * 32 + 32) {
-                for (int a = 0; a < 4; a++) {
-                    if (isAgentSelected(a)) {
-                        if (i + j * 4 < mission_->ped(a)->numWeapons()) {
-                            if (button == 1) {
-                                if (mission_->ped(a)->selectedWeapon()
-                                        == mission_->ped(a)->weapon(i + j * 4))
-                                    mission_->ped(a)->setSelectedWeapon(-1);
-                                else {
-                                    mission_->ped(a)->setSelectedWeapon(
-                                            i + j * 4);
-                                }
-                            }
-                            else
-                                mission_->ped(a)->dropWeapon(i + j * 4);
+    if (x < 129) {
+        for (int j = 0; j < 2; j++) {
+            for (int i = 0; i < 4; i++) {
+                if (x >= 32 * i && x < 32 * i + 32
+                        && y >= 2 + 46 + 44 + 10 + 46 + 44 + 15 + j * 32
+                        && y < 2 + 46 + 44 + 10 + 46 + 44 + 15 + j * 32 + 32) {
+                    for (int a = 0; a < 4; a++) {
+                        if (isAgentSelected(a)) {
+                            if (i + j * 4 < mission_->ped(a)->numWeapons()) {
+                                if (button == 1) {
+                                    if (mission_->ped(a)->selectedWeapon()
+                                            == mission_->ped(a)->weapon(i + j * 4))
+                                        mission_->ped(a)->setSelectedWeapon(-1);
+                                    else {
+                                        mission_->ped(a)->setSelectedWeapon(
+                                                i + j * 4);
+                                    }
+                                } else
+                                    mission_->ped(a)->dropWeapon(i + j * 4);
 
-                            change = true;
+                                change = true;
+                            }
                         }
                     }
                 }
