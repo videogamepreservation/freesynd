@@ -76,6 +76,8 @@ Block g_Blocks[50] = {
     {"INDONESIA", 47999794, 25, 30, STAT_HAPPY, BLK_UNAVAIL, NULL}
 };
 
+const int GameSession::HOUR_DELAY = 4000;
+
 GameSession::GameSession() {
     reset();
     enable_all_mis_ = false;
@@ -104,6 +106,7 @@ void GameSession::reset() {
     time_hour_ = 0;
     time_day_ = 1;
     time_year_ = 85;
+    time_elapsed_ = 0;
 }
 
 Block & GameSession::getBlock(uint8 index) {
@@ -139,34 +142,37 @@ void GameSession::completeSelectedBlock() {
 }
 
 /*!
- * Updates the game time based on the given elapsed time in hours.
- * This methods computes the tax revenues, the population
- * status and the research evolution.
- * \param hour_elapsed The number of elapsed hour.
+ * Updates the game time based on the given elapsed millisecond since
+ * the last update.
+ * For every day passed, it calls the updateCountries() method and update
+ * the user's amount of money.
+ * \param elapsed The number of millisecond since the last update. Set to -1
+ * to reset the counter.
+ * \return True if time has changed.
  */
-void GameSession::updateTime(int hour_elapsed) {
-    // Number of days in the 
-    int day_elapsed = hour_elapsed / 24;
-    int hour_remain = hour_elapsed % 24;
-
-    // Hour update
-    time_hour_ += hour_remain;
-    if (time_hour_ > 23) {
-        time_hour_ -= 24;
-        time_day_++;
-
-        if (time_day_ > 365) {
-            time_day_ = 1;
-            time_year_++;
-        }
-
-        // Update money
-        money_ += updateCountries();
+bool GameSession::updateTime(int elapsed) {
+    
+    if (elapsed == -1) {
+        time_elapsed_ = 0;
+        return false;
     }
 
-    if (day_elapsed != 0) {
-        for (int i=0; i<day_elapsed; i++) {
+    time_elapsed_ += elapsed;
+    if (time_elapsed_ > GameSession::HOUR_DELAY) {
+        // Computes how much hours have passed
+        int hour_elapsed = time_elapsed_ / HOUR_DELAY;
+        // Reset the counter
+        time_elapsed_ = 0;
+        // Number of days in that time
+        int day_elapsed = hour_elapsed / 24;
+        int hour_remain = hour_elapsed % 24;
+
+        // Hour update
+        time_hour_ += hour_remain;
+        if (time_hour_ > 23) {
+            time_hour_ -= 24;
             time_day_++;
+
             if (time_day_ > 365) {
                 time_day_ = 1;
                 time_year_++;
@@ -175,7 +181,32 @@ void GameSession::updateTime(int hour_elapsed) {
             // Update money
             money_ += updateCountries();
         }
+
+        if (day_elapsed != 0) {
+            for (int i=0; i<day_elapsed; i++) {
+                time_day_++;
+                if (time_day_ > 365) {
+                    time_day_ = 1;
+                    time_year_++;
+                }
+
+                // Update money
+                money_ += updateCountries();
+            }
+        }
+
+        return true;
     }
+
+    return false;
+}
+
+void GameSession::getTimeAsStr(char *dest) {
+#ifdef WIN_SECURE
+    sprintf_s(dest, 100, "%02d:%d:%dNC", time_hour_, time_day_, time_year_);
+#else
+    sprintf(dest, "%02d:%d:%dNC", time_hour_, time_day_, time_year_);
+#endif
 }
 
 int GameSession::getTaxRevenue(int population, int rate) {

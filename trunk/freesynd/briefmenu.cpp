@@ -35,6 +35,7 @@ Menu(m, "brief", "mbrief.dat", "mbrieout.dat"), map_menu_(mapMenu),
 orig_pixels_(0), start_line_(0), info_level_(0),
 enhance_level_(0), mission_(0) {
     addStatic(148, 35, "MISSION BRIEF", 3, true);
+    addStatic(500, 9, "", 1, false);       // Time
     addOption(538, 118, "INFO", 1, KEY_F1, NULL);
     addOption(518, 169, "ENHANCE", 1, KEY_F2, NULL);
     addOption(461, 320, "", 1, KEY_F6, NULL, true, Sprite::MSPR_RIGHT_ARROW2_D, Sprite::MSPR_RIGHT_ARROW2_L);
@@ -42,6 +43,7 @@ enhance_level_(0), mission_(0) {
     addOption(43, 352, "ACCEPT", 1, KEY_F3, "select");
     addOption(173, 352, "MAP", 1, KEY_F4, "map");
     addOption(535, 352, "MENU", 1, KEY_F5, "main");
+
     setParentMenu("map");
 }
 
@@ -53,30 +55,53 @@ BriefMenu::~BriefMenu() {
         delete mission_;
 }
 
-void BriefMenu::handleShow() {
-    // grab mission info
-    int cur_miss = g_Session.getSelectedBlock().mis_id;
-    mission_ = g_App.missions().loadMission(cur_miss);
+void BriefMenu::handleTick(int elapsed)
+{
+    if (g_Session.updateTime(elapsed)) {
+        updateClock();
+    }
 }
 
-void BriefMenu::handleRender() {
+/*! 
+ * Update the game time display
+ */
+void BriefMenu::updateClock() {
+    char tmp[100];
+
+    g_Session.getTimeAsStr(tmp);
+    setStaticText(1, tmp);
+
+    needRendering();
+}
+
+void BriefMenu::handleShow() {
+
     if (orig_pixels_ == 0) {
         orig_pixels_ = new uint8[GAME_SCREEN_WIDTH * GAME_SCREEN_HEIGHT];
         memcpy(orig_pixels_, g_Screen.pixels(),
                GAME_SCREEN_WIDTH * GAME_SCREEN_HEIGHT);
     }
-    else {
-        g_Screen.blit(0, 0, 500, 340, orig_pixels_, false,
+
+    // grab mission info
+    int cur_miss = g_Session.getSelectedBlock().mis_id;
+    mission_ = g_App.missions().loadMission(cur_miss);
+
+    updateClock();
+}
+
+void BriefMenu::handleRender() {
+
+    g_Screen.blit(0, 0, GAME_SCREEN_WIDTH, 340, orig_pixels_, false,
                       GAME_SCREEN_WIDTH);
-    }
 
     g_Screen.drawLogo(18, 14, g_Session.getLogo(), g_Session.getLogoColour());
 
     // write briefing
     if (mission_->briefing()) {
-        char *mbriefing = (char *)malloc(strlen(mission_->briefing()) + 1);
+        int sizeStr = strlen(mission_->briefing()) + 1;
+        char *mbriefing = (char *)malloc(sizeStr);
         assert(mbriefing != NULL);
-        strcpy(mbriefing, mission_->briefing());
+        fs_strcpy(mbriefing, sizeStr, mission_->briefing());
         char *miss = mbriefing;
         char *nextline = miss - 1;
 

@@ -67,6 +67,9 @@ typedef struct Block_ {
  */
 class GameSession {
 public:
+    /*! Number of millisecond for an hour in the game.*/
+    static const int HOUR_DELAY;
+
     GameSession();
     ~GameSession();
 
@@ -145,26 +148,8 @@ public:
         money_ = m;
     }
 
-    /*!
-     * Returns the current hour.
-     */
-    int getHour() const {
-        return time_hour_;
-    }
-
-    /*!
-     * Returns the current day.
-     */
-    int getDay() const {
-        return time_day_;
-    }
-
-    /*!
-     * Returns the current year.
-     */
-    int getYear() const {
-        return time_year_;
-    }
+    //! Sets the representation of the time in the given string
+    void getTimeAsStr(char *dest);
 
     /*!
      * Returns the index of the current selected region on map menu.
@@ -198,7 +183,8 @@ public:
     //! Tells if cheat mode Replay missions is on
     bool canReplayMission() { return replay_mission_; }
 
-    void updateTime(int hour_elapsed);
+    //! Do all time related updates
+    bool updateTime(int elapsed);
 
     //! Adds the given amount to the selected block tax rate.
     bool addToTaxRate(int amount);
@@ -218,6 +204,8 @@ private:
     int time_day_;
     /*! Stores the current year. */
     int time_year_;
+    /*! Time in millisecond since the last time update.*/
+    int time_elapsed_;
     /*! 
      * Stores the index of the current selected
      * region on the mission map.

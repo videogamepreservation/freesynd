@@ -120,8 +120,6 @@ MapMenu::MapMenu(MenuManager * m)
 :  Menu(m, "map", "mmap.dat", "mmapout.dat"),
 mapblk_data_(NULL), orig_pixels_(NULL), select_tick_count_(0)
 {
-    time_tick_count_ = 0;
-
     addOption(53, 352, "BRIEF", 1, KEY_F4, "brief");
     addOption(535, 352, "MENU", 1, KEY_F5, "main");
 
@@ -273,13 +271,8 @@ void MapMenu::handleTick(int elapsed)
         needRendering();
     }
 
-    // This a count to refresh the game time
-    time_tick_count_ += elapsed;
-    // 1 hour every 4 seconds
-    if (time_tick_count_ > 4000) {
-        g_Session.updateTime(1);
+    if (g_Session.updateTime(elapsed)) {
         updateClock();
-        time_tick_count_ = 0;
     }
 }
 
@@ -288,11 +281,7 @@ void MapMenu::handleTick(int elapsed)
  */
 void MapMenu::updateClock() {
     char tmp[100];
-#ifdef WIN_SECURE
-    sprintf_s(tmp, 100, "%02d:%d:%dNC", g_Session.getHour(), g_Session.getDay(), g_Session.getYear());
-#else
-    sprintf(tmp, "%02d:%d:%dNC", g_Session.getHour(), g_Session.getDay(), g_Session.getYear());
-#endif
+    g_Session.getTimeAsStr(tmp);
     setStaticText(TIME_STATIC_ID, tmp);
 
     needRendering();

@@ -314,6 +314,10 @@ void GameplayMenu::improveScroll(int &newScrollX, int &newScrollY)
         newScrollY--;
 }
 
+void GameplayMenu::handleShow() {
+    
+}
+
 int qanim = 1085, qframe = 0;
 
 void GameplayMenu::handleRender()
@@ -733,6 +737,18 @@ extern int topz;
 
 void GameplayMenu::handleUnknownKey(Key key, KeyMod mod, bool pressed) {
     bool change = false; /* indicator whether menu should be redrawn */
+
+#ifdef _DEBUG
+    if (key == KEY_h && mission_) {
+        map_menu_->setBlkColour(g_Session.getSelectedBlockId(),
+                g_Session.getLogoColour());
+
+        g_Session.completeSelectedBlock();
+
+        menu_manager_->changeCurrentMenu("misswin");
+        return;
+    }
+#endif
 
     // SPACE is pressed when the mission failed or succeeded to return
     // to menu

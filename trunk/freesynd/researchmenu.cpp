@@ -35,6 +35,8 @@ orig_pixels_(0), sel_weapon_(0), sel_field_(0),
 sel_mod_(0)
 {
     addStatic(228, 35, "RESEARCH", 3, true);
+    addStatic(500, 9, "", 1, false);       // Time
+
     addOption(52, 296, "MODS", 1, KEY_F1, NULL);
     addOption(52, 324, "EQUIP", 1, KEY_F2, NULL);
     addOption(43, 352, "ACCEPT", 1, KEY_F3, "select");
@@ -135,22 +137,49 @@ void ResearchMenu::addFieldOptions()
     addOption(20, 144, g_Fields[9], 0, KEY_9, 0, false);
 }
 
+void ResearchMenu::handleTick(int elapsed)
+{
+    if (g_Session.updateTime(elapsed)) {
+        updateClock();
+    }
+}
+
+/*! 
+ * Update the game time display
+ */
+void ResearchMenu::updateClock() {
+    char tmp[100];
+    g_Session.getTimeAsStr(tmp);
+    setStaticText(1, tmp);
+
+    needRendering();
+}
+
+void ResearchMenu::handleShow() {
+    
+    if (orig_pixels_ == 0) {
+        orig_pixels_ = new uint8[GAME_SCREEN_WIDTH * GAME_SCREEN_HEIGHT];
+        memcpy(orig_pixels_, g_Screen.pixels(),
+               GAME_SCREEN_WIDTH * GAME_SCREEN_HEIGHT);
+    }
+
+    // Show the mouse
+    g_System.showCursor();
+
+    // Update the time
+    updateClock();
+}
+
 void ResearchMenu::handleRender()
 {
     if (tab_ == 1 && sel_weapon_ == 0) {
         addWeaponOptions();
     }
 
-    if (orig_pixels_ == 0) {
-        orig_pixels_ = new uint8[GAME_SCREEN_WIDTH * GAME_SCREEN_HEIGHT];
-        memcpy(orig_pixels_, g_Screen.pixels(),
-               GAME_SCREEN_WIDTH * GAME_SCREEN_HEIGHT);
-    } else {
-        g_Screen.blit(0, 0, 145, 230, orig_pixels_, false,
+    g_Screen.blit(0, 0, 145, 230, orig_pixels_, false,
                       GAME_SCREEN_WIDTH);
-        g_Screen.blit(145, 0, GAME_SCREEN_WIDTH - 145, GAME_SCREEN_HEIGHT,
+    g_Screen.blit(145, 0, GAME_SCREEN_WIDTH - 145, GAME_SCREEN_HEIGHT,
                       orig_pixels_ + 145, false, GAME_SCREEN_WIDTH);
-    }
 
     g_Screen.drawLogo(18, 14, g_App.getGameSession().getLogo(), g_App.getGameSession().getLogoColour());
 

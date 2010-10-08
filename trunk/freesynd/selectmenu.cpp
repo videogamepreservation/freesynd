@@ -34,6 +34,8 @@ cur_agent_(0), tick_count_(0), sel_weapon_(0), sel_mod_(0),
 sel_weapon_inst_(0), sel_all_(false)
 {
     addStatic(148, 35, "TEAM SELECTION", 3, true);
+    addStatic(500, 9, "", 1, false);       // Time
+
     addOption(32, 240, "RESEARCH", 1, KEY_F1, "research");
     addOption(52, 268, "TEAM", 1, KEY_F2, NULL);
     addOption(52, 296, "MODS", 1, KEY_F3, NULL);
@@ -49,6 +51,8 @@ sel_weapon_inst_(0), sel_all_(false)
     addOption(517, 324, "PURCHASE", 1, KEY_F8, NULL, false);
     addOption(537, 324, "SELL", 1, KEY_F9, NULL, false);
     setParentMenu("brief");
+
+    rnd_ = 0;
 }
 
 SelectMenu::~SelectMenu()
@@ -82,33 +86,32 @@ void SelectMenu::addRecruitOptions()
                   (Key) (KEY_0 + i), NULL, false);
 }
 
-void SelectMenu::drawAgentSelector(int x, int y)
-{
-    static int lx, ly;
-    if (x != -1)
-        lx = x;
-    else
-        x = lx;
-    if (y != -1)
-        ly = y;
-    else
-        y = ly;
-
-    int rnd = tick_count_ % 8;
-
+/*!
+ * Draws a dashed line around the currently selected agent selector.
+ * \param x Coordinates of the top left corner 
+ * \param y Coordinates of the top left corner 
+ */
+void SelectMenu::drawAgentSelector(int x, int y) {
+    // First create a transparent sprite
     uint8 cdata[30 * 33];
     int cwidth = 30;
     int cheight = 33;
     memset(cdata, 255, sizeof(cdata));
+
+    // Draws the upper and lower lines
     for (int i = 0; i < cwidth; i++) {
-        cdata[i] = ((rnd + i) % 8 <= 4) ? 252 : 16;
+        cdata[i] = ((rnd_ + i) % 8 <= 4) ? 252 : 16;
         cdata[i + (cheight - 1) * cwidth] =
-            ((rnd + i) % 8 >= 4) ? 252 : 16;
+            ((rnd_ + i) % 8 >= 4) ? 252 : 16;
     }
+
+    // Draws the right and left line
     for (int j = 0; j < cheight; j++) {
-        cdata[j * cwidth] = ((rnd + j) % 8 >= 4) ? 252 : 16;
-        cdata[j * cwidth + cwidth - 1] = ((rnd + j) % 8 <= 4) ? 252 : 16;
+        cdata[j * cwidth] = ((rnd_ + j) % 8 >= 4) ? 252 : 16;
+        cdata[j * cwidth + cwidth - 1] = ((rnd_ + j) % 8 <= 4) ? 252 : 16;
     }
+
+    // blits the sprite at given position
     g_Screen.scale2x(x, y, cwidth, cheight, cdata);
 }
 
@@ -285,26 +288,50 @@ void SelectMenu::hideEquipList()
 void SelectMenu::handleTick(int elapsed)
 {
     tick_count_ += elapsed;
+    // Updates the moving agent selector
     if (tick_count_ > 300) {
-        static int count = 0;
-        tick_count_ = count++;
-        drawAgentSelector();
+        rnd_ = ++rnd_ % 8;
         tick_count_ = 0;
+        needRendering();
+    }
+
+    // Update the clock
+    if (g_Session.updateTime(elapsed)) {
+        updateClock();
     }
 }
 
-void SelectMenu::handleRender()
-{
+/*! 
+ * Update the game time display
+ */
+void SelectMenu::updateClock() {
+    char tmp[100];
+    g_Session.getTimeAsStr(tmp);
+    setStaticText(1, tmp);
+
+    needRendering();
+}
+
+void SelectMenu::handleShow() {
+    
     if (orig_pixels_ == 0) {
         orig_pixels_ = new uint8[GAME_SCREEN_WIDTH * GAME_SCREEN_HEIGHT];
         memcpy(orig_pixels_, g_Screen.pixels(),
                GAME_SCREEN_WIDTH * GAME_SCREEN_HEIGHT);
-    } else {
-        g_Screen.blit(0, 0, 145, 230, orig_pixels_, false,
-                      GAME_SCREEN_WIDTH);
-        g_Screen.blit(145, 0, GAME_SCREEN_WIDTH - 145, GAME_SCREEN_HEIGHT,
-                      orig_pixels_ + 145, false, GAME_SCREEN_WIDTH);
     }
+
+    // Show the mouse
+    g_System.showCursor();
+
+    // Update the time
+    updateClock();
+}
+
+void SelectMenu::handleRender() {
+    g_Screen.blit(0, 0, 145, 230, orig_pixels_, false,
+                  GAME_SCREEN_WIDTH);
+    g_Screen.blit(145, 0, GAME_SCREEN_WIDTH - 145, GAME_SCREEN_HEIGHT,
+                  orig_pixels_ + 145, false, GAME_SCREEN_WIDTH);
 
     g_Screen.drawLogo(18, 14, g_App.getGameSession().getLogo(), g_App.getGameSession().getLogoColour());
 
@@ -334,8 +361,6 @@ void SelectMenu::handleRender()
             for (int i = 0; i < t1->health() * 35 / 255; i++)
                 g_Screen.scale2x(68, 122 - i, 3, 1, datag);
         }
-        if (cur_agent_ == 0)
-            drawAgentSelector(20, 84);
     }
     if (t2) {
         if (t2->isActive()) {
@@ -346,8 +371,6 @@ void SelectMenu::handleRender()
             for (int i = 0; i < t1->health() * 35 / 255; i++)
                 g_Screen.scale2x(132, 122 - i, 3, 1, datag);
         }
-        if (cur_agent_ == 1)
-            drawAgentSelector(82, 84);
     }
     if (t3) {
         if (t3->isActive()) {
@@ -358,8 +381,6 @@ void SelectMenu::handleRender()
             for (int i = 0; i < t1->health() * 35 / 255; i++)
                 g_Screen.scale2x(68, 200 - i, 3, 1, datag);
         }
-        if (cur_agent_ == 2)
-            drawAgentSelector(20, 162);
     }
     if (t4) {
         if (t4->isActive()) {
@@ -370,11 +391,25 @@ void SelectMenu::handleRender()
             for (int i = 0; i < t1->health() * 35 / 255; i++)
                 g_Screen.scale2x(132, 200 - i, 3, 1, datag);
         }
-        if (cur_agent_ == 3)
-            drawAgentSelector(82, 162);
     }
     if (sel_all_) {
         g_App.menuSprites().drawSpriteXYZ(77, 20, 152, 0, false, true);
+    }
+
+    // Draw the selector around the selected agent
+    switch (cur_agent_) {
+    case 0:
+        drawAgentSelector(20, 84);
+        break;
+    case 1:
+        drawAgentSelector(82, 84);
+        break;
+    case 2:
+        drawAgentSelector(20, 162);
+        break;
+    case 3:
+        drawAgentSelector(82, 162);
+        break;
     }
 
     drawAgent();
@@ -423,8 +458,6 @@ void SelectMenu::handleRender()
         for (int i = g_App.numRecruits(); i < 18; i++)
             g_App.fonts().drawText(520, 124 + i * 12, "EMPTY", 0, true);
     }
-
-    g_System.showCursor();
 }
 
 void SelectMenu::handleShowLate()

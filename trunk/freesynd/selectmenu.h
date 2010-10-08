@@ -35,6 +35,7 @@ public:
     ~SelectMenu();
 
     void handleTick(int elapsed);
+    void handleShow();
     void handleRender();
     void handleShowLate();
     void handleLeave();
@@ -42,14 +43,9 @@ public:
     void handleOption(Key key);
 
 protected:
-    uint8 *orig_pixels_;
-    int tab_;
-    int cur_agent_;
-    int tick_count_;
-    int sel_weapon_, sel_mod_, sel_weapon_inst_;
-    bool sel_all_;
-
-    void drawAgentSelector(int x = -1, int y = -1);
+    void updateClock();
+    //! Draws a focus around the selected agent picture
+    void drawAgentSelector(int x, int y);
     void drawAgent();
     void showTeamList();
     void hideTeamList();
@@ -63,6 +59,17 @@ protected:
     void addRecruitOptions();
 
     void toggleAgent(int n);
+
+protected:
+    uint8 *orig_pixels_;
+    int tab_;
+    int cur_agent_;
+    /*! Counter to update the rnd_ field.*/
+    int tick_count_;
+    /*! A counter used to draw the agent selector.*/
+    int rnd_;
+    int sel_weapon_, sel_mod_, sel_weapon_inst_;
+    bool sel_all_;
 };
 
 #endif

@@ -74,8 +74,6 @@ protected:
     uint8 blk_colours_[50];
     /*! A counter for the blinking line of the selector.*/
     int select_tick_count_;
-    /*! A counter for the game time. */
-    int time_tick_count_;
 
     //! Utility method to draw the mission selector
     void drawSelector();

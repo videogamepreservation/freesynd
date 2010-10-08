@@ -37,11 +37,15 @@ public:
     BriefMenu(MenuManager *m, MapMenu *mapMenu);
     ~BriefMenu();
 
+    void handleTick(int elapsed);
     void handleShow();
     void handleRender();
     void handleLeave();
     void handleOption(Key key);
     Mission *mission() { return mission_; }
+
+protected:
+    void updateClock();
 
 protected:
     MapMenu *map_menu_;

@@ -31,6 +31,9 @@
 class ResearchMenu : public Menu {
 public:
     ResearchMenu(MenuManager *m);
+
+    void handleTick(int elapsed);
+    void handleShow();
     void handleRender();
     void handleShowLate();
     void handleLeave();
@@ -40,6 +43,8 @@ protected:
     int tab_;
     uint8 *orig_pixels_;
     int sel_weapon_, sel_field_, sel_mod_;
+
+    void updateClock();
 
     void showFieldList();
     void hideFieldList();
