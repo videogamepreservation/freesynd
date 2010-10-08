@@ -2,7 +2,6 @@
 #include "mapmanager.h"
 #include "file.h"
 #include <png.h>
-#include <cstdlib.h>
 #include <stdlib.h>
 #include <sys/stat.h>
 #include <sys/types.h>
