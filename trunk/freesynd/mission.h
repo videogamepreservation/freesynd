@@ -329,13 +329,13 @@ public:
         uint8 unkn1[3];
     } LEVELDATA_MAPINFOS;        // total: 14 bytes
 
-    typedef struct {// 7 or less objectives(?)
+    typedef struct {
+        // only max 5 objectives are non-zero, we will read 6
         // 0x00 ??? ;0x01 persuade; 0x02 assassinate; 0x03 protect;
         // 0x05 equipment aquisition; 0x0a combat sweep (police);
-        // 0x0b combat sweep; 0x0d(0x0e(?)) raid and rescue;
-        // 0x0e(0x0f(?)) use vehicle; 0x10 evacuate
-        // if protect, the type is zero, and the next objectives are the
-        // goals, the list finish with zero and the offset of the protected item ?
+        // 0x0b combat sweep; 0x0e destroy vehicle
+        // 0x0f use vehicle; 0x10 evacuate
+        // more info in mission.cpp : loadLevel()
         uint8 type[2];
         // 'offset + 32774' gives the offset in this file of the first objective
         uint8 offset[2];
@@ -350,7 +350,7 @@ public:
     } LEVELDATA_OBJECTIVES;         // total: 14 bytes
 
     typedef struct {
-        uint8 unkn10[1896];
+        uint8 unkn10[1952];
     } LEVELDATA_UNKN11;         // total: 1896 bytes
 
     typedef struct {
@@ -365,8 +365,8 @@ public:
         /*  97128 */ LEVELDATA_SCENARIOS scenarios[2048];
         /* 113512 */ LEVELDATA_UNKN09 u09;
         /* 113960 */ LEVELDATA_MAPINFOS mapinfos;
-        /* 113974 */ LEVELDATA_OBJECTIVES objectives[10];
-        /* 114114 */ LEVELDATA_UNKN11 u11;
+        /* 113974 */ LEVELDATA_OBJECTIVES objectives[6];
+        /* 114058 */ LEVELDATA_UNKN11 u11;
     } LEVELDATA;
 
     // map-tile surfaces

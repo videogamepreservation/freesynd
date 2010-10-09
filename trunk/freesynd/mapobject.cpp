@@ -258,10 +258,13 @@ Static *Static::loadInstance(uint8 * data, int m)
             s = new EtcObj(m, curanim, curanim, curanim);
             break;
         case 0x26:
-            // 0x80 south - north
-            // 0x40 weast - east
+            // 0x00,0x80 south - north = 0
+            // 0x40,0xC0 weast - east = 2
             s = new LargeDoor(m, curanim, curanim + 1, curanim + 2);
-            s->setSubType(gamdata->orientation);
+            if (gamdata->orientation == 0x00 || gamdata->orientation == 0x80)
+                s->setSubType(0);
+            else
+                s->setSubType(2);
             break;
         default:
             printf("uknown type %02X , %02X, %X\n", gamdata->sub_type,
@@ -350,10 +353,10 @@ bool LargeDoor::animate(int elapsed, Mission *obj)
     bool changed = MapObject::animate(elapsed);
     switch(state_) {
         case 0: //open
-            if (sub_type_ == 0x80) {
+            if (sub_type_ == 0) {
                 i = &rel_inc;
                 j = &inc_rel;
-            } else if (sub_type_ == 0x40) {
+            } else if (sub_type_ == 2) {
                 i = &inc_rel;
                 j = &rel_inc;
             }
@@ -401,11 +404,11 @@ bool LargeDoor::animate(int elapsed, Mission *obj)
             break;
         case 2: //closed
             char sign;
-            if (sub_type_ == 0x80) {
+            if (sub_type_ == 0) {
                 i = &rel_inc;
                 j = &inc_rel;
                 sign = 1;
-            } else if (sub_type_ == 0x40) {
+            } else if (sub_type_ == 2) {
                 i = &inc_rel;
                 j = &rel_inc;
                 sign = -1;
@@ -447,10 +450,10 @@ bool LargeDoor::animate(int elapsed, Mission *obj)
                         p->hold_on_.wayFree = 2;
                         p->hold_on_.tilex = x;
                         p->hold_on_.tiley = y;
-                        if (sub_type_ == 0x80) {
+                        if (sub_type_ == 0) {
                             p->hold_on_.xadj = 1;
                             p->hold_on_.yadj = 0;
-                        } else if (sub_type_ == 0x40) {
+                        } else if (sub_type_ == 2) {
                             p->hold_on_.xadj = 0;
                             p->hold_on_.yadj = 1;
                         }
@@ -468,10 +471,10 @@ bool LargeDoor::animate(int elapsed, Mission *obj)
                         p->hold_on_.wayFree = 2;
                         p->hold_on_.tilex = x;
                         p->hold_on_.tiley = y;
-                        if (sub_type_ == 0x80) {
+                        if (sub_type_ == 0) {
                             p->hold_on_.xadj = 1;
                             p->hold_on_.yadj = 0;
-                        } else if (sub_type_ == 0x40) {
+                        } else if (sub_type_ == 2) {
                             p->hold_on_.xadj = 0;
                             p->hold_on_.yadj = 1;
                         }

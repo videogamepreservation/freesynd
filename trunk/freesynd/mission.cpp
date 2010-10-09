@@ -65,7 +65,7 @@ bool Mission::loadLevel(uint8 * levelData)
     copydata(u09, 113512);
     copydata(mapinfos, 113960);
     copydata(objectives, 113974);
-    copydata(u11, 114114);
+    copydata(u11, 114058);
 
     map_ = READ_LE_UINT16(level_data_.mapinfos.map);
     printf("map to load %X\n", map_);
@@ -73,7 +73,33 @@ bool Mission::loadLevel(uint8 * levelData)
     min_y_ = READ_LE_UINT16(level_data_.mapinfos.min_y) / 2;
     max_x_ = READ_LE_UINT16(level_data_.mapinfos.max_x) / 2;
     max_y_ = READ_LE_UINT16(level_data_.mapinfos.max_y) / 2;
+#if 0
+    // for hacking objectives data
+    char nameSo[256];
+    sprintf(nameSo, "obj%02X.hex", map_);
+    FILE *staticsFo = fopen(nameSo,"wb");
+    if (staticsFo) {
+        fwrite(level_data_.objectives, 1, 140, staticsFo);
+        fclose(staticsFo);
+    }
+#endif
     objective_ = 2;
+    // 0x01 offset of ped
+    // 0x02 offset of ped
+    // 0x03 offset of ped, next objective 0x00 + coord, nxt 0x00 + offset of ped
+    // second objective is where ped should go, third ped that should reach it
+    // also can be without those data or can have offset of ped + coord
+    // 0x05 offset of weapon
+    // 0x0E offset of vehicle
+    // 0x0F offset of vehicle
+    // 0x10 coordinates
+    // looks like that objectives even if they are defined where not fully
+    // defined(or are correct), indonesia has one objective but has 2
+    // 0x0 objectives with peds offset + coords, rockies mission
+    // has 0x0e objective + 0x01 but offsets are wrong as in original
+    // gameplay only 1 persuade + evacuate present, in description
+    // 0x0e + 2 x 0x01 + 0x0f, because of this careful loading required
+    // max 5(6?) objectives
 /* objective data not 10, 7 or less
     objective_ =
         level_data_.u10.objective[0] | (level_data_.u10.objective[1] << 8);
@@ -129,7 +155,8 @@ bool Mission::loadLevel(uint8 * levelData)
         if (v) {
             vehicles_.push_back(v);
             vindx[i] = mindx;
-            if (car.offset_of_driver != 0) {
+            if (car.offset_of_driver != 0 && ((car.offset_of_driver - 2) / 92 + 2) * 92
+                == car.offset_of_driver) {
                 driverindx[(car.offset_of_driver - 2) / 92] = mindx;
             }
             mindx++;
