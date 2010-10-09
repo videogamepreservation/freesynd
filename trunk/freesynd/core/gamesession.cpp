@@ -21,6 +21,7 @@
  ************************************************************************/
 
 #include <stdlib.h>
+#include <stdio.h>
 #include "gamesession.h"
 
 Block g_Blocks[50] = {
