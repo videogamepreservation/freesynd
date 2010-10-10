@@ -75,6 +75,7 @@ public:
     virtual void drawAt(int tilex, int tiley, int tilez, int x, int y,
             int scrollX, int scrollY);
     const char *briefing() { return briefing_.c_str(); }
+    void objectiveMsg(const char ** msg);
 
     int infoCost(int lvl) {
         assert(lvl < 3);
@@ -95,9 +96,6 @@ public:
     WeaponInstance *weapon(int i) { return weapons_[i]; }
     int numStatics() { return (int) statics_.size(); }
     Static *statics(int i) { return statics_[i]; }
-    int objective() { return objective_; }
-    int objectivePed() { return objective_ped_; }
-    int objectiveVehicle() { return objective_vehicle_; }
 
     void start();
     bool failed();
@@ -331,10 +329,10 @@ public:
 
     typedef struct {
         // only max 5 objectives are non-zero, we will read 6
-        // 0x00 ??? ;0x01 persuade; 0x02 assassinate; 0x03 protect;
-        // 0x05 equipment aquisition; 0x0a combat sweep (police);
-        // 0x0b combat sweep; 0x0e destroy vehicle
-        // 0x0f use vehicle; 0x10 evacuate
+        // 0x00 action for non-agent(?) ;0x01 persuade; 0x02 assassinate;
+        // 0x03 protect; 0x05 equipment aquisition; 0x0a combat sweep (police);
+        // 0x0b combat sweep; 0x0e destroy vehicle; 0x0f use vehicle;
+        // 0x10 evacuate
         // more info in mission.cpp : loadLevel()
         uint8 type[2];
         // 'offset + 32774' gives the offset in this file of the first objective
@@ -390,6 +388,63 @@ public:
     std::vector<WeaponInstance *> weapons_;
     std::vector<Static *> statics_;
 
+    typedef enum {
+        objv_None,
+        //setup control over object where possible to lose this control
+        objv_AquireControl,
+        // Object can be in danger of being destroyed and it is not executing
+        // any action
+        objv_Protect,
+        // Object can do some action and requires protection until action is
+        // complete
+        objv_Support,
+        // Obtain inventory object
+        // NOTE: maybe in future we have not only weapons, costumes? drones?
+        objv_GetObject,
+        // Object of defined subtype (of type) should be destroyed
+        // defined by indx
+        objv_DestroyObject,
+        // Use of object untill condition is met
+        objv_UseObject,
+        // Not necessary that all controlled objects should reach location
+        objv_ReachLocation,
+        // All controlled objects should reach location
+        objv_Evacuate,
+        // Objective for non-agent
+        objv_ExecuteObjective
+    }ObjectiveType;
+
+    typedef struct {
+        ObjectiveType type;
+        // 0 - vehicle, 1 - ped, 2 - weapon, 3 - static
+        uint8 targettype;
+        // 0 - not defined, 1 - our agent, 2 - enemy agent, 3 - guards
+        // 4 - police, 5 - civilians
+        uint8 targetsubtype;
+        // index within vector of data
+        uint16 targetindx;
+        // 0 - not defined, 1b - has sub objective, 2b - refers to all objects
+        // of subtype, 3b - complete, 4b - failed
+        uint32 condition;
+        // indx for sub objective
+        uint16 subobjindx;
+        // tile position
+        uint8 posxt;
+        uint8 posyt;
+        uint8 poszt;
+        // offset position
+        uint8 posxo;
+        uint8 posyo;
+        uint8 poszo;
+        // This message should be setup during objective definition
+        const char* msg;
+        uint16 nxtobjindx;
+    }ObjectiveDesc;
+
+    std::vector <ObjectiveDesc> objectives_;
+    std::vector <ObjectiveDesc> sub_objectives_;
+    uint16 cur_objective_;
+
     // TODO: enhance level require better handling of values
     // some missions have 2 info costs, some 3, enhance cost same thing
     // the total number is const = 3 it should be variable
@@ -397,9 +452,6 @@ public:
     int enhance_costs_[10];
     std::string briefing_;
     int map_, min_x_, min_y_, max_x_, max_y_;
-    int objective_;
-    int objective_ped_;
-    int objective_vehicle_;
 
     std::set<int> fast_vehicle_cache_, fast_ped_cache_, fast_weapon_cache_,
             fast_statics_cache_;

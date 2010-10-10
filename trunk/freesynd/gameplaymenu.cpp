@@ -1112,34 +1112,7 @@ void GameplayMenu::drawMissionHint(int elapsed) {
         }
 
         if (mission_) {
-            // TODO: check these
-            switch (mission_->objective()) {
-            case 1:
-                str = "PERSUADE";
-                break;
-            case 2:
-                str = "ASSASSINATE";
-                break;
-            case 3:
-                str = "PROTECT";
-                break;
-            case 5:
-                str = "GET WEAPON";
-                break;
-            case 10:
-            case 11:
-                str = "ELIMINATE";
-                break;
-            case 14:
-                str = "RESCUE";
-                break;
-            case 15:
-                str = "USE VEHICLE";
-                break;
-            default:
-                break;
-            }
-
+            mission_->objectiveMsg(&str);
             if (mission_->failed()) {
                 if (!completed_) {
                     completed_ = true;
@@ -1158,8 +1131,9 @@ void GameplayMenu::drawMissionHint(int elapsed) {
                 str = "MISSION COMPLETE";
             }
 
-            if (mission_->completed() || mission_->failed())
-                str = "PRESS SPACE";
+            if (mission_hint_ > 40 && mission_hint_ < 61)
+                if (mission_->completed() || mission_->failed())
+                    str = "PRESS SPACE";
         }
     }
 

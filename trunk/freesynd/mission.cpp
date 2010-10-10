@@ -32,8 +32,7 @@
 #include "app.h"
 
 Mission::Mission(): mtsurfaces_(NULL), mdpoints_(NULL), mdpoints_cp_(NULL),
-map_(0), min_x_(0), min_y_(0), max_x_(0), max_y_(0), objective_(0),
-objective_ped_(-1), objective_vehicle_(-1)
+map_(0), min_x_(0), min_y_(0), max_x_(0), max_y_(0), cur_objective_(0)
 {
     memset(&level_data_, 0, sizeof(level_data_));
 }
@@ -50,6 +49,13 @@ Mission::~Mission()
 }
 
 #define copydata(x, y) memcpy(&level_data_.x, levelData + y, sizeof(level_data_.x))
+
+void Mission::objectiveMsg(const char ** msg) {
+    if (objectives_[cur_objective_].type == objv_None)
+        *msg = "";
+    else
+        *msg = objectives_[cur_objective_].msg;
+}
 
 bool Mission::loadLevel(uint8 * levelData)
 {
@@ -73,56 +79,6 @@ bool Mission::loadLevel(uint8 * levelData)
     min_y_ = READ_LE_UINT16(level_data_.mapinfos.min_y) / 2;
     max_x_ = READ_LE_UINT16(level_data_.mapinfos.max_x) / 2;
     max_y_ = READ_LE_UINT16(level_data_.mapinfos.max_y) / 2;
-#if 0
-    // for hacking objectives data
-    char nameSo[256];
-    sprintf(nameSo, "obj%02X.hex", map_);
-    FILE *staticsFo = fopen(nameSo,"wb");
-    if (staticsFo) {
-        fwrite(level_data_.objectives, 1, 140, staticsFo);
-        fclose(staticsFo);
-    }
-#endif
-    objective_ = 2;
-    // 0x01 offset of ped
-    // 0x02 offset of ped
-    // 0x03 offset of ped, next objective 0x00 + coord, nxt 0x00 + offset of ped
-    // second objective is where ped should go, third ped that should reach it
-    // also can be without those data or can have offset of ped + coord
-    // 0x05 offset of weapon
-    // 0x0E offset of vehicle
-    // 0x0F offset of vehicle
-    // 0x10 coordinates
-    // looks like that objectives even if they are defined where not fully
-    // defined(or are correct), indonesia has one objective but has 2
-    // 0x0 objectives with peds offset + coords, rockies mission
-    // has 0x0e objective + 0x01 but offsets are wrong as in original
-    // gameplay only 1 persuade + evacuate present, in description
-    // 0x0e + 2 x 0x01 + 0x0f, because of this careful loading required
-    // max 5(6?) objectives
-/* objective data not 10, 7 or less
-    objective_ =
-        level_data_.u10.objective[0] | (level_data_.u10.objective[1] << 8);
-    int objective_data =
-        level_data_.u10.objective_data[0] | (level_data_.u10.
-                                             objective_data[1] << 8);
-                                             */
-
-    // 1  = persuade
-    // 2  = assassinate
-    // 3  = protect
-    // 5  = equipment aquisition
-    // 10 = combat sweep (police)
-    // 11 = combat sweep
-    // 14 = raid and rescue
-    // 15 = use vehicle
-    //printf("%i %i %x\n", objective_, objective_data, objective_data);
-
-    //if (objective_ == 1 || objective_ == 2 || objective_ == 3)
-        //objective_ped_ = (objective_data - 2) / 0x5c;
-
-    //if (objective_ == 14 || objective_ == 15)
-    //    objective_vehicle_ = ((objective_data & 0xff) - 2) / 0x2a;
 
     vehicles_.clear();
 
@@ -273,6 +229,127 @@ bool Mission::loadLevel(uint8 * levelData)
             }
         }
     }
+
+#if 0
+    // for hacking objectives data
+    char nameSo[256];
+    sprintf(nameSo, "obj%02X.hex", map_);
+    FILE *staticsFo = fopen(nameSo,"wb");
+    if (staticsFo) {
+        fwrite(level_data_.objectives, 1, 140, staticsFo);
+        fclose(staticsFo);
+    }
+#endif
+    // 0x01 offset of ped
+    // 0x02 offset of ped
+    // 0x03 offset of ped, next objective 0x00 + coord, nxt 0x00 + offset of ped
+    // second objective is where ped should go, third ped that should reach it
+    // also can be without those data or can have offset of ped + coord
+    // 0x05 offset of weapon
+    // 0x0E offset of vehicle
+    // 0x0F offset of vehicle
+    // 0x10 coordinates
+    // looks like that objectives even if they are defined where not fully
+    // defined(or are correct), indonesia has one objective but has 2
+    // 0x0 objectives with peds offset + coords, rockies mission
+    // has 0x0e objective + 0x01 but offsets are wrong as in original
+    // gameplay only 1 persuade + evacuate present, in description
+    // 0x0e + 2 x 0x01 + 0x0f, because of this careful loading required
+    // max 5(6 read) objectives
+
+    for (unsigned char i = 0; i < 6; i++) {
+        bool isset = false;
+        ObjectiveDesc objd;
+        memset(&objd, 0, sizeof(ObjectiveDesc));
+        LEVELDATA_OBJECTIVES & obj = level_data_.objectives[i];
+        unsigned int bindx = READ_LE_UINT16(obj.offset), cindx = 0;
+        // TODO: checking is implemented for correct offset, because
+        // in game data objective description is not correctly defined
+        // some offsets are wrong, objective type is missing somewhere{
+            // TODO: check these
+            /*
+            switch (mission_->objective()) {
+            case 1:
+                str = "PERSUADE";
+                break;
+            case 2:
+                str = "ASSASSINATE";
+                break;
+            case 3:
+                str = "PROTECT";
+                break;
+            case 5:
+                str = "GET WEAPON";
+                break;
+            case 10:
+            case 11:
+                str = "ELIMINATE";
+                break;
+            case 14:
+                str = "RESCUE";
+                break;
+            case 15:
+                str = "USE VEHICLE";
+                break;
+            default:
+                break;
+            }
+*/
+        switch (READ_LE_UINT16(obj.type)) {
+            case 0x00:
+                break;
+            case 0x01:
+                if (bindx > 0 && bindx < 0x5C02) {
+                    cindx = (bindx - 2) / 92;
+                    if ((cindx * 92 + 2) == bindx) {
+                        objd.type = objv_AquireControl;
+                        objd.targettype = 1;
+                        objd.targetindx = pindx[cindx];
+                        objd.msg = "PERSUADE";
+                    } else
+                        printf("0x01 incorrect offset");
+                } else
+                    printf("0x01 type not matched");
+                isset = true;
+                break;
+            case 0x02:
+                if (bindx > 0 && bindx < 0x5C02) {
+                    cindx = (bindx - 2) / 92;
+                    if ((cindx * 92 + 2) == bindx) {
+                        objd.type = objv_DestroyObject;
+                        objd.targettype = 1;
+                        objd.targetindx = pindx[cindx];
+                        objd.msg = "ASSASSINATE";
+                    } else
+                        printf("0x02 incorrect offset");
+                } else
+                    printf("0x02 type not matched");
+                isset = true;
+                break;
+            case 0x03:
+                break;
+            case 0x05:
+                break;
+            case 0x0A:
+                break;
+            case 0x0B:
+                break;
+            case 0x0E:
+                break;
+            case 0x0F:
+                break;
+            case 0x10:
+                break;
+        }
+        if (isset) {
+            objectives_.push_back(objd);
+        } else {
+            memset(&objd, 0, sizeof(ObjectiveDesc));
+            objectives_.push_back(objd);
+            break;
+        }
+    }
+
     return true;
 }
 
@@ -491,22 +568,79 @@ void Mission::start()
 
 bool Mission::failed()
 {
-    // TODO: other ways to fail
-    // INFO: peds are loaded in wrong way objective number
-    // can be non-present
-    //if (objective_ == 1 && peds_[objective_ped_]->health() <= 0)
-        //return true;
-    return false;
+    bool rspfailed = false;
+    if (objectives_.size() != 0) {
+        ObjectiveDesc &objd = objectives_[cur_objective_];
+        switch (objd.type) {
+            case objv_None:
+                break;
+            case objv_AquireControl:
+                break;
+            case objv_Protect:
+                break;
+            case objv_Support:
+                break;
+            case objv_GetObject:
+                break;
+            case objv_DestroyObject:
+                break;
+            case objv_UseObject:
+                break;
+            case objv_ReachLocation:
+                break;
+            case objv_Evacuate:
+                break;
+            case objv_ExecuteObjective:
+                break;
+        }
+    }
+    return rspfailed;
 }
 
 bool Mission::completed()
 {
-    // TODO: other ways to complete
-    // INFO: peds are loaded in wrong way objective number
-    // can be non-present
-    //if (objective_ == 2 && peds_[objective_ped_]->health() <= 0)
-        //return true;
-    return false;
+    bool rspcompleted = false;
+
+    if (objectives_.size() != 0) {
+        ObjectiveDesc &objd = objectives_[cur_objective_];
+        switch (objd.type) {
+            case objv_None:
+                rspcompleted = true;
+                break;
+            case objv_AquireControl:
+                break;
+            case objv_Protect:
+                break;
+            case objv_Support:
+                break;
+            case objv_GetObject:
+                break;
+            case objv_DestroyObject:
+                switch (objd.targettype) {
+                    case 1: //ped
+                        if ((objd.condition & 4) == 0) {
+                            if (peds_[objd.targetindx]->health() <= 0) {
+                                rspcompleted = true;
+                                cur_objective_ ++;
+                            }
+                        }
+                        break;
+                    default:
+                        break;
+                }
+                break;
+            case objv_UseObject:
+                break;
+            case objv_ReachLocation:
+                break;
+            case objv_Evacuate:
+                break;
+            case objv_ExecuteObjective:
+                break;
+        }
+    }
+
+    return rspcompleted;
 }
 
 void Mission::end()
