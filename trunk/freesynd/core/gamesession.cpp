@@ -23,6 +23,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "gamesession.h"
+#include "../map.h"
+#include "../mission.h"
 
 Block g_Blocks[50] = {
     {"ALASKA", 46000000, 17, 30, STAT_HAPPY, BLK_UNAVAIL, NULL},
@@ -80,6 +82,7 @@ Block g_Blocks[50] = {
 const int GameSession::HOUR_DELAY = 4000;
 
 GameSession::GameSession() {
+    mission_ = NULL;
     reset();
     enable_all_mis_ = false;
     replay_mission_ = false;
@@ -108,6 +111,11 @@ void GameSession::reset() {
     time_day_ = 1;
     time_year_ = 85;
     time_elapsed_ = 0;
+
+    if (mission_) {
+        delete mission_;
+        mission_ = NULL;
+    }
 }
 
 Block & GameSession::getBlock(uint8 index) {
@@ -116,6 +124,15 @@ Block & GameSession::getBlock(uint8 index) {
 
 Block & GameSession::getSelectedBlock() {
     return g_Blocks[selected_blck_];
+}
+
+void GameSession::setMission(Mission *pMission) { 
+    if ((pMission == NULL && mission_) || pMission != mission_) {
+        if (mission_) {
+            delete mission_;
+        }
+        mission_ = pMission;
+    }
 }
 
 /*!

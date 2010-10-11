@@ -30,7 +30,6 @@
 #include <assert.h>
 #include "app.h"
 #include "file.h"
-#include "loadingmenu.h"
 #include "mapmenu.h"
 #include "gameplaymenu.h"
 #ifdef _WIN32
@@ -40,9 +39,8 @@
 // The number of pixel of a scroll
 const int SCROLL_STEP = 16;
 
-GameplayMenu::GameplayMenu(MenuManager *m, LoadingMenu *loading,
-        MapMenu *mapMenu) :
-Menu(m, "Gameplay", "", ""), loading_(loading), map_menu_(mapMenu),
+GameplayMenu::GameplayMenu(MenuManager *m, MapMenu *mapMenu) :
+Menu(m, "Gameplay", "", ""), map_menu_(mapMenu),
 tick_count_(0), last_animate_tick_(0), last_motion_tick_(0),
 last_motion_x_(320), last_motion_y_(240), mission_hint_ticks_(0), 
 mission_hint_(0), mission_(0), world_x_(0),
@@ -323,7 +321,7 @@ int qanim = 1085, qframe = 0;
 void GameplayMenu::handleRender()
 {
     if (mission_ == NULL) {
-        mission_ = loading_->mission();
+        mission_ = g_Session.getMission();
         mission_->start();
         completed_ = false;
         g_App.music().playTrack(MusicManager::TRACK_ASSASSINATE);

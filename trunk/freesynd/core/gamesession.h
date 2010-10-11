@@ -61,6 +61,8 @@ typedef struct Block_ {
     const char *next;
 } Block;
 
+class Mission;
+
 /*!
  * A holder for player data.
  * This class stores all user data.
@@ -86,17 +88,17 @@ public:
     }
 
     /*!
-     * Returns the logo colour.
-     */
-    int getLogoColour() const {
-        return logo_colour_;
-    }
-
-    /*!
      * Sets the id of the user's logo.
      */
     void setLogo(int new_logo) {
         logo_ = new_logo;
+    }
+
+    /*!
+     * Returns the logo colour.
+     */
+    int getLogoColour() const {
+        return logo_colour_;
     }
 
     /*!
@@ -114,17 +116,17 @@ public:
     }
 
     /*!
-     * Returns the user's name.
-     */
-    const char *getUserName() const {
-        return username_.c_str();
-    }
-
-    /*!
      * Sets the user's company name.
      */
     void setCompanyName(const char *name) {
         company_name_ = name;
+    }
+
+    /*!
+     * Returns the user's name.
+     */
+    const char *getUserName() const {
+        return username_.c_str();
     }
 
     /*!
@@ -151,10 +153,16 @@ public:
     //! Sets the representation of the time in the given string
     void getTimeAsStr(char *dest);
 
+    //! Returns the Block at the given index.
+    Block & getBlock(uint8 index);
+
     /*!
      * Returns the index of the current selected region on map menu.
      */
     uint8 getSelectedBlockId() { return selected_blck_; }
+
+    //! Convenience method to get the selected block
+    Block & getSelectedBlock();
 
     /*!
      * Sets the index of the current selected region on map menu.
@@ -162,11 +170,17 @@ public:
      */
     void setSelectedBlockId(uint8 index) { if (index >= 0 && index < 50) selected_blck_ = index; }
 
-    //! Adds the given mission index to the list of finished missions.
-    Block & getBlock(uint8 index);
+    /*!
+     * Return the currently played mission.
+     * \return Can be NULL.
+     */
+    Mission * getMission() { return mission_; }
 
-    //! Convenience method to get the selected block
-    Block & getSelectedBlock();
+    /*!
+     * Sets the mission.
+     * \param pMission The mission the user will play.
+     */
+    void setMission(Mission *pMission);
 
     //! Update state when finishing a mission
     void completeSelectedBlock();
@@ -211,6 +225,10 @@ private:
      * region on the mission map.
      */
     uint8 selected_blck_;
+    /*!
+     * Currently played mission.
+     */
+    Mission *mission_;
     /*! Cheat flag to tell that all missions are playable.*/
     bool enable_all_mis_;
     /*! Cheat flag to enable replay of finished missions. */

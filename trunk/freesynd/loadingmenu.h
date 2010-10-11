@@ -25,7 +25,6 @@
 #ifndef LOADINGMENU_H
 #define LOADINGMENU_H
 
-class BriefMenu;
 class Mission;
 
 /*!
@@ -33,16 +32,13 @@ class Mission;
  */
 class LoadingMenu : public Menu {
 public:
-    LoadingMenu(MenuManager *m, BriefMenu *brief);
+    LoadingMenu(MenuManager *m);
 
-    Mission *mission() { return mission_; }
     bool isSubMenu() { return false; }
     void handleTick(int elapsed);
 
 protected:
-    BriefMenu *brief_;
     int tick_count_;
-    Mission *mission_;
 };
 
 #endif

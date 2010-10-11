@@ -27,11 +27,10 @@
 #include <assert.h>
 #include "app.h"
 #include "file.h"
-#include "briefmenu.h"
 #include "loadingmenu.h"
 
-LoadingMenu::LoadingMenu(MenuManager * m, BriefMenu * brief):Menu(m, "loading", "", ""),
-brief_(brief), tick_count_(-500), mission_(0)
+LoadingMenu::LoadingMenu(MenuManager * m):Menu(m, "loading", "", ""),
+tick_count_(-500)
 {
     addStatic(180, 180, "LOADING GAME", 3, false);
 
@@ -44,9 +43,10 @@ void LoadingMenu::handleTick(int elapsed)
     if (tick_count_ >= 100) {
         if (!g_App.gameSprites().loaded())
             g_App.gameSprites().load();
-        mission_ = brief_->mission();
-        mission_->loadMap();// TODO : move this to briefmenu
-        mission_->setSurfaces();
+
+        Mission *pMission = g_Session.getMission();
+        pMission->loadMap();// TODO : move this to briefmenu
+        pMission->setSurfaces();
         menu_manager_->changeCurrentMenu("Gameplay");
         tick_count_ = -500;
     }

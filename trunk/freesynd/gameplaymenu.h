@@ -25,7 +25,6 @@
 #ifndef GAMEPLAYMENU_H
 #define GAMEPLAYMENU_H
 
-class BriefMenu;
 class Mission;
 
 /*!
@@ -33,7 +32,7 @@ class Mission;
  */
 class GameplayMenu : public Menu {
 public:
-    GameplayMenu(MenuManager *m, LoadingMenu *loading, MapMenu *mapMenu);
+    GameplayMenu(MenuManager *m, MapMenu *mapMenu);
 
     bool isSubMenu() { return false; }
 
@@ -66,7 +65,6 @@ protected:
     }
 
 protected:
-    LoadingMenu *loading_;
     MapMenu *map_menu_;
     int tick_count_, last_animate_tick_;
     int last_motion_tick_, last_motion_x_, last_motion_y_;

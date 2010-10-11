@@ -73,3 +73,4 @@ should be variable
 range = tile*256(x,y)+off(x,y),  tile*128(z) + offz, our z is tile based
  - set weapons for enemy agents, because in gamedata weapons are not the same as
 in original gameplay or are not present at all
+ - Create a Cheats structure in App.h and removes cheat get/set methods in GameSession

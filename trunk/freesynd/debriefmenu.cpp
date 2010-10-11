@@ -48,5 +48,10 @@ void DebriefMenu::handleRender() {
 }
 
 void DebriefMenu::handleLeave() {
+    // We're leaving to the map menu
+    // So at this point the current mission is no more needed
+    // as a new one will be selected in the map menu
+    g_Session.setMission(NULL);
+
     g_System.hideCursor();
 }

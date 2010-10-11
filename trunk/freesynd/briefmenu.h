@@ -26,7 +26,6 @@
 #ifndef BRIEFMENU_H
 #define BRIEFMENU_H
 
-class MapMenu;
 class Mission;
 
 /*!
@@ -34,7 +33,7 @@ class Mission;
  */
 class BriefMenu : public Menu {
 public:
-    BriefMenu(MenuManager *m, MapMenu *mapMenu);
+    BriefMenu(MenuManager *m);
     ~BriefMenu();
 
     void handleTick(int elapsed);
@@ -42,18 +41,15 @@ public:
     void handleRender();
     void handleLeave();
     void handleOption(Key key);
-    Mission *mission() { return mission_; }
-
+    
 protected:
     void updateClock();
 
 protected:
-    MapMenu *map_menu_;
     uint8 *orig_pixels_;
     int start_line_;
     int info_level_;
     int enhance_level_;
-    Mission *mission_;
 };
 
 #endif

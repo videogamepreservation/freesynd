@@ -27,13 +27,12 @@
 #include <assert.h>
 #include "app.h"
 #include "file.h"
-#include "mapmenu.h"
 #include "briefmenu.h"
 
-BriefMenu::BriefMenu(MenuManager * m, MapMenu * mapMenu) :
-Menu(m, "brief", "mbrief.dat", "mbrieout.dat"), map_menu_(mapMenu),
+BriefMenu::BriefMenu(MenuManager * m) :
+Menu(m, "brief", "mbrief.dat", "mbrieout.dat"),
 orig_pixels_(0), start_line_(0), info_level_(0),
-enhance_level_(0), mission_(0) {
+enhance_level_(0) {
     addStatic(148, 35, "MISSION BRIEF", 3, true);
     addStatic(500, 9, "", 1, false);       // Time
     addOption(538, 118, "INFO", 1, KEY_F1, NULL);
@@ -50,9 +49,6 @@ enhance_level_(0), mission_(0) {
 BriefMenu::~BriefMenu() {
     if (orig_pixels_)
         delete[] orig_pixels_;
-
-    if (mission_)
-        delete mission_;
 }
 
 void BriefMenu::handleTick(int elapsed)
@@ -84,7 +80,9 @@ void BriefMenu::handleShow() {
 
     // grab mission info
     int cur_miss = g_Session.getSelectedBlock().mis_id;
-    mission_ = g_App.missions().loadMission(cur_miss);
+    Mission *pMission = g_App.missions().loadMission(cur_miss);
+    assert(pMission != NULL);
+    g_Session.setMission(pMission);
 
     updateClock();
 }
@@ -96,12 +94,13 @@ void BriefMenu::handleRender() {
 
     g_Screen.drawLogo(18, 14, g_Session.getLogo(), g_Session.getLogoColour());
 
+    Mission *pMission = g_Session.getMission();
     // write briefing
-    if (mission_->briefing()) {
-        int sizeStr = strlen(mission_->briefing()) + 1;
+    if (pMission->briefing()) {
+        int sizeStr = strlen(pMission->briefing()) + 1;
         char *mbriefing = (char *)malloc(sizeStr);
         assert(mbriefing != NULL);
-        fs_strcpy(mbriefing, sizeStr, mission_->briefing());
+        fs_strcpy(mbriefing, sizeStr, pMission->briefing());
         char *miss = mbriefing;
         char *nextline = miss - 1;
 
@@ -211,7 +210,7 @@ void BriefMenu::handleRender() {
                   GAME_SCREEN_WIDTH);
 
     if (info_level_ < 3) {
-        sprintf(tmp, "%d", mission_->infoCost(info_level_));
+        sprintf(tmp, "%d", pMission->infoCost(info_level_));
         g_App.fonts().drawText(560 - g_App.fonts().textWidth(tmp, FontManager::SIZE_2) / 2,
                                140, tmp, FontManager::SIZE_2, false);
     }
@@ -222,7 +221,7 @@ void BriefMenu::handleRender() {
                   GAME_SCREEN_WIDTH);
 
     if (enhance_level_ < 3) {
-        sprintf(tmp, "%d", mission_->enhanceCost(enhance_level_));
+        sprintf(tmp, "%d", pMission->enhanceCost(enhance_level_));
         g_App.fonts().drawText(560 - g_App.fonts().textWidth(tmp, FontManager::SIZE_2) / 2,
                                195, tmp, FontManager::SIZE_2, false);
     }
@@ -238,7 +237,8 @@ void BriefMenu::handleOption(Key key) {
     if (key == KEY_F1) {
         // Buy some informations
         if (info_level_ < 3) {
-            g_App.getGameSession().setMoney(g_App.getGameSession().getMoney() - mission_->infoCost(info_level_));
+            Mission *pMission = g_Session.getMission();
+            g_Session.setMoney(g_Session.getMoney() - pMission->infoCost(info_level_));
             info_level_++;
             needRendering();
         }
@@ -249,8 +249,9 @@ void BriefMenu::handleOption(Key key) {
     if (key == KEY_F2) {
         // Buy some map enhancement
         if (enhance_level_ < 3) {
-            g_App.getGameSession().setMoney(g_App.getGameSession().getMoney() -
-                           mission_->enhanceCost(enhance_level_));
+            Mission *pMission = g_Session.getMission();
+            g_Session.setMoney(g_Session.getMoney() -
+                           pMission->enhanceCost(enhance_level_));
             enhance_level_++;
             needRendering();
         }

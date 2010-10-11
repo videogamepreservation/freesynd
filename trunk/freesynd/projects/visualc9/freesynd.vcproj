@@ -463,6 +463,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\pathsurfaces.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\ped.h"
 				>
 			</File>
