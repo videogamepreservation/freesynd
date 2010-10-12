@@ -45,6 +45,14 @@ class Static;
 class MapHelper;
 
 /*!
+ * A structure that holds mission statistics.
+ */
+typedef struct {
+    /*! How many time did the mission last. */
+    int mission_duration;
+} MissionStats;
+
+/*!
  * Contains information read from original mission data file.
  */
 class Mission : public MapHelper {
@@ -96,6 +104,8 @@ public:
     WeaponInstance *weapon(int i) { return weapons_[i]; }
     int numStatics() { return (int) statics_.size(); }
     Static *statics(int i) { return statics_[i]; }
+    /*! Return the mission statistics. */
+    MissionStats *getStatistics() { return &stats_; }
 
     void start();
     bool failed();
@@ -452,6 +462,8 @@ public:
 
     std::set<int> fast_vehicle_cache_, fast_ped_cache_, fast_weapon_cache_,
             fast_statics_cache_;
+    /*! Statistics : time, shots, ...*/
+    MissionStats stats_;
 };
 
 #endif

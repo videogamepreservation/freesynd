@@ -603,7 +603,7 @@ void Mission::drawAt(int tilex, int tiley, int tilez, int x, int y,
 
 void Mission::start()
 {
-    for (int i = 0; i < 4; i++)
+    for (int i = 0; i < 4; i++) {
         if (g_App.teamMember(i)) {
             if(g_App.teamMember(i)->isActive()){
                 peds_[i]->setHealth(g_App.teamMember(i)->health() *
@@ -622,6 +622,10 @@ void Mission::start()
             peds_[i]->setHealth(-1);
             peds_[i]->setAsAgent(PedInstance::Agent_Non_Active);
         }
+    }
+
+    // Reset mission statistics
+    stats_.mission_duration = 0;
 }
 
 bool Mission::failed()

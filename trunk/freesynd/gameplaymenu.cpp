@@ -235,6 +235,9 @@ void GameplayMenu::handleTick(int elapsed)
     bool change = false;
     tick_count_ += elapsed;
 
+    // Update stats
+    mission_->getStatistics()->mission_duration += elapsed;
+
     // Scroll the map
     if (scroll_x_ != 0 || scroll_y_ != 0) {
         change = scroll();
@@ -418,6 +421,9 @@ void GameplayMenu::handleLeave()
     g_System.hideCursor();
     g_App.setPalette("mselect.pal");
     mission_->end();
+    // update time
+    int elapsed = mission_->getStatistics()->mission_duration;
+    g_Session.updateTime(elapsed);
     mission_ = NULL;
     g_App.music().stopPlayback();
 }
