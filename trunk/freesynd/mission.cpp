@@ -84,10 +84,13 @@ bool Mission::loadLevel(uint8 * levelData)
 
     uint16 vindx[64];
     uint16 pindx[256];
+    // contains indexes for driver's vehicle
     uint16 driverindx[256];
+    uint16 windx[512];
     memset(vindx, 0xFF, 2*64);
     memset(pindx, 0xFF, 2*256);
     memset(driverindx, 0xFF, 2*256);
+    memset(windx, 0xFF, 2*512);
 
 #if 0
     // for hacking vehicles data
@@ -100,7 +103,7 @@ bool Mission::loadLevel(uint8 * levelData)
     }
 
 #endif
-    uint16 mindx = 0;
+
     for (int i = 0; i < 64; i++) {
         LEVELDATA_CARS & car = level_data_.cars[i];
         // car.sub_type 0x09 - train
@@ -109,13 +112,12 @@ bool Mission::loadLevel(uint8 * levelData)
         VehicleInstance *v =
             g_App.vehicles().loadInstance((uint8 *) & car, map_);
         if (v) {
+            vindx[i] = vehicles_.size();
             vehicles_.push_back(v);
-            vindx[i] = mindx;
             if (car.offset_of_driver != 0 && ((car.offset_of_driver - 2) / 92 + 2) * 92
                 == car.offset_of_driver) {
-                driverindx[(car.offset_of_driver - 2) / 92] = mindx;
+                driverindx[(car.offset_of_driver - 2) / 92] = vindx[i];
             }
-            mindx++;
         }
     }
 
@@ -132,7 +134,6 @@ bool Mission::loadLevel(uint8 * levelData)
     }
 #endif
 
-    mindx = 0;
     for (int i = 0; i < 256; i++) {
         LEVELDATA_PEOPLE & pedref = level_data_.people[i];
         if(pedref.type == 0x0 || pedref.desc == 0x0D || pedref.desc == 0x0C)
@@ -162,13 +163,12 @@ bool Mission::loadLevel(uint8 * levelData)
                     }
                 }
             }
+            pindx[i] = peds_.size();
             peds_.push_back(p);
             if (i > 7) {
                 //p->setHostile(true);
                 p->setSightRange(7);
             }
-            pindx[i] = mindx;
-            mindx++;
         }
     }
 #if 0
@@ -216,6 +216,7 @@ bool Mission::loadLevel(uint8 * levelData)
                     if (offset_owner > 7 && pindx[offset_owner] != 0xFFFF) {
                         // TODO: correct weapons for enemy agents
                         peds_[pindx[offset_owner]]->addWeapon(w);
+                        windx[i] = weapons_.size();
                         weapons_.push_back(w);
                     } else {
                         delete w;
@@ -224,7 +225,8 @@ bool Mission::loadLevel(uint8 * levelData)
                     delete w;
                 }
             } else {
-                w->setMap(map_);
+                w->setMap(map_);;
+                windx[i] = weapons_.size();
                 weapons_.push_back(w);
             }
         }
@@ -265,43 +267,21 @@ bool Mission::loadLevel(uint8 * levelData)
         unsigned int bindx = READ_LE_UINT16(obj.offset), cindx = 0;
         // TODO: checking is implemented for correct offset, because
         // in game data objective description is not correctly defined
-        // some offsets are wrong, objective type is missing somewhere{
-            // TODO: check these
-            /*
-            switch (mission_->objective()) {
-            case 1:
-                str = "PERSUADE";
-                break;
-            case 2:
-                str = "ASSASSINATE";
-                break;
-            case 3:
-                str = "PROTECT";
-                break;
-            case 5:
-                str = "GET WEAPON";
-                break;
-            case 10:
-            case 11:
-                str = "ELIMINATE";
-                break;
-            case 14:
-                str = "RESCUE";
-                break;
-            case 15:
-                str = "USE VEHICLE";
-                break;
-            default:
-                break;
-            }
-*/
+        // some offsets are wrong, objective type is missing somewhere
+        // check this, also 0x03 is not fully implemented
+        // Also for some objectives there should be "small" actions defined
+        // inside ped data, in 1 lvl when agents are close to target
+        // ped goes to car and moves to location, if reached mission is
+        // failed, similar actions are in many missions, find where they
+        // are defined
+
         switch (READ_LE_UINT16(obj.type)) {
             case 0x00:
                 break;
             case 0x01:
                 if (bindx > 0 && bindx < 0x5C02) {
                     cindx = (bindx - 2) / 92;
-                    if ((cindx * 92 + 2) == bindx) {
+                    if ((cindx * 92 + 2) == bindx && pindx[cindx] != 0xFFFF) {
                         objd.type = objv_AquireControl;
                         objd.targettype = 1;
                         objd.targetindx = pindx[cindx];
@@ -315,7 +295,7 @@ bool Mission::loadLevel(uint8 * levelData)
             case 0x02:
                 if (bindx > 0 && bindx < 0x5C02) {
                     cindx = (bindx - 2) / 92;
-                    if ((cindx * 92 + 2) == bindx) {
+                    if ((cindx * 92 + 2) == bindx && pindx[cindx] != 0xFFFF) {
                         objd.type = objv_DestroyObject;
                         objd.targettype = 1;
                         objd.targetindx = pindx[cindx];
@@ -327,18 +307,96 @@ bool Mission::loadLevel(uint8 * levelData)
                 isset = true;
                 break;
             case 0x03:
+                if (bindx > 0 && bindx < 0x5C02) {
+                    cindx = (bindx - 2) / 92;
+                    if ((cindx * 92 + 2) == bindx && pindx[cindx] != 0xFFFF) {
+                        objd.type = objv_Protect;
+                        objd.targettype = 1;
+                        objd.targetindx = pindx[cindx];
+                        objd.msg = "PROTECT";
+                    } else
+                        printf("0x03 incorrect offset");
+                } else
+                    printf("0x03 type not matched");
+                isset = true;
                 break;
             case 0x05:
+                if (bindx > 0x9562 && bindx < 0xDD62) {
+                    bindx -= 0x9562;
+                    cindx = (bindx - 2) / 36;
+                    if ((cindx * 36 + 2) == bindx && windx[cindx] != 0xFFFF) {
+                        objd.type = objv_GetObject;
+                        objd.targettype = 2;
+                        objd.targetindx = windx[cindx];
+                        objd.msg = "GET WEAPON";
+                    } else
+                        printf("0x05 incorrect offset");
+                } else
+                    printf("0x05 type not matched");
+                isset = true;
                 break;
             case 0x0A:
+                objd.type = objv_DestroyObject;
+                objd.targettype = 1;
+                // maybe also guards should be eliminated?
+                objd.targetsubtype = 4;
+                objd.condition = 4;
+                objd.targetindx = pindx[cindx];
+                objd.msg = "ELIMINATE POLICE";
+                isset = true;
                 break;
             case 0x0B:
+                objd.type = objv_DestroyObject;
+                objd.targettype = 1;
+                objd.targetsubtype = 2;
+                objd.condition = 4;
+                objd.targetindx = pindx[cindx];
+                objd.msg = "ELIMINATE AGENTS";
+                isset = true;
                 break;
             case 0x0E:
+                if (bindx > 0x5C02 && bindx < 0x6682) {
+                    bindx -= 0x5C02;
+                    cindx = (bindx - 2) / 36;
+                    if ((cindx * 36 + 2) == bindx && vindx[cindx] != 0xFFFF) {
+                        objd.type = objv_DestroyObject;
+                        objd.targettype = 0;
+                        objd.targetindx = vindx[cindx];
+                        objd.msg = "DESTROY VEHICLE";
+                    } else
+                        printf("0x0E incorrect offset");
+                } else
+                    printf("0x0E type not matched");;
+                isset = true;
                 break;
             case 0x0F:
+                if (bindx > 0x5C02 && bindx < 0x6682) {
+                    bindx -= 0x5C02;
+                    cindx = (bindx - 2) / 36;
+                    if ((cindx * 36 + 2) == bindx && vindx[cindx] != 0xFFFF) {
+                        objd.type = objv_DestroyObject;
+                        objd.targettype = 0;
+                        objd.targetindx = vindx[cindx];
+                        objd.msg = "USE VEHICLE";
+                    } else
+                        printf("0x0F incorrect offset");
+                } else
+                    printf("0x0F type not matched");;
+                isset = true;
                 break;
             case 0x10:
+                objd.type = objv_ReachLocation;
+                objd.posxt = obj.mapposx[1];
+                objd.posxo = obj.mapposx[0];
+                objd.posyt = obj.mapposy[1];
+                objd.posyo = obj.mapposx[0];
+                objd.poszt = READ_LE_UINT16(obj.mapposz) >> 7;
+                objd.poszo = obj.mapposz[0] & 0x7F;
+                if (objd.poszo != 0)
+                    objd.poszt++;
+                objd.condition = 32;
+                objd.msg = "EVACUATE";
+                isset = true;
                 break;
         }
         if (isset) {
@@ -578,8 +636,6 @@ bool Mission::failed()
                 break;
             case objv_Protect:
                 break;
-            case objv_Support:
-                break;
             case objv_GetObject:
                 break;
             case objv_DestroyObject:
@@ -587,8 +643,6 @@ bool Mission::failed()
             case objv_UseObject:
                 break;
             case objv_ReachLocation:
-                break;
-            case objv_Evacuate:
                 break;
             case objv_ExecuteObjective:
                 break;
@@ -611,8 +665,6 @@ bool Mission::completed()
                 break;
             case objv_Protect:
                 break;
-            case objv_Support:
-                break;
             case objv_GetObject:
                 break;
             case objv_DestroyObject:
@@ -632,8 +684,6 @@ bool Mission::completed()
             case objv_UseObject:
                 break;
             case objv_ReachLocation:
-                break;
-            case objv_Evacuate:
                 break;
             case objv_ExecuteObjective:
                 break;

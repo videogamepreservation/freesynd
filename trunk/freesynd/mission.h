@@ -392,12 +392,8 @@ public:
         objv_None,
         //setup control over object where possible to lose this control
         objv_AquireControl,
-        // Object can be in danger of being destroyed and it is not executing
-        // any action
+        // Protect object at all cost
         objv_Protect,
-        // Object can do some action and requires protection until action is
-        // complete
-        objv_Support,
         // Obtain inventory object
         // NOTE: maybe in future we have not only weapons, costumes? drones?
         objv_GetObject,
@@ -406,15 +402,15 @@ public:
         objv_DestroyObject,
         // Use of object untill condition is met
         objv_UseObject,
-        // Not necessary that all controlled objects should reach location
+        // Objects should be at defined location
         objv_ReachLocation,
-        // All controlled objects should reach location
-        objv_Evacuate,
-        // Objective for non-agent
+        // Objective for defined object(s), has sub-objective
+        // NOTE: this can be used to set objective(s) for single ped or group
         objv_ExecuteObjective
     }ObjectiveType;
 
     typedef struct {
+        // type of objective
         ObjectiveType type;
         // 0 - vehicle, 1 - ped, 2 - weapon, 3 - static
         uint8 targettype;
@@ -424,7 +420,8 @@ public:
         // index within vector of data
         uint16 targetindx;
         // 0 - not defined, 1b - has sub objective, 2b - refers to all objects
-        // of subtype, 3b - complete, 4b - failed
+        // of subtype, 3b - completed, 4b - failed, 5b - check previous
+        // objecives for fail
         uint32 condition;
         // indx for sub objective
         uint16 subobjindx;
