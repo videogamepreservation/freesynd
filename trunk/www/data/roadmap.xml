@@ -3,9 +3,12 @@
 	<date>2010-09-30</date>
 	<status>Release v0.5 is now under development. There is no release date scheduled for now.</status>
 	<features>
-	  <feature id="3043686" status="N">Game Time</feature>
+	  <feature id="3043686" status="D">Game Time</feature>
 	  <feature id="3072653" status="N">Use libsyndicate data info</feature>
 	  <feature id="3081550" status="N">Minimap basic</feature>
+	  <feature id="3086471" status="N">Implements Reseach functionnality</feature>
+	  <feature id="3086469" status="N">Tax influence on countries status</feature>
+	  <feature id="3086955" status="N">Possibility to load/save game</feature>
 	</features>
 	<bugs>
 		<bug id="3005294" status="N">Debriefing information is not displayed after ending the mission</bug>
