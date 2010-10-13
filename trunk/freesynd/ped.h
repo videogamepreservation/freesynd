@@ -222,8 +222,8 @@ public:
         Agent_Active
     } ped_enum;
 
-    void setAsAgent(int set_agent_as) { is_an_agent_ = set_agent_as; }
-    int isAsAgent() { return is_an_agent_; }
+    void setAsAgent(ped_enum set_agent_as) { is_an_agent_ = set_agent_as; }
+    ped_enum isAsAgent() { return is_an_agent_; }
 
     int map();
     AnimationDrawn getDrawnAnim();
@@ -288,7 +288,7 @@ protected:
     int selected_weapon_;
     WeaponInstance *pickup_weapon_, *putdown_weapon_;
     VehicleInstance *in_vehicle_;
-    int is_an_agent_;
+    ped_enum is_an_agent_;
     // IPA levels: white bar level,set level,exhaused level and forced level
     //uint8 lvl_adrena_reserve_;
     uint8 lvl_adrena_amount_;

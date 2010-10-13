@@ -81,6 +81,7 @@ void PedManager::setPed(Ped *pedanim, unsigned short baseAnim)
     // 208 walking on fire
     // 209 die burning
     // 210 dead and smoking
+    // 236 persuaded
 }
 
 PedInstance *PedManager::loadInstance(uint8 * data, int map)

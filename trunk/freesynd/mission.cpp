@@ -360,7 +360,7 @@ bool Mission::loadLevel(uint8 * levelData)
                     cindx = (bindx - 2) / 36;
                     if ((cindx * 36 + 2) == bindx && vindx[cindx] != 0xFFFF) {
                         objd.type = objv_DestroyObject;
-                        objd.targettype = 0;
+                        objd.targettype = 4;
                         objd.targetindx = vindx[cindx];
                         objd.msg = "DESTROY VEHICLE";
                     } else
@@ -375,7 +375,7 @@ bool Mission::loadLevel(uint8 * levelData)
                     cindx = (bindx - 2) / 36;
                     if ((cindx * 36 + 2) == bindx && vindx[cindx] != 0xFFFF) {
                         objd.type = objv_DestroyObject;
-                        objd.targettype = 0;
+                        objd.targettype = 4;
                         objd.targetindx = vindx[cindx];
                         objd.msg = "USE VEHICLE";
                     } else
@@ -407,6 +407,16 @@ bool Mission::loadLevel(uint8 * levelData)
             break;
         }
     }
+#if 0
+    // for hacking scenarios data
+    char nameSss[256];
+    sprintf(nameSss, "scenarios%02X.hex", map_);
+    FILE *staticsFss = fopen(nameSss,"wb");
+    if (staticsFss) {
+        fwrite(level_data_.scenarios, 1, 2048 * 8 + 448, staticsFss);
+        fclose(staticsFss);
+    }
+#endif
 
     return true;
 }
@@ -729,18 +739,6 @@ MapObject * Mission::findAt(int tilex, int tiley, int tilez,
                             int *majorType, int *searchIndex, bool only)
 {
     switch(*majorType) {
-        case 0:
-            for (unsigned int i = *searchIndex; i < vehicles_.size(); i++)
-                if (vehicles_[i]->tileX() == tilex
-                    && vehicles_[i]->tileY() == tiley
-                    && vehicles_[i]->tileZ() == tilez) {
-                    *searchIndex = i + 1;
-                    *majorType = 0;
-                    return vehicles_[i];
-                }
-            if(only)
-                return NULL;
-            *searchIndex = 0;
         case 1:
             for (unsigned int i = *searchIndex; i < peds_.size(); i++)
                 if (peds_[i]->tileX() == tilex && peds_[i]->tileY() == tiley
@@ -773,6 +771,22 @@ MapObject * Mission::findAt(int tilex, int tiley, int tilez,
                     *majorType = 3;
                     return statics_[i];
                 }
+            if(only)
+                return NULL;
+            *searchIndex = 0;
+        case 4:
+            for (unsigned int i = *searchIndex; i < vehicles_.size(); i++)
+                if (vehicles_[i]->tileX() == tilex
+                    && vehicles_[i]->tileY() == tiley
+                    && vehicles_[i]->tileZ() == tilez) {
+                    *searchIndex = i + 1;
+                    *majorType = 4;
+                    return vehicles_[i];
+                }
+            break;
+        default:
+            printf("undefined majortype %i", *majorType);
+            break;
     }
     return NULL;
 }

@@ -363,7 +363,7 @@ bool LargeDoor::animate(int elapsed, Mission *obj)
             assert(i != 0 && j != 0);
             *j = -1;
             for(*i = -2; *i < 3; *i += 1) {
-                mt = 0; si = 0;
+                mt = 4; si = 0;
                 v = (VehicleInstance *)(obj->findAt(x + inc_rel,
                     y + rel_inc,z, &mt, &si, true));
                 if (!v && state_ == 0 && !found) {
@@ -377,7 +377,7 @@ bool LargeDoor::animate(int elapsed, Mission *obj)
             }
             *j = 1;
             for(*i = -2; *i < 3; *i += 1) {
-                mt = 0; si = 0;
+                mt = 4; si = 0;
                 v = (VehicleInstance *)(obj->findAt(x + inc_rel,
                     y + rel_inc,z,&mt,&si,true));
                 if (!v && state_ == 0 && !found) {
@@ -416,7 +416,7 @@ bool LargeDoor::animate(int elapsed, Mission *obj)
             assert(i != 0 && j != 0);
             *j = -1 * sign;
             *i = -2;
-            mt = 0; si = 0;
+            mt = 4; si = 0;
             v = (VehicleInstance *)(obj->findAt(x + inc_rel,
                 y + rel_inc,z,&mt,&si,true));
             if (v) {
@@ -429,7 +429,7 @@ bool LargeDoor::animate(int elapsed, Mission *obj)
             }
             *j = 1 * sign;
             *i = 2;
-            mt = 0; si = 0;
+            mt = 4; si = 0;
             v = (VehicleInstance *)(obj->findAt(x + inc_rel,
                 y + rel_inc,z,&mt,&si,true));
             if (v) {

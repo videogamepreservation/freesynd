@@ -294,7 +294,7 @@ public:
         uint8 unkn7[2];
     } LEVELDATA_WEAPONS;         // total: 36 bytes
 
-    typedef struct {// was not able to verify correctness
+    typedef struct {
         uint8 offset_next[2];
         uint8 offset_prev[2];
         uint8 mapposx[2];
@@ -370,7 +370,7 @@ public:
         /*  59016 0x6682*/ LEVELDATA_STATICS statics[400];
         /*  71016 0x9562*/ LEVELDATA_WEAPONS weapons[512];
         /*  89448 0xDD62*/ LEVELDATA_SFX sfx[256];
-        /*  97128 */ LEVELDATA_SCENARIOS scenarios[2048];
+        /*  97128 0xFB62*/ LEVELDATA_SCENARIOS scenarios[2048];
         /* 113512 */ LEVELDATA_UNKN09 u09;
         /* 113960 */ LEVELDATA_MAPINFOS mapinfos;
         /* 113974 */ LEVELDATA_OBJECTIVES objectives[6];
@@ -400,8 +400,11 @@ public:
 
     typedef enum {
         objv_None,
-        //setup control over object where possible to lose this control
+        // Setup control over object where possible to lose this control
         objv_AquireControl,
+        // Leave control over object where possible to lose this control
+        // NOTE: reserved in case we will need it
+        objv_LoseControl,
         // Protect object at all cost
         objv_Protect,
         // Obtain inventory object
@@ -412,17 +415,23 @@ public:
         objv_DestroyObject,
         // Use of object untill condition is met
         objv_UseObject,
+        // Leave object
+        // NOTE: reserved in case we will need it
+        objv_LeaveObject,
         // Objects should be at defined location
         objv_ReachLocation,
         // Objective for defined object(s), has sub-objective
         // NOTE: this can be used to set objective(s) for single ped or group
-        objv_ExecuteObjective
+        objv_ExecuteObjective,
+        // Should wait some time
+        // NOTE: reserved in case we will need it
+        objv_Wait
     }ObjectiveType;
 
     typedef struct {
         // type of objective
         ObjectiveType type;
-        // 0 - vehicle, 1 - ped, 2 - weapon, 3 - static
+        // 0 - not defined, 1 - ped, 2 - weapon, 3 - static, 4 - vehicle
         uint8 targettype;
         // 0 - not defined, 1 - our agent, 2 - enemy agent, 3 - guards
         // 4 - police, 5 - civilians
