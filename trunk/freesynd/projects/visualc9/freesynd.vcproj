@@ -177,138 +177,138 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath="..\..\agent.cpp"
+				RelativePath="..\..\src\agent.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\agentmanager.cpp"
+				RelativePath="..\..\src\agentmanager.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\app.cpp"
+				RelativePath="..\..\src\app.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\freesynd.cpp"
+				RelativePath="..\..\src\freesynd.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\map.cpp"
+				RelativePath="..\..\src\map.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\mapmanager.cpp"
+				RelativePath="..\..\src\mapmanager.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\mapobject.cpp"
+				RelativePath="..\..\src\mapobject.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\mission.cpp"
+				RelativePath="..\..\src\mission.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\missionmanager.cpp"
+				RelativePath="..\..\src\missionmanager.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\mod.cpp"
+				RelativePath="..\..\src\mod.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\modmanager.cpp"
+				RelativePath="..\..\src\modmanager.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\ped.cpp"
+				RelativePath="..\..\src\ped.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\pedmanager.cpp"
+				RelativePath="..\..\src\pedmanager.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\system_sdl.cpp"
+				RelativePath="..\..\src\system_sdl.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\vehicle.cpp"
+				RelativePath="..\..\src\vehicle.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\vehiclemanager.cpp"
+				RelativePath="..\..\src\vehiclemanager.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\weapon.cpp"
+				RelativePath="..\..\src\weapon.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\weaponmanager.cpp"
+				RelativePath="..\..\src\weaponmanager.cpp"
 				>
 			</File>
 			<Filter
 				Name="menus"
 				>
 				<File
-					RelativePath="..\..\briefmenu.cpp"
+					RelativePath="..\..\src\briefmenu.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\confmenu.cpp"
+					RelativePath="..\..\src\confmenu.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\debriefmenu.cpp"
+					RelativePath="..\..\src\debriefmenu.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\gameplaymenu.cpp"
+					RelativePath="..\..\src\gameplaymenu.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\loadingmenu.cpp"
+					RelativePath="..\..\src\loadingmenu.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\loadsavemenu.cpp"
+					RelativePath="..\..\src\loadsavemenu.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\logoutmenu.cpp"
+					RelativePath="..\..\src\logoutmenu.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\mainmenu.cpp"
+					RelativePath="..\..\src\mainmenu.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\mapmenu.cpp"
+					RelativePath="..\..\src\mapmenu.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\menu.cpp"
+					RelativePath="..\..\src\menu.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\menumanager.cpp"
+					RelativePath="..\..\src\menumanager.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\misslosemenu.cpp"
+					RelativePath="..\..\src\misslosemenu.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\misswinmenu.cpp"
+					RelativePath="..\..\src\misswinmenu.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\researchmenu.cpp"
+					RelativePath="..\..\src\researchmenu.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\selectmenu.cpp"
+					RelativePath="..\..\src\selectmenu.cpp"
 					>
 				</File>
 			</Filter>
@@ -316,15 +316,15 @@
 				Name="utils"
 				>
 				<File
-					RelativePath="..\..\dernc.cpp"
+					RelativePath="..\..\src\dernc.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\file.cpp"
+					RelativePath="..\..\src\file.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\utils\log.cpp"
+					RelativePath="..\..\src\utils\log.cpp"
 					>
 				</File>
 			</Filter>
@@ -332,27 +332,27 @@
 				Name="sound"
 				>
 				<File
-					RelativePath="..\..\audio.cpp"
+					RelativePath="..\..\src\audio.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\musicmanager.cpp"
+					RelativePath="..\..\src\musicmanager.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\sound\sdlmixermusic.cpp"
+					RelativePath="..\..\src\sound\sdlmixermusic.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\sound\sdlmixersound.cpp"
+					RelativePath="..\..\src\sound\sdlmixersound.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\soundmanager.cpp"
+					RelativePath="..\..\src\soundmanager.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\xmidi.cpp"
+					RelativePath="..\..\src\xmidi.cpp"
 					>
 				</File>
 			</Filter>
@@ -360,35 +360,35 @@
 				Name="gfx"
 				>
 				<File
-					RelativePath="..\..\fliplayer.cpp"
+					RelativePath="..\..\src\fliplayer.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\font.cpp"
+					RelativePath="..\..\src\font.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\fontmanager.cpp"
+					RelativePath="..\..\src\fontmanager.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\screen.cpp"
+					RelativePath="..\..\src\screen.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\sprite.cpp"
+					RelativePath="..\..\src\sprite.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\spritemanager.cpp"
+					RelativePath="..\..\src\spritemanager.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\tile.cpp"
+					RelativePath="..\..\src\tile.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\tilemanager.cpp"
+					RelativePath="..\..\src\tilemanager.cpp"
 					>
 				</File>
 			</Filter>
@@ -396,7 +396,7 @@
 				Name="core"
 				>
 				<File
-					RelativePath="..\..\core\gamesession.cpp"
+					RelativePath="..\..\src\core\gamesession.cpp"
 					>
 				</File>
 			</Filter>
@@ -407,166 +407,166 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath="..\..\agent.h"
+				RelativePath="..\..\src\agent.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\agentmanager.h"
+				RelativePath="..\..\src\agentmanager.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\app.h"
+				RelativePath="..\..\src\app.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\common.h"
+				RelativePath="..\..\src\common.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\config.h"
+				RelativePath="..\..\src\config.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\keys.h"
+				RelativePath="..\..\src\keys.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\map.h"
+				RelativePath="..\..\src\map.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\mapmanager.h"
+				RelativePath="..\..\src\mapmanager.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\mapobject.h"
+				RelativePath="..\..\src\mapobject.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\mission.h"
+				RelativePath="..\..\src\mission.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\missionmanager.h"
+				RelativePath="..\..\src\missionmanager.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\mod.h"
+				RelativePath="..\..\src\mod.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\modmanager.h"
+				RelativePath="..\..\src\modmanager.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\path.h"
+				RelativePath="..\..\src\path.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\pathsurfaces.h"
+				RelativePath="..\..\src\pathsurfaces.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\ped.h"
+				RelativePath="..\..\src\ped.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\pedmanager.h"
+				RelativePath="..\..\src\pedmanager.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\singleton.h"
+				RelativePath="..\..\src\singleton.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\system.h"
+				RelativePath="..\..\src\system.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\system_sdl.h"
+				RelativePath="..\..\src\system_sdl.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\vehicle.h"
+				RelativePath="..\..\src\vehicle.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\vehiclemanager.h"
+				RelativePath="..\..\src\vehiclemanager.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\weapon.h"
+				RelativePath="..\..\src\weapon.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\weaponholder.h"
+				RelativePath="..\..\src\weaponholder.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\weaponmanager.h"
+				RelativePath="..\..\src\weaponmanager.h"
 				>
 			</File>
 			<Filter
 				Name="menus"
 				>
 				<File
-					RelativePath="..\..\briefmenu.h"
+					RelativePath="..\..\src\briefmenu.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\confmenu.h"
+					RelativePath="..\..\src\confmenu.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\debriefmenu.h"
+					RelativePath="..\..\src\debriefmenu.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\gameplaymenu.h"
+					RelativePath="..\..\src\gameplaymenu.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\loadingmenu.h"
+					RelativePath="..\..\src\loadingmenu.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\loadsavemenu.h"
+					RelativePath="..\..\src\loadsavemenu.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\logoutmenu.h"
+					RelativePath="..\..\src\logoutmenu.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\mainmenu.h"
+					RelativePath="..\..\src\mainmenu.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\mapmenu.h"
+					RelativePath="..\..\src\mapmenu.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\menu.h"
+					RelativePath="..\..\src\menu.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\menumanager.h"
+					RelativePath="..\..\src\menumanager.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\misslosemenu.h"
+					RelativePath="..\..\src\misslosemenu.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\misswinmenu.h"
+					RelativePath="..\..\src\misswinmenu.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\researchmenu.h"
+					RelativePath="..\..\src\researchmenu.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\selectmenu.h"
+					RelativePath="..\..\src\selectmenu.h"
 					>
 				</File>
 			</Filter>
@@ -574,15 +574,15 @@
 				Name="utils"
 				>
 				<File
-					RelativePath="..\..\dernc.h"
+					RelativePath="..\..\src\dernc.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\file.h"
+					RelativePath="..\..\src\file.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\utils\log.h"
+					RelativePath="..\..\src\utils\log.h"
 					>
 				</File>
 			</Filter>
@@ -590,35 +590,35 @@
 				Name="sound"
 				>
 				<File
-					RelativePath="..\..\audio.h"
+					RelativePath="..\..\src\audio.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\music.h"
+					RelativePath="..\..\src\music.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\musicmanager.h"
+					RelativePath="..\..\src\musicmanager.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\sound\sdlmixermusic.h"
+					RelativePath="..\..\src\sound\sdlmixermusic.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\sound\sdlmixersound.h"
+					RelativePath="..\..\src\sound\sdlmixersound.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\sound.h"
+					RelativePath="..\..\src\sound.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\soundmanager.h"
+					RelativePath="..\..\src\soundmanager.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\xmidi.h"
+					RelativePath="..\..\src\xmidi.h"
 					>
 				</File>
 			</Filter>
@@ -626,35 +626,35 @@
 				Name="gfx"
 				>
 				<File
-					RelativePath="..\..\fliplayer.h"
+					RelativePath="..\..\src\fliplayer.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\font.h"
+					RelativePath="..\..\src\font.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\fontmanager.h"
+					RelativePath="..\..\src\fontmanager.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\screen.h"
+					RelativePath="..\..\src\screen.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\sprite.h"
+					RelativePath="..\..\src\sprite.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\spritemanager.h"
+					RelativePath="..\..\src\spritemanager.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\tile.h"
+					RelativePath="..\..\src\tile.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\tilemanager.h"
+					RelativePath="..\..\src\tilemanager.h"
 					>
 				</File>
 			</Filter>
@@ -662,7 +662,7 @@
 				Name="core"
 				>
 				<File
-					RelativePath="..\..\core\gamesession.h"
+					RelativePath="..\..\src\core\gamesession.h"
 					>
 				</File>
 			</Filter>
