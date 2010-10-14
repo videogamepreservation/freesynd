@@ -277,6 +277,10 @@ protected:
         Firing_Stop
     } firing_;
 
+    // NOTE: reserved defines state of ped (stand, walk, hit, etc)
+    unsigned int state_;
+    // NOTE: reserved describe what is ped (hostile, civilian, police, etc)
+    unsigned int desc_;
     AnimationDrawn drawn_anim_;
     ShootableMapObject *target_;
     int target_x_, target_y_;

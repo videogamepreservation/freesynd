@@ -94,9 +94,10 @@ public:
     }
 
     float distanceTo(MapObject *t) {
-        return sqrt((float) (t->tileX() - tileX()) * (t->tileX() - tileX())
-                + (t->tileY() - tileY()) * (t->tileY() - tileY())
-                + (t->tileZ() - tileZ()) * (t->tileZ() - tileZ()));
+        int cx = tileX() * 256 + offX() - (t->tileX() * 256 + t->offX());
+        int cy = tileY() * 256 + offY() - (t->tileY() * 256 + t->offY());
+        int cz = tileZ() * 128 + offZ() - (t->tileZ() * 128 + t->offZ());
+        return sqrt((float) (cx * cx + cy * cy + cz * cz ));
     }
 
     virtual bool animate(int elapsed);

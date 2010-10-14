@@ -150,9 +150,10 @@ public:
         //0x05 - ped not on map(driving)
         //0x0D - they are not visible/present on original map(on water located), purpose?
         //0x0C - located level above possible walking surface, purpose?
-        //0x0D and 0x0C are exluded from being loaded
+        //0x0D and 0x0C are excluded from being loaded
         uint8 desc;
-        uint8 unkn2;            // this bit is connected with control
+        // 0x0 - standing, 0x10 - walking, 0x11 - dead
+        uint8 state;
         uint8 unkn3[2];         // nothing changes when this changes
         uint8 index_base_anim[2];  //index in (HSTA-0.ANI)
         uint8 index_current_frame[2];   //index in (HFRA-0.ANI)

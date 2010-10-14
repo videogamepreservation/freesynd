@@ -9,7 +9,7 @@ evacuation red circle
 - Play sound in end mission animation
 - Remove debug info displayed in the console
  - Correct identification of object types during mission load, includes
-vehicles, people, static objects, wepons, also there are sfx for weapons
+vehicles, people, static objects, weapons, also setup sfx for weapons
  - Objects state identification on loading phase: some of them don't start with
 first animation, some doors are already open or are openning, some blinking
 signs have different start frame
@@ -69,8 +69,18 @@ position
  - briefmenu enhance level require better handling of values some missions have 2
 info costs, some 3, enhance cost same thing, the total number is const = 3 it
 should be variable
- - rewrite PedInstance::inRange it is tile based, weapons have offset like size
-range = tile*256(x,y)+off(x,y),  tile*128(z) + offz, our z is tile based
+ - rewrite PedInstance::inRange, include check for Z + objects
  - set weapons for enemy agents, because in gamedata weapons are not the same as
 in original gameplay or are not present at all
  - Create a Cheats structure in App.h and removes cheat get/set methods in GameSession
+-- These should be implemented in folowing order
+ - add LUA support;
+ - write simple A.L.;
+ - write mission editor;
+ - create new mission files using editor, based on original game mission files.
+--
+ - BriefMenu::handleRender() needs optimization, when info is maximum and last
+ page is viewed briefing text display is very slow
+ - We usually use in menus single mouse button interface, some buttons(Options)
+require second button as tax rate changing, left button +(-) 1%, right +(-) 10%,
+also we need dragging implemented

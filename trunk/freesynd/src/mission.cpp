@@ -163,10 +163,15 @@ bool Mission::loadLevel(uint8 * levelData)
                     }
                 }
             }
+            // TODO: remove this later
+            if (pedref.state != 0x0 && pedref.state != 0x10 && pedref.state != 0x11)
+                printf("hmm unknown ped state found");
             pindx[i] = peds_.size();
             peds_.push_back(p);
             if (i > 7) {
-                //p->setHostile(true);
+                if (pedref.type_ped == 0x02 || pedref.type_ped == 0x08) {
+                    p->setHostile(true);
+                }
                 p->setSightRange(7);
             }
         }
@@ -321,10 +326,10 @@ bool Mission::loadLevel(uint8 * levelData)
                 isset = true;
                 break;
             case 0x05:
-                if (bindx > 0x9562 && bindx < 0xDD62) {
+                if (bindx >= 0x9562 && bindx < 0xDD62) {
                     bindx -= 0x9562;
-                    cindx = (bindx - 2) / 36;
-                    if ((cindx * 36 + 2) == bindx && windx[cindx] != 0xFFFF) {
+                    cindx = bindx / 36;
+                    if ((cindx * 36) == bindx && windx[cindx] != 0xFFFF) {
                         objd.type = objv_GetObject;
                         objd.targettype = 2;
                         objd.targetindx = windx[cindx];
@@ -332,7 +337,7 @@ bool Mission::loadLevel(uint8 * levelData)
                     } else
                         printf("0x05 incorrect offset");
                 } else
-                    printf("0x05 type not matched");
+                    printf("0x05 type not matched %X", bindx);
                 isset = true;
                 break;
             case 0x0A:
@@ -355,10 +360,10 @@ bool Mission::loadLevel(uint8 * levelData)
                 isset = true;
                 break;
             case 0x0E:
-                if (bindx > 0x5C02 && bindx < 0x6682) {
+                if (bindx >= 0x5C02 && bindx < 0x6682) {
                     bindx -= 0x5C02;
-                    cindx = (bindx - 2) / 36;
-                    if ((cindx * 36 + 2) == bindx && vindx[cindx] != 0xFFFF) {
+                    cindx = bindx / 42;
+                    if ((cindx * 42) == bindx && vindx[cindx] != 0xFFFF) {
                         objd.type = objv_DestroyObject;
                         objd.targettype = 4;
                         objd.targetindx = vindx[cindx];
@@ -370,10 +375,10 @@ bool Mission::loadLevel(uint8 * levelData)
                 isset = true;
                 break;
             case 0x0F:
-                if (bindx > 0x5C02 && bindx < 0x6682) {
+                if (bindx >= 0x5C02 && bindx < 0x6682) {
                     bindx -= 0x5C02;
-                    cindx = (bindx - 2) / 36;
-                    if ((cindx * 36 + 2) == bindx && vindx[cindx] != 0xFFFF) {
+                    cindx = bindx / 42;
+                    if ((cindx * 42) == bindx && vindx[cindx] != 0xFFFF) {
                         objd.type = objv_DestroyObject;
                         objd.targettype = 4;
                         objd.targetindx = vindx[cindx];
@@ -413,7 +418,7 @@ bool Mission::loadLevel(uint8 * levelData)
     sprintf(nameSss, "scenarios%02X.hex", map_);
     FILE *staticsFss = fopen(nameSss,"wb");
     if (staticsFss) {
-        fwrite(level_data_.scenarios, 1, 2048 * 8 + 448, staticsFss);
+        fwrite(level_data_.scenarios, 1, 2048 * 8, staticsFss);
         fclose(staticsFss);
     }
 #endif

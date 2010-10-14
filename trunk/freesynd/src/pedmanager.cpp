@@ -95,13 +95,22 @@ PedInstance *PedManager::loadInstance(uint8 * data, int map)
     // TODO: correct initialization for animations
     // require find out where current action is set in data
     int dir = gamdata->orientation >> 5;
-    int hp = 2;
+    int hp = 0;
 
     Ped *pedanim = new Ped();
     setPed(pedanim, READ_LE_UINT32(gamdata->index_base_anim));
     PedInstance *newped = pedanim->createInstance(map);
+    if (gamdata->type_ped == 0x02)
+        hp = 10;
+    else
+        hp = 2;
     newped->setStartHealth(hp);
-    newped->setHealth(hp);
+
+    if (gamdata->state == 0x11) {
+        newped->setDrawnAnim(PedInstance::DeadAnim);
+        newped->setHealth(-1);
+    } else
+        newped->setHealth(hp);
     // this is tile based Z we get, realword Z is current
     // reverse operation is required for correct calculations of
     // viewpoint, target hit etc.
@@ -117,7 +126,7 @@ PedInstance *PedManager::loadInstance(uint8 * data, int map)
                         gamdata->mapposy[0], oz);
     newped->setDirection(dir);
     newped->setMainType(gamdata->type_ped);
-    newped->setMainType(gamdata->status);
+    //newped->setSubType(gamdata->status);
 
     newped->setAllAdrenaLevels(gamdata->adrena_amount,
         gamdata->adrena_dependency, gamdata->adrena_effect);

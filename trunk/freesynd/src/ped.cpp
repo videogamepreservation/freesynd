@@ -197,7 +197,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                         && mission->weapon(i)->ammoRemaining() > 0) {
                     float d = distanceTo(mission->weapon(i));
 
-                    if (d < closest) {
+                    if (d < 1024 && d < closest) {
                         closest = d;
                         closest_w = mission->weapon(i);
                     }
@@ -698,41 +698,12 @@ void PedInstance::drawSelectorAnim(int x, int y) {
 }
 
 bool PedInstance::inRange(ShootableMapObject *t) {
+    // TODO: this should be in Weapon, also this implementation is bad
+    // rewrite needed
     if (selectedWeapon() == 0)
         return false;
-/*
-    int maxr;
-    // TODO: this should be in Weapon
 
-    switch (selectedWeapon()->index()) {
-    case Ped::Pistol:
-        maxr = 5;
-        break;
-    case Ped::Minigun:
-        maxr = 5;
-        break;
-    case Ped::Flamer:
-        maxr = 5;
-        break;
-    case Ped::LongRange:
-        maxr = 15;
-        break;
-    case Ped::Uzi:
-        maxr = 5;
-        break;
-    case Ped::Laser:
-        maxr = 50;
-        break;
-    case Ped::Gauss:
-        maxr = 15;
-        break;
-    case Ped::Shotgun:
-        maxr = 2;
-        break;
-    default:
-        maxr = 0;
-        break;
-    }
+    int maxr = selectedWeapon()->range();
 
     float d = distanceTo(t);
 
@@ -742,20 +713,21 @@ bool PedInstance::inRange(ShootableMapObject *t) {
     // check for obstacles.
     Map *m = g_App.maps().map(map());
 
-    float sx = (float) tileX();
-    float sy = (float) tileY();
+    int cx = tileX() * 256;
+    int cy = tileY() * 256;
+    float sx = (float) cx;
+    float sy = (float) cy;
     int lvl = tileZ() + 1;
+    int tx = t->tileX() * 256;
+    int ty = t->tileY() * 256;
 
-    //printf("%i %i %i -> %i %i %i\n", tileX(), tileY(), tileZ(), t->tileX(), t->tileY(), t->tileZ());
-
-    while (fabs(sx - t->tileX()) > 1.0f || fabs(sy - t->tileY()) > 1.0f) {
-        //printf("at %i %i %i is %i\n", (int)sx, (int)sy, lvl, map->tileAt((int)sx, (int)sy, lvl));
-        if (m->tileAt((int) sx, (int) sy, lvl) > 5)
+    while (fabs(sx - tx) > 256.0f || fabs(sy - ty) > 256.0f) {
+        // TODO: use mtsurface instead of this
+        if (m->tileAt((int) sx / 256, (int) sy / 256, lvl) > 5)
             return false;
-        sx += (t->tileX() - tileX()) / d;
-        sy += (t->tileY() - tileY()) / d;
+        sx += (tx - cx) / d;
+        sy += (ty - cy) / d;
     }
-*/
     return true;
 }
 
