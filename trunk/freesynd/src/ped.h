@@ -277,10 +277,26 @@ protected:
         Firing_Stop
     } firing_;
 
-    // NOTE: reserved defines state of ped (stand, walk, hit, etc)
-    unsigned int state_;
-    // NOTE: reserved describe what is ped (hostile, civilian, police, etc)
-    unsigned int desc_;
+    // NOTE: reserved defines action of ped (stand, walk, hit, etc)
+    unsigned int action_state_;
+    // 0 - not defined, 1b - controled(persuaded), 2b - hostile (condition is
+    // hostile_desc_ + enemy_groups_), 3b - armed, 4b - supporter (no
+    // active action should be done, ex. persuaded ped will shoot target
+    // of persuader only if persuader shoots at it), 5b - neutral (all unarmed
+    // are nuetral), 6b - see enemy, 7b - is dead, 8b - no ammunition
+    unsigned int desc_state_;
+    // this inherits definition from desc_state_
+    // ((target checked)desc_state_ & hostile_desc_) != 0 kill him
+    unsigned char hostile_desc_;
+    std::set <unsigned char> enemy_groups_;
+    // group ped belongs to
+    // 0 - neutral, 1 - our agents group, 2 - enemy agents group,
+    // 3 - guards, 4 - police
+    // NOTE: this will be used in A.L., guards group can be as enemy agents group,
+    // but what if we would like to make guards attack only territory intruders or
+    // someone who has took something on controlled surface, or attacked one of
+    // guards or etc.
+    unsigned char peds_group_;
     AnimationDrawn drawn_anim_;
     ShootableMapObject *target_;
     int target_x_, target_y_;

@@ -92,8 +92,7 @@ PedInstance *PedManager::loadInstance(uint8 * data, int map)
     if (gamdata->type == 0)
         return NULL;
 
-    // TODO: correct initialization for animations
-    // require find out where current action is set in data
+    // TODO: correct initialization for animations based on current state
     int dir = gamdata->orientation >> 5;
     int hp = 0;
 
@@ -111,9 +110,9 @@ PedInstance *PedManager::loadInstance(uint8 * data, int map)
         newped->setHealth(-1);
     } else
         newped->setHealth(hp);
-    // this is tile based Z we get, realword Z is current
-    // reverse operation is required for correct calculations of
-    // viewpoint, target hit etc.
+    // this is tile based Z we get, realword Z is in gamdata,
+    // for correct calculations of viewpoint, target hit etc.
+    // Zr = (Zt * 128) / 256
     int z = READ_LE_UINT16(gamdata->mapposz) >> 7;
     z--;
     int oz = gamdata->mapposz[0] & 0x7F;
@@ -125,7 +124,20 @@ PedInstance *PedManager::loadInstance(uint8 * data, int map)
                         z, gamdata->mapposx[0],
                         gamdata->mapposy[0], oz);
     newped->setDirection(dir);
-    newped->setMainType(gamdata->type_ped);
+    switch (gamdata->type_ped) {
+        case 0x01:
+            newped->setMainType(m_tpPedestrian);
+            break;
+        case 0x02:
+            newped->setMainType(m_tpAgent);
+            break;
+        case 0x04:
+            newped->setMainType(m_tpPolice);
+            break;
+        case 0x08:
+            newped->setMainType(m_tpGuard);
+            break;
+    }
     //newped->setSubType(gamdata->status);
 
     newped->setAllAdrenaLevels(gamdata->adrena_amount,

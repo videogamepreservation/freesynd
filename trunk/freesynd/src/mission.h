@@ -129,6 +129,11 @@ public:
         uint8 objs[32768];
     } LEVELDATA_MAP;            // total: 32768 bytes
 
+#define m_tpPedestrian  1
+#define m_tpAgent       2
+#define m_tpPolice      3
+#define m_tpGuard       4
+
     // This structure contains all people in the game, including agents
     // This struct size is 92.
     // most 2 byte variable have little-endianess byte order(LE)
@@ -312,13 +317,13 @@ public:
     typedef struct {// was not able to verify correctness
         uint8 next[2];
         uint8 offset_object[2];
-        // tile* where _i_factor, _j_factor, _k_factor
-        //i = (_i_factor < < 7) | 0x0040
-        //j = (_j_factor < < 7) | 0x0040
-        //k = (_k_factor < < 7) | 0x0000 
+        // tile_x_ = (tilex < < 7) / 256
+        // off_x_ = (tilex < < 7) % 256
+        // tile_y_ = (tiley < < 7) / 256
+        // off_y_ = (tiley < < 7) % 256
+        // tile_z_ = tilez
         uint8 tilex;
         uint8 tiley;
-        // tile = tilez << 1 or *2
         uint8 tilez;
         uint8 type;
     } LEVELDATA_SCENARIOS;         // total: 8 bytes
