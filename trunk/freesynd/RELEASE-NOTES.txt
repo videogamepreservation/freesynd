@@ -25,7 +25,8 @@ Fixed Bugs
 
 Features added
 ----------
-  * 0000000 : 
+  * 3043686 : Game time
+  * 3072653 : Use libsyndicate data info
 
 Known issues with this release
 ------------------------------
@@ -34,7 +35,7 @@ Known issues with this release
   * Tax collection and other functionality of the world map are not done.
   * PathFinding requires improvement
   * Mission debriefing is not operational
-  * No animation for trees, doors
+  * No animation for trees, windows
   * Map drawing is buggy
 
 History

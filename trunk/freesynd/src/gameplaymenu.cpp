@@ -535,6 +535,7 @@ void GameplayMenu::handleMouseDown(int x, int y, int button)
        * to it. If control key is pressed, add or removes agent from
        * current selection. */
         if (x < 128) {
+            // TODO: agent is dead, selectable?
             if (y < 42) {
                 if (x < 64) {
                     if ((selectable_agents_ & (1 << 0)) != 0) {
@@ -1146,7 +1147,7 @@ void GameplayMenu::drawMissionHint(int elapsed) {
 
     while (*t) {
         if (*t == 0x20) {
-            x += g_App.menuSprites().sprite(665 - 'A')->width();
+            x += g_App.menuSprites().sprite(665 - 'A')->width() - 1;
             t++;
         } else {
             x += g_App.menuSprites().sprite(665 + *t++ - 'A')->width() - 1;
