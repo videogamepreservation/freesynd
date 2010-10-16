@@ -138,10 +138,6 @@ bool Mission::loadLevel(uint8 * levelData)
         LEVELDATA_PEOPLE & pedref = level_data_.people[i];
         if(pedref.type == 0x0 || pedref.desc == 0x0D || pedref.desc == 0x0C)
             continue;
-        if(pedref.desc != 0x04 && pedref.desc != 0x05) {
-            if(pedref.type !=0) //TODO: pedref.desc == 0 exist?
-                printf("unknown property %i\n", pedref.desc);
-        }
         PedInstance *p =
             g_App.peds().loadInstance((uint8 *) & pedref, map_);
         if (p) {
@@ -163,9 +159,6 @@ bool Mission::loadLevel(uint8 * levelData)
                     }
                 }
             }
-            // TODO: remove this later
-            if (pedref.state != 0x0 && pedref.state != 0x10 && pedref.state != 0x11)
-                printf("hmm unknown ped state found %X", pedref.state);
             pindx[i] = peds_.size();
             peds_.push_back(p);
             if (i > 7) {

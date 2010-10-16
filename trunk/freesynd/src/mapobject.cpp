@@ -155,7 +155,7 @@ Static *Static::loadInstance(uint8 * data, int m)
     Static *s = 0;
 
     // TODO: find where object current state is,
-    // some doors are open, windows are broken etc
+    // some windows are broken/open etc
     // Also verify whether object description is correct
     uint16 curanim = READ_LE_UINT16(gamdata->index_current_anim);
     uint16 baseanim = READ_LE_UINT16(gamdata->index_base_anim);
@@ -294,6 +294,7 @@ Static *Static::loadInstance(uint8 * data, int m)
             else
                 s->setSubType(2);
             break;
+            /*
         default:
             printf("uknown type %02X , %02X, %X\n", gamdata->sub_type,
                 gamdata->orientation,
@@ -305,6 +306,7 @@ Static *Static::loadInstance(uint8 * data, int m)
             printf("z is %i, zoff is %i\n", gamdata->mapposz[1],
                 gamdata->mapposz[0]);
             break;
+            */
     }
 
     if (s) {

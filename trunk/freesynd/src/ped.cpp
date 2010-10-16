@@ -43,18 +43,18 @@ Ped::Ped() {
     memset(walk_fire_anims_, 0, sizeof(walk_fire_anims_));
 }
 
-bool Ped::drawStandFrame(int x, int y, int dir, int frame, Weapon::WeaponAnimIndex weapon) {
-    /*if (weapon == MedKit)
-        weapon = Weapon::Unarmed_Anim;*/
+bool Ped::drawStandFrame(int x, int y, int dir, int frame,
+                         Weapon::WeaponAnimIndex weapon)
+{
 
     assert(weapon < NUM_ANIMS);
     return g_App.gameSprites().drawFrame(
             stand_anims_[weapon] + dir, frame, x, y);
 }
 
-bool Ped::drawWalkFrame(int x, int y, int dir, int frame, Weapon::WeaponAnimIndex weapon) {
-    /*if (weapon == MedKit)
-        weapon = Weapon::Unarmed_Anim;*/
+bool Ped::drawWalkFrame(int x, int y, int dir, int frame,
+                        Weapon::WeaponAnimIndex weapon)
+{
 
     assert(weapon < NUM_ANIMS);
     return g_App.gameSprites().drawFrame(
@@ -87,13 +87,17 @@ bool Ped::drawWalkFireFrame(int x, int y, int dir, int frame,
             walk_fire_anims_[weapon] + dir, frame, x, y);
 }
 
-int Ped::lastStandFireFrame(int dir, int frame, Weapon::WeaponAnimIndex weapon) {
+int Ped::lastStandFireFrame(int dir, int frame,
+                            Weapon::WeaponAnimIndex weapon)
+{
     assert(weapon != 0 && weapon < NUM_ANIMS);
     return g_App.gameSprites().lastFrame(
             stand_fire_anims_[weapon] + dir, frame);
 }
 
-int Ped::lastWalkFireFrame(int dir, int frame, Weapon::WeaponAnimIndex weapon) {
+int Ped::lastWalkFireFrame(int dir, int frame,
+                           Weapon::WeaponAnimIndex weapon)
+{
     assert(weapon != 0 && weapon < NUM_ANIMS);
     return g_App.gameSprites().lastFrame(walk_fire_anims_[weapon] + dir, frame);
 }
@@ -570,7 +574,8 @@ drawn_anim_(PedInstance::StandAnim), target_(NULL), target_x_(-1),
 target_y_(-1), hit_damage_(0), receive_damage_(0), sight_range_(0),
 is_hostile_(false), reload_count_(0), selected_weapon_(-1),
 pickup_weapon_(0), putdown_weapon_(0), in_vehicle_(0),
-is_an_agent_(PedInstance::Not_Agent) {
+is_an_agent_(PedInstance::Not_Agent)
+{
     hold_on_.wayFree = 0;
 }
 
@@ -599,6 +604,7 @@ void PedInstance::draw(int x, int y, int scrollX, int scrollY) {
     }
 
     switch(getDrawnAnim()){
+        // TODO: add different types of hit
         case PedInstance::HitAnim:
             ped_->drawHitFrame(x, y, dir_, frame_);
             break;
@@ -630,17 +636,6 @@ void PedInstance::draw(int x, int y, int scrollX, int scrollY) {
             printf("hmm NoAnimation\n");
             break;
     }
-    /*
-    {
-        if (lastFrame) {
-            // draw the impact, TODO: this doesn't work if the shooter is off screen.
-            g_App.gameSprites().drawSpriteXYZ(18 * 40 + 9 + firing_ - 3,
-                                              target_x_ - scrollX + 129 +
-                                              (target_ ? 15 : 0),
-                                              target_y_ - scrollY -
-                                              (target_ ? 15 : 0), 0);
-        }
-    }*/
 }
 
 void PedInstance::drawSelectorAnim(int x, int y) {
@@ -849,7 +844,8 @@ void PedInstance::setDrawnAnim(PedInstance::AnimationDrawn drawn_anim) {
 }
 
 void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
-                                     int ox, int oy, int new_speed) {
+                                     int ox, int oy, int new_speed)
+{
     // NOTE: this is a "flood" algorithm, it expands until it reaches other's
     // flood point, then it removes unrelated points
     // TODO: look at "YUKON" map in original map (x = 62, y = 63, z = 1)
@@ -859,7 +855,6 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
 #endif
     m->adjXYZ(x, y, z);
     dest_path_.clear();
-    z = 1;
     speed_ = 0;
 
 #if 0

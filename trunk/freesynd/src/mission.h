@@ -164,7 +164,7 @@ public:
         uint8 index_base_anim[2];  //index in (HSTA-0.ANI)
         uint8 index_current_frame[2];   //index in (HFRA-0.ANI)
         uint8 index_current_anim[2]; // index in (HSTA-0.ANI)
-        uint8 unkn20[2];
+        uint8 health[2];
         uint8 offset_last_enemy[2];
         //0x01 ped; 0x02 vehicle; 0x04 weapon;
         //0x05 object; allow to display a target, a pickup, and for minimap
@@ -235,7 +235,7 @@ public:
         uint8 index_base_anim[2];
         uint8 index_current_frame[2];
         uint8 index_current_anim[2];
-        uint8 unkn10[2];
+        uint8 health[2];
         uint8 offset_last_enemy[2];
         uint8 type; // 0x02
         uint8 sub_type;

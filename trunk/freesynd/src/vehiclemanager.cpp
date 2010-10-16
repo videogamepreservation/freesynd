@@ -49,7 +49,7 @@ VehicleInstance *VehicleManager::loadInstance(uint8 * data, int map)
 {
     Mission::LEVELDATA_CARS * gamdata = (Mission::LEVELDATA_CARS *) data;
 
-    int hp = 5;
+    int hp = READ_LE_INT16(gamdata->health);
     int dir = gamdata->orientation >> 5;
 
     Vehicle *vehicleanim = new Vehicle();

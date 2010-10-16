@@ -140,14 +140,12 @@ PedInstance *PedManager::loadInstance(uint8 * data, int map)
         return NULL;
 
     int dir = gamdata->orientation >> 5;
-    int hp = 0;
+    int hp = READ_LE_INT16(gamdata->health);
 
     Ped *pedanim = new Ped();
     setPed(pedanim, READ_LE_UINT32(gamdata->index_base_anim));
     PedInstance *newped = pedanim->createInstance(map);
-    if (gamdata->type_ped == 0x02)
-        hp = 10;
-    else
+    if (hp <= 0)
         hp = 2;
     newped->setStartHealth(hp);
 
