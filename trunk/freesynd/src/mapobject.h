@@ -237,6 +237,12 @@ public:
 
     virtual void draw(int x, int y) = 0;
     virtual bool animate(int elapsed, Mission *obj) { return MapObject::animate(elapsed); }
+    typedef enum {
+        sttdoor_Open = 0,
+        sttdoor_Closing,
+        sttdoor_Closed,
+        sttdoor_Opening
+    }stateDoors;
 
 protected:
     Static(int m):MapObject(m) {}

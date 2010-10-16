@@ -277,7 +277,8 @@ protected:
         Firing_Stop
     } firing_;
 
-    // NOTE: reserved defines action of ped (stand, walk, hit, etc)
+    // 0 - not defined, 1b - stand, 2b - walking, 3b - hit, 4b - firing,
+    // 5b - following, 6b - pickup/putdown, 7b - burning
     unsigned int action_state_;
     // 0 - not defined, 1b - controled(persuaded), 2b - hostile (condition is
     // hostile_desc_ + enemy_groups_), 3b - armed, 4b - supporter (no
@@ -285,7 +286,8 @@ protected:
     // of persuader only if persuader shoots at it), 5b - neutral (all unarmed
     // are nuetral), 6b - enemy in range, 7b - is dead, 8b - not dead, 9b - no
     // ammunition, 10b - emulates some groups, 11b - emulation failed (some
-    // actions should remove emulation for group, maybe temporary)
+    // actions should remove emulation for group, maybe temporary), 12b - A.L.
+    // controled(maybe one day we would like to do remote control on persuaded)
     unsigned int desc_state_;
     // this inherits definition from desc_state_
     // ((target checked)desc_state_ & hostile_desc_) != 0 kill him

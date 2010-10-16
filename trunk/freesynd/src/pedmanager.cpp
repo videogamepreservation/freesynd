@@ -74,6 +74,8 @@ void PedManager::setPed(Ped *pedanim, unsigned short baseAnim)
         pedanim->setWalkFireAnim(Weapon::Flamer_Anim, 176 + baseAnim);
         pedanim->setWalkFireAnim(Weapon::LongRange_Anim, 184 + baseAnim);
     } else {
+        // NOTE: peds other then agents have pistol like animations for
+        // all weapons
         pedanim->setStandAnim(Weapon::Unarmed_Anim, 0 + baseAnim);
         pedanim->setWalkAnim(Weapon::Unarmed_Anim, 8 + baseAnim);
         pedanim->setStandAnim(Weapon::EnergyShield_Anim, 0 + baseAnim);
@@ -137,7 +139,6 @@ PedInstance *PedManager::loadInstance(uint8 * data, int map)
     if (gamdata->type == 0)
         return NULL;
 
-    // TODO: correct initialization for animations based on current state
     int dir = gamdata->orientation >> 5;
     int hp = 0;
 
@@ -169,26 +170,7 @@ PedInstance *PedManager::loadInstance(uint8 * data, int map)
                         z, gamdata->mapposx[0],
                         gamdata->mapposy[0], oz);
     newped->setDirection(dir);
-    switch (gamdata->type_ped) {
-        case 0x01:
-            newped->setMainType(m_tpPedestrian);
-            break;
-        case 0x02:
-            newped->setMainType(m_tpAgent);
-            break;
-        case 0x04:
-            newped->setMainType(m_tpPolice);
-            break;
-        case 0x08:
-            newped->setMainType(m_tpGuard);
-            break;
-        case 0x10:
-            newped->setMainType(m_tpCriminal);
-            break;
-        default:
-            printf("unknown ped type %X", gamdata->type_ped);
-    }
-    //newped->setSubType(gamdata->status);
+    newped->setMainType(gamdata->type_ped);
 
     newped->setAllAdrenaLevels(gamdata->adrena_amount,
         gamdata->adrena_dependency, gamdata->adrena_effect);
