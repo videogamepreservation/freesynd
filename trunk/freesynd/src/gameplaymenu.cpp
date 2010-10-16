@@ -453,13 +453,15 @@ void GameplayMenu::handleMouseMotion(int x, int y, int state)
 
     for (int i = 8; mission_ && i < mission_->numPeds(); i++) {
         PedInstance *p = mission_->ped(i);
-        int px = p->screenX() - 20;
-        int py = p->screenY() - 10 - p->visZ() * TILE_HEIGHT/3;
+        if (p->health() > 0) {
+            int px = p->screenX() - 20;
+            int py = p->screenY() - 10 - p->visZ() * TILE_HEIGHT/3;
 
-        if (x - 129 + world_x_ >= px && y + world_y_ >= py &&
-            x - 129 + world_x_ < px + 40 && y + world_y_ < py + 32) {
-            pointing_at_ped_ = i;
-            break;
+            if (x - 129 + world_x_ >= px && y + world_y_ >= py &&
+                x - 129 + world_x_ < px + 40 && y + world_y_ < py + 32) {
+                pointing_at_ped_ = i;
+                break;
+            }
         }
     }
 
@@ -467,13 +469,15 @@ void GameplayMenu::handleMouseMotion(int x, int y, int state)
 
     for (int i = 0; mission_ && i < mission_->numVehicles(); i++) {
         VehicleInstance *v = mission_->vehicle(i);
-        int px = v->screenX() - 20;
-        int py = v->screenY() - 10 - v->visZ() * TILE_HEIGHT/3;
+        if (v->health() > 0) {
+            int px = v->screenX() - 20;
+            int py = v->screenY() - 10 - v->visZ() * TILE_HEIGHT/3;
 
-        if (x - 129 + world_x_ >= px && y + world_y_ >= py &&
-            x - 129 + world_x_ < px + 40 && y + world_y_ < py + 32) {
-            pointing_at_vehicle_ = i;
-            break;
+            if (x - 129 + world_x_ >= px && y + world_y_ >= py &&
+                x - 129 + world_x_ < px + 40 && y + world_y_ < py + 32) {
+                pointing_at_vehicle_ = i;
+                break;
+            }
         }
     }
 
@@ -504,8 +508,7 @@ void GameplayMenu::handleMouseMotion(int x, int y, int state)
     if (pointing_at_ped_ != -1) {
         for (int i = 0; i < 4; i++)
             if (isAgentSelected(i)
-                    && mission_->ped(i)->selectedWeapon()
-                    && mission_->ped(pointing_at_ped_)->health() > 0)
+                    && mission_->ped(i)->selectedWeapon())
                 shootable = true;
     }
 
