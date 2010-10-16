@@ -165,11 +165,12 @@ bool Mission::loadLevel(uint8 * levelData)
             }
             // TODO: remove this later
             if (pedref.state != 0x0 && pedref.state != 0x10 && pedref.state != 0x11)
-                printf("hmm unknown ped state found");
+                printf("hmm unknown ped state found %X", pedref.state);
             pindx[i] = peds_.size();
             peds_.push_back(p);
             if (i > 7) {
-                if (pedref.type_ped == 0x02 || pedref.type_ped == 0x08) {
+                if (pedref.type_ped == m_tpAgent
+                    || pedref.type_ped == m_tpGuard) {
                     p->setHostile(true);
                 }
                 p->setSightRange(7);
@@ -333,7 +334,7 @@ bool Mission::loadLevel(uint8 * levelData)
                         objd.type = objv_GetObject;
                         objd.targettype = 2;
                         objd.targetindx = windx[cindx];
-                        objd.msg = "GET WEAPON";
+                        objd.msg = "TAKE WEAPON";
                     } else
                         printf("0x05 incorrect offset");
                 } else

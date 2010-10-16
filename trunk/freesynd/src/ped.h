@@ -283,12 +283,16 @@ protected:
     // hostile_desc_ + enemy_groups_), 3b - armed, 4b - supporter (no
     // active action should be done, ex. persuaded ped will shoot target
     // of persuader only if persuader shoots at it), 5b - neutral (all unarmed
-    // are nuetral), 6b - see enemy, 7b - is dead, 8b - no ammunition
+    // are nuetral), 6b - enemy in range, 7b - is dead, 8b - not dead, 9b - no
+    // ammunition, 10b - emulates some groups, 11b - emulation failed (some
+    // actions should remove emulation for group, maybe temporary)
     unsigned int desc_state_;
     // this inherits definition from desc_state_
     // ((target checked)desc_state_ & hostile_desc_) != 0 kill him
     unsigned char hostile_desc_;
     std::set <unsigned char> enemy_groups_;
+    std::set <unsigned char> emulated_groups_;
+    std::set <unsigned char> emulated_failed_groups_;
     // group ped belongs to
     // 0 - neutral, 1 - our agents group, 2 - enemy agents group,
     // 3 - guards, 4 - police

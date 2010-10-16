@@ -129,10 +129,11 @@ public:
         uint8 objs[32768];
     } LEVELDATA_MAP;            // total: 32768 bytes
 
-#define m_tpPedestrian  1
-#define m_tpAgent       2
-#define m_tpPolice      3
-#define m_tpGuard       4
+#define m_tpPedestrian  0x01
+#define m_tpAgent       0x02
+#define m_tpPolice      0x04
+#define m_tpGuard       0x08
+#define m_tpCriminal    0x10
 
     // This structure contains all people in the game, including agents
     // This struct size is 92.
@@ -180,7 +181,7 @@ public:
         // surface is mapped not to 360 degrees/surface, but 256 degrees/surface
         uint8 orientation;
         uint8 unkn4;
-        // when 01 pedestrian, 02 agent, 04 police, 08 guard : change IA and minimap
+        // when 01 pedestrian, 02 agent, 04 police, 08 guard, 16 criminal
         uint8 type_ped;
         uint8 unkn5[3];
         uint8 offset_of_persuader[2];

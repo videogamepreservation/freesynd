@@ -42,14 +42,14 @@ public:
     virtual ~MapObject() {}
 
     typedef enum {
-        dmg_No,
-        dmg_Bullet,
-        dmg_Laser,
-        dmg_Fire,
-        dmg_Explosion,
-        dmg_Hit,
-        dmg_Mental,
-        dmg_Heal
+        dmg_No = 0,
+        dmg_Bullet = 1,
+        dmg_Laser = 2,
+        dmg_Fire = 4,
+        dmg_Explosion = 8,
+        dmg_Hit = 16,
+        dmg_Mental = 32,
+        dmg_Heal = 64,
     } ObjDamageType;
 
     void setPosition(int tile_x, int tile_y, int tile_z, int off_x = 0,
@@ -121,6 +121,12 @@ public:
         int yadj;// and y 
     }FreeWay;
 
+    void setRcvDamageType(ObjDamageType rcvdamagetype) {
+        rcv_damage_type_ = rcvdamagetype;
+    }
+    ObjDamageType getRcvDamageType() {
+        return rcv_damage_type_;
+    }
 
 protected:
     // vis_z_ is location used for adjusting object drawing/calculations
@@ -131,6 +137,7 @@ protected:
     int elapsed_carry_;
     int frames_per_sec_;
     int sub_type_, main_type_;
+    ObjDamageType rcv_damage_type_;
 
     void addOffs(int &x, int &y);
 };

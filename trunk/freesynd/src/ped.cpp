@@ -152,13 +152,11 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
         if (numWeapons())
             dropAllWeapons();
 
-    }
-    else if (isHostile()) {
+    } else if (isHostile()) {
         // find a weapon with ammo
-        for (int i = 0; selectedWeapon() == 0 && i < numWeapons(); i++) {
-            if (weapon(i)->ammoRemaining() > 0)
-                selected_weapon_ = i;
-        }
+        // NOTE: weapon should not be drawn until enemy is in sight
+        if (selectedWeapon() == 0)
+            selectBestWeapon();
 
         target_ = 0;
         if (selectedWeapon()) {
@@ -184,7 +182,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                                        mission->ped(i)->tileZ());
                     break;
                 }
-        }else {
+        } else {
             if (pickup_weapon_ && pickup_weapon_->map() == -1)
                 pickup_weapon_ = 0;
 
@@ -223,17 +221,17 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
             tile_z_ = in_vehicle_->tileZ();
             off_x_ = in_vehicle_->offX();
             off_y_ = in_vehicle_->offY();
-        }else if (samePosition(in_vehicle_)) {
+        } else if (samePosition(in_vehicle_)) {
             map_ = -1;
             in_vehicle_->setDriver(this);
             return true;
         } else {
             if(health_ > 0) {
-                if(dest_path_.empty())
+                if(dest_path_.empty()) {
                     setDestinationP(mission ,in_vehicle_->tileX(),
                         in_vehicle_->tileY(), in_vehicle_->tileZ(),
                         in_vehicle_->offX(), in_vehicle_->offY(), 320);
-                else {
+                } else {
                     if(dest_path_.back().tileX() != in_vehicle_->tileX()
                         || dest_path_.back().tileY() != in_vehicle_->tileY()
                         || dest_path_.back().tileZ() != in_vehicle_->tileZ()
@@ -281,23 +279,20 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
     }
     if (pickup_weapon_) {
         if (samePosition(pickup_weapon_)) {
-            {
-                weapons_.push_back(pickup_weapon_);
-                pickup_weapon_->setMap(-1);
-                pickup_weapon_ = 0;
-                frame_ = ped_->lastPickupFrame();
-                setDrawnAnim(PedInstance::PickupAnim);
-                draw_timeout_ = 1;
-                return true;
-            }
-        }
-        else{
+            weapons_.push_back(pickup_weapon_);
+            pickup_weapon_->setMap(-1);
+            pickup_weapon_ = 0;
+            frame_ = ped_->lastPickupFrame();
+            setDrawnAnim(PedInstance::PickupAnim);
+            draw_timeout_ = 1;
+            return true;
+        } else {
             if(health_ > 0) {
-                if(dest_path_.empty())
+                if(dest_path_.empty()) {
                     setDestinationP(mission, pickup_weapon_->tileX(),
                         pickup_weapon_->tileY(), pickup_weapon_->tileZ(),
                         pickup_weapon_->offX(), pickup_weapon_->offY(), 320);
-                else {
+                } else {
                     if(dest_path_.back().tileX() != pickup_weapon_->tileX()
                         || dest_path_.back().tileY() != pickup_weapon_->tileY()
                         || dest_path_.back().tileZ() != pickup_weapon_->tileZ()
@@ -312,26 +307,24 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
     }
 
     if (putdown_weapon_) {
-         {
-            WeaponInstance *w = putdown_weapon_;
-            w->setMap(map());
-            w->setTileX(tile_x_);
-            w->setTileY(tile_y_);
-            w->setTileZ(tile_z_);
-            w->setVisZ(vis_z_);
-            w->setOffX(off_x_);
-            w->setOffY(off_y_);
-            w->setOffZ(0);
-            putdown_weapon_ = 0;
-            frame_ = ped_->lastPickupFrame();
-            setDrawnAnim(PedInstance::PutdownAnim);
-            draw_timeout_ = 1;
-            if(speed() != 0){
-                clearDestination();
-                setSpeed(0);
-            }
-            return true;
+        WeaponInstance *w = putdown_weapon_;
+        w->setMap(map());
+        w->setTileX(tile_x_);
+        w->setTileY(tile_y_);
+        w->setTileZ(tile_z_);
+        w->setVisZ(vis_z_);
+        w->setOffX(off_x_);
+        w->setOffY(off_y_);
+        w->setOffZ(0);
+        putdown_weapon_ = 0;
+        frame_ = ped_->lastPickupFrame();
+        setDrawnAnim(PedInstance::PutdownAnim);
+        draw_timeout_ = 1;
+        if(speed() != 0){
+            clearDestination();
+            setSpeed(0);
         }
+        return true;
     }
 
     updated = movementP(mission, elapsed);
@@ -369,16 +362,14 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                 dir_ = 0;
             else
                 dir_ = 7;
-        }
-        else if (target_x_ - stx > fuzz) {
+        } else if (target_x_ - stx > fuzz) {
             if (target_y_ - sty < -fuzz)
                 dir_ = 4;
             else if (target_y_ - sty > fuzz)
                 dir_ = 2;
             else
                 dir_ = 3;
-        }
-        else {
+        } else {
             if (target_y_ - sty < -fuzz)
                 dir_ = 5;
             else if (target_y_ - sty > fuzz)
@@ -403,8 +394,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
             && health_ > 0 && draw_timeout_ == 0) {
         if(speed_){
             setDrawnAnim(PedInstance::WalkAnim);
-        }
-        else
+        } else
             setDrawnAnim(PedInstance::StandAnim);
 
         if (selectedWeapon())
@@ -438,20 +428,19 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                 speed_ = 0;
                 clearDestination();
                 setDrawnAnim(PedInstance::DieAnim);
-            }else{
+            } else {
                 setDrawnAnim(PedInstance::HitAnim);
             }
 
             receive_damage_ = 0;
             frame_ = 0;
             draw_timeout_ = 1;
-        }else
-            if (health_ == 0) {
-                health_ = -1;
-                frame_ = 0;
-                setDrawnAnim(PedInstance::DeadAnim);
-                draw_timeout_ = 0;
-            }
+        } else if (health_ == 0) {
+            health_ = -1;
+            frame_ = 0;
+            setDrawnAnim(PedInstance::DeadAnim);
+            draw_timeout_ = 0;
+        }
 
         if ((firing_ == PedInstance::Firing_Fire
                 || firing_ == PedInstance::Firing_Stop)
@@ -460,8 +449,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
             draw_timeout_ = 0;
             if (speed_){
                 setDrawnAnim(PedInstance::WalkFireAnim);
-            }
-            else
+            } else
                 setDrawnAnim(PedInstance::StandFireAnim);
 
             if (target_ && target_->health() > 0 && hit_damage_){

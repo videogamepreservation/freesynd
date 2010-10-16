@@ -139,6 +139,24 @@ void App::cheatFemaleRecruits() {
 void App::cheatEquipFancyWeapons() {
     for (unsigned int i = 0; i < agents_recruited_.size(); i++) {
         agents_recruited_[i]->removeAllWeapons();
+#ifdef _DEBUG
+        agents_recruited_[i]->addWeapon(
+                weapons_.findWeapon("MINI-GUN")->createInstance());
+        agents_recruited_[i]->addWeapon(
+                weapons_.findWeapon("PISTOL")->createInstance());
+        agents_recruited_[i]->addWeapon(
+                weapons_.findWeapon("GAUSS GUN")->createInstance());
+        agents_recruited_[i]->addWeapon(
+                weapons_.findWeapon("FLAMER")->createInstance());
+        agents_recruited_[i]->addWeapon(
+                weapons_.findWeapon("UZI")->createInstance());
+        agents_recruited_[i]->addWeapon(
+                weapons_.findWeapon("ENERGY SHIELD")->createInstance());
+        agents_recruited_[i]->addWeapon(
+                weapons_.findWeapon("LASER")->createInstance());
+        agents_recruited_[i]->addWeapon(
+                weapons_.findWeapon("LONG RANGE")->createInstance());
+#else
         agents_recruited_[i]->addWeapon(
                 weapons_.findWeapon("MINI-GUN")->createInstance());
         agents_recruited_[i]->addWeapon(
@@ -155,6 +173,7 @@ void App::cheatEquipFancyWeapons() {
                 weapons_.findWeapon("LASER")->createInstance());
         agents_recruited_[i]->addWeapon(
                 weapons_.findWeapon("LASER")->createInstance());
+#endif
     }
 }
 
