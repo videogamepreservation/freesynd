@@ -65,7 +65,7 @@ VehicleInstance::VehicleInstance(Vehicle * vehicle,
 
 bool VehicleInstance::animate(int elapsed)
 {
-    bool updated = movementV(elapsed);
+    bool updated = false;
 
     if (health_ <= 0) {
         vehicle_driver_ = 0;
@@ -75,7 +75,11 @@ bool VehicleInstance::animate(int elapsed)
                 (*it)->leaveVehicle();
         }
         all_passengers_.clear();
+        dest_path_.clear();
+    } else {
+        updated = movementV(elapsed);
     }
+
     if (health_ <= start_health_) {
         return MapObject::animate(elapsed);
     }

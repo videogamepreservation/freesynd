@@ -198,8 +198,7 @@ Static *Static::loadInstance(uint8 * data, int m)
                 s->setSubType(2);
             }
             break;
-        case 0x0D:
-            // TODO: open doors? verify
+        case 0x0D: // closed door
             if (gamdata->orientation == 0x00 || gamdata->orientation == 0x80) {
                 s = new Door(m, baseanim, baseanim + 2, baseanim + 4, baseanim + 6);
                 s->setSubType(0);
@@ -220,13 +219,16 @@ Static *Static::loadInstance(uint8 * data, int m)
             }
             s->state_ = sttdoor_Opening;
             break;
-        case 0x0F:
-            // TODO: open doors? verify
-            s = new Door(m, curanim, curanim + 2, curanim + 4, curanim + 6);
-            if (gamdata->orientation == 0x00 || gamdata->orientation == 0x80)
+        case 0x0F: // opening doors, not open
+            if (gamdata->orientation == 0x00 || gamdata->orientation == 0x80) {
+                s = new Door(m, baseanim, baseanim + 2, baseanim + 4, baseanim + 6);
                 s->setSubType(0);
-            else
+            } else {
+                baseanim++;
+                s = new Door(m, baseanim, baseanim + 2, baseanim + 4, baseanim + 6);
                 s->setSubType(2);
+            }
+            s->state_ = sttdoor_Opening;
             break;
         case 0x11:
             // ???? what is this
@@ -372,16 +374,18 @@ bool Door::animate(int elapsed, Mission *obj)
             assert(i != 0 && j != 0);
             for(*i = 0; *i < 2; *i += 1) {
                 mt = 1; si = 0;
-                p = (PedInstance *)(obj->findAt(x + inc_rel,
-                    y + rel_inc,z, &mt, &si, true));
-                if (!p && state_ == sttdoor_Open && (!found)) {
-                    state_ = sttdoor_Closing;
-                    frame_ = 0;
-                } else if (p){
-                    state_ = sttdoor_Open;
-                    found = true;
-                    p->hold_on_.wayFree = 0;
-                }
+                do {
+                    p = (PedInstance *)(obj->findAt(x + inc_rel,
+                        y + rel_inc,z, &mt, &si, true));
+                    if (!p && state_ == sttdoor_Open && (!found)) {
+                        state_ = sttdoor_Closing;
+                        frame_ = 0;
+                    } else if (p && p->health() > 0){
+                        state_ = sttdoor_Open;
+                        found = true;
+                        p->hold_on_.wayFree = 0;
+                    }
+                } while (p);
             }
             break;
         case sttdoor_Closed:
@@ -395,28 +399,32 @@ bool Door::animate(int elapsed, Mission *obj)
             assert(i != 0 && j != 0);
             *i = 1;
             mt = 1; si = 0;
-            p = (PedInstance *)(obj->findAt(x + inc_rel,
-                y + rel_inc,z,&mt,&si,true));
-            if (p) {
-                if (!found) {
-                    state_ = sttdoor_Opening;
-                    found = true;
-                    frame_ = 0;
+            do {
+                p = (PedInstance *)(obj->findAt(x + inc_rel,
+                    y + rel_inc,z,&mt,&si,true));
+                if (p && p->health() > 0) {
+                    if (!found) {
+                        state_ = sttdoor_Opening;
+                        found = true;
+                        frame_ = 0;
+                    }
+                    p->hold_on_.wayFree = 1;
                 }
-                p->hold_on_.wayFree = 1;
-            }
+            } while (p);
             *i = 0;
             mt = 1; si = 0;
-            p = (PedInstance *)(obj->findAt(x + inc_rel,
-                y + rel_inc,z,&mt,&si,true));
-            if (p) {
-                if (!found) {
-                    state_ = sttdoor_Opening;
-                    found = true;
-                    frame_ = 0;
+            do {
+                p = (PedInstance *)(obj->findAt(x + inc_rel,
+                    y + rel_inc,z,&mt,&si,true));
+                if (p && p->health() > 0) {
+                    if (!found) {
+                        state_ = sttdoor_Opening;
+                        found = true;
+                        frame_ = 0;
+                    }
+                    p->hold_on_.wayFree = 1;
                 }
-                p->hold_on_.wayFree = 1;
-            }
+            } while (p);
             break;
         case sttdoor_Closing:
             if (frame_ >= g_App.gameSprites().lastFrame(closing_anim_)) {

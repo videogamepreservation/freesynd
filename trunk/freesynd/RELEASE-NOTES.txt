@@ -16,6 +16,8 @@ Changes
   * People are armed, but enemy agents are not armed correctly
   * In missions, at start, where weapons are on floor, weapons should be
   visible now
+  * Small doors will open and close
+  * Vehicles will not move if they are destroyed
 
 Fixed Bugs
 ----------

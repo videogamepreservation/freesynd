@@ -278,7 +278,7 @@ protected:
     } firing_;
 
     // 0 - not defined, 1b - stand, 2b - walking, 3b - hit, 4b - firing,
-    // 5b - following, 6b - pickup/putdown, 7b - burning
+    // 5b - following, 6b - pickup/putdown, 7b - burning, 8b - in car
     unsigned int action_state_;
     // 0 - not defined, 1b - controled(persuaded), 2b - hostile (condition is
     // hostile_desc_ + enemy_groups_), 3b - armed, 4b - supporter (no

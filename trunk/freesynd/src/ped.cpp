@@ -852,17 +852,21 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                                      int ox, int oy, int new_speed) {
     // NOTE: this is a "flood" algorithm, it expands until it reaches other's
     // flood point, then it removes unrelated points
+    // TODO: look at "YUKON" map in original map (x = 62, y = 63, z = 1)
 #ifdef EXECUTION_SPEED_TIME
     printf("---------------------------");
     printf("start time %i.%i\n", SDL_GetTicks()/1000, SDL_GetTicks()%1000);
 #endif
     m->adjXYZ(x, y, z);
     dest_path_.clear();
+    z = 1;
     speed_ = 0;
-#if 1
-    printf("target pos: x %X; y %X; z %i, ox %i, oy %i\n",
+
+#if 0
+    printf("target pos: x %i; y %i; z %i, ox %i, oy %i\n",
         x, y, z, ox, oy);
 #endif
+
     if (map_ == -1 || health_ <= 0)
         return;
 
@@ -876,12 +880,17 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
         targetd->dirm, based->t, based->dirm);
     printf("base pos: x %i; y %i; z %i, ox %i, oy %i, oz %i\n",
         tile_x_, tile_y_, tile_z_, off_x_, off_y_, off_z_);
+    printf("ttwd %X \n",m->mtsurfaces_[x + y * m->mmax_x_ 
+        + z * m->mmax_m_xy].twd);
     if ( (z + 1) < m->mmax_z_) {
         unsigned char utwd = 
         printf("upper twd %i\n", m->mtsurfaces_[x + y * m->mmax_x_ 
         + (z + 1) * m->mmax_m_xy].twd);
     }
 #endif
+
+    //if (map_ == -1 || health_ <= 0)
+        //return;
 
     if(targetd->t == m_fdNonWalkable || map_ == -1 || health_ <= 0) {
         return;
