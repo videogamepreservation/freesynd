@@ -1049,7 +1049,7 @@ void GameplayMenu::drawSelectAllButton() {
 
 static int drawChar(int x, int y, char ch, uint8 color) {
     if (ch == ' ')
-        return 3;
+        return g_App.menuSprites().sprite(665 - 'A')->width();
 
     Sprite *s = g_App.menuSprites().sprite(665 + ch - 'A');
     uint8 *data = new uint8[s->width() * s->height()];
@@ -1144,8 +1144,14 @@ void GameplayMenu::drawMissionHint(int elapsed) {
     int x = 0;
     const char *t = str;
 
-    while (*t)
-        x += g_App.menuSprites().sprite(665 + *t++ - 'A')->width() - 1;
+    while (*t) {
+        if (*t == 0x20) {
+            x += g_App.menuSprites().sprite(665 - 'A')->width();
+            t++;
+        } else {
+            x += g_App.menuSprites().sprite(665 + *t++ - 'A')->width() - 1;
+        }
+    }
 
     x = 64 - x / 2;
 
