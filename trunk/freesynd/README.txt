@@ -12,6 +12,9 @@ License information
 -------------------
 
 FreeSynd is released under the GNU General Public Licence, version 2.
+Thanks to Tomasz Lis for some preliminary work on the level files. His code is
+used under GNU General Public Licence, version 2 or later with permission from
+author.
 Some code is based on "libsyndicate" library by Paul Chavent. It is
 re-licensed under GNU General Public Licence, version 2. Original license
 and code is located in svn source/trunk/libsyndicate/.

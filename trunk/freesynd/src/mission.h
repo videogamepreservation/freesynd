@@ -21,11 +21,6 @@
  *  project's  web  site;  see <http://www.gnu.org/licenses/gpl.html>.  *
  *  The full text of the license is also included in the file COPYING.  *
  *                                                                      *
- *                                  **                                  *
- *                                                                      *
- *  Thanks to Tomasz Lis for some preliminary work on the level files.  *
- *  Some of his code is included below (without permission).            *
- *                                                                      *
  ************************************************************************/
 
 #ifndef MISSION_H
