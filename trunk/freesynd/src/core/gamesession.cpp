@@ -23,60 +23,61 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "gamesession.h"
-#include "../map.h"
-#include "../mission.h"
+#include "map.h"
+#include "mission.h"
 
 Block g_Blocks[50] = {
-    {"ALASKA", 46000000, 17, 30, STAT_HAPPY, BLK_UNAVAIL, NULL},
-    {"NORTHWEST TERRITORIES", 56000000, 39, 30, STAT_HAPPY, BLK_UNAVAIL, NULL},
-    {"NORTHEAST TERRITORIES", 58000000, 8, 30, STAT_HAPPY, BLK_UNAVAIL, NULL},
-    {"GREENLAND", 40000000, 16, 30, STAT_HAPPY, BLK_UNAVAIL, NULL},
-    {"SCANDINAVIA", 54000000, 20, 30, STAT_HAPPY, BLK_UNAVAIL, "10"},
-    {"URALS", 40000000, 18, 30, STAT_HAPPY, BLK_UNAVAIL, "6:12:13"},
-    {"SIBERIA", 54000000, 22, 30, STAT_HAPPY, BLK_UNAVAIL, "7"},
-    {"KAMCHATKA", 56000000, 12, 30, STAT_HAPPY, BLK_UNAVAIL, NULL},
-    {"YUKON", 58000000, 21, 30, STAT_HAPPY, BLK_UNAVAIL, NULL},
-    {"WESTERN EUROPE", 48000000, 1, 30, STAT_HAPPY, BLK_UNAVAIL, "4"},
-    {"CENTRAL EUROPE", 50000000, 15, 30, STAT_HAPPY, BLK_UNAVAIL, "11"},
-    {"EASTERN EUROPE", 52000000, 10, 30, STAT_HAPPY, BLK_UNAVAIL, "5"},
-    {"KAZAKHSTAN", 42000000, 9, 30, STAT_HAPPY, BLK_UNAVAIL, NULL},
-    {"MONGOLIA", 52000000, 3, 30, STAT_HAPPY, BLK_UNAVAIL, NULL},
-    {"FAR EAST", 42000000, 2, 30, STAT_HAPPY, BLK_UNAVAIL, NULL},
-    {"NEWFOUNDLAND", 44000000, 42, 30, STAT_HAPPY, BLK_UNAVAIL, NULL},
-    {"CALIFORNIA", 46000000, 5, 30, STAT_HAPPY, BLK_UNAVAIL, NULL},
-    {"ROCKIES", 56000000, 23, 30, STAT_HAPPY, BLK_UNAVAIL, NULL},
-    {"MID WEST", 58000000, 34, 30, STAT_HAPPY, BLK_UNAVAIL, NULL},
-    {"NEW ENGLAND", 40000000, 29, 30, STAT_HAPPY, BLK_UNAVAIL, NULL},
-    {"ALGERIA", 50000000, 28, 30, STAT_HAPPY, BLK_UNAVAIL, NULL},
-    {"LYBIA", 40000000, 35, 30, STAT_HAPPY, BLK_UNAVAIL, NULL},
-    {"IRAQ", 50000000, 6, 30, STAT_HAPPY, BLK_UNAVAIL, NULL},
-    {"IRAN", 52000000, 4, 30, STAT_HAPPY, BLK_UNAVAIL, NULL},
-    {"CHINA", 54000000, 50, 30, STAT_HAPPY, BLK_UNAVAIL, NULL},
-    {"COLORADO", 40000000, 32, 30, STAT_HAPPY, BLK_UNAVAIL, NULL},
-    {"SOUTHERN STATES", 42000000, 24, 30, STAT_HAPPY, BLK_UNAVAIL, NULL},
-    {"ATLANTIC ACCELERATOR", 44000000, 37, 30, STAT_HAPPY, BLK_UNAVAIL, NULL},
-    {"MAURITANIA", 58000453, 41, 30, STAT_HAPPY, BLK_UNAVAIL, NULL},
-    {"SUDAN", 43999510, 33, 30, STAT_HAPPY, BLK_UNAVAIL, NULL},
-    {"ARABIA", 54000471, 38, 30, STAT_HAPPY, BLK_UNAVAIL, NULL},
-    {"INDIA", 55999864, 7, 30, STAT_HAPPY, BLK_UNAVAIL, NULL},
-    {"PACIFIC RIM", 57999593, 48, 30, STAT_HAPPY, BLK_UNAVAIL, NULL},
-    {"MEXICO", 43999722, 26, 30, STAT_HAPPY, BLK_UNAVAIL, NULL},
-    {"COLOMBIA", 45999547, 44, 30, STAT_HAPPY, BLK_UNAVAIL, NULL},
-    {"NIGERIA", 48000204, 45, 30, STAT_HAPPY, BLK_UNAVAIL, NULL},
-    {"ZAIRE", 57999525, 27, 30, STAT_HAPPY, BLK_UNAVAIL, NULL},
-    {"KENYA", 47999574, 40, 30, STAT_HAPPY, BLK_UNAVAIL, NULL},
-    {"PERU", 57999719, 14, 30, STAT_HAPPY, BLK_UNAVAIL, NULL},
-    {"VENEZUALA", 40000488, 36, 30, STAT_HAPPY, BLK_UNAVAIL, NULL},
-    {"BRAZIL", 41999785, 46, 30, STAT_HAPPY, BLK_UNAVAIL, NULL},
-    {"SOUTH AFRICA", 48000138, 31, 30, STAT_HAPPY, BLK_UNAVAIL, NULL},
-    {"MOZAMBIQUE", 45999915, 13, 30, STAT_HAPPY, BLK_UNAVAIL, NULL},
-    {"WESTERN AUSTRALIA", 47999716, 11, 30, STAT_HAPPY, BLK_UNAVAIL, NULL},
-    {"NORTHERN TERRITORIES", 41999837, 19, 30, STAT_HAPPY, BLK_UNAVAIL, NULL},
-    {"NEW SOUTH WALES", 47999878, 43, 30, STAT_HAPPY, BLK_UNAVAIL, NULL},
-    {"PARAGUAY", 58000207, 49, 30, STAT_HAPPY, BLK_UNAVAIL, NULL},
-    {"ARGENTINA", 40000352, 30, 30, STAT_HAPPY, BLK_UNAVAIL, NULL},
-    {"URUGUAY", 57999681, 47, 30, STAT_HAPPY, BLK_UNAVAIL, NULL},
-    {"INDONESIA", 47999794, 25, 30, STAT_HAPPY, BLK_UNAVAIL, NULL}
+    // name, defpop, population, mis_id, tax, addtotax, daysToNextStatus, daysStatusElapsed, status, next
+    {"ALASKA", 46000000, 46000000, 17, 30, 0, STAT_VERY_HAPPY, 0, 0, BLK_UNAVAIL, NULL},
+    {"NORTHWEST TERRITORIES", 56000000, 56000000, 39, 30, 0, STAT_VERY_HAPPY, 0, 0, BLK_UNAVAIL, NULL},
+    {"NORTHEAST TERRITORIES", 58000000, 58000000, 8, 30, 0, STAT_VERY_HAPPY, 0, 0, BLK_UNAVAIL, NULL},
+    {"GREENLAND", 40000000, 40000000, 16, 30, 0, STAT_VERY_HAPPY, 0, 0, BLK_UNAVAIL, NULL},
+    {"SCANDINAVIA", 54000000, 54000000, 20, 30, 0, STAT_VERY_HAPPY, 0, 0, BLK_UNAVAIL, "10"},
+    {"URALS", 40000000, 40000000, 18, 30, 0, STAT_VERY_HAPPY, 0, 0, BLK_UNAVAIL, "6:12:13"},
+    {"SIBERIA", 54000000, 54000000, 22, 30, 0, STAT_VERY_HAPPY, 0, 0, BLK_UNAVAIL, "7"},
+    {"KAMCHATKA", 56000000, 56000000, 12, 30, 0, STAT_VERY_HAPPY, 0, 0, BLK_UNAVAIL, NULL},
+    {"YUKON", 58000000, 58000000, 21, 30, 0, STAT_VERY_HAPPY, 0, 0, BLK_UNAVAIL, NULL},
+    {"WESTERN EUROPE", 48000000, 48000000, 1, 30, 0, STAT_VERY_HAPPY, 0, 0, BLK_UNAVAIL, "4"},
+    {"CENTRAL EUROPE", 50000000, 50000000, 15, 30, 0, STAT_VERY_HAPPY, 0, 0, BLK_UNAVAIL, "11"},
+    {"EASTERN EUROPE", 52000000, 52000000, 10, 30, 0, STAT_VERY_HAPPY, 0, 0, BLK_UNAVAIL, "5"},
+    {"KAZAKHSTAN", 42000000, 42000000, 9, 30, 0, STAT_VERY_HAPPY, 0, 0, BLK_UNAVAIL, NULL},
+    {"MONGOLIA", 52000000, 52000000, 3, 30, 0, STAT_VERY_HAPPY, 0, 0, BLK_UNAVAIL, NULL},
+    {"FAR EAST", 42000000, 42000000, 2, 30, 0, STAT_VERY_HAPPY, 0, 0, BLK_UNAVAIL, NULL},
+    {"NEWFOUNDLAND", 44000000, 44000000, 42, 30, 0, STAT_VERY_HAPPY, 0, 0, BLK_UNAVAIL, NULL},
+    {"CALIFORNIA", 46000000, 46000000, 5, 30, 0, STAT_VERY_HAPPY, 0, 0, BLK_UNAVAIL, NULL},
+    {"ROCKIES", 56000000, 56000000, 23, 30, 0, STAT_VERY_HAPPY, 0, 0, BLK_UNAVAIL, NULL},
+    {"MID WEST", 58000000, 58000000, 34, 30, 0, STAT_VERY_HAPPY, 0, 0, BLK_UNAVAIL, NULL},
+    {"NEW ENGLAND", 40000000, 40000000, 29, 30, 0, STAT_VERY_HAPPY, 0, 0, BLK_UNAVAIL, NULL},
+    {"ALGERIA", 50000000, 50000000, 28, 30, 0, STAT_VERY_HAPPY, 0, 0, BLK_UNAVAIL, NULL},
+    {"LYBIA", 40000000, 40000000, 35, 30, 0, STAT_VERY_HAPPY, 0, 0, BLK_UNAVAIL, NULL},
+    {"IRAQ", 50000000, 50000000, 6, 30, 0, STAT_VERY_HAPPY, 0, 0, BLK_UNAVAIL, NULL},
+    {"IRAN", 52000000, 52000000, 4, 30, 0, STAT_VERY_HAPPY, 0, 0, BLK_UNAVAIL, NULL},
+    {"CHINA", 54000000, 54000000, 50, 30, 0, STAT_VERY_HAPPY, 0, 0, BLK_UNAVAIL, NULL},
+    {"COLORADO", 40000000, 40000000, 32, 30, 0, STAT_VERY_HAPPY, 0, 0, BLK_UNAVAIL, NULL},
+    {"SOUTHERN STATES", 42000000, 42000000, 24, 30, 0, STAT_VERY_HAPPY, 0, 0, BLK_UNAVAIL, NULL},
+    {"ATLANTIC ACCELERATOR", 44000000, 44000000, 37, 30, 0, STAT_VERY_HAPPY, 0, 0, BLK_UNAVAIL, NULL},
+    {"MAURITANIA", 58000000, 58000000, 41, 30, 0, STAT_VERY_HAPPY, 0, 0, BLK_UNAVAIL, NULL},
+    {"SUDAN", 44000000, 44000000, 33, 30, 0, STAT_VERY_HAPPY, 0, 0, BLK_UNAVAIL, NULL},
+    {"ARABIA", 54000000, 54000000, 38, 30, 0, STAT_VERY_HAPPY, 0, 0, BLK_UNAVAIL, NULL},
+    {"INDIA", 56000000, 56000000, 7, 30, 0, STAT_VERY_HAPPY, 0, 0, BLK_UNAVAIL, NULL},
+    {"PACIFIC RIM", 58000000, 58000000, 48, 30, 0, STAT_VERY_HAPPY, 0, 0, BLK_UNAVAIL, NULL},
+    {"MEXICO", 44000000, 44000000, 26, 30, 0, STAT_VERY_HAPPY, 0, 0, BLK_UNAVAIL, NULL},
+    {"COLOMBIA", 46000000, 46000000, 44, 30, 0, STAT_VERY_HAPPY, 0, 0, BLK_UNAVAIL, NULL},
+    {"NIGERIA", 48000000, 48000000, 45, 30, 0, STAT_VERY_HAPPY, 0, 0, BLK_UNAVAIL, NULL},
+    {"ZAIRE", 58000000, 58000000, 27, 30, 0, STAT_VERY_HAPPY, 0, 0, BLK_UNAVAIL, NULL},
+    {"KENYA", 48000000, 48000000, 40, 30, 0, STAT_VERY_HAPPY, 0, 0, BLK_UNAVAIL, NULL},
+    {"PERU", 58000000, 58000000, 14, 30, 0, STAT_VERY_HAPPY, 0, 0, BLK_UNAVAIL, NULL},
+    {"VENEZUALA", 40000000, 40000000, 36, 30, 0, STAT_VERY_HAPPY, 0, 0, BLK_UNAVAIL, NULL},
+    {"BRAZIL", 42000000, 42000000, 46, 30, 0, STAT_VERY_HAPPY, 0, 0, BLK_UNAVAIL, NULL},
+    {"SOUTH AFRICA", 48000000, 48000000, 31, 30, 0, STAT_VERY_HAPPY, 0, 0, BLK_UNAVAIL, NULL},
+    {"MOZAMBIQUE", 46000000, 46000000, 13, 30, 0, STAT_VERY_HAPPY, 0, 0, BLK_UNAVAIL, NULL},
+    {"WESTERN AUSTRALIA", 48000000, 48000000, 11, 30, 0, STAT_VERY_HAPPY, 0, 0, BLK_UNAVAIL, NULL},
+    {"NORTHERN TERRITORIES", 42000000, 42000000, 19, 30, 0, STAT_VERY_HAPPY, 0, 0, BLK_UNAVAIL, NULL},
+    {"NEW SOUTH WALES", 48000000, 48000000, 43, 30, 0, STAT_VERY_HAPPY, 0, 0, BLK_UNAVAIL, NULL},
+    {"PARAGUAY", 58000000, 58000000, 49, 30, 0, STAT_VERY_HAPPY, 0, 0, BLK_UNAVAIL, NULL},
+    {"ARGENTINA", 40000000, 40000000, 30, 30, 0, STAT_VERY_HAPPY, 0, 0, BLK_UNAVAIL, NULL},
+    {"URUGUAY", 58000000, 58000000, 47, 30, 0, STAT_VERY_HAPPY, 0, 0, BLK_UNAVAIL, NULL},
+    {"INDONESIA", 48000000, 48000000, 25, 30, 0, STAT_VERY_HAPPY, 0, 0, BLK_UNAVAIL, NULL}
 };
 
 const int GameSession::HOUR_DELAY = 4000;
@@ -86,6 +87,7 @@ GameSession::GameSession() {
     reset();
     enable_all_mis_ = false;
     replay_mission_ = false;
+    hour_delay_ = HOUR_DELAY;
 }
 
 GameSession::~GameSession() {
@@ -102,7 +104,11 @@ void GameSession::reset() {
     for (int i=0; i<50; i++) {
         g_Blocks[i].status = BLK_UNAVAIL;
         g_Blocks[i].tax = 30;
-        g_Blocks[i].popStatus = STAT_HAPPY;
+        g_Blocks[i].addToTax = 0;
+        g_Blocks[i].popStatus = STAT_VERY_HAPPY;
+        g_Blocks[i].population = g_Blocks[i].defPopulation;
+        g_Blocks[i].daysToNextStatus = 0;
+        g_Blocks[i].daysStatusElapsed = 0;
     }
 
     g_Blocks[selected_blck_].status = BLK_AVAIL;
@@ -142,6 +148,7 @@ void GameSession::setMission(Mission *pMission) {
  */
 void GameSession::completeSelectedBlock() {
     g_Blocks[selected_blck_].status = BLK_FINISHED;
+    g_Blocks[selected_blck_].popStatus = STAT_VERY_HAPPY;
 
     // Make the next missions available
     if (g_Blocks[selected_blck_].next != NULL) {
@@ -176,9 +183,9 @@ bool GameSession::updateTime(int elapsed) {
     }
 
     time_elapsed_ += elapsed;
-    if (time_elapsed_ > GameSession::HOUR_DELAY) {
+    if (time_elapsed_ > hour_delay_) {
         // Computes how much hours have passed
-        int hour_elapsed = time_elapsed_ / HOUR_DELAY;
+        int hour_elapsed = time_elapsed_ / hour_delay_;
         // Reset the counter
         time_elapsed_ = 0;
         // Number of days in that time
@@ -219,6 +226,10 @@ bool GameSession::updateTime(int elapsed) {
     return false;
 }
 
+/*!
+ * Returns the current game time as a string.
+ * \param dest Buffer that will contains the resulting string.
+ */
 void GameSession::getTimeAsStr(char *dest) {
 #ifdef WIN_SECURE
     sprintf_s(dest, 100, "%02d:%d:%dNC", time_hour_, time_day_, time_year_);
@@ -227,32 +238,192 @@ void GameSession::getTimeAsStr(char *dest) {
 #endif
 }
 
+/*!
+ * Returns the revenue of the given tax rate on the given population.
+ * \param population The population number
+ * \param rate The current tax rate (0<=rate<=100)
+ * \return The resulting amount of money
+ */
 int GameSession::getTaxRevenue(int population, int rate) {
+    // This formula is not exactly the same as in the original game
     int amount = ((population / 1000000 + 1) * 1375 * rate) / 1000;
 
     return amount;
 }
 
-
+/*!
+ * Increase/decrease the current amount of tax that will be added to the tax rate
+ * at the end of the day.
+ * \param amount The amount to add to tax rate.
+ * \return true if rate has changed.
+ */
 bool GameSession::addToTaxRate(int amount) {
-    int newRate = g_Blocks[selected_blck_].tax + amount;
+    int newRate = g_Blocks[selected_blck_].tax + g_Blocks[selected_blck_].addToTax + amount;
     
     if (newRate <= 100 && newRate >= 0) {
-        g_Blocks[selected_blck_].tax = newRate;
+        g_Blocks[selected_blck_].addToTax += amount;
         return true;
     }
 
     return false;
 }
 
+/*!
+ * Returns the number of days before status changes.
+ * \param status The current population status
+ * \param tax The current tax rate
+ * \return a number of days
+ */
+int GameSession::getDaysBeforeChange(Status_Pop status, int tax) {
+
+    if (tax <= 30) {
+        // Below 30% status will increase slowly : every 15 days
+        return 15;
+    } else if (tax >= 90) {
+        // Above 90%, status will decrease every 1 or 2 days
+        return 1 + (rand() % 2);
+    }
+
+    // Between 30% and 90%, period is a pourcentage of a base number of days
+    // plus a randow variation between -1 to +1 days
+    int base = 12;
+    int delta = 1 - (rand() % 2);
+    int days = (100 - tax) * base / 100 + delta;
+
+    // Period cannot be zero
+    if (days <= 0) {
+        days = 1;
+    }
+
+    // There's a plateau between status CONTENT and UNHAPPY between 1 and 2 days
+    if (status == STAT_CONTENT) {
+        days = days + 1 + (rand() % 2);
+    }
+
+    return days;
+}
+
+int GameSession::getNewPopulation(const int defaultPop, int currPop) {
+
+    // Population variation is between 100 and 300 people / day
+    int add = 100 + (rand() % 200);
+    // 2/5 chances that population decreases and 3/5 that it increases
+    int op = (rand() % 5) > 1 ? 1 : -1;
+    add *= op;
+
+    if (((defaultPop + 2000) < (currPop + add)) || ((defaultPop - 1000) > (currPop + add))) {
+        // If we're out of limit add the opposite of variation
+        return currPop - add;
+    } else {
+        // else add variation
+        return currPop + add;
+    }
+}
+
+/*!
+ * Updates population number and status for all countries on a daily basis.
+ * \return The amount of money collected after all countries have been updated
+ */
 int GameSession::updateCountries() {
+    // TODO : add population variation
     int amount = 0;
 
     for (int i=0; i < 50; i++) {
-        Block blk = g_Blocks[i];
+        // Update country population nulber
+        g_Blocks[i].population = getNewPopulation(g_Blocks[i].defPopulation, g_Blocks[i].population);
 
-        if (blk.status == BLK_FINISHED) {
-            amount += getTaxRevenue(blk.population, blk.tax);
+        if (g_Blocks[i].status == BLK_FINISHED) {
+            // update the population status
+            if (g_Blocks[i].daysStatusElapsed < g_Blocks[i].daysToNextStatus) {
+                g_Blocks[i].daysStatusElapsed += 1;
+                
+                if (g_Blocks[i].daysStatusElapsed == g_Blocks[i].daysToNextStatus) {
+                    // We have reached the limit -> Change population status
+                    // reset the counter
+                    g_Blocks[i].daysStatusElapsed = 0;
+                    g_Blocks[i].daysToNextStatus = getDaysBeforeChange(g_Blocks[i].popStatus, g_Blocks[i].tax);
+
+                    // Above 30% status will be down
+                    bool down = g_Blocks[i].tax > 30;
+
+                    switch (g_Blocks[i].popStatus) {
+                        case STAT_VERY_HAPPY:
+                            if (down) {
+                                g_Blocks[i].popStatus = STAT_HAPPY;
+                            }
+                            break;
+                        case STAT_HAPPY:
+                            if (down) {
+                                g_Blocks[i].popStatus = STAT_CONTENT;
+                            } else {
+                                g_Blocks[i].popStatus = STAT_VERY_HAPPY;
+                                // We've reached the max status so no more evolution
+                                g_Blocks[i].daysToNextStatus = 0;
+                            }
+                            break;
+                        case STAT_CONTENT:
+                            if (down) {
+                                g_Blocks[i].popStatus = STAT_UNHAPPY;
+                            } else {
+                                g_Blocks[i].popStatus = STAT_HAPPY;
+                            }
+                            break;
+                        case STAT_UNHAPPY:
+                            if (down) {
+                                g_Blocks[i].popStatus = STAT_DISCONTENT;
+                            } else {
+                                g_Blocks[i].popStatus = STAT_CONTENT;
+                            }
+                            break;
+                        case STAT_DISCONTENT:
+                            if (down) {
+                                g_Blocks[i].popStatus = STAT_REBEL;
+                                g_Blocks[i].status = BLK_REBEL;
+                                g_Blocks[i].daysToNextStatus = 0;
+                            } else {
+                                g_Blocks[i].popStatus = STAT_UNHAPPY;
+                            }
+                            break;
+                    } // end switch
+                }
+            }
+
+            // Status update has been made : check if money can be percieved
+            if (g_Blocks[i].status == BLK_FINISHED) {
+                // Status has not changed so take the money
+                amount += getTaxRevenue(g_Blocks[i].population, g_Blocks[i].tax);
+            }
+
+            // Adds the tax buffer to the current tax rate and computes evolution
+            if (g_Blocks[i].addToTax != 0) {
+                int newTax = g_Blocks[i].tax + g_Blocks[i].addToTax;
+
+                if (newTax <= 30) {
+                    if (g_Blocks[i].tax > 30) {
+                        // Tax is now below 30 so stop going down and slowly begin to go up
+                        g_Blocks[i].daysStatusElapsed = 0;
+                        // It always take 15 days to gain one level up of status
+                        g_Blocks[i].daysToNextStatus = 15;
+                    }
+                } else {
+                    if (g_Blocks[i].tax <= 30) {
+                        // Tax is now above 30 : stops going up and begin going down
+                        g_Blocks[i].daysStatusElapsed = 0;
+                        g_Blocks[i].daysToNextStatus = getDaysBeforeChange(g_Blocks[i].popStatus, newTax);
+                    } else {
+                        // Tax was already above 30
+                        g_Blocks[i].daysToNextStatus = getDaysBeforeChange(g_Blocks[i].popStatus, newTax);
+                        if (g_Blocks[i].daysToNextStatus <= g_Blocks[i].daysStatusElapsed) {
+                            // new limit is already below current elapsed days so put
+                            // elapsed day just below limit
+                            g_Blocks[i].daysStatusElapsed = g_Blocks[i].daysToNextStatus - 1;
+                        }
+                    }
+                }
+
+                g_Blocks[i].tax = newTax;
+                g_Blocks[i].addToTax = 0;
+            }
         }
     }
 

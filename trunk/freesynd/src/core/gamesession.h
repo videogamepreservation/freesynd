@@ -46,13 +46,29 @@ enum Status_Blk {
 
 typedef struct Block_ {
     const char *name;
+    /*! Default population number.*/
+    int defPopulation;
+    /*! Current population number.*/
     int population;
     int mis_id;
     int tax;
-    /**! 
+    /*!
+     * A temporary buffer to holds tax update.
+     * Real tax rate is updated with this buffer every day.
+     */
+    int addToTax;
+    /*! 
      * Status of the population satisfaction.
      */
     Status_Pop popStatus;
+    /*!
+     * Number of days before changing statuts.
+     */
+    int daysToNextStatus;
+    /*!
+     * Number of days elapsed for the current status
+     */
+    int daysStatusElapsed;
     /**
      * Tells whether the mission can be played or is finished.
      */
@@ -197,6 +213,8 @@ public:
     //! Tells if cheat mode Replay missions is on
     bool canReplayMission() { return replay_mission_; }
 
+    void cheatAccelerateTime() { hour_delay_ = 1000; }
+
     //! Do all time related updates
     bool updateTime(int elapsed);
 
@@ -220,6 +238,8 @@ private:
     int time_year_;
     /*! Time in millisecond since the last time update.*/
     int time_elapsed_;
+    /*! How long does an hour in millisecond. */
+    int hour_delay_;
     /*! 
      * Stores the index of the current selected
      * region on the mission map.
@@ -234,8 +254,11 @@ private:
     /*! Cheat flag to enable replay of finished missions. */
     bool replay_mission_;
 
-    // Update population, status and returns money
+    int getDaysBeforeChange(Status_Pop status, int tax);
+    //! Update population, status and returns money
     int updateCountries();
+    //! Returns new population number
+    int getNewPopulation(const int defaultPop, int currPop);
 };
 
 #endif //CORE_GAME_SESSION_H

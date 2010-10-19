@@ -221,10 +221,11 @@ void MapMenu::handleBlockSelected() {
         }
 
         // Tax
+        int tax = blk.tax + blk.addToTax;
 #ifdef WIN_SECURE
-        sprintf_s(tmp, 100, "%i", g_Session.getTaxRevenue(blk.population, blk.tax));
+        sprintf_s(tmp, 100, "%i", g_Session.getTaxRevenue(blk.population, tax));
 #else
-        sprintf(tmp, "%i", g_Session.getTaxRevenue(blk.population, blk.tax));
+        sprintf(tmp, "%i", g_Session.getTaxRevenue(blk.population, tax));
 #endif
         setStaticText(TAX_VALUE_STATIC_ID, tmp);
 
@@ -232,13 +233,14 @@ void MapMenu::handleBlockSelected() {
         showOption(KEY_PLUS);
 
 #ifdef WIN_SECURE
-        sprintf_s(tmp, 100, "@   %d%%", blk.tax);
+        sprintf_s(tmp, 100, "@   %d%%", tax);
 #else
-        sprintf(tmp, "@   %d%%", blk.tax);
+        sprintf(tmp, "@   %d%%", tax);
 #endif
         setStaticText(TAX_PCT_STATIC_ID, tmp);
 
     } else {
+        int tax = blk.tax + blk.addToTax;
         // Status
         setStaticText(OWN_LBL_STATIC_ID, "OWN");
         setStaticText(OWN_STATIC_ID, "");
@@ -246,9 +248,9 @@ void MapMenu::handleBlockSelected() {
         if (blk.status == BLK_REBEL) {
             setStaticText(TAX_VALUE_STATIC_ID, "REBELLIOUS");
 #ifdef WIN_SECURE
-            sprintf_s(tmp, 100, "@   %d%%", blk.tax);
+            sprintf_s(tmp, 100, "@   %d%%", tax);
 #else
-            sprintf(tmp, "@   %d%%", blk.tax);
+            sprintf(tmp, "@   %d%%", tax);
 #endif
             setStaticText(TAX_PCT_STATIC_ID, tmp);
         } else {
@@ -272,6 +274,7 @@ void MapMenu::handleTick(int elapsed)
     }
 
     if (g_Session.updateTime(elapsed)) {
+        handleBlockSelected();
         updateClock();
     }
 }

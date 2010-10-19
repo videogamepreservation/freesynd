@@ -60,6 +60,10 @@ Commands
  * 0   : Puts the selector on first mission
  * Left: Puts the selector on the next mission
  * Right : Puts the selector on the previous mission
+ * + / - : Increase / decrease tax rate on selected country.
+           Rates above 30% will decrease population status down to rebellious : mission
+		   will have to be played again.
+		   Rates below 30% will increase population up to VERY HAPPY.
  
 - In game :
  * F1  : Turns music on/off

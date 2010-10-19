@@ -116,7 +116,7 @@ void App::cheatOwnAllCountries() {
 }
 
 void App::cheatAccelerateTime() {
-    // TODO: Implement cheatAccelerateTime()
+    g_Session.cheatAccelerateTime();
 }
 
 void App::cheatFemaleRecruits() {

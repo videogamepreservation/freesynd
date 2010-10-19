@@ -41,7 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;..\..\..\libs\libpng-1.4.1\include&quot;;&quot;..\..\..\libs\SDL_image-1.2.10\include&quot;;&quot;..\..\..\libs\SDL_mixer-1.2.11\include&quot;;&quot;..\..\..\libs\SDL-1.2.14\include&quot;;&quot;..\..\..\libs\zlib-1.2.3\include&quot;"
+				AdditionalIncludeDirectories="..\..\src;&quot;..\..\..\libs\libpng-1.4.1\include&quot;;&quot;..\..\..\libs\SDL_image-1.2.10\include&quot;;&quot;..\..\..\libs\SDL_mixer-1.2.11\include&quot;;&quot;..\..\..\libs\SDL-1.2.14\include&quot;;&quot;..\..\..\libs\zlib-1.2.3\include&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;SYSTEM_SDL;WIN_SECURE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
