@@ -1,5 +1,4 @@
 - Complete mission tree
-- Available missions blinking on map menu
 - MiniMap in brief menu
 - Research Menu
 - MiniMap in game : more detailed map, display peds, guns, radar focus,

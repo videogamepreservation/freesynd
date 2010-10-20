@@ -75,6 +75,8 @@ typedef struct Block_ {
     Status_Blk status;
     /*! The list of blocks available after finishing this mission.*/
     const char *next;
+    /*! Country color.*/
+    uint8 colour;
 } Block;
 
 class Mission;
@@ -87,6 +89,8 @@ class GameSession {
 public:
     /*! Number of millisecond for an hour in the game.*/
     static const int HOUR_DELAY;
+    /*! Total number of missions. */
+    static const int NB_MISSION;
 
     GameSession();
     ~GameSession();
@@ -202,10 +206,7 @@ public:
     void completeSelectedBlock();
 
     //! Cheat method to enable all missions
-    void cheatEnableAllMission() { enable_all_mis_ = true; }
-
-    //! Tells if cheat mode All missions enabled is on
-    bool isAllMissionEnabled() { return enable_all_mis_; }
+    void cheatEnableAllMission();
 
     //! Cheat method to replay finished mission
     void cheatReplayMission() { replay_mission_ = true; }

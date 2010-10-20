@@ -32,7 +32,7 @@ class Mission;
  */
 class GameplayMenu : public Menu {
 public:
-    GameplayMenu(MenuManager *m, MapMenu *mapMenu);
+    GameplayMenu(MenuManager *m);
 
     bool isSubMenu() { return false; }
 
@@ -65,7 +65,6 @@ protected:
     }
 
 protected:
-    MapMenu *map_menu_;
     int tick_count_, last_animate_tick_;
     int last_motion_tick_, last_motion_x_, last_motion_y_;
     int mission_hint_ticks_,mission_hint_;

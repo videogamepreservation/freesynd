@@ -223,7 +223,7 @@ void MenuManager::createAllMenus()
     menu_select_ = new SelectMenu(this);
     menu_research_ = new ResearchMenu(this);
     menu_loading_ = new LoadingMenu(this);
-    menu_gameplay_ = new GameplayMenu(this, menu_map_);
+    menu_gameplay_ = new GameplayMenu(this);
     menu_debrief_ = new DebriefMenu(this);
     menu_miss_win_ = new MissWinMenu(this);
     menu_miss_lose_ = new MissLoseMenu(this);

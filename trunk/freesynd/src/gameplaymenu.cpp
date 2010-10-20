@@ -30,7 +30,6 @@
 #include <assert.h>
 #include "app.h"
 #include "file.h"
-#include "mapmenu.h"
 #include "gameplaymenu.h"
 #ifdef _WIN32
 #include <windows.h>
@@ -39,8 +38,8 @@
 // The number of pixel of a scroll
 const int SCROLL_STEP = 16;
 
-GameplayMenu::GameplayMenu(MenuManager *m, MapMenu *mapMenu) :
-Menu(m, "Gameplay", "", ""), map_menu_(mapMenu),
+GameplayMenu::GameplayMenu(MenuManager *m) :
+Menu(m, "Gameplay", "", ""),
 tick_count_(0), last_animate_tick_(0), last_motion_tick_(0),
 last_motion_x_(320), last_motion_y_(240), mission_hint_ticks_(0), 
 mission_hint_(0), mission_(0), world_x_(0),
@@ -748,9 +747,6 @@ void GameplayMenu::handleUnknownKey(Key key, KeyMod mod, bool pressed) {
 
 #ifdef _DEBUG
     if (key == KEY_h && mission_) {
-        map_menu_->setBlkColour(g_Session.getSelectedBlockId(),
-                g_Session.getLogoColour());
-
         g_Session.completeSelectedBlock();
 
         menu_manager_->changeCurrentMenu("misswin");
@@ -762,9 +758,6 @@ void GameplayMenu::handleUnknownKey(Key key, KeyMod mod, bool pressed) {
     // to menu
     if (key == KEY_SPACE && mission_) {
         if (mission_->completed()) {
-            map_menu_->setBlkColour(g_Session.getSelectedBlockId(),
-                    g_Session.getLogoColour());
-
             g_Session.completeSelectedBlock();
 
             menu_manager_->changeCurrentMenu("misswin");

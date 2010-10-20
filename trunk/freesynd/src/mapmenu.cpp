@@ -141,13 +141,11 @@ mapblk_data_(NULL), orig_pixels_(NULL), select_tick_count_(0)
     setParentMenu("main");
 
     // 64 x 44 x 50
+    // Load map block informations
     mapblk_data_ = File::loadFile("mmapblk.dat", mapblk_size_);
-    for (int i = 0; i < 50; i++) {
-        do {
-            int index = rand() % (sizeof(g_Colours) / sizeof(int));
-            blk_colours_[i] = g_Colours[index];
-		} while (blk_colours_[i] == g_App.getGameSession().getLogoColour());
-    }
+
+    blk_tick_count_ = 0;
+    blink_status_ = true;
 }
 
 MapMenu::~MapMenu()
@@ -172,12 +170,7 @@ void MapMenu::handleBlockSelected() {
             hideOption(KEY_F4);
         }
     } else if (blk.status == BLK_UNAVAIL) { // A mission is unavailable
-        // Brief is available only if all missions enable cheat is set
-        if (g_Session.isAllMissionEnabled()) {
-            showOption(KEY_F4);
-        } else {
-            hideOption(KEY_F4);
-        }
+        hideOption(KEY_F4);
     } else {
         // Brief is available because mission is either available or on rebellion
         showOption(KEY_F4);
@@ -273,6 +266,13 @@ void MapMenu::handleTick(int elapsed)
         needRendering();
     }
 
+    blk_tick_count_ += elapsed;
+    if (blk_tick_count_ > 500) {
+        blk_tick_count_ = 0;
+        blink_status_ = !blink_status_;
+        needRendering();
+    }
+
     if (g_Session.updateTime(elapsed)) {
         handleBlockSelected();
         updateClock();
@@ -360,16 +360,21 @@ void MapMenu::handleRender()
     g_Screen.blit(0, 0, GAME_SCREEN_WIDTH, GAME_SCREEN_HEIGHT, orig_pixels_);
 
     // Draws all countries
-    for (int i = 0; i < 50; i++) {
-        uint8 data[64 * 44];
-        memcpy(data, mapblk_data_ + i * 64 * 44, 64 * 44);
-        for (int j = 0; j < 64 * 44; j++)
-            if (data[j] == 0)
-                data[j] = 255;
-            else
-                data[j] = blk_colours_[i];
-        g_Screen.scale2x(g_BlocksDisplay[i].pos.x, g_BlocksDisplay[i].pos.y, 64, 44,
-                         data, 64);
+    for (int i = 0; i < GameSession::NB_MISSION; i++) {
+        Block blk = g_Session.getBlock(i);
+        if ((i == g_Session.getSelectedBlockId()) || 
+            (blk.status == BLK_AVAIL && blink_status_) || 
+            blk.status != BLK_AVAIL) {
+            uint8 data[64 * 44];
+            memcpy(data, mapblk_data_ + i * 64 * 44, 64 * 44);
+            for (int j = 0; j < 64 * 44; j++)
+                if (data[j] == 0)
+                    data[j] = 255;
+                else
+                    data[j] = blk.colour;
+            g_Screen.scale2x(g_BlocksDisplay[i].pos.x, g_BlocksDisplay[i].pos.y, 64, 44,
+                             data, 64);
+        }
     }
 
     // Draws the selector

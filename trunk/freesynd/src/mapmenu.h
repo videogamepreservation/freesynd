@@ -47,11 +47,6 @@ public:
     void handleOption(Key key);
     void handleUnknownKey(Key key, KeyMod mod, bool pressed);
 
-    void setBlkColour(int n, uint8 c) {
-        assert(n < 50);
-        blk_colours_[n] = c;
-    }
-
 protected:
     static const int OWN_LBL_STATIC_ID;
     static const int COUNTRY_STATIC_ID;
@@ -71,9 +66,12 @@ protected:
      * Used to reset the screen.
      */
     uint8 *orig_pixels_;
-    uint8 blk_colours_[50];
     /*! A counter for the blinking line of the selector.*/
     int select_tick_count_;
+    /*! A counter for the blinking available blocks. */
+    int blk_tick_count_;
+    /*! */
+    bool blink_status_;
 
     //! Utility method to draw the mission selector
     void drawSelector();
