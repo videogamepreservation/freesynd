@@ -28,7 +28,6 @@
 #include <assert.h>
 
 #include "app.h"
-#include "file.h"
 #include "fliplayer.h"
 #include "screen.h"
 

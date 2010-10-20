@@ -316,11 +316,11 @@
 				Name="utils"
 				>
 				<File
-					RelativePath="..\..\src\dernc.cpp"
+					RelativePath="..\..\src\utils\dernc.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\src\file.cpp"
+					RelativePath="..\..\src\utils\file.cpp"
 					>
 				</File>
 				<File
@@ -574,11 +574,11 @@
 				Name="utils"
 				>
 				<File
-					RelativePath="..\..\src\dernc.h"
+					RelativePath="..\..\src\utils\dernc.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\src\file.h"
+					RelativePath="..\..\src\utils\file.h"
 					>
 				</File>
 				<File

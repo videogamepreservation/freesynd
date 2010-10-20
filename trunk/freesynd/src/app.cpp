@@ -25,7 +25,7 @@
  ************************************************************************/
 
 #include "app.h"
-#include "file.h"
+#include "utils/file.h"
 #include "fliplayer.h"
 
 #ifdef SYSTEM_SDL

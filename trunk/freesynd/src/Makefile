@@ -2,7 +2,7 @@ include Makefile.inc
 
 TARGET	= freesynd
 SRC	= agent.cpp agentmanager.cpp app.cpp audio.cpp briefmenu.cpp confmenu.cpp \
-	debriefmenu.cpp dernc.cpp file.cpp fliplayer.cpp font.cpp \
+	debriefmenu.cpp fliplayer.cpp font.cpp \
 	fontmanager.cpp freesynd.cpp gameplaymenu.cpp loadingmenu.cpp \
 	loadsavemenu.cpp logoutmenu.cpp mainmenu.cpp map.cpp mapobject.cpp \
 	mapmanager.cpp mapmenu.cpp menu.cpp menumanager.cpp mission.cpp \
@@ -23,7 +23,7 @@ DUMPMAPS_OBJS = dumpmaps.o mapmanager.o map.o tilemanager.o tile.o file.o dernc.
 DIRS	= utils sound core
 OBJS = $(SRC:.cpp=.o)
 SND_OBJ	= sound/sdlmixermusic.o sound/sdlmixersound.o
-UTL_OBJ	= utils/log.o
+UTL_OBJ	= utils/log.o utils/dernc.o utils/file.o
 CORE_OBJ= core/gamesession.o
 DEPS = $(SRC:.cpp=.d)
 

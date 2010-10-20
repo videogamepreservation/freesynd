@@ -26,7 +26,6 @@
 #include <stdio.h>
 #include <assert.h>
 #include "app.h"
-#include "file.h"
 #include "selectmenu.h"
 
 SelectMenu::SelectMenu(MenuManager * m):Menu(m, "select", "mselect.dat", "mselout.dat"), orig_pixels_(0), tab_(2),

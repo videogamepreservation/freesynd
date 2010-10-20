@@ -28,7 +28,7 @@
 #include "audio.h"
 #include "musicmanager.h"
 #include "xmidi.h"
-#include "file.h"
+#include "utils/file.h"
 #include "utils/log.h"
 
 MusicManager::MusicManager():is_playing_(false)

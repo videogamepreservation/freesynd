@@ -26,7 +26,6 @@
 #include <stdio.h>
 #include <assert.h>
 #include "app.h"
-#include "file.h"
 #include "mainmenu.h"
 
 MainMenu::MainMenu(MenuManager * m):Menu(m, "main", "moption.dat",

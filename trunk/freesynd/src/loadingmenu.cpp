@@ -26,7 +26,6 @@
 #include <stdio.h>
 #include <assert.h>
 #include "app.h"
-#include "file.h"
 #include "loadingmenu.h"
 
 LoadingMenu::LoadingMenu(MenuManager * m):Menu(m, "loading", "", ""),

@@ -25,7 +25,6 @@
 #include <stdio.h>
 #include <assert.h>
 #include "app.h"
-#include "file.h"
 #include "misswinmenu.h"
 
 MissWinMenu::MissWinMenu(MenuManager * m):Menu(m, "misswin", "mgamewin.dat",

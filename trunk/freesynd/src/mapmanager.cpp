@@ -25,7 +25,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include "mapmanager.h"
-#include "file.h"
+#include "utils/file.h"
 
 MapManager::MapManager()
 {

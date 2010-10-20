@@ -25,9 +25,9 @@
  ************************************************************************/
 
 #include "soundmanager.h"
-#include "file.h"
 #include "config.h"
 #include "audio.h"
+#include "utils/file.h"
 #include "utils/log.h"
 
 SoundManager::SoundManager():tabentry_startoffset_(58), tabentry_offset_(32)

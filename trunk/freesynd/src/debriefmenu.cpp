@@ -25,7 +25,6 @@
 #include <stdio.h>
 #include <assert.h>
 #include "app.h"
-#include "file.h"
 #include "debriefmenu.h"
 
 DebriefMenu::DebriefMenu(MenuManager *m) : Menu(m, "debrief", "mdebrief.dat",

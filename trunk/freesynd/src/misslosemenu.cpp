@@ -25,7 +25,6 @@
 #include <stdio.h>
 #include <assert.h>
 #include "app.h"
-#include "file.h"
 #include "misslosemenu.h"
 
 MissLoseMenu::MissLoseMenu(MenuManager * m):Menu(m, "misslose", "mlosegam.dat",

@@ -28,7 +28,7 @@
 #include "app.h"
 #include "audio.h"
 #include "config.h"
-#include "file.h"
+#include "utils/file.h"
 #include "utils/log.h"
 
 #include "SDL_image.h"

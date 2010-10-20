@@ -26,7 +26,7 @@
 
 #include "common.h"
 #include "screen.h"
-#include "file.h"
+#include "utils/file.h"
 
 Screen::Screen(int width, int height)
 :width_(width)

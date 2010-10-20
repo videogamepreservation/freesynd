@@ -1,6 +1,6 @@
 include ../Makefile.inc
 
-SRC	= log.cpp
+SRC	= log.cpp dernc.cpp file.cpp
 
 OBJS = $(SRC:.cpp=.o)
 DEPS = $(SRC:.cpp=.d)

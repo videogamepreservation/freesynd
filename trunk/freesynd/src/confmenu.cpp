@@ -26,7 +26,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include "app.h"
-#include "file.h"
+#include "utils/file.h"
 #include "confmenu.h"
 
 class CommonConfSubMenu : public Menu {
