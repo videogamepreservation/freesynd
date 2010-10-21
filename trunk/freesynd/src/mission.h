@@ -75,8 +75,14 @@ public:
     int maxScreenX();
     int maxScreenY();
     void drawMap(int scrollx, int scrolly);
+
+    //--- MapHelper stuff
     virtual void drawAt(int tilex, int tiley, int tilez, int x, int y,
             int scrollX, int scrollY);
+    virtual void createFastKeys(int tilex, int tiley,
+        int maxtilex, int maxtiley);
+    //---
+
     const char *briefing() { return briefing_.c_str(); }
     void objectiveMsg(const char ** msg);
 

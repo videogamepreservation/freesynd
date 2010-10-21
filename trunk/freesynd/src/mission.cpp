@@ -521,29 +521,56 @@ int fastKey(MapObject * m)
     return fastKey(m->tileX(), m->tileY(), m->tileZ());
 }
 
-void Mission::drawMap(int scrollx, int scrolly)
-{
+void Mission::createFastKeys(int tilex, int tiley, int maxtilex, int maxtiley) {
+
     fast_vehicle_cache_.clear();
-    for (unsigned int i = 0; i < vehicles_.size(); i++)
-        fast_vehicle_cache_.insert(fastKey(vehicles_[i]));
+    for (unsigned int i = 0; i < vehicles_.size(); i++) {
+        VehicleInstance *v = vehicles_[i];
+        if (v->tileX() >= tilex && v->tileX() < maxtilex
+            && v->tileY() >= tiley && v->tileY() < maxtiley)
+            fast_vehicle_cache_.insert(fastKey(v));
+    }
 
     fast_ped_cache_.clear();
-    for (unsigned int i = 0; i < 4; i++)
-        if (g_App.teamMember(i)->isActive())
-            fast_ped_cache_.insert(fastKey(peds_[i]));
-    for (unsigned int i = 8; i < peds_.size(); i++)
-        fast_ped_cache_.insert(fastKey(peds_[i]));
+    for (unsigned int i = 0; i < 4; i++) {
+        PedInstance *p = peds_[i];
+        if (g_App.teamMember(i)->isActive() && p->map() != -1) {
+            if (p->tileX() >= tilex && p->tileX() < maxtilex
+                && p->tileY() >= tiley && p->tileY() < maxtiley)
+            fast_ped_cache_.insert(fastKey(p));
+        }
+    }
+    for (unsigned int i = 8; i < peds_.size(); i++) {
+        PedInstance *p = peds_[i];
+        if (p->map() != -1) {
+            if (p->tileX() >= tilex && p->tileX() < maxtilex
+                && p->tileY() >= tiley && p->tileY() < maxtiley)
+                fast_ped_cache_.insert(fastKey(p));
+        }
+    }
 
     fast_weapon_cache_.clear();
-    for (unsigned int i = 0; i < weapons_.size(); i++)
-        if (weapons_[i]->map() != -1)
-            fast_weapon_cache_.insert(fastKey(weapons_[i]));
+    for (unsigned int i = 0; i < weapons_.size(); i++) {
+        WeaponInstance *w = weapons_[i];
+        if (w->map() != -1) {
+            if (w->tileX() >= tilex && w->tileX() < maxtilex
+                && w->tileY() >= tiley && w->tileY() < maxtiley)
+                fast_weapon_cache_.insert(fastKey(w));
+        }
+    }
 
+    // TODO: statics don't move, set value on mission load?
     fast_statics_cache_.clear();
-    // TODO: static objects don't move :))
-    for (unsigned int i = 0; i < statics_.size(); i++)
-        fast_statics_cache_.insert(fastKey(statics_[i]));
+    for (unsigned int i = 0; i < statics_.size(); i++) {
+        Static *s = statics_[i];
+        if (s->tileX() >= tilex && s->tileX() < maxtilex
+            && s->tileY() >= tiley && s->tileY() < maxtiley)
+            fast_statics_cache_.insert(fastKey(s));
+    }
+}
 
+void Mission::drawMap(int scrollx, int scrolly)
+{
     g_App.maps().drawMap(map_, scrollx, scrolly, this);
 }
 

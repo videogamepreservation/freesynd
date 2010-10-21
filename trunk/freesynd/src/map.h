@@ -42,6 +42,8 @@ public:
     virtual ~ MapHelper() {}
     virtual void drawAt(int tilex, int tiley, int tilez, int x, int y,
             int scrollX, int scrollY) = 0;
+    virtual void createFastKeys(int tilex, int tiley,
+        int maxtilex, int maxtiley) = 0;
 };
 
 /*!

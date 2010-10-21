@@ -32,6 +32,13 @@
 #include "map.h"
 #include "tilemanager.h"
 
+#if 1
+#ifdef SYSTEM_SDL
+#include "system_sdl.h"
+#endif
+#define EXECUTION_SPEED_TIME
+#endif
+
 Map::Map(TileManager * tileManager):map_data_(NULL),
 tile_manager_(tileManager)
 {
@@ -65,9 +72,7 @@ bool Map::loadMap(uint8 * mapData)
     delete[] lookup;
 
     map_width_ = max_x_ * TILE_WIDTH;
-    map_height_ =
-        max_x_ * TILE_HEIGHT / 3 + max_y_ * TILE_HEIGHT / 3 +
-        max_z_ * TILE_HEIGHT / 3;
+    map_height_ = (max_x_ + max_y_ + max_z_) * TILE_HEIGHT / 3;
 
     return true;
 }
@@ -130,6 +135,7 @@ int Map::maxZAt(int x, int y)
 {
     assert(x < max_x_);
     assert(y < max_y_);
+    /*
     int idx = y * max_x_ + x;
     int mz = 0;
     for (int z = 0; z < max_z_; z++) {
@@ -138,7 +144,8 @@ int Map::maxZAt(int x, int y)
             mz = z;
         }
     }
-    // TODO: disabling this thing causes a lot of speed drain
+    */
+    // TODO: disabling this thing, causes a lot of speed drain
     // find a better for such optimization, not all objects are drawn
     // that is why I disabled it
     return max_z_ - 1;
@@ -175,73 +182,81 @@ void Map::draw(int scrollX, int scrollY, MapHelper * helper)
 
     int ox, oy;
     int sw = screenToTileX(scrollX, scrollY, ox);
-    int swm = sw + g_Screen.gameScreenWidth() * 30 / GAME_SCREEN_WIDTH;
-    if (swm > max_x_)
-        swm = max_x_;
+    int chk = g_Screen.gameScreenWidth() / (TILE_WIDTH / 2) + 2
+        + g_Screen.gameScreenHeight() / (TILE_HEIGHT / 3) + max_z_ * 2;
+    int swm = sw + chk;
     int sh = screenToTileY(scrollX, scrollY, oy) - 8;
-    if (sh < 0)
-        sh = 0;
-    int shm = sh + g_Screen.gameScreenHeight() * 30 / GAME_SCREEN_HEIGHT;
-    if (shm > max_y_)
-        shm = max_y_;
+    int shm = sh + chk;
 
     if (topz == -1)
         topz = max_z_;
 
-#if 0 
+#if 0
     // HACK for map dump
     sw = 0; swm = max_x_;
     sh = 0; shm = max_y_;
 #endif
 
-#if 1
-    // TODO: this is messy, and it doesn't draw sprites in the right order (top to bottom)
-    for (int pass = 0; pass < 2; pass++)
-        for (int h = sh; h < shm; h++)
-            for (int w = sw; w < swm; w++) {
+#ifdef EXECUTION_SPEED_TIME
+    printf("---------------------------");
+    printf("start time %i.%i\n", SDL_GetTicks()/1000, SDL_GetTicks()%1000);
+#endif
+
+    helper->createFastKeys(sw, sh, swm, shm);
+    int cmw = g_Screen.gameScreenWidth() - g_Screen.gameScreenLeftMargin() + 128;
+    int cmh = g_Screen.gameScreenHeight() + 128;
+     //  z = 0 - is minimap data and mapdata
+    for (int z = 0; z < max_z_; z++) {
+        int cz = (z - 1) * (TILE_HEIGHT / 3);
+        for (int yb = sh; yb < shm; yb++) {
+            if (yb < 0)
+                continue;
+            int h = yb;
+            int chky = sh < 0 ? 0 : sh;
+            for (int w = sw; h >= chky && w < max_x_; w++ && h--) {
+                if (sw < 0 || h >= max_y_)
+                    continue;
                 int idx = h * max_x_ + w;
-                int screen_w =
-                    map_width_ / 2 + w * TILE_WIDTH / 2 -
-                    h * TILE_WIDTH / 2;
+                int screen_w = map_width_ / 2 + (w - h) * (TILE_WIDTH / 2);
                 int screen_h =
-                    max_z_ * TILE_HEIGHT / 3 + (w + h) * TILE_HEIGHT / 3;
-                for (int z = 0; //  z = 0 - is minimap data and mapdata
-                     pass == 0 ? z < 2 : (z < max_z_ && z < topz); z++) {
-                    int tile = map_data_[idx * max_z_ + z];
-                    int coord_h = screen_h - ((z - 1) * TILE_HEIGHT / 3);
-                    if (screen_w >= scrollX - 64
-                        && screen_w + TILE_WIDTH <
-                        scrollX + (g_Screen.gameScreenWidth() - g_Screen.gameScreenLeftMargin() + 128)
-                        && coord_h >= scrollY - 64
-                        && coord_h + TILE_HEIGHT <
-                        scrollY + g_Screen.gameScreenHeight() + 128) {
-                        bool helpOnly = (pass == 1 && z <= 1);
-                        if (helpOnly
-                            || (tile == 0 ? false : tile_manager_->drawTileTo(buf, TILE_WIDTH,
-                                             TILE_HEIGHT, tile, 0, 0, true))) {
-                            int dx = 0, dy = 0;
-                            if (screen_w - scrollX < 0)
-                                dx = -(screen_w - scrollX);
-                            if (coord_h - scrollY < 0)
-                                dy = -(coord_h - scrollY);
-                            if (dx < TILE_WIDTH && dy < TILE_HEIGHT
-                                && !helpOnly) {
-                                g_Screen.blit(screen_w - scrollX + g_Screen.gameScreenLeftMargin() +
-                                              dx, coord_h - scrollY + dy,
-                                              TILE_WIDTH - dx,
-                                              TILE_HEIGHT - dy,
-                                              buf + dx + dy * TILE_WIDTH,
-                                              false, TILE_WIDTH);
-                            }
-                            if (helper)
-                                helper->drawAt(w, h, z,
-                                               screen_w - scrollX + g_Screen.gameScreenLeftMargin() +
-                                               TILE_WIDTH / 2,
-                                               coord_h - scrollY, scrollX,
-                                               scrollY);
+                    max_z_ * (TILE_HEIGHT / 3) + (w + h) * (TILE_HEIGHT / 3);
+                int tile = map_data_[idx * max_z_ + z];
+                int coord_h = screen_h - cz;
+                if (screen_w >= scrollX - 64
+                    && screen_w + TILE_WIDTH < scrollX + cmw
+                    && coord_h >= scrollY - 64 && coord_h + TILE_HEIGHT <
+                    scrollY + cmh) {
+                    int dx = 0, dy = 0;
+                    if (screen_w - scrollX < 0)
+                        dx = -(screen_w - scrollX);
+                    if (coord_h - scrollY < 0)
+                        dy = -(coord_h - scrollY);
+                    if (dx < TILE_WIDTH && dy < TILE_HEIGHT) {
+                        if (tile < 5 ? false : tile_manager_->drawTileTo(buf, TILE_WIDTH,
+                                             TILE_HEIGHT, tile, 0, 0, true)) {
+                            g_Screen.blit(screen_w - scrollX + g_Screen.gameScreenLeftMargin() +
+                                          dx, coord_h - scrollY + dy,
+                                          TILE_WIDTH - dx,
+                                          TILE_HEIGHT - dy,
+                                          buf + dx + dy * TILE_WIDTH,
+                                          false, TILE_WIDTH);
                         }
+                    }
+                    if ( (z - 3) >= 0 ) {
+                        helper->drawAt(w, h, z - 3,
+                                       screen_w - scrollX + g_Screen.gameScreenLeftMargin() +
+                                       TILE_WIDTH / 2,
+                                       coord_h - scrollY  + TILE_HEIGHT, scrollX,
+                                       scrollY);
                     }
                 }
             }
+        }
+    }
+
+#ifdef EXECUTION_SPEED_TIME
+    printf("+++++++++++++++++++++++++++");
+    printf("end time %i.%i\n", SDL_GetTicks()/1000, SDL_GetTicks()%1000);
 #endif
+
 }
