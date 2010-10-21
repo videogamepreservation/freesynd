@@ -9,8 +9,7 @@ evacuation red circle
  - Correct identification of object types during mission load, includes
 vehicles, people, static objects, weapons, also setup sfx for weapons
  - Objects state identification on loading phase: some of them don't start with
-first animation, some doors are already open or are openning, some blinking
-signs have different start frame
+first animation, some blinking signs have different start frame
  - Adding properties to:
    vehicle: max people can hold; speed per type; damage can inflict/recieve per type;
 radius of damage when destroyed

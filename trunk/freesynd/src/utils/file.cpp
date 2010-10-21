@@ -48,6 +48,10 @@ const char *File::fileFullPath(const char *filename, bool uppercase) {
     memset(buf, 0, 256);
     fs_strcpy(buf, 240, _path);
 
+    if (strlen(_path) > 255) {
+        printf("_path string size is too big");
+        exit(-2);
+    }
     int start = strlen(_path);
     int end = start + strlen(filename);
 
@@ -57,6 +61,9 @@ const char *File::fileFullPath(const char *filename, bool uppercase) {
             tolower(filename[i - start]);
     }
 
+    // NOTE: have added this because on my Win machine wrong string
+    // generated and file cannot be opened
+    buf[end] = 0;
     return buf;
 }
 
