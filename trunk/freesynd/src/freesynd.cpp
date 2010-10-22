@@ -116,7 +116,6 @@ void operator delete(void *p) {
 }
 #endif
 
-bool want_fullscreen = false;
 int  start_mission = -1;
 
 void print_usage() {
@@ -124,6 +123,8 @@ void print_usage() {
 }
 
 int main(int argc, char *argv[]) {
+    bool want_fullscreen = false;
+
 #ifdef CHEAP_LEAK_DETECTION
     initLeakDetection();
 #endif
@@ -187,21 +188,25 @@ int main(int argc, char *argv[]) {
     LOG(Log::k_FLG_INFO, "Main", "main", ("Initializing application..."))
     std::auto_ptr<App> app(new App());
 
-    // setting the cheat codes
-    if (cheatCodeIndex != -1) {
-        char s[50];
-        strcpy(s, argv[cheatCodeIndex]);
-        char *token = strtok(s, ":");
-        while ( token != NULL ) {
-            LOG(Log::k_FLG_INFO, "Main", "main", ("Cheat code activated : %s", token))
-            app->setCheatCode(token);
-            token = strtok(NULL, ":");
+    if (app->initialize(want_fullscreen)) {
+        // setting the cheat codes
+        if (cheatCodeIndex != -1) {
+            char s[50];
+            strcpy(s, argv[cheatCodeIndex]);
+            char *token = strtok(s, ":");
+            while ( token != NULL ) {
+                LOG(Log::k_FLG_INFO, "Main", "main", ("Cheat code activated : %s", token))
+                app->setCheatCode(token);
+                token = strtok(NULL, ":");
+            }
         }
+
+        LOG(Log::k_FLG_INFO, "Main", "main", ("Initializing application completed"))
+
+        app->run();
+    } else {
+        LOG(Log::k_FLG_INFO, "Main", "main", ("Initializing application failed"))
     }
-
-    LOG(Log::k_FLG_INFO, "Main", "main", ("Initializing application completed"))
-
-    app->run();
 
 #ifdef _DEBUG
     // Close log

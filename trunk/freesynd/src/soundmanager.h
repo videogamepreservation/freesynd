@@ -45,7 +45,7 @@ public:
     SoundManager();
     ~SoundManager();
 
-    void loadSounds(SampleSet set);
+    bool loadSounds(SampleSet set);
 
     //! Plays the sound a number a time
     void play(snd::InGameSample sample, int loops = 0);

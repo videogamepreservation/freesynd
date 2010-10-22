@@ -25,12 +25,6 @@
  ************************************************************************/
 
 #include "app.h"
-#include "utils/file.h"
-#include "fliplayer.h"
-
-#ifdef SYSTEM_SDL
-#include "system_sdl.h"
-#endif
 
 #ifdef WIN32
 #include <windows.h>
@@ -41,10 +35,15 @@
 #include <iostream>
 #include <set>
 
+#ifdef SYSTEM_SDL
+#include "system_sdl.h"
+#endif
+
 #include "fliplayer.h"
 #include "spritemanager.h"
 #include "screen.h"
 #include "audio.h"
+#include "utils/file.h"
 #include "utils/log.h"
 
 App::App(): running_(true), playingFli_(false),
@@ -54,19 +53,45 @@ skipFli_(false), screen_(new Screen(GAME_SCREEN_WIDTH, GAME_SCREEN_HEIGHT))
 #else
 #error A suitable System object has not been defined!
 #endif
-{
-    agents_.loadAgents();
-    weapons_.loadWeapons();
-    mods_.loadMods();
-    intro_sounds_.loadSounds(SoundManager::SAMPLES_INTRO);
-    game_sounds_.loadSounds(SoundManager::SAMPLES_GAME);
-    music_.loadMusic();
-
-    reset();
-}
+{}
 
 App::~App() {
 
+}
+
+/*!
+ * Initialize application.
+ * \param fullscreen True if application runs in full screen.
+ * \return True if initialization is ok.
+ */
+bool App::initialize(bool fullscreen) {
+    
+    LOG(Log::k_FLG_GFX, "App", "initialize", ("initializing system..."))
+    if (!system_->initialize(fullscreen)) {
+        return false;
+    }
+
+    LOG(Log::k_FLG_GFX, "App", "initialize", ("Loading game data..."))
+    agents_.loadAgents();
+    weapons_.loadWeapons();
+    mods_.loadMods();
+
+    LOG(Log::k_FLG_GFX, "App", "initialize", ("Loading intro sounds..."))
+    if (!intro_sounds_.loadSounds(SoundManager::SAMPLES_INTRO)) {
+        return false;
+    }
+
+    LOG(Log::k_FLG_GFX, "App", "initialize", ("Loading game sounds..."))
+    if (!game_sounds_.loadSounds(SoundManager::SAMPLES_GAME)) {
+        return false;
+    }
+
+    LOG(Log::k_FLG_GFX, "App", "initialize", ("Loading music..."))
+    music_.loadMusic();
+
+    reset();
+
+    return true;
 }
 
 /*!

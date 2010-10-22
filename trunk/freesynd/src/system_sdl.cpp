@@ -33,20 +33,36 @@
 
 #include "SDL_image.h"
 
-extern bool want_fullscreen;
 SDL_Joystick *joy = NULL;
 
 const int SystemSDL::CURSOR_WIDTH = 24;
 
-SystemSDL::SystemSDL(int depth)
-:depth_(depth) {
+SystemSDL::SystemSDL(int depth) {
+    depth_ = depth;
+}
+
+SystemSDL::~SystemSDL() {
+    SDL_FreeSurface(temp_surf_);
+    SDL_FreeSurface(cursor_surf_);
+
+#ifdef HAVE_SDL_MIXER
+    Audio::quit();
+#endif
+
+    // Destroy SDL_Image Lib
+    IMG_Quit();
+
+    SDL_Quit();
+}
+
+bool SystemSDL::initialize(bool fullscreen) {
     if (SDL_Init(SDL_INIT_VIDEO
 #ifdef GP2X
                  | SDL_INIT_JOYSTICK
 #endif
         ) < 0) {
         printf("Critical error, SDL could not be initialized!");
-        exit(1);
+        return false;
     }
 #ifdef GP2X
     if (SDL_NumJoysticks() > 0) {
@@ -76,8 +92,8 @@ SystemSDL::SystemSDL(int depth)
         SDL_CreateRGBSurface(SDL_SWSURFACE, 320, 240, 8, 0, 0, 0, 0);
 #else
     screen_surf_ =
-        SDL_SetVideoMode(GAME_SCREEN_WIDTH, GAME_SCREEN_HEIGHT, depth,
-                         SDL_DOUBLEBUF | SDL_HWSURFACE | (want_fullscreen ?
+        SDL_SetVideoMode(GAME_SCREEN_WIDTH, GAME_SCREEN_HEIGHT, depth_,
+                         SDL_DOUBLEBUF | SDL_HWSURFACE | (fullscreen ?
                                                           SDL_FULLSCREEN :
                                                           0));
     temp_surf_ =
@@ -102,20 +118,8 @@ SystemSDL::SystemSDL(int depth)
         hideCursor();
         useMenuCursor();
     }
-}
 
-SystemSDL::~SystemSDL() {
-    SDL_FreeSurface(temp_surf_);
-    SDL_FreeSurface(cursor_surf_);
-
-#ifdef HAVE_SDL_MIXER
-    Audio::quit();
-#endif
-
-    // Destroy SDL_Image Lib
-    IMG_Quit();
-
-    SDL_Quit();
+    return true;
 }
 
 void SystemSDL::updateScreen() {

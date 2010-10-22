@@ -35,6 +35,7 @@ class Sprite;
  */
 struct System : public Singleton<System> {
     virtual ~System() {}
+    virtual bool initialize(bool fullscreen) = 0;
     virtual void updateScreen() = 0;
     virtual void handleEvents() = 0;
     virtual void delay(int msec) = 0;

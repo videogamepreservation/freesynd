@@ -100,6 +100,9 @@ class App : public Singleton < App > {
     App();
     virtual ~App();
 
+    //! Initialize application
+    bool initialize(bool fullscreen);
+
     uint8 walkdata_[256];
     // patched version
     uint8 walkdata_p_[256];

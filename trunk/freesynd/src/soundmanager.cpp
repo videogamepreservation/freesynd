@@ -51,7 +51,7 @@ Sound *SoundManager::sound(snd::InGameSample sample)
 }
 
 
-void SoundManager::loadSounds(SampleSet set)
+bool SoundManager::loadSounds(SampleSet set)
 {
     int tabSize, size;
     uint8 *tabData, *data;
@@ -60,14 +60,22 @@ void SoundManager::loadSounds(SampleSet set)
         {
             tabData = File::loadFile("ISNDS-0.TAB", tabSize);
             data = File::loadFile("ISNDS-0.DAT", size);
-            loadSounds(tabData, tabSize, data);
+            bool loaded = loadSounds(tabData, tabSize, data);
             delete[] tabData;
             delete[] data;
+            if (!loaded) {
+                printf("Error : Could not load sounds from file ISNDS-0.DAT\n");
+                return false;
+            }
             tabData = File::loadFile("ISNDS-1.TAB", tabSize);
             data = File::loadFile("ISNDS-1.DAT", size);
             loadSounds(tabData, tabSize, data);
             delete[] tabData;
             delete[] data;
+            if (!loaded) {
+                printf("Error : Could not load sounds from file ISNDS-1.DAT\n");
+                return false;
+            }
         }
         break;
     case SAMPLES_GAME:
@@ -87,13 +95,17 @@ void SoundManager::loadSounds(SampleSet set)
     default:
         break;
     }
+
+    return true;
 }
 
 bool SoundManager::loadSounds(uint8 * tabData, int tabSize,
                               uint8 * soundData)
 {
-    assert(tabData);
-    assert(soundData);
+    if (!tabData || !soundData) {
+        return false;
+    }
+    
     tabData += tabentry_startoffset_;
 
     int soundnum = 0;

@@ -38,7 +38,7 @@ char File::_path[240] = "./data/";
  * The methods returns a new pointer to a string composed of the root path
  * and given file name. The absolute file name cannot exceed 256 caracters.
  * No control is made on the result format or file existence.
- * \param filename The relative path to a file.
+ * \param filename The relative path to a file (must be null terminated).
  * \param uppercase If true, the resulting string will uppercased.
  * \see setPath()
  */
@@ -46,14 +46,13 @@ const char *File::fileFullPath(const char *filename, bool uppercase) {
     static char buf[256];
 
     memset(buf, 0, 256);
+    // We're sure that _path is less than 255 because setPath method
+    // controls its length
     fs_strcpy(buf, 240, _path);
 
-    if (strlen(_path) > 255) {
-        printf("_path string size is too big");
-        exit(-2);
-    }
     int start = strlen(_path);
-    int end = start + strlen(filename);
+    // Add 1 because strlen excludes the null caracter
+    int end = start + strlen(filename) + 1;
 
     for (int i = start; i < end; ++i) {
         buf[i] =
@@ -61,12 +60,12 @@ const char *File::fileFullPath(const char *filename, bool uppercase) {
             tolower(filename[i - start]);
     }
 
-    // NOTE: have added this because on my Win machine wrong string
-    // generated and file cannot be opened
-    buf[end] = 0;
     return buf;
 }
 
+/*!
+ * \return NULL if file cannot be read.
+ */
 uint8 *File::loadFileToMem(const char *filename, int &filesize) {
     assert(filename);
 
@@ -82,13 +81,14 @@ uint8 *File::loadFileToMem(const char *filename, int &filesize) {
         fread(mem, 1, filesize, fp);
         fclose(fp);
         return mem;
-    } else {
-        printf("ERROR: Couldn't open file '%s' (using path: '%s')\n",
-               filename, _path);
-        exit(-1);
-        //filesize = 0;
-        //return NULL;
     }
+
+    // If we're here, there's a problem
+    printf("ERROR: Couldn't open file '%s' (using path: '%s')\n",
+               filename, _path);
+
+    filesize = 0;
+    return NULL;
 }
 
 FILE *File::loadTextFile(const char *filename) {

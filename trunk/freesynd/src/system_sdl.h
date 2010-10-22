@@ -52,6 +52,8 @@ public:
     SystemSDL(int depth = 32);
     ~SystemSDL();
 
+    bool initialize(bool fullscreen);
+
     void updateScreen();
     void handleEvents();
     void delay(int msec);
