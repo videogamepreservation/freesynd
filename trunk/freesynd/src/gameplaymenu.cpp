@@ -852,52 +852,6 @@ void GameplayMenu::handleUnknownKey(Key key, KeyMod mod, bool pressed) {
     }
 
 #if 0
-    Ped *ped = g_App.peds().ped(0);
-
-    if (key == KEY_q)
-        ped->init(ped->head() - 1, ped->torso(), ped->legs());
-
-    if (key == KEY_w)
-        ped->init(ped->head() + 1, ped->torso(), ped->legs());
-
-    if (key == KEY_a)
-        ped->init(ped->head(), ped->torso() - 20, ped->legs());
-
-    if (key == KEY_s)
-        ped->init(ped->head(), ped->torso() + 20, ped->legs());
-
-    if (key == KEY_z)
-        ped->init(ped->head(), ped->torso(), ped->legs() - 1);
-
-    if (key == KEY_x)
-        ped->init(ped->head(), ped->torso(), ped->legs() + 1);
-
-    if (key == KEY_c)
-        ped->init(ped->head(), ped->torso(), ped->torso() + 100);
-
-    if (key == KEY_SPACE)
-        printf("%i %i %i\n", ped->head(), ped->torso(), ped->legs());
-#endif
-
-#if 0
-    static int n = 0;
-
-    if (key == KEY_a && n > 0)
-        n--;
-
-    if (key == KEY_s && n < mission_->numPeds() - 1)
-        n++;
-
-    if (key == KEY_SPACE) {
-        PedInstance *p = mission_->ped(n);
-        p->animate();
-    }
-
-    if (key == KEY_p)
-        printf("%d\n", n);
-#endif
-
-#if 0
     if (key == KEY_UP)
         mission_->ped(0)->setTileY(mission_->ped(0)->tileY() - 1);
 
@@ -911,17 +865,6 @@ void GameplayMenu::handleUnknownKey(Key key, KeyMod mod, bool pressed) {
         mission_->ped(0)->setTileX(mission_->ped(0)->tileX() + 1);
 
     printf("%i %i\n", mission_->ped(0)->tileX(), mission_->ped(0)->tileY());
-#endif
-
-#if 0
-    if (key == KEY_LEFT)
-        inc--;
-
-    if (key == KEY_RIGHT)
-        inc++;
-
-    if (key == KEY_SPACE)
-        printf("%i\n", inc);
 #endif
 
 #ifdef _DEBUG

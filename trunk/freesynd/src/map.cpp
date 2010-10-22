@@ -77,9 +77,6 @@ bool Map::loadMap(uint8 * mapData)
     return true;
 }
 
-// TODO: these are hacks to get the units positioned correctly on the map
-// I have no idea why they work and they're probably incorrect for other values of z
-//int mx = 67, my = 14, mz = 31;
 float scalexPx = 256.0f;
 float scalexPy = 256.0f;
 float scaleyPx = 256.0f;
@@ -222,10 +219,10 @@ void Map::draw(int scrollX, int scrollY, MapHelper * helper)
                     max_z_ * (TILE_HEIGHT / 3) + (w + h) * (TILE_HEIGHT / 3);
                 int tile = map_data_[idx * max_z_ + z];
                 int coord_h = screen_h - cz;
-                if (screen_w >= scrollX - 64
-                    && screen_w + TILE_WIDTH < scrollX + cmw
-                    && coord_h >= scrollY - 64 && coord_h + TILE_HEIGHT <
-                    scrollY + cmh) {
+                if (screen_w >= scrollX - TILE_WIDTH * 2
+                    && screen_w + TILE_WIDTH * 2 < scrollX + cmw
+                    && coord_h >= scrollY - TILE_HEIGHT * 2 && coord_h
+                    + TILE_HEIGHT * 2 < scrollY + cmh) {
                     int dx = 0, dy = 0;
                     if (screen_w - scrollX < 0)
                         dx = -(screen_w - scrollX);

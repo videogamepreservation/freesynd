@@ -523,6 +523,14 @@ int fastKey(MapObject * m)
 
 void Mission::createFastKeys(int tilex, int tiley, int maxtilex, int maxtiley) {
 
+    if (tilex < 0)
+        tilex = 0;
+    if (tiley < 0)
+        tiley = 0;
+    if (maxtilex >= mmax_x_)
+        maxtilex = mmax_x_;
+    if (maxtiley >= mmax_y_)
+        maxtiley = mmax_y_;
     fast_vehicle_cache_.clear();
     for (unsigned int i = 0; i < vehicles_.size(); i++) {
         VehicleInstance *v = vehicles_[i];
