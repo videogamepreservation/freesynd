@@ -203,20 +203,19 @@ void Map::draw(int scrollX, int scrollY, MapHelper * helper)
     int cmw = g_Screen.gameScreenWidth() - g_Screen.gameScreenLeftMargin() + 128;
     int cmh = g_Screen.gameScreenHeight() + 128;
      //  z = 0 - is minimap data and mapdata
-    for (int z = 0; z < max_z_; z++) {
-        int cz = (z - 1) * (TILE_HEIGHT / 3);
-        for (int yb = sh; yb < shm; yb++) {
-            if (yb < 0)
-                continue;
-            int h = yb;
-            int chky = sh < 0 ? 0 : sh;
-            for (int w = sw; h >= chky && w < max_x_; w++ && h--) {
+    for (int yb = sh; yb < shm; yb++) {
+        if (yb < 0)
+            continue;
+        int h = yb;
+        int chky = sh < 0 ? 0 : sh;
+        for (int w = sw; h >= chky && w < max_x_; w++ && h--) {
+            for (int z = 0; z < max_z_; z++) {
+                int cz = (z - 1) * (TILE_HEIGHT / 3);
                 if (sw < 0 || h >= max_y_)
                     continue;
                 int idx = h * max_x_ + w;
                 int screen_w = map_width_ / 2 + (w - h) * (TILE_WIDTH / 2);
-                int screen_h =
-                    max_z_ * (TILE_HEIGHT / 3) + (w + h) * (TILE_HEIGHT / 3);
+                int screen_h = (max_z_ + w + h) * (TILE_HEIGHT / 3);
                 int tile = map_data_[idx * max_z_ + z];
                 int coord_h = screen_h - cz;
                 if (screen_w >= scrollX - TILE_WIDTH * 2
@@ -239,7 +238,8 @@ void Map::draw(int scrollX, int scrollY, MapHelper * helper)
                                           false, TILE_WIDTH);
                         }
                     }
-                    if ( (z - 3) >= 0 ) {
+                    if ( (z - 3) >= 0 )
+                    {
                         helper->drawAt(w, h, z - 3,
                                        screen_w - scrollX + g_Screen.gameScreenLeftMargin() +
                                        TILE_WIDTH / 2,

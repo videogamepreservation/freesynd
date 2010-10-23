@@ -531,49 +531,69 @@ void Mission::createFastKeys(int tilex, int tiley, int maxtilex, int maxtiley) {
         maxtilex = mmax_x_;
     if (maxtiley >= mmax_y_)
         maxtiley = mmax_y_;
+
+    cache_vehicles_.clear();
+    cache_peds_.clear();
+    cache_weapons_.clear();
+    cache_statics_.clear();
+
     fast_vehicle_cache_.clear();
+    fast_ped_cache_.clear();
+    fast_weapon_cache_.clear();
+    fast_statics_cache_.clear();
+
+    // vehicles
     for (unsigned int i = 0; i < vehicles_.size(); i++) {
         VehicleInstance *v = vehicles_[i];
         if (v->tileX() >= tilex && v->tileX() < maxtilex
-            && v->tileY() >= tiley && v->tileY() < maxtiley)
+            && v->tileY() >= tiley && v->tileY() < maxtiley) {
             fast_vehicle_cache_.insert(fastKey(v));
+            cache_vehicles_.push_back(v);
+        }
     }
 
-    fast_ped_cache_.clear();
+    // peds
     for (unsigned int i = 0; i < 4; i++) {
         PedInstance *p = peds_[i];
         if (g_App.teamMember(i)->isActive() && p->map() != -1) {
             if (p->tileX() >= tilex && p->tileX() < maxtilex
-                && p->tileY() >= tiley && p->tileY() < maxtiley)
-            fast_ped_cache_.insert(fastKey(p));
+                && p->tileY() >= tiley && p->tileY() < maxtiley) {
+                fast_ped_cache_.insert(fastKey(p));
+                cache_peds_.push_back(p);
+            }
         }
     }
     for (unsigned int i = 8; i < peds_.size(); i++) {
         PedInstance *p = peds_[i];
         if (p->map() != -1) {
             if (p->tileX() >= tilex && p->tileX() < maxtilex
-                && p->tileY() >= tiley && p->tileY() < maxtiley)
+                && p->tileY() >= tiley && p->tileY() < maxtiley) {
                 fast_ped_cache_.insert(fastKey(p));
+                cache_peds_.push_back(p);
+            }
         }
     }
 
-    fast_weapon_cache_.clear();
+    // weapons
     for (unsigned int i = 0; i < weapons_.size(); i++) {
         WeaponInstance *w = weapons_[i];
         if (w->map() != -1) {
             if (w->tileX() >= tilex && w->tileX() < maxtilex
-                && w->tileY() >= tiley && w->tileY() < maxtiley)
+                && w->tileY() >= tiley && w->tileY() < maxtiley) {
                 fast_weapon_cache_.insert(fastKey(w));
+                cache_weapons_.push_back(w);
+            }
         }
     }
 
-    // TODO: statics don't move, set value on mission load?
-    fast_statics_cache_.clear();
+    // statics
     for (unsigned int i = 0; i < statics_.size(); i++) {
         Static *s = statics_[i];
         if (s->tileX() >= tilex && s->tileX() < maxtilex
-            && s->tileY() >= tiley && s->tileY() < maxtiley)
+            && s->tileY() >= tiley && s->tileY() < maxtiley) {
             fast_statics_cache_.insert(fastKey(s));
+            cache_statics_.push_back(s);
+        }
     }
 }
 
@@ -589,58 +609,53 @@ void Mission::drawAt(int tilex, int tiley, int tilez, int x, int y,
 
     if (fast_vehicle_cache_.find(key) != fast_vehicle_cache_.end()) {
         // draw vehicles
-        for (unsigned int i = 0; i < vehicles_.size(); i++)
-            if (vehicles_[i]->tileX() == tilex
-                && vehicles_[i]->tileY() == tiley
-                && vehicles_[i]->tileZ() == tilez)
-                vehicles_[i]->draw(x, y);
+        for (unsigned int i = 0; i < cache_vehicles_.size(); i++)
+            if (cache_vehicles_[i]->tileX() == tilex
+                && cache_vehicles_[i]->tileY() == tiley
+                && cache_vehicles_[i]->tileZ() == tilez)
+                cache_vehicles_[i]->draw(x, y);
     }
 
     if (fast_ped_cache_.find(key) != fast_ped_cache_.end()) {
-        // draw agents
-        for (unsigned int i = 0; i < 4; i++)
-            if (g_App.teamMember(i)->isActive())
-                if (peds_[i]->tileX() == tilex
-                    && peds_[i]->tileY() == tiley
-                    && peds_[i]->tileZ() == tilez) {
-                    peds_[i]->draw(x, y, scrollX, scrollY);
-#if 0
-                    g_Screen.drawLine(x - TILE_WIDTH / 2, y,
-                                      x + TILE_WIDTH / 2, y, 11);
-                    g_Screen.drawLine(x + TILE_WIDTH / 2, y,
-                                      x + TILE_WIDTH / 2, y + TILE_HEIGHT,
-                                      11);
-                    g_Screen.drawLine(x + TILE_WIDTH / 2, y + TILE_HEIGHT,
-                                      x - TILE_WIDTH / 2, y + TILE_HEIGHT,
-                                      11);
-                    g_Screen.drawLine(x - TILE_WIDTH / 2, y + TILE_HEIGHT,
-                                      x - TILE_WIDTH / 2, y, 11);
-#endif
-                }
         // draw peds
-        for (unsigned int i = 8; i < peds_.size(); i++)
-            if (peds_[i]->tileX() == tilex && peds_[i]->tileY() == tiley
-                && peds_[i]->tileZ() == tilez)
-                peds_[i]->draw(x, y, scrollX, scrollY);
+        for (unsigned int i = 0; i < cache_peds_.size(); i++)
+            if (cache_peds_[i]->tileX() == tilex
+                && cache_peds_[i]->tileY() == tiley
+                && cache_peds_[i]->tileZ() == tilez) {
+                cache_peds_[i]->draw(x, y, scrollX, scrollY);
+#if 0
+                g_Screen.drawLine(x - TILE_WIDTH / 2, y,
+                                  x + TILE_WIDTH / 2, y, 11);
+                g_Screen.drawLine(x + TILE_WIDTH / 2, y,
+                                  x + TILE_WIDTH / 2, y + TILE_HEIGHT,
+                                  11);
+                g_Screen.drawLine(x + TILE_WIDTH / 2, y + TILE_HEIGHT,
+                                  x - TILE_WIDTH / 2, y + TILE_HEIGHT,
+                                  11);
+                g_Screen.drawLine(x - TILE_WIDTH / 2, y + TILE_HEIGHT,
+                                  x - TILE_WIDTH / 2, y, 11);
+#endif
+
+            }
     }
 
     if (fast_weapon_cache_.find(key) != fast_weapon_cache_.end()) {
         // draw weapons
-        for (unsigned int i = 0; i < weapons_.size(); i++)
-            if (weapons_[i]->map() != -1 && weapons_[i]->tileX() == tilex
-                && weapons_[i]->tileY() == tiley
-                && weapons_[i]->tileZ() == tilez) {
-                weapons_[i]->draw(x, y);
+        for (unsigned int i = 0; i < cache_weapons_.size(); i++)
+            if (cache_weapons_[i]->map() != -1 && cache_weapons_[i]->tileX() == tilex
+                && cache_weapons_[i]->tileY() == tiley
+                && cache_weapons_[i]->tileZ() == tilez) {
+                cache_weapons_[i]->draw(x, y);
             }
     }
 
     if (fast_statics_cache_.find(key) != fast_statics_cache_.end()) {
         // draw statics
-        for (unsigned int i = 0; i < statics_.size(); i++)
-            if (statics_[i]->tileX() == tilex
-                && statics_[i]->tileY() == tiley
-                && statics_[i]->tileZ() == tilez) {
-                statics_[i]->draw(x, y);
+        for (unsigned int i = 0; i < cache_statics_.size(); i++)
+            if (cache_statics_[i]->tileX() == tilex
+                && cache_statics_[i]->tileY() == tiley
+                && cache_statics_[i]->tileZ() == tilez) {
+                cache_statics_[i]->draw(x, y);
             }
     }
 }

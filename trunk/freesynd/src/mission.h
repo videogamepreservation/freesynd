@@ -405,6 +405,10 @@ public:
     std::vector<PedInstance *> peds_;
     std::vector<WeaponInstance *> weapons_;
     std::vector<Static *> statics_;
+    std::vector<VehicleInstance *> cache_vehicles_;
+    std::vector<PedInstance *> cache_peds_;
+    std::vector<WeaponInstance *> cache_weapons_;
+    std::vector<Static *> cache_statics_;
 
     typedef enum {
         objv_None,
