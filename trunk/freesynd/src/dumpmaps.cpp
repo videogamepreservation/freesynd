@@ -1,6 +1,6 @@
 #include "screen.h"
 #include "mapmanager.h"
-#include "file.h"
+#include "utils/file.h"
 #include <png.h>
 #include <stdlib.h>
 #include <sys/stat.h>

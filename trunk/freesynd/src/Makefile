@@ -15,10 +15,10 @@ SRC	= agent.cpp agentmanager.cpp app.cpp audio.cpp briefmenu.cpp confmenu.cpp \
 	weaponmanager.cpp xmidi.cpp
 
 DUMP_TARGET = dump
-DUMP_OBJS = dump.o spritemanager.o sprite.o file.o dernc.o
+DUMP_OBJS = dump.o spritemanager.o sprite.o utils/file.o utils/dernc.o
 
 DUMPMAPS_TARGET = dumpmaps
-DUMPMAPS_OBJS = dumpmaps.o mapmanager.o map.o tilemanager.o tile.o file.o dernc.o
+DUMPMAPS_OBJS = dumpmaps.o mapmanager.o map.o tilemanager.o tile.o utils/file.o utils/dernc.o
 
 DIRS	= utils sound core
 OBJS = $(SRC:.cpp=.o)
@@ -48,7 +48,7 @@ $(UTL_OBJ): force_look
 	cd sound; $(MAKE) $(MFLAGS)
 
 .cpp.o:
-	$(CXX) $(CXXFLAGS) -MMD -c $< -o $*.o
+	$(CXX) $(CXXFLAGS) -I. -MMD -c $< -o $*.o
 
 clean:
 	rm -f $(TARGET) $(DUMP_TARGET) $(DUMPMAPS_TARGET) *.o *.d
