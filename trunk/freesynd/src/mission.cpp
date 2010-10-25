@@ -224,7 +224,7 @@ bool Mission::loadLevel(uint8 * levelData)
                     delete w;
                 }
             } else {
-                w->setMap(map_);;
+                w->setMap(map_);
                 windx[i] = weapons_.size();
                 weapons_.push_back(w);
             }

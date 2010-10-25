@@ -55,10 +55,7 @@ public:
     WeaponInstance *removeWeapon(int n) {
         assert(n < (int) weapons_.size());
         WeaponInstance *w = weapons_[n];
-        std::vector<WeaponInstance *>::iterator it = weapons_.begin();
-
-        for (int i = 0; i < n; i++)
-            it++;
+        std::vector<WeaponInstance *>::iterator it = weapons_.begin() + n;
 
         weapons_.erase(it);
         return w;

@@ -32,7 +32,7 @@
 #include "map.h"
 #include "tilemanager.h"
 
-#if 0
+#if 1
 #ifdef SYSTEM_SDL
 #include "system_sdl.h"
 #endif
@@ -200,8 +200,9 @@ void Map::draw(int scrollX, int scrollY, MapHelper * helper)
 #endif
 
     helper->createFastKeys(sw, sh, swm, shm);
-    int cmw = g_Screen.gameScreenWidth() - g_Screen.gameScreenLeftMargin() + 128;
-    int cmh = g_Screen.gameScreenHeight() + 128;
+    int cmw = scrollX + g_Screen.gameScreenWidth() - g_Screen.gameScreenLeftMargin() + 128;
+    int cmh = scrollY + g_Screen.gameScreenHeight() + 128;
+    int cmx = scrollX - g_Screen.gameScreenLeftMargin();
      //  z = 0 - is minimap data and mapdata
     for (int i = 0; i < (max_z_ / 3 + 1); i++) {
         for (int yb = sh; yb < shm; yb++) {
@@ -211,40 +212,38 @@ void Map::draw(int scrollX, int scrollY, MapHelper * helper)
             int chky = sh < 0 ? 0 : sh;
             for (int w = sw; h >= chky && w < max_x_; w++ && h--) {
                 for (int z = i * 3; z < (i * 3 + 3); z++) {
-                    int cz = (z - 1) * (TILE_HEIGHT / 3);
                     if (sw < 0 || h >= max_y_)
                         continue;
                     int idx = h * max_x_ + w;
-                    int screen_w = map_width_ / 2 + (w - h) * (TILE_WIDTH / 2);
+                    int screen_w = (max_x_ + (w - h)) * (TILE_WIDTH / 2);
                     int screen_h = (max_z_ + w + h) * (TILE_HEIGHT / 3);
                     int tile = map_data_[idx * max_z_ + z];
-                    int coord_h = screen_h - cz;
+                    int coord_h = screen_h - (z - 1) * (TILE_HEIGHT / 3);
                     if (screen_w >= scrollX - TILE_WIDTH * 2
-                        && screen_w + TILE_WIDTH * 2 < scrollX + cmw
-                        && coord_h >= scrollY - TILE_HEIGHT * 2 && coord_h
-                        + TILE_HEIGHT * 2 < scrollY + cmh) {
-                        int dx = 0, dy = 0;
-                        if (z < max_z_) {
+                        && screen_w + TILE_WIDTH * 2 < cmw
+                        && coord_h >= scrollY - TILE_HEIGHT * 2
+                        && coord_h + TILE_HEIGHT * 2 < cmh) {
+                        if (z < max_z_ && tile > 4) {
+                            int dx = 0, dy = 0;
                             if (screen_w - scrollX < 0)
                                 dx = -(screen_w - scrollX);
                             if (coord_h - scrollY < 0)
                                 dy = -(coord_h - scrollY);
                             if (dx < TILE_WIDTH && dy < TILE_HEIGHT) {
-                                if (tile < 5 ? false : tile_manager_->drawTileTo(buf, TILE_WIDTH,
-                                                     TILE_HEIGHT, tile, 0, 0, true)) {
-                                    g_Screen.blit(screen_w - scrollX + g_Screen.gameScreenLeftMargin() +
-                                                  dx, coord_h - scrollY + dy,
-                                                  TILE_WIDTH - dx,
-                                                  TILE_HEIGHT - dy,
-                                                  buf + dx + dy * TILE_WIDTH,
-                                                  false, TILE_WIDTH);
-                                }
+                                tile_manager_->drawTileTo(buf, TILE_WIDTH,
+                                                     TILE_HEIGHT, tile, 0, 0, true);
+                                g_Screen.blit(screen_w - cmx +
+                                              dx, coord_h - scrollY + dy,
+                                              TILE_WIDTH - dx,
+                                              TILE_HEIGHT - dy,
+                                              buf + dx + dy * TILE_WIDTH,
+                                              false, TILE_WIDTH);
                             }
                         }
                         if ( (z - 3) >= 0 )
                         {
                             helper->drawAt(w, h, z - 3,
-                                           screen_w - scrollX + g_Screen.gameScreenLeftMargin() +
+                                           screen_w - cmx +
                                            TILE_WIDTH / 2,
                                            coord_h - scrollY  + TILE_HEIGHT, scrollX,
                                            scrollY);
