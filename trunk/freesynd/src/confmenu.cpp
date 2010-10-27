@@ -180,7 +180,7 @@ public:
         drawCaret();
     }
 
-    virtual void handleUnknownKey(Key key, KeyMod mod, bool pressed) {
+    virtual void handleUnknownKey(Key key, const int modKeys) {
         if (key == KEY_BACKSPACE)
             name_value_ = name_value_.substr(0, name_value_.size() - 1);
 

@@ -229,10 +229,14 @@ class App : public Singleton < App > {
     void waitForKeyPress();
     void setPalette(const char *fname, bool sixbit = true);
 
-    void keyEvent(Key & key, KeyMod & mod, bool pressed);
-    void mouseDownEvent(int x, int y, int button);
-    void mouseUpEvent(int x, int y, int button);
-    void mouseMotionEvent(int x, int y, int state);
+    //! Handles key pressed
+    void keyEvent(Key & key, const int modKeys);
+    //! Handles mouse button pressed
+    void mouseDownEvent(int x, int y, int button, const int modKeys);
+    //! Handles mouse button released
+    void mouseUpEvent(int x, int y, int button, const int modKeys);
+    //! Handles mouse moved
+    void mouseMotionEvent(int x, int y, int state, const int modKeys);
 };
 
 #define g_App   App::singleton()

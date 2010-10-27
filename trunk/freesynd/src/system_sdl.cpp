@@ -39,6 +39,7 @@ const int SystemSDL::CURSOR_WIDTH = 24;
 
 SystemSDL::SystemSDL(int depth) {
     depth_ = depth;
+    keyModState_ = 0;
 }
 
 SystemSDL::~SystemSDL() {
@@ -159,36 +160,90 @@ void SystemSDL::updateScreen() {
     }
 }
 
+/*!
+ * Watch the event queue and dispatch events.
+ * - keyboard events : when a modifier key is pressed,
+ * the system does not dispatch the event to the application:
+ * it stores the key state and then passes the complete state
+ * when a regular key is pressed. So that the application knows
+ * if multiple modifier keys are pressed at the same time (ie Ctrl/Shift)
+ */
 void SystemSDL::handleEvents() {
     static SDL_Event event;
     Key key;
-    KeyMod keyMod;
 
     while (SDL_PollEvent(&event)) {
         switch (event.type) {
         case SDL_KEYDOWN:
-        case SDL_KEYUP:
+            {
+            // Get the key value
             key = static_cast < Key > (event.key.keysym.sym);
-            keyMod = static_cast < KeyMod > (event.key.keysym.mod);
-            g_App.keyEvent(key, keyMod, event.type == SDL_KEYDOWN);
+            // Check if key pressed is a modifier
+            bool isKeyMod = false;
+            if (key == KEY_LCTRL) {
+                keyModState_ = keyModState_ | KMD_LCTRL; 
+                isKeyMod = true;
+            } else if (key == KEY_RCTRL) {
+                keyModState_ = keyModState_ | KMD_RCTRL; 
+                isKeyMod = true;
+            } else if (key == KEY_RSHIFT) {
+                keyModState_ = keyModState_ | KMD_RSHIFT; 
+                isKeyMod = true;
+            } else if (key == KEY_LSHIFT) {
+                keyModState_ = keyModState_ | KMD_LSHIFT; 
+                isKeyMod = true;
+            } else if (key == KEY_RALT) {
+                keyModState_ = keyModState_ | KMD_RALT; 
+                isKeyMod = true;
+            } else if (key == KEY_LALT) {
+                keyModState_ = keyModState_ | KMD_LALT; 
+                isKeyMod = true;
+            }
+
+            // We pass the event only if it's not a allowed modifier key
+            // Plus, the application receives event only when key is pressed
+            // not released.
+            if (!isKeyMod) {
+                g_App.keyEvent(key, keyModState_);
+            }
+            }
+            break;
+        case SDL_KEYUP:
+            {
+            // We follow keyup to reset the state of modifier keys
+            key = static_cast < Key > (event.key.keysym.sym);
+            if (key == KEY_LCTRL) {
+                keyModState_ = keyModState_ & !KMD_LCTRL; 
+            } else if (key == KEY_RCTRL) {
+                keyModState_ = keyModState_ & !KMD_RCTRL; 
+            } else if (key == KEY_RSHIFT) {
+                keyModState_ = keyModState_ & !KMD_RSHIFT; 
+            } else if (key == KEY_LSHIFT) {
+                keyModState_ = keyModState_ & !KMD_LSHIFT; 
+            } else if (key == KEY_RALT) {
+                keyModState_ = keyModState_ & !KMD_RALT; 
+            } else if (key == KEY_LALT) {
+                keyModState_ = keyModState_ & !KMD_LALT; 
+            }
+            }
             break;
 #ifdef GP2X
         case SDL_JOYBUTTONDOWN:
         case SDL_JOYBUTTONUP:
             key = static_cast < Key > (event.jbutton.button);
             keyMod = KMD_NONE;
-            g_App.keyEvent(key, keyMod, event.type == SDL_JOYBUTTONDOWN);
+            g_App.keyEvent(key, KMD_NONE);
             break;
 #endif
 
         case SDL_MOUSEBUTTONUP:
             g_App.mouseUpEvent(event.button.x, event.button.y,
-                               event.button.button);
+                               event.button.button, keyModState_);
             break;
 
         case SDL_MOUSEBUTTONDOWN:
             g_App.mouseDownEvent(event.button.x, event.button.y,
-                                 event.button.button);
+                                 event.button.button, keyModState_);
             break;
 
         case SDL_MOUSEMOTION:
@@ -196,7 +251,7 @@ void SystemSDL::handleEvents() {
             cursor_x_ = event.motion.x;
             cursor_y_ = event.motion.y;
             g_App.mouseMotionEvent(event.motion.x, event.motion.y,
-                                   event.motion.state);
+                                   event.motion.state, keyModState_);
             break;
 
         case SDL_QUIT:

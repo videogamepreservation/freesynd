@@ -174,7 +174,12 @@ void Menu::addOption(int x, int y, const char *text, int size, Key key,
     options_[key] = m;
 }
 
-void Menu::keyEvent(Key key, KeyMod mod, bool pressed)
+/*!
+ * Handles the key pressed event.
+ * \param key The key that was pressed
+ * \param modKeys State of all modifier keys
+ */
+void Menu::keyEvent(Key key, const int modKeys)
 {
 
     if (key == KEY_ESCAPE) {
@@ -182,49 +187,48 @@ void Menu::keyEvent(Key key, KeyMod mod, bool pressed)
         return;
     }
 
-    if (pressed) {
-        std::vector < MenuText * >options_vec;
-        for (std::map < Key, Option >::iterator it = options_.begin();
-             it != options_.end(); it++)
-            options_vec.push_back(&it->second);
+    // Please comment
+    std::vector < MenuText * >options_vec;
+    for (std::map < Key, Option >::iterator it = options_.begin();
+         it != options_.end(); it++)
+        options_vec.push_back(&it->second);
 
-        if (options_vec.size()) {
-            unsigned int curOpt = 0;
-            for (unsigned int i = 0; i < options_vec.size(); i++)
-                if (!options_vec[i]->dark_) {
-                    curOpt = i;
-                    break;
-                }
-            if (key == VK_UP || key == KEY_UP) {
+    if (options_vec.size()) {
+        unsigned int curOpt = 0;
+        for (unsigned int i = 0; i < options_vec.size(); i++)
+            if (!options_vec[i]->dark_) {
+                curOpt = i;
+                break;
+            }
+        if (key == VK_UP || key == KEY_UP) {
+            options_vec[curOpt]->dark_ = true;
+            if (curOpt == 0)
+                curOpt = options_vec.size() - 1;
+            else
+                curOpt--;
+            options_vec[curOpt]->dark_ = false;
+            render();
+        }
+        if (key == VK_DOWN || key == KEY_DOWN) {
+            if (!options_vec[curOpt]->dark_) {
                 options_vec[curOpt]->dark_ = true;
-                if (curOpt == 0)
-                    curOpt = options_vec.size() - 1;
-                else
-                    curOpt--;
-                options_vec[curOpt]->dark_ = false;
-                render();
+                curOpt++;
+                if (curOpt >= options_vec.size())
+                    curOpt = 0;
             }
-            if (key == VK_DOWN || key == KEY_DOWN) {
-                if (!options_vec[curOpt]->dark_) {
-                    options_vec[curOpt]->dark_ = true;
-                    curOpt++;
-                    if (curOpt >= options_vec.size())
-                        curOpt = 0;
-                }
-                options_vec[curOpt]->dark_ = false;
-                render();
-            }
-            if (key == VK_FB || key == KEY_RETURN || key == KEY_KP_ENTER) {
-                for (std::map < Key, Option >::iterator it =
-                     options_.begin(); it != options_.end(); it++)
-                    if (&it->second == options_vec[curOpt])
-                        key = it->first;
-            }
+            options_vec[curOpt]->dark_ = false;
+            render();
+        }
+        if (key == VK_FB || key == KEY_RETURN || key == KEY_KP_ENTER) {
+            for (std::map < Key, Option >::iterator it =
+                 options_.begin(); it != options_.end(); it++)
+                if (&it->second == options_vec[curOpt])
+                    key = it->first;
         }
     }
 
     if (options_.find(key) == options_.end()) {
-        handleUnknownKey(key, mod, pressed);
+        handleUnknownKey(key, modKeys);
         return;
     }
     handleOption(key);
@@ -232,9 +236,16 @@ void Menu::keyEvent(Key key, KeyMod mod, bool pressed)
         menu_manager_->changeCurrentMenu(options_[key].to_);
 }
 
-void Menu::mouseMotionEvent(int x, int y, int state)
+/*!
+ * Handles the mouse motion event.
+ * \param x X screen coordinate
+ * \param y Y screen coordinate
+ * \param state If button is pressed during mouse motion.
+ * \param modKeys State of all modifier keys
+ */
+void Menu::mouseMotionEvent(int x, int y, int state, const int modKeys)
 {
-    handleMouseMotion(x, y, state);
+    handleMouseMotion(x, y, state, modKeys);
 
     // See if the mouse is hovering a button
     for (std::map < Key, Option >::iterator it = options_.begin();
@@ -263,7 +274,14 @@ void Menu::mouseMotionEvent(int x, int y, int state)
     }
 }
 
-void Menu::mouseDownEvent(int x, int y, int button)
+/*!
+ * Handles the mouse down event.
+ * \param x X screen coordinate
+ * \param y Y screen coordinate
+ * \param button What button was pressed
+ * \param modKeys State of all modifier keys
+ */
+void Menu::mouseDownEvent(int x, int y, int button, const int modKeys)
 {
     for (std::map < Key, Option >::iterator it = options_.begin();
          it != options_.end(); it++) {
@@ -275,14 +293,21 @@ void Menu::mouseDownEvent(int x, int y, int button)
         }
 
         if (m.isMouseOver(x, y)) {
-            keyEvent(it->first, KMD_NONE, true);
+            keyEvent(it->first, KMD_NONE);
             return;
         }
     }
-    handleMouseDown(x, y, button);
+    handleMouseDown(x, y, button, modKeys);
 }
 
-void Menu::mouseUpEvent(int x, int y, int button)
+/*!
+ * Handles the mouse up event.
+ * \param x X screen coordinate
+ * \param y Y screen coordinate
+ * \param button What button was released
+ * \param modKeys State of all modifier keys
+ */
+void Menu::mouseUpEvent(int x, int y, int button, const int modKeys)
 {
-    handleMouseUp(x, y, button);
+    handleMouseUp(x, y, button, modKeys);
 }

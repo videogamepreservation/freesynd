@@ -386,7 +386,7 @@ void MapMenu::handleLeave() {
     g_System.hideCursor();
 }
 
-void MapMenu::handleMouseDown(int x, int y, int button)
+void MapMenu::handleMouseDown(int x, int y, int button, const int modKeys)
 {
     // Checks among the missions which one has been clicked on
     for (int i = 0; i < 50; i++) {
@@ -424,7 +424,7 @@ void MapMenu::handleOption(Key key) {
     }
 }
 
-void MapMenu::handleUnknownKey(Key key, KeyMod mod, bool pressed)
+void MapMenu::handleUnknownKey(Key key, const int modKeys)
 {
     if (key == KEY_0) {
         g_Session.setSelectedBlockId(0);

@@ -42,12 +42,13 @@ Menu(m, "Gameplay", "", ""),
 tick_count_(0), last_animate_tick_(0), last_motion_tick_(0),
 last_motion_x_(320), last_motion_y_(240), mission_hint_ticks_(0), 
 mission_hint_(0), mission_(0), world_x_(0),
-world_y_(0), selected_agents_(0), ctrl_(false), alt_(false),
+world_y_(0), selected_agents_(0),
 pointing_at_ped_(-1), pointing_at_vehicle_(-1) 
 {
     setParentMenu("debrief");
     scroll_x_ = 0;
     scroll_y_ = 0;
+    showPath_ = false;
 }
 
 /*!
@@ -263,7 +264,7 @@ void GameplayMenu::handleTick(int elapsed)
     if (change) {
         render();
         // force pointing_at_ped / vehicle to update
-        handleMouseMotion(last_motion_x_, last_motion_y_, 0);
+        handleMouseMotion(last_motion_x_, last_motion_y_, 0, KMD_NONE);
     }
 
     drawMissionHint(elapsed);
@@ -368,7 +369,7 @@ void GameplayMenu::handleRender()
     drawWeaponSelectors();
     drawMiniMap();
 
-    if (ctrl_) {
+    if (showPath_) {
         if (isAgentSelected(0))
             mission_->ped(0)->showPath(world_x_, world_y_);
 
@@ -426,7 +427,7 @@ void GameplayMenu::handleLeave()
     g_App.music().stopPlayback();
 }
 
-void GameplayMenu::handleMouseMotion(int x, int y, int state)
+void GameplayMenu::handleMouseMotion(int x, int y, int state, const int modKeys)
 {
     last_motion_tick_ = tick_count_;
     last_motion_x_ = x;
@@ -444,7 +445,8 @@ void GameplayMenu::handleMouseMotion(int x, int y, int state)
         scroll_y_ = SCROLL_STEP;
     }
 
-    if (alt_)
+    // what's the use of Left Alt?
+    if (modKeys & KMD_LALT)
         return;
 
     pointing_at_ped_ = -1;
@@ -527,9 +529,13 @@ void GameplayMenu::handleMouseMotion(int x, int y, int state)
         g_System.usePointerCursor();
 }
 
-void GameplayMenu::handleMouseDown(int x, int y, int button)
+void GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
 {
     bool change = false; /* Indicator whether we need menu redraw */
+    bool ctrl = false;  // Is control button pressed
+    if (modKeys & KMD_CTRL) {
+        ctrl = true;
+    }
 
     if (button == 1) {
       /* Handle agent selection. Click on an agent changes selection
@@ -540,12 +546,12 @@ void GameplayMenu::handleMouseDown(int x, int y, int button)
             if (y < 42) {
                 if (x < 64) {
                     if ((selectable_agents_ & (1 << 0)) != 0) {
-                        selectAgent(0);
+                        selectAgent(0, ctrl);
                         change = true;
                     }
                 } else {
                     if ((selectable_agents_ & (1 << 1)) != 0) {
-                        selectAgent(1);
+                        selectAgent(1, ctrl);
                         change = true;
                     }
                 }
@@ -554,12 +560,12 @@ void GameplayMenu::handleMouseDown(int x, int y, int button)
             if (y >= 42 + 48 + 10 && y < 42 + 48 + 10 + 42) {
                 if (x < 64) {
                     if ((selectable_agents_ & (1 << 2)) != 0) {
-                        selectAgent(2);
+                        selectAgent(2, ctrl);
                         change = true;
                     }
                 } else {
                     if ((selectable_agents_ & (1 << 3)) != 0) {
-                        selectAgent(3);
+                        selectAgent(3, ctrl);
                         change = true;
                     }
                 }
@@ -626,14 +632,15 @@ void GameplayMenu::handleMouseDown(int x, int y, int button)
                             sty = ty * 256 + oy + 128 * mission_->ped(i)->inVehicle()->tileZ();
                             //soy = sty % 256;
                             sty = sty / 256;
-                            if (ctrl_)
+                            if (modKeys & KMD_CTRL) {
                                 mission_->ped(i)->inVehicle()->
                                     addDestinationV(stx, sty, 0,
                                     128, 128, 480);
-                            else
+                            } else {
                                 mission_->ped(i)->inVehicle()->
                                     setDestinationV(mission_, stx, sty, 0, 
                                     128, 128, 480);
+                            }
                         }
                     } else {
                         int stx = tx;
@@ -642,10 +649,12 @@ void GameplayMenu::handleMouseDown(int x, int y, int button)
                         int sox = ox;
                         int soy = oy;
                         mission_->getWalkable(stx, sty, stz, sox, soy);
-                        if (ctrl_)
+                        if (modKeys & KMD_CTRL) {
+                            showPath_ = true;
                             mission_->ped(i)->addDestinationP(mission_,stx, sty, stz,
                                     sox, soy, 320);
-                        else {
+                        } else {
+                            showPath_ = false;
                             if (selectedAgentsCount() > 1) {
                                 //TODO: current group position is like
                                 // in original this can make non-tile
@@ -728,7 +737,7 @@ void GameplayMenu::handleMouseDown(int x, int y, int button)
         render();
 }
 
-void GameplayMenu::handleMouseUp(int x, int y, int button) {
+void GameplayMenu::handleMouseUp(int x, int y, int button, const int modKeys) {
     if (button == 3) {
         for (int i = 0; i < 4; i++) {
             if (isAgentSelected(i)
@@ -741,7 +750,7 @@ void GameplayMenu::handleMouseUp(int x, int y, int button) {
 
 extern int topz;
 
-void GameplayMenu::handleUnknownKey(Key key, KeyMod mod, bool pressed) {
+void GameplayMenu::handleUnknownKey(Key key, const int modKeys) {
     bool change = false; /* indicator whether menu should be redrawn */
 
 #ifdef _DEBUG
@@ -768,13 +777,10 @@ void GameplayMenu::handleUnknownKey(Key key, KeyMod mod, bool pressed) {
         }
     }
 
-    if (key == KEY_LCTRL)
-        ctrl_ = pressed;
-    else if (key == KEY_RCTRL)
-        ctrl_ = pressed;
-
-    if (key == KEY_LALT) {
-        alt_ = pressed;
+    /*
+    What's that about?
+    if (modKeys & KMD_LALT) {
+        alt_ = true;
         printf("%i\n", pointing_at_ped_);
 
         if (pointing_at_ped_ != -1 && !alt_) {
@@ -791,7 +797,13 @@ void GameplayMenu::handleUnknownKey(Key key, KeyMod mod, bool pressed) {
             mission_->ped(pointing_at_ped_)->setOffY(oy);
         }
     }
+    */
 
+
+    bool ctrl = false;
+    if (modKeys & KMD_CTRL) {
+        ctrl = true;
+    }
 
     /* Handle agent selection by numeric keys. Key 0 cycles between current
      * selection and all 4 agents. Ctrl + 0 inverts selection.
@@ -800,30 +812,30 @@ void GameplayMenu::handleUnknownKey(Key key, KeyMod mod, bool pressed) {
     if (key == KEY_0 || key == KEY_KP0 || key == KEY_BACKQUOTE) {
         /* This code is exactly the same as for clicking on "group-button"
          * as you can see above. */
-        selectAllAgents();
+        selectAllAgents(ctrl);
         change = true;
     }
     else if (key == KEY_1 || key == KEY_KP1) {
         if ((selectable_agents_ & (1 << 0)) != 0) {
-            selectAgent(0);
+            selectAgent(0, ctrl);
             change = true;
         }
     }
     else if (key == KEY_2 || key == KEY_KP2) {
         if ((selectable_agents_ & (1 << 1)) != 0) {
-            selectAgent(1);
+            selectAgent(1, ctrl);
             change = true;
         }
     }
     else if (key == KEY_3 || key == KEY_KP3) {
         if ((selectable_agents_ & (1 << 2)) != 0) {
-            selectAgent(2);
+            selectAgent(2, ctrl);
             change = true;
         }
     }
     else if (key == KEY_4 || key == KEY_KP4) {
         if ((selectable_agents_ & (1 << 3)) != 0) {
-            selectAgent(3);
+            selectAgent(3, ctrl);
             change = true;
         }
     }
@@ -1210,15 +1222,26 @@ int GameplayMenu::selectedAgentsCount() {
     return agents;
 }
 
-void GameplayMenu::selectAgent(unsigned int agentNo) {
-    if (ctrl_)
+/*!
+ * Select the given agent.
+ * \param agentNo Agent id
+ * \param addToGroup If true, agent is added to the current selection.
+ * If not, the selection is emptied and filled with the new agent.
+ */
+void GameplayMenu::selectAgent(unsigned int agentNo, bool addToGroup) {
+    if (addToGroup)
         selected_agents_ ^= 1 << agentNo;
     else
         selected_agents_ = 1 << agentNo;
 }
 
-void GameplayMenu::selectAllAgents() {
-    if (ctrl_) {
+/*!
+ * Selects all agents.
+ * \param invert If true, selects only the agents that were not already
+ * selected.
+ */
+void GameplayMenu::selectAllAgents(bool invert) {
+    if (invert) {
         if ((selectable_agents_ & (1 << 0)) != 0)
             selected_agents_ ^= 1;
         if ((selectable_agents_ & (1 << 1)) != 0)

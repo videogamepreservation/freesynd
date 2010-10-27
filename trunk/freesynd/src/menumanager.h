@@ -70,10 +70,14 @@ public:
     //! Returns true if a menu is being displayed
     bool showingMenu() { return current_ != NULL; }
 
-    void keyEvent(Key key, KeyMod mod, bool pressed);
-    void mouseMotionEvent(int x, int y, int state);
-    void mouseDownEvent(int x, int y, int button);
-    void mouseUpEvent(int x, int y, int button);
+    //! Handles key pressed
+    void keyEvent(Key key, const int modKeys);
+    //! Handles mouse moved
+    void mouseMotionEvent(int x, int y, int state, const int modKeys);
+    //! Handles mouse button pressed
+    void mouseDownEvent(int x, int y, int button, const int modKeys);
+    //! Handles mouse button released
+    void mouseUpEvent(int x, int y, int button, const int modKeys);
 
 protected:
     //! Shows the menu opening animation

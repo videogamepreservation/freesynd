@@ -39,7 +39,7 @@ public:
     void handleRender();
     void handleShowLate();
     void handleLeave();
-    void handleMouseDown(int x, int y, int button);
+    void handleMouseDown(int x, int y, int button, const int modKeys);
     void handleOption(Key key);
 
 protected:

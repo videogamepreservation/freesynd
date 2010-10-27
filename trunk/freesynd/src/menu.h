@@ -150,10 +150,14 @@ public:
 
     void setParentMenu(const char *m) { parent_menu_ = m; }
 
-    void keyEvent(Key key, KeyMod mod, bool pressed);
-    void mouseMotionEvent(int x, int y, int state);
-    void mouseDownEvent(int x, int y, int button);
-    void mouseUpEvent(int x, int y, int button);
+    //! Handles key pressed
+    void keyEvent(Key key, const int modKeys);
+    //! Handles mouse moved
+    void mouseMotionEvent(int x, int y, int state, const int modKeys);
+    //! Handles mouse button pressed
+    void mouseDownEvent(int x, int y, int button, const int modKeys);
+    //! Handles mouse button released
+    void mouseUpEvent(int x, int y, int button, const int modKeys);
 
     void setStaticText(int static_id, const char *text);
 
@@ -190,10 +194,10 @@ public:
     }
 
     virtual void handleTick(int elapsed) {}
-    virtual void handleUnknownKey(Key key, KeyMod mod, bool pressed) {}
-    virtual void handleMouseDown(int x, int y, int button) {}
-    virtual void handleMouseUp(int x, int y, int button) {}
-    virtual void handleMouseMotion(int x, int y, int state) {}
+    virtual void handleUnknownKey(Key key, const int modKeys) {}
+    virtual void handleMouseDown(int x, int y, int button, const int modKeys) {}
+    virtual void handleMouseUp(int x, int y, int button, const int modKeys) {}
+    virtual void handleMouseMotion(int x, int y, int state, const int modKeys) {}
 
     //! Callback function : Childs can reimplement
     /*! 

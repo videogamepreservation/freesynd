@@ -138,7 +138,7 @@ void MenuManager::showMenu(Menu *pMenu, bool playAnim) {
     // is upon it
     int x,y;
     int state = g_System.getMousePos(&x, &y);
-    pMenu->mouseMotionEvent(x, y, state);
+    pMenu->mouseMotionEvent(x, y, state, KMD_NONE);
     
     // First draw completly the menu
     pMenu->render();
@@ -180,30 +180,60 @@ void MenuManager::renderMenu() {
     }
 }
 
-void MenuManager::keyEvent(Key key, KeyMod mod, bool pressed)
+/*!
+ * Handles the key pressed event.
+ * Actually, passes the event to the current menu.
+ * \param key The key that was pressed
+ * \param modKeys State of all modifier keys
+ */
+void MenuManager::keyEvent(Key key, const int modKeys)
 {
     if (current_ && !drop_events_) {
-        current_->keyEvent(key, mod, pressed);
+        current_->keyEvent(key, modKeys);
     }
 }
 
-void MenuManager::mouseMotionEvent(int x, int y, int state)
+/*!
+ * Handles the mouse motion event.
+ * Actually, passes the event to the current menu.
+ * \param x X screen coordinate
+ * \param y Y screen coordinate
+ * \param state If button is pressed during mouse motion.
+ * \param modKeys State of all modifier keys
+ */
+void MenuManager::mouseMotionEvent(int x, int y, int state, const int modKeys)
 {
     if (current_ && !drop_events_)
-        current_->mouseMotionEvent(x, y, state);
+        current_->mouseMotionEvent(x, y, state, modKeys);
 }
 
-void MenuManager::mouseDownEvent(int x, int y, int button)
+/*!
+ * Handles the mouse down event.
+ * Actually, passes the event to the current menu.
+ * \param x X screen coordinate
+ * \param y Y screen coordinate
+ * \param button What button was pressed
+ * \param modKeys State of all modifier keys
+ */
+void MenuManager::mouseDownEvent(int x, int y, int button, const int modKeys)
 {
     if (current_ && !drop_events_) {
-        current_->mouseDownEvent(x, y, button);
+        current_->mouseDownEvent(x, y, button, modKeys);
     }
 }
 
-void MenuManager::mouseUpEvent(int x, int y, int button)
+/*!
+ * Handles the mouse up event.
+ * Actually, passes the event to the current menu.
+ * \param x X screen coordinate
+ * \param y Y screen coordinate
+ * \param button What button was released
+ * \param modKeys State of all modifier keys
+ */
+void MenuManager::mouseUpEvent(int x, int y, int button, const int modKeys)
 {
     if (current_ && !drop_events_) {
-        current_->mouseUpEvent(x, y, button);
+        current_->mouseUpEvent(x, y, button, modKeys);
     }
 }
 

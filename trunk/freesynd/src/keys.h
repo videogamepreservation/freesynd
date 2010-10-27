@@ -295,8 +295,7 @@ enum Key {
     KEY_UNDO = 322,
 };
 
-// Valid key modifiers
-// (Again, a direct copy of the SDLMod enum)
+//! Valid key modifiers
 enum KeyMod {
     KMD_NONE = 0x0000,
     KMD_LSHIFT = 0x0001,
@@ -304,18 +303,11 @@ enum KeyMod {
     KMD_LCTRL = 0x0040,
     KMD_RCTRL = 0x0080,
     KMD_LALT = 0x0100,
-    KMD_RALT = 0x0200,
-    KMD_LMETA = 0x0400,
-    KMD_RMETA = 0x0800,
-    KMD_NUM = 0x1000,
-    KMD_CAPS = 0x2000,
-    KMD_MODE = 0x4000,
-    KMD_RESERVED = 0x8000
+    KMD_RALT = 0x0200
 };
 
 const int KMD_CTRL = KMD_LCTRL | KMD_RCTRL;
 const int KMD_SHIFT = KMD_LSHIFT | KMD_RSHIFT;
 const int KMD_ALT = KMD_LALT | KMD_RALT;
-const int KMD_META = KMD_LMETA | KMD_RMETA;
 
 #endif

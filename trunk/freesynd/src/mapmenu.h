@@ -43,9 +43,9 @@ public:
     void handleShow();
     void handleRender();
     void handleLeave();
-    void handleMouseDown(int x, int y, int button);
+    void handleMouseDown(int x, int y, int button, const int modKeys);
     void handleOption(Key key);
-    void handleUnknownKey(Key key, KeyMod mod, bool pressed);
+    void handleUnknownKey(Key key, const int modKeys);
 
 protected:
     static const int OWN_LBL_STATIC_ID;

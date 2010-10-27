@@ -105,6 +105,12 @@ protected:
     /*! A flag that tells that cursor must be updated because
      the mouse has moved or the cursor has changed.*/
     bool update_cursor_;
+    /*!
+     * This field is a bit buffer storing the state of modifier buttons.
+     * When a bit is set, that means a button is pressed.
+     * See KeyMod enumeration to know all modifier buttons.
+     */
+    int keyModState_;
 };
 
 #endif

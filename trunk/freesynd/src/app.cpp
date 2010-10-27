@@ -288,23 +288,32 @@ void App::reset() {
 //    cheatEquipAllMods();
 }
 
-void App::keyEvent(Key & key, KeyMod & mod, bool pressed) {
-    if (!pressed && key != KEY_LCTRL && key != KEY_RCTRL
-        && key != KEY_LALT)
-        return;
+/*!
+ * Handles the key pressed event.
+ * Actually, passes the event to the menu manager.
+ * \param key The key that was pressed
+ * \param modKeys State of all modifier keys
+ */
+void App::keyEvent(Key & key, const int modKeys) {
 
+    // TODO : There should be a special menu that 
+    // would play Fli so that playing Fli would not
+    // be a special event in the application.
     if (playingFli_) {
-        if (key == KEY_LSHIFT || key == KEY_LCTRL || key == KEY_LALT)
-            return;
         skipFli_ = true;
         return;
     }
 
     if (menus_.showingMenu()) {
-        menus_.keyEvent(key, mod, pressed);
+        menus_.keyEvent(key, modKeys);
         return;
     }
 
+    // TODO : this part is never reached because the app
+    // is either playing a Fli or showing a menu
+    // Maybe checked if menus has treated the current event
+    // and if not run this code
+#ifdef _DEBUG
     switch (key) {
     case KEY_ESCAPE:
     case KEY_q:
@@ -314,25 +323,50 @@ void App::keyEvent(Key & key, KeyMod & mod, bool pressed) {
     default:
         break;
     }
+#endif
 }
 
-void App::mouseDownEvent(int x, int y, int button) {
+/*!
+ * Handles the mouse down event.
+ * Actually, passes the event to the menu manager.
+ * \param x X screen coordinate
+ * \param y Y screen coordinate
+ * \param button What button was pressed
+ * \param modKeys State of all modifier keys
+ */
+void App::mouseDownEvent(int x, int y, int button, const int modKeys) {
     if (menus_.showingMenu()) {
-        menus_.mouseDownEvent(x, y, button);
+        menus_.mouseDownEvent(x, y, button, modKeys);
         return;
     }
 }
 
-void App::mouseUpEvent(int x, int y, int button) {
+/*!
+ * Handles the mouse up event.
+ * Actually, passes the event to the menu manager.
+ * \param x X screen coordinate
+ * \param y Y screen coordinate
+ * \param button What button was released
+ * \param modKeys State of all modifier keys
+ */
+void App::mouseUpEvent(int x, int y, int button, const int modKeys) {
     if (menus_.showingMenu()) {
-        menus_.mouseUpEvent(x, y, button);
+        menus_.mouseUpEvent(x, y, button, modKeys);
         return;
     }
 }
 
-void App::mouseMotionEvent(int x, int y, int state) {
+/*!
+ * Handles the mouse motion event.
+ * Actually, passes the event to the menu manager.
+ * \param x X screen coordinate
+ * \param y Y screen coordinate
+ * \param state If button is pressed during mouse motion.
+ * \param modKeys State of all modifier keys
+ */
+void App::mouseMotionEvent(int x, int y, int state, const int modKeys) {
     if (menus_.showingMenu()) {
-        menus_.mouseMotionEvent(x, y, state);
+        menus_.mouseMotionEvent(x, y, state, modKeys);
         return;
     }
 }

@@ -40,10 +40,10 @@ public:
     void handleShow();
     void handleRender();
     void handleLeave();
-    void handleMouseMotion(int x, int y, int state);
-    void handleMouseDown(int x, int y, int button);
-    void handleMouseUp(int x, int y, int button);
-    void handleUnknownKey(Key key, KeyMod mod, bool pressed);
+    void handleMouseMotion(int x, int y, int state, const int modKeys);
+    void handleMouseDown(int x, int y, int button, const int modKeys);
+    void handleMouseUp(int x, int y, int button, const int modKeys);
+    void handleUnknownKey(Key key, const int modKeys);
 
 protected:
     void drawAgentSelectors();
@@ -57,8 +57,8 @@ protected:
     bool isScrollLegal(int newScrollX, int newScrollY);
     void improveScroll(int &newScrollX, int &newScrollY);
     int selectedAgentsCount();
-    void selectAgent(unsigned int agentNo);
-    void selectAllAgents();
+    void selectAgent(unsigned int agentNo, bool addToGroup);
+    void selectAllAgents(bool invert=false);
 
     bool isAgentSelected(unsigned int agentNo) {
         return (selected_agents_ & (1 << agentNo))!=0;
@@ -79,7 +79,9 @@ protected:
     int scroll_y_;
     unsigned int selected_agents_;
     unsigned int selectable_agents_;
-    bool ctrl_, alt_;
+    /*! Flag to tell if path between checkpoints must be drawn. */
+    //TODO : see if this could be computed dynamically
+    bool showPath_;
     int pointing_at_ped_, pointing_at_vehicle_, pointing_at_weapon_;
     int mm_tx_, mm_ty_;
     bool completed_;
