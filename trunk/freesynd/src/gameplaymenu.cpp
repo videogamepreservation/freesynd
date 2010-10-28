@@ -382,6 +382,8 @@ void GameplayMenu::handleRender()
         if (isAgentSelected(3))
             mission_->ped(3)->showPath(world_x_, world_y_);
     }
+#ifdef _DEBUG
+    // drawing of different sprites
 //    g_App.gameSprites().sprite(9 * 40 + 1)->draw(0, 0, 0, false, true);
 #if 0
     // 1601 == start of weapons icons for sidebar
@@ -410,8 +412,10 @@ void GameplayMenu::handleRender()
             my = s->height();
     }
 #endif
+    // this is used in combination with keys
 #if 0
     g_App.gameSprites().drawFrame(qanim, qframe, 320, 200);
+#endif
 #endif
 }
 
@@ -777,29 +781,6 @@ void GameplayMenu::handleUnknownKey(Key key, const int modKeys) {
         }
     }
 
-    /*
-    What's that about?
-    if (modKeys & KMD_LALT) {
-        alt_ = true;
-        printf("%i\n", pointing_at_ped_);
-
-        if (pointing_at_ped_ != -1 && !alt_) {
-            int ox, oy;
-            int tx = g_App.maps().screenToTileX(mission_->map(),
-                    last_motion_x_ - 129 + world_x_,
-                    last_motion_y_ + world_y_, ox);
-            int ty = g_App.maps().screenToTileY(mission_->map(),
-                    last_motion_x_ - 129 + world_x_,
-                    last_motion_y_ + world_y_, oy);
-            mission_->ped(pointing_at_ped_)->setTileX(tx);
-            mission_->ped(pointing_at_ped_)->setTileY(ty);
-            mission_->ped(pointing_at_ped_)->setOffX(ox);
-            mission_->ped(pointing_at_ped_)->setOffY(oy);
-        }
-    }
-    */
-
-
     bool ctrl = false;
     if (modKeys & KMD_CTRL) {
         ctrl = true;
@@ -881,6 +862,7 @@ void GameplayMenu::handleUnknownKey(Key key, const int modKeys) {
 
 #ifdef _DEBUG
 
+    /* lowers position by z of 1st agent
     if (key == KEY_PAGEUP) {
         if (mission_->ped(0)->tileZ() < mission_->mmax_z_)
             mission_->ped(0)->setTileZ(mission_->ped(0)->tileZ() + 1);
@@ -890,18 +872,15 @@ void GameplayMenu::handleUnknownKey(Key key, const int modKeys) {
         if (mission_->ped(0)->tileZ() > 0)
             mission_->ped(0)->setTileZ(mission_->ped(0)->tileZ() - 1);
     }
-    
-    if (key == KEY_o)
-        topz++;
+    */
 
-    if (key == KEY_l)
-        topz--;
-
+    // all agents are killed with 'd'
     if (key == KEY_d) {
         for (int i = 8; i < mission_->numPeds(); i++)
             mission_->ped(i)->setHealth(0);
     }
 
+    /* used to see animations by number + frame
     if (key == KEY_a) {
         qanim--;
 
@@ -926,7 +905,10 @@ void GameplayMenu::handleUnknownKey(Key key, const int modKeys) {
 
     if (key == KEY_SPACE)
         printf("qanim %i qframe %i\n", qanim, qframe);
+    */
 
+    /* when directional pathfinding will be implemented this will be used
+    * for tests
     if (key == KEY_t) {
         mission_->vehicle(0)->setDirection(
                 mission_->vehicle(0)->direction() + 1);
@@ -936,6 +918,7 @@ void GameplayMenu::handleUnknownKey(Key key, const int modKeys) {
         mission_->vehicle(0)->setDirection(
                 mission_->vehicle(0)->direction() - 1);
     }
+    */
 
 #endif //_DEBUG
 
@@ -1200,7 +1183,9 @@ void GameplayMenu::drawMiniMap() {
 
     for (int j = 0; j < 16; j++)
         for (int i = 0; i < 16; i++) {
-            // TODO: still needs tweaking
+            // TODO: rewrite required
+            // minimap should be generated in brief menu and reused with
+            // objects added on top
             int t =
                 g_App.maps().map(mission_->map())->tileAt(tx + i, ty + j, 0);
 
