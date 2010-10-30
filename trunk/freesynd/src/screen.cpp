@@ -250,8 +250,8 @@ void Screen::setPixel(int x, int y, uint8 color)
 
 void Screen::drawRect(int x, int y, int width, int height, uint8 color)
 {
-    if (x < 0 || y < 0 || (x + width) >= width_
-        || (y + height) >= height_ || width <= 0 || height <= 0)
+    if (x < 0 || y < 0 || (x + width) > width_
+        || (y + height) > height_ || width <= 0 || height <= 0)
         return;
     for( int i = 0; i != height; i++) {
         memset(pixels_ + width_ * (y + i), color, width);
