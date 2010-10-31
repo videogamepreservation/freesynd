@@ -32,7 +32,7 @@
 #include "map.h"
 #include "tilemanager.h"
 
-#if 1
+#if 0
 #ifdef SYSTEM_SDL
 #include "system_sdl.h"
 #endif
@@ -204,27 +204,33 @@ void Map::draw(int scrollX, int scrollY, MapHelper * helper)
     int cmh = scrollY + g_Screen.gameScreenHeight() + 128;
     int cmx = scrollX - g_Screen.gameScreenLeftMargin();
      //  z = 0 - is minimap data and mapdata
-    for (int i = 0; i < (max_z_ / 3 + 1); i++) {
-        for (int yb = sh; yb < shm; yb++) {
-            if (yb < 0)
+    int chky = sh < 0 ? 0 : sh;
+    int zr = shm + max_z_- 1;
+    for (int inc = 0; inc < zr; inc++) {
+        int ye = sh + inc;
+        int ys = ye - max_z_;
+        int z = max_z_;
+        for (int yb = ys; yb < ye; yb++) {
+            z--;
+            if (yb < 0 || yb < sh || yb >= shm)
                 continue;
             int h = yb;
-            int chky = sh < 0 ? 0 : sh;
-            for (int w = sw; h >= chky && w < max_x_; w++ && h--) {
-                for (int z = i * 3; z < (i * 3 + 3); z++) {
-                    if (sw < 0 || h >= max_y_)
-                        continue;
-                    int idx = h * max_x_ + w;
-                    int screen_w = (max_x_ + (w - h)) * (TILE_WIDTH / 2);
-                    int screen_h = (max_z_ + w + h) * (TILE_HEIGHT / 3);
-                    int tile = map_data_[idx * max_z_ + z];
-                    int coord_h = screen_h - (z - 1) * (TILE_HEIGHT / 3);
-                    if (screen_w >= scrollX - TILE_WIDTH * 2
-                        && screen_w + TILE_WIDTH * 2 < cmw
-                        && coord_h >= scrollY - TILE_HEIGHT * 2
-                        && coord_h + TILE_HEIGHT * 2 < cmh) {
-                        if (z < max_z_ && tile > 4) {
-                            int dx = 0, dy = 0;
+            for (int w = sw; h >= chky && w < max_x_; w++) {
+                if (w < 0 || h >= max_y_) {
+                    h--;
+                    continue;
+                }
+                int screen_w = (max_x_ + (w - h)) * (TILE_WIDTH / 2);
+                int screen_h = (max_z_ + w + h) * (TILE_HEIGHT / 3);
+                int coord_h = screen_h - (z - 1) * (TILE_HEIGHT / 3);
+                if (screen_w >= scrollX - TILE_WIDTH * 2
+                    && screen_w + TILE_WIDTH * 2 < cmw
+                    && coord_h >= scrollY - TILE_HEIGHT * 2
+                    && coord_h + TILE_HEIGHT * 2 < cmh) {
+                    if (z < max_z_) {
+                        int tile = map_data_[(h * max_x_ + w) * max_z_ + z];
+                        if (tile > 4) {
+                        int dx = 0, dy = 0;
                             if (screen_w - scrollX < 0)
                                 dx = -(screen_w - scrollX);
                             if (coord_h - scrollY < 0)
@@ -240,16 +246,15 @@ void Map::draw(int scrollX, int scrollY, MapHelper * helper)
                                               false, TILE_WIDTH);
                             }
                         }
-                        if ( (z - 3) >= 0 )
-                        {
-                            helper->drawAt(w, h, z - 3,
-                                           screen_w - cmx +
-                                           TILE_WIDTH / 2,
-                                           coord_h - scrollY  + TILE_HEIGHT, scrollX,
-                                           scrollY);
-                        }
+                    }
+                    if (z - 2 >= 0) {
+                        helper->drawAt(w, h, z - 2,
+                            screen_w - cmx + TILE_WIDTH / 2,
+                            coord_h - scrollY + TILE_HEIGHT / 3 * 2,
+                            scrollX, scrollY);
                     }
                 }
+                h--;
             }
         }
     }
