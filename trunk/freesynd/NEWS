@@ -18,6 +18,7 @@ Changes
   visible now
   * Small doors will open and close
   * Vehicles will not move if they are destroyed
+  * Project is now buld with autoconf/automake
 
 Fixed Bugs
 ----------

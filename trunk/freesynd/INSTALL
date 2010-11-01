@@ -1,0 +1,47 @@
+Installation Instructions
+*************************
+
+Windows Installation
+====================
+
+   Unzip the file in any directory you want. Everything you need to
+run FreeSynd is included in this release.
+
+Linux Installation
+==================
+
+   In order to run FreeSynd under Linux, you first need to install:
+ - libSDL-1.2
+ - libSDL_mixer
+ - libSDL_image
+
+On a debian based distribution you can do this as simply as:
+   apt-get install libsdl1.2debian
+   apt-get install libsdl-mixer1.2
+
+for other distributions, consult the appropriate documentation.
+
+ * Installation from released file
+ ---------------------------------
+   Unzip/untar file in your prefered directory and enter the newly 
+created freesynd directory. Type the following commands:
+	./configure
+	make
+	make install
+
+   Consult documentation on configure to know how to
+customize installation.
+
+ * Installation from SVN
+   ---------------------
+
+   After having checked out freesynd sources from svn, enter the
+freesynd directory.
+   Run the following commands to set the environment up :
+	autoconf
+	automake -ac
+
+Then run those commands to build the game:
+	./configure
+	make
+	
