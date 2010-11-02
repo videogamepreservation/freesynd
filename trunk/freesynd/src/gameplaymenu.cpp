@@ -844,25 +844,20 @@ void GameplayMenu::handleUnknownKey(Key key, const int modKeys) {
         g_App.gameSounds().toggleSound();
     }
 
+#ifdef _DEBUG
 #if 0
-    if (key == KEY_UP)
+    if (key == KEY_i)
         mission_->ped(0)->setTileY(mission_->ped(0)->tileY() - 1);
 
-    if (key == KEY_DOWN)
+    if (key == KEY_k)
         mission_->ped(0)->setTileY(mission_->ped(0)->tileY() + 1);
 
-    if (key == KEY_LEFT)
+    if (key == KEY_j)
         mission_->ped(0)->setTileX(mission_->ped(0)->tileX() - 1);
 
-    if (key == KEY_RIGHT)
+    if (key == KEY_l)
         mission_->ped(0)->setTileX(mission_->ped(0)->tileX() + 1);
 
-    printf("%i %i\n", mission_->ped(0)->tileX(), mission_->ped(0)->tileY());
-#endif
-
-#ifdef _DEBUG
-
-    /* lowers position by z of 1st agent
     if (key == KEY_PAGEUP) {
         if (mission_->ped(0)->tileZ() < mission_->mmax_z_)
             mission_->ped(0)->setTileZ(mission_->ped(0)->tileZ() + 1);
@@ -872,7 +867,30 @@ void GameplayMenu::handleUnknownKey(Key key, const int modKeys) {
         if (mission_->ped(0)->tileZ() > 0)
             mission_->ped(0)->setTileZ(mission_->ped(0)->tileZ() - 1);
     }
-    */
+
+    if (key == KEY_o) {
+        mission_->ped(0)->setOffZ(mission_->ped(0)->offZ() + 8);
+        if (mission_->ped(0)->tileZ() >= mission_->mmax_z_) {
+            mission_->ped(0)->setTileZ(mission_->mmax_z_ - 1);
+            mission_->ped(0)->setOffZ(127);
+        }
+    }
+
+    if (key == KEY_p) {
+        mission_->ped(0)->setOffZ(mission_->ped(0)->offZ() - 8);
+        if (mission_->ped(0)->tileZ() < 0) {
+            mission_->ped(0)->setTileZ(0);
+            mission_->ped(0)->setOffZ(0);
+        }
+    }
+    if (mission_->ped(0)->offZ() != 0)
+        mission_->ped(0)->setVisZ(mission_->ped(0)->tileZ() - 1);
+    else
+        mission_->ped(0)->setVisZ(mission_->ped(0)->tileZ());
+
+    printf("%i %i %i\n", mission_->ped(0)->tileX(), mission_->ped(0)->tileY(),
+        mission_->ped(0)->tileZ());
+#endif
 
     // all agents are killed with 'd'
     if (key == KEY_d) {

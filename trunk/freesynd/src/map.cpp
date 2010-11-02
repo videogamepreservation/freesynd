@@ -205,15 +205,16 @@ void Map::draw(int scrollX, int scrollY, MapHelper * helper)
     int cmx = scrollX - g_Screen.gameScreenLeftMargin();
      //  z = 0 - is minimap data and mapdata
     int chky = sh < 0 ? 0 : sh;
-    int zr = shm + max_z_- 1;
+    int zr = shm + max_z_ + 1;
     for (int inc = 0; inc < zr; inc++) {
         int ye = sh + inc;
-        int ys = ye - max_z_;
-        int z = max_z_;
+        int ys = ye - max_z_ - 2;
+        int z = max_z_ + 1;
         for (int yb = ys; yb < ye; yb++) {
-            z--;
-            if (yb < 0 || yb < sh || yb >= shm)
+            if (yb < 0 || yb < sh || yb >= shm) {
+                z--;
                 continue;
+            }
             int h = yb;
             for (int w = sw; h >= chky && w < max_x_; w++) {
                 if (w < 0 || h >= max_y_) {
@@ -256,6 +257,7 @@ void Map::draw(int scrollX, int scrollY, MapHelper * helper)
                 }
                 h--;
             }
+            z--;
         }
     }
 

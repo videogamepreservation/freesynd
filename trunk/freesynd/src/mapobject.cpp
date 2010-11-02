@@ -255,6 +255,7 @@ Static *Static::loadInstance(uint8 * data, int m)
         case 0x1A:
             // advertisement on wall
             s = new EtcObj(m, curanim, curanim, curanim);
+            s->setMainType(1);
             break;
         case 0x1C:
             // ???? what is this?
@@ -262,8 +263,9 @@ Static *Static::loadInstance(uint8 * data, int m)
             //printf("0x1C anim %X\n", curanim);
             break;
         case 0x1F:
-            // advertisement on wall
+            // advertisement on wall + brokem signal
             s = new EtcObj(m, curanim, curanim, curanim);
+            s->setMainType(1);
             break;
         case 0x20:
             // window without light animated
@@ -314,6 +316,10 @@ Static *Static::loadInstance(uint8 * data, int m)
         z--;
         int oz = gamdata->mapposz[0] & 0x7F;
         s->setVisZ(z);
+        // patch for advertisement on wall
+        if (s->getMainType() == 1)
+            z += 2;
+
         if (oz > 0)
             z++;
         s->setPosition(gamdata->mapposx[1], gamdata->mapposy[1],

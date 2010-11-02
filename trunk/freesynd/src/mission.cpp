@@ -164,7 +164,7 @@ bool Mission::loadLevel(uint8 * levelData)
             if (i > 7) {
                 if (pedref.type_ped == m_tpAgent
                     || pedref.type_ped == m_tpGuard) {
-                    p->setHostile(true);
+                    //p->setHostile(true);
                 }
                 p->setSightRange(7);
             }
@@ -547,7 +547,8 @@ void Mission::createFastKeys(int tilex, int tiley, int maxtilex, int maxtiley) {
         VehicleInstance *v = vehicles_[i];
         if (v->tileX() >= tilex && v->tileX() < maxtilex
             && v->tileY() >= tiley && v->tileY() < maxtiley) {
-            fast_vehicle_cache_.insert(fastKey(v));
+            fast_vehicle_cache_.insert(fastKey(v->tileX(),
+                v->tileY(), v->tileZ() + 1));
             cache_vehicles_.push_back(v);
         }
     }
@@ -612,8 +613,8 @@ void Mission::drawAt(int tilex, int tiley, int tilez, int x, int y,
         for (unsigned int i = 0; i < cache_vehicles_.size(); i++)
             if (cache_vehicles_[i]->tileX() == tilex
                 && cache_vehicles_[i]->tileY() == tiley
-                && cache_vehicles_[i]->tileZ() == tilez)
-                cache_vehicles_[i]->draw(x, y);
+                && (cache_vehicles_[i]->tileZ() + 1) == tilez)
+                cache_vehicles_[i]->draw(x, y + TILE_HEIGHT / 3);
     }
 
     if (fast_ped_cache_.find(key) != fast_ped_cache_.end()) {
