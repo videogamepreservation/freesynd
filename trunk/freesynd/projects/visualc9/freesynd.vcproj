@@ -332,11 +332,11 @@
 				Name="sound"
 				>
 				<File
-					RelativePath="..\..\src\audio.cpp"
+					RelativePath="..\..\src\sound\audio.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\src\musicmanager.cpp"
+					RelativePath="..\..\src\sound\musicmanager.cpp"
 					>
 				</File>
 				<File
@@ -348,11 +348,11 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\src\soundmanager.cpp"
+					RelativePath="..\..\src\sound\soundmanager.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\src\xmidi.cpp"
+					RelativePath="..\..\src\sound\xmidi.cpp"
 					>
 				</File>
 			</Filter>
@@ -590,15 +590,15 @@
 				Name="sound"
 				>
 				<File
-					RelativePath="..\..\src\audio.h"
+					RelativePath="..\..\src\sound\audio.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\src\music.h"
+					RelativePath="..\..\src\sound\music.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\src\musicmanager.h"
+					RelativePath="..\..\src\sound\musicmanager.h"
 					>
 				</File>
 				<File
@@ -610,15 +610,15 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\src\sound.h"
+					RelativePath="..\..\src\sound\sound.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\src\soundmanager.h"
+					RelativePath="..\..\src\sound\soundmanager.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\src\xmidi.h"
+					RelativePath="..\..\src\sound\xmidi.h"
 					>
 				</File>
 			</Filter>

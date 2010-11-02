@@ -12,12 +12,15 @@ freesynd_SOURCES = common.h config.h keys.h singleton.h \
 	utils/dernc.cpp utils/dernc.h\
 	utils/log.cpp utils/log.h \
 	core/gamesession.cpp core/gamesession.h \
+	sound/audio.cpp sound/audio.h \
+	sound/soundmanager.cpp sound/soundmanager.h sound/sound.h \
+	sound/musicmanager.cpp sound/musicmanager.h sound/music.h \
 	sound/sdlmixermusic.cpp sound/sdlmixermusic.h \
 	sound/sdlmixersound.cpp sound/sdlmixersound.h \
+	sound/xmidi.cpp sound/xmidi.h
 	agent.cpp agent.h \
 	agentmanager.cpp agentmanager.h \
 	app.cpp app.h \
-	audio.cpp audio.h \
 	briefmenu.cpp briefmenu.h \
 	confmenu.cpp confmenu.h \
 	debriefmenu.cpp debriefmenu.h \
@@ -42,13 +45,11 @@ freesynd_SOURCES = common.h config.h keys.h singleton.h \
 	misswinmenu.cpp misswinmenu.h \
 	mod.cpp mod.h \
 	modmanager.cpp modmanager.h \
-	musicmanager.cpp musicmanager.h music.h \
 	ped.cpp ped.h \
 	pedmanager.cpp pedmanager.h \
 	researchmenu.cpp researchmenu.h \
 	screen.cpp screen.h \
 	selectmenu.cpp selectmenu.h \
-	soundmanager.cpp soundmanager.h sound.h \
 	sprite.cpp sprite.h \
 	spritemanager.cpp spritemanager.h \
 	system_sdl.cpp system_sdl.h system.h \
@@ -57,8 +58,7 @@ freesynd_SOURCES = common.h config.h keys.h singleton.h \
 	vehicle.cpp vehicle.h \
 	vehiclemanager.cpp vehiclemanager.h \
 	weapon.cpp weapon.h weaponholder.h \
-	weaponmanager.cpp weaponmanager.h \
-	xmidi.cpp xmidi.h
+	weaponmanager.cpp weaponmanager.h
 
 dump_LDADD = ${SDL_LIBS} -lpng
 

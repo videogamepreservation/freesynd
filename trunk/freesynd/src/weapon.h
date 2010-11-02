@@ -28,7 +28,7 @@
 
 #include <string>
 #include "mapobject.h"
-#include "sound.h"
+#include "sound/sound.h"
 
 class WeaponInstance;
 

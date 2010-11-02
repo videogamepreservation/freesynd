@@ -42,7 +42,7 @@
 #include "fliplayer.h"
 #include "spritemanager.h"
 #include "screen.h"
-#include "audio.h"
+#include "sound/audio.h"
 #include "utils/file.h"
 #include "utils/log.h"
 

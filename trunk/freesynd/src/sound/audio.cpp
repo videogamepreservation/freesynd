@@ -38,7 +38,7 @@
 
 #ifdef HAVE_SDL_MIXER
 
-#include "sound/sdlmixersound.h"
+#include "sdlmixersound.h"
 
 /*!
  * Initialize the audio system using SDL_Mixer.

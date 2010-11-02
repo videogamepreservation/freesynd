@@ -33,7 +33,7 @@
 #ifdef HAVE_SDL_MIXER
 
 // Load the SDL_Mixer implementation
-#include "sound/sdlmixermusic.h"
+#include "sdlmixermusic.h"
 
 // This macro is used to hide the implementation class
 #define Music SdlMixerMusic

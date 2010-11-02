@@ -23,11 +23,11 @@
  *                                                                      *
  ************************************************************************/
 
+#include "config.h"
 #include "screen.h"
 #include "system_sdl.h"
 #include "app.h"
-#include "audio.h"
-#include "config.h"
+#include "sound/audio.h"
 #include "utils/file.h"
 #include "utils/log.h"
 

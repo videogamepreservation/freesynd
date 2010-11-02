@@ -45,8 +45,8 @@
 #include "modmanager.h"
 #include "vehiclemanager.h"
 #include "pedmanager.h"
-#include "soundmanager.h"
-#include "musicmanager.h"
+#include "sound/soundmanager.h"
+#include "sound/musicmanager.h"
 #include "core/gamesession.h"
 
 /*!

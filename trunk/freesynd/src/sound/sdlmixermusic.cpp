@@ -24,8 +24,8 @@
  *                                                                      *
  ************************************************************************/
 
-#include "../config.h"
-#include "../audio.h"
+#include "config.h"
+#include "audio.h"
 
 #ifdef HAVE_SDL_MIXER
 
