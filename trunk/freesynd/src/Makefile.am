@@ -17,7 +17,7 @@ freesynd_SOURCES = common.h config.h keys.h singleton.h \
 	sound/musicmanager.cpp sound/musicmanager.h sound/music.h \
 	sound/sdlmixermusic.cpp sound/sdlmixermusic.h \
 	sound/sdlmixersound.cpp sound/sdlmixersound.h \
-	sound/xmidi.cpp sound/xmidi.h
+	sound/xmidi.cpp sound/xmidi.h \
 	agent.cpp agent.h \
 	agentmanager.cpp agentmanager.h \
 	app.cpp app.h \
@@ -66,5 +66,9 @@ dump_SOURCES = \
 	dump.cpp \
 	sprite.cpp \
 	spritemanager.cpp \
+	map.cpp \
+	mapmanager.cpp \
+	tile.cpp \
+	tilemanager.cpp \
 	utils/file.cpp \
 	utils/dernc.cpp
