@@ -171,6 +171,7 @@ bool Mission::loadLevel(uint8 * levelData)
         }
     }
 #if 0
+    // TODO: new england doors, venezuela windows!!!
     // for hacking statics data
     char nameSs[256];
     sprintf(nameSs, "statics%02X.hex", map_);
@@ -907,7 +908,7 @@ bool Mission::setSurfaces() {
         int x = p->tileX();
         int y = p->tileY();
         int z = p->tileZ();
-        if (z >= mmax_z_)
+        if (z >= mmax_z_ || z < 0)
             continue;
         if (mdpoints_[x + y * mmax_x_ + z * mmax_m_xy].t == m_fdNotDefined) {
             toDefineXYZ stodef;
@@ -935,7 +936,7 @@ bool Mission::setSurfaces() {
                 uint8 upper_s = 0;
                 floodPointDesc *cfp = &(mdpoints_[x + y + z]);
                 floodPointDesc *nxtfp;
-                if (zp < (mmax_m_xy * (mmax_z_ - 2))) {
+                if (zp < (mmax_m_xy * (mmax_z_ - 1))) {
                     upper_s = mtsurfaces_[x + y + zp].twd;
                     if(!sWalkable(this_s, upper_s)) {
                         cfp->t = m_fdNonWalkable;

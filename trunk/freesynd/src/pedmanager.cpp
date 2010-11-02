@@ -136,9 +136,6 @@ PedInstance *PedManager::loadInstance(uint8 * data, int map)
     Mission::LEVELDATA_PEOPLE * gamdata =
         (Mission::LEVELDATA_PEOPLE *) data;
 
-    if (gamdata->type == 0)
-        return NULL;
-
     int dir = gamdata->orientation >> 5;
     int hp = READ_LE_INT16(gamdata->health);
 
@@ -158,6 +155,9 @@ PedInstance *PedManager::loadInstance(uint8 * data, int map)
     // for correct calculations of viewpoint, target hit etc.
     // Zr = (Zt * 128) / 256
     int z = READ_LE_UINT16(gamdata->mapposz) >> 7;
+    // some peds have z = 0 - map paraguay
+    if (z == 0)
+        z = 1;
     z--;
     int oz = gamdata->mapposz[0] & 0x7F;
     newped->setVisZ(z);
