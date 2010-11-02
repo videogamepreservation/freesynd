@@ -858,7 +858,7 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
     speed_ = 0;
 
 #if 0
-    printf("target pos: x %i; y %i; z %i, ox %i, oy %i\n",
+    printf("target pos: x %x; y %x; z %x, ox %i, oy %i\n",
         x, y, z, ox, oy);
 #endif
 

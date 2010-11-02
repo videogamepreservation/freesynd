@@ -189,7 +189,8 @@ Static *Static::loadInstance(uint8 * data, int m)
             s = new NeonSign(m, curanim);
             break;
         case 0x0C: // closed door
-            if (gamdata->orientation == 0x00 || gamdata->orientation == 0x80) {
+            if (gamdata->orientation == 0x00 || gamdata->orientation == 0x80
+                || gamdata->orientation == 0x7E || gamdata->orientation == 0xFE) {
                 s = new Door(m, baseanim, baseanim + 2, baseanim + 4, baseanim + 6);
                 s->setSubType(0);
             } else {
@@ -199,7 +200,8 @@ Static *Static::loadInstance(uint8 * data, int m)
             }
             break;
         case 0x0D: // closed door
-            if (gamdata->orientation == 0x00 || gamdata->orientation == 0x80) {
+            if (gamdata->orientation == 0x00 || gamdata->orientation == 0x80
+                || gamdata->orientation == 0x7E || gamdata->orientation == 0xFE) {
                 s = new Door(m, baseanim, baseanim + 2, baseanim + 4, baseanim + 6);
                 s->setSubType(0);
             } else {
@@ -209,7 +211,8 @@ Static *Static::loadInstance(uint8 * data, int m)
             }
             break;
         case 0x0E: // opening doors, not open
-            if (gamdata->orientation == 0x00 || gamdata->orientation == 0x80) {
+            if (gamdata->orientation == 0x00 || gamdata->orientation == 0x80
+                || gamdata->orientation == 0x7E || gamdata->orientation == 0xFE) {
                 s = new Door(m, baseanim, baseanim + 2, baseanim + 4, baseanim + 6);
                 s->setSubType(0);
             } else {
@@ -220,7 +223,8 @@ Static *Static::loadInstance(uint8 * data, int m)
             s->state_ = sttdoor_Opening;
             break;
         case 0x0F: // opening doors, not open
-            if (gamdata->orientation == 0x00 || gamdata->orientation == 0x80) {
+            if (gamdata->orientation == 0x00 || gamdata->orientation == 0x80
+                || gamdata->orientation == 0x7E || gamdata->orientation == 0xFE) {
                 s = new Door(m, baseanim, baseanim + 2, baseanim + 4, baseanim + 6);
                 s->setSubType(0);
             } else {

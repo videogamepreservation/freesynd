@@ -164,14 +164,13 @@ bool Mission::loadLevel(uint8 * levelData)
             if (i > 7) {
                 if (pedref.type_ped == m_tpAgent
                     || pedref.type_ped == m_tpGuard) {
-                    //p->setHostile(true);
+                    p->setHostile(true);
                 }
                 p->setSightRange(7);
             }
         }
     }
 #if 0
-    // TODO: new england doors, venezuela windows!!!
     // for hacking statics data
     char nameSs[256];
     sprintf(nameSs, "statics%02X.hex", map_);
