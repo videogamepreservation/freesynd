@@ -219,7 +219,14 @@ public:
      */
     virtual void handleLeave() {}
     virtual void handleShowLate() {}
-    virtual void handleOption(Key key) {}
+
+    //! Callback function : Childs can reimplement
+    /*! 
+     * Called when an option has been activated.
+     * \param key The key that was pressed.
+     * \param modKeys The state of all modifiers buttons
+     */
+    virtual void handleOption(Key key, const int modKeys) {}
 
 protected:
     MenuManager *menu_manager_;

@@ -40,7 +40,7 @@ public:
     void handleShow();
     void handleRender();
     void handleLeave();
-    void handleOption(Key key);
+    void handleOption(Key key, const int modKeys);
     
 protected:
     void updateClock();

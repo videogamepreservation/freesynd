@@ -233,7 +233,7 @@ void BriefMenu::handleLeave() {
     g_System.hideCursor();
 }
 
-void BriefMenu::handleOption(Key key) {
+void BriefMenu::handleOption(Key key, const int modKeys) {
     if (key == KEY_F1) {
         // Buy some informations
         if (info_level_ < 3) {

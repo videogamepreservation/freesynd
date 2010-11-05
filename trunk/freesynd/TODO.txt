@@ -1,6 +1,4 @@
 - Complete mission tree
-- MiniMap in brief menu
-- Research Menu
 - MiniMap in game : more detailed map, display peds, guns, radar focus,
 evacuation red circle
 - Mission objectives
@@ -76,6 +74,4 @@ in original gameplay or are not present at all
 --
  - BriefMenu::handleRender() needs optimization, when info is maximum and last
  page is viewed briefing text display is very slow
- - We usually use in menus single mouse button interface, some buttons(Options)
-require second button as tax rate changing, left button +(-) 1%, right +(-) 10%,
-also we need dragging implemented
+ - Implements dragging in SelectMenu to pass a weapon from an agent to another.

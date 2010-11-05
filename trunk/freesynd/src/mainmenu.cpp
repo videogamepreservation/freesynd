@@ -51,7 +51,7 @@ void MainMenu::handleLeave() {
     g_System.hideCursor();
 }
 
-void MainMenu::handleOption(Key key)
+void MainMenu::handleOption(Key key, const int modKeys)
 {
     if (key == KEY_F4)
         g_App.reset();

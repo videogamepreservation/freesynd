@@ -228,7 +228,7 @@ void ResearchMenu::handleLeave() {
     g_System.hideCursor();
 }
 
-void ResearchMenu::handleOption(Key key)
+void ResearchMenu::handleOption(Key key, const int modKeys)
 {
     if (key >= KEY_0 && key <= KEY_9) {
         sel_field_ = key - KEY_0 + 1;

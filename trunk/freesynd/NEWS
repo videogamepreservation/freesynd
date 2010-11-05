@@ -19,6 +19,7 @@ Changes
   * Small doors will open and close
   * Vehicles will not move if they are destroyed
   * Project is now buld with autoconf/automake
+  * Map menu is now completly fonctionnal
 
 Fixed Bugs
 ----------
@@ -34,7 +35,6 @@ Known issues with this release
 ------------------------------
   * Agent AI is not operational.
   * The minimap is not complete.
-  * Tax collection and other functionality of the world map are not done.
   * PathFinding requires improvement
   * Mission debriefing is not operational
   * No animation for trees, windows

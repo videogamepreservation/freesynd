@@ -540,7 +540,7 @@ void SelectMenu::handleMouseDown(int x, int y, int button, const int modKeys)
             }
 }
 
-void SelectMenu::handleOption(Key key)
+void SelectMenu::handleOption(Key key, const int modKeys)
 {
     if (key == KEY_F2) {
         sel_weapon_ = sel_mod_ = sel_weapon_inst_ = 0;

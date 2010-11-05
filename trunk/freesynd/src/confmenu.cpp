@@ -89,7 +89,7 @@ public:
         g_Screen.drawLogo(336, 55, logo_, g_Colours[colour_]);
     }
 
-    virtual void handleOption(Key key) {
+    virtual void handleOption(Key key, const int modKeys) {
         if (key == KEY_F1) {
             if (colour_ > 0)
                 colour_--;
@@ -217,7 +217,7 @@ public:
         name_value_ = g_App.getGameSession().getCompanyName();
     }
 
-    virtual void handleOption(Key key) {
+    virtual void handleOption(Key key, const int modKeys) {
         if (key == KEY_F5) {
             g_App.getGameSession().setCompanyName(name_value_.c_str());
             g_App.setCheatCode(name_value_.c_str());
@@ -236,7 +236,7 @@ public:
         name_value_ = g_App.getGameSession().getUserName();
     }
 
-    virtual void handleOption(Key key) {
+    virtual void handleOption(Key key, const int modKeys) {
         if (key == KEY_F5)
             g_App.getGameSession().setUserName(name_value_.c_str());
     }

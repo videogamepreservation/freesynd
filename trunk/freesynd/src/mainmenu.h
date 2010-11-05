@@ -34,7 +34,7 @@ public:
 
     void handleRender();
     void handleLeave();
-    void handleOption(Key key);
+    void handleOption(Key key, const int modKeys);
 };
 
 #endif

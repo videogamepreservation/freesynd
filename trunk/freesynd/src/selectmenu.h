@@ -40,7 +40,7 @@ public:
     void handleShowLate();
     void handleLeave();
     void handleMouseDown(int x, int y, int button, const int modKeys);
-    void handleOption(Key key);
+    void handleOption(Key key, const int modKeys);
 
 protected:
     void updateClock();

@@ -410,12 +410,20 @@ void MapMenu::handleMouseDown(int x, int y, int button, const int modKeys)
     }
 }
 
-void MapMenu::handleOption(Key key) {
+void MapMenu::handleOption(Key key, const int modKeys) {
     bool refresh = false;
     if (key == KEY_PLUS ) {
-        refresh = g_Session.addToTaxRate(1);
+        if (modKeys & KMD_CTRL) {
+            refresh = g_Session.addToTaxRate(10);
+        } else {
+            refresh = g_Session.addToTaxRate(1);
+        }
     } else if (key == KEY_MINUS ) {
-        refresh = g_Session.addToTaxRate(-1);
+        if (modKeys & KMD_CTRL) {
+            refresh = g_Session.addToTaxRate(-10);
+        } else {
+            refresh = g_Session.addToTaxRate(-1);
+        }
     }
 
     if (refresh) {

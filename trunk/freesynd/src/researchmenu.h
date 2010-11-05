@@ -37,7 +37,7 @@ public:
     void handleRender();
     void handleShowLate();
     void handleLeave();
-    void handleOption(Key key);
+    void handleOption(Key key, const int modKeys);
 
 protected:
     int tab_;

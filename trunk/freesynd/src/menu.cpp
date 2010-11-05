@@ -231,7 +231,7 @@ void Menu::keyEvent(Key key, const int modKeys)
         handleUnknownKey(key, modKeys);
         return;
     }
-    handleOption(key);
+    handleOption(key, modKeys);
     if (options_[key].to_)
         menu_manager_->changeCurrentMenu(options_[key].to_);
 }
@@ -293,7 +293,7 @@ void Menu::mouseDownEvent(int x, int y, int button, const int modKeys)
         }
 
         if (m.isMouseOver(x, y)) {
-            keyEvent(it->first, KMD_NONE);
+            keyEvent(it->first, modKeys);
             return;
         }
     }
