@@ -93,6 +93,8 @@ public:
     bool drawFrame(int animNum, int frameNum, int x, int y);
     bool lastFrame(int animNum, int frameNum);
     int lastFrame(int animNum);
+    int getFrameFromFrameIndx(int frameIndx);
+    int getFrameNum(int animNum);
 
 protected:
     std::vector<int> index_;

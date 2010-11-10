@@ -6,8 +6,6 @@ evacuation red circle
 - Remove debug info displayed in the console
  - Correct identification of object types during mission load, includes
 vehicles, people, static objects, weapons, also setup sfx for weapons
- - Objects state identification on loading phase: some of them don't start with
-first animation, some blinking signs have different start frame
  - Adding properties to:
    vehicle: max people can hold; speed per type; damage can inflict/recieve per type;
 radius of damage when destroyed
@@ -24,7 +22,7 @@ area(?) - bomb, gauss, laser;
    all: type of damage that can be inflicted - windows can break from bullets/explosion,
 but trees will burn from explosions only, people with shield vulnerable to explosions
 only
- - indexes within group of type for vehicles/people/weapons, to be used for minimap
+ - (remove this?)indexes within group of type for vehicles/people/weapons, to be used for minimap
 drawing during briefing, they are as offsets in mission data in files, these offsets
 have different use within original game code and transforming them from offsets to
 indexes is required due to difference in realization in our project and in original
@@ -55,11 +53,7 @@ of event/state:
    windows break when shot
    different objects burn
  - object positioning during drawing
- - map drawing should start from top and go down, by visual (x,y) not map (x,y),
-better to group drawing objects by Z, it can be faster, for fast searching is used
-key generated every time, this can be added and generated for object on load and on
-change respectively, will also speed up drawing as not all objects change their
-position
+ - map drawing still buggy
  - briefmenu enhance level require better handling of values some missions have 2
 info costs, some 3, enhance cost same thing, the total number is const = 3 it
 should be variable

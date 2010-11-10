@@ -40,9 +40,6 @@ void LoadingMenu::handleTick(int elapsed)
 {
     tick_count_ += elapsed;
     if (tick_count_ >= 100) {
-        if (!g_App.gameSprites().loaded())
-            g_App.gameSprites().load();
-
         Mission *pMission = g_Session.getMission();
         pMission->loadMap();// TODO : move this to briefmenu
         pMission->setSurfaces();

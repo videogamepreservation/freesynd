@@ -525,6 +525,9 @@ void App::run() {
         delete[] data;
     }
 
+    if (!gameSprites().loaded())
+        gameSprites().load();
+
     menus_.createAllMenus();
 
     if (start_mission == -1) {
@@ -535,7 +538,7 @@ void App::run() {
         // in the given mission
         // First, we find the block associated with the given
         // mission number
-        for (int i=0; i<50; i++) {
+        for (int i = 0; i < 50; i++) {
             if (session_.getBlock(i).mis_id == start_mission) {
                 session_.setSelectedBlockId(i);
             }

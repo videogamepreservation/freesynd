@@ -170,6 +170,7 @@ int topz = -1;
 
 void Map::draw(int scrollX, int scrollY, MapHelper * helper)
 {
+    // TODO: after a lot of attempts to fix this, map drawing remain buggy
     if (scrollX + (g_Screen.gameScreenWidth() - g_Screen.gameScreenLeftMargin()) >= map_width_)
         scrollX = map_width_ - (g_Screen.gameScreenWidth() - g_Screen.gameScreenLeftMargin());
     if (scrollY + g_Screen.gameScreenHeight() >= map_height_)

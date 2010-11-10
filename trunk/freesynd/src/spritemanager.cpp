@@ -283,3 +283,37 @@ int GameSpriteManager::lastFrame(int animNum)
         frameNum++;
     }
 }
+
+int GameSpriteManager::getFrameFromFrameIndx(int frameIndx)
+{
+    int frameNum = 0;
+
+    GameSpriteFrame *f = &frames_[frameIndx];
+    while (1) {
+        f = &frames_[f->next_frame_];
+        if (f->flags_ == 0x0100)
+            break;
+    }
+
+    while (1) {
+        f = &frames_[f->next_frame_];
+        if (f->next_frame_ == frameIndx)
+            return frameNum;
+        frameNum++;
+    }
+}
+
+int GameSpriteManager::getFrameNum(int animNum)
+{
+    // NOTE: this is not tested for correctness
+    assert(animNum < (int) index_.size());
+    int frameNum = 1;
+
+    GameSpriteFrame *f = &frames_[index_[animNum]];
+    while (1) {
+        if (f->flags_ == 0x0100)
+            return frameNum;
+        f = &frames_[f->next_frame_];
+        frameNum++;
+    }
+}

@@ -111,6 +111,7 @@ public:
         frames_per_sec_ = framesPerSec;
     }
     int getFramesPerSec() { return frames_per_sec_; }
+
     typedef struct{
         // 0 - can go to this tile; 1 - wait; 2 - stop
         char wayFree;
@@ -121,13 +122,14 @@ public:
         int yadj;// and y 
     }FreeWay;
 
-    void setRcvDamageType(ObjDamageType rcvdamagetype) {
-        rcv_damage_type_ = rcvdamagetype;
+    void setRcvDamageType(ObjDamageType rcvDamageType) {
+        rcv_damage_type_ = rcvDamageType;
     }
     ObjDamageType getRcvDamageType() {
         return rcv_damage_type_;
     }
 
+    void setFrame(int frame) { frame_ = frame;}
 protected:
     // vis_z_ is location used for adjusting object drawing/calculations
     // tile_z_ represents true location for tile

@@ -159,6 +159,7 @@ Static *Static::loadInstance(uint8 * data, int m)
     // Also verify whether object description is correct
     uint16 curanim = READ_LE_UINT16(gamdata->index_current_anim);
     uint16 baseanim = READ_LE_UINT16(gamdata->index_base_anim);
+    uint16 curframe = READ_LE_UINT16(gamdata->index_current_frame);
     switch(gamdata->sub_type) {
         case 0x01:
             // phone booth
@@ -187,6 +188,7 @@ Static *Static::loadInstance(uint8 * data, int m)
             break;
         case 0x0A:
             s = new NeonSign(m, curanim);
+            s->setFrame(g_App.gameSprites().getFrameFromFrameIndx(curframe));
             break;
         case 0x0C: // closed door
             if (gamdata->orientation == 0x00 || gamdata->orientation == 0x80

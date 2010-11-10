@@ -19,7 +19,8 @@ Changes
   * Small doors will open and close
   * Vehicles will not move if they are destroyed
   * Project is now buld with autoconf/automake
-  * Map menu is now completly fonctionnal
+  * Map menu is now completly functional
+  * Neon signs are correctly setup on mission load
 
 Fixed Bugs
 ----------
