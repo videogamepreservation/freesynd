@@ -256,31 +256,57 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
     }
 
     updated = MapObject::animate(elapsed);
-    if(getDrawnAnim() == PedInstance::PickupAnim
-            || getDrawnAnim() == PedInstance::PutdownAnim)
-    {
-        if (frame_ > ped_->lastPickupFrame()) {
-            if(speed_) {
-                setDrawnAnim(PedInstance::WalkAnim);
-            }else
-                setDrawnAnim(PedInstance::StandAnim);
-        } else
-            return updated;
-    }
-    if(getDrawnAnim() == PedInstance::HitAnim) {
-        if (frame_ > ped_->lastHitFrame(dir_)) {
-            if(speed_) {
-                setDrawnAnim(PedInstance::WalkAnim);
-            }else
-                setDrawnAnim(PedInstance::StandAnim);
-        } else
-            return updated;
-    }
-    if(getDrawnAnim() == PedInstance::DieAnim) {
-        if (frame_ <= ped_->lastDieFrame())
-            return updated;
+    
+    switch (getDrawnAnim()) {
+        case PedInstance::HitAnim:
+            if (frame_ > ped_->lastHitFrame(dir_)) {
+                if(speed_) {
+                    setDrawnAnim(PedInstance::WalkAnim);
+                }else
+                    setDrawnAnim(PedInstance::StandAnim);
+            } else
+                return updated;
+            break;
+        case PedInstance::DieAnim:
+            if (frame_ <= ped_->lastDieFrame())
+                return updated;
+            health_ = -1;
+            setDrawnAnim(PedInstance::DeadAnim);
+            return true;
+            break;
+        case PedInstance::DeadAnim:
+            return false;
+            break;
+        case PedInstance::PickupAnim:
+        case PedInstance::PutdownAnim:
+            if (frame_ > ped_->lastPickupFrame()) {
+                if(speed_) {
+                    setDrawnAnim(PedInstance::WalkAnim);
+                }else
+                    setDrawnAnim(PedInstance::StandAnim);
+            } else
+                return updated;
+            break;
+        case PedInstance::WalkAnim:
+            break;
+        case PedInstance::StandAnim:
+            break;
+        case PedInstance::WalkFireAnim:
+            if(frame_ < ped_->lastWalkFireFrame(dir_, frame_, weapon_idx)) {
+                return true;
+            }
+            break;
+        case PedInstance::StandFireAnim:
+            if(frame_ < ped_->lastStandFireFrame(dir_, frame_, weapon_idx)) {
+                return true;
+            }
+            break;
+        case PedInstance::NoAnimation:
+            printf("hmm NoAnimation\n");
+            break;
     }
 
+    updated = movementP(mission, elapsed);
     if (pickup_weapon_) {
         if (samePosition(pickup_weapon_)) {
             weapons_.push_back(pickup_weapon_);
@@ -326,8 +352,6 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
         }
         return true;
     }
-
-    updated = movementP(mission, elapsed);
 
     if (target_) {
         if (inRange(target_)) {
@@ -391,7 +415,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
 
     if ((firing_ == PedInstance::Firing_Reload
             || firing_ == PedInstance::Firing_Not)
-            && health_ > 0 && draw_timeout_ == 0) {
+            && health_ > 0) {
         if(speed_){
             setDrawnAnim(PedInstance::WalkAnim);
         } else
@@ -416,7 +440,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
     }
 
     if (firing_ != PedInstance::Firing_Not || updated || health_ <= 0
-            || receive_damage_ || pickup_weapon_ || putdown_weapon_) {
+            || receive_damage_ || pickup_weapon_) {
         if (receive_damage_) {
             health_ -= receive_damage_;
 
@@ -432,10 +456,6 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
             }
 
             receive_damage_ = 0;
-        } else if (health_ == 0) {
-            health_ = -1;
-            setDrawnAnim(PedInstance::DeadAnim);
-            return true;
         }
 
         if ((firing_ == PedInstance::Firing_Fire
@@ -447,15 +467,16 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
             } else
                 setDrawnAnim(PedInstance::StandFireAnim);
 
-            if (target_ && target_->health() > 0 && hit_damage_){
-                target_->inflictDamage(hit_damage_);
-                hit_damage_ = 0;
-            }
-
             if (selectedWeapon()->ammoRemaining() > 0) {
                 selectedWeapon()->setAmmoRemaining(
                         selectedWeapon()->ammoRemaining() - 1);
             }
+
+            if (target_ && target_->health() > 0 && hit_damage_){
+                target_->inflictDamage(hit_damage_);
+                hit_damage_ = 0;
+            } else
+                firing_ = PedInstance::Firing_Stop;
 
             // last frame, still firing, reload
             if (firing_ == PedInstance::Firing_Fire)
@@ -555,7 +576,7 @@ void PedInstance::showPath(int scrollX, int scrollY) {
 }
 
 PedInstance::PedInstance(Ped *ped, int m) : ShootableMovableMapObject(m),
-draw_timeout_(0), ped_(ped), firing_(PedInstance::Firing_Not),
+ped_(ped), firing_(PedInstance::Firing_Not),
 drawn_anim_(PedInstance::StandAnim), target_(NULL), target_x_(-1),
 target_y_(-1), hit_damage_(0), receive_damage_(0), sight_range_(0),
 is_hostile_(false), reload_count_(0), selected_weapon_(-1),
@@ -833,25 +854,25 @@ void PedInstance::setDrawnAnim(PedInstance::AnimationDrawn drawn_anim) {
     frame_ = 0;
     switch (drawn_anim_) {
         case PedInstance::HitAnim:
-            setFramesPerSec(2);
+            setFramesPerSec(6);
             break;
         case PedInstance::DieAnim:
-            setFramesPerSec(2);
+            setFramesPerSec(6);
             break;
         case PedInstance::DeadAnim:
             setFramesPerSec(2);
             break;
         case PedInstance::PickupAnim:
-            setFramesPerSec(4);
+            setFramesPerSec(8);
             break;
         case PedInstance::PutdownAnim:
-            setFramesPerSec(4);
+            setFramesPerSec(8);
             break;
         case PedInstance::WalkAnim:
             setFramesPerSec(8);
             break;
         case PedInstance::StandAnim:
-            setFramesPerSec(2);
+            setFramesPerSec(8);
             break;
         case PedInstance::WalkFireAnim:
             setFramesPerSec(8);

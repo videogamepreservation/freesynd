@@ -246,8 +246,6 @@ public:
 
     bool movementP(Mission *m, int elapsed);
 
-    int draw_timeout_;
-
     void setAllAdrenaLevels(uint8 amount, uint8 depend, uint8 effect) {
         lvl_percep_amount_ = amount;
         lvl_percep_dependency_ = depend;
