@@ -305,14 +305,18 @@ int GameSpriteManager::getFrameFromFrameIndx(int frameIndx)
 
 int GameSpriteManager::getFrameNum(int animNum)
 {
-    // NOTE: this is not tested for correctness
     assert(animNum < (int) index_.size());
     int frameNum = 1;
 
     GameSpriteFrame *f = &frames_[index_[animNum]];
+    bool passedStart = false;
     while (1) {
-        if (f->flags_ == 0x0100)
-            return frameNum;
+        if (f->flags_ == 0x0100) {
+            if (passedStart)
+                return frameNum;
+            else
+                passedStart = true;
+        }
         f = &frames_[f->next_frame_];
         frameNum++;
     }
