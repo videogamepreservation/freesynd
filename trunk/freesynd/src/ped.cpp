@@ -314,7 +314,9 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
     if (curanim != PedInstance::HitAnim
         && curanim != PedInstance::PickupAnim
         && curanim != PedInstance::PutdownAnim)
+    {
         updated |= movementP(mission, elapsed);
+    }
 
     if (pickup_weapon_) {
         if (samePosition(pickup_weapon_)) {
@@ -378,10 +380,12 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
     }
 
     if (target_x_ != -1 && target_y_ != -1
-            //&& firing_ == PedInstance::Firing_Not
-            && (selectedWeapon()
-            && selectedWeapon()->ammoRemaining())
-            && health_ > 0 && curanim != PedInstance::HitAnim) {
+            && firing_ == PedInstance::Firing_Not
+            && (selectedWeapon() && selectedWeapon()->ammoRemaining())
+            && health_ > 0
+            && (is_an_agent_ == PedInstance::Agent_Active ? true
+            : curanim != PedInstance::HitAnim))
+    {
         // TODO : check this, direction must be setup correctly
         int stx = screenX() + 30;
         int sty = screenY() - 4;
@@ -470,10 +474,16 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
         // miliseconds
         // TODO: this value should be influenced by IPA values
         int required = 1200;
+        if (is_an_agent_ == PedInstance::Agent_Active)
+            required = 200;
 
         if (weapon_idx == Weapon::Pistol_Anim
-                || weapon_idx == Weapon::Shotgun_Anim)
+            || weapon_idx == Weapon::Shotgun_Anim)
+        {
             required = 1500;
+            if (is_an_agent_ == PedInstance::Agent_Active)
+                required = 250;
+        }
 
         if (reload_count_ >= required) {
             firing_ = PedInstance::Firing_Not;
