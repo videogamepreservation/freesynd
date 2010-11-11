@@ -100,14 +100,14 @@ public:
             Weapon::WeaponAnimIndex weapon = Weapon::Unarmed_Anim);
     bool drawWalkFrame(int x, int y, int dir, int frame,
             Weapon::WeaponAnimIndex weapon = Weapon::Unarmed_Anim);
-    int lastStandFrame(int dir, int frame, Weapon::WeaponAnimIndex weapon);
-    int lastWalkFrame(int dir, int frame, Weapon::WeaponAnimIndex weapon);
+    int lastStandFrame(int dir, Weapon::WeaponAnimIndex weapon);
+    int lastWalkFrame(int dir, Weapon::WeaponAnimIndex weapon);
     bool drawStandFireFrame(int x, int y, int dir, int frame,
             Weapon::WeaponAnimIndex weapon);
     bool drawWalkFireFrame(int x, int y, int dir, int frame,
             Weapon::WeaponAnimIndex weapon);
-    int lastStandFireFrame(int dir, int frame, Weapon::WeaponAnimIndex weapon);
-    int lastWalkFireFrame(int dir, int frame, Weapon::WeaponAnimIndex weapon);
+    int lastStandFireFrame(int dir, Weapon::WeaponAnimIndex weapon);
+    int lastWalkFireFrame(int dir, Weapon::WeaponAnimIndex weapon);
     bool drawDieFrame(int x, int y, int frame);
     int lastDieFrame();
     void drawDeadFrame(int x, int y, int frame);

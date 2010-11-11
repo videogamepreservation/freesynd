@@ -21,7 +21,7 @@ area(?) - bomb, gauss, laser;
    static objects: damage recieve value; destructable or not
    all: type of damage that can be inflicted - windows can break from bullets/explosion,
 but trees will burn from explosions only, people with shield vulnerable to explosions
-only
+only(?)
  - (remove this?)indexes within group of type for vehicles/people/weapons, to be used for minimap
 drawing during briefing, they are as offsets in mission data in files, these offsets
 have different use within original game code and transforming them from offsets to
@@ -33,17 +33,15 @@ use 2 bytes, 9(10)bits will be used for index within group, bits that remain for
 type definition, although it can be slower and create some problems in future
  - A.L. - this one is complex
  - pathfinding directional to be used for simulation of people walking around city
- - damage inflicted by vehicles/weapons, variate by type of damage
+ - damage inflicted by vehicles/weapons, variate by type of damage and range
  - state of vehicles/people/objects should change correctly due to gameplay:
    vehicles should start burning when their health is zero and stop after some time,
 same for trees, people etc - switch of state due to damage
-   damage type priority laser->explosion->burning->hit
-   during pickup/putdown/hit people are unable to do anything else untill state is
-complete
+   damage type priority laser(highest)->explosion->burning->hit(lowest)
    when vehicle is destroyed, explosion should create damage to all in range
    change in behavior due to persuade
    "access card" make agent become police officer
-   firing should have delay, ammo/sec(?)
+   firing should have delay, correct delay per weapon(?)/ipa
    instant damage to vehicles/people/objects, current implementation is cumulative,
 if 4 agents shoot inflicting 1 hp damage/agent at target with 2hp they will inflict
 4hp damage it is incorrect, should be implemented with boolean on return to check
