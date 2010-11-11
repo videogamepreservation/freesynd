@@ -264,14 +264,15 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                     setDrawnAnim(PedInstance::WalkAnim);
                 }else
                     setDrawnAnim(PedInstance::StandAnim);
-            } else
-                return updated;
+            }
             break;
         case PedInstance::DieAnim:
             if (frame_ <= ped_->lastDieFrame())
                 return updated;
             health_ = -1;
             setDrawnAnim(PedInstance::DeadAnim);
+            if (numWeapons())
+                dropAllWeapons();
             return true;
             break;
         case PedInstance::DeadAnim:
@@ -363,8 +364,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                 target_x_ = -1;
                 target_y_ = -1;
             }
-        }
-        else {
+        } else {
             stopFiring();
         }
     }
@@ -372,7 +372,8 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
     if (target_x_ != -1 && target_y_ != -1
             && firing_ == PedInstance::Firing_Not
             && (selectedWeapon()
-            && selectedWeapon()->ammoRemaining())) {
+            && selectedWeapon()->ammoRemaining())
+            && health_ > 0 && getDrawnAnim() != PedInstance::HitAnim) {
         // TODO : check this, direction must be setup correctly
         int stx = screenX() + 30;
         int sty = screenY() - 4;
@@ -424,44 +425,8 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
         if (selectedWeapon())
             if (selectedWeapon()->ammoRemaining() == 0)
                 selectNextWeapon();
-    }
-    if (firing_ == PedInstance::Firing_Reload) {
-        reload_count_++;
-        int required = 1;
-
-        if (weapon_idx == Weapon::Pistol_Anim
-                || weapon_idx == Weapon::Shotgun_Anim)
-            required = 50;
-
-        if (reload_count_ >= required) {
-            firing_ = PedInstance::Firing_Not;
-            reload_count_ = 0;
-        }
-    }
-
-    if (firing_ != PedInstance::Firing_Not || updated || health_ <= 0
-            || receive_damage_ || pickup_weapon_) {
-        if (receive_damage_) {
-            health_ -= receive_damage_;
-
-            if (health_ <= 0){
-                health_ = 0;
-                target_ = 0;
-                target_x_ = target_y_ = -1;
-                speed_ = 0;
-                clearDestination();
-                setDrawnAnim(PedInstance::DieAnim);
-            } else {
-                setDrawnAnim(PedInstance::HitAnim);
-            }
-
-            receive_damage_ = 0;
-        }
-
-        if ((firing_ == PedInstance::Firing_Fire
-                || firing_ == PedInstance::Firing_Stop)
-                && health_ > 0) {
-
+    } else {
+        if (health_ > 0) {
             if (speed_){
                 setDrawnAnim(PedInstance::WalkFireAnim);
             } else
@@ -487,11 +452,44 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                 target_ = 0;
                 target_x_ = target_y_ = -1;
             }
+            updated = true;
         }
-        return true;
+    }
+    if (firing_ == PedInstance::Firing_Reload) {
+        reload_count_ += elapsed;
+        // miliseconds
+        // TODO: for enemy agents this value should be influenced by IPA
+        int required = 1200;
+
+        if (weapon_idx == Weapon::Pistol_Anim
+                || weapon_idx == Weapon::Shotgun_Anim)
+            required = 1500;
+
+        if (reload_count_ >= required) {
+            firing_ = PedInstance::Firing_Not;
+            reload_count_ = 0;
+            updated = true;
+        }
+    }
+    if (receive_damage_) {
+        health_ -= receive_damage_;
+
+        if (health_ <= 0){
+            health_ = 0;
+            target_ = 0;
+            target_x_ = target_y_ = -1;
+            speed_ = 0;
+            clearDestination();
+            setDrawnAnim(PedInstance::DieAnim);
+        } else {
+            setDrawnAnim(PedInstance::HitAnim);
+        }
+
+        receive_damage_ = 0;
+        updated = true;
     }
 
-    return false;
+    return updated;
 }
 
 void PedInstance::stopFiring() {
@@ -857,7 +855,7 @@ void PedInstance::setDrawnAnim(PedInstance::AnimationDrawn drawn_anim) {
             setFramesPerSec(6);
             break;
         case PedInstance::DieAnim:
-            setFramesPerSec(6);
+            setFramesPerSec(10);
             break;
         case PedInstance::DeadAnim:
             setFramesPerSec(2);
