@@ -117,18 +117,20 @@ void PedManager::setPed(Ped *pedanim, unsigned short baseAnim)
     }
     pedanim->setPickupAnim(192 + baseAnim);
     pedanim->setHitAnim(193 + baseAnim);
-    // 197 - 200 vapourized
-    // 201 sinking
-    // 203 - die, 204 - dead, agent only(?)
+    pedanim->setVaporizeAnim(197 + baseAnim);
+    pedanim->setSinkAnim(201 + baseAnim);
+    // 203 - die, 204 - dead, agent only
     pedanim->setDieAgentAnim(203 + baseAnim);
     pedanim->setDeadAgentAnim(204 + baseAnim);
     pedanim->setDieAnim(205 + baseAnim);
     pedanim->setDeadAnim(206 + baseAnim);
-    // 207 on fire
-    // 208 walking on fire
-    // 209 die burning
-    // 210 dead and smoking
-    // 236 persuaded
+    // when this burning should be used?
+    pedanim->setBurnAnim(207 + baseAnim);
+    // this one used when hit with flamethrower
+    pedanim->setWalkBurnAnim(208 + baseAnim);
+    pedanim->setDieBurnAnim(209 + baseAnim);
+    pedanim->setDeadBurnAnim(210 + baseAnim);
+    pedanim->setPersuadeAnim(235 + baseAnim);
 }
 
 PedInstance *PedManager::loadInstance(uint8 * data, int map)

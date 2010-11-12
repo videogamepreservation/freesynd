@@ -68,7 +68,6 @@ public:
         Laser_Anim,
         Gauss_Anim,
         Shotgun_Anim,
-        MedKit_Anim,
     } WeaponAnimIndex;
 
     Weapon(const char *w_name, int smallIcon, int bigIcon, int w_cost,
@@ -93,12 +92,12 @@ public:
     }
 
     WeaponAnimIndex index() { return idx_; }
-    WeaponType getType() { return type_; }
+    WeaponType getWeaponType() { return type_; }
 
     //! Plays the weapon's sound.
     void playSound();
 
-    bool operator==(Weapon weapon) { return this->type_ == weapon.getType(); }
+    bool operator==(Weapon weapon) { return this->type_ == weapon.getWeaponType(); }
 
 protected:
     std::string name_;

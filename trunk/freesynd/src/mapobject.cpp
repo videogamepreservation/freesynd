@@ -178,7 +178,7 @@ Static *Static::loadInstance(uint8 * data, int m)
             s = new EtcObj(m, curanim, curanim, curanim);
             break;
         case 0x08:
-            // crossroad things 0x0270
+            // crossroad things
             s = new EtcObj(m, curanim, curanim, curanim);
             break;
         case 0x0B:
@@ -242,9 +242,11 @@ Static *Static::loadInstance(uint8 * data, int m)
             //printf("0x11 anim %X\n", curanim);
             break;
         case 0x12:
+            // open window
             s = new WindowObj(m, curanim, curanim + 2, curanim + 4);
             break;
         case 0x13:
+            // closed window
             s = new WindowObj(m, curanim, curanim + 4, curanim + 6);
             break;
         case 0x15:

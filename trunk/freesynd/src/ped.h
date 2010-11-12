@@ -70,43 +70,35 @@ public:
         walk_fire_anims_[weapon] = anim;
     }
 
-    void setDieAgentAnim(int anim) {
-        die_agent_anim_ = anim;
-    }
+    void setDieAgentAnim(int anim) { die_agent_anim_ = anim; }
+    void setDeadAgentAnim(int anim) { dead_agent_anim_ = anim; }
+    void setDieAnim(int anim) { die_anim_ = anim; }
+    void setDeadAnim(int anim) { dead_anim_ = anim; }
+    void setHitAnim(int anim) { hit_anim_ = anim; }
+    void setPickupAnim(int anim) { pickup_anim_ = anim; }
 
-    void setDeadAgentAnim(int anim) {
-        dead_agent_anim_ = anim;
-    }
+    void setVaporizeAnim(int anim) { vaporize_anim_ = anim; }
+    void setSinkAnim(int anim) { sink_anim_ = anim; }
+    void setBurnAnim(int anim) { burn_anim_ = anim; }
+    void setWalkBurnAnim(int anim) { walk_burn_anim_ = anim; }
+    void setDieBurnAnim(int anim) { die_burn_anim_ = anim; }
+    void setDeadBurnAnim(int anim) { dead_burn_anim_ = anim; }
 
-    void setDieAnim(int anim) {
-        die_anim_ = anim;
-    }
-
-    void setDeadAnim(int anim) {
-        dead_anim_ = anim;
-    }
-
-    void setHitAnim(int anim) {
-        hit_anim_ = anim;
-    }
-
-    void setPickupAnim(int anim) {
-        pickup_anim_ = anim;
-    }
+    void setPersuadeAnim(int anim) { persuade_anim_ = anim; }
 
     PedInstance *createInstance(int map);
 
     bool drawStandFrame(int x, int y, int dir, int frame,
             Weapon::WeaponAnimIndex weapon = Weapon::Unarmed_Anim);
+    int lastStandFrame(int dir, Weapon::WeaponAnimIndex weapon);
     bool drawWalkFrame(int x, int y, int dir, int frame,
             Weapon::WeaponAnimIndex weapon = Weapon::Unarmed_Anim);
-    int lastStandFrame(int dir, Weapon::WeaponAnimIndex weapon);
     int lastWalkFrame(int dir, Weapon::WeaponAnimIndex weapon);
     bool drawStandFireFrame(int x, int y, int dir, int frame,
             Weapon::WeaponAnimIndex weapon);
+    int lastStandFireFrame(int dir, Weapon::WeaponAnimIndex weapon);
     bool drawWalkFireFrame(int x, int y, int dir, int frame,
             Weapon::WeaponAnimIndex weapon);
-    int lastStandFireFrame(int dir, Weapon::WeaponAnimIndex weapon);
     int lastWalkFireFrame(int dir, Weapon::WeaponAnimIndex weapon);
     bool drawDieFrame(int x, int y, int frame);
     int lastDieFrame();
@@ -115,6 +107,19 @@ public:
     int lastHitFrame(int dir);
     void drawPickupFrame(int x, int y, int frame);
     int lastPickupFrame();
+    void drawVaporizeFrame(int x, int y, int dir, int frame);
+    int lastVaporizeFrame(int dir);
+    void drawSinkFrame(int x, int y, int frame);
+    int lastSinkFrame();
+    
+    void drawBurnFrame(int x, int y, int frame);
+    void drawWalkBurnFrame(int x, int y, int frame);
+    void drawDieBurnFrame(int x, int y, int frame);
+    int lastDieBurnFrame();
+    void drawDeadBurnFrame(int x, int y, int frame);
+
+    void drawPersuadeFrame(int x, int y, int frame);
+    int lastPersuadeFrame();
 
 protected:
     int stand_anims_[NUM_ANIMS];
@@ -125,8 +130,19 @@ protected:
     int dead_agent_anim_;
     int die_anim_;
     int dead_anim_;
+    // has 4 directions
     int hit_anim_;
     int pickup_anim_;
+
+    // has 4 directions
+    int vaporize_anim_;
+    int sink_anim_;
+    int burn_anim_;
+    int walk_burn_anim_;
+    int die_burn_anim_;
+    int dead_burn_anim_;
+
+    int persuade_anim_;
 };
 
 /*!
@@ -148,6 +164,12 @@ public:
         StandAnim,
         WalkFireAnim,
         StandFireAnim,
+        VaporizeAnim,
+        SinkAnim,
+        BurnAnim,
+        WalkBurnAnim,
+        DieBurnAnim,
+        DeadBurnAnim,
     }AnimationDrawn;
 
     void draw(int x, int y, int scrollX, int scrollY);

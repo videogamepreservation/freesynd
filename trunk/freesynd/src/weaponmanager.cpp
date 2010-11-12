@@ -98,7 +98,7 @@ Weapon *WeaponManager::findWeapon(const char *name) {
 
 Weapon *WeaponManager::findWeapon(Weapon::WeaponType wt) {
     for (unsigned int i = 0; i < weapons_.size(); i++) {
-        if (wt == weapons_[i]->getType())
+        if (wt == weapons_[i]->getWeaponType())
             return weapons_[i];
     }
 

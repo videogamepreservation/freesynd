@@ -52,6 +52,11 @@ bool Ped::drawStandFrame(int x, int y, int dir, int frame,
             stand_anims_[weapon] + dir, frame, x, y);
 }
 
+int Ped::lastStandFrame(int dir, Weapon::WeaponAnimIndex weapon) {
+    assert(weapon != 0 && weapon < NUM_ANIMS);
+    return g_App.gameSprites().lastFrame(stand_anims_[weapon] + dir);
+}
+
 bool Ped::drawWalkFrame(int x, int y, int dir, int frame,
                         Weapon::WeaponAnimIndex weapon)
 {
@@ -59,11 +64,6 @@ bool Ped::drawWalkFrame(int x, int y, int dir, int frame,
     assert(weapon < NUM_ANIMS);
     return g_App.gameSprites().drawFrame(
             walk_anims_[weapon] + dir, frame, x, y);
-}
-
-int Ped::lastStandFrame(int dir, Weapon::WeaponAnimIndex weapon) {
-    assert(weapon != 0 && weapon < NUM_ANIMS);
-    return g_App.gameSprites().lastFrame(stand_anims_[weapon] + dir);
 }
 
 int Ped::lastWalkFrame(int dir, Weapon::WeaponAnimIndex weapon) {
@@ -79,18 +79,18 @@ bool Ped::drawStandFireFrame(int x, int y, int dir, int frame,
             stand_fire_anims_[weapon] + dir, frame, x, y);
 }
 
-bool Ped::drawWalkFireFrame(int x, int y, int dir, int frame,
-        Weapon::WeaponAnimIndex weapon) {
-    assert(weapon != 0 && weapon < NUM_ANIMS);
-    return g_App.gameSprites().drawFrame(
-            walk_fire_anims_[weapon] + dir, frame, x, y);
-}
-
 int Ped::lastStandFireFrame(int dir, Weapon::WeaponAnimIndex weapon)
 {
     assert(weapon != 0 && weapon < NUM_ANIMS);
     return g_App.gameSprites().lastFrame(
             stand_fire_anims_[weapon] + dir);
+}
+
+bool Ped::drawWalkFireFrame(int x, int y, int dir, int frame,
+        Weapon::WeaponAnimIndex weapon) {
+    assert(weapon != 0 && weapon < NUM_ANIMS);
+    return g_App.gameSprites().drawFrame(
+            walk_fire_anims_[weapon] + dir, frame, x, y);
 }
 
 int Ped::lastWalkFireFrame(int dir, Weapon::WeaponAnimIndex weapon)
@@ -108,16 +108,11 @@ int Ped::lastDieFrame() {
 }
 
 void Ped::drawDeadFrame(int x, int y, int frame) {
-    if (frame > g_App.gameSprites().lastFrame(dead_anim_))
-        frame = g_App.gameSprites().lastFrame(dead_anim_);
-
+    // TODO: findout whether frame really changes?
     g_App.gameSprites().drawFrame(dead_anim_, frame, x, y);
 }
 
 void Ped::drawHitFrame(int x, int y, int dir, int frame) {
-    if (frame > g_App.gameSprites().lastFrame(hit_anim_ + dir / 2))
-        frame = g_App.gameSprites().lastFrame(hit_anim_ + dir / 2);
-
     g_App.gameSprites().drawFrame(hit_anim_ + dir / 2, frame, x, y);
 }
 
@@ -134,6 +129,51 @@ int Ped::lastPickupFrame() {
     return g_App.gameSprites().lastFrame(pickup_anim_);
 }
 
+void Ped::drawVaporizeFrame(int x, int y, int dir, int frame) {
+    g_App.gameSprites().drawFrame(vaporize_anim_ + dir / 2, frame, x, y);
+}
+
+int Ped::lastVaporizeFrame(int dir) {
+    return g_App.gameSprites().lastFrame(vaporize_anim_ + dir / 2);
+}
+
+void Ped::drawSinkFrame(int x, int y, int frame) {
+    g_App.gameSprites().drawFrame(sink_anim_, frame, x, y);
+}
+
+int Ped::lastSinkFrame() {
+    return g_App.gameSprites().lastFrame(sink_anim_);
+}
+
+void Ped::drawBurnFrame(int x, int y, int frame) {
+    g_App.gameSprites().drawFrame(burn_anim_, frame, x, y);
+}
+
+void Ped::drawWalkBurnFrame(int x, int y, int frame) {
+    g_App.gameSprites().drawFrame(walk_burn_anim_, frame, x, y);
+}
+
+void Ped::drawDieBurnFrame(int x, int y, int frame) {
+    g_App.gameSprites().drawFrame(die_burn_anim_, frame, x, y);
+}
+
+int Ped::lastDieBurnFrame() {
+    return g_App.gameSprites().lastFrame(die_burn_anim_);
+}
+
+void Ped::drawDeadBurnFrame(int x, int y, int frame) {
+    // TODO: findout whether frame really changes?
+    g_App.gameSprites().drawFrame(dead_burn_anim_, frame, x, y);
+}
+
+void Ped::drawPersuadeFrame(int x, int y, int frame) {
+    g_App.gameSprites().drawFrame(persuade_anim_, frame, x, y);
+}
+
+int Ped::lastPersuadeFrame() {
+    return g_App.gameSprites().lastFrame(persuade_anim_);
+}
+
 
 bool PedInstance::animate(int elapsed, Mission *mission) {
     bool updated = false;
@@ -143,12 +183,15 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
     if (is_an_agent_ == PedInstance::Agent_Non_Active)
         return true;
 
-    if (weapon_idx == Weapon::MedKit_Anim && selectedWeapon()->ammoRemaining()
-            && health_ < start_health_) {
-        health_ = start_health_;
-        selectedWeapon()->setAmmoRemaining(0);
-        return true;
-    }
+    if (selectedWeapon())
+        if ((selectedWeapon()->getWeaponType() == Weapon::MediKit)
+                && selectedWeapon()->ammoRemaining()
+                && health_ < start_health_)
+        {
+            health_ = start_health_;
+            selectedWeapon()->setAmmoRemaining(0);
+            return true;
+        }
 
     if (health_ < 0) {
         if (numWeapons())
@@ -254,7 +297,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
     }
 
     updated = MapObject::animate(elapsed);
-    int curanim = getDrawnAnim();
+    PedInstance::AnimationDrawn curanim = getDrawnAnim();
     switch (curanim) {
         case PedInstance::HitAnim:
             if (frame_ > ped_->lastHitFrame(dir_)) {
@@ -305,6 +348,18 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                 } else
                     setDrawnAnim(PedInstance::StandAnim);
             }
+            break;
+        case PedInstance::VaporizeAnim:
+            break;
+        case PedInstance::SinkAnim:
+            break;
+        case PedInstance::BurnAnim:
+            break;
+        case PedInstance::WalkBurnAnim:
+            break;
+        case PedInstance::DieBurnAnim:
+            break;
+        case PedInstance::DeadBurnAnim:
             break;
         case PedInstance::NoAnimation:
             printf("hmm NoAnimation\n");
@@ -633,7 +688,6 @@ void PedInstance::draw(int x, int y, int scrollX, int scrollY) {
     }
 
     switch(getDrawnAnim()){
-        // TODO: add different types of hit
         case PedInstance::HitAnim:
             ped_->drawHitFrame(x, y, dir_, frame_);
             break;
@@ -660,6 +714,24 @@ void PedInstance::draw(int x, int y, int scrollX, int scrollY) {
             break;
         case PedInstance::StandFireAnim:
             ped_->drawStandFireFrame(x, y, dir_, frame_, weapon_idx);
+            break;
+        case PedInstance::VaporizeAnim:
+            ped_->drawVaporizeFrame(x, y, dir_, frame_);
+            break;
+        case PedInstance::SinkAnim:
+            ped_->drawSinkFrame(x, y, frame_);
+            break;
+        case PedInstance::BurnAnim:
+            ped_->drawBurnFrame(x, y, frame_);
+            break;
+        case PedInstance::WalkBurnAnim:
+            ped_->drawWalkBurnFrame(x, y, frame_);
+            break;
+        case PedInstance::DieBurnAnim:
+            ped_->drawDieBurnFrame(x, y, frame_);
+            break;
+        case PedInstance::DeadBurnAnim:
+            ped_->drawDeadBurnFrame(x, y, frame_);
             break;
         case PedInstance::NoAnimation:
             printf("hmm NoAnimation\n");
@@ -901,6 +973,24 @@ void PedInstance::setDrawnAnim(PedInstance::AnimationDrawn drawn_anim) {
             break;
         case PedInstance::StandFireAnim:
             setFramesPerSec(8);
+            break;
+        case PedInstance::VaporizeAnim:
+            setFramesPerSec(8);
+            break;
+        case PedInstance::SinkAnim:
+            setFramesPerSec(8);
+            break;
+        case PedInstance::BurnAnim:
+            setFramesPerSec(8);
+            break;
+        case PedInstance::WalkBurnAnim:
+            setFramesPerSec(8);
+            break;
+        case PedInstance::DieBurnAnim:
+            setFramesPerSec(6);
+            break;
+        case PedInstance::DeadBurnAnim:
+            setFramesPerSec(2);
             break;
         case PedInstance::NoAnimation:
             printf("hmm NoAnimation\n");
