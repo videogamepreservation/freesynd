@@ -86,7 +86,7 @@ function printRoadMap() {
 	if (file_exists('data/roadmap.xml')) {
 		$xml = simplexml_load_file('data/roadmap.xml');
 		
-		echo "<p><b>" . $xml->date . "</b> : " . $xml->status . "</p>\n";
+		echo "<p><b>" . date("Y-m-d", filemtime('data/roadmap.xml')) . "</b> : " . $xml->status . "</p>\n";
 		
 		echo "<h4>Features:</h4>\n";
 		echo " <ul>\n";
