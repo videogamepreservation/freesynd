@@ -901,25 +901,39 @@ void GameplayMenu::handleUnknownKey(Key key, const int modKeys) {
     /* used to see animations by number + frame
     if (key == KEY_a) {
         qanim--;
-
         if (qanim < 0)
             qanim = 0;
     }
 
-    if (key == KEY_s)
+    if (key == KEY_s) {
         qanim++;
+        if (qanim > 1969)
+            qanim = 1969;
+    }
 
-    if (key == KEY_g)
+    if (key == KEY_w) {
         qanim -= 8;
+        if (qanim < 0)
+            qanim = 0;
+    }
 
-    if (key == KEY_h)
+    if (key == KEY_q) {
         qanim += 8;
+        if (qanim > 1969)
+            qanim = 1969;
+    }
 
-    if (key == KEY_x)
+    if (key == KEY_x) {
         qframe++;
+        if (qframe > 30)
+            qframe = 0;
+    }
 
-    if (key == KEY_z)
+    if (key == KEY_z) {
         qframe--;
+        if (qframe < 0)
+            qframe = 0;
+    }
 
     if (key == KEY_SPACE)
         printf("qanim %i qframe %i\n", qanim, qframe);

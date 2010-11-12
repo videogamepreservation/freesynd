@@ -82,6 +82,7 @@ public:
     void setBurnAnim(int anim) { burn_anim_ = anim; }
     void setWalkBurnAnim(int anim) { walk_burn_anim_ = anim; }
     void setDieBurnAnim(int anim) { die_burn_anim_ = anim; }
+    void setSmokeBurnAnim(int anim) { smoke_burn_anim_ = anim; }
     void setDeadBurnAnim(int anim) { dead_burn_anim_ = anim; }
 
     void setPersuadeAnim(int anim) { persuade_anim_ = anim; }
@@ -116,6 +117,7 @@ public:
     void drawWalkBurnFrame(int x, int y, int frame);
     void drawDieBurnFrame(int x, int y, int frame);
     int lastDieBurnFrame();
+    void drawSmokeBurnFrame(int x, int y, int frame);
     void drawDeadBurnFrame(int x, int y, int frame);
 
     void drawPersuadeFrame(int x, int y, int frame);
@@ -140,6 +142,7 @@ protected:
     int burn_anim_;
     int walk_burn_anim_;
     int die_burn_anim_;
+    int smoke_burn_anim_;
     int dead_burn_anim_;
 
     int persuade_anim_;
@@ -169,6 +172,7 @@ public:
         BurnAnim,
         WalkBurnAnim,
         DieBurnAnim,
+        SmokeBurnAnim,
         DeadBurnAnim,
     }AnimationDrawn;
 

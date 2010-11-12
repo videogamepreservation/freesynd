@@ -165,7 +165,7 @@ Static *Static::loadInstance(uint8 * data, int m)
             // phone booth
             s = new EtcObj(m, curanim, curanim, curanim);
             break;
-        case 0x05:
+        case 0x05:// 1040-1043, 1044 - damaged
             // crossroad things
             s = new EtcObj(m, curanim, curanim, curanim);
             break;

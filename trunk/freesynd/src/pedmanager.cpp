@@ -125,12 +125,13 @@ void PedManager::setPed(Ped *pedanim, unsigned short baseAnim)
     pedanim->setDieAnim(205 + baseAnim);
     pedanim->setDeadAnim(206 + baseAnim);
     // when this burning should be used?
-    pedanim->setBurnAnim(207 + baseAnim);
+    pedanim->setBurnAnim(209);
     // this one used when hit with flamethrower
-    pedanim->setWalkBurnAnim(208 + baseAnim);
-    pedanim->setDieBurnAnim(209 + baseAnim);
-    pedanim->setDeadBurnAnim(210 + baseAnim);
-    pedanim->setPersuadeAnim(235 + baseAnim);
+    pedanim->setWalkBurnAnim(210);
+    pedanim->setDieBurnAnim(211);
+    pedanim->setSmokeBurnAnim(212);
+    pedanim->setDeadBurnAnim(828);
+    pedanim->setPersuadeAnim(236);
 }
 
 PedInstance *PedManager::loadInstance(uint8 * data, int map)

@@ -161,6 +161,10 @@ int Ped::lastDieBurnFrame() {
     return g_App.gameSprites().lastFrame(die_burn_anim_);
 }
 
+void Ped::drawSmokeBurnFrame(int x, int y, int frame) {
+    g_App.gameSprites().drawFrame(smoke_burn_anim_, frame, x, y);
+}
+
 void Ped::drawDeadBurnFrame(int x, int y, int frame) {
     // TODO: findout whether frame really changes?
     g_App.gameSprites().drawFrame(dead_burn_anim_, frame, x, y);
@@ -358,6 +362,8 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
         case PedInstance::WalkBurnAnim:
             break;
         case PedInstance::DieBurnAnim:
+            break;
+        case PedInstance::SmokeBurnAnim:
             break;
         case PedInstance::DeadBurnAnim:
             break;
@@ -730,6 +736,9 @@ void PedInstance::draw(int x, int y, int scrollX, int scrollY) {
         case PedInstance::DieBurnAnim:
             ped_->drawDieBurnFrame(x, y, frame_);
             break;
+        case PedInstance::SmokeBurnAnim:
+            ped_->drawSmokeBurnFrame(x, y, frame_);
+            break;
         case PedInstance::DeadBurnAnim:
             ped_->drawDeadBurnFrame(x, y, frame_);
             break;
@@ -774,6 +783,27 @@ void PedInstance::drawSelectorAnim(int x, int y) {
             break;
         case PedInstance::StandFireAnim:
             ped_->drawStandFireFrame(x, y, dir_, frame_, weapon_idx);
+            break;
+        case PedInstance::VaporizeAnim:
+            ped_->drawVaporizeFrame(x, y, dir_, frame_);
+            break;
+        case PedInstance::SinkAnim:
+            ped_->drawSinkFrame(x, y, frame_);
+            break;
+        case PedInstance::BurnAnim:
+            ped_->drawBurnFrame(x, y, frame_);
+            break;
+        case PedInstance::WalkBurnAnim:
+            ped_->drawWalkBurnFrame(x, y, frame_);
+            break;
+        case PedInstance::DieBurnAnim:
+            ped_->drawDieBurnFrame(x, y, frame_);
+            break;
+        case PedInstance::SmokeBurnAnim:
+            ped_->drawSmokeBurnFrame(x, y, frame_);
+            break;
+        case PedInstance::DeadBurnAnim:
+            ped_->drawDeadBurnFrame(x, y, frame_);
             break;
         case PedInstance::NoAnimation:
             printf("hmm NoAnimation\n");
@@ -987,6 +1017,9 @@ void PedInstance::setDrawnAnim(PedInstance::AnimationDrawn drawn_anim) {
             setFramesPerSec(8);
             break;
         case PedInstance::DieBurnAnim:
+            setFramesPerSec(6);
+            break;
+        case PedInstance::SmokeBurnAnim:
             setFramesPerSec(6);
             break;
         case PedInstance::DeadBurnAnim:
