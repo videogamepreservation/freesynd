@@ -42,7 +42,7 @@ public:
     virtual ~MapObject() {}
 
     typedef enum {
-        dmg_No = 0,
+        dmg_None = 0,
         dmg_Bullet = 1,
         dmg_Laser = 2,
         dmg_Fire = 4,
@@ -50,7 +50,18 @@ public:
         dmg_Hit = 16,
         dmg_Mental = 32,
         dmg_Heal = 64,
+        dmg_All = 127,
     } ObjDamageType;
+
+    typedef enum {
+        ddmg_Invulnerable = dmg_None,
+        ddmg_Ped = dmg_All,
+        ddmg_PedWithShield = dmg_Explosion | dmg_Hit | dmg_Heal,
+        ddmg_Vehicle = dmg_Bullet | dmg_Laser | dmg_Fire | dmg_Explosion,
+        ddmg_StaticTree = dmg_Laser | dmg_Fire | dmg_Explosion,
+        ddmg_StaticWindow = dmg_Bullet | dmg_Explosion,
+        ddmg_StaticGeneral = dmg_Laser | dmg_Explosion,
+    } ObjDamageDefType;
 
     void setPosition(int tile_x, int tile_y, int tile_z, int off_x = 0,
             int off_y = 0, int off_z = 0) {
@@ -122,11 +133,11 @@ public:
         int yadj;// and y 
     }FreeWay;
 
-    void setRcvDamageType(ObjDamageType rcvDamageType) {
-        rcv_damage_type_ = rcvDamageType;
+    void setRcvDamageDef(unsigned int rcvDamageDef) {
+        rcv_damage_def_ = rcvDamageDef;
     }
-    ObjDamageType getRcvDamageType() {
-        return rcv_damage_type_;
+    unsigned int getRcvDamageDef() {
+        return rcv_damage_def_;
     }
 
     void setFrame(int frame) { frame_ = frame;}
@@ -139,7 +150,7 @@ protected:
     int elapsed_carry_;
     int frames_per_sec_;
     int sub_type_, main_type_;
-    ObjDamageType rcv_damage_type_;
+    unsigned int rcv_damage_def_;
 
     void addOffs(int &x, int &y);
 };

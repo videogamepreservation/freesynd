@@ -73,7 +73,8 @@ public:
     Weapon(const char *w_name, int smallIcon, int bigIcon, int w_cost,
             int w_ammo, int w_range, int w_shot, int w_rank, int w_anim,
             WeaponAnimIndex w_idx, snd::InGameSample w_sample,
-            WeaponType w_type, MapObject::ObjDamageType w_dmg_type);
+            WeaponType w_type, MapObject::ObjDamageType w_dmg_type,
+            int w_shots_per_sec, int w_ammo_per_shot);
 
     const char *name() { return name_.c_str(); }
 
@@ -99,6 +100,9 @@ public:
 
     bool operator==(Weapon weapon) { return this->type_ == weapon.getWeaponType(); }
 
+    int getShotsPerSec() { return shots_per_sec_; }
+    int getAmmoPerSec() { return ammo_per_shot_; }
+
 protected:
     std::string name_;
     int small_icon_, big_icon_;
@@ -109,6 +113,7 @@ protected:
     MapObject::ObjDamageType dmg_type_;
     WeaponAnimIndex idx_;
     snd::InGameSample sample_;
+    int shots_per_sec_, ammo_per_shot_;
 };
 
 /*!

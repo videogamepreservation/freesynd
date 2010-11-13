@@ -281,11 +281,12 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                         in_vehicle_->tileY(), in_vehicle_->tileZ(),
                         in_vehicle_->offX(), in_vehicle_->offY(), 320);
                 } else {
-                    if(dest_path_.back().tileX() != in_vehicle_->tileX()
-                        || dest_path_.back().tileY() != in_vehicle_->tileY()
-                        || dest_path_.back().tileZ() != in_vehicle_->tileZ()
-                        || dest_path_.back().offX() != in_vehicle_->offX()
-                        || dest_path_.back().offY() != in_vehicle_->offY())
+                    PathNode &pn = dest_path_.back();
+                    if(pn.tileX() != in_vehicle_->tileX()
+                        || pn.tileY() != in_vehicle_->tileY()
+                        || pn.tileZ() != in_vehicle_->tileZ()
+                        || pn.offX() != in_vehicle_->offX()
+                        || pn.offY() != in_vehicle_->offY())
                         setDestinationP(mission ,in_vehicle_->tileX(),
                             in_vehicle_->tileY(), in_vehicle_->tileZ(),
                             in_vehicle_->offX(), in_vehicle_->offY(), 320);
@@ -393,11 +394,12 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                         pickup_weapon_->tileY(), pickup_weapon_->tileZ(),
                         pickup_weapon_->offX(), pickup_weapon_->offY(), 320);
                 } else {
-                    if(dest_path_.back().tileX() != pickup_weapon_->tileX()
-                        || dest_path_.back().tileY() != pickup_weapon_->tileY()
-                        || dest_path_.back().tileZ() != pickup_weapon_->tileZ()
-                        || dest_path_.back().offX() != pickup_weapon_->offX()
-                        || dest_path_.back().offY() != pickup_weapon_->offY())
+                    PathNode &pn = dest_path_.back();
+                    if(pn.tileX() != pickup_weapon_->tileX()
+                        || pn.tileY() != pickup_weapon_->tileY()
+                        || pn.tileZ() != pickup_weapon_->tileZ()
+                        || pn.offX() != pickup_weapon_->offX()
+                        || pn.offY() != pickup_weapon_->offY())
                         setDestinationP(mission, pickup_weapon_->tileX(),
                             pickup_weapon_->tileY(), pickup_weapon_->tileZ(),
                             pickup_weapon_->offX(), pickup_weapon_->offY(), 320);
@@ -409,13 +411,8 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
     if (putdown_weapon_) {
         WeaponInstance *w = putdown_weapon_;
         w->setMap(map());
-        w->setTileX(tile_x_);
-        w->setTileY(tile_y_);
-        w->setTileZ(tile_z_);
+        w->setPosition(tile_x_, tile_y_, tile_z_, off_x_, off_y_, off_z_);
         w->setVisZ(vis_z_);
-        w->setOffX(off_x_);
-        w->setOffY(off_y_);
-        w->setOffZ(0);
         putdown_weapon_ = 0;
         setDrawnAnim(PedInstance::PutdownAnim);
         if(speed() != 0){
@@ -913,13 +910,8 @@ void PedInstance::dropAllWeapons() {
     for (it = weapons_.begin(); it != weapons_.end(); it++) {
         WeaponInstance *w = weapons_[n];
         w->setMap(map());
-        w->setTileX(tile_x_);
-        w->setTileY(tile_y_);
-        w->setTileZ(tile_z_);
+        w->setPosition(tile_x_, tile_y_, tile_z_, off_x_, off_y_, off_z_);
         w->setVisZ(vis_z_);
-        w->setOffX(off_x_);
-        w->setOffY(off_y_);
-        w->setOffZ(0);
         n++;
     }
 

@@ -40,40 +40,42 @@ WeaponManager::~WeaponManager() {
 void WeaponManager::loadWeapons() {
     weapons_.push_back(new Weapon("PERSUADERTRON", 14, 64, 5000, -1, 256, 0,
         -1, 367, Weapon::Unarmed_Anim, snd::PERSUADE, Weapon::Persuadatron,
-        MapObject::dmg_Mental));
+        MapObject::dmg_Mental, 1, 1));
     weapons_.push_back(new Weapon("PISTOL", 15, 65, 0, 13, 1280, 1, 1, 368,
         Weapon::Pistol_Anim, snd::PISTOL, Weapon::Pistol,
-        MapObject::dmg_Bullet));
+        MapObject::dmg_Bullet, 1, 1));
     weapons_.push_back(new Weapon("GAUSS GUN", 16, 66, 50000, 3, 5120, 15000, 0,
         369, Weapon::Gauss_Anim, snd::GAUSSGUN, Weapon::GaussGun,
-        MapObject::dmg_Explosion));
+        MapObject::dmg_Explosion, 1, 1));
     weapons_.push_back(new Weapon("SHOTGUN", 17, 67, 250, 12, 1024, 2, 2, 370,
         Weapon::Shotgun_Anim, snd::SHOTGUN, Weapon::Shotgun,
-        MapObject::dmg_Bullet));
+        MapObject::dmg_Bullet, 1, 1));
     weapons_.push_back(new Weapon("UZI", 18, 68, 750, 50, 1792, 2, 5, 371,
-        Weapon::Uzi_Anim, snd::UZI, Weapon::Uzi, MapObject::dmg_Bullet));
+        Weapon::Uzi_Anim, snd::UZI, Weapon::Uzi, MapObject::dmg_Bullet, 1, 1));
     weapons_.push_back(new Weapon("MINI-GUN", 19, 69, 10000, 500, 2304, 10, 6,
         372, Weapon::Minigun_Anim, snd::MINIGUN, Weapon::Minigun,
-        MapObject::dmg_Bullet));
+        MapObject::dmg_Bullet, 1, 1));
     weapons_.push_back(new Weapon("LASER", 20, 70, 35000, 5, 4096, 2000, 7, 373,
-        Weapon::Laser_Anim, snd::LASER, Weapon::Laser, MapObject::dmg_Laser));
+        Weapon::Laser_Anim, snd::LASER, Weapon::Laser, MapObject::dmg_Laser,
+        1, 1));
     weapons_.push_back(new Weapon("FLAMER", 21, 71, 1500, 1000, 512, 1, 4, 374,
-        Weapon::Flamer_Anim, snd::FLAME, Weapon::Flamer, MapObject::dmg_Fire));
+        Weapon::Flamer_Anim, snd::FLAME, Weapon::Flamer, MapObject::dmg_Fire,
+        1, 1));
     weapons_.push_back(new Weapon("LONG RANGE", 22, 72, 1000, 30, 6144, 2, 3,
         375, Weapon::LongRange_Anim, snd::LONGRANGE, Weapon::LongRange,
-        MapObject::dmg_Bullet));
+        MapObject::dmg_Bullet, 1, 1));
     weapons_.push_back(new Weapon("SCANNER", 23, 73, 500, -1, 4096, 0, -1, 376,
         Weapon::Unarmed_Anim, snd::NO_SOUND, Weapon::Scanner,
-        MapObject::dmg_No));
+        MapObject::dmg_None, 1, 1));
     weapons_.push_back(new Weapon("MEDIKIT", 24, 74, 500, 1, 256, 0, -1, 377,
         Weapon::Unarmed_Anim, snd::NO_SOUND, Weapon::MediKit,
-        MapObject::dmg_Heal));
+        MapObject::dmg_Heal, 1, 1));
     weapons_.push_back(new Weapon("TIME BOMB", 25, 75, 25000, -1, 1000, 0, -1,
         378, Weapon::Unarmed_Anim, snd::TIMEBOMB, Weapon::TimeBomb,
-        MapObject::dmg_Explosion));
+        MapObject::dmg_Explosion, 1, 1));
     weapons_.push_back(new Weapon("ACCESS CARD", 26, 76, 1000, -1, 256, 0, -1,
         379, Weapon::Unarmed_Anim, snd::NO_SOUND, Weapon::AccessCard,
-        MapObject::dmg_No));
+        MapObject::dmg_None, 1, 1));
     /* NOTE: small icon 27 exists and looks like an N with an arrow above it.
        the corresponding large icon is actually the "all" button on the
        select menu.  It would appear Bullfrog was going to have another
@@ -82,7 +84,7 @@ void WeaponManager::loadWeapons() {
      */
     weapons_.push_back(new Weapon("ENERGY SHIELD", 28, 78, 8000, 200, 768, 15,
         -1, 381, Weapon::EnergyShield_Anim, snd::NO_SOUND,
-        Weapon::EnergyShield, MapObject::dmg_No));
+        Weapon::EnergyShield, MapObject::dmg_None, 1, 1));
 }
 
 Weapon *WeaponManager::findWeapon(const char *name) {
