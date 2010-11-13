@@ -97,7 +97,6 @@ name_(menu_name), showAnim_(showAnim), leaveAnim_(leaveAnim),
 parent_menu_(NULL), background_(NULL)
 {
     menuManager->addMenu(this);
-    needRendering();
 }
 
 Menu::Menu(MenuManager * menuManager, const char *menu_name,
@@ -106,7 +105,6 @@ name_(menu_name), showAnim_(""), leaveAnim_(""),
 parent_menu_(parent), background_(NULL)
 {
     menuManager->addMenu(this);
-    needRendering();
 }
 
 void Menu::redrawOptions()
@@ -117,6 +115,24 @@ void Menu::redrawOptions()
         m.draw();
     }
     handleShowLate();
+}
+
+/*!
+ * Adds a dirty rect the size of the screen.
+ */
+void Menu::needRendering() {
+    menu_manager_->addRect(0, 0, g_Screen.gameScreenWidth(), g_Screen.gameScreenHeight());
+}
+
+/*!
+ * Adds a dirty rect.
+ * \param x
+ * \param y
+ * \param width
+ * \param height
+ */
+void Menu::addDirtyRect(int x, int y, int width, int height) {
+    menu_manager_->addRect(x, y, width, height);
 }
 
 void Menu::render()
@@ -137,8 +153,6 @@ void Menu::render()
     }
 
     redrawOptions();
-    
-    need_rendering_ = false;
 }
 
 /*!
@@ -207,7 +221,7 @@ void Menu::keyEvent(Key key, const int modKeys)
             else
                 curOpt--;
             options_vec[curOpt]->dark_ = false;
-            render();
+            needRendering();
         }
         if (key == VK_DOWN || key == KEY_DOWN) {
             if (!options_vec[curOpt]->dark_) {
@@ -217,7 +231,7 @@ void Menu::keyEvent(Key key, const int modKeys)
                     curOpt = 0;
             }
             options_vec[curOpt]->dark_ = false;
-            render();
+            needRendering();
         }
         if (key == VK_FB || key == KEY_RETURN || key == KEY_KP_ENTER) {
             for (std::map < Key, Option >::iterator it =

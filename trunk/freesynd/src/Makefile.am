@@ -18,6 +18,7 @@ freesynd_SOURCES = common.h config.h keys.h singleton.h \
 	sound/sdlmixermusic.cpp sound/sdlmixermusic.h \
 	sound/sdlmixersound.cpp sound/sdlmixersound.h \
 	sound/xmidi.cpp sound/xmidi.h \
+	gfx/dirtylist.cpp gfx/dirtylist.h \
 	agent.cpp agent.h \
 	agentmanager.cpp agentmanager.h \
 	app.cpp app.h \

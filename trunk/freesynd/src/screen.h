@@ -43,6 +43,8 @@ public:
 
     void blit(int x, int y, int width, int height, const uint8 *pixeldata,
             bool flipped = false, int stride = 0);
+    void blitRect(int x, int y, int width, int height,
+                  const uint8 * pixeldata, bool flipped = false, int stride = 0);
     void scale2x(int x, int y, int width, int height, const uint8 *pixeldata,
             int stride = 0, bool transp = true);
 

@@ -235,33 +235,33 @@ void ResearchMenu::handleOption(Key key, const int modKeys)
         hideFieldList();
         showOption(KEY_F6);
         showOption(KEY_F7);
-        render();
+        needRendering();
     }
     if (key >= KEY_a && key < (Key) (KEY_a + g_App.numAvailableMods())) {
         sel_mod_ = key - KEY_a + 1;
         hideModsList();
         showOption(KEY_F5);
-        render();
+        needRendering();
     }
     if (key >= KEY_g && key <= KEY_z) {
         sel_weapon_ = key - KEY_g + 1;
         hideEquipList();
         showOption(KEY_F5);
-        render();
+        needRendering();
     }
     if (key == KEY_F1) {
         tab_ = 0;
         showModsList();
         hideEquipList();
         showFieldList();
-        render();
+        needRendering();
     }
     if (key == KEY_F2) {
         tab_ = 1;
         hideModsList();
         showEquipList();
         showFieldList();
-        render();
+        needRendering();
     }
     if (key == KEY_F5) {
         sel_mod_ = sel_weapon_ = 0;
@@ -270,13 +270,13 @@ void ResearchMenu::handleOption(Key key, const int modKeys)
             showModsList();
         else
             showEquipList();
-        render();
+        needRendering();
     }
     if (key == KEY_F7) {
         sel_field_ = 0;
         hideOption(KEY_F6);
         hideOption(KEY_F7);
         showFieldList();
-        render();
+        needRendering();
     }
 }

@@ -139,8 +139,7 @@ public:
     const char * getShowAnimName() { return showAnim_.c_str(); }
     bool hasLeaveAnim() { return leaveAnim_.size() != 0; }
     const char * getLeaveAnimName() { return leaveAnim_.c_str(); }
-    /*! Returns true if the menu needs to be rendered. */
-    bool isRenderingNeeded() { return need_rendering_; }
+    
     void render();
     //! Creates a new text label and returns its id
     int addStatic(int x, int y, const char *text, int size, bool dark);
@@ -234,14 +233,13 @@ protected:
     std::string showAnim_, leaveAnim_;
     std::list<MenuText> statics_;
     std::map<Key, Option> options_;
-    /*! This flag tells whether the menu needs to be redrawn. */
-    bool need_rendering_;
     const char *parent_menu_;
     uint8 *background_;
     int clear_x_, clear_y_, clear_w_, clear_h_;
 
     void redrawOptions();
-    void needRendering() { need_rendering_ = true; }
+    void needRendering();
+    void addDirtyRect(int x, int y, int width, int height);
 };
 
 #endif

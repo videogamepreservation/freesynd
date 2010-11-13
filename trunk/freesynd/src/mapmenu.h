@@ -61,11 +61,6 @@ protected:
     int mapblk_size_;
     /*! Contains the images of the differents blocks.*/
     uint8 *mapblk_data_;
-    /*!
-     * Contains the pixels on screen just after the opening animation.
-     * Used to reset the screen.
-     */
-    uint8 *orig_pixels_;
     /*! A counter for the blinking line of the selector.*/
     int select_tick_count_;
     /*! A counter for the blinking available blocks. */

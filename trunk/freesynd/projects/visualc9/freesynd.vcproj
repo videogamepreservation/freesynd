@@ -360,6 +360,10 @@
 				Name="gfx"
 				>
 				<File
+					RelativePath="..\..\src\gfx\dirtylist.cpp"
+					>
+				</File>
+				<File
 					RelativePath="..\..\src\fliplayer.cpp"
 					>
 				</File>
@@ -625,6 +629,10 @@
 			<Filter
 				Name="gfx"
 				>
+				<File
+					RelativePath="..\..\src\gfx\dirtylist.h"
+					>
+				</File>
 				<File
 					RelativePath="..\..\src\fliplayer.h"
 					>

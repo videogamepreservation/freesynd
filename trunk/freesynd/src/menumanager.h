@@ -28,6 +28,7 @@
 
 #include "common.h"
 #include "menu.h"
+#include "gfx/dirtylist.h"
 #include <string>
 #include <map>
 
@@ -64,6 +65,16 @@ public:
     //! Switch from menu and plays the transition animation.
     void changeCurrentMenu(const char *name);
 
+    //! Take a snapshot of the screen.
+    void saveBackground();
+
+    /*! 
+     * Adds a new dirty rectangle
+     */
+    void addRect(int x, int y, int width, int height) {
+        dirtyList_.addRect(x, y, width, height);
+    }
+
     //! Displays the current menu
     void renderMenu();
 
@@ -92,6 +103,12 @@ protected:
     Menu *current_;
     /** This flag prevents the input events from being processed.*/
     bool drop_events_;
+    /** This array stores a copy of the back buffer to reset the screen.*/
+    uint8 *background_;
+    /*! This flag tells whether current menu needs a background or not.*/
+    bool needBackground_;
+    /** Dirty rects list. */
+    DirtyList   dirtyList_;
 
     MainMenu *menu_main_;
     ConfMenu *menu_conf_;

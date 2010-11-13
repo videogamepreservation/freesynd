@@ -118,7 +118,7 @@ const int MapMenu::TAX_INC_OPT_ID = 3;
  */
 MapMenu::MapMenu(MenuManager * m)
 :  Menu(m, "map", "mmap.dat", "mmapout.dat"),
-mapblk_data_(NULL), orig_pixels_(NULL), select_tick_count_(0)
+mapblk_data_(NULL), select_tick_count_(0)
 {
     addOption(53, 352, "BRIEF", 1, KEY_F4, "brief");
     addOption(535, 352, "MENU", 1, KEY_F5, "main");
@@ -151,8 +151,6 @@ mapblk_data_(NULL), orig_pixels_(NULL), select_tick_count_(0)
 MapMenu::~MapMenu()
 {
     delete[] mapblk_data_;
-    if (orig_pixels_)
-        delete[] orig_pixels_;
 }
 
 /*!
@@ -254,6 +252,8 @@ void MapMenu::handleBlockSelected() {
         hideOption(KEY_MINUS);
         hideOption(KEY_PLUS);
     }
+
+    //addDirtyRect(192, 310, 260, 70);
 }
 
 void MapMenu::handleTick(int elapsed)
@@ -288,6 +288,7 @@ void MapMenu::updateClock() {
     setStaticText(TIME_STATIC_ID, tmp);
 
     needRendering();
+    //addDirtyRect(500, 9, 120, 15);
 }
 
 /*!
@@ -337,12 +338,8 @@ void MapMenu::drawSelector()
 }
 
 void MapMenu::handleShow() {
-    
-    if (orig_pixels_ == 0) {
-        orig_pixels_ = new uint8[GAME_SCREEN_WIDTH * GAME_SCREEN_HEIGHT];
-        memcpy(orig_pixels_, g_Screen.pixels(),
-               GAME_SCREEN_WIDTH * GAME_SCREEN_HEIGHT);
-    }
+    // save a background without country colour
+    menu_manager_->saveBackground();
 
     // Show the mouse
     g_System.showCursor();
@@ -356,9 +353,6 @@ void MapMenu::handleShow() {
 
 void MapMenu::handleRender()
 {
-    // Reset the menu display
-    g_Screen.blit(0, 0, GAME_SCREEN_WIDTH, GAME_SCREEN_HEIGHT, orig_pixels_);
-
     // Draws all countries
     for (int i = 0; i < GameSession::NB_MISSION; i++) {
         Block blk = g_Session.getBlock(i);

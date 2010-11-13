@@ -67,8 +67,8 @@ void Screen::blit(int x, int y, int width, int height,
     if (x + width < 0 || y + height < 0 || x >= width_ || y >= height_)
         return;
 
-    int dx = x < 0 ? 0 : x;
-    int dy = y < 0 ? 0 : y;
+    int clipped_x = x < 0 ? 0 : x;
+    int clipped_y = y < 0 ? 0 : y;
 
     int sx = x < 0 ? -x : 0;
     int sy = y < 0 ? -y : 0;
@@ -82,7 +82,7 @@ void Screen::blit(int x, int y, int width, int height,
     int inc = flipped ? -1 : 1;
 
     for (int j = 0; j < h; ++j) {
-        uint8 *d = pixels_ + (dy + j) * width_ + dx + ofs;
+        uint8 *d = pixels_ + (clipped_y + j) * width_ + clipped_x + ofs;
         const uint8 *s;
         if(flipped)
             s = pixeldata + (sy + j) * stride + sx + (width-w);
@@ -90,6 +90,47 @@ void Screen::blit(int x, int y, int width, int height,
             s = pixeldata + (sy + j) * stride + sx;
 
         for (int i = 0; i < w; ++i) {
+            uint8 c = *s++;
+
+            if (c != 255)
+                *d = c;
+
+            d += inc;
+        }
+    }
+
+    dirty_ = true;
+}
+
+/*!
+ * Blits a portion of the source data to the screen a given position.
+ */
+void Screen::blitRect(int x, int y, int width, int height,
+                  const uint8 * pixeldata, bool flipped, int stride)
+{
+    if (x + width < 0 || y + height < 0 || x >= width_ || y >= height_)
+        return;
+
+    int dest_x = x < 0 ? 0 : x;
+    int dest_y = y < 0 ? 0 : y;
+
+    int clipped_w = x < 0 ? x + width : x + width > width_ ? width_ - x : width;
+    int clipped_h = y < 0
+        ? y + height : y + height > height_ ? height_ - y : height;
+
+    stride = (stride == 0 ? width : stride);
+    int ofs = flipped ? clipped_w - 1 : 0;
+    int inc = flipped ? -1 : 1;
+
+    for (int j = 0; j < clipped_h; ++j) {
+        uint8 *d = pixels_ + (dest_y + j) * width_ + dest_x + ofs;
+        const uint8 *s;
+        if(flipped)
+            s = pixeldata + (y + j) * stride + x + (width- clipped_w);
+        else
+            s = pixeldata + (y + j) * stride + x;
+
+        for (int i = 0; i < clipped_w; ++i) {
             uint8 c = *s++;
 
             if (c != 255)
