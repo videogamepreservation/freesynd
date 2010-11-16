@@ -215,6 +215,7 @@ bool Mission::loadLevel(uint8 * levelData)
                     if (offset_owner > 7 && pindx[offset_owner] != 0xFFFF) {
                         // TODO: correct weapons for enemy agents
                         peds_[pindx[offset_owner]]->addWeapon(w);
+                        w->setOwner(peds_[pindx[offset_owner]]);
                         windx[i] = weapons_.size();
                         weapons_.push_back(w);
                     } else {
@@ -225,6 +226,7 @@ bool Mission::loadLevel(uint8 * levelData)
                 }
             } else {
                 w->setMap(map_);
+                w->setOwner(0);
                 windx[i] = weapons_.size();
                 weapons_.push_back(w);
             }
@@ -672,6 +674,7 @@ void Mission::start()
                     WeaponInstance *wi = g_App.teamMember(i)->removeWeapon(0);
                     weapons_.push_back(wi);
                     peds_[i]->addWeapon(wi);
+                    wi->setOwner(peds_[i]);
                 }
                 peds_[i]->setAsAgent(PedInstance::Agent_Active);
             }else{

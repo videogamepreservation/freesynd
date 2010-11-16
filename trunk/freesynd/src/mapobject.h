@@ -51,7 +51,7 @@ public:
         dmg_Mental = 32,
         dmg_Heal = 64,
         dmg_All = 127,
-    } ObjDamageType;
+    } DamageType;
 
     typedef enum {
         ddmg_Invulnerable = dmg_None,
@@ -61,7 +61,14 @@ public:
         ddmg_StaticTree = dmg_Laser | dmg_Fire | dmg_Explosion,
         ddmg_StaticWindow = dmg_Bullet | dmg_Explosion,
         ddmg_StaticGeneral = dmg_Laser | dmg_Explosion,
-    } ObjDamageDefType;
+    } DefDamageType;
+
+    typedef struct {
+        DamageType dtype;
+        int dvalue;
+        // direction damage comes from, should be angle 256 degree based
+        int ddir;
+    } DamageInflictType;
 
     void setPosition(int tile_x, int tile_y, int tile_z, int off_x = 0,
             int off_y = 0, int off_z = 0) {
@@ -141,6 +148,13 @@ public:
     }
 
     void setFrame(int frame) { frame_ = frame;}
+
+    void setDirection(int dir);
+    void setDirection(int posx, int posy);
+
+    int getDirection(int snum = 8);
+
+
 protected:
     // vis_z_ is location used for adjusting object drawing/calculations
     // tile_z_ represents true location for tile
@@ -151,6 +165,7 @@ protected:
     int frames_per_sec_;
     int sub_type_, main_type_;
     unsigned int rcv_damage_def_;
+    int dir_;
 
     void addOffs(int &x, int &y);
 };
@@ -206,17 +221,6 @@ public:
     ShootableMovableMapObject(int m);
     virtual ~ShootableMovableMapObject() {}
 
-    void setDirection(int dir) {
-        if (dir < 0)
-            dir = 8 + dir;
-
-        dir_ = dir % 8;
-    }
-
-    int direction() {
-        return dir_;
-    }
-
     void setSpeed(int new_speed) {
         speed_ = new_speed;
     }
@@ -232,7 +236,6 @@ public:
     FreeWay hold_on_;
 
 protected:
-    int dir_;
     int speed_;
     std::list<PathNode> dest_path_;
 
@@ -244,7 +247,7 @@ protected:
 /*!
  * Static map object class.
  */
-class Static : public MapObject {
+class Static : public ShootableMapObject {
 public:
     static Static *loadInstance(uint8 *data, int m);
 
@@ -258,7 +261,7 @@ public:
     }stateDoors;
 
 protected:
-    Static(int m):MapObject(m) {}
+    Static(int m):ShootableMapObject(m) {}
     virtual ~Static() {}
     unsigned int state_;
 };

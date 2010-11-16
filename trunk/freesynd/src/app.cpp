@@ -515,6 +515,8 @@ void App::run() {
         fliPlayer.loadFliData(data);
         fliPlayer.play();
         delete[] data;
+        if (!gameSprites().loaded())
+            gameSprites().load();
         waitForKeyPress();
 
         // play the groovy menu startup anim
@@ -523,10 +525,10 @@ void App::run() {
         fliPlayer.loadFliData(data);
         fliPlayer.play();
         delete[] data;
+    } else {
+        if (!gameSprites().loaded())
+            gameSprites().load();
     }
-
-    if (!gameSprites().loaded())
-        gameSprites().load();
 
     menus_.createAllMenus();
 

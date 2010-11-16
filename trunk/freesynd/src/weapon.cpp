@@ -33,7 +33,7 @@
 Weapon::Weapon(const char *w_name, int smallIcon, int bigIcon, int w_cost,
     int w_ammo, int w_range, int w_shot, int w_rank, int w_anim,
     Weapon::WeaponAnimIndex w_idx, snd::InGameSample w_sample,
-    WeaponType w_type, MapObject::ObjDamageType w_dmg_type,
+    WeaponType w_type, MapObject::DamageType w_dmg_type,
     int w_shots_per_sec, int w_ammo_per_shot) :
     name_(w_name), small_icon_(smallIcon), big_icon_(bigIcon), cost_(w_cost),
     ammo_(w_ammo), range_(w_range), shot_(w_shot), anim_(w_anim), rank_(w_rank),
@@ -100,4 +100,10 @@ bool WeaponInstance::animate(int elapsed) {
 void WeaponInstance::draw(int x, int y) {
     addOffs(x, y);
     g_App.gameSprites().drawFrame(anim_, frame_, x, y);
+}
+
+bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
+    bool forcedshot, int duration)
+{
+    return true;
 }

@@ -30,7 +30,7 @@
 #include "system_sdl.h"
 #endif
 MapObject::MapObject(int m):map_(m), frame_(0), elapsed_carry_(0),
-frames_per_sec_(8), sub_type_(0), main_type_(0)
+frames_per_sec_(8), sub_type_(0), main_type_(0), dir_(0)
 {
 }
 
@@ -107,12 +107,78 @@ bool MapObject::animate(int elapsed)
     return changed;
 }
 
+void MapObject::setDirection(int dir) {
+    assert(dir >= 0);
+    dir_ = dir;
+}
+
+// posx = targetx - objx
+// posy = targety - objy
+void MapObject::setDirection(int posx, int posy) {
+    int direction = -1;
+    double PI = 3.14159265;
+    if (posx == 0) {
+        if (posy > 0) {
+            direction = 128;
+        } else if (posy < 0) {
+            direction = 0;
+        }
+    } else if (posy == 0) {
+        if (posx > 0) {
+            direction = 64;
+        } else if (posx < 0) {
+            direction = 192;
+        }
+    } else if (posx < 0 && posy > 0) {
+        int swapx = -posx;
+        posx = posy;
+        posy = swapx;
+        direction = (int)((128 * atan(double(posy/posx))) / PI + 128);
+    } else if (posx < 0 && posy < 0) {
+        posx = -posx;
+        posy = -posy;
+        direction = (int)((128 * atan(double(posy/posx))) / PI + 192);
+    } else if (posx > 0 && posy < 0) {
+        int swapx = posx;
+        posx = -posy;
+        posy = swapx;
+        direction = (int)((128 * atan(double(posy/posx))) / PI);
+    } else {
+        direction = (int)((128 * atan(double(posy/posx))) / PI + 64);
+    }
+    if (direction != -1)
+        dir_ = direction;
+}
+
+int MapObject::getDirection(int snum) {
+    assert(snum > 0);
+
+    int n = snum;
+    int direction = 0;
+    int sinc = 256 / snum;
+    int sdec = sinc / 2;
+    do {
+        int s = direction * sinc;
+        if (direction == 0) {
+            if ((256 - sdec) > dir_ || (s + sdec) <= dir_)
+                break;
+        } else {
+            if ((s - sdec) > dir_ || (s + sdec) <= dir_)
+                break;
+        }
+        direction++;
+    } while (direction < snum);
+    assert(direction < snum);
+
+    return direction;
+}
+
 ShootableMapObject::ShootableMapObject(int m):MapObject(m)
 {
 }
 
 ShootableMovableMapObject::
-ShootableMovableMapObject(int m):ShootableMapObject(m), dir_(0),
+ShootableMovableMapObject(int m):ShootableMapObject(m),
 speed_(0)
 {
 }

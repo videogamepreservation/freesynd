@@ -209,7 +209,6 @@ public:
         if(health_ > 0){
             if (receive_damage_ == 0) {
                 receive_damage_ = d;
-                frame_ = 0;
             }else{
                 receive_damage_ += d;
             }

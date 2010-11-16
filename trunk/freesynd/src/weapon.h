@@ -73,7 +73,7 @@ public:
     Weapon(const char *w_name, int smallIcon, int bigIcon, int w_cost,
             int w_ammo, int w_range, int w_shot, int w_rank, int w_anim,
             WeaponAnimIndex w_idx, snd::InGameSample w_sample,
-            WeaponType w_type, MapObject::ObjDamageType w_dmg_type,
+            WeaponType w_type, MapObject::DamageType w_dmg_type,
             int w_shots_per_sec, int w_ammo_per_shot);
 
     const char *name() { return name_.c_str(); }
@@ -110,7 +110,7 @@ protected:
     int anim_;
     int rank_;  //!> weapon rank
     WeaponType type_;
-    MapObject::ObjDamageType dmg_type_;
+    MapObject::DamageType dmg_type_;
     WeaponAnimIndex idx_;
     snd::InGameSample sample_;
     int shots_per_sec_, ammo_per_shot_;
@@ -128,9 +128,15 @@ public:
 
     bool animate(int elapsed);
     void draw(int x, int y);
+    bool inflictDamage(ShootableMapObject * tobj, PathNode * tp,
+        bool forcedshot, int duration);
+
+    void setOwner(ShootableMapObject *owner) { owner_ = owner; }
+    ShootableMapObject *getOwner() { return owner_; }
 
 protected:
     int ammo_remaining_;
+    ShootableMapObject *owner_;
 };
 
 #endif

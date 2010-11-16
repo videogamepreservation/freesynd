@@ -178,11 +178,10 @@ int Ped::lastPersuadeFrame() {
     return g_App.gameSprites().lastFrame(persuade_anim_);
 }
 
-
 bool PedInstance::animate(int elapsed, Mission *mission) {
     bool updated = false;
     Weapon::WeaponAnimIndex weapon_idx =
-        selectedWeapon()? selectedWeapon()->index() : Weapon::Unarmed_Anim;
+        selectedWeapon() ? selectedWeapon()->index() : Weapon::Unarmed_Anim;
 
     if (is_an_agent_ == PedInstance::Agent_Non_Active)
         return true;
@@ -375,15 +374,32 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
 
     if (curanim != PedInstance::HitAnim
         && curanim != PedInstance::PickupAnim
-        && curanim != PedInstance::PutdownAnim)
+        && curanim != PedInstance::PutdownAnim
+        && curanim != PedInstance::StandFireAnim)
     {
         updated |= movementP(mission, elapsed);
+    }
+
+    if (putdown_weapon_) {
+        WeaponInstance *w = putdown_weapon_;
+        w->setMap(map());
+        w->setPosition(tile_x_, tile_y_, tile_z_, off_x_, off_y_, off_z_);
+        w->setVisZ(vis_z_);
+        w->setOwner(0);
+        putdown_weapon_ = 0;
+        setDrawnAnim(PedInstance::PutdownAnim);
+        if(speed() != 0){
+            clearDestination();
+            setSpeed(0);
+        }
+        return true;
     }
 
     if (pickup_weapon_) {
         if (samePosition(pickup_weapon_)) {
             weapons_.push_back(pickup_weapon_);
             pickup_weapon_->setMap(-1);
+            pickup_weapon_->setOwner(this);
             pickup_weapon_ = 0;
             setDrawnAnim(PedInstance::PickupAnim);
             return true;
@@ -406,20 +422,6 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                 }
             }
         }
-    }
-
-    if (putdown_weapon_) {
-        WeaponInstance *w = putdown_weapon_;
-        w->setMap(map());
-        w->setPosition(tile_x_, tile_y_, tile_z_, off_x_, off_y_, off_z_);
-        w->setVisZ(vis_z_);
-        putdown_weapon_ = 0;
-        setDrawnAnim(PedInstance::PutdownAnim);
-        if(speed() != 0){
-            clearDestination();
-            setSpeed(0);
-        }
-        return true;
     }
 
     if (target_) {
@@ -912,6 +914,7 @@ void PedInstance::dropAllWeapons() {
         w->setMap(map());
         w->setPosition(tile_x_, tile_y_, tile_z_, off_x_, off_y_, off_z_);
         w->setVisZ(vis_z_);
+        w->setOwner(0);
         n++;
     }
 
