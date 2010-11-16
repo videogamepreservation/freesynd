@@ -139,7 +139,6 @@ PedInstance *PedManager::loadInstance(uint8 * data, int map)
     Mission::LEVELDATA_PEOPLE * gamdata =
         (Mission::LEVELDATA_PEOPLE *) data;
 
-    int dir = gamdata->orientation >> 5;
     int hp = READ_LE_INT16(gamdata->health);
 
     Ped *pedanim = new Ped();
@@ -170,7 +169,7 @@ PedInstance *PedManager::loadInstance(uint8 * data, int map)
     newped->setPosition(gamdata->mapposx[1], gamdata->mapposy[1],
                         z, gamdata->mapposx[0],
                         gamdata->mapposy[0], oz);
-    newped->setDirection(dir);
+    newped->setDirection(gamdata->orientation);
     newped->setMainType(gamdata->type_ped);
 
     newped->setAllAdrenaLevels(gamdata->adrena_amount,

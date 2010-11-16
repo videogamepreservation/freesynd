@@ -65,7 +65,7 @@ VehicleInstance *VehicleManager::loadInstance(uint8 * data, int map)
                             gamdata->mapposy[0], oz);
     newvehicle->setHealth(hp);
     newvehicle->setStartHealth(hp);
-    newvehicle->setDirection(dir);
+    newvehicle->setDirection(gamdata->orientation);
 
     return newvehicle;
 }

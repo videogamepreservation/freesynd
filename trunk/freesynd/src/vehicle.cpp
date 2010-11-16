@@ -43,17 +43,17 @@ VehicleInstance *Vehicle::createInstance(int map)
 
 void Vehicle::draw(int x, int y, int dir, int frame)
 {
-    g_App.gameSprites().drawFrame(anims_ + (dir / 2) * 2, frame, x, y);
+    g_App.gameSprites().drawFrame(anims_ + dir * 2, frame, x, y);
 }
 
 void Vehicle::drawOnFire(int x, int y, int dir, int frame)
 {
-    g_App.gameSprites().drawFrame(anims_burning_ + dir / 2, frame, x, y);
+    g_App.gameSprites().drawFrame(anims_burning_ + dir, frame, x, y);
 }
 
 void Vehicle::drawBurnt(int x, int y, int dir, int frame)
 {
-    g_App.gameSprites().drawFrame(anims_burnt_ + dir / 2, frame, x, y);
+    g_App.gameSprites().drawFrame(anims_burnt_ + dir, frame, x, y);
 }
 
 VehicleInstance::VehicleInstance(Vehicle * vehicle,
@@ -96,11 +96,11 @@ void VehicleInstance::draw(int x, int y)
         return;
 
     if (health_ == 0)
-        vehicle_->drawBurnt(x, y, dir_, frame_);
+        vehicle_->drawBurnt(x, y, getDirection(4), frame_);
     else if (health_ != start_health_)
-        vehicle_->drawOnFire(x, y, dir_, frame_);
+        vehicle_->drawOnFire(x, y, getDirection(4), frame_);
     else
-        vehicle_->draw(x, y, dir_, frame_);
+        vehicle_->draw(x, y, getDirection(4), frame_);
 }
 
 bool VehicleInstance::walkable(int x, int y, int z)
@@ -274,11 +274,7 @@ void VehicleInstance::setDestinationV(Mission *m, int x, int y, int z, int ox,
     dest_path_.clear();
     setSpeed(0);
 
-    //if (m->mtsurfaces_[tile_x_ + tile_y_ * m->mmax_x_ + tile_z_ * m->mmax_m_xy].id
-        //!= m->mtsurfaces_[x + y * m->mmax_x_ + z * m->mmax_m_xy].id)
-        //return;
-    if (map_ == -1 || health_ <= 0
-        || !(walkable(x, y, z)))
+    if (map_ == -1 || health_ <= 0 || !(walkable(x, y, z)))
         return;
 
     if (!walkable(tile_x_, tile_y_, tile_z_)) {
@@ -493,29 +489,8 @@ bool VehicleInstance::movementV(int elapsed)
                 speed_ = 0;
             updated = true;
         } else {
-            // TODO: something better?
-            int fuzz = 16;
-            if (ady < (aty - fuzz)) {
-                if (adx < (atx - fuzz))
-                    dir_ = 5;
-                else if (adx > (atx + fuzz))
-                    dir_ = 3;
-                else if (adx < (atx + fuzz))
-                    dir_ = 4;
-            } else if (abs(diffy) < fuzz) {
-                if (adx < (atx - fuzz))
-                    dir_ = 6;
-                else if (adx > (atx + fuzz))
-                    dir_ = 2;
-            } else if (abs(diffy) > fuzz) {
-                if (adx < (atx - fuzz))
-                    dir_ = 7;
-                else if (adx > (atx + fuzz))
-                    dir_ = 1;
-                else if (adx < (atx + fuzz))
-                    dir_ = 0;
-            }
-
+            // our Y is inversed
+            setDirection(diffx, aty - ady);
             int dx = 0, dy = 0;
             float d = sqrt((float) (diffx * diffx + diffy * diffy));
 

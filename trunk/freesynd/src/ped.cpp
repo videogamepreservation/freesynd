@@ -304,7 +304,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
     PedInstance::AnimationDrawn curanim = getDrawnAnim();
     switch (curanim) {
         case PedInstance::HitAnim:
-            if (frame_ > ped_->lastHitFrame(dir_)) {
+            if (frame_ > ped_->lastHitFrame(getDirection())) {
                 if(speed_) {
                     setDrawnAnim(PedInstance::WalkAnim);
                 } else
@@ -338,7 +338,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
         case PedInstance::StandAnim:
             break;
         case PedInstance::WalkFireAnim:
-            if(frame_ > ped_->lastWalkFireFrame(dir_, weapon_idx)) {
+            if(frame_ > ped_->lastWalkFireFrame(getDirection(), weapon_idx)) {
                 if (speed_) {
                     setDrawnAnim(PedInstance::WalkAnim);
                 } else
@@ -346,7 +346,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
             }
             break;
         case PedInstance::StandFireAnim:
-            if(frame_ > ped_->lastStandFireFrame(dir_, weapon_idx)) {
+            if(frame_ > ped_->lastStandFireFrame(getDirection(), weapon_idx)) {
                 if (speed_) {
                     setDrawnAnim(PedInstance::WalkAnim);
                 } else
@@ -427,8 +427,8 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
     if (target_) {
         if (inRange(target_)) {
             if(target_->health() > 0) {
-                target_x_ = target_->screenX();
-                target_y_ = target_->screenY();
+                target_x_ = target_->tileX() + target_->offX();
+                target_y_ = target_->tileY() + target_->offY();
             } else {
                 target_ = NULL;
                 target_x_ = -1;
@@ -446,36 +446,9 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
             && (is_an_agent_ == PedInstance::Agent_Active ? true
             : curanim != PedInstance::HitAnim))
     {
-        // TODO : check this, direction must be setup correctly
-        int stx = screenX() + 30;
-        int sty = screenY() - 4;
 
-        int fuzz = 16;
-
-        if (target_x_ - stx < -fuzz) {
-            if (target_y_ - sty < -fuzz)
-                dir_ = 6;
-            else if (target_y_ - sty > fuzz)
-                dir_ = 0;
-            else
-                dir_ = 7;
-        } else if (target_x_ - stx > fuzz) {
-            if (target_y_ - sty < -fuzz)
-                dir_ = 4;
-            else if (target_y_ - sty > fuzz)
-                dir_ = 2;
-            else
-                dir_ = 3;
-        } else {
-            if (target_y_ - sty < -fuzz)
-                dir_ = 5;
-            else if (target_y_ - sty > fuzz)
-                dir_ = 1;
-            else {
-                // shoot yourself?
-            }
-        }
-
+        setDirection(target_x_ - (tile_x_ * 256 + off_x_),
+            (tile_y_ * 256 + off_y_) - target_y_);
         setHitDamage(selectedWeapon()->shot());
         firing_ = PedInstance::Firing_Fire;
         updated = true;
@@ -694,7 +667,7 @@ void PedInstance::draw(int x, int y, int scrollX, int scrollY) {
 
     switch(getDrawnAnim()){
         case PedInstance::HitAnim:
-            ped_->drawHitFrame(x, y, dir_, frame_);
+            ped_->drawHitFrame(x, y, getDirection(), frame_);
             break;
         case PedInstance::DieAnim:
             ped_->drawDieFrame(x, y, frame_);
@@ -709,19 +682,19 @@ void PedInstance::draw(int x, int y, int scrollX, int scrollY) {
             ped_->drawPickupFrame(x, y, frame_);
             break;
         case PedInstance::WalkAnim:
-            ped_->drawWalkFrame(x, y, dir_, frame_, weapon_idx);
+            ped_->drawWalkFrame(x, y, getDirection(), frame_, weapon_idx);
             break;
         case PedInstance::StandAnim:
-            ped_->drawStandFrame(x, y, dir_, frame_, weapon_idx);
+            ped_->drawStandFrame(x, y, getDirection(), frame_, weapon_idx);
             break;
         case PedInstance::WalkFireAnim:
-            ped_->drawWalkFireFrame(x, y, dir_, frame_, weapon_idx);
+            ped_->drawWalkFireFrame(x, y, getDirection(), frame_, weapon_idx);
             break;
         case PedInstance::StandFireAnim:
-            ped_->drawStandFireFrame(x, y, dir_, frame_, weapon_idx);
+            ped_->drawStandFireFrame(x, y, getDirection(), frame_, weapon_idx);
             break;
         case PedInstance::VaporizeAnim:
-            ped_->drawVaporizeFrame(x, y, dir_, frame_);
+            ped_->drawVaporizeFrame(x, y, getDirection(), frame_);
             break;
         case PedInstance::SinkAnim:
             ped_->drawSinkFrame(x, y, frame_);
@@ -757,7 +730,7 @@ void PedInstance::drawSelectorAnim(int x, int y) {
 
     switch(getDrawnAnim()){
         case PedInstance::HitAnim:
-            ped_->drawHitFrame(x, y, dir_, frame_);
+            ped_->drawHitFrame(x, y, getDirection(), frame_);
             break;
         case PedInstance::DieAnim:
             ped_->drawDieFrame(x, y, frame_);
@@ -772,19 +745,19 @@ void PedInstance::drawSelectorAnim(int x, int y) {
             ped_->drawPickupFrame(x, y, frame_);
             break;
         case PedInstance::WalkAnim:
-            ped_->drawWalkFrame(x, y, dir_, frame_, weapon_idx);
+            ped_->drawWalkFrame(x, y, getDirection(), frame_, weapon_idx);
             break;
         case PedInstance::StandAnim:
-            ped_->drawStandFrame(x, y, dir_, frame_, weapon_idx);
+            ped_->drawStandFrame(x, y, getDirection(), frame_, weapon_idx);
             break;
         case PedInstance::WalkFireAnim:
-            ped_->drawWalkFireFrame(x, y, dir_, frame_, weapon_idx);
+            ped_->drawWalkFireFrame(x, y, getDirection(), frame_, weapon_idx);
             break;
         case PedInstance::StandFireAnim:
-            ped_->drawStandFireFrame(x, y, dir_, frame_, weapon_idx);
+            ped_->drawStandFireFrame(x, y, getDirection(), frame_, weapon_idx);
             break;
         case PedInstance::VaporizeAnim:
-            ped_->drawVaporizeFrame(x, y, dir_, frame_);
+            ped_->drawVaporizeFrame(x, y, getDirection(), frame_);
             break;
         case PedInstance::SinkAnim:
             ped_->drawSinkFrame(x, y, frame_);
@@ -3135,28 +3108,8 @@ bool PedInstance::movementP(Mission *m, int elapsed)
                 speed_ = 0;
             updated = true;
         } else {
-            // TODO: something better?
-            int fuzz = 16;
-            if (ady < (aty - fuzz)) {
-                if (adx < (atx - fuzz))
-                    dir_ = 5;
-                else if (adx > (atx + fuzz))
-                    dir_ = 3;
-                else if (adx < (atx + fuzz))
-                    dir_ = 4;
-            } else if (abs(diffy) < fuzz) {
-                if (adx < (atx - fuzz))
-                    dir_ = 6;
-                else if (adx > (atx + fuzz))
-                    dir_ = 2;
-            } else if (abs(diffy) > fuzz) {
-                if (adx < (atx - fuzz))
-                    dir_ = 7;
-                else if (adx > (atx + fuzz))
-                    dir_ = 1;
-                else if (adx < (atx + fuzz))
-                    dir_ = 0;
-            }
+            // our Y is inversed
+            setDirection(diffx, aty - ady);
 
             int dx = 0, dy = 0;
             float d = sqrt((float) (diffx * diffx + diffy * diffy));

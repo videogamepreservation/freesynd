@@ -696,13 +696,13 @@ void GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
                         mission_->ped(i)->setTarget(
                                 mission_->vehicle(pointing_at_vehicle_));
                     }
-                    else if (pointing_at_ped_ == -1
+                    /*else if (pointing_at_ped_ == -1
                             && pointing_at_vehicle_ == -1) {
                         mission_->ped(i)->setTarget(world_x_ + x - 129,
                                 world_y_ + y);
-                    }
-                    WeaponInstance *w = mission_->ped(i)->selectedWeapon();
-                    mission_->ped(i)->setHitDamage(w->shot());
+                    }*/
+                    //WeaponInstance *w = mission_->ped(i)->selectedWeapon();
+                    //mission_->ped(i)->setHitDamage(w->shot());
                 }
         }
     }
