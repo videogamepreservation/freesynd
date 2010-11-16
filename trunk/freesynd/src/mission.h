@@ -52,6 +52,16 @@ typedef struct {
  */
 class Mission : public MapHelper {
 public:
+    /*!
+     * List of all possible mission status. 
+     */
+    enum Status {
+        RUNNING = 0,
+        ABORTED = 1,
+        FAILED = 2,
+        COMPLETED = 3
+    };
+
     Mission();
     virtual ~Mission();
     bool loadMission(uint8 *missData, int size);
@@ -109,8 +119,14 @@ public:
     MissionStats *getStatistics() { return &stats_; }
 
     void start();
-    bool failed();
-    bool completed();
+    //! Forces mission status
+    void setStatus(Status status) { status_ = status; }
+    //! Check if objectives are completed or failed
+    void checkObjectives();
+    //! Returns true if mission status is failed
+    bool failed() { return status_ == FAILED; }
+    //! Returns true if mission status is completed
+    bool completed() { return status_ == COMPLETED; }
     void end();
 
     void addWeapon(WeaponInstance *w);
@@ -472,6 +488,13 @@ public:
     std::vector <ObjectiveDesc> objectives_;
     std::vector <ObjectiveDesc> sub_objectives_;
     uint16 cur_objective_;
+    /*!
+     * Mission status. 
+     * By default, a mission is running but it can be
+     * aborted if user escapes the mission, failed if
+     * missions objectives are not fullfilled or completed.
+     */
+    Status status_;
 
     // TODO: enhance level require better handling of values
     // some missions have 2 info costs, some 3, enhance cost same thing

@@ -31,7 +31,7 @@
 
 BriefMenu::BriefMenu(MenuManager * m) :
 Menu(m, "brief", "mbrief.dat", "mbrieout.dat"),
-orig_pixels_(0), start_line_(0), info_level_(0),
+start_line_(0), info_level_(0),
 enhance_level_(0) {
     addStatic(148, 35, "MISSION BRIEF", 3, true);
     addStatic(500, 9, "", 1, false);       // Time
@@ -47,8 +47,6 @@ enhance_level_(0) {
 }
 
 BriefMenu::~BriefMenu() {
-    if (orig_pixels_)
-        delete[] orig_pixels_;
 }
 
 void BriefMenu::handleTick(int elapsed)
@@ -72,11 +70,7 @@ void BriefMenu::updateClock() {
 
 void BriefMenu::handleShow() {
 
-    if (orig_pixels_ == 0) {
-        orig_pixels_ = new uint8[GAME_SCREEN_WIDTH * GAME_SCREEN_HEIGHT];
-        memcpy(orig_pixels_, g_Screen.pixels(),
-               GAME_SCREEN_WIDTH * GAME_SCREEN_HEIGHT);
-    }
+    menu_manager_->saveBackground();
 
     // grab mission info
     int cur_miss = g_Session.getSelectedBlock().mis_id;
@@ -89,8 +83,8 @@ void BriefMenu::handleShow() {
 
 void BriefMenu::handleRender() {
 
-    g_Screen.blit(0, 0, GAME_SCREEN_WIDTH, 340, orig_pixels_, false,
-                      GAME_SCREEN_WIDTH);
+    /*g_Screen.blit(0, 0, GAME_SCREEN_WIDTH, 340, orig_pixels_, false,
+                      GAME_SCREEN_WIDTH);*/
 
     g_Screen.drawLogo(18, 14, g_Session.getLogo(), g_Session.getLogoColour());
 
@@ -197,17 +191,17 @@ void BriefMenu::handleRender() {
 
     // write money
     char tmp[100];
-    g_Screen.blit(502, 87, 125, 30,
+/*    g_Screen.blit(502, 87, 125, 30,
                   orig_pixels_ + 502 + 87 * GAME_SCREEN_WIDTH, false,
-                  GAME_SCREEN_WIDTH);
+                  GAME_SCREEN_WIDTH);*/
     sprintf(tmp, "%d", g_App.getGameSession().getMoney());
     g_App.fonts().drawText(560 - g_App.fonts().textWidth(tmp, FontManager::SIZE_2) / 2, 87,
                            tmp, FontManager::SIZE_2, false);
 
     // write cost for more info
-    g_Screen.blit(538, 140, 100, 30,
+/*    g_Screen.blit(538, 140, 100, 30,
                   orig_pixels_ + 538 + 140 * GAME_SCREEN_WIDTH, false,
-                  GAME_SCREEN_WIDTH);
+                  GAME_SCREEN_WIDTH);*/
 
     if (info_level_ < 3) {
         sprintf(tmp, "%d", pMission->infoCost(info_level_));
@@ -216,9 +210,9 @@ void BriefMenu::handleRender() {
     }
 
     // write cost for more enhance
-    g_Screen.blit(538, 195, 100, 30,
+/*    g_Screen.blit(538, 195, 100, 30,
                   orig_pixels_ + 538 + 195 * GAME_SCREEN_WIDTH, false,
-                  GAME_SCREEN_WIDTH);
+                  GAME_SCREEN_WIDTH);*/
 
     if (enhance_level_ < 3) {
         sprintf(tmp, "%d", pMission->enhanceCost(enhance_level_));

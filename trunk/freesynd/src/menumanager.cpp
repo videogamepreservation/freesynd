@@ -38,8 +38,6 @@
 #include "loadingmenu.h"
 #include "gameplaymenu.h"
 #include "debriefmenu.h"
-#include "misswinmenu.h"
-#include "misslosemenu.h"
 #include "logoutmenu.h"
 #include "fliplayer.h"
 #include "system.h"
@@ -48,7 +46,7 @@ MenuManager::MenuManager():current_(NULL),
 menu_main_(NULL), menu_conf_(NULL), menu_load_save_(NULL),
 menu_map_(NULL), menu_brief_(NULL), menu_select_(NULL),
 menu_research_(NULL), menu_loading_(NULL), menu_gameplay_(NULL),
-menu_debrief_(NULL), menu_miss_win_(NULL), menu_miss_lose_(NULL),
+menu_debrief_(NULL),
 menu_logout_(NULL), dirtyList_(g_Screen.gameScreenWidth(), g_Screen.gameScreenHeight())
 {
     drop_events_ = false;
@@ -79,10 +77,6 @@ MenuManager::~MenuManager()
         delete menu_gameplay_;
     if (menu_debrief_)
         delete menu_debrief_;
-    if (menu_miss_win_)
-        delete menu_miss_win_;
-    if (menu_miss_lose_)
-        delete menu_miss_lose_;
     if (menu_logout_)
         delete menu_logout_;
 
@@ -283,8 +277,6 @@ void MenuManager::createAllMenus()
     menu_loading_ = new LoadingMenu(this);
     menu_gameplay_ = new GameplayMenu(this);
     menu_debrief_ = new DebriefMenu(this);
-    menu_miss_win_ = new MissWinMenu(this);
-    menu_miss_lose_ = new MissLoseMenu(this);
     menu_logout_ = new LogoutMenu(this);
 
     // still to go:  mendlose.dat, mendwin.dat

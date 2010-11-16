@@ -42,8 +42,6 @@ freesynd_SOURCES = common.h config.h keys.h singleton.h \
 	menumanager.cpp menumanager.h \
 	mission.cpp mission.h \
 	missionmanager.cpp missionmanager.h \
-	misslosemenu.cpp misslosemenu.h \
-	misswinmenu.cpp misswinmenu.h \
 	mod.cpp mod.h \
 	modmanager.cpp modmanager.h \
 	ped.cpp ped.h \

@@ -135,9 +135,13 @@ public:
         return leaveAnim_.size() == 0;
     }
 
+    /*! Returns true if an animation has been defined when opening the menu.*/
     bool hasShowAnim() { return showAnim_.size() != 0; }
+    /*! Returns the opening animation file name. */
     const char * getShowAnimName() { return showAnim_.c_str(); }
+    /*! Returns true if an animation has been defined when leaving the menu.*/
     bool hasLeaveAnim() { return leaveAnim_.size() != 0; }
+    /*! Returns the leaving animation file name. */
     const char * getLeaveAnimName() { return leaveAnim_.c_str(); }
     
     void render();

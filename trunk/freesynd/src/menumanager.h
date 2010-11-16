@@ -120,8 +120,6 @@ protected:
     LoadingMenu *menu_loading_;
     GameplayMenu *menu_gameplay_;
     DebriefMenu *menu_debrief_;
-    Menu *menu_miss_win_;
-    Menu *menu_miss_lose_;
     LogoutMenu *menu_logout_;
 };
 

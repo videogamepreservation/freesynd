@@ -296,14 +296,6 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\src\misslosemenu.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\src\misswinmenu.cpp"
-					>
-				</File>
-				<File
 					RelativePath="..\..\src\researchmenu.cpp"
 					>
 				</File>
@@ -555,14 +547,6 @@
 				</File>
 				<File
 					RelativePath="..\..\src\menumanager.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\src\misslosemenu.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\src\misswinmenu.h"
 					>
 				</File>
 				<File

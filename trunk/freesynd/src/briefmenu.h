@@ -46,7 +46,6 @@ protected:
     void updateClock();
 
 protected:
-    uint8 *orig_pixels_;
     int start_line_;
     int info_level_;
     int enhance_level_;

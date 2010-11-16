@@ -34,6 +34,7 @@
 Mission::Mission(): mtsurfaces_(NULL), mdpoints_(NULL), mdpoints_cp_(NULL),
 map_(0), min_x_(0), min_y_(0), max_x_(0), max_y_(0), cur_objective_(0)
 {
+    status_ = RUNNING;
     memset(&level_data_, 0, sizeof(level_data_));
 }
 
@@ -691,42 +692,16 @@ void Mission::start()
     stats_.mission_duration = 0;
 }
 
-bool Mission::failed()
-{
-    bool rspfailed = false;
+/*! 
+ * Checks if objectives are completed or failed and updates
+ * mission status.
+ */
+void Mission::checkObjectives() {
     if (objectives_.size() != 0) {
         ObjectiveDesc &objd = objectives_[cur_objective_];
         switch (objd.type) {
             case objv_None:
-                break;
-            case objv_AquireControl:
-                break;
-            case objv_Protect:
-                break;
-            case objv_GetObject:
-                break;
-            case objv_DestroyObject:
-                break;
-            case objv_UseObject:
-                break;
-            case objv_ReachLocation:
-                break;
-            case objv_ExecuteObjective:
-                break;
-        }
-    }
-    return rspfailed;
-}
-
-bool Mission::completed()
-{
-    bool rspcompleted = false;
-
-    if (objectives_.size() != 0) {
-        ObjectiveDesc &objd = objectives_[cur_objective_];
-        switch (objd.type) {
-            case objv_None:
-                rspcompleted = true;
+                status_ = COMPLETED;
                 break;
             case objv_AquireControl:
                 break;
@@ -739,7 +714,7 @@ bool Mission::completed()
                     case 1: //ped
                         if ((objd.condition & 4) == 0) {
                             if (peds_[objd.targetindx]->health() <= 0) {
-                                rspcompleted = true;
+                                status_ = COMPLETED;
                                 cur_objective_ ++;
                             }
                         }
@@ -756,8 +731,6 @@ bool Mission::completed()
                 break;
         }
     }
-
-    return rspcompleted;
 }
 
 void Mission::end()

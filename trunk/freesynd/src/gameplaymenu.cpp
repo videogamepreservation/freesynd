@@ -30,6 +30,9 @@
 #include <assert.h>
 #include "app.h"
 #include "gameplaymenu.h"
+#include "fliplayer.h"
+#include "utils/file.h"
+
 #ifdef _WIN32
 #include <windows.h>
 #endif
@@ -38,7 +41,7 @@
 const int SCROLL_STEP = 16;
 
 GameplayMenu::GameplayMenu(MenuManager *m) :
-Menu(m, "Gameplay", "", ""),
+Menu(m, "Gameplay", "", "mscrenup.dat"),
 tick_count_(0), last_animate_tick_(0), last_motion_tick_(0),
 last_motion_x_(320), last_motion_y_(240), mission_hint_ticks_(0), 
 mission_hint_(0), mission_(0), world_x_(0),
@@ -237,6 +240,9 @@ void GameplayMenu::handleTick(int elapsed)
     // Update stats
     mission_->getStatistics()->mission_duration += elapsed;
 
+    // Checks mission objectives
+    mission_->checkObjectives();
+
     // Scroll the map
     if (scroll_x_ != 0 || scroll_y_ != 0) {
         change = scroll();
@@ -421,14 +427,35 @@ void GameplayMenu::handleRender()
 
 void GameplayMenu::handleLeave()
 {
+    g_App.music().stopPlayback();
+
     g_System.hideCursor();
     g_App.setPalette("mselect.pal");
     mission_->end();
     // update time
     int elapsed = mission_->getStatistics()->mission_duration;
     g_Session.updateTime(elapsed);
+
+    char * anim = NULL;
+    if (mission_->completed()) {
+        anim = "mgamewin.dat";
+    } else if (mission_->failed()) {
+        anim = "mlosegam.dat";
+    }
+
+    if (anim != NULL) {
+        FliPlayer fliPlayer;
+        uint8 *data;
+        int size;
+        data = File::loadFile(anim, size);
+        fliPlayer.loadFliData(data, true);
+        //g_App.gameSounds().play(snd::MENU_CHANGE);
+        fliPlayer.play();
+        delete[] data;
+    }
+
     mission_ = NULL;
-    g_App.music().stopPlayback();
+    
 }
 
 void GameplayMenu::handleMouseMotion(int x, int y, int state, const int modKeys)
@@ -757,11 +784,19 @@ extern int topz;
 void GameplayMenu::handleUnknownKey(Key key, const int modKeys) {
     bool change = false; /* indicator whether menu should be redrawn */
 
-#ifdef _DEBUG
-    if (key == KEY_h && mission_) {
-        g_Session.completeSelectedBlock();
+    if (mission_ == NULL) {
+        // Mission must not be null
+        return;
+    }
 
-        menu_manager_->changeCurrentMenu("misswin");
+#ifdef _DEBUG
+    if (key == KEY_h) {
+        mission_->setStatus(Mission::COMPLETED);
+        return;
+    }
+
+    if (key == KEY_g) {
+        mission_->setStatus(Mission::FAILED);
         return;
     }
 #endif
@@ -772,11 +807,12 @@ void GameplayMenu::handleUnknownKey(Key key, const int modKeys) {
         if (mission_->completed()) {
             g_Session.completeSelectedBlock();
 
-            menu_manager_->changeCurrentMenu("misswin");
+            menu_manager_->changeCurrentMenu("debrief");
             return;
         }
         else if (mission_->failed()) {
-            menu_manager_->changeCurrentMenu("misslose");
+
+            menu_manager_->changeCurrentMenu("debrief");
             return;
         }
     }
