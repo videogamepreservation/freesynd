@@ -173,6 +173,15 @@ int MapObject::getDirection(int snum) {
     return direction;
 }
 
+SFXObject::SFXObject(int m, int type):MapObject(m), stage_(0)
+{
+    /*
+    switch(type) {
+        // TODO: set animations per type
+    }
+    */
+}
+
 ShootableMapObject::ShootableMapObject(int m):MapObject(m)
 {
 }

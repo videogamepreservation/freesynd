@@ -171,6 +171,20 @@ protected:
 };
 
 /*!
+ * SFXObject map object class.
+ */
+class SFXObject : public MapObject {
+public:
+    SFXObject(int m, int type);
+    virtual ~SFXObject() {}
+protected:
+    // max 5 stages animation
+    int anim_[5];
+    unsigned char stage_;
+    unsigned char max_stages_;
+};
+
+/*!
  * Shootable map object class.
  */
 class ShootableMapObject : public MapObject {
