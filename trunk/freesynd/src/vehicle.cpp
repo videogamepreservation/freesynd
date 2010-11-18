@@ -57,10 +57,11 @@ void Vehicle::drawBurnt(int x, int y, int dir, int frame)
 }
 
 VehicleInstance::VehicleInstance(Vehicle * vehicle,
-                         int m):ShootableMovableMapObject(m),
-                         vehicle_(vehicle), vehicle_driver_(NULL)
+int m):ShootableMovableMapObject(m), vehicle_(vehicle), vehicle_driver_(NULL)
 {
     hold_on_.wayFree = 0;
+    rcv_damage_def_ = MapObject::ddmg_Vehicle;
+    vehicle_->setVehicleAnim(Vehicle::NormalAnim);
 }
 
 bool VehicleInstance::animate(int elapsed)
@@ -80,8 +81,20 @@ bool VehicleInstance::animate(int elapsed)
         updated = movementV(elapsed);
     }
 
-    if (health_ <= start_health_) {
-        return MapObject::animate(elapsed);
+    switch (vehicle_->getVehicleAnim()) {
+        case Vehicle::NormalAnim:
+            break;
+        case Vehicle::OnFireAnim:
+            if (leftTimeShowAnim(elapsed))
+                updated |= MapObject::animate(elapsed);
+            else {
+                vehicle_->setVehicleAnim(Vehicle::BurntAnim);
+                frame_ = 0;
+                updated = true;
+            }
+            break;
+        case Vehicle::BurntAnim:
+            break;
     }
 
     return updated;
@@ -95,12 +108,17 @@ void VehicleInstance::draw(int x, int y)
     if (x < 90 || y < -20)
         return;
 
-    if (health_ == 0)
-        vehicle_->drawBurnt(x, y, getDirection(4), frame_);
-    else if (health_ != start_health_)
-        vehicle_->drawOnFire(x, y, getDirection(4), frame_);
-    else
-        vehicle_->draw(x, y, getDirection(4), frame_);
+    switch (vehicle_->getVehicleAnim()) {
+        case Vehicle::NormalAnim:
+            vehicle_->draw(x, y, getDirection(4), frame_);
+            break;
+        case Vehicle::OnFireAnim:
+            vehicle_->drawOnFire(x, y, getDirection(4), frame_);
+            break;
+        case Vehicle::BurntAnim:
+            vehicle_->drawBurnt(x, y, getDirection(4), frame_);
+            break;
+    }
 }
 
 bool VehicleInstance::walkable(int x, int y, int z)
@@ -490,7 +508,7 @@ bool VehicleInstance::movementV(int elapsed)
             updated = true;
         } else {
             // our Y is inversed
-            setDirection(diffx, aty - ady);
+            setDirection(diffx, aty - ady, &dir_);
             int dx = 0, dy = 0;
             float d = sqrt((float) (diffx * diffx + diffy * diffy));
 
@@ -530,4 +548,25 @@ bool VehicleInstance::movementV(int elapsed)
     }
 
     return updated;
+}
+
+
+bool VehicleInstance::handleDamage(MapObject::DamageInflictType *d) {
+    if (health_ < 0 || d->dtype == MapObject::dmg_Mental)
+        return false;
+    health_ -= d->dvalue;
+    if (health_ <= 0){
+        speed_ = 0;
+        clearDestination();
+        switch ((unsigned int)d->dtype) {
+            case MapObject::dmg_Bullet:
+            case MapObject::dmg_Laser:
+            case MapObject::dmg_Burn:
+            case MapObject::dmg_Explosion:
+                vehicle_->setVehicleAnim(Vehicle::OnFireAnim);
+                setTimeShowAnim(10000);
+                break;
+        }
+    } // NOTE: maybe reduce speed on hit?
+    return true;
 }

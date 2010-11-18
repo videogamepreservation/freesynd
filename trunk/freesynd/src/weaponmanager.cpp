@@ -59,7 +59,7 @@ void WeaponManager::loadWeapons() {
         Weapon::Laser_Anim, snd::LASER, Weapon::Laser, MapObject::dmg_Laser,
         1, 1));
     weapons_.push_back(new Weapon("FLAMER", 21, 71, 1500, 1000, 512, 1, 4, 374,
-        Weapon::Flamer_Anim, snd::FLAME, Weapon::Flamer, MapObject::dmg_Fire,
+        Weapon::Flamer_Anim, snd::FLAME, Weapon::Flamer, MapObject::dmg_Burn,
         1, 1));
     weapons_.push_back(new Weapon("LONG RANGE", 22, 72, 1000, 30, 6144, 2, 3,
         375, Weapon::LongRange_Anim, snd::LONGRANGE, Weapon::LongRange,
@@ -172,6 +172,8 @@ WeaponInstance *WeaponManager::loadInstance(uint8 * data, int map)
         wi->setPosition(gamdata->mapposx[1], gamdata->mapposy[1],
                             z, gamdata->mapposx[0],
                             gamdata->mapposy[0], oz);
+        if (wi->getWeaponType() == Weapon::TimeBomb)
+            wi->setRcvDamageDef(MapObject::ddmg_WeaponBomb);
         return wi;
     }
 

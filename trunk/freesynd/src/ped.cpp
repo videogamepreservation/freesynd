@@ -112,6 +112,11 @@ void Ped::drawDeadFrame(int x, int y, int frame) {
     g_App.gameSprites().drawFrame(dead_anim_, frame, x, y);
 }
 
+void Ped::drawDeadAgentFrame(int x, int y, int frame) {
+    // TODO: findout whether frame really changes?
+    g_App.gameSprites().drawFrame(dead_agent_anim_, frame, x, y);
+}
+
 void Ped::drawHitFrame(int x, int y, int dir, int frame) {
     g_App.gameSprites().drawFrame(hit_anim_ + dir / 2, frame, x, y);
 }
@@ -145,8 +150,8 @@ int Ped::lastSinkFrame() {
     return g_App.gameSprites().lastFrame(sink_anim_);
 }
 
-void Ped::drawBurnFrame(int x, int y, int frame) {
-    g_App.gameSprites().drawFrame(burn_anim_, frame, x, y);
+void Ped::drawStandBurnFrame(int x, int y, int frame) {
+    g_App.gameSprites().drawFrame(stand_burn_anim_, frame, x, y);
 }
 
 void Ped::drawWalkBurnFrame(int x, int y, int frame) {
@@ -186,7 +191,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
     if (is_an_agent_ == PedInstance::Agent_Non_Active)
         return true;
 
-    if (selectedWeapon())
+    if (selectedWeapon()) {
         if ((selectedWeapon()->getWeaponType() == Weapon::MediKit)
                 && selectedWeapon()->ammoRemaining()
                 && health_ < start_health_)
@@ -195,6 +200,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
             selectedWeapon()->setAmmoRemaining(0);
             return true;
         }
+    }
 
     if (health_ < 0) {
         if (numWeapons())
@@ -202,7 +208,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
 
     } else if (isHostile()) {
         // find a weapon with ammo
-        // NOTE: weapon should not be drawn until enemy is in sight
+        // TODO: weapon should not be drawn until enemy is in sight
         if (selectedWeapon() == 0)
             selectBestWeapon();
 
@@ -309,8 +315,11 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                     setDrawnAnim(PedInstance::WalkAnim);
                 } else
                     setDrawnAnim(PedInstance::StandAnim);
-            }
-            break;
+            } else 
+                if (health_ <= 0)
+                    return updated;
+            if (health_ > 0)
+                break;
         case PedInstance::DieAnim:
             if (frame_ <= ped_->lastDieFrame())
                 return updated;
@@ -321,6 +330,9 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
             return true;
             break;
         case PedInstance::DeadAnim:
+            return false;
+            break;
+        case PedInstance::DeadAgentAnim:
             return false;
             break;
         case PedInstance::PickupAnim:
@@ -354,22 +366,39 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
             }
             break;
         case PedInstance::VaporizeAnim:
-            break;
+            if (frame_ > ped_->lastVaporizeFrame(getDirection())) {
+                if (is_an_agent_ == PedInstance::Agent_Active) {
+                    setDrawnAnim(PedInstance::DeadAgentAnim);
+                } else {
+                    setDrawnAnim(PedInstance::NoAnimation);
+                }
+            }
+            return updated;
         case PedInstance::SinkAnim:
-            break;
-        case PedInstance::BurnAnim:
+            // TODO: use this in future
             break;
         case PedInstance::WalkBurnAnim:
-            break;
+            updated |= movementP(mission, elapsed);
+        case PedInstance::StandBurnAnim:
+            if (leftTimeShowAnim(elapsed))
+                return updated;
+            setDrawnAnim(PedInstance::DieBurnAnim);
+            return updated;
         case PedInstance::DieBurnAnim:
-            break;
+            if (frame_ > ped_->lastDieBurnFrame()) {
+                setDrawnAnim(PedInstance::SmokeBurnAnim);
+                setTimeShowAnim(7000);
+            }
+            return updated;
         case PedInstance::SmokeBurnAnim:
-            break;
+            if (leftTimeShowAnim(elapsed))
+                return updated;
+            setDrawnAnim(PedInstance::DeadBurnAnim);
+            return updated;
         case PedInstance::DeadBurnAnim:
-            break;
+            return updated;
         case PedInstance::NoAnimation:
-            printf("hmm NoAnimation\n");
-            break;
+            return updated;
     }
 
     if (curanim != PedInstance::HitAnim
@@ -427,33 +456,29 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
     if (target_) {
         if (inRange(target_)) {
             if(target_->health() > 0) {
-                target_x_ = target_->tileX() + target_->offX();
-                target_y_ = target_->tileY() + target_->offY();
+                int target_x = target_->tileX() * 256 + target_->offX();
+                int target_y = target_->tileY() * 256 + target_->offY();
+                if (firing_ == PedInstance::Firing_Not
+                        && (selectedWeapon() && selectedWeapon()->ammoRemaining())
+                        && health_ > 0
+                        && (is_an_agent_ == PedInstance::Agent_Active ? true
+                        : curanim != PedInstance::HitAnim))
+                {
+
+                    setDirection(target_x - (tile_x_ * 256 + off_x_),
+                        (tile_y_ * 256 + off_y_) - target_y, &dir_);
+                    selectedWeapon()->inflictDamage(target_, NULL, true);
+                    firing_ = PedInstance::Firing_Fire;
+                    updated = true;
+
+                    selectedWeapon()->playSound();
+                }
             } else {
                 target_ = NULL;
-                target_x_ = -1;
-                target_y_ = -1;
             }
         } else {
             stopFiring();
         }
-    }
-
-    if (target_x_ != -1 && target_y_ != -1
-            && firing_ == PedInstance::Firing_Not
-            && (selectedWeapon() && selectedWeapon()->ammoRemaining())
-            && health_ > 0
-            && (is_an_agent_ == PedInstance::Agent_Active ? true
-            : curanim != PedInstance::HitAnim))
-    {
-
-        setDirection(target_x_ - (tile_x_ * 256 + off_x_),
-            (tile_y_ * 256 + off_y_) - target_y_);
-        setHitDamage(selectedWeapon()->shot());
-        firing_ = PedInstance::Firing_Fire;
-        updated = true;
-
-        selectedWeapon()->playSound();
     }
 
     if (weapon_idx == Weapon::Unarmed_Anim) {
@@ -486,20 +511,15 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                         selectedWeapon()->ammoRemaining() - 1);
             }
 
-            if (target_ && target_->health() > 0 && hit_damage_){
-                target_->inflictDamage(hit_damage_);
-                hit_damage_ = 0;
-            } else
+            if (!(target_ && target_->health() > 0))
                 firing_ = PedInstance::Firing_Stop;
 
             if (firing_ == PedInstance::Firing_Fire)
                 firing_ = PedInstance::Firing_Reload;
-
-            if (firing_ == PedInstance::Firing_Stop) {
-                firing_ = PedInstance::Firing_Not;
-                target_ = 0;
-                target_x_ = target_y_ = -1;
-            }
+        }
+        if (firing_ == PedInstance::Firing_Stop) {
+            firing_ = PedInstance::Firing_Not;
+            target_ = 0;
         }
     }
     if (firing_ == PedInstance::Firing_Reload) {
@@ -527,23 +547,6 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                 if (selectedWeapon()->ammoRemaining() == 0)
                     selectNextWeapon();
         }
-    }
-    if (receive_damage_) {
-        health_ -= receive_damage_;
-
-        if (health_ <= 0){
-            health_ = 0;
-            target_ = 0;
-            target_x_ = target_y_ = -1;
-            speed_ = 0;
-            clearDestination();
-            setDrawnAnim(PedInstance::DieAnim);
-        } else {
-            setDrawnAnim(PedInstance::HitAnim);
-        }
-
-        receive_damage_ = 0;
-        updated = true;
     }
 
     return updated;
@@ -632,13 +635,13 @@ void PedInstance::showPath(int scrollX, int scrollY) {
 
 PedInstance::PedInstance(Ped *ped, int m) : ShootableMovableMapObject(m),
 ped_(ped), firing_(PedInstance::Firing_Not),
-drawn_anim_(PedInstance::StandAnim), target_(NULL), target_x_(-1),
-target_y_(-1), hit_damage_(0), receive_damage_(0), sight_range_(0),
+drawn_anim_(PedInstance::StandAnim), target_(NULL), sight_range_(0),
 is_hostile_(false), reload_count_(0), selected_weapon_(-1),
 pickup_weapon_(0), putdown_weapon_(0), in_vehicle_(0),
 is_an_agent_(PedInstance::Not_Agent)
 {
     hold_on_.wayFree = 0;
+    rcv_damage_def_ = MapObject::ddmg_Ped;
 }
 
 PedInstance::~PedInstance(){
@@ -662,7 +665,6 @@ void PedInstance::draw(int x, int y, int scrollX, int scrollY) {
     if (selectedWeapon() == 0) {
         firing_ = PedInstance::Firing_Not;
         target_ = 0;
-        target_x_ = target_y_ = -1;
     }
 
     switch(getDrawnAnim()){
@@ -674,6 +676,8 @@ void PedInstance::draw(int x, int y, int scrollX, int scrollY) {
             break;
         case PedInstance::DeadAnim:
             ped_->drawDeadFrame(x, y, frame_);
+            break;
+        case PedInstance::DeadAgentAnim:
             break;
         case PedInstance::PickupAnim:
             ped_->drawPickupFrame(x, y, frame_);
@@ -699,8 +703,8 @@ void PedInstance::draw(int x, int y, int scrollX, int scrollY) {
         case PedInstance::SinkAnim:
             ped_->drawSinkFrame(x, y, frame_);
             break;
-        case PedInstance::BurnAnim:
-            ped_->drawBurnFrame(x, y, frame_);
+        case PedInstance::StandBurnAnim:
+            ped_->drawStandBurnFrame(x, y, frame_);
             break;
         case PedInstance::WalkBurnAnim:
             ped_->drawWalkBurnFrame(x, y, frame_);
@@ -715,7 +719,6 @@ void PedInstance::draw(int x, int y, int scrollX, int scrollY) {
             ped_->drawDeadBurnFrame(x, y, frame_);
             break;
         case PedInstance::NoAnimation:
-            printf("hmm NoAnimation\n");
             break;
     }
 }
@@ -728,7 +731,7 @@ void PedInstance::drawSelectorAnim(int x, int y) {
     Weapon::WeaponAnimIndex weapon_idx =
         selectedWeapon() ? selectedWeapon()->index() : Weapon::Unarmed_Anim;
 
-    switch(getDrawnAnim()){
+    switch(getDrawnAnim()) {
         case PedInstance::HitAnim:
             ped_->drawHitFrame(x, y, getDirection(), frame_);
             break;
@@ -737,6 +740,9 @@ void PedInstance::drawSelectorAnim(int x, int y) {
             break;
         case PedInstance::DeadAnim:
             ped_->drawDeadFrame(x, y, frame_);
+            break;
+        case PedInstance::DeadAgentAnim:
+            ped_->drawDeadAgentFrame(x, y, frame_);
             break;
         case PedInstance::PickupAnim:
             ped_->drawPickupFrame(x, y, frame_);
@@ -762,8 +768,8 @@ void PedInstance::drawSelectorAnim(int x, int y) {
         case PedInstance::SinkAnim:
             ped_->drawSinkFrame(x, y, frame_);
             break;
-        case PedInstance::BurnAnim:
-            ped_->drawBurnFrame(x, y, frame_);
+        case PedInstance::StandBurnAnim:
+            ped_->drawStandBurnFrame(x, y, frame_);
             break;
         case PedInstance::WalkBurnAnim:
             ped_->drawWalkBurnFrame(x, y, frame_);
@@ -848,21 +854,28 @@ void PedInstance::selectBestWeapon() {
     int bestWeapon = -1;
     int bestWeaponRank = -1;
 
-    for (int i = numWeapons() - 1; i >=0; i--)
+    for (int i = numWeapons() - 1; i >=0; i--) {
         if (weapon(i)->ammoRemaining() && weapon(i)->rank() > bestWeaponRank) {
             bestWeapon = i;
             bestWeaponRank = weapon(i)->rank();
         }
+    }
 
-    if(bestWeapon != -1)
+    if(bestWeapon != -1) {
         selected_weapon_ = bestWeapon;
+    }
 }
 
 void PedInstance::dropWeapon(int n) {
     assert(n >= 0 && n < (int) weapons_.size());
 
-    if (selected_weapon_ == n)
+    if (selected_weapon_ == n) {
+        if (weapons_[selected_weapon_]->getWeaponType() == Weapon::EnergyShield)
+            setRcvDamageDef(MapObject::ddmg_PedWithEnergyShield);
+        else
+            setRcvDamageDef(MapObject::ddmg_Ped);
         selected_weapon_ = -1;
+    }
 
     WeaponInstance *w = weapons_[n];
     std::vector < WeaponInstance * >::iterator it;
@@ -877,6 +890,7 @@ void PedInstance::dropWeapon(int n) {
 
 void PedInstance::dropAllWeapons() {
 
+    setRcvDamageDef(MapObject::ddmg_Ped);
     selected_weapon_ = -1;
 
     std::vector < WeaponInstance * >::iterator it;
@@ -922,10 +936,11 @@ void PedInstance::leaveVehicle() {
 }
 
 int PedInstance::map() {
+#ifdef _DEBUG
     if (map_ == -1) {
         assert(in_vehicle_);
-        return in_vehicle_->map();
     }
+#endif
 
     return map_;
 }
@@ -954,6 +969,9 @@ void PedInstance::setDrawnAnim(PedInstance::AnimationDrawn drawn_anim) {
         case PedInstance::DeadAnim:
             setFramesPerSec(2);
             break;
+        case PedInstance::DeadAgentAnim:
+            setFramesPerSec(2);
+            break;
         case PedInstance::PickupAnim:
             setFramesPerSec(8);
             break;
@@ -973,12 +991,12 @@ void PedInstance::setDrawnAnim(PedInstance::AnimationDrawn drawn_anim) {
             setFramesPerSec(8);
             break;
         case PedInstance::VaporizeAnim:
-            setFramesPerSec(8);
+            setFramesPerSec(6);
             break;
         case PedInstance::SinkAnim:
             setFramesPerSec(8);
             break;
-        case PedInstance::BurnAnim:
+        case PedInstance::StandBurnAnim:
             setFramesPerSec(8);
             break;
         case PedInstance::WalkBurnAnim:
@@ -988,13 +1006,12 @@ void PedInstance::setDrawnAnim(PedInstance::AnimationDrawn drawn_anim) {
             setFramesPerSec(6);
             break;
         case PedInstance::SmokeBurnAnim:
-            setFramesPerSec(6);
+            setFramesPerSec(2);
             break;
         case PedInstance::DeadBurnAnim:
             setFramesPerSec(2);
             break;
         case PedInstance::NoAnimation:
-            printf("hmm NoAnimation\n");
             break;
     }
 }
@@ -3109,7 +3126,7 @@ bool PedInstance::movementP(Mission *m, int elapsed)
             updated = true;
         } else {
             // our Y is inversed
-            setDirection(diffx, aty - ady);
+            setDirection(diffx, aty - ady, &dir_);
 
             int dx = 0, dy = 0;
             float d = sqrt((float) (diffx * diffx + diffy * diffy));
@@ -3180,4 +3197,58 @@ bool PedInstance::movementP(Mission *m, int elapsed)
     }
 
     return updated;
+}
+
+bool PedInstance::handleDamage(MapObject::DamageInflictType *d) {
+    if (health_ <= 0 || rcv_damage_def_ == MapObject::ddmg_Invulnerable
+        || (d->dtype & rcv_damage_def_) == 0)
+        return false;
+
+    health_ -= d->dvalue;
+    if (d->ddir != -1) {
+        dir_ = 256 - d->ddir;
+    }
+    if (health_ <= 0){
+        health_ = 0;
+        target_ = 0;
+        speed_ = 0;
+        clearDestination();
+        switch ((unsigned int)d->dtype) {
+            case MapObject::dmg_Bullet:
+                setDrawnAnim(PedInstance::DieAnim);
+                break;
+            case MapObject::dmg_Laser:
+                setDrawnAnim(PedInstance::VaporizeAnim);
+                destroyAllWeapons();
+                break;
+            case MapObject::dmg_Burn:
+                // TODO: sometimes we will walk burning
+                setDrawnAnim(PedInstance::StandBurnAnim);
+                destroyAllWeapons();
+                setTimeShowAnim(4000);
+                break;
+            case MapObject::dmg_Explosion:
+                // TODO: sometimes we will walk burning
+                setDrawnAnim(PedInstance::StandBurnAnim);
+                destroyAllWeapons();
+                setTimeShowAnim(4000);
+                break;
+            case MapObject::dmg_Hit:
+                setDrawnAnim(PedInstance::HitAnim);
+                break;
+        }
+    } else {
+        // TODO: agent sometimes can survive explosion, they need to walk burning?
+        setDrawnAnim(PedInstance::HitAnim);
+    }
+    return true;
+}
+
+void PedInstance::destroyAllWeapons() {
+    while (weapons_.size()) {
+        WeaponInstance * w = removeWeapon(0);
+        w->setMap(-1);
+        w->setOwner(0);
+    }
+    selected_weapon_ = 0;
 }

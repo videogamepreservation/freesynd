@@ -52,9 +52,22 @@ public:
     void setAnimsBurning(int anims) { anims_burning_ = anims; }
     void setAnimsBurnt(int anims) { anims_burnt_ = anims; }
 
+    typedef enum {
+        NormalAnim,
+        OnFireAnim,
+        BurntAnim,
+    } VehicleAnimation;
+
+    void setVehicleAnim(VehicleAnimation anim) {
+        vehicle_anim_ = anim;
+    }
+    VehicleAnimation getVehicleAnim() {
+        return vehicle_anim_;
+    }
 protected:
     std::string name_;
     int anims_, anims_burning_, anims_burnt_;
+    VehicleAnimation vehicle_anim_;
 };
 
 /*!
@@ -98,6 +111,7 @@ public:
         vehicle_driver_ = vehicleDriver;
         all_passengers_.insert(vehicleDriver);
     }
+    bool handleDamage(MapObject::DamageInflictType *d);
 
 protected:
     Vehicle *vehicle_;

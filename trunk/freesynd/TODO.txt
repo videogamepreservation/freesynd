@@ -16,12 +16,8 @@ recieved modifier, if we don't want to recalculate all the time; persuade power
 points; persuade points needed to persuade - this value will be added to agent
 that succesfully persuaded; weapon range modifier(?); accuracy modifier/property(?);
 type of damage inflicted(?)
-   weapons: type of damage/effect inflicted; destructabillity(bomb); radius of damage
-area(?) - bomb, gauss, laser;
+   weapons: destructabillity(bomb); radius of damage; area(?) - bomb, gauss, laser;
    static objects: damage recieve value; destructable or not
-   all: type of damage that can be inflicted - windows can break from bullets/explosion,
-but trees will burn from explosions only, people with shield vulnerable to explosions
-only(?)
  - (remove this?)indexes within group of type for vehicles/people/weapons, to be used for minimap
 drawing during briefing, they are as offsets in mission data in files, these offsets
 have different use within original game code and transforming them from offsets to
@@ -42,11 +38,8 @@ same for trees, people etc - switch of state due to damage
    change in behavior due to persuade
    "access card" make agent become police officer
    firing should have delay, correct delay per weapon(?)/ipa
-   instant damage to vehicles/people/objects, current implementation is cumulative,
-if 4 agents shoot inflicting 1 hp damage/agent at target with 2hp they will inflict
-4hp damage it is incorrect, should be implemented with boolean on return to check
-whether shooting is possible
- - animation for people/objects need to be fixed, to correctly represent every stage
+   instant damage to objects
+ - animation for objects need to be fixed, to correctly represent every stage
 of event/state:
    windows break when shot
    different objects burn

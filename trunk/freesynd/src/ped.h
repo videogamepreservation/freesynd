@@ -79,7 +79,7 @@ public:
 
     void setVaporizeAnim(int anim) { vaporize_anim_ = anim; }
     void setSinkAnim(int anim) { sink_anim_ = anim; }
-    void setBurnAnim(int anim) { burn_anim_ = anim; }
+    void setStandBurnAnim(int anim) { stand_burn_anim_ = anim; }
     void setWalkBurnAnim(int anim) { walk_burn_anim_ = anim; }
     void setDieBurnAnim(int anim) { die_burn_anim_ = anim; }
     void setSmokeBurnAnim(int anim) { smoke_burn_anim_ = anim; }
@@ -103,7 +103,10 @@ public:
     int lastWalkFireFrame(int dir, Weapon::WeaponAnimIndex weapon);
     bool drawDieFrame(int x, int y, int frame);
     int lastDieFrame();
+
     void drawDeadFrame(int x, int y, int frame);
+    void drawDeadAgentFrame(int x, int y, int frame);
+
     void drawHitFrame(int x, int y, int dir, int frame);
     int lastHitFrame(int dir);
     void drawPickupFrame(int x, int y, int frame);
@@ -113,7 +116,7 @@ public:
     void drawSinkFrame(int x, int y, int frame);
     int lastSinkFrame();
     
-    void drawBurnFrame(int x, int y, int frame);
+    void drawStandBurnFrame(int x, int y, int frame);
     void drawWalkBurnFrame(int x, int y, int frame);
     void drawDieBurnFrame(int x, int y, int frame);
     int lastDieBurnFrame();
@@ -139,7 +142,7 @@ protected:
     // has 4 directions
     int vaporize_anim_;
     int sink_anim_;
-    int burn_anim_;
+    int stand_burn_anim_;
     int walk_burn_anim_;
     int die_burn_anim_;
     int smoke_burn_anim_;
@@ -161,6 +164,7 @@ public:
         HitAnim,
         DieAnim,
         DeadAnim,
+        DeadAgentAnim,
         PickupAnim,
         PutdownAnim,
         WalkAnim,
@@ -169,7 +173,7 @@ public:
         StandFireAnim,
         VaporizeAnim,
         SinkAnim,
-        BurnAnim,
+        StandBurnAnim,
         WalkBurnAnim,
         DieBurnAnim,
         SmokeBurnAnim,
@@ -193,27 +197,7 @@ public:
     ShootableMapObject *target() { return target_; }
     void setTarget(ShootableMapObject *t) { target_ = t; }
 
-    void setTarget(int x, int y) {
-        target_ = 0;
-        target_x_ = x;
-        target_y_ = y;
-    }
-
     void stopFiring();
-
-    int hitDamage() { return hit_damage_; }
-    void setHitDamage(int n) { hit_damage_ = n; }
-
-    void inflictDamage(int d) {
-
-        if(health_ > 0){
-            if (receive_damage_ == 0) {
-                receive_damage_ = d;
-            }else{
-                receive_damage_ += d;
-            }
-        }
-    }
 
     bool inRange(ShootableMapObject *t);
     bool inSightRange(MapObject *t);
@@ -227,7 +211,13 @@ public:
             ? weapons_[selected_weapon_] : 0;
     }
 
-    void setSelectedWeapon(int n) { selected_weapon_ = n; }
+    void setSelectedWeapon(int n) {
+        selected_weapon_ = n;
+        if (weapons_[selected_weapon_]->getWeaponType() == Weapon::EnergyShield)
+            setRcvDamageDef(MapObject::ddmg_PedWithEnergyShield);
+        else
+            setRcvDamageDef(MapObject::ddmg_Ped);
+    }
 
     void selectNextWeapon();
     void selectBestWeapon();
@@ -289,6 +279,9 @@ public:
         lvl_percep_effect_ = effect;
     }
 
+    bool handleDamage(MapObject::DamageInflictType *d);
+    void destroyAllWeapons();
+
 protected:
     Ped *ped_;
     bool dead_;
@@ -328,9 +321,6 @@ protected:
     unsigned char peds_group_;
     AnimationDrawn drawn_anim_;
     ShootableMapObject *target_;
-    int target_x_, target_y_;
-    int hit_damage_;
-    int receive_damage_;
     int sight_range_;
     bool is_hostile_;
     int reload_count_;

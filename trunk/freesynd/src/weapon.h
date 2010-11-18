@@ -85,7 +85,7 @@ public:
     int cost() { return cost_; }
     int ammo() { return ammo_; }
     int range() { return range_; }
-    int shot() { return shot_; }
+    int damagePerShot() { return damage_per_shot_; }
     int rank() { return rank_; }
 
     int selector() {
@@ -102,11 +102,12 @@ public:
 
     int getShotsPerSec() { return shots_per_sec_; }
     int getAmmoPerSec() { return ammo_per_shot_; }
+    MapObject::DamageType getDmgType() { return dmg_type_; }
 
 protected:
     std::string name_;
     int small_icon_, big_icon_;
-    int cost_, ammo_, range_, shot_;
+    int cost_, ammo_, range_, damage_per_shot_;
     int anim_;
     int rank_;  //!> weapon rank
     WeaponType type_;
@@ -119,7 +120,7 @@ protected:
 /*!
  * Weapon instance class.
  */
-class WeaponInstance : public Weapon, public MapObject {
+class WeaponInstance : public Weapon, public ShootableMapObject {
 public:
     WeaponInstance(Weapon *w);
 
@@ -129,7 +130,7 @@ public:
     bool animate(int elapsed);
     void draw(int x, int y);
     bool inflictDamage(ShootableMapObject * tobj, PathNode * tp,
-        bool forcedshot, int duration);
+        bool forcedshot, int duration = 1000);
 
     void setOwner(ShootableMapObject *owner) { owner_ = owner; }
     ShootableMapObject *getOwner() { return owner_; }
@@ -137,6 +138,7 @@ public:
 protected:
     int ammo_remaining_;
     ShootableMapObject *owner_;
+    int weapon_time_used_;
 };
 
 #endif

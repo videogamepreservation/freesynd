@@ -45,7 +45,7 @@ public:
         dmg_None = 0,
         dmg_Bullet = 1,
         dmg_Laser = 2,
-        dmg_Fire = 4,
+        dmg_Burn = 4,
         dmg_Explosion = 8,
         dmg_Hit = 16,
         dmg_Mental = 32,
@@ -56,11 +56,12 @@ public:
     typedef enum {
         ddmg_Invulnerable = dmg_None,
         ddmg_Ped = dmg_All,
-        ddmg_PedWithShield = dmg_Explosion | dmg_Hit | dmg_Heal,
-        ddmg_Vehicle = dmg_Bullet | dmg_Laser | dmg_Fire | dmg_Explosion,
-        ddmg_StaticTree = dmg_Laser | dmg_Fire | dmg_Explosion,
+        ddmg_PedWithEnergyShield = dmg_Explosion | dmg_Hit | dmg_Heal,
+        ddmg_Vehicle = dmg_Bullet | dmg_Laser | dmg_Burn | dmg_Explosion,
+        ddmg_StaticTree = dmg_Laser | dmg_Burn | dmg_Explosion,
         ddmg_StaticWindow = dmg_Bullet | dmg_Explosion,
         ddmg_StaticGeneral = dmg_Laser | dmg_Explosion,
+        ddmg_WeaponBomb = dmg_Bullet | dmg_Laser | dmg_Explosion,
     } DefDamageType;
 
     typedef struct {
@@ -140,21 +141,28 @@ public:
         int yadj;// and y 
     }FreeWay;
 
-    void setRcvDamageDef(unsigned int rcvDamageDef) {
+    void setRcvDamageDef(DefDamageType rcvDamageDef) {
         rcv_damage_def_ = rcvDamageDef;
     }
-    unsigned int getRcvDamageDef() {
+    DefDamageType getRcvDamageDef() {
         return rcv_damage_def_;
     }
 
     void setFrame(int frame) { frame_ = frame;}
 
     void setDirection(int dir);
-    void setDirection(int posx, int posy);
+    void setDirection(int posx, int posy, int * dir);
 
     int getDirection(int snum = 8);
 
-
+    void setTimeShowAnim(int t) {
+        time_show_anim_ = t;
+        time_showing_anim_ = 0;
+    }
+    bool leftTimeShowAnim(int t) {
+        time_showing_anim_ += t;
+        return time_show_anim_ > time_showing_anim_;
+    }
 protected:
     // vis_z_ is location used for adjusting object drawing/calculations
     // tile_z_ represents true location for tile
@@ -164,8 +172,10 @@ protected:
     int elapsed_carry_;
     int frames_per_sec_;
     int sub_type_, main_type_;
-    unsigned int rcv_damage_def_;
+    DefDamageType rcv_damage_def_;
     int dir_;
+    int time_show_anim_;
+    int time_showing_anim_;
 
     void addOffs(int &x, int &y);
 };
@@ -216,11 +226,12 @@ public:
         start_health_ = n;
     }
 
-    virtual void inflictDamage(int d) {
-        health_ -= d;
-
-        if (health_ < 0)
-            health_ = 0;
+    virtual bool handleDamage(MapObject::DamageInflictType * d) {
+        if (health_ > 0) {
+            health_ -= d->dvalue;
+            return true;
+        }
+        return false;
     }
 
   protected:

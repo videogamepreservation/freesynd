@@ -36,9 +36,10 @@ Weapon::Weapon(const char *w_name, int smallIcon, int bigIcon, int w_cost,
     WeaponType w_type, MapObject::DamageType w_dmg_type,
     int w_shots_per_sec, int w_ammo_per_shot) :
     name_(w_name), small_icon_(smallIcon), big_icon_(bigIcon), cost_(w_cost),
-    ammo_(w_ammo), range_(w_range), shot_(w_shot), anim_(w_anim), rank_(w_rank),
+    ammo_(w_ammo), range_(w_range), damage_per_shot_(w_shot), anim_(w_anim), rank_(w_rank),
     idx_(w_idx), dmg_type_(w_dmg_type), sample_(w_sample), type_(w_type),
-    shots_per_sec_(w_shots_per_sec), ammo_per_shot_(w_ammo_per_shot) {
+    shots_per_sec_(w_shots_per_sec), ammo_per_shot_(w_ammo_per_shot)
+{
 }
 
 void Weapon::drawSmallIcon(int x, int y) {
@@ -68,8 +69,8 @@ void Weapon::drawInfo(int x, int y) {
         y += 12;
     }
 
-    if (shot_ >= 0) {
-        sprintf(tmp, "SHOT   :%d", shot_);
+    if (damage_per_shot_ >= 0) {
+        sprintf(tmp, "SHOT   :%d", damage_per_shot_);
         g_App.fonts().drawText(x, y, tmp, 0, false);
         y += 12;
     }
@@ -86,8 +87,10 @@ WeaponInstance *Weapon::createInstance() {
     return new WeaponInstance(this);
 }
 
-WeaponInstance::WeaponInstance(Weapon * w) : Weapon(*w), MapObject(-1),
-        ammo_remaining_(w->ammo()) {
+WeaponInstance::WeaponInstance(Weapon * w) : Weapon(*w), ShootableMapObject(-1),
+        ammo_remaining_(w->ammo())
+{
+        rcv_damage_def_ = MapObject::ddmg_Invulnerable;
 }
 
 bool WeaponInstance::animate(int elapsed) {
@@ -105,5 +108,48 @@ void WeaponInstance::draw(int x, int y) {
 bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
     bool forcedshot, int duration)
 {
+    // TODO: "tp" + "forcedshot" will be used later for calculating vector
+    // when target is not object; "duration" will be used during continuos
+    // shooting to calculate damage + delay(reloading) time;
+
+    // NOTE: for now this will check "tobj"
+    if (ammo_remaining_ == 0)
+        return false;
+    assert(tobj != 0);
+
+    if (getDmgType() == MapObject::dmg_None)
+        return false;
+    if (getDmgType() == MapObject::dmg_Heal) {
+        // NOTE: not only self-healing in future?
+        owner_->setHealth(owner_->startHealth());
+        ammo_ = 0;
+        return true;
+    }
+    if (tobj->getRcvDamageDef() == MapObject::ddmg_Invulnerable)
+        return false;
+    DamageInflictType d;
+    d.dtype = dmg_type_;
+    int ammoused = (shots_per_sec_ * duration / 1000) * ammo_per_shot_;
+    if (ammoused > ammo_remaining_) {
+        ammoused = ammo_remaining_;
+        ammo_remaining_ = 0;
+    } else
+        ammo_remaining_ -= ammoused;
+    int totaldmg = ammoused * damage_per_shot_;
+    d.dvalue = totaldmg;
+    int xb = 0;
+    int yb = 0;
+    if (owner_) {
+        xb = owner_->tileX() * 256 + owner_->offX();
+        yb = owner_->tileY() * 256 + owner_->offY();
+    } else {
+        xb = tile_x_ * 256 + off_x_;
+        yb = tile_y_ * 256 + off_y_;
+    }
+    d.ddir = -1;
+    // our Y is inversed
+    setDirection((tobj->tileX() * 256 + tobj->offX()) - xb,
+        yb - (tobj->tileY() * 256 + tobj->offY()), &(d.ddir));
+    tobj->handleDamage(&d);
     return true;
 }

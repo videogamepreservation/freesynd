@@ -21,10 +21,14 @@ Changes
   * Project is now buld with autoconf/automake
   * Map menu is now completly functional
   * Neon signs are correctly setup on mission load
+  * Correct animations for people/vehicles on damage recieved
+  * Instant damage, damage types
+  * Energy shield will not protect from Hit, Explosion
 
 Fixed Bugs
 ----------
   * 3005295 : The tax rate for the region cannot be altered by player
+  * 3031032 : Rewrite animation generation procedures
 
 Features added
 ----------

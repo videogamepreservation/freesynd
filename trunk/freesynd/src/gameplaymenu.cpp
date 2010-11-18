@@ -486,7 +486,7 @@ void GameplayMenu::handleMouseMotion(int x, int y, int state, const int modKeys)
 
     for (int i = 8; mission_ && i < mission_->numPeds(); i++) {
         PedInstance *p = mission_->ped(i);
-        if (p->health() > 0) {
+        if (p->health() > 0 && p->map() != -1) {
             int px = p->screenX() - 20;
             int py = p->screenY() - 10 - p->visZ() * TILE_HEIGHT/3;
 
@@ -715,23 +715,23 @@ void GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
                         && mission_->ped(i)->selectedWeapon()) {
                     if (pointing_at_ped_ != -1
                             && mission_->ped(i)->inRange(
-                                    mission_->ped(pointing_at_ped_))) {
-                        mission_->ped(i)->setTarget(
-                                mission_->ped(pointing_at_ped_));
+                                    mission_->ped(pointing_at_ped_)))
+                    {
+                        mission_->ped(i)->selectedWeapon()->inflictDamage(
+                            mission_->ped(pointing_at_ped_), NULL, true);
                     }
                     else if (pointing_at_vehicle_ != -1
                             && mission_->ped(i)->inRange(
-                                    mission_->vehicle(pointing_at_vehicle_))) {
-                        mission_->ped(i)->setTarget(
-                                mission_->vehicle(pointing_at_vehicle_));
+                                    mission_->vehicle(pointing_at_vehicle_)))
+                    {
+                        mission_->ped(i)->selectedWeapon()->inflictDamage(
+                            mission_->vehicle(pointing_at_vehicle_), NULL, true);
                     }
                     /*else if (pointing_at_ped_ == -1
                             && pointing_at_vehicle_ == -1) {
                         mission_->ped(i)->setTarget(world_x_ + x - 129,
                                 world_y_ + y);
                     }*/
-                    //WeaponInstance *w = mission_->ped(i)->selectedWeapon();
-                    //mission_->ped(i)->setHitDamage(w->shot());
                 }
         }
     }

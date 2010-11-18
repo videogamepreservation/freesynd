@@ -114,7 +114,7 @@ void MapObject::setDirection(int dir) {
 
 // posx = targetx - objx
 // posy = targety - objy
-void MapObject::setDirection(int posx, int posy) {
+void MapObject::setDirection(int posx, int posy, int * dir) {
     int direction = -1;
     double PI = 3.14159265;
     if (posx == 0) {
@@ -147,7 +147,7 @@ void MapObject::setDirection(int posx, int posy) {
         direction = (int)((128 * atan(double(posy/posx))) / PI + 64);
     }
     if (direction != -1)
-        dir_ = direction;
+        *dir = direction;
 }
 
 int MapObject::getDirection(int snum) {
@@ -419,6 +419,7 @@ anim_(anim), closing_anim_(closingAnim),open_anim_(openAnim),
 opening_anim_(openingAnim)
 {
     state_ = sttdoor_Closed;
+    rcv_damage_def_ = MapObject::ddmg_Invulnerable;
 }
 
 void Door::draw(int x, int y)
@@ -537,6 +538,7 @@ LargeDoor::LargeDoor(int m, int anim, int closingAnim, int openingAnim):Static(m
 closing_anim_(closingAnim), opening_anim_(openingAnim)
 {
     state_ = sttdoor_Closed;
+    rcv_damage_def_ = MapObject::ddmg_Invulnerable;
 }
 
 void LargeDoor::draw(int x, int y)
@@ -723,6 +725,7 @@ bool LargeDoor::animate(int elapsed, Mission *obj)
 Tree::Tree(int m, int anim, int burningAnim, int damagedAnim):Static(m),
 anim_(anim), burning_anim_(burningAnim), damaged_anim_(damagedAnim)
 {
+    rcv_damage_def_ = MapObject::ddmg_StaticTree;
 }
 
 void Tree::draw(int x, int y)
@@ -734,6 +737,7 @@ void Tree::draw(int x, int y)
 WindowObj::WindowObj(int m, int anim, int breakingAnim, int damagedAnim):Static(m),
 anim_(anim), breaking_anim_(breakingAnim), damaged_anim_(damagedAnim)
 {
+    rcv_damage_def_ = MapObject::ddmg_StaticWindow;
 }
 
 void WindowObj::draw(int x, int y)
@@ -745,6 +749,7 @@ void WindowObj::draw(int x, int y)
 EtcObj::EtcObj(int m, int anim, int burningAnim , int damagedAnim):Static(m),
 anim_(anim), burning_anim_(burningAnim), damaged_anim_(damagedAnim)
 {
+    rcv_damage_def_ = MapObject::ddmg_StaticGeneral;
 }
 
 void EtcObj::draw(int x, int y)
@@ -756,6 +761,7 @@ void EtcObj::draw(int x, int y)
 NeonSign::NeonSign(int m, int anim):Static(m),
 anim_(anim)
 {
+    rcv_damage_def_ = MapObject::ddmg_Invulnerable;
 }
 
 void NeonSign::draw(int x, int y)
