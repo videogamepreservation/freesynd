@@ -28,7 +28,7 @@
 #include <cstring>
 #include <cassert>
 
-#include "singleton.h"
+#include "utils/singleton.h"
 #include "keys.h"
 
 // TODO: Add a configuration scheme to allow setting these during runtime

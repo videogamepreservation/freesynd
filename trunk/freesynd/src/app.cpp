@@ -39,9 +39,9 @@
 #include "system_sdl.h"
 #endif
 
-#include "fliplayer.h"
-#include "spritemanager.h"
-#include "screen.h"
+#include "gfx/fliplayer.h"
+#include "gfx/spritemanager.h"
+#include "gfx/screen.h"
 #include "sound/audio.h"
 #include "utils/file.h"
 #include "utils/log.h"

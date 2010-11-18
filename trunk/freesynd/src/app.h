@@ -33,9 +33,9 @@
 
 #include "common.h"
 #include "system.h"
-#include "screen.h"
+#include "gfx/screen.h"
 #include "path.h"
-#include "fontmanager.h"
+#include "gfx/fontmanager.h"
 #include "menumanager.h"
 #include "mapmanager.h"
 #include "mission.h"

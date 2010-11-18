@@ -39,7 +39,7 @@
 #include "gameplaymenu.h"
 #include "debriefmenu.h"
 #include "logoutmenu.h"
-#include "fliplayer.h"
+#include "gfx/fliplayer.h"
 #include "system.h"
 
 MenuManager::MenuManager():current_(NULL),

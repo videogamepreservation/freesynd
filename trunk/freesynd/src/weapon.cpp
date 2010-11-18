@@ -28,7 +28,7 @@
 #include <assert.h>
 
 #include "app.h"
-#include "screen.h"
+#include "gfx/screen.h"
 
 Weapon::Weapon(const char *w_name, int smallIcon, int bigIcon, int w_cost,
     int w_ammo, int w_range, int w_shot, int w_rank, int w_anim,

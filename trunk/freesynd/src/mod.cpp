@@ -28,7 +28,7 @@
 #include <assert.h>
 
 #include "app.h"
-#include "screen.h"
+#include "gfx/screen.h"
 
 Mod::Mod(const char *mod_name, int mod_cost, const char *mod_desc,
          int mod_slot, int mod_icon, int mod_iconF):name_(mod_name),

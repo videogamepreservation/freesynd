@@ -24,7 +24,7 @@
  ************************************************************************/
 
 #include "config.h"
-#include "screen.h"
+#include "gfx/screen.h"
 #include "system_sdl.h"
 #include "app.h"
 #include "sound/audio.h"

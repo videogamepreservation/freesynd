@@ -28,9 +28,9 @@
 #include <assert.h>
 
 #include "app.h"
-#include "screen.h"
+#include "gfx/screen.h"
 #include "map.h"
-#include "tilemanager.h"
+#include "gfx/tilemanager.h"
 
 #if 0
 #ifdef SYSTEM_SDL

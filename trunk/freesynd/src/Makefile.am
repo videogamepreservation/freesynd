@@ -6,7 +6,7 @@ AM_CPPFLAGS = -DSYSTEM_SDL -DUSE_RWOPS
 
 freesynd_LDADD = ${SDL_LIBS} -lpng -lSDL_mixer -lSDL_image
 
-freesynd_SOURCES = common.h config.h keys.h singleton.h \
+freesynd_SOURCES = common.h config.h keys.h utils/singleton.h \
 	path.h pathsurfaces.h \
 	utils/file.cpp utils/file.h \
 	utils/dernc.cpp utils/dernc.h\
@@ -19,15 +19,20 @@ freesynd_SOURCES = common.h config.h keys.h singleton.h \
 	sound/sdlmixersound.cpp sound/sdlmixersound.h \
 	sound/xmidi.cpp sound/xmidi.h \
 	gfx/dirtylist.cpp gfx/dirtylist.h \
+	gfx/fliplayer.cpp gfx/fliplayer.h \
+	gfx/font.cpp gfx/font.h \
+	gfx/fontmanager.cpp gfx/fontmanager.h \
+	gfx/screen.cpp gfx/screen.h \
+	gfx/sprite.cpp gfx/sprite.h \
+	gfx/spritemanager.cpp gfx/spritemanager.h \
+	gfx/tile.cpp gfx/tile.h \
+	gfx/tilemanager.cpp gfx/tilemanager.h \
 	agent.cpp agent.h \
 	agentmanager.cpp agentmanager.h \
 	app.cpp app.h \
 	briefmenu.cpp briefmenu.h \
 	confmenu.cpp confmenu.h \
 	debriefmenu.cpp debriefmenu.h \
-	fliplayer.cpp fliplayer.h \
-	font.cpp font.h \
-	fontmanager.cpp fontmanager.h \
 	freesynd.cpp \
 	gameplaymenu.cpp gameplaymenu.h \
 	loadingmenu.cpp loadingmenu.h \
@@ -47,13 +52,8 @@ freesynd_SOURCES = common.h config.h keys.h singleton.h \
 	ped.cpp ped.h \
 	pedmanager.cpp pedmanager.h \
 	researchmenu.cpp researchmenu.h \
-	screen.cpp screen.h \
 	selectmenu.cpp selectmenu.h \
-	sprite.cpp sprite.h \
-	spritemanager.cpp spritemanager.h \
 	system_sdl.cpp system_sdl.h system.h \
-	tile.cpp tile.h \
-	tilemanager.cpp tilemanager.h \
 	vehicle.cpp vehicle.h \
 	vehiclemanager.cpp vehiclemanager.h \
 	weapon.cpp weapon.h weaponholder.h \

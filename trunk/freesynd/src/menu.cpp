@@ -28,8 +28,8 @@
 #include <assert.h>
 
 #include "app.h"
-#include "fliplayer.h"
-#include "screen.h"
+#include "gfx/fliplayer.h"
+#include "gfx/screen.h"
 
 /*!
  * Draw the widget at the current position and only if it's

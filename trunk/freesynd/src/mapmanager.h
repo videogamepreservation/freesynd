@@ -28,7 +28,7 @@
 #include <map>
 #include "common.h"
 #include "map.h"
-#include "tilemanager.h"
+#include "gfx/tilemanager.h"
 
 /*!
  * Map manager class.

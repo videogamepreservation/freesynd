@@ -27,7 +27,7 @@
 #include <string.h>
 #include <assert.h>
 
-#include "screen.h"
+#include "gfx/screen.h"
 #include "agent.h"
 #include "weapon.h"
 

@@ -30,7 +30,7 @@
 #include <assert.h>
 #include "app.h"
 #include "gameplaymenu.h"
-#include "fliplayer.h"
+#include "gfx/fliplayer.h"
 #include "utils/file.h"
 
 #ifdef _WIN32

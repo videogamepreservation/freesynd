@@ -29,7 +29,7 @@
 #include <assert.h>
 
 #include "app.h"
-#include "screen.h"
+#include "gfx/screen.h"
 
 Vehicle::Vehicle(const char *vehicle_name, int first_anim):
 name_(vehicle_name), anims_(first_anim)

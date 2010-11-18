@@ -30,7 +30,7 @@
 #include "common.h"
 #include "mapobject.h"
 #include "pathsurfaces.h"
-#include "spritemanager.h"
+#include "gfx/spritemanager.h"
 #include "weaponholder.h"
 #include "weapon.h"
 #include <list>

@@ -356,35 +356,35 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\src\fliplayer.cpp"
+					RelativePath="..\..\src\gfx\fliplayer.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\src\font.cpp"
+					RelativePath="..\..\src\gfx\font.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\src\fontmanager.cpp"
+					RelativePath="..\..\src\gfx\fontmanager.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\src\screen.cpp"
+					RelativePath="..\..\src\gfx\screen.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\src\sprite.cpp"
+					RelativePath="..\..\src\gfx\sprite.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\src\spritemanager.cpp"
+					RelativePath="..\..\src\gfx\spritemanager.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\src\tile.cpp"
+					RelativePath="..\..\src\gfx\tile.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\src\tilemanager.cpp"
+					RelativePath="..\..\src\gfx\tilemanager.cpp"
 					>
 				</File>
 			</Filter>
@@ -468,10 +468,6 @@
 			</File>
 			<File
 				RelativePath="..\..\src\pedmanager.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\singleton.h"
 				>
 			</File>
 			<File
@@ -573,6 +569,10 @@
 					RelativePath="..\..\src\utils\log.h"
 					>
 				</File>
+				<File
+					RelativePath="..\..\src\utils\singleton.h"
+					>
+				</File>
 			</Filter>
 			<Filter
 				Name="sound"
@@ -618,35 +618,35 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\src\fliplayer.h"
+					RelativePath="..\..\src\gfx\fliplayer.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\src\font.h"
+					RelativePath="..\..\src\gfx\font.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\src\fontmanager.h"
+					RelativePath="..\..\src\gfx\fontmanager.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\src\screen.h"
+					RelativePath="..\..\src\gfx\screen.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\src\sprite.h"
+					RelativePath="..\..\src\gfx\sprite.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\src\spritemanager.h"
+					RelativePath="..\..\src\gfx\spritemanager.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\src\tile.h"
+					RelativePath="..\..\src\gfx\tile.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\src\tilemanager.h"
+					RelativePath="..\..\src\gfx\tilemanager.h"
 					>
 				</File>
 			</Filter>

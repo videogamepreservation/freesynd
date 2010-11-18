@@ -28,7 +28,7 @@
 #include <string.h>
 #include <assert.h>
 
-#include "screen.h"
+#include "gfx/screen.h"
 #include "app.h"
 
 Mission::Mission(): mtsurfaces_(NULL), mdpoints_(NULL), mdpoints_cp_(NULL),
