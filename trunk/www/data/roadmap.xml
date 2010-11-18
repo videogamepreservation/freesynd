@@ -12,7 +12,7 @@
 	</features>
 	<bugs>
 		<bug id="3005294" status="N">Debriefing information is not displayed after ending the mission</bug>
-		<bug id="3031032" status="N">Rewrite animation generation procedures</bug>
+		<bug id="3031032" status="D">Rewrite animation generation procedures</bug>
 		<bug id="3036610" status="P">Rewrite map drawing</bug>
 		<bug id="3005295" status="D">The tax rate for the region cannot altered by the player</bug>
 	</bugs>
