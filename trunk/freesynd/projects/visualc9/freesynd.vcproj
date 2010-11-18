@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9.00"
+	Version="9,00"
 	Name="freesynd"
 	ProjectGUID="{8FF0D516-3F4B-4E7F-A833-195A5240E5B5}"
 	RootNamespace="freesynd"
@@ -308,6 +308,10 @@
 				Name="utils"
 				>
 				<File
+					RelativePath="..\..\src\utils\configfile.cpp"
+					>
+				</File>
+				<File
 					RelativePath="..\..\src\utils\dernc.cpp"
 					>
 				</File>
@@ -557,6 +561,10 @@
 			<Filter
 				Name="utils"
 				>
+				<File
+					RelativePath="..\..\src\utils\configfile.h"
+					>
+				</File>
 				<File
 					RelativePath="..\..\src\utils\dernc.h"
 					>

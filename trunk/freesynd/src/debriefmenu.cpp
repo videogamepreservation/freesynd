@@ -39,37 +39,37 @@ DebriefMenu::DebriefMenu(MenuManager *m) : Menu(m, "debrief", "mdebrief.dat",
     separatorSize_ = 210;
 
     y = 120;
-    addStatic(left_x, y, "MISSION STATUS", 1, false);
+    addStatic(left_x, y, "MISSION STATUS:", 1, false);
     txtStatusId_ = addStatic(right_x, y, "", 1, false);
     y += 15;
-    addStatic(left_x, y, "AGENT USED", 1, false);
+    addStatic(left_x, y, "AGENTS USED:", 1, false);
     txtUsedId_ = addStatic(right_x, y, "", 1, false);
     y += 15;
-    addStatic(left_x, y, "AGENT TAKEN", 1, false);
+    addStatic(left_x, y, "NEW AGENTS GAINED:", 1, false);
     txtAgentCapturedId_ = addStatic(right_x, y, "", 1, false);
     y += 15;
-    addStatic(left_x, y, "MISSION DURATION", 1, false);
+    addStatic(left_x, y, "TIME IN MISSION:", 1, false);
     txtTimeId_ = addStatic(right_x, y, "", 1, false);
     y += 15;
-    addStatic(left_x, y, "ENEMY KILLED", 1, false);
+    addStatic(left_x, y, "ENEMY AGENTS KILLED:", 1, false);
     txtAgentKilledId_ = addStatic(right_x, y, "", 1, false);
     y += 15;
-    addStatic(left_x, y, "CRIMINAL KILLED", 1, false);
+    addStatic(left_x, y, "CRIMINALS KILLED:", 1, false);
     txtCrimKilledId_ = addStatic(right_x, y, "", 1, false);
     y += 15;
-    addStatic(left_x, y, "CIVIL KILLED", 1, false);
+    addStatic(left_x, y, "CIVILIANS KILLED:", 1, false);
     txtCivilKilledId_ = addStatic(right_x, y, "", 1, false);
     y += 15;
-    addStatic(left_x, y, "POLICE KILLED", 1, false);
+    addStatic(left_x, y, "POLICE KILLED:", 1, false);
     txtPoliceKilledId_ = addStatic(right_x, y, "", 1, false);
     y += 15;
-    addStatic(left_x, y, "GARD KILLED", 1, false);
+    addStatic(left_x, y, "GARDS KILLED:", 1, false);
     txtGardKilledId_ = addStatic(right_x, y, "", 1, false);
     y += 15;
-    addStatic(left_x, y, "PERSON CONVINCED", 1, false);
+    addStatic(left_x, y, "PEOPLE PERSUADED:", 1, false);
     txtConvincedId_ = addStatic(right_x, y, "", 1, false);
     y += 15;
-    addStatic(left_x, y, "SHOOTING PRECISION", 1, false);
+    addStatic(left_x, y, "HIT ACCURACY:", 1, false);
     txtPrecisionId_ = addStatic(right_x, y, "", 1, false);
 
     y = 352;
@@ -89,11 +89,11 @@ void DebriefMenu::handleShow() {
     MissionStats *pStats = pMission->getStatistics();
 
     if (pMission->getStatus() == Mission::FAILED) {
-        setStaticText(txtStatusId_, "MISSION FAILED");
+        setStaticText(txtStatusId_, "FAILED");
     } else if (pMission->getStatus() == Mission::COMPLETED) {
-        setStaticText(txtStatusId_, "MISSION COMPLETED");
+        setStaticText(txtStatusId_, "COMPLETED");
     } else if (pMission->getStatus() == Mission::ABORTED) {
-        setStaticText(txtStatusId_, "MISSION ABORTED");
+        setStaticText(txtStatusId_, "ABORTED");
     }
 
     setStaticTextFormated(txtUsedId_, "%i", pStats->agents);
