@@ -63,11 +63,11 @@ dump_LDADD = ${SDL_LIBS} -lpng
 
 dump_SOURCES = \
 	dump.cpp \
-	sprite.cpp \
-	spritemanager.cpp \
+	gfx/sprite.cpp \
+	gfx/spritemanager.cpp \
 	map.cpp \
 	mapmanager.cpp \
-	tile.cpp \
-	tilemanager.cpp \
+	gfx/tile.cpp \
+	gfx/tilemanager.cpp \
 	utils/file.cpp \
 	utils/dernc.cpp
