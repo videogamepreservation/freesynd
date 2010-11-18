@@ -26,7 +26,7 @@
 #define DEBRIEFMENU_H
 
 /*!
- * Debrief Menu class.
+ * Menu displaying statistics about the last mission played.
  */
 class DebriefMenu : public Menu {
 public:
@@ -37,6 +37,30 @@ public:
     void handleLeave();
 
 protected:
+    /*! Id of the text widget for mission status.*/
+    int txtStatusId_;
+    /*! Id of the text widget for number of agents used.*/
+    int txtUsedId_;
+    /*! Id of the text widget for mission duration.*/
+    int txtTimeId_;
+    /*! Id of the text widget for number of ennemy agents captured.*/
+    int txtAgentCapturedId_;
+    /*! Id of the text widget for number of ennemy agents killed.*/
+    int txtAgentKilledId_;
+    /*! Id of the text widget for number of criminal killed.*/
+    int txtCrimKilledId_;
+    /*! Id of the text widget for number of civilian killed.*/
+    int txtCivilKilledId_;
+    /*! Id of the text widget for number of policemen killed.*/
+    int txtPoliceKilledId_;
+    /*! Id of the text widget for number of guard killed.*/
+    int txtGardKilledId_;
+    /*! Id of the text widget for number of people convinced.*/
+    int txtConvincedId_;
+    /*! Id of the text widget for shooting precision.*/
+    int txtPrecisionId_;
+    /*! Size of the line separator between title and statistics. */
+    int separatorSize_;
 };
 
 #endif

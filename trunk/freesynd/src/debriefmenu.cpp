@@ -29,21 +29,102 @@
 
 DebriefMenu::DebriefMenu(MenuManager *m) : Menu(m, "debrief", "mdebrief.dat",
      "mdeout.dat") {
-    addStatic(100, 35, "MISSION DEBRIEFING", 3, true);
-    addOption(43, 352, "ACCEPT", 1, KEY_F5, "map");
-    addOption(535, 352, "MENU", 1, KEY_F6, "main");
+    int y = 35;
+    int right_x = 310;
+    int left_x = 20;
+    addStatic(100, y, "MISSION DEBRIEFING", 3, true);
+    y = 100;
+    addStatic(left_x, y, "MISSION STATISTICS", 1, false);
+    // TODO compute size dynamically
+    separatorSize_ = 210;
+
+    y = 120;
+    addStatic(left_x, y, "MISSION STATUS", 1, false);
+    txtStatusId_ = addStatic(right_x, y, "", 1, false);
+    y += 15;
+    addStatic(left_x, y, "AGENT USED", 1, false);
+    txtUsedId_ = addStatic(right_x, y, "", 1, false);
+    y += 15;
+    addStatic(left_x, y, "AGENT TAKEN", 1, false);
+    txtAgentCapturedId_ = addStatic(right_x, y, "", 1, false);
+    y += 15;
+    addStatic(left_x, y, "MISSION DURATION", 1, false);
+    txtTimeId_ = addStatic(right_x, y, "", 1, false);
+    y += 15;
+    addStatic(left_x, y, "ENEMY KILLED", 1, false);
+    txtAgentKilledId_ = addStatic(right_x, y, "", 1, false);
+    y += 15;
+    addStatic(left_x, y, "CRIMINAL KILLED", 1, false);
+    txtCrimKilledId_ = addStatic(right_x, y, "", 1, false);
+    y += 15;
+    addStatic(left_x, y, "CIVIL KILLED", 1, false);
+    txtCivilKilledId_ = addStatic(right_x, y, "", 1, false);
+    y += 15;
+    addStatic(left_x, y, "POLICE KILLED", 1, false);
+    txtPoliceKilledId_ = addStatic(right_x, y, "", 1, false);
+    y += 15;
+    addStatic(left_x, y, "GARD KILLED", 1, false);
+    txtGardKilledId_ = addStatic(right_x, y, "", 1, false);
+    y += 15;
+    addStatic(left_x, y, "PERSON CONVINCED", 1, false);
+    txtConvincedId_ = addStatic(right_x, y, "", 1, false);
+    y += 15;
+    addStatic(left_x, y, "SHOOTING PRECISION", 1, false);
+    txtPrecisionId_ = addStatic(right_x, y, "", 1, false);
+
+    y = 352;
+    addOption(43, y, "ACCEPT", 1, KEY_F5, "map");
+    addOption(535, y, "MENU", 1, KEY_F6, "main");
 }
 
 /*!
- * This method sets the menu cursor and shows it.
+ * This method sets the menu cursor and shows it and
+ * updates infos based on mission statistics.
  */
 void DebriefMenu::handleShow() {
     g_System.useMenuCursor();
     g_System.showCursor();
+
+    Mission *pMission = g_Session.getMission();
+    MissionStats *pStats = pMission->getStatistics();
+
+    if (pMission->getStatus() == Mission::FAILED) {
+        setStaticText(txtStatusId_, "MISSION FAILED");
+    } else if (pMission->getStatus() == Mission::COMPLETED) {
+        setStaticText(txtStatusId_, "MISSION COMPLETED");
+    } else if (pMission->getStatus() == Mission::ABORTED) {
+        setStaticText(txtStatusId_, "MISSION ABORTED");
+    }
+
+    setStaticTextFormated(txtUsedId_, "%i", pStats->agents);
+    setStaticTextFormated(txtAgentCapturedId_, "%i", pStats->agentCaptured);
+
+    int days = 0;
+    int hours = 0;
+    g_Session.getDayHourFromPeriod(pStats->mission_duration, days, hours);
+    setStaticTextFormated(txtTimeId_, "%02d HOURS %d DAYS", hours, days);
+    setStaticTextFormated(txtAgentKilledId_, "%i", pStats->ennemyKilled);
+    setStaticTextFormated(txtCrimKilledId_, "%i", pStats->criminalKilled);
+    setStaticTextFormated(txtCivilKilledId_, "%i", pStats->civilKilled);
+    setStaticTextFormated(txtPoliceKilledId_, "%i", pStats->policeKilled);
+    setStaticTextFormated(txtGardKilledId_, "%i", pStats->guardKilled);
+    setStaticTextFormated(txtConvincedId_, "%i", pStats->convinced);
+
+    if (pStats->nbOfShots == 0) {
+        setStaticTextFormated(txtPrecisionId_, "NO BULLET FIRED");;
+    } else {
+        int precision = (pStats->nbOfHits * 100) / pStats->nbOfShots ;
+        setStaticTextFormated(txtPrecisionId_, "%i%%", precision);
+    }
 }
 
 void DebriefMenu::handleRender() {
+    // Display team logo
     g_Screen.drawLogo(18, 14, g_App.getGameSession().getLogo(), g_App.getGameSession().getLogoColour());
+
+    // Draws separator line between title and statistics
+    g_Screen.drawLine(20, 117, 20 + separatorSize_, 117, 252);
+    g_Screen.drawLine(20, 116, 20 + separatorSize_, 116, 252);
 }
 
 void DebriefMenu::handleLeave() {

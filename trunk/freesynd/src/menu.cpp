@@ -181,6 +181,18 @@ void Menu::setStaticText(int static_id, const char *text){
     }
 }
 
+void Menu::setStaticTextFormated(int static_id, const char * format, ...){
+
+    char tmp[200];
+    va_list list;
+
+    va_start(list, format);
+    vsprintf(tmp, format, list);
+    va_end(list);
+
+    setStaticText(static_id, tmp);
+}
+
 void Menu::addOption(int x, int y, const char *text, int size, Key key,
                      const char *to, bool visible, int dark_widget, int light_widget)
 {

@@ -219,6 +219,9 @@ public:
     //! Do all time related updates
     bool updateTime(int elapsed);
 
+    //! Returns the number of days and hours from the given amount of time
+    void getDayHourFromPeriod(int elapsed, int & days, int & hours);
+
     //! Adds the given amount to the selected block tax rate.
     bool addToTaxRate(int amount);
 

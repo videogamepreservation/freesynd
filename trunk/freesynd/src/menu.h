@@ -163,6 +163,7 @@ public:
     void mouseUpEvent(int x, int y, int button, const int modKeys);
 
     void setStaticText(int static_id, const char *text);
+    void setStaticTextFormated(int static_id, const char * format, ...);
 
     //! Hides the given button
     /*!

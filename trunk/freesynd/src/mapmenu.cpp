@@ -131,7 +131,7 @@ mapblk_data_(NULL), select_tick_count_(0)
     addStatic(194, 360, "OWN", 1, false);       // Own name
     addStatic(268, 360, "", 0, false);          // Own status
 
-    addStatic(500, 9, "00:1:85NC", 1, false);       // Time
+    addStatic(500, 9, "", 1, false);       // Time
 
     // Tax cursors
     addStatic(350, 346, "@   30%", 0, false);
@@ -286,9 +286,6 @@ void MapMenu::updateClock() {
     char tmp[100];
     g_Session.getTimeAsStr(tmp);
     setStaticText(TIME_STATIC_ID, tmp);
-
-    needRendering();
-    //addDirtyRect(500, 9, 120, 15);
 }
 
 /*!

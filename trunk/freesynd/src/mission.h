@@ -43,8 +43,28 @@ class MapHelper;
  * A structure that holds mission statistics.
  */
 typedef struct {
+    /*! How many agents participated in the mission. */
+    int agents;
     /*! How many time did the mission last. */
     int mission_duration;
+    /*! How many opposing agents where captured.*/
+    int agentCaptured;
+    /*! How many opposing agents where killed.*/
+    int ennemyKilled;
+    /*! How many criminal where killed.*/
+    int criminalKilled;
+    /*! How many civilian where killed.*/
+    int civilKilled;
+    /*! How many policemen where killed.*/
+    int policeKilled;
+    /*! How many guards where killed.*/
+    int guardKilled;
+    /*! How many people where convinced.*/
+    int convinced;
+    /*! How many times did agents shoot.*/
+    int nbOfShots;
+    /*! How many times did agents hit.*/
+    int nbOfHits;
 } MissionStats;
 
 /*!
@@ -121,6 +141,8 @@ public:
     void start();
     //! Forces mission status
     void setStatus(Status status) { status_ = status; }
+    //! Returns mission status
+    Status getStatus() { return status_; }
     //! Check if objectives are completed or failed
     void checkObjectives();
     //! Returns true if mission status is failed

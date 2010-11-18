@@ -188,6 +188,21 @@ void GameSession::cheatEnableAllMission() {
 }
 
 /*!
+ * Returns the number of hours and days for the given period 
+ * in millisecond.
+ * \param elapsed
+ * \param days
+ * \param hours
+ */
+void GameSession::getDayHourFromPeriod(int elapsed, int & days, int & hours) {
+    // Total number of hours in the period
+    int hour_elapsed = elapsed / hour_delay_;
+
+    days = hour_elapsed / 24;
+    hours = hour_elapsed % 24;
+}
+
+/*!
  * Updates the game time based on the given elapsed millisecond since
  * the last update.
  * For every day passed, it calls the updateCountries() method and update

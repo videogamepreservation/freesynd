@@ -441,6 +441,8 @@ void GameplayMenu::handleLeave()
         anim = "mgamewin.dat";
     } else if (mission_->failed()) {
         anim = "mlosegam.dat";
+    } else {
+        mission_->setStatus(Mission::ABORTED);
     }
 
     if (anim != NULL) {

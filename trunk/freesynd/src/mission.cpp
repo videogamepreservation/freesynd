@@ -666,9 +666,23 @@ void Mission::drawAt(int tilex, int tiley, int tilez, int x, int y,
 
 void Mission::start()
 {
+    // Reset mission statistics
+    stats_.agents = 0;
+    stats_.mission_duration = 0;
+    stats_.agentCaptured = 0;
+    stats_.ennemyKilled = 0;
+    stats_.criminalKilled = 0;
+    stats_.civilKilled = 0;
+    stats_.policeKilled = 0;
+    stats_.guardKilled = 0;
+    stats_.convinced = 0;
+    stats_.nbOfShots = 0;
+    stats_.nbOfHits = 0;
+
     for (int i = 0; i < 4; i++) {
         if (g_App.teamMember(i)) {
             if(g_App.teamMember(i)->isActive()){
+                stats_.agents += 1;
                 peds_[i]->setHealth(g_App.teamMember(i)->health() *
                                 peds_[i]->health() / 255);
                 while (g_App.teamMember(i)->numWeapons()) {
@@ -686,10 +700,7 @@ void Mission::start()
             peds_[i]->setHealth(-1);
             peds_[i]->setAsAgent(PedInstance::Agent_Non_Active);
         }
-    }
-
-    // Reset mission statistics
-    stats_.mission_duration = 0;
+    }    
 }
 
 /*! 
