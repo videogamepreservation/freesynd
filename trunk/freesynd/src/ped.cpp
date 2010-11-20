@@ -453,21 +453,18 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
         }
     }
 
-    if (target_) {
+    if (target_ && health_ > 0) {
         if (inRange(target_)) {
             if(target_->health() > 0) {
                 int target_x = target_->tileX() * 256 + target_->offX();
                 int target_y = target_->tileY() * 256 + target_->offY();
                 if (firing_ == PedInstance::Firing_Not
-                        && (selectedWeapon() && selectedWeapon()->ammoRemaining())
-                        && health_ > 0
-                        && (is_an_agent_ == PedInstance::Agent_Active ? true
-                        : curanim != PedInstance::HitAnim))
+                        && (selectedWeapon() && selectedWeapon()->ammoRemaining()))
                 {
 
                     setDirection(target_x - (tile_x_ * 256 + off_x_),
                         (tile_y_ * 256 + off_y_) - target_y, &dir_);
-                    selectedWeapon()->inflictDamage(target_, NULL, true);
+                    selectedWeapon()->inflictDamage(target_, NULL);
                     firing_ = PedInstance::Firing_Fire;
                     updated = true;
 
@@ -506,11 +503,6 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
             } else
                 setDrawnAnim(PedInstance::StandFireAnim);
 
-            if (selectedWeapon()->ammoRemaining() > 0) {
-                selectedWeapon()->setAmmoRemaining(
-                        selectedWeapon()->ammoRemaining() - 1);
-            }
-
             if (!(target_ && target_->health() > 0))
                 firing_ = PedInstance::Firing_Stop;
 
@@ -528,14 +520,14 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
         // TODO: this value should be influenced by IPA values
         int required = 1200;
         if (is_an_agent_ == PedInstance::Agent_Active)
-            required = 200;
+            required = 500;
 
         if (weapon_idx == Weapon::Pistol_Anim
             || weapon_idx == Weapon::Shotgun_Anim)
         {
             required = 1500;
             if (is_an_agent_ == PedInstance::Agent_Active)
-                required = 250;
+                required = 750;
         }
 
         if (reload_count_ >= required) {
@@ -878,12 +870,10 @@ void PedInstance::dropWeapon(int n) {
     }
 
     WeaponInstance *w = weapons_[n];
-    std::vector < WeaponInstance * >::iterator it;
-
-    for (it = weapons_.begin(); *it != w; it++) {}
-
-    assert(*it == w);
+    std::vector < WeaponInstance * >::iterator it = weapons_.begin() + n;
     weapons_.erase(it);
+    if (n < selected_weapon_)
+        selected_weapon_--;
 
     putdown_weapon_ = w;
 }
@@ -1021,7 +1011,6 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
 {
     // NOTE: this is a "flood" algorithm, it expands until it reaches other's
     // flood point, then it removes unrelated points
-    // TODO: look at "YUKON" map in original map (x = 62, y = 63, z = 1)
 #ifdef EXECUTION_SPEED_TIME
     printf("---------------------------");
     printf("start time %i.%i\n", SDL_GetTicks()/1000, SDL_GetTicks()%1000);
@@ -1033,6 +1022,7 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
 #if 0
     printf("target pos: x %x; y %x; z %x, ox %i, oy %i\n",
         x, y, z, ox, oy);
+    printf("tileAt %x\n", g_App.maps().map(map())->tileAt(x,y,z));
 #endif
 
     if (map_ == -1 || health_ <= 0)

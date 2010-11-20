@@ -428,8 +428,8 @@ bool Mission::loadMission(uint8 * missData, int size)
     char *miss = (char *) missData;
     miss[size - 1] = 0;
 
-    info_costs_[0] = info_costs_[1] = info_costs_[2] = 0;
-    enhance_costs_[0] = enhance_costs_[1] = enhance_costs_[2] = 0;
+    memset(info_costs_, 0, sizeof(int) * MAX_INFO_ENHANCE_LVL);
+    memset(enhance_costs_, 0, sizeof(int) * MAX_INFO_ENHANCE_LVL);
 
     int i = 0;
 
@@ -437,6 +437,7 @@ bool Mission::loadMission(uint8 * missData, int size)
         info_costs_[i++] = atoi(miss);
         miss = strchr(miss, '\n') + 1;
     }
+    max_info_lvl_ = i;
 
     miss += 2;
     i = 0;
@@ -445,6 +446,7 @@ bool Mission::loadMission(uint8 * missData, int size)
         enhance_costs_[i++] = atoi(miss);
         miss = strchr(miss, '\n') + 1;
     }
+    max_enhance_lvl_ = i;
 
     miss += 2;
 
@@ -691,14 +693,14 @@ void Mission::start()
                     peds_[i]->addWeapon(wi);
                     wi->setOwner(peds_[i]);
                 }
-                peds_[i]->setAsAgent(PedInstance::Agent_Active);
+                peds_[i]->setIsAnAgent(PedInstance::Agent_Active);
             }else{
                 peds_[i]->setHealth(-1);
-                peds_[i]->setAsAgent(PedInstance::Agent_Non_Active);
+                peds_[i]->setIsAnAgent(PedInstance::Agent_Non_Active);
             }
         } else {
             peds_[i]->setHealth(-1);
-            peds_[i]->setAsAgent(PedInstance::Agent_Non_Active);
+            peds_[i]->setIsAnAgent(PedInstance::Agent_Non_Active);
         }
     }    
 }

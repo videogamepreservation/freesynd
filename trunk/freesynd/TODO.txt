@@ -45,9 +45,6 @@ of event/state:
    different objects burn
  - object positioning during drawing
  - map drawing still buggy
- - briefmenu enhance level require better handling of values some missions have 2
-info costs, some 3, enhance cost same thing, the total number is const = 3 it
-should be variable
  - rewrite PedInstance::inRange, include check for Z + objects
  - set weapons for enemy agents, because in gamedata weapons are not the same as
 in original gameplay or are not present at all

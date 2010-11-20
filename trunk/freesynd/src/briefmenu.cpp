@@ -203,7 +203,7 @@ void BriefMenu::handleRender() {
                   orig_pixels_ + 538 + 140 * GAME_SCREEN_WIDTH, false,
                   GAME_SCREEN_WIDTH);*/
 
-    if (info_level_ < 3) {
+    if (info_level_ < pMission->getMaxInfoLvl()) {
         sprintf(tmp, "%d", pMission->infoCost(info_level_));
         g_App.fonts().drawText(560 - g_App.fonts().textWidth(tmp, FontManager::SIZE_2) / 2,
                                140, tmp, FontManager::SIZE_2, false);
@@ -214,7 +214,7 @@ void BriefMenu::handleRender() {
                   orig_pixels_ + 538 + 195 * GAME_SCREEN_WIDTH, false,
                   GAME_SCREEN_WIDTH);*/
 
-    if (enhance_level_ < 3) {
+    if (enhance_level_ < pMission->getMaxEnhanceLvl()) {
         sprintf(tmp, "%d", pMission->enhanceCost(enhance_level_));
         g_App.fonts().drawText(560 - g_App.fonts().textWidth(tmp, FontManager::SIZE_2) / 2,
                                195, tmp, FontManager::SIZE_2, false);
@@ -228,10 +228,10 @@ void BriefMenu::handleLeave() {
 }
 
 void BriefMenu::handleOption(Key key, const int modKeys) {
+    Mission *pMission = g_Session.getMission();
     if (key == KEY_F1) {
         // Buy some informations
-        if (info_level_ < 3) {
-            Mission *pMission = g_Session.getMission();
+        if (info_level_ < pMission->getMaxInfoLvl()) {
             g_Session.setMoney(g_Session.getMoney() - pMission->infoCost(info_level_));
             info_level_++;
             needRendering();
@@ -242,8 +242,7 @@ void BriefMenu::handleOption(Key key, const int modKeys) {
 
     if (key == KEY_F2) {
         // Buy some map enhancement
-        if (enhance_level_ < 3) {
-            Mission *pMission = g_Session.getMission();
+        if (enhance_level_ < pMission->getMaxEnhanceLvl()) {
             g_Session.setMoney(g_Session.getMoney() -
                            pMission->enhanceCost(enhance_level_));
             enhance_level_++;

@@ -52,6 +52,25 @@ bool MapManager::loadMap(int mapNum)
 
     maps_[mapNum] = new Map(&tileManager_);
     maps_[mapNum]->loadMap(mapData);
+    // patch for "YUKON" map
+    if (mapNum == 0x27) {
+        maps_[mapNum]->patchMap(60, 63, 1, 0x27);
+        maps_[mapNum]->patchMap(61, 63, 1, 0x27);
+        maps_[mapNum]->patchMap(62, 63, 1, 0x27);
+        maps_[mapNum]->patchMap(60, 64, 1, 0x27);
+        maps_[mapNum]->patchMap(61, 64, 1, 0x27);
+        maps_[mapNum]->patchMap(62, 64, 1, 0x27);
+        maps_[mapNum]->patchMap(60, 65, 1, 0x27);
+        maps_[mapNum]->patchMap(61, 65, 1, 0x27);
+        maps_[mapNum]->patchMap(62, 65, 1, 0x27);
+        maps_[mapNum]->patchMap(60, 66, 1, 0x27);
+        maps_[mapNum]->patchMap(61, 66, 1, 0x27);
+        maps_[mapNum]->patchMap(62, 66, 1, 0x27);
+        maps_[mapNum]->patchMap(60, 67, 1, 0x27);
+        maps_[mapNum]->patchMap(61, 67, 1, 0x27);
+        maps_[mapNum]->patchMap(62, 67, 1, 0x27);
+    }
+
     delete[] mapData;
 
     return true;

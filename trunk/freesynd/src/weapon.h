@@ -130,7 +130,7 @@ public:
     bool animate(int elapsed);
     void draw(int x, int y);
     bool inflictDamage(ShootableMapObject * tobj, PathNode * tp,
-        bool forcedshot, int duration = 1000);
+        int duration = 1000);
 
     void setOwner(ShootableMapObject *owner) { owner_ = owner; }
     ShootableMapObject *getOwner() { return owner_; }

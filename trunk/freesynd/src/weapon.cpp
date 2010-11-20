@@ -106,10 +106,10 @@ void WeaponInstance::draw(int x, int y) {
 }
 
 bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
-    bool forcedshot, int duration)
+    int duration)
 {
-    // TODO: "tp" + "forcedshot" will be used later for calculating vector
-    // when target is not object; "duration" will be used during continuos
+    // TODO: "tp" will be used later for calculating vector when target
+    // is not object(floor); "duration" will be used during continuos
     // shooting to calculate damage + delay(reloading) time;
 
     // NOTE: for now this will check "tobj"
@@ -123,6 +123,7 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
         // NOTE: not only self-healing in future?
         owner_->setHealth(owner_->startHealth());
         ammo_ = 0;
+        ((PedInstance *)owner_)->selectNextWeapon();
         return true;
     }
     if (tobj->getRcvDamageDef() == MapObject::ddmg_Invulnerable)

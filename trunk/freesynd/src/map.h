@@ -71,6 +71,7 @@ public:
 
     int maxZAt(int x, int y);
     int tileAt(int x, int y, int z);
+    void patchMap(int x, int y, int z, uint8 tileNum);
     bool stairsAt(int x, int y, int z);
 
 protected:

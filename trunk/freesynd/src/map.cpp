@@ -103,7 +103,6 @@ int Map::screenToTileX(int x, int y, int &ox)
     // x now equals fx * TILE_WIDTH / 2 - fy * TILE_WIDTH / 2
     // which equals TILE_WIDTH/2 * (fx - fy)
     y -= (max_z_ + 1) * TILE_HEIGHT / 3;
-//    y += mz;
     // y now equals (fx + fy) * TILE_HEIGHT / 3
     float dx = (float) x / (TILE_WIDTH / 2);
     float dy = (float) y / (TILE_HEIGHT / 3);
@@ -119,7 +118,6 @@ int Map::screenToTileY(int x, int y, int &oy)
 {
     x -= (map_width_ / 2 + TILE_WIDTH / 2);
     y -= (max_z_ + 1) * TILE_HEIGHT / 3;
-//    y += mz;
     float dx = (float) x / (TILE_WIDTH / 2);
     float dy = (float) y / (TILE_HEIGHT / 3);
     float r = (dy - dx) / 2;
@@ -157,6 +155,14 @@ int Map::tileAt(int x, int y, int z)
     if (z < 0 || z >= max_z_)
         return 0;
     return map_data_[(y * max_x_ + x) * max_z_ + z];
+}
+
+void Map::patchMap(int x, int y, int z, uint8 tileNum)
+{
+    assert((x >= 0 && x < max_x_)
+        && (y >= 0 && y < max_y_)
+        && (z >= 0 && z < max_z_));
+    map_data_[(y * max_x_ + x) * max_z_ + z] = tileNum;
 }
 
 bool Map::stairsAt(int x, int y, int z)

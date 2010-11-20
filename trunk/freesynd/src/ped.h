@@ -197,6 +197,7 @@ public:
     ShootableMapObject *target() { return target_; }
     void setTarget(ShootableMapObject *t) { target_ = t; }
 
+    void startFiring() { firing_ = PedInstance::Firing_Fire; }
     void stopFiring();
 
     bool inRange(ShootableMapObject *t);
@@ -213,7 +214,7 @@ public:
 
     void setSelectedWeapon(int n) {
         selected_weapon_ = n;
-        if (weapons_[selected_weapon_]->getWeaponType() == Weapon::EnergyShield)
+        if (n != -1 && weapons_[selected_weapon_]->getWeaponType() == Weapon::EnergyShield)
             setRcvDamageDef(MapObject::ddmg_PedWithEnergyShield);
         else
             setRcvDamageDef(MapObject::ddmg_Ped);
@@ -237,8 +238,8 @@ public:
         Agent_Active
     } ped_enum;
 
-    void setAsAgent(ped_enum set_agent_as) { is_an_agent_ = set_agent_as; }
-    ped_enum isAsAgent() { return is_an_agent_; }
+    void setIsAnAgent(ped_enum set_agent_as) { is_an_agent_ = set_agent_as; }
+    ped_enum getIsAnAgent() { return is_an_agent_; }
 
     int map();
     AnimationDrawn getDrawnAnim();

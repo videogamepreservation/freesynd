@@ -351,7 +351,7 @@ void GameplayMenu::handleRender()
 
         for (int i = 0; i < 4; i++)
             if (mission_->ped(i)) {
-                if(mission_->ped(i)->isAsAgent() == PedInstance::Agent_Active){
+                if(mission_->ped(i)->getIsAnAgent() == PedInstance::Agent_Active){
                     selectable_agents_ |= 1 << i;
                 }
             }
@@ -718,20 +718,22 @@ void GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
                                     mission_->ped(pointing_at_ped_)))
                     {
                         mission_->ped(i)->selectedWeapon()->inflictDamage(
-                            mission_->ped(pointing_at_ped_), NULL, true);
+                            mission_->ped(pointing_at_ped_), NULL);
+                        mission_->ped(i)->startFiring();
+                        mission_->ped(i)->setTarget(
+                            mission_->ped(pointing_at_ped_));
                     }
                     else if (pointing_at_vehicle_ != -1
                             && mission_->ped(i)->inRange(
                                     mission_->vehicle(pointing_at_vehicle_)))
                     {
                         mission_->ped(i)->selectedWeapon()->inflictDamage(
-                            mission_->vehicle(pointing_at_vehicle_), NULL, true);
+                            mission_->vehicle(pointing_at_vehicle_), NULL);
+                        mission_->ped(i)->startFiring();
+                        mission_->ped(i)->setTarget(
+                            mission_->ped(pointing_at_vehicle_));
                     }
-                    /*else if (pointing_at_ped_ == -1
-                            && pointing_at_vehicle_ == -1) {
-                        mission_->ped(i)->setTarget(world_x_ + x - 129,
-                                world_y_ + y);
-                    }*/
+                    // TODO: add shooting on floor
                 }
         }
     }
@@ -744,6 +746,9 @@ void GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
                         && y >= 2 + 46 + 44 + 10 + 46 + 44 + 15 + j * 32
                         && y < 2 + 46 + 44 + 10 + 46 + 44 + 15 + j * 32 + 32) {
                     for (int a = 0; a < 4; a++) {
+                        // TODO: when more then one agent is selected weapon,
+                        // the chosen ones should be same type and less ammo
+                        // or best in rank
                         if (isAgentSelected(a)) {
                             if (i + j * 4 < mission_->ped(a)->numWeapons()) {
                                 if (button == 1) {

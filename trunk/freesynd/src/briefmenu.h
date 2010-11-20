@@ -47,8 +47,8 @@ protected:
 
 protected:
     int start_line_;
-    int info_level_;
-    int enhance_level_;
+    unsigned char info_level_;
+    unsigned char enhance_level_;
 };
 
 #endif

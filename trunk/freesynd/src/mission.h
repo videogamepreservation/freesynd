@@ -72,6 +72,7 @@ typedef struct {
  */
 class Mission : public MapHelper {
 public:
+#define MAX_INFO_ENHANCE_LVL    10
     /*!
      * List of all possible mission status. 
      */
@@ -116,13 +117,13 @@ public:
     const char *briefing() { return briefing_.c_str(); }
     void objectiveMsg(const char ** msg);
 
-    int infoCost(int lvl) {
-        assert(lvl < 3);
+    int infoCost(unsigned char lvl) {
+        assert(lvl < MAX_INFO_ENHANCE_LVL);
         return info_costs_[lvl];
     }
 
-    int enhanceCost(int lvl) {
-        assert(lvl < 3);
+    int enhanceCost(unsigned char lvl) {
+        assert(lvl < MAX_INFO_ENHANCE_LVL);
         return enhance_costs_[lvl];
     }
 
@@ -432,6 +433,9 @@ public:
     int mmax_x_, mmax_y_, mmax_z_;
     int mmax_m_all, mmax_m_xy;
 
+    unsigned int getMaxInfoLvl() {return max_info_lvl_; }
+    unsigned int getMaxEnhanceLvl() {return max_enhance_lvl_; }
+
   protected:
     LEVELDATA level_data_;
     bool sWalkable(char thisTile, char upperTile);
@@ -518,11 +522,10 @@ public:
      */
     Status status_;
 
-    // TODO: enhance level require better handling of values
-    // some missions have 2 info costs, some 3, enhance cost same thing
-    // the total number is const = 3 it should be variable
     int info_costs_[10];
+    unsigned char max_info_lvl_;
     int enhance_costs_[10];
+    unsigned char max_enhance_lvl_;
     std::string briefing_;
     int map_, min_x_, min_y_, max_x_, max_y_;
 
