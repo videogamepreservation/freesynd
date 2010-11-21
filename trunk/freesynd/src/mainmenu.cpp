@@ -31,7 +31,9 @@
 MainMenu::MainMenu(MenuManager * m):Menu(m, "main", "moption.dat",
      "moptout.dat")
 {
-    addStatic(208, 40, "MAIN MENU", 3, true);
+    std::string str;
+    menu_manager_->getMessage("MAIN_TITLE", str);
+    addStatic(208, 40, str.c_str(), 3, true);
     addOption(208, 134, "CONFIGURE COMPANY", 2, KEY_F1, "conf");
     addOption(208, 168, "BEGIN MISSION", 2, KEY_F2, "map");
     addOption(208, 201, "LOAD AND SAVE GAME", 2, KEY_F3, "loadsave");

@@ -33,6 +33,7 @@
 #include <map>
 
 class SpriteManager;
+class ConfigFile;
 
 class MainMenu;
 class ConfMenu;
@@ -51,9 +52,22 @@ class LogoutMenu;
  */
 class MenuManager {
 public:
+    /*!
+     * Available language in the game.
+     */
+    enum FS_Lang {
+        ENGLISH = 0,
+        FRENCH = 1,
+        ITALIAN = 2,
+        GERMAN = 3
+    };
+
     MenuManager();
     ~MenuManager();
     void createAllMenus();
+
+    void setLanguage(FS_Lang lang);
+    void getMessage(const std::string & id, std::string & msg);
 
     void addMenu(Menu *m) { menus_[m->name()] = m; }
 
@@ -107,8 +121,10 @@ protected:
     uint8 *background_;
     /*! This flag tells whether current menu needs a background or not.*/
     bool needBackground_;
-    /** Dirty rects list. */
+    /*! Dirty rects list. */
     DirtyList   dirtyList_;
+    /*! Language file. */
+    ConfigFile  *language_;
 
     MainMenu *menu_main_;
     ConfMenu *menu_conf_;

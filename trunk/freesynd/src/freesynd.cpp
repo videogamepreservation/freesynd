@@ -123,7 +123,6 @@ void print_usage() {
 }
 
 int main(int argc, char *argv[]) {
-    bool want_fullscreen = false;
 
 #ifdef CHEAP_LEAK_DETECTION
     initLeakDetection();
@@ -140,21 +139,7 @@ int main(int argc, char *argv[]) {
     int cheatCodeIndex = -1;
 
     for (int i = 1; i < argc; ++i) {
-        if (0 == strcmp("-p", argv[i]) || 0 == strcmp("--path", argv[i])) {
-            if (argv[i + 1])
-                File::setPath(argv[i + 1]);
-            i++;
-        }
-
-        if (0 == strcmp("-f", argv[i])
-                || 0 == strcmp("--full-screen", argv[i])) {
-            want_fullscreen = true;
-        }
-
-        if (0 == strcmp("-h", argv[i]) || 0 == strcmp("--help", argv[i])) {
-            print_usage();
-            return 0;
-        }
+        
 
 #ifdef _DEBUG
         // This parameter is used in debug phase to accelerate the starting
@@ -188,7 +173,7 @@ int main(int argc, char *argv[]) {
     LOG(Log::k_FLG_INFO, "Main", "main", ("Initializing application..."))
     std::auto_ptr<App> app(new App());
 
-    if (app->initialize(want_fullscreen)) {
+    if (app->initialize()) {
         // setting the cheat codes
         if (cheatCodeIndex != -1) {
             char s[50];

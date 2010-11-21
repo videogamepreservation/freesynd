@@ -54,54 +54,12 @@
  * Used for managing game settings and workflows.
  */
 class App : public Singleton < App > {
-    GameSession session_;
-    Agent *team_members_[4];
-    std::vector<Agent *> agents_recruited_;
-    std::vector<Weapon *> available_weapons_;
-    std::vector<Mod *> available_mods_;
-
-    bool running_, playingFli_, skipFli_;
-    std::auto_ptr<Screen> screen_;
-    std::auto_ptr<System> system_;
-
-    SpriteManager menu_sprites_;
-    GameSpriteManager game_sprites_;
-    FontManager fonts_;
-    HFont game_font_;
-    Font intro_font_;
-    SpriteManager intro_font_sprites_;
-    MenuManager menus_;
-    MissionManager missions_;
-    AgentManager agents_;
-    WeaponManager weapons_;
-    ModManager mods_;
-    MapManager maps_;
-    VehicleManager vehicles_;
-    PedManager peds_;
-    SoundManager intro_sounds_;
-    SoundManager game_sounds_;
-    MusicManager music_;
-
-    void cheatFunds() {
-        session_.setMoney(100000000);
-    }
-
-    void cheatRepeatOrCompleteMission();
-    void cheatWeaponsAndMods();
-    void cheatEquipAllMods();
-    void cheatAnyMission();
-    void cheatResurrectAgents();
-    void cheatOwnAllCountries();
-    void cheatAccelerateTime();
-    void cheatFemaleRecruits();
-    void cheatEquipFancyWeapons();
-
   public:
     App();
     virtual ~App();
 
     //! Initialize application
-    bool initialize(bool fullscreen);
+    bool initialize();
 
     uint8 walkdata_[256];
     // patched version
@@ -237,6 +195,54 @@ class App : public Singleton < App > {
     void mouseUpEvent(int x, int y, int button, const int modKeys);
     //! Handles mouse moved
     void mouseMotionEvent(int x, int y, int state, const int modKeys);
+
+private:
+    bool App::readConfiguration();
+
+    void cheatFunds() {
+        session_.setMoney(100000000);
+    }
+
+    void cheatRepeatOrCompleteMission();
+    void cheatWeaponsAndMods();
+    void cheatEquipAllMods();
+    void cheatAnyMission();
+    void cheatResurrectAgents();
+    void cheatOwnAllCountries();
+    void cheatAccelerateTime();
+    void cheatFemaleRecruits();
+    void cheatEquipFancyWeapons();
+
+private:
+    GameSession session_;
+    Agent *team_members_[4];
+    std::vector<Agent *> agents_recruited_;
+    std::vector<Weapon *> available_weapons_;
+    std::vector<Mod *> available_mods_;
+
+    bool running_, playingFli_, skipFli_;
+    bool fullscreen_;
+    bool playIntro_;
+    std::auto_ptr<Screen> screen_;
+    std::auto_ptr<System> system_;
+
+    SpriteManager menu_sprites_;
+    GameSpriteManager game_sprites_;
+    FontManager fonts_;
+    HFont game_font_;
+    Font intro_font_;
+    SpriteManager intro_font_sprites_;
+    MenuManager menus_;
+    MissionManager missions_;
+    AgentManager agents_;
+    WeaponManager weapons_;
+    ModManager mods_;
+    MapManager maps_;
+    VehicleManager vehicles_;
+    PedManager peds_;
+    SoundManager intro_sounds_;
+    SoundManager game_sounds_;
+    MusicManager music_;
 };
 
 #define g_App   App::singleton()

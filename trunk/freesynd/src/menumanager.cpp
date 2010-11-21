@@ -41,6 +41,7 @@
 #include "logoutmenu.h"
 #include "gfx/fliplayer.h"
 #include "system.h"
+#include "utils/configfile.h"
 
 MenuManager::MenuManager():current_(NULL),
 menu_main_(NULL), menu_conf_(NULL), menu_load_save_(NULL),
@@ -53,6 +54,7 @@ menu_logout_(NULL), dirtyList_(g_Screen.gameScreenWidth(), g_Screen.gameScreenHe
     background_ = new uint8[g_Screen.gameScreenWidth() * g_Screen.gameScreenHeight()];
     memset(background_, 0, g_Screen.gameScreenHeight() * g_Screen.gameScreenWidth());
     needBackground_ = false;
+    language_ = NULL;
 }
 
 MenuManager::~MenuManager()
@@ -82,6 +84,46 @@ MenuManager::~MenuManager()
 
     if (background_) {
         delete[] background_;
+    }
+
+    if (language_) {
+        delete language_;
+    }
+}
+
+void MenuManager::setLanguage(FS_Lang lang) {
+    std::string filename(File::fileFullPath("/lang/", false));
+    switch (lang) {
+        case ENGLISH:
+            filename.append("english.lng");
+            break;
+        case FRENCH:
+            filename.append("french.lng");
+            break;
+        case ITALIAN:
+            filename.append("italian.lng");
+            break;
+        case GERMAN:
+            filename.append("german.lng");
+            break;
+        default:
+            filename.append("english.lng");
+            break;
+    }
+
+    try {
+        language_ = new ConfigFile(filename);
+    } catch (...) {
+        printf("ERROR : Unable to load language file %s.\n", filename.c_str());
+        language_ = NULL;
+    }
+}
+
+void MenuManager::getMessage(const std::string & id, std::string & msg) {
+    if (language_) {
+        if (!language_->readInto(msg, id)) {
+            msg = "?";
+        }
     }
 }
 

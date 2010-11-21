@@ -40,11 +40,19 @@ const int SystemSDL::CURSOR_WIDTH = 24;
 SystemSDL::SystemSDL(int depth) {
     depth_ = depth;
     keyModState_ = 0;
+    screen_surf_ = NULL;
+    temp_surf_ = NULL;
+    cursor_surf_ = NULL;
 }
 
 SystemSDL::~SystemSDL() {
-    SDL_FreeSurface(temp_surf_);
-    SDL_FreeSurface(cursor_surf_);
+    if (temp_surf_) {
+        SDL_FreeSurface(temp_surf_);
+    }
+
+    if (cursor_surf_) {
+        SDL_FreeSurface(cursor_surf_);
+    }
 
 #ifdef HAVE_SDL_MIXER
     Audio::quit();

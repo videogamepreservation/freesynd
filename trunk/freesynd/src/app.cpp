@@ -45,6 +45,7 @@
 #include "sound/audio.h"
 #include "utils/file.h"
 #include "utils/log.h"
+#include "utils/configfile.h"
 
 App::App(): running_(true), playingFli_(false),
 skipFli_(false), screen_(new Screen(GAME_SCREEN_WIDTH, GAME_SCREEN_HEIGHT))
@@ -53,10 +54,47 @@ skipFli_(false), screen_(new Screen(GAME_SCREEN_WIDTH, GAME_SCREEN_HEIGHT))
 #else
 #error A suitable System object has not been defined!
 #endif
-{}
+{
+    fullscreen_ = false;
+    playIntro_ = true;
+}
 
 App::~App() {
 
+}
+
+bool App::readConfiguration() {
+    try {
+        ConfigFile conf("freesynd.ini");
+        conf.readInto(fullscreen_, "fullscreen", false);
+        conf.readInto(playIntro_, "play_intro", true);
+        string path;
+        conf.readInto(path, "data_dir");
+        File::setPath(path.c_str());
+        
+        switch (conf.read("language", 0)) {
+            case 0:
+                menus_.setLanguage(MenuManager::ENGLISH);
+                break;
+            case 1:
+                menus_.setLanguage(MenuManager::FRENCH);
+                break;
+            case 2:
+                menus_.setLanguage(MenuManager::ITALIAN);
+                break;
+            case 3:
+                menus_.setLanguage(MenuManager::GERMAN);
+                break;
+            default:
+                menus_.setLanguage(MenuManager::ENGLISH);
+                break;
+        }
+
+    } catch (...) {
+        printf("unable to read configuration file\n");
+        return false;
+    }
+    return true;
 }
 
 /*!
@@ -64,10 +102,16 @@ App::~App() {
  * \param fullscreen True if application runs in full screen.
  * \return True if initialization is ok.
  */
-bool App::initialize(bool fullscreen) {
+bool App::initialize() {
     
+    LOG(Log::k_FLG_GFX, "App", "initialize", ("reading configuration..."))
+    if (!readConfiguration()) {
+        LOG(Log::k_FLG_GFX, "App", "initialize", ("failed to read configuration..."))
+        return false;
+    }
+
     LOG(Log::k_FLG_GFX, "App", "initialize", ("initializing system..."))
-    if (!system_->initialize(fullscreen)) {
+    if (!system_->initialize(fullscreen_)) {
         return false;
     }
 
@@ -403,9 +447,9 @@ void App::run() {
 
     FliPlayer fliPlayer;
 
-    // TODO : add a config file to keep the info that the intro is played
-    // only the first time the game is run
-    if (start_mission == -1) {
+    // Play intro only the first time the application is run
+    // start_mission is available only in DEBUG mode to jump to a mission
+    if (playIntro_ && start_mission == -1) {
         LOG(Log::k_FLG_GFX, "App", "run", ("Loading resource for the intro"))
         // this font is for the intro
         tabData = File::loadFile("mfnt-0.tab", tabSize);
