@@ -39,12 +39,10 @@ tick_count_(-500)
 void LoadingMenu::handleTick(int elapsed)
 {
     tick_count_ += elapsed;
-    if (tick_count_ >= 100) {
-        Mission *pMission = g_Session.getMission();
-        pMission->loadMap();// TODO : move this to briefmenu
-        pMission->setSurfaces();
+    if (tick_count_ >= 2000) {
+        g_Session.getMission()->setSurfaces();
         menu_manager_->changeCurrentMenu("Gameplay");
         tick_count_ = -500;
     }
-    assert(tick_count_ < 100);
+    assert(tick_count_ < 2000);
 }

@@ -114,7 +114,9 @@ void MapObject::setDirection(int dir) {
 
 // posx = targetx - objx
 // posy = targety - objy
+// if dir == NULL, object callers dir_ will be set
 void MapObject::setDirection(int posx, int posy, int * dir) {
+
     int direction = -1;
     double PI = 3.14159265;
     if (posx == 0) {
@@ -129,25 +131,31 @@ void MapObject::setDirection(int posx, int posy, int * dir) {
         } else if (posx < 0) {
             direction = 192;
         }
-    } else if (posx < 0 && posy > 0) {
-        int swapx = -posx;
-        posx = posy;
-        posy = swapx;
-        direction = (int)((128 * atan(double(posy/posx))) / PI + 128);
-    } else if (posx < 0 && posy < 0) {
-        posx = -posx;
-        posy = -posy;
-        direction = (int)((128 * atan(double(posy/posx))) / PI + 192);
+    } else if (posx < 0) {
+        if (posy > 0) {
+            int swapx = -posx;
+            posx = posy;
+            posy = swapx;
+            direction = (int)((128 * atan(double(posy/posx))) / PI + 128);
+        } else { // posy < 0
+            posx = -posx;
+            posy = -posy;
+            direction = (int)((128 * atan(double(posy/posx))) / PI + 192);
+        }
     } else if (posx > 0 && posy < 0) {
         int swapx = posx;
         posx = -posy;
         posy = swapx;
         direction = (int)((128 * atan(double(posy/posx))) / PI);
-    } else {
+    } else { // posx > 0 && posy > 0
         direction = (int)((128 * atan(double(posy/posx))) / PI + 64);
     }
-    if (direction != -1)
-        *dir = direction;
+    if (direction != -1) {
+        if (dir == NULL)
+            this->dir_ = direction;
+        else
+            *dir = direction;
+    }
 }
 
 int MapObject::getDirection(int snum) {

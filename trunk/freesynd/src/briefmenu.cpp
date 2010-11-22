@@ -77,6 +77,8 @@ void BriefMenu::handleShow() {
     Mission *pMission = g_App.missions().loadMission(cur_miss);
     assert(pMission != NULL);
     g_Session.setMission(pMission);
+    // NOTE: map is required to be loaded here, because minimap is z=0
+    pMission->loadMap();
 
     updateClock();
 }
