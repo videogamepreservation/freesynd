@@ -24,6 +24,8 @@ Changes
   * Correct animations for people/vehicles on damage recieved
   * Instant damage, damage types
   * Energy shield will not protect from Hit, Explosion
+  * Use of freesynd.ini file to specify application configuration
+  * Use of language files
 
 Fixed Bugs
 ----------
