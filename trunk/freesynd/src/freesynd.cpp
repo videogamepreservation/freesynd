@@ -139,7 +139,6 @@ int main(int argc, char *argv[]) {
     int cheatCodeIndex = -1;
 
     for (int i = 1; i < argc; ++i) {
-        
 
 #ifdef _DEBUG
         // This parameter is used in debug phase to accelerate the starting
@@ -170,10 +169,16 @@ int main(int argc, char *argv[]) {
     Log::initialize(Log::k_FLG_ALL, "game.log");
 #endif
 
+    std::string confPath;
+
+    confPath.append(argv[0]);
+    size_t pos = confPath.find_last_of('\\');
+    confPath.erase(pos + 1);
+
     LOG(Log::k_FLG_INFO, "Main", "main", ("Initializing application..."))
     std::auto_ptr<App> app(new App());
 
-    if (app->initialize()) {
+    if (app->initialize(confPath.c_str())) {
         // setting the cheat codes
         if (cheatCodeIndex != -1) {
             char s[50];

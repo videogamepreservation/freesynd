@@ -63,9 +63,11 @@ App::~App() {
 
 }
 
-bool App::readConfiguration() {
+bool App::readConfiguration(const char *dir) {
+    std::string path(dir);
+    path.append("freesynd.ini");
     try {
-        ConfigFile conf("freesynd.ini");
+        ConfigFile conf(path);
         conf.readInto(fullscreen_, "fullscreen", false);
         conf.readInto(playIntro_, "play_intro", true);
         string path;
@@ -99,13 +101,13 @@ bool App::readConfiguration() {
 
 /*!
  * Initialize application.
- * \param fullscreen True if application runs in full screen.
+ * \param dir True if application runs in full screen.
  * \return True if initialization is ok.
  */
-bool App::initialize() {
+bool App::initialize(const char *dir) {
     
     LOG(Log::k_FLG_GFX, "App", "initialize", ("reading configuration..."))
-    if (!readConfiguration()) {
+    if (!readConfiguration(dir)) {
         LOG(Log::k_FLG_GFX, "App", "initialize", ("failed to read configuration..."))
         return false;
     }

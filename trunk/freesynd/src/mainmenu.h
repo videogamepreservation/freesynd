@@ -32,7 +32,7 @@ class MainMenu : public Menu {
 public:
     MainMenu(MenuManager *m);
 
-    void handleRender();
+    void handleShow();
     void handleLeave();
     void handleOption(Key key, const int modKeys);
 };

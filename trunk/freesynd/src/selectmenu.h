@@ -61,7 +61,6 @@ protected:
     void toggleAgent(int n);
 
 protected:
-    uint8 *orig_pixels_;
     int tab_;
     int cur_agent_;
     /*! Counter to update the rnd_ field.*/

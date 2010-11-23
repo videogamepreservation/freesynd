@@ -59,7 +59,7 @@ class App : public Singleton < App > {
     virtual ~App();
 
     //! Initialize application
-    bool initialize();
+    bool initialize(const char *dir);
 
     uint8 walkdata_[256];
     // patched version
@@ -197,7 +197,7 @@ class App : public Singleton < App > {
     void mouseMotionEvent(int x, int y, int state, const int modKeys);
 
 private:
-    bool App::readConfiguration();
+    bool App::readConfiguration(const char *dir);
 
     void cheatFunds() {
         session_.setMoney(100000000);

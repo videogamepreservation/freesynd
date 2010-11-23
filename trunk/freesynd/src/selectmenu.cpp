@@ -28,7 +28,7 @@
 #include "app.h"
 #include "selectmenu.h"
 
-SelectMenu::SelectMenu(MenuManager * m):Menu(m, "select", "mselect.dat", "mselout.dat"), orig_pixels_(0), tab_(2),
+SelectMenu::SelectMenu(MenuManager * m):Menu(m, "select", "mselect.dat", "mselout.dat"), tab_(2),
 cur_agent_(0), tick_count_(0), sel_weapon_(0), sel_mod_(0),
 sel_weapon_inst_(0), sel_all_(false)
 {
@@ -56,8 +56,7 @@ sel_weapon_inst_(0), sel_all_(false)
 
 SelectMenu::~SelectMenu()
 {
-    if (orig_pixels_)
-        delete[] orig_pixels_;
+    
 }
 
 void SelectMenu::addModOptions()
@@ -206,24 +205,24 @@ void SelectMenu::drawAgent()
                                           true);
     }
     // restore lines over agent
-    g_Screen.blit(254, 124, 30, 2,
-                  orig_pixels_ + 256 + 124 * GAME_SCREEN_WIDTH, false,
+/*    g_Screen.blit(254, 124, 30, 2,
+                  background_ + 256 + 124 * GAME_SCREEN_WIDTH, false,
                   GAME_SCREEN_WIDTH);
     g_Screen.blit(264, 132, 30, 2,
-                  orig_pixels_ + 266 + 132 * GAME_SCREEN_WIDTH, false,
+                  background_ + 266 + 132 * GAME_SCREEN_WIDTH, false,
                   GAME_SCREEN_WIDTH);
     g_Screen.blit(266, 174, 36, 2,
-                  orig_pixels_ + 268 + 174 * GAME_SCREEN_WIDTH, false,
+                  background_ + 268 + 174 * GAME_SCREEN_WIDTH, false,
                   GAME_SCREEN_WIDTH);
     g_Screen.blit(252, 210, 56, 2,
-                  orig_pixels_ + 254 + 210 * GAME_SCREEN_WIDTH, false,
+                  background_ + 254 + 210 * GAME_SCREEN_WIDTH, false,
                   GAME_SCREEN_WIDTH);
     g_Screen.blit(302, 232, 10, 2,
-                  orig_pixels_ + 304 + 232 * GAME_SCREEN_WIDTH, false,
+                  background_ + 304 + 232 * GAME_SCREEN_WIDTH, false,
                   GAME_SCREEN_WIDTH);
     g_Screen.blit(264, 256, 30, 2,
-                  orig_pixels_ + 266 + 256 * GAME_SCREEN_WIDTH, false,
-                  GAME_SCREEN_WIDTH);
+                  background_ + 266 + 256 * GAME_SCREEN_WIDTH, false,
+                  GAME_SCREEN_WIDTH);*/
 
     // write inventory
     for (int j = 0; j < 2; j++)
@@ -307,17 +306,11 @@ void SelectMenu::updateClock() {
     char tmp[100];
     g_Session.getTimeAsStr(tmp);
     setStaticText(1, tmp);
-
-    needRendering();
 }
 
 void SelectMenu::handleShow() {
     
-    if (orig_pixels_ == 0) {
-        orig_pixels_ = new uint8[GAME_SCREEN_WIDTH * GAME_SCREEN_HEIGHT];
-        memcpy(orig_pixels_, g_Screen.pixels(),
-               GAME_SCREEN_WIDTH * GAME_SCREEN_HEIGHT);
-    }
+    menu_manager_->saveBackground();
 
     // Show the mouse
     g_System.showCursor();
@@ -327,18 +320,10 @@ void SelectMenu::handleShow() {
 }
 
 void SelectMenu::handleRender() {
-    g_Screen.blit(0, 0, 145, 230, orig_pixels_, false,
-                  GAME_SCREEN_WIDTH);
-    g_Screen.blit(145, 0, GAME_SCREEN_WIDTH - 145, GAME_SCREEN_HEIGHT,
-                  orig_pixels_ + 145, false, GAME_SCREEN_WIDTH);
-
     g_Screen.drawLogo(18, 14, g_App.getGameSession().getLogo(), g_App.getGameSession().getLogoColour());
 
     // write money
     char tmp[100];
-    g_Screen.blit(538, 87, 100, 30,
-                  orig_pixels_ + 538 + 87 * GAME_SCREEN_WIDTH, false,
-                  GAME_SCREEN_WIDTH);
     sprintf(tmp, "%d", g_App.getGameSession().getMoney());
     g_App.fonts().drawText(560 - g_App.fonts().textWidth(tmp, FontManager::SIZE_2) / 2, 87,
                            tmp, FontManager::SIZE_2, false);

@@ -34,14 +34,19 @@ MainMenu::MainMenu(MenuManager * m):Menu(m, "main", "moption.dat",
     std::string str;
     menu_manager_->getMessage("MAIN_TITLE", str);
     addStatic(208, 40, str.c_str(), 3, true);
-    addOption(208, 134, "CONFIGURE COMPANY", 2, KEY_F1, "conf");
-    addOption(208, 168, "BEGIN MISSION", 2, KEY_F2, "map");
-    addOption(208, 201, "LOAD AND SAVE GAME", 2, KEY_F3, "loadsave");
-    addOption(208, 236, "RESTART GAME", 2, KEY_F4, "main");
-    addOption(208, 269, "QUIT TO DOS", 2, KEY_F5, NULL);
+    menu_manager_->getMessage("MAIN_CONF", str);
+    addOption(208, 134, str.c_str(), 2, KEY_F1, "conf");
+    menu_manager_->getMessage("MAIN_BEGIN", str);
+    addOption(208, 168, str.c_str(), 2, KEY_F2, "map");
+    menu_manager_->getMessage("MAIN_LOAD_SAVE", str);
+    addOption(208, 201, str.c_str(), 2, KEY_F3, "loadsave");
+    menu_manager_->getMessage("MAIN_RESET", str);
+    addOption(208, 236, str.c_str(), 2, KEY_F4, "main");
+    menu_manager_->getMessage("MAIN_QUIT", str);
+    addOption(208, 269, str.c_str(), 2, KEY_F5, NULL);
 }
 
-void MainMenu::handleRender()
+void MainMenu::handleShow()
 {
     // If we came from the intro, the cursor is invisible
     // otherwise, it does no harm
