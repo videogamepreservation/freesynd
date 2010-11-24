@@ -92,11 +92,45 @@ bool App::readConfiguration(const char *dir) {
                 break;
         }
 
+        return true;
     } catch (...) {
-        printf("unable to read configuration file\n");
-        return false;
+        LOG(Log::k_FLG_GFX, "App", "readConfiguration", ("creating default configuration file"))
+        ConfigFile conf;
+        conf.add("fullscreen", false);
+        conf.add("play_intro", true);
+        conf.add("data_dir", "./");
+        conf.add("language", 0);
+
+        menus_.setLanguage(MenuManager::ENGLISH);
+
+        std::ofstream file(path.c_str(), std::ios::out | std::ios::trunc);
+        if (file) {
+            file << conf;
+            file.close();
+            return true;
+        } else {
+            return false;
+        }
     }
-    return true;
+}
+
+void App::updateIntroFlag(const char *dir) {
+    std::string path(dir);
+    path.append("freesynd.ini");
+    try {
+        ConfigFile conf(path);
+        conf.add("play_intro", false);
+
+        std::ofstream file(path.c_str(), std::ios::out | std::ios::trunc);
+        if (file) {
+            file << conf;
+            file.close();
+        } else {
+            LOG(Log::k_FLG_GFX, "App", "updateIntroFlag", ("Could not update configuration file!"))
+        }
+    } catch (...) {
+        LOG(Log::k_FLG_GFX, "App", "updateIntroFlag", ("Could not update configuration file!"))
+    }
 }
 
 /*!
@@ -443,7 +477,12 @@ void App::setPalette(const char *fname, bool sixbit) {
 // TODO : use a general structure to holds init parameters
 extern int start_mission;
 
-void App::run() {
+/*!
+ * This method defines the application loop.
+ * \param dir Directory of the application config file
+ * \param start_mission Mission id used to start the application
+ */
+void App::run(const char *dir, int start_mission) {
     int size = 0, tabSize = 0;
     uint8 *data, *tabData;
 
@@ -470,6 +509,9 @@ void App::run() {
         fliPlayer.play(true);
         music().stopPlayback();
         delete[] data;
+
+        // Update intro flag so intro won't be played next time
+        updateIntroFlag(dir);
     }
 
     // load palette

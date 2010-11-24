@@ -116,8 +116,6 @@ void operator delete(void *p) {
 }
 #endif
 
-int  start_mission = -1;
-
 void print_usage() {
     printf("usage: freesynd [-h|--help] [-p|--path path-to-data] [-f|--full-screen]\n");
 }
@@ -137,6 +135,9 @@ int main(int argc, char *argv[]) {
     // This variable stores the index of the cheat code param on
     // the command line
     int cheatCodeIndex = -1;
+    // If different from -1, the game will start directly on mission
+    // with the given id
+    int  start_mission = -1;
 
     for (int i = 1; i < argc; ++i) {
 
@@ -169,6 +170,8 @@ int main(int argc, char *argv[]) {
     Log::initialize(Log::k_FLG_ALL, "game.log");
 #endif
 
+    // The variable stores the directory where
+    // Freesynd configuration file should be
     std::string confPath;
 
     confPath.append(argv[0]);
@@ -193,7 +196,7 @@ int main(int argc, char *argv[]) {
 
         LOG(Log::k_FLG_INFO, "Main", "main", ("Initializing application completed"))
 
-        app->run();
+        app->run(confPath.c_str(), start_mission);
     } else {
         LOG(Log::k_FLG_INFO, "Main", "main", ("Initializing application failed"))
     }

@@ -33,7 +33,8 @@ MainMenu::MainMenu(MenuManager * m):Menu(m, "main", "moption.dat",
 {
     std::string str;
     menu_manager_->getMessage("MAIN_TITLE", str);
-    addStatic(208, 40, str.c_str(), 3, true);
+    int titleX = g_Screen.gameScreenWidth() / 2  - g_App.fonts().textWidth(str.c_str(), FontManager::SIZE_4) / 2;
+    addStatic(titleX, 40, str.c_str(), 3, true);
     menu_manager_->getMessage("MAIN_CONF", str);
     addOption(208, 134, str.c_str(), 2, KEY_F1, "conf");
     menu_manager_->getMessage("MAIN_BEGIN", str);

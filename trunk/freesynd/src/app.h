@@ -160,7 +160,9 @@ class App : public Singleton < App > {
         return available_mods_[n];
     }
 
-    void run();
+    //! Main application method
+    void run(const char *dir, int start_mission);
+    //! Reset the application data
     void reset();
 
     void quit() {
@@ -197,7 +199,11 @@ class App : public Singleton < App > {
     void mouseMotionEvent(int x, int y, int state, const int modKeys);
 
 private:
-    bool App::readConfiguration(const char *dir);
+    //! Reads the configuration file
+    bool readConfiguration(const char *dir);
+
+    //! Sets the intro flag to false in the config file
+    void updateIntroFlag(const char *dir);
 
     void cheatFunds() {
         session_.setMoney(100000000);
@@ -221,7 +227,9 @@ private:
     std::vector<Mod *> available_mods_;
 
     bool running_, playingFli_, skipFli_;
+    /*! True means the game will run in fullscreen. */
     bool fullscreen_;
+    /*! True means the intro will be played.*/
     bool playIntro_;
     std::auto_ptr<Screen> screen_;
     std::auto_ptr<System> system_;

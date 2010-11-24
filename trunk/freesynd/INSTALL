@@ -73,3 +73,15 @@ Then run those commands to build the game:
 	This is a list of all Preprocessor macros used when building the application:
   - _DEBUG : Activate debugging informations. Specify this macro at compile time
   - SYSTEM_SDL : Tells that the underlying graphic system is SDL. Specify this macro at compile time.
+  
+Configuring Freesynd
+====================
+
+	Freesynd reads the file freesynd.ini to get its running configuration.
+You can modify this file to customize your installation by editing the file with any text editor.
+Here is a description a each parameter :
+ * fullscreen : (true/false) Setting true will run the game in fullscreen
+ * play_intro : (true/false) True will play the game introduction.
+ * data_dir : data files directory
+ * language :  0:english, 1:french, 2:italian, 3:deutch 
+ 

@@ -19,6 +19,8 @@ Some code is based on "libsyndicate" library by Paul Chavent. It is
 re-licensed under GNU General Public Licence, version 2. Original license
 and code is located in svn source/trunk/libsyndicate/.
 See the file "COPYING" for informations on this licence.
+ConfigFile code is from Richard J. Wagner. For Licence information, see comments 
+in files config.cpp and config.h.
 
 
 What's new in this release?
