@@ -190,6 +190,8 @@ void BriefMenu::handleRender() {
         free(mbriefing);        // using free because allocated this
     }
     // TODO: draw briefing minimap
+    // NOTE: enhance levels: 0 = 10px(5), 1 = 8px(4), 2 = 6px(3), 3 - 4px(2),
+    // 4 - 2px(1) + enemy peds; x = 502(251), y = 218(109), 124x124(62x62)
 
     // write money
     char tmp[100];

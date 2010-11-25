@@ -295,7 +295,7 @@ void Screen::drawRect(int x, int y, int width, int height, uint8 color)
         || (y + height) > height_ || width <= 0 || height <= 0)
         return;
     for( int i = 0; i != height; i++) {
-        memset(pixels_ + width_ * (y + i), color, width);
+        memset(pixels_ + x + width_ * (y + i), color, width);
     }
     dirty_ = true;
 }
