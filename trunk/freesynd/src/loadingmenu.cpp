@@ -31,9 +31,10 @@
 LoadingMenu::LoadingMenu(MenuManager * m):Menu(m, "loading", "", ""),
 tick_count_(-500)
 {
-    addStatic(180, 180, "LOADING GAME", 3, false);
-
-    //addOption(300, 300, "DEBRIEF", 1, KEY_F5, "debrief");
+    std::string str;
+    menu_manager_->getMessage("LDGAME_TITLE", str);
+    int titleX = g_Screen.gameScreenWidth() / 2  - g_App.fonts().textWidth(str.c_str(), FontManager::SIZE_4) / 2;
+    addStatic(titleX, 180, str.c_str(), 3, false);
 }
 
 void LoadingMenu::handleTick(int elapsed)

@@ -120,15 +120,23 @@ MapMenu::MapMenu(MenuManager * m)
 :  Menu(m, "map", "mmap.dat", "mmapout.dat"),
 mapblk_data_(NULL), select_tick_count_(0)
 {
-    addOption(53, 352, "BRIEF", 1, KEY_F4, "brief");
-    addOption(535, 352, "MENU", 1, KEY_F5, "main");
+    std::string str;
+    menu_manager_->getMessage("MAP_BRIEF_BUT", str);
+    int butX = 80 - g_App.fonts().textWidth(str.c_str(), FontManager::SIZE_2) / 2;
+    addOption(butX, 352, str.c_str(), 1, KEY_F4, "brief");
 
-    addStatic(268, 312, "COUNTRY", 0, false);   // Country name
-    addStatic(194, 332, "POP", 1, false);       // Pop label
+    menu_manager_->getMessage("MENU_MAIN_BUT", str);
+    addOption(535, 352, str.c_str(), 1, KEY_F5, "main");
+
+    addStatic(268, 312, "", 0, false);   // Country name
+    menu_manager_->getMessage("MAP_POP", str);
+    addStatic(194, 332, str.c_str(), 1, false);       // Pop label
     addStatic(268, 332, "", 0, false);          // Pop value
-    addStatic(194, 346, "TAX", 1, false);       // Tax name
+    menu_manager_->getMessage("MAP_TAX", str);
+    addStatic(194, 346, str.c_str(), 1, false);       // Tax label
     addStatic(268, 346, "", 0, false);       // Tax value
-    addStatic(194, 360, "OWN", 1, false);       // Own name
+    menu_manager_->getMessage("MAP_OWN", str);
+    addStatic(194, 360, str.c_str(), 1, false);       // Own label
     addStatic(268, 360, "", 0, false);          // Own status
 
     addStatic(500, 9, "", 1, false);       // Time
@@ -175,7 +183,9 @@ void MapMenu::handleBlockSelected() {
     }
 
     // Update the country informations
-    setStaticText(COUNTRY_STATIC_ID, blk.name);
+    std::string str;
+    menu_manager_->getMessage(blk.name, str);
+    setStaticText(COUNTRY_STATIC_ID, str.c_str());
 
     char tmp[100];
 
@@ -189,27 +199,31 @@ void MapMenu::handleBlockSelected() {
 
     // Mission is finished
     if (blk.status == BLK_FINISHED) {
+    
         // Status
-        setStaticText(OWN_LBL_STATIC_ID, "STAT");
+        menu_manager_->getMessage("MAP_STAT", str);
+        setStaticText(OWN_LBL_STATIC_ID, str.c_str());
         switch (blk.popStatus) {
             case STAT_VERY_HAPPY:
-                setStaticText(OWN_STATIC_ID, "VERY HAPPY");
+                menu_manager_->getMessage("MAP_STAT_VHAPPY", str);
                 break;
             case STAT_HAPPY:
-                setStaticText(OWN_STATIC_ID, "HAPPY");
+                menu_manager_->getMessage("MAP_STAT_HAPPY", str);
                 break;
             case STAT_CONTENT:
-                setStaticText(OWN_STATIC_ID, "CONTENT");
+                menu_manager_->getMessage("MAP_STAT_CTNT", str);
                 break;
             case STAT_UNHAPPY:
-                setStaticText(OWN_STATIC_ID, "UNHAPPY");
+                menu_manager_->getMessage("MAP_STAT_UNHAPPY", str);
                 break;
             case STAT_DISCONTENT:
-                setStaticText(OWN_STATIC_ID, "DISCONTENT");
+                menu_manager_->getMessage("MAP_STAT_DISCTNT", str);
                 break;
             default:
-                setStaticText(OWN_STATIC_ID, "UNKNOWN");
+                // should never happend
+                str.clear();
         }
+        setStaticText(OWN_STATIC_ID, str.c_str());
 
         // Tax
         int tax = blk.tax + blk.addToTax;
@@ -233,11 +247,13 @@ void MapMenu::handleBlockSelected() {
     } else {
         int tax = blk.tax + blk.addToTax;
         // Status
-        setStaticText(OWN_LBL_STATIC_ID, "OWN");
+        menu_manager_->getMessage("MAP_OWN", str);
+        setStaticText(OWN_LBL_STATIC_ID, str.c_str());
         setStaticText(OWN_STATIC_ID, "");
         // Tax
         if (blk.status == BLK_REBEL) {
-            setStaticText(TAX_VALUE_STATIC_ID, "REBELLIOUS");
+            menu_manager_->getMessage("MAP_STAT_REBEL", str);
+            setStaticText(TAX_VALUE_STATIC_ID, str.c_str());
 #ifdef WIN_SECURE
             sprintf_s(tmp, 100, "@   %d%%", tax);
 #else
@@ -245,7 +261,8 @@ void MapMenu::handleBlockSelected() {
 #endif
             setStaticText(TAX_PCT_STATIC_ID, tmp);
         } else {
-            setStaticText(TAX_VALUE_STATIC_ID, "UNKNOWN");
+            menu_manager_->getMessage("MAP_TAX_UNKWN", str);
+            setStaticText(TAX_VALUE_STATIC_ID, str.c_str());
             setStaticText(TAX_PCT_STATIC_ID, "");
         }
 
