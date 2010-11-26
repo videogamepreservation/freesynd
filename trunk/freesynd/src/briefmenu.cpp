@@ -33,15 +33,26 @@ BriefMenu::BriefMenu(MenuManager * m) :
 Menu(m, "brief", "mbrief.dat", "mbrieout.dat"),
 start_line_(0), info_level_(0),
 enhance_level_(0) {
-    addStatic(148, 35, "MISSION BRIEF", 3, true);
+    std::string str;
+    menu_manager_->getMessage("MAP_BRIEF_BUT", str);
+    
+    addStatic(148, 35, "#BRIEF_TITLE", 3, true);
     addStatic(500, 9, "", 1, false);       // Time
-    addOption(538, 118, "INFO", 1, KEY_F1, NULL);
-    addOption(518, 169, "ENHANCE", 1, KEY_F2, NULL);
+    menu_manager_->getMessage("BRIEF_INFO", str);
+    int butX = 560 - g_App.fonts().textWidth(str.c_str(), FontManager::SIZE_2) / 2;
+    addOption(butX, 118, str.c_str(), 1, KEY_F1, NULL);
+    menu_manager_->getMessage("BRIEF_ENH", str);
+    butX = 560 - g_App.fonts().textWidth(str.c_str(), FontManager::SIZE_2) / 2;
+    addOption(butX, 169, str.c_str(), 1, KEY_F2, NULL);
     addOption(461, 320, "", 1, KEY_F6, NULL, true, Sprite::MSPR_RIGHT_ARROW2_D, Sprite::MSPR_RIGHT_ARROW2_L);
     addOption(427, 320, "", 1, KEY_F7, NULL, false, Sprite::MSPR_LEFT_ARROW2_D, Sprite::MSPR_LEFT_ARROW2_L);
-    addOption(43, 352, "ACCEPT", 1, KEY_F3, "select");
-    addOption(173, 352, "MAP", 1, KEY_F4, "map");
-    addOption(535, 352, "MENU", 1, KEY_F5, "main");
+    menu_manager_->getMessage("MENU_ACC_BUT", str);
+    butX = 80 - g_App.fonts().textWidth(str.c_str(), FontManager::SIZE_2) / 2;
+    addOption(butX, 352, str.c_str(), 1, KEY_F3, "select");
+    menu_manager_->getMessage("BRIEF_MAP", str);
+    butX = 195 - g_App.fonts().textWidth(str.c_str(), FontManager::SIZE_2) / 2;
+    addOption(butX, 352, str.c_str(), 1, KEY_F4, "map");
+    addOption(535, 352, "#MENU_MAIN_BUT", 1, KEY_F5, "main");
 
     setParentMenu("map");
 }

@@ -156,11 +156,26 @@ void Menu::render()
 }
 
 /*!
- * 
+ * Creates and adds a label to the menu.
+ * \param x X coordinate
+ * \param y Y coordinate
+ * \param text If text starts with a '#' then
+ * text is a property in the current language file and it is
+ * replaced by its value.
+ * \param size Font size
+ * \param dark True means text is not highlighted
  */
 int Menu::addStatic(int x, int y, const char *text, int size, bool dark)
 {
-    MenuText m(x, y, text, size, dark, true);
+    std::string lbl(text);
+    // Find if string starts with '#' caracter
+    if (lbl.find_first_of('#') == 0) {
+        // Erase the # caracter
+        lbl.erase(0, 1);
+        // and looks for the message in the langage file
+        menu_manager_->getMessage(lbl.c_str(), lbl);
+    }
+    MenuText m(x, y, lbl.c_str(), size, dark, true);
     statics_.push_back(m);
     return statics_.size() - 1;
 }
@@ -172,7 +187,15 @@ void Menu::setStaticText(int static_id, const char *text){
         MenuText & m = *it;
         
         if (i == static_id) {
-            m.text_ = text;
+            std::string lbl(text);
+            // Find if string starts with '#' caracter
+            if (lbl.find_first_of('#') == 0) {
+                // Erase the # caracter
+                lbl.erase(0, 1);
+                // and looks for the message in the langage file
+                menu_manager_->getMessage(lbl.c_str(), lbl);
+            }
+            m.text_ = lbl;
             needRendering();
             return;
         }
@@ -186,17 +209,48 @@ void Menu::setStaticTextFormated(int static_id, const char * format, ...){
     char tmp[200];
     va_list list;
 
+    std::string lbl(format);
+    // Find if string starts with '#' caracter
+    if (lbl.find_first_of('#') == 0) {
+        // Erase the # caracter
+        lbl.erase(0, 1);
+        // and looks for the message in the langage file
+        menu_manager_->getMessage(lbl.c_str(), lbl);
+    }
+
     va_start(list, format);
-    vsprintf(tmp, format, list);
+    vsprintf(tmp, lbl.c_str(), list);
     va_end(list);
 
     setStaticText(static_id, tmp);
 }
 
+/*!
+ * Creates and adds a button to the menu.
+ * \param x X coordinate
+ * \param y Y coordinate
+ * \param text Button label. If text starts with a '#' then
+ * text is a property in the current language file and it is
+ * replaced by its value.
+ * \param size Font size
+ * \param key Acceleration key
+ * \param to Name of the next menu when button is clicked
+ * \param visible True if button is visible on screen
+ * \param dark_widget Widget drawn in front of the button when it's not highlighted
+ * \param light_widget Widget drawn in front of the button when it's highlighted
+ */
 void Menu::addOption(int x, int y, const char *text, int size, Key key,
                      const char *to, bool visible, int dark_widget, int light_widget)
 {
-    Option m(x, y, text, size, to, visible, dark_widget, light_widget);
+    std::string lbl(text);
+    // Find if string starts with '#' caracter
+    if (lbl.find_first_of('#') == 0) {
+        // Erase the # caracter
+        lbl.erase(0, 1);
+        // and looks for the message in the langage file
+        menu_manager_->getMessage(lbl.c_str(), lbl);
+    }
+    Option m(x, y, lbl.c_str(), size, to, visible, dark_widget, light_widget);
     options_[key] = m;
 }
 

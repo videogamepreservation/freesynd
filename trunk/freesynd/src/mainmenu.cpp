@@ -35,16 +35,11 @@ MainMenu::MainMenu(MenuManager * m):Menu(m, "main", "moption.dat",
     menu_manager_->getMessage("MAIN_TITLE", str);
     int titleX = g_Screen.gameScreenWidth() / 2  - g_App.fonts().textWidth(str.c_str(), FontManager::SIZE_4) / 2;
     addStatic(titleX, 40, str.c_str(), 3, true);
-    menu_manager_->getMessage("MAIN_CONF", str);
-    addOption(208, 134, str.c_str(), 2, KEY_F1, "conf");
-    menu_manager_->getMessage("MAIN_BEGIN", str);
-    addOption(208, 168, str.c_str(), 2, KEY_F2, "map");
-    menu_manager_->getMessage("MAIN_LOAD_SAVE", str);
-    addOption(208, 201, str.c_str(), 2, KEY_F3, "loadsave");
-    menu_manager_->getMessage("MAIN_RESET", str);
-    addOption(208, 236, str.c_str(), 2, KEY_F4, "main");
-    menu_manager_->getMessage("MAIN_QUIT", str);
-    addOption(208, 269, str.c_str(), 2, KEY_F5, NULL);
+    addOption(208, 134, "#MAIN_CONF", 2, KEY_F1, "conf");
+    addOption(208, 168, "#MAIN_BEGIN", 2, KEY_F2, "map");
+    addOption(208, 201, "#MAIN_LOAD_SAVE", 2, KEY_F3, "loadsave");
+    addOption(208, 236, "#MAIN_RESET", 2, KEY_F4, "main");
+    addOption(208, 269, "#MAIN_QUIT", 2, KEY_F5, NULL);
 }
 
 void MainMenu::handleShow()
