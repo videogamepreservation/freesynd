@@ -430,8 +430,13 @@ public:
     floodPointDesc *mdpoints_;
     // for copy in pathfinding
     floodPointDesc *mdpoints_cp_;
+    // initialized in createMinimap, used for in-class calculations
     int mmax_x_, mmax_y_, mmax_z_;
+    // initialized in setSurfaces, used for in-class calculations
     int mmax_m_all, mmax_m_xy;
+
+    void createMinimap();
+    unsigned char getMinimapColour(int x, int y);
 
     unsigned int getMaxInfoLvl() {return max_info_lvl_; }
     unsigned int getMaxEnhanceLvl() {return max_enhance_lvl_; }
@@ -533,6 +538,9 @@ public:
             fast_statics_cache_;
     /*! Statistics : time, shots, ...*/
     MissionStats stats_;
+    // minimap in colours, map z = 0 tiles transformed based on
+    // walkdata->minimap_colours_ in function createMinimap
+    unsigned char *minimap_c_;
 };
 
 #endif

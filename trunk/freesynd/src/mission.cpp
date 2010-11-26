@@ -32,7 +32,8 @@
 #include "app.h"
 
 Mission::Mission(): mtsurfaces_(NULL), mdpoints_(NULL), mdpoints_cp_(NULL),
-map_(0), min_x_(0), min_y_(0), max_x_(0), max_y_(0), cur_objective_(0)
+map_(0), min_x_(0), min_y_(0), max_x_(0), max_y_(0), cur_objective_(0),
+minimap_c_(0)
 {
     status_ = RUNNING;
     memset(&level_data_, 0, sizeof(level_data_));
@@ -47,6 +48,8 @@ Mission::~Mission()
     for (unsigned int i = 0; i < weapons_.size(); i++)
         delete weapons_[i];
     clrSurfaces();
+    if (minimap_c_)
+        free(minimap_c_);
 }
 
 #define copydata(x, y) memcpy(&level_data_.x, levelData + y, sizeof(level_data_.x))
@@ -864,15 +867,13 @@ bool Mission::setSurfaces() {
     // want to do.
     // 0x10 appear above walking tile where train stops
     clrSurfaces();
-    if (!(g_App.maps().mapDimensions(map_,
-        &mmax_x_, &mmax_y_, &mmax_z_)))
-        return false;
     mmax_m_all = mmax_x_ * mmax_y_ * mmax_z_;
     mtsurfaces_ = (surfaceDesc *)malloc(mmax_m_all * sizeof(surfaceDesc));
     mdpoints_ = (floodPointDesc *)malloc(mmax_m_all * sizeof(floodPointDesc));
     mdpoints_cp_ = (floodPointDesc *)malloc(mmax_m_all * sizeof(floodPointDesc));
     if(mtsurfaces_ == NULL || mdpoints_ == NULL || mdpoints_cp_ == NULL) {
         clrSurfaces();
+        printf("ERROR: memory allocation failed in Mission::setSurfaces");
         return false;
     }
     mmax_m_xy = mmax_x_ * mmax_y_;
@@ -2542,4 +2543,40 @@ void Mission::adjXYZ(int &x, int &y, int &z) {
         x = mmax_x_ - 1;
     if (y >= mmax_y_)
         y = mmax_y_ - 1;
+}
+
+void Mission::createMinimap() {
+    // walkdata based colours
+    int minimap_colours_[] = {
+        8,  7,  7,  7,
+        7,  7, 10, 10,
+       10, 10,  0, 10,
+       15, 15, 10, 10,
+       0,   0,  0,  0,
+    };
+    Map *m = g_App.maps().map(map_);
+
+    if (!(g_App.maps().mapDimensions(map_,
+        &mmax_x_, &mmax_y_, &mmax_z_)))
+        return;
+
+    minimap_c_ = (unsigned char *)( malloc(m->maxX() * m->maxY()) );
+    if(minimap_c_ == 0) {
+        printf("ERROR: memory allocation failed in Mission::createMinimap");
+        return;
+    }
+    for (unsigned short y = 0; y < mmax_y_; y++) {
+        unsigned short yadd = y * mmax_x_;
+        for (unsigned short x = 0; x < mmax_x_; x++) {
+            minimap_c_[x + yadd] =
+                minimap_colours_[g_App.walkdata_[m->tileAt(x, y, 0)]];
+        }
+    }
+}
+
+unsigned char Mission::getMinimapColour(int x, int y) {
+
+    if (minimap_c_ != 0)
+        return minimap_c_[x + y * mmax_x_];
+    return 0;
 }

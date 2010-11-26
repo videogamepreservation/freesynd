@@ -1222,14 +1222,6 @@ void GameplayMenu::drawWeaponSelectors() {
     }
 }
 
-int mcolors_[] = {
-    8,  7,  7,  7,
-    7,  7, 10, 10,
-   10, 10,  0, 10,
-   15, 15, 10, 10,
-   0,
-};
-
 void GameplayMenu::drawMiniMap() {
     if (mission_ == 0)
         return;
@@ -1237,11 +1229,10 @@ void GameplayMenu::drawMiniMap() {
     int sy = 46 + 44 + 10 + 46 + 44 + 15 + 2 * 32 + 2;
 
     int ox, oy;
-    int tx = g_App.maps().map(mission_->map())->screenToTileX(
-            world_x_ + (GAME_SCREEN_WIDTH - 129) / 2,
+    Map *m = g_App.maps().map(mission_->map());
+    int tx = m->screenToTileX(world_x_ + (GAME_SCREEN_WIDTH - 129) / 2,
             world_y_ + GAME_SCREEN_HEIGHT / 2, ox);
-    int ty = g_App.maps().map(mission_->map())->screenToTileY(
-            world_x_ + (GAME_SCREEN_WIDTH - 129) / 2,
+    int ty = m->screenToTileY(world_x_ + (GAME_SCREEN_WIDTH - 129) / 2,
             world_y_ + GAME_SCREEN_HEIGHT / 2, oy);
 
     for (int i = 0; i < 4; i++)
@@ -1261,15 +1252,15 @@ void GameplayMenu::drawMiniMap() {
             // TODO: rewrite required
             // minimap should be generated in brief menu and reused with
             // objects added on top
-            int t =
-                g_App.maps().map(mission_->map())->tileAt(tx + i, ty + j, 0);
 
             uint8 ground[8 * 8];
-            memset(ground, mcolors_[g_App.walkdata_[t]], sizeof(ground));
+            memset(ground, mission_->getMinimapColour(tx + i, ty + j),
+                sizeof(ground));
             g_Screen.blit(i * 8, j * 8 + sy, 8, 8, ground);
         }
 
         // TODO: draw icons for units, weapons, etc
+
 }
 
 int GameplayMenu::selectedAgentsCount() {
