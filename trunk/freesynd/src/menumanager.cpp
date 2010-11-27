@@ -92,7 +92,7 @@ MenuManager::~MenuManager()
 }
 
 void MenuManager::setLanguage(FS_Lang lang) {
-    std::string filename(File::fileFullPath("/lang/", false));
+    std::string filename(File::fileFullPath("lang/", false));
     switch (lang) {
         case ENGLISH:
             filename.append("english.lng");

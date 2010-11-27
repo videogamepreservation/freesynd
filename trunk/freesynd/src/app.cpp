@@ -70,9 +70,9 @@ bool App::readConfiguration(const char *dir) {
         ConfigFile conf(path);
         conf.readInto(fullscreen_, "fullscreen", false);
         conf.readInto(playIntro_, "play_intro", true);
-        string path;
-        conf.readInto(path, "data_dir");
-        File::setPath(path.c_str());
+        string dataDir;
+        conf.readInto(dataDir, "data_dir");
+        File::setPath(dataDir.c_str());
         
         switch (conf.read("language", 0)) {
             case 0:
@@ -472,10 +472,6 @@ void App::setPalette(const char *fname, bool sixbit) {
 
     delete[] data;
 }
-
-// This variable is defined in freesynd.cpp
-// TODO : use a general structure to holds init parameters
-extern int start_mission;
 
 /*!
  * This method defines the application loop.

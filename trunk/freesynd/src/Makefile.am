@@ -11,6 +11,7 @@ freesynd_SOURCES = common.h config.h keys.h utils/singleton.h \
 	utils/file.cpp utils/file.h \
 	utils/dernc.cpp utils/dernc.h\
 	utils/log.cpp utils/log.h \
+	utils/configfile.cpp utils/configfile.h \
 	core/gamesession.cpp core/gamesession.h \
 	sound/audio.cpp sound/audio.h \
 	sound/soundmanager.cpp sound/soundmanager.h sound/sound.h \
