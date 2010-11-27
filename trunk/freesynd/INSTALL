@@ -5,9 +5,9 @@ Original game data files
 ========================
 
 	Due to licence restrictions, we don't distribute the original game data files.
-You will have to dowload them by yourself. In order to run FreeSynd, copy all files in
+You will have to dowload them by yourself. In order to run FreeSynd, copy all files from
 the original Syndicate DATA directory to the FreeSynd Data directory.
-	You can use the '-p' parameter when running FreeSynd to specify a directory containing
+	See the "Configuring Freesynd" to specify the directory containing
 all data files (original files and FreeSynd data files).
 
 Required Libraries
@@ -78,7 +78,13 @@ Configuring Freesynd
 ====================
 
 	Freesynd reads the file freesynd.ini to get its running configuration.
-You can modify this file to customize your installation by editing the file with any text editor.
+You can edit the file with any text editore to customize your installation.
+
+    On Linux, the application looks for the file in the $HOME directory but 
+on Windows, it searches in the directory containing the freesynd.exe file. 
+If the freesynd.ini is not found, then the application generates a new file 
+with default parameters values.
+
 Here is a description a each parameter :
  * fullscreen : (true/false) Setting true will run the game in fullscreen
  * play_intro : (true/false) True will play the game introduction.

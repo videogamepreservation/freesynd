@@ -94,7 +94,7 @@ bool App::readConfiguration(const char *dir) {
 
         return true;
     } catch (...) {
-        LOG(Log::k_FLG_GFX, "App", "readConfiguration", ("creating default configuration file"))
+      LOG(Log::k_FLG_GFX, "App", "readConfiguration", ("creating default configuration file in %s", path.c_str()))
         ConfigFile conf;
         conf.add("fullscreen", false);
         conf.add("play_intro", true);
@@ -109,6 +109,7 @@ bool App::readConfiguration(const char *dir) {
             file.close();
             return true;
         } else {
+	  printf("Error : Failed to create config file in %s\n", path.c_str());
             return false;
         }
     }

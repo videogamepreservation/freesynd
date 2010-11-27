@@ -174,10 +174,18 @@ int main(int argc, char *argv[]) {
     // Freesynd configuration file should be
     std::string confPath;
 
+#ifdef _WIN32
+    // Under windows config file is in the same directory
+    // that the freesynd.exe file
     confPath.append(argv[0]);
     size_t pos = confPath.find_last_of('\\');
     confPath.erase(pos + 1);
-
+#else
+    // Under unix it's in the user home directory
+    confPath.assign(getenv("HOME"));
+    confPath.append("/");
+    
+#endif
     LOG(Log::k_FLG_INFO, "Main", "main", ("Initializing application..."))
     std::auto_ptr<App> app(new App());
 
