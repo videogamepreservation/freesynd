@@ -203,8 +203,82 @@ void BriefMenu::handleRender() {
     }
     // TODO: draw briefing minimap
     // NOTE: enhance levels: 0 = 10px(5), 1 = 8px(4), 2 = 6px(3), 3 - 4px(2),
-    // 4 - 2px(1) + enemy peds; x = 502(251), y = 218(109), 124x124(62x62)
-    // 640x400(320x200)
+    // 4 - 2px(1), 5 - enemy peds; x = 502(251), y = 218(109), 124x124(62x62)
+    // 640x400(320x200), (504, 220) = (252, 110)
+    // g_Screen.drawRect(504, 220, 120, 120);
+
+    minimap_scroll_x_ = 40;
+    minimap_scroll_y_ = 40;
+    int maxx = g_App.maps().map(pMission->map())->maxX();
+    int maxy = g_App.maps().map(pMission->map())->maxY();
+    unsigned char clvl = enhance_level_;
+    bool addenemies = false;
+    if (clvl > 4) {
+        clvl = 4;
+        addenemies = true;
+    }
+    unsigned char pixperblock = 10 - (clvl << 1);
+    short fullblocks = 120 / pixperblock;
+    short halfblocks = fullblocks / 2;
+    short modblocks = fullblocks % 2;
+    short bxl = minimap_scroll_x_ - halfblocks + 1;
+    short bxr = minimap_scroll_x_ + halfblocks + modblocks;
+    short byl = minimap_scroll_y_ - halfblocks + 1;
+    short byr = minimap_scroll_y_ + halfblocks + modblocks;
+    // checking borders for correctness, map will be always on center
+    if (bxl < 0) {
+        bxl = 0;
+        if (bxr >= maxx) {
+            bxr = maxx - 1;
+        } else {
+            bxr = fullblocks >= maxx ? maxx - 1 : (fullblocks) - 1;
+        }
+    }
+    if (bxr >= maxx) {
+        bxr = maxx - 1;
+        bxl = (maxx - (fullblocks)) < 0 ? 0 : (maxx - (fullblocks));
+    }
+
+    if (byl < 0) {
+        byl = 0;
+        if (byr >= maxy) {
+            byr = maxy - 1;
+        } else {
+            byr = fullblocks >= maxy ? maxy - 1 : (fullblocks) - 1;
+        }
+    }
+    if (byr >= maxy) {
+        byr = maxy - 1;
+        byl = (maxy - (fullblocks)) < 0 ? 0 : (maxy - (fullblocks));
+    }
+
+    short sx = 504;
+    short sy = 220;
+    if ((bxr - bxl + 1) < (fullblocks)) {
+        sx += ((fullblocks - (bxr - bxl + 1)) >> 1) * pixperblock;
+    }
+    if ((byr - byl + 1) < (fullblocks)) {
+        sy += ((fullblocks - (byr - byl + 1)) >> 1) * pixperblock;
+    }
+
+    if (addenemies) {
+        for (short x = bxl; x <= bxr; x++) {
+            short xc = sx + (x - bxl) * pixperblock;
+            for (short y = byl; y <= byr; y++) {
+                g_Screen.drawRect(xc, sy + (y - byl) * pixperblock, pixperblock,
+                    pixperblock, pMission->getMinimapColour(x, y));
+            }
+        }
+    } else {
+        for (short x = bxl; x <= bxr; x++) {
+            short xc = sx + (x - bxl) * pixperblock;
+            for (short y = byl; y <= byr; y++) {
+                g_Screen.drawRect(xc, sy + (y - byl) * pixperblock, pixperblock,
+                    pixperblock, pMission->getMinimapColour(x, y));
+            }
+        }
+    }
+
 
     // write money
     char tmp[100];
@@ -285,4 +359,7 @@ void BriefMenu::handleOption(Key key, const int modKeys) {
         showOption(KEY_F6);
         needRendering();
     }
+}
+
+void BriefMenu::resetMinimapBaseValues() {
 }

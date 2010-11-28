@@ -41,14 +41,22 @@ public:
     void handleRender();
     void handleLeave();
     void handleOption(Key key, const int modKeys);
+    void resetMinimapBaseValues();
     
 protected:
     void updateClock();
 
 protected:
     int start_line_;
+    // TODO: info+enhance should be stored in mission data for saving game
+    // move it somewhere?
     unsigned char info_level_;
     unsigned char enhance_level_;
+    short minimap_scroll_x_;
+    short minimap_scroll_y_;
+    // minimap scroll sizes
+    //short ms_scroll_x_;
+    //short ms_scroll_y_;
 };
 
 #endif
