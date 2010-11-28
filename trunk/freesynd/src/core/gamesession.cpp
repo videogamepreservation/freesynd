@@ -132,6 +132,10 @@ void GameSession::reset() {
         delete mission_;
         mission_ = NULL;
     }
+
+    for (int i=0; i<4; i++) {
+        teamMembers_[i] = NULL;
+    }
 }
 
 Block & GameSession::getBlock(uint8 index) {

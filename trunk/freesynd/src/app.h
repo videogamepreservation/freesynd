@@ -111,6 +111,10 @@ class App : public Singleton < App > {
         return vehicles_;
     }
 
+    AgentManager &agents() {
+        return agents_;
+    }
+
     PedManager &peds() {
         return peds_;
     }
@@ -125,23 +129,6 @@ class App : public Singleton < App > {
 
     MusicManager &music() {
         return music_;
-    }
-
-    Agent *teamMember(int n) {
-        assert(n < 4);
-        return team_members_[n];
-    }
-
-    void setTeamMember(int n, Agent *a) {
-        team_members_[n] = a;
-    }
-
-    int numRecruits() {
-        return agents_recruited_.size();
-    }
-
-    Agent *recruit(int n) {
-        return agents_recruited_[n];
     }
 
     int numAvailableWeapons() {
@@ -221,8 +208,6 @@ private:
 
 private:
     GameSession session_;
-    Agent *team_members_[4];
-    std::vector<Agent *> agents_recruited_;
     std::vector<Weapon *> available_weapons_;
     std::vector<Mod *> available_mods_;
 

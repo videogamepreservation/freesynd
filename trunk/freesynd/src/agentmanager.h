@@ -36,21 +36,26 @@
  */
 class AgentManager {
 public:
+    /*! Max number of agents in cryo chamber.*/
+    static const int MAX_AGENT;
+
     AgentManager();
     ~AgentManager();
 
     void loadAgents();
-    void reset();
-
-    int numAgents() { return agents_.size(); }
+    void reset(bool onlyWomen = false);
 
     Agent *agent(int n) {
-        assert(n < (int) agents_.size());
+        assert(n < MAX_AGENT);
         return agents_[n];
     }
 
 protected:
-    std::vector<Agent *> agents_;
+    /*!
+     * Selected agents for the next mission. Up to 4 agents.
+     */
+    Agent *agents_[18];
+    int nextName_;
 };
 
 #endif

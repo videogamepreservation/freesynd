@@ -79,9 +79,12 @@ void SelectMenu::addWeaponOptions()
 
 void SelectMenu::addRecruitOptions()
 {
-    for (int i = 0; i < g_App.numRecruits(); i++)
-        addOption(520, 124 + i * 12, g_App.recruit(i)->name(), 0,
+    for (int i = 0; i < AgentManager::MAX_AGENT; i++) {
+        if (g_App.agents().agent(i)) {
+            addOption(520, 124 + i * 12, g_App.agents().agent(i)->name(), 0,
                   (Key) (KEY_0 + i), NULL, false);
+        }
+    }
 }
 
 /*!
@@ -115,7 +118,7 @@ void SelectMenu::drawAgentSelector(int x, int y) {
 
 void SelectMenu::drawAgent()
 {
-    Agent *selected = g_App.teamMember(cur_agent_);
+    Agent *selected = g_Session.teamMember(cur_agent_);
 
     // write selected agent's name
     char tmp[100];
@@ -249,13 +252,13 @@ void SelectMenu::drawAgent()
 
 void SelectMenu::showTeamList()
 {
-    for (int i = 0; i < g_App.numRecruits(); i++)
+    for (int i = 0; i < AgentManager::MAX_AGENT; i++)
         showOption((Key) (KEY_0 + i));
 }
 
 void SelectMenu::hideTeamList()
 {
-    for (int i = 0; i < g_App.numRecruits(); i++)
+    for (int i = 0; i < AgentManager::MAX_AGENT; i++)
         hideOption((Key) (KEY_0 + i));
 }
 
@@ -332,10 +335,10 @@ void SelectMenu::handleRender() {
     uint8 data[4], datag[4];
     memset(data, 204, 4);
     memset(datag, 10, 4);
-    Agent *t1 = g_App.teamMember(0);
-    Agent *t2 = g_App.teamMember(1);
-    Agent *t3 = g_App.teamMember(2);
-    Agent *t4 = g_App.teamMember(3);
+    Agent *t1 = g_Session.teamMember(0);
+    Agent *t2 = g_Session.teamMember(1);
+    Agent *t3 = g_Session.teamMember(2);
+    Agent *t4 = g_Session.teamMember(3);
     if (t1) {
         if (t1->isActive()) {
             g_App.menuSprites().drawSpriteXYZ(Sprite::MSPR_SELECT_1, 20, 84, 0, false, true);
@@ -409,7 +412,7 @@ void SelectMenu::handleRender() {
         if (sel_weapon_)
             w = g_App.availableWeapon(sel_weapon_ - 1);
         else {
-            Agent *selected = g_App.teamMember(cur_agent_);
+            Agent *selected = g_Session.teamMember(cur_agent_);
             w = selected->weapon(sel_weapon_inst_ - 1);
         }
         w->drawBigIcon(502, 108);
@@ -432,15 +435,18 @@ void SelectMenu::handleRender() {
         uint8 ldata[49];
         memset(ldata, 252, sizeof(ldata));
         g_Screen.scale2x(504, 120, sizeof(ldata), 1, ldata);
-        for (int i = 0; i < g_App.numRecruits(); i++)
-            for (int j = 0; j < 4; j++)
-                if (g_App.teamMember(j) == g_App.recruit(i)) {
-                    sprintf(tmp, "%d", j + 1);
-                    g_App.fonts().drawText(504, 124 + i * 12, tmp, FontManager::SIZE_1,
-                                           true);
+        for (int i = 0; i < AgentManager::MAX_AGENT; i++) {
+            if (g_App.agents().agent(i)) {
+                for (int j = 0; j < 4; j++)
+                    if (g_Session.teamMember(j) == g_App.agents().agent(i)) {
+                        sprintf(tmp, "%d", j + 1);
+                        g_App.fonts().drawText(504, 124 + i * 12, tmp, FontManager::SIZE_1,
+                                               true);
                 }
-        for (int i = g_App.numRecruits(); i < 18; i++)
-            g_App.fonts().drawText(520, 124 + i * 12, "EMPTY", 0, true);
+            } else {
+                g_App.fonts().drawText(520, 124 + i * 12, "EMPTY", 0, true);
+            }
+        }
     }
 }
 
@@ -459,9 +465,9 @@ void SelectMenu::toggleAgent(int n)
 {
     int nactive = 0;
     for (int i = 0; i < 4; i++)
-        if (g_App.teamMember(i) && g_App.teamMember(i)->isActive())
+        if (g_Session.teamMember(i) && g_Session.teamMember(i)->isActive())
             nactive++;
-    Agent *a = g_App.teamMember(n);
+    Agent *a = g_Session.teamMember(n);
     if (a) {
         if (a->isActive() && nactive == 1)
             return;
@@ -506,7 +512,7 @@ void SelectMenu::handleMouseDown(int x, int y, int button, const int modKeys)
         }
     }
 
-    Agent *selected = g_App.teamMember(cur_agent_);
+    Agent *selected = g_Session.teamMember(cur_agent_);
     for (int j = 0; j < 2; j++)
         for (int i = 0; i < 4; i++)
             if (j * 4 + i < selected->numWeapons() &&
@@ -560,15 +566,15 @@ void SelectMenu::handleOption(Key key, const int modKeys)
         showEquipList();
         needRendering();
     }
-    if (key >= KEY_0 && key < (Key) (KEY_0 + g_App.numRecruits())) {
+    if (key >= KEY_0 && key < (Key) (KEY_0 + AgentManager::MAX_AGENT)) {
         int i = key - KEY_0;
-        Agent *n = g_App.recruit(i);
+        Agent *n = g_App.agents().agent(i);
         bool found = false;
         for (int j = 0; j < 4; j++)
-            if (g_App.teamMember(j) == n)
+            if (g_Session.teamMember(j) == n)
                 found = true;
         if (!found) {
-            g_App.setTeamMember(cur_agent_, n);
+            g_Session.setTeamMember(cur_agent_, n);
             needRendering();
         }
     }
@@ -606,7 +612,7 @@ void SelectMenu::handleOption(Key key, const int modKeys)
         Weapon *w = g_App.availableWeapon(sel_weapon_ - 1);
         if (sel_all_) {
             for (int n = 0; n < 4; n++) {
-                Agent *selected = g_App.teamMember(n);
+                Agent *selected = g_Session.teamMember(n);
                 if (selected->numWeapons() < 8
                     && g_App.getGameSession().getMoney() >= w->cost()) {
                     g_App.getGameSession().setMoney(g_App.getGameSession().getMoney() - w->cost());
@@ -614,7 +620,7 @@ void SelectMenu::handleOption(Key key, const int modKeys)
                 }
             }
         } else {
-            Agent *selected = g_App.teamMember(cur_agent_);
+            Agent *selected = g_Session.teamMember(cur_agent_);
             if (selected->numWeapons() < 8 && g_App.getGameSession().getMoney() >= w->cost()) {
                 g_App.getGameSession().setMoney(g_App.getGameSession().getMoney() - w->cost());
                 selected->addWeapon(w->createInstance());
@@ -626,7 +632,7 @@ void SelectMenu::handleOption(Key key, const int modKeys)
         Mod *m = g_App.availableMod(sel_mod_ - 1);
         if (sel_all_) {
             for (int n = 0; n < 4; n++) {
-                Agent *selected = g_App.teamMember(n);
+                Agent *selected = g_Session.teamMember(n);
                 if ((selected->slot(m->slot()) == NULL
                      || selected->slot(m->slot())->cost() < m->cost())
                     && g_App.getGameSession().getMoney() >= m->cost()) {
@@ -635,7 +641,7 @@ void SelectMenu::handleOption(Key key, const int modKeys)
                 }
             }
         } else {
-            Agent *selected = g_App.teamMember(cur_agent_);
+            Agent *selected = g_Session.teamMember(cur_agent_);
             if ((selected->slot(m->slot()) == NULL
                  || selected->slot(m->slot())->cost() < m->cost())
                 && g_App.getGameSession().getMoney() >= m->cost()) {
@@ -650,9 +656,9 @@ void SelectMenu::handleOption(Key key, const int modKeys)
         needRendering();
     }
     if (key == KEY_F9 && sel_weapon_inst_) {
-        Agent *selected = g_App.teamMember(cur_agent_);
+        Agent *selected = g_Session.teamMember(cur_agent_);
         WeaponInstance *w = selected->removeWeapon(sel_weapon_inst_ - 1);
-        g_App.getGameSession().setMoney(g_App.getGameSession().getMoney() + w->cost());
+        g_Session.setMoney(g_Session.getMoney() + w->cost());
         delete w;
         sel_weapon_inst_ = 0;
         hideOption(KEY_F7);

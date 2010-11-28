@@ -564,7 +564,7 @@ void Mission::createFastKeys(int tilex, int tiley, int maxtilex, int maxtiley) {
     // peds
     for (unsigned int i = 0; i < 4; i++) {
         PedInstance *p = peds_[i];
-        if (g_App.teamMember(i)->isActive() && p->map() != -1) {
+        if (g_Session.teamMember(i)->isActive() && p->map() != -1) {
             if (p->tileX() >= tilex && p->tileX() < maxtilex
                 && p->tileY() >= tiley && p->tileY() < maxtiley) {
                 fast_ped_cache_.insert(fastKey(p));
@@ -685,13 +685,13 @@ void Mission::start()
     stats_.nbOfHits = 0;
 
     for (int i = 0; i < 4; i++) {
-        if (g_App.teamMember(i)) {
-            if(g_App.teamMember(i)->isActive()){
+        if (g_Session.teamMember(i)) {
+            if(g_Session.teamMember(i)->isActive()){
                 stats_.agents += 1;
-                peds_[i]->setHealth(g_App.teamMember(i)->health() *
+                peds_[i]->setHealth(g_Session.teamMember(i)->health() *
                                 peds_[i]->health() / 255);
-                while (g_App.teamMember(i)->numWeapons()) {
-                    WeaponInstance *wi = g_App.teamMember(i)->removeWeapon(0);
+                while (g_Session.teamMember(i)->numWeapons()) {
+                    WeaponInstance *wi = g_Session.teamMember(i)->removeWeapon(0);
                     weapons_.push_back(wi);
                     peds_[i]->addWeapon(wi);
                     wi->setOwner(peds_[i]);
@@ -753,7 +753,7 @@ void Mission::end()
 {
     //TODO: requires attention
     for (int i = 0; i < 4; i++)
-        if (g_App.teamMember(i)) {
+        if (g_Session.teamMember(i)) {
             // TODO: kill agents if associated ped is dead
             while (peds_[i]->numWeapons()) {
                 WeaponInstance *wi = peds_[i]->removeWeapon(0);
@@ -763,7 +763,7 @@ void Mission::end()
                     it++;
                 assert(it != weapons_.end());
                 weapons_.erase(it);
-                g_App.teamMember(i)->addWeapon(wi);
+                g_Session.teamMember(i)->addWeapon(wi);
             }
         }
 }

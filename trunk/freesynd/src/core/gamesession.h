@@ -80,6 +80,7 @@ typedef struct Block_ {
 } Block;
 
 class Mission;
+class Agent;
 
 /*!
  * A holder for player data.
@@ -202,6 +203,24 @@ public:
      */
     void setMission(Mission *pMission);
 
+    /*!
+     * Returns an agent of the team.
+     * \param n The agent's index in the team (from 0 to 3)
+     */
+    Agent *teamMember(int n) {
+        assert(n < 4);
+        return teamMembers_[n];
+    }
+
+    /*!
+     * sets an agent in the team at the given index.
+     * \param n The agent's index in the team (from 0 to 3)
+     * \param a The new agent
+     */
+    void setTeamMember(int n, Agent *a) {
+        teamMembers_[n] = a;
+    }
+
     //! Update state when finishing a mission
     void completeSelectedBlock();
 
@@ -253,6 +272,10 @@ private:
      * Currently played mission.
      */
     Mission *mission_;
+    /*!
+     * Selected agents for the next mission. Up to 4 agents.
+     */
+    Agent *teamMembers_[4];
     /*! Cheat flag to tell that all missions are playable.*/
     bool enable_all_mis_;
     /*! Cheat flag to enable replay of finished missions. */

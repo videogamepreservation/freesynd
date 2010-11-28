@@ -27,13 +27,20 @@
 #include <assert.h>
 #include "app.h"
 
-AgentManager::AgentManager() {
+int const AgentManager::MAX_AGENT = 18;
 
+AgentManager::AgentManager() {
+    nextName_ = 0;
+    for (unsigned int i = 0; i != MAX_AGENT; ++i)
+        agents_[i] = NULL;
 }
 
 AgentManager::~AgentManager() {
-    for (unsigned int i = 0; i != agents_.size(); ++i)
-        delete agents_[i];
+    for (unsigned int i = 0; i != MAX_AGENT; ++i) {
+        if (agents_[i]) {
+            delete agents_[i];
+        }
+    }
 }
 
 const char *g_AgentNames[] = {
@@ -110,18 +117,22 @@ const char *g_AgentNames[] = {
 };
 
 void AgentManager::loadAgents() {
-    for (int i = 0; g_AgentNames[i]; i++) {
-        agents_.push_back(new Agent(g_AgentNames[i], true));
-        agents_.push_back(new Agent(g_AgentNames[i], false));
-    }
+    // TODO : load names from file
 }
 
-void AgentManager::reset() {
-    for (unsigned int i = 0; i < agents_.size(); i++) {
-        agents_[i]->setHealth(255);
-        agents_[i]->clearSlots();
-        agents_[i]->removeAllWeapons();
+void AgentManager::reset(bool onlyWomen) {
+    nextName_ = 0;
+    for (unsigned int i = 0; i < MAX_AGENT; i++) {
+        if (agents_[i]) {
+            delete agents_[i];
+            agents_[i] = NULL;
+        }
+    }
+
+    for (int i = 0; i < 8; i++) {
+        agents_[i] = new Agent(g_AgentNames[nextName_], onlyWomen ? true : ((i % 2) == 0));
         agents_[i]->addWeapon(
-                g_App.weapons().findWeapon("PISTOL")->createInstance());
+            g_App.weapons().findWeapon("PISTOL")->createInstance());
+        nextName_++;
     }
 }

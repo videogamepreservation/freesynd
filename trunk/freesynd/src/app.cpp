@@ -197,11 +197,13 @@ void App::cheatWeaponsAndMods() {
 }
 
 void App::cheatEquipAllMods() {
-    for (unsigned int agent = 0; agent < agents_recruited_.size(); agent++) {
-        agents_recruited_[agent]->clearSlots();
-        for (unsigned int i = 0; i < 6; i++) {
-            agents_recruited_[agent]->setSlot(SLOT_LEGS - i,
-                                              available_mods_[2 + i * 3]);
+    for (int agent = 0; agent < AgentManager::MAX_AGENT; agent++) {
+        if (agents_.agent(agent)) {
+            agents_.agent(agent)->clearSlots();
+            for (unsigned int i = 0; i < 6; i++) {
+                agents_.agent(agent)->setSlot(SLOT_LEGS - i,
+                                                  available_mods_[2 + i * 3]);
+            }
         }
     }
 }
@@ -226,60 +228,52 @@ void App::cheatAccelerateTime() {
 }
 
 void App::cheatFemaleRecruits() {
-    agents_recruited_.clear();
-
-    std::set<std::string> names;
-    while (agents_recruited_.size() < 18) {
-        Agent *a = agents_.agent(rand() % agents_.numAgents());
-
-        if (names.find(a->name()) == names.end() && !a->isMale()) {
-            agents_recruited_.push_back(a);
-            names.insert(a->name());
-        }
-    }
+    agents_.reset(true);
 
     for (int i = 0; i < 4; i++)
-        team_members_[i] = agents_recruited_[i];
+        session_.setTeamMember(i, agents_.agent(i));
 }
 
 void App::cheatEquipFancyWeapons() {
-    for (unsigned int i = 0; i < agents_recruited_.size(); i++) {
-        agents_recruited_[i]->removeAllWeapons();
+    for (int i = 0; i < AgentManager::MAX_AGENT; i++) {
+        if (agents_.agent(i)) {
+        agents_.agent(i)->removeAllWeapons();
 #ifdef _DEBUG
-        agents_recruited_[i]->addWeapon(
+        agents_.agent(i)->addWeapon(
                 weapons_.findWeapon("MINI-GUN")->createInstance());
-        agents_recruited_[i]->addWeapon(
+        agents_.agent(i)->addWeapon(
                 weapons_.findWeapon("PISTOL")->createInstance());
-        agents_recruited_[i]->addWeapon(
+        agents_.agent(i)->addWeapon(
                 weapons_.findWeapon("GAUSS GUN")->createInstance());
-        agents_recruited_[i]->addWeapon(
+        agents_.agent(i)->addWeapon(
                 weapons_.findWeapon("FLAMER")->createInstance());
-        agents_recruited_[i]->addWeapon(
+        agents_.agent(i)->addWeapon(
                 weapons_.findWeapon("UZI")->createInstance());
-        agents_recruited_[i]->addWeapon(
+        agents_.agent(i)->addWeapon(
                 weapons_.findWeapon("ENERGY SHIELD")->createInstance());
-        agents_recruited_[i]->addWeapon(
+        agents_.agent(i)->addWeapon(
                 weapons_.findWeapon("LASER")->createInstance());
-        agents_recruited_[i]->addWeapon(
+        agents_.agent(i)->addWeapon(
                 weapons_.findWeapon("LONG RANGE")->createInstance());
 #else
-        agents_recruited_[i]->addWeapon(
+        agents_.agent(i)->addWeapon(
                 weapons_.findWeapon("MINI-GUN")->createInstance());
-        agents_recruited_[i]->addWeapon(
+        agents_.agent(i)->addWeapon(
                 weapons_.findWeapon("MINI-GUN")->createInstance());
-        agents_recruited_[i]->addWeapon(
+        agents_.agent(i)->addWeapon(
                 weapons_.findWeapon("PERSUADERTRON")->createInstance());
-        agents_recruited_[i]->addWeapon(
+        agents_.agent(i)->addWeapon(
                 weapons_.findWeapon("TIME BOMB")->createInstance());
-        agents_recruited_[i]->addWeapon(
+        agents_.agent(i)->addWeapon(
                 weapons_.findWeapon("ENERGY SHIELD")->createInstance());
-        agents_recruited_[i]->addWeapon(
+        agents_.agent(i)->addWeapon(
                 weapons_.findWeapon("ENERGY SHIELD")->createInstance());
-        agents_recruited_[i]->addWeapon(
+        agents_.agent(i)->addWeapon(
                 weapons_.findWeapon("LASER")->createInstance());
-        agents_recruited_[i]->addWeapon(
+        agents_.agent(i)->addWeapon(
                 weapons_.findWeapon("LASER")->createInstance());
 #endif
+        }
     }
 }
 
@@ -341,20 +335,8 @@ void App::reset() {
 
     agents_.reset();
 
-    agents_recruited_.clear();
-
-    std::set<std::string> names;
-    while (agents_recruited_.size() < 8) {
-        Agent *a = agents_.agent(rand() % agents_.numAgents());
-
-        if (names.find(a->name()) == names.end()) {
-            agents_recruited_.push_back(a);
-            names.insert(a->name());
-        }
-    }
-
     for (int i = 0; i < 4; i++)
-        team_members_[i] = agents_recruited_[i];
+        session_.setTeamMember(i, agents_.agent(i));
 
     available_weapons_.push_back(weapons_.findWeapon("PERSUADERTRON"));
     available_weapons_.push_back(weapons_.findWeapon("PISTOL"));
