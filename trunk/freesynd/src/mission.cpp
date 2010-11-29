@@ -37,6 +37,7 @@ minimap_c_(0)
 {
     status_ = RUNNING;
     memset(&level_data_, 0, sizeof(level_data_));
+    memset(minimap_overlay_, 0, 128*128);
 }
 
 Mission::~Mission()
@@ -86,7 +87,9 @@ bool Mission::loadLevel(uint8 * levelData)
 
     vehicles_.clear();
 
+    // indexes within vehicle vector
     uint16 vindx[64];
+    // indexes within vehicle vector
     uint16 pindx[256];
     // contains indexes for driver's vehicle
     uint16 driverindx[256];
@@ -174,6 +177,50 @@ bool Mission::loadLevel(uint8 * levelData)
             }
         }
     }
+    
+#if 0
+    // for hacking map data
+    char nameSmap[256];
+    sprintf(nameSmap, "map%02X.hex", map_);
+    FILE *staticsFmap = fopen(nameSmap,"wb");
+    if (staticsFmap) {
+        fwrite(level_data_.map.objs, 1, 32768, staticsFmap);
+        fclose(staticsFmap);
+    }
+
+#endif
+    for(unsigned short i = 0; i < (128*128); i++) {
+        unsigned short pin = READ_LE_UINT16(level_data_.map.objs + i * 2);
+        if (pin >= 0x0002 && pin < 0x5C02) {
+            if (pin >= 0x0002 && pin < 0x02e2) {
+                minimap_overlay_[i] = 1;
+            } else {
+                pin = pindx[(pin - 2) / 92];
+                if (pin != 0xFFFF && peds_[pin]->getMainType() == m_tpAgent) {
+                    minimap_overlay_[i] = 2;
+                }
+            }
+        } else if (pin >= 0x9562 && pin < 0xDD62) {
+            pin = (pin - 0x9562) / 36; // 36 = weapon data size
+            LEVELDATA_WEAPONS & wref = level_data_.weapons[pin];
+            if (wref.desc == 0x05) {
+                pin = READ_LE_UINT16(wref.offset_owner);
+                if (pin != 0) {
+                    pin = (pin - 2) / 92; // 92 = ped data size
+                    if (pin > 7) {
+                        if (pindx[pin] != 0xFFFF
+                            && peds_[pindx[pin]]->getMainType() == m_tpAgent)
+                        {
+                            minimap_overlay_[i] = 2;
+                        }
+                    } else {
+                        minimap_overlay_[i] = 1;
+                    }
+                }
+            }
+        }
+    }
+
 #if 0
     // for hacking statics data
     char nameSs[256];

@@ -440,6 +440,8 @@ public:
 
     unsigned int getMaxInfoLvl() {return max_info_lvl_; }
     unsigned int getMaxEnhanceLvl() {return max_enhance_lvl_; }
+    // 0 - not present, 1 - our agent, 2 - enemy agent
+    unsigned char minimap_overlay_[128*128];
 
   protected:
     LEVELDATA level_data_;

@@ -18,15 +18,6 @@ that succesfully persuaded; weapon range modifier(?); accuracy modifier/property
 type of damage inflicted(?)
    weapons: destructabillity(bomb); radius of damage; area(?) - bomb, gauss, laser;
    static objects: damage recieve value; destructable or not
- - (remove this?)indexes within group of type for vehicles/people/weapons, to be used for minimap
-drawing during briefing, they are as offsets in mission data in files, these offsets
-have different use within original game code and transforming them from offsets to
-indexes is required due to difference in realization in our project and in original
-game, we have array per type and in original all data was loaded to memory as single
-chunk which permitted to use offsets within this chunk - it is very fast method, these
-indexes can be: 1 byte for type of group + 2 bytes for index within group; or we can
-use 2 bytes, 9(10)bits will be used for index within group, bits that remain for group
-type definition, although it can be slower and create some problems in future
  - A.L. - this one is complex
  - pathfinding directional to be used for simulation of people walking around city
  - damage inflicted by vehicles/weapons, variate by type of damage and range

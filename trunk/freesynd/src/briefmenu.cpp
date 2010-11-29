@@ -29,6 +29,13 @@
 #include "utils/file.h"
 #include "briefmenu.h"
 
+#if 1
+#ifdef SYSTEM_SDL
+#include "system_sdl.h"
+#endif
+#define EXECUTION_SPEED_TIME
+#endif
+
 BriefMenu::BriefMenu(MenuManager * m) :
 Menu(m, "brief", "mbrief.dat", "mbrieout.dat"),
 start_line_(0), info_level_(0),
@@ -103,6 +110,11 @@ void BriefMenu::handleRender() {
     g_Screen.drawLogo(18, 14, g_Session.getLogo(), g_Session.getLogoColour());
 
     Mission *pMission = g_Session.getMission();
+
+#ifdef EXECUTION_SPEED_TIME
+    printf("---------------------------");
+    printf("start time %i.%i\n", SDL_GetTicks()/1000, SDL_GetTicks()%1000);
+#endif
     // write briefing
     if (pMission->briefing()) {
         int sizeStr = strlen(pMission->briefing()) + 1;
@@ -203,18 +215,23 @@ void BriefMenu::handleRender() {
     }
     // TODO: draw briefing minimap
     // NOTE: enhance levels: 0 = 10px(5), 1 = 8px(4), 2 = 6px(3), 3 - 4px(2),
-    // 4 - 2px(1), 5 - enemy peds; x = 502(251), y = 218(109), 124x124(62x62)
+    // 4 - 2px(1) + enemy peds; x = 502(251), y = 218(109), 124x124(62x62)
     // 640x400(320x200), (504, 220) = (252, 110)
     // g_Screen.drawRect(504, 220, 120, 120);
 
-    minimap_scroll_x_ = 40;
-    minimap_scroll_y_ = 40;
+#ifdef EXECUTION_SPEED_TIME
+    printf("write briefing time %i.%i\n", SDL_GetTicks()/1000, SDL_GetTicks()%1000);
+#endif
+
+    minimap_scroll_x_ = 50;
+    minimap_scroll_y_ = 10;
     int maxx = g_App.maps().map(pMission->map())->maxX();
     int maxy = g_App.maps().map(pMission->map())->maxY();
+    //printf("x %i, y %i\n", maxx, maxy);
     unsigned char clvl = enhance_level_;
     bool addenemies = false;
-    if (clvl > 4) {
-        clvl = 4;
+
+    if (clvl == 4) {
         addenemies = true;
     }
     unsigned char pixperblock = 10 - (clvl << 1);
@@ -225,6 +242,7 @@ void BriefMenu::handleRender() {
     short bxr = minimap_scroll_x_ + halfblocks + modblocks;
     short byl = minimap_scroll_y_ - halfblocks + 1;
     short byr = minimap_scroll_y_ + halfblocks + modblocks;
+
     // checking borders for correctness, map will be always on center
     if (bxl < 0) {
         bxl = 0;
@@ -261,24 +279,34 @@ void BriefMenu::handleRender() {
         sy += ((fullblocks - (byr - byl + 1)) >> 1) * pixperblock;
     }
 
-    if (addenemies) {
-        for (short x = bxl; x <= bxr; x++) {
-            short xc = sx + (x - bxl) * pixperblock;
-            for (short y = byl; y <= byr; y++) {
-                g_Screen.drawRect(xc, sy + (y - byl) * pixperblock, pixperblock,
-                    pixperblock, pMission->getMinimapColour(x, y));
+    for (short x = bxl; x <= bxr; x++) {
+        short xc = sx + (x - bxl) * pixperblock;
+        for (short y = byl; y <= byr; y++) {
+            unsigned char c = pMission->minimap_overlay_[x + y * maxx];
+            switch (c) {
+                case 0:
+                    c = pMission->getMinimapColour(x, y);
+                    break;
+                case 1:
+                    c = 1;
+                    break;
+                case 2:
+                    if (addenemies)
+                        c = 2;
+                    else
+                        c = pMission->getMinimapColour(x, y);
             }
-        }
-    } else {
-        for (short x = bxl; x <= bxr; x++) {
-            short xc = sx + (x - bxl) * pixperblock;
-            for (short y = byl; y <= byr; y++) {
-                g_Screen.drawRect(xc, sy + (y - byl) * pixperblock, pixperblock,
-                    pixperblock, pMission->getMinimapColour(x, y));
-            }
+            g_Screen.drawRect(xc, sy + (y - byl) * pixperblock, pixperblock,
+                pixperblock, c);
         }
     }
 
+#ifdef EXECUTION_SPEED_TIME
+    printf("+++++++++++++++++++++++++++");
+    printf("end time %i.%i\n", SDL_GetTicks()/1000, SDL_GetTicks()%1000);
+#endif
+
+    g_Screen.scale2x(10, 100, maxx, maxy, pMission->minimap_overlay_,0, false);
 
     // write money
     char tmp[100];

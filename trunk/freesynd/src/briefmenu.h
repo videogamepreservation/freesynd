@@ -54,9 +54,6 @@ protected:
     unsigned char enhance_level_;
     short minimap_scroll_x_;
     short minimap_scroll_y_;
-    // minimap scroll sizes
-    //short ms_scroll_x_;
-    //short ms_scroll_y_;
 };
 
 #endif
