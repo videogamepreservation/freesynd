@@ -2624,6 +2624,9 @@ void Mission::createMinimap() {
 
 unsigned char Mission::getMinimapColour(int x, int y) {
 
+    if (x < 0 || y < 0 || x >= mmax_x_ || y >= mmax_y_)
+        return 0;
+
     if (minimap_c_ != 0)
         return minimap_c_[x + y * mmax_x_];
     return 0;

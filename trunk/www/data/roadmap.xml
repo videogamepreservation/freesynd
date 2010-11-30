@@ -5,7 +5,7 @@
 	<features>
 	  <feature id="3043686" status="D">Game Time</feature>
 	  <feature id="3072653" status="D">Use libsyndicate data info</feature>
-	  <feature id="3081550" status="N">Minimap basic</feature>
+	  <feature id="3081550" status="D">Minimap basic</feature>
 	  <feature id="3086471" status="N">Implements Reseach functionnality</feature>
 	  <feature id="3086469" status="D">Tax influence on countries status</feature>
 	  <feature id="3086955" status="N">Possibility to load/save game</feature>

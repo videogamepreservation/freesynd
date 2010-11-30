@@ -1272,6 +1272,8 @@ void GameplayMenu::drawMiniMap() {
         if (isAgentSelected(i)) {
             tx = mission_->ped(i)->tileX();
             ty = mission_->ped(i)->tileY();
+            ox = mission_->ped(i)->offX();
+            oy = mission_->ped(i)->offY();
             break;
         }
 
@@ -1279,19 +1281,29 @@ void GameplayMenu::drawMiniMap() {
     ty -= 8;
     mm_tx_ = tx;
     mm_ty_ = ty;
+    // every 32 of offset = 1 pixel
+    ox = ox / 32;
+    oy = oy / 32;
 
-    for (int j = 0; j < 16; j++)
-        for (int i = 0; i < 16; i++) {
-            // TODO: rewrite required
-            // minimap should be generated in brief menu and reused with
-            // objects added on top
+    uint8 minimap_layer[21*21*8*8];
+    memset(minimap_layer, 0, 21*21*8*8);
+    uint8 minimap_final_layer[128*128];
 
-            uint8 ground[8 * 8];
-            memset(ground, mission_->getMinimapColour(tx + i, ty + j),
-                sizeof(ground));
-            g_Screen.blit(i * 8, j * 8 + sy, 8, 8, ground);
+    for (int j = 0; j < 17; j++) {
+        for (int i = 0; i < 17; i++) {
+            uint8 gcolour = mission_->getMinimapColour(tx + i, ty + j);
+            for (char inc = 0; inc < 8; inc ++) {
+                memset(minimap_layer + (j + 2) * 8 * 8 * 21 + (i + 2) * 8
+                    + inc * 8 * 21, gcolour, 8);
+            }
         }
-
+    }
+    //g_Screen.blit(130, 10, 168, 168, minimap_layer);
+    for (int j = 0; j < 128; j++) {
+        memcpy(minimap_final_layer + 128 * j, minimap_layer + (8 * 8 * 21) * 2
+            + (j + oy) * 8 * 21 + (8 * 2) + ox, 128);
+    }
+    g_Screen.blit(0, sy, 128, 128, minimap_final_layer);
         // TODO: draw icons for units, weapons, etc
 
 }
