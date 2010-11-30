@@ -45,6 +45,4 @@ in original gameplay or are not present at all
  - write mission editor;
  - create new mission files using editor, based on original game mission files.
 --
- - BriefMenu::handleRender() needs optimization, when info is maximum and last
- page is viewed briefing text display is very slow
  - Implements dragging in SelectMenu to pass a weapon from an agent to another.

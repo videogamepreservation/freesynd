@@ -29,13 +29,6 @@
 #include "utils/file.h"
 #include "briefmenu.h"
 
-#if 1
-#ifdef SYSTEM_SDL
-#include "system_sdl.h"
-#endif
-#define EXECUTION_SPEED_TIME
-#endif
-
 BriefMenu::BriefMenu(MenuManager * m) :
 Menu(m, "brief", "mbrief.dat", "mbrieout.dat"),
 start_line_(0), info_level_(0),
@@ -133,10 +126,6 @@ void BriefMenu::handleRender() {
 
     Mission *pMission = g_Session.getMission();
 
-#ifdef EXECUTION_SPEED_TIME
-    printf("---------------------------");
-    printf("start time %i.%i\n", SDL_GetTicks()/1000, SDL_GetTicks()%1000);
-#endif
     // write briefing
     if (pMission->briefing()) {
         int sizeStr = strlen(pMission->briefing()) + 1;
@@ -238,14 +227,8 @@ void BriefMenu::handleRender() {
     // NOTE: enhance levels: 0 = 10px(5), 1 = 8px(4), 2 = 6px(3), 3 - 4px(2),
     // 4 - 2px(1) + enemy peds; x = 502(251), y = 218(109), 124x124(62x62)
     // 640x400(320x200), (504, 220) = (252, 110)
-    // g_Screen.drawRect(504, 220, 120, 120);
     // g_Screen.scale2x(10, 100, pMission->mmax_x_, pMission->mmax_y_,
     //     pMission->minimap_overlay_,0, false);
-
-#ifdef EXECUTION_SPEED_TIME
-    printf("+++++++++++++++++++++++++++");
-    printf("end time %i.%i\n", SDL_GetTicks()/1000, SDL_GetTicks()%1000);
-#endif
 
     drawMinimap(0);
     // write money
