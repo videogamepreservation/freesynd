@@ -267,6 +267,30 @@ void GameplayMenu::handleTick(int elapsed)
             change |= mission_->statics(i)->animate(diff, mission_);
     }
 
+    selectable_agents_ = 0;
+    for (int i = 0; i < 4; i++) {
+        if (mission_->ped(i)) {
+            if(mission_->ped(i)->getIsAnAgent() == PedInstance::Agent_Active)
+            {
+                if (mission_->ped(i)->health() > 0) {
+                    selectable_agents_ |= 1 << i;
+                } else {
+                    if ((selected_agents_ & (1 << (i + 4))) != 0 )
+                        selected_agents_ ^= 1 << (i + 4);
+                    if ((selected_agents_ & (1 << i)) != 0 )
+                        selected_agents_ ^= 1 << i;
+                }
+            }
+        }
+    }
+    if ((selected_agents_ & 0xFF) == 0) {
+        for (int i = 0; i < 4; i++)
+            if ((selectable_agents_ & (1 << i)) != 0) {
+                    selected_agents_ = 1 << i;
+                    break;
+            }
+    }
+
     if (change) {
         render();
         // force pointing_at_ped / vehicle to update
@@ -746,7 +770,7 @@ void GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
                         && y >= 2 + 46 + 44 + 10 + 46 + 44 + 15 + j * 32
                         && y < 2 + 46 + 44 + 10 + 46 + 44 + 15 + j * 32 + 32) {
                     for (int a = 0; a < 4; a++) {
-                        // TODO: when more then one agent is selected weapon,
+                        // TODO: when more then one agent is selecting weapon,
                         // the chosen ones should be same type and less ammo
                         // or best in rank
                         if (isAgentSelected(a)) {
@@ -1219,6 +1243,15 @@ void GameplayMenu::drawWeaponSelectors() {
                                     12);
                 }
             }
+    } else {
+        for (int j = 0; j < 2; j++)
+            for (int i = 0; i < 4; i++) {
+                int s = 1601;
+
+                g_App.gameSprites().sprite(s)->draw(
+                        32 * i, 2 + 46 + 44 + 10 + 46 + 44 + 15 + j * 32, 0);
+            }
+
     }
 }
 
@@ -1301,8 +1334,7 @@ void GameplayMenu::selectAllAgents(bool invert) {
             selected_agents_ ^= 4;
         if ((selectable_agents_ & (1 << 3)) != 0)
             selected_agents_ ^= 8;
-    }
-    else {
+    } else {
         if ((selected_agents_ & selectable_agents_) == selectable_agents_)
             selected_agents_ = selected_agents_ >> 4;
         else
