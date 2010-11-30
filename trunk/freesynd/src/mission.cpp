@@ -880,6 +880,7 @@ MapObject * Mission::findAt(int tilex, int tiley, int tilez,
     return NULL;
 }
 
+// Surface walkable
 bool Mission::sWalkable(char thisTile, char upperTile) {
 
     return (thisTile != upperTile

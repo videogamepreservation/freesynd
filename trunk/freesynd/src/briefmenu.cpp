@@ -62,7 +62,6 @@ enhance_level_(0) {
     addOption(535, 352, "#MENU_MAIN_BUT", 1, KEY_F5, "main");
 
     setParentMenu("map");
-    resetMinimapBaseValues();
 }
 
 BriefMenu::~BriefMenu() {
@@ -73,6 +72,7 @@ void BriefMenu::handleTick(int elapsed)
     if (g_Session.updateTime(elapsed)) {
         updateClock();
     }
+    drawMinimap(elapsed);
 }
 
 /*! 
@@ -100,7 +100,26 @@ void BriefMenu::handleShow() {
     pMission->loadMap();
 
     pMission->createMinimap();
-    resetMinimapBaseValues();
+    
+    bool found = false;
+    int maxx = pMission->mmax_x_;
+    int maxy = pMission->mmax_y_;
+
+    for (int x = 0; x < maxx && (!found); x++) {
+        for (int y = 0; y < maxy && (!found); y++) {
+            if (pMission->getMinimapOverlay(x, y) == 1) {
+                minimap_scroll_x_ = x;
+                minimap_scroll_y_ = y;
+                found = true;
+            }
+        }
+    }
+
+    // TODO: *level_ should be remembered read on enter and set on leave
+    info_level_ = 0;
+    enhance_level_ = 0;
+    minimap_blink_ticks_ = 0;
+    minimap_blink_ = 0;
 
     updateClock();
 }
@@ -216,99 +235,19 @@ void BriefMenu::handleRender() {
 
         free(mbriefing);        // using free because allocated this
     }
-    // TODO: draw briefing minimap
     // NOTE: enhance levels: 0 = 10px(5), 1 = 8px(4), 2 = 6px(3), 3 - 4px(2),
     // 4 - 2px(1) + enemy peds; x = 502(251), y = 218(109), 124x124(62x62)
     // 640x400(320x200), (504, 220) = (252, 110)
     // g_Screen.drawRect(504, 220, 120, 120);
-
-#ifdef EXECUTION_SPEED_TIME
-    printf("write briefing time %i.%i\n", SDL_GetTicks()/1000, SDL_GetTicks()%1000);
-#endif
-
-    int maxx = pMission->mmax_x_;
-    int maxy = pMission->mmax_y_;
-    //printf("x %i, y %i\n", maxx, maxy);
-    unsigned char clvl = enhance_level_;
-    bool addenemies = false;
-
-    if (clvl == 4) {
-        addenemies = true;
-    }
-    unsigned char pixperblock = 10 - (clvl << 1);
-    short fullblocks = 120 / pixperblock;
-    short halfblocks = fullblocks / 2;
-    short modblocks = fullblocks % 2;
-    short bxl = minimap_scroll_x_ - halfblocks + 1;
-    short bxr = minimap_scroll_x_ + halfblocks + modblocks;
-    short byl = minimap_scroll_y_ - halfblocks + 1;
-    short byr = minimap_scroll_y_ + halfblocks + modblocks;
-
-    // checking borders for correctness, map will be always on center
-    if (bxl < 0) {
-        bxl = 0;
-        if (bxr >= maxx) {
-            bxr = maxx - 1;
-        } else {
-            bxr = fullblocks >= maxx ? maxx - 1 : (fullblocks) - 1;
-        }
-    }
-    if (bxr >= maxx) {
-        bxr = maxx - 1;
-        bxl = (maxx - (fullblocks)) < 0 ? 0 : (maxx - (fullblocks));
-    }
-
-    if (byl < 0) {
-        byl = 0;
-        if (byr >= maxy) {
-            byr = maxy - 1;
-        } else {
-            byr = fullblocks >= maxy ? maxy - 1 : (fullblocks) - 1;
-        }
-    }
-    if (byr >= maxy) {
-        byr = maxy - 1;
-        byl = (maxy - (fullblocks)) < 0 ? 0 : (maxy - (fullblocks));
-    }
-
-    short sx = 504;
-    short sy = 220;
-    if ((bxr - bxl + 1) < (fullblocks)) {
-        sx += ((fullblocks - (bxr - bxl + 1)) >> 1) * pixperblock;
-    }
-    if ((byr - byl + 1) < (fullblocks)) {
-        sy += ((fullblocks - (byr - byl + 1)) >> 1) * pixperblock;
-    }
-
-    for (short x = bxl; x <= bxr; x++) {
-        short xc = sx + (x - bxl) * pixperblock;
-        for (short y = byl; y <= byr; y++) {
-            unsigned char c = pMission->getMinimapOverlay(x, y);
-            switch (c) {
-                case 0:
-                    c = pMission->getMinimapColour(x, y);
-                    break;
-                case 1:
-                    c = 1;
-                    break;
-                case 2:
-                    if (addenemies)
-                        c = 2;
-                    else
-                        c = pMission->getMinimapColour(x, y);
-            }
-            g_Screen.drawRect(xc, sy + (y - byl) * pixperblock, pixperblock,
-                pixperblock, c);
-        }
-    }
+    // g_Screen.scale2x(10, 100, pMission->mmax_x_, pMission->mmax_y_,
+    //     pMission->minimap_overlay_,0, false);
 
 #ifdef EXECUTION_SPEED_TIME
     printf("+++++++++++++++++++++++++++");
     printf("end time %i.%i\n", SDL_GetTicks()/1000, SDL_GetTicks()%1000);
 #endif
 
-    //g_Screen.scale2x(10, 100, maxx, maxy, pMission->minimap_overlay_,0, false);
-
+    drawMinimap(0);
     // write money
     char tmp[100];
 /*    g_Screen.blit(502, 87, 125, 30,
@@ -419,9 +358,114 @@ void BriefMenu::handleMouseDown(int x, int y, int button, const int modKeys) {
     }
 }
 
-void BriefMenu::resetMinimapBaseValues() {
-    minimap_scroll_x_ = 0;
-    minimap_scroll_y_ = 0;
-    info_level_ = 0;
-    enhance_level_ = 0;
+void BriefMenu::drawMinimap(int elapsed) {
+
+    Mission *pMission = g_Session.getMission();
+    int maxx = pMission->mmax_x_;
+    int maxy = pMission->mmax_y_;
+    //printf("x %i, y %i\n", maxx, maxy);
+    unsigned char clvl = enhance_level_;
+    bool addenemies = false;
+
+    if (clvl == 4) {
+        addenemies = true;
+    }
+    unsigned char pixperblock = 10 - (clvl << 1);
+    short fullblocks = 120 / pixperblock;
+    short halfblocks = fullblocks / 2;
+    short modblocks = fullblocks % 2;
+    short bxl = minimap_scroll_x_ - halfblocks + 1;
+    short bxr = minimap_scroll_x_ + halfblocks + modblocks;
+    short byl = minimap_scroll_y_ - halfblocks + 1;
+    short byr = minimap_scroll_y_ + halfblocks + modblocks;
+
+    // checking borders for correctness, map will be always on center
+    if (bxl < 0) {
+        bxl = 0;
+        if (bxr >= maxx) {
+            bxr = maxx - 1;
+        } else {
+            bxr = fullblocks >= maxx ? maxx - 1 : (fullblocks) - 1;
+        }
+    }
+    if (bxr >= maxx) {
+        bxr = maxx - 1;
+        bxl = (maxx - (fullblocks)) < 0 ? 0 : (maxx - (fullblocks));
+    }
+
+    if (byl < 0) {
+        byl = 0;
+        if (byr >= maxy) {
+            byr = maxy - 1;
+        } else {
+            byr = fullblocks >= maxy ? maxy - 1 : (fullblocks) - 1;
+        }
+    }
+    if (byr >= maxy) {
+        byr = maxy - 1;
+        byl = (maxy - (fullblocks)) < 0 ? 0 : (maxy - (fullblocks));
+    }
+
+    short sx = 504;
+    short sy = 220;
+    if ((bxr - bxl + 1) < (fullblocks)) {
+        sx += ((fullblocks - (bxr - bxl + 1)) >> 1) * pixperblock;
+    }
+    if ((byr - byl + 1) < (fullblocks)) {
+        sy += ((fullblocks - (byr - byl + 1)) >> 1) * pixperblock;
+    }
+
+    if (elapsed == 0) {
+        for (short x = bxl; x <= bxr; x++) {
+            short xc = sx + (x - bxl) * pixperblock;
+            for (short y = byl; y <= byr; y++) {
+                unsigned char c = pMission->getMinimapOverlay(x, y);
+                switch (c) {
+                    case 0:
+                        c = pMission->getMinimapColour(x, y);
+                        break;
+                    case 1:
+                        c = 14;
+                        break;
+                    case 2:
+                        if (addenemies)
+                            c = 14;
+                        else
+                            c = pMission->getMinimapColour(x, y);
+                }
+                g_Screen.drawRect(xc, sy + (y - byl) * pixperblock, pixperblock,
+                    pixperblock, c);
+            }
+        }
+    } else {
+        elapsed += minimap_blink_ticks_;
+        int inc = elapsed / 50;
+        minimap_blink_ticks_ = elapsed % 50;
+        minimap_blink_ += inc;
+        unsigned char cour = 14;
+        unsigned char cenemy = 14;
+        minimap_blink_ %= 20;
+        if ((minimap_blink_ % 10)  > 6) {
+            cour = 12;
+            cenemy = 5;
+        }
+        for (short x = bxl; x <= bxr; x++) {
+            short xc = sx + (x - bxl) * pixperblock;
+            for (short y = byl; y <= byr; y++) {
+                unsigned char c = pMission->getMinimapOverlay(x, y);
+                switch (c) {
+                    case 0:
+                        break;
+                    case 1:
+                        g_Screen.drawRect(xc, sy + (y - byl) * pixperblock, pixperblock,
+                            pixperblock, cour);
+                        break;
+                    case 2:
+                        if (addenemies)
+                            g_Screen.drawRect(xc, sy + (y - byl) * pixperblock, pixperblock,
+                                pixperblock, cenemy);
+                }
+            }
+        }
+    }
 }

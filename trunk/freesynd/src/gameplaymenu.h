@@ -67,7 +67,7 @@ protected:
 protected:
     int tick_count_, last_animate_tick_;
     int last_motion_tick_, last_motion_x_, last_motion_y_;
-    int mission_hint_ticks_,mission_hint_;
+    int mission_hint_ticks_, mission_hint_;
     Mission *mission_;
     /*! Holds the X coordinate of the screen origin (top left corner) in the world coordinate.*/
     int world_x_;

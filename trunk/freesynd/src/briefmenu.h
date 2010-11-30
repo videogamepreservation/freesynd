@@ -42,7 +42,7 @@ public:
     void handleLeave();
     void handleOption(Key key, const int modKeys);
     void handleMouseDown(int x, int y, int button, const int modKeys);
-    void resetMinimapBaseValues();
+    void drawMinimap(int elapsed);
     
 protected:
     void updateClock();
@@ -54,6 +54,7 @@ protected:
     unsigned char enhance_level_;
     short minimap_scroll_x_;
     short minimap_scroll_y_;
+    int minimap_blink_ticks_, minimap_blink_;
 };
 
 #endif
