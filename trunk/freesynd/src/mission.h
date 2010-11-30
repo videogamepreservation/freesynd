@@ -437,11 +437,13 @@ public:
 
     void createMinimap();
     unsigned char getMinimapColour(int x, int y);
+    unsigned char getMinimapOverlay(int x, int y) {
+        return minimap_overlay_[x + y * mmax_x_];
+    }
 
     unsigned int getMaxInfoLvl() {return max_info_lvl_; }
     unsigned int getMaxEnhanceLvl() {return max_enhance_lvl_; }
     // 0 - not present, 1 - our agent, 2 - enemy agent
-    unsigned char minimap_overlay_[128*128];
 
   protected:
     LEVELDATA level_data_;
@@ -543,6 +545,7 @@ public:
     // minimap in colours, map z = 0 tiles transformed based on
     // walkdata->minimap_colours_ in function createMinimap
     unsigned char *minimap_c_;
+    unsigned char minimap_overlay_[128*128];
 };
 
 #endif

@@ -62,6 +62,7 @@ enhance_level_(0) {
     addOption(535, 352, "#MENU_MAIN_BUT", 1, KEY_F5, "main");
 
     setParentMenu("map");
+    resetMinimapBaseValues();
 }
 
 BriefMenu::~BriefMenu() {
@@ -97,7 +98,9 @@ void BriefMenu::handleShow() {
     g_Session.setMission(pMission);
     // NOTE: map is required to be loaded here, because minimap is z=0
     pMission->loadMap();
+
     pMission->createMinimap();
+    resetMinimapBaseValues();
 
     updateClock();
 }
@@ -223,10 +226,8 @@ void BriefMenu::handleRender() {
     printf("write briefing time %i.%i\n", SDL_GetTicks()/1000, SDL_GetTicks()%1000);
 #endif
 
-    minimap_scroll_x_ = 50;
-    minimap_scroll_y_ = 10;
-    int maxx = g_App.maps().map(pMission->map())->maxX();
-    int maxy = g_App.maps().map(pMission->map())->maxY();
+    int maxx = pMission->mmax_x_;
+    int maxy = pMission->mmax_y_;
     //printf("x %i, y %i\n", maxx, maxy);
     unsigned char clvl = enhance_level_;
     bool addenemies = false;
@@ -282,7 +283,7 @@ void BriefMenu::handleRender() {
     for (short x = bxl; x <= bxr; x++) {
         short xc = sx + (x - bxl) * pixperblock;
         for (short y = byl; y <= byr; y++) {
-            unsigned char c = pMission->minimap_overlay_[x + y * maxx];
+            unsigned char c = pMission->getMinimapOverlay(x, y);
             switch (c) {
                 case 0:
                     c = pMission->getMinimapColour(x, y);
@@ -306,7 +307,7 @@ void BriefMenu::handleRender() {
     printf("end time %i.%i\n", SDL_GetTicks()/1000, SDL_GetTicks()%1000);
 #endif
 
-    g_Screen.scale2x(10, 100, maxx, maxy, pMission->minimap_overlay_,0, false);
+    //g_Screen.scale2x(10, 100, maxx, maxy, pMission->minimap_overlay_,0, false);
 
     // write money
     char tmp[100];
@@ -389,5 +390,38 @@ void BriefMenu::handleOption(Key key, const int modKeys) {
     }
 }
 
+void BriefMenu::handleMouseDown(int x, int y, int button, const int modKeys) {
+
+    unsigned char scroll_step = 30 / (10 - (enhance_level_ << 1));
+
+    Mission *pMission = g_Session.getMission();
+    if (button == 1 && x >= 504 && x < 624
+        && y >= 220 && y < 340) {
+        if (x >= 504 && x < 544) {
+            minimap_scroll_x_ -= scroll_step;
+            if (minimap_scroll_x_ < 0)
+                minimap_scroll_x_ = 0;
+        } else if (x >= 584 && x < 624) {
+            minimap_scroll_x_ += scroll_step;
+            if (minimap_scroll_x_ > pMission->mmax_x_)
+                minimap_scroll_x_ = pMission->mmax_x_ - 1;
+        }
+        if (y >= 220 && y < 260) {
+            minimap_scroll_y_ -= scroll_step;
+            if (minimap_scroll_y_ < 0)
+                minimap_scroll_y_ = 0;
+        } else if (y >= 300 && y < 340) {
+            minimap_scroll_y_ += scroll_step;
+            if (minimap_scroll_y_ > pMission->mmax_y_)
+                minimap_scroll_y_ = pMission->mmax_y_ - 1;
+        }
+        needRendering();
+    }
+}
+
 void BriefMenu::resetMinimapBaseValues() {
+    minimap_scroll_x_ = 0;
+    minimap_scroll_y_ = 0;
+    info_level_ = 0;
+    enhance_level_ = 0;
 }

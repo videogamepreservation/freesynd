@@ -41,6 +41,7 @@ public:
     void handleRender();
     void handleLeave();
     void handleOption(Key key, const int modKeys);
+    void handleMouseDown(int x, int y, int button, const int modKeys);
     void resetMinimapBaseValues();
     
 protected:
@@ -48,8 +49,7 @@ protected:
 
 protected:
     int start_line_;
-    // TODO: info+enhance should be stored in mission data for saving game
-    // move it somewhere?
+    // TODO: info+enhance should be stored in mission data for preserving values
     unsigned char info_level_;
     unsigned char enhance_level_;
     short minimap_scroll_x_;
