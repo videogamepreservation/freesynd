@@ -50,7 +50,7 @@ public:
     VehicleInstance *loadInstance(uint8 *data, int map);
 
 protected:
-    // TODO:remove this
+    // TODO:remove this(?)
     std::vector<Vehicle *> vehicles_;
 };
 

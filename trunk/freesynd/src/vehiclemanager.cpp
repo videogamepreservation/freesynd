@@ -34,8 +34,10 @@ VehicleManager::VehicleManager()
 
 VehicleManager::~VehicleManager()
 {
+    /*
     for (unsigned int i = 0; i < vehicles_.size(); i++)
         delete vehicles_[i];
+        */
 }
 
 void VehicleManager::setVehicle(Vehicle *vehicleanim, unsigned short baseAnim)

@@ -426,7 +426,7 @@ Door::Door(int m, int anim, int closingAnim, int openAnim, int openingAnim):Stat
 anim_(anim), closing_anim_(closingAnim),open_anim_(openAnim),
 opening_anim_(openingAnim)
 {
-    state_ = sttdoor_Closed;
+    state_ = Static::sttdoor_Closed;
     rcv_damage_def_ = MapObject::ddmg_Invulnerable;
 }
 
@@ -434,16 +434,16 @@ void Door::draw(int x, int y)
 {
     addOffs(x, y);
     switch(state_) {
-        case sttdoor_Open:
+        case Static::sttdoor_Open:
             g_App.gameSprites().drawFrame(open_anim_, frame_, x, y);
             break;
-        case sttdoor_Closing:
+        case Static::sttdoor_Closing:
             g_App.gameSprites().drawFrame(closing_anim_, frame_, x, y);
             break;
-        case sttdoor_Closed:
+        case Static::sttdoor_Closed:
             g_App.gameSprites().drawFrame(anim_, frame_, x, y);
             break;
-        case sttdoor_Opening:
+        case Static::sttdoor_Opening:
             g_App.gameSprites().drawFrame(opening_anim_, frame_, x, y);
             break;
     }
@@ -463,7 +463,7 @@ bool Door::animate(int elapsed, Mission *obj)
 
     bool changed = MapObject::animate(elapsed);
     switch(state_) {
-        case sttdoor_Open:
+        case Static::sttdoor_Open:
             if (sub_type_ == 0) {
                 i = &rel_inc;
                 j = &inc_rel;
@@ -477,18 +477,18 @@ bool Door::animate(int elapsed, Mission *obj)
                 do {
                     p = (PedInstance *)(obj->findAt(x + inc_rel,
                         y + rel_inc,z, &mt, &si, true));
-                    if (!p && state_ == sttdoor_Open && (!found)) {
-                        state_ = sttdoor_Closing;
+                    if (!p && state_ == Static::sttdoor_Open && (!found)) {
+                        state_ = Static::sttdoor_Closing;
                         frame_ = 0;
                     } else if (p && p->health() > 0){
-                        state_ = sttdoor_Open;
+                        state_ = Static::sttdoor_Open;
                         found = true;
                         p->hold_on_.wayFree = 0;
                     }
                 } while (p);
             }
             break;
-        case sttdoor_Closed:
+        case Static::sttdoor_Closed:
             if (sub_type_ == 0) {
                 i = &rel_inc;
                 j = &inc_rel;
@@ -504,7 +504,7 @@ bool Door::animate(int elapsed, Mission *obj)
                     y + rel_inc,z,&mt,&si,true));
                 if (p && p->health() > 0) {
                     if (!found) {
-                        state_ = sttdoor_Opening;
+                        state_ = Static::sttdoor_Opening;
                         found = true;
                         frame_ = 0;
                     }
@@ -518,7 +518,7 @@ bool Door::animate(int elapsed, Mission *obj)
                     y + rel_inc,z,&mt,&si,true));
                 if (p && p->health() > 0) {
                     if (!found) {
-                        state_ = sttdoor_Opening;
+                        state_ = Static::sttdoor_Opening;
                         found = true;
                         frame_ = 0;
                     }
@@ -526,15 +526,15 @@ bool Door::animate(int elapsed, Mission *obj)
                 }
             } while (p);
             break;
-        case sttdoor_Closing:
+        case Static::sttdoor_Closing:
             if (frame_ >= g_App.gameSprites().lastFrame(closing_anim_)) {
-                state_ = sttdoor_Closed;
+                state_ = Static::sttdoor_Closed;
                 frame_ = 0;
             }
             break;
-        case sttdoor_Opening:
+        case Static::sttdoor_Opening:
             if (frame_ >= g_App.gameSprites().lastFrame(opening_anim_)) {
-                state_ = sttdoor_Open;
+                state_ = Static::sttdoor_Open;
                 frame_ = 0;
             }
             break;
@@ -545,7 +545,7 @@ bool Door::animate(int elapsed, Mission *obj)
 LargeDoor::LargeDoor(int m, int anim, int closingAnim, int openingAnim):Static(m), anim_(anim),
 closing_anim_(closingAnim), opening_anim_(openingAnim)
 {
-    state_ = sttdoor_Closed;
+    state_ = Static::sttdoor_Closed;
     rcv_damage_def_ = MapObject::ddmg_Invulnerable;
 }
 
@@ -553,15 +553,15 @@ void LargeDoor::draw(int x, int y)
 {
     addOffs(x, y);
     switch(state_) {
-        case sttdoor_Open:
+        case Static::sttdoor_Open:
             break;
-        case sttdoor_Closing:
+        case Static::sttdoor_Closing:
             g_App.gameSprites().drawFrame(closing_anim_, frame_, x, y);
             break;
-        case sttdoor_Closed:
+        case Static::sttdoor_Closed:
             g_App.gameSprites().drawFrame(anim_, frame_, x, y);
             break;
-        case sttdoor_Opening:
+        case Static::sttdoor_Opening:
             g_App.gameSprites().drawFrame(opening_anim_, frame_, x, y);
             break;
     }
@@ -583,7 +583,7 @@ bool LargeDoor::animate(int elapsed, Mission *obj)
 
     bool changed = MapObject::animate(elapsed);
     switch(state_) {
-        case sttdoor_Open:
+        case Static::sttdoor_Open:
             if (sub_type_ == 0) {
                 i = &rel_inc;
                 j = &inc_rel;
@@ -597,11 +597,11 @@ bool LargeDoor::animate(int elapsed, Mission *obj)
                 mt = 4; si = 0;
                 v = (VehicleInstance *)(obj->findAt(x + inc_rel,
                     y + rel_inc,z, &mt, &si, true));
-                if (!v && state_ == sttdoor_Open && (!found)) {
-                    state_ = sttdoor_Closing;
+                if (!v && state_ == Static::sttdoor_Open && (!found)) {
+                    state_ = Static::sttdoor_Closing;
                     frame_ = 0;
                 } else if (v){
-                    state_ = sttdoor_Open;
+                    state_ = Static::sttdoor_Open;
                     found = true;
                     v->hold_on_.wayFree = 0;
                 }
@@ -611,11 +611,11 @@ bool LargeDoor::animate(int elapsed, Mission *obj)
                 mt = 4; si = 0;
                 v = (VehicleInstance *)(obj->findAt(x + inc_rel,
                     y + rel_inc,z,&mt,&si,true));
-                if (!v && state_ == sttdoor_Open && (!found)) {
-                    state_ = sttdoor_Closing;
+                if (!v && state_ == Static::sttdoor_Open && (!found)) {
+                    state_ = Static::sttdoor_Closing;
                     frame_ = 0;
                 } else if (v){
-                    state_ = sttdoor_Open;
+                    state_ = Static::sttdoor_Open;
                     found = true;
                     v->hold_on_.wayFree = 0;
                 }
@@ -633,7 +633,7 @@ bool LargeDoor::animate(int elapsed, Mission *obj)
                 }
             }
             break;
-        case sttdoor_Closed:
+        case Static::sttdoor_Closed:
             char sign;
             if (sub_type_ == 0) {
                 i = &rel_inc;
@@ -652,7 +652,7 @@ bool LargeDoor::animate(int elapsed, Mission *obj)
                 y + rel_inc,z,&mt,&si,true));
             if (v) {
                 if (!found) {
-                    state_ = sttdoor_Opening;
+                    state_ = Static::sttdoor_Opening;
                     found = true;
                     frame_ = 0;
                 }
@@ -665,7 +665,7 @@ bool LargeDoor::animate(int elapsed, Mission *obj)
                 y + rel_inc,z,&mt,&si,true));
             if (v) {
                 if (!found) {
-                    state_ = sttdoor_Opening;
+                    state_ = Static::sttdoor_Opening;
                     found = true;
                     frame_ = 0;
                 }
@@ -714,15 +714,15 @@ bool LargeDoor::animate(int elapsed, Mission *obj)
                 } while (p);
             }
             break;
-        case sttdoor_Closing:
+        case Static::sttdoor_Closing:
             if (frame_ >= g_App.gameSprites().lastFrame(closing_anim_)) {
-                state_ = sttdoor_Closed;
+                state_ = Static::sttdoor_Closed;
                 frame_ = 0;
             }
             break;
-        case sttdoor_Opening:
+        case Static::sttdoor_Opening:
             if (frame_ >= g_App.gameSprites().lastFrame(opening_anim_)) {
-                state_ = sttdoor_Open;
+                state_ = Static::sttdoor_Open;
                 frame_ = 0;
             }
             break;

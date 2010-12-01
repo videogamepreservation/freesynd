@@ -190,6 +190,13 @@ bool Mission::loadLevel(uint8 * levelData)
     }
 
 #endif
+    // NOTE: this part transcodes original map overlay for minimap into
+    // our representation, in original agent our/enemy is defined by ped offset
+    // or by weapon offset - if weapon has owner we look into type/index of
+    // owner to define our/enemy state; original map overlay is 16384x2
+    // array(container), only using map size we can correctly use our
+    // minimap_overlay_; our agent = 1, enemy agent = 2, tile doesn't have
+    // ped = 0
     for(unsigned short i = 0; i < (128*128); i++) {
         unsigned short pin = READ_LE_UINT16(level_data_.map.objs + i * 2);
         if (pin >= 0x0002 && pin < 0x5C02) {
@@ -325,8 +332,7 @@ bool Mission::loadLevel(uint8 * levelData)
         // Also for some objectives there should be "small" actions defined
         // inside ped data, in 1 lvl when agents are close to target
         // ped goes to car and moves to location, if reached mission is
-        // failed, similar actions are in many missions, find where they
-        // are defined
+        // failed, similar actions are in many missions(scenarios defines this)
 
         switch (READ_LE_UINT16(obj.type)) {
             case 0x00:
