@@ -29,6 +29,12 @@
 #include "utils/file.h"
 #include "briefmenu.h"
 
+#if 0
+#ifdef SYSTEM_SDL
+#include "system_sdl.h"
+#endif
+#define EXECUTION_SPEED_TIME
+#endif
 BriefMenu::BriefMenu(MenuManager * m) :
 Menu(m, "brief", "mbrief.dat", "mbrieout.dat"),
 start_line_(0), info_level_(0),
@@ -113,6 +119,7 @@ void BriefMenu::handleShow() {
     enhance_level_ = 0;
     minimap_blink_ticks_ = 0;
     minimap_blink_ = 0;
+    start_line_ = 0;
 
     updateClock();
 }
@@ -127,8 +134,12 @@ void BriefMenu::handleRender() {
     Mission *pMission = g_Session.getMission();
 
     // write briefing
+#ifdef EXECUTION_SPEED_TIME
+    printf("---------------------------");
+    printf("start time %i.%i\n", SDL_GetTicks()/1000, SDL_GetTicks()%1000);
+#endif
     if (pMission->briefing()) {
-        int sizeStr = strlen(pMission->briefing()) + 1;
+        int sizeStr = strlen(pMission->briefing()) + 2;
         char *mbriefing = (char *)malloc(sizeStr);
         assert(mbriefing != NULL);
         fs_strcpy(mbriefing, sizeStr, pMission->briefing());
@@ -153,6 +164,19 @@ void BriefMenu::handleRender() {
                 } while (g_App.fonts().textWidth(tmp, FontManager::SIZE_2) > 470);
 
                 delete[] tmp;
+                /* is this faster?
+                char tmp;
+                bool found;
+
+                do {
+                    tmp = *nextline;
+                    *nextline = 0;
+                    found = g_App.fonts().textWidth(miss, FontManager::SIZE_2) > 470;
+                    *nextline = tmp;
+                    nextline--;
+                } while (found);
+                */
+
                 nextline++;
 
                 while (nextline[0] != '\x0a' && nextline[0] != ' '
@@ -224,6 +248,10 @@ void BriefMenu::handleRender() {
 
         free(mbriefing);        // using free because allocated this
     }
+#ifdef EXECUTION_SPEED_TIME
+    printf("+++++++++++++++++++++++++++");
+    printf("end time %i.%i\n", SDL_GetTicks()/1000, SDL_GetTicks()%1000);
+#endif
     // NOTE: enhance levels: 0 = 10px(5), 1 = 8px(4), 2 = 6px(3), 3 - 4px(2),
     // 4 - 2px(1) + enemy peds; x = 502(251), y = 218(109), 124x124(62x62)
     // 640x400(320x200), (504, 220) = (252, 110)
@@ -421,6 +449,7 @@ void BriefMenu::drawMinimap(int elapsed) {
             }
         }
     } else {
+        // drawing blinking only
         elapsed += minimap_blink_ticks_;
         int inc = elapsed / 50;
         minimap_blink_ticks_ = elapsed % 50;
