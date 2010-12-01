@@ -58,12 +58,12 @@ Mission *MissionManager::loadMission(int n)
     sprintf(tmp, "game%02d.dat", n);
     data = File::loadFile(tmp, size);
     if (data == NULL) {
-        delete[] data;
         delete m;
         return NULL;
     }
 
     if (!m->loadLevel(data)) {
+        delete[] data;
         delete m;
         return NULL;
     }
