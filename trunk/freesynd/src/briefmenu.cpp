@@ -39,8 +39,7 @@
 #endif
 BriefMenu::BriefMenu(MenuManager * m) :
 Menu(m, "brief", "mbrief.dat", "mbrieout.dat"),
-start_line_(0), info_level_(0),
-enhance_level_(0) {
+start_line_(0) {
     std::string str;
     menu_manager_->getMessage("MAP_BRIEF_BUT", str);
     
@@ -116,9 +115,6 @@ void BriefMenu::handleShow() {
         }
     }
 
-    // TODO: *level_ should be remembered read on enter and set on leave
-    info_level_ = 0;
-    enhance_level_ = 0;
     minimap_blink_ticks_ = 0;
     minimap_blink_ = 0;
     start_line_ = 0;
@@ -190,7 +186,7 @@ void BriefMenu::handleRender() {
             if (*miss == '|') {
                 lvls++;
 
-                if (lvls > info_level_) {
+                if (lvls > g_Session.getSelectedBlock().infoLevel) {
                     hideOption(KEY_F6);
                     break;
                 }
@@ -275,8 +271,8 @@ void BriefMenu::handleRender() {
                   orig_pixels_ + 538 + 140 * GAME_SCREEN_WIDTH, false,
                   GAME_SCREEN_WIDTH);*/
 
-    if (info_level_ < pMission->getMaxInfoLvl()) {
-        sprintf(tmp, "%d", pMission->infoCost(info_level_));
+    if (g_Session.getSelectedBlock().infoLevel < pMission->getMaxInfoLvl()) {
+        sprintf(tmp, "%d", pMission->infoCost(g_Session.getSelectedBlock().infoLevel));
         g_App.fonts().drawText(560 - g_App.fonts().textWidth(tmp, FontManager::SIZE_2) / 2,
                                140, tmp, FontManager::SIZE_2, false);
     }
@@ -286,8 +282,8 @@ void BriefMenu::handleRender() {
                   orig_pixels_ + 538 + 195 * GAME_SCREEN_WIDTH, false,
                   GAME_SCREEN_WIDTH);*/
 
-    if (enhance_level_ < pMission->getMaxEnhanceLvl()) {
-        sprintf(tmp, "%d", pMission->enhanceCost(enhance_level_));
+    if (g_Session.getSelectedBlock().enhanceLevel < pMission->getMaxEnhanceLvl()) {
+        sprintf(tmp, "%d", pMission->enhanceCost(g_Session.getSelectedBlock().enhanceLevel));
         g_App.fonts().drawText(560 - g_App.fonts().textWidth(tmp, FontManager::SIZE_2) / 2,
                                195, tmp, FontManager::SIZE_2, false);
     }
@@ -303,9 +299,9 @@ void BriefMenu::handleOption(Key key, const int modKeys) {
     Mission *pMission = g_Session.getMission();
     if (key == KEY_F1) {
         // Buy some informations
-        if (info_level_ < pMission->getMaxInfoLvl()) {
-            g_Session.setMoney(g_Session.getMoney() - pMission->infoCost(info_level_));
-            info_level_++;
+        if (g_Session.getSelectedBlock().infoLevel < pMission->getMaxInfoLvl()) {
+            g_Session.setMoney(g_Session.getMoney() - pMission->infoCost(g_Session.getSelectedBlock().infoLevel));
+            g_Session.getSelectedBlock().infoLevel += 1;
             needRendering();
         }
 
@@ -314,10 +310,10 @@ void BriefMenu::handleOption(Key key, const int modKeys) {
 
     if (key == KEY_F2) {
         // Buy some map enhancement
-        if (enhance_level_ < pMission->getMaxEnhanceLvl()) {
+        if (g_Session.getSelectedBlock().enhanceLevel < pMission->getMaxEnhanceLvl()) {
             g_Session.setMoney(g_Session.getMoney() -
-                           pMission->enhanceCost(enhance_level_));
-            enhance_level_++;
+                pMission->enhanceCost(g_Session.getSelectedBlock().enhanceLevel));
+            g_Session.getSelectedBlock().enhanceLevel += 1;
             needRendering();
         }
     }
@@ -344,7 +340,7 @@ void BriefMenu::handleOption(Key key, const int modKeys) {
 
 void BriefMenu::handleMouseDown(int x, int y, int button, const int modKeys) {
 
-    unsigned char scroll_step = 30 / (10 - (enhance_level_ << 1));
+    unsigned char scroll_step = 30 / (10 - (g_Session.getSelectedBlock().enhanceLevel << 1));
 
     Mission *pMission = g_Session.getMission();
     if (button == 1 && x >= 504 && x < 624
@@ -377,7 +373,7 @@ void BriefMenu::drawMinimap(int elapsed) {
     int maxx = pMission->mmax_x_;
     int maxy = pMission->mmax_y_;
     //printf("x %i, y %i\n", maxx, maxy);
-    unsigned char clvl = enhance_level_;
+    unsigned char clvl = g_Session.getSelectedBlock().enhanceLevel;
     bool addenemies = false;
 
     if (clvl == 4) {

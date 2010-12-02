@@ -51,9 +51,6 @@ protected:
 
 protected:
     int start_line_;
-    // TODO: info+enhance should be stored in mission data for preserving values
-    unsigned char info_level_;
-    unsigned char enhance_level_;
     short minimap_scroll_x_;
     short minimap_scroll_y_;
     int minimap_blink_ticks_, minimap_blink_;

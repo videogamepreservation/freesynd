@@ -77,6 +77,10 @@ typedef struct Block_ {
     const char *next;
     /*! Country color.*/
     uint8 colour;
+    /*! Informations level for briefing. */
+    unsigned char infoLevel;
+    /*! Details level for briefing. */
+    unsigned char enhanceLevel;
 } Block;
 
 class Mission;
