@@ -170,8 +170,8 @@ bool Mission::loadLevel(uint8 * levelData)
             pindx[i] = peds_.size();
             peds_.push_back(p);
             if (i > 7) {
-                if (pedref.type_ped == m_tpAgent
-                    || pedref.type_ped == m_tpGuard) {
+                if (pedref.type_ped == PedInstance::m_tpAgent
+                    || pedref.type_ped == PedInstance::m_tpGuard) {
                     p->setHostile(true);
                 }
                 p->setSightRange(7);
@@ -204,7 +204,8 @@ bool Mission::loadLevel(uint8 * levelData)
                 minimap_overlay_[i] = 1;
             } else {
                 pin = pindx[(pin - 2) / 92];
-                if (pin != 0xFFFF && peds_[pin]->getMainType() == m_tpAgent) {
+                if (pin != 0xFFFF && peds_[pin]->getMainType()
+                    == PedInstance::m_tpAgent) {
                     minimap_overlay_[i] = 2;
                 }
             }
@@ -217,7 +218,8 @@ bool Mission::loadLevel(uint8 * levelData)
                     pin = (pin - 2) / 92; // 92 = ped data size
                     if (pin > 7) {
                         if (pindx[pin] != 0xFFFF
-                            && peds_[pindx[pin]]->getMainType() == m_tpAgent)
+                            && peds_[pindx[pin]]->getMainType()
+                            == PedInstance::m_tpAgent)
                         {
                             minimap_overlay_[i] = 2;
                         }
@@ -729,7 +731,7 @@ void Mission::start()
     stats_.agents = 0;
     stats_.mission_duration = 0;
     stats_.agentCaptured = 0;
-    stats_.ennemyKilled = 0;
+    stats_.enemyKilled = 0;
     stats_.criminalKilled = 0;
     stats_.civilKilled = 0;
     stats_.policeKilled = 0;
@@ -805,19 +807,54 @@ void Mission::checkObjectives() {
 
 void Mission::end()
 {
-    //TODO: requires attention
+    for (unsigned int i = 4; i < peds_.size(); i++) {
+        if (peds_[i]->health() <= 0)
+            switch (peds_[i]->getMainType()) {
+                case PedInstance::m_tpAgent:
+                    stats_.enemyKilled++;
+                    break;
+                case PedInstance::m_tpCriminal:
+                    stats_.criminalKilled++;
+                    break;
+                case PedInstance::m_tpPedestrian:
+                    stats_.civilKilled++;
+                    break;
+                case PedInstance::m_tpGuard:
+                    stats_.guardKilled++;
+                    break;
+                case PedInstance::m_tpPolice:
+                    stats_.policeKilled++;
+                    break;
+            }
+    }
+
     for (int i = 0; i < 4; i++)
         if (g_Session.teamMember(i)) {
-            // TODO: kill agents if associated ped is dead
-            while (peds_[i]->numWeapons()) {
-                WeaponInstance *wi = peds_[i]->removeWeapon(0);
-                std::vector < WeaponInstance * >::iterator it =
-                    weapons_.begin();
-                while (it != weapons_.end() && *it != wi)
-                    it++;
-                assert(it != weapons_.end());
-                weapons_.erase(it);
-                g_Session.teamMember(i)->addWeapon(wi);
+            if (peds_[i]->health() <= 0) {
+                peds_[i]->destroyAllWeapons();
+                Agent *pAg = g_Session.teamMember(i);
+                pAg->removeAllWeapons();
+                pAg->clearSlots();
+                g_Session.setTeamMember(i, NULL);
+                for (int inc = 0;
+                    inc < g_App.agents().MAX_AGENT; inc++)
+                {
+                    if (g_App.agents().agent(inc) == pAg) {
+                        g_App.agents().destroyAgentSlot(inc);
+                        break;
+                    }
+                }
+            } else {
+                while (peds_[i]->numWeapons()) {
+                    WeaponInstance *wi = peds_[i]->removeWeapon(0);
+                    std::vector < WeaponInstance * >::iterator it =
+                        weapons_.begin();
+                    while (it != weapons_.end() && *it != wi)
+                        it++;
+                    assert(it != weapons_.end());
+                    weapons_.erase(it);
+                    g_Session.teamMember(i)->addWeapon(wi);
+                }
             }
         }
 }

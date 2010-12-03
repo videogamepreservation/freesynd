@@ -58,6 +58,7 @@ protected:
     void addModOptions();
     void addWeaponOptions();
     void addRecruitOptions();
+    void clearRecruitOptions();
 
     void toggleAgent(int n);
 

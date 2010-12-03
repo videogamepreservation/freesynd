@@ -44,6 +44,11 @@ public:
 
     void loadAgents();
     void reset(bool onlyWomen = false);
+    void destroyAgentSlot(int n) {
+        assert(n < MAX_AGENT);
+        delete agents_[n];
+        agents_[n] = NULL;
+    }
 
     Agent *agent(int n) {
         assert(n < MAX_AGENT);

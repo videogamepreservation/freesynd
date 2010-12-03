@@ -51,7 +51,7 @@ typedef struct {
     /*! How many opposing agents where captured.*/
     int agentCaptured;
     /*! How many opposing agents where killed.*/
-    int ennemyKilled;
+    int enemyKilled;
     /*! How many criminal where killed.*/
     int criminalKilled;
     /*! How many civilian where killed.*/
@@ -169,12 +169,6 @@ public:
         // 128*128 offsets size 2 bytes(LE)
         uint8 objs[32768];
     } LEVELDATA_MAP;            // total: 32768 bytes
-
-#define m_tpPedestrian  0x01
-#define m_tpAgent       0x02
-#define m_tpPolice      0x04
-#define m_tpGuard       0x08
-#define m_tpCriminal    0x10
 
     // This structure contains all people in the game, including agents
     // This struct size is 92.

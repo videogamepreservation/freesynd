@@ -28,6 +28,8 @@ Changes
   * Use of language files
   * Added minimap to briefmenu
   * Fixed, selection for agents killed during gameplay is not possible now
+  * Added information about killed during mission to Debrief menu
+  * When agent is killed during mission he will be removed from agents list
 
 Fixed Bugs
 ----------

@@ -108,7 +108,7 @@ void DebriefMenu::handleShow() {
     int hours = 0;
     g_Session.getDayHourFromPeriod(pStats->mission_duration, days, hours);
     setStaticTextFormated(txtTimeId_, "#DEBRIEF_TIME_FORMAT", hours, days);
-    setStaticTextFormated(txtAgentKilledId_, "%i", pStats->ennemyKilled);
+    setStaticTextFormated(txtAgentKilledId_, "%i", pStats->enemyKilled);
     setStaticTextFormated(txtCrimKilledId_, "%i", pStats->criminalKilled);
     setStaticTextFormated(txtCivilKilledId_, "%i", pStats->civilKilled);
     setStaticTextFormated(txtPoliceKilledId_, "%i", pStats->policeKilled);

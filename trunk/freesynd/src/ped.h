@@ -180,6 +180,14 @@ public:
         DeadBurnAnim,
     }AnimationDrawn;
 
+    typedef enum {
+        m_tpPedestrian = 0x01,
+        m_tpAgent = 0x02,
+        m_tpPolice = 0x04,
+        m_tpGuard = 0x08,
+        m_tpCriminal = 0x10,
+    }mainPedType;
+
     void draw(int x, int y, int scrollX, int scrollY);
 
     void setFrame(int f) { frame_ = f; }

@@ -461,9 +461,6 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                 if (firing_ == PedInstance::Firing_Not
                         && (selectedWeapon() && selectedWeapon()->ammoRemaining()))
                 {
-
-                    setDirection(target_x - (tile_x_ * 256 + off_x_),
-                        (tile_y_ * 256 + off_y_) - target_y, &dir_);
                     selectedWeapon()->inflictDamage(target_, NULL);
                     firing_ = PedInstance::Firing_Fire;
                     updated = true;
@@ -3196,7 +3193,7 @@ bool PedInstance::handleDamage(MapObject::DamageInflictType *d) {
 
     health_ -= d->dvalue;
     if (d->ddir != -1) {
-        dir_ = 256 - d->ddir;
+        dir_ = 255 - d->ddir;
     }
     if (health_ <= 0){
         health_ = 0;

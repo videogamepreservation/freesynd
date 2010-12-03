@@ -152,6 +152,10 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
     // our Y is inversed
     setDirection((tobj->tileX() * 256 + tobj->offX()) - xb,
         yb - (tobj->tileY() * 256 + tobj->offY()), &(d.ddir));
+    if (owner_) {
+        if (d.ddir != -1)
+            owner_->setDirection(d.ddir);
+    }
     tobj->handleDamage(&d);
     return true;
 }
