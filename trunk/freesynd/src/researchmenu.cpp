@@ -34,19 +34,19 @@ ResearchMenu::ResearchMenu(MenuManager * m):Menu(m, "research", "mresrch.dat", "
 orig_pixels_(0), sel_weapon_(0), sel_field_(0),
 sel_mod_(0)
 {
-    addStatic(228, 35, "RESEARCH", 3, true);
-    addStatic(500, 9, "", 1, false);       // Time
+    addStatic(228, 35, "RESEARCH", FontManager::SIZE_4, true);
+    addStatic(500, 9, "", FontManager::SIZE_2, false);       // Time
 
-    addOption(52, 296, "MODS", 1, KEY_F1, NULL);
-    addOption(52, 324, "EQUIP", 1, KEY_F2, NULL);
-    addOption(43, 352, "ACCEPT", 1, KEY_F3, "select");
-    addOption(535, 352, "MENU", 1, KEY_F4, "main");
+    addOption(52, 296, "MODS", FontManager::SIZE_2, KEY_F1, NULL);
+    addOption(52, 324, "EQUIP", FontManager::SIZE_2, KEY_F2, NULL);
+    addOption(43, 352, "ACCEPT", FontManager::SIZE_2, KEY_F3, "select");
+    addOption(535, 352, "MENU", FontManager::SIZE_2, KEY_F4, "main");
     addFieldOptions();
     addWeaponOptions();
     addModOptions();
-    addOption(527, 324, "CANCEL", 1, KEY_F5, NULL, false);
-    addOption(30, 164, "RESEARCH", 1, KEY_F6, NULL, false);
-    addOption(40, 188, "CANCEL", 1, KEY_F7, NULL, false);
+    addOption(527, 324, "CANCEL", FontManager::SIZE_2, KEY_F5, NULL, false);
+    addOption(30, 164, "RESEARCH", FontManager::SIZE_2, KEY_F6, NULL, false);
+    addOption(40, 188, "CANCEL", FontManager::SIZE_2, KEY_F7, NULL, false);
     setParentMenu("select");
 }
 
@@ -72,7 +72,7 @@ void ResearchMenu::addWeaponOptions()
 {
     for (int i = 0; i < g_App.numAvailableWeapons(); i++) {
         Weapon *w = g_App.availableWeapon(i);
-        addOption(504, 110 + 12 * i, w->name(), 0,
+        addOption(504, 110 + 12 * i, w->name(), FontManager::SIZE_1,
                   (Key) (KEY_a + g_App.numAvailableMods() + i), NULL);
     }
 }
@@ -93,7 +93,7 @@ void ResearchMenu::addModOptions()
 {
     for (int i = 0; i < g_App.numAvailableMods(); i++) {
         Mod *m = g_App.availableMod(i);
-        addOption(504, 110 + 12 * i, m->name(), 0, (Key) (KEY_a + i), NULL,
+        addOption(504, 110 + 12 * i, m->name(), FontManager::SIZE_1, (Key) (KEY_a + i), NULL,
                   false);
     }
 }
@@ -125,16 +125,16 @@ const char *g_Fields[] =
 
 void ResearchMenu::addFieldOptions()
 {
-    addOption(20, 84, g_Fields[0], 0, KEY_0);
-    addOption(20, 96, g_Fields[1], 0, KEY_1);
-    addOption(20, 108, g_Fields[2], 0, KEY_2);
-    addOption(20, 120, g_Fields[3], 0, KEY_3);
-    addOption(20, 84, g_Fields[4], 0, KEY_4, 0, false);
-    addOption(20, 96, g_Fields[5], 0, KEY_5, 0, false);
-    addOption(20, 108, g_Fields[6], 0, KEY_6, 0, false);
-    addOption(20, 120, g_Fields[7], 0, KEY_7, 0, false);
-    addOption(20, 132, g_Fields[8], 0, KEY_8, 0, false);
-    addOption(20, 144, g_Fields[9], 0, KEY_9, 0, false);
+    addOption(20, 84, g_Fields[0], FontManager::SIZE_1, KEY_0);
+    addOption(20, 96, g_Fields[1], FontManager::SIZE_1, KEY_1);
+    addOption(20, 108, g_Fields[2], FontManager::SIZE_1, KEY_2);
+    addOption(20, 120, g_Fields[3], FontManager::SIZE_1, KEY_3);
+    addOption(20, 84, g_Fields[4], FontManager::SIZE_1, KEY_4, 0, false);
+    addOption(20, 96, g_Fields[5], FontManager::SIZE_1, KEY_5, 0, false);
+    addOption(20, 108, g_Fields[6], FontManager::SIZE_1, KEY_6, 0, false);
+    addOption(20, 120, g_Fields[7], FontManager::SIZE_1, KEY_7, 0, false);
+    addOption(20, 132, g_Fields[8], FontManager::SIZE_1, KEY_8, 0, false);
+    addOption(20, 144, g_Fields[9], FontManager::SIZE_1, KEY_9, 0, false);
 }
 
 void ResearchMenu::handleTick(int elapsed)
@@ -150,9 +150,7 @@ void ResearchMenu::handleTick(int elapsed)
 void ResearchMenu::updateClock() {
     char tmp[100];
     g_Session.getTimeAsStr(tmp);
-    setStaticText(1, tmp);
-
-    needRendering();
+    getStatic(1)->setText(tmp);
 }
 
 void ResearchMenu::handleShow() {
@@ -189,7 +187,7 @@ void ResearchMenu::handleRender()
                   orig_pixels_ + 538 + 87 * GAME_SCREEN_WIDTH, false,
                   GAME_SCREEN_WIDTH);
     sprintf(tmp, "%d", g_App.getGameSession().getMoney());
-    g_App.fonts().drawText(560 - g_App.fonts().textWidth(tmp, 1) / 2, 87,
+    g_App.fonts().drawText(560 - g_App.fonts().textWidth(tmp, FontManager::SIZE_2) / 2, 87,
                            tmp, 1, false);
 
     if (sel_weapon_) {

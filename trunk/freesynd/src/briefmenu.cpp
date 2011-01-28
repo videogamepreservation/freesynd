@@ -43,23 +43,23 @@ start_line_(0) {
     std::string str;
     menu_manager_->getMessage("MAP_BRIEF_BUT", str);
     
-    addStatic(148, 35, "#BRIEF_TITLE", 3, true);
-    addStatic(500, 9, "", 1, false);       // Time
+    addStatic(148, 35, "#BRIEF_TITLE", FontManager::SIZE_4, true);
+    addStatic(500, 9, "", FontManager::SIZE_2, false);       // Time
     menu_manager_->getMessage("BRIEF_INFO", str);
     int butX = 560 - g_App.fonts().textWidth(str.c_str(), FontManager::SIZE_2) / 2;
-    addOption(butX, 118, str.c_str(), 1, KEY_F1, NULL);
+    addOption(butX, 118, str.c_str(), FontManager::SIZE_2, KEY_F1, NULL);
     menu_manager_->getMessage("BRIEF_ENH", str);
     butX = 560 - g_App.fonts().textWidth(str.c_str(), FontManager::SIZE_2) / 2;
-    addOption(butX, 169, str.c_str(), 1, KEY_F2, NULL);
-    addOption(461, 320, "", 1, KEY_F6, NULL, true, Sprite::MSPR_RIGHT_ARROW2_D, Sprite::MSPR_RIGHT_ARROW2_L);
-    addOption(427, 320, "", 1, KEY_F7, NULL, false, Sprite::MSPR_LEFT_ARROW2_D, Sprite::MSPR_LEFT_ARROW2_L);
+    addOption(butX, 169, str.c_str(), FontManager::SIZE_2, KEY_F2, NULL);
+    addOption(461, 320, "", FontManager::SIZE_2, KEY_F6, NULL, true, Sprite::MSPR_RIGHT_ARROW2_D, Sprite::MSPR_RIGHT_ARROW2_L);
+    addOption(427, 320, "", FontManager::SIZE_2, KEY_F7, NULL, false, Sprite::MSPR_LEFT_ARROW2_D, Sprite::MSPR_LEFT_ARROW2_L);
     menu_manager_->getMessage("MENU_ACC_BUT", str);
     butX = 80 - g_App.fonts().textWidth(str.c_str(), FontManager::SIZE_2) / 2;
-    addOption(butX, 352, str.c_str(), 1, KEY_F3, "select");
+    addOption(butX, 352, str.c_str(), FontManager::SIZE_2, KEY_F3, "select");
     menu_manager_->getMessage("BRIEF_MAP", str);
     butX = 195 - g_App.fonts().textWidth(str.c_str(), FontManager::SIZE_2) / 2;
-    addOption(butX, 352, str.c_str(), 1, KEY_F4, "map");
-    addOption(535, 352, "#MENU_MAIN_BUT", 1, KEY_F5, "main");
+    addOption(butX, 352, str.c_str(), FontManager::SIZE_2, KEY_F4, "map");
+    addOption(535, 352, "#MENU_MAIN_BUT", FontManager::SIZE_2, KEY_F5, "main");
 
     setParentMenu("map");
 }
@@ -82,7 +82,7 @@ void BriefMenu::updateClock() {
     char tmp[100];
 
     g_Session.getTimeAsStr(tmp);
-    setStaticText(1, tmp);
+    getStatic(1)->setText(tmp);
 
     needRendering();
 }

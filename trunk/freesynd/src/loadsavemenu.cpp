@@ -31,7 +31,7 @@ LoadSaveMenu::LoadSaveMenu(MenuManager * m):Menu(m, "loadsave", "mlosa.dat",
      "mlosaout.dat")
 {
     // TODO: Slots 1 to 10, LOAD and SAVE
-    addOption(535, 352, "MENU", 1, KEY_F5, "main");
+    addOption(535, 352, "MENU", FontManager::SIZE_2, KEY_F5, "main");
     setParentMenu("main");
 }
 

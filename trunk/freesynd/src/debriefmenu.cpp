@@ -35,51 +35,51 @@ DebriefMenu::DebriefMenu(MenuManager *m) : Menu(m, "debrief", "mdebrief.dat",
     int left_x = 20;
     std::string str;
 
-    addStatic(100, y, "#DEBRIEF_TITLE", 3, true);
+    addStatic(100, y, "#DEBRIEF_TITLE", FontManager::SIZE_4, true);
     y = 100;
     menu_manager_->getMessage("DEBRIEF_SUBTITLE", str);
-    addStatic(left_x, y, str.c_str(), 1, false);
+    addStatic(left_x, y, str.c_str(), FontManager::SIZE_2, false);
     separatorSize_ = g_App.fonts().textWidth(str.c_str(), FontManager::SIZE_2);
 
     y = 120;
-    addStatic(left_x, y, "#DEBRIEF_STATUS", 1, false);
-    txtStatusId_ = addStatic(right_x, y, "", 1, false);
+    addStatic(left_x, y, "#DEBRIEF_STATUS", FontManager::SIZE_2, false);
+    txtStatusId_ = addStatic(right_x, y, "", FontManager::SIZE_2, false);
     y += 15;
-    addStatic(left_x, y, "#DEBRIEF_AGENTS", 1, false);
-    txtUsedId_ = addStatic(right_x, y, "", 1, false);
+    addStatic(left_x, y, "#DEBRIEF_AGENTS", FontManager::SIZE_2, false);
+    txtUsedId_ = addStatic(right_x, y, "", FontManager::SIZE_2, false);
     y += 15;
-    addStatic(left_x, y, "#DEBRIEF_NEW_AGENT", 1, false);
-    txtAgentCapturedId_ = addStatic(right_x, y, "", 1, false);
+    addStatic(left_x, y, "#DEBRIEF_NEW_AGENT", FontManager::SIZE_2, false);
+    txtAgentCapturedId_ = addStatic(right_x, y, "", FontManager::SIZE_2, false);
     y += 15;
-    addStatic(left_x, y, "#DEBRIEF_TIME", 1, false);
-    txtTimeId_ = addStatic(right_x, y, "", 1, false);
+    addStatic(left_x, y, "#DEBRIEF_TIME", FontManager::SIZE_2, false);
+    txtTimeId_ = addStatic(right_x, y, "", FontManager::SIZE_2, false);
     y += 15;
-    addStatic(left_x, y, "#DEBRIEF_AGT_KILLED", 1, false);
-    txtAgentKilledId_ = addStatic(right_x, y, "", 1, false);
+    addStatic(left_x, y, "#DEBRIEF_AGT_KILLED", FontManager::SIZE_2, false);
+    txtAgentKilledId_ = addStatic(right_x, y, "", FontManager::SIZE_2, false);
     y += 15;
-    addStatic(left_x, y, "#DEBRIEF_CRIM_KILLED", 1, false);
-    txtCrimKilledId_ = addStatic(right_x, y, "", 1, false);
+    addStatic(left_x, y, "#DEBRIEF_CRIM_KILLED", FontManager::SIZE_2, false);
+    txtCrimKilledId_ = addStatic(right_x, y, "", FontManager::SIZE_2, false);
     y += 15;
-    addStatic(left_x, y, "#DEBRIEF_CIV_KILLED", 1, false);
-    txtCivilKilledId_ = addStatic(right_x, y, "", 1, false);
+    addStatic(left_x, y, "#DEBRIEF_CIV_KILLED", FontManager::SIZE_2, false);
+    txtCivilKilledId_ = addStatic(right_x, y, "", FontManager::SIZE_2, false);
     y += 15;
-    addStatic(left_x, y, "#DEBRIEF_POL_KILLED", 1, false);
-    txtPoliceKilledId_ = addStatic(right_x, y, "", 1, false);
+    addStatic(left_x, y, "#DEBRIEF_POL_KILLED", FontManager::SIZE_2, false);
+    txtPoliceKilledId_ = addStatic(right_x, y, "", FontManager::SIZE_2, false);
     y += 15;
-    addStatic(left_x, y, "#DEBRIEF_GUARD_KILLED", 1, false);
-    txtGardKilledId_ = addStatic(right_x, y, "", 1, false);
+    addStatic(left_x, y, "#DEBRIEF_GUARD_KILLED", FontManager::SIZE_2, false);
+    txtGardKilledId_ = addStatic(right_x, y, "", FontManager::SIZE_2, false);
     y += 15;
-    addStatic(left_x, y, "#DEBRIEF_PERSUADED", 1, false);
-    txtConvincedId_ = addStatic(right_x, y, "", 1, false);
+    addStatic(left_x, y, "#DEBRIEF_PERSUADED", FontManager::SIZE_2, false);
+    txtConvincedId_ = addStatic(right_x, y, "", FontManager::SIZE_2, false);
     y += 15;
-    addStatic(left_x, y, "#DEBRIEF_HIT", 1, false);
-    txtPrecisionId_ = addStatic(right_x, y, "", 1, false);
+    addStatic(left_x, y, "#DEBRIEF_HIT", FontManager::SIZE_2, false);
+    txtPrecisionId_ = addStatic(right_x, y, "", FontManager::SIZE_2, false);
 
     y = 352;
     menu_manager_->getMessage("MENU_ACC_BUT", str);
     int butX = 80 - g_App.fonts().textWidth(str.c_str(), FontManager::SIZE_2) / 2;
-    addOption(butX, y, str.c_str(), 1, KEY_F5, "map");
-    addOption(535, y, "#MENU_MAIN_BUT", 1, KEY_F6, "main");
+    addOption(butX, y, str.c_str(), FontManager::SIZE_2, KEY_F5, "map");
+    addOption(535, y, "#MENU_MAIN_BUT", FontManager::SIZE_2, KEY_F6, "main");
 }
 
 /*!
@@ -94,32 +94,32 @@ void DebriefMenu::handleShow() {
     MissionStats *pStats = pMission->getStatistics();
 
     if (pMission->getStatus() == Mission::FAILED) {
-        setStaticText(txtStatusId_, "#DEBRIEF_MIS_FAILED");
+        getStatic(txtStatusId_)->setText("#DEBRIEF_MIS_FAILED");
     } else if (pMission->getStatus() == Mission::COMPLETED) {
-        setStaticText(txtStatusId_, "#DEBRIEF_MIS_COMP");
+        getStatic(txtStatusId_)->setText("#DEBRIEF_MIS_COMP");
     } else if (pMission->getStatus() == Mission::ABORTED) {
-        setStaticText(txtStatusId_, "#DEBRIEF_MIS_ABORT");
+        getStatic(txtStatusId_)->setText("#DEBRIEF_MIS_ABORT");
     }
 
-    setStaticTextFormated(txtUsedId_, "%i", pStats->agents);
-    setStaticTextFormated(txtAgentCapturedId_, "%i", pStats->agentCaptured);
+    getStatic(txtUsedId_)->setTextFormated("%i", pStats->agents);
+    getStatic(txtAgentCapturedId_)->setTextFormated("%i", pStats->agentCaptured);
 
     int days = 0;
     int hours = 0;
     g_Session.getDayHourFromPeriod(pStats->mission_duration, days, hours);
-    setStaticTextFormated(txtTimeId_, "#DEBRIEF_TIME_FORMAT", hours, days);
-    setStaticTextFormated(txtAgentKilledId_, "%i", pStats->enemyKilled);
-    setStaticTextFormated(txtCrimKilledId_, "%i", pStats->criminalKilled);
-    setStaticTextFormated(txtCivilKilledId_, "%i", pStats->civilKilled);
-    setStaticTextFormated(txtPoliceKilledId_, "%i", pStats->policeKilled);
-    setStaticTextFormated(txtGardKilledId_, "%i", pStats->guardKilled);
-    setStaticTextFormated(txtConvincedId_, "%i", pStats->convinced);
+    getStatic(txtTimeId_)->setTextFormated("#DEBRIEF_TIME_FORMAT", hours, days);
+    getStatic(txtAgentKilledId_)->setTextFormated("%i", pStats->enemyKilled);
+    getStatic(txtCrimKilledId_)->setTextFormated("%i", pStats->criminalKilled);
+    getStatic(txtCivilKilledId_)->setTextFormated("%i", pStats->civilKilled);
+    getStatic(txtPoliceKilledId_)->setTextFormated("%i", pStats->policeKilled);
+    getStatic(txtGardKilledId_)->setTextFormated("%i", pStats->guardKilled);
+    getStatic(txtConvincedId_)->setTextFormated("%i", pStats->convinced);
 
     if (pStats->nbOfShots == 0) {
-        setStaticTextFormated(txtPrecisionId_, "#DEBRIEF_NO_BULLET");
+        getStatic(txtPrecisionId_)->setText("#DEBRIEF_NO_BULLET");
     } else {
         int precision = (pStats->nbOfHits * 100) / pStats->nbOfShots ;
-        setStaticTextFormated(txtPrecisionId_, "%i%%", precision);
+        getStatic(txtPrecisionId_)->setTextFormated("%i%%", precision);
     }
 }
 

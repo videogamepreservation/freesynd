@@ -303,6 +303,10 @@
 					RelativePath="..\..\src\selectmenu.cpp"
 					>
 				</File>
+				<File
+					RelativePath="..\..\src\menus\widget.cpp"
+					>
+				</File>
 			</Filter>
 			<Filter
 				Name="utils"
@@ -555,6 +559,10 @@
 				</File>
 				<File
 					RelativePath="..\..\src\selectmenu.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\menus\widget.h"
 					>
 				</File>
 			</Filter>

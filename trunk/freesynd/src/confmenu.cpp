@@ -69,15 +69,15 @@ public:
     CommonConfSubMenu(m, "changeLogo", bkg, confMenu), logo_(g_App.getGameSession().getLogo()),
     colour_(0) {
         setClearArea(bkg_, 283, 28, 328, 120);
-        addStatic(299, 32, "CHANGE COLOUR AND LOGO", 1, false);
-        addOption(405, 65, "", 1, KEY_F1, NULL, true, Sprite::MSPR_LEFT_ARROW_D, Sprite::MSPR_LEFT_ARROW_L);
-        addOption(435, 65, "", 1, KEY_F2, NULL, true, Sprite::MSPR_RIGHT_ARROW_D, Sprite::MSPR_RIGHT_ARROW_L);
-        addStatic(475, 65, "COLOUR", 1, false);
-        addOption(405, 95, "", 1, KEY_F3, NULL, true, Sprite::MSPR_LEFT_ARROW_D, Sprite::MSPR_LEFT_ARROW_L);
-        addOption(435, 95, "", 1, KEY_F4, NULL, true, Sprite::MSPR_RIGHT_ARROW_D, Sprite::MSPR_RIGHT_ARROW_L);
-        addStatic(475, 95, "LOGO", 1, false);
-        addOption(340, 127, "OK", 1, KEY_F5, "conf");
-        addOption(501, 127, "CANCEL", 1, KEY_F6, "conf");
+        addStatic(299, 32, "CHANGE COLOUR AND LOGO", FontManager::SIZE_2, false);
+        addOption(405, 65, "", FontManager::SIZE_2, KEY_F1, NULL, true, Sprite::MSPR_LEFT_ARROW_D, Sprite::MSPR_LEFT_ARROW_L);
+        addOption(435, 65, "", FontManager::SIZE_2, KEY_F2, NULL, true, Sprite::MSPR_RIGHT_ARROW_D, Sprite::MSPR_RIGHT_ARROW_L);
+        addStatic(475, 65, "COLOUR", FontManager::SIZE_2, false);
+        addOption(405, 95, "", FontManager::SIZE_2, KEY_F3, NULL, true, Sprite::MSPR_LEFT_ARROW_D, Sprite::MSPR_LEFT_ARROW_L);
+        addOption(435, 95, "", FontManager::SIZE_2, KEY_F4, NULL, true, Sprite::MSPR_RIGHT_ARROW_D, Sprite::MSPR_RIGHT_ARROW_L);
+        addStatic(475, 95, "LOGO", FontManager::SIZE_2, false);
+        addOption(340, 127, "OK", FontManager::SIZE_2, KEY_F5, "conf");
+        addOption(501, 127, "CANCEL", FontManager::SIZE_2, KEY_F6, "conf");
 
         for (unsigned int i = 0; i < sizeof(g_Colours) / sizeof(int); i++) {
             if (g_Colours[i] == g_App.getGameSession().getLogoColour())
@@ -212,9 +212,9 @@ public:
     ChangeCompanyNameMenu(MenuManager *m, uint8 *bkg, ConfMenu *confMenu) :
     ChangeNameMenu(m, "changeCompany", bkg, confMenu) {
         setClearArea(bkg, 283, 28, 328, 120);
-        addStatic(320, 32, "CHANGE COMPANY NAME", 1, false);
-        addOption(340, 127, "OK", 1, KEY_F5, "conf");
-        addOption(501, 127, "CANCEL", 1, KEY_F6, "conf");
+        addStatic(320, 32, "CHANGE COMPANY NAME", FontManager::SIZE_2, false);
+        addOption(340, 127, "OK", FontManager::SIZE_2, KEY_F5, "conf");
+        addOption(501, 127, "CANCEL", FontManager::SIZE_2, KEY_F6, "conf");
         name_value_ = g_App.getGameSession().getCompanyName();
     }
 
@@ -231,9 +231,9 @@ public:
     ChangeYourNameMenu(MenuManager *m, uint8 *bkg, ConfMenu *confMenu) :
     ChangeNameMenu(m, "changeName", bkg, confMenu) {
         setClearArea(bkg, 283, 28, 328, 120);
-        addStatic(350, 32, "ENTER YOUR NAME", 1, false);
-        addOption(340, 127, "OK", 1, KEY_F5, "conf");
-        addOption(501, 127, "CANCEL", 1, KEY_F6, "conf");
+        addStatic(350, 32, "ENTER YOUR NAME", FontManager::SIZE_2, false);
+        addOption(340, 127, "OK", FontManager::SIZE_2, KEY_F5, "conf");
+        addOption(501, 127, "CANCEL", FontManager::SIZE_2, KEY_F6, "conf");
         name_value_ = g_App.getGameSession().getUserName();
     }
 
@@ -251,12 +251,12 @@ Menu(m, "conf", "mconfup.dat", "mconfout.dat") {
     submenu_company_name_ = new ChangeCompanyNameMenu(m, bkg_, this);
     submenu_name_ = new ChangeYourNameMenu(m, bkg_, this);
     setClearArea(bkg_, 283, 28, 328, 120);
-    addStatic(299, 32, "SELECT DETAIL TO CHANGE", 1, false);
-    addOption(325, 65, "COLOUR AND LOGO", 1, KEY_F1, "changeLogo", true, Sprite::MSPR_BULLET_D, Sprite::MSPR_BULLET_L);
-    addOption(325, 90, "COMPANY NAME", 1, KEY_F2, "changeCompany", true, Sprite::MSPR_BULLET_D, Sprite::MSPR_BULLET_L);
-    addOption(325, 115, "YOUR NAME", 1, KEY_F3, "changeName", true, Sprite::MSPR_BULLET_D, Sprite::MSPR_BULLET_L);
-    addOption(43, 352, "ACCEPT", 1, KEY_F4, "main");
-    addOption(535, 352, "MENU", 1, KEY_F5, "main");
+    addStatic(299, 32, "SELECT DETAIL TO CHANGE", FontManager::SIZE_2, false);
+    addOption(325, 65, "COLOUR AND LOGO", FontManager::SIZE_2, KEY_F1, "changeLogo", true, Sprite::MSPR_BULLET_D, Sprite::MSPR_BULLET_L);
+    addOption(325, 90, "COMPANY NAME", FontManager::SIZE_2, KEY_F2, "changeCompany", true, Sprite::MSPR_BULLET_D, Sprite::MSPR_BULLET_L);
+    addOption(325, 115, "YOUR NAME", FontManager::SIZE_2, KEY_F3, "changeName", true, Sprite::MSPR_BULLET_D, Sprite::MSPR_BULLET_L);
+    addOption(43, 352, "ACCEPT", FontManager::SIZE_2, KEY_F4, "main");
+    addOption(535, 352, "MENU", FontManager::SIZE_2, KEY_F5, "main");
     setParentMenu("main");
 }
 

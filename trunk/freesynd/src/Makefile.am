@@ -28,6 +28,7 @@ freesynd_SOURCES = common.h config.h keys.h utils/singleton.h \
 	gfx/spritemanager.cpp gfx/spritemanager.h \
 	gfx/tile.cpp gfx/tile.h \
 	gfx/tilemanager.cpp gfx/tilemanager.h \
+	menus/widget.cpp menus/widget.h \
 	agent.cpp agent.h \
 	agentmanager.cpp agentmanager.h \
 	app.cpp app.h \

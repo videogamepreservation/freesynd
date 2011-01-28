@@ -34,12 +34,12 @@ MainMenu::MainMenu(MenuManager * m):Menu(m, "main", "moption.dat",
     std::string str;
     menu_manager_->getMessage("MAIN_TITLE", str);
     int titleX = g_Screen.gameScreenWidth() / 2  - g_App.fonts().textWidth(str.c_str(), FontManager::SIZE_4) / 2;
-    addStatic(titleX, 40, str.c_str(), 3, true);
-    addOption(208, 134, "#MAIN_CONF", 2, KEY_F1, "conf");
-    addOption(208, 168, "#MAIN_BEGIN", 2, KEY_F2, "map");
-    addOption(208, 201, "#MAIN_LOAD_SAVE", 2, KEY_F3, "loadsave");
-    addOption(208, 236, "#MAIN_RESET", 2, KEY_F4, "main");
-    addOption(208, 269, "#MAIN_QUIT", 2, KEY_F5, NULL);
+    addStatic(titleX, 40, str.c_str(), FontManager::SIZE_4, true);
+    addOption(208, 134, "#MAIN_CONF", FontManager::SIZE_3, KEY_F1, "conf");
+    addOption(208, 168, "#MAIN_BEGIN", FontManager::SIZE_3, KEY_F2, "map");
+    addOption(208, 201, "#MAIN_LOAD_SAVE", FontManager::SIZE_3, KEY_F3, "loadsave");
+    addOption(208, 236, "#MAIN_RESET", FontManager::SIZE_3, KEY_F4, "main");
+    addOption(208, 269, "#MAIN_QUIT", FontManager::SIZE_3, KEY_F5, NULL);
 }
 
 void MainMenu::handleShow()

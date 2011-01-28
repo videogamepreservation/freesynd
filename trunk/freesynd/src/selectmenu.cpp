@@ -33,22 +33,22 @@ SelectMenu::SelectMenu(MenuManager * m):Menu(m, "select", "mselect.dat", "mselou
 cur_agent_(0), tick_count_(0), sel_weapon_(0), sel_mod_(0),
 sel_weapon_inst_(0), sel_all_(false)
 {
-    addStatic(148, 35, "TEAM SELECTION", 3, true);
-    addStatic(500, 9, "", 1, false);       // Time
+    addStatic(148, 35, "TEAM SELECTION", FontManager::SIZE_4, true);
+    addStatic(500, 9, "", FontManager::SIZE_2, false);       // Time
 
-    addOption(32, 240, "RESEARCH", 1, KEY_F1, "research");
-    addOption(52, 268, "TEAM", 1, KEY_F2, NULL);
-    addOption(52, 296, "MODS", 1, KEY_F3, NULL);
-    addOption(52, 324, "EQUIP", 1, KEY_F4, NULL);
-    addOption(43, 352, "ACCEPT", 1, KEY_F5, "loading");
-    addOption(535, 352, "MENU", 1, KEY_F6, "main");
+    addOption(32, 240, "RESEARCH", FontManager::SIZE_2, KEY_F1, "research");
+    addOption(52, 268, "TEAM", FontManager::SIZE_2, KEY_F2, NULL);
+    addOption(52, 296, "MODS", FontManager::SIZE_2, KEY_F3, NULL);
+    addOption(52, 324, "EQUIP", FontManager::SIZE_2, KEY_F4, NULL);
+    addOption(43, 352, "ACCEPT", FontManager::SIZE_2, KEY_F5, "loading");
+    addOption(535, 352, "MENU", FontManager::SIZE_2, KEY_F6, "main");
 
     addModOptions();
     addWeaponOptions();
 
-    addOption(527, 274, "CANCEL", 1, KEY_F7, NULL, false);
-    addOption(517, 324, "PURCHASE", 1, KEY_F8, NULL, false);
-    addOption(537, 324, "SELL", 1, KEY_F9, NULL, false);
+    addOption(527, 274, "CANCEL", FontManager::SIZE_2, KEY_F7, NULL, false);
+    addOption(517, 324, "PURCHASE", FontManager::SIZE_2, KEY_F8, NULL, false);
+    addOption(537, 324, "SELL", FontManager::SIZE_2, KEY_F9, NULL, false);
     setParentMenu("brief");
 
     rnd_ = 0;
@@ -63,7 +63,7 @@ void SelectMenu::addModOptions()
 {
     for (int i = 0; i < g_App.numAvailableMods(); i++) {
         Mod *m = g_App.availableMod(i);
-        addOption(504, 110 + 12 * i, m->name(), 0, (Key) (KEY_a + i), NULL,
+        addOption(504, 110 + 12 * i, m->name(), FontManager::SIZE_1, (Key) (KEY_a + i), NULL,
                   false);
     }
 }
@@ -72,7 +72,7 @@ void SelectMenu::addWeaponOptions()
 {
     for (int i = 0; i < g_App.numAvailableWeapons(); i++) {
         Weapon *w = g_App.availableWeapon(i);
-        addOption(504, 110 + 12 * i, w->name(), 0,
+        addOption(504, 110 + 12 * i, w->name(), FontManager::SIZE_1,
                   (Key) (KEY_a + g_App.numAvailableMods() + i), NULL);
     }
 }
@@ -81,7 +81,7 @@ void SelectMenu::addRecruitOptions()
 {
     for (int i = 0; i < AgentManager::MAX_AGENT; i++) {
         if (g_App.agents().agent(i)) {
-            addOption(520, 124 + i * 12, g_App.agents().agent(i)->name(), 0,
+            addOption(520, 124 + i * 12, g_App.agents().agent(i)->name(), FontManager::SIZE_1,
                   (Key) (KEY_0 + i), NULL, false);
         }
     }
@@ -317,7 +317,7 @@ void SelectMenu::handleTick(int elapsed)
 void SelectMenu::updateClock() {
     char tmp[100];
     g_Session.getTimeAsStr(tmp);
-    setStaticText(1, tmp);
+    getStatic(1)->setText(tmp);
 }
 
 void SelectMenu::handleShow() {

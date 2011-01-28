@@ -52,8 +52,6 @@ public:
 
     void drawText(int x, int y, const char *text, int size, bool dark,
             bool x2 = true);
-    int textWidth(const char *text, int size, bool x2 = true);
-    int textHeight(int size, bool x2 = true);
 
     void drawText(int x, int y, const char *text, EFontSize size, bool dark,
             bool x2 = true);

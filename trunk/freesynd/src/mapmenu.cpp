@@ -123,24 +123,24 @@ mapblk_data_(NULL), select_tick_count_(0)
     std::string str;
     menu_manager_->getMessage("MAP_BRIEF_BUT", str);
     int butX = 80 - g_App.fonts().textWidth(str.c_str(), FontManager::SIZE_2) / 2;
-    addOption(butX, 352, str.c_str(), 1, KEY_F4, "brief");
+    addOption(butX, 352, str.c_str(), FontManager::SIZE_2, KEY_F4, "brief");
 
-    addOption(535, 352, "#MENU_MAIN_BUT", 1, KEY_F5, "main");
+    addOption(535, 352, "#MENU_MAIN_BUT", FontManager::SIZE_2, KEY_F5, "main");
 
-    addStatic(268, 312, "", 0, false);   // Country name
-    addStatic(194, 332, "#MAP_POP", 1, false);       // Pop label
-    addStatic(268, 332, "", 0, false);          // Pop value
-    addStatic(194, 346, "#MAP_TAX", 1, false);       // Tax label
-    addStatic(268, 346, "", 0, false);       // Tax value
-    addStatic(194, 360, "#MAP_OWN", 1, false);       // Own label
-    addStatic(268, 360, "", 0, false);          // Own status
+    addStatic(268, 312, "", FontManager::SIZE_1, false);   // Country name
+    addStatic(194, 332, "#MAP_POP", FontManager::SIZE_2, false);       // Pop label
+    addStatic(268, 332, "", FontManager::SIZE_1, false);          // Pop value
+    addStatic(194, 346, "#MAP_TAX", FontManager::SIZE_2, false);       // Tax label
+    addStatic(268, 346, "", FontManager::SIZE_1, false);       // Tax value
+    addStatic(194, 360, "#MAP_OWN", FontManager::SIZE_2, false);       // Own label
+    addStatic(268, 360, "", FontManager::SIZE_1, false);          // Own status
 
-    addStatic(500, 9, "", 1, false);       // Time
+    addStatic(500, 9, "", FontManager::SIZE_2, false);       // Time
 
     // Tax cursors
-    addStatic(350, 346, "@   30%", 0, false);
-    addOption(375, 350, "", 1, KEY_MINUS, NULL, false, Sprite::MSPR_TAX_DECR, Sprite::MSPR_TAX_DECR);
-    addOption(435, 350, "", 1, KEY_PLUS, NULL, false, Sprite::MSPR_TAX_INCR, Sprite::MSPR_TAX_INCR);
+    addStatic(350, 346, "@   30%", FontManager::SIZE_1, false);
+    addOption(375, 350, "", FontManager::SIZE_2, KEY_MINUS, NULL, false, Sprite::MSPR_TAX_DECR, Sprite::MSPR_TAX_DECR);
+    addOption(435, 350, "", FontManager::SIZE_2, KEY_PLUS, NULL, false, Sprite::MSPR_TAX_INCR, Sprite::MSPR_TAX_INCR);
 
     setParentMenu("main");
 
@@ -179,7 +179,7 @@ void MapMenu::handleBlockSelected() {
     }
 
     // Update the country informations
-    setStaticText(COUNTRY_STATIC_ID, blk.name);
+    getStatic(COUNTRY_STATIC_ID)->setText(blk.name);
 
     char tmp[100];
 
@@ -189,32 +189,32 @@ void MapMenu::handleBlockSelected() {
 #else
     sprintf(tmp, "%i", blk.population);
 #endif
-    setStaticText(POP_STATIC_ID, tmp);
+    getStatic(POP_STATIC_ID)->setText(tmp);
 
     // Mission is finished
     if (blk.status == BLK_FINISHED) {
     
         // Status
-        setStaticText(OWN_LBL_STATIC_ID, "#MAP_STAT");
+        getStatic(OWN_LBL_STATIC_ID)->setText("#MAP_STAT");
         switch (blk.popStatus) {
             case STAT_VERY_HAPPY:
-                setStaticText(OWN_STATIC_ID, "#MAP_STAT_VHAPPY");
+                getStatic(OWN_STATIC_ID)->setText("#MAP_STAT_VHAPPY");
                 break;
             case STAT_HAPPY:
-                setStaticText(OWN_STATIC_ID, "#MAP_STAT_HAPPY");
+                getStatic(OWN_STATIC_ID)->setText("#MAP_STAT_HAPPY");
                 break;
             case STAT_CONTENT:
-                setStaticText(OWN_STATIC_ID, "#MAP_STAT_CTNT");
+                getStatic(OWN_STATIC_ID)->setText("#MAP_STAT_CTNT");
                 break;
             case STAT_UNHAPPY:
-                setStaticText(OWN_STATIC_ID, "#MAP_STAT_UNHAPPY");
+                getStatic(OWN_STATIC_ID)->setText("#MAP_STAT_UNHAPPY");
                 break;
             case STAT_DISCONTENT:
-                setStaticText(OWN_STATIC_ID, "#MAP_STAT_DISCTNT");
+                getStatic(OWN_STATIC_ID)->setText("#MAP_STAT_DISCTNT");
                 break;
             default:
                 // should never happend
-                setStaticText(OWN_STATIC_ID, "");
+                getStatic(OWN_STATIC_ID)->setText("");
         }
 
         // Tax
@@ -224,7 +224,7 @@ void MapMenu::handleBlockSelected() {
 #else
         sprintf(tmp, "%i", g_Session.getTaxRevenue(blk.population, tax));
 #endif
-        setStaticText(TAX_VALUE_STATIC_ID, tmp);
+        getStatic(TAX_VALUE_STATIC_ID)->setText(tmp);
 
         showOption(KEY_MINUS);
         showOption(KEY_PLUS);
@@ -234,25 +234,25 @@ void MapMenu::handleBlockSelected() {
 #else
         sprintf(tmp, "@   %d%%", tax);
 #endif
-        setStaticText(TAX_PCT_STATIC_ID, tmp);
+        getStatic(TAX_PCT_STATIC_ID)->setText(tmp);
 
     } else {
         int tax = blk.tax + blk.addToTax;
         // Status
-        setStaticText(OWN_LBL_STATIC_ID, "#MAP_OWN");
-        setStaticText(OWN_STATIC_ID, "");
+        getStatic(OWN_LBL_STATIC_ID)->setText("#MAP_OWN");
+        getStatic(OWN_STATIC_ID)->setText("");
         // Tax
         if (blk.status == BLK_REBEL) {
-            setStaticText(TAX_VALUE_STATIC_ID, "#MAP_STAT_REBEL");
+            getStatic(TAX_VALUE_STATIC_ID)->setText("#MAP_STAT_REBEL");
 #ifdef WIN_SECURE
             sprintf_s(tmp, 100, "@   %d%%", tax);
 #else
             sprintf(tmp, "@   %d%%", tax);
 #endif
-            setStaticText(TAX_PCT_STATIC_ID, tmp);
+            getStatic(TAX_PCT_STATIC_ID)->setText(tmp);
         } else {
-            setStaticText(TAX_VALUE_STATIC_ID, "#MAP_TAX_UNKWN");
-            setStaticText(TAX_PCT_STATIC_ID, "");
+            getStatic(TAX_VALUE_STATIC_ID)->setText("#MAP_TAX_UNKWN");
+            getStatic(TAX_PCT_STATIC_ID)->setText("");
         }
 
         hideOption(KEY_MINUS);
@@ -291,7 +291,7 @@ void MapMenu::handleTick(int elapsed)
 void MapMenu::updateClock() {
     char tmp[100];
     g_Session.getTimeAsStr(tmp);
-    setStaticText(TIME_STATIC_ID, tmp);
+    getStatic(TIME_STATIC_ID)->setText(tmp);
 }
 
 /*!

@@ -72,16 +72,6 @@ void FontManager::drawText(int x, int y, const char *text, int size,
     }
 }
 
-int FontManager::textWidth(const char *text, int size, bool x2)
-{
-    return dark_fonts_[size]->textWidth(text, x2);
-}
-
-int FontManager::textHeight(int size, bool x2)
-{
-    return dark_fonts_[size]->textHeight(x2);
-}
-
 void FontManager::drawText(int x, int y, const char *text, EFontSize size,
                            bool dark, bool x2)
 {

@@ -35,7 +35,7 @@ tick_count_(-500)
     std::string str;
     menu_manager_->getMessage("LDGAME_TITLE", str);
     int titleX = g_Screen.gameScreenWidth() / 2  - g_App.fonts().textWidth(str.c_str(), FontManager::SIZE_4) / 2;
-    addStatic(titleX, 180, str.c_str(), 3, false);
+    addStatic(titleX, 180, str.c_str(), FontManager::SIZE_4, false);
 }
 
 void LoadingMenu::handleTick(int elapsed)
