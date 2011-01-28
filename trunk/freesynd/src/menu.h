@@ -74,6 +74,7 @@ public:
     void render();
     //! Creates a new text label and returns its id
     int addStatic(int x, int y, const char *text, FontManager::EFontSize size, bool dark);
+    int addStatic(int x, int y, int width, const char *text, FontManager::EFontSize size, bool dark);
     //! Returns the MenuText at given position
     MenuText * getStatic(int staticId);
     //! Creates a new button and returns its id

@@ -54,6 +54,13 @@ protected:
     short minimap_scroll_x_;
     short minimap_scroll_y_;
     int minimap_blink_ticks_, minimap_blink_;
+
+    /*! Id of the text widget for money.*/
+    int txtMoneyId_;
+    /*! Id of the text widget for info.*/
+    int txtInfoId_;
+    /*! Id of the text widget for enhance.*/
+    int txtEnhId_;
 };
 
 #endif

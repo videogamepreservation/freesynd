@@ -30,10 +30,7 @@
 LogoutMenu::LogoutMenu(MenuManager * m):Menu(m, "logout", "", ""),
 tick_count_(0)
 {
-    std::string str;
-    menu_manager_->getMessage("LGOUT_TITLE", str);
-    int titleX = g_Screen.gameScreenWidth() / 2  - g_App.fonts().textWidth(str.c_str(), FontManager::SIZE_4) / 2;
-    addStatic(titleX, 180, str.c_str(), FontManager::SIZE_4, false);
+    addStatic(0, 180, g_Screen.gameScreenWidth(), "#LGOUT_TITLE", FontManager::SIZE_4, false);
 }
 
 void LogoutMenu::handleTick(int elapsed)

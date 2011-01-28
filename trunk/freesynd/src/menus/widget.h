@@ -87,12 +87,25 @@ protected:
  * This class represents a static text label : it displays a text
  * at a given location.
  * The text is displayed in dark or light green.
+ * A MenuText can be defined in two ways : left aligned or centered.
+ * Each constructor is specific to an alignment: When specifying widget width,
+ * that means that text will be centered using widget location and width.
+ * When setting only widget location, text will start at widget location.
  */
 class MenuText : public Widget {
 public:
+    /*!
+     * Use this constructor to left align text. Widget width will depend on text and font.
+     */
     MenuText(int x, int y, const char *text, FontManager::EFontSize size, bool dark,
-            bool visible): Widget(x, y, 0, 0, visible), 
-            text_(text), dark_(dark), size_(size) {}
+            bool visible);
+
+    /*!
+     * Use this constructor to center align text. Widget width will be fixed but text position
+     * will depend of font size and text length.
+     */
+    MenuText(int x, int y, int width, const char *text, FontManager::EFontSize size, bool dark,
+            bool visible);
 
     virtual ~MenuText() {}
 
@@ -107,9 +120,23 @@ public:
     bool isDark() { return dark_; }
 
 protected:
+    /*!
+     * Utility method to update text and compute associated data.
+     */
+    void updateText(const char *text);
+
+protected:
     /*! The text to be displayed.*/
     std::string text_;
     bool dark_;
+    /*! True means the text is centered, false the text is anchored
+     * to the left.
+     */
+    bool centered_;
+    /*! Real location of text.*/
+    int anchorX_;
+    /*! Real location of text.*/
+    int anchorY_;
     /*! Size of text font. */
     FontManager::EFontSize size_;
 };

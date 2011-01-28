@@ -31,10 +31,7 @@
 MainMenu::MainMenu(MenuManager * m):Menu(m, "main", "moption.dat",
      "moptout.dat")
 {
-    std::string str;
-    menu_manager_->getMessage("MAIN_TITLE", str);
-    int titleX = g_Screen.gameScreenWidth() / 2  - g_App.fonts().textWidth(str.c_str(), FontManager::SIZE_4) / 2;
-    addStatic(titleX, 40, str.c_str(), FontManager::SIZE_4, true);
+    addStatic(0, 40, g_Screen.gameScreenWidth(), "#MAIN_TITLE", FontManager::SIZE_4, true);
     addOption(208, 134, "#MAIN_CONF", FontManager::SIZE_3, KEY_F1, "conf");
     addOption(208, 168, "#MAIN_BEGIN", FontManager::SIZE_3, KEY_F2, "map");
     addOption(208, 201, "#MAIN_LOAD_SAVE", FontManager::SIZE_3, KEY_F3, "loadsave");

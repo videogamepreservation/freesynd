@@ -61,6 +61,13 @@ start_line_(0) {
     addOption(butX, 352, str.c_str(), FontManager::SIZE_2, KEY_F4, "map");
     addOption(535, 352, "#MENU_MAIN_BUT", FontManager::SIZE_2, KEY_F5, "main");
 
+    // Money
+    txtMoneyId_ = addStatic(500, 87, 127, "0", FontManager::SIZE_2, false);
+    // Info
+    txtInfoId_ = addStatic(500, 140, 127, "0", FontManager::SIZE_2, false);
+    // Enhancement
+    txtEnhId_ = addStatic(500, 195, 127, "0", FontManager::SIZE_2, false);
+
     setParentMenu("map");
 }
 
@@ -84,7 +91,8 @@ void BriefMenu::updateClock() {
     g_Session.getTimeAsStr(tmp);
     getStatic(1)->setText(tmp);
 
-    needRendering();
+    // update money
+    getStatic(txtMoneyId_)->setTextFormated("%d", g_Session.getMoney());
 }
 
 void BriefMenu::handleShow() {
@@ -120,12 +128,14 @@ void BriefMenu::handleShow() {
     start_line_ = 0;
 
     updateClock();
+
+    getStatic(txtInfoId_)->setTextFormated("%d", pMission->infoCost(g_Session.getSelectedBlock().infoLevel));
+    getStatic(txtEnhId_)->setTextFormated("%d", pMission->enhanceCost(g_Session.getSelectedBlock().enhanceLevel));
+
+    g_System.showCursor();
 }
 
 void BriefMenu::handleRender() {
-
-    /*g_Screen.blit(0, 0, GAME_SCREEN_WIDTH, 340, orig_pixels_, false,
-                      GAME_SCREEN_WIDTH);*/
 
     g_Screen.drawLogo(18, 14, g_Session.getLogo(), g_Session.getLogoColour());
 
@@ -257,38 +267,6 @@ void BriefMenu::handleRender() {
     //     pMission->minimap_overlay_,0, false);
 
     drawMinimap(0);
-    // write money
-    char tmp[100];
-/*    g_Screen.blit(502, 87, 125, 30,
-                  orig_pixels_ + 502 + 87 * GAME_SCREEN_WIDTH, false,
-                  GAME_SCREEN_WIDTH);*/
-    sprintf(tmp, "%d", g_App.getGameSession().getMoney());
-    g_App.fonts().drawText(560 - g_App.fonts().textWidth(tmp, FontManager::SIZE_2) / 2, 87,
-                           tmp, FontManager::SIZE_2, false);
-
-    // write cost for more info
-/*    g_Screen.blit(538, 140, 100, 30,
-                  orig_pixels_ + 538 + 140 * GAME_SCREEN_WIDTH, false,
-                  GAME_SCREEN_WIDTH);*/
-
-    if (g_Session.getSelectedBlock().infoLevel < pMission->getMaxInfoLvl()) {
-        sprintf(tmp, "%d", pMission->infoCost(g_Session.getSelectedBlock().infoLevel));
-        g_App.fonts().drawText(560 - g_App.fonts().textWidth(tmp, FontManager::SIZE_2) / 2,
-                               140, tmp, FontManager::SIZE_2, false);
-    }
-
-    // write cost for more enhance
-/*    g_Screen.blit(538, 195, 100, 30,
-                  orig_pixels_ + 538 + 195 * GAME_SCREEN_WIDTH, false,
-                  GAME_SCREEN_WIDTH);*/
-
-    if (g_Session.getSelectedBlock().enhanceLevel < pMission->getMaxEnhanceLvl()) {
-        sprintf(tmp, "%d", pMission->enhanceCost(g_Session.getSelectedBlock().enhanceLevel));
-        g_App.fonts().drawText(560 - g_App.fonts().textWidth(tmp, FontManager::SIZE_2) / 2,
-                               195, tmp, FontManager::SIZE_2, false);
-    }
-
-    g_System.showCursor();
 }
 
 void BriefMenu::handleLeave() {
@@ -302,7 +280,9 @@ void BriefMenu::handleOption(Key key, const int modKeys) {
         if (g_Session.getSelectedBlock().infoLevel < pMission->getMaxInfoLvl()) {
             g_Session.setMoney(g_Session.getMoney() - pMission->infoCost(g_Session.getSelectedBlock().infoLevel));
             g_Session.getSelectedBlock().infoLevel += 1;
-            needRendering();
+            
+            getStatic(txtMoneyId_)->setTextFormated("%d", g_Session.getMoney());
+            getStatic(txtInfoId_)->setTextFormated("%d", pMission->infoCost(g_Session.getSelectedBlock().infoLevel));
         }
 
         showOption(KEY_F6);
@@ -311,10 +291,12 @@ void BriefMenu::handleOption(Key key, const int modKeys) {
     if (key == KEY_F2) {
         // Buy some map enhancement
         if (g_Session.getSelectedBlock().enhanceLevel < pMission->getMaxEnhanceLvl()) {
-            g_Session.setMoney(g_Session.getMoney() -
+            g_Session.setMoney(g_Session.getMoney() - 
                 pMission->enhanceCost(g_Session.getSelectedBlock().enhanceLevel));
             g_Session.getSelectedBlock().enhanceLevel += 1;
-            needRendering();
+            
+            getStatic(txtMoneyId_)->setTextFormated("%d", g_Session.getMoney());
+            getStatic(txtEnhId_)->setTextFormated("%d", pMission->enhanceCost(g_Session.getSelectedBlock().enhanceLevel));
         }
     }
 

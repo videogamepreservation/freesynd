@@ -122,6 +122,12 @@ int Menu::addStatic(int x, int y, const char *text, FontManager::EFontSize size,
     return statics_.size() - 1;
 }
 
+int Menu::addStatic(int x, int y, int width, const char *text, FontManager::EFontSize size, bool dark) {
+    MenuText m(x, y, width, text, size, dark, true);
+    statics_.push_back(m);
+    return statics_.size() - 1;
+}
+
 MenuText * Menu::getStatic(int staticId) {
     int i = 0;
     for (std::list < MenuText >::iterator it = statics_.begin();

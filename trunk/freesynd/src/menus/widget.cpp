@@ -28,13 +28,33 @@ void Widget::setVisible(bool visible) {
     visible_ = visible;
 }
 
-/*! 
- * Modify the MenuText text.
- * If the given text starts with a '#', the remaining
- * text identifies a key in the language file.
- * \param text to set
- */
-void MenuText::setText(const char *text) {
+MenuText::MenuText(int x, int y, const char *text, FontManager::EFontSize size, 
+                   bool dark, bool visible): 
+            Widget(x, y, 0, 0, visible), dark_(dark), size_(size) {
+
+        centered_ = false;
+        anchorX_ = x;
+        anchorY_ = y;
+        // Height is fixed by font size
+        height_ = g_App.fonts().textHeight(size_);
+
+        updateText(text);
+}
+
+MenuText::MenuText(int x, int y, int width, const char *text, FontManager::EFontSize size, 
+                   bool dark, bool visible): 
+            Widget(x, y, width, 0, visible), dark_(dark), size_(size) {
+        
+        centered_ = true;
+        anchorX_ = x;
+        anchorY_ = y;
+        // Height is fixed by font size
+        height_ = g_App.fonts().textHeight(size_);
+
+        updateText(text);
+    }
+
+void MenuText::updateText(const char *text) {
     std::string lbl(text);
     // Find if string starts with '#' caracter
     if (lbl.find_first_of('#') == 0) {
@@ -44,6 +64,25 @@ void MenuText::setText(const char *text) {
         g_App.menus().getMessage(lbl.c_str(), lbl);
     }
     text_ = lbl;
+
+    int textWidth = g_App.fonts().textWidth(text_.c_str(), size_);
+
+    if (centered_) {
+        anchorX_ = (x_ + x_ + width_) / 2  - textWidth / 2;
+    } else {
+        // Width varies with text size
+        width_ = textWidth;
+    }
+}
+
+/*! 
+ * Modify the MenuText text.
+ * If the given text starts with a '#', the remaining
+ * text identifies a key in the language file.
+ * \param text to set
+ */
+void MenuText::setText(const char *text) {
+    updateText(text);
     redraw();
 }
 
@@ -88,7 +127,7 @@ void MenuText::setDark(bool dark) {
  */
 void MenuText::draw() {
     if (visible_)
-        g_App.fonts().drawText(x_, y_, text_.c_str(), size_, dark_);
+        g_App.fonts().drawText(anchorX_, anchorY_, text_.c_str(), size_, dark_);
 }
 
 /*!
