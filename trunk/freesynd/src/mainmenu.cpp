@@ -32,11 +32,12 @@ MainMenu::MainMenu(MenuManager * m):Menu(m, "main", "moption.dat",
      "moptout.dat")
 {
     addStatic(0, 40, g_Screen.gameScreenWidth(), "#MAIN_TITLE", FontManager::SIZE_4, true);
-    addOption(208, 134, "#MAIN_CONF", FontManager::SIZE_3, KEY_F1, "conf");
-    addOption(208, 168, "#MAIN_BEGIN", FontManager::SIZE_3, KEY_F2, "map");
-    addOption(208, 201, "#MAIN_LOAD_SAVE", FontManager::SIZE_3, KEY_F3, "loadsave");
-    addOption(208, 236, "#MAIN_RESET", FontManager::SIZE_3, KEY_F4, "main");
-    addOption(208, 269, "#MAIN_QUIT", FontManager::SIZE_3, KEY_F5, NULL);
+
+    addOption(201, 130, 300, 25, "#MAIN_CONF", FontManager::SIZE_3, KEY_F1, "conf", true, false);
+    addOption(201, 164, 300, 25, "#MAIN_BEGIN", FontManager::SIZE_3, KEY_F2, "map", true, false);
+    addOption(201, 198, 300, 25, "#MAIN_LOAD_SAVE", FontManager::SIZE_3, KEY_F3, "loadsave", true, false);
+    addOption(201, 232, 300, 25, "#MAIN_RESET", FontManager::SIZE_3, KEY_F4, "main", true, false);
+    addOption(201, 266, 300, 25, "#MAIN_QUIT", FontManager::SIZE_3, KEY_F5, NULL, true, false);
 }
 
 void MainMenu::handleShow()

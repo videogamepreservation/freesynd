@@ -201,7 +201,7 @@ void MenuManager::showMenu(Menu *pMenu, bool playAnim) {
  * \param playAnim True to play the animation.
  */
 void MenuManager::leaveMenu(Menu *pMenu, bool playAnim) {
-    pMenu->handleLeave();
+    pMenu->leave();
 
     if (pMenu->hasLeaveAnim() && playAnim) {
         drop_events_ = true;

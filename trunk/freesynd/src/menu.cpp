@@ -38,6 +38,7 @@ Menu::Menu(MenuManager * menuManager, const char *menu_name,
 name_(menu_name), showAnim_(showAnim), leaveAnim_(leaveAnim),
 parent_menu_(NULL), background_(NULL)
 {
+    focusedWgId_ = -1;
     menuManager->addMenu(this);
 }
 
@@ -46,6 +47,7 @@ Menu::Menu(MenuManager * menuManager, const char *menu_name,
 name_(menu_name), showAnim_(""), leaveAnim_(""),
 parent_menu_(parent), background_(NULL)
 {
+    focusedWgId_ = -1;
     menuManager->addMenu(this);
 }
 
@@ -95,6 +97,23 @@ void Menu::render()
     }
 
     redrawOptions();
+}
+
+void Menu::leave() {
+    if (focusedWgId_ != -1) {
+        int i=0;
+        for (std::map < Key, Option >::iterator it = options_.begin();
+         it != options_.end(); it++, i++) {
+
+             if (focusedWgId_ == i) {
+                Option & m = it->second;
+                m.handleFocusLost();
+                focusedWgId_ = -1;
+                break;
+             }
+        }
+    }
+    handleLeave();
 }
 
 /*!
@@ -158,8 +177,8 @@ MenuText * Menu::getStatic(int staticId) {
  * \param dark_widget Widget drawn in front of the button when it's not highlighted
  * \param light_widget Widget drawn in front of the button when it's highlighted
  */
-void Menu::addOption(int x, int y, const char *text, FontManager::EFontSize size, Key key,
-                     const char *to, bool visible, int dark_widget, int light_widget)
+void Menu::addOption(int x, int y, int width, int height, const char *text, FontManager::EFontSize size, Key key,
+            const char *to, bool visible, bool centered, int dark_widget, int light_widget)
 {
     std::string lbl(text);
     // Find if string starts with '#' caracter
@@ -169,7 +188,7 @@ void Menu::addOption(int x, int y, const char *text, FontManager::EFontSize size
         // and looks for the message in the langage file
         menu_manager_->getMessage(lbl.c_str(), lbl);
     }
-    Option m(x, y, lbl.c_str(), size, to, visible, dark_widget, light_widget);
+    Option m(x, y, width, height, lbl.c_str(), size, to, visible, centered, dark_widget, light_widget);
     options_[key] = m;
 }
 
@@ -181,18 +200,19 @@ void Menu::addOption(int x, int y, const char *text, FontManager::EFontSize size
 void Menu::keyEvent(Key key, const int modKeys)
 {
 
+    // Pressing Escape changes the current menu to its parent(like a back)
     if (key == KEY_ESCAPE) {
         menu_manager_->changeCurrentMenu(parent_menu_);
         return;
     }
 
-    // Please comment
-    std::vector < MenuText * >options_vec;
+    // Transform option map into a vector
+    std::vector < Option * >options_vec;
     for (std::map < Key, Option >::iterator it = options_.begin();
          it != options_.end(); it++)
         options_vec.push_back(&it->second);
 
-    if (options_vec.size()) {
+/*    if (options_vec.size()) {
         unsigned int curOpt = 0;
         for (unsigned int i = 0; i < options_vec.size(); i++)
             if (!options_vec[i]->isDark()) {
@@ -225,7 +245,7 @@ void Menu::keyEvent(Key key, const int modKeys)
                     key = it->first;
         }
     }
-
+*/
     if (options_.find(key) == options_.end()) {
         handleUnknownKey(key, modKeys);
         return;
@@ -246,9 +266,27 @@ void Menu::mouseMotionEvent(int x, int y, int state, const int modKeys)
 {
     handleMouseMotion(x, y, state, modKeys);
 
+    // Check focus is lost for currently focused widget
+    if (focusedWgId_ != -1) {
+        int i=0;
+        for (std::map < Key, Option >::iterator it = options_.begin();
+         it != options_.end(); it++, i++) {
+
+             if (focusedWgId_ == i) {
+                Option & m = it->second;
+                if (!m.isMouseOver(x, y)) {
+                    m.handleFocusLost();
+                    focusedWgId_ = -1;
+                }
+                break;
+             }
+        }
+    }
+
     // See if the mouse is hovering a button
+    int i=0;
     for (std::map < Key, Option >::iterator it = options_.begin();
-         it != options_.end(); it++) {
+         it != options_.end(); it++, i++) {
         Option & m = it->second;
 
         if (!m.isVisible()) {
@@ -256,19 +294,18 @@ void Menu::mouseMotionEvent(int x, int y, int state, const int modKeys)
             continue;
         }
 
+        // Mouse is over a widget
         if (m.isMouseOver(x, y)) {
-            if ( m.isDark() ) {
-                // The button was dark but is now highlighted
-                // since the mouse is over it
-                m.setDark(false);
-                needRendering();
+            if (i != focusedWgId_) {
+                // Widget has now the focus : handle the event
+                m.handleFocusGained();
+                focusedWgId_ = i;
             }
-        } else {
-            if (!m.isDark()) {
-                // The button was highlighted but not anymore : refresh
-                needRendering();
-            }
-            m.setDark(true);
+
+            // Pass the event to the widget
+            m.handleMouseMotion(x, y, state, modKeys);
+
+            return;
         }
     }
 }

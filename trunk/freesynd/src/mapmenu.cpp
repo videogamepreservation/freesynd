@@ -120,12 +120,9 @@ MapMenu::MapMenu(MenuManager * m)
 :  Menu(m, "map", "mmap.dat", "mmapout.dat"),
 mapblk_data_(NULL), select_tick_count_(0)
 {
-    std::string str;
-    menu_manager_->getMessage("MAP_BRIEF_BUT", str);
-    int butX = 80 - g_App.fonts().textWidth(str.c_str(), FontManager::SIZE_2) / 2;
-    addOption(butX, 352, str.c_str(), FontManager::SIZE_2, KEY_F4, "brief");
+    addOption(17, 347, 128, 25, "#MAP_BRIEF_BUT", FontManager::SIZE_2, KEY_F4, "brief");
 
-    addOption(535, 352, "#MENU_MAIN_BUT", FontManager::SIZE_2, KEY_F5, "main");
+    addOption(500, 347,  128, 25, "#MENU_MAIN_BUT", FontManager::SIZE_2, KEY_F5, "main");
 
     addStatic(268, 312, "", FontManager::SIZE_1, false);   // Country name
     addStatic(194, 332, "#MAP_POP", FontManager::SIZE_2, false);       // Pop label
@@ -139,8 +136,8 @@ mapblk_data_(NULL), select_tick_count_(0)
 
     // Tax cursors
     addStatic(350, 346, "@   30%", FontManager::SIZE_1, false);
-    addOption(375, 350, "", FontManager::SIZE_2, KEY_MINUS, NULL, false, Sprite::MSPR_TAX_DECR, Sprite::MSPR_TAX_DECR);
-    addOption(435, 350, "", FontManager::SIZE_2, KEY_PLUS, NULL, false, Sprite::MSPR_TAX_INCR, Sprite::MSPR_TAX_INCR);
+    addOption(375, 346,  10, 10, "", FontManager::SIZE_2, KEY_MINUS, NULL, false, true, Sprite::MSPR_TAX_DECR, Sprite::MSPR_TAX_DECR);
+    addOption(435, 346,  10, 10, "", FontManager::SIZE_2, KEY_PLUS, NULL, false, true, Sprite::MSPR_TAX_INCR, Sprite::MSPR_TAX_INCR);
 
     setParentMenu("main");
 

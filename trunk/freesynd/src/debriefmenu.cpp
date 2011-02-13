@@ -76,10 +76,9 @@ DebriefMenu::DebriefMenu(MenuManager *m) : Menu(m, "debrief", "mdebrief.dat",
     txtPrecisionId_ = addStatic(right_x, y, "", FontManager::SIZE_2, false);
 
     y = 352;
-    menu_manager_->getMessage("MENU_ACC_BUT", str);
-    int butX = 80 - g_App.fonts().textWidth(str.c_str(), FontManager::SIZE_2) / 2;
-    addOption(butX, y, str.c_str(), FontManager::SIZE_2, KEY_F5, "map");
-    addOption(535, y, "#MENU_MAIN_BUT", FontManager::SIZE_2, KEY_F6, "main");
+
+    addOption(16, 346, 129, 25, "#MENU_ACC_BUT", FontManager::SIZE_2, KEY_F5, "map");
+    addOption(500, 347,  128, 25, "#MENU_MAIN_BUT", FontManager::SIZE_2, KEY_F6, "main");
 }
 
 /*!

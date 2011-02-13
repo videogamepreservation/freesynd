@@ -16,15 +16,8 @@ void Widget::setLocation(int x, int y) {
     y_ = y;
 }
 
-void Widget::setWidth(int width) {
-    width_ = width;
-}
-
-void Widget::setHeight(int height) {
-    height_ = height;
-}
-
 void Widget::setVisible(bool visible) {
+    redraw();
     visible_ = visible;
 }
 
@@ -42,10 +35,10 @@ MenuText::MenuText(int x, int y, const char *text, FontManager::EFontSize size,
 }
 
 MenuText::MenuText(int x, int y, int width, const char *text, FontManager::EFontSize size, 
-                   bool dark, bool visible): 
+                   bool dark, bool visible, bool centered): 
             Widget(x, y, width, 0, visible), dark_(dark), size_(size) {
         
-        centered_ = true;
+        centered_ = centered;
         anchorX_ = x;
         anchorY_ = y;
         // Height is fixed by font size
@@ -66,12 +59,12 @@ void MenuText::updateText(const char *text) {
     text_ = lbl;
 
     int textWidth = g_App.fonts().textWidth(text_.c_str(), size_);
+    if (textWidth > width_) {
+        width_ = textWidth;
+    }
 
     if (centered_) {
         anchorX_ = (x_ + x_ + width_) / 2  - textWidth / 2;
-    } else {
-        // Width varies with text size
-        width_ = textWidth;
     }
 }
 
@@ -114,6 +107,15 @@ void MenuText::setTextFormated(const char * format, ...) {
     setText(tmp);
 }
 
+void MenuText::setLocation(int x, int y) {
+    int dx = x - x_;
+    int dy = y - y_;
+    x_ = x;
+    y_ = y;
+    anchorX_ += dx;
+    anchorY_ += dy;
+}
+
 void MenuText::setDark(bool dark) {
     dark_ = dark;
     redraw();
@@ -130,6 +132,25 @@ void MenuText::draw() {
         g_App.fonts().drawText(anchorX_, anchorY_, text_.c_str(), size_, dark_);
 }
 
+Option::Option(int x, int y, int width, int height, const char *text, FontManager::EFontSize size,
+            const char *to, bool visible, bool centered, int darkWidgetId, int lightWidgetId) 
+            : Widget(x, y, width, height, visible), text_(x, y, width - 4, text, size, true, true, centered) {
+        to_ = to;
+        darkWidget_ = NULL;
+        lightWidget_ = NULL;
+
+        // Position the button text in the middle of height
+        // add 1 pixel to height to compensate lost of division
+        text_.setLocation(text_.getX(), y_ + (height_ / 2) - (text_.getHeight() / 2) + 1);
+
+        if (darkWidgetId != 0) {
+            darkWidget_ = g_App.menuSprites().sprite(darkWidgetId);
+            lightWidget_ = g_App.menuSprites().sprite(lightWidgetId);
+            // there's a small pad between heading widget ant text
+            text_.setLocation(text_.getX() + darkWidget_->width() * 2 + 8, text_.getY());
+        }
+    }
+
 /*!
  * Draw the widget at the current position and only if it's
  * visible.
@@ -139,41 +160,29 @@ void MenuText::draw() {
 void Option::draw() {
     if (visible_) {
         int x = x_;
-        if (dark_ && dark_widget_id_ != 0) {
-            Sprite *widget = g_App.menuSprites().sprite(dark_widget_id_);
-            widget->draw(x, y_ - 4, 0, false, true);
-            x += widget->width() * 2 + 8;
-        } else if (light_widget_id_ != 0) {
-            Sprite *widget = g_App.menuSprites().sprite(light_widget_id_);
-            widget->draw(x, y_ - 4, 0, false, true);
-            x += widget->width() * 2 + 8;
+        if (text_.isDark() && darkWidget_ != NULL) {
+            darkWidget_->draw(x, y_, 0, false, true);
+        } else if (lightWidget_ != NULL) {
+            lightWidget_->draw(x, y_, 0, false, true);
         }
 
-        g_App.fonts().drawText(x, y_, text_.c_str(), size_, dark_);
+        text_.draw();
     }
 }
 
 bool Option::isMouseOver(int x, int y) {
-    int width = 0;
-    int height = 0;
-    
-    if (dark_widget_id_ != 0) {
-        // We consider that the dark and light widget have the same size
-        Sprite *widget = g_App.menuSprites().sprite(dark_widget_id_);
-        width = widget->width() * 2;
-        height = widget->height() * 2;
-
-        if (text_.size() != 0) {
-            // This is the space between the widget and the text
-            width += 8 + g_App.fonts().textWidth(text_.c_str(), size_);
-        }
-    } else {
-        width = g_App.fonts().textWidth(text_.c_str(), size_);
-        height = g_App.fonts().textHeight(size_);
-    }
-
-    return (x > x_ - 2 && 
-            x < x_ + width && 
+ 
+    return (x > x_  && 
+            x < x_ + width_ && 
             y >= y_ && 
-            y < y_ + height - 2);
+            y < y_ + height_);
+}
+
+void Option::handleFocusGained() {
+    text_.setDark(false);
+    redraw();
+}
+void Option::handleFocusLost() {
+    text_.setDark(true);
+    redraw();
 }

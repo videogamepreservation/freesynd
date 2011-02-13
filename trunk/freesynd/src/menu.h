@@ -72,14 +72,15 @@ public:
     const char * getLeaveAnimName() { return leaveAnim_.c_str(); }
     
     void render();
+    void leave();
     //! Creates a new text label and returns its id
     int addStatic(int x, int y, const char *text, FontManager::EFontSize size, bool dark);
     int addStatic(int x, int y, int width, const char *text, FontManager::EFontSize size, bool dark);
     //! Returns the MenuText at given position
     MenuText * getStatic(int staticId);
     //! Creates a new button and returns its id
-    void addOption(int x, int y, const char *text, FontManager::EFontSize size, Key key,
-            const char *to = NULL, bool visible = true, int dark_widget = 0, int light_widget = 0);
+    void addOption(int x, int y, int width, int height, const char *text, FontManager::EFontSize size, Key key,
+            const char *to = NULL, bool visible = true, bool centered = true, int dark_widget = 0, int light_widget = 0);
 
     void setParentMenu(const char *m) { parent_menu_ = m; }
 
@@ -161,13 +162,18 @@ public:
 
 protected:
     MenuManager *menu_manager_;
+    /*! A unique name to identify this menu.*/
     std::string name_;
     std::string showAnim_, leaveAnim_;
+    /*! The list of all static widgets (MenuText).*/
     std::list<MenuText> statics_;
+    /*! The list of all dynamic widgets (Option).*/
     std::map<Key, Option> options_;
     const char *parent_menu_;
     uint8 *background_;
     int clear_x_, clear_y_, clear_w_, clear_h_;
+    /*! The id of the widget that currently has focus.*/
+    int focusedWgId_;
 
     void redrawOptions();
     void needRendering();

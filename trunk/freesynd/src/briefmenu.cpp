@@ -40,32 +40,28 @@
 BriefMenu::BriefMenu(MenuManager * m) :
 Menu(m, "brief", "mbrief.dat", "mbrieout.dat"),
 start_line_(0) {
-    std::string str;
-    menu_manager_->getMessage("MAP_BRIEF_BUT", str);
     
     addStatic(148, 35, "#BRIEF_TITLE", FontManager::SIZE_4, true);
     addStatic(500, 9, "", FontManager::SIZE_2, false);       // Time
-    menu_manager_->getMessage("BRIEF_INFO", str);
-    int butX = 560 - g_App.fonts().textWidth(str.c_str(), FontManager::SIZE_2) / 2;
-    addOption(butX, 118, str.c_str(), FontManager::SIZE_2, KEY_F1, NULL);
-    menu_manager_->getMessage("BRIEF_ENH", str);
-    butX = 560 - g_App.fonts().textWidth(str.c_str(), FontManager::SIZE_2) / 2;
-    addOption(butX, 169, str.c_str(), FontManager::SIZE_2, KEY_F2, NULL);
-    addOption(461, 320, "", FontManager::SIZE_2, KEY_F6, NULL, true, Sprite::MSPR_RIGHT_ARROW2_D, Sprite::MSPR_RIGHT_ARROW2_L);
-    addOption(427, 320, "", FontManager::SIZE_2, KEY_F7, NULL, false, Sprite::MSPR_LEFT_ARROW2_D, Sprite::MSPR_LEFT_ARROW2_L);
-    menu_manager_->getMessage("MENU_ACC_BUT", str);
-    butX = 80 - g_App.fonts().textWidth(str.c_str(), FontManager::SIZE_2) / 2;
-    addOption(butX, 352, str.c_str(), FontManager::SIZE_2, KEY_F3, "select");
-    menu_manager_->getMessage("BRIEF_MAP", str);
-    butX = 195 - g_App.fonts().textWidth(str.c_str(), FontManager::SIZE_2) / 2;
-    addOption(butX, 352, str.c_str(), FontManager::SIZE_2, KEY_F4, "map");
-    addOption(535, 352, "#MENU_MAIN_BUT", FontManager::SIZE_2, KEY_F5, "main");
+
+    // Briefing scroll button
+    addOption(461, 316, 30, 20, "", FontManager::SIZE_2, KEY_F6, NULL, true, true, Sprite::MSPR_RIGHT_ARROW2_D, Sprite::MSPR_RIGHT_ARROW2_L);
+    addOption(427, 316, 30, 20, "", FontManager::SIZE_2, KEY_F7, NULL, false, true, Sprite::MSPR_LEFT_ARROW2_D, Sprite::MSPR_LEFT_ARROW2_L);
+
+    // Accept button
+    addOption(17, 347, 128, 25, "#MENU_ACC_BUT", FontManager::SIZE_2, KEY_F3, "select");
+    // Map button
+    addOption(148, 347, 99, 25, "#BRIEF_MAP", FontManager::SIZE_2, KEY_F4, "map");
+    // Main menu button
+    addOption(500, 347,  128, 25, "#MENU_MAIN_BUT", FontManager::SIZE_2, KEY_F5, "main");
 
     // Money
-    txtMoneyId_ = addStatic(500, 87, 127, "0", FontManager::SIZE_2, false);
+    txtMoneyId_ = addStatic(500, 87, 127, "0", FontManager::SIZE_2, false);     // textfield
     // Info
+    addOption(500, 118, 127, 10, "#BRIEF_INFO", FontManager::SIZE_2, KEY_F1); // info button
     txtInfoId_ = addStatic(500, 140, 127, "0", FontManager::SIZE_2, false);
     // Enhancement
+    addOption(500, 169, 127, 10, "#BRIEF_ENH", FontManager::SIZE_2, KEY_F2);
     txtEnhId_ = addStatic(500, 195, 127, "0", FontManager::SIZE_2, false);
 
     setParentMenu("map");

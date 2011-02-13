@@ -54,14 +54,11 @@ public:
     //! Draw the widget on screen. All subclass must implement this method.
     virtual void draw() = 0;
 
-    void setLocation(int x, int y);
+    virtual void setLocation(int x, int y);
     int getX() { return x_; }
     int getY() { return y_; }
 
-    void setWidth(int width);
     int getWidth() { return width_; }
-
-    void setHeight(int height);
     int getHeight() { return height_; }
 
     void setVisible(bool visible);
@@ -87,10 +84,7 @@ protected:
  * This class represents a static text label : it displays a text
  * at a given location.
  * The text is displayed in dark or light green.
- * A MenuText can be defined in two ways : left aligned or centered.
- * Each constructor is specific to an alignment: When specifying widget width,
- * that means that text will be centered using widget location and width.
- * When setting only widget location, text will start at widget location.
+ * Text label can be left aligned or centered.
  */
 class MenuText : public Widget {
 public:
@@ -98,19 +92,21 @@ public:
      * Use this constructor to left align text. Widget width will depend on text and font.
      */
     MenuText(int x, int y, const char *text, FontManager::EFontSize size, bool dark,
-            bool visible);
+            bool visible = true);
 
     /*!
-     * Use this constructor to center align text. Widget width will be fixed but text position
+     * Use this constructor to specify text alignment. Widget width will be fixed but text position
      * will depend of font size and text length.
      */
     MenuText(int x, int y, int width, const char *text, FontManager::EFontSize size, bool dark,
-            bool visible);
+            bool visible = true, bool centered = true);
 
     virtual ~MenuText() {}
 
     //! Draw the widget on screen
     void draw();
+
+    void setLocation(int x, int y);
 
     void setText(const char * text);
     void setTextFormated(const char * format, ...);
@@ -140,42 +136,31 @@ protected:
     /*! Size of text font. */
     FontManager::EFontSize size_;
 };
+
+class Sprite;
+
 //! A button widget.
 /*!
- * This class extends the MenuText class to represent a button on
- * the screen. A button can lead to another screen which name is
- * stored in the field "to".
+ * This class represents a button. A button can lead to another screen 
+ * which name is stored in the field "to".
  * It can have a widget in front of its text (like an arrow or a bullet).
  */
-class Option : public MenuText {
+class Option : public Widget {
 public:
+
     /*! The name of the next menu.*/
     const char *to_;
-    /*! 
-     * The widget to display when button is dark.
-     * When id is zero, there is no widget.
-    */
-    int dark_widget_id_;
-    /*! 
-     * The widget to display when button is highlighted.
-     * When id is zero, there is no widget.
-     */
-    int light_widget_id_;
 
     //! Constructs a new button.
-    Option() : MenuText(0, 0, "", FontManager::SIZE_1, true, true) {
+    Option() : Widget(), text_(0, 0, "", FontManager::SIZE_1, true, true) {
         to_ = NULL;
-        dark_widget_id_ = 0;
-        light_widget_id_ = 0;
+        darkWidget_ = NULL;
+        lightWidget_ = NULL;
     }
 
     //! Constructs a new button.
-    Option(int x, int y, const char *text, FontManager::EFontSize size,
-            const char *to, bool visible, int dark_widget = 0, int light_widget = 0) : MenuText(x, y, text, size, true, visible) {
-        to_ = to;
-        dark_widget_id_ = dark_widget;
-        light_widget_id_ = light_widget;
-    }
+    Option(int x, int y, int width, int height, const char *text, FontManager::EFontSize size,
+            const char *to, bool visible, bool centered = true, int dark_widget = 0, int light_widget = 0);
 
     ~Option() { to_ = NULL; }
 
@@ -184,6 +169,24 @@ public:
 
     //! Tells whether the pointer is over the button or not
     bool isMouseOver(int x, int y);
+
+    virtual void handleMouseMotion(int x, int y, int state, const int modKeys) {}
+
+    virtual void handleFocusGained();
+    virtual void handleFocusLost();
+
+protected:
+    MenuText text_;
+    /*! 
+     * The widget to display when button is dark.
+     * When id is zero, there is no widget.
+    */
+    Sprite *darkWidget_;
+    /*! 
+     * The widget to display when button is highlighted.
+     * When id is zero, there is no widget.
+     */
+    Sprite *lightWidget_;
 };
 
 #endif // WIDGET_H

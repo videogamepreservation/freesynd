@@ -37,16 +37,16 @@ sel_mod_(0)
     addStatic(228, 35, "RESEARCH", FontManager::SIZE_4, true);
     addStatic(500, 9, "", FontManager::SIZE_2, false);       // Time
 
-    addOption(52, 296, "MODS", FontManager::SIZE_2, KEY_F1, NULL);
-    addOption(52, 324, "EQUIP", FontManager::SIZE_2, KEY_F2, NULL);
-    addOption(43, 352, "ACCEPT", FontManager::SIZE_2, KEY_F3, "select");
-    addOption(535, 352, "MENU", FontManager::SIZE_2, KEY_F4, "main");
+    addOption(16, 290, 129, 25, "MODS", FontManager::SIZE_2, KEY_F1, NULL);
+    addOption(16, 318, 129, 25,  "EQUIP", FontManager::SIZE_2, KEY_F2, NULL);
+    addOption(16, 346, 129, 25,  "#MENU_ACC_BUT", FontManager::SIZE_2, KEY_F3, "select");
+    addOption(500, 347,  128, 25, "#MENU_MAIN_BUT", FontManager::SIZE_2, KEY_F4, "main");
     addFieldOptions();
     addWeaponOptions();
     addModOptions();
-    addOption(527, 324, "CANCEL", FontManager::SIZE_2, KEY_F5, NULL, false);
-    addOption(30, 164, "RESEARCH", FontManager::SIZE_2, KEY_F6, NULL, false);
-    addOption(40, 188, "CANCEL", FontManager::SIZE_2, KEY_F7, NULL, false);
+    addOption(500, 320,  127, 22,  "CANCEL", FontManager::SIZE_2, KEY_F5, NULL, false);
+    addOption(16, 158, 129, 25,  "RESEARCH", FontManager::SIZE_2, KEY_F6, NULL, false);
+    addOption(16, 184, 129, 25,  "CANCEL", FontManager::SIZE_2, KEY_F7, NULL, false);
     setParentMenu("select");
 }
 
@@ -72,8 +72,8 @@ void ResearchMenu::addWeaponOptions()
 {
     for (int i = 0; i < g_App.numAvailableWeapons(); i++) {
         Weapon *w = g_App.availableWeapon(i);
-        addOption(504, 110 + 12 * i, w->name(), FontManager::SIZE_1,
-                  (Key) (KEY_a + g_App.numAvailableMods() + i), NULL);
+        addOption(504, 110 + 12 * i,  120, 10, w->name(), FontManager::SIZE_1,
+                  (Key) (KEY_a + g_App.numAvailableMods() + i), NULL, true, false);
     }
 }
 
@@ -93,8 +93,8 @@ void ResearchMenu::addModOptions()
 {
     for (int i = 0; i < g_App.numAvailableMods(); i++) {
         Mod *m = g_App.availableMod(i);
-        addOption(504, 110 + 12 * i, m->name(), FontManager::SIZE_1, (Key) (KEY_a + i), NULL,
-                  false);
+        addOption(504, 110 + 12 * i,  120, 10, m->name(), FontManager::SIZE_1, (Key) (KEY_a + i), NULL,
+                  false, false);
     }
 }
 
@@ -125,16 +125,16 @@ const char *g_Fields[] =
 
 void ResearchMenu::addFieldOptions()
 {
-    addOption(20, 84, g_Fields[0], FontManager::SIZE_1, KEY_0);
-    addOption(20, 96, g_Fields[1], FontManager::SIZE_1, KEY_1);
-    addOption(20, 108, g_Fields[2], FontManager::SIZE_1, KEY_2);
-    addOption(20, 120, g_Fields[3], FontManager::SIZE_1, KEY_3);
-    addOption(20, 84, g_Fields[4], FontManager::SIZE_1, KEY_4, 0, false);
-    addOption(20, 96, g_Fields[5], FontManager::SIZE_1, KEY_5, 0, false);
-    addOption(20, 108, g_Fields[6], FontManager::SIZE_1, KEY_6, 0, false);
-    addOption(20, 120, g_Fields[7], FontManager::SIZE_1, KEY_7, 0, false);
-    addOption(20, 132, g_Fields[8], FontManager::SIZE_1, KEY_8, 0, false);
-    addOption(20, 144, g_Fields[9], FontManager::SIZE_1, KEY_9, 0, false);
+    addOption(20, 84,  122, 10, g_Fields[0], FontManager::SIZE_1, KEY_0, NULL, true, false);
+    addOption(20, 96,  122, 10, g_Fields[1], FontManager::SIZE_1, KEY_1, NULL, true, false);
+    addOption(20, 108, 122, 10, g_Fields[2], FontManager::SIZE_1, KEY_2, NULL, true, false);
+    addOption(20, 120, 122, 10, g_Fields[3], FontManager::SIZE_1, KEY_3, NULL, true, false);
+    addOption(20, 84,  122, 10, g_Fields[4], FontManager::SIZE_1, KEY_4, 0, false, false);
+    addOption(20, 96,  122, 10, g_Fields[5], FontManager::SIZE_1, KEY_5, 0, false, false);
+    addOption(20, 108, 122, 10, g_Fields[6], FontManager::SIZE_1, KEY_6, 0, false, false);
+    addOption(20, 120, 122, 10, g_Fields[7], FontManager::SIZE_1, KEY_7, 0, false, false);
+    addOption(20, 132, 122, 10, g_Fields[8], FontManager::SIZE_1, KEY_8, 0, false, false);
+    addOption(20, 144, 122, 10, g_Fields[9], FontManager::SIZE_1, KEY_9, 0, false, false);
 }
 
 void ResearchMenu::handleTick(int elapsed)
@@ -170,10 +170,6 @@ void ResearchMenu::handleShow() {
 
 void ResearchMenu::handleRender()
 {
-    if (tab_ == 1 && sel_weapon_ == 0) {
-        addWeaponOptions();
-    }
-
     g_Screen.blit(0, 0, 145, 230, orig_pixels_, false,
                       GAME_SCREEN_WIDTH);
     g_Screen.blit(145, 0, GAME_SCREEN_WIDTH - 145, GAME_SCREEN_HEIGHT,
@@ -183,9 +179,7 @@ void ResearchMenu::handleRender()
 
     // write money
     char tmp[100];
-    g_Screen.blit(538, 87, 100, 30,
-                  orig_pixels_ + 538 + 87 * GAME_SCREEN_WIDTH, false,
-                  GAME_SCREEN_WIDTH);
+
     sprintf(tmp, "%d", g_App.getGameSession().getMoney());
     g_App.fonts().drawText(560 - g_App.fonts().textWidth(tmp, FontManager::SIZE_2) / 2, 87,
                            tmp, 1, false);
@@ -219,8 +213,6 @@ void ResearchMenu::handleRender()
         g_Screen.scale2x(18, 158, sizeof(ldata), 1, ldata);
         g_Screen.scale2x(18, 182, sizeof(ldata), 1, ldata);
     }
-
-    g_System.showCursor();
 }
 
 void ResearchMenu::handleLeave() {
