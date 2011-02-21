@@ -42,12 +42,12 @@ public:
     void handleShow();
     void handleRender();
     void handleLeave();
-    void handleOption(Key key, const int modKeys);
+    void handleAction(const int actionId, void *ctx, const int modKeys);
     void handleMouseDown(int x, int y, int button, const int modKeys);
-    void drawMinimap(int elapsed);
     
 protected:
     void updateClock();
+    void drawMinimap(int elapsed);
 
 protected:
     int start_line_;
@@ -55,12 +55,22 @@ protected:
     short minimap_scroll_y_;
     int minimap_blink_ticks_, minimap_blink_;
 
+    /*! Id of the text widget for time.*/
+    int txtTimeId_;
     /*! Id of the text widget for money.*/
     int txtMoneyId_;
     /*! Id of the text widget for info.*/
     int txtInfoId_;
     /*! Id of the text widget for enhance.*/
     int txtEnhId_;
+    /*! Id of the infos button.*/
+    int infosButId_;
+    /*! Id of the enhance button.*/
+    int enhButId_;
+    /*! Id of the scroll next button.*/
+    int nextButId_;
+    /*! Id of the scroll previous button.*/
+    int prevButId_;
 };
 
 #endif

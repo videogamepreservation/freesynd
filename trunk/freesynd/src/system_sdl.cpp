@@ -169,6 +169,71 @@ void SystemSDL::updateScreen() {
 }
 
 /*!
+ * Using the keysym parameter, verify if this is a key that is 
+ * used in the game and returns the corresponding entry in the Key enumaration.
+ * \ returns If key code is not valid, returns KEY_UNKNOWN.
+ */
+Key SystemSDL::checkValidKey(SDL_keysym keysym) {
+    Key key = KEY_UNKNOWN;
+    switch(keysym.sym) {
+        case SDLK_ESCAPE: key = KEY_ESCAPE; break;
+        case SDLK_BACKSPACE: key = KEY_BACKSPACE; break;
+        case SDLK_SPACE: key = KEY_SPACE; break;
+        case SDLK_BACKQUOTE: key = KEY_BACKQUOTE; break;
+        case SDLK_UP:
+        case SDLK_DOWN:
+        case SDLK_RIGHT:
+        case SDLK_LEFT:
+        case KEY_HOME:
+        case KEY_END:
+        case KEY_PAGEUP:
+        case KEY_PAGEDOWN:
+            key = static_cast < Key > (KEY_UP + (keysym.sym - SDLK_UP));
+            break;
+        case SDLK_F1:
+        case SDLK_F2:
+        case SDLK_F3:
+        case SDLK_F4:
+        case SDLK_F5:
+        case SDLK_F6:
+        case SDLK_F7:
+        case SDLK_F8:
+        case SDLK_F9:
+        case SDLK_F10:
+        case SDLK_F11:
+        case SDLK_F12:
+            key = static_cast < Key > (KEY_F1 + (keysym.sym - SDLK_F1));
+            break;
+
+        case SDLK_a:case SDLK_b:case SDLK_c:case SDLK_d:case SDLK_e:
+        case SDLK_f:case SDLK_g:case SDLK_h:case SDLK_i:case SDLK_j:
+        case SDLK_k:case SDLK_l:case SDLK_m:case SDLK_n:case SDLK_o:
+        case SDLK_p:case SDLK_q:case SDLK_r:case SDLK_s:case SDLK_t:
+        case SDLK_u:case SDLK_v:case SDLK_w:case SDLK_x:case SDLK_y:case SDLK_z:
+            key = static_cast < Key > (KEY_a + (keysym.sym - SDLK_a));
+            break;
+
+        case SDLK_0:case SDLK_1:case SDLK_2:case SDLK_3:case SDLK_4:
+        case SDLK_5:case SDLK_6:case SDLK_7:case SDLK_8:case SDLK_9:
+            key = static_cast < Key > (KEY_0 + (keysym.sym - SDLK_0));
+            break;
+
+        case SDLK_KP0:case SDLK_KP1:case SDLK_KP2:case SDLK_KP3:case SDLK_KP4:
+        case SDLK_KP5:case SDLK_KP6:case SDLK_KP7:case SDLK_KP8:case SDLK_KP9:
+            key = static_cast < Key > (KEY_0 + (keysym.sym - SDLK_KP0));
+            break;
+
+        case SDLK_PLUS:case SDLK_COMMA:case SDLK_MINUS:case SDLK_PERIOD:
+        case SDLK_SLASH:
+            key = static_cast < Key > (KEY_PLUS + (keysym.sym - SDLK_PLUS));
+            break;
+        //default:
+        //    printf("Touche inconnue\n");
+    }
+
+    return key;
+}
+/*!
  * Watch the event queue and dispatch events.
  * - keyboard events : when a modifier key is pressed,
  * the system does not dispatch the event to the application:
@@ -188,31 +253,41 @@ void SystemSDL::handleEvents() {
             key = static_cast < Key > (event.key.keysym.sym);
             // Check if key pressed is a modifier
             bool isKeyMod = false;
-            if (key == KEY_LCTRL) {
-                keyModState_ = keyModState_ | KMD_LCTRL; 
-                isKeyMod = true;
-            } else if (key == KEY_RCTRL) {
-                keyModState_ = keyModState_ | KMD_RCTRL; 
-                isKeyMod = true;
-            } else if (key == KEY_RSHIFT) {
-                keyModState_ = keyModState_ | KMD_RSHIFT; 
-                isKeyMod = true;
-            } else if (key == KEY_LSHIFT) {
-                keyModState_ = keyModState_ | KMD_LSHIFT; 
-                isKeyMod = true;
-            } else if (key == KEY_RALT) {
-                keyModState_ = keyModState_ | KMD_RALT; 
-                isKeyMod = true;
-            } else if (key == KEY_LALT) {
-                keyModState_ = keyModState_ | KMD_LALT; 
-                isKeyMod = true;
+            switch(event.key.keysym.sym) {
+                case SDLK_RSHIFT:
+                    keyModState_ = keyModState_ | KMD_RSHIFT; 
+                    isKeyMod = true;
+                    break;
+                case SDLK_LSHIFT:
+                    keyModState_ = keyModState_ | KMD_LSHIFT; 
+                    isKeyMod = true;
+                    break;
+                case SDLK_RCTRL:
+                    keyModState_ = keyModState_ | KMD_RCTRL; 
+                    isKeyMod = true;
+                    break;
+                case SDLK_LCTRL:
+                    keyModState_ = keyModState_ | KMD_LCTRL; 
+                    isKeyMod = true;
+                    break;
+                case SDLK_RALT:
+                    keyModState_ = keyModState_ | KMD_RALT; 
+                    isKeyMod = true;
+                    break;
+                case SDLK_LALT:
+                    keyModState_ = keyModState_ | KMD_LALT; 
+                    isKeyMod = true;
+                    break;
             }
 
             // We pass the event only if it's not a allowed modifier key
             // Plus, the application receives event only when key is pressed
             // not released.
             if (!isKeyMod) {
-                g_App.keyEvent(key, keyModState_);
+                Key key = checkValidKey(event.key.keysym);
+                if (key != KEY_UNKNOWN) {
+                    g_App.keyEvent(key, keyModState_);
+                }
             }
             }
             break;
@@ -220,18 +295,25 @@ void SystemSDL::handleEvents() {
             {
             // We follow keyup to reset the state of modifier keys
             key = static_cast < Key > (event.key.keysym.sym);
-            if (key == KEY_LCTRL) {
-                keyModState_ = keyModState_ & !KMD_LCTRL; 
-            } else if (key == KEY_RCTRL) {
-                keyModState_ = keyModState_ & !KMD_RCTRL; 
-            } else if (key == KEY_RSHIFT) {
-                keyModState_ = keyModState_ & !KMD_RSHIFT; 
-            } else if (key == KEY_LSHIFT) {
-                keyModState_ = keyModState_ & !KMD_LSHIFT; 
-            } else if (key == KEY_RALT) {
-                keyModState_ = keyModState_ & !KMD_RALT; 
-            } else if (key == KEY_LALT) {
-                keyModState_ = keyModState_ & !KMD_LALT; 
+            switch(event.key.keysym.sym) {
+                case SDLK_RSHIFT:
+                    keyModState_ = keyModState_ & !KMD_RSHIFT;
+                    break;
+                case SDLK_LSHIFT:
+                    keyModState_ = keyModState_ & !KMD_LSHIFT;
+                    break;
+                case SDLK_RCTRL:
+                    keyModState_ = keyModState_ & !KMD_RCTRL;
+                    break;
+                case SDLK_LCTRL:
+                    keyModState_ = keyModState_ & !KMD_LCTRL;
+                    break;
+                case SDLK_RALT:
+                    keyModState_ = keyModState_ & !KMD_RALT;
+                    break;
+                case SDLK_LALT:
+                    keyModState_ = keyModState_ & !KMD_LALT;
+                    break;
             }
             }
             break;

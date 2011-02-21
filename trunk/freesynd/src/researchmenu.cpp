@@ -34,19 +34,21 @@ ResearchMenu::ResearchMenu(MenuManager * m):Menu(m, "research", "mresrch.dat", "
 orig_pixels_(0), sel_weapon_(0), sel_field_(0),
 sel_mod_(0)
 {
+    mod0Id_ = 0;
+    equip0Id_ = 0;
     addStatic(228, 35, "RESEARCH", FontManager::SIZE_4, true);
-    addStatic(500, 9, "", FontManager::SIZE_2, false);       // Time
+    txtTimeId_ = addStatic(500, 9, "", FontManager::SIZE_2, false);       // Time
 
-    addOption(16, 290, 129, 25, "MODS", FontManager::SIZE_2, KEY_F1, NULL);
-    addOption(16, 318, 129, 25,  "EQUIP", FontManager::SIZE_2, KEY_F2, NULL);
+    modsButId_ = addOption(16, 290, 129, 25, "MODS", FontManager::SIZE_2, KEY_F1, NULL);
+    equipButId_ = addOption(16, 318, 129, 25,  "EQUIP", FontManager::SIZE_2, KEY_F2, NULL);
     addOption(16, 346, 129, 25,  "#MENU_ACC_BUT", FontManager::SIZE_2, KEY_F3, "select");
     addOption(500, 347,  128, 25, "#MENU_MAIN_BUT", FontManager::SIZE_2, KEY_F4, "main");
     addFieldOptions();
     addWeaponOptions();
     addModOptions();
-    addOption(500, 320,  127, 22,  "CANCEL", FontManager::SIZE_2, KEY_F5, NULL, false);
-    addOption(16, 158, 129, 25,  "RESEARCH", FontManager::SIZE_2, KEY_F6, NULL, false);
-    addOption(16, 184, 129, 25,  "CANCEL", FontManager::SIZE_2, KEY_F7, NULL, false);
+    cancelDescId_ = addOption(500, 320,  127, 22,  "CANCEL", FontManager::SIZE_2, KEY_F5, NULL, false);
+    researchId_ = addOption(16, 158, 129, 25,  "RESEARCH", FontManager::SIZE_2, KEY_F6, NULL, false);
+    cancelSearchId_ = addOption(16, 184, 129, 25,  "CANCEL", FontManager::SIZE_2, KEY_F7, NULL, false);
     setParentMenu("select");
 }
 
@@ -72,8 +74,12 @@ void ResearchMenu::addWeaponOptions()
 {
     for (int i = 0; i < g_App.numAvailableWeapons(); i++) {
         Weapon *w = g_App.availableWeapon(i);
-        addOption(504, 110 + 12 * i,  120, 10, w->name(), FontManager::SIZE_1,
+        int id = addOption(504, 110 + 12 * i,  120, 10, w->name(), FontManager::SIZE_1,
                   (Key) (KEY_a + g_App.numAvailableMods() + i), NULL, true, false);
+
+        if (equip0Id_ == 0) {
+            equip0Id_ = id;
+        }
     }
 }
 
@@ -93,8 +99,12 @@ void ResearchMenu::addModOptions()
 {
     for (int i = 0; i < g_App.numAvailableMods(); i++) {
         Mod *m = g_App.availableMod(i);
-        addOption(504, 110 + 12 * i,  120, 10, m->name(), FontManager::SIZE_1, (Key) (KEY_a + i), NULL,
+        int id = addOption(504, 110 + 12 * i,  120, 10, m->name(), FontManager::SIZE_1, (Key) (KEY_a + i), NULL,
                   false, false);
+
+        if (mod0Id_ == 0) {
+            mod0Id_ = id;
+        }
     }
 }
 
@@ -125,11 +135,11 @@ const char *g_Fields[] =
 
 void ResearchMenu::addFieldOptions()
 {
-    addOption(20, 84,  122, 10, g_Fields[0], FontManager::SIZE_1, KEY_0, NULL, true, false);
+    equipField0Id_ = addOption(20, 84,  122, 10, g_Fields[0], FontManager::SIZE_1, KEY_0, NULL, true, false);
     addOption(20, 96,  122, 10, g_Fields[1], FontManager::SIZE_1, KEY_1, NULL, true, false);
     addOption(20, 108, 122, 10, g_Fields[2], FontManager::SIZE_1, KEY_2, NULL, true, false);
     addOption(20, 120, 122, 10, g_Fields[3], FontManager::SIZE_1, KEY_3, NULL, true, false);
-    addOption(20, 84,  122, 10, g_Fields[4], FontManager::SIZE_1, KEY_4, 0, false, false);
+    modField0Id_ = addOption(20, 84,  122, 10, g_Fields[4], FontManager::SIZE_1, KEY_4, 0, false, false);
     addOption(20, 96,  122, 10, g_Fields[5], FontManager::SIZE_1, KEY_5, 0, false, false);
     addOption(20, 108, 122, 10, g_Fields[6], FontManager::SIZE_1, KEY_6, 0, false, false);
     addOption(20, 120, 122, 10, g_Fields[7], FontManager::SIZE_1, KEY_7, 0, false, false);
@@ -150,7 +160,7 @@ void ResearchMenu::handleTick(int elapsed)
 void ResearchMenu::updateClock() {
     char tmp[100];
     g_Session.getTimeAsStr(tmp);
-    getStatic(1)->setText(tmp);
+    getStatic(txtTimeId_)->setText(tmp);
 }
 
 void ResearchMenu::handleShow() {
@@ -219,42 +229,42 @@ void ResearchMenu::handleLeave() {
     g_System.hideCursor();
 }
 
-void ResearchMenu::handleOption(Key key, const int modKeys)
+void ResearchMenu::handleAction(const int actionId, void *ctx, const int modKeys)
 {
-    if (key >= KEY_0 && key <= KEY_9) {
-        sel_field_ = key - KEY_0 + 1;
+    if (actionId >= equipField0Id_ && actionId <= (equipField0Id_ + 10 )) {
+        sel_field_ = actionId - equipField0Id_ + 1;
         hideFieldList();
         showOption(KEY_F6);
         showOption(KEY_F7);
         needRendering();
     }
-    if (key >= KEY_a && key < (Key) (KEY_a + g_App.numAvailableMods())) {
-        sel_mod_ = key - KEY_a + 1;
+    if (actionId >= mod0Id_ && actionId < (mod0Id_ + g_App.numAvailableMods())) {
+        sel_mod_ = actionId - mod0Id_ + 1;
         hideModsList();
         showOption(KEY_F5);
         needRendering();
     }
-    if (key >= KEY_g && key <= KEY_z) {
-        sel_weapon_ = key - KEY_g + 1;
+    if (actionId >= equip0Id_ && actionId <= (equip0Id_ + g_App.numAvailableWeapons())) {
+        sel_weapon_ = actionId - equip0Id_ + 1;
         hideEquipList();
         showOption(KEY_F5);
         needRendering();
     }
-    if (key == KEY_F1) {
+    if (actionId == modsButId_) {
         tab_ = 0;
         showModsList();
         hideEquipList();
         showFieldList();
         needRendering();
     }
-    if (key == KEY_F2) {
+    if (actionId == equipButId_) {
         tab_ = 1;
         hideModsList();
         showEquipList();
         showFieldList();
         needRendering();
     }
-    if (key == KEY_F5) {
+    if (actionId == cancelDescId_) {
         sel_mod_ = sel_weapon_ = 0;
         hideOption(KEY_F5);
         if (tab_ == 0)
@@ -263,7 +273,7 @@ void ResearchMenu::handleOption(Key key, const int modKeys)
             showEquipList();
         needRendering();
     }
-    if (key == KEY_F7) {
+    if (actionId == cancelSearchId_) {
         sel_field_ = 0;
         hideOption(KEY_F6);
         hideOption(KEY_F7);

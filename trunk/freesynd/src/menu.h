@@ -72,15 +72,21 @@ public:
     const char * getLeaveAnimName() { return leaveAnim_.c_str(); }
     
     void render();
+    //! Does common actions before leaving
     void leave();
     //! Creates a new text label and returns its id
     int addStatic(int x, int y, const char *text, FontManager::EFontSize size, bool dark);
+    //! Creates a new text label with a fixed size and returns its id
     int addStatic(int x, int y, int width, const char *text, FontManager::EFontSize size, bool dark);
-    //! Returns the MenuText at given position
+    //! Returns the MenuText with given id
     MenuText * getStatic(int staticId);
+    //! Creates a new button that has no text but an image
+    int addImageOption(int x, int y, Key key, int dark_widget, int light_widget, bool visible = true);
     //! Creates a new button and returns its id
-    void addOption(int x, int y, int width, int height, const char *text, FontManager::EFontSize size, Key key,
+    int addOption(int x, int y, int width, int height, const char *text, FontManager::EFontSize size, Key key,
             const char *to = NULL, bool visible = true, bool centered = true, int dark_widget = 0, int light_widget = 0);
+
+    Option * getOption(int buttonId);
 
     void setParentMenu(const char *m) { parent_menu_ = m; }
 
@@ -100,12 +106,13 @@ public:
      * \param key The key associated to the option.
      */
     void hideOption(Key key) {
-        if (options_.find(key) == options_.end())
+        if (hotKeys_.find(key) == hotKeys_.end())
             return;
 
-        if (options_[key].isVisible()) {
-            options_[key].setVisible(false);
-            needRendering();
+        Option *opt = getOption(hotKeys_[key]);
+
+        if (opt->isVisible()) {
+            opt->setVisible(false);
         }
     }
 
@@ -116,12 +123,13 @@ public:
      * \param key The key associated to the option.
      */
     void showOption(Key key) {
-        if (options_.find(key) == options_.end())
+        if (hotKeys_.find(key) == hotKeys_.end())
             return;
 
-        if (!options_[key].isVisible()) {
-            options_[key].setVisible(true);
-            needRendering();
+        Option *opt = getOption(hotKeys_[key]);
+
+        if (!opt->isVisible()) {
+            opt->setVisible(true);
         }
     }
 
@@ -154,11 +162,17 @@ public:
 
     //! Callback function : Childs can reimplement
     /*! 
-     * Called when an option has been activated.
-     * \param key The key that was pressed.
+     * Called when an action widget has been activated.
+     * \param actionId The id of the actionWidget that was activated.
+     * \param ctx A pointer to a context specific to the action
      * \param modKeys The state of all modifiers buttons
      */
-    virtual void handleOption(Key key, const int modKeys) {}
+    virtual void handleAction(const int actionId, void *ctx, const int modKeys) {}
+
+protected:
+    void redrawOptions();
+    void needRendering();
+    void addDirtyRect(int x, int y, int width, int height);
 
 protected:
     MenuManager *menu_manager_;
@@ -168,16 +182,13 @@ protected:
     /*! The list of all static widgets (MenuText).*/
     std::list<MenuText> statics_;
     /*! The list of all dynamic widgets (Option).*/
-    std::map<Key, Option> options_;
+    std::list<Option> actions_;
+    std::map<Key, int> hotKeys_;
     const char *parent_menu_;
     uint8 *background_;
     int clear_x_, clear_y_, clear_w_, clear_h_;
     /*! The id of the widget that currently has focus.*/
     int focusedWgId_;
-
-    void redrawOptions();
-    void needRendering();
-    void addDirtyRect(int x, int y, int width, int height);
 };
 
 #endif

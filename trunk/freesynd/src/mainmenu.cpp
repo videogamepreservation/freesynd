@@ -36,8 +36,8 @@ MainMenu::MainMenu(MenuManager * m):Menu(m, "main", "moption.dat",
     addOption(201, 130, 300, 25, "#MAIN_CONF", FontManager::SIZE_3, KEY_F1, "conf", true, false);
     addOption(201, 164, 300, 25, "#MAIN_BEGIN", FontManager::SIZE_3, KEY_F2, "map", true, false);
     addOption(201, 198, 300, 25, "#MAIN_LOAD_SAVE", FontManager::SIZE_3, KEY_F3, "loadsave", true, false);
-    addOption(201, 232, 300, 25, "#MAIN_RESET", FontManager::SIZE_3, KEY_F4, "main", true, false);
-    addOption(201, 266, 300, 25, "#MAIN_QUIT", FontManager::SIZE_3, KEY_F5, NULL, true, false);
+    resetButId_ = addOption(201, 232, 300, 25, "#MAIN_RESET", FontManager::SIZE_3, KEY_F4, "main", true, false);
+    quitButId_ = addOption(201, 266, 300, 25, "#MAIN_QUIT", FontManager::SIZE_3, KEY_F5, NULL, true, false);
 }
 
 void MainMenu::handleShow()
@@ -52,10 +52,10 @@ void MainMenu::handleLeave() {
     g_System.hideCursor();
 }
 
-void MainMenu::handleOption(Key key, const int modKeys)
+void MainMenu::handleAction(const int actionId, void *ctx, const int modKeys)
 {
-    if (key == KEY_F4)
+    if (actionId == resetButId_)
         g_App.reset();
-    if (key == KEY_F5)
+    if (actionId == quitButId_)
         menu_manager_->changeCurrentMenu("logout");
 }

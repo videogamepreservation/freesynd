@@ -48,3 +48,4 @@ in original gameplay or are not present at all
  - Implements dragging in SelectMenu to pass a weapon from an agent to another.
  - resolve shooting issues: targeting, range checking, target in range checking, range
 damage, obstacle checking
+ - Manage Qwerty / azerty keyboard. Today only qwerty keyboard are used.

@@ -33,22 +33,25 @@ SelectMenu::SelectMenu(MenuManager * m):Menu(m, "select", "mselect.dat", "mselou
 cur_agent_(0), tick_count_(0), sel_weapon_(0), sel_mod_(0),
 sel_weapon_inst_(0), sel_all_(false)
 {
+    mod0Id_ = 0;
+    equip0Id_ = 0;
+    agent0Id_ = 0;
     addStatic(148, 35, "TEAM SELECTION", FontManager::SIZE_4, true);
-    addStatic(500, 9, "", FontManager::SIZE_2, false);       // Time
+    txtTimeId_ = addStatic(500, 9, "", FontManager::SIZE_2, false);       // Time
 
     addOption(16, 234, 129, 25, "RESEARCH", FontManager::SIZE_2, KEY_F1, "research");
-    addOption(16, 262, 129, 25, "TEAM", FontManager::SIZE_2, KEY_F2, NULL);
-    addOption(16, 290, 129, 25, "MODS", FontManager::SIZE_2, KEY_F3, NULL);
-    addOption(16, 318, 129, 25, "EQUIP", FontManager::SIZE_2, KEY_F4, NULL);
+    teamButId_ = addOption(16, 262, 129, 25, "TEAM", FontManager::SIZE_2, KEY_F2, NULL);
+    modsButId_ = addOption(16, 290, 129, 25, "MODS", FontManager::SIZE_2, KEY_F3, NULL);
+    equipButId_ = addOption(16, 318, 129, 25, "EQUIP", FontManager::SIZE_2, KEY_F4, NULL);
     addOption(16, 346, 129, 25, "#MENU_ACC_BUT", FontManager::SIZE_2, KEY_F5, "loading");
     addOption(500, 347,  128, 25, "#MENU_MAIN_BUT", FontManager::SIZE_2, KEY_F6, "main");
 
     addModOptions();
     addWeaponOptions();
 
-    addOption(500, 270,  127, 22, "CANCEL", FontManager::SIZE_2, KEY_F7, NULL, false);
-    addOption(500, 320,  127, 22, "PURCHASE", FontManager::SIZE_2, KEY_F8, NULL, false);
-    addOption(500, 320,  127, 22, "SELL", FontManager::SIZE_2, KEY_F9, NULL, false);
+    cancelButId_ = addOption(500, 270,  127, 22, "CANCEL", FontManager::SIZE_2, KEY_F7, NULL, false);
+    purchaseButId_ = addOption(500, 320,  127, 22, "PURCHASE", FontManager::SIZE_2, KEY_F8, NULL, false);
+    sellButId_ = addOption(500, 320,  127, 22, "SELL", FontManager::SIZE_2, KEY_F9, NULL, false);
     setParentMenu("brief");
 
     rnd_ = 0;
@@ -63,8 +66,11 @@ void SelectMenu::addModOptions()
 {
     for (int i = 0; i < g_App.numAvailableMods(); i++) {
         Mod *m = g_App.availableMod(i);
-        addOption(504, 110 + 12 * i,  120, 10, m->name(), FontManager::SIZE_1, (Key) (KEY_a + i), NULL,
-                  false, false);
+        int id = addOption(504, 110 + 12 * i,  120, 10, m->name(), FontManager::SIZE_1, 
+                            (Key) (KEY_a + i), NULL, false, false);
+        if (mod0Id_ == 0) {
+            mod0Id_ = id;
+        }
     }
 }
 
@@ -72,8 +78,12 @@ void SelectMenu::addWeaponOptions()
 {
     for (int i = 0; i < g_App.numAvailableWeapons(); i++) {
         Weapon *w = g_App.availableWeapon(i);
-        addOption(504, 110 + 12 * i,  120, 10, w->name(), FontManager::SIZE_1,
+        int id = addOption(504, 110 + 12 * i,  120, 10, w->name(), FontManager::SIZE_1,
                   (Key) (KEY_a + g_App.numAvailableMods() + i), NULL, true, false);
+
+        if (equip0Id_ == 0) {
+            equip0Id_ = id;
+        }
     }
 }
 
@@ -81,17 +91,34 @@ void SelectMenu::addRecruitOptions()
 {
     for (int i = 0; i < AgentManager::MAX_AGENT; i++) {
         if (g_App.agents().agent(i)) {
-            addOption(520, 124 + i * 12,  104, 10, g_App.agents().agent(i)->name(), FontManager::SIZE_1,
-                  (Key) (KEY_0 + i), NULL, false, false);
+            int id = addOption(520, 124 + i * 12,  104, 10, g_App.agents().agent(i)->name(), 
+                        FontManager::SIZE_1, (Key) (KEY_0 + i), NULL, false, false);
+
+            if (agent0Id_ == 0) {
+                agent0Id_ = id;
+            }
         }
     }
 }
 
 void SelectMenu::clearRecruitOptions()
 {
-    for (int i = 0; i < AgentManager::MAX_AGENT; i++) {
-        if (options_.find((Key) (KEY_0 + i)) != options_.end())
-            options_.erase(options_.find((Key) (KEY_0 + i)));
+    if (agent0Id_ != 0) {
+        for (int i = 0; i < AgentManager::MAX_AGENT; i++) {
+            if (g_App.agents().agent(i)) {
+                for (std::list < Option >::iterator it = actions_.begin();
+                    it != actions_.end(); it++) {
+                    Option & m = *it;
+
+                    if (m.getId() == agent0Id_ + i) {
+                        actions_.erase(it);
+                        break;
+                    }
+                }
+            }
+        }
+
+        agent0Id_ = 0;
     }
 }
 /*!
@@ -317,10 +344,12 @@ void SelectMenu::handleTick(int elapsed)
 void SelectMenu::updateClock() {
     char tmp[100];
     g_Session.getTimeAsStr(tmp);
-    getStatic(1)->setText(tmp);
+    getStatic(txtTimeId_)->setText(tmp);
 }
 
 void SelectMenu::handleShow() {
+
+    menu_manager_->saveBackground();
 
     cur_agent_ = 0;
     for (int i = 0; i < 4; i++) {
@@ -331,7 +360,6 @@ void SelectMenu::handleShow() {
     }
     clearRecruitOptions();
     addRecruitOptions();
-    menu_manager_->saveBackground();
 
     // Show the mouse
     g_System.showCursor();
@@ -552,9 +580,9 @@ void SelectMenu::handleMouseDown(int x, int y, int button, const int modKeys)
     }
 }
 
-void SelectMenu::handleOption(Key key, const int modKeys)
+void SelectMenu::handleAction(const int actionId, void *ctx, const int modKeys)
 {
-    if (key == KEY_F2) {
+    if (actionId == teamButId_) {
         sel_weapon_ = sel_mod_ = sel_weapon_inst_ = 0;
         tab_ = 0;
         hideOption(KEY_F7);
@@ -565,7 +593,7 @@ void SelectMenu::handleOption(Key key, const int modKeys)
         hideEquipList();
         needRendering();
     }
-    if (key == KEY_F3) {
+    if (actionId == modsButId_) {
         sel_weapon_ = sel_mod_ = sel_weapon_inst_ = 0;
         tab_ = 1;
         hideOption(KEY_F7);
@@ -576,7 +604,7 @@ void SelectMenu::handleOption(Key key, const int modKeys)
         hideEquipList();
         needRendering();
     }
-    if (key == KEY_F4) {
+    if (actionId == equipButId_) {
         sel_weapon_ = sel_mod_ = sel_weapon_inst_ = 0;
         tab_ = 2;
         hideOption(KEY_F7);
@@ -587,8 +615,8 @@ void SelectMenu::handleOption(Key key, const int modKeys)
         showEquipList();
         needRendering();
     }
-    if (key >= KEY_0 && key < (Key) (KEY_0 + AgentManager::MAX_AGENT)) {
-        int i = key - KEY_0;
+    if (actionId >= agent0Id_ && (actionId < agent0Id_ + AgentManager::MAX_AGENT)) {
+        int i = actionId - agent0Id_;
         Agent *n = g_App.agents().agent(i);
         if (n) {
             bool found = false;
@@ -606,26 +634,24 @@ void SelectMenu::handleOption(Key key, const int modKeys)
             needRendering();
         }
     }
-    if (key >= KEY_a && key < (Key) (KEY_a + g_App.numAvailableMods())) {
-        int i = key - KEY_a + 1;
+    if (actionId >= mod0Id_ && actionId < (mod0Id_ + g_App.numAvailableMods())) {
+        int i = actionId - mod0Id_ + 1;
         sel_mod_ = i;
         showOption(KEY_F7);
         showOption(KEY_F8);
         hideModsList();
         needRendering();
     }
-    if (key >= (Key) (KEY_a + g_App.numAvailableMods())
-        && key <=
-        (Key) (KEY_a + g_App.numAvailableMods() +
-               g_App.numAvailableWeapons())) {
-        int i = key - (KEY_a + g_App.numAvailableMods()) + 1;
+    if (actionId >= equip0Id_
+        && actionId <= equip0Id_ + g_App.numAvailableWeapons()) {
+        int i = actionId - equip0Id_ + 1;
         sel_weapon_ = i;
         showOption(KEY_F7);
         showOption(KEY_F8);
         hideEquipList();
         needRendering();
     }
-    if (key == KEY_F7) {
+    if (actionId == cancelButId_) {
         sel_weapon_ = sel_mod_ = sel_weapon_inst_ = 0;
         hideOption(KEY_F7);
         hideOption(KEY_F8);
@@ -636,7 +662,7 @@ void SelectMenu::handleOption(Key key, const int modKeys)
             showEquipList();
         needRendering();
     }
-    if (key == KEY_F8 && sel_weapon_) {
+    if (actionId == purchaseButId_ && sel_weapon_) {
         Weapon *w = g_App.availableWeapon(sel_weapon_ - 1);
         if (sel_all_) {
             for (int n = 0; n < 4; n++) {
@@ -657,7 +683,7 @@ void SelectMenu::handleOption(Key key, const int modKeys)
         }
         needRendering();
     }
-    if (key == KEY_F8 && sel_mod_) {
+    if (actionId == purchaseButId_ && sel_mod_) {
         Mod *m = g_App.availableMod(sel_mod_ - 1);
         if (sel_all_) {
             for (int n = 0; n < 4; n++) {
@@ -684,7 +710,7 @@ void SelectMenu::handleOption(Key key, const int modKeys)
         showModsList();
         needRendering();
     }
-    if (key == KEY_F9 && sel_weapon_inst_) {
+    if (actionId == sellButId_ && sel_weapon_inst_) {
         Agent *selected = g_Session.teamMember(cur_agent_);
         WeaponInstance *w = selected->removeWeapon(sel_weapon_inst_ - 1);
         g_Session.setMoney(g_Session.getMoney() + w->cost());

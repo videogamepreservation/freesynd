@@ -34,7 +34,13 @@ public:
 
     void handleShow();
     void handleLeave();
-    void handleOption(Key key, const int modKeys);
+    void handleAction(const int actionId, void *ctx, const int modKeys);
+
+protected:
+    /*! Id of the reset button.*/
+    int resetButId_;
+    /*! Id of the quit button.*/
+    int quitButId_;
 };
 
 #endif

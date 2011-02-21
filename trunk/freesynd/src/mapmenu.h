@@ -44,19 +44,18 @@ public:
     void handleRender();
     void handleLeave();
     void handleMouseDown(int x, int y, int button, const int modKeys);
-    void handleOption(Key key, const int modKeys);
+    void handleAction(const int actionId, void *ctx, const int modKeys);
     void handleUnknownKey(Key key, const int modKeys);
 
 protected:
-    static const int OWN_LBL_STATIC_ID;
-    static const int COUNTRY_STATIC_ID;
-    static const int POP_STATIC_ID;
-    static const int OWN_STATIC_ID;
-    static const int TAX_VALUE_STATIC_ID;
-    static const int TIME_STATIC_ID;
-    static const int TAX_PCT_STATIC_ID;
-    static const int TAX_INC_OPT_ID;
-    static const int TAX_DEC_OPT_ID;
+    //! Utility method to draw the mission selector
+    void drawSelector();
+    //! Utility method to update mission informations
+    void handleBlockSelected();
+    //! Update the game time display
+    void updateClock();
+
+protected:
 
     int mapblk_size_;
     /*! Contains the images of the differents blocks.*/
@@ -68,12 +67,25 @@ protected:
     /*! */
     bool blink_status_;
 
-    //! Utility method to draw the mission selector
-    void drawSelector();
-    //! Utility method to update mission informations
-    void handleBlockSelected();
-    //! Update the game time display
-    void updateClock();
+    /*! Id of the text widget for time.*/
+    int txtTimeId_;
+    /*! Id of the text widget for Own label status.*/
+    int txtOwnLblId_;
+    /*! Id of the text widget for Own status.*/
+    int txtOwnId_;
+    /*! Id of the text widget for Country name.*/
+    int txtCountryId_;
+    /*! Id of the text widget for population.*/
+    int txtPopId_;
+    /*! Id of the text widget for tax value.*/
+    int txtTaxValueId_;
+    /*! Id of the text widget for tax percentage.*/
+    int txtTaxPctId_;
+
+    /*! Id of the increment tax percentage button.*/
+    int incrTaxButId_;
+    /*! Id of the decrement tax percentage button.*/
+    int decrTaxButId_;
 };
 
 #endif

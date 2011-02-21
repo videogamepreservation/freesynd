@@ -38,13 +38,15 @@ public:
     /*!
      * Default constructor.
      */
-    Widget() : x_(0), y_(0), width_(0), height_(0), visible_(true) {}
+    Widget() : 
+      id_(++widgetCnt), x_(0), y_(0), width_(0), height_(0), visible_(true) {}
 
     /*!
      * Constructs a widget with given size and location.
      */
     Widget(int x, int y, int width, int height, bool visible):
-            x_(x), y_(y), width_(width), height_(height), visible_(visible) {}
+            id_(++widgetCnt), x_(x), y_(y), width_(width), 
+            height_(height), visible_(visible) {}
 
     /*!
      * Default constructor.
@@ -53,6 +55,8 @@ public:
 
     //! Draw the widget on screen. All subclass must implement this method.
     virtual void draw() = 0;
+
+    int getId() { return id_; }
 
     virtual void setLocation(int x, int y);
     int getX() { return x_; }
@@ -77,6 +81,12 @@ protected:
     /*! True if the widget is displayed on screen. */
     bool visible_;
 
+private:
+    /*! A counter to have unique widget IDs.*/
+    static int widgetCnt;
+
+    /*! A unique ID identifying the widget.*/
+    int id_;
 };
 
 //! A text widget.
@@ -137,6 +147,7 @@ protected:
     FontManager::EFontSize size_;
 };
 
+class Menu;
 class Sprite;
 
 //! A button widget.
@@ -152,14 +163,14 @@ public:
     const char *to_;
 
     //! Constructs a new button.
-    Option() : Widget(), text_(0, 0, "", FontManager::SIZE_1, true, true) {
+    Option() : Widget(), text_(0, 0, 0, "", FontManager::SIZE_1, true, true) {
         to_ = NULL;
         darkWidget_ = NULL;
         lightWidget_ = NULL;
     }
 
     //! Constructs a new button.
-    Option(int x, int y, int width, int height, const char *text, FontManager::EFontSize size,
+    Option(Menu *peer, int x, int y, int width, int height, const char *text, FontManager::EFontSize size,
             const char *to, bool visible, bool centered = true, int dark_widget = 0, int light_widget = 0);
 
     ~Option() { to_ = NULL; }
@@ -171,11 +182,14 @@ public:
     bool isMouseOver(int x, int y);
 
     virtual void handleMouseMotion(int x, int y, int state, const int modKeys) {}
+    virtual void handleMouseDown(int x, int y, int button, const int modKeys);
 
     virtual void handleFocusGained();
     virtual void handleFocusLost();
 
 protected:
+    Menu *peer_;
+
     MenuText text_;
     /*! 
      * The widget to display when button is dark.

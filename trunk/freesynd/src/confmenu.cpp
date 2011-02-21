@@ -70,13 +70,15 @@ public:
     colour_(0) {
         setClearArea(bkg_, 283, 28, 328, 120);
         addStatic(299, 32, "CHANGE COLOUR AND LOGO", FontManager::SIZE_2, false);
-        addOption(405, 58, 27, 22, "", FontManager::SIZE_2, KEY_F1, NULL, true, true, Sprite::MSPR_LEFT_ARROW_D, Sprite::MSPR_LEFT_ARROW_L);
-        addOption(435, 58, 27, 22, "", FontManager::SIZE_2, KEY_F2, NULL, true, true, Sprite::MSPR_RIGHT_ARROW_D, Sprite::MSPR_RIGHT_ARROW_L);
+        leftColButId_ = addImageOption(405, 58, KEY_F1, Sprite::MSPR_LEFT_ARROW_D, Sprite::MSPR_LEFT_ARROW_L);
+        rightColButId_ = addImageOption(435, 58, KEY_F2, Sprite::MSPR_RIGHT_ARROW_D, Sprite::MSPR_RIGHT_ARROW_L);
+
         addStatic(475, 60, "COLOUR", FontManager::SIZE_2, false);
-        addOption(405, 94, 27, 22, "", FontManager::SIZE_2, KEY_F3, NULL, true, true, Sprite::MSPR_LEFT_ARROW_D, Sprite::MSPR_LEFT_ARROW_L);
-        addOption(435, 94, 27, 22, "", FontManager::SIZE_2, KEY_F4, NULL, true, true, Sprite::MSPR_RIGHT_ARROW_D, Sprite::MSPR_RIGHT_ARROW_L);
+        leftLogoButId_ = addImageOption(405, 94, KEY_F3, Sprite::MSPR_LEFT_ARROW_D, Sprite::MSPR_LEFT_ARROW_L);
+        rightLogoButId_ = addImageOption(435, 94, KEY_F4, Sprite::MSPR_RIGHT_ARROW_D, Sprite::MSPR_RIGHT_ARROW_L);
+        
         addStatic(475, 96, "LOGO", FontManager::SIZE_2, false);
-        addOption(291, 122, 125, 23, "OK", FontManager::SIZE_2, KEY_F5, "conf");
+        okButId_ = addOption(291, 122, 125, 23, "OK", FontManager::SIZE_2, KEY_F5, "conf");
         addOption(476, 122, 123, 23, "CANCEL", FontManager::SIZE_2, KEY_F6, "conf");
 
         for (unsigned int i = 0; i < sizeof(g_Colours) / sizeof(int); i++) {
@@ -90,8 +92,8 @@ public:
         g_Screen.drawLogo(336, 55, logo_, g_Colours[colour_]);
     }
 
-    virtual void handleOption(Key key, const int modKeys) {
-        if (key == KEY_F1) {
+    virtual void handleAction(const int actionId, void *ctx, const int modKeys) {
+        if (actionId == leftColButId_) {
             if (colour_ > 0)
                 colour_--;
             else
@@ -100,7 +102,7 @@ public:
             g_Screen.drawLogo(336, 55, logo_, g_Colours[colour_]);
         }
 
-        if (key == KEY_F2) {
+        if (actionId == rightColButId_) {
             if ((unsigned int) colour_ < sizeof(g_Colours) / sizeof(int) - 1)
                 colour_++;
             else
@@ -109,7 +111,7 @@ public:
             g_Screen.drawLogo(336, 55, logo_, g_Colours[colour_]);
         }
 
-        if (key == KEY_F3) {
+        if (actionId == leftLogoButId_) {
             if (logo_ > 0)
                 logo_--;
             else
@@ -118,7 +120,7 @@ public:
             g_Screen.drawLogo(336, 55, logo_, g_Colours[colour_]);
         }
 
-        if (key == KEY_F4) {
+        if (actionId == rightLogoButId_) {
             if (logo_ < g_Screen.numLogos() - 1)
                 logo_++;
             else
@@ -127,7 +129,7 @@ public:
             g_Screen.drawLogo(336, 55, logo_, g_Colours[colour_]);
         }
 
-        if (key == KEY_F5) {
+        if (actionId == okButId_) {
             g_App.getGameSession().setLogo(logo_);
             g_App.getGameSession().setLogoColour(g_Colours[colour_]);
         }
@@ -135,6 +137,11 @@ public:
 
 protected:
     int logo_, colour_;
+    int rightColButId_;
+    int leftColButId_;
+    int leftLogoButId_;
+    int rightLogoButId_;
+    int okButId_;
 };
 
 class ChangeNameMenu : public CommonConfSubMenu {
@@ -213,17 +220,20 @@ public:
     ChangeNameMenu(m, "changeCompany", bkg, confMenu) {
         setClearArea(bkg, 283, 28, 328, 120);
         addStatic(320, 32, "CHANGE COMPANY NAME", FontManager::SIZE_2, false);
-        addOption(291, 122, 125, 23, "OK", FontManager::SIZE_2, KEY_F5, "conf");
+        okButId_ = addOption(291, 122, 125, 23, "OK", FontManager::SIZE_2, KEY_F5, "conf");
         addOption(476, 122, 123, 23, "CANCEL", FontManager::SIZE_2, KEY_F6, "conf");
         name_value_ = g_App.getGameSession().getCompanyName();
     }
 
-    virtual void handleOption(Key key, const int modKeys) {
-        if (key == KEY_F5) {
+    virtual void handleAction(const int actionId, void *ctx, const int modKeys) {
+        if (actionId == okButId_) {
             g_App.getGameSession().setCompanyName(name_value_.c_str());
             g_App.setCheatCode(name_value_.c_str());
         }
     }
+
+private:
+    int okButId_;
 };
 
 class ChangeYourNameMenu : public ChangeNameMenu {
@@ -232,15 +242,17 @@ public:
     ChangeNameMenu(m, "changeName", bkg, confMenu) {
         setClearArea(bkg, 283, 28, 328, 120);
         addStatic(350, 32, "ENTER YOUR NAME", FontManager::SIZE_2, false);
-        addOption(291, 122, 125, 23, "OK", FontManager::SIZE_2, KEY_F5, "conf");
+        okButId_ = addOption(291, 122, 125, 23, "OK", FontManager::SIZE_2, KEY_F5, "conf");
         addOption(476, 122, 123, 23, "CANCEL", FontManager::SIZE_2, KEY_F6, "conf");
         name_value_ = g_App.getGameSession().getUserName();
     }
 
-    virtual void handleOption(Key key, const int modKeys) {
-        if (key == KEY_F5)
+    virtual void handleAction(const int actionId, void *ctx, const int modKeys) {
+        if (actionId == okButId_)
             g_App.getGameSession().setUserName(name_value_.c_str());
     }
+private:
+    int okButId_;
 };
 
 ConfMenu::ConfMenu(MenuManager *m) :

@@ -42,7 +42,7 @@ public:
     virtual void handleRender();
     void handleLeave();
 
-    virtual void handleOption(Key key, const int modKeys) {}
+    virtual void handleAction(const int actionId, void *ctx, const int modKeys) {}
 
 protected:
     uint8 *bkg_;

@@ -38,12 +38,25 @@ public:
     void handleRender();
     void handleShowLate();
     void handleLeave();
-    void handleOption(Key key, const int modKeys);
+    void handleAction(const int actionId, void *ctx, const int modKeys);
 
 protected:
     int tab_;
     uint8 *orig_pixels_;
     int sel_weapon_, sel_field_, sel_mod_;
+    /*! Id of the text widget for time.*/
+    int txtTimeId_;
+    /*! Id of the mods toogle button.*/
+    int modsButId_;
+    /*! Id of the equipment toogle button.*/
+    int equipButId_;
+    int cancelSearchId_;
+    int researchId_;
+    int cancelDescId_;
+    int mod0Id_;
+    int equip0Id_;
+    int modField0Id_;
+    int equipField0Id_;
 
     void updateClock();
 

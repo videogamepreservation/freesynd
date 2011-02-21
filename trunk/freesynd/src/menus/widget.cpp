@@ -1,6 +1,8 @@
 #include "widget.h"
 #include "app.h"
 
+int Widget::widgetCnt = 0;
+
 /*!
  * Utility method to add a dirty rect to the menu.
  * Adds rect only if widget is visible.
@@ -132,9 +134,10 @@ void MenuText::draw() {
         g_App.fonts().drawText(anchorX_, anchorY_, text_.c_str(), size_, dark_);
 }
 
-Option::Option(int x, int y, int width, int height, const char *text, FontManager::EFontSize size,
+Option::Option(Menu *peer, int x, int y, int width, int height, const char *text, FontManager::EFontSize size,
             const char *to, bool visible, bool centered, int darkWidgetId, int lightWidgetId) 
             : Widget(x, y, width, height, visible), text_(x, y, width - 4, text, size, true, true, centered) {
+        peer_ = peer;
         to_ = to;
         darkWidget_ = NULL;
         lightWidget_ = NULL;
@@ -185,4 +188,15 @@ void Option::handleFocusGained() {
 void Option::handleFocusLost() {
     text_.setDark(true);
     redraw();
+}
+
+void Option::handleMouseDown(int x, int y, int button, const int modKeys) {
+    if (peer_) {
+        peer_->handleAction(getId(), NULL, modKeys);
+    }
+
+    if (to_) {
+        g_App.menus().changeCurrentMenu(to_);
+        return;
+    }
 }

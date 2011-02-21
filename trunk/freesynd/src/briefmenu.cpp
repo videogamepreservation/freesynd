@@ -42,11 +42,11 @@ Menu(m, "brief", "mbrief.dat", "mbrieout.dat"),
 start_line_(0) {
     
     addStatic(148, 35, "#BRIEF_TITLE", FontManager::SIZE_4, true);
-    addStatic(500, 9, "", FontManager::SIZE_2, false);       // Time
+    txtTimeId_ = addStatic(500, 9, "", FontManager::SIZE_2, false);       // Time
 
     // Briefing scroll button
-    addOption(461, 316, 30, 20, "", FontManager::SIZE_2, KEY_F6, NULL, true, true, Sprite::MSPR_RIGHT_ARROW2_D, Sprite::MSPR_RIGHT_ARROW2_L);
-    addOption(427, 316, 30, 20, "", FontManager::SIZE_2, KEY_F7, NULL, false, true, Sprite::MSPR_LEFT_ARROW2_D, Sprite::MSPR_LEFT_ARROW2_L);
+    nextButId_ = addImageOption(461, 316, KEY_F6, Sprite::MSPR_RIGHT_ARROW2_D, Sprite::MSPR_RIGHT_ARROW2_L);
+    prevButId_ = addImageOption(427, 316, KEY_F7, Sprite::MSPR_LEFT_ARROW2_D, Sprite::MSPR_LEFT_ARROW2_L, false);
 
     // Accept button
     addOption(17, 347, 128, 25, "#MENU_ACC_BUT", FontManager::SIZE_2, KEY_F3, "select");
@@ -58,10 +58,10 @@ start_line_(0) {
     // Money
     txtMoneyId_ = addStatic(500, 87, 127, "0", FontManager::SIZE_2, false);     // textfield
     // Info
-    addOption(500, 118, 127, 10, "#BRIEF_INFO", FontManager::SIZE_2, KEY_F1); // info button
+    infosButId_ = addOption(500, 118, 127, 10, "#BRIEF_INFO", FontManager::SIZE_2, KEY_F1); // info button
     txtInfoId_ = addStatic(500, 140, 127, "0", FontManager::SIZE_2, false);
     // Enhancement
-    addOption(500, 169, 127, 10, "#BRIEF_ENH", FontManager::SIZE_2, KEY_F2);
+    enhButId_ = addOption(500, 169, 127, 10, "#BRIEF_ENH", FontManager::SIZE_2, KEY_F2);
     txtEnhId_ = addStatic(500, 195, 127, "0", FontManager::SIZE_2, false);
 
     setParentMenu("map");
@@ -85,7 +85,7 @@ void BriefMenu::updateClock() {
     char tmp[100];
 
     g_Session.getTimeAsStr(tmp);
-    getStatic(1)->setText(tmp);
+    getStatic(txtTimeId_)->setText(tmp);
 
     // update money
     getStatic(txtMoneyId_)->setTextFormated("%d", g_Session.getMoney());
@@ -193,7 +193,7 @@ void BriefMenu::handleRender() {
                 lvls++;
 
                 if (lvls > g_Session.getSelectedBlock().infoLevel) {
-                    hideOption(KEY_F6);
+                    getOption(nextButId_)->setVisible(false);
                     break;
                 }
 
@@ -247,7 +247,7 @@ void BriefMenu::handleRender() {
                 }
             }
             else
-                hideOption(KEY_F6);
+                getOption(nextButId_)->setVisible(false);
         } while (miss && *miss && line_count < start_line_ + 14);
 
         free(mbriefing);        // using free because allocated this
@@ -269,9 +269,9 @@ void BriefMenu::handleLeave() {
     g_System.hideCursor();
 }
 
-void BriefMenu::handleOption(Key key, const int modKeys) {
+void BriefMenu::handleAction(const int actionId, void *ctx, const int modKeys) {
     Mission *pMission = g_Session.getMission();
-    if (key == KEY_F1) {
+    if (actionId == infosButId_) {
         // Buy some informations
         if (g_Session.getSelectedBlock().infoLevel < pMission->getMaxInfoLvl()) {
             g_Session.setMoney(g_Session.getMoney() - pMission->infoCost(g_Session.getSelectedBlock().infoLevel));
@@ -281,10 +281,10 @@ void BriefMenu::handleOption(Key key, const int modKeys) {
             getStatic(txtInfoId_)->setTextFormated("%d", pMission->infoCost(g_Session.getSelectedBlock().infoLevel));
         }
 
-        showOption(KEY_F6);
+        getOption(nextButId_)->setVisible(true);
     }
 
-    if (key == KEY_F2) {
+    if (actionId == enhButId_) {
         // Buy some map enhancement
         if (g_Session.getSelectedBlock().enhanceLevel < pMission->getMaxEnhanceLvl()) {
             g_Session.setMoney(g_Session.getMoney() - 
@@ -296,22 +296,22 @@ void BriefMenu::handleOption(Key key, const int modKeys) {
         }
     }
 
-    if (key == KEY_F6) {
+    if (actionId == nextButId_) {
         // Next page
         start_line_ += 14;
-        showOption(KEY_F7);
+        getOption(prevButId_)->setVisible(true);
         needRendering();
     }
 
-    if (key == KEY_F7) {
+    if (actionId == prevButId_) {
         // Previous page
         start_line_ -= 14;
 
         if (start_line_ <= 0) {
             start_line_ = 0;
-            hideOption(KEY_F7);
+            getOption(prevButId_)->setVisible(false);
         }
-        showOption(KEY_F6);
+        getOption(nextButId_)->setVisible(true);
         needRendering();
     }
 }

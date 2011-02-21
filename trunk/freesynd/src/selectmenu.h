@@ -41,7 +41,7 @@ public:
     void handleShowLate();
     void handleLeave();
     void handleMouseDown(int x, int y, int button, const int modKeys);
-    void handleOption(Key key, const int modKeys);
+    void handleAction(const int actionId, void *ctx, const int modKeys);
 
 protected:
     void updateClock();
@@ -71,6 +71,24 @@ protected:
     int rnd_;
     int sel_weapon_, sel_mod_, sel_weapon_inst_;
     bool sel_all_;
+    /*! Id of the text widget for time.*/
+    int txtTimeId_;
+    /*! Id of the team toogle button.*/
+    int teamButId_;
+    /*! Id of the mods toogle button.*/
+    int modsButId_;
+    /*! Id of the equipment toogle button.*/
+    int equipButId_;
+    /*! Id of the cancel button.*/
+    int cancelButId_;
+    /*! Id of the purchase button.*/
+    int purchaseButId_;
+    /*! Id of the sell button.*/
+    int sellButId_;
+
+    int mod0Id_;
+    int equip0Id_;
+    int agent0Id_;
 };
 
 #endif
