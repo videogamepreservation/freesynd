@@ -46,7 +46,7 @@ public:
     Menu(MenuManager *menuManager, const char *name, const char *showAnim,
             const char *leaveAnim);
     Menu(MenuManager *menuManager, const char *name, const char *parent);
-    virtual ~Menu() {}
+    virtual ~Menu();
 
     const char *name() { return name_.c_str(); }
 
@@ -85,6 +85,8 @@ public:
     //! Creates a new button and returns its id
     int addOption(int x, int y, int width, int height, const char *text, FontManager::EFontSize size, Key key,
             const char *to = NULL, bool visible = true, bool centered = true, int dark_widget = 0, int light_widget = 0);
+    //! Creates a new toggle button and returns its id
+    int addToggleAction(int x, int y, int width, int height, const char *text, FontManager::EFontSize size, Key key, bool selected);
 
     Option * getOption(int buttonId);
 
@@ -182,8 +184,9 @@ protected:
     /*! The list of all static widgets (MenuText).*/
     std::list<MenuText> statics_;
     /*! The list of all dynamic widgets (Option).*/
-    std::list<Option> actions_;
+    std::list<ActionWidget *> actions_;
     std::map<Key, int> hotKeys_;
+    Group group_;
     const char *parent_menu_;
     uint8 *background_;
     int clear_x_, clear_y_, clear_w_, clear_h_;

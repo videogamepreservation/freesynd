@@ -39,8 +39,8 @@ sel_mod_(0)
     addStatic(228, 35, "RESEARCH", FontManager::SIZE_4, true);
     txtTimeId_ = addStatic(500, 9, "", FontManager::SIZE_2, false);       // Time
 
-    modsButId_ = addOption(16, 290, 129, 25, "MODS", FontManager::SIZE_2, KEY_F1, NULL);
-    equipButId_ = addOption(16, 318, 129, 25,  "EQUIP", FontManager::SIZE_2, KEY_F2, NULL);
+    modsButId_ = addToggleAction(16, 290, 129, 25, "MODS", FontManager::SIZE_2, KEY_F1, false);
+    equipButId_ = addToggleAction(16, 318, 129, 25,  "EQUIP", FontManager::SIZE_2, KEY_F2, true);
     addOption(16, 346, 129, 25,  "#MENU_ACC_BUT", FontManager::SIZE_2, KEY_F3, "select");
     addOption(500, 347,  128, 25, "#MENU_MAIN_BUT", FontManager::SIZE_2, KEY_F4, "main");
     addFieldOptions();
@@ -50,12 +50,6 @@ sel_mod_(0)
     researchId_ = addOption(16, 158, 129, 25,  "RESEARCH", FontManager::SIZE_2, KEY_F6, NULL, false);
     cancelSearchId_ = addOption(16, 184, 129, 25,  "CANCEL", FontManager::SIZE_2, KEY_F7, NULL, false);
     setParentMenu("select");
-}
-
-void ResearchMenu::handleShowLate()
-{
-    g_App.fonts().drawText(52, 296, "MODS", 1, tab_ != 0);
-    g_App.fonts().drawText(52, 324, "EQUIP", 1, tab_ != 1);
 }
 
 void ResearchMenu::showEquipList()

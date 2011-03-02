@@ -52,12 +52,20 @@ parent_menu_(parent), background_(NULL)
     menuManager->addMenu(this);
 }
 
+Menu::~Menu() {
+    for (std::list < ActionWidget * >::iterator it = actions_.begin();
+         it != actions_.end(); it++) {
+        delete (*it);
+    }
+
+    actions_.clear();
+}
+
 void Menu::redrawOptions()
 {
-    for (std::list < Option >::iterator it = actions_.begin();
+    for (std::list < ActionWidget * >::iterator it = actions_.begin();
          it != actions_.end(); it++) {
-        Option & m = *it;
-        it->draw();
+        (*it)->draw();
     }
     
     handleShowLate();
@@ -188,12 +196,12 @@ int Menu::addImageOption(int x, int y, Key key, int dark_widget, int light_widge
 
     Sprite *spr = g_App.menuSprites().sprite(dark_widget);
    
-    Option m(this, x, y, spr->width() * 2, spr->height() * 2, "", 
+    Option *m = new Option(this, x, y, spr->width() * 2, spr->height() * 2, "", 
                 FontManager::SIZE_1, NULL, visible, true, dark_widget, light_widget);
-    hotKeys_[key] = m.getId();
+    hotKeys_[key] = m->getId();
     actions_.push_back(m);
 
-    return m.getId();
+    return m->getId();
 }
 
 /*!
@@ -216,24 +224,32 @@ int Menu::addImageOption(int x, int y, Key key, int dark_widget, int light_widge
 int Menu::addOption(int x, int y, int width, int height, const char *text, FontManager::EFontSize size, Key key,
             const char *to, bool visible, bool centered, int dark_widget, int light_widget) {
     
-    Option m(this, x, y, width, height, text, size, to, visible, centered, dark_widget, light_widget);
-    hotKeys_[key] = m.getId();
+    Option *m = new Option(this, x, y, width, height, text, size, to, visible, centered, dark_widget, light_widget);
+    hotKeys_[key] = m->getId();
     actions_.push_back(m);
 
-    return m.getId();
+    return m->getId();
 }
 
 Option * Menu::getOption(int buttonId) {
-    for (std::list < Option >::iterator it = actions_.begin();
+    for (std::list < ActionWidget * >::iterator it = actions_.begin();
          it != actions_.end(); it++) {
-        Option & m = *it;
 
-        if (buttonId == m.getId()) {
-            return &m;
+        if (buttonId == (*it)->getId()) {
+            return dynamic_cast<Option *> (*it);
         }
     }
 
     return NULL;
+}
+
+int Menu::addToggleAction(int x, int y, int width, int height, const char *text, FontManager::EFontSize size, Key key, bool selected) {
+    ToggleAction *a = new ToggleAction(this, x, y, width, height, text, size, selected, &group_);
+    group_.addButton(a);
+    hotKeys_[key] = a->getId();
+    actions_.push_back(a);
+
+    return a->getId();
 }
 
 /*!
@@ -286,25 +302,25 @@ void Menu::mouseMotionEvent(int x, int y, int state, const int modKeys)
     }
 
     // See if the mouse is hovering a button
-    for (std::list < Option >::iterator it = actions_.begin();
+    for (std::list < ActionWidget * >::iterator it = actions_.begin();
          it != actions_.end(); it++) {
-        Option & m = *it;
+        ActionWidget *m = *it;
 
-        if (!m.isVisible()) {
+        if (!m->isVisible()) {
             // Button is not visible so it doesn't count
             continue;
         }
 
         // Mouse is over a widget
-        if (m.isMouseOver(x, y)) {
-            if (m.getId() != focusedWgId_) {
+        if (m->isMouseOver(x, y)) {
+            if (m->getId() != focusedWgId_) {
                 // Widget has now the focus : handle the event
-                m.handleFocusGained();
-                focusedWgId_ = m.getId();
+                m->handleFocusGained();
+                focusedWgId_ = m->getId();
             }
 
             // Pass the event to the widget
-            m.handleMouseMotion(x, y, state, modKeys);
+            m->handleMouseMotion(x, y, state, modKeys);
 
             return;
         }
@@ -320,17 +336,17 @@ void Menu::mouseMotionEvent(int x, int y, int state, const int modKeys)
  */
 void Menu::mouseDownEvent(int x, int y, int button, const int modKeys)
 {
-    for (std::list < Option >::iterator it = actions_.begin();
+    for (std::list < ActionWidget * >::iterator it = actions_.begin();
          it != actions_.end(); it++) {
-        Option & m = *it;
+        ActionWidget *m = *it;
 
-        if (!m.isVisible()) {
+        if (!m->isVisible()) {
             // Button is not visible so it doesn't count
             continue;
         }
 
-        if (m.isMouseOver(x, y)) {
-            m.handleMouseDown(x, y, button, modKeys);
+        if (m->isMouseOver(x, y)) {
+            m->handleMouseDown(x, y, button, modKeys);
             return;
         }
     }

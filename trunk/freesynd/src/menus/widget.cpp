@@ -134,9 +134,17 @@ void MenuText::draw() {
         g_App.fonts().drawText(anchorX_, anchorY_, text_.c_str(), size_, dark_);
 }
 
+bool ActionWidget::isMouseOver(int x, int y) {
+ 
+    return (x > x_  && 
+            x < x_ + width_ && 
+            y >= y_ && 
+            y < y_ + height_);
+}
+
 Option::Option(Menu *peer, int x, int y, int width, int height, const char *text, FontManager::EFontSize size,
             const char *to, bool visible, bool centered, int darkWidgetId, int lightWidgetId) 
-            : Widget(x, y, width, height, visible), text_(x, y, width - 4, text, size, true, true, centered) {
+            : ActionWidget(x, y, width, height, visible), text_(x, y, width - 4, text, size, true, true, centered) {
         peer_ = peer;
         to_ = to;
         darkWidget_ = NULL;
@@ -152,8 +160,11 @@ Option::Option(Menu *peer, int x, int y, int width, int height, const char *text
             // there's a small pad between heading widget ant text
             text_.setLocation(text_.getX() + darkWidget_->width() * 2 + 8, text_.getY());
         }
-    }
+}
 
+Option::~Option() {
+    to_ = NULL; 
+}
 /*!
  * Draw the widget at the current position and only if it's
  * visible.
@@ -171,14 +182,6 @@ void Option::draw() {
 
         text_.draw();
     }
-}
-
-bool Option::isMouseOver(int x, int y) {
- 
-    return (x > x_  && 
-            x < x_ + width_ && 
-            y >= y_ && 
-            y < y_ + height_);
 }
 
 void Option::handleFocusGained() {
@@ -199,4 +202,54 @@ void Option::handleMouseDown(int x, int y, int button, const int modKeys) {
         g_App.menus().changeCurrentMenu(to_);
         return;
     }
+}
+
+Group::~Group() {
+    actions_.clear();
+}
+
+void Group::addButton(ToggleAction *pAction) {
+    actions_.push_back(pAction);
+}
+
+void Group::selectButton(int id) {
+    for (std::list < ToggleAction * >::iterator it = actions_.begin();
+         it != actions_.end(); it++) {
+        ToggleAction *pAction = *it;
+
+        if (pAction->getId() != id ) {
+            pAction->handleSelectionLost();
+        }
+    }
+}
+
+ToggleAction::ToggleAction(Menu *peer, int x, int y, int width, int height, 
+                            const char *text, FontManager::EFontSize size, bool selected, Group *pGroup)
+: Option(peer, x, y, width, height, text, size, NULL, true) {
+    selected_ = selected;
+    group_ = pGroup;
+    if (selected_) {
+        text_.setDark(false);
+    }
+}
+
+void ToggleAction::handleMouseDown(int x, int y, int button, const int modKeys) {
+    selected_ = true;
+    group_->selectButton(getId());
+    Option::handleMouseDown(x, y, button, modKeys);
+}
+
+void ToggleAction::handleFocusLost() {
+    // Toggle buttons get dark only
+    // if they are not pushed
+    if (!selected_) {
+        text_.setDark(true);
+        redraw();
+    }
+}
+
+void ToggleAction::handleSelectionLost() {
+    selected_ = false;
+    text_.setDark(true);
+    redraw();
 }

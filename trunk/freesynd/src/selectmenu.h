@@ -38,7 +38,6 @@ public:
     void handleTick(int elapsed);
     void handleShow();
     void handleRender();
-    void handleShowLate();
     void handleLeave();
     void handleMouseDown(int x, int y, int button, const int modKeys);
     void handleAction(const int actionId, void *ctx, const int modKeys);

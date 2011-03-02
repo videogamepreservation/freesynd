@@ -24,6 +24,7 @@
 #define WIDGET_H
 
 #include <string>
+#include <list>
 
 #include "gfx/fontmanager.h"
 
@@ -31,6 +32,7 @@
  * This is a graphical component. It's the base class
  * for all widgets (text, button, ...).
  * A widget has a size and location and can be visible or not.
+ * Each widget has a unique id.
  */
 class Widget {
 public:
@@ -43,6 +45,11 @@ public:
 
     /*!
      * Constructs a widget with given size and location.
+     * \param x X coordinate
+     * \param y Y coordinate
+     * \param widht Widget width
+     * \param height Widget height
+     * \param visible True means the widget is drawn
      */
     Widget(int x, int y, int width, int height, bool visible):
             id_(++widgetCnt), x_(x), y_(y), width_(width), 
@@ -56,6 +63,9 @@ public:
     //! Draw the widget on screen. All subclass must implement this method.
     virtual void draw() = 0;
 
+    /*!
+     * Returns the widget id.
+     */
     int getId() { return id_; }
 
     virtual void setLocation(int x, int y);
@@ -150,20 +160,42 @@ protected:
 class Menu;
 class Sprite;
 
+/*!
+ * A widget that responds to user interactions.
+ */
+class ActionWidget : public Widget {
+public:
+    ActionWidget() : Widget() {}
+    ActionWidget(int x, int y, int width, int height, bool visible) : Widget(x, y, width, height, visible) {}
+
+    //! Tells whether the pointer is over the widget or not
+    bool isMouseOver(int x, int y);
+
+    //! Callback method to respond to mouse motion event
+    virtual void handleMouseMotion(int x, int y, int state, const int modKeys) {}
+    //! Callback method to respond to mouse down event
+    virtual void handleMouseDown(int x, int y, int button, const int modKeys) {}
+
+    //! Callback method called when the mouse is over the widget
+    virtual void handleFocusGained() {}
+    //! Callback method called when the mouse leaves the widget
+    virtual void handleFocusLost() {}
+};
+
 //! A button widget.
 /*!
  * This class represents a button. A button can lead to another screen 
  * which name is stored in the field "to".
  * It can have a widget in front of its text (like an arrow or a bullet).
  */
-class Option : public Widget {
+class Option : public ActionWidget {
 public:
 
     /*! The name of the next menu.*/
     const char *to_;
 
     //! Constructs a new button.
-    Option() : Widget(), text_(0, 0, 0, "", FontManager::SIZE_1, true, true) {
+    Option() : ActionWidget(), text_(0, 0, 0, "", FontManager::SIZE_1, true, true) {
         to_ = NULL;
         darkWidget_ = NULL;
         lightWidget_ = NULL;
@@ -173,19 +205,15 @@ public:
     Option(Menu *peer, int x, int y, int width, int height, const char *text, FontManager::EFontSize size,
             const char *to, bool visible, bool centered = true, int dark_widget = 0, int light_widget = 0);
 
-    ~Option() { to_ = NULL; }
+    ~Option();
 
     //! Draw the widget on screen
     void draw();
 
-    //! Tells whether the pointer is over the button or not
-    bool isMouseOver(int x, int y);
+    void handleMouseDown(int x, int y, int button, const int modKeys);
 
-    virtual void handleMouseMotion(int x, int y, int state, const int modKeys) {}
-    virtual void handleMouseDown(int x, int y, int button, const int modKeys);
-
-    virtual void handleFocusGained();
-    virtual void handleFocusLost();
+    void handleFocusGained();
+    void handleFocusLost();
 
 protected:
     Menu *peer_;
@@ -201,6 +229,52 @@ protected:
      * When id is zero, there is no widget.
      */
     Sprite *lightWidget_;
+};
+
+class ToggleAction;
+
+/*!
+ * A group is used to track the 
+ * mutual exclusion between toggle actions.
+ * Each time a button is selected, the others
+ * must be unselected.
+ */
+class Group {
+public:
+    Group() {}
+    ~Group();
+
+    //! Adds a button to the group
+    void addButton(ToggleAction *action);
+    //! A toggle button has been selected
+    void selectButton(int id);
+
+private:
+    /*! List of buttons that belongs to the group.*/
+    std::list<ToggleAction *> actions_;
+};
+
+/*!
+ * ToggleAction are buttons that stay pushed when clicked
+ * but gets deselected when another button from the same group
+ * gets selected.
+ */
+class ToggleAction : public Option {
+public:
+    //! Constructs a new button.
+    ToggleAction(Menu *peer, int x, int y, int width, int height, 
+                    const char *text, FontManager::EFontSize size, bool selected, Group *pGroup);
+
+    void handleMouseDown(int x, int y, int button, const int modKeys);
+
+    void handleFocusLost();
+
+    void handleSelectionLost();
+protected:
+    /*! State of the button. True means the button is on.*/
+    bool selected_;
+    /*! Group of the button.*/
+    Group *group_;
 };
 
 #endif // WIDGET_H

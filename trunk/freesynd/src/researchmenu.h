@@ -36,7 +36,6 @@ public:
     void handleTick(int elapsed);
     void handleShow();
     void handleRender();
-    void handleShowLate();
     void handleLeave();
     void handleAction(const int actionId, void *ctx, const int modKeys);
 

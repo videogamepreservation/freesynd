@@ -40,9 +40,9 @@ sel_weapon_inst_(0), sel_all_(false)
     txtTimeId_ = addStatic(500, 9, "", FontManager::SIZE_2, false);       // Time
 
     addOption(16, 234, 129, 25, "RESEARCH", FontManager::SIZE_2, KEY_F1, "research");
-    teamButId_ = addOption(16, 262, 129, 25, "TEAM", FontManager::SIZE_2, KEY_F2, NULL);
-    modsButId_ = addOption(16, 290, 129, 25, "MODS", FontManager::SIZE_2, KEY_F3, NULL);
-    equipButId_ = addOption(16, 318, 129, 25, "EQUIP", FontManager::SIZE_2, KEY_F4, NULL);
+    teamButId_ = addToggleAction(16, 262, 129, 25, "TEAM", FontManager::SIZE_2, KEY_F2, false);
+    modsButId_ = addToggleAction(16, 290, 129, 25, "MODS", FontManager::SIZE_2, KEY_F3, false);
+    equipButId_ = addToggleAction(16, 318, 129, 25, "EQUIP", FontManager::SIZE_2, KEY_F4, true);
     addOption(16, 346, 129, 25, "#MENU_ACC_BUT", FontManager::SIZE_2, KEY_F5, "loading");
     addOption(500, 347,  128, 25, "#MENU_MAIN_BUT", FontManager::SIZE_2, KEY_F6, "main");
 
@@ -106,12 +106,13 @@ void SelectMenu::clearRecruitOptions()
     if (agent0Id_ != 0) {
         for (int i = 0; i < AgentManager::MAX_AGENT; i++) {
             if (g_App.agents().agent(i)) {
-                for (std::list < Option >::iterator it = actions_.begin();
+                for (std::list < ActionWidget * >::iterator it = actions_.begin();
                     it != actions_.end(); it++) {
-                    Option & m = *it;
 
-                    if (m.getId() == agent0Id_ + i) {
-                        actions_.erase(it);
+                    if ((*it)->getId() == agent0Id_ + i) {
+                        delete (*it);
+                        it = actions_.erase(it);
+                        // TODO faire un delete
                         break;
                     }
                 }
@@ -495,13 +496,6 @@ void SelectMenu::handleRender() {
             }
         }
     }
-}
-
-void SelectMenu::handleShowLate()
-{
-    g_App.fonts().drawText(52, 268, "TEAM", FontManager::SIZE_2, tab_ != 0);
-    g_App.fonts().drawText(52, 296, "MODS", FontManager::SIZE_2, tab_ != 1);
-    g_App.fonts().drawText(52, 324, "EQUIP", FontManager::SIZE_2, tab_ != 2);
 }
 
 void SelectMenu::handleLeave() {
