@@ -184,6 +184,21 @@ void Option::draw() {
     }
 }
 
+/*!
+ * Calls Menu::handleAction() then redirect to
+ * another menu if the field "to" has been set.
+ */
+void Option::executeAction(const int modKeys) {
+    if (peer_) {
+        peer_->handleAction(getId(), NULL, modKeys);
+    }
+
+    if (to_) {
+        g_App.menus().changeCurrentMenu(to_);
+        return;
+    }
+}
+
 void Option::handleFocusGained() {
     text_.setDark(false);
     redraw();
@@ -194,14 +209,7 @@ void Option::handleFocusLost() {
 }
 
 void Option::handleMouseDown(int x, int y, int button, const int modKeys) {
-    if (peer_) {
-        peer_->handleAction(getId(), NULL, modKeys);
-    }
-
-    if (to_) {
-        g_App.menus().changeCurrentMenu(to_);
-        return;
-    }
+    executeAction(modKeys);
 }
 
 Group::~Group() {
@@ -226,30 +234,32 @@ void Group::selectButton(int id) {
 ToggleAction::ToggleAction(Menu *peer, int x, int y, int width, int height, 
                             const char *text, FontManager::EFontSize size, bool selected, Group *pGroup)
 : Option(peer, x, y, width, height, text, size, NULL, true) {
-    selected_ = selected;
     group_ = pGroup;
-    if (selected_) {
-        text_.setDark(false);
-    }
+    setSelected(selected);
 }
 
-void ToggleAction::handleMouseDown(int x, int y, int button, const int modKeys) {
-    selected_ = true;
+void ToggleAction::setSelected(bool isSelected) {
+    selected_ = isSelected;
+    // When a ToggleAction is selected it lighted
+    text_.setDark(!selected_);
+    redraw();
+}
+
+void ToggleAction::executeAction(const int modKeys) {
+    setSelected(true);
+    // Deselect all other buttons of the group
     group_->selectButton(getId());
-    Option::handleMouseDown(x, y, button, modKeys);
+    Option::executeAction(modKeys);
 }
 
 void ToggleAction::handleFocusLost() {
     // Toggle buttons get dark only
     // if they are not pushed
     if (!selected_) {
-        text_.setDark(true);
-        redraw();
+        Option::handleFocusLost();
     }
 }
 
 void ToggleAction::handleSelectionLost() {
-    selected_ = false;
-    text_.setDark(true);
-    redraw();
+    setSelected(false);
 }

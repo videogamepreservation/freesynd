@@ -215,6 +215,9 @@ public:
     void handleFocusGained();
     void handleFocusLost();
 
+    //! Runs the action for this widget
+    virtual void executeAction(const int modKeys);
+
 protected:
     Menu *peer_;
 
@@ -265,11 +268,14 @@ public:
     ToggleAction(Menu *peer, int x, int y, int width, int height, 
                     const char *text, FontManager::EFontSize size, bool selected, Group *pGroup);
 
-    void handleMouseDown(int x, int y, int button, const int modKeys);
+    void executeAction(const int modKeys);
 
     void handleFocusLost();
 
     void handleSelectionLost();
+protected:
+    //! True to select the button
+    void setSelected(bool isSelected);
 protected:
     /*! State of the button. True means the button is on.*/
     bool selected_;

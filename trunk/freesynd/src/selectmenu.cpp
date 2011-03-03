@@ -112,7 +112,6 @@ void SelectMenu::clearRecruitOptions()
                     if ((*it)->getId() == agent0Id_ + i) {
                         delete (*it);
                         it = actions_.erase(it);
-                        // TODO faire un delete
                         break;
                     }
                 }

@@ -111,7 +111,7 @@ public:
         if (hotKeys_.find(key) == hotKeys_.end())
             return;
 
-        Option *opt = getOption(hotKeys_[key]);
+        Option *opt = hotKeys_[key];
 
         if (opt->isVisible()) {
             opt->setVisible(false);
@@ -128,7 +128,7 @@ public:
         if (hotKeys_.find(key) == hotKeys_.end())
             return;
 
-        Option *opt = getOption(hotKeys_[key]);
+        Option *opt = hotKeys_[key];
 
         if (!opt->isVisible()) {
             opt->setVisible(true);
@@ -185,7 +185,9 @@ protected:
     std::list<MenuText> statics_;
     /*! The list of all dynamic widgets (Option).*/
     std::list<ActionWidget *> actions_;
-    std::map<Key, int> hotKeys_;
+    /*! An association between key and option for hotkeys.*/
+    std::map<Key, Option *> hotKeys_;
+    /*! A group of mutual exclusive ToggleAction.*/
     Group group_;
     const char *parent_menu_;
     uint8 *background_;
