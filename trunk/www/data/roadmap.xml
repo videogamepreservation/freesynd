@@ -1,7 +1,7 @@
 <?xml version='1.0' standalone='yes'?>
 <roadmap>
 	<date>2010-09-30</date>
-	<status>Release v0.5 is now under development. There is no release date scheduled for now.</status>
+	<status>Release v0.5 is now under development. Release is scheduled at the end of 03/2011.</status>
 	<features>
 	  <feature id="3043686" status="D">Game Time</feature>
 	  <feature id="3072653" status="D">Use libsyndicate data info</feature>

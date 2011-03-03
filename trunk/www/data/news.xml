@@ -1,0 +1,62 @@
+<?xml version='1.0' standalone='yes'?>
+<news>
+	<item title="Project status" date="2011-03-03" author="Benoit Blancard">
+	After quite a long period of inactivity, Freesynd development has started again. Holidays, new year's eve resolutions
+	have delayed the release of the v0.5 version. On top of that, we lost one of our contributor : chamel. See you!
+	
+	I'm planning to release v0.5 at the end of March. The goal of this version is to complete all work on menus so that
+	future development will be focused on the gameplay. Next stop : end of march!
+	</item>
+	<item title="New v0.4 release" date="2010-09-27" author="Benoit Blancard">
+The v0.4 development release is now available from [[https://sourceforge.net/project/showfiles.php?group_id=93282 sourceforge]]. Again,
+this release contains mainly bug fixes and enhancement. Read the release notes to have a complete view of the work done.
+
+This release and the next ones won't contain the original data files because of licence restrictions. 
+So you'll have to download the original game to use its data files (use -p option to specify the new data path when launching the game).
+
+Enjoy!
+	</item>
+	
+	<item title="New v0.3 release" date="2010-07-21" author="Benoit Blancard">
+Freesynd is still alive! A new development release is available from [[https://sourceforge.net/project/showfiles.php?group_id=93282 sourceforge]].
+This v0.3 release contains mainly bug fixes and minor evolutions but it's still a step toward the v1.0. 
+	
+Please try it and report any bug in the project bug tracker.
+	</item>
+	
+	<item title="Now with sound" date="2007-04-24" author="Trent Waddington">
+	After some [[http://quantumg.blogspot.com/2007/04/freesynd-version-02-released.html battles]] FreeSynd now has almost all 
+	the sounds from the original game functional.  This is cause for release 0.2.  
+	You can [[https://sourceforge.net/project/showfiles.php?group_id=93282 download it here.]]  If you would prefer to get the source from CVS,
+	use the tag: release_0_2.
+
+	There's been a number of new people contributing code, and that's great.  If you would like to try your hand at some reverse engineering, 
+	implement some features or fix some bugs, we're here to help.
+	</item>
+	
+	<item title="First level now playable" date="2006-12-21" author="Trent Waddington">
+	I hearby declare that the first level of FreeSynd is now playable.  To celebrate this milestone I have made release 0.1.  
+	You can [[https://sourceforge.net/project/showfiles.php?group_id=93282 download it here.]]  This is an all-in-one package.
+	It includes: binaries for Linux, binaries for Windows, source code and all the required data files.  If you would prefer to 
+	get the source from CVS, use the tag: release_0_1.  
+
+	We still need lots of help.  If you find a bug, please report it in the [[http://sourceforge.net/tracker/?group_id=93282 bug tracker]]. 
+	If you can run the original game in [[http://dosbox.sourceforge.net/ dosbox]], have a go at figuring out what particular bytes in 
+	the GAME??.DAT files do (you'll need to [[http://rtfm.insomnia.org/~qg/dernc.exe decompress]] it first).  
+	If you can program in C++, check out the source code, fix some bugs or implement some features.
+
+	</item>
+	
+	<item title="Progress" date="2006-09-06" author="Trent Waddington">
+	Believe it or not, development has started again.  Open Source is a funny
+thing, sometimes people get so excited about what they can do that they don't
+do anything.  Other times they find they are just overcomitted and can not seem
+to find the time to do anything significant.  I like to think that every little
+bit counts, so here's my little bit.  In the last couple of days I have
+implemented all the menus which one could say make up half the game.  I've also
+written a map renderer, so soon we can start on the other half of the game.
+However, if I get distracted by work, family, or other projects, I expect
+someone else to pick up where I left off.  Let's aim for a 2013 release date,
+20 years to the day of the original game's release date!
+	</item>
+</news>

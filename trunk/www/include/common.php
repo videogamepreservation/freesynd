@@ -50,11 +50,59 @@ function getLinkToIssue($id, $label) {
 	return '<a href="http://sourceforge.net/support/tracker.php?aid=' . $id . '">'. $label . '</a>';
 }
 
+function replaceLink($str) {
+	$res = $str;
+	$start = 0;
+	$end = 0;
+	
+	while (($start = stripos($res,"[[")) !== false) {
+		if (($end = stripos($res, "]]", $start)) !== false) {
+			$href = trim(substr($res, $start + 2, $end - $start - 2));
+			$label = $href;
+			
+			$pos = strpos($href, ' ');
+			if ($pos !== false) {
+				$label = trim(substr($href, $pos));
+				$href = trim(substr($href, 0, $pos));
+			}
+			$link = '<a href="' . $href . '">'. $label . '</a>';
+			$res = substr($res, 0, $start) . $link . substr($res, $end + 2);
+		} else {
+			return $str;
+		}
+	}
+	return $res;
+}
+
+
 function newsItem($title, $content, $submitter, $date)
 {
+	// News title
     echo '<h3>' . htmlentities($title) . "</h3>\n";
-    echo '<p>' . implode("</p>\n<p>", explode("\n\n", $content))
-        . "</p>\n";
+	// News content
+	$arr = explode("\n", $content);
+	
+	$openedPar = false;
+	foreach ($arr as &$line) {
+		$trimLine = trim($line);
+		$trimLine = replaceLink($trimLine);
+		if (strlen($trimLine) == 0 && $openedPar == true) {
+			echo "</p>\n";
+			$openedPar = false;
+		} else {
+			if ($openedPar == false) {
+				$openedPar = true;
+				echo "<p>";
+			}
+			echo $trimLine . "\n";
+		}
+	}
+	
+	if ($openedPar == true) {
+		echo "</p>\n";
+	}
+
+	// News submitter and date
     echo '<div class="rght_algn"><b> -- ' . htmlentities($submitter)
         . '</b><br />' . htmlentities($date) . "</div>\n\n";
 }
@@ -105,6 +153,19 @@ function printRoadMap() {
 		}
 
 		echo " </ul>\n";
+	} else {
+		echo "No roadmap defined.\n";
+	}
+}
+
+function printNews() {
+	if (file_exists('data/news.xml')) {
+		$xml = simplexml_load_file('data/news.xml');
+		
+		foreach ($xml->item as $item) {
+			newsItem($item['title'], $item, $item['author'], $item['date']);
+		}
+
 	} else {
 		echo "No roadmap defined.\n";
 	}
