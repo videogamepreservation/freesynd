@@ -31,8 +31,15 @@
 #include "agent.h"
 #include "weapon.h"
 
-Agent::Agent(const char *agent_name, bool male) : name_(agent_name),
+/*!
+ * Constructs a new agent.
+ * \param id Object id.
+ * \param agent_name The agent name.
+ * \param male True means the agent is a male.
+ */
+Agent::Agent(int id, const char *agent_name, bool male) : name_(agent_name),
 male_(male), active_(true), health_(255) {
+    id_ = id;
     for (int i = 0; i < 6; i++)
         slots_[i] = NULL;
 }

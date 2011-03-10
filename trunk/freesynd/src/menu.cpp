@@ -65,10 +65,10 @@ void Menu::redrawOptions()
 {
     for (std::list < ActionWidget * >::iterator it = actions_.begin();
          it != actions_.end(); it++) {
-        (*it)->draw();
+            if ( (*it)->isVisible()) {
+                (*it)->draw();
+            }
     }
-    
-    handleShowLate();
 }
 
 /*!
@@ -103,7 +103,9 @@ void Menu::render()
     for (std::list < MenuText >::iterator it = statics_.begin();
          it != statics_.end(); it++) {
         MenuText & m = *it;
-        m.draw();
+        if ( m.isVisible()) {
+            m.draw();
+        }
     }
 
     redrawOptions();
@@ -116,9 +118,9 @@ void Menu::render()
 void Menu::leave() {
     // Reset focus if an action widget had one.
     if (focusedWgId_ != -1) {
-        Option *opt = getOption(focusedWgId_);
+        ActionWidget *pAction = getActionWidget(focusedWgId_);
 
-        opt->handleFocusLost();
+        pAction->handleFocusLost();
         focusedWgId_ = -1;
     }
 
@@ -231,13 +233,28 @@ int Menu::addOption(int x, int y, int width, int height, const char *text, FontM
     return m->getId();
 }
 
-Option * Menu::getOption(int buttonId) {
+/*!
+ * Returns a pointer to the action widget with the given id.
+ * \param id The id of the widget.
+ * \return NULL if no widget has that id.
+ */
+ActionWidget * Menu::getActionWidget(int id) {
     for (std::list < ActionWidget * >::iterator it = actions_.begin();
          it != actions_.end(); it++) {
 
-        if (buttonId == (*it)->getId()) {
-            return dynamic_cast<Option *> (*it);
+        if (id == (*it)->getId()) {
+            return *it;
         }
+    }
+
+    return NULL;
+}
+
+Option * Menu::getOption(int optionId) {
+    ActionWidget *pAction = getActionWidget(optionId);
+
+    if (pAction) {
+        return dynamic_cast<Option *> (pAction);
     }
 
     return NULL;
@@ -250,6 +267,24 @@ int Menu::addToggleAction(int x, int y, int width, int height, const char *text,
     actions_.push_back(a);
 
     return a->getId();
+}
+
+/*!
+ * Creates and adds a list box to the menu.
+ * \param x X coordinate
+ * \param y Y coordinate
+ * \param width widget width
+ * \param height widget height
+ * \param maxLine
+ * \param visible True if widget is visible on screen
+ * \param title Sets a title to the widget.Set to NULL if not title is needed.
+ * \return A pointer on the widget.
+ */
+ListBox * Menu::addListBox(int x, int y, int width, int height, int maxLine, bool visible, const char *title) {
+    ListBox *pBox = new ListBox(this, x, y, width, height, maxLine, visible, title);
+    actions_.push_back(pBox);
+
+    return pBox;
 }
 
 /*!
@@ -289,10 +324,10 @@ void Menu::mouseMotionEvent(int x, int y, int state, const int modKeys)
 
     // Check focus is lost for currently focused widget
     if (focusedWgId_ != -1) {
-        Option *opt = getOption(focusedWgId_);
+        ActionWidget *pAction = getActionWidget(focusedWgId_);
         
-        if (!opt->isMouseOver(x, y)) {
-            opt->handleFocusLost();
+        if (!pAction->isMouseOver(x, y)) {
+            pAction->handleFocusLost();
             focusedWgId_ = -1;
         }
     }

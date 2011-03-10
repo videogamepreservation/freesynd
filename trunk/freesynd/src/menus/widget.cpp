@@ -124,14 +124,12 @@ void MenuText::setDark(bool dark) {
 }
 
 /*!
- * Draw the widget at the current position and only if it's
- * visible.
+ * Draw the widget at the current position.
  * Actually, only a text is drawn (see Font). The borders are
  * already drawn on the background image.
  */
 void MenuText::draw() {
-    if (visible_)
-        g_App.fonts().drawText(anchorX_, anchorY_, text_.c_str(), size_, dark_);
+    g_App.fonts().drawText(anchorX_, anchorY_, text_.c_str(), size_, dark_);
 }
 
 bool ActionWidget::isMouseOver(int x, int y) {
@@ -166,22 +164,19 @@ Option::~Option() {
     to_ = NULL; 
 }
 /*!
- * Draw the widget at the current position and only if it's
- * visible.
+ * Draw the widget at the current position.
  * Actually, only a text is drawn (see Font). The borders are
  * already drawn on the background image.
  */
 void Option::draw() {
-    if (visible_) {
-        int x = x_;
-        if (text_.isDark() && darkWidget_ != NULL) {
-            darkWidget_->draw(x, y_, 0, false, true);
-        } else if (lightWidget_ != NULL) {
-            lightWidget_->draw(x, y_, 0, false, true);
-        }
-
-        text_.draw();
+    int x = x_;
+    if (text_.isDark() && darkWidget_ != NULL) {
+        darkWidget_->draw(x, y_, 0, false, true);
+    } else if (lightWidget_ != NULL) {
+        lightWidget_->draw(x, y_, 0, false, true);
     }
+
+    text_.draw();
 }
 
 /*!
@@ -262,4 +257,152 @@ void ToggleAction::handleFocusLost() {
 
 void ToggleAction::handleSelectionLost() {
     setSelected(false);
+}
+
+ListBox::ListBox(Menu *peer, int x, int y, int width, int height, int maxLine, bool visible, const char *title) :
+        ActionWidget(x, y, width, height, visible) {
+    peer_ = peer;
+    pTitle_ = NULL;
+    yOrigin_ = y;
+    maxLine_ = maxLine;
+    focusedLine_ = -1;
+
+    // init list
+    for (int i=0; i<maxLine; i++) {
+        entries_.push_back(NULL);
+    }
+
+    if (title != NULL) {
+        pTitle_ = new MenuText(x, y, width, title, FontManager::SIZE_1, false);
+        lUnderline_ = g_App.fonts().textWidth(pTitle_->getText().c_str(), FontManager::SIZE_1);
+        xUnderline_ = (x + x + width) / 2  - lUnderline_ / 2;
+        yUnderline_ = y + g_App.fonts().textHeight(FontManager::SIZE_1);
+        yOrigin_ = yUnderline_ + 2;
+    }
+
+    g_App.menus().getMessage("MENU_LB_EMPTY", emptyLbl_);
+}
+
+ListBox::~ListBox() {
+    if (pTitle_) {
+        delete pTitle_;
+        pTitle_ = NULL;
+    }
+
+    // Delete all lines content
+    for (int i = 0; i < maxLine_; i++) {
+        ListEntry *entry = entries_[i];
+        if (entry != NULL) {
+            delete entry;
+            entries_[i] = NULL;
+        }
+    }
+}
+
+//! Draw the widget on screen
+void ListBox::draw() {
+    if (pTitle_) {
+        pTitle_->draw();
+        g_Screen.drawRect(xUnderline_, yUnderline_, lUnderline_, 2, 252);
+    }
+
+    for (int i = 0; i < maxLine_; i++) {
+        ListEntry *entry = entries_[i];
+        if (entry == NULL) {
+            g_App.fonts().drawText(getX() + 16, yOrigin_ + i * 12, emptyLbl_.c_str(), FontManager::SIZE_1, true);
+        } else {
+            g_App.fonts().drawText(getX(), yOrigin_ + i * 12, entry->label_.c_str(), FontManager::SIZE_1, focusedLine_ != i);
+        }
+    }
+}
+
+void ListBox::handleMouseMotion(int x, int y, int state, const int modKeys) {
+    // Gets the line pointed by the mouse
+    int i = (y - yOrigin_) / 12;
+    if (i < maxLine_) {
+        if (entries_[i]) {
+            // If line contains something, highlight it
+            if (focusedLine_ != i) {
+                redraw();
+                focusedLine_ = i;
+            }
+        } else {
+            if (focusedLine_ != -1) {
+                redraw();
+                focusedLine_ = -1;
+            }
+        }
+    }
+}
+
+void ListBox::handleMouseDown(int x, int y, int button, const int modKeys) {
+    if (focusedLine_ != -1) {
+        if (peer_) {
+            // call the peer handleAction method giving the index of pressed line.
+            peer_->handleAction(getId(), &focusedLine_, modKeys);
+        }
+    }
+}
+
+void ListBox::handleFocusLost() {
+    focusedLine_ = -1;
+    redraw();
+}
+
+void ListBox::add(std::string label, int itemId) {
+    for (int i = 0; i < maxLine_; i++) {
+        if (entries_[i] == NULL) {
+            addAt(label, itemId, i);
+            break;
+        }
+    }
+}
+
+void ListBox::addAt(std::string label, int itemId, int index) {
+    assert(index < maxLine_);
+    ListEntry *entry = new ListEntry();
+    entry->label_ = label;
+    entry->itemId_ = itemId;
+
+    entries_[index] = entry;
+    redraw();
+}
+
+void ListBox::setLabel(std::string label, int index) {
+    assert(index < maxLine_);
+    if (entries_[index] != NULL) {
+        entries_[index]->label_ = label;
+        redraw();
+    }
+}
+
+int ListBox::getItemIdAt(int index) {
+    assert(index < maxLine_);
+    if (entries_[index] != NULL) {
+        return entries_[index]->itemId_;
+    }
+
+    return NULL;
+}
+
+int ListBox::getIndexWithItemId(int itemId) {
+    for (int i=0; i<maxLine_; i++) {
+        if (entries_[i]->itemId_ == itemId) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+bool ListBox::existsAt(int index) {
+    assert(index < maxLine_);
+    return (entries_[index] != NULL);
+}
+
+void ListBox::remove(int index) {
+    assert(index < maxLine_);
+    delete entries_[index];
+    entries_[index] = NULL;
+
+    redraw();
 }

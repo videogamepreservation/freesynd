@@ -27,6 +27,8 @@
 #ifndef SELECTMENU_H
 #define SELECTMENU_H
 
+class ListBox;
+
 /*!
  * Select Menu class.
  */
@@ -47,8 +49,6 @@ protected:
     //! Draws a focus around the selected agent picture
     void drawAgentSelector(int x, int y);
     void drawAgent();
-    void showTeamList();
-    void hideTeamList();
     void showModsList();
     void hideModsList();
     void showEquipList();
@@ -56,8 +56,8 @@ protected:
 
     void addModOptions();
     void addWeaponOptions();
-    void addRecruitOptions();
-    void clearRecruitOptions();
+    //! Checks that team list box match the current team list
+    void synchTeamList();
 
     void toggleAgent(int n);
 
@@ -70,6 +70,8 @@ protected:
     int rnd_;
     int sel_weapon_, sel_mod_, sel_weapon_inst_;
     bool sel_all_;
+    /*! Id of the text widget presenting the selected agent name.*/
+    int txtAgentId_;
     /*! Id of the text widget for time.*/
     int txtTimeId_;
     /*! Id of the team toogle button.*/
@@ -84,10 +86,11 @@ protected:
     int purchaseButId_;
     /*! Id of the sell button.*/
     int sellButId_;
+    /*! The team list box.*/
+    ListBox *pTeamLBox_;
 
     int mod0Id_;
     int equip0Id_;
-    int agent0Id_;
 };
 
 #endif

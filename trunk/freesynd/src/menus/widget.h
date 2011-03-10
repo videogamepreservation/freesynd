@@ -283,4 +283,78 @@ protected:
     Group *group_;
 };
 
+/*!
+ * A list box is a widget that displays a list of lines. Each line corresponds to
+ * a game object (team members, equips, mods, ...). A list box reacts to user actions
+ * and calls Menu::handleAction() if one of its items has been pressed.
+ * A list box can have a title, displayed at the top of the list and can print a default
+ * label for all empty lines.
+ */
+class ListBox : public ActionWidget {
+public:
+    //! Constructs a new list box.
+    ListBox(Menu *peer, int x, int y, int width, int height, int maxLine, bool visible = true, const char *title = NULL);
+
+    ~ListBox();
+
+    //! Draw the widget on screen
+    void draw();
+    //! Callback method to respond to mouse motion event
+    void handleMouseMotion(int x, int y, int state, const int modKeys);
+    //! Callback method to respond to mouse down event
+    void handleMouseDown(int x, int y, int button, const int modKeys);
+    void handleFocusLost();
+
+    //! Returns the number of lines in the list box.
+    int getMaxLine() { return maxLine_; }
+
+    //! Adds a new line at the first emmty place
+    void add(std::string label, int itemId);
+    //! Adds a new line at the given emmty place
+    void addAt(std::string label, int itemId, int i);
+    //! Modifies the given line label 
+    void setLabel(std::string label, int i);
+
+    //! Returns the item id associated to the given line
+    int getItemIdAt(int index);
+
+    //! Returns the first line with the given associated id
+    int getIndexWithItemId(int itemId);
+    //! Returns true if there is a non empty line at given index
+    bool existsAt(int index);
+    //! Removes line contents
+    void remove(int index);
+
+protected:
+    struct ListEntry {
+        std::string label_;
+        int itemId_;
+
+        ListEntry() {
+            itemId_ = -1;
+        }
+    };
+
+    Menu *peer_;
+
+    /*! Title of the list box. Optional.*/
+    MenuText *pTitle_;
+    /*! The label for an empty line.*/
+    std::string emptyLbl_;
+
+    std::vector<ListEntry *> entries_;
+    /*! X coord for title underline.*/
+    int xUnderline_;
+    /*! Y coord for title underline.*/
+    int yUnderline_;
+    /*! Length of title underline.*/
+    int lUnderline_;
+    /*! Starting coordinate of content list.*/
+    int yOrigin_;
+    /*! Maximum number of line in the list box.*/
+    int maxLine_;
+    /*! The line that the mouse is on. -1 if no line is hovered.*/
+    int focusedLine_;
+};
+
 #endif // WIDGET_H

@@ -35,7 +35,6 @@ sel_weapon_inst_(0), sel_all_(false)
 {
     mod0Id_ = 0;
     equip0Id_ = 0;
-    agent0Id_ = 0;
     addStatic(148, 35, "TEAM SELECTION", FontManager::SIZE_4, true);
     txtTimeId_ = addStatic(500, 9, "", FontManager::SIZE_2, false);       // Time
 
@@ -46,6 +45,8 @@ sel_weapon_inst_(0), sel_all_(false)
     addOption(16, 346, 129, 25, "#MENU_ACC_BUT", FontManager::SIZE_2, KEY_F5, "loading");
     addOption(500, 347,  128, 25, "#MENU_MAIN_BUT", FontManager::SIZE_2, KEY_F6, "main");
 
+    // Team list
+    pTeamLBox_ = addListBox(502, 106, 124, 236, AgentManager::MAX_AGENT, false, "#SELECT_CRYO_TITLE");
     addModOptions();
     addWeaponOptions();
 
@@ -54,12 +55,15 @@ sel_weapon_inst_(0), sel_all_(false)
     sellButId_ = addOption(500, 320,  127, 22, "SELL", FontManager::SIZE_2, KEY_F9, NULL, false);
     setParentMenu("brief");
 
+    // Agent name selected
+    txtAgentId_ = addStatic(158, 86, "", FontManager::SIZE_2, false);
+
     rnd_ = 0;
 }
 
 SelectMenu::~SelectMenu()
 {
-    
+    pTeamLBox_ = NULL;
 }
 
 void SelectMenu::addModOptions()
@@ -87,40 +91,54 @@ void SelectMenu::addWeaponOptions()
     }
 }
 
-void SelectMenu::addRecruitOptions()
-{
-    for (int i = 0; i < AgentManager::MAX_AGENT; i++) {
-        if (g_App.agents().agent(i)) {
-            int id = addOption(520, 124 + i * 12,  104, 10, g_App.agents().agent(i)->name(), 
-                        FontManager::SIZE_1, (Key) (KEY_0 + i), NULL, false, false);
-
-            if (agent0Id_ == 0) {
-                agent0Id_ = id;
-            }
-        }
-    }
-}
-
-void SelectMenu::clearRecruitOptions()
-{
-    if (agent0Id_ != 0) {
-        for (int i = 0; i < AgentManager::MAX_AGENT; i++) {
-            if (g_App.agents().agent(i)) {
-                for (std::list < ActionWidget * >::iterator it = actions_.begin();
-                    it != actions_.end(); it++) {
-
-                    if ((*it)->getId() == agent0Id_ + i) {
-                        delete (*it);
-                        it = actions_.erase(it);
-                        break;
-                    }
+/*!
+ * Checks the the team list box has the same content as the reference list.
+ */
+void SelectMenu::synchTeamList() {
+    // Runs through the Agent list
+    for (int i=0; i < AgentManager::MAX_AGENT; i++) {
+        Agent *pAgent = g_App.agents().agent(i);
+        // There is an agent on this slot
+        if (pAgent) {
+            // Adds a number in front of name of agent if he's part of mission squad
+            char tmp[100];
+            bool found = false;
+            for (int j = 0; j < 4; j++) {
+                if (g_Session.teamMember(j) == g_App.agents().agent(i)) {
+                    sprintf(tmp, "%d %s", i+1, pAgent->name());
+                    found = true;
+                    break;
                 }
             }
-        }
+            
+            if (!found) {
+                sprintf(tmp, "  %s", pAgent->name());
+            }
 
-        agent0Id_ = 0;
+            if (pTeamLBox_->existsAt(i)) {
+                // An agent is also on this slot in the list box : checks
+                // if two agents are the same
+                int id = pTeamLBox_->getItemIdAt(i);
+                if (pAgent->getId() != id) {
+                    // Ids are different : removes the one on the listbox
+                    // and adds the one that is on the reference list
+                    pTeamLBox_->remove(i);
+                    pTeamLBox_->addAt(tmp, pAgent->getId(), i);
+                }
+            } else {
+                // The list box is empty on this slot so adds a new agent
+                pTeamLBox_->addAt(tmp, pAgent->getId(), i);
+            }
+        } else {
+            // This slot should be empty
+            if (pTeamLBox_->existsAt(i)) {
+                // removes agent from list box
+                pTeamLBox_->remove(i);
+            }
+        }
     }
 }
+
 /*!
  * Draws a dashed line around the currently selected agent selector.
  * \param x Coordinates of the top left corner 
@@ -155,11 +173,6 @@ void SelectMenu::drawAgent()
     Agent *selected = g_Session.teamMember(cur_agent_);
     if (selected == NULL)
         return;
-
-    // write selected agent's name
-    char tmp[100];
-    sprintf(tmp, "SPECIAL AGENT %s", selected->name());
-    g_App.fonts().drawText(158, 86, tmp, FontManager::SIZE_2, false);
 
     // TODO: mods
     int torso, arms, legs;
@@ -286,18 +299,6 @@ void SelectMenu::drawAgent()
             }
 }
 
-void SelectMenu::showTeamList()
-{
-    for (int i = 0; i < AgentManager::MAX_AGENT; i++)
-        showOption((Key) (KEY_0 + i));
-}
-
-void SelectMenu::hideTeamList()
-{
-    for (int i = 0; i < AgentManager::MAX_AGENT; i++)
-        hideOption((Key) (KEY_0 + i));
-}
-
 void SelectMenu::showModsList()
 {
     for (int i = 0; i < g_App.numAvailableMods(); i++)
@@ -355,11 +356,11 @@ void SelectMenu::handleShow() {
     for (int i = 0; i < 4; i++) {
         if (g_Session.teamMember(i) != NULL) {
             cur_agent_ = i;
+            getStatic(txtAgentId_)->setTextFormated("#SELECT_SUBTITLE", g_Session.teamMember(i)->name());
             break;
         }
     }
-    clearRecruitOptions();
-    addRecruitOptions();
+    synchTeamList();
 
     // Show the mouse
     g_System.showCursor();
@@ -476,25 +477,6 @@ void SelectMenu::handleRender() {
         Mod *m = g_App.availableMod(sel_mod_ - 1);
         m->drawInfo(504, 108);
     }
-
-    if (tab_ == 0) {
-        g_App.fonts().drawText(504, 106, "CRYO CHAMBER", FontManager::SIZE_1, false);
-        uint8 ldata[49];
-        memset(ldata, 252, sizeof(ldata));
-        g_Screen.scale2x(504, 120, sizeof(ldata), 1, ldata);
-        for (int i = 0; i < AgentManager::MAX_AGENT; i++) {
-            if (g_App.agents().agent(i)) {
-                for (int j = 0; j < 4; j++)
-                    if (g_Session.teamMember(j) == g_App.agents().agent(i)) {
-                        sprintf(tmp, "%d", j + 1);
-                        g_App.fonts().drawText(504, 124 + i * 12, tmp, FontManager::SIZE_1,
-                                               true);
-                }
-            } else {
-                g_App.fonts().drawText(520, 124 + i * 12, "EMPTY", 0, true);
-            }
-        }
-    }
 }
 
 void SelectMenu::handleLeave() {
@@ -522,13 +504,17 @@ void SelectMenu::handleMouseDown(int x, int y, int button, const int modKeys)
             if (x >= 82) {
                 if (button == 3)
                     toggleAgent(1);
-                else
+                else {
                     cur_agent_ = 1;
+                    getStatic(txtAgentId_)->setTextFormated("#SELECT_SUBTITLE", g_Session.teamMember(1)->name());
+                }
             } else {
                 if (button == 3)
                     toggleAgent(0);
-                else
+                else {
                     cur_agent_ = 0;
+                    getStatic(txtAgentId_)->setTextFormated("#SELECT_SUBTITLE", g_Session.teamMember(0)->name());
+                }
             }
             needRendering();
         }
@@ -540,13 +526,17 @@ void SelectMenu::handleMouseDown(int x, int y, int button, const int modKeys)
             if (x >= 82) {
                 if (button == 3)
                     toggleAgent(3);
-                else
+                else {
                     cur_agent_ = 3;
+                    getStatic(txtAgentId_)->setTextFormated("#SELECT_SUBTITLE", g_Session.teamMember(3)->name());
+                }
             } else {
                 if (button == 3)
                     toggleAgent(2);
-                else
+                else {
                     cur_agent_ = 2;
+                    getStatic(txtAgentId_)->setTextFormated("#SELECT_SUBTITLE", g_Session.teamMember(2)->name());
+                }
             }
             needRendering();
         }
@@ -565,7 +555,7 @@ void SelectMenu::handleMouseDown(int x, int y, int button, const int modKeys)
                     hideOption(KEY_F8);
                     showOption(KEY_F7);
                     showOption(KEY_F9);
-                    hideTeamList();
+                    pTeamLBox_->setVisible(false);
                     hideModsList();
                     hideEquipList();
                     needRendering();
@@ -581,50 +571,74 @@ void SelectMenu::handleAction(const int actionId, void *ctx, const int modKeys)
         hideOption(KEY_F7);
         hideOption(KEY_F8);
         hideOption(KEY_F9);
-        showTeamList();
+        pTeamLBox_->setVisible(true);
         hideModsList();
         hideEquipList();
         needRendering();
-    }
-    if (actionId == modsButId_) {
+    } else if (actionId == modsButId_) {
         sel_weapon_ = sel_mod_ = sel_weapon_inst_ = 0;
         tab_ = 1;
         hideOption(KEY_F7);
         hideOption(KEY_F8);
         hideOption(KEY_F9);
-        hideTeamList();
+        pTeamLBox_->setVisible(false);
         showModsList();
         hideEquipList();
         needRendering();
-    }
-    if (actionId == equipButId_) {
+    } else if (actionId == equipButId_) {
         sel_weapon_ = sel_mod_ = sel_weapon_inst_ = 0;
         tab_ = 2;
         hideOption(KEY_F7);
         hideOption(KEY_F8);
         hideOption(KEY_F9);
-        hideTeamList();
+        pTeamLBox_->setVisible(false);
         hideModsList();
         showEquipList();
         needRendering();
-    }
-    if (actionId >= agent0Id_ && (actionId < agent0Id_ + AgentManager::MAX_AGENT)) {
-        int i = actionId - agent0Id_;
-        Agent *n = g_App.agents().agent(i);
-        if (n) {
+    } else if (actionId == pTeamLBox_->getId()) {
+        // get the selected agent from the team listbox
+        int *id = static_cast<int *> (ctx);
+        int itemId = pTeamLBox_->getItemIdAt(*id);
+        Agent *pNewAgent = g_App.agents().agent(itemId);
+        if (pNewAgent) {
             bool found = false;
             int j;
+            // check if selected agent is already part of the mission squad
             for (j = 0; j < 4; j++)
-                if (g_Session.teamMember(j) == n) {
+                if (g_Session.teamMember(j) == pNewAgent) {
                     found = true;
                     break;
                 }
+            // If not, adds him to the squad
             if (!found) {
-                g_Session.setTeamMember(cur_agent_, n);
+                char tmp[100];
+
+                // remove number in front of old agent
+                Agent *pOldAgent = g_Session.teamMember(cur_agent_);
+                if (pOldAgent) {
+                    int oldId = pTeamLBox_->getIndexWithItemId(pOldAgent->getId());
+                    sprintf(tmp, "  %s", pOldAgent->name());
+                    pTeamLBox_->setLabel(tmp, oldId);
+                }
+
+                // add number in front of new agent
+                g_Session.setTeamMember(cur_agent_, pNewAgent);
+                sprintf(tmp, "%d %s", cur_agent_ + 1, pNewAgent->name());
+                pTeamLBox_->setLabel(tmp, *id);
+                getStatic(txtAgentId_)->setTextFormated("#SELECT_SUBTITLE", pNewAgent->name());
             } else if (j == cur_agent_){
+                // else if agent is the currently selected
+                // removes him from squad
                 g_Session.setTeamMember(j, NULL);
+                char tmp[100];
+                sprintf(tmp, "  %s", pNewAgent->name());
+                pTeamLBox_->setLabel(tmp, *id);
+                getStatic(txtAgentId_)->setTextFormated("");
             }
-            needRendering();
+            // redraw agent display
+            addDirtyRect(158, 110, 340, 260);
+            // redraw agent buttons
+            addDirtyRect(16, 80, 130, 155);
         }
     }
     if (actionId >= mod0Id_ && actionId < (mod0Id_ + g_App.numAvailableMods())) {

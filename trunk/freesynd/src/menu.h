@@ -87,7 +87,10 @@ public:
             const char *to = NULL, bool visible = true, bool centered = true, int dark_widget = 0, int light_widget = 0);
     //! Creates a new toggle button and returns its id
     int addToggleAction(int x, int y, int width, int height, const char *text, FontManager::EFontSize size, Key key, bool selected);
+    //! Creates a new list box and returns a pointer on it
+    ListBox * addListBox(int x, int y, int width, int height, int maxLine, bool visible = true, const char *title = NULL);
 
+    ActionWidget * getActionWidget(int buttonId);
     Option * getOption(int buttonId);
 
     void setParentMenu(const char *m) { parent_menu_ = m; }
@@ -160,7 +163,6 @@ public:
      * been defined) and the menu closed.
      */
     virtual void handleLeave() {}
-    virtual void handleShowLate() {}
 
     //! Callback function : Childs can reimplement
     /*! 

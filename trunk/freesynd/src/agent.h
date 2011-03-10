@@ -45,9 +45,10 @@ class WeaponInstance;
  */
 class Agent : public WeaponHolder {
 public:
-    Agent(const char *agent_name, bool male);
+    Agent(int id, const char *agent_name, bool male);
     ~Agent();
 
+    int getId() { return id_;}
     const char *name() { return name_.c_str(); }
     bool isMale() { return male_; }
     bool isActive() { return active_; }
@@ -79,6 +80,8 @@ public:
     void removeAllWeapons();
 
 protected:
+    /*! A unique id for the instance of Agent.*/
+    int id_;
     std::string name_;
     bool male_;
     bool active_;

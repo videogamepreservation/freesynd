@@ -130,7 +130,7 @@ void AgentManager::reset(bool onlyWomen) {
     }
 
     for (int i = 0; i < 8; i++) {
-        agents_[i] = new Agent(g_AgentNames[nextName_], onlyWomen ? true : ((i % 2) == 0));
+        agents_[i] = new Agent(i, g_AgentNames[nextName_], onlyWomen ? true : ((i % 2) == 0));
         agents_[i]->addWeapon(
             g_App.weapons().findWeapon("PISTOL")->createInstance());
         nextName_++;
