@@ -32,13 +32,22 @@
 #include "gfx/screen.h"
 #include "app.h"
 
-Mission::Mission(): mtsurfaces_(NULL), mdpoints_(NULL), mdpoints_cp_(NULL),
-map_(0), min_x_(0), min_y_(0), max_x_(0), max_y_(0), cur_objective_(0),
-minimap_c_(0)
+Mission::Mission()
 {
     status_ = RUNNING;
     memset(&level_data_, 0, sizeof(level_data_));
     memset(minimap_overlay_, 0, 128*128);
+    
+    mtsurfaces_ = NULL;
+    mdpoints_ = NULL;
+    mdpoints_cp_ = NULL;
+    map_ = 0;
+    min_x_= 0;
+    min_y_ = 0;
+    max_x_ = 0;
+    max_y_ = 0;
+    cur_objective_ = 0;
+    minimap_c_ = 0;
 }
 
 Mission::~Mission()
@@ -800,6 +809,8 @@ void Mission::checkObjectives() {
             case objv_ReachLocation:
                 break;
             case objv_ExecuteObjective:
+                break;
+            default:
                 break;
         }
     }

@@ -428,6 +428,8 @@ int GameSession::updateCountries() {
                                 g_Blocks[i].popStatus = STAT_UNHAPPY;
                             }
                             break;
+                        default:
+                            break;
                     } // end switch
                 }
             }

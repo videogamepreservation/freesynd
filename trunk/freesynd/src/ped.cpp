@@ -456,8 +456,8 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
     if (target_ && health_ > 0) {
         if (inRange(target_)) {
             if(target_->health() > 0) {
-                int target_x = target_->tileX() * 256 + target_->offX();
-                int target_y = target_->tileY() * 256 + target_->offY();
+                //int target_x = target_->tileX() * 256 + target_->offX();
+                //int target_y = target_->tileY() * 256 + target_->offY();
                 if (firing_ == PedInstance::Firing_Not
                         && (selectedWeapon() && selectedWeapon()->ammoRemaining()))
                 {

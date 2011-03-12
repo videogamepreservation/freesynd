@@ -35,12 +35,23 @@ Weapon::Weapon(const char *w_name, int smallIcon, int bigIcon, int w_cost,
     int w_ammo, int w_range, int w_shot, int w_rank, int w_anim,
     Weapon::WeaponAnimIndex w_idx, snd::InGameSample w_sample,
     WeaponType w_type, MapObject::DamageType w_dmg_type,
-    int w_shots_per_sec, int w_ammo_per_shot) :
-    name_(w_name), small_icon_(smallIcon), big_icon_(bigIcon), cost_(w_cost),
-    ammo_(w_ammo), range_(w_range), damage_per_shot_(w_shot), anim_(w_anim), rank_(w_rank),
-    idx_(w_idx), dmg_type_(w_dmg_type), sample_(w_sample), type_(w_type),
-    shots_per_sec_(w_shots_per_sec), ammo_per_shot_(w_ammo_per_shot)
-{
+    int w_shots_per_sec, int w_ammo_per_shot) {
+    
+    name_ = w_name;
+    small_icon_ = smallIcon;
+    big_icon_ = bigIcon;
+    cost_ = w_cost;
+    ammo_= w_ammo;
+    range_= w_range;
+    damage_per_shot_ = w_shot;
+    anim_ = w_anim;
+    rank_ = w_rank;
+    idx_ = w_idx;
+    dmg_type_ = w_dmg_type;
+    sample_ = w_sample;
+    type_ = w_type;
+    shots_per_sec_ = w_shots_per_sec;
+    ammo_per_shot_ = w_ammo_per_shot;
 }
 
 void Weapon::drawSmallIcon(int x, int y) {

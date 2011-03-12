@@ -40,8 +40,14 @@ public:
     /*!
      * Default constructor.
      */
-    Widget() : 
-      id_(++widgetCnt), x_(0), y_(0), width_(0), height_(0), visible_(true) {}
+    Widget() {
+        id_ = ++widgetCnt;
+        x_ = 0;
+        y_ = 0;
+        width_ = 0;
+        height_ = 0;
+        visible_ = true;
+    }
 
     /*!
      * Constructs a widget with given size and location.
@@ -51,10 +57,15 @@ public:
      * \param height Widget height
      * \param visible True means the widget is drawn
      */
-    Widget(int x, int y, int width, int height, bool visible):
-            id_(++widgetCnt), x_(x), y_(y), width_(width), 
-            height_(height), visible_(visible) {}
-
+    Widget(int x, int y, int width, int height, bool visible) {
+        id_ = ++widgetCnt;
+        x_ = x;
+        y_ = y;
+        width_ = width;
+        height_ = height;
+        visible_ = visible;
+    }
+    
     /*!
      * Default constructor.
      */

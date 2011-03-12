@@ -78,7 +78,11 @@ uint8 *File::loadFileToMem(const char *filename, int &filesize) {
         filesize = ftell(fp);
         uint8 *mem = new uint8[filesize];
         fseek(fp, 0, SEEK_SET);
-        fread(mem, 1, filesize, fp);
+        size_t  n = fread(mem, 1, filesize, fp);
+        if (n == 0) {
+            printf("WARN: File '%s' (using path: '%s') is empty\n",
+               filename, _path);
+         }
         fclose(fp);
         return mem;
     }

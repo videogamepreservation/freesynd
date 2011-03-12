@@ -31,12 +31,12 @@ int const AgentManager::MAX_AGENT = 18;
 
 AgentManager::AgentManager() {
     nextName_ = 0;
-    for (unsigned int i = 0; i != MAX_AGENT; ++i)
+    for (int i = 0; i != MAX_AGENT; ++i)
         agents_[i] = NULL;
 }
 
 AgentManager::~AgentManager() {
-    for (unsigned int i = 0; i != MAX_AGENT; ++i) {
+    for (int i = 0; i != MAX_AGENT; ++i) {
         if (agents_[i]) {
             delete agents_[i];
         }
@@ -122,7 +122,7 @@ void AgentManager::loadAgents() {
 
 void AgentManager::reset(bool onlyWomen) {
     nextName_ = 0;
-    for (unsigned int i = 0; i < MAX_AGENT; i++) {
+    for (int i = 0; i < MAX_AGENT; i++) {
         if (agents_[i]) {
             delete agents_[i];
             agents_[i] = NULL;

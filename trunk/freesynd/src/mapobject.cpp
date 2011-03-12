@@ -161,7 +161,6 @@ void MapObject::setDirection(int posx, int posy, int * dir) {
 int MapObject::getDirection(int snum) {
     assert(snum > 0);
 
-    int n = snum;
     int direction = 0;
     int sinc = 256 / snum;
     int sdec = sinc / 2;

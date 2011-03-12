@@ -90,8 +90,8 @@ void Sprite::loadSpriteFromPNG(const char *filename)
         return;
     }
     png_byte header[8];
-    fread(header, 1, 8, fp);
-    if (png_sig_cmp(header, 0, 8) != 0) {
+    size_t shead = fread(header, 1, 8, fp);
+    if (shead == 0 || png_sig_cmp(header, 0, 8) != 0) {
         fprintf(stderr, "%s is not a png.\n", filename);
         fclose(fp);
         return;

@@ -455,7 +455,7 @@ void SelectMenu::handleRender() {
         g_Screen.scale2x(502, 292, sizeof(ldata), 1, ldata);
         g_Screen.scale2x(502, 318, sizeof(ldata), 1, ldata);
 
-        Weapon *w;
+        Weapon *w = NULL;
         if (sel_weapon_)
             w = g_App.availableWeapon(sel_weapon_ - 1);
         else {
@@ -463,8 +463,11 @@ void SelectMenu::handleRender() {
             if (selected)
                 w = selected->weapon(sel_weapon_inst_ - 1);
         }
-        w->drawBigIcon(502, 108);
-        w->drawInfo(504, 196);
+        
+        if (w) {
+            w->drawBigIcon(502, 108);
+            w->drawInfo(504, 196);
+        }
     }
 
     if (sel_mod_) {

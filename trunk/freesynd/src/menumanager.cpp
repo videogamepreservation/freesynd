@@ -43,18 +43,26 @@
 #include "system.h"
 #include "utils/configfile.h"
 
-MenuManager::MenuManager():current_(NULL),
-menu_main_(NULL), menu_conf_(NULL), menu_load_save_(NULL),
-menu_map_(NULL), menu_brief_(NULL), menu_select_(NULL),
-menu_research_(NULL), menu_loading_(NULL), menu_gameplay_(NULL),
-menu_debrief_(NULL),
-menu_logout_(NULL), dirtyList_(g_Screen.gameScreenWidth(), g_Screen.gameScreenHeight())
+MenuManager::MenuManager(): dirtyList_(g_Screen.gameScreenWidth(), g_Screen.gameScreenHeight())
 {
     drop_events_ = false;
     background_ = new uint8[g_Screen.gameScreenWidth() * g_Screen.gameScreenHeight()];
     memset(background_, 0, g_Screen.gameScreenHeight() * g_Screen.gameScreenWidth());
     needBackground_ = false;
     language_ = NULL;
+    
+    current_ = NULL;
+    menu_main_ = NULL;
+    menu_conf_ = NULL;
+    menu_load_save_ = NULL;
+    menu_map_ = NULL;
+    menu_brief_ = NULL;
+    menu_select_ = NULL;
+    menu_research_ = NULL;
+    menu_loading_ = NULL;
+    menu_gameplay_ = NULL;
+    menu_debrief_ = NULL;
+    menu_logout_ = NULL;
 }
 
 MenuManager::~MenuManager()

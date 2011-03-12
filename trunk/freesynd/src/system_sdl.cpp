@@ -227,8 +227,9 @@ Key SystemSDL::checkValidKey(SDL_keysym keysym) {
         case SDLK_SLASH:
             key = static_cast < Key > (KEY_PLUS + (keysym.sym - SDLK_PLUS));
             break;
-        //default:
-        //    printf("Touche inconnue\n");
+        default:
+            // unused key
+            break;
     }
 
     return key;
@@ -243,14 +244,11 @@ Key SystemSDL::checkValidKey(SDL_keysym keysym) {
  */
 void SystemSDL::handleEvents() {
     static SDL_Event event;
-    Key key;
 
     while (SDL_PollEvent(&event)) {
         switch (event.type) {
         case SDL_KEYDOWN:
             {
-            // Get the key value
-            key = static_cast < Key > (event.key.keysym.sym);
             // Check if key pressed is a modifier
             bool isKeyMod = false;
             switch(event.key.keysym.sym) {
@@ -278,6 +276,8 @@ void SystemSDL::handleEvents() {
                     keyModState_ = keyModState_ | KMD_LALT; 
                     isKeyMod = true;
                     break;
+                default:
+                    break;
             }
 
             // We pass the event only if it's not a allowed modifier key
@@ -293,8 +293,6 @@ void SystemSDL::handleEvents() {
             break;
         case SDL_KEYUP:
             {
-            // We follow keyup to reset the state of modifier keys
-            key = static_cast < Key > (event.key.keysym.sym);
             switch(event.key.keysym.sym) {
                 case SDLK_RSHIFT:
                     keyModState_ = keyModState_ & !KMD_RSHIFT;
@@ -314,13 +312,15 @@ void SystemSDL::handleEvents() {
                 case SDLK_LALT:
                     keyModState_ = keyModState_ & !KMD_LALT;
                     break;
+                default:
+                    break;
             }
             }
             break;
 #ifdef GP2X
         case SDL_JOYBUTTONDOWN:
         case SDL_JOYBUTTONUP:
-            key = static_cast < Key > (event.jbutton.button);
+            Key key = static_cast < Key > (event.jbutton.button);
             keyMod = KMD_NONE;
             g_App.keyEvent(key, KMD_NONE);
             break;

@@ -460,7 +460,7 @@ void GameplayMenu::handleLeave()
     int elapsed = mission_->getStatistics()->mission_duration;
     g_Session.updateTime(elapsed);
 
-    char * anim = NULL;
+    std::string anim;
     if (mission_->completed()) {
         anim = "mgamewin.dat";
     } else if (mission_->failed()) {
@@ -469,11 +469,11 @@ void GameplayMenu::handleLeave()
         mission_->setStatus(Mission::ABORTED);
     }
 
-    if (anim != NULL) {
+    if (anim.size() != 0) {
         FliPlayer fliPlayer;
         uint8 *data;
         int size;
-        data = File::loadFile(anim, size);
+        data = File::loadFile(anim.c_str(), size);
         fliPlayer.loadFliData(data, true);
         //g_App.gameSounds().play(snd::MENU_CHANGE);
         fliPlayer.play();
