@@ -293,7 +293,8 @@ protected:
 class ListBox : public ActionWidget {
 public:
     //! Constructs a new list box.
-    ListBox(Menu *peer, int x, int y, int width, int height, int maxLine, bool visible = true, const char *title = NULL);
+    ListBox(Menu *peer, int x, int y, int width, int height, int maxLine, 
+                bool visible = true, const char *title = NULL, bool displayEmpty = false);
 
     ~ListBox();
 
@@ -341,6 +342,8 @@ protected:
     MenuText *pTitle_;
     /*! The label for an empty line.*/
     std::string emptyLbl_;
+    /*! True will display a label when entry is null.*/
+    bool displayEmpty_;
 
     std::vector<ListEntry *> entries_;
     /*! X coord for title underline.*/

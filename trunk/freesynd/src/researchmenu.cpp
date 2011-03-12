@@ -30,20 +30,23 @@
 
 // TODO
 
-ResearchMenu::ResearchMenu(MenuManager * m):Menu(m, "research", "mresrch.dat", "mresout.dat"), tab_(1),
-orig_pixels_(0), sel_weapon_(0), sel_field_(0),
-sel_mod_(0)
+ResearchMenu::ResearchMenu(MenuManager * m):Menu(m, "research", "mresrch.dat", "mresout.dat"), 
+    tab_(TAB_EQUIPS), orig_pixels_(0), sel_weapon_(0), sel_field_(0), sel_mod_(0)
 {
-    mod0Id_ = 0;
-    equip0Id_ = 0;
     addStatic(228, 35, "RESEARCH", FontManager::SIZE_4, true);
     txtTimeId_ = addStatic(500, 9, "", FontManager::SIZE_2, false);       // Time
 
-    modsButId_ = addToggleAction(16, 290, 129, 25, "MODS", FontManager::SIZE_2, KEY_F1, false);
-    equipButId_ = addToggleAction(16, 318, 129, 25,  "EQUIP", FontManager::SIZE_2, KEY_F2, true);
+    modsButId_ = addToggleAction(16, 290, 129, 25, "MODS", FontManager::SIZE_2, KEY_F1, tab_ == TAB_MODS);
+    equipButId_ = addToggleAction(16, 318, 129, 25,  "EQUIP", FontManager::SIZE_2, KEY_F2, tab_ == TAB_EQUIPS);
     addOption(16, 346, 129, 25,  "#MENU_ACC_BUT", FontManager::SIZE_2, KEY_F3, "select");
     addOption(500, 347,  128, 25, "#MENU_MAIN_BUT", FontManager::SIZE_2, KEY_F4, "main");
+
+    pFieldEquipLBox_ = addListBox(20, 84,  122, 120, 4, tab_ == TAB_EQUIPS);
+    pFieldModsLBox_ = addListBox(20, 84,  122, 120, 6, tab_ == TAB_MODS);
     addFieldOptions();
+
+    pEquipsLBox_ = addListBox(504, 110,  122, 230, 18, tab_ == TAB_EQUIPS);
+    pModsLBox_ = addListBox(504, 110,  122, 230, 18, tab_ == TAB_MODS);
     addWeaponOptions();
     addModOptions();
     cancelDescId_ = addOption(500, 320,  127, 22,  "CANCEL", FontManager::SIZE_2, KEY_F5, NULL, false);
@@ -54,72 +57,59 @@ sel_mod_(0)
 
 void ResearchMenu::showEquipList()
 {
-    for (int i = 0; i < g_App.numAvailableWeapons(); i++)
-        showOption((Key) (KEY_a + g_App.numAvailableMods() + i));
+    pEquipsLBox_->setVisible(true);
 }
 
 void ResearchMenu::hideEquipList()
 {
-    for (int i = 0; i < g_App.numAvailableWeapons(); i++)
-        hideOption((Key) (KEY_a + g_App.numAvailableMods() + i));
+    pEquipsLBox_->setVisible(false);
 }
 
 void ResearchMenu::addWeaponOptions()
 {
     for (int i = 0; i < g_App.numAvailableWeapons(); i++) {
         Weapon *w = g_App.availableWeapon(i);
-        int id = addOption(504, 110 + 12 * i,  120, 10, w->name(), FontManager::SIZE_1,
-                  (Key) (KEY_a + g_App.numAvailableMods() + i), NULL, true, false);
-
-        if (equip0Id_ == 0) {
-            equip0Id_ = id;
-        }
+        pEquipsLBox_->add(w->name(), i);
     }
 }
 
 void ResearchMenu::showModsList()
 {
-    for (int i = 0; i < g_App.numAvailableMods(); i++)
-        showOption((Key) (KEY_a + i));
+    pModsLBox_->setVisible(true);
 }
 
 void ResearchMenu::hideModsList()
 {
-    for (int i = 0; i < g_App.numAvailableMods(); i++)
-        hideOption((Key) (KEY_a + i));
+    pModsLBox_->setVisible(false);
 }
 
 void ResearchMenu::addModOptions()
 {
     for (int i = 0; i < g_App.numAvailableMods(); i++) {
         Mod *m = g_App.availableMod(i);
-        int id = addOption(504, 110 + 12 * i,  120, 10, m->name(), FontManager::SIZE_1, (Key) (KEY_a + i), NULL,
-                  false, false);
-
-        if (mod0Id_ == 0) {
-            mod0Id_ = id;
-        }
+        pModsLBox_->add(m->name(), i);
     }
 }
 
-void ResearchMenu::showFieldList()
-{
-    for (int i = KEY_0; i < KEY_4; i++)
-        if (tab_ == 1)
-            showOption((Key) i);
-        else
-            hideOption((Key) i);
-    for (int i = KEY_4; i <= KEY_9; i++)
-        if (tab_ == 0)
-            showOption((Key) i);
-        else
-            hideOption((Key) i);
+/*!
+ * Shows either the search field list box for Equips or Mods.
+ */
+void ResearchMenu::showFieldList() {
+    if (tab_ == TAB_EQUIPS) {
+        pFieldEquipLBox_->setVisible(true);
+        pFieldModsLBox_->setVisible(false);
+    } else {
+        pFieldEquipLBox_->setVisible(false);
+        pFieldModsLBox_->setVisible(true);
+    }
 }
 
-void ResearchMenu::hideFieldList()
-{
-    for (int i = KEY_0; i <= KEY_9; i++)
-        hideOption((Key) i);
+/*!
+ * Hides the search field list box for Equips and Mods.
+ */
+void ResearchMenu::hideFieldList() {
+    pFieldEquipLBox_->setVisible(false);
+    pFieldModsLBox_->setVisible(false);
 }
 
 const char *g_Fields[] =
@@ -129,16 +119,17 @@ const char *g_Fields[] =
 
 void ResearchMenu::addFieldOptions()
 {
-    equipField0Id_ = addOption(20, 84,  122, 10, g_Fields[0], FontManager::SIZE_1, KEY_0, NULL, true, false);
-    addOption(20, 96,  122, 10, g_Fields[1], FontManager::SIZE_1, KEY_1, NULL, true, false);
-    addOption(20, 108, 122, 10, g_Fields[2], FontManager::SIZE_1, KEY_2, NULL, true, false);
-    addOption(20, 120, 122, 10, g_Fields[3], FontManager::SIZE_1, KEY_3, NULL, true, false);
-    modField0Id_ = addOption(20, 84,  122, 10, g_Fields[4], FontManager::SIZE_1, KEY_4, 0, false, false);
-    addOption(20, 96,  122, 10, g_Fields[5], FontManager::SIZE_1, KEY_5, 0, false, false);
-    addOption(20, 108, 122, 10, g_Fields[6], FontManager::SIZE_1, KEY_6, 0, false, false);
-    addOption(20, 120, 122, 10, g_Fields[7], FontManager::SIZE_1, KEY_7, 0, false, false);
-    addOption(20, 132, 122, 10, g_Fields[8], FontManager::SIZE_1, KEY_8, 0, false, false);
-    addOption(20, 144, 122, 10, g_Fields[9], FontManager::SIZE_1, KEY_9, 0, false, false);
+    pFieldEquipLBox_->add(g_Fields[0], 1);
+    pFieldEquipLBox_->add(g_Fields[1], 2);
+    pFieldEquipLBox_->add(g_Fields[2], 3);
+    pFieldEquipLBox_->add(g_Fields[3], 4);
+
+    pFieldModsLBox_->add(g_Fields[4], 5);
+    pFieldModsLBox_->add(g_Fields[5], 6);
+    pFieldModsLBox_->add(g_Fields[6], 7);
+    pFieldModsLBox_->add(g_Fields[7], 8);
+    pFieldModsLBox_->add(g_Fields[8], 9);
+    pFieldModsLBox_->add(g_Fields[9], 10);
 }
 
 void ResearchMenu::handleTick(int elapsed)
@@ -193,7 +184,7 @@ void ResearchMenu::handleRender()
         memset(ldata, 16, sizeof(ldata));
         g_Screen.scale2x(502, 318, sizeof(ldata), 1, ldata);
 
-        Weapon *w = g_App.availableWeapon(sel_weapon_ - 1);
+        Weapon *w = g_App.availableWeapon(sel_weapon_);
         w->drawBigIcon(502, 108);
         w->drawInfo(504, 196);
     }
@@ -203,7 +194,7 @@ void ResearchMenu::handleRender()
         memset(ldata, 16, sizeof(ldata));
         g_Screen.scale2x(502, 318, sizeof(ldata), 1, ldata);
 
-        Mod *m = g_App.availableMod(sel_mod_ - 1);
+        Mod *m = g_App.availableMod(sel_mod_);
         m->drawInfo(504, 108);
     }
 
@@ -225,43 +216,51 @@ void ResearchMenu::handleLeave() {
 
 void ResearchMenu::handleAction(const int actionId, void *ctx, const int modKeys)
 {
-    if (actionId >= equipField0Id_ && actionId <= (equipField0Id_ + 10 )) {
-        sel_field_ = actionId - equipField0Id_ + 1;
+    // Field list box : Equips or Mods
+    if (actionId == pFieldEquipLBox_->getId() || actionId == pFieldModsLBox_->getId()) {
+        // get selected field
+        int *id = static_cast<int *> (ctx);
+        if (actionId == pFieldEquipLBox_->getId()) {
+            sel_field_ = pFieldEquipLBox_->getItemIdAt(*id);
+        } else {
+            sel_field_ = pFieldModsLBox_->getItemIdAt(*id);
+        }
+        // Hide list
         hideFieldList();
+        // Show Research and Cancel buttons
         showOption(KEY_F6);
         showOption(KEY_F7);
-        needRendering();
     }
-    if (actionId >= mod0Id_ && actionId < (mod0Id_ + g_App.numAvailableMods())) {
-        sel_mod_ = actionId - mod0Id_ + 1;
+    if (actionId == pModsLBox_->getId()) {
+        int *id = static_cast<int *> (ctx);
+        sel_mod_ = pModsLBox_->getItemIdAt(*id);
         hideModsList();
         showOption(KEY_F5);
-        needRendering();
-    }
-    if (actionId >= equip0Id_ && actionId <= (equip0Id_ + g_App.numAvailableWeapons())) {
-        sel_weapon_ = actionId - equip0Id_ + 1;
+    } else if (actionId == pEquipsLBox_->getId()) {
+        int *id = static_cast<int *> (ctx);
+        sel_weapon_ = pEquipsLBox_->getItemIdAt(*id);
         hideEquipList();
         showOption(KEY_F5);
-        needRendering();
     }
     if (actionId == modsButId_) {
-        tab_ = 0;
+        tab_ = TAB_MODS;
         showModsList();
         hideEquipList();
         showFieldList();
-        needRendering();
-    }
-    if (actionId == equipButId_) {
-        tab_ = 1;
+        hideOption(KEY_F6);
+        hideOption(KEY_F7);
+    } else if (actionId == equipButId_) {
+        tab_ = TAB_EQUIPS;
         hideModsList();
         showEquipList();
         showFieldList();
-        needRendering();
+        hideOption(KEY_F6);
+        hideOption(KEY_F7);
     }
     if (actionId == cancelDescId_) {
         sel_mod_ = sel_weapon_ = 0;
         hideOption(KEY_F5);
-        if (tab_ == 0)
+        if (tab_ == TAB_MODS)
             showModsList();
         else
             showEquipList();

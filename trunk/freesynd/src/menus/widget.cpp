@@ -259,13 +259,14 @@ void ToggleAction::handleSelectionLost() {
     setSelected(false);
 }
 
-ListBox::ListBox(Menu *peer, int x, int y, int width, int height, int maxLine, bool visible, const char *title) :
+ListBox::ListBox(Menu *peer, int x, int y, int width, int height, int maxLine, bool visible, const char *title, bool displayEmpty) :
         ActionWidget(x, y, width, height, visible) {
     peer_ = peer;
     pTitle_ = NULL;
     yOrigin_ = y;
     maxLine_ = maxLine;
     focusedLine_ = -1;
+    displayEmpty_ = displayEmpty;
 
     // init list
     for (int i=0; i<maxLine; i++) {
@@ -280,7 +281,9 @@ ListBox::ListBox(Menu *peer, int x, int y, int width, int height, int maxLine, b
         yOrigin_ = yUnderline_ + 2;
     }
 
-    g_App.menus().getMessage("MENU_LB_EMPTY", emptyLbl_);
+    if (displayEmpty_) {
+        g_App.menus().getMessage("MENU_LB_EMPTY", emptyLbl_);
+    }
 }
 
 ListBox::~ListBox() {
@@ -308,10 +311,10 @@ void ListBox::draw() {
 
     for (int i = 0; i < maxLine_; i++) {
         ListEntry *entry = entries_[i];
-        if (entry == NULL) {
-            g_App.fonts().drawText(getX() + 16, yOrigin_ + i * 12, emptyLbl_.c_str(), FontManager::SIZE_1, true);
-        } else {
+        if (entry) {
             g_App.fonts().drawText(getX(), yOrigin_ + i * 12, entry->label_.c_str(), FontManager::SIZE_1, focusedLine_ != i);
+        } else if (displayEmpty_) {
+            g_App.fonts().drawText(getX() + 16, yOrigin_ + i * 12, emptyLbl_.c_str(), FontManager::SIZE_1, true);
         }
     }
 }
@@ -332,6 +335,9 @@ void ListBox::handleMouseMotion(int x, int y, int state, const int modKeys) {
                 focusedLine_ = -1;
             }
         }
+    }  else if (focusedLine_ != -1) {
+        redraw();
+        focusedLine_ = -1;
     }
 }
 
@@ -403,6 +409,16 @@ void ListBox::remove(int index) {
     assert(index < maxLine_);
     delete entries_[index];
     entries_[index] = NULL;
+
+    // if not displaying empty lines
+    // that means that when removing a line 
+    // all following lines must go up
+    if (!displayEmpty_) {
+        for (int i=index+1; i<maxLine_;i++) {
+            entries_[i -1] = entries_[i];
+            entries_[i] = NULL;
+        }
+    }
 
     redraw();
 }

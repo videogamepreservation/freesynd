@@ -40,23 +40,6 @@ public:
     void handleAction(const int actionId, void *ctx, const int modKeys);
 
 protected:
-    int tab_;
-    uint8 *orig_pixels_;
-    int sel_weapon_, sel_field_, sel_mod_;
-    /*! Id of the text widget for time.*/
-    int txtTimeId_;
-    /*! Id of the mods toogle button.*/
-    int modsButId_;
-    /*! Id of the equipment toogle button.*/
-    int equipButId_;
-    int cancelSearchId_;
-    int researchId_;
-    int cancelDescId_;
-    int mod0Id_;
-    int equip0Id_;
-    int modField0Id_;
-    int equipField0Id_;
-
     void updateClock();
 
     void showFieldList();
@@ -71,6 +54,36 @@ protected:
     void addFieldOptions();
     void addWeaponOptions();
     void addModOptions();
+
+protected:
+    enum ETab {
+        TAB_MODS = 0,
+        TAB_EQUIPS = 1
+    };
+
+    ETab tab_;
+    uint8 *orig_pixels_;
+    int sel_weapon_, sel_field_, sel_mod_;
+    /*! Id of the text widget for time.*/
+    int txtTimeId_;
+    /*! Id of the mods toogle button.*/
+    int modsButId_;
+    /*! Id of the equipment toogle button.*/
+    int equipButId_;
+    /*! Id of the cancel search button.*/
+    int cancelSearchId_;
+    /*! Id of the search field button.*/
+    int researchId_;
+    /*! Id of the cancel description tab button.*/
+    int cancelDescId_;
+    /*! List box for all search on equips.*/
+    ListBox *pFieldEquipLBox_;
+    /*! List box for all search on mods.*/
+    ListBox *pFieldModsLBox_;
+    /*! List box for all available mods.*/
+    ListBox *pModsLBox_;
+    /*! List box for all available euips.*/
+    ListBox *pEquipsLBox_;
 };
 
 #endif

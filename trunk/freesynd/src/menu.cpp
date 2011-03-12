@@ -281,7 +281,7 @@ int Menu::addToggleAction(int x, int y, int width, int height, const char *text,
  * \return A pointer on the widget.
  */
 ListBox * Menu::addListBox(int x, int y, int width, int height, int maxLine, bool visible, const char *title) {
-    ListBox *pBox = new ListBox(this, x, y, width, height, maxLine, visible, title);
+    ListBox *pBox = new ListBox(this, x, y, width, height, maxLine, visible, title, title != NULL);
     actions_.push_back(pBox);
 
     return pBox;
@@ -326,7 +326,7 @@ void Menu::mouseMotionEvent(int x, int y, int state, const int modKeys)
     if (focusedWgId_ != -1) {
         ActionWidget *pAction = getActionWidget(focusedWgId_);
         
-        if (!pAction->isMouseOver(x, y)) {
+        if (!pAction->isMouseOver(x, y) || !pAction->isVisible()) {
             pAction->handleFocusLost();
             focusedWgId_ = -1;
         }
