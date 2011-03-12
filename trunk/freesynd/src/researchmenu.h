@@ -45,11 +45,8 @@ protected:
     void showFieldList();
     void hideFieldList();
 
-    void showEquipList();
-    void hideEquipList();
-
-    void showModsList();
-    void hideModsList();
+    void showDetailsList();
+    void hideDetailsList();
 
     void addFieldOptions();
     void addWeaponOptions();
@@ -62,8 +59,11 @@ protected:
     };
 
     ETab tab_;
-    uint8 *orig_pixels_;
-    int sel_weapon_, sel_field_, sel_mod_;
+    /*! Weapon selected in the Equips tab.*/
+    Weapon *pSelectedWeapon_;
+    /*! Mod selected in the Mods tab.*/
+    Mod *pSelectedMod_;
+    int sel_field_;
     /*! Id of the text widget for time.*/
     int txtTimeId_;
     /*! Id of the mods toogle button.*/

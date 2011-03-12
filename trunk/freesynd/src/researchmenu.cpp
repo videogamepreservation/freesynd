@@ -30,9 +30,13 @@
 
 // TODO
 
-ResearchMenu::ResearchMenu(MenuManager * m):Menu(m, "research", "mresrch.dat", "mresout.dat"), 
-    tab_(TAB_EQUIPS), orig_pixels_(0), sel_weapon_(0), sel_field_(0), sel_mod_(0)
+ResearchMenu::ResearchMenu(MenuManager * m):Menu(m, "research", "mresrch.dat", "mresout.dat")
 {
+    tab_ = TAB_EQUIPS;
+    pSelectedWeapon_ = NULL;
+    pSelectedMod_ = NULL;
+    sel_field_ = 0;
+
     addStatic(228, 35, "RESEARCH", FontManager::SIZE_4, true);
     txtTimeId_ = addStatic(500, 9, "", FontManager::SIZE_2, false);       // Time
 
@@ -55,63 +59,6 @@ ResearchMenu::ResearchMenu(MenuManager * m):Menu(m, "research", "mresrch.dat", "
     setParentMenu("select");
 }
 
-void ResearchMenu::showEquipList()
-{
-    pEquipsLBox_->setVisible(true);
-}
-
-void ResearchMenu::hideEquipList()
-{
-    pEquipsLBox_->setVisible(false);
-}
-
-void ResearchMenu::addWeaponOptions()
-{
-    for (int i = 0; i < g_App.numAvailableWeapons(); i++) {
-        Weapon *w = g_App.availableWeapon(i);
-        pEquipsLBox_->add(w->name(), i);
-    }
-}
-
-void ResearchMenu::showModsList()
-{
-    pModsLBox_->setVisible(true);
-}
-
-void ResearchMenu::hideModsList()
-{
-    pModsLBox_->setVisible(false);
-}
-
-void ResearchMenu::addModOptions()
-{
-    for (int i = 0; i < g_App.numAvailableMods(); i++) {
-        Mod *m = g_App.availableMod(i);
-        pModsLBox_->add(m->name(), i);
-    }
-}
-
-/*!
- * Shows either the search field list box for Equips or Mods.
- */
-void ResearchMenu::showFieldList() {
-    if (tab_ == TAB_EQUIPS) {
-        pFieldEquipLBox_->setVisible(true);
-        pFieldModsLBox_->setVisible(false);
-    } else {
-        pFieldEquipLBox_->setVisible(false);
-        pFieldModsLBox_->setVisible(true);
-    }
-}
-
-/*!
- * Hides the search field list box for Equips and Mods.
- */
-void ResearchMenu::hideFieldList() {
-    pFieldEquipLBox_->setVisible(false);
-    pFieldModsLBox_->setVisible(false);
-}
-
 const char *g_Fields[] =
     { "AUTOMATIC", "HEAVY", "ASSAULT", "MISCELLANEOUS",
     "LEGS V2", "ARMS V2", "CHEST V2", "HEART V2", "EYES V2", "BRAIN V2"
@@ -132,6 +79,74 @@ void ResearchMenu::addFieldOptions()
     pFieldModsLBox_->add(g_Fields[9], 10);
 }
 
+void ResearchMenu::addWeaponOptions()
+{
+    for (int i = 0; i < g_App.numAvailableWeapons(); i++) {
+        Weapon *w = g_App.availableWeapon(i);
+        pEquipsLBox_->add(w->name(), i);
+    }
+}
+
+void ResearchMenu::addModOptions()
+{
+    for (int i = 0; i < g_App.numAvailableMods(); i++) {
+        Mod *m = g_App.availableMod(i);
+        pModsLBox_->add(m->name(), i);
+    }
+}
+
+/*!
+ * Shows either the mods list box or equips list box.
+ */
+void ResearchMenu::showDetailsList() {
+    addDirtyRect(500, 105,  125, 235);
+    hideOption(KEY_F5);
+    pSelectedWeapon_ = NULL;
+    pSelectedMod_ = NULL;
+
+    if (tab_ == TAB_MODS) {
+        pModsLBox_->setVisible(true);
+        pEquipsLBox_->setVisible(false);
+    } else {
+        pEquipsLBox_->setVisible(true);
+        pModsLBox_->setVisible(false);
+    }
+}
+
+/*!
+ * Hides the mods list box or equips list box.
+ */
+void ResearchMenu::hideDetailsList() {
+    pEquipsLBox_->setVisible(false);
+    pModsLBox_->setVisible(false);
+}
+
+/*!
+ * Shows either the search field list box for Equips or Mods.
+ */
+void ResearchMenu::showFieldList() {
+    addDirtyRect(15, 80,  130, 130);
+
+    if (tab_ == TAB_EQUIPS) {
+        pFieldEquipLBox_->setVisible(true);
+        pFieldModsLBox_->setVisible(false);
+    } else {
+        pFieldEquipLBox_->setVisible(false);
+        pFieldModsLBox_->setVisible(true);
+    }
+
+    hideOption(KEY_F6);
+    hideOption(KEY_F7);
+}
+
+/*!
+ * Hides the search field list box for Equips and Mods.
+ */
+void ResearchMenu::hideFieldList() {
+    pFieldEquipLBox_->setVisible(false);
+    pFieldModsLBox_->setVisible(false);
+}
+
 void ResearchMenu::handleTick(int elapsed)
 {
     if (g_Session.updateTime(elapsed)) {
@@ -150,11 +165,7 @@ void ResearchMenu::updateClock() {
 
 void ResearchMenu::handleShow() {
     
-    if (orig_pixels_ == 0) {
-        orig_pixels_ = new uint8[GAME_SCREEN_WIDTH * GAME_SCREEN_HEIGHT];
-        memcpy(orig_pixels_, g_Screen.pixels(),
-               GAME_SCREEN_WIDTH * GAME_SCREEN_HEIGHT);
-    }
+    menu_manager_->saveBackground();
 
     // Show the mouse
     g_System.showCursor();
@@ -165,11 +176,6 @@ void ResearchMenu::handleShow() {
 
 void ResearchMenu::handleRender()
 {
-    g_Screen.blit(0, 0, 145, 230, orig_pixels_, false,
-                      GAME_SCREEN_WIDTH);
-    g_Screen.blit(145, 0, GAME_SCREEN_WIDTH - 145, GAME_SCREEN_HEIGHT,
-                      orig_pixels_ + 145, false, GAME_SCREEN_WIDTH);
-
     g_Screen.drawLogo(18, 14, g_App.getGameSession().getLogo(), g_App.getGameSession().getLogoColour());
 
     // write money
@@ -179,23 +185,21 @@ void ResearchMenu::handleRender()
     g_App.fonts().drawText(560 - g_App.fonts().textWidth(tmp, FontManager::SIZE_2) / 2, 87,
                            tmp, 1, false);
 
-    if (sel_weapon_) {
+    if (pSelectedWeapon_) {
         uint8 ldata[62];
         memset(ldata, 16, sizeof(ldata));
         g_Screen.scale2x(502, 318, sizeof(ldata), 1, ldata);
 
-        Weapon *w = g_App.availableWeapon(sel_weapon_);
-        w->drawBigIcon(502, 108);
-        w->drawInfo(504, 196);
+        pSelectedWeapon_->drawBigIcon(502, 108);
+        pSelectedWeapon_->drawInfo(504, 196);
     }
 
-    if (sel_mod_) {
+    if (pSelectedMod_) {
         uint8 ldata[62];
         memset(ldata, 16, sizeof(ldata));
         g_Screen.scale2x(502, 318, sizeof(ldata), 1, ldata);
 
-        Mod *m = g_App.availableMod(sel_mod_);
-        m->drawInfo(504, 108);
+        pSelectedMod_->drawInfo(504, 108);
     }
 
     if (sel_field_) {
@@ -230,47 +234,39 @@ void ResearchMenu::handleAction(const int actionId, void *ctx, const int modKeys
         // Show Research and Cancel buttons
         showOption(KEY_F6);
         showOption(KEY_F7);
-    }
-    if (actionId == pModsLBox_->getId()) {
+
+    } else if (actionId == pModsLBox_->getId()) {
         int *id = static_cast<int *> (ctx);
-        sel_mod_ = pModsLBox_->getItemIdAt(*id);
-        hideModsList();
+        int mId = pModsLBox_->getItemIdAt(*id);
+        pSelectedMod_ = g_App.availableMod(mId);
+        hideDetailsList();
         showOption(KEY_F5);
+
     } else if (actionId == pEquipsLBox_->getId()) {
         int *id = static_cast<int *> (ctx);
-        sel_weapon_ = pEquipsLBox_->getItemIdAt(*id);
-        hideEquipList();
+        int wId = pEquipsLBox_->getItemIdAt(*id);
+        pSelectedWeapon_ = g_App.availableWeapon(wId);
+        hideDetailsList();
         showOption(KEY_F5);
-    }
-    if (actionId == modsButId_) {
-        tab_ = TAB_MODS;
-        showModsList();
-        hideEquipList();
-        showFieldList();
-        hideOption(KEY_F6);
-        hideOption(KEY_F7);
+
+    } else if (actionId == modsButId_) {
+        if (tab_ != TAB_MODS) {
+            tab_ = TAB_MODS;
+            sel_field_ = 0;
+            showFieldList();
+            showDetailsList();
+        }
     } else if (actionId == equipButId_) {
-        tab_ = TAB_EQUIPS;
-        hideModsList();
-        showEquipList();
-        showFieldList();
-        hideOption(KEY_F6);
-        hideOption(KEY_F7);
-    }
-    if (actionId == cancelDescId_) {
-        sel_mod_ = sel_weapon_ = 0;
-        hideOption(KEY_F5);
-        if (tab_ == TAB_MODS)
-            showModsList();
-        else
-            showEquipList();
-        needRendering();
-    }
-    if (actionId == cancelSearchId_) {
+        if (tab_ != TAB_EQUIPS) {
+            tab_ = TAB_EQUIPS;
+            sel_field_ = 0;
+            showFieldList();
+            showDetailsList();
+        }
+    } else if (actionId == cancelDescId_) {
+        showDetailsList();
+    } else if (actionId == cancelSearchId_) {
         sel_field_ = 0;
-        hideOption(KEY_F6);
-        hideOption(KEY_F7);
         showFieldList();
-        needRendering();
     }
 }

@@ -5,10 +5,12 @@ Original game data files
 ========================
 
 	Due to licence restrictions, we don't distribute the original game data files.
-You will have to dowload them by yourself. In order to run FreeSynd, copy all files from
-the original Syndicate DATA directory to the FreeSynd Data directory.
-	See the "Configuring Freesynd" to specify the directory containing
-all data files (original files and FreeSynd data files).
+You will have to dowload them by yourself (search for "abandonware syndicate"). In
+order to run FreeSynd, copy all files from the original Syndicate DATA directory 
+to the FreeSynd Data directory.
+	You can also copy all files (original files and FreeSynd data files) to a unique
+and distinct directory and tell Freesynd to read resources into it.	See the chapter
+"Configuring Freesynd" to specify that directory.
 
 Required Libraries
 ==================
@@ -33,8 +35,8 @@ Installation from released file
  * Windows Installation
  ----------------------
 
-   Unzip the file in any directory you want. Everything you need to
-run FreeSynd is included in this release.
+   Unzip the file in any directory you want. See chapter "Original game data files"
+to add original Syndicate resources that are not bundled with Freesynd.
 
  * Linux Installation
  --------------------
@@ -46,7 +48,8 @@ created freesynd directory. Type the following commands:
 	make install
 
 	By default, FreeSynd will install its binaries in the 'bindir' and its data
-in 'datarootdir/freesynd'. 
+in 'datarootdir/freesynd'. See chapter "Original game data files"
+to add original Syndicate resources that are not bundled with Freesynd.
 
    Consult documentation on configure to know how to customize installation.
 
