@@ -48,7 +48,8 @@ protected:
     void showDetailsList();
     void hideDetailsList();
 
-    void addFieldOptions();
+    //! Verify that list of research match mods or equips list box
+    void synchFieldSearchList(std::list<Research *> *pVec, ListBox *pListBox);
     void addWeaponOptions();
     void addModOptions();
 
@@ -76,6 +77,8 @@ protected:
     int researchId_;
     /*! Id of the cancel description tab button.*/
     int cancelDescId_;
+    /*! Id of the text field displaying current search field.*/
+    int fieldTxtId_;
     /*! List box for all search on equips.*/
     ListBox *pFieldEquipLBox_;
     /*! List box for all search on mods.*/

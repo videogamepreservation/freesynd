@@ -322,8 +322,8 @@ public:
 
     //! Adds a new line at the first emmty place
     void add(std::string label, int itemId);
-    //! Adds a new line at the given emmty place
-    void addAt(std::string label, int itemId, int i);
+    //! Adds a new line at the given place
+    void setAt(std::string label, int itemId, int i);
     //! Modifies the given line label 
     void setLabel(std::string label, int i);
 

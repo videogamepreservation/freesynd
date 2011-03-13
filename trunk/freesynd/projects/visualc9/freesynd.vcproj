@@ -403,6 +403,14 @@
 					RelativePath="..\..\src\core\gamesession.cpp"
 					>
 				</File>
+				<File
+					RelativePath="..\..\src\core\research.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\core\researchmanager.cpp"
+					>
+				</File>
 			</Filter>
 		</Filter>
 		<Filter
@@ -670,7 +678,19 @@
 				Name="core"
 				>
 				<File
+					RelativePath="..\..\src\core\gameevent.h"
+					>
+				</File>
+				<File
 					RelativePath="..\..\src\core\gamesession.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\core\research.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\core\researchmanager.h"
 					>
 				</File>
 			</Filter>

@@ -48,6 +48,7 @@
 #include "sound/soundmanager.h"
 #include "sound/musicmanager.h"
 #include "core/gamesession.h"
+#include "core/researchmanager.h"
 
 /*!
  * Application class.
@@ -129,6 +130,10 @@ class App : public Singleton < App > {
 
     MusicManager &music() {
         return music_;
+    }
+
+    ResearchManager &researchManager() {
+        return researchMan_;
     }
 
     int numAvailableWeapons() {
@@ -236,6 +241,7 @@ private:
     SoundManager intro_sounds_;
     SoundManager game_sounds_;
     MusicManager music_;
+    ResearchManager researchMan_;
 };
 
 #define g_App   App::singleton()

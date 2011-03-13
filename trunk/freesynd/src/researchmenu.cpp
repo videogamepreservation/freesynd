@@ -26,19 +26,18 @@
 #include <stdio.h>
 #include <assert.h>
 #include "app.h"
+#include "core/research.h"
 #include "researchmenu.h"
-
-// TODO
 
 ResearchMenu::ResearchMenu(MenuManager * m):Menu(m, "research", "mresrch.dat", "mresout.dat")
 {
     tab_ = TAB_EQUIPS;
     pSelectedWeapon_ = NULL;
     pSelectedMod_ = NULL;
-    sel_field_ = 0;
+    sel_field_ = -1;
 
-    addStatic(228, 35, "RESEARCH", FontManager::SIZE_4, true);
-    txtTimeId_ = addStatic(500, 9, "", FontManager::SIZE_2, false);       // Time
+    addStatic(228, 35, "RESEARCH", FontManager::SIZE_4, true);          //Title
+    txtTimeId_ = addStatic(500, 9, "", FontManager::SIZE_2, false);     // Time
 
     modsButId_ = addToggleAction(16, 290, 129, 25, "MODS", FontManager::SIZE_2, KEY_F1, tab_ == TAB_MODS);
     equipButId_ = addToggleAction(16, 318, 129, 25,  "EQUIP", FontManager::SIZE_2, KEY_F2, tab_ == TAB_EQUIPS);
@@ -47,7 +46,8 @@ ResearchMenu::ResearchMenu(MenuManager * m):Menu(m, "research", "mresrch.dat", "
 
     pFieldEquipLBox_ = addListBox(20, 84,  122, 120, 4, tab_ == TAB_EQUIPS);
     pFieldModsLBox_ = addListBox(20, 84,  122, 120, 6, tab_ == TAB_MODS);
-    addFieldOptions();
+    synchFieldSearchList(g_App.researchManager().getAvailableModsSearch(), pFieldModsLBox_);
+    synchFieldSearchList(g_App.researchManager().getAvailableEquipsSearch(), pFieldEquipLBox_);
 
     pEquipsLBox_ = addListBox(504, 110,  122, 230, 18, tab_ == TAB_EQUIPS);
     pModsLBox_ = addListBox(504, 110,  122, 230, 18, tab_ == TAB_MODS);
@@ -56,27 +56,45 @@ ResearchMenu::ResearchMenu(MenuManager * m):Menu(m, "research", "mresrch.dat", "
     cancelDescId_ = addOption(500, 320,  127, 22,  "CANCEL", FontManager::SIZE_2, KEY_F5, NULL, false);
     researchId_ = addOption(16, 158, 129, 25,  "RESEARCH", FontManager::SIZE_2, KEY_F6, NULL, false);
     cancelSearchId_ = addOption(16, 184, 129, 25,  "CANCEL", FontManager::SIZE_2, KEY_F7, NULL, false);
+
+    fieldTxtId_ = addStatic(20, 86, "", FontManager::SIZE_1, false);    // Search name
     setParentMenu("select");
 }
 
-const char *g_Fields[] =
-    { "AUTOMATIC", "HEAVY", "ASSAULT", "MISCELLANEOUS",
-    "LEGS V2", "ARMS V2", "CHEST V2", "HEART V2", "EYES V2", "BRAIN V2"
-};
-
-void ResearchMenu::addFieldOptions()
+/*!
+ * Verify that list of research match mods or equips list box
+ * \param pList List of available researches
+ * \param pListBox Mods or Equips List box
+ */
+void ResearchMenu::synchFieldSearchList(std::list<Research *> *pList, ListBox *pListBox)
 {
-    pFieldEquipLBox_->add(g_Fields[0], 1);
-    pFieldEquipLBox_->add(g_Fields[1], 2);
-    pFieldEquipLBox_->add(g_Fields[2], 3);
-    pFieldEquipLBox_->add(g_Fields[3], 4);
+    int i = 0;
+    // Runs through the research list
+    for (std::list < Research * >::iterator it = pList->begin(); it != pList->end(); it++) {
+        Research *pResearch = *it;
+        // Check if entries match
+        if (pListBox->existsAt(i)) {
+            // An agent is also on this slot in the list box : checks
+            // if two agents are the same
+            int id = pListBox->getItemIdAt(i);
+            if (pResearch->getId() != id) {
+                // Ids are different : replaces the one on the listbox
+                // by the one that is on the reference list
+                pListBox->setAt(pResearch->getName(), pResearch->getId(), i);
+            }
+        } else {
+            // The list box is empty on this slot so adds a new agent
+            pListBox->setAt(pResearch->getName(), pResearch->getId(), i);
+        }
+        i++;
+    }
 
-    pFieldModsLBox_->add(g_Fields[4], 5);
-    pFieldModsLBox_->add(g_Fields[5], 6);
-    pFieldModsLBox_->add(g_Fields[6], 7);
-    pFieldModsLBox_->add(g_Fields[7], 8);
-    pFieldModsLBox_->add(g_Fields[8], 9);
-    pFieldModsLBox_->add(g_Fields[9], 10);
+    // Removes any remaining lines in list box
+    if (i < pListBox->getMaxLine()) {
+        for (; i < pListBox->getMaxLine(); i++) {
+            pListBox->remove(i);
+        }
+    }
 }
 
 void ResearchMenu::addWeaponOptions()
@@ -135,8 +153,10 @@ void ResearchMenu::showFieldList() {
         pFieldModsLBox_->setVisible(true);
     }
 
+    sel_field_ = -1;
     hideOption(KEY_F6);
     hideOption(KEY_F7);
+    getStatic(fieldTxtId_)->setVisible(false);
 }
 
 /*!
@@ -202,10 +222,9 @@ void ResearchMenu::handleRender()
         pSelectedMod_->drawInfo(504, 108);
     }
 
-    if (sel_field_) {
+    if (sel_field_ != -1) {
         uint8 ldata[63];
         memset(ldata, 16, sizeof(ldata));
-        g_App.fonts().drawText(20, 86, g_Fields[sel_field_ - 1], 0, false);
         g_Screen.scale2x(18, 102, sizeof(ldata), 1, ldata);
         g_App.fonts().drawText(20, 106, "MIN FUNDING", 0, true);
         g_App.fonts().drawText(20, 130, "MAX FUNDING", 0, true);
@@ -224,11 +243,16 @@ void ResearchMenu::handleAction(const int actionId, void *ctx, const int modKeys
     if (actionId == pFieldEquipLBox_->getId() || actionId == pFieldModsLBox_->getId()) {
         // get selected field
         int *id = static_cast<int *> (ctx);
+        Research *pResearch = NULL;
         if (actionId == pFieldEquipLBox_->getId()) {
             sel_field_ = pFieldEquipLBox_->getItemIdAt(*id);
+            pResearch = g_App.researchManager().getEquipsSearch(sel_field_);
         } else {
             sel_field_ = pFieldModsLBox_->getItemIdAt(*id);
+            pResearch = g_App.researchManager().getModsSearch(sel_field_);
         }
+        getStatic(fieldTxtId_)->setVisible(true);
+        getStatic(fieldTxtId_)->setText(pResearch->getName().c_str());
         // Hide list
         hideFieldList();
         // Show Research and Cancel buttons
@@ -252,21 +276,18 @@ void ResearchMenu::handleAction(const int actionId, void *ctx, const int modKeys
     } else if (actionId == modsButId_) {
         if (tab_ != TAB_MODS) {
             tab_ = TAB_MODS;
-            sel_field_ = 0;
             showFieldList();
             showDetailsList();
         }
     } else if (actionId == equipButId_) {
         if (tab_ != TAB_EQUIPS) {
             tab_ = TAB_EQUIPS;
-            sel_field_ = 0;
             showFieldList();
             showDetailsList();
         }
     } else if (actionId == cancelDescId_) {
         showDetailsList();
     } else if (actionId == cancelSearchId_) {
-        sel_field_ = 0;
         showFieldList();
     }
 }

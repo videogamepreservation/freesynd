@@ -120,14 +120,13 @@ void SelectMenu::synchTeamList() {
                 // if two agents are the same
                 int id = pTeamLBox_->getItemIdAt(i);
                 if (pAgent->getId() != id) {
-                    // Ids are different : removes the one on the listbox
-                    // and adds the one that is on the reference list
-                    pTeamLBox_->remove(i);
-                    pTeamLBox_->addAt(tmp, pAgent->getId(), i);
+                    // Ids are different : replaces the one on the listbox
+                    // with the one that is on the reference list
+                    pTeamLBox_->setAt(tmp, pAgent->getId(), i);
                 }
             } else {
                 // The list box is empty on this slot so adds a new agent
-                pTeamLBox_->addAt(tmp, pAgent->getId(), i);
+                pTeamLBox_->setAt(tmp, pAgent->getId(), i);
             }
         } else {
             // This slot should be empty

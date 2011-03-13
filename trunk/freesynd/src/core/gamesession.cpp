@@ -369,7 +369,6 @@ int GameSession::getNewPopulation(const int defaultPop, int currPop) {
  * \return The amount of money collected after all countries have been updated
  */
 int GameSession::updateCountries() {
-    // TODO : add population variation
     int amount = 0;
 
     for (int i=0; i < 50; i++) {

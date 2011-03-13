@@ -13,6 +13,8 @@ freesynd_SOURCES = common.h config.h keys.h utils/singleton.h \
 	utils/log.cpp utils/log.h \
 	utils/configfile.cpp utils/configfile.h \
 	core/gamesession.cpp core/gamesession.h \
+	core/research.cpp core/research.h \
+	core/researchmanager.cpp core/researchmanager.h \
 	sound/audio.cpp sound/audio.h \
 	sound/soundmanager.cpp sound/soundmanager.h sound/sound.h \
 	sound/musicmanager.cpp sound/musicmanager.h sound/music.h \

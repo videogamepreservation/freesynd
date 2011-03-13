@@ -358,15 +358,19 @@ void ListBox::handleFocusLost() {
 void ListBox::add(std::string label, int itemId) {
     for (int i = 0; i < maxLine_; i++) {
         if (entries_[i] == NULL) {
-            addAt(label, itemId, i);
+            setAt(label, itemId, i);
             break;
         }
     }
 }
 
-void ListBox::addAt(std::string label, int itemId, int index) {
+void ListBox::setAt(std::string label, int itemId, int index) {
     assert(index < maxLine_);
-    ListEntry *entry = new ListEntry();
+
+    ListEntry *entry = entries_[index];
+    if (entry == NULL) {
+        entry = new ListEntry();
+    }
     entry->label_ = label;
     entry->itemId_ = itemId;
 
@@ -406,19 +410,20 @@ bool ListBox::existsAt(int index) {
 }
 
 void ListBox::remove(int index) {
-    assert(index < maxLine_);
-    delete entries_[index];
-    entries_[index] = NULL;
+    if (index < maxLine_ && entries_[index]) {
+        delete entries_[index];
+        entries_[index] = NULL;
 
-    // if not displaying empty lines
-    // that means that when removing a line 
-    // all following lines must go up
-    if (!displayEmpty_) {
-        for (int i=index+1; i<maxLine_;i++) {
-            entries_[i -1] = entries_[i];
-            entries_[i] = NULL;
+        // if not displaying empty lines
+        // that means that when removing a line 
+        // all following lines must go up
+        if (!displayEmpty_) {
+            for (int i=index+1; i<maxLine_;i++) {
+                entries_[i -1] = entries_[i];
+                entries_[i] = NULL;
+            }
         }
-    }
 
-    redraw();
+        redraw();
+    }
 }
