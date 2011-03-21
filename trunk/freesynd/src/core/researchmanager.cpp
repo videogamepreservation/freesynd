@@ -29,17 +29,17 @@ const char *g_Fields[] =
 };
 
 ResearchManager::ResearchManager() {
-    availableEquipsSearch_.push_back(new Research(g_Fields[0]));
-    availableEquipsSearch_.push_back(new Research(g_Fields[1]));
-    availableEquipsSearch_.push_back(new Research(g_Fields[2]));
-    availableEquipsSearch_.push_back(new Research(g_Fields[3]));
+    availableEquipsSearch_.push_back(new Research(g_Fields[0], 96));
+    availableEquipsSearch_.push_back(new Research(g_Fields[1], 7992));
+    availableEquipsSearch_.push_back(new Research(g_Fields[2], 244));
+    availableEquipsSearch_.push_back(new Research(g_Fields[3], 1992));
 
-    availableModsSearch_.push_back(new Research(g_Fields[4]));
-    availableModsSearch_.push_back(new Research(g_Fields[5]));
-    availableModsSearch_.push_back(new Research(g_Fields[6]));
-    availableModsSearch_.push_back(new Research(g_Fields[7]));
-    availableModsSearch_.push_back(new Research(g_Fields[8]));
-    availableModsSearch_.push_back(new Research(g_Fields[9]));
+    availableModsSearch_.push_back(new Research(g_Fields[4], 4440));
+    availableModsSearch_.push_back(new Research(g_Fields[5], 4440));
+    availableModsSearch_.push_back(new Research(g_Fields[6], 6000));
+    availableModsSearch_.push_back(new Research(g_Fields[7], 3480));
+    availableModsSearch_.push_back(new Research(g_Fields[8], 3480));
+    availableModsSearch_.push_back(new Research(g_Fields[9], 34800));
 }
 
 ResearchManager::~ResearchManager() {
@@ -55,6 +55,9 @@ ResearchManager::~ResearchManager() {
 
     availableModsSearch_.clear();
     availableEquipsSearch_.clear();
+}
+
+void ResearchManager::reset() {
 }
 
 /*!

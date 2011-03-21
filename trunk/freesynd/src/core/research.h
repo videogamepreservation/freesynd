@@ -29,17 +29,33 @@
  */
 class Research {
 public:
-    Research(std::string name);
+    Research(std::string name, int min);
     ~Research() {}
 
     int getId() { return id_; }
     std::string getName() { return name_; }
+    int getMinFunding() { return minFunding_; }
+    int getMaxFunding() { return minFunding_ * 100; }
+    int getCurrFunding();
+    bool incrFunding();
+    bool decrFunding();
+    int isStarted() { return isStarted_; }
+    void start() { isStarted_ = true; }
 protected:
     /*! A counter to have unique IDs.*/
     static int researchCnt;
-
+    /*! Id of the research.*/
     int id_;
+    /*! Name of the research.*/
     std::string name_;
+    /*! Minimum amount of funding.*/
+    int minFunding_;
+    /*! Current funding.*/
+    int currFunding_;
+    /*! True is search has started.*/
+    bool isStarted_;
+    /*! Index of the multiplicator coeff.*/
+    int coeffInd_;
 };
 
 #endif //RESEARCH_H

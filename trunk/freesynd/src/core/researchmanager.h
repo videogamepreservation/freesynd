@@ -35,6 +35,7 @@ public:
     ResearchManager();
     ~ResearchManager();
 
+    void reset();
     /*!
      * Returns a list of all available search on mods.
      * \return List can be empty but not null.
@@ -50,6 +51,7 @@ public:
     Research * getEquipsSearch(int id);
     //! Returns a Research on mods with given id
     Research * getModsSearch(int id);
+
 protected:
     /*! List of all currently available research on mods.*/
     std::list<Research *> availableModsSearch_;

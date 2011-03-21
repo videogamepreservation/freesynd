@@ -19,8 +19,10 @@ void Widget::setLocation(int x, int y) {
 }
 
 void Widget::setVisible(bool visible) {
-    redraw();
-    visible_ = visible;
+    if (visible != visible_) {
+        redraw();
+        visible_ = visible;
+    }
 }
 
 MenuText::MenuText(int x, int y, const char *text, FontManager::EFontSize size, 

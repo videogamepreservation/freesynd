@@ -334,6 +334,7 @@ void App::reset() {
     session_.reset();
 
     agents_.reset();
+    researchMan_.reset();
 
     for (int i = 0; i < 4; i++)
         session_.setTeamMember(i, agents_.agent(i));

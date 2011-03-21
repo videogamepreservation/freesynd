@@ -24,7 +24,45 @@
 
 int Research::researchCnt = 0;
 
-Research::Research(std::string name) {
+const short g_Coeffs[] = {1, 2, 4, 6, 10, 15, 30, 50, 75 , 100};
+
+Research::Research(std::string name, int min) {
     id_ = researchCnt++;
     name_ = name;
+    minFunding_ = min;
+    isStarted_ = false;
+    currFunding_ = minFunding_;
+    coeffInd_ = 0;
+}
+
+int Research::getCurrFunding() { 
+    if (coeffInd_ == -1) {
+        return 0;
+    } else {
+        return g_Coeffs[coeffInd_] * minFunding_;
+    }
+}
+
+/*!
+ * \return True if funding has changed.
+ */
+bool Research::incrFunding() {
+    if (coeffInd_ < 9) {
+        coeffInd_++;
+        return true;
+    }
+
+    return false;
+}
+
+/*!
+ * \return True if funding has changed.
+ */
+bool Research::decrFunding() {
+    if (coeffInd_ >= 0) {
+        coeffInd_--;
+        return true;
+    }
+
+    return false;
 }

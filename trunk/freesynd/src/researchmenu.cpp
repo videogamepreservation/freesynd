@@ -34,13 +34,13 @@ ResearchMenu::ResearchMenu(MenuManager * m):Menu(m, "research", "mresrch.dat", "
     tab_ = TAB_EQUIPS;
     pSelectedWeapon_ = NULL;
     pSelectedMod_ = NULL;
-    sel_field_ = -1;
+    pSelectedRes_ = NULL;
 
-    addStatic(228, 35, "RESEARCH", FontManager::SIZE_4, true);          //Title
+    addStatic(228, 35, "#RES_TITLE", FontManager::SIZE_4, true);          //Title
     txtTimeId_ = addStatic(500, 9, "", FontManager::SIZE_2, false);     // Time
 
-    modsButId_ = addToggleAction(16, 290, 129, 25, "MODS", FontManager::SIZE_2, KEY_F1, tab_ == TAB_MODS);
-    equipButId_ = addToggleAction(16, 318, 129, 25,  "EQUIP", FontManager::SIZE_2, KEY_F2, tab_ == TAB_EQUIPS);
+    modsButId_ = addToggleAction(16, 290, 129, 25, "#RES_MODS_BUT", FontManager::SIZE_2, KEY_F1, tab_ == TAB_MODS);
+    equipButId_ = addToggleAction(16, 318, 129, 25,  "#RES_EQUIP_BUT", FontManager::SIZE_2, KEY_F2, tab_ == TAB_EQUIPS);
     addOption(16, 346, 129, 25,  "#MENU_ACC_BUT", FontManager::SIZE_2, KEY_F3, "select");
     addOption(500, 347,  128, 25, "#MENU_MAIN_BUT", FontManager::SIZE_2, KEY_F4, "main");
 
@@ -53,11 +53,25 @@ ResearchMenu::ResearchMenu(MenuManager * m):Menu(m, "research", "mresrch.dat", "
     pModsLBox_ = addListBox(504, 110,  122, 230, 18, tab_ == TAB_MODS);
     addWeaponOptions();
     addModOptions();
-    cancelDescId_ = addOption(500, 320,  127, 22,  "CANCEL", FontManager::SIZE_2, KEY_F5, NULL, false);
-    researchId_ = addOption(16, 158, 129, 25,  "RESEARCH", FontManager::SIZE_2, KEY_F6, NULL, false);
-    cancelSearchId_ = addOption(16, 184, 129, 25,  "CANCEL", FontManager::SIZE_2, KEY_F7, NULL, false);
+    // Close Mods/Equips details button
+    cancelDescId_ = addOption(500, 320,  127, 22,  "#MENU_CANCEL_BUT", FontManager::SIZE_2, KEY_F5, NULL, false);
+    // Start research button
+    researchId_ = addOption(16, 158, 129, 25,  "#RES_RES_BUT", FontManager::SIZE_2, KEY_F6, NULL, false);
+    // Close search details button
+    cancelSearchId_ = addOption(16, 184, 129, 25,  "#MENU_CANCEL_BUT", FontManager::SIZE_2, KEY_F7, NULL, false);
 
     fieldTxtId_ = addStatic(20, 86, "", FontManager::SIZE_1, false);    // Search name
+    fundMinLblId_ = addStatic(20, 105, "#RES_MIN_FUND_LBL", FontManager::SIZE_1, true);    // Funding Minimun label
+    getStatic(fundMinLblId_)->setVisible(false);
+    fundMinTxtId_ = addStatic(20, 117, "", FontManager::SIZE_1, false);    // Funding Minimun
+    fundMaxLblId_ = addStatic(20, 130, "#RES_MAX_FUND_LBL", FontManager::SIZE_1, true);    // Funding max label
+    getStatic(fundMaxLblId_)->setVisible(false);
+    fundMaxTxtId_ = addStatic(20, 143, "", FontManager::SIZE_1, false);    // Search maximum
+
+    incrFundId_ = addOption(16, 210, 129, 25,  "#RES_INC_FUND_BUT", FontManager::SIZE_2, KEY_F8, NULL, false);
+    decrFundId_ = addOption(16, 260, 129, 25,  "#RES_DEC_FUND_BUT", FontManager::SIZE_2, KEY_F9, NULL, false);
+    fundCurrLblId_ = addStatic(16, 242, 129, "", FontManager::SIZE_2, false);    // Current Funding label
+    searchTitleLblId_ = addStatic(158, 86, "", FontManager::SIZE_2, false);    // Current search title
     setParentMenu("select");
 }
 
@@ -153,10 +167,14 @@ void ResearchMenu::showFieldList() {
         pFieldModsLBox_->setVisible(true);
     }
 
-    sel_field_ = -1;
+    pSelectedRes_ = NULL;
     hideOption(KEY_F6);
     hideOption(KEY_F7);
     getStatic(fieldTxtId_)->setVisible(false);
+    getStatic(fundMinTxtId_)->setVisible(false);
+    getStatic(fundMaxTxtId_)->setVisible(false);
+    getStatic(fundMinLblId_)->setVisible(false);
+    getStatic(fundMaxLblId_)->setVisible(false);
 }
 
 /*!
@@ -165,6 +183,45 @@ void ResearchMenu::showFieldList() {
 void ResearchMenu::hideFieldList() {
     pFieldEquipLBox_->setVisible(false);
     pFieldModsLBox_->setVisible(false);
+}
+
+void ResearchMenu::showResInfo() {
+    if (pSelectedRes_) {
+        MenuText * pTxt = getStatic(fundMinTxtId_);
+        pTxt->setVisible(true);
+        pTxt->setTextFormated("%d", pSelectedRes_->getMinFunding());
+
+        pTxt = getStatic(fundMaxTxtId_);
+        pTxt->setVisible(true);
+        pTxt->setTextFormated("%d", pSelectedRes_->getMaxFunding());
+
+        pTxt = getStatic(fieldTxtId_);
+        pTxt->setVisible(true);
+        pTxt->setText(pSelectedRes_->getName().c_str());
+
+        getStatic(fundMinLblId_)->setVisible(true);
+        getStatic(fundMaxLblId_)->setVisible(true);
+
+        if (pSelectedRes_->isStarted()) {
+            showResGraph();
+        } else {
+            // Show start research button only if selected research
+            // has not started yet
+            getOption(researchId_)->setVisible(true);
+        }
+        // Show cancel button
+        getOption(cancelSearchId_)->setVisible(true);
+    }
+}
+
+void ResearchMenu::showResGraph() {
+    getOption(researchId_)->setVisible(false);
+    getOption(incrFundId_)->setVisible(true);
+    getOption(decrFundId_)->setVisible(true);
+    MenuText *pTxt = getStatic(fundCurrLblId_);
+    pTxt->setVisible(true);
+    pTxt->setTextFormated("%d", pSelectedRes_->getCurrFunding());
+    getStatic(searchTitleLblId_)->setTextFormated("#RES_GRAP_TITLE", pSelectedRes_->getName().c_str());
 }
 
 void ResearchMenu::handleTick(int elapsed)
@@ -222,12 +279,10 @@ void ResearchMenu::handleRender()
         pSelectedMod_->drawInfo(504, 108);
     }
 
-    if (sel_field_ != -1) {
+    if (pSelectedRes_) {
         uint8 ldata[63];
         memset(ldata, 16, sizeof(ldata));
         g_Screen.scale2x(18, 102, sizeof(ldata), 1, ldata);
-        g_App.fonts().drawText(20, 106, "MIN FUNDING", 0, true);
-        g_App.fonts().drawText(20, 130, "MAX FUNDING", 0, true);
         g_Screen.scale2x(18, 158, sizeof(ldata), 1, ldata);
         g_Screen.scale2x(18, 182, sizeof(ldata), 1, ldata);
     }
@@ -243,21 +298,19 @@ void ResearchMenu::handleAction(const int actionId, void *ctx, const int modKeys
     if (actionId == pFieldEquipLBox_->getId() || actionId == pFieldModsLBox_->getId()) {
         // get selected field
         int *id = static_cast<int *> (ctx);
-        Research *pResearch = NULL;
+        int selRes = -1;
         if (actionId == pFieldEquipLBox_->getId()) {
-            sel_field_ = pFieldEquipLBox_->getItemIdAt(*id);
-            pResearch = g_App.researchManager().getEquipsSearch(sel_field_);
+            selRes = pFieldEquipLBox_->getItemIdAt(*id);
+            pSelectedRes_ = g_App.researchManager().getEquipsSearch(selRes);
         } else {
-            sel_field_ = pFieldModsLBox_->getItemIdAt(*id);
-            pResearch = g_App.researchManager().getModsSearch(sel_field_);
+            selRes = pFieldModsLBox_->getItemIdAt(*id);
+            pSelectedRes_ = g_App.researchManager().getModsSearch(selRes);
         }
-        getStatic(fieldTxtId_)->setVisible(true);
-        getStatic(fieldTxtId_)->setText(pResearch->getName().c_str());
+        
         // Hide list
         hideFieldList();
         // Show Research and Cancel buttons
-        showOption(KEY_F6);
-        showOption(KEY_F7);
+        showResInfo();
 
     } else if (actionId == pModsLBox_->getId()) {
         int *id = static_cast<int *> (ctx);
@@ -289,5 +342,16 @@ void ResearchMenu::handleAction(const int actionId, void *ctx, const int modKeys
         showDetailsList();
     } else if (actionId == cancelSearchId_) {
         showFieldList();
+    } else if (actionId == researchId_) {
+        pSelectedRes_->start();
+        showResGraph();
+    } else if (actionId == incrFundId_) {
+        if (pSelectedRes_->incrFunding()) {
+            getStatic(fundCurrLblId_)->setTextFormated("%d", pSelectedRes_->getCurrFunding());
+        }
+    } else if (actionId == decrFundId_) {
+        if (pSelectedRes_->decrFunding()) {
+            getStatic(fundCurrLblId_)->setTextFormated("%d", pSelectedRes_->getCurrFunding());
+        }
     }
 }

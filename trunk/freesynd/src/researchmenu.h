@@ -48,6 +48,9 @@ protected:
     void showDetailsList();
     void hideDetailsList();
 
+    void showResInfo();
+    void showResGraph();
+
     //! Verify that list of research match mods or equips list box
     void synchFieldSearchList(std::list<Research *> *pVec, ListBox *pListBox);
     void addWeaponOptions();
@@ -64,7 +67,7 @@ protected:
     Weapon *pSelectedWeapon_;
     /*! Mod selected in the Mods tab.*/
     Mod *pSelectedMod_;
-    int sel_field_;
+    Research *pSelectedRes_;
     /*! Id of the text widget for time.*/
     int txtTimeId_;
     /*! Id of the mods toogle button.*/
@@ -79,6 +82,18 @@ protected:
     int cancelDescId_;
     /*! Id of the text field displaying current search field.*/
     int fieldTxtId_;
+    int fundMinTxtId_;
+    int fundMaxTxtId_;
+    int fundMinLblId_;
+    int fundMaxLblId_;
+    /*! Id of the increase funding button.*/
+    int incrFundId_;
+    /*! Id of the decrease funding button.*/
+    int decrFundId_;
+    /*! Id of the text field displaying current search funding.*/
+    int fundCurrLblId_;
+    /*! Id of the text field displaying current search title.*/
+    int searchTitleLblId_;
     /*! List box for all search on equips.*/
     ListBox *pFieldEquipLBox_;
     /*! List box for all search on mods.*/
