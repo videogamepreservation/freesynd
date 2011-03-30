@@ -27,6 +27,7 @@
 #include <set>
 
 #include "../common.h"
+#include "researchmanager.h"
 
 enum Status_Pop {
     STAT_VERY_HAPPY = 5,
@@ -175,6 +176,10 @@ public:
         money_ = m;
     }
 
+    ResearchManager &researchManager() {
+        return researchMan_;
+    }
+
     //! Sets the representation of the time in the given string
     void getTimeAsStr(char *dest);
 
@@ -252,6 +257,13 @@ public:
     int getTaxRevenue(int population, int rate);
 
 private:
+    int getDaysBeforeChange(Status_Pop status, int tax);
+    //! Update population, status and returns money
+    int updateCountries();
+    //! Returns new population number
+    int getNewPopulation(const int defaultPop, int currPop);
+
+private:
     int logo_;
     int logo_colour_;
     int money_;
@@ -284,12 +296,8 @@ private:
     bool enable_all_mis_;
     /*! Cheat flag to enable replay of finished missions. */
     bool replay_mission_;
-
-    int getDaysBeforeChange(Status_Pop status, int tax);
-    //! Update population, status and returns money
-    int updateCountries();
-    //! Returns new population number
-    int getNewPopulation(const int defaultPop, int currPop);
+    /*! Manager for researches. */
+    ResearchManager researchMan_;
 };
 
 #endif //CORE_GAME_SESSION_H

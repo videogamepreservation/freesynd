@@ -80,8 +80,8 @@ void SelectMenu::addModOptions()
 
 void SelectMenu::addWeaponOptions()
 {
-    for (int i = 0; i < g_App.numAvailableWeapons(); i++) {
-        Weapon *w = g_App.availableWeapon(i);
+    for (int i = 0; i < g_App.weapons().numAvailableWeapons(); i++) {
+        Weapon *w = g_App.weapons().availableWeapon(i);
         int id = addOption(504, 110 + 12 * i,  120, 10, w->name(), FontManager::SIZE_1,
                   (Key) (KEY_a + g_App.numAvailableMods() + i), NULL, true, false);
 
@@ -312,13 +312,13 @@ void SelectMenu::hideModsList()
 
 void SelectMenu::showEquipList()
 {
-    for (int i = 0; i < g_App.numAvailableWeapons(); i++)
+    for (int i = 0; i < g_App.weapons().numAvailableWeapons(); i++)
         showOption((Key) (KEY_a + g_App.numAvailableMods() + i));
 }
 
 void SelectMenu::hideEquipList()
 {
-    for (int i = 0; i < g_App.numAvailableWeapons(); i++)
+    for (int i = 0; i < g_App.weapons().numAvailableWeapons(); i++)
         hideOption((Key) (KEY_a + g_App.numAvailableMods() + i));
 }
 
@@ -456,7 +456,7 @@ void SelectMenu::handleRender() {
 
         Weapon *w = NULL;
         if (sel_weapon_)
-            w = g_App.availableWeapon(sel_weapon_ - 1);
+            w = g_App.weapons().availableWeapon(sel_weapon_ - 1);
         else {
             Agent *selected = g_Session.teamMember(cur_agent_);
             if (selected)
@@ -652,7 +652,7 @@ void SelectMenu::handleAction(const int actionId, void *ctx, const int modKeys)
         needRendering();
     }
     if (actionId >= equip0Id_
-        && actionId <= equip0Id_ + g_App.numAvailableWeapons()) {
+        && actionId <= equip0Id_ + g_App.weapons().numAvailableWeapons()) {
         int i = actionId - equip0Id_ + 1;
         sel_weapon_ = i;
         showOption(KEY_F7);
@@ -672,7 +672,7 @@ void SelectMenu::handleAction(const int actionId, void *ctx, const int modKeys)
         needRendering();
     }
     if (actionId == purchaseButId_ && sel_weapon_) {
-        Weapon *w = g_App.availableWeapon(sel_weapon_ - 1);
+        Weapon *w = g_App.weapons().availableWeapon(sel_weapon_ - 1);
         if (sel_all_) {
             for (int n = 0; n < 4; n++) {
                 Agent *selected = g_Session.teamMember(n);

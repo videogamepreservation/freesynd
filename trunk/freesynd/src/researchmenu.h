@@ -26,10 +26,12 @@
 #ifndef RESEARCHMENU_H
 #define RESEARCHMENU_H
 
+#include "core/gameevent.h"
+
 /*!
  * Research class.
  */
-class ResearchMenu : public Menu {
+class ResearchMenu : public Menu, public GameEventListener {
 public:
     ResearchMenu(MenuManager *m);
 
@@ -38,6 +40,7 @@ public:
     void handleRender();
     void handleLeave();
     void handleAction(const int actionId, void *ctx, const int modKeys);
+    void handleGameEvent(GameEvent evt);
 
 protected:
     void updateClock();
@@ -51,10 +54,14 @@ protected:
     void showResInfo();
     void showResGraph();
 
+    void redrawGraph() { addDirtyRect(200, 110, 250, 250); } 
+
     //! Verify that list of research match mods or equips list box
     void synchFieldSearchList(std::list<Research *> *pVec, ListBox *pListBox);
-    void addWeaponOptions();
-    void addModOptions();
+    //! Verify that list of available equips match the equips list box
+    void synchEquipsList();
+    //! Verify that list of available mods match the mods list box
+    void synchModsList();
 
 protected:
     enum ETab {
@@ -67,7 +74,10 @@ protected:
     Weapon *pSelectedWeapon_;
     /*! Mod selected in the Mods tab.*/
     Mod *pSelectedMod_;
+    /*! Research selected from the field list*/
     Research *pSelectedRes_;
+    /*! Research used for displaying graph.*/
+    Research *pResForGraph_;
     /*! Id of the text widget for time.*/
     int txtTimeId_;
     /*! Id of the mods toogle button.*/
@@ -82,6 +92,8 @@ protected:
     int cancelDescId_;
     /*! Id of the text field displaying current search field.*/
     int fieldTxtId_;
+    /*! Id of the text field displaying current amount of money.*/
+    int moneyTxtId_;
     int fundMinTxtId_;
     int fundMaxTxtId_;
     int fundMinLblId_;

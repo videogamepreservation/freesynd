@@ -23,29 +23,72 @@
 #define RESEARCH_H
 
 #include <string>
+#include <list>
+
+#include "weapon.h"
 
 /*!
  * Represents a research on a specific field.
  */
 class Research {
 public:
+
+    enum EResType {
+        EQUIPS,
+        MODS
+    };
+
+    enum EResStatus {
+        NOT_STARTED,
+        STARTED,
+        FINISHED
+    };
+
+    /*!
+     * Represents a point on the progression graph.
+     */
+    struct ProgressPoint {
+        float percentage;
+        short hours;
+        short coeffId;
+    };
+
+    Research(Weapon::WeaponType wType, std::string name, int min);
     Research(std::string name, int min);
     ~Research() {}
 
     int getId() { return id_; }
+    EResType getType() { return type_; }
     std::string getName() { return name_; }
     int getMinFunding() { return minFunding_; }
     int getMaxFunding() { return minFunding_ * 100; }
     int getCurrFunding();
+    //! Returns the current status
+    EResStatus getStatus() { return status_; }
+
+    Weapon::WeaponType getSearchWeapon() { return weapon_; }
+    Weapon::WeaponType getNextWeaponRes() { return Weapon::Unknown; }
+
     bool incrFunding();
     bool decrFunding();
-    int isStarted() { return isStarted_; }
-    void start() { isStarted_ = true; }
+    //!Starts the research
+    void start() { status_ = STARTED; }
+    int getProjectedHour() { return projectedHour_; }
+    std::list<ProgressPoint> getProgressList() { return progressList_; }
+    int updateProgression(short hour, int budget);
+
+protected:
+    void init(std::string name, int min);
+    void updateProjection();
 protected:
     /*! A counter to have unique IDs.*/
     static int researchCnt;
     /*! Id of the research.*/
     int id_;
+    /*! Type of research.*/
+    EResType type_;
+    /*! If research is on weapon, then this field is set.*/
+    Weapon::WeaponType weapon_;
     /*! Name of the research.*/
     std::string name_;
     /*! Minimum amount of funding.*/
@@ -53,9 +96,12 @@ protected:
     /*! Current funding.*/
     int currFunding_;
     /*! True is search has started.*/
-    bool isStarted_;
-    /*! Index of the multiplicator coeff.*/
-    int coeffInd_;
+    EResStatus status_;
+    /*! Index of the multiplicator coeff for funding and progression.*/
+    short coeffInd_;
+    /*! The projected duration in hour before the end of research.*/
+    int projectedHour_;
+    std::list<ProgressPoint> progressList_;
 };
 
 #endif //RESEARCH_H

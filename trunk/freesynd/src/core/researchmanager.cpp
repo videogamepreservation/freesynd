@@ -20,6 +20,7 @@
  *                                                                      *
  ************************************************************************/
 
+#include "app.h"
 #include "researchmanager.h"
 #include "research.h"
 
@@ -29,10 +30,10 @@ const char *g_Fields[] =
 };
 
 ResearchManager::ResearchManager() {
-    availableEquipsSearch_.push_back(new Research(g_Fields[0], 96));
-    availableEquipsSearch_.push_back(new Research(g_Fields[1], 7992));
-    availableEquipsSearch_.push_back(new Research(g_Fields[2], 244));
-    availableEquipsSearch_.push_back(new Research(g_Fields[3], 1992));
+    availableEquipsSearch_.push_back(new Research(Weapon::Uzi, g_Fields[0], 96));
+    availableEquipsSearch_.push_back(new Research(Weapon::Unknown, g_Fields[1], 7992));
+    availableEquipsSearch_.push_back(new Research(Weapon::Unknown, g_Fields[2], 244));
+    availableEquipsSearch_.push_back(new Research(Weapon::Unknown, g_Fields[3], 1992));
 
     availableModsSearch_.push_back(new Research(g_Fields[4], 4440));
     availableModsSearch_.push_back(new Research(g_Fields[5], 4440));
@@ -55,6 +56,7 @@ ResearchManager::~ResearchManager() {
 
     availableModsSearch_.clear();
     availableEquipsSearch_.clear();
+    listeners_.clear();
 }
 
 void ResearchManager::reset() {
@@ -92,4 +94,79 @@ Research * ResearchManager::getModsSearch(int id) {
     }
 
     return NULL;
+}
+
+void ResearchManager::addListener(GameEventListener *pListener) {
+    if (pListener) {
+        listeners_.push_back(pListener);
+    }
+}
+
+void ResearchManager::fireGameEvent(Research *pResearch) {
+    for (std::list < GameEventListener * >::iterator it = listeners_.begin();
+                        it != listeners_.end(); it++) {
+        GameEvent evt;
+        evt.type_ = GameEvent::GE_SEARCH;
+        evt.pCtxt_ = pResearch;
+        (*it)->handleGameEvent(evt);
+    }
+}
+
+/*!
+ * Process all started research and returns the amount of money
+ * corresponding those researches
+ */
+int ResearchManager::process(int hourElapsed, int moneyLeft) {
+    int amount = 0;
+
+    // process research on mods
+    amount += processList(hourElapsed, moneyLeft, &availableModsSearch_);
+    hourElapsed -= amount;
+
+    // process research on equips
+    amount += processList(hourElapsed, moneyLeft, &availableEquipsSearch_);
+    
+    return amount;
+}
+
+int ResearchManager::processList(int hourElapsed, int moneyLeft, std::list < Research * > *pList) {
+    int amount = 0;
+    // process research on equips
+    for (std::list < Research * >::iterator it = pList->begin();
+         it != pList->end(); ) {
+        Research *pRes = *it;
+        bool incrIt = true;
+        
+        if (pRes->getStatus() == Research::STARTED) {
+            amount += pRes->updateProgression(hourElapsed, moneyLeft);
+            moneyLeft -= amount;
+
+            if (pRes->getStatus() == Research::FINISHED) {
+                // Enable new weapon or mods
+                if (pRes->getType() == Research::EQUIPS) {
+                    g_App.weapons().enableWeapon(pRes->getSearchWeapon());
+                } else {
+                    
+                }
+
+                // Loads next research
+                if (pRes->getNextWeaponRes() != Weapon::Unknown) {
+                    
+                } else {
+                    // There's no more research for this category
+                    it = pList->erase(it);
+                    incrIt = false;
+                }
+                // alerts of change
+                fireGameEvent(pRes);
+                delete pRes;
+            }
+        }
+
+        if (incrIt) {
+            it++;
+        }
+    }
+
+    return amount;
 }

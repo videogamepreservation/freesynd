@@ -35,9 +35,11 @@ ResearchMenu::ResearchMenu(MenuManager * m):Menu(m, "research", "mresrch.dat", "
     pSelectedWeapon_ = NULL;
     pSelectedMod_ = NULL;
     pSelectedRes_ = NULL;
+    pResForGraph_ = NULL;
 
     addStatic(228, 35, "#RES_TITLE", FontManager::SIZE_4, true);          //Title
     txtTimeId_ = addStatic(500, 9, "", FontManager::SIZE_2, false);     // Time
+    moneyTxtId_ = addStatic(500, 87, 128, "0", FontManager::SIZE_2, false);     // Money
 
     modsButId_ = addToggleAction(16, 290, 129, 25, "#RES_MODS_BUT", FontManager::SIZE_2, KEY_F1, tab_ == TAB_MODS);
     equipButId_ = addToggleAction(16, 318, 129, 25,  "#RES_EQUIP_BUT", FontManager::SIZE_2, KEY_F2, tab_ == TAB_EQUIPS);
@@ -46,13 +48,12 @@ ResearchMenu::ResearchMenu(MenuManager * m):Menu(m, "research", "mresrch.dat", "
 
     pFieldEquipLBox_ = addListBox(20, 84,  122, 120, 4, tab_ == TAB_EQUIPS);
     pFieldModsLBox_ = addListBox(20, 84,  122, 120, 6, tab_ == TAB_MODS);
-    synchFieldSearchList(g_App.researchManager().getAvailableModsSearch(), pFieldModsLBox_);
-    synchFieldSearchList(g_App.researchManager().getAvailableEquipsSearch(), pFieldEquipLBox_);
+    synchFieldSearchList(g_Session.researchManager().getAvailableModsSearch(), pFieldModsLBox_);
+    synchFieldSearchList(g_Session.researchManager().getAvailableEquipsSearch(), pFieldEquipLBox_);
 
     pEquipsLBox_ = addListBox(504, 110,  122, 230, 18, tab_ == TAB_EQUIPS);
     pModsLBox_ = addListBox(504, 110,  122, 230, 18, tab_ == TAB_MODS);
-    addWeaponOptions();
-    addModOptions();
+    
     // Close Mods/Equips details button
     cancelDescId_ = addOption(500, 320,  127, 22,  "#MENU_CANCEL_BUT", FontManager::SIZE_2, KEY_F5, NULL, false);
     // Start research button
@@ -73,6 +74,10 @@ ResearchMenu::ResearchMenu(MenuManager * m):Menu(m, "research", "mresrch.dat", "
     fundCurrLblId_ = addStatic(16, 242, 129, "", FontManager::SIZE_2, false);    // Current Funding label
     searchTitleLblId_ = addStatic(158, 86, "", FontManager::SIZE_2, false);    // Current search title
     setParentMenu("select");
+
+    synchEquipsList();
+    synchModsList();
+    g_Session.researchManager().addListener(this);
 }
 
 /*!
@@ -88,8 +93,7 @@ void ResearchMenu::synchFieldSearchList(std::list<Research *> *pList, ListBox *p
         Research *pResearch = *it;
         // Check if entries match
         if (pListBox->existsAt(i)) {
-            // An agent is also on this slot in the list box : checks
-            // if two agents are the same
+            // Compares ids
             int id = pListBox->getItemIdAt(i);
             if (pResearch->getId() != id) {
                 // Ids are different : replaces the one on the listbox
@@ -111,15 +115,40 @@ void ResearchMenu::synchFieldSearchList(std::list<Research *> *pList, ListBox *p
     }
 }
 
-void ResearchMenu::addWeaponOptions()
+void ResearchMenu::synchEquipsList()
 {
-    for (int i = 0; i < g_App.numAvailableWeapons(); i++) {
-        Weapon *w = g_App.availableWeapon(i);
+    /*for (int i = 0; i < g_App.weapons().numAvailableWeapons(); i++) {
+        Weapon *w = g_App.weapons().availableWeapon(i);
         pEquipsLBox_->add(w->name(), i);
+    }*/
+    int i = 0;
+    // Runs through the equips list
+    for (; i < g_App.weapons().numAvailableWeapons(); i++) {
+        Weapon *w = g_App.weapons().availableWeapon(i);
+        // Check if entries match
+        if (pEquipsLBox_->existsAt(i)) {
+            // Compares ids
+            int id = pEquipsLBox_->getItemIdAt(i);
+            if (w->getWeaponType() != id) {
+                // Ids are different : replaces the one on the listbox
+                // by the one that is on the reference list
+                pEquipsLBox_->setAt(w->name(), w->getWeaponType(), i);
+            }
+        } else {
+            // The list box is empty on this slot so adds a new agent
+            pEquipsLBox_->setAt(w->name(), w->getWeaponType(), i);
+        }
+    }
+
+    // Removes any remaining lines in list box
+    if (i < pEquipsLBox_->getMaxLine()) {
+        for (; i < pEquipsLBox_->getMaxLine(); i++) {
+            pEquipsLBox_->remove(i);
+        }
     }
 }
 
-void ResearchMenu::addModOptions()
+void ResearchMenu::synchModsList()
 {
     for (int i = 0; i < g_App.numAvailableMods(); i++) {
         Mod *m = g_App.availableMod(i);
@@ -168,8 +197,11 @@ void ResearchMenu::showFieldList() {
     }
 
     pSelectedRes_ = NULL;
-    hideOption(KEY_F6);
-    hideOption(KEY_F7);
+    getOption(researchId_)->setVisible(false);
+    getOption(cancelSearchId_)->setVisible(false);
+    getOption(incrFundId_)->setVisible(false);
+    getOption(decrFundId_)->setVisible(false);
+
     getStatic(fieldTxtId_)->setVisible(false);
     getStatic(fundMinTxtId_)->setVisible(false);
     getStatic(fundMaxTxtId_)->setVisible(false);
@@ -185,6 +217,9 @@ void ResearchMenu::hideFieldList() {
     pFieldModsLBox_->setVisible(false);
 }
 
+/*!
+ * Displays max and min fundings for selected research.
+ */
 void ResearchMenu::showResInfo() {
     if (pSelectedRes_) {
         MenuText * pTxt = getStatic(fundMinTxtId_);
@@ -202,7 +237,7 @@ void ResearchMenu::showResInfo() {
         getStatic(fundMinLblId_)->setVisible(true);
         getStatic(fundMaxLblId_)->setVisible(true);
 
-        if (pSelectedRes_->isStarted()) {
+        if (pSelectedRes_->getStatus() == Research::STARTED) {
             showResGraph();
         } else {
             // Show start research button only if selected research
@@ -215,6 +250,8 @@ void ResearchMenu::showResInfo() {
 }
 
 void ResearchMenu::showResGraph() {
+    redrawGraph();
+    pResForGraph_ = pSelectedRes_;
     getOption(researchId_)->setVisible(false);
     getOption(incrFundId_)->setVisible(true);
     getOption(decrFundId_)->setVisible(true);
@@ -228,6 +265,9 @@ void ResearchMenu::handleTick(int elapsed)
 {
     if (g_Session.updateTime(elapsed)) {
         updateClock();
+        if (pResForGraph_) {
+            redrawGraph();
+        }
     }
 }
 
@@ -238,6 +278,9 @@ void ResearchMenu::updateClock() {
     char tmp[100];
     g_Session.getTimeAsStr(tmp);
     getStatic(txtTimeId_)->setText(tmp);
+
+    // update money
+    getStatic(moneyTxtId_)->setTextFormated("%d", g_Session.getMoney());
 }
 
 void ResearchMenu::handleShow() {
@@ -254,13 +297,6 @@ void ResearchMenu::handleShow() {
 void ResearchMenu::handleRender()
 {
     g_Screen.drawLogo(18, 14, g_App.getGameSession().getLogo(), g_App.getGameSession().getLogoColour());
-
-    // write money
-    char tmp[100];
-
-    sprintf(tmp, "%d", g_App.getGameSession().getMoney());
-    g_App.fonts().drawText(560 - g_App.fonts().textWidth(tmp, FontManager::SIZE_2) / 2, 87,
-                           tmp, 1, false);
 
     if (pSelectedWeapon_) {
         uint8 ldata[62];
@@ -286,6 +322,34 @@ void ResearchMenu::handleRender()
         g_Screen.scale2x(18, 158, sizeof(ldata), 1, ldata);
         g_Screen.scale2x(18, 182, sizeof(ldata), 1, ldata);
     }
+
+    if (pResForGraph_) {
+        int lastX = 205;
+        int lastY = 350;
+        int projectedX = pResForGraph_->getProjectedHour() + 205;
+        int projectedY = 110;
+
+        // draw progression
+        std::list < Research::ProgressPoint > list = pResForGraph_->getProgressList();
+        for (std::list < Research::ProgressPoint >::iterator it = list.begin();
+                it != list.end(); it++) {
+            Research::ProgressPoint p = *it;
+            int x = p.hours + 205;
+            int y = 350 - (int)(p.percentage *2.4f);
+
+            g_Screen.drawLine(lastX, lastY, x, y, 252);
+            g_Screen.drawLine(lastX - 1, lastY, x - 1, y, 252);
+
+            lastX = x;
+            lastY = y;
+        }
+        
+        // draw projection line
+        if (pResForGraph_->getCurrFunding() != 0) {
+            g_Screen.drawLine(lastX, lastY, projectedX, projectedY, 16);
+            g_Screen.drawLine(lastX - 1, lastY, projectedX - 1, projectedY, 16);
+        }
+    }
 }
 
 void ResearchMenu::handleLeave() {
@@ -301,10 +365,10 @@ void ResearchMenu::handleAction(const int actionId, void *ctx, const int modKeys
         int selRes = -1;
         if (actionId == pFieldEquipLBox_->getId()) {
             selRes = pFieldEquipLBox_->getItemIdAt(*id);
-            pSelectedRes_ = g_App.researchManager().getEquipsSearch(selRes);
+            pSelectedRes_ = g_Session.researchManager().getEquipsSearch(selRes);
         } else {
             selRes = pFieldModsLBox_->getItemIdAt(*id);
-            pSelectedRes_ = g_App.researchManager().getModsSearch(selRes);
+            pSelectedRes_ = g_Session.researchManager().getModsSearch(selRes);
         }
         
         // Hide list
@@ -322,7 +386,7 @@ void ResearchMenu::handleAction(const int actionId, void *ctx, const int modKeys
     } else if (actionId == pEquipsLBox_->getId()) {
         int *id = static_cast<int *> (ctx);
         int wId = pEquipsLBox_->getItemIdAt(*id);
-        pSelectedWeapon_ = g_App.availableWeapon(wId);
+        pSelectedWeapon_ = g_App.weapons().availableWeapon(wId);
         hideDetailsList();
         showOption(KEY_F5);
 
@@ -348,10 +412,41 @@ void ResearchMenu::handleAction(const int actionId, void *ctx, const int modKeys
     } else if (actionId == incrFundId_) {
         if (pSelectedRes_->incrFunding()) {
             getStatic(fundCurrLblId_)->setTextFormated("%d", pSelectedRes_->getCurrFunding());
+            // redraw graph
+            addDirtyRect(200, 108, 250, 250);
         }
     } else if (actionId == decrFundId_) {
         if (pSelectedRes_->decrFunding()) {
             getStatic(fundCurrLblId_)->setTextFormated("%d", pSelectedRes_->getCurrFunding());
+            // redraw graph
+            addDirtyRect(200, 108, 250, 250);
+        }
+    }
+}
+
+void ResearchMenu::handleGameEvent(GameEvent evt) {
+    if (evt.type_ == GameEvent::GE_SEARCH) {
+        Research *pRes = static_cast<Research *> (evt.pCtxt_);
+
+        // If current graph was for this reseach, make it disappear
+        if (pResForGraph_->getId() == pRes->getId()) {
+            pResForGraph_ = NULL;
+            redrawGraph();
+            getStatic(fundCurrLblId_)->setVisible(false);
+            getStatic(searchTitleLblId_)->setText("");
+        }
+
+        // If there was a research info panel opened -> close it
+        if (pSelectedRes_->getId() == pRes->getId()) {
+            showFieldList();
+        }
+
+        // and update fields lists
+        if (pRes->getType() == Research::EQUIPS) {
+            synchFieldSearchList(g_Session.researchManager().getAvailableEquipsSearch(), pFieldEquipLBox_);
+            synchEquipsList();
+        } else {
+            synchFieldSearchList(g_Session.researchManager().getAvailableModsSearch(), pFieldModsLBox_);
         }
     }
 }

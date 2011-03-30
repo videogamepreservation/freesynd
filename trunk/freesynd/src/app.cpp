@@ -183,11 +183,8 @@ void App::cheatRepeatOrCompleteMission() {
 }
 
 void App::cheatWeaponsAndMods() {
-    available_weapons_.clear();
     available_mods_.clear();
-
-    for (int i = 0; i < weapons_.numWeapons(); i++)
-        available_weapons_.push_back(weapons_.weapon(i));
+    weapons_.cheatEnableAllWeapons();
 
     for (int i = 0; i < 6; i++) {
         available_mods_.push_back(mods_.mod(i));
@@ -240,38 +237,38 @@ void App::cheatEquipFancyWeapons() {
         agents_.agent(i)->removeAllWeapons();
 #ifdef _DEBUG
         agents_.agent(i)->addWeapon(
-                weapons_.findWeapon("MINI-GUN")->createInstance());
+            weapons_.findWeapon(Weapon::Minigun)->createInstance());
         agents_.agent(i)->addWeapon(
-                weapons_.findWeapon("PISTOL")->createInstance());
+            weapons_.findWeapon(Weapon::Pistol)->createInstance());
         agents_.agent(i)->addWeapon(
-                weapons_.findWeapon("GAUSS GUN")->createInstance());
+            weapons_.findWeapon(Weapon::GaussGun)->createInstance());
         agents_.agent(i)->addWeapon(
-                weapons_.findWeapon("FLAMER")->createInstance());
+            weapons_.findWeapon(Weapon::Flamer)->createInstance());
         agents_.agent(i)->addWeapon(
-                weapons_.findWeapon("UZI")->createInstance());
+            weapons_.findWeapon(Weapon::Uzi)->createInstance());
         agents_.agent(i)->addWeapon(
-                weapons_.findWeapon("ENERGY SHIELD")->createInstance());
+            weapons_.findWeapon(Weapon::EnergyShield)->createInstance());
         agents_.agent(i)->addWeapon(
-                weapons_.findWeapon("LASER")->createInstance());
+            weapons_.findWeapon(Weapon::Laser)->createInstance());
         agents_.agent(i)->addWeapon(
-                weapons_.findWeapon("LONG RANGE")->createInstance());
+            weapons_.findWeapon(Weapon::LongRange)->createInstance());
 #else
         agents_.agent(i)->addWeapon(
-                weapons_.findWeapon("MINI-GUN")->createInstance());
+                weapons_.findWeapon(Weapon::Minigun)->createInstance());
         agents_.agent(i)->addWeapon(
-                weapons_.findWeapon("MINI-GUN")->createInstance());
+                weapons_.findWeapon(Weapon::Minigun)->createInstance());
         agents_.agent(i)->addWeapon(
-                weapons_.findWeapon("PERSUADERTRON")->createInstance());
+                weapons_.findWeapon(Weapon::Persuadatron)->createInstance());
         agents_.agent(i)->addWeapon(
-                weapons_.findWeapon("TIME BOMB")->createInstance());
+                weapons_.findWeapon(Weapon::TimeBomb)->createInstance());
         agents_.agent(i)->addWeapon(
-                weapons_.findWeapon("ENERGY SHIELD")->createInstance());
+                weapons_.findWeapon(Weapon::EnergyShield)->createInstance());
         agents_.agent(i)->addWeapon(
-                weapons_.findWeapon("ENERGY SHIELD")->createInstance());
+                weapons_.findWeapon(Weapon::EnergyShield)->createInstance());
         agents_.agent(i)->addWeapon(
-                weapons_.findWeapon("LASER")->createInstance());
+                weapons_.findWeapon(Weapon::Laser)->createInstance());
         agents_.agent(i)->addWeapon(
-                weapons_.findWeapon("LASER")->createInstance());
+                weapons_.findWeapon(Weapon::Laser)->createInstance());
 #endif
         }
     }
@@ -334,16 +331,11 @@ void App::reset() {
     session_.reset();
 
     agents_.reset();
-    researchMan_.reset();
 
     for (int i = 0; i < 4; i++)
         session_.setTeamMember(i, agents_.agent(i));
 
-    available_weapons_.push_back(weapons_.findWeapon("PERSUADERTRON"));
-    available_weapons_.push_back(weapons_.findWeapon("PISTOL"));
-    available_weapons_.push_back(weapons_.findWeapon("SHOTGUN"));
-    available_weapons_.push_back(weapons_.findWeapon("SCANNER"));
-    available_weapons_.push_back(weapons_.findWeapon("MEDIKIT"));
+    weapons_.reset();
 
     for (int i = 0; i < 6; i++)
         available_mods_.push_back(mods_.mod(i));

@@ -2,10 +2,7 @@
  *                                                                      *
  *  FreeSynd - a remake of the classic Bullfrog game "Syndicate".       *
  *                                                                      *
- *   Copyright (C) 2005  Stuart Binge  <skbinge@gmail.com>              *
- *   Copyright (C) 2005  Joost Peters  <joostp@users.sourceforge.net>   *
- *   Copyright (C) 2006  Trent Waddington <qg@biodome.org>              *
- *   Copyright (C) 2006  Tarjei Knapstad <tarjei.knapstad@gmail.com>    *
+ *   Copyright (C) 2011  Benoit Blancard <benblan@users.sourceforge.net>*
  *                                                                      *
  *    This program is free software;  you can redistribute it and / or  *
  *  modify it  under the  terms of the  GNU General  Public License as  *
@@ -23,52 +20,23 @@
  *                                                                      *
  ************************************************************************/
 
-#ifndef WEAPONMANAGER_H
-#define WEAPONMANAGER_H
+#ifndef GAMEVENT_H
+#define GAMEVENT_H
 
-#include "common.h"
-#include "weapon.h"
-#include "ped.h"
-#include <vector>
-
-/*!
- * Weapon manager class.
- */
-class WeaponManager {
+class GameEvent {
 public:
-    WeaponManager();
-    ~WeaponManager();
+    enum EEventType {
+        GE_AGENT,
+        GE_SEARCH
+    };
 
-    void loadWeapons();
-
-    void cheatEnableAllWeapons();
-
-    void reset();
-
-    int numWeapons() { return weapons_.size(); }
-
-    Weapon *weapon(int n) {
-        assert(n < (int) weapons_.size());
-        return weapons_[n];
-    }
-
-    Weapon *findWeapon(Weapon::WeaponType wt);
-
-    WeaponInstance *loadInstance(uint8 *data, int map);
-
-    int numAvailableWeapons() {
-        return available_weapons_.size();
-    }
-
-    Weapon *availableWeapon(int n) {
-        return available_weapons_[n];
-    }
-
-    void enableWeapon(Weapon::WeaponType wt);
-
-protected:
-    std::vector<Weapon *> weapons_;
-    std::vector<Weapon *> available_weapons_;
+    EEventType type_;
+    void *pCtxt_;
 };
 
-#endif
+class GameEventListener {
+public:
+    virtual void handleGameEvent(GameEvent evt) = 0;
+};
+
+#endif //GAMEVENT_H

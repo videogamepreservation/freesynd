@@ -88,15 +88,20 @@ void WeaponManager::loadWeapons() {
         Weapon::EnergyShield, MapObject::dmg_None, 1, 1));
 }
 
-Weapon *WeaponManager::findWeapon(const char *name) {
-    std::string n = name;
+void WeaponManager::cheatEnableAllWeapons() {
+    available_weapons_.clear();
 
-    for (unsigned int i = 0; i < weapons_.size(); i++) {
-        if (n == weapons_[i]->name())
-            return weapons_[i];
-    }
+    for (unsigned int i = 0; i < weapons_.size(); i++)
+        available_weapons_.push_back(weapons_[i]);
+}
 
-    return NULL;
+void WeaponManager::reset() {
+    available_weapons_.clear();
+    available_weapons_.push_back(findWeapon(Weapon::Persuadatron));
+    available_weapons_.push_back(findWeapon(Weapon::Pistol));
+    available_weapons_.push_back(findWeapon(Weapon::Shotgun));
+    available_weapons_.push_back(findWeapon(Weapon::Scanner));
+    available_weapons_.push_back(findWeapon(Weapon::MediKit));
 }
 
 Weapon *WeaponManager::findWeapon(Weapon::WeaponType wt) {
@@ -179,4 +184,12 @@ WeaponInstance *WeaponManager::loadInstance(uint8 * data, int map)
     }
 
     return NULL;
+}
+
+void WeaponManager::enableWeapon(Weapon::WeaponType wt) {
+    Weapon *pWeapon = findWeapon(wt);
+
+    if (pWeapon) {
+        available_weapons_.push_back(pWeapon);
+    }
 }

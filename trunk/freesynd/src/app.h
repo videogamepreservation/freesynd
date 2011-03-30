@@ -48,7 +48,6 @@
 #include "sound/soundmanager.h"
 #include "sound/musicmanager.h"
 #include "core/gamesession.h"
-#include "core/researchmanager.h"
 
 /*!
  * Application class.
@@ -132,18 +131,6 @@ class App : public Singleton < App > {
         return music_;
     }
 
-    ResearchManager &researchManager() {
-        return researchMan_;
-    }
-
-    int numAvailableWeapons() {
-        return available_weapons_.size();
-    }
-
-    Weapon *availableWeapon(int n) {
-        return available_weapons_[n];
-    }
-
     int numAvailableMods() {
         return available_mods_.size();
     }
@@ -213,7 +200,6 @@ private:
 
 private:
     GameSession session_;
-    std::vector<Weapon *> available_weapons_;
     std::vector<Mod *> available_mods_;
 
     bool running_, playingFli_, skipFli_;
@@ -241,7 +227,6 @@ private:
     SoundManager intro_sounds_;
     SoundManager game_sounds_;
     MusicManager music_;
-    ResearchManager researchMan_;
 };
 
 #define g_App   App::singleton()

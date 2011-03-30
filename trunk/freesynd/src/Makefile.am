@@ -6,7 +6,7 @@ AM_CPPFLAGS = -DSYSTEM_SDL -DUSE_RWOPS
 
 freesynd_LDADD = ${SDL_LIBS} -lpng -lSDL_mixer -lSDL_image
 
-freesynd_SOURCES = common.h config.h keys.h utils/singleton.h \
+freesynd_SOURCES = common.h config.h keys.h utils/singleton.h  core/gameevent.h\
 	path.h pathsurfaces.h \
 	utils/file.cpp utils/file.h \
 	utils/dernc.cpp utils/dernc.h\

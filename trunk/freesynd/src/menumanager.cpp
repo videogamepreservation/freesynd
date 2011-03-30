@@ -289,6 +289,13 @@ void MenuManager::mouseMotionEvent(int x, int y, int state, const int modKeys)
  */
 void MenuManager::mouseDownEvent(int x, int y, int button, const int modKeys)
 {
+#ifdef _DEBUG
+    // Display mouse coordinate
+    if (modKeys & KMD_SHIFT) {
+        printf("Mouse is at %d, %d\n", x, y);
+    }
+#endif
+
     if (current_ && !drop_events_) {
         current_->mouseDownEvent(x, y, button, modKeys);
     }

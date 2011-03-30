@@ -140,6 +140,8 @@ void GameSession::reset() {
     for (int i=0; i<4; i++) {
         teamMembers_[i] = NULL;
     }
+
+    researchMan_.reset();
 }
 
 Block & GameSession::getBlock(uint8 index) {
@@ -238,6 +240,9 @@ bool GameSession::updateTime(int elapsed) {
 
         // Hour update
         time_hour_ += hour_remain;
+        // Update research
+        money_ -= researchMan_.process(hour_remain, money_);
+        // Collect taxes if we reached the end of the day
         if (time_hour_ > 23) {
             time_hour_ -= 24;
             time_day_++;
@@ -259,6 +264,8 @@ bool GameSession::updateTime(int elapsed) {
                     time_year_++;
                 }
 
+                // Update research for a day
+                money_ -= researchMan_.process(24, money_);
                 // Update money
                 money_ += updateCountries();
             }

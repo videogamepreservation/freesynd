@@ -24,6 +24,8 @@
 
 #include <list>
 
+#include "core/gameevent.h"
+
 class Research;
 
 /*!
@@ -51,12 +53,22 @@ public:
     Research * getEquipsSearch(int id);
     //! Returns a Research on mods with given id
     Research * getModsSearch(int id);
+    // Processes all engaged research
+    int process(int hourElapsed, int moneyLeft);
+    //! Adds a listener for research event
+    void addListener(GameEventListener *pListener);
+
+protected:
+    void fireGameEvent(Research *pResearch);
+    int processList(int hourElapsed, int moneyLeft, std::list < Research * > *pList);
 
 protected:
     /*! List of all currently available research on mods.*/
     std::list<Research *> availableModsSearch_;
     /*! List of all currently available research on equips.*/
     std::list<Research *> availableEquipsSearch_;
+    /*! List of listeners for research events.*/
+    std::list<GameEventListener *> listeners_;
 };
 
 #endif //RESEARCHMANAGER_H
