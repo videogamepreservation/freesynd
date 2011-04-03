@@ -47,13 +47,15 @@ ResearchMenu::ResearchMenu(MenuManager * m):Menu(m, "research", "mresrch.dat", "
     addOption(500, 347,  128, 25, "#MENU_MAIN_BUT", FontManager::SIZE_2, KEY_F4, "main");
 
     pFieldEquipLBox_ = addListBox(20, 84,  122, 120, 4, tab_ == TAB_EQUIPS);
+    pFieldEquipLBox_->setModel(g_Session.researchManager().getAvailableEquipsSearch());
     pFieldModsLBox_ = addListBox(20, 84,  122, 120, 6, tab_ == TAB_MODS);
-    synchFieldSearchList(g_Session.researchManager().getAvailableModsSearch(), pFieldModsLBox_);
-    synchFieldSearchList(g_Session.researchManager().getAvailableEquipsSearch(), pFieldEquipLBox_);
+    pFieldModsLBox_->setModel(g_Session.researchManager().getAvailableModsSearch());
 
     pEquipsLBox_ = addListBox(504, 110,  122, 230, 18, tab_ == TAB_EQUIPS);
+    pEquipsLBox_->setModel(g_App.weapons().getAvailableWeapons());
     pModsLBox_ = addListBox(504, 110,  122, 230, 18, tab_ == TAB_MODS);
-    
+    pModsLBox_->setModel(g_App.mods().getAvalaibleMods());
+
     // Close Mods/Equips details button
     cancelDescId_ = addOption(500, 320,  127, 22,  "#MENU_CANCEL_BUT", FontManager::SIZE_2, KEY_F5, NULL, false);
     // Start research button
@@ -75,85 +77,7 @@ ResearchMenu::ResearchMenu(MenuManager * m):Menu(m, "research", "mresrch.dat", "
     searchTitleLblId_ = addStatic(158, 86, "", FontManager::SIZE_2, false);    // Current search title
     setParentMenu("select");
 
-    synchEquipsList();
-    synchModsList();
     g_Session.researchManager().addListener(this);
-}
-
-/*!
- * Verify that list of research match mods or equips list box
- * \param pList List of available researches
- * \param pListBox Mods or Equips List box
- */
-void ResearchMenu::synchFieldSearchList(std::list<Research *> *pList, ListBox *pListBox)
-{
-    int i = 0;
-    // Runs through the research list
-    for (std::list < Research * >::iterator it = pList->begin(); it != pList->end(); it++) {
-        Research *pResearch = *it;
-        // Check if entries match
-        if (pListBox->existsAt(i)) {
-            // Compares ids
-            int id = pListBox->getItemIdAt(i);
-            if (pResearch->getId() != id) {
-                // Ids are different : replaces the one on the listbox
-                // by the one that is on the reference list
-                pListBox->setAt(pResearch->getName(), pResearch->getId(), i);
-            }
-        } else {
-            // The list box is empty on this slot so adds a new agent
-            pListBox->setAt(pResearch->getName(), pResearch->getId(), i);
-        }
-        i++;
-    }
-
-    // Removes any remaining lines in list box
-    if (i < pListBox->getMaxLine()) {
-        for (; i < pListBox->getMaxLine(); i++) {
-            pListBox->remove(i);
-        }
-    }
-}
-
-void ResearchMenu::synchEquipsList()
-{
-    /*for (int i = 0; i < g_App.weapons().numAvailableWeapons(); i++) {
-        Weapon *w = g_App.weapons().availableWeapon(i);
-        pEquipsLBox_->add(w->name(), i);
-    }*/
-    int i = 0;
-    // Runs through the equips list
-    for (; i < g_App.weapons().numAvailableWeapons(); i++) {
-        Weapon *w = g_App.weapons().availableWeapon(i);
-        // Check if entries match
-        if (pEquipsLBox_->existsAt(i)) {
-            // Compares ids
-            int id = pEquipsLBox_->getItemIdAt(i);
-            if (w->getWeaponType() != id) {
-                // Ids are different : replaces the one on the listbox
-                // by the one that is on the reference list
-                pEquipsLBox_->setAt(w->name(), w->getWeaponType(), i);
-            }
-        } else {
-            // The list box is empty on this slot so adds a new agent
-            pEquipsLBox_->setAt(w->name(), w->getWeaponType(), i);
-        }
-    }
-
-    // Removes any remaining lines in list box
-    if (i < pEquipsLBox_->getMaxLine()) {
-        for (; i < pEquipsLBox_->getMaxLine(); i++) {
-            pEquipsLBox_->remove(i);
-        }
-    }
-}
-
-void ResearchMenu::synchModsList()
-{
-    for (int i = 0; i < g_App.numAvailableMods(); i++) {
-        Mod *m = g_App.availableMod(i);
-        pModsLBox_->add(m->name(), i);
-    }
 }
 
 /*!
@@ -361,32 +285,20 @@ void ResearchMenu::handleAction(const int actionId, void *ctx, const int modKeys
     // Field list box : Equips or Mods
     if (actionId == pFieldEquipLBox_->getId() || actionId == pFieldModsLBox_->getId()) {
         // get selected field
-        int *id = static_cast<int *> (ctx);
-        int selRes = -1;
-        if (actionId == pFieldEquipLBox_->getId()) {
-            selRes = pFieldEquipLBox_->getItemIdAt(*id);
-            pSelectedRes_ = g_Session.researchManager().getEquipsSearch(selRes);
-        } else {
-            selRes = pFieldModsLBox_->getItemIdAt(*id);
-            pSelectedRes_ = g_Session.researchManager().getModsSearch(selRes);
-        }
+        pSelectedRes_ = static_cast<Research *> (ctx);
         
         // Hide list
         hideFieldList();
         // Show Research and Cancel buttons
         showResInfo();
 
-    } else if (actionId == pModsLBox_->getId()) {
-        int *id = static_cast<int *> (ctx);
-        int mId = pModsLBox_->getItemIdAt(*id);
-        pSelectedMod_ = g_App.availableMod(mId);
+    } else if (actionId == pModsLBox_->getId()) {  // Selection of an avalaible mod
+        pSelectedMod_ = static_cast<Mod *> (ctx);
         hideDetailsList();
         showOption(KEY_F5);
 
-    } else if (actionId == pEquipsLBox_->getId()) {
-        int *id = static_cast<int *> (ctx);
-        int wId = pEquipsLBox_->getItemIdAt(*id);
-        pSelectedWeapon_ = g_App.weapons().availableWeapon(wId);
+    } else if (actionId == pEquipsLBox_->getId()) { // Selection of an avalaible weapon
+        pSelectedWeapon_ = static_cast<Weapon *> (ctx);
         hideDetailsList();
         showOption(KEY_F5);
 
@@ -413,19 +325,20 @@ void ResearchMenu::handleAction(const int actionId, void *ctx, const int modKeys
         if (pSelectedRes_->incrFunding()) {
             getStatic(fundCurrLblId_)->setTextFormated("%d", pSelectedRes_->getCurrFunding());
             // redraw graph
-            addDirtyRect(200, 108, 250, 250);
+            redrawGraph();
         }
     } else if (actionId == decrFundId_) {
         if (pSelectedRes_->decrFunding()) {
             getStatic(fundCurrLblId_)->setTextFormated("%d", pSelectedRes_->getCurrFunding());
             // redraw graph
-            addDirtyRect(200, 108, 250, 250);
+            redrawGraph();
         }
     }
 }
 
 void ResearchMenu::handleGameEvent(GameEvent evt) {
     if (evt.type_ == GameEvent::GE_SEARCH) {
+        // A research has ended
         Research *pRes = static_cast<Research *> (evt.pCtxt_);
 
         // If current graph was for this reseach, make it disappear
@@ -439,14 +352,6 @@ void ResearchMenu::handleGameEvent(GameEvent evt) {
         // If there was a research info panel opened -> close it
         if (pSelectedRes_->getId() == pRes->getId()) {
             showFieldList();
-        }
-
-        // and update fields lists
-        if (pRes->getType() == Research::EQUIPS) {
-            synchFieldSearchList(g_Session.researchManager().getAvailableEquipsSearch(), pFieldEquipLBox_);
-            synchEquipsList();
-        } else {
-            synchFieldSearchList(g_Session.researchManager().getAvailableModsSearch(), pFieldModsLBox_);
         }
     }
 }

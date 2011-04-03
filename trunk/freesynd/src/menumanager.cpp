@@ -28,6 +28,7 @@
 #include <assert.h>
 #include "app.h"
 #include "utils/file.h"
+#include "utils/log.h"
 #include "mainmenu.h"
 #include "confmenu.h"
 #include "mapmenu.h"
@@ -66,29 +67,58 @@ MenuManager::MenuManager(): dirtyList_(g_Screen.gameScreenWidth(), g_Screen.game
 }
 
 MenuManager::~MenuManager()
-{
-    if (menu_main_)
+{}
+
+/*!
+ * Destroy all menus and resources.
+ */
+void MenuManager::destroy() {
+    LOG(Log::k_FLG_MEM, "MenuManager", "~MenuManager", ("Destruction..."))
+
+    if (menu_main_) {
         delete menu_main_;
-    if (menu_conf_)
+        menu_main_ = NULL;
+    }
+    if (menu_conf_) {
         delete menu_conf_;
-    if (menu_load_save_)
+        menu_conf_ = NULL;
+    }
+    if (menu_load_save_) {
         delete menu_load_save_;
-    if (menu_map_)
+        menu_load_save_ = NULL;
+    }
+    if (menu_map_) {
         delete menu_map_;
-    if (menu_brief_)
+        menu_map_ = NULL;
+    }
+    if (menu_brief_) {
         delete menu_brief_;
-    if (menu_select_)
+        menu_brief_ = NULL;
+    }
+    if (menu_select_) {
         delete menu_select_;
-    if (menu_research_)
+        menu_select_ = NULL;
+    }
+    if (menu_research_) {
         delete menu_research_;
-    if (menu_loading_)
+        menu_research_ = NULL;
+    }
+    if (menu_loading_) {
         delete menu_loading_;
-    if (menu_gameplay_)
+        menu_loading_ = NULL;
+    }
+    if (menu_gameplay_) {
         delete menu_gameplay_;
-    if (menu_debrief_)
+        menu_gameplay_ = NULL;
+    }
+    if (menu_debrief_) {
         delete menu_debrief_;
-    if (menu_logout_)
+        menu_debrief_ = NULL;
+    }
+    if (menu_logout_) {
         delete menu_logout_;
+        menu_logout_ = NULL;
+    }
 
     if (background_) {
         delete[] background_;
@@ -96,6 +126,7 @@ MenuManager::~MenuManager()
 
     if (language_) {
         delete language_;
+        language_ = NULL;
     }
 }
 

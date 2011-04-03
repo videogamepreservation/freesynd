@@ -27,7 +27,7 @@
 
 #include "common.h"
 #include "mod.h"
-#include <vector>
+#include "utils/seqmodel.h"
 
 /*!
  * Modifications manager class.
@@ -42,11 +42,16 @@ public:
     Mod *mod(int slot, int version = 1) {
         assert(slot < 6);
         assert(version >= 1 && version <= 3);
-        return mods_[slot + (version - 1) * 6];
+        return mods_.get(slot + (version - 1) * 6);
     }
 
+    SequenceModel * getAvalaibleMods() { return &mods_; }
+
+    void cheatEnableAllMods();
+    void reset();
+
 protected:
-     std::vector<Mod *> mods_;
+     VectorModel<Mod *> mods_;
 };
 
 #endif

@@ -33,10 +33,17 @@
  */
 class Mod {
 public:
+    /*!
+     * Different types of Mod.
+     */
+    enum EModType {
+        Unknown
+    } ;
+
     Mod(const char *mod_name, int mod_cost, const char *mod_desc, int mod_slot,
             int mod_icon, int mod_iconF = 0);
 
-    const char *name() { return name_.c_str(); }
+    const char *getName() { return name_.c_str(); }
     int cost() { return cost_; }
     const char *desc() { return desc_.c_str(); }
     int slot() { return slot_; }

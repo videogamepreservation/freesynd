@@ -209,6 +209,9 @@ int main(int argc, char *argv[]) {
         LOG(Log::k_FLG_INFO, "Main", "main", ("Initializing application failed"))
     }
 
+    // Destroy application
+    app->destroy();
+
 #ifdef _DEBUG
     // Close log
     Log::close();

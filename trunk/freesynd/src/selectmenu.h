@@ -49,27 +49,32 @@ protected:
     //! Draws a focus around the selected agent picture
     void drawAgentSelector(int x, int y);
     void drawAgent();
-    void showModsList();
-    void hideModsList();
-    void showEquipList();
-    void hideEquipList();
-
-    void addModOptions();
-    void addWeaponOptions();
-    //! Checks that team list box match the current team list
-    void synchTeamList();
 
     void toggleAgent(int n);
 
+    void showModWeaponPanel();
+    void showItemList();
+
 protected:
-    int tab_;
+    enum ETab {
+        TAB_MODS = 0,
+        TAB_EQUIPS = 1,
+        TAB_TEAM = 2
+    };
+
+    ETab tab_;
     int cur_agent_;
     /*! Counter to update the rnd_ field.*/
     int tick_count_;
     /*! A counter used to draw the agent selector.*/
     int rnd_;
-    int sel_weapon_, sel_mod_, sel_weapon_inst_;
     bool sel_all_;
+    /*! Selected weapon on the weapon list.*/
+    Weapon *pSelectedWeap_;
+    /*! Selected weapon instance id on the current agent inventory.*/
+    int selectedWInstId_;
+    /*! Selected mod on the mods list.*/
+    Mod *pSelectedMod_;
     /*! Id of the text widget presenting the selected agent name.*/
     int txtAgentId_;
     /*! Id of the text widget for time.*/
@@ -88,9 +93,10 @@ protected:
     int sellButId_;
     /*! The team list box.*/
     ListBox *pTeamLBox_;
-
-    int mod0Id_;
-    int equip0Id_;
+    /*! The weapons list.*/
+    ListBox *pWeaponsLBox_;
+    /*! The mods list.*/
+    ListBox *pModsLBox_;
 };
 
 #endif

@@ -23,6 +23,7 @@
 #include "app.h"
 #include "researchmanager.h"
 #include "research.h"
+#include "utils/log.h"
 
 const char *g_Fields[] =
     { "AUTOMATIC", "HEAVY", "ASSAULT", "MISCELLANEOUS",
@@ -30,28 +31,29 @@ const char *g_Fields[] =
 };
 
 ResearchManager::ResearchManager() {
-    availableEquipsSearch_.push_back(new Research(Weapon::Uzi, g_Fields[0], 96));
-    availableEquipsSearch_.push_back(new Research(Weapon::Unknown, g_Fields[1], 7992));
-    availableEquipsSearch_.push_back(new Research(Weapon::Unknown, g_Fields[2], 244));
-    availableEquipsSearch_.push_back(new Research(Weapon::Unknown, g_Fields[3], 1992));
+    availableEquipsSearch_.add(new Research(Weapon::Uzi, g_Fields[0], 96));
+    availableEquipsSearch_.add(new Research(Weapon::Unknown, g_Fields[1], 7992));
+    availableEquipsSearch_.add(new Research(Weapon::Unknown, g_Fields[2], 244));
+    availableEquipsSearch_.add(new Research(Weapon::Unknown, g_Fields[3], 1992));
 
-    availableModsSearch_.push_back(new Research(g_Fields[4], 4440));
-    availableModsSearch_.push_back(new Research(g_Fields[5], 4440));
-    availableModsSearch_.push_back(new Research(g_Fields[6], 6000));
-    availableModsSearch_.push_back(new Research(g_Fields[7], 3480));
-    availableModsSearch_.push_back(new Research(g_Fields[8], 3480));
-    availableModsSearch_.push_back(new Research(g_Fields[9], 34800));
+    availableModsSearch_.add(new Research(g_Fields[4], 4440));
+    availableModsSearch_.add(new Research(g_Fields[5], 4440));
+    availableModsSearch_.add(new Research(g_Fields[6], 6000));
+    availableModsSearch_.add(new Research(g_Fields[7], 3480));
+    availableModsSearch_.add(new Research(g_Fields[8], 3480));
+    availableModsSearch_.add(new Research(g_Fields[9], 34800));
 }
 
 ResearchManager::~ResearchManager() {
-    for (std::list < Research * >::iterator it = availableModsSearch_.begin();
-         it != availableModsSearch_.end(); it++) {
-        delete (*it);
+    LOG(Log::k_FLG_MEM, "ResearchManager", "~ResearchManager", ("Destruction..."))
+    for (int i=0; i<availableModsSearch_.size(); i++) {
+        Research *pRes = availableModsSearch_.get(i);
+        delete pRes;
     }
 
-    for (std::list < Research * >::iterator it = availableEquipsSearch_.begin();
-         it != availableEquipsSearch_.end(); it++) {
-        delete (*it);
+    for (int i=0; i<availableEquipsSearch_.size(); i++) {
+        Research *pRes = availableEquipsSearch_.get(i);
+        delete pRes;
     }
 
     availableModsSearch_.clear();
@@ -68,9 +70,8 @@ void ResearchManager::reset() {
  * \return a pointer on a research. NULL if no research was found.
  */
 Research * ResearchManager::getEquipsSearch(int id) {
-    for (std::list < Research * >::iterator it = availableEquipsSearch_.begin();
-         it != availableEquipsSearch_.end(); it++) {
-        Research * pRes = *it;
+    for (int i=0; i<availableEquipsSearch_.size(); i++) {
+        Research *pRes = availableEquipsSearch_.get(i);
         if (pRes->getId() == id) {
             return pRes;
         }
@@ -85,9 +86,8 @@ Research * ResearchManager::getEquipsSearch(int id) {
  * \return a pointer on a research. NULL if no research was found.
  */
 Research * ResearchManager::getModsSearch(int id) {
-    for (std::list < Research * >::iterator it = availableModsSearch_.begin();
-         it != availableModsSearch_.end(); it++) {
-        Research * pRes = *it;
+    for (int i=0; i<availableModsSearch_.size(); i++) {
+        Research *pRes = availableModsSearch_.get(i);
         if (pRes->getId() == id) {
             return pRes;
         }
@@ -99,6 +99,16 @@ Research * ResearchManager::getModsSearch(int id) {
 void ResearchManager::addListener(GameEventListener *pListener) {
     if (pListener) {
         listeners_.push_back(pListener);
+    }
+}
+
+void ResearchManager::removeListener(GameEventListener *pListener) {
+    for (std::list < GameEventListener * >::iterator it = listeners_.begin();
+         it != listeners_.end(); it++) {
+             if (pListener == *it) {
+                 listeners_.erase(it);
+                 return;
+             }
     }
 }
 
@@ -129,12 +139,11 @@ int ResearchManager::process(int hourElapsed, int moneyLeft) {
     return amount;
 }
 
-int ResearchManager::processList(int hourElapsed, int moneyLeft, std::list < Research * > *pList) {
+int ResearchManager::processList(int hourElapsed, int moneyLeft, VectorModel < Research * > *pList) {
     int amount = 0;
-    // process research on equips
-    for (std::list < Research * >::iterator it = pList->begin();
-         it != pList->end(); ) {
-        Research *pRes = *it;
+    // process research 
+    for (int i=0; i<pList->size();) {
+        Research *pRes = pList->get(i);
         bool incrIt = true;
         
         if (pRes->getStatus() == Research::STARTED) {
@@ -154,7 +163,7 @@ int ResearchManager::processList(int hourElapsed, int moneyLeft, std::list < Res
                     
                 } else {
                     // There's no more research for this category
-                    it = pList->erase(it);
+                    pList->remove(i);
                     incrIt = false;
                 }
                 // alerts of change
@@ -164,7 +173,7 @@ int ResearchManager::processList(int hourElapsed, int moneyLeft, std::list < Res
         }
 
         if (incrIt) {
-            it++;
+            i++;
         }
     }
 

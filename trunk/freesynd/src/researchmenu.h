@@ -56,13 +56,6 @@ protected:
 
     void redrawGraph() { addDirtyRect(200, 110, 250, 250); } 
 
-    //! Verify that list of research match mods or equips list box
-    void synchFieldSearchList(std::list<Research *> *pVec, ListBox *pListBox);
-    //! Verify that list of available equips match the equips list box
-    void synchEquipsList();
-    //! Verify that list of available mods match the mods list box
-    void synchModsList();
-
 protected:
     enum ETab {
         TAB_MODS = 0,

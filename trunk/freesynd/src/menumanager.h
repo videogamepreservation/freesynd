@@ -65,7 +65,10 @@ public:
 
     MenuManager();
     ~MenuManager();
+    
     void createAllMenus();
+    //! Destroy all menus and resources
+    void destroy();
 
     void setLanguage(FS_Lang lang);
     void getMessage(const std::string & id, std::string & msg);

@@ -27,6 +27,7 @@
 #include <list>
 
 #include "gfx/fontmanager.h"
+#include "utils/seqmodel.h"
 
 /*!
  * This is a graphical component. It's the base class
@@ -176,8 +177,10 @@ class Sprite;
  */
 class ActionWidget : public Widget {
 public:
-    ActionWidget() : Widget() {}
-    ActionWidget(int x, int y, int width, int height, bool visible) : Widget(x, y, width, height, visible) {}
+    ActionWidget(Menu *peer, int x, int y, int width, int height, bool visible) 
+        : Widget(x, y, width, height, visible) {
+            peer_ = peer;
+    }
 
     //! Tells whether the pointer is over the widget or not
     bool isMouseOver(int x, int y);
@@ -191,6 +194,9 @@ public:
     virtual void handleFocusGained() {}
     //! Callback method called when the mouse leaves the widget
     virtual void handleFocusLost() {}
+
+protected:
+    Menu *peer_;
 };
 
 //! A button widget.
@@ -204,13 +210,6 @@ public:
 
     /*! The name of the next menu.*/
     const char *to_;
-
-    //! Constructs a new button.
-    Option() : ActionWidget(), text_(0, 0, 0, "", FontManager::SIZE_1, true, true) {
-        to_ = NULL;
-        darkWidget_ = NULL;
-        lightWidget_ = NULL;
-    }
 
     //! Constructs a new button.
     Option(Menu *peer, int x, int y, int width, int height, const char *text, FontManager::EFontSize size,
@@ -230,7 +229,6 @@ public:
     virtual void executeAction(const int modKeys);
 
 protected:
-    Menu *peer_;
 
     MenuText text_;
     /*! 
@@ -301,7 +299,7 @@ protected:
  * A list box can have a title, displayed at the top of the list and can print a default
  * label for all empty lines.
  */
-class ListBox : public ActionWidget {
+class ListBox : public ActionWidget , public ModelListener {
 public:
     //! Constructs a new list box.
     ListBox(Menu *peer, int x, int y, int width, int height, int maxLine, 
@@ -310,53 +308,24 @@ public:
     ~ListBox();
 
     //! Draw the widget on screen
-    void draw();
+    void draw(); 
+
     //! Callback method to respond to mouse motion event
     void handleMouseMotion(int x, int y, int state, const int modKeys);
     //! Callback method to respond to mouse down event
     void handleMouseDown(int x, int y, int button, const int modKeys);
     void handleFocusLost();
 
-    //! Returns the number of lines in the list box.
-    int getMaxLine() { return maxLine_; }
-
-    //! Adds a new line at the first emmty place
-    void add(std::string label, int itemId);
-    //! Adds a new line at the given place
-    void setAt(std::string label, int itemId, int i);
-    //! Modifies the given line label 
-    void setLabel(std::string label, int i);
-
-    //! Returns the item id associated to the given line
-    int getItemIdAt(int index);
-
-    //! Returns the first line with the given associated id
-    int getIndexWithItemId(int itemId);
-    //! Returns true if there is a non empty line at given index
-    bool existsAt(int index);
-    //! Removes line contents
-    void remove(int index);
+    void setModel(SequenceModel *pModel);
+    void handleModelChanged();
 
 protected:
-    struct ListEntry {
-        std::string label_;
-        int itemId_;
-
-        ListEntry() {
-            itemId_ = -1;
-        }
-    };
-
-    Menu *peer_;
-
     /*! Title of the list box. Optional.*/
     MenuText *pTitle_;
-    /*! The label for an empty line.*/
-    std::string emptyLbl_;
-    /*! True will display a label when entry is null.*/
-    bool displayEmpty_;
+    std::list<std::string> labels_;
 
-    std::vector<ListEntry *> entries_;
+    SequenceModel *pModel_;
+
     /*! X coord for title underline.*/
     int xUnderline_;
     /*! Y coord for title underline.*/
@@ -365,8 +334,6 @@ protected:
     int lUnderline_;
     /*! Starting coordinate of content list.*/
     int yOrigin_;
-    /*! Maximum number of line in the list box.*/
-    int maxLine_;
     /*! The line that the mouse is on. -1 if no line is hovered.*/
     int focusedLine_;
 };

@@ -12,6 +12,7 @@ freesynd_SOURCES = common.h config.h keys.h utils/singleton.h  core/gameevent.h\
 	utils/dernc.cpp utils/dernc.h\
 	utils/log.cpp utils/log.h \
 	utils/configfile.cpp utils/configfile.h \
+	utils/seqmodel.cpp utils/seqmodel.h \
 	core/gamesession.cpp core/gamesession.h \
 	core/research.cpp core/research.h \
 	core/researchmanager.cpp core/researchmanager.h \

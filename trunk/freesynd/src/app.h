@@ -103,6 +103,10 @@ class App : public Singleton < App > {
         return weapons_;
     }
 
+    ModManager &mods() {
+        return mods_;
+    }
+
     MapManager &maps() {
         return maps_;
     }
@@ -131,14 +135,6 @@ class App : public Singleton < App > {
         return music_;
     }
 
-    int numAvailableMods() {
-        return available_mods_.size();
-    }
-
-    Mod *availableMod(int n) {
-        return available_mods_[n];
-    }
-
     //! Main application method
     void run(const char *dir, int start_mission);
     //! Reset the application data
@@ -151,6 +147,9 @@ class App : public Singleton < App > {
     bool isRunning() const {
         return running_;
     }
+
+    //! Destroy all components
+    void destroy();
 
     void startedPlayingFli() {
         playingFli_ = true;
@@ -200,7 +199,6 @@ private:
 
 private:
     GameSession session_;
-    std::vector<Mod *> available_mods_;
 
     bool running_, playingFli_, skipFli_;
     /*! True means the game will run in fullscreen. */

@@ -29,12 +29,13 @@
 #include "app.h"
 #include "selectmenu.h"
 
-SelectMenu::SelectMenu(MenuManager * m):Menu(m, "select", "mselect.dat", "mselout.dat"), tab_(2),
-cur_agent_(0), tick_count_(0), sel_weapon_(0), sel_mod_(0),
-sel_weapon_inst_(0), sel_all_(false)
+SelectMenu::SelectMenu(MenuManager * m):Menu(m, "select", "mselect.dat", "mselout.dat"),
+cur_agent_(0), tick_count_(0), sel_all_(false)
 {
-    mod0Id_ = 0;
-    equip0Id_ = 0;
+    tab_ = TAB_EQUIPS;
+    pSelectedWeap_ = NULL;
+    selectedWInstId_ = 0;
+    pSelectedMod_ = NULL;
     addStatic(148, 35, "TEAM SELECTION", FontManager::SIZE_4, true);
     txtTimeId_ = addStatic(500, 9, "", FontManager::SIZE_2, false);       // Time
 
@@ -47,8 +48,12 @@ sel_weapon_inst_(0), sel_all_(false)
 
     // Team list
     pTeamLBox_ = addListBox(502, 106, 124, 236, AgentManager::MAX_AGENT, false, "#SELECT_CRYO_TITLE");
-    addModOptions();
-    addWeaponOptions();
+    // Available weapons list
+    pWeaponsLBox_ = addListBox(504, 110,  122, 230, 18, tab_ == TAB_EQUIPS);
+    pWeaponsLBox_->setModel(g_App.weapons().getAvailableWeapons());
+    // Available mods list
+    pModsLBox_ = addListBox(504, 110,  122, 230, 18, tab_ == TAB_MODS);
+    pModsLBox_->setModel(g_App.mods().getAvalaibleMods());
 
     cancelButId_ = addOption(500, 270,  127, 22, "CANCEL", FontManager::SIZE_2, KEY_F7, NULL, false);
     purchaseButId_ = addOption(500, 320,  127, 22, "PURCHASE", FontManager::SIZE_2, KEY_F8, NULL, false);
@@ -64,78 +69,6 @@ sel_weapon_inst_(0), sel_all_(false)
 SelectMenu::~SelectMenu()
 {
     pTeamLBox_ = NULL;
-}
-
-void SelectMenu::addModOptions()
-{
-    for (int i = 0; i < g_App.numAvailableMods(); i++) {
-        Mod *m = g_App.availableMod(i);
-        int id = addOption(504, 110 + 12 * i,  120, 10, m->name(), FontManager::SIZE_1, 
-                            (Key) (KEY_a + i), NULL, false, false);
-        if (mod0Id_ == 0) {
-            mod0Id_ = id;
-        }
-    }
-}
-
-void SelectMenu::addWeaponOptions()
-{
-    for (int i = 0; i < g_App.weapons().numAvailableWeapons(); i++) {
-        Weapon *w = g_App.weapons().availableWeapon(i);
-        int id = addOption(504, 110 + 12 * i,  120, 10, w->name(), FontManager::SIZE_1,
-                  (Key) (KEY_a + g_App.numAvailableMods() + i), NULL, true, false);
-
-        if (equip0Id_ == 0) {
-            equip0Id_ = id;
-        }
-    }
-}
-
-/*!
- * Checks the the team list box has the same content as the reference list.
- */
-void SelectMenu::synchTeamList() {
-    // Runs through the Agent list
-    for (int i=0; i < AgentManager::MAX_AGENT; i++) {
-        Agent *pAgent = g_App.agents().agent(i);
-        // There is an agent on this slot
-        if (pAgent) {
-            // Adds a number in front of name of agent if he's part of mission squad
-            char tmp[100];
-            bool found = false;
-            for (int j = 0; j < 4; j++) {
-                if (g_Session.teamMember(j) == g_App.agents().agent(i)) {
-                    sprintf(tmp, "%d %s", i+1, pAgent->name());
-                    found = true;
-                    break;
-                }
-            }
-            
-            if (!found) {
-                sprintf(tmp, "  %s", pAgent->name());
-            }
-
-            if (pTeamLBox_->existsAt(i)) {
-                // An agent is also on this slot in the list box : checks
-                // if two agents are the same
-                int id = pTeamLBox_->getItemIdAt(i);
-                if (pAgent->getId() != id) {
-                    // Ids are different : replaces the one on the listbox
-                    // with the one that is on the reference list
-                    pTeamLBox_->setAt(tmp, pAgent->getId(), i);
-                }
-            } else {
-                // The list box is empty on this slot so adds a new agent
-                pTeamLBox_->setAt(tmp, pAgent->getId(), i);
-            }
-        } else {
-            // This slot should be empty
-            if (pTeamLBox_->existsAt(i)) {
-                // removes agent from list box
-                pTeamLBox_->remove(i);
-            }
-        }
-    }
 }
 
 /*!
@@ -195,12 +128,12 @@ void SelectMenu::drawAgent()
 
     if (selected->slot(SLOT_LEGS)) {
         legs = selected->slot(SLOT_LEGS)->icon(selected->isMale());
-        g_App.fonts().drawText(366, 250, selected->slot(SLOT_LEGS)->name(),
+        g_App.fonts().drawText(366, 250, selected->slot(SLOT_LEGS)->getName(),
                                FontManager::SIZE_1, false);
     }
     if (selected->slot(SLOT_ARMS)) {
         arms = selected->slot(SLOT_ARMS)->icon(selected->isMale());
-        g_App.fonts().drawText(366, 226, selected->slot(SLOT_ARMS)->name(),
+        g_App.fonts().drawText(366, 226, selected->slot(SLOT_ARMS)->getName(),
                                FontManager::SIZE_1, false);
     }
 
@@ -211,7 +144,7 @@ void SelectMenu::drawAgent()
     if (selected->slot(SLOT_CHEST)) {
         int chest = selected->slot(SLOT_CHEST)->icon(selected->isMale());
         g_App.fonts().drawText(366, 202,
-                               selected->slot(SLOT_CHEST)->name(), FontManager::SIZE_1,
+                               selected->slot(SLOT_CHEST)->getName(), FontManager::SIZE_1,
                                false);
         int chestx = 216;
         int chesty = 146;
@@ -226,14 +159,14 @@ void SelectMenu::drawAgent()
     if (selected->slot(SLOT_HEART)) {
         int heart = selected->slot(SLOT_HEART)->icon(selected->isMale());
         g_App.fonts().drawText(366, 160,
-                               selected->slot(SLOT_HEART)->name(), FontManager::SIZE_1,
+                               selected->slot(SLOT_HEART)->getName(), FontManager::SIZE_1,
                                false);
         g_App.menuSprites().drawSpriteXYZ(heart, 254, 166, 0, false, true);
     }
 
     if (selected->slot(SLOT_EYES)) {
         int eyes = selected->slot(SLOT_EYES)->icon(selected->isMale());
-        g_App.fonts().drawText(366, 136, selected->slot(SLOT_EYES)->name(),
+        g_App.fonts().drawText(366, 136, selected->slot(SLOT_EYES)->getName(),
                                FontManager::SIZE_1, false);
         int eyesx = 238;
         if (!selected->isMale()) {
@@ -246,7 +179,7 @@ void SelectMenu::drawAgent()
     if (selected->slot(SLOT_BRAIN)) {
         int brain = selected->slot(SLOT_BRAIN)->icon(selected->isMale());
         g_App.fonts().drawText(366, 112,
-                               selected->slot(SLOT_BRAIN)->name(), FontManager::SIZE_1,
+                               selected->slot(SLOT_BRAIN)->getName(), FontManager::SIZE_1,
                                false);
         int brainx = 238;
         if (!selected->isMale()) {
@@ -298,30 +231,6 @@ void SelectMenu::drawAgent()
             }
 }
 
-void SelectMenu::showModsList()
-{
-    for (int i = 0; i < g_App.numAvailableMods(); i++)
-        showOption((Key) (KEY_a + i));
-}
-
-void SelectMenu::hideModsList()
-{
-    for (int i = 0; i < g_App.numAvailableMods(); i++)
-        hideOption((Key) (KEY_a + i));
-}
-
-void SelectMenu::showEquipList()
-{
-    for (int i = 0; i < g_App.weapons().numAvailableWeapons(); i++)
-        showOption((Key) (KEY_a + g_App.numAvailableMods() + i));
-}
-
-void SelectMenu::hideEquipList()
-{
-    for (int i = 0; i < g_App.weapons().numAvailableWeapons(); i++)
-        hideOption((Key) (KEY_a + g_App.numAvailableMods() + i));
-}
-
 void SelectMenu::handleTick(int elapsed)
 {
     tick_count_ += elapsed;
@@ -359,7 +268,6 @@ void SelectMenu::handleShow() {
             break;
         }
     }
-    synchTeamList();
 
     // Show the mouse
     g_System.showCursor();
@@ -447,37 +355,24 @@ void SelectMenu::handleRender() {
 
     drawAgent();
 
-    if (sel_weapon_ || sel_weapon_inst_) {
+    if (pSelectedWeap_) {
         uint8 ldata[62];
         memset(ldata, 16, sizeof(ldata));
         g_Screen.scale2x(502, 268, sizeof(ldata), 1, ldata);
         g_Screen.scale2x(502, 292, sizeof(ldata), 1, ldata);
         g_Screen.scale2x(502, 318, sizeof(ldata), 1, ldata);
-
-        Weapon *w = NULL;
-        if (sel_weapon_)
-            w = g_App.weapons().availableWeapon(sel_weapon_ - 1);
-        else {
-            Agent *selected = g_Session.teamMember(cur_agent_);
-            if (selected)
-                w = selected->weapon(sel_weapon_inst_ - 1);
-        }
         
-        if (w) {
-            w->drawBigIcon(502, 108);
-            w->drawInfo(504, 196);
-        }
-    }
-
-    if (sel_mod_) {
+        pSelectedWeap_->drawBigIcon(502, 108);
+        pSelectedWeap_->drawInfo(504, 196);
+    
+    } else if (pSelectedMod_) {
         uint8 ldata[62];
         memset(ldata, 16, sizeof(ldata));
         g_Screen.scale2x(502, 268, sizeof(ldata), 1, ldata);
         g_Screen.scale2x(502, 292, sizeof(ldata), 1, ldata);
         g_Screen.scale2x(502, 318, sizeof(ldata), 1, ldata);
 
-        Mod *m = g_App.availableMod(sel_mod_ - 1);
-        m->drawInfo(504, 108);
+        pSelectedMod_->drawInfo(504, 108);
     }
 }
 
@@ -551,55 +446,70 @@ void SelectMenu::handleMouseDown(int x, int y, int button, const int modKeys)
                 if (j * 4 + i < selected->numWeapons() &&
                     x >= 366 + i * 32 && x < 366 + i * 32 + 32 &&
                     y >= 308 + j * 32 && y < 308 + j * 32 + 32) {
-                    tab_ = 2;
-                    sel_weapon_ = sel_mod_ = 0;
-                    sel_weapon_inst_ = i + j * 4 + 1;
+                    tab_ = TAB_EQUIPS;
+                    pSelectedMod_ = NULL;
+                    selectedWInstId_ = i + j * 4 + 1;
+                    pSelectedWeap_ = selected->weapon(selectedWInstId_ - 1);
+                    addDirtyRect(500, 105,  125, 235);
+
                     hideOption(KEY_F8);
                     showOption(KEY_F7);
                     showOption(KEY_F9);
                     pTeamLBox_->setVisible(false);
-                    hideModsList();
-                    hideEquipList();
-                    needRendering();
+                    pModsLBox_->setVisible(false);
+                    pWeaponsLBox_->setVisible(false);
                 }
+    }
+}
+
+void SelectMenu::showModWeaponPanel() {
+    showOption(KEY_F7);
+    showOption(KEY_F8);
+    if (tab_ == TAB_MODS) {
+        pModsLBox_->setVisible(false);
+    } else {
+        pWeaponsLBox_->setVisible(false);
+    }
+}
+
+void SelectMenu::showItemList() {
+    addDirtyRect(500, 105,  125, 235);
+    pSelectedMod_ = NULL;
+    pSelectedWeap_ = NULL;
+    selectedWInstId_ = 0;
+    getOption(cancelButId_)->setVisible(false);
+    getOption(purchaseButId_)->setVisible(false);
+    getOption(sellButId_)->setVisible(false);
+
+    if (tab_ == TAB_MODS) {
+        pModsLBox_->setVisible(true);
+        pWeaponsLBox_->setVisible(false);
+        pTeamLBox_->setVisible(false);
+    } else if (tab_ == TAB_EQUIPS) {
+        pModsLBox_->setVisible(false);
+        pWeaponsLBox_->setVisible(true);
+        pTeamLBox_->setVisible(false);
+    } else {
+        pModsLBox_->setVisible(false);
+        pWeaponsLBox_->setVisible(false);
+        pTeamLBox_->setVisible(true);
     }
 }
 
 void SelectMenu::handleAction(const int actionId, void *ctx, const int modKeys)
 {
     if (actionId == teamButId_) {
-        sel_weapon_ = sel_mod_ = sel_weapon_inst_ = 0;
-        tab_ = 0;
-        hideOption(KEY_F7);
-        hideOption(KEY_F8);
-        hideOption(KEY_F9);
-        pTeamLBox_->setVisible(true);
-        hideModsList();
-        hideEquipList();
-        needRendering();
+        tab_ = TAB_TEAM;
+        showItemList();
     } else if (actionId == modsButId_) {
-        sel_weapon_ = sel_mod_ = sel_weapon_inst_ = 0;
-        tab_ = 1;
-        hideOption(KEY_F7);
-        hideOption(KEY_F8);
-        hideOption(KEY_F9);
-        pTeamLBox_->setVisible(false);
-        showModsList();
-        hideEquipList();
-        needRendering();
+        tab_ = TAB_MODS;
+        showItemList();
     } else if (actionId == equipButId_) {
-        sel_weapon_ = sel_mod_ = sel_weapon_inst_ = 0;
-        tab_ = 2;
-        hideOption(KEY_F7);
-        hideOption(KEY_F8);
-        hideOption(KEY_F9);
-        pTeamLBox_->setVisible(false);
-        hideModsList();
-        showEquipList();
-        needRendering();
+        tab_ = TAB_EQUIPS;
+        showItemList();
     } else if (actionId == pTeamLBox_->getId()) {
         // get the selected agent from the team listbox
-        int *id = static_cast<int *> (ctx);
+/*        int *id = static_cast<int *> (ctx);
         int itemId = pTeamLBox_->getItemIdAt(*id);
         Agent *pNewAgent = g_App.agents().agent(itemId);
         if (pNewAgent) {
@@ -641,93 +551,65 @@ void SelectMenu::handleAction(const int actionId, void *ctx, const int modKeys)
             addDirtyRect(158, 110, 340, 260);
             // redraw agent buttons
             addDirtyRect(16, 80, 130, 155);
-        }
-    }
-    if (actionId >= mod0Id_ && actionId < (mod0Id_ + g_App.numAvailableMods())) {
-        int i = actionId - mod0Id_ + 1;
-        sel_mod_ = i;
-        showOption(KEY_F7);
-        showOption(KEY_F8);
-        hideModsList();
-        needRendering();
-    }
-    if (actionId >= equip0Id_
-        && actionId <= equip0Id_ + g_App.weapons().numAvailableWeapons()) {
-        int i = actionId - equip0Id_ + 1;
-        sel_weapon_ = i;
-        showOption(KEY_F7);
-        showOption(KEY_F8);
-        hideEquipList();
-        needRendering();
-    }
-    if (actionId == cancelButId_) {
-        sel_weapon_ = sel_mod_ = sel_weapon_inst_ = 0;
-        hideOption(KEY_F7);
-        hideOption(KEY_F8);
-        hideOption(KEY_F9);
-        if (tab_ == 1)
-            showModsList();
-        else
-            showEquipList();
-        needRendering();
-    }
-    if (actionId == purchaseButId_ && sel_weapon_) {
-        Weapon *w = g_App.weapons().availableWeapon(sel_weapon_ - 1);
-        if (sel_all_) {
-            for (int n = 0; n < 4; n++) {
-                Agent *selected = g_Session.teamMember(n);
+        }*/
+    } else if (actionId == pModsLBox_->getId()) {
+        pSelectedMod_ = static_cast<Mod *> (ctx);
+        showModWeaponPanel();
+    } else if (actionId == pWeaponsLBox_->getId()) {
+        pSelectedWeap_ = static_cast<Weapon *> (ctx);
+        showModWeaponPanel();
+    } else if (actionId == cancelButId_) {
+        showItemList();
+    } else if (actionId == purchaseButId_) {
+        // Buying weapon
+        if (pSelectedWeap_) {
+            if (sel_all_) {
+                for (int n = 0; n < 4; n++) {
+                    Agent *selected = g_Session.teamMember(n);
+                    if (selected && selected->numWeapons() < 8
+                        && g_Session.getMoney() >= pSelectedWeap_->cost()) {
+                        g_Session.setMoney(g_Session.getMoney() - pSelectedWeap_->cost());
+                        selected->addWeapon(pSelectedWeap_->createInstance());
+                    }
+                }
+            } else {
+                Agent *selected = g_Session.teamMember(cur_agent_);
                 if (selected && selected->numWeapons() < 8
-                    && g_App.getGameSession().getMoney() >= w->cost()) {
-                    g_App.getGameSession().setMoney(g_App.getGameSession().getMoney() - w->cost());
-                    selected->addWeapon(w->createInstance());
+                    && g_Session.getMoney() >= pSelectedWeap_->cost()) {
+                    g_Session.setMoney(g_Session.getMoney() - pSelectedWeap_->cost());
+                    selected->addWeapon(pSelectedWeap_->createInstance());
                 }
             }
-        } else {
-            Agent *selected = g_Session.teamMember(cur_agent_);
-            if (selected && selected->numWeapons() < 8
-                && g_App.getGameSession().getMoney() >= w->cost()) {
-                g_App.getGameSession().setMoney(g_App.getGameSession().getMoney() - w->cost());
-                selected->addWeapon(w->createInstance());
-            }
-        }
-        needRendering();
-    }
-    if (actionId == purchaseButId_ && sel_mod_) {
-        Mod *m = g_App.availableMod(sel_mod_ - 1);
-        if (sel_all_) {
-            for (int n = 0; n < 4; n++) {
-                Agent *selected = g_Session.teamMember(n);
-                if (selected && (selected->slot(m->slot()) == NULL
-                     || selected->slot(m->slot())->cost() < m->cost())
-                    && g_App.getGameSession().getMoney() >= m->cost()) {
-                    selected->setSlot(m->slot(), m);
-                    g_App.getGameSession().setMoney(g_App.getGameSession().getMoney() - m->cost());
+            needRendering();
+        } else { // Buying mod
+            if (sel_all_) {
+                for (int n = 0; n < 4; n++) {
+                    Agent *selected = g_Session.teamMember(n);
+                    if (selected && (selected->slot(pSelectedMod_->slot()) == NULL
+                        || selected->slot(pSelectedMod_->slot())->cost() < pSelectedMod_->cost())
+                        && g_Session.getMoney() >= pSelectedMod_->cost()) {
+                        selected->setSlot(pSelectedMod_->slot(), pSelectedMod_);
+                        g_Session.setMoney(g_Session.getMoney() - pSelectedMod_->cost());
+                    }
+                }
+            } else {
+                Agent *selected = g_Session.teamMember(cur_agent_);
+                if (selected && (selected->slot(pSelectedMod_->slot()) == NULL
+                     || selected->slot(pSelectedMod_->slot())->cost() < pSelectedMod_->cost())
+                    && g_Session.getMoney() >= pSelectedMod_->cost()) {
+                    selected->setSlot(pSelectedMod_->slot(), pSelectedMod_);
+                    g_Session.setMoney(g_Session.getMoney() - pSelectedMod_->cost());
                 }
             }
-        } else {
-            Agent *selected = g_Session.teamMember(cur_agent_);
-            if (selected && (selected->slot(m->slot()) == NULL
-                 || selected->slot(m->slot())->cost() < m->cost())
-                && g_App.getGameSession().getMoney() >= m->cost()) {
-                selected->setSlot(m->slot(), m);
-                g_App.getGameSession().setMoney(g_App.getGameSession().getMoney() - m->cost());
-            }
+            showItemList();
         }
-        sel_mod_ = 0;
-        hideOption(KEY_F7);
-        hideOption(KEY_F8);
-        showModsList();
-        needRendering();
-    }
-    if (actionId == sellButId_ && sel_weapon_inst_) {
+    
+    } else if (actionId == sellButId_ && selectedWInstId_) {
+        addDirtyRect(360, 305, 135, 70);
         Agent *selected = g_Session.teamMember(cur_agent_);
-        WeaponInstance *w = selected->removeWeapon(sel_weapon_inst_ - 1);
+        WeaponInstance *w = selected->removeWeapon(selectedWInstId_ - 1);
         g_Session.setMoney(g_Session.getMoney() + w->cost());
         delete w;
-        sel_weapon_inst_ = 0;
-        hideOption(KEY_F7);
-        hideOption(KEY_F9);
-        showEquipList();
-        needRendering();
+        showItemList();
     }
 }

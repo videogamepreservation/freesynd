@@ -92,16 +92,16 @@ void WeaponManager::cheatEnableAllWeapons() {
     available_weapons_.clear();
 
     for (unsigned int i = 0; i < weapons_.size(); i++)
-        available_weapons_.push_back(weapons_[i]);
+        available_weapons_.add(weapons_[i]);
 }
 
 void WeaponManager::reset() {
     available_weapons_.clear();
-    available_weapons_.push_back(findWeapon(Weapon::Persuadatron));
-    available_weapons_.push_back(findWeapon(Weapon::Pistol));
-    available_weapons_.push_back(findWeapon(Weapon::Shotgun));
-    available_weapons_.push_back(findWeapon(Weapon::Scanner));
-    available_weapons_.push_back(findWeapon(Weapon::MediKit));
+    available_weapons_.add(findWeapon(Weapon::Persuadatron));
+    available_weapons_.add(findWeapon(Weapon::Pistol));
+    available_weapons_.add(findWeapon(Weapon::Shotgun));
+    available_weapons_.add(findWeapon(Weapon::Scanner));
+    available_weapons_.add(findWeapon(Weapon::MediKit));
 }
 
 Weapon *WeaponManager::findWeapon(Weapon::WeaponType wt) {
@@ -190,6 +190,6 @@ void WeaponManager::enableWeapon(Weapon::WeaponType wt) {
     Weapon *pWeapon = findWeapon(wt);
 
     if (pWeapon) {
-        available_weapons_.push_back(pWeapon);
+        available_weapons_.add(pWeapon);
     }
 }

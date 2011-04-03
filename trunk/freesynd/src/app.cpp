@@ -60,7 +60,13 @@ skipFli_(false), screen_(new Screen(GAME_SCREEN_WIDTH, GAME_SCREEN_HEIGHT))
 }
 
 App::~App() {
+}
 
+/*!
+ * Destory the application.
+ */
+void App::destroy() {
+    menus_.destroy();
 }
 
 bool App::readConfiguration(const char *dir) {
@@ -183,14 +189,8 @@ void App::cheatRepeatOrCompleteMission() {
 }
 
 void App::cheatWeaponsAndMods() {
-    available_mods_.clear();
     weapons_.cheatEnableAllWeapons();
-
-    for (int i = 0; i < 6; i++) {
-        available_mods_.push_back(mods_.mod(i));
-        available_mods_.push_back(mods_.mod(i, 2));
-        available_mods_.push_back(mods_.mod(i, 3));
-    }
+    mods_.cheatEnableAllMods();
 }
 
 void App::cheatEquipAllMods() {
@@ -199,7 +199,7 @@ void App::cheatEquipAllMods() {
             agents_.agent(agent)->clearSlots();
             for (unsigned int i = 0; i < 6; i++) {
                 agents_.agent(agent)->setSlot(SLOT_LEGS - i,
-                                                  available_mods_[2 + i * 3]);
+                    mods_.mod(2 + i * 3));
             }
         }
     }
@@ -337,11 +337,7 @@ void App::reset() {
 
     weapons_.reset();
 
-    for (int i = 0; i < 6; i++)
-        available_mods_.push_back(mods_.mod(i));
-//    cheatFunds();
-//    cheatWeaponsAndMods();
-//    cheatEquipAllMods();
+    mods_.reset();
 }
 
 /*!

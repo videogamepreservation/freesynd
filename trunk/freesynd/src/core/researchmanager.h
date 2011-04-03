@@ -24,9 +24,10 @@
 
 #include <list>
 
+#include "core/research.h"
 #include "core/gameevent.h"
+#include "utils/seqmodel.h"
 
-class Research;
 
 /*!
  * This class manages all research functionnality.
@@ -42,12 +43,12 @@ public:
      * Returns a list of all available search on mods.
      * \return List can be empty but not null.
      */
-    std::list<Research *> * getAvailableModsSearch() { return &availableModsSearch_; }
+    SequenceModel * getAvailableModsSearch() { return &availableModsSearch_; }
     /*!
      * Returns a list of all available search on equips.
      * \return List can be empty but not null.
      */
-    std::list<Research *> * getAvailableEquipsSearch() { return &availableEquipsSearch_; }
+    SequenceModel * getAvailableEquipsSearch() { return &availableEquipsSearch_; }
 
     //! Returns a Research on equips with given id
     Research * getEquipsSearch(int id);
@@ -57,16 +58,17 @@ public:
     int process(int hourElapsed, int moneyLeft);
     //! Adds a listener for research event
     void addListener(GameEventListener *pListener);
+    void removeListener(GameEventListener *pListener);
 
 protected:
     void fireGameEvent(Research *pResearch);
-    int processList(int hourElapsed, int moneyLeft, std::list < Research * > *pList);
+    int processList(int hourElapsed, int moneyLeft, VectorModel < Research * > *pList);
 
 protected:
     /*! List of all currently available research on mods.*/
-    std::list<Research *> availableModsSearch_;
+    VectorModel<Research *> availableModsSearch_;
     /*! List of all currently available research on equips.*/
-    std::list<Research *> availableEquipsSearch_;
+    VectorModel<Research *> availableEquipsSearch_;
     /*! List of listeners for research events.*/
     std::list<GameEventListener *> listeners_;
 };

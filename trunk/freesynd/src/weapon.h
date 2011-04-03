@@ -77,7 +77,7 @@ public:
             WeaponType w_type, MapObject::DamageType w_dmg_type,
             int w_shots_per_sec, int w_ammo_per_shot);
 
-    const char *name() { return name_.c_str(); }
+    const char *getName() { return name_.c_str(); }
 
     void drawSmallIcon(int x, int y);
     void drawBigIcon(int x, int y);

@@ -2,10 +2,7 @@
  *                                                                      *
  *  FreeSynd - a remake of the classic Bullfrog game "Syndicate".       *
  *                                                                      *
- *   Copyright (C) 2005  Stuart Binge  <skbinge@gmail.com>              *
- *   Copyright (C) 2005  Joost Peters  <joostp@users.sourceforge.net>   *
- *   Copyright (C) 2006  Trent Waddington <qg@biodome.org>              *
- *   Copyright (C) 2006  Tarjei Knapstad <tarjei.knapstad@gmail.com>    *
+ *   Copyright (C) 2010  Benoit Blancard <benblan@users.sourceforge.net>*
  *                                                                      *
  *    This program is free software;  you can redistribute it and / or  *
  *  modify it  under the  terms of the  GNU General  Public License as  *
@@ -23,55 +20,29 @@
  *                                                                      *
  ************************************************************************/
 
-#ifndef WEAPONMANAGER_H
-#define WEAPONMANAGER_H
+#include "seqmodel.h"
 
-#include "common.h"
-#include "weapon.h"
-#include "ped.h"
-#include <vector>
-#include "utils/seqmodel.h"
+SequenceModel::~SequenceModel() {
+    listeners_.clear();
+}
 
-/*!
- * Weapon manager class.
- */
-class WeaponManager {
-public:
-    WeaponManager();
-    ~WeaponManager();
+void SequenceModel::addModelListener(ModelListener *pListener) {
+    listeners_.push_back(pListener);
+}
 
-    void loadWeapons();
-
-    void cheatEnableAllWeapons();
-
-    void reset();
-
-    int numWeapons() { return weapons_.size(); }
-
-    Weapon *weapon(int n) {
-        assert(n < (int) weapons_.size());
-        return weapons_[n];
+void SequenceModel::removeModelListener(ModelListener *pListener) {
+    for (std::list < ModelListener * >::iterator it = listeners_.begin();
+         it != listeners_.end(); it++) {
+             if (pListener == *it) {
+                 listeners_.erase(it);
+                 return;
+             }
     }
+}
 
-    Weapon *findWeapon(Weapon::WeaponType wt);
-
-    WeaponInstance *loadInstance(uint8 *data, int map);
-
-    int numAvailableWeapons() {
-        return available_weapons_.size();
+void SequenceModel::fireModelChanged() {
+    for (std::list < ModelListener * >::iterator it = listeners_.begin();
+         it != listeners_.end(); it++) {
+             (*it)->handleModelChanged();
     }
-
-    Weapon *availableWeapon(int n) {
-        return available_weapons_.get(n);
-    }
-
-    void enableWeapon(Weapon::WeaponType wt);
-
-    SequenceModel * getAvailableWeapons() { return &available_weapons_; }
-
-protected:
-    std::vector<Weapon *> weapons_;
-    VectorModel<Weapon *> available_weapons_;
-};
-
-#endif
+}
