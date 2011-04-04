@@ -27,7 +27,7 @@
 
 #include "common.h"
 #include "agent.h"
-#include <vector>
+#include "utils/seqmodel.h"
 
 /*!
  * Agent Manager class.
@@ -44,22 +44,20 @@ public:
 
     void loadAgents();
     void reset(bool onlyWomen = false);
-    void destroyAgentSlot(int n) {
-        assert(n < MAX_AGENT);
-        delete agents_[n];
-        agents_[n] = NULL;
-    }
+    void destroyAgentSlot(int n);
 
     Agent *agent(int n) {
         assert(n < MAX_AGENT);
-        return agents_[n];
+        return agents_.get(n);
     }
+
+    SequenceModel * getAgents() { return &agents_; }
 
 protected:
     /*!
-     * Selected agents for the next mission. Up to 4 agents.
+     * All available agents.
      */
-    Agent *agents_[18];
+    VectorModel<Agent *> agents_;
     int nextName_;
 };
 

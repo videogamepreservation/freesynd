@@ -275,13 +275,27 @@ int Menu::addToggleAction(int x, int y, int width, int height, const char *text,
  * \param y Y coordinate
  * \param width widget width
  * \param height widget height
- * \param maxLine
  * \param visible True if widget is visible on screen
- * \param title Sets a title to the widget.Set to NULL if not title is needed.
  * \return A pointer on the widget.
  */
-ListBox * Menu::addListBox(int x, int y, int width, int height, int maxLine, bool visible, const char *title) {
-    ListBox *pBox = new ListBox(this, x, y, width, height, maxLine, visible, title, title != NULL);
+ListBox * Menu::addListBox(int x, int y, int width, int height, bool visible) {
+    ListBox *pBox = new ListBox(this, x, y, width, height, visible);
+    actions_.push_back(pBox);
+
+    return pBox;
+}
+
+/*!
+ * Creates and adds a team list box to the menu.
+ * \param x X coordinate
+ * \param y Y coordinate
+ * \param width widget width
+ * \param height widget height
+ * \param visible True if widget is visible on screen
+ * \return A pointer on the widget.
+ */
+TeamListBox * Menu::addTeamListBox(int x, int y, int width, int height, bool visible) {
+    TeamListBox *pBox = new TeamListBox(this, x, y, width, height, visible);
     actions_.push_back(pBox);
 
     return pBox;

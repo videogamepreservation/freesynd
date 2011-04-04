@@ -88,7 +88,9 @@ public:
     //! Creates a new toggle button and returns its id
     int addToggleAction(int x, int y, int width, int height, const char *text, FontManager::EFontSize size, Key key, bool selected);
     //! Creates a new list box and returns a pointer on it
-    ListBox * addListBox(int x, int y, int width, int height, int maxLine, bool visible = true, const char *title = NULL);
+    ListBox * addListBox(int x, int y, int width, int height, bool visible = true);
+    //! Creates a specific list box for team selection and returns a pointer on it
+    TeamListBox * addTeamListBox(int x, int y, int width, int height, bool visible = true);
 
     ActionWidget * getActionWidget(int buttonId);
     Option * getOption(int buttonId);

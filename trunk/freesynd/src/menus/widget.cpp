@@ -260,28 +260,13 @@ void ToggleAction::handleSelectionLost() {
     setSelected(false);
 }
 
-ListBox::ListBox(Menu *peer, int x, int y, int width, int height, int maxLine, bool visible, const char *title, bool displayEmpty) :
+ListBox::ListBox(Menu *peer, int x, int y, int width, int height, bool visible) :
         ActionWidget(peer, x, y, width, height, visible) {
-    pTitle_ = NULL;
-    yOrigin_ = y;
     focusedLine_ = -1;
     pModel_ = NULL;
-
-    if (title != NULL) {
-        pTitle_ = new MenuText(x, y, width, title, FontManager::SIZE_1, false);
-        lUnderline_ = g_App.fonts().textWidth(pTitle_->getText().c_str(), FontManager::SIZE_1);
-        xUnderline_ = (x + x + width) / 2  - lUnderline_ / 2;
-        yUnderline_ = y + g_App.fonts().textHeight(FontManager::SIZE_1);
-        yOrigin_ = yUnderline_ + 2;
-    }
 }
 
 ListBox::~ListBox() {
-    if (pTitle_) {
-        delete pTitle_;
-        pTitle_ = NULL;
-    }
-    
     labels_.clear();
 
     if (pModel_) {
@@ -304,15 +289,10 @@ void ListBox::handleModelChanged() {
 
 //! Draw the widget on screen
 void ListBox::draw() {
-    if (pTitle_) {
-        pTitle_->draw();
-        g_Screen.drawRect(xUnderline_, yUnderline_, lUnderline_, 2, 252);
-    }
-
     int i=0;
     for (std::list < std::string >::iterator it = labels_.begin();
          it != labels_.end(); it++, i++) {
-             g_App.fonts().drawText(getX(), yOrigin_ + i * 12, (*it).c_str(), FontManager::SIZE_1, focusedLine_ != i);
+             g_App.fonts().drawText(getX(), getY() + i * 12, (*it).c_str(), FontManager::SIZE_1, focusedLine_ != i);
     }
 }
 
@@ -320,7 +300,7 @@ void ListBox::handleMouseMotion(int x, int y, int state, const int modKeys) {
     
     if (pModel_) {
         // Gets the line pointed by the mouse
-        int i = (y - yOrigin_) / 12;
+        int i = (y - getY()) / 12;
         if (i < pModel_->size()) {
             if (pModel_->getElement(i)) {
                 // If line contains something, highlight it
@@ -346,7 +326,9 @@ void ListBox::handleMouseDown(int x, int y, int button, const int modKeys) {
     if (focusedLine_ != -1 && pModel_) {
         if (peer_) {
             // call the peer handleAction method giving the index of pressed line.
-            peer_->handleAction(getId(), pModel_->getElement(focusedLine_), modKeys);
+            std::pair<int, void *> tuple = std::make_pair(focusedLine_, pModel_->getElement(focusedLine_));
+            peer_->handleAction(getId(), &tuple, modKeys);
+            
         }
     }
 }
@@ -354,4 +336,83 @@ void ListBox::handleMouseDown(int x, int y, int button, const int modKeys) {
 void ListBox::handleFocusLost() {
     focusedLine_ = -1;
     redraw();
+}
+
+const int TeamListBox::LINE_OFFSET = 20;
+
+TeamListBox::TeamListBox(Menu *peer, int x, int y, int width, int height, bool visible) :
+        ListBox(peer, x, y, width, height, visible) {
+    pTitle_ = new MenuText(x, y, width, "#SELECT_CRYO_TITLE", FontManager::SIZE_1, false);
+    lUnderline_ = g_App.fonts().textWidth(pTitle_->getText().c_str(), FontManager::SIZE_1);
+    xUnderline_ = (x + x + width) / 2  - lUnderline_ / 2;
+    yUnderline_ = y + g_App.fonts().textHeight(FontManager::SIZE_1);
+    yOrigin_ = yUnderline_ + 2;
+    for (int i=0; i<4; i++) {
+        squadLines_[i] = i;
+    }
+
+    g_App.menus().getMessage("MENU_LB_EMPTY", emptyLbl_);
+}
+
+TeamListBox::~TeamListBox() {
+    delete pTitle_;
+    pTitle_ = NULL;
+}
+
+//! Draw the widget on screen
+void TeamListBox::draw() {
+
+    pTitle_->draw();
+    g_Screen.drawRect(xUnderline_, yUnderline_, lUnderline_, 2, 252);
+
+    int i=0;
+    for (std::list < std::string >::iterator it = labels_.begin();
+         it != labels_.end(); it++, i++) {
+             if ((*it).size() != 0) {
+                 for (int ln=0; ln<4; ln++) {
+                     if (squadLines_[ln] ==  i) {
+                        char tmp[5];
+                        sprintf(tmp, "%d", ln+1);
+                        g_App.fonts().drawText(getX(), yOrigin_ + i * 12, tmp, FontManager::SIZE_1, focusedLine_ != i);
+                        break;
+                     }
+                 }
+                 g_App.fonts().drawText(getX() + LINE_OFFSET, yOrigin_ + i * 12, (*it).c_str(), FontManager::SIZE_1, focusedLine_ != i);
+             } else {
+                 g_App.fonts().drawText(getX() + LINE_OFFSET, yOrigin_ + i * 12, emptyLbl_.c_str(), FontManager::SIZE_1, focusedLine_ != i);
+             }
+    }
+}
+
+void TeamListBox::handleMouseMotion(int x, int y, int state, const int modKeys) {
+    
+    if (pModel_) {
+        // Gets the line pointed by the mouse
+        int i = (y - yOrigin_) / 12;
+        if (i >= 0 && i < pModel_->size()) {
+            if (pModel_->getElement(i)) {
+                // If line contains something, highlight it
+                if (focusedLine_ != i) {
+                    redraw();
+                    focusedLine_ = i;
+                }
+            } else {
+                if (focusedLine_ != -1) {
+                    redraw();
+                    focusedLine_ = -1;
+                }
+            }
+        }  else if (focusedLine_ != -1) {
+            // A line was highlighted but not anymore
+            redraw();
+            focusedLine_ = -1;
+        }
+    }
+}
+
+void TeamListBox::setSquadLine(int squadSlot, int line) {
+    if (pModel_ && line < pModel_->size() && squadSlot >= 0 && squadSlot < 4) {
+        squadLines_[squadSlot] = line;
+        redraw();
+    }
 }

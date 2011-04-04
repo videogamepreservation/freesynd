@@ -49,7 +49,7 @@ public:
     ~Agent();
 
     int getId() { return id_;}
-    const char *name() { return name_.c_str(); }
+    const char *getName() { return name_.c_str(); }
     bool isMale() { return male_; }
     bool isActive() { return active_; }
     void setActive(bool a) { active_ = a; }

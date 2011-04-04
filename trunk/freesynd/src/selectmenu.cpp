@@ -47,12 +47,13 @@ cur_agent_(0), tick_count_(0), sel_all_(false)
     addOption(500, 347,  128, 25, "#MENU_MAIN_BUT", FontManager::SIZE_2, KEY_F6, "main");
 
     // Team list
-    pTeamLBox_ = addListBox(502, 106, 124, 236, AgentManager::MAX_AGENT, false, "#SELECT_CRYO_TITLE");
+    pTeamLBox_ = addTeamListBox(502, 106, 124, 236, false);
+    pTeamLBox_->setModel(g_App.agents().getAgents());
     // Available weapons list
-    pWeaponsLBox_ = addListBox(504, 110,  122, 230, 18, tab_ == TAB_EQUIPS);
+    pWeaponsLBox_ = addListBox(504, 110,  122, 230, tab_ == TAB_EQUIPS);
     pWeaponsLBox_->setModel(g_App.weapons().getAvailableWeapons());
     // Available mods list
-    pModsLBox_ = addListBox(504, 110,  122, 230, 18, tab_ == TAB_MODS);
+    pModsLBox_ = addListBox(504, 110,  122, 230, tab_ == TAB_MODS);
     pModsLBox_->setModel(g_App.mods().getAvalaibleMods());
 
     cancelButId_ = addOption(500, 270,  127, 22, "CANCEL", FontManager::SIZE_2, KEY_F7, NULL, false);
@@ -260,15 +261,6 @@ void SelectMenu::handleShow() {
 
     menu_manager_->saveBackground();
 
-    cur_agent_ = 0;
-    for (int i = 0; i < 4; i++) {
-        if (g_Session.teamMember(i) != NULL) {
-            cur_agent_ = i;
-            getStatic(txtAgentId_)->setTextFormated("#SELECT_SUBTITLE", g_Session.teamMember(i)->name());
-            break;
-        }
-    }
-
     // Show the mouse
     g_System.showCursor();
 
@@ -403,14 +395,22 @@ void SelectMenu::handleMouseDown(int x, int y, int button, const int modKeys)
                     toggleAgent(1);
                 else {
                     cur_agent_ = 1;
-                    getStatic(txtAgentId_)->setTextFormated("#SELECT_SUBTITLE", g_Session.teamMember(1)->name());
+                    if (g_Session.teamMember(1)) {
+                        getStatic(txtAgentId_)->setTextFormated("#SELECT_SUBTITLE", g_Session.teamMember(1)->getName());
+                    } else {
+                        getStatic(txtAgentId_)->setText("");
+                    }
                 }
             } else {
                 if (button == 3)
                     toggleAgent(0);
                 else {
                     cur_agent_ = 0;
-                    getStatic(txtAgentId_)->setTextFormated("#SELECT_SUBTITLE", g_Session.teamMember(0)->name());
+                    if (g_Session.teamMember(0)) {
+                        getStatic(txtAgentId_)->setTextFormated("#SELECT_SUBTITLE", g_Session.teamMember(0)->getName());
+                    } else {
+                        getStatic(txtAgentId_)->setText("");
+                    }
                 }
             }
             needRendering();
@@ -425,14 +425,22 @@ void SelectMenu::handleMouseDown(int x, int y, int button, const int modKeys)
                     toggleAgent(3);
                 else {
                     cur_agent_ = 3;
-                    getStatic(txtAgentId_)->setTextFormated("#SELECT_SUBTITLE", g_Session.teamMember(3)->name());
+                    if (g_Session.teamMember(3)) {
+                        getStatic(txtAgentId_)->setTextFormated("#SELECT_SUBTITLE", g_Session.teamMember(3)->getName());
+                    } else {
+                        getStatic(txtAgentId_)->setText("");
+                    }
                 }
             } else {
                 if (button == 3)
                     toggleAgent(2);
                 else {
                     cur_agent_ = 2;
-                    getStatic(txtAgentId_)->setTextFormated("#SELECT_SUBTITLE", g_Session.teamMember(2)->name());
+                    if (g_Session.teamMember(2)) {
+                        getStatic(txtAgentId_)->setTextFormated("#SELECT_SUBTITLE", g_Session.teamMember(2)->getName());
+                    } else {
+                        getStatic(txtAgentId_)->setText("");
+                    }
                 }
             }
             needRendering();
@@ -509,54 +517,45 @@ void SelectMenu::handleAction(const int actionId, void *ctx, const int modKeys)
         showItemList();
     } else if (actionId == pTeamLBox_->getId()) {
         // get the selected agent from the team listbox
-/*        int *id = static_cast<int *> (ctx);
-        int itemId = pTeamLBox_->getItemIdAt(*id);
-        Agent *pNewAgent = g_App.agents().agent(itemId);
-        if (pNewAgent) {
-            bool found = false;
-            int j;
-            // check if selected agent is already part of the mission squad
-            for (j = 0; j < 4; j++)
-                if (g_Session.teamMember(j) == pNewAgent) {
-                    found = true;
-                    break;
-                }
-            // If not, adds him to the squad
-            if (!found) {
-                char tmp[100];
-
-                // remove number in front of old agent
-                Agent *pOldAgent = g_Session.teamMember(cur_agent_);
-                if (pOldAgent) {
-                    int oldId = pTeamLBox_->getIndexWithItemId(pOldAgent->getId());
-                    sprintf(tmp, "  %s", pOldAgent->name());
-                    pTeamLBox_->setLabel(tmp, oldId);
-                }
-
-                // add number in front of new agent
-                g_Session.setTeamMember(cur_agent_, pNewAgent);
-                sprintf(tmp, "%d %s", cur_agent_ + 1, pNewAgent->name());
-                pTeamLBox_->setLabel(tmp, *id);
-                getStatic(txtAgentId_)->setTextFormated("#SELECT_SUBTITLE", pNewAgent->name());
-            } else if (j == cur_agent_){
-                // else if agent is the currently selected
-                // removes him from squad
-                g_Session.setTeamMember(j, NULL);
-                char tmp[100];
-                sprintf(tmp, "  %s", pNewAgent->name());
-                pTeamLBox_->setLabel(tmp, *id);
-                getStatic(txtAgentId_)->setTextFormated("");
+        std::pair<int, void *> * pPair = static_cast<std::pair<int, void *> *> (ctx);
+        Agent *pNewAgent = static_cast<Agent *> (pPair->second);
+        
+        bool found = false;
+        int j;
+        // check if selected agent is already part of the mission squad
+        for (j = 0; j < 4; j++) {
+            if (g_Session.teamMember(j) == pNewAgent) {
+                found = true;
+                break;
             }
-            // redraw agent display
-            addDirtyRect(158, 110, 340, 260);
-            // redraw agent buttons
-            addDirtyRect(16, 80, 130, 155);
-        }*/
+        }
+
+        // Agent was not part of the squad
+        if (!found) {
+            // adds his to the squad
+            g_Session.setTeamMember(cur_agent_, pNewAgent);
+            // Update current agent name
+            getStatic(txtAgentId_)->setTextFormated("#SELECT_SUBTITLE", pNewAgent->getName());
+            pTeamLBox_->setSquadLine(cur_agent_, pPair->first);
+        } else if (j == cur_agent_){
+            // else if agent is the currently selected
+            // removes him from squad
+            g_Session.setTeamMember(j, NULL);
+            getStatic(txtAgentId_)->setTextFormated("");
+            pTeamLBox_->setSquadLine(cur_agent_, -1);
+        }
+        // redraw agent display
+        addDirtyRect(158, 110, 340, 260);
+        // redraw agent buttons
+        addDirtyRect(16, 80, 130, 155);
+        
     } else if (actionId == pModsLBox_->getId()) {
-        pSelectedMod_ = static_cast<Mod *> (ctx);
+        std::pair<int, void *> * pPair = static_cast<std::pair<int, void *> *> (ctx);
+        pSelectedMod_ = static_cast<Mod *> (pPair->second);
         showModWeaponPanel();
     } else if (actionId == pWeaponsLBox_->getId()) {
-        pSelectedWeap_ = static_cast<Weapon *> (ctx);
+        std::pair<int, void *> * pPair = static_cast<std::pair<int, void *> *> (ctx);
+        pSelectedWeap_ = static_cast<Weapon *> (pPair->second);
         showModWeaponPanel();
     } else if (actionId == cancelButId_) {
         showItemList();

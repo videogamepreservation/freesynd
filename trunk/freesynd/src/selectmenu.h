@@ -92,7 +92,7 @@ protected:
     /*! Id of the sell button.*/
     int sellButId_;
     /*! The team list box.*/
-    ListBox *pTeamLBox_;
+    TeamListBox *pTeamLBox_;
     /*! The weapons list.*/
     ListBox *pWeaponsLBox_;
     /*! The mods list.*/

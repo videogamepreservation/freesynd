@@ -55,6 +55,8 @@ public:
     virtual void getLabels(std::list<std::string> &labels) = 0;
     //! Returns a pointer to the element at given position
     virtual void * getElement(int i) = 0;
+    //! Returns the line number for the given element
+    virtual int getLineForElement(void *pElement) = 0;
     //! Returns the number of elements
     virtual int size() = 0;
     //! Removes all elements from the collection
@@ -135,6 +137,21 @@ public:
         return get(i);
     }
 
+    /*! 
+     * Returns the line number for the given element or -1 if not found.
+     */
+    int getLineForElement(void *pElement) {
+        int i=0;
+        for (std::vector < T >::iterator it = elements_.begin();
+         it != elements_.end(); it++, i++) {
+             if (pElement == *it) {
+                 return i;
+             }
+        }
+
+        return -1;
+    }
+
     /*!
      * Returns the element at given position.
      */
@@ -160,7 +177,11 @@ public:
     void getLabels(std::list<std::string> &labels) {
         for (std::vector < T >::iterator it = elements_.begin();
          it != elements_.end(); it++) {
-             labels.push_back((*it)->getName());
+             if (*it) {
+                labels.push_back((*it)->getName());
+             } else {
+                 labels.push_back("");
+             }
         }
     }
 

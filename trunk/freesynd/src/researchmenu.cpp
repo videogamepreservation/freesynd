@@ -46,14 +46,14 @@ ResearchMenu::ResearchMenu(MenuManager * m):Menu(m, "research", "mresrch.dat", "
     addOption(16, 346, 129, 25,  "#MENU_ACC_BUT", FontManager::SIZE_2, KEY_F3, "select");
     addOption(500, 347,  128, 25, "#MENU_MAIN_BUT", FontManager::SIZE_2, KEY_F4, "main");
 
-    pFieldEquipLBox_ = addListBox(20, 84,  122, 120, 4, tab_ == TAB_EQUIPS);
+    pFieldEquipLBox_ = addListBox(20, 84,  122, 120, tab_ == TAB_EQUIPS);
     pFieldEquipLBox_->setModel(g_Session.researchManager().getAvailableEquipsSearch());
-    pFieldModsLBox_ = addListBox(20, 84,  122, 120, 6, tab_ == TAB_MODS);
+    pFieldModsLBox_ = addListBox(20, 84,  122, 120, tab_ == TAB_MODS);
     pFieldModsLBox_->setModel(g_Session.researchManager().getAvailableModsSearch());
 
-    pEquipsLBox_ = addListBox(504, 110,  122, 230, 18, tab_ == TAB_EQUIPS);
+    pEquipsLBox_ = addListBox(504, 110,  122, 230, tab_ == TAB_EQUIPS);
     pEquipsLBox_->setModel(g_App.weapons().getAvailableWeapons());
-    pModsLBox_ = addListBox(504, 110,  122, 230, 18, tab_ == TAB_MODS);
+    pModsLBox_ = addListBox(504, 110,  122, 230, tab_ == TAB_MODS);
     pModsLBox_->setModel(g_App.mods().getAvalaibleMods());
 
     // Close Mods/Equips details button
@@ -285,7 +285,8 @@ void ResearchMenu::handleAction(const int actionId, void *ctx, const int modKeys
     // Field list box : Equips or Mods
     if (actionId == pFieldEquipLBox_->getId() || actionId == pFieldModsLBox_->getId()) {
         // get selected field
-        pSelectedRes_ = static_cast<Research *> (ctx);
+        std::pair<int, void *> * pPair = static_cast<std::pair<int, void *> *> (ctx);
+        pSelectedRes_ = static_cast<Research *> (pPair->second);
         
         // Hide list
         hideFieldList();
@@ -293,12 +294,14 @@ void ResearchMenu::handleAction(const int actionId, void *ctx, const int modKeys
         showResInfo();
 
     } else if (actionId == pModsLBox_->getId()) {  // Selection of an avalaible mod
-        pSelectedMod_ = static_cast<Mod *> (ctx);
+        std::pair<int, void *> * pPair = static_cast<std::pair<int, void *> *> (ctx);
+        pSelectedMod_ = static_cast<Mod *> (pPair->second);
         hideDetailsList();
         showOption(KEY_F5);
 
     } else if (actionId == pEquipsLBox_->getId()) { // Selection of an avalaible weapon
-        pSelectedWeapon_ = static_cast<Weapon *> (ctx);
+        std::pair<int, void *> * pPair = static_cast<std::pair<int, void *> *> (ctx);
+        pSelectedWeapon_ = static_cast<Weapon *> (pPair->second);
         hideDetailsList();
         showOption(KEY_F5);
 

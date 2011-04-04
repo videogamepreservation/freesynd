@@ -294,18 +294,15 @@ protected:
 
 /*!
  * A list box is a widget that displays a list of lines. Each line corresponds to
- * a game object (team members, equips, mods, ...). A list box reacts to user actions
+ * a game object (equips, mods, ...). A list box reacts to user actions
  * and calls Menu::handleAction() if one of its items has been pressed.
- * A list box can have a title, displayed at the top of the list and can print a default
- * label for all empty lines.
  */
 class ListBox : public ActionWidget , public ModelListener {
 public:
     //! Constructs a new list box.
-    ListBox(Menu *peer, int x, int y, int width, int height, int maxLine, 
-                bool visible = true, const char *title = NULL, bool displayEmpty = false);
+    ListBox(Menu *peer, int x, int y, int width, int height, bool visible = true);
 
-    ~ListBox();
+    virtual ~ListBox();
 
     //! Draw the widget on screen
     void draw(); 
@@ -320,12 +317,40 @@ public:
     void handleModelChanged();
 
 protected:
+    /*! Lines displayed in the list box.*/
+    std::list<std::string> labels_;
+    /*! Data that are displayed in the list box.*/
+    SequenceModel *pModel_;
+    /*! The line that the mouse is on. -1 if no line is hovered.*/
+    int focusedLine_;
+};
+
+/*!
+ * 
+ * A Team list box has a title, displayed at the top of the list and prints a default
+ * label for all empty lines.
+ */
+class TeamListBox : public ListBox {
+public:
+    //! Constructs a new list box.
+    TeamListBox(Menu *peer, int x, int y, int width, int height, bool visible = true);
+
+    ~TeamListBox();
+
+    //! Draw the widget on screen
+    void draw(); 
+
+    //! Callback method to respond to mouse motion event
+    void handleMouseMotion(int x, int y, int state, const int modKeys);
+
+    void setSquadLine(int squadSlot, int line);
+
+protected:
+    static const int LINE_OFFSET;
     /*! Title of the list box. Optional.*/
     MenuText *pTitle_;
-    std::list<std::string> labels_;
-
-    SequenceModel *pModel_;
-
+    /*! The label for an empty line.*/
+    std::string emptyLbl_;
     /*! X coord for title underline.*/
     int xUnderline_;
     /*! Y coord for title underline.*/
@@ -334,8 +359,8 @@ protected:
     int lUnderline_;
     /*! Starting coordinate of content list.*/
     int yOrigin_;
-    /*! The line that the mouse is on. -1 if no line is hovered.*/
-    int focusedLine_;
+    /*! Stores the lines for the current squad members.*/
+    int squadLines_[4];
 };
 
 #endif // WIDGET_H
