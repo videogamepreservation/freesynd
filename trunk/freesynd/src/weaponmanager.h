@@ -6,6 +6,7 @@
  *   Copyright (C) 2005  Joost Peters  <joostp@users.sourceforge.net>   *
  *   Copyright (C) 2006  Trent Waddington <qg@biodome.org>              *
  *   Copyright (C) 2006  Tarjei Knapstad <tarjei.knapstad@gmail.com>    *
+ *   Copyright (C) 2011  Benoit Blancard <benblan@users.sourceforge.net>*
  *                                                                      *
  *    This program is free software;  you can redistribute it and / or  *
  *  modify it  under the  terms of the  GNU General  Public License as  *
@@ -26,10 +27,10 @@
 #ifndef WEAPONMANAGER_H
 #define WEAPONMANAGER_H
 
+#include <vector>
+
 #include "common.h"
 #include "weapon.h"
-#include "ped.h"
-#include <vector>
 #include "utils/seqmodel.h"
 
 /*!
@@ -37,41 +38,33 @@
  */
 class WeaponManager {
 public:
+    //! Constructor
     WeaponManager();
+    //! Destructor
     ~WeaponManager();
-
-    void loadWeapons();
-
-    void cheatEnableAllWeapons();
-
+    //! Resources destruction
+    void destroy();
+    //! Reset data
     void reset();
-
-    int numWeapons() { return weapons_.size(); }
-
-    Weapon *weapon(int n) {
-        assert(n < (int) weapons_.size());
-        return weapons_[n];
-    }
-
-    Weapon *findWeapon(Weapon::WeaponType wt);
-
-    WeaponInstance *loadInstance(uint8 *data, int map);
-
-    int numAvailableWeapons() {
-        return available_weapons_.size();
-    }
-
-    Weapon *availableWeapon(int n) {
-        return available_weapons_.get(n);
-    }
-
+    //! Cheating mode to enable all weapons
+    void cheatEnableAllWeapons();
+    //! Enable weapon of given type
     void enableWeapon(Weapon::WeaponType wt);
-
-    SequenceModel * getAvailableWeapons() { return &available_weapons_; }
+    //! Returns the list of currently available weapons
+    SequenceModel * getAvailableWeapons() { return &availableWeapons_; }
+    //! Returns a weapon of given type whether it is available or not
+    Weapon *getWeapon(Weapon::WeaponType wt);
 
 protected:
-    std::vector<Weapon *> weapons_;
-    VectorModel<Weapon *> available_weapons_;
+    //! Loads the weapon from file
+    Weapon *loadWeapon(Weapon::WeaponType wt);
+
+protected:
+    /*! This vector is used to store necessary but unavailable weapons until there
+     * are made available.*/
+    std::vector<Weapon *> preFetch_;
+    /*! This is the list of all weapons available to the user.*/
+    VectorModel<Weapon *> availableWeapons_;
 };
 
 #endif

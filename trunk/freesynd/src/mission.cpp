@@ -276,7 +276,7 @@ bool Mission::loadLevel(uint8 * levelData)
         LEVELDATA_WEAPONS & wref = level_data_.weapons[i];
         if(wref.desc == 0)
             continue;
-        WeaponInstance *w = g_App.weapons().loadInstance((uint8 *) & wref, map_);
+        WeaponInstance *w = createWeaponInstance((uint8 *) & wref, map_);
         if (w) {
             if (wref.desc == 0x05) {
                 uint16 offset_owner = READ_LE_UINT16(wref.offset_owner);
@@ -2685,4 +2685,78 @@ unsigned char Mission::getMinimapColour(int x, int y) {
     if (minimap_c_ != 0)
         return minimap_c_[x + y * mmax_x_];
     return 0;
+}
+
+WeaponInstance *Mission::createWeaponInstance(uint8 * data, int map)
+{
+    Mission::LEVELDATA_WEAPONS * gamdata =
+        (Mission::LEVELDATA_WEAPONS *) data;
+    Weapon::WeaponType wType = Weapon::Unknown;
+
+    switch (gamdata->sub_type) {
+        case 0x01:
+            wType = Weapon::Persuadatron;
+            break;
+        case 0x02:
+            wType = Weapon::Pistol;
+            break;
+        case 0x03:
+            wType = Weapon::GaussGun;
+            break;
+        case 0x04:
+            wType = Weapon::Shotgun;
+            break;
+        case 0x05:
+            wType = Weapon::Uzi;
+            break;
+        case 0x06:
+            wType = Weapon::Minigun;
+            break;
+        case 0x07:
+            wType = Weapon::Laser;
+            break;
+        case 0x08:
+            wType = Weapon::Flamer;
+            break;
+        case 0x09:
+            wType = Weapon::LongRange;
+            break;
+        case 0x0A:
+            wType = Weapon::Scanner;
+            break;
+        case 0x0B:
+            wType = Weapon::MediKit;
+            break;
+        case 0x0C:
+            wType = Weapon::TimeBomb;
+            break;
+        case 0x0D:
+            wType = Weapon::AccessCard;
+            break;
+        case 0x11:
+            wType = Weapon::EnergyShield;
+            break;
+        default:
+            break;
+    }
+
+    Weapon *pWeapon = g_App.weapons().getWeapon(wType);
+    if (pWeapon) {
+        WeaponInstance *wi = pWeapon->createInstance();
+        wi->setAmmoRemaining(wi->ammo());
+        int z = READ_LE_UINT16(gamdata->mapposz) >> 7;
+        z--;
+        int oz = gamdata->mapposz[0] & 0x7F;
+        wi->setVisZ(z);
+        if (oz > 0)
+            z++;
+        wi->setPosition(gamdata->mapposx[1], gamdata->mapposy[1],
+                            z, gamdata->mapposx[0],
+                            gamdata->mapposy[0], oz);
+        if (wi->getWeaponType() == Weapon::TimeBomb)
+            wi->setRcvDamageDef(MapObject::ddmg_WeaponBomb);
+        return wi;
+    }
+
+    return NULL;
 }

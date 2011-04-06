@@ -440,11 +440,15 @@ public:
     unsigned int getMaxEnhanceLvl() {return max_enhance_lvl_; }
     // 0 - not present, 1 - our agent, 2 - enemy agent
 
-  protected:
-    LEVELDATA level_data_;
+protected:
     bool sWalkable(char thisTile, char upperTile);
     bool isSurface(char thisTile);
     bool isStairs(char thisTile);
+
+    WeaponInstance *createWeaponInstance(uint8 *data, int map);
+
+protected:
+    LEVELDATA level_data_;
 
     // eventually all this level data will be replaced by objects like this:
     std::vector<VehicleInstance *> vehicles_;

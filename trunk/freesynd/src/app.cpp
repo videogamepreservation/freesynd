@@ -160,7 +160,6 @@ bool App::initialize(const char *dir) {
 
     LOG(Log::k_FLG_GFX, "App", "initialize", ("Loading game data..."))
     agents_.loadAgents();
-    weapons_.loadWeapons();
     mods_.loadMods();
 
     LOG(Log::k_FLG_GFX, "App", "initialize", ("Loading intro sounds..."))
@@ -237,38 +236,38 @@ void App::cheatEquipFancyWeapons() {
         agents_.agent(i)->removeAllWeapons();
 #ifdef _DEBUG
         agents_.agent(i)->addWeapon(
-            weapons_.findWeapon(Weapon::Minigun)->createInstance());
+            weapons_.getWeapon(Weapon::Minigun)->createInstance());
         agents_.agent(i)->addWeapon(
-            weapons_.findWeapon(Weapon::Pistol)->createInstance());
+            weapons_.getWeapon(Weapon::Pistol)->createInstance());
         agents_.agent(i)->addWeapon(
-            weapons_.findWeapon(Weapon::GaussGun)->createInstance());
+            weapons_.getWeapon(Weapon::GaussGun)->createInstance());
         agents_.agent(i)->addWeapon(
-            weapons_.findWeapon(Weapon::Flamer)->createInstance());
+            weapons_.getWeapon(Weapon::Flamer)->createInstance());
         agents_.agent(i)->addWeapon(
-            weapons_.findWeapon(Weapon::Uzi)->createInstance());
+            weapons_.getWeapon(Weapon::Uzi)->createInstance());
         agents_.agent(i)->addWeapon(
-            weapons_.findWeapon(Weapon::EnergyShield)->createInstance());
+            weapons_.getWeapon(Weapon::EnergyShield)->createInstance());
         agents_.agent(i)->addWeapon(
-            weapons_.findWeapon(Weapon::Laser)->createInstance());
+            weapons_.getWeapon(Weapon::Laser)->createInstance());
         agents_.agent(i)->addWeapon(
-            weapons_.findWeapon(Weapon::LongRange)->createInstance());
+            weapons_.getWeapon(Weapon::LongRange)->createInstance());
 #else
         agents_.agent(i)->addWeapon(
-                weapons_.findWeapon(Weapon::Minigun)->createInstance());
+                weapons_.getWeapon(Weapon::Minigun)->createInstance());
         agents_.agent(i)->addWeapon(
-                weapons_.findWeapon(Weapon::Minigun)->createInstance());
+                weapons_.getWeapon(Weapon::Minigun)->createInstance());
         agents_.agent(i)->addWeapon(
-                weapons_.findWeapon(Weapon::Persuadatron)->createInstance());
+                weapons_.getWeapon(Weapon::Persuadatron)->createInstance());
         agents_.agent(i)->addWeapon(
-                weapons_.findWeapon(Weapon::TimeBomb)->createInstance());
+                weapons_.getWeapon(Weapon::TimeBomb)->createInstance());
         agents_.agent(i)->addWeapon(
-                weapons_.findWeapon(Weapon::EnergyShield)->createInstance());
+                weapons_.getWeapon(Weapon::EnergyShield)->createInstance());
         agents_.agent(i)->addWeapon(
-                weapons_.findWeapon(Weapon::EnergyShield)->createInstance());
+                weapons_.getWeapon(Weapon::EnergyShield)->createInstance());
         agents_.agent(i)->addWeapon(
-                weapons_.findWeapon(Weapon::Laser)->createInstance());
+                weapons_.getWeapon(Weapon::Laser)->createInstance());
         agents_.agent(i)->addWeapon(
-                weapons_.findWeapon(Weapon::Laser)->createInstance());
+                weapons_.getWeapon(Weapon::Laser)->createInstance());
 #endif
         }
     }
@@ -328,16 +327,18 @@ void App::setCheatCode(const char *name) {
 }
 
 void App::reset() {
-    session_.reset();
+    // Reset default mods and weapons
+    weapons_.reset();
+    mods_.reset();
 
+    // Reset default agents
     agents_.reset();
+
+    // Reset user session
+    session_.reset();
 
     for (int i = 0; i < 4; i++)
         session_.setTeamMember(i, agents_.agent(i));
-
-    weapons_.reset();
-
-    mods_.reset();
 }
 
 /*!

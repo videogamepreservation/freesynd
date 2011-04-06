@@ -41,21 +41,21 @@ public:
 
     WeaponInstance *createInstance();
     typedef enum {
-        Unknown,
-        Persuadatron,
-        Pistol,
-        Minigun,
-        Flamer,
-        LongRange,
-        EnergyShield,
-        Uzi,
-        Laser,
-        GaussGun,
-        Shotgun,
-        MediKit,
-        Scanner,
-        AccessCard,
-        TimeBomb
+        Persuadatron = 0,
+        Pistol = 1,
+        Shotgun = 2,
+        Uzi = 3,
+        Scanner = 4,
+        MediKit = 5,
+        Minigun = 6,
+        Flamer = 7,
+        LongRange = 8,
+        EnergyShield = 9,
+        Laser = 10,
+        GaussGun = 11,
+        AccessCard = 12,
+        TimeBomb = 13,
+        Unknown = 14
     } WeaponType;
 
     typedef enum {

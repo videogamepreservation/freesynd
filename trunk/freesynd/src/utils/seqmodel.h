@@ -109,8 +109,17 @@ public:
      * Next elements are moved.
      */
     void insertAt(int index, T item) {
-        
-        fireModelChanged();
+        int i=0;
+        for (std::vector < T >::iterator it = elements_.begin();
+         it != elements_.end(); it++, i++) {
+             if (i == index) {
+                 elements_.insert(it, item);
+                 fireModelChanged();
+                 return;
+             }
+        }
+
+        throw std::range_error("Index");
     }
 
     /*!

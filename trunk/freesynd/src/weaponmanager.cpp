@@ -7,6 +7,7 @@
  *   Copyright (C) 2006  Trent Waddington <qg@biodome.org>              *
  *   Copyright (C) 2006  Tarjei Knapstad <tarjei.knapstad@gmail.com>    *
  *   Copyright (C) 2010  Bohdan Stelmakh <chamel@users.sourceforge.net> *
+ *   Copyright (C) 2011  Benoit Blancard <benblan@users.sourceforge.net>*
  *                                                                      *
  *    This program is free software;  you can redistribute it and / or  *
  *  modify it  under the  terms of the  GNU General  Public License as  *
@@ -30,166 +31,189 @@
 #include "weaponmanager.h"
 
 WeaponManager::WeaponManager() {
-    weapons_.reserve(14);
+    
+}
+
+void WeaponManager::destroy() {
+    // Delete all weapons from the cache
+    for (unsigned int i = 0; i != preFetch_.size(); ++i) {
+       delete preFetch_[i];
+    }
+
+    // Then delete all available weapons
+    for (unsigned i = 0; i != availableWeapons_.size(); ++i) {
+        delete availableWeapons_.get(i);
+    }
+
+    preFetch_.clear();
+    availableWeapons_.clear();
 }
 
 WeaponManager::~WeaponManager() {
-    for (unsigned int i = 0; i != weapons_.size(); ++i)
-        delete weapons_[i];
+    destroy();
 }
 
-void WeaponManager::loadWeapons() {
-    weapons_.push_back(new Weapon("PERSUADERTRON", 14, 64, 5000, -1, 256, 0,
-        -1, 367, Weapon::Unarmed_Anim, snd::PERSUADE, Weapon::Persuadatron,
-        MapObject::dmg_Mental, 1, 1));
-    weapons_.push_back(new Weapon("PISTOL", 15, 65, 0, 13, 1280, 1, 1, 368,
-        Weapon::Pistol_Anim, snd::PISTOL, Weapon::Pistol,
-        MapObject::dmg_Bullet, 1, 1));
-    weapons_.push_back(new Weapon("GAUSS GUN", 16, 66, 50000, 3, 5120, 15000, 0,
-        369, Weapon::Gauss_Anim, snd::GAUSSGUN, Weapon::GaussGun,
-        MapObject::dmg_Explosion, 1, 1));
-    weapons_.push_back(new Weapon("SHOTGUN", 17, 67, 250, 12, 1024, 2, 2, 370,
-        Weapon::Shotgun_Anim, snd::SHOTGUN, Weapon::Shotgun,
-        MapObject::dmg_Bullet, 1, 1));
-    weapons_.push_back(new Weapon("UZI", 18, 68, 750, 50, 1792, 2, 5, 371,
-        Weapon::Uzi_Anim, snd::UZI, Weapon::Uzi, MapObject::dmg_Bullet, 1, 1));
-    weapons_.push_back(new Weapon("MINI-GUN", 19, 69, 10000, 500, 2304, 10, 6,
-        372, Weapon::Minigun_Anim, snd::MINIGUN, Weapon::Minigun,
-        MapObject::dmg_Bullet, 1, 1));
-    weapons_.push_back(new Weapon("LASER", 20, 70, 35000, 5, 4096, 2000, 7, 373,
-        Weapon::Laser_Anim, snd::LASER, Weapon::Laser, MapObject::dmg_Laser,
-        1, 1));
-    weapons_.push_back(new Weapon("FLAMER", 21, 71, 1500, 1000, 512, 1, 4, 374,
-        Weapon::Flamer_Anim, snd::FLAME, Weapon::Flamer, MapObject::dmg_Burn,
-        1, 1));
-    weapons_.push_back(new Weapon("LONG RANGE", 22, 72, 1000, 30, 6144, 2, 3,
-        375, Weapon::LongRange_Anim, snd::LONGRANGE, Weapon::LongRange,
-        MapObject::dmg_Bullet, 1, 1));
-    weapons_.push_back(new Weapon("SCANNER", 23, 73, 500, -1, 4096, 0, -1, 376,
-        Weapon::Unarmed_Anim, snd::NO_SOUND, Weapon::Scanner,
-        MapObject::dmg_None, 1, 1));
-    weapons_.push_back(new Weapon("MEDIKIT", 24, 74, 500, 1, 256, 0, -1, 377,
-        Weapon::Unarmed_Anim, snd::NO_SOUND, Weapon::MediKit,
-        MapObject::dmg_Heal, 1, 1));
-    weapons_.push_back(new Weapon("TIME BOMB", 25, 75, 25000, -1, 1000, 0, -1,
-        378, Weapon::Unarmed_Anim, snd::TIMEBOMB, Weapon::TimeBomb,
-        MapObject::dmg_Explosion, 1, 1));
-    weapons_.push_back(new Weapon("ACCESS CARD", 26, 76, 1000, -1, 256, 0, -1,
-        379, Weapon::Unarmed_Anim, snd::NO_SOUND, Weapon::AccessCard,
-        MapObject::dmg_None, 1, 1));
+void WeaponManager::reset() {
+    destroy();
+
+    // Enables default weapons
+    availableWeapons_.add(loadWeapon(Weapon::Persuadatron));
+    availableWeapons_.add(loadWeapon(Weapon::Pistol));
+    availableWeapons_.add(loadWeapon(Weapon::Shotgun));
+    availableWeapons_.add(loadWeapon(Weapon::Scanner));
+    availableWeapons_.add(loadWeapon(Weapon::MediKit));
+}
+
+void WeaponManager::cheatEnableAllWeapons() {
+    enableWeapon(Weapon::Persuadatron);
+    enableWeapon(Weapon::Pistol);
+    enableWeapon(Weapon::Shotgun);
+    enableWeapon(Weapon::Uzi);
+    enableWeapon(Weapon::Scanner);
+    enableWeapon(Weapon::MediKit);
+    enableWeapon(Weapon::Minigun);
+    enableWeapon(Weapon::Flamer);
+    enableWeapon(Weapon::LongRange);
+    enableWeapon(Weapon::EnergyShield);
+    enableWeapon(Weapon::Laser);
+    enableWeapon(Weapon::GaussGun);
+    enableWeapon(Weapon::AccessCard);
+    enableWeapon(Weapon::TimeBomb);
+}
+
+void WeaponManager::enableWeapon(Weapon::WeaponType wt) {
+    // First check if weapon is not already available
+    for (unsigned i = 0; i != availableWeapons_.size(); ++i) {
+        if (wt == availableWeapons_.get(i)->getWeaponType())
+            return;
+    }
+
+    // Then get weapon
+    Weapon *pWeapon = getWeapon(wt);
+
+    // removes it from cache
+    for (std::vector < Weapon * >::iterator it = preFetch_.begin();
+         it != preFetch_.end(); it++) {
+             if (pWeapon == *it) {
+                preFetch_.erase(it);
+                break;
+             }
+    }
+
+    // make it available
+    for (unsigned i = 0; i != availableWeapons_.size(); ++i) {
+        if (pWeapon->getWeaponType() < availableWeapons_.get(i)->getWeaponType()) {
+            // The new weapon is inserted in the order of the WeaponType constants
+            availableWeapons_.insertAt(i, pWeapon);
+            return;
+        }
+    }
+    // If we're here, it's because the new weapon comes at the end of the list
+    availableWeapons_.add(pWeapon);
+}
+
+Weapon * WeaponManager::getWeapon(Weapon::WeaponType wt) {
+    // Search in prefetched weapons first
+    for (unsigned int i = 0; i < preFetch_.size(); i++) {
+        if (wt == preFetch_[i]->getWeaponType())
+            return preFetch_[i];
+    }
+
+    // Then search in available weapons
+    for (unsigned i = 0; i != availableWeapons_.size(); ++i) {
+        if (wt == availableWeapons_.get(i)->getWeaponType())
+            return availableWeapons_.get(i);
+    }
+
+    // Weapon was not found so loads it
+    Weapon *pWeapon = loadWeapon(wt);
+    // Stores it in cache
+    preFetch_.push_back(pWeapon);
+    
+    return pWeapon;
+}
+
+Weapon * WeaponManager::loadWeapon(Weapon::WeaponType wt) {
     /* NOTE: small icon 27 exists and looks like an N with an arrow above it.
        the corresponding large icon is actually the "all" button on the
        select menu.  It would appear Bullfrog was going to have another
        weapon here but it got scrapped early on and they used the large
        icon space to implement the all button.
      */
-    weapons_.push_back(new Weapon("ENERGY SHIELD", 28, 78, 8000, 200, 768, 15,
+    Weapon *pWeapon = NULL;
+    switch(wt) {
+        case Weapon::Persuadatron:
+            pWeapon = new Weapon("PERSUADERTRON", 14, 64, 5000, -1, 256, 0,
+        -1, 367, Weapon::Unarmed_Anim, snd::PERSUADE, Weapon::Persuadatron,
+        MapObject::dmg_Mental, 1, 1);
+            break;
+        case Weapon::Pistol:
+            pWeapon = new Weapon("PISTOL", 15, 65, 0, 13, 1280, 1, 1, 368,
+        Weapon::Pistol_Anim, snd::PISTOL, Weapon::Pistol,
+        MapObject::dmg_Bullet, 1, 1);
+            break;
+        case Weapon::Minigun:
+            pWeapon = new Weapon("MINI-GUN", 19, 69, 10000, 500, 2304, 10, 6,
+        372, Weapon::Minigun_Anim, snd::MINIGUN, Weapon::Minigun,
+        MapObject::dmg_Bullet, 1, 1);
+            break;
+        case Weapon::Flamer:
+            pWeapon = new Weapon("FLAMER", 21, 71, 1500, 1000, 512, 1, 4, 374,
+        Weapon::Flamer_Anim, snd::FLAME, Weapon::Flamer, MapObject::dmg_Burn,
+        1, 1);
+            break;
+        case Weapon::LongRange:
+            pWeapon = new Weapon("LONG RANGE", 22, 72, 1000, 30, 6144, 2, 3,
+        375, Weapon::LongRange_Anim, snd::LONGRANGE, Weapon::LongRange,
+        MapObject::dmg_Bullet, 1, 1);
+            break;
+        case Weapon::EnergyShield:
+            pWeapon = new Weapon("ENERGY SHIELD", 28, 78, 8000, 200, 768, 15,
         -1, 381, Weapon::EnergyShield_Anim, snd::NO_SOUND,
-        Weapon::EnergyShield, MapObject::dmg_None, 1, 1));
-}
-
-void WeaponManager::cheatEnableAllWeapons() {
-    available_weapons_.clear();
-
-    for (unsigned int i = 0; i < weapons_.size(); i++)
-        available_weapons_.add(weapons_[i]);
-}
-
-void WeaponManager::reset() {
-    available_weapons_.clear();
-    available_weapons_.add(findWeapon(Weapon::Persuadatron));
-    available_weapons_.add(findWeapon(Weapon::Pistol));
-    available_weapons_.add(findWeapon(Weapon::Shotgun));
-    available_weapons_.add(findWeapon(Weapon::Scanner));
-    available_weapons_.add(findWeapon(Weapon::MediKit));
-}
-
-Weapon *WeaponManager::findWeapon(Weapon::WeaponType wt) {
-    for (unsigned int i = 0; i < weapons_.size(); i++) {
-        if (wt == weapons_[i]->getWeaponType())
-            return weapons_[i];
-    }
-
-    return NULL;
-}
-
-WeaponInstance *WeaponManager::loadInstance(uint8 * data, int map)
-{
-    Mission::LEVELDATA_WEAPONS * gamdata =
-        (Mission::LEVELDATA_WEAPONS *) data;
-    Weapon *w = 0;
-
-    switch (gamdata->sub_type) {
-        case 0x01:
-            w = findWeapon(Weapon::Persuadatron);
+        Weapon::EnergyShield, MapObject::dmg_None, 1, 1);
             break;
-        case 0x02:
-            w = findWeapon(Weapon::Pistol);
+        case Weapon::Uzi:
+            pWeapon = new Weapon("UZI", 18, 68, 750, 50, 1792, 2, 5, 371,
+        Weapon::Uzi_Anim, snd::UZI, Weapon::Uzi, MapObject::dmg_Bullet, 1, 1);
             break;
-        case 0x03:
-            w = findWeapon(Weapon::GaussGun);
+        case Weapon::Laser:
+            pWeapon = new Weapon("LASER", 20, 70, 35000, 5, 4096, 2000, 7, 373,
+        Weapon::Laser_Anim, snd::LASER, Weapon::Laser, MapObject::dmg_Laser,
+        1, 1);
             break;
-        case 0x04:
-            w = findWeapon(Weapon::Shotgun);
+        case Weapon::GaussGun:
+            pWeapon = new Weapon("GAUSS GUN", 16, 66, 50000, 3, 5120, 15000, 0,
+        369, Weapon::Gauss_Anim, snd::GAUSSGUN, Weapon::GaussGun,
+        MapObject::dmg_Explosion, 1, 1);
             break;
-        case 0x05:
-            w = findWeapon(Weapon::Uzi);
+        case Weapon::Shotgun:
+            pWeapon = new Weapon("SHOTGUN", 17, 67, 250, 12, 1024, 2, 2, 370,
+        Weapon::Shotgun_Anim, snd::SHOTGUN, Weapon::Shotgun,
+        MapObject::dmg_Bullet, 1, 1);
             break;
-        case 0x06:
-            w = findWeapon(Weapon::Minigun);
+        case Weapon::MediKit:
+            pWeapon = new Weapon("MEDIKIT", 24, 74, 500, 1, 256, 0, -1, 377,
+        Weapon::Unarmed_Anim, snd::NO_SOUND, Weapon::MediKit,
+        MapObject::dmg_Heal, 1, 1);
             break;
-        case 0x07:
-            w = findWeapon(Weapon::Laser);
+        case Weapon::Scanner:
+            pWeapon = new Weapon("SCANNER", 23, 73, 500, -1, 4096, 0, -1, 376,
+        Weapon::Unarmed_Anim, snd::NO_SOUND, Weapon::Scanner,
+        MapObject::dmg_None, 1, 1);
             break;
-        case 0x08:
-            w = findWeapon(Weapon::Flamer);
+        case Weapon::AccessCard:
+            pWeapon = new Weapon("ACCESS CARD", 26, 76, 1000, -1, 256, 0, -1,
+        379, Weapon::Unarmed_Anim, snd::NO_SOUND, Weapon::AccessCard,
+        MapObject::dmg_None, 1, 1);
             break;
-        case 0x09:
-            w = findWeapon(Weapon::LongRange);
-            break;
-        case 0x0A:
-            w = findWeapon(Weapon::Scanner);
-            break;
-        case 0x0B:
-            w = findWeapon(Weapon::MediKit);
-            break;
-        case 0x0C:
-            w = findWeapon(Weapon::TimeBomb);
-            break;
-        case 0x0D:
-            w = findWeapon(Weapon::AccessCard);
-            break;
-        case 0x11:
-            w = findWeapon(Weapon::EnergyShield);
+        case Weapon::TimeBomb:
+            pWeapon = new Weapon("TIME BOMB", 25, 75, 25000, -1, 1000, 0, -1,
+        378, Weapon::Unarmed_Anim, snd::TIMEBOMB, Weapon::TimeBomb,
+        MapObject::dmg_Explosion, 1, 1);
             break;
         default:
             break;
     }
-    if (w) {
-        WeaponInstance *wi = w->createInstance();
-        wi->setAmmoRemaining(wi->ammo());
-        int z = READ_LE_UINT16(gamdata->mapposz) >> 7;
-        z--;
-        int oz = gamdata->mapposz[0] & 0x7F;
-        wi->setVisZ(z);
-        if (oz > 0)
-            z++;
-        //printf("x %i y %i z %i ox %i oy %i oz %i\n", gamdata->mapposx[1], gamdata->mapposy[1], z, gamdata->mapposx[0], gamdata->mapposy[0], oz);
-        wi->setPosition(gamdata->mapposx[1], gamdata->mapposy[1],
-                            z, gamdata->mapposx[0],
-                            gamdata->mapposy[0], oz);
-        if (wi->getWeaponType() == Weapon::TimeBomb)
-            wi->setRcvDamageDef(MapObject::ddmg_WeaponBomb);
-        return wi;
-    }
 
-    return NULL;
-}
-
-void WeaponManager::enableWeapon(Weapon::WeaponType wt) {
-    Weapon *pWeapon = findWeapon(wt);
-
-    if (pWeapon) {
-        available_weapons_.add(pWeapon);
-    }
+    return pWeapon;
 }
