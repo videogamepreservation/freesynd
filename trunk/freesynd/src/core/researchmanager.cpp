@@ -22,8 +22,9 @@
 
 #include "app.h"
 #include "researchmanager.h"
-#include "research.h"
 #include "utils/log.h"
+#include "utils/file.h"
+#include "utils/configfile.h"
 
 const char *g_Fields[] =
     { "AUTOMATIC", "HEAVY", "ASSAULT", "MISCELLANEOUS",
@@ -31,10 +32,97 @@ const char *g_Fields[] =
 };
 
 ResearchManager::ResearchManager() {
-    availableEquipsSearch_.add(new Research(Weapon::Uzi, g_Fields[0], 96));
-    availableEquipsSearch_.add(new Research(Weapon::Unknown, g_Fields[1], 7992));
-    availableEquipsSearch_.add(new Research(Weapon::Unknown, g_Fields[2], 244));
-    availableEquipsSearch_.add(new Research(Weapon::Unknown, g_Fields[3], 1992));
+}
+
+ResearchManager::~ResearchManager() {
+    LOG(Log::k_FLG_MEM, "ResearchManager", "~ResearchManager", ("Destruction..."))
+    destroy();
+    listeners_.clear();
+}
+
+void ResearchManager::destroy() {
+    // Destroy researches on mods
+    for (int i=0; i<availableModsSearch_.size(); i++) {
+        Research *pRes = availableModsSearch_.get(i);
+        delete pRes;
+    }
+
+    // Destroy researches on weapons
+    for (int i=0; i<availableWeaponsSearch_.size(); i++) {
+        Research *pRes = availableWeaponsSearch_.get(i);
+        delete pRes;
+    }
+
+    availableModsSearch_.clear();
+    availableWeaponsSearch_.clear();
+}
+
+/*!
+ * Loads a research for the given weapon type from the configuration file.
+ * \param wt Weapon type to research
+ * \return NULL if a problem has happened
+ */
+Research *ResearchManager::loadResearch(Weapon::WeaponType wt) {
+    std::string filename(File::fileFullPath("ref/research.dat", false));
+    try {
+        // Loads configuration file
+        ConfigFile conf(filename);
+        std::string name;
+        int fund;
+        int next;
+        Weapon::WeaponType nextWeap = Weapon::Unknown;
+        char tmp[25];
+        char *pattern = "res.weap.%d.%s";
+
+        sprintf(tmp, pattern, wt, "name");
+        conf.readInto(name, tmp);
+        sprintf(tmp, pattern, wt, "minFund");
+        conf.readInto(fund, tmp);
+        sprintf(tmp, pattern, wt, "next");
+        conf.readInto(next, tmp);
+
+        // Convert file constants to game constants
+        if (next == 2) {
+            nextWeap = Weapon::GaussGun;
+        } else if (next == 4) {
+            nextWeap = Weapon::Uzi;
+        } else if (next == 5) {
+            nextWeap = Weapon::Minigun;
+        } else if (next == 6) {
+            nextWeap = Weapon::Laser;
+        } else if (next == 7) {
+            nextWeap = Weapon::Flamer;
+        } else if (next == 8) {
+            nextWeap = Weapon::LongRange;
+        } else if (next == 11) {
+            nextWeap = Weapon::TimeBomb;
+        } else if (next == 12) {
+            nextWeap = Weapon::AccessCard;
+        } else if (next == 13) {
+            nextWeap = Weapon::EnergyShield;
+        }
+
+        // Create new research
+        return new Research(wt, name, fund, nextWeap);
+    } catch (...) {
+        FSERR(Log::k_FLG_IO, "ResearchManager", "loadResearch", ("File %s cannot be read", filename.c_str()))
+        return NULL;
+    }
+    return NULL;
+}
+
+bool ResearchManager::reset() {
+    destroy();
+
+    Weapon::WeaponType defWeapons[] = {Weapon::Uzi, Weapon::Laser, Weapon::Flamer, Weapon::AccessCard};
+
+    for (int i=0; i<4; i++) {
+        Research *pRes = loadResearch(defWeapons[i]);
+        if (pRes == NULL) {
+            return false;
+        }
+        availableWeaponsSearch_.add(pRes);
+    }
 
     availableModsSearch_.add(new Research(g_Fields[4], 4440));
     availableModsSearch_.add(new Research(g_Fields[5], 4440));
@@ -42,58 +130,8 @@ ResearchManager::ResearchManager() {
     availableModsSearch_.add(new Research(g_Fields[7], 3480));
     availableModsSearch_.add(new Research(g_Fields[8], 3480));
     availableModsSearch_.add(new Research(g_Fields[9], 34800));
-}
 
-ResearchManager::~ResearchManager() {
-    LOG(Log::k_FLG_MEM, "ResearchManager", "~ResearchManager", ("Destruction..."))
-    for (int i=0; i<availableModsSearch_.size(); i++) {
-        Research *pRes = availableModsSearch_.get(i);
-        delete pRes;
-    }
-
-    for (int i=0; i<availableEquipsSearch_.size(); i++) {
-        Research *pRes = availableEquipsSearch_.get(i);
-        delete pRes;
-    }
-
-    availableModsSearch_.clear();
-    availableEquipsSearch_.clear();
-    listeners_.clear();
-}
-
-void ResearchManager::reset() {
-}
-
-/*!
- * Returns a Research on equips with given id.
- * \param id
- * \return a pointer on a research. NULL if no research was found.
- */
-Research * ResearchManager::getEquipsSearch(int id) {
-    for (int i=0; i<availableEquipsSearch_.size(); i++) {
-        Research *pRes = availableEquipsSearch_.get(i);
-        if (pRes->getId() == id) {
-            return pRes;
-        }
-    }
-
-    return NULL;
-}
-
-/*!
- * Returns a Research on mods with given id.
- * \param id
- * \return a pointer on a research. NULL if no research was found.
- */
-Research * ResearchManager::getModsSearch(int id) {
-    for (int i=0; i<availableModsSearch_.size(); i++) {
-        Research *pRes = availableModsSearch_.get(i);
-        if (pRes->getId() == id) {
-            return pRes;
-        }
-    }
-
-    return NULL;
+    return true;
 }
 
 void ResearchManager::addListener(GameEventListener *pListener) {
@@ -133,8 +171,8 @@ int ResearchManager::process(int hourElapsed, int moneyLeft) {
     amount += processList(hourElapsed, moneyLeft, &availableModsSearch_);
     hourElapsed -= amount;
 
-    // process research on equips
-    amount += processList(hourElapsed, moneyLeft, &availableEquipsSearch_);
+    // process research on weapons
+    amount += processList(hourElapsed, moneyLeft, &availableWeaponsSearch_);
     
     return amount;
 }
@@ -160,7 +198,10 @@ int ResearchManager::processList(int hourElapsed, int moneyLeft, VectorModel < R
 
                 // Loads next research
                 if (pRes->getNextWeaponRes() != Weapon::Unknown) {
-                    
+                    Research *pNextRes = loadResearch(pRes->getNextWeaponRes());
+                    if (pNextRes) {
+                        pList->setAt(i, pNextRes);
+                    }
                 } else {
                     // There's no more research for this category
                     pList->remove(i);

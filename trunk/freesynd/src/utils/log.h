@@ -29,10 +29,12 @@
 #ifdef _DEBUG
 
 #define LOG(t, c, m, str) { if (Log::canLog(t)) {Log::logHeader(t, c, m); Log::logMessage str;} }  // NOLINT
+#define FSERR(t, c, m, str) { if (Log::canLog(t)) {Log::logHeader(t, c, m); Log::logMessage str;} printf str; }  // NOLINT
 
 #else
 
 #define LOG(type, comp, meth, str)
+#define FSERR(t, c, m, str) { printf str; }  // NOLINT
 
 #endif
 

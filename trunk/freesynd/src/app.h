@@ -138,7 +138,7 @@ class App : public Singleton < App > {
     //! Main application method
     void run(const char *dir, int start_mission);
     //! Reset the application data
-    void reset();
+    bool reset();
 
     void quit() {
         running_ = false;

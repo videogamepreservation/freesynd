@@ -28,6 +28,7 @@
 #include "core/gameevent.h"
 #include "utils/seqmodel.h"
 
+class Research;
 
 /*!
  * This class manages all research functionnality.
@@ -38,22 +39,18 @@ public:
     ResearchManager();
     ~ResearchManager();
 
-    void reset();
+    bool reset();
     /*!
      * Returns a list of all available search on mods.
      * \return List can be empty but not null.
      */
     SequenceModel * getAvailableModsSearch() { return &availableModsSearch_; }
     /*!
-     * Returns a list of all available search on equips.
+     * Returns a list of all available search on weapons.
      * \return List can be empty but not null.
      */
-    SequenceModel * getAvailableEquipsSearch() { return &availableEquipsSearch_; }
+    SequenceModel * getAvailableWeaponsSearch() { return &availableWeaponsSearch_; }
 
-    //! Returns a Research on equips with given id
-    Research * getEquipsSearch(int id);
-    //! Returns a Research on mods with given id
-    Research * getModsSearch(int id);
     // Processes all engaged research
     int process(int hourElapsed, int moneyLeft);
     //! Adds a listener for research event
@@ -61,14 +58,16 @@ public:
     void removeListener(GameEventListener *pListener);
 
 protected:
+    Research *loadResearch(Weapon::WeaponType wt);
+    void destroy();
     void fireGameEvent(Research *pResearch);
     int processList(int hourElapsed, int moneyLeft, VectorModel < Research * > *pList);
 
 protected:
     /*! List of all currently available research on mods.*/
     VectorModel<Research *> availableModsSearch_;
-    /*! List of all currently available research on equips.*/
-    VectorModel<Research *> availableEquipsSearch_;
+    /*! List of all currently available research on weapons.*/
+    VectorModel<Research *> availableWeaponsSearch_;
     /*! List of listeners for research events.*/
     std::list<GameEventListener *> listeners_;
 };

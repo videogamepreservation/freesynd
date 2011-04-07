@@ -103,8 +103,9 @@ public:
 
     /*!
      * Resets all data.
+     * \returns True if reset has succeeded
      */
-    void reset();
+    bool reset();
 
     /*!
      * Returns the id of the user logo.
@@ -257,6 +258,8 @@ public:
     int getTaxRevenue(int population, int rate);
 
 private:
+    //! Destroy GameSession resources
+    void destroy();
     int getDaysBeforeChange(Status_Pop status, int tax);
     //! Update population, status and returns money
     int updateCountries();

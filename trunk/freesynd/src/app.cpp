@@ -175,9 +175,7 @@ bool App::initialize(const char *dir) {
     LOG(Log::k_FLG_GFX, "App", "initialize", ("Loading music..."))
     music_.loadMusic();
 
-    reset();
-
-    return true;
+    return reset();
 }
 
 /*!
@@ -326,7 +324,11 @@ void App::setCheatCode(const char *name) {
     }
 }
 
-void App::reset() {
+/*!
+ * Reset application data.
+ * \returns True if reset is ok.
+ */
+bool App::reset() {
     // Reset default mods and weapons
     weapons_.reset();
     mods_.reset();
@@ -335,10 +337,14 @@ void App::reset() {
     agents_.reset();
 
     // Reset user session
-    session_.reset();
+    if (!session_.reset()) {
+        return false;
+    }
 
     for (int i = 0; i < 4; i++)
         session_.setTeamMember(i, agents_.agent(i));
+
+    return true;
 }
 
 /*!

@@ -53,7 +53,7 @@ public:
         short coeffId;
     };
 
-    Research(Weapon::WeaponType wType, std::string name, int min);
+    Research(Weapon::WeaponType wType, std::string name, int min, Weapon::WeaponType nextWeapon);
     Research(std::string name, int min);
     ~Research() {}
 
@@ -67,7 +67,7 @@ public:
     EResStatus getStatus() { return status_; }
 
     Weapon::WeaponType getSearchWeapon() { return weapon_; }
-    Weapon::WeaponType getNextWeaponRes() { return Weapon::Unknown; }
+    Weapon::WeaponType getNextWeaponRes() { return nextWeapon_; }
 
     bool incrFunding();
     bool decrFunding();
@@ -89,6 +89,8 @@ protected:
     EResType type_;
     /*! If research is on weapon, then this field is set.*/
     Weapon::WeaponType weapon_;
+    /*! If research is on weapon, then this field is set.*/
+    Weapon::WeaponType nextWeapon_;
     /*! Name of the research.*/
     std::string name_;
     /*! Minimum amount of funding.*/

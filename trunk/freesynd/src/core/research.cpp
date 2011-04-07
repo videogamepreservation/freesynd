@@ -34,10 +34,11 @@ const short g_CoeffsFund[] = {1, 2, 4, 6, 10, 15, 30, 50, 75 , 100};
  */
 const float g_CoeffsProg[] = {0.416f, 0.83f, 1.25f, 1.666f, 2.083f, 2.5f, 2.941f, 3.333f, 3.846f, 4.166f};
 
-Research::Research(Weapon::WeaponType wType, std::string name, int min) {
+Research::Research(Weapon::WeaponType wType, std::string name, int min, Weapon::WeaponType nextWeapon) {
     init(name, min);
     weapon_ = wType;
     type_ = EQUIPS;
+    nextWeapon_ = nextWeapon;
 }
 
 Research::Research(std::string name, int min) {

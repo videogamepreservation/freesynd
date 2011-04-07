@@ -43,18 +43,18 @@ public:
     typedef enum {
         Persuadatron = 0,
         Pistol = 1,
-        Shotgun = 2,
-        Uzi = 3,
-        Scanner = 4,
-        MediKit = 5,
-        Minigun = 6,
+        GaussGun = 2,
+        Shotgun = 3,
+        Uzi = 4,
+        Minigun = 5,
+        Laser = 6,
         Flamer = 7,
         LongRange = 8,
-        EnergyShield = 9,
-        Laser = 10,
-        GaussGun = 11,
+        Scanner = 9,
+        MediKit = 10,
+        TimeBomb = 11,
         AccessCard = 12,
-        TimeBomb = 13,
+        EnergyShield = 13,
         Unknown = 14
     } WeaponType;
 

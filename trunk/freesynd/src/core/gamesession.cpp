@@ -88,17 +88,25 @@ const int GameSession::NB_MISSION = 50;
 
 GameSession::GameSession() {
     mission_ = NULL;
-    reset();
     enable_all_mis_ = false;
     replay_mission_ = false;
     hour_delay_ = HOUR_DELAY;
 }
 
 GameSession::~GameSession() {
-    reset();
+    destroy();
 }
 
-void GameSession::reset() {
+void GameSession::destroy() {
+    if (mission_) {
+        delete mission_;
+        mission_ = NULL;
+    }
+}
+
+bool GameSession::reset() {
+    destroy();
+
     logo_ = 0;
     logo_colour_ = 6;
     company_name_.clear();
@@ -132,16 +140,11 @@ void GameSession::reset() {
     time_year_ = 85;
     time_elapsed_ = 0;
 
-    if (mission_) {
-        delete mission_;
-        mission_ = NULL;
-    }
-
     for (int i=0; i<4; i++) {
         teamMembers_[i] = NULL;
     }
 
-    researchMan_.reset();
+    return researchMan_.reset();
 }
 
 Block & GameSession::getBlock(uint8 index) {

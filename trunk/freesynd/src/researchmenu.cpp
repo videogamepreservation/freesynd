@@ -47,7 +47,7 @@ ResearchMenu::ResearchMenu(MenuManager * m):Menu(m, "research", "mresrch.dat", "
     addOption(500, 347,  128, 25, "#MENU_MAIN_BUT", FontManager::SIZE_2, KEY_F4, "main");
 
     pFieldEquipLBox_ = addListBox(20, 84,  122, 120, tab_ == TAB_EQUIPS);
-    pFieldEquipLBox_->setModel(g_Session.researchManager().getAvailableEquipsSearch());
+    pFieldEquipLBox_->setModel(g_Session.researchManager().getAvailableWeaponsSearch());
     pFieldModsLBox_ = addListBox(20, 84,  122, 120, tab_ == TAB_MODS);
     pFieldModsLBox_->setModel(g_Session.researchManager().getAvailableModsSearch());
 
