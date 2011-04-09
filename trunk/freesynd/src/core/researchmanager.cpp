@@ -26,12 +26,8 @@
 #include "utils/file.h"
 #include "utils/configfile.h"
 
-const char *g_Fields[] =
-    { "AUTOMATIC", "HEAVY", "ASSAULT", "MISCELLANEOUS",
-    "LEGS V2", "ARMS V2", "CHEST V2", "HEART V2", "EYES V2", "BRAIN V2"
-};
-
 ResearchManager::ResearchManager() {
+    pCurrResearch_ = NULL;
 }
 
 ResearchManager::~ResearchManager() {
@@ -55,6 +51,7 @@ void ResearchManager::destroy() {
 
     availableModsSearch_.clear();
     availableWeaponsSearch_.clear();
+    pCurrResearch_ = NULL;
 }
 
 /*!
@@ -67,48 +64,81 @@ Research *ResearchManager::loadResearch(Weapon::WeaponType wt) {
     try {
         // Loads configuration file
         ConfigFile conf(filename);
-        std::string name;
-        int fund;
-        int next;
-        Weapon::WeaponType nextWeap = Weapon::Unknown;
-        char tmp[25];
-        char *pattern = "res.weap.%d.%s";
 
-        sprintf(tmp, pattern, wt, "name");
-        conf.readInto(name, tmp);
-        sprintf(tmp, pattern, wt, "minFund");
-        conf.readInto(fund, tmp);
-        sprintf(tmp, pattern, wt, "next");
-        conf.readInto(next, tmp);
+        try {
+            std::string name;
+            int fund;
+            int next;
+            Weapon::WeaponType nextWeap = Weapon::Unknown;
+            char tmp[25];
+            char *pattern = "res.weap.%d.%s";
 
-        // Convert file constants to game constants
-        if (next == 2) {
-            nextWeap = Weapon::GaussGun;
-        } else if (next == 4) {
-            nextWeap = Weapon::Uzi;
-        } else if (next == 5) {
-            nextWeap = Weapon::Minigun;
-        } else if (next == 6) {
-            nextWeap = Weapon::Laser;
-        } else if (next == 7) {
-            nextWeap = Weapon::Flamer;
-        } else if (next == 8) {
-            nextWeap = Weapon::LongRange;
-        } else if (next == 11) {
-            nextWeap = Weapon::TimeBomb;
-        } else if (next == 12) {
-            nextWeap = Weapon::AccessCard;
-        } else if (next == 13) {
-            nextWeap = Weapon::EnergyShield;
+            sprintf(tmp, pattern, wt, "name");
+            conf.readInto(name, tmp);
+            sprintf(tmp, pattern, wt, "minFund");
+            conf.readInto(fund, tmp);
+            sprintf(tmp, pattern, wt, "next");
+            conf.readInto(next, tmp);
+
+            // Convert file constants to game constants
+            if (next == 2) {
+                nextWeap = Weapon::GaussGun;
+            } else if (next == 4) {
+                nextWeap = Weapon::Uzi;
+            } else if (next == 5) {
+                nextWeap = Weapon::Minigun;
+            } else if (next == 6) {
+                nextWeap = Weapon::Laser;
+            } else if (next == 7) {
+                nextWeap = Weapon::Flamer;
+            } else if (next == 8) {
+                nextWeap = Weapon::LongRange;
+            } else if (next == 11) {
+                nextWeap = Weapon::TimeBomb;
+            } else if (next == 12) {
+                nextWeap = Weapon::AccessCard;
+            } else if (next == 13) {
+                nextWeap = Weapon::EnergyShield;
+            }
+
+            // Create new research
+            return new Research(wt, name, fund, nextWeap);
+        } catch (...) {
+            FSERR(Log::k_FLG_GAME, "ResearchManager", "loadResearch", ("Cannot load weapon research %d", wt))
         }
+    } catch (...) {
+        FSERR(Log::k_FLG_IO, "ResearchManager", "loadResearch", ("File %s cannot be read", filename.c_str()))
+    }
+    return NULL;
+}
 
-        // Create new research
-        return new Research(wt, name, fund, nextWeap);
+Research *ResearchManager::loadResearch(Mod::EModType mt, Mod::EModVersion version) {
+    std::string filename(File::fileFullPath("ref/research.dat", false));
+    try {
+        // Loads configuration file
+        ConfigFile conf(filename);
+
+        std::string name;
+        int min;
+
+        char tmp[25];
+        char *pattern = "res.mod.%d.%d.%s";
+
+        sprintf(tmp, pattern, mt, version, "name");
+        conf.readInto(name, tmp);
+        sprintf(tmp, pattern, mt, version, "minFund");
+        conf.readInto(min, tmp, 0);
+
+        if (min == 0 || name.size() == 0) {
+            FSERR(Log::k_FLG_GAME, "ResearchManager", "loadResearch", ("Cannot load mod research %d, version %d", mt, version))
+            return NULL;
+        }
+        return new Research(mt, version, name, min);
+
     } catch (...) {
         FSERR(Log::k_FLG_IO, "ResearchManager", "loadResearch", ("File %s cannot be read", filename.c_str()))
         return NULL;
     }
-    return NULL;
 }
 
 bool ResearchManager::reset() {
@@ -124,12 +154,14 @@ bool ResearchManager::reset() {
         availableWeaponsSearch_.add(pRes);
     }
 
-    availableModsSearch_.add(new Research(g_Fields[4], 4440));
-    availableModsSearch_.add(new Research(g_Fields[5], 4440));
-    availableModsSearch_.add(new Research(g_Fields[6], 6000));
-    availableModsSearch_.add(new Research(g_Fields[7], 3480));
-    availableModsSearch_.add(new Research(g_Fields[8], 3480));
-    availableModsSearch_.add(new Research(g_Fields[9], 34800));
+    Mod::EModType defMods[] = {Mod::MOD_LEGS, Mod::MOD_ARMS, Mod::MOD_CHEST,Mod::MOD_HEART, Mod::MOD_EYES, Mod::MOD_BRAIN};
+    for (int i=0; i<6; i++) {
+        Research *pRes = loadResearch(defMods[i], Mod::MOD_V2);
+        if (pRes == NULL) {
+            return false;
+        }
+        availableModsSearch_.add(pRes);
+    }
 
     return true;
 }
@@ -160,6 +192,17 @@ void ResearchManager::fireGameEvent(Research *pResearch) {
     }
 }
 
+void ResearchManager::start(Research *pResearch) {
+    // If there is already a running search => suspends it
+    if (pCurrResearch_) {
+        pCurrResearch_->suspend();
+    }
+
+    // Starts research
+    pCurrResearch_ = pResearch;
+    pCurrResearch_->start();
+}
+
 /*!
  * Process all started research and returns the amount of money
  * corresponding those researches
@@ -167,56 +210,66 @@ void ResearchManager::fireGameEvent(Research *pResearch) {
 int ResearchManager::process(int hourElapsed, int moneyLeft) {
     int amount = 0;
 
-    // process research on mods
-    amount += processList(hourElapsed, moneyLeft, &availableModsSearch_);
-    hourElapsed -= amount;
+    if (pCurrResearch_ && pCurrResearch_->getStatus() == Research::STARTED) {
+            amount = pCurrResearch_->updateProgression(hourElapsed, moneyLeft);
 
-    // process research on weapons
-    amount += processList(hourElapsed, moneyLeft, &availableWeaponsSearch_);
+            if (pCurrResearch_->getStatus() == Research::FINISHED) {
+                Research *pNextRes = NULL;
+                // Enable new weapon or mods
+                if (pCurrResearch_->getType() == Research::EQUIPS) {
+                    g_App.weapons().enableWeapon(pCurrResearch_->getSearchWeapon());
+                    // Loads next research
+                    if (pCurrResearch_->getNextWeaponRes() != Weapon::Unknown) {
+                        pNextRes = loadResearch(pCurrResearch_->getNextWeaponRes());
+                        
+                    }
+                } else {
+                    g_App.mods().enableMod(pCurrResearch_->getSearchModType(), pCurrResearch_->getSearchModVersion());
+                    // Loads next research
+                    if (pCurrResearch_->getSearchModVersion() == Mod::MOD_V2) {
+                        pNextRes = loadResearch(pCurrResearch_->getSearchModType(), Mod::MOD_V3);
+                    }
+                }
+
+                // There is a new research of the same field
+                if (pNextRes) {
+                    // Replace with new search
+                    replaceSearch(pCurrResearch_, pNextRes);
+                } else {
+                    // There's no more research for this category
+                    removeSearch(pCurrResearch_);
+                }
+                // alerts of change
+                fireGameEvent(pCurrResearch_);
+                delete pCurrResearch_;
+                pCurrResearch_ = NULL;
+            }
+        }
     
     return amount;
 }
 
-int ResearchManager::processList(int hourElapsed, int moneyLeft, VectorModel < Research * > *pList) {
-    int amount = 0;
-    // process research 
-    for (int i=0; i<pList->size();) {
-        Research *pRes = pList->get(i);
-        bool incrIt = true;
-        
-        if (pRes->getStatus() == Research::STARTED) {
-            amount += pRes->updateProgression(hourElapsed, moneyLeft);
-            moneyLeft -= amount;
-
-            if (pRes->getStatus() == Research::FINISHED) {
-                // Enable new weapon or mods
-                if (pRes->getType() == Research::EQUIPS) {
-                    g_App.weapons().enableWeapon(pRes->getSearchWeapon());
-                } else {
-                    
-                }
-
-                // Loads next research
-                if (pRes->getNextWeaponRes() != Weapon::Unknown) {
-                    Research *pNextRes = loadResearch(pRes->getNextWeaponRes());
-                    if (pNextRes) {
-                        pList->setAt(i, pNextRes);
-                    }
-                } else {
-                    // There's no more research for this category
-                    pList->remove(i);
-                    incrIt = false;
-                }
-                // alerts of change
-                fireGameEvent(pRes);
-                delete pRes;
-            }
-        }
-
-        if (incrIt) {
-            i++;
+void ResearchManager::replaceSearch(Research *pOldSearch, Research *pNewSearch) {
+    VectorModel < Research * > *pList = 
+        pOldSearch->getType() == Research::EQUIPS ? &availableWeaponsSearch_ : &availableModsSearch_;
+    
+    for (int i=0; i<pList->size(); i++) {
+        if (pOldSearch->getId() == pList->get(i)->getId()) {
+            pList->setAt(i, pNewSearch);
+            return;
         }
     }
+}
 
-    return amount;
+// There's no more research for this category
+void ResearchManager::removeSearch(Research *pOldSearch) {
+    VectorModel < Research * > *pList = 
+        pOldSearch->getType() == Research::EQUIPS ? &availableWeaponsSearch_ : &availableModsSearch_;
+    
+    for (int i=0; i<pList->size(); i++) {
+        if (pOldSearch->getId() == pList->get(i)->getId()) {
+            pList->remove(i);
+            return;
+        }
+    }
 }

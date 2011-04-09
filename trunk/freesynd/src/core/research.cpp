@@ -41,14 +41,18 @@ Research::Research(Weapon::WeaponType wType, std::string name, int min, Weapon::
     nextWeapon_ = nextWeapon;
 }
 
-Research::Research(std::string name, int min) {
+Research::Research(Mod::EModType mType, Mod::EModVersion ver, std::string name, int min) {
     init(name, min);
     type_ = MODS;
+    modType_ = mType;
+    modVersion_ = ver;
 }
 
 void Research::init(std::string name, int min) {
     id_ = researchCnt++;
     weapon_ = Weapon::Unknown;
+    modType_ = Mod::Unknown;
+    modVersion_ = Mod::MOD_V1;
     name_ = name;
     minFunding_ = min;
     status_ = NOT_STARTED;

@@ -26,6 +26,7 @@
 #include <list>
 
 #include "weapon.h"
+#include "mod.h"
 
 /*!
  * Represents a research on a specific field.
@@ -41,6 +42,7 @@ public:
     enum EResStatus {
         NOT_STARTED,
         STARTED,
+        SUSPENDED,
         FINISHED
     };
 
@@ -54,7 +56,7 @@ public:
     };
 
     Research(Weapon::WeaponType wType, std::string name, int min, Weapon::WeaponType nextWeapon);
-    Research(std::string name, int min);
+    Research(Mod::EModType mType, Mod::EModVersion ver, std::string name, int min);
     ~Research() {}
 
     int getId() { return id_; }
@@ -66,15 +68,23 @@ public:
     //! Returns the current status
     EResStatus getStatus() { return status_; }
 
+    //! Weapon researched
     Weapon::WeaponType getSearchWeapon() { return weapon_; }
+    //! Nex research on weapon
     Weapon::WeaponType getNextWeaponRes() { return nextWeapon_; }
+    //! Mod research type
+    Mod::EModType getSearchModType() { return modType_; }
+    //! Mod research version
+    Mod::EModVersion getSearchModVersion() { return modVersion_; }
 
     bool incrFunding();
     bool decrFunding();
     //!Starts the research
     void start() { status_ = STARTED; }
+    //!Suspends the research
+    void suspend() { status_ = SUSPENDED; }
     int getProjectedHour() { return projectedHour_; }
-    std::list<ProgressPoint> getProgressList() { return progressList_; }
+    std::list<ProgressPoint> &getProgressList() { return progressList_; }
     int updateProgression(short hour, int budget);
 
 protected:
@@ -91,6 +101,10 @@ protected:
     Weapon::WeaponType weapon_;
     /*! If research is on weapon, then this field is set.*/
     Weapon::WeaponType nextWeapon_;
+    /*! If research is on mod, then this field is set.*/
+    Mod::EModType modType_;
+    /*! If research is on mod, then this field is set.*/
+    Mod::EModVersion modVersion_;
     /*! Name of the research.*/
     std::string name_;
     /*! Minimum amount of funding.*/

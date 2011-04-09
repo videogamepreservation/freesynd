@@ -584,19 +584,17 @@ void SelectMenu::handleAction(const int actionId, void *ctx, const int modKeys)
             if (sel_all_) {
                 for (int n = 0; n < 4; n++) {
                     Agent *selected = g_Session.teamMember(n);
-                    if (selected && (selected->slot(pSelectedMod_->slot()) == NULL
-                        || selected->slot(pSelectedMod_->slot())->cost() < pSelectedMod_->cost())
+                    if (selected && selected->canHaveMod(pSelectedMod_)
                         && g_Session.getMoney() >= pSelectedMod_->cost()) {
-                        selected->setSlot(pSelectedMod_->slot(), pSelectedMod_);
+                        selected->addMod(pSelectedMod_);
                         g_Session.setMoney(g_Session.getMoney() - pSelectedMod_->cost());
                     }
                 }
             } else {
                 Agent *selected = g_Session.teamMember(cur_agent_);
-                if (selected && (selected->slot(pSelectedMod_->slot()) == NULL
-                     || selected->slot(pSelectedMod_->slot())->cost() < pSelectedMod_->cost())
+                if (selected && selected->canHaveMod(pSelectedMod_)
                     && g_Session.getMoney() >= pSelectedMod_->cost()) {
-                    selected->setSlot(pSelectedMod_->slot(), pSelectedMod_);
+                    selected->addMod(pSelectedMod_);
                     g_Session.setMoney(g_Session.getMoney() - pSelectedMod_->cost());
                 }
             }

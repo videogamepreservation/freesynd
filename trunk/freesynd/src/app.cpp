@@ -147,34 +147,32 @@ void App::updateIntroFlag(const char *dir) {
  */
 bool App::initialize(const char *dir) {
     
-    LOG(Log::k_FLG_GFX, "App", "initialize", ("reading configuration..."))
+    LOG(Log::k_FLG_INFO, "App", "initialize", ("reading configuration..."))
     if (!readConfiguration(dir)) {
         LOG(Log::k_FLG_GFX, "App", "initialize", ("failed to read configuration..."))
         return false;
     }
 
-    LOG(Log::k_FLG_GFX, "App", "initialize", ("initializing system..."))
+    LOG(Log::k_FLG_INFO, "App", "initialize", ("initializing system..."))
     if (!system_->initialize(fullscreen_)) {
         return false;
     }
 
-    LOG(Log::k_FLG_GFX, "App", "initialize", ("Loading game data..."))
-    agents_.loadAgents();
-    mods_.loadMods();
-
-    LOG(Log::k_FLG_GFX, "App", "initialize", ("Loading intro sounds..."))
+    LOG(Log::k_FLG_INFO, "App", "initialize", ("Loading intro sounds..."))
     if (!intro_sounds_.loadSounds(SoundManager::SAMPLES_INTRO)) {
         return false;
     }
 
-    LOG(Log::k_FLG_GFX, "App", "initialize", ("Loading game sounds..."))
+    LOG(Log::k_FLG_INFO, "App", "initialize", ("Loading game sounds..."))
     if (!game_sounds_.loadSounds(SoundManager::SAMPLES_GAME)) {
         return false;
     }
 
-    LOG(Log::k_FLG_GFX, "App", "initialize", ("Loading music..."))
+    LOG(Log::k_FLG_INFO, "App", "initialize", ("Loading music..."))
     music_.loadMusic();
 
+    LOG(Log::k_FLG_INFO, "App", "initialize", ("Loading game data..."))
+    agents_.loadAgents();
     return reset();
 }
 
@@ -192,12 +190,16 @@ void App::cheatWeaponsAndMods() {
 
 void App::cheatEquipAllMods() {
     for (int agent = 0; agent < AgentManager::MAX_AGENT; agent++) {
-        if (agents_.agent(agent)) {
-            agents_.agent(agent)->clearSlots();
-            for (unsigned int i = 0; i < 6; i++) {
-                agents_.agent(agent)->setSlot(SLOT_LEGS - i,
-                    mods_.mod(2 + i * 3));
-            }
+        Agent *pAgent = agents_.agent(agent);
+        if (pAgent) {
+            pAgent->clearSlots();
+
+            pAgent->addMod(mods_.getMod(Mod::MOD_LEGS, Mod::MOD_V3));
+            pAgent->addMod(mods_.getMod(Mod::MOD_ARMS, Mod::MOD_V3));
+            pAgent->addMod(mods_.getMod(Mod::MOD_EYES, Mod::MOD_V3));
+            pAgent->addMod(mods_.getMod(Mod::MOD_BRAIN, Mod::MOD_V3));
+            pAgent->addMod(mods_.getMod(Mod::MOD_CHEST, Mod::MOD_V3));
+            pAgent->addMod(mods_.getMod(Mod::MOD_HEART, Mod::MOD_V3));
         }
     }
 }

@@ -34,24 +34,35 @@
  */
 class ModManager {
 public:
+    //! Constructor
     ModManager();
+    //! Destructor
     ~ModManager();
 
-    void loadMods();
+    //! Resources destruction
+    void destroy();
+    //! Reset Data
+    void reset();
+    //! Cheating mode to enable all mods
+    void cheatEnableAllMods();
+    
+    Mod *getMod(Mod::EModType mt, Mod::EModVersion ver);
 
-    Mod *mod(int slot, int version = 1) {
-        assert(slot < 6);
-        assert(version >= 1 && version <= 3);
-        return mods_.get(slot + (version - 1) * 6);
-    }
-
+    //! Enable mod of given type and version
+    void enableMod(Mod::EModType mt, Mod::EModVersion ver);
+    //! Returns the list of currently available weapons
     SequenceModel * getAvalaibleMods() { return &mods_; }
 
-    void cheatEnableAllMods();
-    void reset();
+protected:
+    //! Loads the mod from file
+    Mod *loadMod(Mod::EModType mt, Mod::EModVersion ver);
 
 protected:
-     VectorModel<Mod *> mods_;
+    /*! This vector is used to store necessary but unavailable mods until there
+     * are made available.*/
+    std::vector<Mod *> preFetch_;
+    //! The list of currently available mods
+    VectorModel<Mod *> mods_;
 };
 
 #endif

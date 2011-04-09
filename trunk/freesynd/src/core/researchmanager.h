@@ -51,6 +51,8 @@ public:
      */
     SequenceModel * getAvailableWeaponsSearch() { return &availableWeaponsSearch_; }
 
+    //! Starts research and suspends current search
+    void start(Research *pResearch);
     // Processes all engaged research
     int process(int hourElapsed, int moneyLeft);
     //! Adds a listener for research event
@@ -59,9 +61,11 @@ public:
 
 protected:
     Research *loadResearch(Weapon::WeaponType wt);
+    Research *loadResearch(Mod::EModType mt, Mod::EModVersion version);
+    void removeSearch(Research *pOldSearch);
+    void replaceSearch(Research *pOldSearch, Research *pNewSearch);
     void destroy();
     void fireGameEvent(Research *pResearch);
-    int processList(int hourElapsed, int moneyLeft, VectorModel < Research * > *pList);
 
 protected:
     /*! List of all currently available research on mods.*/
@@ -70,6 +74,8 @@ protected:
     VectorModel<Research *> availableWeaponsSearch_;
     /*! List of listeners for research events.*/
     std::list<GameEventListener *> listeners_;
+    /*! There is only one active search at a time.*/
+    Research *pCurrResearch_;
 };
 
 #endif //RESEARCHMANAGER_H

@@ -85,7 +85,7 @@ ResearchMenu::ResearchMenu(MenuManager * m):Menu(m, "research", "mresrch.dat", "
  */
 void ResearchMenu::showDetailsList() {
     addDirtyRect(500, 105,  125, 235);
-    hideOption(KEY_F5);
+    getOption(cancelDescId_)->setVisible(false);
     pSelectedWeapon_ = NULL;
     pSelectedMod_ = NULL;
 
@@ -322,7 +322,7 @@ void ResearchMenu::handleAction(const int actionId, void *ctx, const int modKeys
     } else if (actionId == cancelSearchId_) {
         showFieldList();
     } else if (actionId == researchId_) {
-        pSelectedRes_->start();
+        g_Session.researchManager().start(pSelectedRes_);
         showResGraph();
     } else if (actionId == incrFundId_) {
         if (pSelectedRes_->incrFunding()) {
@@ -353,7 +353,7 @@ void ResearchMenu::handleGameEvent(GameEvent evt) {
         }
 
         // If there was a research info panel opened -> close it
-        if (pSelectedRes_->getId() == pRes->getId()) {
+        if (pSelectedRes_ && pSelectedRes_->getId() == pRes->getId()) {
             showFieldList();
         }
     }

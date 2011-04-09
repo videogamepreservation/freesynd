@@ -30,6 +30,7 @@
 #include "gfx/screen.h"
 #include "agent.h"
 #include "weapon.h"
+#include "mod.h"
 
 /*!
  * Constructs a new agent.
@@ -51,4 +52,29 @@ Agent::~Agent() {
 void Agent::removeAllWeapons() {
     while (weapons_.size())
         delete removeWeapon(0);
+}
+
+/*!
+ * Returns true if the agent can be equiped with that mod version.
+ */
+bool Agent::canHaveMod(Mod *pNewMod) {
+    if (pNewMod == NULL) {
+        return false;
+    }
+
+    Mod *pMod = slots_[pNewMod->getType()];
+    if (pMod) {
+        // Agent has a mod of the same type
+        // Returns true if equiped version if less than new version
+        return (pMod->getVersion() < pNewMod->getVersion());
+    }
+    
+    // There is no mod of that type so agent can be equiped
+    return true;
+}
+
+void Agent::addMod(Mod *pNewMod) {
+    if (pNewMod) {
+        slots_[pNewMod->getType()] = pNewMod;
+    }
 }

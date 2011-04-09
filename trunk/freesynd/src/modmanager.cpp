@@ -31,110 +31,204 @@ ModManager::ModManager()
 {
 }
 
-ModManager::~ModManager()
-{
+ModManager::~ModManager() {
+    destroy();
+}
+
+void ModManager::destroy() {
+    // Delete all mods from the cache
+    for (unsigned int i = 0; i != preFetch_.size(); ++i) {
+       delete preFetch_[i];
+    }
+
+    // Delete all available mods 
     for (int i = 0; i < mods_.size(); i++) {
         delete mods_.get(i);
     }
+
+    preFetch_.clear();
     mods_.clear();
 }
 
-void ModManager::loadMods()
-{
-    mods_.
-        add(new
-                  Mod("LEGS V1", 6000,
-                      "REPLACEMENT\nMETAL LEGS.\nSERVO ASSISTED\nHYDRAULICS\nALLOW QUICKER\nMOVEMENT.",
-                      5, 33, 37));
-    mods_.
-        add(new
-                  Mod("ARMS V1", 5000,
-                      "REPLACEMENT\nMETAL LEGS.\nSERVO ASSISTED\nHYDRAULICS\nALLOW THE\nCARRYING OF\nHEAVIER ITEMS.",
-                      4, 41, 45));
-    mods_.
-        add(new
-                  Mod("CHEST V1", 8000,
-                      "METAL CHEST\nCAGE. ALL\nINTERNAL\nORGANS ARE\nSHIELDED BY\nHEAVY METAL\nCASING.",
-                      3, 48, 51));
-    mods_.
-        add(new
-                  Mod("HEART V1", 4500,
-                      "HEART\nSTIMULATOR.\nMONITORS AND\nMAINTAINS THE\nHEART RATE OF\nTHE INDIVIDUAL.",
-                      2, 54));
-    mods_.
-        add(new
-                  Mod("EYES V1", 4500,
-                      "VISION\nENHANCER WITH\nLIMITED ZOOM\nFACILITY.\nALLOWS NEAR\nPERFECT SIGHT\nEVEN AT NIGHT.",
-                      1, 60));
-    mods_.
-        add(new
-                  Mod("BRAIN V1", 4500,
-                      "NEURAL\nENHANCER THAT\nSPEEDS UP\nBRAIN STEM\nRESPONSE TIME.",
-                      0, 57));
+void ModManager::reset() {
+    destroy();
 
-/*    mods_.
-        add(new
-                  Mod("LEGS V2", 30000,
-                      "PLASTEEL LEGS.\nLIGHTER AND\nTOUGHER THAN\nMETAL LEGS.\nENHANCED\nHYDRAULIC\nSYSTEM AND\nBALANCE\nCONTROL.",
-                      5, 34, 38));
-    mods_.
-        add(new
-                  Mod("ARMS V2", 25000,
-                      "PLASTEEL ARMS.\nLIGHTER AND\nTOUGHER THAN\nMETAL ARMS.\nENHANCED\nHYDRAULIC\nSYSTEM AND\nPRESSURE\nCONTROL.",
-                      4, 42, 46));
-    mods_.
-        add(new
-                  Mod("CHEST V2", 40000,
-                      "PLASTEEL CHEST\nCAGE. LIGHTER\nAND TOUGHER\nTHAN THE METAL\nVERSION WITH\nBETTER\nMOBILITY.",
-                      3, 49, 52));
-    mods_.
-        add(new
-                  Mod("HEART V2", 22500,
-                      "HEART\nACCELERATOR\nAND MONITOR.\nHEART RATE IS\nALMOST DOUBLED\nALLOWING THE\nQUICKER\nDISTRIBUTION\nOF HORMONES.",
-                      2, 55));
-    mods_.
-        add(new
-                  Mod("EYES V2", 22500,
-                      "ENHANCED MODEL\nOF THE V1\nINCORPORATING\nA TARGET\nAQUISITION\nFACILITY AND\nRANGE FINDER.",
-                      1, 61));
-    mods_.
-        add(new
-                  Mod("BRAIN V2", 22500,
-                      "NEURO CNS\nDEVICE THAT\nINTERCEPTS\nMOST LOW LEVEL\nFUNCTIONS\nLEAVING THE\nBRAIN FREE TO\nDEAL WITH HIGH\nEND DESICIONS.",
-                      0, 58));
-
-    mods_.
-        add(new
-                  Mod("LEGS V3", 60000,
-                      "CYBERMESH LEGS.\nPLASTEEL CORE\nWITH SYNTHETIC\nMUSCLE FIBRE.\nSUPERB\nRESPONSE AND\nBALANCE\nCOUPLED WITH\nHIGH SPEED.",
-                      5, 35, 39));
-    mods_.
-        add(new
-                  Mod("ARMS V3", 50000,
-                      "CYBERMESH ARMS.\nPLASTEEL CORE\nWITH SYNTHETIC\nMUSCLE FIBRE.\nEXCELLENT\nTACTILE\nCONTROL AND\nWEIGHT LOADING.",
-                      4, 43, 47));
-    mods_.
-        add(new
-                  Mod("CHEST V3", 80000,
-                      "CYBERMESH\nCHEST CAGE\nWITH POWER\nSHIELDING. ALL\nINTERNAL\nORGANS ARE\nSHIELDED BY A\nLOW POWER\nFIELD\nGENERATOR.",
-                      3, 50, 53));
-    mods_.
-        add(new
-                  Mod("HEART V3", 45000,
-                      "CYBERNETIC\nHEART. POWERFUL\nPUMP WITH IN\nBUILT SYSTEM\nANALYSIS AND\nOVERIDE\nFACILITIES.\nTRIPLES OUTPUT\nOF A STANDARD\nHUMAN HEART.",
-                      2, 56));
-    mods_.
-        add(new
-                  Mod("EYES V3", 45000,
-                      "LATEST\nNEUROCYBERNETIC\nIMPLANTS. GIVES\nPERFECT NIGHT\nVISION WITH\nTHE AID OF\nTARGETERS\nRANGE FINDERS\nAND THREAT\nIDENTIFIER.",
-                      1, 62));
-    mods_.
-        add(new
-                  Mod("BRAIN V3", 45000,
-                      "CEREBRAL\nMULTIPLIER\nCONNECTED TO A\nCOMPUNET\nGIVING ACCESS\nTO A MASS OF\nTACTICAL INFO.\nADAPTED FROM\nTHE MILITARY\nVERSION.",
-                      0, 59));*/
+    Mod::EModType types[] = {Mod::MOD_LEGS, Mod::MOD_ARMS, Mod::MOD_CHEST,
+        Mod::MOD_HEART, Mod::MOD_EYES, Mod::MOD_BRAIN};
+    
+    for (int t=0; t<6; t++) {
+        enableMod(types[t], Mod::MOD_V1);
+    }
 }
 
-void ModManager::cheatEnableAllMods() {}
+void ModManager::cheatEnableAllMods() {
+    Mod::EModType types[] = {Mod::MOD_LEGS, Mod::MOD_ARMS, Mod::MOD_CHEST,
+        Mod::MOD_HEART, Mod::MOD_EYES, Mod::MOD_BRAIN};
+    Mod::EModVersion versions[] = {Mod::MOD_V1, Mod::MOD_V2, Mod::MOD_V3};
 
-void ModManager::reset() {}
+    for (int t=0; t<6; t++) {
+        for (int v=0; v<3; v++) {
+            enableMod(types[t], versions[v]);
+        }
+    }
+}
+
+void ModManager::enableMod(Mod::EModType mt, Mod::EModVersion ver) {
+    // First check if mod is not already available
+    for (unsigned i = 0; i != mods_.size(); ++i) {
+        if (mt == mods_.get(i)->getType() && ver == mods_.get(i)->getVersion())
+            return;
+    }
+
+    // Then get mod
+    Mod *pMod = getMod(mt, ver);
+
+    // removes it from cache
+    for (std::vector < Mod * >::iterator it = preFetch_.begin();
+         it != preFetch_.end(); it++) {
+             if (pMod == *it) {
+                preFetch_.erase(it);
+                break;
+             }
+    }
+
+    // make it available
+    for (unsigned i = 0; i != mods_.size(); ++i) {
+        Mod *pOther = mods_.get(i);
+        if (pMod->getType() < pOther->getType()) {
+            // The new mod is inserted in the order of the type and version
+            mods_.insertAt(i, pMod);
+            return;
+        }
+    }
+    // If we're here, it's because the new mod comes at the end of the list
+    mods_.add(pMod);
+}
+
+Mod *ModManager::getMod(Mod::EModType mt, Mod::EModVersion ver) {
+    // Search in prefetched mods first
+    for (unsigned int i = 0; i < preFetch_.size(); i++) {
+        if (mt == preFetch_[i]->getType() && ver == preFetch_[i]->getVersion())
+            return preFetch_[i];
+    }
+
+    // Then search in available mods
+    for (unsigned i = 0; i != mods_.size(); ++i) {
+        if (mt == mods_.get(i)->getType() && ver == mods_.get(i)->getVersion())
+            return mods_.get(i);
+    }
+
+    // Mod was not found so loads it
+    Mod *pMod = loadMod(mt, ver);
+    // Stores it in cache
+    preFetch_.push_back(pMod);
+    
+    return pMod;
+}
+
+Mod *ModManager::loadMod(Mod::EModType mt, Mod::EModVersion ver) {
+    if (mt == Mod::MOD_LEGS) {
+        if (ver == Mod::MOD_V1) {
+            return new Mod("LEGS V1", Mod::MOD_LEGS, Mod::MOD_V1, 6000,
+                        "REPLACEMENT\nMETAL LEGS.\nSERVO ASSISTED\nHYDRAULICS\nALLOW QUICKER\nMOVEMENT.",
+                        33, 37);
+        } else if (ver == Mod::MOD_V2) {
+            return new
+                  Mod("LEGS V2", Mod::MOD_LEGS, Mod::MOD_V2, 30000,
+                      "PLASTEEL LEGS.\nLIGHTER AND\nTOUGHER THAN\nMETAL LEGS.\nENHANCED\nHYDRAULIC\nSYSTEM AND\nBALANCE\nCONTROL.",
+                      34, 38);
+        } else if (ver == Mod::MOD_V3) {
+            return new
+                  Mod("LEGS V3", Mod::MOD_LEGS, Mod::MOD_V3, 60000,
+                      "CYBERMESH LEGS.\nPLASTEEL CORE\nWITH SYNTHETIC\nMUSCLE FIBRE.\nSUPERB\nRESPONSE AND\nBALANCE\nCOUPLED WITH\nHIGH SPEED.",
+                      35, 39);
+        }
+    } else if (mt == Mod::MOD_ARMS) {
+        if (ver == Mod::MOD_V1) {
+            return new
+                  Mod("ARMS V1", Mod::MOD_ARMS, Mod::MOD_V1, 5000,
+                      "REPLACEMENT\nMETAL LEGS.\nSERVO ASSISTED\nHYDRAULICS\nALLOW THE\nCARRYING OF\nHEAVIER ITEMS.",
+                      41, 45);
+        } else if (ver == Mod::MOD_V2) {
+            return new
+                  Mod("ARMS V2", Mod::MOD_ARMS, Mod::MOD_V2, 25000,
+                      "PLASTEEL ARMS.\nLIGHTER AND\nTOUGHER THAN\nMETAL ARMS.\nENHANCED\nHYDRAULIC\nSYSTEM AND\nPRESSURE\nCONTROL.",
+                      42, 46);
+        } else if (ver == Mod::MOD_V3) {
+            return new
+                  Mod("ARMS V3", Mod::MOD_ARMS, Mod::MOD_V3, 50000,
+                      "CYBERMESH ARMS.\nPLASTEEL CORE\nWITH SYNTHETIC\nMUSCLE FIBRE.\nEXCELLENT\nTACTILE\nCONTROL AND\nWEIGHT LOADING.",
+                      43, 47);
+        }
+    } else if (mt == Mod::MOD_CHEST) {
+        if (ver == Mod::MOD_V1) {
+            return new
+                  Mod("CHEST V1", Mod::MOD_CHEST, Mod::MOD_V1, 8000,
+                      "METAL CHEST\nCAGE. ALL\nINTERNAL\nORGANS ARE\nSHIELDED BY\nHEAVY METAL\nCASING.",
+                      48, 51);
+        } else if (ver == Mod::MOD_V2) {
+            return new
+                  Mod("CHEST V2", Mod::MOD_CHEST, Mod::MOD_V2, 40000,
+                      "PLASTEEL CHEST\nCAGE. LIGHTER\nAND TOUGHER\nTHAN THE METAL\nVERSION WITH\nBETTER\nMOBILITY.",
+                      49, 52);
+        } else if (ver == Mod::MOD_V3) {
+            return new
+                  Mod("CHEST V3", Mod::MOD_CHEST, Mod::MOD_V3, 80000,
+                      "CYBERMESH\nCHEST CAGE\nWITH POWER\nSHIELDING. ALL\nINTERNAL\nORGANS ARE\nSHIELDED BY A\nLOW POWER\nFIELD\nGENERATOR.",
+                      50, 53);
+        }
+    } else if (mt == Mod::MOD_HEART) {
+        if (ver == Mod::MOD_V1) {
+            return new
+                  Mod("HEART V1", Mod::MOD_HEART, Mod::MOD_V1, 4500,
+                      "HEART\nSTIMULATOR.\nMONITORS AND\nMAINTAINS THE\nHEART RATE OF\nTHE INDIVIDUAL.",
+                      54);
+        } else if (ver == Mod::MOD_V2) {
+            return new
+                  Mod("HEART V2", Mod::MOD_HEART, Mod::MOD_V2, 22500,
+                      "HEART\nACCELERATOR\nAND MONITOR.\nHEART RATE IS\nALMOST DOUBLED\nALLOWING THE\nQUICKER\nDISTRIBUTION\nOF HORMONES.",
+                      55);
+        } else if (ver == Mod::MOD_V3) {
+            return new
+                  Mod("HEART V3", Mod::MOD_HEART, Mod::MOD_V3, 45000,
+                      "CYBERNETIC\nHEART. POWERFUL\nPUMP WITH IN\nBUILT SYSTEM\nANALYSIS AND\nOVERIDE\nFACILITIES.\nTRIPLES OUTPUT\nOF A STANDARD\nHUMAN HEART.",
+                      56);
+        }
+    } else if (mt == Mod::MOD_EYES) {
+        if (ver == Mod::MOD_V1) {
+            return new
+                  Mod("EYES V1", Mod::MOD_EYES, Mod::MOD_V1, 4500,
+                      "VISION\nENHANCER WITH\nLIMITED ZOOM\nFACILITY.\nALLOWS NEAR\nPERFECT SIGHT\nEVEN AT NIGHT.",
+                      60);
+        } else if (ver == Mod::MOD_V2) {
+            return new
+                  Mod("EYES V2", Mod::MOD_EYES, Mod::MOD_V2, 22500,
+                      "ENHANCED MODEL\nOF THE V1\nINCORPORATING\nA TARGET\nAQUISITION\nFACILITY AND\nRANGE FINDER.",
+                      61);
+        } else if (ver == Mod::MOD_V3) {
+            return new
+                  Mod("EYES V3", Mod::MOD_EYES, Mod::MOD_V3, 45000,
+                      "LATEST\nNEUROCYBERNETIC\nIMPLANTS. GIVES\nPERFECT NIGHT\nVISION WITH\nTHE AID OF\nTARGETERS\nRANGE FINDERS\nAND THREAT\nIDENTIFIER.",
+                      62);
+        }
+    } else if (mt == Mod::MOD_BRAIN) {
+        if (ver == Mod::MOD_V1) {
+            return new
+                  Mod("BRAIN V1", Mod::MOD_BRAIN, Mod::MOD_V1, 4500,
+                      "NEURAL\nENHANCER THAT\nSPEEDS UP\nBRAIN STEM\nRESPONSE TIME.",
+                      57);
+        } else if (ver == Mod::MOD_V2) {
+            return new
+                  Mod("BRAIN V2", Mod::MOD_BRAIN, Mod::MOD_V2, 22500,
+                      "NEURO CNS\nDEVICE THAT\nINTERCEPTS\nMOST LOW LEVEL\nFUNCTIONS\nLEAVING THE\nBRAIN FREE TO\nDEAL WITH HIGH\nEND DESICIONS.",
+                      58);
+        } else if (ver == Mod::MOD_V3) {
+            return new
+                  Mod("BRAIN V3", Mod::MOD_BRAIN, Mod::MOD_V3, 45000, 
+                      "CEREBRAL\nMULTIPLIER\nCONNECTED TO A\nCOMPUNET\nGIVING ACCESS\nTO A MASS OF\nTACTICAL INFO.\nADAPTED FROM\nTHE MILITARY\nVERSION.",
+                      59);
+        }
+    }
+
+    return NULL;
+}

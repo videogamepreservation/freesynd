@@ -62,14 +62,13 @@ public:
         health_ = n;
     }
 
+    bool canHaveMod(Mod *pNewMod);
+
+    void addMod(Mod *pNewMod);
+
     Mod *slot(int n) {
         assert(n < 6);
         return slots_[n];
-    }
-
-    void setSlot(int n, Mod *m) {
-        assert(n < 6);
-        slots_[n] = m;
     }
 
     void clearSlots() {

@@ -44,3 +44,45 @@ res.weap.12.next=13
 res.weap.13.name=MISCELLANEOUS
 res.weap.13.minFund=3000
 res.weap.13.next=0
+
+# Legs
+res.mod.0.1.name=LEGS V2
+res.mod.0.1.minFund=4440
+
+res.mod.0.2.name=LEGS V3
+res.mod.0.2.minFund=8880
+
+# Arms
+res.mod.1.1.name=ARMS V2
+res.mod.1.1.minFund=4440
+
+res.mod.1.2.name=ARMS V3
+res.mod.1.2.minFund=8880
+
+# Chest
+res.mod.2.1.name=CHEST V2
+res.mod.2.1.minFund=6000
+
+res.mod.2.2.name=CHEST V3
+res.mod.2.2.minFund=12000
+
+# Heart
+res.mod.3.1.name=HEART V2
+res.mod.3.1.minFund=3480
+
+res.mod.3.2.name=HEART V3
+res.mod.3.2.minFund=6960
+
+# Eyes
+res.mod.4.1.name=EYES V2
+res.mod.4.1.minFund=3480
+
+res.mod.4.2.name=EYES V3
+res.mod.4.2.minFund=6960
+
+# Brain
+res.mod.5.1.name=BRAIN V2
+res.mod.5.1.minFund=3480
+
+res.mod.5.2.name=BRAIN V3
+res.mod.5.2.minFund=6960

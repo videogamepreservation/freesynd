@@ -37,23 +37,42 @@ public:
      * Different types of Mod.
      */
     enum EModType {
-        Unknown
+        MOD_LEGS = 0,
+        MOD_ARMS = 1,
+        MOD_CHEST = 2,
+        MOD_HEART = 3,
+        MOD_EYES = 4,
+        MOD_BRAIN = 5,
+        Unknown = 6
     } ;
 
-    Mod(const char *mod_name, int mod_cost, const char *mod_desc, int mod_slot,
+    enum EModVersion {
+        MOD_V1 = 0,
+        MOD_V2 = 1,
+        MOD_V3 = 2
+    };
+
+    Mod(const char *mod_name, EModType type, EModVersion version, int mod_cost, const char *mod_desc,
             int mod_icon, int mod_iconF = 0);
 
     const char *getName() { return name_.c_str(); }
+    //! Return modification type
+    EModType getType() { return type_; }
+    //! Return modification version
+    EModVersion getVersion() { return ver_; }
     int cost() { return cost_; }
     const char *desc() { return desc_.c_str(); }
-    int slot() { return slot_; }
     int icon(bool isMale) { return isMale ? icon_ : icon_f_; }
 
     void drawInfo(int x, int y);
 
 protected:
     std::string name_, desc_;
-    int cost_, slot_, icon_, icon_f_;
+    /*! Type of modification.*/
+    EModType type_;
+    /*! Version of modification.*/
+    EModVersion ver_;
+    int cost_, icon_, icon_f_;
 };
 
 #endif
