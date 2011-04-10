@@ -343,7 +343,7 @@ public:
     //! Callback method to respond to mouse motion event
     void handleMouseMotion(int x, int y, int state, const int modKeys);
 
-    void setSquadLine(int squadSlot, int line);
+    void setSquadLine(int squadSlot, unsigned int line);
 
 protected:
     static const int LINE_OFFSET;

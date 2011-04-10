@@ -42,7 +42,7 @@ void ModManager::destroy() {
     }
 
     // Delete all available mods 
-    for (int i = 0; i < mods_.size(); i++) {
+    for (unsigned int i = 0; i < mods_.size(); i++) {
         delete mods_.get(i);
     }
 

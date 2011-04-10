@@ -36,6 +36,7 @@ public:
 
 class GameEventListener {
 public:
+	virtual ~GameEventListener() {}
     virtual void handleGameEvent(GameEvent evt) = 0;
 };
 

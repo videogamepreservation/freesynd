@@ -445,7 +445,7 @@ protected:
     bool isSurface(char thisTile);
     bool isStairs(char thisTile);
 
-    WeaponInstance *createWeaponInstance(uint8 *data, int map);
+    WeaponInstance *createWeaponInstance(uint8 *data);
 
 protected:
     LEVELDATA level_data_;

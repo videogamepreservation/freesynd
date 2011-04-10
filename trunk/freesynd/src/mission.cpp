@@ -276,7 +276,7 @@ bool Mission::loadLevel(uint8 * levelData)
         LEVELDATA_WEAPONS & wref = level_data_.weapons[i];
         if(wref.desc == 0)
             continue;
-        WeaponInstance *w = createWeaponInstance((uint8 *) & wref, map_);
+        WeaponInstance *w = createWeaponInstance((uint8 *) & wref);
         if (w) {
             if (wref.desc == 0x05) {
                 uint16 offset_owner = READ_LE_UINT16(wref.offset_owner);
@@ -2687,7 +2687,7 @@ unsigned char Mission::getMinimapColour(int x, int y) {
     return 0;
 }
 
-WeaponInstance *Mission::createWeaponInstance(uint8 * data, int map)
+WeaponInstance *Mission::createWeaponInstance(uint8 * data)
 {
     Mission::LEVELDATA_WEAPONS * gamdata =
         (Mission::LEVELDATA_WEAPONS *) data;

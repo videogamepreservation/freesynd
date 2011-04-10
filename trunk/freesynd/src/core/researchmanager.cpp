@@ -38,13 +38,13 @@ ResearchManager::~ResearchManager() {
 
 void ResearchManager::destroy() {
     // Destroy researches on mods
-    for (int i=0; i<availableModsSearch_.size(); i++) {
+    for (unsigned int i=0; i<availableModsSearch_.size(); i++) {
         Research *pRes = availableModsSearch_.get(i);
         delete pRes;
     }
 
     // Destroy researches on weapons
-    for (int i=0; i<availableWeaponsSearch_.size(); i++) {
+    for (unsigned int i=0; i<availableWeaponsSearch_.size(); i++) {
         Research *pRes = availableWeaponsSearch_.get(i);
         delete pRes;
     }
@@ -71,7 +71,7 @@ Research *ResearchManager::loadResearch(Weapon::WeaponType wt) {
             int next;
             Weapon::WeaponType nextWeap = Weapon::Unknown;
             char tmp[25];
-            char *pattern = "res.weap.%d.%s";
+            const char *pattern = "res.weap.%d.%s";
 
             sprintf(tmp, pattern, wt, "name");
             conf.readInto(name, tmp);
@@ -122,7 +122,7 @@ Research *ResearchManager::loadResearch(Mod::EModType mt, Mod::EModVersion versi
         int min;
 
         char tmp[25];
-        char *pattern = "res.mod.%d.%d.%s";
+        const char *pattern = "res.mod.%d.%d.%s";
 
         sprintf(tmp, pattern, mt, version, "name");
         conf.readInto(name, tmp);
@@ -253,7 +253,7 @@ void ResearchManager::replaceSearch(Research *pOldSearch, Research *pNewSearch) 
     VectorModel < Research * > *pList = 
         pOldSearch->getType() == Research::EQUIPS ? &availableWeaponsSearch_ : &availableModsSearch_;
     
-    for (int i=0; i<pList->size(); i++) {
+    for (unsigned int i=0; i<pList->size(); i++) {
         if (pOldSearch->getId() == pList->get(i)->getId()) {
             pList->setAt(i, pNewSearch);
             return;
@@ -266,7 +266,7 @@ void ResearchManager::removeSearch(Research *pOldSearch) {
     VectorModel < Research * > *pList = 
         pOldSearch->getType() == Research::EQUIPS ? &availableWeaponsSearch_ : &availableModsSearch_;
     
-    for (int i=0; i<pList->size(); i++) {
+    for (unsigned int i=0; i<pList->size(); i++) {
         if (pOldSearch->getId() == pList->get(i)->getId()) {
             pList->remove(i);
             return;

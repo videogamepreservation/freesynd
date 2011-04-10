@@ -300,7 +300,7 @@ void ListBox::handleMouseMotion(int x, int y, int state, const int modKeys) {
     
     if (pModel_) {
         // Gets the line pointed by the mouse
-        int i = (y - getY()) / 12;
+        unsigned int i = (y - getY()) / 12;
         if (i < pModel_->size()) {
             if (pModel_->getElement(i)) {
                 // If line contains something, highlight it
@@ -410,7 +410,7 @@ void TeamListBox::handleMouseMotion(int x, int y, int state, const int modKeys) 
     }
 }
 
-void TeamListBox::setSquadLine(int squadSlot, int line) {
+void TeamListBox::setSquadLine(int squadSlot, unsigned int line) {
     if (pModel_ && line < pModel_->size() && squadSlot >= 0 && squadSlot < 4) {
         squadLines_[squadSlot] = line;
         redraw();

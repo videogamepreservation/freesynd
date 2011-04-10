@@ -23,15 +23,17 @@
 #ifndef SEQMODEL_H
 #define SEQMODEL_H
 
+#include <string>
 #include <list>
 #include <vector>
-#include <exception>
+#include <stdexcept>
 
 /*!
  * A listener that can react to changes of the model.
  */
 class ModelListener {
 public:
+	virtual ~ModelListener() {}
     /*!
      * Called by the model to alert on the changes.
      */
@@ -54,11 +56,11 @@ public:
     //! Fills the given list of string, one for each element
     virtual void getLabels(std::list<std::string> &labels) = 0;
     //! Returns a pointer to the element at given position
-    virtual void * getElement(int i) = 0;
+    virtual void * getElement(unsigned int i) = 0;
     //! Returns the line number for the given element
     virtual int getLineForElement(void *pElement) = 0;
     //! Returns the number of elements
-    virtual int size() = 0;
+    virtual unsigned int size() = 0;
     //! Removes all elements from the collection
     virtual void clear() = 0;
 
@@ -99,7 +101,7 @@ public:
      * Sets the element at the given position.
      * Replaces existing element.
      */
-    void setAt(int index, T item) {
+    void setAt(unsigned int index, T item) {
         elements_[index] = item;
         fireModelChanged();
     }
@@ -108,9 +110,10 @@ public:
      * Insert element at the given position.
      * Next elements are moved.
      */
-    void insertAt(int index, T item) {
-        int i=0;
-        for (std::vector < T >::iterator it = elements_.begin();
+    void insertAt(unsigned int index, T item) {
+        unsigned int i=0;
+		typename std::vector < T >::iterator it;
+        for (it = elements_.begin();
          it != elements_.end(); it++, i++) {
              if (i == index) {
                  elements_.insert(it, item);
@@ -125,9 +128,10 @@ public:
     /*!
      * Removes the element at the given position.
      */
-    void remove(int index) {
-        int i=0;
-        for (std::vector < T >::iterator it = elements_.begin();
+    void remove(unsigned int index) {
+        unsigned int i=0;
+		typename std::vector < T >::iterator it;
+        for (it = elements_.begin();
          it != elements_.end(); it++, i++) {
              if (i == index) {
                  elements_.erase(it);
@@ -142,7 +146,7 @@ public:
     /*!
      * Returns the element at given position.
      */
-    void * getElement(int i) {
+    void * getElement(unsigned int i) {
         return get(i);
     }
 
@@ -151,7 +155,8 @@ public:
      */
     int getLineForElement(void *pElement) {
         int i=0;
-        for (std::vector < T >::iterator it = elements_.begin();
+		typename std::vector < T >::iterator it;
+        for (it = elements_.begin();
          it != elements_.end(); it++, i++) {
              if (pElement == *it) {
                  return i;
@@ -164,7 +169,7 @@ public:
     /*!
      * Returns the element at given position.
      */
-    T get(int index) {
+    T get(unsigned int index) {
         if (index < size()) {
             return elements_[index];
         }
@@ -175,7 +180,7 @@ public:
     /*!
      * Returns number of elements in the vector.
      */
-    int size() {
+    unsigned int size() {
         return elements_.size();
     }
 
@@ -184,7 +189,8 @@ public:
      * Calls T::getName() to obtain the string.
      */
     void getLabels(std::list<std::string> &labels) {
-        for (std::vector < T >::iterator it = elements_.begin();
+		typename std::vector < T >::iterator it;
+        for (it = elements_.begin();
          it != elements_.end(); it++) {
              if (*it) {
                 labels.push_back((*it)->getName());
