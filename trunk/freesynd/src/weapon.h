@@ -88,6 +88,8 @@ public:
     int range() { return range_; }
     int damagePerShot() { return damage_per_shot_; }
     int rank() { return rank_; }
+    int anim() { return anim_; }
+    snd::InGameSample getSound() { return sample_; }
 
     int selector() {
         return small_icon_ == 28 ? 1618 : small_icon_ - 14 + 1602;
@@ -96,14 +98,14 @@ public:
     WeaponAnimIndex index() { return idx_; }
     WeaponType getWeaponType() { return type_; }
 
-    //! Plays the weapon's sound.
-    void playSound();
-
     bool operator==(Weapon weapon) { return this->type_ == weapon.getWeaponType(); }
 
     int getShotsPerSec() { return shots_per_sec_; }
     int getAmmoPerSec() { return ammo_per_shot_; }
     MapObject::DamageType getDmgType() { return dmg_type_; }
+
+    bool wasSubmittedToSearch() { return submittedToSearch_; }
+    void submitToSearch() { submittedToSearch_ = true; }
 
 protected:
     std::string name_;
@@ -116,12 +118,14 @@ protected:
     WeaponAnimIndex idx_;
     snd::InGameSample sample_;
     int shots_per_sec_, ammo_per_shot_;
+    /*! True when weapon was found and submit to search manager.*/
+    bool submittedToSearch_;
 };
 
 /*!
  * Weapon instance class.
  */
-class WeaponInstance : public Weapon, public ShootableMapObject {
+class WeaponInstance : public ShootableMapObject {
 public:
     WeaponInstance(Weapon *w);
 
@@ -136,7 +140,22 @@ public:
     void setOwner(ShootableMapObject *owner) { owner_ = owner; }
     ShootableMapObject *getOwner() { return owner_; }
 
+    Weapon *getWeaponClass() { return pWeaponClass_; }
+
+    int range() { return pWeaponClass_->range(); }
+    int ammo() { return pWeaponClass_->ammo(); }
+    int rank() { return pWeaponClass_->rank(); }
+
+    Weapon::WeaponAnimIndex index() { return pWeaponClass_->index(); }
+    Weapon::WeaponType getWeaponType() { return pWeaponClass_->getWeaponType(); }
+
+    bool operator==(WeaponInstance wi) { return pWeaponClass_->getWeaponType() == wi.getWeaponType(); }
+
+    //! Plays the weapon's sound.
+    void playSound();
+
 protected:
+    Weapon *pWeaponClass_;
     int ammo_remaining_;
     ShootableMapObject *owner_;
     int weapon_time_used_;

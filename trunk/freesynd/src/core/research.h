@@ -86,6 +86,8 @@ public:
     int getProjectedHour() { return projectedHour_; }
     std::list<ProgressPoint> &getProgressList() { return progressList_; }
     int updateProgression(short hour, int budget);
+    //! Boost research with an existing weapon
+    void improve(Weapon *pWeapon);
 
 protected:
     void init(std::string name, int min);

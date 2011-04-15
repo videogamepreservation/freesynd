@@ -416,18 +416,25 @@ void MapMenu::handleAction(const int actionId, void *ctx, const int modKeys) {
     }
 }
 
-void MapMenu::handleUnknownKey(Key key, const int modKeys)
+bool MapMenu::handleUnknownKey(Key key, const int modKeys)
 {
+    bool consumed = false;
     if (key == KEY_0) {
         g_Session.setSelectedBlockId(0);
-        needRendering();
+        consumed = true;
     } else if (key == KEY_LEFT && (g_Session.getSelectedBlockId() > 0)) {
         g_Session.setSelectedBlockId(g_Session.getSelectedBlockId() - 1);
-        needRendering();
+        consumed = true;
     } else if (key == KEY_RIGHT && g_Session.getSelectedBlockId() < 49) {
         g_Session.setSelectedBlockId(g_Session.getSelectedBlockId() + 1);
+        consumed = true;
+    }
+
+    if (consumed) {
         needRendering();
-    } 
+    }
 
     handleBlockSelected();
+
+    return consumed;
 }

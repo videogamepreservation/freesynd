@@ -45,9 +45,9 @@ public:
     void handleLeave();
     void handleMouseDown(int x, int y, int button, const int modKeys);
     void handleAction(const int actionId, void *ctx, const int modKeys);
-    void handleUnknownKey(Key key, const int modKeys);
 
 protected:
+    bool handleUnknownKey(Key key, const int modKeys);
     //! Utility method to draw the mission selector
     void drawSelector();
     //! Utility method to update mission informations

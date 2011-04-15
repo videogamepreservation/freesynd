@@ -26,16 +26,23 @@
 #ifndef DEBRIEFMENU_H
 #define DEBRIEFMENU_H
 
+#include "core/gameevent.h"
+
 /*!
  * Menu displaying statistics about the last mission played.
  */
-class DebriefMenu : public Menu {
+class DebriefMenu : public Menu, public GameEventListener {
 public:
     DebriefMenu(MenuManager *m);
 
     void handleShow();
     void handleRender();
     void handleLeave();
+
+    void handleGameEvent(GameEvent evt);
+
+    void updateStatsFields(Mission *pMission);
+    void checkNewWeaponFound();
 
 protected:
     /*! Id of the text widget for mission status.*/
@@ -62,6 +69,11 @@ protected:
     int txtPrecisionId_;
     /*! Size of the line separator between title and statistics. */
     int separatorSize_;
+    /*! Id of the text widget for displaying research alert.*/
+    int txtSearchId_;
+    /*! Id of the text widget for displaying new weapon found alert.*/
+    int txtNewWeap1Id_;
+    int txtNewWeap2Id_;
 };
 
 #endif

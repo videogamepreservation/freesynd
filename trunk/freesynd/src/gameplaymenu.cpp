@@ -456,29 +456,6 @@ void GameplayMenu::handleLeave()
     g_System.hideCursor();
     g_App.setPalette("mselect.pal");
     mission_->end();
-    // update time
-    int elapsed = mission_->getStatistics()->mission_duration;
-    g_Session.updateTime(elapsed);
-
-    std::string anim;
-    if (mission_->completed()) {
-        anim = "mgamewin.dat";
-    } else if (mission_->failed()) {
-        anim = "mlosegam.dat";
-    } else {
-        mission_->setStatus(Mission::ABORTED);
-    }
-
-    if (anim.size() != 0) {
-        FliPlayer fliPlayer;
-        uint8 *data;
-        int size;
-        data = File::loadFile(anim.c_str(), size);
-        fliPlayer.loadFliData(data, true);
-        //g_App.gameSounds().play(snd::MENU_CHANGE);
-        fliPlayer.play();
-        delete[] data;
-    }
 
     mission_ = NULL;
     
@@ -812,45 +789,54 @@ void GameplayMenu::handleMouseUp(int x, int y, int button, const int modKeys) {
 
 extern int topz;
 
-void GameplayMenu::handleUnknownKey(Key key, const int modKeys) {
+bool GameplayMenu::handleUnknownKey(Key key, const int modKeys) {
     bool change = false; /* indicator whether menu should be redrawn */
+    bool consumed = true;
 
     if (mission_ == NULL) {
         // Mission must not be null
-        return;
-    }
-
-#ifdef _DEBUG
-    if (key == KEY_h) {
-        mission_->setStatus(Mission::COMPLETED);
-        return;
-    }
-
-    if (key == KEY_g) {
-        mission_->setStatus(Mission::FAILED);
-        return;
-    }
-#endif
-
-    // SPACE is pressed when the mission failed or succeeded to return
-    // to menu
-    if (key == KEY_SPACE && mission_) {
-        if (mission_->completed()) {
-            g_Session.completeSelectedBlock();
-
-            menu_manager_->changeCurrentMenu("debrief");
-            return;
-        }
-        else if (mission_->failed()) {
-
-            menu_manager_->changeCurrentMenu("debrief");
-            return;
-        }
+        return false;
     }
 
     bool ctrl = false;
     if (modKeys & KMD_CTRL) {
         ctrl = true;
+    }
+
+#ifdef _DEBUG
+    if (key == KEY_h) {
+        mission_->setStatus(Mission::COMPLETED);
+        return true;
+    }
+
+    if (key == KEY_g) {
+        mission_->setStatus(Mission::FAILED);
+        return true;
+    }
+#endif
+
+    // SPACE is pressed when the mission failed or succeeded to return
+    // to menu
+    if (key == KEY_SPACE) {
+        if (mission_->completed() || mission_->failed()) {
+            if (mission_->completed()) {
+                g_Session.completeSelectedBlock();
+                // Set win animation
+                leaveAnim_ = "mgamewin.dat";
+            }
+            else if (mission_->failed()) {
+                // set lose animation
+                leaveAnim_ = "mlosegam.dat";
+            }
+            // Go to debrief menu
+            menu_manager_->changeCurrentMenu("debrief");
+            return true;
+        }
+    } else if (key == KEY_ESCAPE) {
+        // Abort mission
+        mission_->setStatus(Mission::ABORTED);
+        // Return false so when can still go to parent menu with escape
+        return false;
     }
 
     /* Handle agent selection by numeric keys. Key 0 cycles between current
@@ -886,29 +872,23 @@ void GameplayMenu::handleUnknownKey(Key key, const int modKeys) {
             selectAgent(3, ctrl);
             change = true;
         }
-    }
-
-    // Scroll the map with the direction keys
-    if (key == KEY_LEFT) {
+    } else if (key == KEY_LEFT) { // Scroll the map to the left
         scroll_x_ = -SCROLL_STEP;
-    } else if (key == KEY_RIGHT) {
+    } else if (key == KEY_RIGHT) { // Scroll the map to the right
         scroll_x_ = SCROLL_STEP;
-    }
-
-    if (key == KEY_UP) {
+    } else if (key == KEY_UP) { // Scroll the map to the top
         scroll_y_ = -SCROLL_STEP;
-    } else if (key == KEY_DOWN) {
+    } else if (key == KEY_DOWN) { // Scroll the map to the bottom
         scroll_y_ = SCROLL_STEP;
-    }
-
-    // Music Control
-    if (key == KEY_F1) {
+    } else if (key == KEY_F1) { // Music Control
         g_App.music().toggleMusic();
-    }
-
-    // Sound Control
-    if (key == KEY_F2) {
+    } else if (key == KEY_F2) { // Sound Control
         g_App.gameSounds().toggleSound();
+    } else if (key == KEY_d) { // all agents are killed with 'd'
+        for (int i = 8; i < mission_->numPeds(); i++)
+            mission_->ped(i)->setHealth(0);
+    } else {
+        consumed = false;
     }
 
 #ifdef _DEBUG
@@ -958,12 +938,6 @@ void GameplayMenu::handleUnknownKey(Key key, const int modKeys) {
     printf("%i %i %i\n", mission_->ped(0)->tileX(), mission_->ped(0)->tileY(),
         mission_->ped(0)->tileZ());
 #endif
-
-    // all agents are killed with 'd'
-    if (key == KEY_d) {
-        for (int i = 8; i < mission_->numPeds(); i++)
-            mission_->ped(i)->setHealth(0);
-    }
 
     /* used to see animations by number + frame
     if (key == KEY_a) {
@@ -1022,7 +996,9 @@ void GameplayMenu::handleUnknownKey(Key key, const int modKeys) {
 #endif //_DEBUG
 
     if (change)
-        render();
+        needRendering();
+
+    return consumed;
 }
 
 void GameplayMenu::drawAgentSelectors() {
@@ -1210,30 +1186,30 @@ void GameplayMenu::drawWeaponSelectors() {
     if (p) {
         for (int j = 0; j < 2; j++)
             for (int i = 0; i < 4; i++) {
-                WeaponInstance *w = NULL;
+                WeaponInstance *wi = NULL;
                 int s = 1601;
 
                 if (i + j * 4 < p->numWeapons()) {
-                    w = p->weapon(i + j * 4);
-                    s = w->selector();
+                    wi = p->weapon(i + j * 4);
+                    s = wi->getWeaponClass()->selector();
                 }
 
-                if (p->selectedWeapon() && p->selectedWeapon() == w)
+                if (p->selectedWeapon() && p->selectedWeapon() == wi)
                     s += 40;
 
                 g_App.gameSprites().sprite(s)->draw(
                         32 * i, 2 + 46 + 44 + 10 + 46 + 44 + 15 + j * 32, 0);
 
                 // draw ammo bars
-                if (w) {
+                if (wi) {
                     int n;
 
-                    if (w->ammo() == -1)
+                    if (wi->ammo() == -1)
                         continue;
-                    if (w->ammo() == 0)
+                    if (wi->ammo() == 0)
                         n = 25;
                     else
-                        n = 25 * w->ammoRemaining() / w->ammo();
+                        n = 25 * wi->ammoRemaining() / wi->ammo();
 
                     for (int m = 0; m < n; m++)
                         for (int k = 0; k < 5; k++)

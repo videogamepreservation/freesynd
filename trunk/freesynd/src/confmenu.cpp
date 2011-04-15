@@ -188,24 +188,35 @@ public:
         drawCaret();
     }
 
-    virtual void handleUnknownKey(Key key, const int modKeys) {
-        if (key == KEY_BACKSPACE)
+    virtual bool handleUnknownKey(Key key, const int modKeys) {
+        bool consumed = false;
+        if (key == KEY_BACKSPACE) {
             name_value_ = name_value_.substr(0, name_value_.size() - 1);
+            consumed = true;
+        }
 
         if (name_value_.size() < 16) {
-            if (key >= KEY_a && key <= KEY_z)
+            if (key >= KEY_a && key <= KEY_z) {
                 name_value_ += key - KEY_a + 'A';
+                consumed = true;
+            }
 
-            if (key >= KEY_0 && key <= KEY_9)
+            if (key >= KEY_0 && key <= KEY_9) {
                 name_value_ += key - KEY_0 + '0';
+                consumed = true;
+            }
 
-            if (key == KEY_SPACE)
+            if (key == KEY_SPACE) {
                 name_value_ += ' ';
+                consumed = true;
+            }
         }
 
         g_Screen.scale2x(310, 80, 120, 9, bkg_ + 155 + 40 * 320, 320);
         g_App.fonts().drawText(313, 81, name_value_.c_str(), FontManager::SIZE_2, false);
         drawCaret();
+
+        return consumed;
     }
 
 protected:

@@ -2743,7 +2743,6 @@ WeaponInstance *Mission::createWeaponInstance(uint8 * data)
     Weapon *pWeapon = g_App.weapons().getWeapon(wType);
     if (pWeapon) {
         WeaponInstance *wi = pWeapon->createInstance();
-        wi->setAmmoRemaining(wi->ammo());
         int z = READ_LE_UINT16(gamdata->mapposz) >> 7;
         z--;
         int oz = gamdata->mapposz[0] & 0x7F;

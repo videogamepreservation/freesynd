@@ -141,7 +141,6 @@ public:
     }
 
     virtual void handleTick(int elapsed) {}
-    virtual void handleUnknownKey(Key key, const int modKeys) {}
     virtual void handleMouseDown(int x, int y, int button, const int modKeys) {}
     virtual void handleMouseUp(int x, int y, int button, const int modKeys) {}
     virtual void handleMouseMotion(int x, int y, int state, const int modKeys) {}
@@ -179,6 +178,8 @@ protected:
     void redrawOptions();
     void needRendering();
     void addDirtyRect(int x, int y, int width, int height);
+
+    virtual bool handleUnknownKey(Key key, const int modKeys) { return false;}
 
 protected:
     MenuManager *menu_manager_;

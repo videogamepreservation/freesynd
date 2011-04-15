@@ -75,7 +75,12 @@ DebriefMenu::DebriefMenu(MenuManager *m) : Menu(m, "debrief", "mdebrief.dat",
     addStatic(left_x, y, "#DEBRIEF_HIT", FontManager::SIZE_2, false);
     txtPrecisionId_ = addStatic(right_x, y, "", FontManager::SIZE_2, false);
 
-    y = 352;
+    y += 20;
+    txtSearchId_ = addStatic(left_x, y, "", FontManager::SIZE_2, false);
+    y += 20;
+    txtNewWeap1Id_ = addStatic(left_x, y, "", FontManager::SIZE_2, false);
+    y += 15;
+    txtNewWeap2Id_ = addStatic(left_x, y, "", FontManager::SIZE_2, false);
 
     addOption(16, 346, 129, 25, "#MENU_ACC_BUT", FontManager::SIZE_2, KEY_F5, "map");
     addOption(500, 347,  128, 25, "#MENU_MAIN_BUT", FontManager::SIZE_2, KEY_F6, "main");
@@ -90,6 +95,20 @@ void DebriefMenu::handleShow() {
     g_System.showCursor();
 
     Mission *pMission = g_Session.getMission();
+    MissionStats *pStats = pMission->getStatistics();
+
+    // update time
+    g_Session.researchManager().addListener(this);
+    int elapsed = pStats->mission_duration;
+    g_Session.updateTime(elapsed);
+    g_Session.researchManager().removeListener(this);
+
+    updateStatsFields(pMission);
+
+    checkNewWeaponFound();
+}
+
+void DebriefMenu::updateStatsFields(Mission *pMission) {
     MissionStats *pStats = pMission->getStatistics();
 
     if (pMission->getStatus() == Mission::FAILED) {
@@ -122,6 +141,25 @@ void DebriefMenu::handleShow() {
     }
 }
 
+void DebriefMenu::checkNewWeaponFound() {
+
+    for (int i=0; i<4; i++) {
+        if (g_Session.teamMember(i)) {
+            Agent *pAgent = g_Session.teamMember(i);
+            for (int wi=0; wi < pAgent->numWeapons(); wi++) {
+                Weapon *pWeapon = pAgent->weapon(wi)->getWeaponClass();
+
+                if (!g_App.weapons().isAvailable(pWeapon)) {
+                    if (g_Session.researchManager().handleWeaponDiscovered(pWeapon)) {
+                        getStatic(txtNewWeap1Id_)->setText("#DEBRIEF_WEAP_FOUND1");
+                        getStatic(txtNewWeap2Id_)->setText("#DEBRIEF_WEAP_FOUND2");
+                    }
+                }
+            }
+        }
+    }
+}
+
 void DebriefMenu::handleRender() {
     // Display team logo
     g_Screen.drawLogo(18, 14, g_App.getGameSession().getLogo(), g_App.getGameSession().getLogoColour());
@@ -137,5 +175,18 @@ void DebriefMenu::handleLeave() {
     // as a new one will be selected in the map menu
     g_Session.setMission(NULL);
 
+    getStatic(txtNewWeap1Id_)->setText("");
+    getStatic(txtNewWeap2Id_)->setText("");
+
     g_System.hideCursor();
+}
+
+void DebriefMenu::handleGameEvent(GameEvent evt) {
+    if (evt.type_ == GameEvent::GE_SEARCH) {
+        // A research has ended
+        Research *pRes = static_cast<Research *> (evt.pCtxt_);
+        Weapon *pWeap = g_App.weapons().getWeapon(pRes->getSearchWeapon());
+
+        getStatic(txtSearchId_)->setTextFormated("#DEBRIEF_SEARCH", pWeap->getName());
+    }
 }

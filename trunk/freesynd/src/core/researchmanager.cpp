@@ -102,7 +102,15 @@ Research *ResearchManager::loadResearch(Weapon::WeaponType wt) {
             }
 
             // Create new research
-            return new Research(wt, name, fund, nextWeap);
+            Research *pRes = new Research(wt, name, fund, nextWeap);
+            
+            // Check if searched weapon has already been discovered
+            Weapon *pW = g_App.weapons().getWeapon(wt);
+            if (pW->wasSubmittedToSearch()) {
+                pRes->improve(pW);
+            }
+
+            return pRes;
         } catch (...) {
             FSERR(Log::k_FLG_GAME, "ResearchManager", "loadResearch", ("Cannot load weapon research %d", wt))
         }
@@ -204,6 +212,48 @@ void ResearchManager::start(Research *pResearch) {
 }
 
 /*!
+ * Terminate the given search and loads a new one if 
+ * the search has defined a next search.
+ * Enables Weapon/Mod associated with that search.
+ * \param pResearch The completed search.
+ */
+void ResearchManager::complete(Research *pResearch) {
+    Research *pNextRes = NULL;
+    // Enable new weapon or mods
+    if (pResearch->getType() == Research::EQUIPS) {
+        g_App.weapons().enableWeapon(pResearch->getSearchWeapon());
+        // Loads next research
+        if (pResearch->getNextWeaponRes() != Weapon::Unknown) {
+            pNextRes = loadResearch(pResearch->getNextWeaponRes());
+        }
+
+    } else {
+        g_App.mods().enableMod(pResearch->getSearchModType(), pResearch->getSearchModVersion());
+        // Loads next research
+        if (pResearch->getSearchModVersion() == Mod::MOD_V2) {
+            pNextRes = loadResearch(pResearch->getSearchModType(), Mod::MOD_V3);
+        }
+    }
+
+    // There is a new research of the same field
+    if (pNextRes) {
+        // Replace with new search
+        replaceSearch(pResearch, pNextRes);
+    } else {
+        // There's no more research for this category
+        removeSearch(pResearch);
+    }
+    // alerts of change
+    fireGameEvent(pResearch);
+
+    if (pResearch == pCurrResearch_) {
+        pCurrResearch_ = NULL;
+    }
+
+    delete pResearch;
+}
+
+/*!
  * Process all started research and returns the amount of money
  * corresponding those researches
  */
@@ -214,35 +264,7 @@ int ResearchManager::process(int hourElapsed, int moneyLeft) {
             amount = pCurrResearch_->updateProgression(hourElapsed, moneyLeft);
 
             if (pCurrResearch_->getStatus() == Research::FINISHED) {
-                Research *pNextRes = NULL;
-                // Enable new weapon or mods
-                if (pCurrResearch_->getType() == Research::EQUIPS) {
-                    g_App.weapons().enableWeapon(pCurrResearch_->getSearchWeapon());
-                    // Loads next research
-                    if (pCurrResearch_->getNextWeaponRes() != Weapon::Unknown) {
-                        pNextRes = loadResearch(pCurrResearch_->getNextWeaponRes());
-                        
-                    }
-                } else {
-                    g_App.mods().enableMod(pCurrResearch_->getSearchModType(), pCurrResearch_->getSearchModVersion());
-                    // Loads next research
-                    if (pCurrResearch_->getSearchModVersion() == Mod::MOD_V2) {
-                        pNextRes = loadResearch(pCurrResearch_->getSearchModType(), Mod::MOD_V3);
-                    }
-                }
-
-                // There is a new research of the same field
-                if (pNextRes) {
-                    // Replace with new search
-                    replaceSearch(pCurrResearch_, pNextRes);
-                } else {
-                    // There's no more research for this category
-                    removeSearch(pCurrResearch_);
-                }
-                // alerts of change
-                fireGameEvent(pCurrResearch_);
-                delete pCurrResearch_;
-                pCurrResearch_ = NULL;
+                complete(pCurrResearch_);
             }
         }
     
@@ -272,4 +294,38 @@ void ResearchManager::removeSearch(Research *pOldSearch) {
             return;
         }
     }
+}
+
+/*!
+ * Tells the ResearchManager that a unknown weapon has been collected during a mission.
+ * The new weapon will accelerate given research.
+ * \param pWeapon The newly discovered weapon
+ * \return True if it's the first time that the weapon has been submitted
+ */
+bool ResearchManager::handleWeaponDiscovered(Weapon *pWeapon) {
+    if (pWeapon && !pWeapon->wasSubmittedToSearch()) {
+        // It's the first time the weapon is submitted
+        pWeapon->submitToSearch();
+        // Find if there is a search already available for this weapon
+        for (unsigned int i=0; i<availableWeaponsSearch_.size(); i++) {
+            if (pWeapon->getWeaponType() == availableWeaponsSearch_.get(i)->getSearchWeapon()) {
+                // There is currently a research on that weapon
+                Research *pRes = availableWeaponsSearch_.get(i);
+                pRes->improve(pWeapon);
+
+                if (pRes->getStatus() == Research::FINISHED) {
+                    // Research is completed after bonus
+                    complete(pRes);
+                } else {
+                    // Replace with the same element to refresh listeners
+                    availableWeaponsSearch_.setAt(i, pRes);
+                }
+                break;
+            }
+        }
+
+        return true;
+    }
+    
+    return false;
 }

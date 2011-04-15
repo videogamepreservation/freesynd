@@ -308,12 +308,6 @@ TeamListBox * Menu::addTeamListBox(int x, int y, int width, int height, bool vis
  */
 void Menu::keyEvent(Key key, const int modKeys)
 {
-    // Pressing Escape changes the current menu to its parent(like a back)
-    if (key == KEY_ESCAPE) {
-        menu_manager_->changeCurrentMenu(parent_menu_);
-        return;
-    }
-
     if (hotKeys_.find(key) != hotKeys_.end()) {
         Option *opt = hotKeys_[key];
         
@@ -322,7 +316,12 @@ void Menu::keyEvent(Key key, const int modKeys)
         return;
     }
 
-    handleUnknownKey(key, modKeys);
+    // Pressing Escape changes the current menu to its parent(like a back)
+    // if menu has not already consummed key event
+    if (!handleUnknownKey(key, modKeys) && key == KEY_ESCAPE) {
+        menu_manager_->changeCurrentMenu(parent_menu_);
+        return;
+    }
 }
 
 /*!

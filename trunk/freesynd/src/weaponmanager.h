@@ -54,6 +54,8 @@ public:
     SequenceModel * getAvailableWeapons() { return &availableWeapons_; }
     //! Returns a weapon of given type whether it is available or not
     Weapon *getWeapon(Weapon::WeaponType wt);
+    //! Returns true is the given weapon is available for agents
+    bool isAvailable(Weapon *pWeapon);
 
 protected:
     //! Loads the weapon from file

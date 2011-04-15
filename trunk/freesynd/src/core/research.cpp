@@ -157,3 +157,31 @@ int Research::updateProgression(short hourElapsed, int budget) {
 
     return cost;
 }
+
+/*!
+ * Improving a research consists in adding 25% of progression
+ * to the research. Plus, the name of the searched weapon is
+ * now displayed instead of the field search.
+ */
+void Research::improve(Weapon *pWeapon) {
+    if (type_ == EQUIPS) {
+        name_.assign(pWeapon->getName());
+
+        ProgressPoint lastPt = progressList_.back();
+        ProgressPoint newPt;
+        newPt.coeffId = lastPt.coeffId;
+        newPt.hours = lastPt.hours;
+        // Adds a bonus to research
+        newPt.percentage = lastPt.percentage + 25.0f;
+
+        // Add new point to the list
+        progressList_.push_back(newPt);
+
+        if (newPt.percentage < 100.0f) {
+            // research is not finished so update projected end
+            updateProjection();
+        } else {
+            status_ = FINISHED;
+        }
+    }
+}

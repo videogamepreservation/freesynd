@@ -57,11 +57,11 @@ void WeaponManager::reset() {
     destroy();
 
     // Enables default weapons
-    availableWeapons_.add(loadWeapon(Weapon::Persuadatron));
-    availableWeapons_.add(loadWeapon(Weapon::Pistol));
-    availableWeapons_.add(loadWeapon(Weapon::Shotgun));
-    availableWeapons_.add(loadWeapon(Weapon::Scanner));
-    availableWeapons_.add(loadWeapon(Weapon::MediKit));
+    enableWeapon(Weapon::Persuadatron);
+    enableWeapon(Weapon::Pistol);
+    enableWeapon(Weapon::Shotgun);
+    enableWeapon(Weapon::Scanner);
+    enableWeapon(Weapon::MediKit);
 }
 
 void WeaponManager::cheatEnableAllWeapons() {
@@ -131,6 +131,17 @@ Weapon * WeaponManager::getWeapon(Weapon::WeaponType wt) {
     preFetch_.push_back(pWeapon);
     
     return pWeapon;
+}
+
+bool WeaponManager::isAvailable(Weapon *pWeapon) {
+    // search in available weapons
+    for (unsigned i = 0; i != availableWeapons_.size(); ++i) {
+        if (pWeapon->getWeaponType() == availableWeapons_.get(i)->getWeaponType())
+            return true;
+    }
+
+    // No weapon of that type has been found
+    return false;
 }
 
 Weapon * WeaponManager::loadWeapon(Weapon::WeaponType wt) {

@@ -213,17 +213,18 @@ void SelectMenu::drawAgent()
     for (int j = 0; j < 2; j++)
         for (int i = 0; i < 4; i++)
             if (j * 4 + i < selected->numWeapons()) {
-                WeaponInstance *w = selected->weapon(j * 4 + i);
-                w->drawSmallIcon(366 + i * 32, 308 + j * 32);
+                WeaponInstance *wi = selected->weapon(j * 4 + i);
+                Weapon *pW = wi->getWeaponClass();
+                pW->drawSmallIcon(366 + i * 32, 308 + j * 32);
                 uint8 data[3];
                 memset(data, 204, 3);
-                if (w->ammo() != -1) {
-                    int n = w->ammoRemaining();
-                    if (w->ammo() == 0)
+                if (pW->ammo() != -1) {
+                    int n = wi->ammoRemaining();
+                    if (pW->ammo() == 0)
                         n = 24;
                     else {
                         n *= 24;
-                        n /= w->ammo();
+                        n /= pW->ammo();
                     }
                     for (int k = 0; k < n; k++)
                         g_Screen.scale2x(366 + i * 32 + k + 4,
@@ -457,7 +458,7 @@ void SelectMenu::handleMouseDown(int x, int y, int button, const int modKeys)
                     tab_ = TAB_EQUIPS;
                     pSelectedMod_ = NULL;
                     selectedWInstId_ = i + j * 4 + 1;
-                    pSelectedWeap_ = selected->weapon(selectedWInstId_ - 1);
+                    pSelectedWeap_ = selected->weapon(selectedWInstId_ - 1)->getWeaponClass();
                     addDirtyRect(500, 105,  125, 235);
 
                     hideOption(KEY_F8);
@@ -604,7 +605,7 @@ void SelectMenu::handleAction(const int actionId, void *ctx, const int modKeys)
     } else if (actionId == sellButId_ && selectedWInstId_) {
         addDirtyRect(360, 305, 135, 70);
         Agent *selected = g_Session.teamMember(cur_agent_);
-        WeaponInstance *w = selected->removeWeapon(selectedWInstId_ - 1);
+        Weapon *w = selected->removeWeapon(selectedWInstId_ - 1)->getWeaponClass();
         g_Session.setMoney(g_Session.getMoney() + w->cost());
         delete w;
         showItemList();

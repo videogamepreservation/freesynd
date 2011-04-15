@@ -51,6 +51,8 @@ public:
      */
     SequenceModel * getAvailableWeaponsSearch() { return &availableWeaponsSearch_; }
 
+    //! An unknown weapon has been found -> it will boost research
+    bool handleWeaponDiscovered(Weapon *pWeapon);
     //! Starts research and suspends current search
     void start(Research *pResearch);
     // Processes all engaged research
@@ -62,6 +64,8 @@ public:
 protected:
     Research *loadResearch(Weapon::WeaponType wt);
     Research *loadResearch(Mod::EModType mt, Mod::EModVersion version);
+    //! Terminate given search
+    void complete(Research *pResearch);
     void removeSearch(Research *pOldSearch);
     void replaceSearch(Research *pOldSearch, Research *pNewSearch);
     void destroy();
