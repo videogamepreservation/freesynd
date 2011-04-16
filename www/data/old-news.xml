@@ -1,29 +1,5 @@
 <?xml version='1.0' standalone='yes'?>
 <news>
-	<item title="Project status" date="2011-03-03" author="Benoit Blancard">
-	After quite a long period of inactivity, Freesynd development has started again. Holidays, new year's eve resolutions
-	have delayed the release of the v0.5 version. On top of that, we lost one of our contributor : chamel. See you!
-	
-	I'm planning to release v0.5 at the end of March. The goal of this version is to complete all work on menus so that
-	future development will be focused on the gameplay. Next stop : end of march!
-	</item>
-	<item title="New v0.4 release" date="2010-09-27" author="Benoit Blancard">
-The v0.4 development release is now available from [[https://sourceforge.net/project/showfiles.php?group_id=93282 sourceforge]]. Again,
-this release contains mainly bug fixes and enhancement. Read the release notes to have a complete view of the work done.
-
-This release and the next ones won't contain the original data files because of licence restrictions. 
-So you'll have to download the original game to use its data files (use -p option to specify the new data path when launching the game).
-
-Enjoy!
-	</item>
-	
-	<item title="New v0.3 release" date="2010-07-21" author="Benoit Blancard">
-Freesynd is still alive! A new development release is available from [[https://sourceforge.net/project/showfiles.php?group_id=93282 sourceforge]].
-This v0.3 release contains mainly bug fixes and minor evolutions but it's still a step toward the v1.0. 
-	
-Please try it and report any bug in the project bug tracker.
-	</item>
-	
 	<item title="Now with sound" date="2007-04-24" author="Trent Waddington">
 	After some [[http://quantumg.blogspot.com/2007/04/freesynd-version-02-released.html battles]] FreeSynd now has almost all 
 	the sounds from the original game functional.  This is cause for release 0.2.  
