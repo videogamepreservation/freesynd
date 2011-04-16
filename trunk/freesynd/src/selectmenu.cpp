@@ -605,9 +605,9 @@ void SelectMenu::handleAction(const int actionId, void *ctx, const int modKeys)
     } else if (actionId == sellButId_ && selectedWInstId_) {
         addDirtyRect(360, 305, 135, 70);
         Agent *selected = g_Session.teamMember(cur_agent_);
-        Weapon *w = selected->removeWeapon(selectedWInstId_ - 1)->getWeaponClass();
-        g_Session.setMoney(g_Session.getMoney() + w->cost());
-        delete w;
+        WeaponInstance *pWi = selected->removeWeapon(selectedWInstId_ - 1);
+        g_Session.setMoney(g_Session.getMoney() + pWi->getWeaponClass()->cost());
+        delete pWi;
         showItemList();
     }
 }
