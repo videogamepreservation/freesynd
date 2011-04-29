@@ -283,6 +283,8 @@ void GameplayMenu::handleTick(int elapsed)
             }
         }
     }
+    if (selectable_agents_ == 0)
+        pressed_btn_select_all_ = false;
     if ((selected_agents_ & 0xFF) == 0) {
         for (int i = 0; i < 4; i++)
             if ((selectable_agents_ & (1 << i)) != 0) {
@@ -387,6 +389,7 @@ void GameplayMenu::handleRender()
 
         g_System.usePointerCursor();
         g_System.showCursor();
+        pressed_btn_select_all_ = false;
     }
 
     g_Screen.clear(0);
@@ -576,7 +579,6 @@ void GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
        * to it. If control key is pressed, add or removes agent from
        * current selection. */
         if (x < 128) {
-            // TODO: agent is dead, selectable?
             if (y < 42) {
                 if (x < 64) {
                     if ((selectable_agents_ & (1 << 0)) != 0) {
@@ -1050,10 +1052,13 @@ void GameplayMenu::drawPerformanceMeters() {
 
 void GameplayMenu::drawSelectAllButton() {
     // 64x10
-    g_App.gameSprites().sprite((selected_agents_ & 15) ==
-        15 ? 1792 : 1796)->draw(0, 46 + 44, 0);
-    g_App.gameSprites().sprite((selected_agents_ & 15) ==
-        15 ? 1793 : 1797)->draw(64, 46 + 44, 0);
+    if(pressed_btn_select_all_) {
+        g_App.gameSprites().sprite(1792)->draw(0, 46 + 44, 0);
+        g_App.gameSprites().sprite(1793)->draw(64, 46 + 44, 0);
+    } else {
+        g_App.gameSprites().sprite(1796)->draw(0, 46 + 44, 0);
+        g_App.gameSprites().sprite(1797)->draw(64, 46 + 44, 0);
+    }
 }
 
 static int drawChar(int x, int y, char ch, uint8 color) {
@@ -1305,6 +1310,7 @@ void GameplayMenu::selectAgent(unsigned int agentNo, bool addToGroup) {
         selected_agents_ ^= 1 << agentNo;
     else
         selected_agents_ = 1 << agentNo;
+    pressed_btn_select_all_ = false;
 }
 
 /*!
@@ -1322,10 +1328,17 @@ void GameplayMenu::selectAllAgents(bool invert) {
             selected_agents_ ^= 4;
         if ((selectable_agents_ & (1 << 3)) != 0)
             selected_agents_ ^= 8;
+        pressed_btn_select_all_ = false;
     } else {
-        if ((selected_agents_ & selectable_agents_) == selectable_agents_)
+        if ((selected_agents_ & 0xF0) != 0) {
             selected_agents_ = selected_agents_ >> 4;
-        else
-            selected_agents_ = (selected_agents_ << 4) | selectable_agents_;
+            pressed_btn_select_all_ = false;
+        } else {
+            if (selectable_agents_ != 0) {
+                selected_agents_ = (selected_agents_ << 4) | selectable_agents_;
+                pressed_btn_select_all_ = true;
+            } else
+                pressed_btn_select_all_ = false;
+        }
     }
 }

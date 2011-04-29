@@ -87,6 +87,7 @@ protected:
     int pointing_at_ped_, pointing_at_vehicle_, pointing_at_weapon_;
     int mm_tx_, mm_ty_;
     bool completed_;
+    bool pressed_btn_select_all_;
 };
 
 #endif

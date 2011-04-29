@@ -629,7 +629,7 @@ void Mission::createFastKeys(int tilex, int tiley, int maxtilex, int maxtiley) {
     // peds
     for (unsigned int i = 0; i < 4; i++) {
         PedInstance *p = peds_[i];
-        if (g_Session.teamMember(i)->isActive() && p->map() != -1) {
+        if (p->getIsAnAgent() == PedInstance::Agent_Active && p->map() != -1) {
             if (p->tileX() >= tilex && p->tileX() < maxtilex
                 && p->tileY() >= tiley && p->tileY() < maxtiley) {
                 fast_ped_cache_.insert(fastKey(p));

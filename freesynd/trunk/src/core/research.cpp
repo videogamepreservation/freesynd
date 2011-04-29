@@ -95,6 +95,7 @@ bool Research::incrFunding() {
     if (coeffInd_ < 9) {
         coeffInd_++;
         updateProjection();
+        currFunding_ = minFunding_ * g_CoeffsFund[coeffInd_];
         return true;
     }
 
@@ -108,6 +109,7 @@ bool Research::decrFunding() {
     if (coeffInd_ >= 0) {
         coeffInd_--;
         updateProjection();
+        currFunding_ = minFunding_ * g_CoeffsFund[coeffInd_];
         return true;
     }
 

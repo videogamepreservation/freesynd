@@ -203,7 +203,7 @@ Weapon * WeaponManager::loadWeapon(Weapon::WeaponType wt) {
         MapObject::dmg_Bullet, 1, 1);
             break;
         case Weapon::MediKit:
-            pWeapon = new Weapon("MEDIKIT", 24, 74, 500, 1, 256, 0, -1, 377,
+            pWeapon = new Weapon("MEDIKIT", 24, 74, 500, 1, 256, 1, -1, 377,
         Weapon::Unarmed_Anim, snd::NO_SOUND, Weapon::MediKit,
         MapObject::dmg_Heal, 1, 1);
             break;
