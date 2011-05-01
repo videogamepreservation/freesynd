@@ -108,6 +108,9 @@ public:
     //! Handles mouse button released
     void mouseUpEvent(int x, int y, int button, const int modKeys);
 
+    bool isPrintableKey(Key key);
+    char getKeyAsChar(Key key);
+
 protected:
     //! Shows the menu opening animation
     void showMenu(Menu *pMenu, bool playAnim);

@@ -26,6 +26,8 @@
 #ifndef FILE_H
 #define FILE_H
 
+#include <string.h>
+#include <vector>
 #include <stdio.h>
 #include "common.h"
 
@@ -35,14 +37,20 @@
 class File {
 public:
     static void setPath(const char *path);
+    //! Sets the path to the home of freesynd where freesynd.ini is.*/
+    static void setHomePath(const char *path);
     static uint8 *loadFile(const char *filename, int &filesize);
     static FILE *loadTextFile(const char *filename);
     //! Returns the full path of the given resource using the current root path.
     static const char *fileFullPath(const char *filename, bool uppercase);
+    //! Returns the list of game saved names
+    static void getGameSavedNames(std::vector<std::string> &files);
 
 private:
     static uint8 *loadFileToMem(const char *filename, int &filesize);
     static char _path[240];
+    /*! The path to the freesynd.ini file and save directory.*/
+    static std::string homePath_;
 };
 
 #endif

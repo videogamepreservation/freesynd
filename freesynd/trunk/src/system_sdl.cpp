@@ -180,14 +180,15 @@ Key SystemSDL::checkValidKey(SDL_keysym keysym) {
         case SDLK_BACKSPACE: key = KEY_BACKSPACE; break;
         case SDLK_SPACE: key = KEY_SPACE; break;
         case SDLK_BACKQUOTE: key = KEY_BACKQUOTE; break;
+        case SDLK_DELETE: key = KEY_DELETE; break;
         case SDLK_UP:
         case SDLK_DOWN:
         case SDLK_RIGHT:
         case SDLK_LEFT:
-        case KEY_HOME:
-        case KEY_END:
-        case KEY_PAGEUP:
-        case KEY_PAGEDOWN:
+        case SDLK_HOME:
+        case SDLK_END:
+        case SDLK_PAGEUP:
+        case SDLK_PAGEDOWN:
             key = static_cast < Key > (KEY_UP + (keysym.sym - SDLK_UP));
             break;
         case SDLK_F1:
@@ -234,6 +235,7 @@ Key SystemSDL::checkValidKey(SDL_keysym keysym) {
 
     return key;
 }
+
 /*!
  * Watch the event queue and dispatch events.
  * - keyboard events : when a modifier key is pressed,

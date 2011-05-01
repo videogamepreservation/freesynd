@@ -72,6 +72,9 @@ void App::destroy() {
 bool App::readConfiguration(const char *dir) {
     std::string path(dir);
     path.append("freesynd.ini");
+    
+    File::setHomePath(dir);
+
     try {
         ConfigFile conf(path);
         conf.readInto(fullscreen_, "fullscreen", false);

@@ -389,7 +389,7 @@ void TeamListBox::handleMouseMotion(int x, int y, int state, const int modKeys) 
     if (pModel_) {
         // Gets the line pointed by the mouse
         int i = (y - yOrigin_) / 12;
-        if (i >= 0 && i < pModel_->size()) {
+        if (i >= 0 && i < (int) pModel_->size()) {
             if (pModel_->getElement(i)) {
                 // If line contains something, highlight it
                 if (focusedLine_ != i) {
