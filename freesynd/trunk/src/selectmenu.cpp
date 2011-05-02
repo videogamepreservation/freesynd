@@ -41,8 +41,8 @@ cur_agent_(0), tick_count_(0), sel_all_(false)
 
     addOption(16, 234, 129, 25, "RESEARCH", FontManager::SIZE_2, KEY_F1, "research");
     teamButId_ = addToggleAction(16, 262, 129, 25, "TEAM", FontManager::SIZE_2, KEY_F2, false);
-    modsButId_ = addToggleAction(16, 290, 129, 25, "MODS", FontManager::SIZE_2, KEY_F3, false);
-    equipButId_ = addToggleAction(16, 318, 129, 25, "EQUIP", FontManager::SIZE_2, KEY_F4, true);
+    modsButId_ = addToggleAction(16, 290, 129, 25, "#MENU_MODS_BUT", FontManager::SIZE_2, KEY_F3, false);
+    equipButId_ = addToggleAction(16, 318, 129, 25, "#MENU_EQUIP_BUT", FontManager::SIZE_2, KEY_F4, true);
     addOption(16, 346, 129, 25, "#MENU_ACC_BUT", FontManager::SIZE_2, KEY_F5, "loading");
     addOption(500, 347,  128, 25, "#MENU_MAIN_BUT", FontManager::SIZE_2, KEY_F6, "main");
 

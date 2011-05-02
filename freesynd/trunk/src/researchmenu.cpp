@@ -41,8 +41,8 @@ ResearchMenu::ResearchMenu(MenuManager * m):Menu(m, "research", "mresrch.dat", "
     txtTimeId_ = addStatic(500, 9, "", FontManager::SIZE_2, false);     // Time
     moneyTxtId_ = addStatic(500, 87, 128, "0", FontManager::SIZE_2, false);     // Money
 
-    modsButId_ = addToggleAction(16, 290, 129, 25, "#RES_MODS_BUT", FontManager::SIZE_2, KEY_F1, tab_ == TAB_MODS);
-    equipButId_ = addToggleAction(16, 318, 129, 25,  "#RES_EQUIP_BUT", FontManager::SIZE_2, KEY_F2, tab_ == TAB_EQUIPS);
+    modsButId_ = addToggleAction(16, 290, 129, 25, "#MENU_MODS_BUT", FontManager::SIZE_2, KEY_F1, tab_ == TAB_MODS);
+    equipButId_ = addToggleAction(16, 318, 129, 25,  "#MENU_EQUIP_BUT", FontManager::SIZE_2, KEY_F2, tab_ == TAB_EQUIPS);
     addOption(16, 346, 129, 25,  "#MENU_ACC_BUT", FontManager::SIZE_2, KEY_F3, "select");
     addOption(500, 347,  128, 25, "#MENU_MAIN_BUT", FontManager::SIZE_2, KEY_F4, "main");
 
