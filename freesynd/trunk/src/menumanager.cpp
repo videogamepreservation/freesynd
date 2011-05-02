@@ -147,11 +147,13 @@ void MenuManager::setLanguage(FS_Lang lang) {
             break;
         default:
             filename.append("english.lng");
+            lang = ENGLISH;
             break;
     }
 
     try {
         language_ = new ConfigFile(filename);
+        curr_language_ = lang;
     } catch (...) {
         printf("ERROR : Unable to load language file %s.\n", filename.c_str());
         language_ = NULL;

@@ -125,8 +125,16 @@ void BriefMenu::handleShow() {
 
     updateClock();
 
-    getStatic(txtInfoId_)->setTextFormated("%d", pMission->infoCost(g_Session.getSelectedBlock().infoLevel));
-    getStatic(txtEnhId_)->setTextFormated("%d", pMission->enhanceCost(g_Session.getSelectedBlock().enhanceLevel));
+    if (g_Session.getSelectedBlock().infoLevel < pMission->getMaxInfoLvl()) {
+        getStatic(txtInfoId_)->setTextFormated("%d",
+            pMission->infoCost(g_Session.getSelectedBlock().infoLevel));
+    } else
+        getStatic(txtInfoId_)->setText("");
+    if (g_Session.getSelectedBlock().enhanceLevel < pMission->getMaxEnhanceLvl()) {
+        getStatic(txtEnhId_)->setTextFormated("%d",
+            pMission->enhanceCost(g_Session.getSelectedBlock().enhanceLevel));
+    } else
+        getStatic(txtEnhId_)->setText("");
 
     g_System.showCursor();
 }
@@ -278,7 +286,11 @@ void BriefMenu::handleAction(const int actionId, void *ctx, const int modKeys) {
             g_Session.getSelectedBlock().infoLevel += 1;
             
             getStatic(txtMoneyId_)->setTextFormated("%d", g_Session.getMoney());
-            getStatic(txtInfoId_)->setTextFormated("%d", pMission->infoCost(g_Session.getSelectedBlock().infoLevel));
+            if (g_Session.getSelectedBlock().infoLevel < pMission->getMaxInfoLvl()) {
+                getStatic(txtInfoId_)->setTextFormated("%d",
+                    pMission->infoCost(g_Session.getSelectedBlock().infoLevel));
+            } else
+                getStatic(txtInfoId_)->setText("");
         }
 
         getOption(nextButId_)->setVisible(true);
@@ -292,7 +304,11 @@ void BriefMenu::handleAction(const int actionId, void *ctx, const int modKeys) {
             g_Session.getSelectedBlock().enhanceLevel += 1;
             
             getStatic(txtMoneyId_)->setTextFormated("%d", g_Session.getMoney());
-            getStatic(txtEnhId_)->setTextFormated("%d", pMission->enhanceCost(g_Session.getSelectedBlock().enhanceLevel));
+            if (g_Session.getSelectedBlock().enhanceLevel < pMission->getMaxEnhanceLvl()) {
+                getStatic(txtEnhId_)->setTextFormated("%d",
+                    pMission->enhanceCost(g_Session.getSelectedBlock().enhanceLevel));
+            } else
+                getStatic(txtEnhId_)->setText("");
         }
     }
 

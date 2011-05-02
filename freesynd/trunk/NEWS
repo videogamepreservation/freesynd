@@ -30,6 +30,7 @@ Changes
   * Fixed, selection for agents killed during gameplay is not possible now
   * Added information about killed during mission to Debrief menu
   * When agent is killed during mission he will be removed from agents list
+  * Added description to mission brief in 3 more languages
 
 Fixed Bugs
 ----------

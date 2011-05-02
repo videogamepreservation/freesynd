@@ -24,6 +24,7 @@
 
 #include <stdio.h>
 #include <assert.h>
+#include "app.h"
 #include "map.h"
 #include "mission.h"
 #include "missionmanager.h"
@@ -40,7 +41,20 @@ Mission *MissionManager::loadMission(int n)
     printf("loading mission %i\n", n);
 
     char tmp[100];
-    sprintf(tmp, "miss%02d.dat", n);
+    switch(g_App.menus().currLanguage()) {
+        case MenuManager::ENGLISH:
+            sprintf(tmp, "miss%02d.dat", n);
+            break;
+        case MenuManager::FRENCH:
+            sprintf(tmp, "miss1%02d.dat", n);
+            break;
+        case MenuManager::ITALIAN:
+            sprintf(tmp, "miss2%02d.dat", n);
+            break;
+        case MenuManager::GERMAN:
+            sprintf(tmp, "miss3%02d.dat", n);
+            break;
+    }
     int size;
     uint8 *data = File::loadFile(tmp, size);
     if (data == NULL) {

@@ -111,6 +111,8 @@ public:
     bool isPrintableKey(Key key);
     char getKeyAsChar(Key key);
 
+    FS_Lang currLanguage(void) {return curr_language_; }
+
 protected:
     //! Shows the menu opening animation
     void showMenu(Menu *pMenu, bool playAnim);
@@ -132,6 +134,7 @@ protected:
     DirtyList   dirtyList_;
     /*! Language file. */
     ConfigFile  *language_;
+    FS_Lang curr_language_;
 
     MainMenu *menu_main_;
     ConfMenu *menu_conf_;
