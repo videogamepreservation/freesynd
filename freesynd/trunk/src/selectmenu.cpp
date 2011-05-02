@@ -36,11 +36,11 @@ cur_agent_(0), tick_count_(0), sel_all_(false)
     pSelectedWeap_ = NULL;
     selectedWInstId_ = 0;
     pSelectedMod_ = NULL;
-    addStatic(148, 35, "TEAM SELECTION", FontManager::SIZE_4, true);
+    addStatic(148, 35, "#SELECT_TITLE", FontManager::SIZE_4, true);
     txtTimeId_ = addStatic(500, 9, "", FontManager::SIZE_2, false);       // Time
 
-    addOption(16, 234, 129, 25, "RESEARCH", FontManager::SIZE_2, KEY_F1, "research");
-    teamButId_ = addToggleAction(16, 262, 129, 25, "TEAM", FontManager::SIZE_2, KEY_F2, false);
+    addOption(16, 234, 129, 25, "#SELECT_RES_BUT", FontManager::SIZE_2, KEY_F1, "research");
+    teamButId_ = addToggleAction(16, 262, 129, 25, "#SELECT_TEAM_BUT", FontManager::SIZE_2, KEY_F2, false);
     modsButId_ = addToggleAction(16, 290, 129, 25, "#MENU_MODS_BUT", FontManager::SIZE_2, KEY_F3, false);
     equipButId_ = addToggleAction(16, 318, 129, 25, "#MENU_EQUIP_BUT", FontManager::SIZE_2, KEY_F4, true);
     addOption(16, 346, 129, 25, "#MENU_ACC_BUT", FontManager::SIZE_2, KEY_F5, "loading");
@@ -56,9 +56,9 @@ cur_agent_(0), tick_count_(0), sel_all_(false)
     pModsLBox_ = addListBox(504, 110,  122, 230, tab_ == TAB_MODS);
     pModsLBox_->setModel(g_App.mods().getAvalaibleMods());
 
-    cancelButId_ = addOption(500, 270,  127, 22, "CANCEL", FontManager::SIZE_2, KEY_F7, NULL, false);
-    purchaseButId_ = addOption(500, 320,  127, 22, "PURCHASE", FontManager::SIZE_2, KEY_F8, NULL, false);
-    sellButId_ = addOption(500, 320,  127, 22, "SELL", FontManager::SIZE_2, KEY_F9, NULL, false);
+    cancelButId_ = addOption(500, 270,  127, 22, "#MENU_CANCEL_BUT", FontManager::SIZE_2, KEY_F7, NULL, false);
+    purchaseButId_ = addOption(500, 320,  127, 22, "#SELECT_BUY_BUT", FontManager::SIZE_2, KEY_F8, NULL, false);
+    sellButId_ = addOption(500, 320,  127, 22, "#SELECT_SELL_BUT", FontManager::SIZE_2, KEY_F9, NULL, false);
     setParentMenu("brief");
 
     // Agent name selected

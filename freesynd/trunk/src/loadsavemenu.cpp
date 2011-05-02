@@ -48,7 +48,7 @@ LoadSaveMenu::LoadSaveMenu(MenuManager * m):Menu(m, "loadsave", "mlosa.dat",
     // Main menu button
     addOption(501, 346, 126, 25, "#MENU_MAIN_BUT", FontManager::SIZE_2, KEY_F5, "main");
 
-    g_App.menus().getMessage("MENU_LB_EMPTY", emptyLbl_);
+    g_App.menus().getMessage("#MENU_LB_EMPTY", emptyLbl_);
     
     for (int i=0; i<10; i++) {
         files_.push_back("");

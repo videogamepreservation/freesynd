@@ -41,37 +41,37 @@ DebriefMenu::DebriefMenu(MenuManager *m) : Menu(m, "debrief", "mdebrief.dat",
     addStatic(left_x, y, str.c_str(), FontManager::SIZE_2, false);
     separatorSize_ = g_App.fonts().textWidth(str.c_str(), FontManager::SIZE_2);
 
-    y = 120;
+    y = 118;
     addStatic(left_x, y, "#DEBRIEF_STATUS", FontManager::SIZE_2, false);
     txtStatusId_ = addStatic(right_x, y, "", FontManager::SIZE_2, false);
-    y += 15;
+    y += 14;
     addStatic(left_x, y, "#DEBRIEF_AGENTS", FontManager::SIZE_2, false);
     txtUsedId_ = addStatic(right_x, y, "", FontManager::SIZE_2, false);
-    y += 15;
+    y += 14;
     addStatic(left_x, y, "#DEBRIEF_NEW_AGENT", FontManager::SIZE_2, false);
     txtAgentCapturedId_ = addStatic(right_x, y, "", FontManager::SIZE_2, false);
-    y += 15;
+    y += 14;
     addStatic(left_x, y, "#DEBRIEF_TIME", FontManager::SIZE_2, false);
     txtTimeId_ = addStatic(right_x, y, "", FontManager::SIZE_2, false);
-    y += 15;
+    y += 14;
     addStatic(left_x, y, "#DEBRIEF_AGT_KILLED", FontManager::SIZE_2, false);
     txtAgentKilledId_ = addStatic(right_x, y, "", FontManager::SIZE_2, false);
-    y += 15;
+    y += 14;
     addStatic(left_x, y, "#DEBRIEF_CRIM_KILLED", FontManager::SIZE_2, false);
     txtCrimKilledId_ = addStatic(right_x, y, "", FontManager::SIZE_2, false);
-    y += 15;
+    y += 14;
     addStatic(left_x, y, "#DEBRIEF_CIV_KILLED", FontManager::SIZE_2, false);
     txtCivilKilledId_ = addStatic(right_x, y, "", FontManager::SIZE_2, false);
-    y += 15;
+    y += 14;
     addStatic(left_x, y, "#DEBRIEF_POL_KILLED", FontManager::SIZE_2, false);
     txtPoliceKilledId_ = addStatic(right_x, y, "", FontManager::SIZE_2, false);
-    y += 15;
+    y += 14;
     addStatic(left_x, y, "#DEBRIEF_GUARD_KILLED", FontManager::SIZE_2, false);
     txtGardKilledId_ = addStatic(right_x, y, "", FontManager::SIZE_2, false);
-    y += 15;
+    y += 14;
     addStatic(left_x, y, "#DEBRIEF_PERSUADED", FontManager::SIZE_2, false);
     txtConvincedId_ = addStatic(right_x, y, "", FontManager::SIZE_2, false);
-    y += 15;
+    y += 14;
     addStatic(left_x, y, "#DEBRIEF_HIT", FontManager::SIZE_2, false);
     txtPrecisionId_ = addStatic(right_x, y, "", FontManager::SIZE_2, false);
 
@@ -79,7 +79,7 @@ DebriefMenu::DebriefMenu(MenuManager *m) : Menu(m, "debrief", "mdebrief.dat",
     txtSearchId_ = addStatic(left_x, y, "", FontManager::SIZE_2, false);
     y += 20;
     txtNewWeap1Id_ = addStatic(left_x, y, "", FontManager::SIZE_2, false);
-    y += 15;
+    y += 14;
     txtNewWeap2Id_ = addStatic(left_x, y, "", FontManager::SIZE_2, false);
 
     addOption(16, 346, 129, 25, "#MENU_ACC_BUT", FontManager::SIZE_2, KEY_F5, "map");
