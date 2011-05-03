@@ -580,7 +580,7 @@ void GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
        * to it. If control key is pressed, add or removes agent from
        * current selection. */
         if (x < 128) {
-            if (y < 42) {
+            if (y < 46) {
                 if (x < 64) {
                     if ((selectable_agents_ & (1 << 0)) != 0) {
                         selectAgent(0, ctrl);
@@ -594,7 +594,7 @@ void GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
                 }
             }
 
-            if (y >= 42 + 48 + 10 && y < 42 + 48 + 10 + 42) {
+            if (y >= 42 + 48 + 10 && y < 42 + 48 + 10 + 46) {
                 if (x < 64) {
                     if ((selectable_agents_ & (1 << 2)) != 0) {
                         selectAgent(2, ctrl);
@@ -1020,13 +1020,9 @@ void GameplayMenu::drawAgentSelectors() {
 
     // draw health bars
     for (int a = 0; a < 4; a++) {
-        for (int j = 36 - 36 * mission_->ped(a)->health()
-                / mission_->ped(a)->startHealth(); j < 36; j++) {
-            for (int i = 0; i < 7; i++) {
-                g_Screen.setPixel(((a % 2) == 1 ? 64 : 0) + 51 + i,
-                        (a > 1 ? 46 + 44 + 10 : 0) + 6 + j, 12);
-            }
-        }
+        int ydiff = 36 * mission_->ped(a)->health() / mission_->ped(a)->startHealth();
+        g_Screen.drawRect(((a % 2) == 1 ? 64 : 0) + 51,
+            (a > 1 ? 46 + 44 + 10 : 0) + 6 + 36 - ydiff, 7, ydiff, 12);
     }
 
     //draw animation within selectors
@@ -1037,7 +1033,7 @@ void GameplayMenu::drawAgentSelectors() {
 }
 
 void GameplayMenu::drawPerformanceMeters() {
-    // 64x44
+    // 64x46
     g_App.gameSprites().sprite(isAgentSelected(0) ? 1778 : 1754)->draw(
             0, 46, 0);
     g_App.gameSprites().sprite(isAgentSelected(1) ? 1778 : 1755)->draw(
@@ -1217,12 +1213,8 @@ void GameplayMenu::drawWeaponSelectors() {
                     else
                         n = 25 * wi->ammoRemaining() / wi->ammo();
 
-                    for (int m = 0; m < n; m++)
-                        for (int k = 0; k < 5; k++)
-                            g_Screen.setPixel(32 * i + 3 + m,
-                                    46 + 44 + 10 + 46 + 44 + 15 + j * 32 + 23
-                                        + k + 2,
-                                    12);
+                    g_Screen.drawRect(32 * i + 3, 46 + 44 + 10 + 46 + 44 + 15 + j * 32 + 23 + 2,
+                        n, 5, 12);
                 }
             }
     } else {
