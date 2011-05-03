@@ -360,8 +360,9 @@ void GameplayMenu::handleRender()
         completed_ = false;
         g_App.music().playTrack(MusicManager::TRACK_ASSASSINATE);
 
-        // TODO: choose the right game palette.
-        g_App.setPalette("hpal02.dat");
+        char spal[20];
+        sprintf(spal,"hpal0%i.dat",g_Session.getSelectedBlock().mis_id % 5 + 1);
+        g_App.setPalette(spal);
         g_Screen.clear(0);
         world_x_ = mission_->startX();
         world_y_ = mission_->startY();
