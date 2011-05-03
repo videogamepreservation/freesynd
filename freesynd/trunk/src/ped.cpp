@@ -192,14 +192,8 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
         return true;
 
     if (selectedWeapon()) {
-        if ((selectedWeapon()->getWeaponType() == Weapon::MediKit)
-                && selectedWeapon()->ammoRemaining()
-                && health_ < start_health_)
-        {
-            health_ = start_health_;
-            selectedWeapon()->setAmmoRemaining(0);
+        if (selectedWeapon()->inflictDamage(NULL, NULL, elapsed))
             return true;
-        }
     }
 
     if (health_ < 0) {
@@ -210,7 +204,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
         // find a weapon with ammo
         // TODO: weapon should not be drawn until enemy is in sight
         if (selectedWeapon() == 0)
-            selectBestWeapon();
+            selectNextWeapon();
 
         target_ = 0;
         if (selectedWeapon()) {
@@ -822,21 +816,30 @@ bool PedInstance::inSightRange(MapObject *t) {
 }
 
 void PedInstance::selectNextWeapon() {
-    int nextWeapon = -1;
 
-    Weapon *curSelectedWeapon = (Weapon *) weapon(selected_weapon_);
+    if (selected_weapon_ != -1) {
+        int nextWeapon = -1;
+        Weapon *curSelectedWeapon = (Weapon *) weapon(selected_weapon_);
 
-    if (curSelectedWeapon)
-        for (int i = numWeapons() - 1; i >=0 && nextWeapon == -1; i--)
-            if (i != selected_weapon_
-                    && weapon(i)->rank() == curSelectedWeapon->rank()
-                    && weapon(i)->ammoRemaining())
-                nextWeapon = i;
+        if (curSelectedWeapon)
+            for (int i = numWeapons() - 1; i >=0 && nextWeapon == -1; i--)
+                if (i != selected_weapon_
+                        && weapon(i)->rank() == curSelectedWeapon->rank()
+                        && weapon(i)->ammoRemaining())
+                    nextWeapon = i;
 
-    if (nextWeapon == -1)
+        if (nextWeapon == -1)
+            selectBestWeapon();
+        else
+            selected_weapon_ = nextWeapon;
+    } else
         selectBestWeapon();
+
+    if (selected_weapon_ != -1
+        && weapon(selected_weapon_)->getWeaponType() == Weapon::EnergyShield)
+            setRcvDamageDef(MapObject::ddmg_PedWithEnergyShield);
     else
-        selected_weapon_ = nextWeapon;
+        setRcvDamageDef(MapObject::ddmg_Ped);
 }
 
 void PedInstance::selectBestWeapon() {

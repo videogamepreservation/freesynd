@@ -6,6 +6,7 @@
  *   Copyright (C) 2005  Joost Peters  <joostp@users.sourceforge.net>   *
  *   Copyright (C) 2006  Trent Waddington <qg@biodome.org>              *
  *   Copyright (C) 2006  Tarjei Knapstad <tarjei.knapstad@gmail.com>    *
+ *   Copyright (C) 2011  Bohdan Stelmakh <chamel@users.sourceforge.net> *
  *                                                                      *
  *    This program is free software;  you can redistribute it and / or  *
  *  modify it  under the  terms of the  GNU General  Public License as  *
@@ -32,13 +33,6 @@
 
 class Mod;
 class WeaponInstance;
-
-#define SLOT_LEGS 5
-#define SLOT_ARMS 4
-#define SLOT_CHEST 3
-#define SLOT_HEART 2
-#define SLOT_EYES 1
-#define SLOT_BRAIN 0
 
 /*!
  * Stores information about agent health, weapons inventory and modifications.

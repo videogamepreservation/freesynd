@@ -7,6 +7,7 @@
  *   Copyright (C) 2006  Trent Waddington <qg@biodome.org>              *
  *   Copyright (C) 2006  Tarjei Knapstad <tarjei.knapstad@gmail.com>    *
  *   Copyright (C) 2010  Benoit Blancard <benblan@users.sourceforge.net>*
+ *   Copyright (C) 2011  Bohdan Stelmakh <chamel@users.sourceforge.net> *
  *                                                                      *
  *    This program is free software;  you can redistribute it and / or  *
  *  modify it  under the  terms of the  GNU General  Public License as  *
@@ -27,6 +28,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include "app.h"
+#include "mod.h"
 #include "selectmenu.h"
 
 SelectMenu::SelectMenu(MenuManager * m):Menu(m, "select", "mselect.dat", "mselout.dat"),
@@ -107,7 +109,6 @@ void SelectMenu::drawAgent()
     if (selected == NULL)
         return;
 
-    // TODO: mods
     int torso, arms, legs;
     int armsx = 188;
     int armsy = 152;
@@ -127,14 +128,14 @@ void SelectMenu::drawAgent()
         legsy -= 4;
     }
 
-    if (selected->slot(SLOT_LEGS)) {
-        legs = selected->slot(SLOT_LEGS)->icon(selected->isMale());
-        g_App.fonts().drawText(366, 250, selected->slot(SLOT_LEGS)->getName(),
+    if (selected->slot(Mod::MOD_LEGS)) {
+        legs = selected->slot(Mod::MOD_LEGS)->icon(selected->isMale());
+        g_App.fonts().drawText(366, 250, selected->slot(Mod::MOD_LEGS)->getName(),
                                FontManager::SIZE_1, false);
     }
-    if (selected->slot(SLOT_ARMS)) {
-        arms = selected->slot(SLOT_ARMS)->icon(selected->isMale());
-        g_App.fonts().drawText(366, 226, selected->slot(SLOT_ARMS)->getName(),
+    if (selected->slot(Mod::MOD_ARMS)) {
+        arms = selected->slot(Mod::MOD_ARMS)->icon(selected->isMale());
+        g_App.fonts().drawText(366, 226, selected->slot(Mod::MOD_ARMS)->getName(),
                                FontManager::SIZE_1, false);
     }
 
@@ -142,10 +143,10 @@ void SelectMenu::drawAgent()
     g_App.menuSprites().drawSpriteXYZ(torso, 224, torsoy, 0, false, true);
     g_App.menuSprites().drawSpriteXYZ(legs, 224, legsy, 0, false, true);
 
-    if (selected->slot(SLOT_CHEST)) {
-        int chest = selected->slot(SLOT_CHEST)->icon(selected->isMale());
+    if (selected->slot(Mod::MOD_CHEST)) {
+        int chest = selected->slot(Mod::MOD_CHEST)->icon(selected->isMale());
         g_App.fonts().drawText(366, 202,
-                               selected->slot(SLOT_CHEST)->getName(), FontManager::SIZE_1,
+                               selected->slot(Mod::MOD_CHEST)->getName(), FontManager::SIZE_1,
                                false);
         int chestx = 216;
         int chesty = 146;
@@ -157,17 +158,17 @@ void SelectMenu::drawAgent()
                                           true);
     }
 
-    if (selected->slot(SLOT_HEART)) {
-        int heart = selected->slot(SLOT_HEART)->icon(selected->isMale());
+    if (selected->slot(Mod::MOD_HEART)) {
+        int heart = selected->slot(Mod::MOD_HEART)->icon(selected->isMale());
         g_App.fonts().drawText(366, 160,
-                               selected->slot(SLOT_HEART)->getName(), FontManager::SIZE_1,
+                               selected->slot(Mod::MOD_HEART)->getName(), FontManager::SIZE_1,
                                false);
         g_App.menuSprites().drawSpriteXYZ(heart, 254, 166, 0, false, true);
     }
 
-    if (selected->slot(SLOT_EYES)) {
-        int eyes = selected->slot(SLOT_EYES)->icon(selected->isMale());
-        g_App.fonts().drawText(366, 136, selected->slot(SLOT_EYES)->getName(),
+    if (selected->slot(Mod::MOD_EYES)) {
+        int eyes = selected->slot(Mod::MOD_EYES)->icon(selected->isMale());
+        g_App.fonts().drawText(366, 136, selected->slot(Mod::MOD_EYES)->getName(),
                                FontManager::SIZE_1, false);
         int eyesx = 238;
         if (!selected->isMale()) {
@@ -177,10 +178,10 @@ void SelectMenu::drawAgent()
                                           true);
     }
 
-    if (selected->slot(SLOT_BRAIN)) {
-        int brain = selected->slot(SLOT_BRAIN)->icon(selected->isMale());
+    if (selected->slot(Mod::MOD_BRAIN)) {
+        int brain = selected->slot(Mod::MOD_BRAIN)->icon(selected->isMale());
         g_App.fonts().drawText(366, 112,
-                               selected->slot(SLOT_BRAIN)->getName(), FontManager::SIZE_1,
+                               selected->slot(Mod::MOD_BRAIN)->getName(), FontManager::SIZE_1,
                                false);
         int brainx = 238;
         if (!selected->isMale()) {
@@ -267,6 +268,12 @@ void SelectMenu::handleShow() {
 
     // Update the time
     updateClock();
+
+    if (g_Session.teamMember(cur_agent_)) {
+        getStatic(txtAgentId_)->setTextFormated("#SELECT_SUBTITLE", g_Session.teamMember(cur_agent_)->getName());
+    } else {
+        getStatic(txtAgentId_)->setText("");
+    }
 }
 
 void SelectMenu::handleRender() {
@@ -371,6 +378,13 @@ void SelectMenu::handleRender() {
 
 void SelectMenu::handleLeave() {
     g_System.hideCursor();
+    // resetting menu
+    tab_ = TAB_EQUIPS;
+    pSelectedWeap_ = NULL;
+    selectedWInstId_ = 0;
+    pSelectedMod_ = NULL;
+    rnd_ = 0;
+    cur_agent_ = 0;
 }
 
 void SelectMenu::toggleAgent(int n)

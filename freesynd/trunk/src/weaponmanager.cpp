@@ -154,7 +154,7 @@ Weapon * WeaponManager::loadWeapon(Weapon::WeaponType wt) {
     Weapon *pWeapon = NULL;
     switch(wt) {
         case Weapon::Persuadatron:
-            pWeapon = new Weapon("PERSUADERTRON", 14, 64, 5000, -1, 256, 0,
+            pWeapon = new Weapon("PERSUADERTRON", 14, 64, 5000, -1, 256, -1,
         -1, 367, Weapon::Unarmed_Anim, snd::PERSUADE, Weapon::Persuadatron,
         MapObject::dmg_Mental, 1, 1);
             break;
@@ -181,7 +181,7 @@ Weapon * WeaponManager::loadWeapon(Weapon::WeaponType wt) {
         case Weapon::EnergyShield:
             pWeapon = new Weapon("ENERGY SHIELD", 28, 78, 8000, 200, 768, 15,
         -1, 381, Weapon::EnergyShield_Anim, snd::NO_SOUND,
-        Weapon::EnergyShield, MapObject::dmg_None, 1, 1);
+        Weapon::EnergyShield, MapObject::dmg_None, 8, 1);
             break;
         case Weapon::Uzi:
             pWeapon = new Weapon("UZI", 18, 68, 750, 50, 1792, 2, 5, 371,
@@ -208,17 +208,18 @@ Weapon * WeaponManager::loadWeapon(Weapon::WeaponType wt) {
         MapObject::dmg_Heal, 1, 1);
             break;
         case Weapon::Scanner:
-            pWeapon = new Weapon("SCANNER", 23, 73, 500, -1, 4096, 0, -1, 376,
+            pWeapon = new Weapon("SCANNER", 23, 73, 500, -1, 4096, -1, -1, 376,
         Weapon::Unarmed_Anim, snd::NO_SOUND, Weapon::Scanner,
         MapObject::dmg_None, 1, 1);
             break;
         case Weapon::AccessCard:
-            pWeapon = new Weapon("ACCESS CARD", 26, 76, 1000, -1, 256, 0, -1,
+            pWeapon = new Weapon("ACCESS CARD", 26, 76, 1000, -1, 256, -1, -1,
         379, Weapon::Unarmed_Anim, snd::NO_SOUND, Weapon::AccessCard,
         MapObject::dmg_None, 1, 1);
             break;
         case Weapon::TimeBomb:
-            pWeapon = new Weapon("TIME BOMB", 25, 75, 25000, -1, 1000, 0, -1,
+        // NOTE: what is real number for "shot"? for now = 7500
+            pWeapon = new Weapon("TIME BOMB", 25, 75, 25000, -1, 1000, 7500, -1,
         378, Weapon::Unarmed_Anim, snd::TIMEBOMB, Weapon::TimeBomb,
         MapObject::dmg_Explosion, 1, 1);
             break;

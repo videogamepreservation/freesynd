@@ -7,6 +7,7 @@
  *   Copyright (C) 2006  Trent Waddington <qg@biodome.org>              *
  *   Copyright (C) 2006  Tarjei Knapstad <tarjei.knapstad@gmail.com>    *
  *   Copyright (C) 2010  Benoit Blancard <benblan@users.sourceforge.net>*
+ *   Copyright (C) 2011  Bohdan Stelmakh <chamel@users.sourceforge.net> *
  *                                                                      *
  *    This program is free software;  you can redistribute it and / or  *
  *  modify it  under the  terms of the  GNU General  Public License as  *
@@ -76,7 +77,7 @@ public:
         addStatic(475, 60, "#CONF_COL_TITLE", FontManager::SIZE_2, false);
         leftLogoButId_ = addImageOption(405, 94, KEY_F3, Sprite::MSPR_LEFT_ARROW_D, Sprite::MSPR_LEFT_ARROW_L);
         rightLogoButId_ = addImageOption(435, 94, KEY_F4, Sprite::MSPR_RIGHT_ARROW_D, Sprite::MSPR_RIGHT_ARROW_L);
-        
+
         addStatic(475, 96, "#CONF_LOGO_TITLE", FontManager::SIZE_2, false);
         okButId_ = addOption(291, 122, 125, 23, "#CONF_OK_BUT", FontManager::SIZE_2, KEY_F5, "conf");
         addOption(476, 122, 123, 23, "#MENU_CANCEL_BUT", FontManager::SIZE_2, KEY_F6, "conf");
@@ -152,19 +153,25 @@ public:
     light_last_tick_(false) {}
 
     void drawCaret(bool light = false) {
-        uint8 data[5];
-        memset(data, light ? 252 : 16, 5);
-        g_Screen.scale2x(315 +
+        g_Screen.drawRect(315 +
                          g_App.fonts().textWidth(name_value_.c_str(), FontManager::SIZE_2),
-                         95, 5, 1, data);
+                         95, 10, 2, light ? 252 : 16);
     }
 
-    virtual void handleTick() {
-        tick_count_++;
+    virtual void handleTick(int elapsed) {
+        tick_count_+= elapsed;
+        tick_count_ %= 200;
 
-        if ((tick_count_ % 50) == 0) {
-            light_last_tick_ = !light_last_tick_;
-            drawCaret(light_last_tick_);
+        if (tick_count_ < 100) {
+            if (light_last_tick_) {
+                light_last_tick_ = false;
+                drawCaret(light_last_tick_);
+            }
+        } else {
+            if (!light_last_tick_) {
+                light_last_tick_ = true;
+                drawCaret(light_last_tick_);
+            }
         }
     }
 
@@ -297,12 +304,12 @@ void ConfMenu::handleRender() {
 
     if (*g_App.getGameSession().getCompanyName()) {
         g_Screen.scale2x(28, 90, 120, 10, bkg_ + 14 + 45 * 320, 320);
-        g_App.fonts().drawText(28, 90, g_App.getGameSession().getCompanyName(), FontManager::SIZE_2, false);
+        g_App.fonts().drawText(28, 92, g_App.getGameSession().getCompanyName(), FontManager::SIZE_1, false);
     }
 
     if (*g_App.getGameSession().getUserName()) {
         g_Screen.scale2x(28, 112, 120, 10, bkg_ + 14 + 56 * 320, 320);
-        g_App.fonts().drawText(28, 112, g_App.getGameSession().getUserName(), FontManager::SIZE_2, false);
+        g_App.fonts().drawText(28, 114, g_App.getGameSession().getUserName(), FontManager::SIZE_1, false);
     }
 
     g_System.showCursor();

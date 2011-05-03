@@ -49,3 +49,4 @@ in original gameplay or are not present at all
  - resolve shooting issues: targeting, range checking, target in range checking, range
 damage, obstacle checking
  - Manage Qwerty / azerty keyboard. Today only qwerty keyboard are used.
+ - Add in select menu reload button for weapons, autoreload for "pistol"
