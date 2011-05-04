@@ -174,6 +174,8 @@ public:
      */
     virtual void handleAction(const int actionId, void *ctx, const int modKeys) {}
 
+    void selectToggleAction(int id) { group_.selectButton(id); }
+
 protected:
     void redrawOptions();
     void needRendering();

@@ -282,6 +282,8 @@ public:
     void handleFocusLost();
 
     void handleSelectionLost();
+
+    void handleSelectionAquire();
 protected:
     //! True to select the button
     void setSelected(bool isSelected);

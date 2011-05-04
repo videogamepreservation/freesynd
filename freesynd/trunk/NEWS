@@ -36,6 +36,7 @@ Fixed Bugs
 ----------
   * 3005295 : The tax rate for the region cannot be altered by player
   * 3031032 : Rewrite animation generation procedures
+  * 3272545 : Team button not selected when clicking on inventory item
 
 Features added
 ----------

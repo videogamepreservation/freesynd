@@ -223,7 +223,8 @@ void Group::selectButton(int id) {
 
         if (pAction->getId() != id ) {
             pAction->handleSelectionLost();
-        }
+        } else
+            pAction->handleSelectionAquire();
     }
 }
 
@@ -242,8 +243,7 @@ void ToggleAction::setSelected(bool isSelected) {
 }
 
 void ToggleAction::executeAction(const int modKeys) {
-    setSelected(true);
-    // Deselect all other buttons of the group
+    // Deselect all other buttons of the group and select current
     group_->selectButton(getId());
     Option::executeAction(modKeys);
 }
@@ -258,6 +258,10 @@ void ToggleAction::handleFocusLost() {
 
 void ToggleAction::handleSelectionLost() {
     setSelected(false);
+}
+
+void ToggleAction::handleSelectionAquire() {
+    setSelected(true);
 }
 
 ListBox::ListBox(Menu *peer, int x, int y, int width, int height, bool visible) :

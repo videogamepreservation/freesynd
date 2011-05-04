@@ -471,6 +471,7 @@ void SelectMenu::handleMouseDown(int x, int y, int button, const int modKeys)
                     y >= 308 + j * 32 && y < 308 + j * 32 + 32) {
                     tab_ = TAB_EQUIPS;
                     pSelectedMod_ = NULL;
+                    selectToggleAction(equipButId_);
                     selectedWInstId_ = i + j * 4 + 1;
                     pSelectedWeap_ = selected->weapon(selectedWInstId_ - 1)->getWeaponClass();
                     addDirtyRect(500, 105,  125, 235);
