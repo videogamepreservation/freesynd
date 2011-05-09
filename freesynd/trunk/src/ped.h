@@ -221,6 +221,8 @@ public:
     }
 
     void setSelectedWeapon(int n) {
+        if (selected_weapon_ != -1)
+            weapons_[selected_weapon_]->resetWeaponUsedTime();
         selected_weapon_ = n;
         if (n != -1 && weapons_[selected_weapon_]->getWeaponType() == Weapon::EnergyShield)
             setRcvDamageDef(MapObject::ddmg_PedWithEnergyShield);
@@ -247,10 +249,10 @@ public:
     } ped_enum;
 
     void setIsAnAgent(ped_enum set_agent_as) { is_an_agent_ = set_agent_as; }
-    ped_enum getIsAnAgent() { return is_an_agent_; }
+    ped_enum isAnAgent() { return is_an_agent_; }
 
     int map();
-    AnimationDrawn getDrawnAnim();
+    AnimationDrawn drawnAnim();
     void setDrawnAnim(AnimationDrawn drawn_anim);
 
     typedef struct {

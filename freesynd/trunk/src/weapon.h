@@ -100,9 +100,11 @@ public:
 
     bool operator==(Weapon weapon) { return this->type_ == weapon.getWeaponType(); }
 
-    int getShotsPerSec() { return shots_per_sec_; }
-    int getAmmoPerSec() { return ammo_per_shot_; }
-    MapObject::DamageType getDmgType() { return dmg_type_; }
+    int shotsPerSec() { return shots_per_sec_; }
+    int ammoPerShot() { return ammo_per_shot_; }
+    int reloadTime() { return reload_time_; }
+    int timeForShot() { return time_for_shot_; }
+    MapObject::DamageType dmgType() { return dmg_type_; }
 
     bool wasSubmittedToSearch() { return submittedToSearch_; }
     void submitToSearch() { submittedToSearch_ = true; }
@@ -118,6 +120,10 @@ protected:
     WeaponAnimIndex idx_;
     snd::InGameSample sample_;
     int shots_per_sec_, ammo_per_shot_;
+    // time required to make weapon ready to shoot
+    int reload_time_;
+    // time weapon uses to do a single shot
+    int time_for_shot_;
     /*! True when weapon was found and submit to search manager.*/
     bool submittedToSearch_;
 };
@@ -149,16 +155,22 @@ public:
     Weapon::WeaponAnimIndex index() { return pWeaponClass_->index(); }
     Weapon::WeaponType getWeaponType() { return pWeaponClass_->getWeaponType(); }
 
-    bool operator==(WeaponInstance wi) { return pWeaponClass_->getWeaponType() == wi.getWeaponType(); }
+    bool operator==(WeaponInstance wi) {
+        return pWeaponClass_->getWeaponType() == wi.getWeaponType();
+    }
 
     //! Plays the weapon's sound.
     void playSound();
+    void resetWeaponUsedTime() { weapon_used_time_ = 0; }
 
 protected:
     Weapon *pWeaponClass_;
     int ammo_remaining_;
     ShootableMapObject *owner_;
-    int weapon_time_used_;
+    // if this value is smaller time_for_shot_ shot cannot be done 
+    // if is greater then time_for_shot_ reload is in execution
+    // if is greater then time_for_shot_ + reload_time_ then full shot is done
+    int weapon_used_time_;
 };
 
 #endif

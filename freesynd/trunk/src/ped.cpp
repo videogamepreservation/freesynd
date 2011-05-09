@@ -301,7 +301,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
     }
 
     updated = MapObject::animate(elapsed);
-    PedInstance::AnimationDrawn curanim = getDrawnAnim();
+    PedInstance::AnimationDrawn curanim = drawnAnim();
     switch (curanim) {
         case PedInstance::HitAnim:
             if (frame_ > ped_->lastHitFrame(getDirection())) {
@@ -650,7 +650,7 @@ void PedInstance::draw(int x, int y, int scrollX, int scrollY) {
         target_ = 0;
     }
 
-    switch(getDrawnAnim()){
+    switch(drawnAnim()){
         case PedInstance::HitAnim:
             ped_->drawHitFrame(x, y, getDirection(), frame_);
             break;
@@ -714,7 +714,7 @@ void PedInstance::drawSelectorAnim(int x, int y) {
     Weapon::WeaponAnimIndex weapon_idx =
         selectedWeapon() ? selectedWeapon()->index() : Weapon::Unarmed_Anim;
 
-    switch(getDrawnAnim()) {
+    switch(drawnAnim()) {
         case PedInstance::HitAnim:
             ped_->drawHitFrame(x, y, getDirection(), frame_);
             break;
@@ -819,14 +819,16 @@ void PedInstance::selectNextWeapon() {
 
     if (selected_weapon_ != -1) {
         int nextWeapon = -1;
-        Weapon *curSelectedWeapon = (Weapon *) weapon(selected_weapon_);
+        Weapon *curSelectedWeapon = (Weapon *)weapon(selected_weapon_);
 
-        if (curSelectedWeapon)
+        if (curSelectedWeapon) {
+            ((WeaponInstance *)curSelectedWeapon)->resetWeaponUsedTime();
             for (int i = numWeapons() - 1; i >=0 && nextWeapon == -1; i--)
                 if (i != selected_weapon_
                         && weapon(i)->rank() == curSelectedWeapon->rank()
                         && weapon(i)->ammoRemaining())
                     nextWeapon = i;
+        }
 
         if (nextWeapon == -1)
             selectBestWeapon();
@@ -870,8 +872,8 @@ void PedInstance::dropWeapon(int n) {
     }
 
     WeaponInstance *w = weapons_[n];
-    std::vector < WeaponInstance * >::iterator it = weapons_.begin() + n;
-    weapons_.erase(it);
+    w->resetWeaponUsedTime();
+    weapons_.erase(weapons_.begin() + n);
     if (n < selected_weapon_)
         selected_weapon_--;
 
@@ -892,6 +894,7 @@ void PedInstance::dropAllWeapons() {
         w->setPosition(tile_x_, tile_y_, tile_z_, off_x_, off_y_, off_z_);
         w->setVisZ(vis_z_);
         w->setOwner(0);
+        w->resetWeaponUsedTime();
         n++;
     }
 
@@ -939,7 +942,7 @@ bool PedInstance::walkable(int x, int y, int z) {
     return true;
 }
 
-PedInstance::AnimationDrawn PedInstance::getDrawnAnim() {
+PedInstance::AnimationDrawn PedInstance::drawnAnim() {
     return drawn_anim_;
 }
 

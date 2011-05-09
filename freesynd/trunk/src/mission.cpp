@@ -629,7 +629,7 @@ void Mission::createFastKeys(int tilex, int tiley, int maxtilex, int maxtiley) {
     // peds
     for (unsigned int i = 0; i < 4; i++) {
         PedInstance *p = peds_[i];
-        if (p->getIsAnAgent() == PedInstance::Agent_Active && p->map() != -1) {
+        if (p->isAnAgent() == PedInstance::Agent_Active && p->map() != -1) {
             if (p->tileX() >= tilex && p->tileX() < maxtilex
                 && p->tileY() >= tiley && p->tileY() < maxtiley) {
                 fast_ped_cache_.insert(fastKey(p));
@@ -840,7 +840,7 @@ void Mission::end()
     }
 
     for (int i = 0; i < 4; i++)
-        if (g_Session.teamMember(i)) {
+        if (g_Session.teamMember(i) && g_Session.teamMember(i)->isActive()) {
             if (peds_[i]->health() <= 0) {
                 peds_[i]->destroyAllWeapons();
                 Agent *pAg = g_Session.teamMember(i);
@@ -864,6 +864,7 @@ void Mission::end()
                         it++;
                     assert(it != weapons_.end());
                     weapons_.erase(it);
+                    wi->resetWeaponUsedTime();
                     g_Session.teamMember(i)->addWeapon(wi);
                 }
             }
