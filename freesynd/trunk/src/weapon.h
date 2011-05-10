@@ -75,7 +75,7 @@ public:
             int w_ammo, int w_range, int w_shot, int w_rank, int w_anim,
             WeaponAnimIndex w_idx, snd::InGameSample w_sample,
             WeaponType w_type, MapObject::DamageType w_dmg_type,
-            int w_shots_per_sec, int w_ammo_per_shot);
+            int w_ammo_per_shot, int w_time_for_shot, int w_time_reload);
 
     const char *getName() { return name_.c_str(); }
 
@@ -97,14 +97,13 @@ public:
 
     WeaponAnimIndex index() { return idx_; }
     WeaponType getWeaponType() { return type_; }
+    MapObject::DamageType dmgType() { return dmg_type_; }
 
     bool operator==(Weapon weapon) { return this->type_ == weapon.getWeaponType(); }
 
-    int shotsPerSec() { return shots_per_sec_; }
     int ammoPerShot() { return ammo_per_shot_; }
-    int reloadTime() { return reload_time_; }
     int timeForShot() { return time_for_shot_; }
-    MapObject::DamageType dmgType() { return dmg_type_; }
+    int timeReload() { return time_reload_; }
 
     bool wasSubmittedToSearch() { return submittedToSearch_; }
     void submitToSearch() { submittedToSearch_ = true; }
@@ -119,11 +118,11 @@ protected:
     MapObject::DamageType dmg_type_;
     WeaponAnimIndex idx_;
     snd::InGameSample sample_;
-    int shots_per_sec_, ammo_per_shot_;
-    // time required to make weapon ready to shoot
-    int reload_time_;
+    int ammo_per_shot_;
     // time weapon uses to do a single shot
     int time_for_shot_;
+    // time required to make weapon ready to shoot
+    int time_reload_;
     /*! True when weapon was found and submit to search manager.*/
     bool submittedToSearch_;
 };
@@ -169,7 +168,7 @@ protected:
     ShootableMapObject *owner_;
     // if this value is smaller time_for_shot_ shot cannot be done 
     // if is greater then time_for_shot_ reload is in execution
-    // if is greater then time_for_shot_ + reload_time_ then full shot is done
+    // if is greater then time_for_shot_ + time_reload_ then full shot is done
     int weapon_used_time_;
 };
 

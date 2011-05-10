@@ -35,8 +35,8 @@ Weapon::Weapon(const char *w_name, int smallIcon, int bigIcon, int w_cost,
     int w_ammo, int w_range, int w_shot, int w_rank, int w_anim,
     Weapon::WeaponAnimIndex w_idx, snd::InGameSample w_sample,
     WeaponType w_type, MapObject::DamageType w_dmg_type,
-    int w_shots_per_sec, int w_ammo_per_shot) {
-    
+    int w_ammo_per_shot, int w_time_for_shot, int w_time_reload) {
+
     name_ = w_name;
     small_icon_ = smallIcon;
     big_icon_ = bigIcon;
@@ -50,10 +50,9 @@ Weapon::Weapon(const char *w_name, int smallIcon, int bigIcon, int w_cost,
     dmg_type_ = w_dmg_type;
     sample_ = w_sample;
     type_ = w_type;
-    shots_per_sec_ = w_shots_per_sec;
     ammo_per_shot_ = w_ammo_per_shot;
-    time_for_shot_ = 1;
-    reload_time_ = 1000 / shots_per_sec_ - time_for_shot_;
+    time_for_shot_ = w_time_for_shot;
+    time_reload_ = w_time_reload;
     submittedToSearch_ = false;
 }
 
@@ -126,10 +125,26 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
     if (ammo_remaining_ == 0)
         return false;
 
+    int time_for_shot = pWeaponClass_->timeForShot();
+    int time_reload = pWeaponClass_->timeReload();
+    int time_full_shot = time_for_shot + time_reload;
+    if (weapon_used_time_ >= time_for_shot) {
+        weapon_used_time_ += duration;
+        if (weapon_used_time_ >= time_full_shot) {
+            weapon_used_time_ -= time_full_shot;
+        } else
+            return false;
+    } else
+        weapon_used_time_ += duration;
+
+    int shots = weapon_used_time_ / time_full_shot;
+    weapon_used_time_ %= time_full_shot;
+    if (weapon_used_time_ >= time_for_shot)
+        shots++;
+
     if (pWeaponClass_->dmgType() == MapObject::dmg_None) {
         if (pWeaponClass_->getWeaponType() == Weapon::EnergyShield) {
-//            if ()
-            int ammoused = (pWeaponClass_->shotsPerSec() * duration / 1000) * pWeaponClass_->ammoPerShot();
+            int ammoused = shots * pWeaponClass_->ammoPerShot();
             if (ammoused >= ammo_remaining_) {
                 ammo_remaining_ = 0;
                 ((PedInstance *)owner_)->selectNextWeapon();
@@ -142,6 +157,7 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
         owner_->setHealth(owner_->startHealth());
         ammo_remaining_ = 0;
         ((PedInstance *)owner_)->selectNextWeapon();
+        weapon_used_time_ = 0;
         return true;
     } else if (pWeaponClass_->dmgType() == MapObject::dmg_Mental) {
         return false;
@@ -154,7 +170,7 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
     d.dtype = pWeaponClass_->dmgType();
     int ammoused = 1;
     if (pWeaponClass_->ammo() > 0) {
-        ammoused = (pWeaponClass_->shotsPerSec() * duration / 1000) * pWeaponClass_->ammoPerShot();
+        ammoused = shots * pWeaponClass_->ammoPerShot();
         if (ammoused > ammo_remaining_) {
             ammoused = ammo_remaining_;
             ammo_remaining_ = 0;
