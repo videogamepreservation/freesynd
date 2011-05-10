@@ -718,7 +718,7 @@ void GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
                 if (isAgentSelected(i)
                         && mission_->ped(i)->selectedWeapon()) {
                     if (pointing_at_ped_ != -1
-                            && mission_->ped(i)->inRange(
+                            && mission_->ped(i)->selectedWeapon()->inRange(
                                     mission_->ped(pointing_at_ped_)))
                     {
                         mission_->ped(i)->selectedWeapon()->inflictDamage(
@@ -728,7 +728,7 @@ void GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
                             mission_->ped(pointing_at_ped_));
                     }
                     else if (pointing_at_vehicle_ != -1
-                            && mission_->ped(i)->inRange(
+                            && mission_->ped(i)->selectedWeapon()->inRange(
                                     mission_->vehicle(pointing_at_vehicle_)))
                     {
                         mission_->ped(i)->selectedWeapon()->inflictDamage(

@@ -125,9 +125,16 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
     if (ammo_remaining_ == 0)
         return false;
 
+    if (tobj == NULL)
+        return false;
+
+    // if owner exists these two values should change
     int time_for_shot = pWeaponClass_->timeForShot();
     int time_reload = pWeaponClass_->timeReload();
+
     int time_full_shot = time_for_shot + time_reload;
+    if (duration == -1)
+        duration = time_full_shot;
     if (weapon_used_time_ >= time_for_shot) {
         weapon_used_time_ += duration;
         if (weapon_used_time_ >= time_full_shot) {
@@ -162,9 +169,6 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
     } else if (pWeaponClass_->dmgType() == MapObject::dmg_Mental) {
         return false;
     }
-
-    if (tobj == NULL)
-        return false;
 
     DamageInflictType d;
     d.dtype = pWeaponClass_->dmgType();
@@ -205,4 +209,63 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
  */
 void WeaponInstance::playSound() {
     g_App.gameSounds().play(pWeaponClass_->getSound());
+}
+
+bool WeaponInstance::inRange(ShootableMapObject *t) {
+
+    int maxr = range();
+
+    float d = 0;
+    if(owner_)
+        d = owner_->distanceTo(t);
+    else
+        d = distanceTo(t);
+
+    if (d >= maxr)
+        return false;
+    Mission *m = g_Session.getMission();
+
+    int cx = 0;
+    int cy = 0;
+    int cz = 0;
+    if (owner_) {
+        cx = owner_->tileX() * 256 + owner_->offX();
+        cy = owner_->tileY() * 256 + owner_->offY();
+        cz = (owner_->tileZ() + 1) * 128 + owner_->offZ();
+    } else {
+        cx = tileX() * 256 + offX();
+        cy = tileY() * 256 + offY();
+        cz = (tileZ() + 1) * 128 + offZ();
+    }
+    float sx = (float) cx;
+    float sy = (float) cy;
+    float sz = (float) cz;
+    int tx = t->tileX() * 256 + t->offX();
+    int ty = t->tileY() * 256 + t->offY();
+    int tz = (t->tileZ() + 1) * 128 + t->offZ();
+    float inc_x = (tx - cx) / d;
+    float inc_y = (ty - cy) / d;
+    float inc_z = (tz - cz) / d;
+    int oldx = cx / 256;
+    int oldy = cy / 256;
+    int oldz = cz / 128;
+
+    while (fabs(sx - tx) > 16.0f || fabs(sy - ty) > 16.0f || fabs(sz - tz) > 8.0f) {
+        int nx = (int)sx / 256;
+        int ny = (int)sy / 256;
+        int nz = (int)sz / 128;
+        if (oldx != nx || oldy != ny || oldz != nz) {
+            unsigned char twd = m->mtsurfaces_[nx + ny * m->mmax_x_
+                + nz * m->mmax_m_xy].twd;
+            if (!(twd == 0x00 || twd == 0x0C || twd == 0x10))
+                return false;
+            oldx = nx;
+            oldy = ny;
+            oldz = nz;
+        }
+        sx += inc_x;
+        sy += inc_y;
+        sz += inc_z;
+    }
+    return true;
 }

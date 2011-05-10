@@ -162,7 +162,7 @@ Weapon * WeaponManager::loadWeapon(Weapon::WeaponType wt) {
         case Weapon::Pistol:
             pWeapon = new Weapon("PISTOL", 15, 65, 0, 13, 1280, 1, 1, 368,
         Weapon::Pistol_Anim, snd::PISTOL, Weapon::Pistol,
-        MapObject::dmg_Bullet, 1, 200, 400);
+        MapObject::dmg_Bullet, 1, 200, 600);
             break;
         case Weapon::Minigun:
             pWeapon = new Weapon("MINI-GUN", 19, 69, 10000, 500, 2304, 10, 6,

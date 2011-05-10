@@ -208,7 +208,6 @@ public:
     void startFiring() { firing_ = PedInstance::Firing_Fire; }
     void stopFiring();
 
-    bool inRange(ShootableMapObject *t);
     bool inSightRange(MapObject *t);
 
     bool isHostile() { return is_hostile_; }

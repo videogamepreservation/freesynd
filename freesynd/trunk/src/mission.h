@@ -432,13 +432,13 @@ public:
 
     void createMinimap();
     unsigned char getMinimapColour(int x, int y);
+    // 0 - not present, 1 - our agent, 2 - enemy agent
     unsigned char getMinimapOverlay(int x, int y) {
         return minimap_overlay_[x + y * mmax_x_];
     }
 
     unsigned int getMaxInfoLvl() {return max_info_lvl_; }
     unsigned int getMaxEnhanceLvl() {return max_enhance_lvl_; }
-    // 0 - not present, 1 - our agent, 2 - enemy agent
 
 protected:
     bool sWalkable(char thisTile, char upperTile);

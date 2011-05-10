@@ -211,7 +211,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
             // for the moment, assume peds can only be hostile towards the agents
             for (int i = 0; i < 4; i++)
                 if (mission->ped(i)->health() > 0
-                        && inRange(mission->ped(i))) {
+                        && selectedWeapon()->inRange(mission->ped(i))) {
                     if (mission->ped(i)->inVehicle())
                         setTarget(mission->ped(i)->inVehicle());
                     else
@@ -448,12 +448,12 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
     }
 
     if (target_ && health_ > 0) {
-        if (inRange(target_)) {
+        if (selectedWeapon() && selectedWeapon()->inRange(target_)) {
             if(target_->health() > 0) {
                 //int target_x = target_->tileX() * 256 + target_->offX();
                 //int target_y = target_->tileY() * 256 + target_->offY();
                 if (firing_ == PedInstance::Firing_Not
-                        && (selectedWeapon() && selectedWeapon()->ammoRemaining()))
+                    && selectedWeapon()->ammoRemaining())
                 {
                     selectedWeapon()->inflictDamage(target_, NULL);
                     firing_ = PedInstance::Firing_Fire;
@@ -770,40 +770,6 @@ void PedInstance::drawSelectorAnim(int x, int y) {
             printf("hmm NoAnimation\n");
             break;
     }
-}
-
-bool PedInstance::inRange(ShootableMapObject *t) {
-    // TODO: this should be in Weapon, also this implementation is bad
-    // rewrite needed
-    if (selectedWeapon() == 0)
-        return false;
-
-    int maxr = selectedWeapon()->range();
-
-    float d = distanceTo(t);
-
-    if (d >= maxr)
-        return false;
-
-    // check for obstacles.
-    Map *m = g_App.maps().map(map());
-
-    int cx = tileX() * 256;
-    int cy = tileY() * 256;
-    float sx = (float) cx;
-    float sy = (float) cy;
-    int lvl = tileZ() + 1;
-    int tx = t->tileX() * 256;
-    int ty = t->tileY() * 256;
-
-    while (fabs(sx - tx) > 256.0f || fabs(sy - ty) > 256.0f) {
-        // TODO: use mtsurface instead of this
-        if (m->tileAt((int) sx / 256, (int) sy / 256, lvl) > 5)
-            return false;
-        sx += (tx - cx) / d;
-        sy += (ty - cy) / d;
-    }
-    return true;
 }
 
 bool PedInstance::inSightRange(MapObject *t) {
