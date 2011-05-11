@@ -41,9 +41,16 @@
         // 3b - link (when base point reaches target point or vice versa),
         // 4b - walkable, 5b - constant, 6b - non walkable
         unsigned char t;
+        // dirh(z + 1), dirm(z), dirl(z - 1) - directions
+        // 0x01 = (x, y + 1, z); 0x02 = (x + 1, y + 1, z);
+        // 0x04 = (x + 1, y, z); 0x08 = (x + 1, y - 1, z);
+        // 0x10 = (x, y - 1, z); 0x20 = (x - 1, y - 1, z);
+        // 0x40 = (x - 1, y, z); 0x80 = (x - 1, y + 1, z)
+        // can be combined 0x01 | 0x02; 0x01 | 0x10 | 0x40 etc.
         unsigned char dirh;
         unsigned char dirm;
         unsigned char dirl;
+
         unsigned short lvl;
     }floodPointDesc;
     #define m_fdNotDefined      0

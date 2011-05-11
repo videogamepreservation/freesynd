@@ -185,6 +185,8 @@ bool Mission::loadLevel(uint8 * levelData)
                 }
                 p->setSightRange(7);
             }
+            if (i > 3 && i < 8)
+                p->setHealth(-1);
         }
     }
     
@@ -1029,7 +1031,7 @@ bool Mission::setSurfaces() {
                 uint8 upper_s = 0;
                 floodPointDesc *cfp = &(mdpoints_[x + y + z]);
                 floodPointDesc *nxtfp;
-                if (zp < (mmax_m_xy * (mmax_z_ - 1))) {
+                if (zp < (mmax_m_xy * mmax_z_)) {
                     upper_s = mtsurfaces_[x + y + zp].twd;
                     if(!sWalkable(this_s, upper_s)) {
                         cfp->t = m_fdNonWalkable;

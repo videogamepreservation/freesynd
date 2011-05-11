@@ -988,12 +988,6 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
     dest_path_.clear();
     speed_ = 0;
 
-#if 0
-    printf("target pos: x %x; y %x; z %x, ox %i, oy %i\n",
-        x, y, z, ox, oy);
-    printf("tileAt %x\n", g_App.maps().map(map())->tileAt(x,y,z));
-#endif
-
     if (map_ == -1 || health_ <= 0)
         return;
 
@@ -1005,10 +999,16 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
 #if 0
     printf("target t %x, dirm %x ; base t %x, dirm %x\n", targetd->t,
         targetd->dirm, based->t, based->dirm);
-    printf("base pos: x %i; y %i; z %i, ox %i, oy %i, oz %i\n",
-        tile_x_, tile_y_, tile_z_, off_x_, off_y_, off_z_);
+    printf("target dirh %x, dirl %x ; base dirh %x, dirl %x\n", targetd->dirh,
+        targetd->dirl, based->dirh, based->dirl);
     printf("ttwd %X \n",m->mtsurfaces_[x + y * m->mmax_x_ 
         + z * m->mmax_m_xy].twd);
+    printf("target pos: x %x; y %x; z %x, ox %i, oy %i\n",
+        x, y, z, ox, oy);
+    //printf("tileAt %x\n", g_App.maps().map(map())->tileAt(x,y,z));
+    printf("base pos: x %i; y %i; z %i, ox %i, oy %i, oz %i\n",
+        tile_x_, tile_y_, tile_z_, off_x_, off_y_, off_z_);
+    printf("zmax %x\n", m->mmax_z_);
     if ( (z + 1) < m->mmax_z_) {
         unsigned char utwd = 
         printf("upper twd %i\n", m->mtsurfaces_[x + y * m->mmax_x_ 

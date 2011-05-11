@@ -488,8 +488,11 @@ void GameplayMenu::handleMouseMotion(int x, int y, int state, const int modKeys)
         return;
 
     pointing_at_ped_ = -1;
-
+#ifdef _DEBUG
+    for (int i = 0; mission_ && i < mission_->numPeds(); i++) {
+#else
     for (int i = 8; mission_ && i < mission_->numPeds(); i++) {
+#endif
         PedInstance *p = mission_->ped(i);
         if (p->health() > 0 && p->map() != -1) {
             int px = p->screenX() - 20;

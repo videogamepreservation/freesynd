@@ -243,14 +243,19 @@ bool WeaponInstance::inRange(ShootableMapObject *t) {
     int tx = t->tileX() * 256 + t->offX();
     int ty = t->tileY() * 256 + t->offY();
     int tz = (t->tileZ() + 1) * 128 + t->offZ();
-    float inc_x = (tx - cx) / d;
-    float inc_y = (ty - cy) / d;
-    float inc_z = (tz - cz) / d;
+
+    // NOTE: these values are less then 1, if they are incremented time
+    // required to check range will be shorter less precise check, if
+    // decremented longer more precise. Increment is (n * 8).
+    float inc_x = ((tx - cx) * 8) / d;
+    float inc_y = ((ty - cy) * 8) / d;
+    float inc_z = ((tz - cz) * 8) / d;
+
     int oldx = cx / 256;
     int oldy = cy / 256;
     int oldz = cz / 128;
 
-    while (fabs(sx - tx) > 16.0f || fabs(sy - ty) > 16.0f || fabs(sz - tz) > 8.0f) {
+    while (fabs(sx - tx) > 16.0f || fabs(sy - ty) > 16.0f || fabs(sz - tz) > 16.0f) {
         int nx = (int)sx / 256;
         int ny = (int)sy / 256;
         int nz = (int)sz / 128;
