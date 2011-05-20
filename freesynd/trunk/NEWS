@@ -3,7 +3,7 @@ FreeSynd 0.5 : Release Notes
 
 Description
 -----------
-This is a prelimary release for testing and development purposes.  
+This is a prelimary release for testing and development purposes.
 
 Changes
 -------
@@ -31,6 +31,7 @@ Changes
   * Added information about killed during mission to Debrief menu
   * When agent is killed during mission he will be removed from agents list
   * Added description to mission brief in 3 more languages
+  * Z checking for inRange checking
 
 Fixed Bugs
 ----------

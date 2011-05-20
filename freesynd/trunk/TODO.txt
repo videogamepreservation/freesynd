@@ -15,7 +15,6 @@ viewing range(?), health recovery(?); mods properties should affect IPAs; damage
 recieved modifier, if we don't want to recalculate all the time; persuade power
 points; persuade points needed to persuade - this value will be added to agent
 that succesfully persuaded; weapon range modifier(?); accuracy modifier/property(?);
-type of damage inflicted(?)
    weapons: destructabillity(bomb); radius of damage; area(?) - bomb, gauss, laser;
    static objects: damage recieve value; destructable or not
  - A.L. - this one is complex
@@ -36,7 +35,6 @@ of event/state:
    different objects burn
  - object positioning during drawing
  - map drawing still buggy
- - rewrite PedInstance::inRange, include check for Z + objects
  - set weapons for enemy agents, because in gamedata weapons are not the same as
 in original gameplay or are not present at all
 -- These should be implemented in folowing order

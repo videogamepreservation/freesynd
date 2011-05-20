@@ -163,8 +163,8 @@ PedInstance *PedManager::loadInstance(uint8 * data, int map)
     z--;
     int oz = gamdata->mapposz[0] & 0x7F;
     newped->setVisZ(z);
-    newped->setSizeX(48);
-    newped->setSizeY(48);
+    newped->setSizeX(32);
+    newped->setSizeY(32);
     newped->setSizeZ(128);
     if (oz > 0)
         z++;
