@@ -30,6 +30,7 @@
 #include <math.h>
 #include <list>
 #include "path.h"
+#include "pathsurfaces.h"
 
 class MapObject;
 class Mission;
@@ -83,12 +84,13 @@ public:
     }
 
     int tileX() { return tile_x_; }
-    void setTileX(int x) { tile_x_ = x; }
     int tileY() { return tile_y_; }
-    void setTileY(int y) { tile_y_ = y; }
     int tileZ() { return tile_z_; }
-    void setTileZ(int z) { tile_z_ = z; }
     int visZ() { return vis_z_; }
+
+    void setTileX(int x) { tile_x_ = x; }
+    void setTileY(int y) { tile_y_ = y; }
+    void setTileZ(int z) { tile_z_ = z; }
     void setVisZ(int z) { vis_z_ = z; }
 
     int offX() { return off_x_; }
@@ -98,6 +100,14 @@ public:
     void setOffX(int n);
     void setOffY(int n);
     void setOffZ(int n);
+
+    int sizeX() { return size_x_;}
+    int sizeY() { return size_y_;}
+    int sizeZ() { return size_z_;}
+
+    void setSizeX(int size_x) { size_x_ = size_x;}
+    void setSizeY(int size_y) { size_y_ = size_y;}
+    void setSizeZ(int size_z) { size_z_ = size_z;}
 
     int screenX();
     int screenY();
@@ -111,13 +121,21 @@ public:
                 && other->tile_z_ == tile_z_
                 && other->off_x_ == off_x_
                 && other->off_y_ == off_y_;
+        // add off_z_ here?
     }
 
-    float distanceTo(MapObject *t) {
+    double distanceTo(MapObject *t) {
         int cx = tileX() * 256 + offX() - (t->tileX() * 256 + t->offX());
         int cy = tileY() * 256 + offY() - (t->tileY() * 256 + t->offY());
         int cz = tileZ() * 128 + offZ() - (t->tileZ() * 128 + t->offZ());
-        return sqrt((float) (cx * cx + cy * cy + cz * cz ));
+        return sqrt((double) (cx * cx + cy * cy + cz * cz));
+    }
+
+    double distanceToPos(toDefineXYZ *xyz) {
+        int cx = tileX() * 256 + offX() - (xyz->x);
+        int cy = tileY() * 256 + offY() - (xyz->y);
+        int cz = tileZ() * 128 + offZ() - (xyz->z);
+        return sqrt((double) (cx * cx + cy * cy + cz * cz));
     }
 
     virtual bool animate(int elapsed);
@@ -164,10 +182,18 @@ public:
         time_showing_anim_ += t;
         return time_show_anim_ > time_showing_anim_;
     }
+
+    bool isIgnored() { return is_ignored_; }
+    void setIsIgnored(bool is_ignored = false) { is_ignored_ = is_ignored; }
+
+    bool isBlocker(toDefineXYZ * startXYZ, toDefineXYZ * endXYZ,
+               double * inc_xyz);
 protected:
     // vis_z_ is location used for adjusting object drawing/calculations
     // tile_z_ represents true location for tile
     int tile_x_, tile_y_, tile_z_, vis_z_, off_x_, off_y_, off_z_;
+    // these are not true sizes, but halfs of full size by respective coord
+    int size_x_, size_y_, size_z_;
     int map_;
     int frame_;
     int elapsed_carry_;
@@ -177,6 +203,8 @@ protected:
     int dir_;
     int time_show_anim_;
     int time_showing_anim_;
+    // object is not included in view/shot trajectory calculation
+    bool is_ignored_;
 
     void addOffs(int &x, int &y);
 };

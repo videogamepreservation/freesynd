@@ -154,12 +154,14 @@ public:
     void end();
 
     void addWeapon(WeaponInstance *w);
-    virtual MapObject * findAt(int tilex, int tiley, int tilez,
+    MapObject * findAt(int tilex, int tiley, int tilez,
             int *majorType, int *searchIndex, bool only);
     bool setSurfaces();
     void clrSurfaces();
     bool getWalkable(int &x, int &y, int &z, int &ox, int &oy);
     void adjXYZ(int &x, int &y, int &z);
+    void blockerExists(toDefineXYZ * startXYZ, toDefineXYZ * endXYZ,
+        double dist, MapObject** blockerObj);
 
     typedef struct {
         uint8 unkn10[6];

@@ -2762,3 +2762,93 @@ WeaponInstance *Mission::createWeaponInstance(uint8 * data)
 
     return NULL;
 }
+
+/*
+* This function looks only for statics and vehicles
+*/
+void Mission::blockerExists(toDefineXYZ * startXYZ, toDefineXYZ * endXYZ,
+                            double dist, MapObject** blockerObj)
+{
+    double inc_xyz[3];
+    inc_xyz[0] = (endXYZ->x - startXYZ->x) / dist;
+    inc_xyz[1] = (endXYZ->y - startXYZ->y) / dist;
+    inc_xyz[2] = (endXYZ->z - startXYZ->z) / dist;
+    toDefineXYZ startZmin = *startXYZ;
+    startZmin.z -= 128;
+    toDefineXYZ copyStartXYZ = *startXYZ;
+    toDefineXYZ copyEndXYZ = *endXYZ;
+    toDefineXYZ blockStartXYZ;
+    toDefineXYZ blockEndXYZ;
+    double closest = -1;
+
+    for (unsigned int i = 0; i < statics_.size(); i++) {
+        MapObject * s_blocker = statics_[i];
+        if (s_blocker->isIgnored())
+            continue;
+        double dist_blocker = s_blocker->distanceToPos(&startZmin);
+        if (dist_blocker <= dist) {
+            if (s_blocker->isBlocker(&copyStartXYZ, &copyEndXYZ, inc_xyz)) {
+                int cx = startXYZ->x - copyStartXYZ.x;
+                int cy = startXYZ->y - copyStartXYZ.y;
+                int cz = startXYZ->z - copyStartXYZ.z;
+                dist_blocker = sqrt((double) (cx * cx + cy * cy + cz * cz));
+                if (closest == -1 || dist_blocker < closest) {
+                    closest = dist_blocker;
+                    *blockerObj = s_blocker;
+                    blockStartXYZ = copyStartXYZ;
+                    blockEndXYZ = copyEndXYZ;
+                }
+                copyStartXYZ = *startXYZ;
+                copyEndXYZ = *endXYZ;
+            }
+        }
+    }
+    for (unsigned int i = 0; i < vehicles_.size(); i++) {
+        MapObject * v_blocker = vehicles_[i];
+        if (v_blocker->isIgnored())
+            continue;
+        double dist_blocker = v_blocker->distanceToPos(&startZmin);
+        if (dist_blocker <= dist) {
+            if (v_blocker->isBlocker(&copyStartXYZ, &copyEndXYZ, inc_xyz)) {
+                int cx = startXYZ->x - copyStartXYZ.x;
+                int cy = startXYZ->y - copyStartXYZ.y;
+                int cz = startXYZ->z - copyStartXYZ.z;
+                dist_blocker = sqrt((double) (cx * cx + cy * cy + cz * cz));
+                if (closest == -1 || dist_blocker < closest) {
+                    closest = dist_blocker;
+                    *blockerObj = v_blocker;
+                    blockStartXYZ = copyStartXYZ;
+                    blockEndXYZ = copyEndXYZ;
+                }
+                copyStartXYZ = *startXYZ;
+                copyEndXYZ = *endXYZ;
+            }
+        }
+    }
+    for (unsigned int i = 0; i < peds_.size(); i++) {
+        MapObject * p_blocker = peds_[i];
+        if (p_blocker->isIgnored())
+            continue;
+        double dist_blocker = p_blocker->distanceToPos(&startZmin);
+        if (dist_blocker <= dist) {
+            if (p_blocker->isBlocker(&copyStartXYZ, &copyEndXYZ, inc_xyz)) {
+                int cx = startXYZ->x - copyStartXYZ.x;
+                int cy = startXYZ->y - copyStartXYZ.y;
+                int cz = startXYZ->z - copyStartXYZ.z;
+                dist_blocker = sqrt((double) (cx * cx + cy * cy + cz * cz));
+                if (closest == -1 || dist_blocker < closest) {
+                    closest = dist_blocker;
+                    *blockerObj = p_blocker;
+                    blockStartXYZ = copyStartXYZ;
+                    blockEndXYZ = copyEndXYZ;
+                }
+                copyStartXYZ = *startXYZ;
+                copyEndXYZ = *endXYZ;
+            }
+        }
+    }
+    if (*blockerObj != NULL) {
+        *startXYZ = blockStartXYZ;
+        *endXYZ = blockEndXYZ;
+    }
+}

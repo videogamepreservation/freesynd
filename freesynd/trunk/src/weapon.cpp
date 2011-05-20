@@ -215,7 +215,7 @@ bool WeaponInstance::inRange(ShootableMapObject *t) {
 
     int maxr = range();
 
-    float d = 0;
+    double d = 0;
     if(owner_)
         d = owner_->distanceTo(t);
     else
@@ -228,28 +228,24 @@ bool WeaponInstance::inRange(ShootableMapObject *t) {
     int cx = 0;
     int cy = 0;
     int cz = 0;
-    if (owner_) {
-        cx = owner_->tileX() * 256 + owner_->offX();
-        cy = owner_->tileY() * 256 + owner_->offY();
-        cz = (owner_->tileZ() + 1) * 128 + owner_->offZ();
-    } else {
-        cx = tileX() * 256 + offX();
-        cy = tileY() * 256 + offY();
-        cz = (tileZ() + 1) * 128 + offZ();
-    }
-    float sx = (float) cx;
-    float sy = (float) cy;
-    float sz = (float) cz;
+    cx = owner_->tileX() * 256 + owner_->offX();
+    cy = owner_->tileY() * 256 + owner_->offY();
+    cz = (owner_->visZ() + 1) * 128 + owner_->offZ();
+    assert((owner_->visZ() + 1) < m->mmax_z_);
+    double sx = (double) cx;
+    double sy = (double) cy;
+    double sz = (double) cz;
     int tx = t->tileX() * 256 + t->offX();
     int ty = t->tileY() * 256 + t->offY();
-    int tz = (t->tileZ() + 1) * 128 + t->offZ();
+    int tz = (t->visZ() + 1) * 128 + t->offZ();
+    assert((t->visZ() + 1) < m->mmax_z_);
 
     // NOTE: these values are less then 1, if they are incremented time
     // required to check range will be shorter less precise check, if
-    // decremented longer more precise. Increment is (n * 8).
-    float inc_x = ((tx - cx) * 8) / d;
-    float inc_y = ((ty - cy) * 8) / d;
-    float inc_z = ((tz - cz) * 8) / d;
+    // decremented longer more precise. Increment is (n * 8)
+    double inc_x = ((tx - cx) * 8) / d;
+    double inc_y = ((ty - cy) * 8) / d;
+    double inc_z = ((tz - cz) * 8) / d;
 
     int oldx = cx / 256;
     int oldy = cy / 256;
@@ -272,5 +268,17 @@ bool WeaponInstance::inRange(ShootableMapObject *t) {
         sy += inc_y;
         sz += inc_z;
     }
+
+    toDefineXYZ startXYZ = {cx, cy, cz};
+    toDefineXYZ endXYZ = {tx, ty, tz};
+    MapObject *blockerObj = NULL;
+    owner_->setIsIgnored(true);
+    t->setIsIgnored(true);
+    m->blockerExists(&startXYZ, &endXYZ, d, &blockerObj);
+    owner_->setIsIgnored();
+    t->setIsIgnored();
+    if (blockerObj)
+        return false;
+
     return true;
 }

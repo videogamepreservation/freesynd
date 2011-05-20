@@ -30,7 +30,8 @@
 #include "system_sdl.h"
 #endif
 MapObject::MapObject(int m):map_(m), frame_(0), elapsed_carry_(0),
-frames_per_sec_(8), sub_type_(0), main_type_(0), dir_(0)
+frames_per_sec_(8), sub_type_(0), main_type_(0), dir_(0), is_ignored_(false),
+size_x_(1), size_y_(1), size_z_(1)
 {
 }
 
@@ -180,6 +181,198 @@ int MapObject::getDirection(int snum) {
     return direction;
 }
 
+/*
+* NOTE: inc_xyz should point to array of three elements of type
+* double for x,y,z
+*/
+bool MapObject::isBlocker(toDefineXYZ * startXYZ, toDefineXYZ * endXYZ,
+               double * inc_xyz)
+{
+    // NOTE: algorithm used check whether object is located within range
+    // defined by "start" and "end", then assuming that x ccord belongs to
+    // vector calculate y from x range and compare range by y, if it is ok,
+    // calculate z from y range, then if in range by z, recalculate x and y
+
+    // range_x check
+    int range_x_h = tile_x_ * 256 + off_x_;
+    int range_x_l = range_x_h - size_x_;
+    range_x_h += size_x_;
+    range_x_h--;
+    int low_num = startXYZ->x;
+    int high_num = endXYZ->x;
+    bool flipped_x = false;
+    if (startXYZ->x > endXYZ->x) {
+        high_num = startXYZ->x;
+        low_num = endXYZ->x;
+        flipped_x = true;
+    }
+    if (range_x_l > high_num || range_x_h < low_num)
+        return false;
+    if (range_x_l < low_num)
+        range_x_l = low_num;
+    if (range_x_h > high_num)
+        range_x_h = high_num;
+
+    // range_y check
+    int range_y_h = tile_y_ * 256 + off_y_;
+    int range_y_l = range_y_h - size_y_;
+    range_y_h += size_y_;
+    range_y_h--;
+    bool flipped_y = false;
+    if (startXYZ->y > endXYZ->y) {
+        high_num = startXYZ->y;
+        low_num = endXYZ->y;
+        flipped_y = true;
+    } else {
+        low_num = startXYZ->y;
+        high_num = endXYZ->y;
+    }
+    if (range_y_l > high_num || range_y_h < low_num)
+        return false;
+    if (range_y_l < low_num)
+        range_y_l = low_num;
+    if (range_y_h > high_num)
+        range_y_h = high_num;
+
+    // range_z check
+    int range_z_l = vis_z_ * 128 + off_z_;
+    int range_z_h = range_z_l + size_z_ * 2;
+    range_z_h--;
+    bool flipped_z = false;
+    if (startXYZ->z > endXYZ->z) {
+        high_num = startXYZ->z;
+        low_num = endXYZ->z;
+        flipped_z = false;
+    } else {
+        low_num = startXYZ->z;
+        high_num = endXYZ->z;
+    }
+    if (range_z_l > high_num || range_z_h < low_num)
+        return false;
+    if (range_z_l < low_num)
+        range_z_l = low_num;
+    if (range_z_h > high_num)
+        range_z_h = high_num;
+
+    double d_l = 0;
+    double d_h = 0;
+    int range_g_l = 0;
+    int range_g_h = 0;
+    if (inc_xyz[0] != 0) {
+        if (flipped_x) {
+            d_h = ((double)(range_x_l - startXYZ->x)) / inc_xyz[0];
+            d_l = ((double)(range_x_h - startXYZ->x)) / inc_xyz[0];
+        } else {
+            d_l = ((double)(range_x_l - startXYZ->x)) / inc_xyz[0];
+            d_h = ((double)(range_x_h - startXYZ->x)) / inc_xyz[0];
+        }
+        range_g_l = (int)(d_l * inc_xyz[1] + startXYZ->y);
+        range_g_h = (int)(d_h * inc_xyz[1] + startXYZ->y);
+        if (range_g_h < range_g_l) {
+            low_num = range_g_h;
+            high_num = range_g_l;
+        } else {
+            low_num = range_g_l;
+            high_num = range_g_h;
+        }
+        if (low_num > range_y_h || high_num < range_y_l)
+            return false;
+        if (low_num > range_y_l)
+            range_y_l = low_num;
+        if (high_num < range_y_h)
+            range_y_h = high_num;
+    }
+
+    if (inc_xyz[1] != 0) {
+        if (flipped_y) {
+            d_h = ((double)(range_y_l - startXYZ->y)) / inc_xyz[1];
+            d_l = ((double)(range_y_h - startXYZ->y)) / inc_xyz[1];
+        } else {
+            d_l = ((double)(range_y_l - startXYZ->y)) / inc_xyz[1];
+            d_h = ((double)(range_y_h - startXYZ->y)) / inc_xyz[1];
+        }
+    }
+    if (inc_xyz[1] != 0 || inc_xyz[0] != 0) {
+        range_g_l = (int)(d_l * inc_xyz[2] + startXYZ->z);
+        range_g_h = (int)(d_h * inc_xyz[2] + startXYZ->z);
+        if (range_g_h < range_g_l) {
+            low_num = range_g_h;
+            high_num = range_g_l;
+        } else {
+            low_num = range_g_l;
+            high_num = range_g_h;
+        }
+        if (low_num > range_z_h || high_num < range_z_l)
+            return false;
+        if (low_num > range_z_l)
+            range_z_l = low_num;
+        if (high_num < range_z_h)
+            range_z_h = high_num;
+    }
+
+    if (flipped_z) {
+        low_num = range_z_l;
+        range_z_l = range_z_h;
+        range_z_h = low_num;
+    }
+    if (inc_xyz[2] != 0) {
+        d_l = ((double)(range_z_l - startXYZ->z)) / inc_xyz[2];
+        d_h = ((double)(range_z_h - startXYZ->z)) / inc_xyz[2];
+        range_g_l = (int)(d_l * inc_xyz[1] + startXYZ->y);
+        range_g_h = (int)(d_h * inc_xyz[1] + startXYZ->y);
+        if (range_g_h < range_g_l) {
+            low_num = range_g_h;
+            high_num = range_g_l;
+        } else {
+            low_num = range_g_l;
+            high_num = range_g_h;
+        }
+        if (low_num > range_y_h || high_num < range_y_l)
+            return false;
+        range_y_l = range_g_l;
+        range_y_h = range_g_h;
+
+        range_g_l = (int)(d_l * inc_xyz[0] + startXYZ->x);
+        range_g_h = (int)(d_h * inc_xyz[0] + startXYZ->x);
+        if (range_g_h < range_g_l) {
+            low_num = range_g_h;
+            high_num = range_g_l;
+        } else {
+            low_num = range_g_l;
+            high_num = range_g_h;
+        }
+        if (low_num > range_x_h || high_num < range_x_l)
+            return false;
+        range_x_l = range_g_l;
+        range_x_h = range_g_h;
+    } else {
+        if (inc_xyz[1] != 0) {
+            range_g_l = (int)(d_l * inc_xyz[0] + startXYZ->x);
+            range_g_h = (int)(d_h * inc_xyz[0] + startXYZ->x);
+            if (range_g_h < range_g_l) {
+                low_num = range_g_h;
+                high_num = range_g_l;
+            } else {
+                low_num = range_g_l;
+                high_num = range_g_h;
+            }
+            if (low_num > range_x_h || high_num < range_x_l)
+                return false;
+            range_x_l = range_g_l;
+            range_x_h = range_g_h;
+        }
+    }
+
+    startXYZ->x = range_x_l;
+    startXYZ->y = range_y_l;
+    startXYZ->z = range_z_l;
+    endXYZ->x = range_x_h;
+    endXYZ->y = range_y_h;
+    endXYZ->z = range_z_h;
+
+    return true;
+}
+
 SFXObject::SFXObject(int m, int type):MapObject(m), stage_(0)
 {
     /*
@@ -239,6 +432,8 @@ Static *Static::loadInstance(uint8 * data, int m)
     // TODO: find where object current state is,
     // some windows are broken/open etc
     // Also verify whether object description is correct
+    // subtype for doors, use instead orientation?
+    // add sizes for windows
     uint16 curanim = READ_LE_UINT16(gamdata->index_current_anim);
     uint16 baseanim = READ_LE_UINT16(gamdata->index_base_anim);
     uint16 curframe = READ_LE_UINT16(gamdata->index_current_frame);
@@ -246,22 +441,37 @@ Static *Static::loadInstance(uint8 * data, int m)
         case 0x01:
             // phone booth
             s = new EtcObj(m, curanim, curanim, curanim);
+            s->setSizeX(128);
+            s->setSizeY(128);
+            s->setSizeZ(128);
             break;
         case 0x05:// 1040-1043, 1044 - damaged
             // crossroad things
             s = new EtcObj(m, curanim, curanim, curanim);
+            s->setSizeX(64);
+            s->setSizeY(64);
+            s->setSizeZ(64);
             break;
         case 0x06:
             // crossroad things
             s = new EtcObj(m, curanim, curanim, curanim);
+            s->setSizeX(64);
+            s->setSizeY(64);
+            s->setSizeZ(64);
             break;
         case 0x07:
             // crossroad things
             s = new EtcObj(m, curanim, curanim, curanim);
+            s->setSizeX(64);
+            s->setSizeY(64);
+            s->setSizeZ(64);
             break;
         case 0x08:
             // crossroad things
             s = new EtcObj(m, curanim, curanim, curanim);
+            s->setSizeX(64);
+            s->setSizeY(64);
+            s->setSizeZ(64);
             break;
         case 0x0B:
             // 0x0270 animation, is this object present in original game?
@@ -271,16 +481,26 @@ Static *Static::loadInstance(uint8 * data, int m)
         case 0x0A:
             s = new NeonSign(m, curanim);
             s->setFrame(g_App.gameSprites().getFrameFromFrameIndx(curframe));
+            s->setIsIgnored(true);
+            s->setSizeX(32);
+            s->setSizeY(1);
+            s->setSizeZ(48);
             break;
         case 0x0C: // closed door
             if (gamdata->orientation == 0x00 || gamdata->orientation == 0x80
                 || gamdata->orientation == 0x7E || gamdata->orientation == 0xFE) {
                 s = new Door(m, baseanim, baseanim + 2, baseanim + 4, baseanim + 6);
                 s->setSubType(0);
+                s->setSizeX(128);
+                s->setSizeY(1);
+                s->setSizeZ(128);
             } else {
                 baseanim++;
                 s = new Door(m, baseanim, baseanim + 2, baseanim + 4, baseanim + 6);
                 s->setSubType(2);
+                s->setSizeX(1);
+                s->setSizeY(128);
+                s->setSizeZ(128);
             }
             break;
         case 0x0D: // closed door
@@ -288,10 +508,16 @@ Static *Static::loadInstance(uint8 * data, int m)
                 || gamdata->orientation == 0x7E || gamdata->orientation == 0xFE) {
                 s = new Door(m, baseanim, baseanim + 2, baseanim + 4, baseanim + 6);
                 s->setSubType(0);
+                s->setSizeX(128);
+                s->setSizeY(1);
+                s->setSizeZ(128);
             } else {
                 baseanim++;
                 s = new Door(m, baseanim, baseanim + 2, baseanim + 4, baseanim + 6);
                 s->setSubType(2);
+                s->setSizeX(1);
+                s->setSizeY(128);
+                s->setSizeZ(128);
             }
             break;
         case 0x0E: // opening doors, not open
@@ -299,10 +525,16 @@ Static *Static::loadInstance(uint8 * data, int m)
                 || gamdata->orientation == 0x7E || gamdata->orientation == 0xFE) {
                 s = new Door(m, baseanim, baseanim + 2, baseanim + 4, baseanim + 6);
                 s->setSubType(0);
+                s->setSizeX(128);
+                s->setSizeY(1);
+                s->setSizeZ(128);
             } else {
                 baseanim++;
                 s = new Door(m, baseanim, baseanim + 2, baseanim + 4, baseanim + 6);
                 s->setSubType(2);
+                s->setSizeX(1);
+                s->setSizeY(128);
+                s->setSizeZ(128);
             }
             s->state_ = sttdoor_Opening;
             break;
@@ -311,10 +543,16 @@ Static *Static::loadInstance(uint8 * data, int m)
                 || gamdata->orientation == 0x7E || gamdata->orientation == 0xFE) {
                 s = new Door(m, baseanim, baseanim + 2, baseanim + 4, baseanim + 6);
                 s->setSubType(0);
+                s->setSizeX(128);
+                s->setSizeY(1);
+                s->setSizeZ(128);
             } else {
                 baseanim++;
                 s = new Door(m, baseanim, baseanim + 2, baseanim + 4, baseanim + 6);
                 s->setSubType(2);
+                s->setSizeX(1);
+                s->setSizeY(128);
+                s->setSizeZ(128);
             }
             s->state_ = sttdoor_Opening;
             break;
@@ -326,26 +564,36 @@ Static *Static::loadInstance(uint8 * data, int m)
         case 0x12:
             // open window
             s = new WindowObj(m, curanim, curanim + 2, curanim + 4);
+            s->setIsIgnored(true);
             break;
         case 0x13:
             // closed window
             s = new WindowObj(m, curanim, curanim + 4, curanim + 6);
+            s->setIsIgnored(true);
             break;
         case 0x15:
             // damaged window
             s = new WindowObj(m, curanim, curanim, curanim);
+            s->setIsIgnored(true);
             break;
         case 0x16:
             s = new Tree(m, curanim, curanim + 1, curanim + 2);
+            s->setSizeX(64);
+            s->setSizeY(64);
+            s->setSizeZ(128);
             break;
         case 0x19:
             // trash can / mail box
             s = new EtcObj(m, curanim, curanim, curanim);
+            s->setSizeX(64);
+            s->setSizeY(64);
+            s->setSizeZ(96);
             break;
         case 0x1A:
             // advertisement on wall
             s = new EtcObj(m, curanim, curanim, curanim);
             s->setMainType(1);
+            s->setIsIgnored(true);
             break;
         case 0x1C:
             // ???? what is this?
@@ -356,35 +604,48 @@ Static *Static::loadInstance(uint8 * data, int m)
             // advertisement on wall + brokem signal
             s = new EtcObj(m, curanim, curanim, curanim);
             s->setMainType(1);
+            s->setIsIgnored(true);
             break;
         case 0x20:
             // window without light animated
             s = new EtcObj(m, curanim, curanim, curanim);
+            s->setIsIgnored(true);
             break;
         case 0x21:
             // window without light animated
             s = new EtcObj(m, curanim, curanim, curanim);
+            s->setIsIgnored(true);
             break;
         case 0x23:
             // window with person's shadow
             s = new EtcObj(m, curanim, curanim, curanim);
+            s->setIsIgnored(true);
             break;
         case 0x24:
             // window with person's shadow
             s = new EtcObj(m, curanim, curanim, curanim);
+            s->setIsIgnored(true);
             break;
         case 0x25:
             // window without light
             s = new EtcObj(m, curanim, curanim, curanim);
+            s->setIsIgnored(true);
             break;
         case 0x26:
             // 0x00,0x80 south - north = 0
             // 0x40,0xC0 weast - east = 2
             s = new LargeDoor(m, curanim, curanim + 1, curanim + 2);
-            if (gamdata->orientation == 0x00 || gamdata->orientation == 0x80)
+            if (gamdata->orientation == 0x00 || gamdata->orientation == 0x80) {
                 s->setSubType(0);
-            else
+                s->setSizeX(256);
+                s->setSizeY(64);
+                s->setSizeZ(192);
+            } else {
                 s->setSubType(2);
+                s->setSizeX(64);
+                s->setSizeY(256);
+                s->setSizeZ(192);
+            }
             break;
             /*
         default:
@@ -416,6 +677,7 @@ Static *Static::loadInstance(uint8 * data, int m)
                        z, gamdata->mapposx[0],
                        gamdata->mapposy[0], oz);
         s->setMainType(gamdata->sub_type);
+        s->setDirection(gamdata->orientation);
     }
 
     return s;
@@ -475,9 +737,10 @@ bool Door::animate(int elapsed, Mission *obj)
                 mt = 1; si = 0;
                 do {
                     p = (PedInstance *)(obj->findAt(x + inc_rel,
-                        y + rel_inc,z, &mt, &si, true));
+                        y + rel_inc, z, &mt, &si, true));
                     if (!p && state_ == Static::sttdoor_Open && (!found)) {
                         state_ = Static::sttdoor_Closing;
+                        is_ignored_ = false;
                         frame_ = 0;
                     } else if (p && p->health() > 0){
                         state_ = Static::sttdoor_Open;
@@ -500,7 +763,7 @@ bool Door::animate(int elapsed, Mission *obj)
             mt = 1; si = 0;
             do {
                 p = (PedInstance *)(obj->findAt(x + inc_rel,
-                    y + rel_inc,z,&mt,&si,true));
+                    y + rel_inc, z, &mt, &si, true));
                 if (p && p->health() > 0) {
                     if (!found) {
                         state_ = Static::sttdoor_Opening;
@@ -514,7 +777,7 @@ bool Door::animate(int elapsed, Mission *obj)
             mt = 1; si = 0;
             do {
                 p = (PedInstance *)(obj->findAt(x + inc_rel,
-                    y + rel_inc,z,&mt,&si,true));
+                    y + rel_inc, z, &mt, &si, true));
                 if (p && p->health() > 0) {
                     if (!found) {
                         state_ = Static::sttdoor_Opening;
@@ -534,6 +797,7 @@ bool Door::animate(int elapsed, Mission *obj)
         case Static::sttdoor_Opening:
             if (frame_ >= g_App.gameSprites().lastFrame(opening_anim_)) {
                 state_ = Static::sttdoor_Open;
+                is_ignored_ = true;
                 frame_ = 0;
             }
             break;
@@ -598,6 +862,7 @@ bool LargeDoor::animate(int elapsed, Mission *obj)
                     y + rel_inc,z, &mt, &si, true));
                 if (!v && state_ == Static::sttdoor_Open && (!found)) {
                     state_ = Static::sttdoor_Closing;
+                    is_ignored_ = false;
                     frame_ = 0;
                 } else if (v){
                     state_ = Static::sttdoor_Open;
@@ -722,6 +987,7 @@ bool LargeDoor::animate(int elapsed, Mission *obj)
         case Static::sttdoor_Opening:
             if (frame_ >= g_App.gameSprites().lastFrame(opening_anim_)) {
                 state_ = Static::sttdoor_Open;
+                is_ignored_ = true;
                 frame_ = 0;
             }
             break;

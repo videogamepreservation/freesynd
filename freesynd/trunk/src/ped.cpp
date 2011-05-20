@@ -235,13 +235,13 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                 pickup_weapon_ = 0;
 
             // find the closest weapon with ammo
-            float closest = 9999;
+            double closest = 9999;
             WeaponInstance *closest_w = 0;
 
             for (int i = 0; i < mission->numWeapons(); i++) {
                 if (mission->weapon(i)->map() != -1
                         && mission->weapon(i)->ammoRemaining() > 0) {
-                    float d = distanceTo(mission->weapon(i));
+                    double d = distanceTo(mission->weapon(i));
 
                     if (d < 1024 && d < closest) {
                         closest = d;

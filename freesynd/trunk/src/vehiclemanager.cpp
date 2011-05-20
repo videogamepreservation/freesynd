@@ -61,6 +61,13 @@ VehicleInstance *VehicleManager::loadInstance(uint8 * data, int map)
     int z = READ_LE_UINT16(gamdata->mapposz) >> 7;
     z--;
     newvehicle->setVisZ(z);
+
+    // TODO: the size should be adjusted on orientation/direction change
+    // and it should be different per vehicle type
+    newvehicle->setSizeX(256);
+    newvehicle->setSizeY(256);
+    newvehicle->setSizeZ(96);
+
     int oz = gamdata->mapposz[0] & 0x7F;
     newvehicle->setPosition(gamdata->mapposx[1], gamdata->mapposy[1],
                             z, gamdata->mapposx[0],
