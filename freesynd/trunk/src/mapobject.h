@@ -188,6 +188,18 @@ public:
 
     bool isBlocker(toDefineXYZ * startXYZ, toDefineXYZ * endXYZ,
                double * inc_xyz);
+
+    typedef enum {
+        mt_Undefined = 0,
+        mt_Ped = 1,
+        mt_Weapon = 2,
+        mt_Static = 3,
+        mt_Vehicle = 4,
+    } MajorTypeEnum;
+
+    MajorTypeEnum majorType() { return major_type_; }
+    void setMajorType(MajorTypeEnum mt) { major_type_ = mt; }
+
 protected:
     // vis_z_ is location used for adjusting object drawing/calculations
     // tile_z_ represents true location for tile
@@ -199,6 +211,8 @@ protected:
     int elapsed_carry_;
     int frames_per_sec_;
     int sub_type_, main_type_;
+    // 0 - not defined, 1 - ped, 2 - weapon, 3 - static, 4 - vehicle
+    MajorTypeEnum major_type_;
     DefDamageType rcv_damage_def_;
     int dir_;
     int time_show_anim_;

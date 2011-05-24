@@ -298,7 +298,7 @@ bool Mission::loadLevel(uint8 * levelData)
                 }
             } else {
                 w->setMap(map_);
-                w->setOwner(0);
+                w->setOwner(NULL);
                 windx[i] = weapons_.size();
                 weapons_.push_back(w);
             }
@@ -355,7 +355,7 @@ bool Mission::loadLevel(uint8 * levelData)
                     cindx = (bindx - 2) / 92;
                     if ((cindx * 92 + 2) == bindx && pindx[cindx] != 0xFFFF) {
                         objd.type = objv_AquireControl;
-                        objd.targettype = 1;
+                        objd.targettype = MapObject::mt_Ped;
                         objd.targetindx = pindx[cindx];
                         objd.msg = "PERSUADE";
                     } else
@@ -369,7 +369,7 @@ bool Mission::loadLevel(uint8 * levelData)
                     cindx = (bindx - 2) / 92;
                     if ((cindx * 92 + 2) == bindx && pindx[cindx] != 0xFFFF) {
                         objd.type = objv_DestroyObject;
-                        objd.targettype = 1;
+                        objd.targettype = MapObject::mt_Ped;
                         objd.targetindx = pindx[cindx];
                         objd.msg = "ASSASSINATE";
                     } else
@@ -383,7 +383,7 @@ bool Mission::loadLevel(uint8 * levelData)
                     cindx = (bindx - 2) / 92;
                     if ((cindx * 92 + 2) == bindx && pindx[cindx] != 0xFFFF) {
                         objd.type = objv_Protect;
-                        objd.targettype = 1;
+                        objd.targettype = MapObject::mt_Ped;
                         objd.targetindx = pindx[cindx];
                         objd.msg = "PROTECT";
                     } else
@@ -398,7 +398,7 @@ bool Mission::loadLevel(uint8 * levelData)
                     cindx = bindx / 36;
                     if ((cindx * 36) == bindx && windx[cindx] != 0xFFFF) {
                         objd.type = objv_GetObject;
-                        objd.targettype = 2;
+                        objd.targettype = MapObject::mt_Weapon;
                         objd.targetindx = windx[cindx];
                         objd.msg = "TAKE WEAPON";
                     } else
@@ -409,7 +409,7 @@ bool Mission::loadLevel(uint8 * levelData)
                 break;
             case 0x0A:
                 objd.type = objv_DestroyObject;
-                objd.targettype = 1;
+                objd.targettype = MapObject::mt_Ped;
                 // maybe also guards should be eliminated?
                 objd.targetsubtype = 4;
                 objd.condition = 4;
@@ -419,7 +419,7 @@ bool Mission::loadLevel(uint8 * levelData)
                 break;
             case 0x0B:
                 objd.type = objv_DestroyObject;
-                objd.targettype = 1;
+                objd.targettype = MapObject::mt_Ped;
                 objd.targetsubtype = 2;
                 objd.condition = 4;
                 objd.targetindx = pindx[cindx];
@@ -432,7 +432,7 @@ bool Mission::loadLevel(uint8 * levelData)
                     cindx = bindx / 42;
                     if ((cindx * 42) == bindx && vindx[cindx] != 0xFFFF) {
                         objd.type = objv_DestroyObject;
-                        objd.targettype = 4;
+                        objd.targettype = MapObject::mt_Vehicle;
                         objd.targetindx = vindx[cindx];
                         objd.msg = "DESTROY VEHICLE";
                     } else
@@ -447,7 +447,7 @@ bool Mission::loadLevel(uint8 * levelData)
                     cindx = bindx / 42;
                     if ((cindx * 42) == bindx && vindx[cindx] != 0xFFFF) {
                         objd.type = objv_DestroyObject;
-                        objd.targettype = 4;
+                        objd.targettype = MapObject::mt_Vehicle;
                         objd.targetindx = vindx[cindx];
                         objd.msg = "USE VEHICLE";
                     } else
@@ -883,56 +883,57 @@ void Mission::addWeapon(WeaponInstance * w)
 }
 
 MapObject * Mission::findAt(int tilex, int tiley, int tilez,
-                            int *majorType, int *searchIndex, bool only)
+                            MapObject::MajorTypeEnum *majorT, int *searchIndex,
+                            bool only)
 {
-    switch(*majorType) {
-        case 1:
+    switch(*majorT) {
+        case MapObject::mt_Ped:
             for (unsigned int i = *searchIndex; i < peds_.size(); i++)
                 if (peds_[i]->tileX() == tilex && peds_[i]->tileY() == tiley
                     && peds_[i]->tileZ() == tilez) {
                     *searchIndex = i + 1;
-                    *majorType = 1;
+                    *majorT = MapObject::mt_Ped;
                     return peds_[i];
                 }
             if(only)
                 return NULL;
             *searchIndex = 0;
-        case 2:
+        case MapObject::mt_Weapon:
             for (unsigned int i = *searchIndex; i < weapons_.size(); i++)
                 if (weapons_[i]->map() != -1 && weapons_[i]->tileX() == tilex
                     && weapons_[i]->tileY() == tiley
                     && weapons_[i]->tileZ() == tilez) {
                     *searchIndex = i + 1;
-                    *majorType = 2;
+                    *majorT = MapObject::mt_Weapon;
                     return weapons_[i];
                 }
             if(only)
                 return NULL;
             *searchIndex = 0;
-        case 3:
+        case MapObject::mt_Static:
             for (unsigned int i = *searchIndex; i < statics_.size(); i++)
                 if (statics_[i]->tileX() == tilex
                     && statics_[i]->tileY() == tiley
                     && statics_[i]->tileZ() == tilez) {
                     *searchIndex = i + 1;
-                    *majorType = 3;
+                    *majorT = MapObject::mt_Static;
                     return statics_[i];
                 }
             if(only)
                 return NULL;
             *searchIndex = 0;
-        case 4:
+        case MapObject::mt_Vehicle:
             for (unsigned int i = *searchIndex; i < vehicles_.size(); i++)
                 if (vehicles_[i]->tileX() == tilex
                     && vehicles_[i]->tileY() == tiley
                     && vehicles_[i]->tileZ() == tilez) {
                     *searchIndex = i + 1;
-                    *majorType = 4;
+                    *majorT = MapObject::mt_Vehicle;
                     return vehicles_[i];
                 }
             break;
         default:
-            printf("undefined majortype %i", *majorType);
+            printf("undefined majortype %i", *majorT);
             break;
     }
     return NULL;

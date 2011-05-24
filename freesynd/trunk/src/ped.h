@@ -220,8 +220,7 @@ public:
     }
 
     void setSelectedWeapon(int n) {
-        if (selected_weapon_ != -1)
-            weapons_[selected_weapon_]->resetWeaponUsedTime();
+
         selected_weapon_ = n;
         if (n != -1 && weapons_[selected_weapon_]->getWeaponType() == Weapon::EnergyShield)
             setRcvDamageDef(MapObject::ddmg_PedWithEnergyShield);

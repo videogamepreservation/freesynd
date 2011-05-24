@@ -48,3 +48,4 @@ in original gameplay or are not present at all
 damage, obstacle checking
  - Manage Qwerty / azerty keyboard. Today only qwerty keyboard are used.
  - Add in select menu reload button for weapons, autoreload for "pistol"
+ - "no_sound"/"no_music" option for config file, or disabled in debug mode

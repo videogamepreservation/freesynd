@@ -240,7 +240,10 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
 
             for (int i = 0; i < mission->numWeapons(); i++) {
                 if (mission->weapon(i)->map() != -1
-                        && mission->weapon(i)->ammoRemaining() > 0) {
+                        && mission->weapon(i)->ammoRemaining() > 0)
+                {
+                    // NOTE: this is too simple calculation for distance
+                    // weapon can be close, but path to reach it can be longer
                     double d = distanceTo(mission->weapon(i));
 
                     if (d < 1024 && d < closest) {
@@ -447,25 +450,20 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
         }
     }
 
-    if (target_ && health_ > 0) {
-        if (selectedWeapon() && selectedWeapon()->inRange(target_)) {
-            if(target_->health() > 0) {
-                //int target_x = target_->tileX() * 256 + target_->offX();
-                //int target_y = target_->tileY() * 256 + target_->offY();
-                if (firing_ == PedInstance::Firing_Not
-                    && selectedWeapon()->ammoRemaining())
-                {
-                    selectedWeapon()->inflictDamage(target_, NULL);
+    if (target_ && health_ > 0 && firing_ == PedInstance::Firing_Not) {
+        if(target_->health() > 0) {
+            if (selectedWeapon() && selectedWeapon()->inRange(target_)) {
+                if (selectedWeapon()->inflictDamage(target_, NULL)) {
                     firing_ = PedInstance::Firing_Fire;
                     updated = true;
 
                     selectedWeapon()->playSound();
                 }
             } else {
-                target_ = NULL;
+                stopFiring();
             }
         } else {
-            stopFiring();
+            target_ = NULL;
         }
     }
 
@@ -625,6 +623,7 @@ is_an_agent_(PedInstance::Not_Agent)
 {
     hold_on_.wayFree = 0;
     rcv_damage_def_ = MapObject::ddmg_Ped;
+    major_type_ = MapObject::mt_Ped;
 }
 
 PedInstance::~PedInstance(){
@@ -788,7 +787,6 @@ void PedInstance::selectNextWeapon() {
         Weapon *curSelectedWeapon = (Weapon *)weapon(selected_weapon_);
 
         if (curSelectedWeapon) {
-            ((WeaponInstance *)curSelectedWeapon)->resetWeaponUsedTime();
             for (int i = numWeapons() - 1; i >=0 && nextWeapon == -1; i--)
                 if (i != selected_weapon_
                         && weapon(i)->rank() == curSelectedWeapon->rank()
@@ -838,7 +836,6 @@ void PedInstance::dropWeapon(int n) {
     }
 
     WeaponInstance *w = weapons_[n];
-    w->resetWeaponUsedTime();
     weapons_.erase(weapons_.begin() + n);
     if (n < selected_weapon_)
         selected_weapon_--;
@@ -859,8 +856,7 @@ void PedInstance::dropAllWeapons() {
         w->setMap(map());
         w->setPosition(tile_x_, tile_y_, tile_z_, off_x_, off_y_, off_z_);
         w->setVisZ(vis_z_);
-        w->setOwner(0);
-        w->resetWeaponUsedTime();
+        w->setOwner(NULL);
         n++;
     }
 

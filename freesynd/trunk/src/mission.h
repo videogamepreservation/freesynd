@@ -155,7 +155,7 @@ public:
 
     void addWeapon(WeaponInstance *w);
     MapObject * findAt(int tilex, int tiley, int tilez,
-            int *majorType, int *searchIndex, bool only);
+        MapObject::MajorTypeEnum *majorT, int *searchIndex, bool only);
     bool setSurfaces();
     void clrSurfaces();
     bool getWalkable(int &x, int &y, int &z, int &ox, int &oy);
@@ -496,7 +496,7 @@ protected:
         // type of objective
         ObjectiveType type;
         // 0 - not defined, 1 - ped, 2 - weapon, 3 - static, 4 - vehicle
-        uint8 targettype;
+        MapObject::MajorTypeEnum targettype;
         // 0 - not defined, 1 - our agent, 2 - enemy agent, 3 - guards
         // 4 - police, 5 - civilians
         uint8 targetsubtype;

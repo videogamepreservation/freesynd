@@ -31,7 +31,7 @@
 #endif
 MapObject::MapObject(int m):map_(m), frame_(0), elapsed_carry_(0),
 frames_per_sec_(8), sub_type_(0), main_type_(0), dir_(0), is_ignored_(false),
-size_x_(1), size_y_(1), size_z_(1)
+size_x_(1), size_y_(1), size_z_(1), major_type_(MapObject::mt_Undefined)
 {
 }
 
@@ -689,6 +689,7 @@ opening_anim_(openingAnim)
 {
     state_ = Static::sttdoor_Closed;
     rcv_damage_def_ = MapObject::ddmg_Invulnerable;
+    major_type_ = MapObject::mt_Static;
 }
 
 void Door::draw(int x, int y)
@@ -716,7 +717,7 @@ bool Door::animate(int elapsed, Mission *obj)
     int x = tileX();
     int y = tileY();
     int z = tileZ();
-    int mt;
+    MapObject::MajorTypeEnum mt;
     int si;
     char inc_rel = 0, rel_inc = 0;
     char *i = 0, *j = 0;
@@ -734,7 +735,7 @@ bool Door::animate(int elapsed, Mission *obj)
             }
             assert(i != 0 && j != 0);
             for(*i = 0; *i < 2; *i += 1) {
-                mt = 1; si = 0;
+                mt = MapObject::mt_Ped; si = 0;
                 do {
                     p = (PedInstance *)(obj->findAt(x + inc_rel,
                         y + rel_inc, z, &mt, &si, true));
@@ -760,7 +761,7 @@ bool Door::animate(int elapsed, Mission *obj)
             }
             assert(i != 0 && j != 0);
             *i = 1;
-            mt = 1; si = 0;
+            mt = MapObject::mt_Ped; si = 0;
             do {
                 p = (PedInstance *)(obj->findAt(x + inc_rel,
                     y + rel_inc, z, &mt, &si, true));
@@ -774,7 +775,7 @@ bool Door::animate(int elapsed, Mission *obj)
                 }
             } while (p);
             *i = 0;
-            mt = 1; si = 0;
+            mt = MapObject::mt_Ped; si = 0;
             do {
                 p = (PedInstance *)(obj->findAt(x + inc_rel,
                     y + rel_inc, z, &mt, &si, true));
@@ -810,6 +811,7 @@ closing_anim_(closingAnim), opening_anim_(openingAnim)
 {
     state_ = Static::sttdoor_Closed;
     rcv_damage_def_ = MapObject::ddmg_Invulnerable;
+    major_type_ = MapObject::mt_Static;
 }
 
 void LargeDoor::draw(int x, int y)
@@ -838,7 +840,7 @@ bool LargeDoor::animate(int elapsed, Mission *obj)
     int x = tileX();
     int y = tileY();
     int z = tileZ();
-    int mt;
+    MapObject::MajorTypeEnum mt;
     int si;
     char inc_rel = 0, rel_inc = 0;
     char *i = 0, *j = 0;
@@ -857,7 +859,7 @@ bool LargeDoor::animate(int elapsed, Mission *obj)
             assert(i != 0 && j != 0);
             *j = -1;
             for(*i = -2; *i < 3; *i += 1) {
-                mt = 4; si = 0;
+                mt = MapObject::mt_Vehicle; si = 0;
                 v = (VehicleInstance *)(obj->findAt(x + inc_rel,
                     y + rel_inc,z, &mt, &si, true));
                 if (!v && state_ == Static::sttdoor_Open && (!found)) {
@@ -872,7 +874,7 @@ bool LargeDoor::animate(int elapsed, Mission *obj)
             }
             *j = 1;
             for(*i = -2; *i < 3; *i += 1) {
-                mt = 4; si = 0;
+                mt = MapObject::mt_Vehicle; si = 0;
                 v = (VehicleInstance *)(obj->findAt(x + inc_rel,
                     y + rel_inc,z,&mt,&si,true));
                 if (!v && state_ == Static::sttdoor_Open && (!found)) {
@@ -886,7 +888,7 @@ bool LargeDoor::animate(int elapsed, Mission *obj)
             }
             for (int a = (y - 1); a <= (y + 1); a++ ) {
                 for (int b = (x - 1); b <= (x + 1); b++) {
-                    mt = 1; si = 0;
+                    mt = MapObject::mt_Ped; si = 0;
                     do {
                         p = (PedInstance *)(obj->findAt(b, a, z,
                             &mt, &si, true));
@@ -911,7 +913,7 @@ bool LargeDoor::animate(int elapsed, Mission *obj)
             assert(i != 0 && j != 0);
             *j = -1 * sign;
             *i = -2;
-            mt = 4; si = 0;
+            mt = MapObject::mt_Vehicle; si = 0;
             v = (VehicleInstance *)(obj->findAt(x + inc_rel,
                 y + rel_inc,z,&mt,&si,true));
             if (v) {
@@ -924,7 +926,7 @@ bool LargeDoor::animate(int elapsed, Mission *obj)
             }
             *j = 1 * sign;
             *i = 2;
-            mt = 4; si = 0;
+            mt = MapObject::mt_Vehicle; si = 0;
             v = (VehicleInstance *)(obj->findAt(x + inc_rel,
                 y + rel_inc,z,&mt,&si,true));
             if (v) {
@@ -937,7 +939,7 @@ bool LargeDoor::animate(int elapsed, Mission *obj)
             }
             *j = -1;
             for ( *i = -1; *i <= 1; *i += 1 ) {
-                mt = 1; si = 0;
+                mt = MapObject::mt_Ped; si = 0;
                 do {
                     p = (PedInstance *)(obj->findAt(x + rel_inc,
                         y + inc_rel, z, &mt, &si, true));
@@ -958,7 +960,7 @@ bool LargeDoor::animate(int elapsed, Mission *obj)
             }
             *j = 1;
             for ( *i = -1; *i <= 1; *i += 1 ) {
-                mt = 1; si = 0;
+                mt = MapObject::mt_Ped; si = 0;
                 do {
                     p = (PedInstance *)(obj->findAt(x + rel_inc,
                         y + inc_rel, z, &mt, &si, true));
@@ -999,6 +1001,7 @@ Tree::Tree(int m, int anim, int burningAnim, int damagedAnim):Static(m),
 anim_(anim), burning_anim_(burningAnim), damaged_anim_(damagedAnim)
 {
     rcv_damage_def_ = MapObject::ddmg_StaticTree;
+    major_type_ = MapObject::mt_Static;
 }
 
 void Tree::draw(int x, int y)
@@ -1011,6 +1014,7 @@ WindowObj::WindowObj(int m, int anim, int breakingAnim, int damagedAnim):Static(
 anim_(anim), breaking_anim_(breakingAnim), damaged_anim_(damagedAnim)
 {
     rcv_damage_def_ = MapObject::ddmg_StaticWindow;
+    major_type_ = MapObject::mt_Static;
 }
 
 void WindowObj::draw(int x, int y)
@@ -1023,6 +1027,7 @@ EtcObj::EtcObj(int m, int anim, int burningAnim , int damagedAnim):Static(m),
 anim_(anim), burning_anim_(burningAnim), damaged_anim_(damagedAnim)
 {
     rcv_damage_def_ = MapObject::ddmg_StaticGeneral;
+    major_type_ = MapObject::mt_Static;
 }
 
 void EtcObj::draw(int x, int y)
@@ -1035,6 +1040,7 @@ NeonSign::NeonSign(int m, int anim):Static(m),
 anim_(anim)
 {
     rcv_damage_def_ = MapObject::ddmg_Invulnerable;
+    major_type_ = MapObject::mt_Static;
 }
 
 void NeonSign::draw(int x, int y)

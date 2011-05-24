@@ -100,9 +100,17 @@ WeaponInstance::WeaponInstance(Weapon * w) : ShootableMapObject(-1)
     ammo_remaining_ = w->ammo();
     rcv_damage_def_ = MapObject::ddmg_Invulnerable;
     weapon_used_time_ = 0;
+    major_type_ = MapObject::mt_Weapon;
 }
 
 bool WeaponInstance::animate(int elapsed) {
+    if ((!owner_) && weapon_used_time_ != 0) {
+        weapon_used_time_ += elapsed;
+        if (weapon_used_time_ > (pWeaponClass_->timeForShot()
+            + pWeaponClass_->timeReload()))
+            weapon_used_time_ = 0;
+    }
+
     if (map_ == -1)
         return false;
 
@@ -125,10 +133,7 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
     if (ammo_remaining_ == 0)
         return false;
 
-    if (tobj == NULL)
-        return false;
-
-    // if owner exists these two values should change
+    // TODO: if owner exists these two values should change(IPA, mods)
     int time_for_shot = pWeaponClass_->timeForShot();
     int time_reload = pWeaponClass_->timeReload();
 
@@ -170,6 +175,8 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
         return false;
     }
 
+    if (tobj == NULL)
+        return false;
     DamageInflictType d;
     d.dtype = pWeaponClass_->dmgType();
     int ammoused = 1;
@@ -221,16 +228,16 @@ bool WeaponInstance::inRange(ShootableMapObject *t) {
     else
         d = distanceTo(t);
 
+    if (d == 0)
+        return true;
     if (d >= maxr)
         return false;
+
     Mission *m = g_Session.getMission();
 
-    int cx = 0;
-    int cy = 0;
-    int cz = 0;
-    cx = owner_->tileX() * 256 + owner_->offX();
-    cy = owner_->tileY() * 256 + owner_->offY();
-    cz = (owner_->visZ() + 1) * 128 + owner_->offZ();
+    int cx = owner_->tileX() * 256 + owner_->offX();
+    int cy = owner_->tileY() * 256 + owner_->offY();
+    int cz = (owner_->visZ() + 1) * 128 + owner_->offZ();
     assert((owner_->visZ() + 1) < m->mmax_z_);
     double sx = (double) cx;
     double sy = (double) cy;
