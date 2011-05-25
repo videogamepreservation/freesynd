@@ -222,7 +222,7 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
         }
     }
     if (can_set_dir) {
-        setDirection(txb - xb, yb - tyb, &(d.ddir));
+        setDirection(txb - xb, tyb - yb, &(d.ddir));
         if (owner_) {
             if (d.ddir != -1)
                 owner_->setDirection(d.ddir);
@@ -230,14 +230,35 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
     }
     if ((has_blocker & 6) != 0) {
         if ((has_blocker & 2) != 0) {
-            if (smp)
+            if (smp) {
                 smp->handleDamage(&d);
-        } else if ((has_blocker & 4) != 0)
-            // TODO: draw sfx sprite for this
-            has_blocker = has_blocker; // dummy
+                SFXObject *so = new SFXObject(g_Session.getMission()->map(),
+                    SFXObject::sfxt_BulletHit);
+                so->setTileX(smp->tileX());
+                so->setTileY(smp->tileY());
+                so->setTileZ(smp->tileZ() + 1);
+                so->setVisZ(smp->visZ() + 1);
+                so->setOffX(smp->offX());
+                so->setOffY(smp->offY());
+                so->setOffZ(smp->offZ());
+                g_Session.getMission()->addSfxObject(so);
+            }
+        } else if ((has_blocker & 4) != 0) {
+        }
     } else {
-        if (tobj)
+        if (tobj) {
             tobj->handleDamage(&d);
+            SFXObject *so = new SFXObject(g_Session.getMission()->map(),
+                SFXObject::sfxt_BulletHit);
+            so->setTileX(tobj->tileX());
+            so->setTileY(tobj->tileY());
+            so->setTileZ(tobj->tileZ() + 1);
+            so->setVisZ(tobj->visZ() + 1);
+            so->setOffX(tobj->offX());
+            so->setOffY(tobj->offY());
+            so->setOffZ(tobj->offZ());
+            g_Session.getMission()->addSfxObject(so);
+        }
     }
     return true;
 }

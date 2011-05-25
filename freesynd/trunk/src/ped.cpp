@@ -3079,8 +3079,7 @@ bool PedInstance::movementP(Mission *m, int elapsed)
                 speed_ = 0;
             updated = true;
         } else {
-            // our Y is inversed
-            setDirection(diffx, aty - ady, &dir_);
+            setDirection(diffx, diffy, &dir_);
 
             int dx = 0, dy = 0;
             float d = sqrt((float) (diffx * diffx + diffy * diffy));
@@ -3160,7 +3159,7 @@ bool PedInstance::handleDamage(MapObject::DamageInflictType *d) {
 
     health_ -= d->dvalue;
     if (d->ddir != -1) {
-        dir_ = 255 - d->ddir;
+        dir_ = (d->ddir + 128) % 256;
     }
     if (health_ <= 0){
         health_ = 0;

@@ -230,11 +230,25 @@ class SFXObject : public MapObject {
 public:
     SFXObject(int m, int type);
     virtual ~SFXObject() {}
+
+    bool sfxLifeOver() { return sfx_life_over_; }
+
+    void draw(int x, int y);
+    bool animate(int elapsed);
+
+    typedef enum {
+        sfxt_Unknown = 0,
+        sfxt_BulletHit = 1,
+        sfxt_FlamerFire = 2,
+        sfxt_Smoke = 3,
+        sfxt_Fire_LongSmoke = 4,
+        sfxt_ExplosionFire = 5,
+        sfxt_ExplosionBall = 6,
+        sfxt_LargeFire = 7,
+    }SfxTypeEnum;
 protected:
-    // max 5 stages animation
-    int anim_[5];
-    unsigned char stage_;
-    unsigned char max_stages_;
+    int anim_;
+    bool sfx_life_over_;
 };
 
 /*!

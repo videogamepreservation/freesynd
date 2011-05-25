@@ -58,6 +58,8 @@ Mission::~Mission()
         delete peds_[i];
     for (unsigned int i = 0; i < weapons_.size(); i++)
         delete weapons_[i];
+    for (unsigned int i = 0; i < sfx_objects_.size(); i++)
+        delete sfx_objects_[i];
     clrSurfaces();
     if (minimap_c_)
         free(minimap_c_);
@@ -611,11 +613,13 @@ void Mission::createFastKeys(int tilex, int tiley, int maxtilex, int maxtiley) {
     cache_peds_.clear();
     cache_weapons_.clear();
     cache_statics_.clear();
+    cache_sfx_objects_.clear();
 
     fast_vehicle_cache_.clear();
     fast_ped_cache_.clear();
     fast_weapon_cache_.clear();
     fast_statics_cache_.clear();
+    fast_sfx_objects_cache_.clear();
 
     // vehicles
     for (unsigned int i = 0; i < vehicles_.size(); i++) {
@@ -669,6 +673,16 @@ void Mission::createFastKeys(int tilex, int tiley, int maxtilex, int maxtiley) {
             && s->tileY() >= tiley && s->tileY() < maxtiley) {
             fast_statics_cache_.insert(fastKey(s));
             cache_statics_.push_back(s);
+        }
+    }
+
+    // sfx objects
+    for (unsigned int i = 0; i < sfx_objects_.size(); i++) {
+        SFXObject *so = sfx_objects_[i];
+        if (so->tileX() >= tilex && so->tileX() < maxtilex
+            && so->tileY() >= tiley && so->tileY() < maxtiley) {
+            fast_sfx_objects_cache_.insert(fastKey(so));
+            cache_sfx_objects_.push_back(so);
         }
     }
 }
@@ -732,6 +746,16 @@ void Mission::drawAt(int tilex, int tiley, int tilez, int x, int y,
                 && cache_statics_[i]->tileY() == tiley
                 && cache_statics_[i]->tileZ() == tilez) {
                 cache_statics_[i]->draw(x, y);
+            }
+    }
+
+    if (fast_sfx_objects_cache_.find(key) != fast_sfx_objects_cache_.end()) {
+        // draw sfx objects
+        for (unsigned int i = 0; i < cache_sfx_objects_.size(); i++)
+            if (cache_sfx_objects_[i]->tileX() == tilex
+                && cache_sfx_objects_[i]->tileY() == tiley
+                && cache_sfx_objects_[i]->tileZ() == tilez) {
+                cache_sfx_objects_[i]->draw(x, y);
             }
     }
 }
@@ -871,6 +895,8 @@ void Mission::end()
                 }
             }
         }
+    for (unsigned int i = 0; i < sfx_objects_.size(); i++)
+        delete sfx_objects_[i];
 }
 
 void Mission::addWeapon(WeaponInstance * w)

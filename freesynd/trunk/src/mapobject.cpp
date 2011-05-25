@@ -121,9 +121,9 @@ void MapObject::setDirection(int posx, int posy, int * dir) {
     int direction = -1;
     double PI = 3.14159265;
     if (posx == 0) {
-        if (posy > 0) {
+        if (posy < 0) {
             direction = 128;
-        } else if (posy < 0) {
+        } else if (posy > 0) {
             direction = 0;
         }
     } else if (posy == 0) {
@@ -134,22 +134,22 @@ void MapObject::setDirection(int posx, int posy, int * dir) {
         }
     } else if (posx < 0) {
         if (posy > 0) {
+            posx = -posx;
+            direction = (int)((128 * atan(double(posy/posx))) / PI + 192);
+        } else { // posy < 0
             int swapx = -posx;
-            posx = posy;
+            posx = -posy;
             posy = swapx;
             direction = (int)((128 * atan(double(posy/posx))) / PI + 128);
-        } else { // posy < 0
-            posx = -posx;
-            posy = -posy;
-            direction = (int)((128 * atan(double(posy/posx))) / PI + 192);
         }
     } else if (posx > 0 && posy < 0) {
-        int swapx = posx;
-        posx = -posy;
-        posy = swapx;
-        direction = (int)((128 * atan(double(posy/posx))) / PI);
-    } else { // posx > 0 && posy > 0
+        posx = posy;
         direction = (int)((128 * atan(double(posy/posx))) / PI + 64);
+    } else { // posx > 0 && posy > 0
+        int swapx = posx;
+        posy = posx;
+        posx = swapx;
+        direction = (int)((128 * atan(double(posy/posx))) / PI);
     }
     if (direction != -1) {
         if (dir == NULL)
@@ -373,13 +373,50 @@ bool MapObject::isBlocker(toDefineXYZ * startXYZ, toDefineXYZ * endXYZ,
     return true;
 }
 
-SFXObject::SFXObject(int m, int type):MapObject(m), stage_(0)
+SFXObject::SFXObject(int m, int type):MapObject(m), sfx_life_over_(false)
 {
-    /*
+    main_type_ = type;
     switch(type) {
         // TODO: set animations per type
+        case SFXObject::sfxt_Unknown:
+            printf("Unknown sfx created");
+            sfx_life_over_ = true;
+            break;
+        case SFXObject::sfxt_BulletHit:
+            anim_ = 382;
+            break;
+        case SFXObject::sfxt_FlamerFire:
+            anim_ = 383;
+            break;
+        case SFXObject::sfxt_Smoke:
+            anim_ = 244;
+            break;
+        case SFXObject::sfxt_Fire_LongSmoke:
+            anim_ = 389;
+            break;
+        case SFXObject::sfxt_ExplosionFire:
+            anim_ = 390;
+            break;
+        case SFXObject::sfxt_ExplosionBall:
+            anim_ = 391;
+            break;
+        case SFXObject::sfxt_LargeFire:
+            anim_ = 243;
+            break;
     }
-    */
+}
+
+void SFXObject::draw(int x, int y) {
+    addOffs(x, y);
+    g_App.gameSprites().drawFrame(anim_, frame_, x, y);
+}
+
+bool SFXObject::animate(int elapsed) {
+
+    bool changed = MapObject::animate(elapsed);
+    if (frame_ >= g_App.gameSprites().lastFrame(anim_))
+        sfx_life_over_ = true;
+    return changed;
 }
 
 ShootableMapObject::ShootableMapObject(int m):MapObject(m)

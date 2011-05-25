@@ -137,6 +137,16 @@ public:
     WeaponInstance *weapon(int i) { return weapons_[i]; }
     int numStatics() { return (int) statics_.size(); }
     Static *statics(int i) { return statics_[i]; }
+    int numSfxObjects() { return (int) sfx_objects_.size(); }
+    SFXObject *sfxObjects(int i) { return sfx_objects_[i]; }
+    void addSfxObject(SFXObject *so) {
+        sfx_objects_.push_back(so);
+    }
+    void delSfxObject(int i) {
+        delete sfx_objects_[i];
+        sfx_objects_.erase((sfx_objects_.begin() + i));
+    }
+
     /*! Return the mission statistics. */
     MissionStats *getStatistics() { return &stats_; }
 
@@ -542,7 +552,7 @@ protected:
     int map_, min_x_, min_y_, max_x_, max_y_;
 
     std::set<int> fast_vehicle_cache_, fast_ped_cache_, fast_weapon_cache_,
-            fast_statics_cache_;
+            fast_statics_cache_, fast_sfx_objects_cache_;
     /*! Statistics : time, shots, ...*/
     MissionStats stats_;
     // minimap in colours, map z = 0 tiles transformed based on

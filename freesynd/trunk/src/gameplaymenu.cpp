@@ -263,8 +263,13 @@ void GameplayMenu::handleTick(int elapsed)
         for (int i = 0; i < mission_->numWeapons(); i++)
             change |= mission_->weapon(i)->animate(diff);
 
-        for (int i = 0; i < mission_->numStatics(); i++)
-            change |= mission_->statics(i)->animate(diff, mission_);
+        for (int i = 0; i < mission_->numSfxObjects(); i++) {
+            change |= mission_->sfxObjects(i)->animate(diff);
+            if (mission_->sfxObjects(i)->sfxLifeOver()) {
+                mission_->delSfxObject(i);
+                i--;
+            }
+        }
     }
 
     selectable_agents_ = 0;
@@ -350,7 +355,7 @@ void GameplayMenu::handleShow() {
     
 }
 
-int qanim = 1085, qframe = 0;
+int qanim = 200, qframe = 0;
 
 void GameplayMenu::handleRender()
 {
@@ -942,7 +947,8 @@ bool GameplayMenu::handleUnknownKey(Key key, const int modKeys) {
         mission_->ped(0)->tileZ());
 #endif
 
-    /* used to see animations by number + frame
+#if 0
+    // used to see animations by number + frame
     if (key == KEY_a) {
         qanim--;
         if (qanim < 0)
@@ -955,13 +961,13 @@ bool GameplayMenu::handleUnknownKey(Key key, const int modKeys) {
             qanim = 1969;
     }
 
-    if (key == KEY_w) {
+    if (key == KEY_q) {
         qanim -= 8;
         if (qanim < 0)
             qanim = 0;
     }
 
-    if (key == KEY_q) {
+    if (key == KEY_w) {
         qanim += 8;
         if (qanim > 1969)
             qanim = 1969;
@@ -981,10 +987,11 @@ bool GameplayMenu::handleUnknownKey(Key key, const int modKeys) {
 
     if (key == KEY_SPACE)
         printf("qanim %i qframe %i\n", qanim, qframe);
-    */
+#endif
 
-    /* when directional pathfinding will be implemented this will be used
-    * for tests
+#if 0
+    // when directional pathfinding will be implemented this will be used
+    // for tests
     if (key == KEY_t) {
         mission_->vehicle(0)->setDirection(
                 mission_->vehicle(0)->direction() + 1);
@@ -994,7 +1001,7 @@ bool GameplayMenu::handleUnknownKey(Key key, const int modKeys) {
         mission_->vehicle(0)->setDirection(
                 mission_->vehicle(0)->direction() - 1);
     }
-    */
+#endif
 
 #endif //_DEBUG
 
