@@ -457,10 +457,12 @@ protected:
     std::vector<PedInstance *> peds_;
     std::vector<WeaponInstance *> weapons_;
     std::vector<Static *> statics_;
+    std::vector<SFXObject *> sfx_objects_;
     std::vector<VehicleInstance *> cache_vehicles_;
     std::vector<PedInstance *> cache_peds_;
     std::vector<WeaponInstance *> cache_weapons_;
     std::vector<Static *> cache_statics_;
+    std::vector<SFXObject *> cache_sfx_objects_;
 
     typedef enum {
         objv_None,

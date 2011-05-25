@@ -184,12 +184,13 @@ int Ped::lastPersuadeFrame() {
 }
 
 bool PedInstance::animate(int elapsed, Mission *mission) {
-    bool updated = false;
-    Weapon::WeaponAnimIndex weapon_idx =
-        selectedWeapon() ? selectedWeapon()->index() : Weapon::Unarmed_Anim;
 
     if (is_an_agent_ == PedInstance::Agent_Non_Active)
         return true;
+
+    bool updated = false;
+    Weapon::WeaponAnimIndex weapon_idx =
+        selectedWeapon() ? selectedWeapon()->index() : Weapon::Unarmed_Anim;
 
     if (health_ < 0) {
         if (numWeapons())
@@ -198,10 +199,10 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
     } else if (isHostile()) {
         // find a weapon with ammo
         // TODO: weapon should not be drawn until enemy is in sight
-        if (selectedWeapon() == 0)
+        if (selectedWeapon() == NULL)
             selectNextWeapon();
 
-        target_ = 0;
+        target_ = NULL;
         if (selectedWeapon()) {
             // for the moment, assume peds can only be hostile towards the agents
 #if 0
@@ -218,15 +219,17 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                 }
 #endif
 
-            for (int i = 0; target() == 0 && i < 4; i++)
-                if (mission->ped(i)->health() > 0
-                        && inSightRange(mission->ped(i))) {
-                    if (dest_path_.size() == 0)
-                        setDestinationP(mission, mission->ped(i)->tileX(),
-                                       mission->ped(i)->tileY(),
-                                       mission->ped(i)->tileZ());
-                    break;
-                }
+            if (target_ == NULL){
+                for (int i = 0; i < 4; i++)
+                    if (mission->ped(i)->health() > 0
+                            && inSightRange(mission->ped(i))) {
+                        if (dest_path_.size() == 0)
+                            setDestinationP(mission, mission->ped(i)->tileX(),
+                                           mission->ped(i)->tileY(),
+                                           mission->ped(i)->tileZ());
+                        break;
+                    }
+            }
         } else {
             if (pickup_weapon_ && pickup_weapon_->map() == -1)
                 pickup_weapon_ = 0;
@@ -258,7 +261,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
             }
         }
 
-        if (target_ == 0)
+        if (target_ == NULL)
             stopFiring();
     }
 
@@ -295,7 +298,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
     }
 
     if (pickup_weapon_ && pickup_weapon_->map() == -1) {
-        pickup_weapon_ = 0;
+        pickup_weapon_ = NULL;
         clearDestination();
         speed_ = 0;
     }
@@ -409,7 +412,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
         w->setPosition(tile_x_, tile_y_, tile_z_, off_x_, off_y_, off_z_);
         w->setVisZ(vis_z_);
         w->setOwner(0);
-        putdown_weapon_ = 0;
+        putdown_weapon_ = NULL;
         setDrawnAnim(PedInstance::PutdownAnim);
         if(speed() != 0){
             clearDestination();
@@ -423,7 +426,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
             weapons_.push_back(pickup_weapon_);
             pickup_weapon_->setMap(-1);
             pickup_weapon_->setOwner(this);
-            pickup_weapon_ = 0;
+            pickup_weapon_ = NULL;
             setDrawnAnim(PedInstance::PickupAnim);
             return true;
         } else {

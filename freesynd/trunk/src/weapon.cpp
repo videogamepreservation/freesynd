@@ -140,10 +140,8 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
     int elapsed, bool ignoreBlocker)
 {
     // TODO: "tp" will be used later for calculating vector when target
-    // is not object(floor); "elapsed" will be used during continuos
-    // shooting to calculate damage + delay(reloading) time;
+    // is not object(floor)
 
-    // NOTE: for now this will check "tobj"
     if (ammo_remaining_ == 0)
         return false;
 
@@ -169,8 +167,8 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
     PathNode pn;
     if(tp)
         pn = *tp;
-    bool has_blocker = !(inRange(&smp, &pn, true));
-    if(has_blocker)
+    uint8 has_blocker = inRange(&smp, &pn, true);
+    if((has_blocker & 1) == 0 && (has_blocker & 6) != 0)
         if (!ignoreBlocker)
         return false;
 
@@ -203,7 +201,7 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
     bool can_set_dir = false;
     if (tobj) {
         can_set_dir = true;
-        if (has_blocker) {
+        if ((has_blocker & 6) != 0) {
             txb = pn.tileX() * 256 + pn.offX();
             tyb = pn.tileY() * 256 + pn.offY();
         } else {
@@ -211,7 +209,7 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
             tyb = tobj->tileY() * 256 + tobj->offY();
         }
     } else {
-        if (has_blocker) {
+        if ((has_blocker & 6) != 0) {
             can_set_dir = true;
             txb = pn.tileX() * 256 + pn.offX();
             tyb = pn.tileY() * 256 + pn.offY();
@@ -230,9 +228,13 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
                 owner_->setDirection(d.ddir);
         }
     }
-    if (has_blocker) {
-        if (smp)
-            smp->handleDamage(&d);
+    if ((has_blocker & 6) != 0) {
+        if ((has_blocker & 2) != 0) {
+            if (smp)
+                smp->handleDamage(&d);
+        } else if ((has_blocker & 4) != 0)
+            // TODO: draw sfx sprite for this
+            has_blocker = has_blocker; // dummy
     } else {
         if (tobj)
             tobj->handleDamage(&d);
@@ -247,7 +249,12 @@ void WeaponInstance::playSound() {
     g_App.gameSounds().play(pWeaponClass_->getSound());
 }
 
-bool WeaponInstance::inRange(ShootableMapObject ** t, PathNode * pn,
+/*
+* returns mask where bits are:
+* 0b - target in range(1); 1b - blocker is object, "t" and "pn" are set(2)
+* 2b - blocker tile, "pn" is set(4).
+*/
+uint8 WeaponInstance::inRange(ShootableMapObject ** t, PathNode * pn,
                              bool setBlocker) {
 
     int maxr = range();
@@ -274,9 +281,9 @@ bool WeaponInstance::inRange(ShootableMapObject ** t, PathNode * pn,
     }
 
     if (d == 0)
-        return true;
+        return 1;
     if (d >= maxr)
-        return false;
+        return 0;
 
     Mission *m = g_Session.getMission();
 
@@ -339,8 +346,9 @@ bool WeaponInstance::inRange(ShootableMapObject ** t, PathNode * pn,
                         pn->setTileXYZ(nx, ny, nz);
                         pn->setOffXYZ((int)sx % 256, (int)sy % 256, (int)sz % 128);
                     }
+                    return 4;
                 }
-                return false;
+                return 0;
             }
             oldx = nx;
             oldy = ny;
@@ -365,22 +373,27 @@ bool WeaponInstance::inRange(ShootableMapObject ** t, PathNode * pn,
         (*t)->setIsIgnored();
     if (blockerObj) {
         if (setBlocker){
-            if (*t)
+            uint8 block_mask = 0;
+            if (*t) {
                 *t = (ShootableMapObject *)blockerObj;
+                block_mask |= 2;
+            }
             if (pn) {
                 pn->setTileXYZ(startXYZ.x / 256, startXYZ.y / 256,
                     startXYZ.z / 128);
                 pn->setOffXYZ(startXYZ.x % 256, startXYZ.y % 256,
                     startXYZ.z % 128);
+                block_mask |= 4;
             }
+            return block_mask;
         }
-        return false;
+        return 0;
     } else
         if (setBlocker)
             if (*t)
                 *t = NULL;
 
-    return true;
+    return 1;
 }
 
 int WeaponInstance::getShots(int elapsed, int tForReload, int tForShot) {

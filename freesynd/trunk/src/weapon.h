@@ -163,7 +163,7 @@ public:
 
     void resetWeaponUsedTime() { weapon_used_time_ = 0; }
 
-    bool inRange(ShootableMapObject ** t, PathNode * pn = NULL,
+    uint8 inRange(ShootableMapObject ** t, PathNode * pn = NULL,
         bool setBlocker = false);
 
     int getShots(int elapsed, int tForReload, int tForShot);
