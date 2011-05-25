@@ -721,28 +721,21 @@ void GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
                 if (isAgentSelected(i)
                         && mission_->ped(i)->selectedWeapon()) {
                     if (pointing_at_ped_ != -1
-                            && mission_->ped(i)->selectedWeapon()->inRange(
-                                    mission_->ped(pointing_at_ped_)))
+                        && mission_->ped(i)->selectedWeapon()->inflictDamage(
+                            mission_->ped(pointing_at_ped_), NULL, -1, true))
                     {
-                        if (mission_->ped(i)->selectedWeapon()->inflictDamage(
-                            mission_->ped(pointing_at_ped_), NULL))
-                        {
-                            mission_->ped(i)->startFiring();
-                            mission_->ped(i)->setTarget(
-                                mission_->ped(pointing_at_ped_));
-                        }
+                        mission_->ped(i)->startFiring();
+                        mission_->ped(i)->setTarget(
+                            mission_->ped(pointing_at_ped_));
                     }
                     else if (pointing_at_vehicle_ != -1
-                            && mission_->ped(i)->selectedWeapon()->inRange(
-                                    mission_->vehicle(pointing_at_vehicle_)))
+                            && mission_->ped(i)->selectedWeapon()->inflictDamage(
+                            mission_->vehicle(pointing_at_vehicle_), NULL, -1,
+                            true))
                     {
-                        if (mission_->ped(i)->selectedWeapon()->inflictDamage(
-                            mission_->vehicle(pointing_at_vehicle_), NULL))
-                        {
-                            mission_->ped(i)->startFiring();
-                            mission_->ped(i)->setTarget(
-                                mission_->ped(pointing_at_vehicle_));
-                        }
+                        mission_->ped(i)->startFiring();
+                        mission_->ped(i)->setTarget(
+                            mission_->ped(pointing_at_vehicle_));
                     }
                     // TODO: add shooting on floor
                 }

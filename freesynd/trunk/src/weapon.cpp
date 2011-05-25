@@ -104,7 +104,21 @@ WeaponInstance::WeaponInstance(Weapon * w) : ShootableMapObject(-1)
 }
 
 bool WeaponInstance::animate(int elapsed) {
-    if ((!owner_) && weapon_used_time_ != 0) {
+    if (owner_) {
+        if (((PedInstance *)owner_)->selectedWeapon()
+            && ((PedInstance *)owner_)->selectedWeapon() == this)
+        {
+            if (pWeaponClass_->getWeaponType() == Weapon::EnergyShield) {
+                int ammoused = getShots(elapsed, pWeaponClass_->timeForShot(),
+                    pWeaponClass_->timeReload()) * pWeaponClass_->ammoPerShot();
+                if (ammoused >= ammo_remaining_) {
+                    ammo_remaining_ = 0;
+                    ((PedInstance *)owner_)->selectNextWeapon();
+                } else
+                    ammo_remaining_ -= ammoused;
+            }
+        }
+    } else if (weapon_used_time_ != 0) {
         weapon_used_time_ += elapsed;
         if (weapon_used_time_ > (pWeaponClass_->timeForShot()
             + pWeaponClass_->timeReload()))
@@ -123,10 +137,10 @@ void WeaponInstance::draw(int x, int y) {
 }
 
 bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
-    int duration)
+    int elapsed, bool ignoreBlocker)
 {
     // TODO: "tp" will be used later for calculating vector when target
-    // is not object(floor); "duration" will be used during continuos
+    // is not object(floor); "elapsed" will be used during continuos
     // shooting to calculate damage + delay(reloading) time;
 
     // NOTE: for now this will check "tobj"
@@ -136,33 +150,9 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
     // TODO: if owner exists these two values should change(IPA, mods)
     int time_for_shot = pWeaponClass_->timeForShot();
     int time_reload = pWeaponClass_->timeReload();
-
-    int time_full_shot = time_for_shot + time_reload;
-    if (duration == -1)
-        duration = time_full_shot;
-    if (weapon_used_time_ >= time_for_shot) {
-        weapon_used_time_ += duration;
-        if (weapon_used_time_ >= time_full_shot) {
-            weapon_used_time_ -= time_full_shot;
-        } else
-            return false;
-    } else
-        weapon_used_time_ += duration;
-
-    int shots = weapon_used_time_ / time_full_shot;
-    weapon_used_time_ %= time_full_shot;
-    if (weapon_used_time_ >= time_for_shot)
-        shots++;
+    int shots = getShots(elapsed, time_reload, time_for_shot);
 
     if (pWeaponClass_->dmgType() == MapObject::dmg_None) {
-        if (pWeaponClass_->getWeaponType() == Weapon::EnergyShield) {
-            int ammoused = shots * pWeaponClass_->ammoPerShot();
-            if (ammoused >= ammo_remaining_) {
-                ammo_remaining_ = 0;
-                ((PedInstance *)owner_)->selectNextWeapon();
-            } else
-                ammo_remaining_ -= ammoused;
-        }
         return false;
     } else if (pWeaponClass_->dmgType() == MapObject::dmg_Heal) {
         // NOTE: not only self-healing in future?
@@ -175,8 +165,15 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
         return false;
     }
 
-    if (tobj == NULL)
+    ShootableMapObject * smp = tobj;
+    PathNode pn;
+    if(tp)
+        pn = *tp;
+    bool has_blocker = !(inRange(&smp, &pn, true));
+    if(has_blocker)
+        if (!ignoreBlocker)
         return false;
+
     DamageInflictType d;
     d.dtype = pWeaponClass_->dmgType();
     int ammoused = 1;
@@ -201,13 +198,45 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
     }
     d.ddir = -1;
     // our Y is inversed
-    setDirection((tobj->tileX() * 256 + tobj->offX()) - xb,
-        yb - (tobj->tileY() * 256 + tobj->offY()), &(d.ddir));
-    if (owner_) {
-        if (d.ddir != -1)
-            owner_->setDirection(d.ddir);
+    int txb = 0;
+    int tyb = 0;
+    bool can_set_dir = false;
+    if (tobj) {
+        can_set_dir = true;
+        if (has_blocker) {
+            txb = pn.tileX() * 256 + pn.offX();
+            tyb = pn.tileY() * 256 + pn.offY();
+        } else {
+            txb = tobj->tileX() * 256 + tobj->offX();
+            tyb = tobj->tileY() * 256 + tobj->offY();
+        }
+    } else {
+        if (has_blocker) {
+            can_set_dir = true;
+            txb = pn.tileX() * 256 + pn.offX();
+            tyb = pn.tileY() * 256 + pn.offY();
+        } else {
+            if (tp) {
+                can_set_dir = true;
+                txb = tp->tileX() * 256 + tp->offX();
+                tyb = tp->tileY() * 256 + tp->offY();
+            }
+        }
     }
-    tobj->handleDamage(&d);
+    if (can_set_dir) {
+        setDirection(txb - xb, yb - tyb, &(d.ddir));
+        if (owner_) {
+            if (d.ddir != -1)
+                owner_->setDirection(d.ddir);
+        }
+    }
+    if (has_blocker) {
+        if (smp)
+            smp->handleDamage(&d);
+    } else {
+        if (tobj)
+            tobj->handleDamage(&d);
+    }
     return true;
 }
 
@@ -218,15 +247,31 @@ void WeaponInstance::playSound() {
     g_App.gameSounds().play(pWeaponClass_->getSound());
 }
 
-bool WeaponInstance::inRange(ShootableMapObject *t) {
+bool WeaponInstance::inRange(ShootableMapObject ** t, PathNode * pn,
+                             bool setBlocker) {
 
     int maxr = range();
 
     double d = 0;
-    if(owner_)
-        d = owner_->distanceTo(t);
-    else
-        d = distanceTo(t);
+    if(owner_) {
+        if (*t)
+            d = owner_->distanceTo(*t);
+        else {
+            toDefineXYZ txyz = {pn->tileX() * 256 + pn->offX(),
+                pn->tileY() * 256 + pn->offY(),
+                pn->tileZ() * 256 + pn->offZ()};
+            d = owner_->distanceToPos(&txyz);
+        }
+    } else {
+        if (*t)
+            d = distanceTo(*t);
+        else {
+            toDefineXYZ txyz = {pn->tileX() * 256 + pn->offX(),
+                pn->tileY() * 256 + pn->offY(),
+                pn->tileZ() * 256 + pn->offZ()};
+            d = distanceToPos(&txyz);
+        }
+    }
 
     if (d == 0)
         return true;
@@ -235,17 +280,38 @@ bool WeaponInstance::inRange(ShootableMapObject *t) {
 
     Mission *m = g_Session.getMission();
 
-    int cx = owner_->tileX() * 256 + owner_->offX();
-    int cy = owner_->tileY() * 256 + owner_->offY();
-    int cz = (owner_->visZ() + 1) * 128 + owner_->offZ();
-    assert((owner_->visZ() + 1) < m->mmax_z_);
+    int cx = 0;
+    int cy = 0;
+    int cz = 0;
+    if (owner_) {
+        cx = owner_->tileX() * 256 + owner_->offX();
+        cy = owner_->tileY() * 256 + owner_->offY();
+        cz = (owner_->visZ() + 1) * 128 + owner_->offZ();
+        assert((owner_->visZ() + 1) < m->mmax_z_);
+    } else {
+        cx = tile_x_ * 256 + off_x_;
+        cy = tile_y_ * 256 + off_y_;
+        cz = (vis_z_ + 1) * 128 + off_z_;
+        assert((vis_z_ + 1) < m->mmax_z_);
+    }
     double sx = (double) cx;
     double sy = (double) cy;
     double sz = (double) cz;
-    int tx = t->tileX() * 256 + t->offX();
-    int ty = t->tileY() * 256 + t->offY();
-    int tz = (t->visZ() + 1) * 128 + t->offZ();
-    assert((t->visZ() + 1) < m->mmax_z_);
+
+    int tx = 0;
+    int ty = 0;
+    int tz = 0;
+    if (*t) {
+        tx = (*t)->tileX() * 256 + (*t)->offX();
+        ty = (*t)->tileY() * 256 + (*t)->offY();
+        tz = ((*t)->visZ() + 1) * 128 + (*t)->offZ();
+        assert(((*t)->visZ() + 1) < m->mmax_z_);
+    } else {
+        tx = pn->tileX() * 256 + pn->offX();
+        ty = pn->tileY() * 256 + pn->offY();
+        tz = (pn->tileZ() + 1) * 128 + pn->offZ();
+        assert((pn->tileZ() + 1) < m->mmax_z_);
+    }
 
     // NOTE: these values are less then 1, if they are incremented time
     // required to check range will be shorter less precise check, if
@@ -265,8 +331,17 @@ bool WeaponInstance::inRange(ShootableMapObject *t) {
         if (oldx != nx || oldy != ny || oldz != nz) {
             unsigned char twd = m->mtsurfaces_[nx + ny * m->mmax_x_
                 + nz * m->mmax_m_xy].twd;
-            if (!(twd == 0x00 || twd == 0x0C || twd == 0x10))
+            if (!(twd == 0x00 || twd == 0x0C || twd == 0x10)) {
+                if (setBlocker) {
+                    if (*t)
+                        *t = NULL;
+                    if (pn) {
+                        pn->setTileXYZ(nx, ny, nz);
+                        pn->setOffXYZ((int)sx % 256, (int)sy % 256, (int)sz % 128);
+                    }
+                }
                 return false;
+            }
             oldx = nx;
             oldy = ny;
             oldz = nz;
@@ -279,13 +354,51 @@ bool WeaponInstance::inRange(ShootableMapObject *t) {
     toDefineXYZ startXYZ = {cx, cy, cz};
     toDefineXYZ endXYZ = {tx, ty, tz};
     MapObject *blockerObj = NULL;
-    owner_->setIsIgnored(true);
-    t->setIsIgnored(true);
+    if (owner_)
+        owner_->setIsIgnored(true);
+    if (*t)
+        (*t)->setIsIgnored(true);
     m->blockerExists(&startXYZ, &endXYZ, d, &blockerObj);
-    owner_->setIsIgnored();
-    t->setIsIgnored();
-    if (blockerObj)
+    if (owner_)
+        owner_->setIsIgnored();
+    if (*t)
+        (*t)->setIsIgnored();
+    if (blockerObj) {
+        if (setBlocker){
+            if (*t)
+                *t = (ShootableMapObject *)blockerObj;
+            if (pn) {
+                pn->setTileXYZ(startXYZ.x / 256, startXYZ.y / 256,
+                    startXYZ.z / 128);
+                pn->setOffXYZ(startXYZ.x % 256, startXYZ.y % 256,
+                    startXYZ.z % 128);
+            }
+        }
         return false;
+    } else
+        if (setBlocker)
+            if (*t)
+                *t = NULL;
 
     return true;
+}
+
+int WeaponInstance::getShots(int elapsed, int tForReload, int tForShot) {
+    int time_full_shot = tForShot + tForReload;
+    if (elapsed == -1)
+        elapsed = time_full_shot;
+    if (weapon_used_time_ >= tForShot) {
+        weapon_used_time_ += elapsed;
+        if (weapon_used_time_ >= time_full_shot) {
+            weapon_used_time_ -= time_full_shot;
+        } else
+            return false;
+    } else
+        weapon_used_time_ += elapsed;
+
+    int shots = weapon_used_time_ / time_full_shot;
+    weapon_used_time_ %= time_full_shot;
+    if (weapon_used_time_ >= tForShot)
+        shots++;
+    return shots;
 }

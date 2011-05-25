@@ -191,11 +191,6 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
     if (is_an_agent_ == PedInstance::Agent_Non_Active)
         return true;
 
-    if (selectedWeapon()) {
-        if (selectedWeapon()->inflictDamage(NULL, NULL, elapsed))
-            return true;
-    }
-
     if (health_ < 0) {
         if (numWeapons())
             dropAllWeapons();
@@ -209,9 +204,10 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
         target_ = 0;
         if (selectedWeapon()) {
             // for the moment, assume peds can only be hostile towards the agents
+#if 0
             for (int i = 0; i < 4; i++)
                 if (mission->ped(i)->health() > 0
-                        && selectedWeapon()->inRange(mission->ped(i))) {
+                        && selectedWeapon()->inRange(&(mission->ped(i)))) {
                     if (mission->ped(i)->inVehicle())
                         setTarget(mission->ped(i)->inVehicle());
                     else
@@ -220,6 +216,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                     clearDestination();
                     speed_ = 0;
                 }
+#endif
 
             for (int i = 0; target() == 0 && i < 4; i++)
                 if (mission->ped(i)->health() > 0
@@ -452,13 +449,12 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
 
     if (target_ && health_ > 0 && firing_ == PedInstance::Firing_Not) {
         if(target_->health() > 0) {
-            if (selectedWeapon() && selectedWeapon()->inRange(target_)) {
-                if (selectedWeapon()->inflictDamage(target_, NULL)) {
-                    firing_ = PedInstance::Firing_Fire;
-                    updated = true;
+            if (selectedWeapon()
+                && selectedWeapon()->inflictDamage(target_, NULL)) {
+                firing_ = PedInstance::Firing_Fire;
+                updated = true;
 
-                    selectedWeapon()->playSound();
-                }
+                selectedWeapon()->playSound();
             } else {
                 stopFiring();
             }

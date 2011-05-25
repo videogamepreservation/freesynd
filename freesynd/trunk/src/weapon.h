@@ -140,7 +140,7 @@ public:
     bool animate(int elapsed);
     void draw(int x, int y);
     bool inflictDamage(ShootableMapObject * tobj, PathNode * tp,
-        int duration = -1);
+        int elapsed = -1, bool ignoreBlocker = false);
 
     void setOwner(ShootableMapObject *owner) { owner_ = owner; }
     ShootableMapObject *getOwner() { return owner_; }
@@ -160,9 +160,13 @@ public:
 
     //! Plays the weapon's sound.
     void playSound();
+
     void resetWeaponUsedTime() { weapon_used_time_ = 0; }
 
-    bool inRange(ShootableMapObject *t);
+    bool inRange(ShootableMapObject ** t, PathNode * pn = NULL,
+        bool setBlocker = false);
+
+    int getShots(int elapsed, int tForReload, int tForShot);
 
 protected:
     Weapon *pWeaponClass_;

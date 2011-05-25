@@ -59,6 +59,20 @@ public:
     void setOffY(int y) { off_y_ = y; }
     void setOffZ(int z) { off_z_ = z; }
     void setOffXY(int x, int y) { off_x_ = x; off_y_ = y; }
+    void setOffXYZ(int x, int y, int z) {
+        off_x_ = x;
+        off_y_ = y;
+        off_z_ = z;
+    }
+
+    void setTileX(int x) { tile_x_ = x; }
+    void setTileY(int y) { tile_y_ = y; }
+    void setTileZ(int z) { tile_z_ = z; }
+    void setTileXYZ(int x, int y, int z) {
+        tile_x_ = x;
+        tile_y_ = y;
+        tile_z_ = z;
+    }
 
 protected:
     int tile_x_, tile_y_, tile_z_, off_x_, off_y_, off_z_;
