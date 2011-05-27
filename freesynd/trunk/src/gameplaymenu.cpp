@@ -500,11 +500,11 @@ void GameplayMenu::handleMouseMotion(int x, int y, int state, const int modKeys)
 #endif
         PedInstance *p = mission_->ped(i);
         if (p->health() > 0 && p->map() != -1) {
-            int px = p->screenX() - 20;
+            int px = p->screenX() - 10;
             int py = p->screenY() - 10 - p->visZ() * TILE_HEIGHT/3;
 
             if (x - 129 + world_x_ >= px && y + world_y_ >= py &&
-                x - 129 + world_x_ < px + 40 && y + world_y_ < py + 32) {
+                x - 129 + world_x_ < px + 21 && y + world_y_ < py + 34) {
                 pointing_at_ped_ = i;
                 break;
             }
@@ -693,7 +693,8 @@ void GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
                         int stz = 0;
                         int sox = ox;
                         int soy = oy;
-                        mission_->getWalkable(stx, sty, stz, sox, soy);
+                        if (!(mission_->getWalkable(stx, sty, stz, sox, soy)))
+                            continue;
                         if (modKeys & KMD_CTRL) {
                             showPath_ = true;
                             mission_->ped(i)->addDestinationP(mission_,stx, sty, stz,
@@ -722,28 +723,48 @@ void GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
         }
     } else if (button == 3) {
         if (x >= 129) {
-            for (int i = 0; i < 4; i++)
+            int ox, oy;
+            int tx =
+                g_App.maps().screenToTileX(mission_->map(), world_x_ + x - 129,
+                    world_y_ + y, ox);
+            int ty =
+                g_App.maps().screenToTileY(mission_->map(), world_x_ + x - 129,
+                    world_y_ + y, oy);
+            for (int i = 0; i < 4; i++) {
+                PedInstance * pa = mission_->ped(i);
                 if (isAgentSelected(i)
-                        && mission_->ped(i)->selectedWeapon()) {
+                        && pa->selectedWeapon()) {
                     if (pointing_at_ped_ != -1
-                        && mission_->ped(i)->selectedWeapon()->inflictDamage(
+                        && pa->selectedWeapon()->inflictDamage(
                             mission_->ped(pointing_at_ped_), NULL, -1, true))
                     {
-                        mission_->ped(i)->startFiring();
-                        mission_->ped(i)->setTarget(
-                            mission_->ped(pointing_at_ped_));
-                    }
-                    else if (pointing_at_vehicle_ != -1
-                            && mission_->ped(i)->selectedWeapon()->inflictDamage(
+                        pa->startFiring();
+                        pa->setTarget(mission_->ped(pointing_at_ped_));
+                    } else if (pointing_at_vehicle_ != -1
+                            && pa->selectedWeapon()->inflictDamage(
                             mission_->vehicle(pointing_at_vehicle_), NULL, -1,
                             true))
                     {
-                        mission_->ped(i)->startFiring();
-                        mission_->ped(i)->setTarget(
-                            mission_->ped(pointing_at_vehicle_));
+                        pa->startFiring();
+                        pa->setTarget(mission_->ped(pointing_at_vehicle_));
+                    } else {
+                        int stx = tx;
+                        int sty = ty;
+                        int stz = 0;
+                        int sox = ox;
+                        int soy = oy;
+                        if (mission_->getShootableTile(stx, sty, stz,
+                            sox, soy))
+                        {
+                            PathNode pn = PathNode(stx, sty, stz, sox, soy);
+                            //if (
+                                pa->selectedWeapon()->inflictDamage(NULL, &pn, -1, true)
+                                //)
+                                ;
+                        }
                     }
-                    // TODO: add shooting on floor
                 }
+            }
         }
     }
 

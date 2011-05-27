@@ -169,6 +169,7 @@ public:
     bool setSurfaces();
     void clrSurfaces();
     bool getWalkable(int &x, int &y, int &z, int &ox, int &oy);
+    bool getShootableTile(int &x, int &y, int &z, int &ox, int &oy);
     void adjXYZ(int &x, int &y, int &z);
     void blockerExists(toDefineXYZ * startXYZ, toDefineXYZ * endXYZ,
         double dist, MapObject** blockerObj);

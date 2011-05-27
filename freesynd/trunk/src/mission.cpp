@@ -2879,3 +2879,33 @@ void Mission::blockerExists(toDefineXYZ * startXYZ, toDefineXYZ * endXYZ,
         *endXYZ = blockEndXYZ;
     }
 }
+
+
+bool Mission::getShootableTile(int &x, int &y, int &z, int &ox, int &oy) {
+    bool gotit = false;
+    int bx, by, box, boy;
+    int bz = mmax_z_;
+    unsigned char twd;
+    do{
+        bz--;
+        bx = x * 256 + ox + 128 * bz;
+        box = bx % 256;
+        bx = bx / 256;
+        by = y * 256 + oy + 128 * bz;
+        boy = by % 256;
+        by = by / 256;
+        if (bz >= mmax_z_ || bx >= mmax_x_ || by >= mmax_y_)
+            continue;
+        twd = mtsurfaces_[bx + by * mmax_x_ + bz * mmax_m_xy].twd;
+        if (!(twd == 0x00 || twd == 0x0C || twd == 0x10))
+            gotit = true;
+    }while (bz != 0 && !gotit);
+    if (gotit) {
+        x = bx;
+        y = by;
+        z = bz;
+        ox = box;
+        oy = boy;
+    }
+    return gotit;
+}

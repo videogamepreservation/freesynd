@@ -411,7 +411,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
         w->setMap(map());
         w->setPosition(tile_x_, tile_y_, tile_z_, off_x_, off_y_, off_z_);
         w->setVisZ(vis_z_);
-        w->setOwner(0);
+        w->setOwner(NULL);
         putdown_weapon_ = NULL;
         setDrawnAnim(PedInstance::PutdownAnim);
         if(speed() != 0){
@@ -875,7 +875,7 @@ void PedInstance::pickupWeapon(WeaponInstance * w) {
 }
 
 bool PedInstance::wePickupWeapon() {
-    return pickup_weapon_ != 0;
+    return pickup_weapon_ != NULL;
 }
 
 void PedInstance::putInVehicle(VehicleInstance * v) {
@@ -886,7 +886,7 @@ void PedInstance::putInVehicle(VehicleInstance * v) {
 void PedInstance::leaveVehicle() {
     assert(map_ == -1 && in_vehicle_);
     map_ = in_vehicle_->map();
-    in_vehicle_ = 0;
+    in_vehicle_ = NULL;
 }
 
 int PedInstance::map() {
@@ -3029,10 +3029,11 @@ bool PedInstance::movementP(Mission *m, int elapsed)
             if (hold_on_.xadj || hold_on_.yadj) {
                 if(abs(hold_on_.tilex - nxtTileX) <= hold_on_.xadj
                     && abs(hold_on_.tiley - nxtTileY) <= hold_on_.yadj
-                    && hold_on_.tilez == nxtTileZ) {
+                    && hold_on_.tilez == nxtTileZ)
+                {
                     dest_path_.clear();
                     speed_ = 0;
-                    // TODO: current action drop function will be
+                    // TODO: "current action drop" function will be
                     // better for this purpose
                     if (in_vehicle_) {
                         in_vehicle_ = 0;

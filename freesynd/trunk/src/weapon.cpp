@@ -168,8 +168,10 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
     if(tp)
         pn = *tp;
     uint8 has_blocker = inRange(&smp, &pn, true);
-    if((has_blocker & 1) == 0 && (has_blocker & 6) != 0)
+    if ((has_blocker & 6) != 0) {
         if (!ignoreBlocker)
+            return false;
+    } else if((has_blocker & 1) == 0)
         return false;
 
     DamageInflictType d;
@@ -194,8 +196,8 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
         xb = tile_x_ * 256 + off_x_;
         yb = tile_y_ * 256 + off_y_;
     }
+
     d.ddir = -1;
-    // our Y is inversed
     int txb = 0;
     int tyb = 0;
     bool can_set_dir = false;
@@ -244,6 +246,16 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
                 g_Session.getMission()->addSfxObject(so);
             }
         } else if ((has_blocker & 4) != 0) {
+            SFXObject *so = new SFXObject(g_Session.getMission()->map(),
+                SFXObject::sfxt_BulletHit);
+            so->setTileX(pn.tileX());
+            so->setTileY(pn.tileY());
+            so->setTileZ(pn.tileZ());
+            so->setVisZ(pn.tileZ());
+            so->setOffX(pn.offX());
+            so->setOffY(pn.offY());
+            so->setOffZ(pn.offZ());
+            g_Session.getMission()->addSfxObject(so);
         }
     } else {
         if (tobj) {
@@ -257,6 +269,17 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
             so->setOffX(tobj->offX());
             so->setOffY(tobj->offY());
             so->setOffZ(tobj->offZ());
+            g_Session.getMission()->addSfxObject(so);
+        } else if (tp) {
+            SFXObject *so = new SFXObject(g_Session.getMission()->map(),
+                SFXObject::sfxt_BulletHit);
+            so->setTileX(tp->tileX());
+            so->setTileY(tp->tileY());
+            so->setTileZ(tp->tileZ());
+            so->setVisZ(tp->tileZ());
+            so->setOffX(tp->offX());
+            so->setOffY(tp->offY());
+            so->setOffZ(tp->offZ());
             g_Session.getMission()->addSfxObject(so);
         }
     }
@@ -337,8 +360,8 @@ uint8 WeaponInstance::inRange(ShootableMapObject ** t, PathNode * pn,
     } else {
         tx = pn->tileX() * 256 + pn->offX();
         ty = pn->tileY() * 256 + pn->offY();
-        tz = (pn->tileZ() + 1) * 128 + pn->offZ();
-        assert((pn->tileZ() + 1) < m->mmax_z_);
+        tz = pn->tileZ() * 128 + pn->offZ();
+        assert(pn->tileZ() < m->mmax_z_);
     }
 
     // NOTE: these values are less then 1, if they are incremented time
@@ -351,11 +374,15 @@ uint8 WeaponInstance::inRange(ShootableMapObject ** t, PathNode * pn,
     int oldx = cx / 256;
     int oldy = cy / 256;
     int oldz = cz / 128;
+    if (cz % 128 != 0)
+        oldz++;
 
     while (fabs(sx - tx) > 16.0f || fabs(sy - ty) > 16.0f || fabs(sz - tz) > 16.0f) {
         int nx = (int)sx / 256;
         int ny = (int)sy / 256;
         int nz = (int)sz / 128;
+        if (((int)sz) % 128 != 0)
+            nz++;
         if (oldx != nx || oldy != ny || oldz != nz) {
             unsigned char twd = m->mtsurfaces_[nx + ny * m->mmax_x_
                 + nz * m->mmax_m_xy].twd;

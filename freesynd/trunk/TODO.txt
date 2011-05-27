@@ -44,8 +44,7 @@ in original gameplay or are not present at all
  - create new mission files using editor, based on original game mission files.
 --
  - Implements dragging in SelectMenu to pass a weapon from an agent to another.
- - resolve shooting issues: targeting, range checking, target in range checking, range
-damage, obstacle checking
+ - resolve shooting issues: targeting, range damage
  - Manage Qwerty / azerty keyboard. Today only qwerty keyboard are used.
  - Add in select menu reload button for weapons, autoreload for "pistol"
  - "no_sound"/"no_music" option for config file, or disabled in debug mode
