@@ -890,6 +890,9 @@ void Mission::end()
                         it++;
                     assert(it != weapons_.end());
                     weapons_.erase(it);
+                    // auto-reload for pistol
+                    if (wi->getWeaponType() == Weapon::Pistol)
+                        wi->setAmmoRemaining(wi->ammo());
                     wi->resetWeaponUsedTime();
                     g_Session.teamMember(i)->addWeapon(wi);
                 }
