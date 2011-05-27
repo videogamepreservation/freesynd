@@ -455,7 +455,7 @@ void GameplayMenu::handleRender()
     }
 #endif
     // this is used in combination with keys
-#if 0
+#if 1
     g_App.gameSprites().drawFrame(qanim, qframe, 320, 200);
 #endif
 #endif
@@ -971,7 +971,7 @@ bool GameplayMenu::handleUnknownKey(Key key, const int modKeys) {
         mission_->ped(0)->tileZ());
 #endif
 
-#if 0
+#if 1
     // used to see animations by number + frame
     if (key == KEY_a) {
         qanim--;
@@ -1119,14 +1119,16 @@ void GameplayMenu::drawMissionHint(int elapsed) {
     mission_hint_ += inc;
 
     bool inversed = false;
+    bool text_pw = (pointing_at_weapon_ != -1
+        && mission_->weapon(pointing_at_weapon_)->map() != -1);
 
     const char *str = "";
 
     uint8 txtColor;
 
     if ((mission_hint_ > 20 && mission_hint_ < 41)
-        ||(mission_hint_ > 60)) {
-
+        || (mission_hint_ > 60))
+    {
         for (int i = 0; i < 4; i++) {
             if (isAgentSelected(i)){
                 if (mission_->ped(i)->speed()) {
@@ -1153,10 +1155,6 @@ void GameplayMenu::drawMissionHint(int elapsed) {
         inversed = (mission_hint_ % 5) > 2;
         txtColor = inversed ? 0 : 11;
 
-        if (inversed) {
-            g_Screen.drawRect(0,46 + 44 + 10 + 46 + 44, 128, 12, 11);
-        }
-
         if (mission_) {
             mission_->objectiveMsg(&str);
             if (mission_->failed()) {
@@ -1166,6 +1164,7 @@ void GameplayMenu::drawMissionHint(int elapsed) {
                 }
 
                 str = "MISSION FAILED";
+                text_pw = false;
             }
 
             if (mission_->completed()) {
@@ -1175,11 +1174,23 @@ void GameplayMenu::drawMissionHint(int elapsed) {
                 }
 
                 str = "MISSION COMPLETE";
+                text_pw = false;
             }
 
             if (mission_hint_ > 40 && mission_hint_ < 61)
-                if (mission_->completed() || mission_->failed())
+                if (mission_->completed() || mission_->failed()) {
                     str = "PRESS SPACE";
+                    text_pw = false;
+                }
+        }
+
+        if (inversed && !text_pw) {
+            g_Screen.drawRect(0, 46 + 44 + 10 + 46 + 44, 128, 12, 11);
+        } else {
+            if (text_pw) {
+                str = mission_->weapon(pointing_at_weapon_)->name();
+                txtColor = inversed ? 14 : 11;
+            }
         }
     }
 
@@ -1217,18 +1228,35 @@ void GameplayMenu::drawWeaponSelectors() {
         p = mission_->ped(0);
 
     if (p) {
-        for (int j = 0; j < 2; j++)
+        bool draw_pw = true;
+        for (int j = 0; j < 2; j++) {
             for (int i = 0; i < 4; i++) {
                 WeaponInstance *wi = NULL;
                 int s = 1601;
+                // NOTE: weapon selectors can be drawn by drawFrame instead
+                // of using current draw(), animations are folowing:
+                // 285,286 empty selector :: 287 persuadatron 289
+                // 291 pistol 293 :: 295 gauss gun 297 :: 299 shotgun 301
+                // 303 uzi 305 :: 307 minigun 309 :: 311 laser gun 313
+                // 315 flamer 317 :: 319 long range 321 :: 323 scanner 325
+                // 327 medikit 329 :: 331 time bomb 333 :: 343 access card 345
+                // 351 energy shield 353
 
                 if (i + j * 4 < p->numWeapons()) {
                     wi = p->weapon(i + j * 4);
                     s = wi->getWeaponClass()->selector();
+                    if (p->selectedWeapon() && p->selectedWeapon() == wi)
+                        s += 40;
+                } else {
+                    if (draw_pw && pointing_at_weapon_ != -1
+                        && (mission_hint_ % 20) < 10
+                        && mission_->weapon(pointing_at_weapon_)->map() != -1)
+                    {
+                        draw_pw = false;
+                        wi = mission_->weapon(pointing_at_weapon_);
+                        s = wi->getWeaponClass()->selector() + 40;
+                    }
                 }
-
-                if (p->selectedWeapon() && p->selectedWeapon() == wi)
-                    s += 40;
 
                 g_App.gameSprites().sprite(s)->draw(
                         32 * i, 2 + 46 + 44 + 10 + 46 + 44 + 15 + j * 32, 0);
@@ -1248,6 +1276,7 @@ void GameplayMenu::drawWeaponSelectors() {
                         n, 5, 12);
                 }
             }
+        }
     } else {
         for (int j = 0; j < 2; j++)
             for (int i = 0; i < 4; i++) {

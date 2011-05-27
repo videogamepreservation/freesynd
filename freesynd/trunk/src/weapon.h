@@ -150,6 +150,7 @@ public:
     int range() { return pWeaponClass_->range(); }
     int ammo() { return pWeaponClass_->ammo(); }
     int rank() { return pWeaponClass_->rank(); }
+    const char * name() { return pWeaponClass_->getName(); }
 
     Weapon::WeaponAnimIndex index() { return pWeaponClass_->index(); }
     Weapon::WeaponType getWeaponType() { return pWeaponClass_->getWeaponType(); }
