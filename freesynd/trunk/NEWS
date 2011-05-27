@@ -32,6 +32,7 @@ Changes
   * When agent is killed during mission he will be removed from agents list
   * Added description to mission brief in 3 more languages
   * Z checking for inRange checking
+  * Trees animations : normal, burning, damaged now in use
 
 Fixed Bugs
 ----------
@@ -53,7 +54,7 @@ Known issues with this release
   * The minimap is not complete.
   * PathFinding requires improvement
   * Mission debriefing is not operational
-  * No animation for trees, windows
+  * Windows
   * Map drawing is buggy
 
 History

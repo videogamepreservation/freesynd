@@ -263,6 +263,9 @@ void GameplayMenu::handleTick(int elapsed)
         for (int i = 0; i < mission_->numWeapons(); i++)
             change |= mission_->weapon(i)->animate(diff);
 
+        for (int i = 0; i < mission_->numStatics(); i++)
+            change |= mission_->statics(i)->animate(diff, mission_);
+
         for (int i = 0; i < mission_->numSfxObjects(); i++) {
             change |= mission_->sfxObjects(i)->animate(diff);
             if (mission_->sfxObjects(i)->sfxLifeOver()) {

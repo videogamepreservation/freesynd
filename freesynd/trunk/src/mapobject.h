@@ -175,6 +175,7 @@ public:
     int getDirection(int snum = 8);
 
     void setTimeShowAnim(int t) {
+        frame_ = 0;
         time_show_anim_ = t;
         time_showing_anim_ = 0;
     }
@@ -342,6 +343,12 @@ public:
         sttdoor_Opening
     }stateDoors;
 
+    typedef enum {
+        stttree_Healthy = 0,
+        stttree_Burning,
+        stttree_Damaged,
+    }stateTrees;
+
 protected:
     Static(int m):ShootableMapObject(m) {}
     virtual ~Static() {}
@@ -386,6 +393,8 @@ public:
     virtual ~Tree() {}
 
     void draw(int x, int y);
+    bool animate(int elapsed, Mission *obj);
+    bool handleDamage(MapObject::DamageInflictType *d);
 
 protected:
     int anim_, burning_anim_, damaged_anim_;

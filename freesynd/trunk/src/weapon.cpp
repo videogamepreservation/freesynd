@@ -391,7 +391,7 @@ uint8 WeaponInstance::inRange(ShootableMapObject ** t, PathNode * pn,
                     if (*t)
                         *t = NULL;
                     if (pn) {
-                        pn->setTileXYZ(nx, ny, nz);
+                        pn->setTileXYZ(nx, ny, (int)sz / 128);
                         pn->setOffXYZ((int)sx % 256, (int)sy % 256, (int)sz % 128);
                     }
                     return 4;
@@ -422,7 +422,7 @@ uint8 WeaponInstance::inRange(ShootableMapObject ** t, PathNode * pn,
     if (blockerObj) {
         if (setBlocker){
             uint8 block_mask = 0;
-            if (*t) {
+            if (t) {
                 *t = (ShootableMapObject *)blockerObj;
                 block_mask |= 2;
             }

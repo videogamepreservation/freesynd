@@ -614,10 +614,13 @@ Static *Static::loadInstance(uint8 * data, int m)
             s->setIsIgnored(true);
             break;
         case 0x16:
+            // TODO: set state if damaged trees exist
             s = new Tree(m, curanim, curanim + 1, curanim + 2);
             s->setSizeX(64);
             s->setSizeY(64);
             s->setSizeZ(128);
+            s->setHealth(1);
+            s->setStartHealth(1);
             break;
         case 0x19:
             // trash can / mail box
@@ -1039,12 +1042,50 @@ anim_(anim), burning_anim_(burningAnim), damaged_anim_(damagedAnim)
 {
     rcv_damage_def_ = MapObject::ddmg_StaticTree;
     major_type_ = MapObject::mt_Static;
+    state_ = Static::stttree_Healthy;
 }
 
 void Tree::draw(int x, int y)
 {
     addOffs(x, y);
-    g_App.gameSprites().drawFrame(anim_, frame_, x, y);
+    switch (state_) {
+        case Static::stttree_Healthy:
+            g_App.gameSprites().drawFrame(anim_, frame_, x, y);
+            break;
+        case Static::stttree_Burning:
+            g_App.gameSprites().drawFrame(burning_anim_, frame_, x, y);
+            break;
+        case Static::stttree_Damaged:
+            g_App.gameSprites().drawFrame(damaged_anim_, frame_, x, y);
+            break;
+    }
+}
+
+bool Tree::animate(int elapsed, Mission *obj) {
+
+    if (state_ == Static::stttree_Burning) {
+        if (!(leftTimeShowAnim(elapsed))) {
+            state_ = Static::stttree_Damaged;
+            frame_ = 0;
+            setFramesPerSec(8);
+            return true;
+        }
+    }
+
+    return MapObject::animate(elapsed);
+}
+
+bool Tree::handleDamage(MapObject::DamageInflictType *d) {
+    if (health_ <= 0 || rcv_damage_def_ == MapObject::ddmg_Invulnerable
+        || (d->dtype & rcv_damage_def_) == 0)
+        return false;
+
+    health_ -= d->dvalue;
+    if (health_ <= 0) {
+        state_ = Static::stttree_Burning;
+        setTimeShowAnim(5000);
+    }
+    return true;
 }
 
 WindowObj::WindowObj(int m, int anim, int breakingAnim, int damagedAnim):Static(m),

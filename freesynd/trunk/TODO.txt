@@ -21,8 +21,7 @@ that succesfully persuaded; weapon range modifier(?); accuracy modifier/property
  - pathfinding directional to be used for simulation of people walking around city
  - damage inflicted by vehicles/weapons, variate by type of damage and range
  - state of vehicles/people/objects should change correctly due to gameplay:
-   trees should start burning when hit and stop after some time,
-same for other objects - switch of state due to damage
+   switch of state due to damage
    damage type priority laser(highest)->explosion->burning->hit(lowest)
    when vehicle is destroyed, explosion should create damage to all in range
    change in behavior due to persuade
@@ -45,6 +44,6 @@ in original gameplay or are not present at all
 --
  - Implements dragging in SelectMenu to pass a weapon from an agent to another.
  - resolve shooting issues: targeting, range damage
- - Manage Qwerty / azerty keyboard. Today only qwerty keyboard are used.
+ - Manage Qwerty / azerty keyboard. Today only qwerty keyboard is used.
  - Add in select menu reload button for weapons
  - "no_sound"/"no_music" option for config file, or disabled in debug mode
