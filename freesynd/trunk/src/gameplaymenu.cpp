@@ -455,7 +455,7 @@ void GameplayMenu::handleRender()
     }
 #endif
     // this is used in combination with keys
-#if 1
+#if 0
     g_App.gameSprites().drawFrame(qanim, qframe, 320, 200);
 #endif
 #endif
@@ -971,7 +971,7 @@ bool GameplayMenu::handleUnknownKey(Key key, const int modKeys) {
         mission_->ped(0)->tileZ());
 #endif
 
-#if 1
+#if 0
     // used to see animations by number + frame
     if (key == KEY_a) {
         qanim--;

@@ -785,6 +785,7 @@ bool Door::animate(int elapsed, Mission *obj)
                         frame_ = 0;
                     } else if (p && p->health() > 0){
                         state_ = Static::sttdoor_Open;
+                        is_ignored_ = true;
                         found = true;
                         p->hold_on_.wayFree = 0;
                     }
@@ -908,6 +909,7 @@ bool LargeDoor::animate(int elapsed, Mission *obj)
                     frame_ = 0;
                 } else if (v){
                     state_ = Static::sttdoor_Open;
+                    is_ignored_ = true;
                     found = true;
                     v->hold_on_.wayFree = 0;
                 }
@@ -919,9 +921,11 @@ bool LargeDoor::animate(int elapsed, Mission *obj)
                     y + rel_inc,z,&mt,&si,true));
                 if (!v && state_ == Static::sttdoor_Open && (!found)) {
                     state_ = Static::sttdoor_Closing;
+                    is_ignored_ = false;
                     frame_ = 0;
                 } else if (v){
                     state_ = Static::sttdoor_Open;
+                    is_ignored_ = true;
                     found = true;
                     v->hold_on_.wayFree = 0;
                 }

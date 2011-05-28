@@ -205,30 +205,30 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
         target_ = NULL;
         if (selectedWeapon()) {
             // for the moment, assume peds can only be hostile towards the agents
-#if 0
-            for (int i = 0; i < 4; i++)
-                if (mission->ped(i)->health() > 0
-                        && selectedWeapon()->inRange(&(mission->ped(i)))) {
-                    if (mission->ped(i)->inVehicle())
-                        setTarget(mission->ped(i)->inVehicle());
+            for (int i = 0; i < 4; i++) {
+                PedInstance * pinst = mission->ped(i);
+                if (pinst->health() > 0
+                    && selectedWeapon()->inRange((ShootableMapObject **)(&pinst))) {
+                    if (pinst->inVehicle())
+                        setTarget(pinst->inVehicle());
                     else
-                        setTarget(mission->ped(i));
+                        setTarget(pinst);
 
                     clearDestination();
                     speed_ = 0;
                 }
-#endif
+            }
 
             if (target_ == NULL){
-                for (int i = 0; i < 4; i++)
-                    if (mission->ped(i)->health() > 0
-                            && inSightRange(mission->ped(i))) {
+                for (int i = 0; i < 4; i++) {
+                    PedInstance * pinst = mission->ped(i);
+                    if (pinst->health() > 0 && inSightRange(pinst)) {
                         if (dest_path_.size() == 0)
-                            setDestinationP(mission, mission->ped(i)->tileX(),
-                                           mission->ped(i)->tileY(),
-                                           mission->ped(i)->tileZ());
+                            setDestinationP(mission, pinst->tileX(),
+                                pinst->tileY(), pinst->tileZ());
                         break;
                     }
+                }
             }
         } else {
             if (pickup_weapon_ && pickup_weapon_->map() == -1)
