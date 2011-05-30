@@ -75,7 +75,8 @@ public:
             int w_ammo, int w_range, int w_shot, int w_rank, int w_anim,
             WeaponAnimIndex w_idx, snd::InGameSample w_sample,
             WeaponType w_type, MapObject::DamageType w_dmg_type,
-            int w_ammo_per_shot, int w_time_for_shot, int w_time_reload);
+            int w_ammo_per_shot, int w_time_for_shot, int w_time_reload,
+            unsigned int w_shot_property);
 
     const char *getName() { return name_.c_str(); }
 
@@ -108,6 +109,53 @@ public:
     bool wasSubmittedToSearch() { return submittedToSearch_; }
     void submitToSearch() { submittedToSearch_ = true; }
 
+    typedef enum {
+        spe_None = 0,
+        // can shoot only at owner
+        spe_Owner = 1,
+        spe_PointToPoint = 2,
+        spe_PointToManyPoints = 4,
+        spe_TargetReachInstant = 8,
+        spe_TargetReachNeedTime = 16,
+        spe_RangeDamageOnReach = 32,
+        // ignore accuracy
+        spe_RandomManyPoints = 64,
+        spe_UsesAmmo = 128,
+        spe_ChangeAttribute = 256,
+        spe_SelfDestruction = 512,
+    }ShotPropertyEnum;
+
+    typedef enum {
+        wspt_None = spe_None,
+        wspt_Persuadatron = (spe_PointToPoint | spe_TargetReachInstant),
+        wspt_Pistol =
+            (spe_PointToPoint | spe_TargetReachInstant | spe_UsesAmmo),
+        wspt_GaussGun =
+            (spe_PointToPoint | spe_TargetReachNeedTime | spe_UsesAmmo),
+        wspt_Shotgun =
+            (spe_PointToManyPoints | spe_TargetReachInstant | spe_UsesAmmo),
+        wspt_Uzi = (spe_PointToPoint | spe_TargetReachInstant | spe_UsesAmmo),
+        wspt_Minigun =
+            (spe_PointToManyPoints | spe_TargetReachInstant | spe_UsesAmmo),
+        wspt_Laser =
+            (spe_PointToPoint | spe_TargetReachInstant
+            | spe_RangeDamageOnReach | spe_UsesAmmo),
+        wspt_Flamer =
+            (spe_PointToPoint | spe_TargetReachInstant | spe_UsesAmmo),
+        wspt_LongRange =
+            (spe_PointToPoint | spe_TargetReachInstant | spe_UsesAmmo),
+        wspt_Scanner = (spe_Owner | spe_ChangeAttribute),
+        wspt_MediKit = (spe_Owner | spe_UsesAmmo),
+        wspt_TimeBomb =
+            (spe_PointToManyPoints | spe_RangeDamageOnReach
+            | spe_SelfDestruction),
+        wspt_AccessCard = (spe_Owner | spe_ChangeAttribute),
+        wspt_EnergyShield =
+            (spe_Owner | spe_ChangeAttribute | spe_UsesAmmo),
+    }WeaponShotPropertyType;
+
+    unsigned int shotProperty() { return shot_property_; }
+
 protected:
     std::string name_;
     int small_icon_, big_icon_;
@@ -125,6 +173,7 @@ protected:
     int time_reload_;
     /*! True when weapon was found and submit to search manager.*/
     bool submittedToSearch_;
+    unsigned int shot_property_;
 };
 
 /*!

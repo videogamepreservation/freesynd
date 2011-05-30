@@ -192,11 +192,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
     Weapon::WeaponAnimIndex weapon_idx =
         selectedWeapon() ? selectedWeapon()->index() : Weapon::Unarmed_Anim;
 
-    if (health_ < 0) {
-        if (numWeapons())
-            dropAllWeapons();
-
-    } else if (isHostile()) {
+    if (health_ > 0 && isHostile()) {
         // find a weapon with ammo
         // TODO: weapon should not be drawn until enemy is in sight
         if (selectedWeapon() == NULL)
@@ -320,10 +316,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
         case PedInstance::DieAnim:
             if (frame_ <= ped_->lastDieFrame())
                 return updated;
-            health_ = -1;
             setDrawnAnim(PedInstance::DeadAnim);
-            if (numWeapons())
-                dropAllWeapons();
             return true;
             break;
         case PedInstance::DeadAnim:
@@ -3162,11 +3155,15 @@ bool PedInstance::handleDamage(MapObject::DamageInflictType *d) {
     if (d->ddir != -1) {
         dir_ = (d->ddir + 128) % 256;
     }
-    if (health_ <= 0){
-        health_ = 0;
-        target_ = 0;
+    if (health_ <= 0) {
+        if (numWeapons())
+            dropAllWeapons();
+        health_ = -1;
         speed_ = 0;
         clearDestination();
+        putdown_weapon_ = NULL;
+        pickup_weapon_ = NULL;
+        target_ = NULL;
         switch ((unsigned int)d->dtype) {
             case MapObject::dmg_Bullet:
                 setDrawnAnim(PedInstance::DieAnim);
@@ -3202,7 +3199,7 @@ void PedInstance::destroyAllWeapons() {
     while (weapons_.size()) {
         WeaponInstance * w = removeWeapon(0);
         w->setMap(-1);
-        w->setOwner(0);
+        w->setOwner(NULL);
     }
-    selected_weapon_ = 0;
+    selected_weapon_ = -1;
 }

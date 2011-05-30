@@ -302,6 +302,7 @@ protected:
         Firing_Stop
     } firing_;
 
+//--------------------------------------------------------------unused for now
     // 0 - not defined, 1b - stand, 2b - walking, 3b - hit, 4b - firing,
     // 5b - following, 6b - pickup/putdown, 7b - burning, 8b - in car
     unsigned int action_state_;
@@ -328,6 +329,8 @@ protected:
     // someone who has took something on controlled surface, or attacked one of
     // guards or etc.
     unsigned char peds_group_;
+//--------------------------------------------------------------unused for now
+
     AnimationDrawn drawn_anim_;
     ShootableMapObject *target_;
     int sight_range_;

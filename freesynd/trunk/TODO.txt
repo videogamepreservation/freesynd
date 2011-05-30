@@ -36,12 +36,7 @@ of event/state:
  - map drawing still buggy
  - set weapons for enemy agents, because in gamedata weapons are not the same as
 in original gameplay or are not present at all
--- These should be implemented in folowing order
- - add LUA support;
- - write simple A.L.;
- - write mission editor;
- - create new mission files using editor, based on original game mission files.
---
+ - write mission editor, create new mission files using editor, based on original game mission files.
  - Implements dragging in SelectMenu to pass a weapon from an agent to another.
  - resolve shooting issues: targeting, range damage
  - Manage Qwerty / azerty keyboard. Today only qwerty keyboard is used.

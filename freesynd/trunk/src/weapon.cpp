@@ -35,7 +35,8 @@ Weapon::Weapon(const char *w_name, int smallIcon, int bigIcon, int w_cost,
     int w_ammo, int w_range, int w_shot, int w_rank, int w_anim,
     Weapon::WeaponAnimIndex w_idx, snd::InGameSample w_sample,
     WeaponType w_type, MapObject::DamageType w_dmg_type,
-    int w_ammo_per_shot, int w_time_for_shot, int w_time_reload) {
+    int w_ammo_per_shot, int w_time_for_shot, int w_time_reload,
+    unsigned int w_shot_property) {
 
     name_ = w_name;
     small_icon_ = smallIcon;
@@ -54,6 +55,7 @@ Weapon::Weapon(const char *w_name, int smallIcon, int bigIcon, int w_cost,
     time_for_shot_ = w_time_for_shot;
     time_reload_ = w_time_reload;
     submittedToSearch_ = false;
+    shot_property_ = w_shot_property;
 }
 
 void Weapon::drawSmallIcon(int x, int y) {
@@ -105,17 +107,23 @@ WeaponInstance::WeaponInstance(Weapon * w) : ShootableMapObject(-1)
 
 bool WeaponInstance::animate(int elapsed) {
     if (owner_) {
-        if (((PedInstance *)owner_)->selectedWeapon()
-            && ((PedInstance *)owner_)->selectedWeapon() == this)
-        {
-            if (pWeaponClass_->getWeaponType() == Weapon::EnergyShield) {
-                int ammoused = getShots(elapsed, pWeaponClass_->timeForShot(),
-                    pWeaponClass_->timeReload()) * pWeaponClass_->ammoPerShot();
+        if (pWeaponClass_->getWeaponType() == Weapon::EnergyShield) {
+            int ammoused = getShots(elapsed, pWeaponClass_->timeForShot(),
+                pWeaponClass_->timeReload()) * pWeaponClass_->ammoPerShot();
+            if (((PedInstance *)owner_)->selectedWeapon()
+                && ((PedInstance *)owner_)->selectedWeapon() == this)
+            {
                 if (ammoused >= ammo_remaining_) {
                     ammo_remaining_ = 0;
                     ((PedInstance *)owner_)->selectNextWeapon();
                 } else
                     ammo_remaining_ -= ammoused;
+            } else if (ammo_remaining_ != 0
+                && ammo_remaining_ != pWeaponClass_->ammo())
+            {
+                ammo_remaining_ += ammoused;
+                if (ammo_remaining_ > pWeaponClass_->ammo())
+                    ammo_remaining_ = pWeaponClass_->ammo();
             }
         }
     } else if (weapon_used_time_ != 0) {
@@ -236,25 +244,17 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
                 smp->handleDamage(&d);
                 SFXObject *so = new SFXObject(g_Session.getMission()->map(),
                     SFXObject::sfxt_BulletHit);
-                so->setTileX(smp->tileX());
-                so->setTileY(smp->tileY());
-                so->setTileZ(smp->tileZ() + 1);
+                so->setPosition(smp->tileX(), smp->tileY(), smp->tileZ() + 1,
+                    smp->offX(), smp->offY(), smp->offZ());
                 so->setVisZ(smp->visZ() + 1);
-                so->setOffX(smp->offX());
-                so->setOffY(smp->offY());
-                so->setOffZ(smp->offZ());
                 g_Session.getMission()->addSfxObject(so);
             }
         } else if ((has_blocker & 4) != 0) {
             SFXObject *so = new SFXObject(g_Session.getMission()->map(),
                 SFXObject::sfxt_BulletHit);
-            so->setTileX(pn.tileX());
-            so->setTileY(pn.tileY());
-            so->setTileZ(pn.tileZ());
+            so->setPosition(pn.tileX(), pn.tileY(), pn.tileZ(), pn.offX(),
+                pn.offY(), pn.offZ());
             so->setVisZ(pn.tileZ());
-            so->setOffX(pn.offX());
-            so->setOffY(pn.offY());
-            so->setOffZ(pn.offZ());
             g_Session.getMission()->addSfxObject(so);
         }
     } else {
@@ -262,24 +262,16 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
             tobj->handleDamage(&d);
             SFXObject *so = new SFXObject(g_Session.getMission()->map(),
                 SFXObject::sfxt_BulletHit);
-            so->setTileX(tobj->tileX());
-            so->setTileY(tobj->tileY());
-            so->setTileZ(tobj->tileZ() + 1);
+            so->setPosition(tobj->tileX(), tobj->tileY(), tobj->tileZ() + 1,
+                tobj->offX(), tobj->offY(), tobj->offZ());
             so->setVisZ(tobj->visZ() + 1);
-            so->setOffX(tobj->offX());
-            so->setOffY(tobj->offY());
-            so->setOffZ(tobj->offZ());
             g_Session.getMission()->addSfxObject(so);
         } else if (tp) {
             SFXObject *so = new SFXObject(g_Session.getMission()->map(),
                 SFXObject::sfxt_BulletHit);
-            so->setTileX(tp->tileX());
-            so->setTileY(tp->tileY());
-            so->setTileZ(tp->tileZ());
+            so->setPosition(tp->tileX(), tp->tileY(), tp->tileZ(), tp->offX(),
+                tp->offY(), tp->offZ());
             so->setVisZ(tp->tileZ());
-            so->setOffX(tp->offX());
-            so->setOffY(tp->offY());
-            so->setOffZ(tp->offZ());
             g_Session.getMission()->addSfxObject(so);
         }
     }
