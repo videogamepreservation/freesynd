@@ -900,6 +900,7 @@ void Mission::end()
         }
     for (unsigned int i = 0; i < sfx_objects_.size(); i++)
         delete sfx_objects_[i];
+    sfx_objects_.clear();
 }
 
 void Mission::addWeapon(WeaponInstance * w)

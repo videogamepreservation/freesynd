@@ -624,7 +624,12 @@ void App::run(const char *dir, int start_mission) {
     while (running_) {
         system_->handleEvents();
         int curtick = SDL_GetTicks();
-        menus_.handleTick(curtick - lasttick);
+        int diff_ticks = curtick - lasttick;
+        if (diff_ticks < 30) {
+            SDL_Delay(30 - diff_ticks);
+            continue;
+        }
+        menus_.handleTick(diff_ticks);
         menus_.renderMenu();
         lasttick = curtick;
         system_->updateScreen();
