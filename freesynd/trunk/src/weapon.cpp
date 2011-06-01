@@ -147,8 +147,6 @@ void WeaponInstance::draw(int x, int y) {
 bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
     int elapsed, bool ignoreBlocker)
 {
-    // TODO: "tp" will be used later for calculating vector when target
-    // is not object(floor)
 
     if (ammo_remaining_ == 0)
         return false;
@@ -187,11 +185,13 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
     int ammoused = 1;
     if (pWeaponClass_->ammo() > 0) {
         ammoused = shots * pWeaponClass_->ammoPerShot();
-        if (ammoused > ammo_remaining_) {
-            ammoused = ammo_remaining_;
-            ammo_remaining_ = 0;
-        } else
-            ammo_remaining_ -= ammoused;
+        if ((pWeaponClass_->shotProperty()) & Weapon::spe_UsesAmmo) {
+            if (ammoused > ammo_remaining_) {
+                ammoused = ammo_remaining_;
+                ammo_remaining_ = 0;
+            } else
+                ammo_remaining_ -= ammoused;
+        }
     }
     int totaldmg = ammoused * pWeaponClass_->damagePerShot();
     d.dvalue = totaldmg;
@@ -239,7 +239,14 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
         }
     }
     if ((has_blocker & 6) != 0) {
-        if ((has_blocker & 2) != 0) {
+        if ((has_blocker & 4) != 0) {
+            SFXObject *so = new SFXObject(g_Session.getMission()->map(),
+                SFXObject::sfxt_BulletHit);
+            so->setPosition(pn.tileX(), pn.tileY(), pn.tileZ(), pn.offX(),
+                pn.offY(), pn.offZ());
+            so->setVisZ(pn.tileZ());
+            g_Session.getMission()->addSfxObject(so);
+        } else if ((has_blocker & 2) != 0) {
             if (smp) {
                 smp->handleDamage(&d);
                 SFXObject *so = new SFXObject(g_Session.getMission()->map(),
@@ -249,13 +256,6 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
                 so->setVisZ(smp->visZ() + 1);
                 g_Session.getMission()->addSfxObject(so);
             }
-        } else if ((has_blocker & 4) != 0) {
-            SFXObject *so = new SFXObject(g_Session.getMission()->map(),
-                SFXObject::sfxt_BulletHit);
-            so->setPosition(pn.tileX(), pn.tileY(), pn.tileZ(), pn.offX(),
-                pn.offY(), pn.offZ());
-            so->setVisZ(pn.tileZ());
-            g_Session.getMission()->addSfxObject(so);
         }
     } else {
         if (tobj) {
@@ -297,29 +297,30 @@ uint8 WeaponInstance::inRange(ShootableMapObject ** t, PathNode * pn,
 
     double d = 0;
     if(owner_) {
-        if (*t)
+        if (t && *t)
             d = owner_->distanceTo(*t);
         else {
             toDefineXYZ txyz = {pn->tileX() * 256 + pn->offX(),
                 pn->tileY() * 256 + pn->offY(),
-                pn->tileZ() * 256 + pn->offZ()};
+                pn->tileZ() * 128 + pn->offZ()};
             d = owner_->distanceToPos(&txyz);
         }
     } else {
-        if (*t)
+        if (t && *t)
             d = distanceTo(*t);
         else {
             toDefineXYZ txyz = {pn->tileX() * 256 + pn->offX(),
                 pn->tileY() * 256 + pn->offY(),
-                pn->tileZ() * 256 + pn->offZ()};
+                pn->tileZ() * 128 + pn->offZ()};
             d = distanceToPos(&txyz);
         }
     }
 
+    uint8 block_mask = 1;
+
     if (d == 0)
-        return 1;
-    if (d >= maxr)
-        return 0;
+        return block_mask;
+
 
     Mission *m = g_Session.getMission();
 
@@ -344,7 +345,7 @@ uint8 WeaponInstance::inRange(ShootableMapObject ** t, PathNode * pn,
     int tx = 0;
     int ty = 0;
     int tz = 0;
-    if (*t) {
+    if (t && *t) {
         tx = (*t)->tileX() * 256 + (*t)->offX();
         ty = (*t)->tileY() * 256 + (*t)->offY();
         tz = ((*t)->visZ() + 1) * 128 + (*t)->offZ();
@@ -354,6 +355,25 @@ uint8 WeaponInstance::inRange(ShootableMapObject ** t, PathNode * pn,
         ty = pn->tileY() * 256 + pn->offY();
         tz = pn->tileZ() * 128 + pn->offZ();
         assert(pn->tileZ() < m->mmax_z_);
+    }
+
+    if (d >= maxr) {
+        block_mask = 0;
+        if (pn == NULL)
+            return block_mask;
+        if (t && *t) {
+            tz -= 128;
+            *t = NULL;
+        }
+        double dist_k = (double)maxr / d;
+        tx = cx + (int)((tx - cx) * dist_k);
+        ty = cy + (int)((ty - cy) * dist_k);
+        tz = cz + (int)((tz - cz) * dist_k);
+        if (setBlocker) {
+            pn->setTileXYZ(tx / 256, ty / 256, tz / 128);
+            pn->setOffXYZ(tx % 256, ty % 256, tz % 128);
+            block_mask = 4;
+        }
     }
 
     // NOTE: these values are less then 1, if they are incremented time
@@ -368,8 +388,9 @@ uint8 WeaponInstance::inRange(ShootableMapObject ** t, PathNode * pn,
     int oldz = cz / 128;
     if (cz % 128 != 0)
         oldz++;
+    double dist_close = d;
 
-    while (fabs(sx - tx) > 16.0f || fabs(sy - ty) > 16.0f || fabs(sz - tz) > 16.0f) {
+    while (dist_close > 16.0f) {
         int nx = (int)sx / 256;
         int ny = (int)sy / 256;
         int nz = (int)sz / 128;
@@ -380,15 +401,20 @@ uint8 WeaponInstance::inRange(ShootableMapObject ** t, PathNode * pn,
                 + nz * m->mmax_m_xy].twd;
             if (!(twd == 0x00 || twd == 0x0C || twd == 0x10)) {
                 if (setBlocker) {
-                    if (*t)
-                        *t = NULL;
                     if (pn) {
-                        pn->setTileXYZ(nx, ny, (int)sz / 128);
-                        pn->setOffXYZ((int)sx % 256, (int)sy % 256, (int)sz % 128);
+                        sx -= inc_x;
+                        sy -= inc_y;
+                        sz -= inc_z;
+                        pn->setTileXYZ((int)sx / 256, (int)sy / 256,
+                            (int)sz / 128);
+                        pn->setOffXYZ((int)sx % 256, (int)sy % 256,
+                            (int)sz % 128);
                     }
-                    return 4;
+                    block_mask = 4;
+                    break;
                 }
-                return 0;
+                block_mask = 0;
+                break;
             }
             oldx = nx;
             oldy = ny;
@@ -397,6 +423,10 @@ uint8 WeaponInstance::inRange(ShootableMapObject ** t, PathNode * pn,
         sx += inc_x;
         sy += inc_y;
         sz += inc_z;
+        double dsx = sx - (double)tx;
+        double dsy = sy - (double)ty;
+        double dsz = sz - (double)tz;
+        dist_close = sqrt(dsx * dsx + dsy * dsy + dsz * dsz);
     }
 
     toDefineXYZ startXYZ = {cx, cy, cz};
@@ -404,36 +434,49 @@ uint8 WeaponInstance::inRange(ShootableMapObject ** t, PathNode * pn,
     MapObject *blockerObj = NULL;
     if (owner_)
         owner_->setIsIgnored(true);
-    if (*t)
+    if (t && *t)
         (*t)->setIsIgnored(true);
     m->blockerExists(&startXYZ, &endXYZ, d, &blockerObj);
     if (owner_)
         owner_->setIsIgnored();
-    if (*t)
+    if (t && *t)
         (*t)->setIsIgnored();
+
     if (blockerObj) {
+        if (block_mask == 1)
+            block_mask = 0;
         if (setBlocker){
-            uint8 block_mask = 0;
+            if (pn) {
+                if (block_mask == 4) {
+                    int dcx = cx - startXYZ.x;
+                    int dcy = cy - startXYZ.y;
+                    int dcz = cz - startXYZ.z;
+                    double dist_blocker =
+                        sqrt((double) (dcx * dcx + dcy * dcy + dcz * dcz));
+                    dcx = cx - (int)sx;
+                    dcy = cy - (int)sy;
+                    dcz = cz - (int)sz;
+                    if (dist_blocker
+                        < sqrt((double) (dcx * dcx + dcy * dcy + dcz * dcz)))
+                    {
+                        block_mask = 0;
+                    }
+                }
+                if (block_mask == 0) {
+                    pn->setTileXYZ(startXYZ.x / 256, startXYZ.y / 256,
+                        startXYZ.z / 128);
+                    pn->setOffXYZ(startXYZ.x % 256, startXYZ.y % 256,
+                        startXYZ.z % 128);
+                }
+            }
             if (t) {
                 *t = (ShootableMapObject *)blockerObj;
                 block_mask |= 2;
             }
-            if (pn) {
-                pn->setTileXYZ(startXYZ.x / 256, startXYZ.y / 256,
-                    startXYZ.z / 128);
-                pn->setOffXYZ(startXYZ.x % 256, startXYZ.y % 256,
-                    startXYZ.z % 128);
-                block_mask |= 4;
-            }
-            return block_mask;
         }
-        return 0;
-    } else
-        if (setBlocker)
-            if (*t)
-                *t = NULL;
+    }
 
-    return 1;
+    return block_mask;
 }
 
 int WeaponInstance::getShots(int elapsed, int tForReload, int tForShot) {

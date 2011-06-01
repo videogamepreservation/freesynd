@@ -204,7 +204,8 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
             for (int i = 0; i < 4; i++) {
                 PedInstance * pinst = mission->ped(i);
                 if (pinst->health() > 0
-                    && selectedWeapon()->inRange((ShootableMapObject **)(&pinst))) {
+                    && selectedWeapon()->inRange(
+                        (ShootableMapObject **)(&pinst)) == 1) {
                     if (pinst->inVehicle())
                         setTarget(pinst->inVehicle());
                     else
@@ -3156,8 +3157,6 @@ bool PedInstance::handleDamage(MapObject::DamageInflictType *d) {
         dir_ = (d->ddir + 128) % 256;
     }
     if (health_ <= 0) {
-        if (numWeapons())
-            dropAllWeapons();
         health_ = -1;
         speed_ = 0;
         clearDestination();
@@ -3188,6 +3187,9 @@ bool PedInstance::handleDamage(MapObject::DamageInflictType *d) {
                 setDrawnAnim(PedInstance::HitAnim);
                 break;
         }
+        if (numWeapons())
+            dropAllWeapons();
+        is_ignored_ = true;
     } else {
         // TODO: agent sometimes can survive explosion, they need to walk burning?
         setDrawnAnim(PedInstance::HitAnim);
