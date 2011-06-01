@@ -30,6 +30,7 @@
 #include "weaponholder.h"
 #include <string>
 #include <vector>
+#include <fstream>
 
 class Mod;
 class WeaponInstance;
@@ -39,7 +40,7 @@ class WeaponInstance;
  */
 class Agent : public WeaponHolder {
 public:
-    Agent(int id, const char *agent_name, bool male);
+    Agent(const char *agent_name, bool male);
     ~Agent();
 
     int getId() { return id_;}
@@ -72,7 +73,14 @@ public:
 
     void removeAllWeapons();
 
+    //! Save instance to file
+    bool saveToFile(std::ofstream &file);
+    //! Load instance from file
+    bool loadFromFile(std::ifstream &infile);
+
 protected:
+    /*! A counter to have unique IDs.*/
+    static int agentCnt;
     /*! A unique id for the instance of Agent.*/
     int id_;
     std::string name_;

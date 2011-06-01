@@ -32,15 +32,17 @@
 #include "weapon.h"
 #include "mod.h"
 
+int Agent::agentCnt = 1;
+
 /*!
  * Constructs a new agent.
  * \param id Object id.
  * \param agent_name The agent name.
  * \param male True means the agent is a male.
  */
-Agent::Agent(int id, const char *agent_name, bool male) : name_(agent_name),
+Agent::Agent(const char *agent_name, bool male) : name_(agent_name),
 male_(male), active_(true), health_(255) {
-    id_ = id;
+    id_ = agentCnt++;
     for (int i = 0; i < 6; i++)
         slots_[i] = NULL;
 }
@@ -77,4 +79,54 @@ void Agent::addMod(Mod *pNewMod) {
     if (pNewMod) {
         slots_[pNewMod->getType()] = pNewMod;
     }
+}
+
+bool Agent::saveToFile(std::ofstream &file) {
+    // id
+    file.write(reinterpret_cast<const char*>(&id_), sizeof(int));
+    // Agent name : 15 caracters max
+    char buf[15];
+    memset(buf, '\0', 15);
+    fs_strcpy(buf, 15, name_.c_str());
+    file.write(buf, 15);
+    // gender : male = 1, female = 0
+    unsigned char uchar = male_ ? 1 : 0;
+    file.write(reinterpret_cast<const char*>(&uchar), sizeof(unsigned char));
+    // active : true = 1, false = 0
+    uchar = active_ ? 1 : 0;
+    file.write(reinterpret_cast<const char*>(&uchar), sizeof(unsigned char));
+    // Health
+    file.write(reinterpret_cast<const char*>(&health_), sizeof(int));
+    // Mods
+    int nb = 0;
+    for (int i = 0; i < 6; i++) {
+        if (slots_[i]) {
+            nb++;
+        }
+    }
+    file.write(reinterpret_cast<const char*>(&nb), sizeof(int));
+    for (int mIndex = 0; mIndex < 6; mIndex++) {
+        Mod *pMod = slot(mIndex);
+        if (pMod) {
+            int ival = pMod->getType();
+            file.write(reinterpret_cast<const char*>(&ival), sizeof(int));
+            ival = pMod->getVersion();
+            file.write(reinterpret_cast<const char*>(&ival), sizeof(int));
+        }
+    }
+    // Weapons
+    nb = numWeapons();
+    file.write(reinterpret_cast<const char*>(&nb), sizeof(int));
+    for (int wIndex = 0; wIndex < numWeapons(); wIndex++) {
+        WeaponInstance *pWinst = weapon(wIndex);
+        int ival = pWinst->getWeaponType();
+        file.write(reinterpret_cast<const char*>(&ival), sizeof(int));
+        ival = pWinst->ammo();
+        file.write(reinterpret_cast<const char*>(&ival), sizeof(int));
+    }
+    return true;
+}
+
+bool Agent::loadFromFile(std::ifstream &infile) {
+    return false;
 }

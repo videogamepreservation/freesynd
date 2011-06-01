@@ -27,6 +27,8 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <ctype.h>
+#include <iostream>
+#include <fstream>
 #include <sstream>
 
 #ifdef _WIN32
@@ -70,6 +72,25 @@ const char *File::fileFullPath(const char *filename, bool uppercase) {
     }
 
     return buf;
+}
+
+void File::getFullPathForSaveSlot(int slot, std::string &path) {
+    path.erase();
+
+    path.append(homePath_).append("save");
+#ifdef _WIN32
+    path.append("\\");
+#else
+    path.append("/");
+#endif
+
+    std::ostringstream out;
+    if (slot < 10) {
+        out << "0";
+    }
+    out << slot << ".fsg";
+
+    path.append(out.str());
 }
 
 /*!
@@ -161,6 +182,10 @@ uint8 *File::loadFile(const char *filename, int &filesize) {
     return data;
 }
 
+/*!
+ * Returns the list of names to display in load/save menu.
+ * \param files 
+ */
 void File::getGameSavedNames(std::vector<std::string> &files) {
     std::string savePath(homePath_);
     savePath.append("save");
@@ -183,14 +208,29 @@ void File::getGameSavedNames(std::vector<std::string> &files) {
     hSearch = FindFirstFile(savePath.c_str(), &File);
     if (hSearch != INVALID_HANDLE_VALUE) {
         do {
-            std::string str(File.cFileName);
-            size_t extPos = str.find_last_of('.');
-            std::string name = str.substr(0, extPos);
+            std::string filename(File.cFileName);
+            size_t extPos = filename.find_last_of('.');
+            std::string name = filename.substr(0, extPos);
             std::istringstream iss( name );
             int index;
             iss >> index;
             if (index < 10) {
-                files[index].assign(name);
+                std::ifstream infile;
+                char buf[25];
+                getFullPathForSaveSlot(index, filename);
+                infile.open(filename.c_str(), std::ios::in | std::ios::binary);
+
+                if (infile.is_open()) {
+                    // Read version first
+                    unsigned char vMaj = 1, vMin = 0;
+                    infile.read(reinterpret_cast<char*>(&vMaj), sizeof(unsigned char));
+                    infile.read(reinterpret_cast<char*>(&vMin), sizeof(unsigned char));
+                    // Read slot name
+                    infile.read(buf, 25);
+                    files[index].assign(buf);
+
+                    infile.close();
+                }
             }
         } while (FindNextFile(hSearch, &File));
     }

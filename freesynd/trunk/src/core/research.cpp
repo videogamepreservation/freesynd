@@ -22,7 +22,7 @@
 
 #include "research.h"
 
-int Research::researchCnt = 0;
+int Research::researchCnt = 1;
 
 /*! This is a list of multiplicator to compute current funding 
  * based on the minimun funding.
@@ -186,4 +186,59 @@ void Research::improve(Weapon *pWeapon) {
             status_ = FINISHED;
         }
     }
+}
+
+/*!
+ * Saves Research structure to the given file.
+ */
+bool Research::saveToFile(std::ofstream &file) {
+    // id
+    file.write(reinterpret_cast<const char*>(&id_), sizeof(int));
+
+    // Research name : 15 caracters max
+    char buf[15];
+    memset(buf, '\0', 15);
+    fs_strcpy(buf, 15, name_.c_str()); 
+    file.write(buf, 15);
+    
+    if (type_ == EQUIPS) {
+        // Weapons specific infos
+        int ival = weapon_;
+        file.write(reinterpret_cast<const char*>(&ival), sizeof(int));
+    } else {
+        // Mods specific infos
+        int ival = modType_;
+        file.write(reinterpret_cast<const char*>(&ival), sizeof(int));
+        ival = modVersion_;
+        file.write(reinterpret_cast<const char*>(&ival), sizeof(int));
+    }
+            
+    // Current funding
+    file.write(reinterpret_cast<const char*>(&currFunding_), sizeof(int));
+    // Current status
+    int status = status_;
+    file.write(reinterpret_cast<const char*>(&status), sizeof(int));
+    // Coeff index
+    file.write(reinterpret_cast<const char*>(&coeffInd_), sizeof(short));
+        
+    // Progression points
+    unsigned int ival = progressList_.size();
+    file.write(reinterpret_cast<const char*>(&ival), sizeof(unsigned int));
+            
+    for (std::list < ProgressPoint >::iterator it = progressList_.begin(); 
+            it != progressList_.end(); it++) {
+        ProgressPoint pt = *it;
+        float pct = pt.percentage;
+        file.write(reinterpret_cast<const char*>(&pct), sizeof(float));
+        short hours = pt.hours;
+        file.write(reinterpret_cast<const char*>(&pct), sizeof(short));
+        short coef = pt.coeffId;
+        file.write(reinterpret_cast<const char*>(&coef), sizeof(short));
+    }
+
+    return true;
+}
+
+bool Research::loadFromFile(std::ifstream &infile, EResType type) {
+    return false;
 }

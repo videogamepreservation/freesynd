@@ -28,6 +28,7 @@
 #define WEAPONMANAGER_H
 
 #include <vector>
+#include <fstream>
 
 #include "common.h"
 #include "weapon.h"
@@ -56,6 +57,11 @@ public:
     Weapon *getWeapon(Weapon::WeaponType wt);
     //! Returns true is the given weapon is available for agents
     bool isAvailable(Weapon *pWeapon);
+
+    //! Save instance to file
+    bool saveToFile(std::ofstream &file);
+    //! Load instance from file
+    bool loadFromFile(std::ifstream &infile);
 
 protected:
     //! Loads the weapon from file

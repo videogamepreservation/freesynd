@@ -232,3 +232,51 @@ Mod *ModManager::loadMod(Mod::EModType mt, Mod::EModVersion ver) {
 
     return NULL;
 }
+
+bool ModManager::saveToFile(std::ofstream &file) {
+    unsigned int isize = mods_.size();
+    file.write(reinterpret_cast<const char*>(&isize), sizeof(unsigned int));
+
+    for(unsigned int i=0; i<isize; i++) {
+        Mod *pMod = mods_.get(i);
+        int type = pMod->getType();
+        file.write(reinterpret_cast<const char*>(&type), sizeof(int));
+        int ver = pMod->getVersion();
+        file.write(reinterpret_cast<const char*>(&ver), sizeof(int));
+    }
+    return true;
+}
+
+bool ModManager::loadFromFile(std::ifstream &infile) {
+
+    int nbMods = 0;
+    infile.read(reinterpret_cast<char*>(&nbMods), sizeof(int));
+
+    for (int i=0;i<nbMods; i++) {
+        int type = 0;
+        Mod::EModType mt = Mod::Unknown;
+        Mod::EModVersion mv = Mod::MOD_V1;
+        infile.read(reinterpret_cast<char*>(&type), sizeof(int));
+        switch (type) {
+            case 0: mt = Mod::MOD_LEGS;break;
+            case 1: mt = Mod::MOD_ARMS;break;
+            case 2: mt = Mod::MOD_CHEST;break;
+            case 3: mt = Mod::MOD_HEART;break;
+            case 4: mt = Mod::MOD_EYES;break;
+            case 5: mt = Mod::MOD_BRAIN;break;
+            default: mt = Mod::Unknown;
+        }
+
+        int ver = 0;
+        infile.read(reinterpret_cast<char*>(&ver), sizeof(int));
+        switch (ver) {
+            case 0: mv = Mod::MOD_V1;break;
+            case 1: mv = Mod::MOD_V2;break;
+            case 2: mv = Mod::MOD_V3;break;
+            default: mv = Mod::MOD_V1;
+        }
+        // enable weapon
+        enableMod(mt, mv);
+    }
+    return true;
+}

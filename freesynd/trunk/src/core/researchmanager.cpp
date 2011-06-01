@@ -329,3 +329,33 @@ bool ResearchManager::handleWeaponDiscovered(Weapon *pWeapon) {
     
     return false;
 }
+
+bool ResearchManager::saveToFile(std::ofstream &file) {
+    // Search on mods
+    unsigned int isize = availableModsSearch_.size();
+    file.write(reinterpret_cast<const char*>(&isize), sizeof(unsigned int));
+
+    for (unsigned int iMod=0; iMod < isize; iMod++) {
+        Research *pRes = availableModsSearch_.get(iMod);
+        pRes->saveToFile(file);
+    }
+
+    // Search on weapons
+    isize = availableWeaponsSearch_.size();
+    file.write(reinterpret_cast<const char*>(&isize), sizeof(unsigned int));
+
+    for (unsigned int iWeap=0; iWeap < isize; iWeap++) {
+        Research *pRes = availableWeaponsSearch_.get(iWeap);
+        pRes->saveToFile(file);
+    }
+
+    // Write the current search
+    int ival = pCurrResearch_ ? pCurrResearch_->getId() : 0;
+    file.write(reinterpret_cast<const char*>(&isize), sizeof(int));
+
+    return true;
+}
+
+bool ResearchManager::loadFromFile(std::ifstream &infile) {
+    return false;
+}

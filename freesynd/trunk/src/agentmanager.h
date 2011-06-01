@@ -53,6 +53,11 @@ public:
 
     SequenceModel * getAgents() { return &agents_; }
 
+    //! Save instance to file
+    bool saveToFile(std::ofstream &file);
+    //! Load instance from file
+    bool loadFromFile(std::ifstream &infile);
+
 protected:
     /*!
      * All available agents.

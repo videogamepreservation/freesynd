@@ -25,6 +25,8 @@
 #ifndef MODMANAGER_H
 #define MODMANAGER_H
 
+#include <fstream>
+
 #include "common.h"
 #include "mod.h"
 #include "utils/seqmodel.h"
@@ -52,6 +54,11 @@ public:
     void enableMod(Mod::EModType mt, Mod::EModVersion ver);
     //! Returns the list of currently available weapons
     SequenceModel * getAvalaibleMods() { return &mods_; }
+
+    //! Save instance to file
+    bool saveToFile(std::ofstream &file);
+    //! Load instance from file
+    bool loadFromFile(std::ifstream &infile);
 
 protected:
     //! Loads the mod from file

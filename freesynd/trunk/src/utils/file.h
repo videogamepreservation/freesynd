@@ -43,6 +43,8 @@ public:
     static FILE *loadTextFile(const char *filename);
     //! Returns the full path of the given resource using the current root path.
     static const char *fileFullPath(const char *filename, bool uppercase);
+    //! Sets the filename fullpath for the given slot (from 0 to 9)
+    static void getFullPathForSaveSlot(int slot, std::string &path);
     //! Returns the list of game saved names
     static void getGameSavedNames(std::vector<std::string> &files);
 

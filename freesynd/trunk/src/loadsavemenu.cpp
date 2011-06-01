@@ -31,7 +31,7 @@
 
 const int LoadSaveMenu::X_ORIGIN = 165;
 const int LoadSaveMenu::Y_ORIGIN = 100;
-const int LoadSaveMenu::NAME_MAX_SIZE = 16;
+const int LoadSaveMenu::NAME_MAX_SIZE = 25;
 
 LoadSaveMenu::LoadSaveMenu(MenuManager * m):Menu(m, "loadsave", "mlosa.dat",
      "mlosaout.dat")
@@ -77,9 +77,20 @@ void LoadSaveMenu::handleLeave() {
 
 void LoadSaveMenu::handleAction(const int actionId, void *ctx, const int modKeys) {
     if (actionId == loadButId_) {
+        if (editNameId_ != -1) {
+            if (g_App.loadGameFromFile(editNameId_)) {
+                editNameId_ = -1;
+                menu_manager_->changeCurrentMenu("main");
+            }
+        }
         // TODO complete loading
     } else if (actionId == saveButId_) {
-        // TODO complete saving
+        if (editNameId_ != -1 && files_[editNameId_].size() != 0) {
+            if (g_App.saveGameToFile(editNameId_, files_[editNameId_])) {
+                editNameId_ = -1;
+                menu_manager_->changeCurrentMenu("main");
+            }
+        }
     }
 }
 
@@ -110,7 +121,7 @@ bool LoadSaveMenu::handleUnknownKey(Key key, const int modKeys) {
     } else if (key == KEY_END) {
         caretPosition_ = files_[editNameId_].size();
     } else if (menu_manager_->isPrintableKey(key)) {
-        if (files_[editNameId_].size() < NAME_MAX_SIZE) {
+        if (files_[editNameId_].size() <= NAME_MAX_SIZE) {
             std::string str;
             str += menu_manager_->getKeyAsChar(key);
             files_[editNameId_].insert(caretPosition_, str);

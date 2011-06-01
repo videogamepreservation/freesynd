@@ -133,7 +133,7 @@ void AgentManager::reset(bool onlyWomen) {
     }
 
     for (int i = 0; i < 8; i++) {
-        Agent * pAgent = new Agent(i, g_AgentNames[nextName_], onlyWomen ? true : ((i % 2) == 0));
+        Agent * pAgent = new Agent(g_AgentNames[nextName_], onlyWomen ? true : ((i % 2) == 0));
         pAgent->addWeapon(g_App.weapons().getWeapon(Weapon::Pistol)->createInstance());
         
         agents_.setAt(i, pAgent);
@@ -144,4 +144,21 @@ void AgentManager::reset(bool onlyWomen) {
 void AgentManager::destroyAgentSlot(int n) {
     delete agents_.get(n);
     agents_.setAt(n, NULL);
+}
+
+bool AgentManager::saveToFile(std::ofstream &file) {
+    for (int i=0; i<AgentManager::MAX_AGENT; i++) {
+        Agent *pAgent = agents_.get(i);
+        // This flag tells if there is an agent on this slot
+        unsigned char uchar = pAgent ? 1 : 0;
+        file.write(reinterpret_cast<const char*>(&uchar), sizeof(unsigned char));
+        if (pAgent) {
+            pAgent->saveToFile(file);
+        }
+    }
+    return true;
+}
+
+bool AgentManager::loadFromFile(std::ifstream &infile) {
+    return false;
 }

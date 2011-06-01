@@ -33,6 +33,7 @@
 #endif
 
 #include <iostream>
+#include <fstream>
 #include <set>
 
 #ifdef SYSTEM_SDL
@@ -642,4 +643,94 @@ void App::run(const char *dir, int start_mission) {
     execl("/usr/gp2x/gp2xmenu", "/usr/gp2x/gp2xmenu", NULL);
 #endif
 #endif
+}
+
+bool App::saveGameToFile(int fileSlot, std::string name) {
+    LOG(Log::k_FLG_IO, "App", "saveGameToFile", ("Saving %s in slot %d", name.c_str(), fileSlot))
+    
+    std::ofstream outfile;
+    std::string path;
+            
+    File::getFullPathForSaveSlot(fileSlot, path);
+    LOG(Log::k_FLG_IO, "App", "saveGameToFile", ("Saving to file %s", path.c_str()))
+
+    outfile.open(path.c_str(), std::ios::out | std::ios::trunc | std::ios::binary);
+
+    if (outfile.is_open()) {
+        // write file format version
+        unsigned char vMaj = 1, vMin = 0;
+        outfile.write(reinterpret_cast<const char*>(&vMaj), sizeof(unsigned char));
+        outfile.write(reinterpret_cast<const char*>(&vMin), sizeof(unsigned char));
+
+        char buf[25];
+        memset(buf, '\0', 25);
+        // Slot name is on 25 caracters max
+        fs_strcpy(buf, 25, name.c_str());
+        outfile.write(buf, 25);
+        
+        // Session
+        session_.saveToFile(outfile);
+
+        // Weapons
+        weapons_.saveToFile(outfile);
+
+        // Mods
+        mods_.saveToFile(outfile);
+
+        // Agents
+        agents_.saveToFile(outfile);
+
+        // save current squad
+        for (int i=0; i<4; i++) {
+            Agent *pAgent = session_.teamMember(i);
+            int id = pAgent ? pAgent->getId() : 0;
+            outfile.write(reinterpret_cast<const char*>(&id), sizeof(int));
+        }
+
+        // save researches
+        session_.researchManager().saveToFile(outfile);
+
+        outfile.close();
+
+        return true;
+    }
+
+    return false;
+}
+
+bool App::loadGameFromFile(int fileSlot) {
+
+    std::string path;
+    std::ifstream infile;
+
+    File::getFullPathForSaveSlot(fileSlot, path);
+
+    infile.open(path.c_str(), std::ios::in | std::ios::binary);
+
+    if (infile.is_open()) {
+        // Read version
+        unsigned char vMaj = 1, vMin = 0;
+        infile.read(reinterpret_cast<char*>(&vMaj), sizeof(unsigned char));
+        infile.read(reinterpret_cast<char*>(&vMin), sizeof(unsigned char));
+
+        char buf[25];
+        memset(buf, '\0', 25);
+
+        reset();
+        //Read slot name
+        infile.read(buf, 25);
+
+        session_.loadFromFile(infile);
+
+        // Weapons
+        weapons_.loadFromFile(infile);
+
+        // Mods
+        mods_.loadFromFile(infile);
+
+        infile.close();
+        return true;
+    }
+
+    return false;
 }

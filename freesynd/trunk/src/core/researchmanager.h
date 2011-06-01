@@ -23,6 +23,7 @@
 #define RESEARCHMANAGER_H
 
 #include <list>
+#include <fstream>
 
 #include "core/research.h"
 #include "core/gameevent.h"
@@ -60,6 +61,11 @@ public:
     //! Adds a listener for research event
     void addListener(GameEventListener *pListener);
     void removeListener(GameEventListener *pListener);
+
+    //! Save instance to file
+    bool saveToFile(std::ofstream &file);
+    //! Load instance from file
+    bool loadFromFile(std::ifstream &infile);
 
 protected:
     Research *loadResearch(Weapon::WeaponType wt);

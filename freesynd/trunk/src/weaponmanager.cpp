@@ -232,3 +232,48 @@ Weapon * WeaponManager::loadWeapon(Weapon::WeaponType wt) {
 
     return pWeapon;
 }
+
+bool WeaponManager::saveToFile(std::ofstream &file) {
+    unsigned int isize = availableWeapons_.size();
+    file.write(reinterpret_cast<const char*>(&isize), sizeof(unsigned int));
+
+    for(unsigned int i=0; i<isize; i++) {
+        Weapon *pWeapon = availableWeapons_.get(i);
+        int ival = pWeapon->getWeaponType();
+        file.write(reinterpret_cast<const char*>(&ival), sizeof(int));
+    }
+
+    return true;
+}
+
+bool WeaponManager::loadFromFile(std::ifstream &infile) {
+    int nbWeap = 0;
+    infile.read(reinterpret_cast<char*>(&nbWeap), sizeof(int));
+
+    for (int i=0;i<nbWeap; i++) {
+        int type = 0;
+        Weapon::WeaponType wt = Weapon::Unknown;
+        infile.read(reinterpret_cast<char*>(&type), sizeof(int));
+        switch (type) {
+            case 0: wt = Weapon::Persuadatron;break;
+            case 1: wt = Weapon::Pistol;break;
+            case 2: wt = Weapon::GaussGun;break;
+            case 3: wt = Weapon::Shotgun;break;
+            case 4: wt = Weapon::Uzi;break;
+            case 5: wt = Weapon::Minigun;break;
+            case 6: wt = Weapon::Laser;break;
+            case 7: wt = Weapon::Flamer;break;
+            case 8: wt = Weapon::LongRange;break;
+            case 9: wt = Weapon::Scanner;break;
+            case 10: wt = Weapon::MediKit;break;
+            case 11: wt = Weapon::TimeBomb;break;
+            case 12: wt = Weapon::AccessCard;break;
+            case 13: wt = Weapon::EnergyShield;break;
+            default: wt = Weapon::Unknown;
+        }
+        // enable weapon
+        enableWeapon(wt);
+    }
+
+    return true;
+}

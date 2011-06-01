@@ -257,6 +257,11 @@ public:
     //! Returns a revenue for a given population and rate.
     int getTaxRevenue(int population, int rate);
 
+    //! Save instance to file
+    bool saveToFile(std::ofstream &file);
+    //! Load instance from file
+    bool loadFromFile(std::ifstream &infile);
+
 private:
     //! Destroy GameSession resources
     void destroy();

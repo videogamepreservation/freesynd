@@ -30,7 +30,7 @@
 extern int g_Colours[8];
 
 Block g_Blocks[50] = {
-    // name, defpop, population, mis_id, tax, addtotax, daysToNextStatus, daysStatusElapsed, status, nextMission, infos, enhanced
+    // name, defpop, population, mis_id, tax, addtotax, popStatus, daysToNextStatus, daysStatusElapsed, status, nextMission, color, infos, enhanced
     {"#CNTRY_17", 46000000, 46000000, 17, 30, 0, STAT_VERY_HAPPY, 0, 0, BLK_UNAVAIL, NULL, 0, 0, 0},
     {"#CNTRY_39", 56000000, 56000000, 39, 30, 0, STAT_VERY_HAPPY, 0, 0, BLK_UNAVAIL, NULL, 0, 0, 0},
     {"#CNTRY_08", 58000000, 58000000, 8, 30, 0, STAT_VERY_HAPPY, 0, 0, BLK_UNAVAIL, NULL, 0, 0, 0},
@@ -483,4 +483,126 @@ int GameSession::updateCountries() {
     }
 
     return amount;
+}
+
+//! Save instance to file
+bool GameSession::saveToFile(std::ofstream &file) {
+    char buf[25];
+    memset(buf, '\0', 25);
+    // Company name
+    fs_strcpy(buf, 25, company_name_.c_str());
+    file.write(buf, 17);
+    // User name
+    memset(buf, '\0', 25);
+    fs_strcpy(buf, 25, username_.c_str());
+    file.write(buf, 17);
+    // Logo
+    file.write(reinterpret_cast<const char*>(&logo_), sizeof(int));
+    // Logo colour
+    file.write(reinterpret_cast<const char*>(&logo_colour_), sizeof(int));
+    // Money
+    file.write(reinterpret_cast<const char*>(&money_), sizeof(int));
+    // Time
+    file.write(reinterpret_cast<const char*>(&time_year_), sizeof(int));
+    file.write(reinterpret_cast<const char*>(&time_day_), sizeof(int));
+    file.write(reinterpret_cast<const char*>(&time_hour_), sizeof(int));
+
+    // Missions
+    for (int i=0; i<GameSession::NB_MISSION; i++) {
+        int ival = g_Blocks[i].population;
+        file.write(reinterpret_cast<const char*>(&ival), sizeof(int));
+        ival = g_Blocks[i].tax;
+        file.write(reinterpret_cast<const char*>(&ival), sizeof(int));
+        ival = g_Blocks[i].popStatus;
+        file.write(reinterpret_cast<const char*>(&ival), sizeof(int));
+        ival = g_Blocks[i].daysToNextStatus;
+        file.write(reinterpret_cast<const char*>(&ival), sizeof(int));
+        ival = g_Blocks[i].daysStatusElapsed;
+        file.write(reinterpret_cast<const char*>(&ival), sizeof(int));
+        ival = g_Blocks[i].status;
+        file.write(reinterpret_cast<const char*>(&ival), sizeof(int));
+        uint8 ui8val = g_Blocks[i].colour;
+        file.write(reinterpret_cast<const char*>(&ui8val), sizeof(uint8));
+        unsigned char uchar = g_Blocks[i].infoLevel;
+        file.write(reinterpret_cast<const char*>(&uchar), sizeof(unsigned char));
+        ival = g_Blocks[i].enhanceLevel;
+        file.write(reinterpret_cast<const char*>(&uchar), sizeof(unsigned char));
+    }
+
+    return true;
+}
+
+//! Load instance from file
+bool GameSession::loadFromFile(std::ifstream &infile) {
+    char buf[25];
+    // Read company name
+    memset(buf, '\0', 25);
+    infile.read(buf, 17);
+    setCompanyName(buf);
+
+    // Read user name
+    memset(buf, '\0', 25);
+    infile.read(buf, 17);
+    setUserName(buf);
+
+    int ival = 0;
+    // Read logo id
+    infile.read(reinterpret_cast<char*>(&ival), sizeof(int));
+    setLogo(ival);
+
+    // Read logo colour
+    infile.read(reinterpret_cast<char*>(&ival), sizeof(int));
+    setLogoColour(ival);
+
+    // Read money
+    infile.read(reinterpret_cast<char*>(&ival), sizeof(int));
+    setMoney(ival);
+
+    // Read time
+    infile.read(reinterpret_cast<char*>(&time_year_), sizeof(int)); // Year
+    infile.read(reinterpret_cast<char*>(&time_day_), sizeof(int)); // Day
+    infile.read(reinterpret_cast<char*>(&time_hour_), sizeof(int)); // Hour
+
+    // Missions
+    for (int i=0; i<GameSession::NB_MISSION; i++) {
+        infile.read(reinterpret_cast<char*>(&ival), sizeof(int));
+        g_Blocks[i].population = ival;
+        infile.read(reinterpret_cast<char*>(&ival), sizeof(int));
+        g_Blocks[i].tax = ival;
+        infile.read(reinterpret_cast<char*>(&ival), sizeof(int));
+        switch (ival) {
+            case 0: g_Blocks[i].popStatus = STAT_REBEL;break;
+            case 1: g_Blocks[i].popStatus = STAT_DISCONTENT;break;
+            case 2: g_Blocks[i].popStatus = STAT_UNHAPPY;break;
+            case 3: g_Blocks[i].popStatus = STAT_CONTENT;break;
+            case 4: g_Blocks[i].popStatus = STAT_HAPPY;break;
+            case 5: g_Blocks[i].popStatus = STAT_VERY_HAPPY;break;
+            default: g_Blocks[i].popStatus = STAT_VERY_HAPPY;break;
+        }
+
+        infile.read(reinterpret_cast<char*>(&ival), sizeof(int));
+        g_Blocks[i].daysToNextStatus = ival;
+        infile.read(reinterpret_cast<char*>(&ival), sizeof(int));
+        g_Blocks[i].daysStatusElapsed = ival;
+        infile.read(reinterpret_cast<char*>(&ival), sizeof(int));
+        switch (ival) {
+            case 0: g_Blocks[i].status = BLK_UNAVAIL;break;
+            case 1: g_Blocks[i].status = BLK_AVAIL;break;
+            case 2: g_Blocks[i].status = BLK_FINISHED;break;
+            case 3: g_Blocks[i].status = BLK_REBEL;break;
+            default: g_Blocks[i].status = BLK_UNAVAIL;break;
+        }
+
+        uint8 ui8val = 0;
+        infile.read(reinterpret_cast<char*>(&ui8val), sizeof(uint8));
+        g_Blocks[i].colour = ui8val;
+
+        unsigned char uchar = 0;
+        infile.read(reinterpret_cast<char*>(&uchar), sizeof(unsigned char));
+        g_Blocks[i].infoLevel = uchar;
+        infile.read(reinterpret_cast<char*>(&uchar), sizeof(unsigned char));
+        g_Blocks[i].enhanceLevel = uchar;
+    }
+
+    return true;
 }

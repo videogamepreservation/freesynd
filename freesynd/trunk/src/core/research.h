@@ -24,6 +24,7 @@
 
 #include <string>
 #include <list>
+#include <fstream>
 
 #include "weapon.h"
 #include "mod.h"
@@ -89,6 +90,10 @@ public:
     //! Boost research with an existing weapon
     void improve(Weapon *pWeapon);
 
+    //! Save instance to file
+    bool saveToFile(std::ofstream &file);
+    //! Load instance from file
+    bool loadFromFile(std::ifstream &infile, EResType type);
 protected:
     void init(std::string name, int min);
     void updateProjection();

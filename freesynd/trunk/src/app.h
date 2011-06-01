@@ -31,6 +31,7 @@
 #include <memory>
 #include <vector>
 
+
 #include "common.h"
 #include "system.h"
 #include "gfx/screen.h"
@@ -175,6 +176,11 @@ class App : public Singleton < App > {
     void mouseUpEvent(int x, int y, int button, const int modKeys);
     //! Handles mouse moved
     void mouseMotionEvent(int x, int y, int state, const int modKeys);
+
+    //! Save game to a file
+    bool saveGameToFile(int fileSlot, std::string name);
+    //! Load game from a file
+    bool loadGameFromFile(int fileSlot);
 
 private:
     //! Reads the configuration file
