@@ -117,6 +117,7 @@ public:
         spe_PointToManyPoints = 4,
         spe_TargetReachInstant = 8,
         spe_TargetReachNeedTime = 16,
+        spe_CreatesProjectile = 16,
         spe_RangeDamageOnReach = 32,
         // ignore accuracy
         spe_NoTarget = 64,
@@ -132,7 +133,8 @@ public:
         wspt_Pistol =
             (spe_PointToPoint | spe_TargetReachInstant | spe_UsesAmmo),
         wspt_GaussGun =
-            (spe_PointToPoint | spe_TargetReachNeedTime | spe_UsesAmmo),
+            (spe_PointToPoint | spe_TargetReachNeedTime | spe_UsesAmmo
+            | spe_RangeDamageOnReach),
         wspt_Shotgun =
             (spe_PointToManyPoints | spe_TargetReachInstant | spe_UsesAmmo),
         wspt_Uzi = (spe_PointToPoint | spe_TargetReachInstant | spe_UsesAmmo),
@@ -147,8 +149,8 @@ public:
             (spe_PointToPoint | spe_TargetReachInstant | spe_UsesAmmo),
         wspt_Scanner = (spe_Owner | spe_ChangeAttribute),
         wspt_MediKit = (spe_Owner | spe_UsesAmmo),
-        wspt_TimeBomb =
-            (spe_RangeDamageOnReach | spe_SelfDestruction),
+        wspt_TimeBomb = (spe_NoTarget
+            | spe_RangeDamageOnReach | spe_SelfDestruction),
         wspt_AccessCard = (spe_Owner | spe_ChangeAttribute),
         wspt_EnergyShield =
             (spe_Owner | spe_ChangeAttribute | spe_UsesAmmo),
@@ -217,7 +219,7 @@ public:
         int dist);
 
     uint8 inRange(ShootableMapObject ** t, PathNode * pn = NULL,
-        bool setBlocker = false);
+        bool setBlocker = false, bool checkTileOnly = false);
 
     int getShots(int elapsed, int tForReload, int tForShot);
 
