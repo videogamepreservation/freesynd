@@ -147,6 +147,7 @@ void AgentManager::destroyAgentSlot(int n) {
 }
 
 bool AgentManager::saveToFile(std::ofstream &file) {
+    file.write(reinterpret_cast<const char*>(&nextName_), sizeof(int));
     for (int i=0; i<AgentManager::MAX_AGENT; i++) {
         Agent *pAgent = agents_.get(i);
         // This flag tells if there is an agent on this slot
@@ -160,5 +161,83 @@ bool AgentManager::saveToFile(std::ofstream &file) {
 }
 
 bool AgentManager::loadFromFile(std::ifstream &infile) {
-    return false;
+    infile.read(reinterpret_cast<char*>(&nextName_), sizeof(int));
+    for (int i=0; i<AgentManager::MAX_AGENT; i++) {
+        unsigned char uchar;
+        infile.read(reinterpret_cast<char*>(&uchar), sizeof(unsigned char));
+        if (uchar) {
+            Agent *pAgent = agents_.get(i);
+            if (pAgent == NULL) {
+                // Create an empty agent
+                pAgent = new Agent("", true);
+            }
+            pAgent->loadFromFile(infile);
+
+            // Mods
+            int nb = 0;
+            infile.read(reinterpret_cast<char*>(&nb), sizeof(int));
+            for (int mIndex = 0; mIndex < nb; mIndex++) {
+                int type = 0;
+                Mod::EModType mt = Mod::Unknown;
+                Mod::EModVersion mv = Mod::MOD_V1;
+                infile.read(reinterpret_cast<char*>(&type), sizeof(int));
+                switch (type) {
+                    case 0: mt = Mod::MOD_LEGS;break;
+                    case 1: mt = Mod::MOD_ARMS;break;
+                    case 2: mt = Mod::MOD_CHEST;break;
+                    case 3: mt = Mod::MOD_HEART;break;
+                    case 4: mt = Mod::MOD_EYES;break;
+                    case 5: mt = Mod::MOD_BRAIN;break;
+                    default: mt = Mod::Unknown;
+                }
+
+                int ver = 0;
+                infile.read(reinterpret_cast<char*>(&ver), sizeof(int));
+                switch (ver) {
+                    case 0: mv = Mod::MOD_V1;break;
+                    case 1: mv = Mod::MOD_V2;break;
+                    case 2: mv = Mod::MOD_V3;break;
+                    default: mv = Mod::MOD_V1;
+                }
+                // add the mod
+                if (mt != Mod::Unknown) {
+                    pAgent->addMod(g_App.mods().getMod(mt, mv));
+                }
+            }
+            // Weapons
+            infile.read(reinterpret_cast<char*>(&nb), sizeof(int));
+            for (int wIndex = 0; wIndex < nb; wIndex++) {
+                int type = 0;
+                Weapon::WeaponType wt = Weapon::Unknown;
+                infile.read(reinterpret_cast<char*>(&type), sizeof(int));
+                switch (type) {
+                    case 0: wt = Weapon::Persuadatron;break;
+                    case 1: wt = Weapon::Pistol;break;
+                    case 2: wt = Weapon::GaussGun;break;
+                    case 3: wt = Weapon::Shotgun;break;
+                    case 4: wt = Weapon::Uzi;break;
+                    case 5: wt = Weapon::Minigun;break;
+                    case 6: wt = Weapon::Laser;break;
+                    case 7: wt = Weapon::Flamer;break;
+                    case 8: wt = Weapon::LongRange;break;
+                    case 9: wt = Weapon::Scanner;break;
+                    case 10: wt = Weapon::MediKit;break;
+                    case 11: wt = Weapon::TimeBomb;break;
+                    case 12: wt = Weapon::AccessCard;break;
+                    case 13: wt = Weapon::EnergyShield;break;
+                    default: wt = Weapon::Unknown;
+                }
+                if (wt != Weapon::Unknown) {
+                    WeaponInstance *pInst = g_App.weapons().getWeapon(wt)->createInstance();
+                    int ammo = 0;
+                    infile.read(reinterpret_cast<char*>(&ammo), sizeof(int));
+                    pInst->setAmmoRemaining(ammo);
+                    pAgent->addWeapon(pInst);
+                }
+            }
+        } else if (agents_.get(i)) {
+            destroyAgentSlot(i);
+        }
+    }
+    return true;
 }

@@ -121,12 +121,36 @@ bool Agent::saveToFile(std::ofstream &file) {
         WeaponInstance *pWinst = weapon(wIndex);
         int ival = pWinst->getWeaponType();
         file.write(reinterpret_cast<const char*>(&ival), sizeof(int));
-        ival = pWinst->ammo();
+        ival = pWinst->ammoRemaining();
         file.write(reinterpret_cast<const char*>(&ival), sizeof(int));
     }
     return true;
 }
 
 bool Agent::loadFromFile(std::ifstream &infile) {
-    return false;
+    // if this instance has already been populated reset it
+    clearSlots();
+    removeAllWeapons();
+    // id
+    infile.read(reinterpret_cast<char*>(&id_), sizeof(int));
+    // update counter
+    if (agentCnt<=id_) {
+        agentCnt = id_ + 1;
+    }
+    // name
+    char buf[15];
+    memset(buf, '\0', 15);
+    infile.read(buf, 15);
+    name_.assign(buf);
+    // gender
+    unsigned char uchar;
+    infile.read(reinterpret_cast<char*>(&uchar), sizeof(unsigned char));
+    male_ = uchar ? true : false;
+    // active
+    infile.read(reinterpret_cast<char*>(&uchar), sizeof(unsigned char));
+    active_ = uchar ? true : false;
+    // health
+    infile.read(reinterpret_cast<char*>(&health_), sizeof(int));
+    
+    return true;
 }

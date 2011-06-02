@@ -584,6 +584,7 @@ bool GameSession::loadFromFile(std::ifstream &infile) {
         g_Blocks[i].daysToNextStatus = ival;
         infile.read(reinterpret_cast<char*>(&ival), sizeof(int));
         g_Blocks[i].daysStatusElapsed = ival;
+        // Read status
         infile.read(reinterpret_cast<char*>(&ival), sizeof(int));
         switch (ival) {
             case 0: g_Blocks[i].status = BLK_UNAVAIL;break;
@@ -593,9 +594,18 @@ bool GameSession::loadFromFile(std::ifstream &infile) {
             default: g_Blocks[i].status = BLK_UNAVAIL;break;
         }
 
+        // Read colour
         uint8 ui8val = 0;
         infile.read(reinterpret_cast<char*>(&ui8val), sizeof(uint8));
         g_Blocks[i].colour = ui8val;
+        if (g_Blocks[i].status != BLK_FINISHED && g_Blocks[i].status != BLK_REBEL &&
+            g_Blocks[i].colour == logo_colour_) {
+            // Find a colour different from the user colour
+            do {
+                int index = rand() % (sizeof(g_Colours) / sizeof(int));
+                g_Blocks[i].colour = g_Colours[index];
+		    } while (g_Blocks[i].colour == getLogoColour());
+        }
 
         unsigned char uchar = 0;
         infile.read(reinterpret_cast<char*>(&uchar), sizeof(unsigned char));

@@ -728,6 +728,19 @@ bool App::loadGameFromFile(int fileSlot) {
         // Mods
         mods_.loadFromFile(infile);
 
+        // Agents
+        agents_.loadFromFile(infile);
+
+        // Read squad
+        for (int i=0; i<4; i++) {
+            int id = 0;
+            infile.read(reinterpret_cast<char*>(&id), sizeof(int));
+            // TODO : finish
+        }
+
+        // Research
+        session_.researchManager().loadFromFile(infile);
+
         infile.close();
         return true;
     }
