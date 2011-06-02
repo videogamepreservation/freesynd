@@ -143,7 +143,7 @@ void MapObject::setDirection(int posx, int posy, int * dir) {
             direction = (int)((128 * atan(double(posy/posx))) / PI + 128);
         }
     } else if (posx > 0 && posy < 0) {
-        posx = posy;
+        posy = -posy;
         direction = (int)((128 * atan(double(posy/posx))) / PI + 64);
     } else { // posx > 0 && posy > 0
         int swapx = posx;

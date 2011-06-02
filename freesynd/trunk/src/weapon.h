@@ -119,7 +119,7 @@ public:
         spe_TargetReachNeedTime = 16,
         spe_RangeDamageOnReach = 32,
         // ignore accuracy
-        spe_RandomManyPoints = 64,
+        spe_NoTarget = 64,
         spe_UsesAmmo = 128,
         spe_ChangeAttribute = 256,
         spe_SelfDestruction = 512,
@@ -127,7 +127,8 @@ public:
 
     typedef enum {
         wspt_None = spe_None,
-        wspt_Persuadatron = (spe_PointToPoint | spe_TargetReachInstant),
+        wspt_Persuadatron = (spe_PointToPoint | spe_TargetReachInstant
+            | spe_NoTarget),
         wspt_Pistol =
             (spe_PointToPoint | spe_TargetReachInstant | spe_UsesAmmo),
         wspt_GaussGun =
@@ -147,8 +148,7 @@ public:
         wspt_Scanner = (spe_Owner | spe_ChangeAttribute),
         wspt_MediKit = (spe_Owner | spe_UsesAmmo),
         wspt_TimeBomb =
-            (spe_PointToManyPoints | spe_RangeDamageOnReach
-            | spe_SelfDestruction),
+            (spe_RangeDamageOnReach | spe_SelfDestruction),
         wspt_AccessCard = (spe_Owner | spe_ChangeAttribute),
         wspt_EnergyShield =
             (spe_Owner | spe_ChangeAttribute | spe_UsesAmmo),
@@ -212,6 +212,9 @@ public:
     void playSound();
 
     void resetWeaponUsedTime() { weapon_used_time_ = 0; }
+
+    void shotTargetRandomizer(PathNode * cp, PathNode * tp, int range,
+        int dist);
 
     uint8 inRange(ShootableMapObject ** t, PathNode * pn = NULL,
         bool setBlocker = false);

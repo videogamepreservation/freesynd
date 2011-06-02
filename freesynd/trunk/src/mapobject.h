@@ -125,16 +125,16 @@ public:
     }
 
     double distanceTo(MapObject *t) {
-        int cx = tileX() * 256 + offX() - (t->tileX() * 256 + t->offX());
-        int cy = tileY() * 256 + offY() - (t->tileY() * 256 + t->offY());
-        int cz = tileZ() * 128 + offZ() - (t->tileZ() * 128 + t->offZ());
+        int cx = tile_x_ * 256 + off_x_ - (t->tileX() * 256 + t->offX());
+        int cy = tile_y_ * 256 + off_y_ - (t->tileY() * 256 + t->offY());
+        int cz = vis_z_ * 128 + off_z_ - (t->visZ() * 128 + t->offZ());
         return sqrt((double) (cx * cx + cy * cy + cz * cz));
     }
 
     double distanceToPos(toDefineXYZ *xyz) {
-        int cx = tileX() * 256 + offX() - (xyz->x);
-        int cy = tileY() * 256 + offY() - (xyz->y);
-        int cz = tileZ() * 128 + offZ() - (xyz->z);
+        int cx = tile_x_ * 256 + off_x_ - (xyz->x);
+        int cy = tile_y_ * 256 + off_y_ - (xyz->y);
+        int cz = vis_z_ * 128 + off_z_ - (xyz->z);
         return sqrt((double) (cx * cx + cy * cy + cz * cz));
     }
 

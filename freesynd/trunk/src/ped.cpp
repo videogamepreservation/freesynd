@@ -451,7 +451,6 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                 firing_ = PedInstance::Firing_Fire;
                 updated = true;
 
-                selectedWeapon()->playSound();
             } else {
                 stopFiring();
             }
@@ -780,11 +779,21 @@ void PedInstance::selectNextWeapon() {
         Weapon *curSelectedWeapon = (Weapon *)weapon(selected_weapon_);
 
         if (curSelectedWeapon) {
-            for (int i = numWeapons() - 1; i >=0 && nextWeapon == -1; i--)
-                if (i != selected_weapon_
-                        && weapon(i)->rank() == curSelectedWeapon->rank()
-                        && weapon(i)->ammoRemaining())
-                    nextWeapon = i;
+            for (int i = 0; i < numWeapons(); i++) {
+                WeaponInstance * wi = weapon(i);
+                if (i != selected_weapon_ && wi->ammoRemaining()
+                        && wi->getWeaponType()
+                            == curSelectedWeapon->getWeaponType())
+                {
+                    if (nextWeapon == -1)
+                        nextWeapon = i;
+                    else {
+                        if (wi->ammoRemaining()
+                            < weapon(nextWeapon)->ammoRemaining())
+                            nextWeapon = i;
+                    }
+                }
+            }
         }
 
         if (nextWeapon == -1)

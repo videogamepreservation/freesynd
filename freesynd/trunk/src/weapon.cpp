@@ -125,6 +125,13 @@ bool WeaponInstance::animate(int elapsed) {
                 if (ammo_remaining_ > pWeaponClass_->ammo())
                     ammo_remaining_ = pWeaponClass_->ammo();
             }
+        } else if (pWeaponClass_->getWeaponType() == Weapon::MediKit) {
+            if (owner_->health() != owner_->startHealth()) {
+                owner_->setHealth(owner_->startHealth());
+                ammo_remaining_ = 0;
+                ((PedInstance *)owner_)->selectNextWeapon();
+                weapon_used_time_ = 0;
+            }
         }
     } else if (weapon_used_time_ != 0) {
         weapon_used_time_ += elapsed;
@@ -144,6 +151,30 @@ void WeaponInstance::draw(int x, int y) {
     g_App.gameSprites().drawFrame(pWeaponClass_->anim(), frame_, x, y);
 }
 
+void WeaponInstance::shotTargetRandomizer(PathNode * cp, PathNode * tp, int range,
+                                          int dist)
+{
+    int cx = cp->tileX() * 256 + cp->offX();
+    int cy = cp->tileY() * 256 + cp->offY();
+    int cz = cp->tileZ() * 128 + cp->offZ();
+
+    int tx = tp->tileX() * 256 + tp->offX();
+    int ty = tp->tileY() * 256 + tp->offY();
+    int tz = tp->tileZ() * 128 + tp->offZ();
+    int dist_cur = (tx - cx) * (tx - cx) + (ty - cy) * (ty - cy)
+        + (tz - cz) * (tz - cz);
+    range = (int)((double)range * (sqrt((double)dist_cur) / (double)dist));
+    tx = tx + rand() % range - range / 2;
+    ty = ty + rand() % range - range / 2;
+    int diff = dist_cur - (tx - cx) * (tx - cx) - (ty - cy) * (ty - cy);
+    diff = (int)(sqrt((double)diff));
+    if (rand() % 2 == 0)
+        diff = -diff;
+    tz = cz + diff;
+    tp->setTileXYZ(tx / 256, ty / 256, tz / 128);
+    tp->setOffXYZ(tx % 256, ty % 256, tz % 128);
+}
+
 bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
     int elapsed, bool ignoreBlocker)
 {
@@ -160,11 +191,7 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
         return false;
     } else if (pWeaponClass_->dmgType() == MapObject::dmg_Heal) {
         // NOTE: not only self-healing in future?
-        owner_->setHealth(owner_->startHealth());
-        ammo_remaining_ = 0;
-        ((PedInstance *)owner_)->selectNextWeapon();
-        weapon_used_time_ = 0;
-        return true;
+        return false;
     } else if (pWeaponClass_->dmgType() == MapObject::dmg_Mental) {
         return false;
     }
@@ -174,40 +201,43 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
     if(tp)
         pn = *tp;
     uint8 has_blocker = inRange(&smp, &pn, true);
+    int xb = 0;
+    int yb = 0;
+    int txb = 0;
+    int tyb = 0;
+    if (owner_) {
+        xb = owner_->tileX() * 256 + owner_->offX();
+        yb = owner_->tileY() * 256 + owner_->offY();
+        if (tobj || tp) {
+            if (tobj) {
+                txb = tobj->tileX() * 256 + tobj->offX();
+                tyb = tobj->tileY() * 256 + tobj->offY();
+            } else {
+                txb = tp->tileX() * 256 + tp->offX();
+                tyb = tp->tileY() * 256 + tp->offY();
+            }
+            int dir = -1;
+            setDirection(txb - xb, tyb - yb, &dir);
+            if (dir != -1)
+                owner_->setDirection(dir);
+        }
+    } else {
+        xb = tile_x_ * 256 + off_x_;
+        yb = tile_y_ * 256 + off_y_;
+    }
     if ((has_blocker & 6) != 0) {
         if (!ignoreBlocker)
             return false;
     } else if((has_blocker & 1) == 0)
         return false;
 
+    this->playSound();
     DamageInflictType d;
     d.dtype = pWeaponClass_->dmgType();
-    int ammoused = 1;
-    if (pWeaponClass_->ammo() > 0) {
-        ammoused = shots * pWeaponClass_->ammoPerShot();
-        if ((pWeaponClass_->shotProperty()) & Weapon::spe_UsesAmmo) {
-            if (ammoused > ammo_remaining_) {
-                ammoused = ammo_remaining_;
-                ammo_remaining_ = 0;
-            } else
-                ammo_remaining_ -= ammoused;
-        }
-    }
-    int totaldmg = ammoused * pWeaponClass_->damagePerShot();
-    d.dvalue = totaldmg;
-    int xb = 0;
-    int yb = 0;
-    if (owner_) {
-        xb = owner_->tileX() * 256 + owner_->offX();
-        yb = owner_->tileY() * 256 + owner_->offY();
-    } else {
-        xb = tile_x_ * 256 + off_x_;
-        yb = tile_y_ * 256 + off_y_;
-    }
 
+    txb = 0;
+    tyb = 0;
     d.ddir = -1;
-    int txb = 0;
-    int tyb = 0;
     bool can_set_dir = false;
     if (tobj) {
         can_set_dir = true;
@@ -233,11 +263,26 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
     }
     if (can_set_dir) {
         setDirection(txb - xb, tyb - yb, &(d.ddir));
-        if (owner_) {
-            if (d.ddir != -1)
-                owner_->setDirection(d.ddir);
+    }
+
+    int ammoused = 1;
+    typedef struct {
+        int dmg;
+        PathNode tp;
+    }ShotDesc;
+
+    if (pWeaponClass_->ammo() > 0) {
+        ammoused = shots * pWeaponClass_->ammoPerShot();
+        if ((pWeaponClass_->shotProperty()) & Weapon::spe_UsesAmmo) {
+            if (ammoused > ammo_remaining_) {
+                ammoused = ammo_remaining_;
+                ammo_remaining_ = 0;
+            } else
+                ammo_remaining_ -= ammoused;
         }
     }
+    int totaldmg = ammoused * pWeaponClass_->damagePerShot();
+    d.dvalue = totaldmg;
     if ((has_blocker & 6) != 0) {
         if ((has_blocker & 4) != 0) {
             SFXObject *so = new SFXObject(g_Session.getMission()->map(),
