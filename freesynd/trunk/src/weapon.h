@@ -215,8 +215,7 @@ public:
 
     void resetWeaponUsedTime() { weapon_used_time_ = 0; }
 
-    void shotTargetRandomizer(PathNode * cp, PathNode * tp, int range,
-        int dist);
+    void shotTargetRandomizer(PathNode * cp, PathNode * tp, double angle);
 
     uint8 inRange(ShootableMapObject ** t, PathNode * pn = NULL,
         bool setBlocker = false, bool checkTileOnly = false);

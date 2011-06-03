@@ -151,9 +151,11 @@ void WeaponInstance::draw(int x, int y) {
     g_App.gameSprites().drawFrame(pWeaponClass_->anim(), frame_, x, y);
 }
 
-void WeaponInstance::shotTargetRandomizer(PathNode * cp, PathNode * tp, int range,
-                                          int dist)
+void WeaponInstance::shotTargetRandomizer(PathNode * cp, PathNode * tp,
+                                          double angle)
 {
+    if (angle == 0)
+        return;
     int cx = cp->tileX() * 256 + cp->offX();
     int cy = cp->tileY() * 256 + cp->offY();
     int cz = cp->tileZ() * 128 + cp->offZ();
@@ -161,41 +163,40 @@ void WeaponInstance::shotTargetRandomizer(PathNode * cp, PathNode * tp, int rang
     int tx = tp->tileX() * 256 + tp->offX();
     int ty = tp->tileY() * 256 + tp->offY();
     int tz = tp->tileZ() * 128 + tp->offZ();
-    int dist_cur = (tx - cx) * (tx - cx) + (ty - cy) * (ty - cy)
-        + (tz - cz) * (tz - cz);
-    range = (int)((double)range * (sqrt((double)dist_cur) / (double)dist));
+    double dtx = (double)(tx - cx);
+    double dty = (double)(ty - cy);
+    double dtz = (double)(tz - cz);
+    double dist_cur = sqrt(dtx * dtx + dty * dty + dtz * dtz);
+    if (dist_cur == 0)
+        return;
 
-    int diff = 0;
-    int gtx = 0;
-    int v_range = range;
-    do {
-        if (v_range == 0)
-            gtx = cx;
-        else
-            gtx = tx + rand() % v_range - v_range / 2;
-        diff = dist_cur - (gtx - cx) * (gtx - cx);
-        v_range /= 2;
-    } while (gtx < 0 || diff < 0);
-    dist_cur = diff;
-    int gty = 0;
-    v_range = range;
-    do {
-        if (v_range == 0)
-            gty = cy;
-        else
-            gty = ty + rand() % v_range - v_range / 2;
-        diff = dist_cur  - (gty - cy) * (gty - cy);
-        v_range /= 2;
-    } while (gty < 0 || diff < 0);
-    diff = (int)(sqrt((double)diff));
-    int gtz = 0;
-    if (rand() % 2 == 0) {
-        if (cz - diff < 0)
-            gtz = cz - diff;
-        else
-            gtz = cz + diff;
-    } else
-        gtz = cz + diff;
+    double PI = 3.14159265;
+    double angx = 0;
+    angle /= (180.0 / PI);
+    angx = acos(dtx/dist_cur);
+    double angy = 0;
+    angy = acos(dty/dist_cur);
+    double angz = 0;
+    angz = acos(dtz/dist_cur);
+
+    double set_sign = 1;
+    if (rand() % 2 == 1)
+        set_sign = -1;
+    angx = angx + (angle / 2 * (double)(rand() % 1000) / 1000.0) * set_sign;
+    int gtx = cx + (int)(cos(angx) * dist_cur);
+
+    set_sign = 1;
+    if (rand() % 2 == 1)
+        set_sign = -1;
+    angy = angy + (angle / 2 * (double)(rand() % 1000) / 1000.0) * set_sign;
+    int gty = cy + (int)(cos(angy) * dist_cur);
+    set_sign = 1;
+    if (rand() % 2 == 1)
+        set_sign = -1;
+    angz = angz + (angle / 2 * (double)(rand() % 1000) / 1000.0) * set_sign;
+    int gtz = cz + (int)(cos(angz) * dist_cur);
+    // TODO: write adjusting for negative values
+    assert(gtx >= 0 && gty >= 0 && gtz >= 0);
 
     tp->setTileXYZ(gtx / 256, gty / 256, gtz / 128);
     tp->setOffXYZ(gtx % 256, gty % 256, gtz % 128);
@@ -266,13 +267,12 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
     DamageInflictType d;
     d.dtype = pWeaponClass_->dmgType();
     // 50% accuracy
-    int accuracy = 128;
+    double accuracy = 50;
 
-    // dist and range is used to generate shot with randomizer
-    int dist = 1024;
-    int range = 128;
+    // angle is used to generate shot with randomizer
+    double angle = 30;
 
-    range = (int)((double)range * ((double)(256 - accuracy) / 256.0));
+    angle = (double)angle * ((double)(100 - accuracy) / 100.0);
 
     typedef struct {
         PathNode tp;
@@ -321,7 +321,7 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
             case Weapon::spe_PointToPoint:
                 for (unsigned short i = 0; i < ammoused; i++) {
                     gen_shots.push_back(base_shot);
-                    shotTargetRandomizer(&cp, &(gen_shots.back().tp), range, dist);
+                    shotTargetRandomizer(&cp, &(gen_shots.back().tp), angle);
                 }
                 if (shot_prop & Weapon::spe_RangeDamageOnReach) {
                 } else {
