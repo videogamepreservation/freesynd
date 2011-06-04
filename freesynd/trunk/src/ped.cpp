@@ -272,6 +272,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
         } else if (samePosition(in_vehicle_)) {
             map_ = -1;
             in_vehicle_->setDriver(this);
+            is_ignored_ = true;
             return true;
         } else {
             if(health_ > 0) {
@@ -406,6 +407,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
         w->setPosition(tile_x_, tile_y_, tile_z_, off_x_, off_y_, off_z_);
         w->setVisZ(vis_z_);
         w->setOwner(NULL);
+        w->setIsIgnored();
         putdown_weapon_ = NULL;
         setDrawnAnim(PedInstance::PutdownAnim);
         if(speed() != 0){
@@ -420,6 +422,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
             weapons_.push_back(pickup_weapon_);
             pickup_weapon_->setMap(-1);
             pickup_weapon_->setOwner(this);
+            pickup_weapon_->setIsIgnored(true);
             pickup_weapon_ = NULL;
             setDrawnAnim(PedInstance::PickupAnim);
             return true;
@@ -859,6 +862,7 @@ void PedInstance::dropAllWeapons() {
         w->setPosition(tile_x_, tile_y_, tile_z_, off_x_, off_y_, off_z_);
         w->setVisZ(vis_z_);
         w->setOwner(NULL);
+        w->setIsIgnored();
         n++;
     }
 
@@ -890,6 +894,7 @@ void PedInstance::leaveVehicle() {
     assert(map_ == -1 && in_vehicle_);
     map_ = in_vehicle_->map();
     in_vehicle_ = NULL;
+    is_ignored_ = false;
 }
 
 int PedInstance::map() {

@@ -174,6 +174,7 @@ bool Mission::loadLevel(uint8 * levelData)
                             p->putInVehicle(vehicles_[vin]);
                             p->setMap(-1);
                             vehicles_[vin]->setDriver(p);
+                            p->setIsIgnored(true);
                         }
                     }
                 }
@@ -187,8 +188,10 @@ bool Mission::loadLevel(uint8 * levelData)
                 }
                 p->setSightRange(7);
             }
-            if (i > 3 && i < 8)
+            if (i > 3 && i < 8) {
                 p->setHealth(-1);
+                p->setIsIgnored(true);
+            }
         }
     }
     
@@ -290,6 +293,7 @@ bool Mission::loadLevel(uint8 * levelData)
                         // TODO: correct weapons for enemy agents
                         peds_[pindx[offset_owner]]->addWeapon(w);
                         w->setOwner(peds_[pindx[offset_owner]]);
+                        w->setIsIgnored(true);
                         windx[i] = weapons_.size();
                         weapons_.push_back(w);
                     } else {
@@ -791,10 +795,12 @@ void Mission::start()
             }else{
                 peds_[i]->setHealth(-1);
                 peds_[i]->setIsAnAgent(PedInstance::Agent_Non_Active);
+                peds_[i]->setIsIgnored(true);
             }
         } else {
             peds_[i]->setHealth(-1);
             peds_[i]->setIsAnAgent(PedInstance::Agent_Non_Active);
+            peds_[i]->setIsIgnored(true);
         }
     }    
 }

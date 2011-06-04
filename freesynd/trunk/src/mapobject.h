@@ -194,8 +194,8 @@ public:
         mt_Undefined = 0,
         mt_Ped = 1,
         mt_Weapon = 2,
-        mt_Static = 3,
-        mt_Vehicle = 4,
+        mt_Static = 4,
+        mt_Vehicle = 8,
     } MajorTypeEnum;
 
     MajorTypeEnum majorType() { return major_type_; }

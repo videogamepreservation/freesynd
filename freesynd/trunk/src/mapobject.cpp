@@ -1075,7 +1075,7 @@ bool Tree::animate(int elapsed, Mission *obj) {
         if (!(leftTimeShowAnim(elapsed))) {
             state_ = Static::stttree_Damaged;
             frame_ = 0;
-            setFramesPerSec(8);
+            setFramesPerSec(2);
             return true;
         }
     }
@@ -1091,7 +1091,8 @@ bool Tree::handleDamage(MapObject::DamageInflictType *d) {
     health_ -= d->dvalue;
     if (health_ <= 0) {
         state_ = Static::stttree_Burning;
-        setTimeShowAnim(5000);
+        setTimeShowAnim(10000);
+        is_ignored_ = true;
     }
     return true;
 }

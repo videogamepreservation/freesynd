@@ -28,6 +28,7 @@
 #define WEAPON_H
 
 #include <string>
+#include <vector>
 #include "mapobject.h"
 #include "sound/sound.h"
 
@@ -219,9 +220,17 @@ public:
     void shotTargetRandomizer(PathNode * cp, PathNode * tp, double angle);
 
     uint8 inRange(ShootableMapObject ** t, PathNode * pn = NULL,
-        bool setBlocker = false, bool checkTileOnly = false);
+        bool setBlocker = false, bool checkTileOnly = false,
+        int maxr = -1);
+    uint8 inRangeCPos(PathNode & cp, ShootableMapObject ** t,
+        PathNode * pn = NULL, bool setBlocker = false,
+        bool checkTileOnly = false, int maxr = -1);
 
     int getShots(int elapsed, int tForReload, int tForShot);
+    void getInRangeOne(PathNode & cp, std::vector<ShootableMapObject *> & targets,
+        uint8 mask, bool checkTileOnly = true, int maxr = -1);
+    void getInRangeAll(PathNode & cp, std::vector<ShootableMapObject *> & targets,
+        uint8 mask, bool checkTileOnly = true, int maxr = -1);
 
 protected:
     Weapon *pWeaponClass_;
