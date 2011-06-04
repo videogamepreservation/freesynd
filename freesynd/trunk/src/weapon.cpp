@@ -182,21 +182,86 @@ void WeaponInstance::shotTargetRandomizer(PathNode * cp, PathNode * tp,
     double set_sign = 1;
     if (rand() % 2 == 1)
         set_sign = -1;
-    angx = angx + (angle / 2 * (double)(rand() % 1000) / 1000.0) * set_sign;
+    angx = angx + (angle / 2 * (double)(rand() % 100) / 100.0) * set_sign;
     int gtx = cx + (int)(cos(angx) * dist_cur);
 
     set_sign = 1;
     if (rand() % 2 == 1)
         set_sign = -1;
-    angy = angy + (angle / 2 * (double)(rand() % 1000) / 1000.0) * set_sign;
+    angy = angy + (angle / 2 * (double)(rand() % 100) / 100.0) * set_sign;
     int gty = cy + (int)(cos(angy) * dist_cur);
     set_sign = 1;
     if (rand() % 2 == 1)
         set_sign = -1;
-    angz = angz + (angle / 2 * (double)(rand() % 1000) / 1000.0) * set_sign;
+    angz = angz + (angle / 2 * (double)(rand() % 100) / 100.0) * set_sign;
     int gtz = cz + (int)(cos(angz) * dist_cur);
-    // TODO: write adjusting for negative values
+
+    if (gtx < 0) {
+        if (cos(angx) == 0) {
+            gtx = 0;
+        } else {
+            dist_cur -= fabs((double)gtx / cos(angx));
+            gtx = 0;
+            gty = cy + (int)(cos(angy) * dist_cur);
+            gtz = cz + (int)(cos(angz) * dist_cur);
+        }
+    }
+    if (gty < 0) {
+        if (cos(angy) == 0) {
+            gty = 0;
+        } else {
+            dist_cur -= fabs((double)gty / cos(angy));
+            gty = 0;
+            gtx = cx + (int)(cos(angx) * dist_cur);
+            gtz = cz + (int)(cos(angz) * dist_cur);
+        }
+    }
+    if (gtz < 0) {
+        if (cos(angz) == 0) {
+            gtz = 0;
+        } else {
+            dist_cur -= fabs((double)gtz / cos(angz));
+            gtz = 0;
+            gtx = cx + (int)(cos(angx) * dist_cur);
+            gty = cy + (int)(cos(angy) * dist_cur);
+        }
+    }
+
+    int max_x = g_App.getGameSession().getMission()->mmax_x_ * 256 - 1;
+    int max_y = g_App.getGameSession().getMission()->mmax_y_ * 256 - 1;
+    int max_z = g_App.getGameSession().getMission()->mmax_z_ * 128 - 1;
+    if (gtx > max_x) {
+        if (cos(angx) == 0) {
+            gtx = max_x;
+        } else {
+            dist_cur -= fabs((double)(gtx - max_x) / cos(angx));
+            gtx = max_x;
+            gty = cy + (int)(cos(angy) * dist_cur);
+            gtz = cz + (int)(cos(angz) * dist_cur);
+        }
+    }
+    if (gty > max_y) {
+        if (cos(angy) == 0) {
+            gty = max_y;
+        } else {
+            dist_cur -= fabs((double)(gty - max_y) / cos(angy));
+            gty = max_y;
+            gtx = cx + (int)(cos(angx) * dist_cur);
+            gtz = cz + (int)(cos(angz) * dist_cur);
+        }
+    }
+    if (gtz > max_z) {
+        if (cos(angx) == 0) {
+            gtz = max_z;
+        } else {
+            dist_cur -= fabs((double)(gtz - max_z) / cos(angz));
+            gtz = max_z;
+            gtx = cx + (int)(cos(angx) * dist_cur);
+            gty = cy + (int)(cos(angy) * dist_cur);
+        }
+    }
     assert(gtx >= 0 && gty >= 0 && gtz >= 0);
+    assert(gtx <= max_x && gty <= max_y && gtz <= max_z);
 
     tp->setTileXYZ(gtx / 256, gty / 256, gtz / 128);
     tp->setOffXYZ(gtx % 256, gty % 256, gtz % 128);
@@ -270,6 +335,7 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
     double accuracy = 50;
 
     // angle is used to generate shot with randomizer
+    // TODO: add angle per weapon(precision is higher for smaller angle)
     double angle = 30;
 
     angle = (double)angle * ((double)(100 - accuracy) / 100.0);
@@ -329,6 +395,14 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
                 }
                 break;
             case Weapon::spe_PointToManyPoints:
+                for (unsigned short i = 0; i < ammoused; i++) {
+                    gen_shots.push_back(base_shot);
+                    shotTargetRandomizer(&cp, &(gen_shots.back().tp), angle);
+                }
+                if (shot_prop & Weapon::spe_RangeDamageOnReach) {
+                } else {
+                    all_shots = gen_shots;
+                }
                 break;
         }
     }

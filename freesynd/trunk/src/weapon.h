@@ -137,7 +137,8 @@ public:
             | spe_RangeDamageOnReach),
         wspt_Shotgun =
             (spe_PointToManyPoints | spe_TargetReachInstant | spe_UsesAmmo),
-        wspt_Uzi = (spe_PointToPoint | spe_TargetReachInstant | spe_UsesAmmo),
+        wspt_Uzi = (spe_PointToManyPoints | spe_TargetReachInstant
+            | spe_UsesAmmo),
         wspt_Minigun =
             (spe_PointToManyPoints | spe_TargetReachInstant | spe_UsesAmmo),
         wspt_Laser =

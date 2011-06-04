@@ -167,7 +167,7 @@ Weapon * WeaponManager::loadWeapon(Weapon::WeaponType wt) {
         case Weapon::Minigun:
             pWeapon = new Weapon("MINI-GUN", 19, 69, 10000, 500, 2304, 10, 6,
         372, Weapon::Minigun_Anim, snd::MINIGUN, Weapon::Minigun,
-        MapObject::dmg_Bullet, 1, 100, 100, Weapon::wspt_Minigun);
+        MapObject::dmg_Bullet, 5, 100, 100, Weapon::wspt_Minigun);
             break;
         case Weapon::Flamer:
             pWeapon = new Weapon("FLAMER", 21, 71, 1500, 1000, 512, 1, 4, 374,
@@ -188,7 +188,7 @@ Weapon * WeaponManager::loadWeapon(Weapon::WeaponType wt) {
         case Weapon::Uzi:
             pWeapon = new Weapon("UZI", 18, 68, 750, 50, 1792, 2, 5, 371,
         Weapon::Uzi_Anim, snd::UZI, Weapon::Uzi, MapObject::dmg_Bullet, 1,
-        150, 350, Weapon::wspt_Uzi);
+        150, 150, Weapon::wspt_Uzi);
             break;
         case Weapon::Laser:
             pWeapon = new Weapon("LASER", 20, 70, 35000, 5, 4096, 2000, 7, 373,
