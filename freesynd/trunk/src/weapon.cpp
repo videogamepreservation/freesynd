@@ -292,7 +292,9 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
     PathNode pn, cp;
     if(tp)
         pn = *tp;
-    uint8 has_blocker = inRange(&smp, &pn);
+    uint8 has_blocker = 1;
+    if (tobj || tp)
+        has_blocker = inRange(&smp, &pn);
     int xb = 0;
     int yb = 0;
     int txb = 0;
@@ -361,6 +363,10 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
     unsigned int shot_prop = pWeaponClass_->shotProperty();
     std::vector <ShotDesc> all_shots;
     all_shots.reserve(20);
+    
+    // TODO: define this somewhere
+    int mask = MapObject::mt_Ped | MapObject::mt_Vehicle
+        | MapObject::mt_Static | MapObject::mt_Weapon;
     if (shot_prop & Weapon::spe_CreatesProjectile) {
         // TODO: create projectile, 1 - spe_PointToPoint,
         // many - spe_PointToManyPoints
@@ -380,7 +386,35 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
     }
 
     if (shot_prop & Weapon::spe_NoTarget) {
-        // TODO: add this
+        std::vector <ShotDesc> gen_shots;
+        if (shot_prop & Weapon::spe_PointToPoint) {
+        } else if (shot_prop & Weapon::spe_PointToManyPoints) {
+        } else {
+            base_shot.tp = cp;
+            gen_shots.push_back(base_shot);
+        }
+        if (shot_prop & Weapon::spe_RangeDamageOnReach) {
+            for (unsigned int i = 0; i < gen_shots.size(); i++) {
+                std::vector<ShootableMapObject *> all_targets;
+
+                getInRangeAll(gen_shots[i].tp, all_targets, mask,
+                    true, 512);
+                for (unsigned int indx = 0; indx < all_targets.size();
+                    indx++)
+                {
+                    ShootableMapObject * smo = all_targets[indx];
+                    ShotDesc sd;
+                    sd.tp = PathNode(smo->tileX(), smo->tileY(),
+                        smo->tileZ(), smo->offX(), smo->offY(),
+                        smo->offZ());
+                    sd.d = gen_shots[i].d;
+                    sd.smo = smo;
+                    all_shots.push_back(sd);
+                }
+            }
+        } else {
+            all_shots = gen_shots;
+        }
     } else {
         std::vector <ShotDesc> gen_shots;
         switch((shot_prop & (Weapon::spe_PointToPoint
@@ -394,9 +428,6 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
                 if (shot_prop & Weapon::spe_RangeDamageOnReach) {
                     for (unsigned int i = 0; i < gen_shots.size(); i++) {
                         std::vector<ShootableMapObject *> all_targets;
-                        // TODO: define this somewhere
-                        int mask = MapObject::mt_Ped | MapObject::mt_Vehicle
-                            | MapObject::mt_Static | MapObject::mt_Weapon;
 
                         getInRangeAll(gen_shots[i].tp, all_targets, mask,
                             true, 512);
@@ -455,13 +486,13 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
             } else if ((has_blocker & 2) != 0) {
                 if (smp) {
                     if (smp->handleDamage(&d)) {
-                        SFXObject *so = new SFXObject(g_Session.getMission()->map(),
-                            SFXObject::sfxt_BulletHit);
-                        so->setPosition(smp->tileX(), smp->tileY(), smp->tileZ() + 1,
-                            smp->offX(), smp->offY(), smp->offZ());
-                        so->setVisZ(smp->visZ() + 1);
-                        g_Session.getMission()->addSfxObject(so);
                     }
+                    SFXObject *so = new SFXObject(g_Session.getMission()->map(),
+                        SFXObject::sfxt_BulletHit);
+                    so->setPosition(smp->tileX(), smp->tileY(), smp->tileZ() + 1,
+                        smp->offX(), smp->offY(), smp->offZ());
+                    so->setVisZ(smp->visZ() + 1);
+                    g_Session.getMission()->addSfxObject(so);
                 }
             }
         } else if (has_blocker == 8) {
@@ -690,7 +721,8 @@ uint8 WeaponInstance::inRange(ShootableMapObject ** t, PathNode * pn,
 }
 
 uint8 WeaponInstance::inRangeCPos(PathNode & cp, ShootableMapObject ** t,
-    PathNode * pn, bool setBlocker, bool checkTileOnly, int maxr)
+    PathNode * pn, bool setBlocker, bool checkTileOnly, int maxr,
+    double * distTo)
 {
     if (maxr == -1)
         maxr = range();
@@ -720,6 +752,8 @@ uint8 WeaponInstance::inRangeCPos(PathNode & cp, ShootableMapObject ** t,
         + (tz - cz) * (tz - cz)));
     uint8 block_mask = 1;
 
+    if (distTo)
+        *distTo = d;
     if (d == 0)
         return block_mask;
 
@@ -872,28 +906,50 @@ int WeaponInstance::getShots(int elapsed, int tForReload, int tForShot) {
 }
 
 void WeaponInstance::getInRangeOne(PathNode & cp,
-   std::vector<ShootableMapObject *> & targets, uint8 mask,
-   bool checkTileOnly, int maxr)
+   ShootableMapObject * & target, uint8 mask, bool checkTileOnly, int maxr)
 {
+    // TODO: this function should do auto-targetting, check for hostile needed
     Mission *m = g_App.getGameSession().getMission();
     bool found = false;
+    double dist = -1;
+    double d = -1;
     if (mask & MapObject::mt_Ped) {
-        for (int i = 0; i < m->numPeds() && (!found); i++) {
+        for (int i = 0; i < m->numPeds(); i++) {
             ShootableMapObject *ped = m->ped(i);
             if (!ped->isIgnored())
-                if (inRangeCPos(cp, &ped, NULL, false, checkTileOnly, maxr) == 1) {
-                    targets.push_back(ped);
-                    found = true;
+                if (inRangeCPos(cp, &ped, NULL, false, checkTileOnly, maxr,
+                    &d) == 1)
+                {
+                    if (found) {
+                        if (d < dist) {
+                            target = ped;
+                            dist = d;
+                        }
+                    } else {
+                        dist = d;
+                        target = ped;
+                        found = true;
+                    }
                 }
         }
     }
     if (mask & MapObject::mt_Static) {
-        for (int i = 0; i < m->numStatics() && (!found); i++) {
+        for (int i = 0; i < m->numStatics(); i++) {
             ShootableMapObject *st = m->statics(i);
             if (!st->isIgnored())
-                if (inRangeCPos(cp, &st, NULL, false, checkTileOnly, maxr) == 1) {
-                    targets.push_back(st);
-                    found = true;
+                if (inRangeCPos(cp, &st, NULL, false, checkTileOnly, maxr,
+                    &d) == 1)
+                {
+                    if (found) {
+                        if (d < dist) {
+                            target = st;
+                            dist = d;
+                        }
+                    } else {
+                        dist = d;
+                        target = st;
+                        found = true;
+                    }
                 }
         }
     }
@@ -901,9 +957,19 @@ void WeaponInstance::getInRangeOne(PathNode & cp,
         for (int i = 0; i < m->numVehicles() && (!found); i++) {
             ShootableMapObject *v = m->vehicle(i);
             if (!v->isIgnored())
-                if (inRangeCPos(cp, &v, NULL, false, checkTileOnly, maxr) == 1) {
-                    targets.push_back(v);
-                    found = true;
+                if (inRangeCPos(cp, &v, NULL, false, checkTileOnly, maxr,
+                    &d) == 1)
+                {
+                    if (found) {
+                        if (d < dist) {
+                            target = v;
+                            dist = d;
+                        }
+                    } else {
+                        dist = d;
+                        target = v;
+                        found = true;
+                    }
                 }
         }
     }
@@ -911,9 +977,19 @@ void WeaponInstance::getInRangeOne(PathNode & cp,
         for (int i = 0; i < m->numWeapons() && (!found); i++) {
             ShootableMapObject *w = m->weapon(i);
             if (!w->isIgnored())
-                if (inRangeCPos(cp, &w, NULL, false, checkTileOnly, maxr) == 1) {
-                    targets.push_back(w);
-                    found = true;
+                if (inRangeCPos(cp, &w, NULL, false, checkTileOnly, maxr,
+                    &d) == 1)
+                {
+                    if (found) {
+                        if (d < dist) {
+                            target = w;
+                            dist = d;
+                        }
+                    } else {
+                        dist = d;
+                        target = w;
+                        found = true;
+                    }
                 }
         }
     }

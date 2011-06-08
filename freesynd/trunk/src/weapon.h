@@ -151,7 +151,7 @@ public:
             (spe_PointToPoint | spe_TargetReachInstant | spe_UsesAmmo),
         wspt_Scanner = (spe_Owner | spe_ChangeAttribute),
         wspt_MediKit = (spe_Owner | spe_UsesAmmo),
-        wspt_TimeBomb = (spe_NoTarget
+        wspt_TimeBomb = (spe_NoTarget | spe_TargetReachInstant
             | spe_RangeDamageOnReach | spe_SelfDestruction),
         wspt_AccessCard = (spe_Owner | spe_ChangeAttribute),
         wspt_EnergyShield =
@@ -224,10 +224,10 @@ public:
         int maxr = -1);
     uint8 inRangeCPos(PathNode & cp, ShootableMapObject ** t,
         PathNode * pn = NULL, bool setBlocker = false,
-        bool checkTileOnly = false, int maxr = -1);
+        bool checkTileOnly = false, int maxr = -1, double * distTo = NULL);
 
     int getShots(int elapsed, int tForReload, int tForShot);
-    void getInRangeOne(PathNode & cp, std::vector<ShootableMapObject *> & targets,
+    void getInRangeOne(PathNode & cp, ShootableMapObject * & target,
         uint8 mask, bool checkTileOnly = true, int maxr = -1);
     void getInRangeAll(PathNode & cp, std::vector<ShootableMapObject *> & targets,
         uint8 mask, bool checkTileOnly = true, int maxr = -1);
