@@ -381,7 +381,6 @@ SFXObject::SFXObject(int m, int type):MapObject(m), sfx_life_over_(false)
 {
     main_type_ = type;
     switch(type) {
-        // TODO: set animations per type
         case SFXObject::sfxt_Unknown:
             printf("Unknown sfx created");
             sfx_life_over_ = true;
@@ -396,6 +395,7 @@ SFXObject::SFXObject(int m, int type):MapObject(m), sfx_life_over_(false)
             anim_ = 244;
             break;
         case SFXObject::sfxt_Fire_LongSmoke:
+            // point of impact for laser
             anim_ = 389;
             break;
         case SFXObject::sfxt_ExplosionFire:

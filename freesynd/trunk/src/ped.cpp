@@ -3091,7 +3091,7 @@ bool PedInstance::movementP(Mission *m, int elapsed)
             setDirection(diffx, diffy, &dir_);
 
             int dx = 0, dy = 0;
-            float d = sqrt((float) (diffx * diffx + diffy * diffy));
+            double d = sqrt((double)(diffx * diffx + diffy * diffy));
 
             if (abs(diffx) > 0)
                 // dx = diffx * (speed_ * elapsed / 1000) / d;

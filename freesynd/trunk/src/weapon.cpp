@@ -267,6 +267,119 @@ void WeaponInstance::shotTargetRandomizer(PathNode * cp, PathNode * tp,
     tp->setOffXYZ(gtx % 256, gty % 256, gtz % 128);
 }
 
+#if 0
+class ProjectileShot {
+public:
+    ProjectileShot(PathNode &cp, PathNode &tp, MapObject::DamageType dt,
+        int d_value, int d_range, ShootableMapObject * ignrd_obj = NULL);
+    bool animate(int elapsed, Mission *m);
+    bool lifeOver() { return life_over_; }
+
+protected:
+    toDefineXYZ cur_pos_;
+    toDefineXYZ target_pos_;
+    toDefineXYZ base_pos_;
+    MapObject::DamageType dmg_type_;
+    int dmg_value_;
+    int dmg_range_;
+    double dist_max_;
+    double dist_passed_;
+    toDefineXYZ last_anim_pos_;
+    double cur_dist_;
+    // per second, current 200
+    double speed_;
+    bool life_over_;
+    // owner should be ignored
+    ShootableMapObject * ignored_obj_;
+    double inc_x_;
+    double inc_y_;
+    double inc_z_;
+};
+
+ProjectileShot::ProjectileShot(PathNode &cp, PathNode &tp, MapObject::DamageType dt,
+        int d_value, int d_range, ShootableMapObject * ignrd_obj)
+{
+    cur_pos_.x = cp.tileX() * 256 + cp.offX();
+    cur_pos_.y = cp.tileY() * 256 + cp.offY();
+    cur_pos_.z = cp.tileZ() * 128 + cp.offZ();
+    target_pos_.x = tp.tileX() * 256 + tp.offX();
+    target_pos_.y = tp.tileY() * 256 + tp.offY();
+    target_pos_.z = tp.tileZ() * 128 + tp.offZ();
+    base_pos_ = cur_pos_;
+    dmg_type_ = dt;
+    dmg_value_ = d_value;
+    dmg_range_ = d_range;
+    dist_max_ = 10000;
+    dist_passed_ = 0;
+    speed_ = 4000;
+    life_over_ = false;
+    last_anim_pos_.x = -1;
+    last_anim_pos_.y = -1;
+    last_anim_pos_.z = -1;
+    double diffx = (double)(cur_pos_.x - target_pos_.x);
+    double diffy = (double)(cur_pos_.y - target_pos_.y);
+    double diffz = (double)(cur_pos_.z - target_pos_.z);
+    cur_dist_ = sqrt(diffx * diffx + diffy * diffy + diffz * diffz);
+    if (cur_dist_ != 0) {
+        inc_x_ = diffx / cur_dist_;
+        inc_y_ = diffy / cur_dist_;
+        inc_z_ = diffz / cur_dist_;
+    }
+    ignored_obj_ = ignrd_obj;
+}
+
+bool ProjectileShot::animate(int elapsed, Mission *m) {
+
+    bool max_range = false;
+    if (cur_dist_ != 0) {
+        double inc_dist = speed_ * elapsed / 1000;
+        if ((cur_dist_ + inc_dist) > dist_max_) {
+            inc_dist = dist_max_ - cur_dist_;
+            max_range = true;
+        }
+        bool ignored_state;
+
+        if (ignored_obj_) {
+            ignored_state = ignored_obj_->isIgnored();
+            ignored_obj_->setIsIgnored(true);
+        }
+
+        target_pos_.x = (int)(cur_pos_.x + inc_x_ * speed_);
+        if (target_pos_.x < 0) {
+            target_pos_.x = 0;
+            max_range = true;
+        } else if (target_pos_.x >= m->mmax_x_ * 256) {
+            target_pos_.x = m->mmax_x_ * 256 - 1;
+            max_range = true;
+        }
+        target_pos_.y = (int)(cur_pos_.y + inc_y_ * speed_);
+        if (target_pos_.y < 0) {
+            target_pos_.y = 0;
+            max_range = true;
+        } else if (target_pos_.y >= m->mmax_y_ * 256) {
+            target_pos_.y = m->mmax_y_ * 256 - 1;
+            max_range = true;
+        }
+        target_pos_.z = (int)(cur_pos_.z + inc_z_ * speed_);
+        if (target_pos_.z < 0) {
+            target_pos_.z = 0;
+            max_range = true;
+        } else if (target_pos_.z >= m->mmax_z_ * 128) {
+            target_pos_.z = m->mmax_z_ * 128 - 1;
+            max_range = true;
+        }
+
+        if (ignored_obj_) {
+            ignored_obj_->setIsIgnored(ignored_state);
+        }
+    }
+
+    if (cur_dist_ == 0 && !max_range) {
+    }
+    return true;
+}
+#endif
+
 bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
     int elapsed, bool ignoreBlocker)
 {
@@ -333,13 +446,13 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
     this->playSound();
     DamageInflictType d;
     // 90% accuracy
-    double accuracy = 90;
+    double accuracy = 0.9;
 
     // angle is used to generate shot with randomizer
     // TODO: add angle per weapon(precision is higher for smaller angle)
     double angle = 30;
 
-    angle = (double)angle * ((double)(100 - accuracy) / 100.0);
+    angle = angle * (1 - accuracy);
 
     ShotDesc base_shot;
     base_shot.smo = NULL;
@@ -357,7 +470,7 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
     unsigned int shot_prop = pWeaponClass_->shotProperty();
     std::vector <ShotDesc> all_shots;
     all_shots.reserve(20);
-    
+
     // TODO: define this somewhere
     int mask = MapObject::mt_Ped | MapObject::mt_Vehicle
         | MapObject::mt_Static | MapObject::mt_Weapon;
@@ -525,6 +638,9 @@ void WeaponInstance::playSound() {
 uint8 WeaponInstance::inRange(ShootableMapObject ** t, PathNode * pn,
                          bool setBlocker, bool checkTileOnly, int maxr)
 {
+    // NOTE: too many calculations of type tile*tilesize + off,
+    // optimize this if possible everywhere, in freesynd
+
     if (maxr == -1)
         maxr = range();
 
@@ -554,7 +670,6 @@ uint8 WeaponInstance::inRange(ShootableMapObject ** t, PathNode * pn,
     if (d == 0)
         return block_mask;
 
-
     Mission *m = g_Session.getMission();
 
     int cx = 0;
@@ -564,12 +679,13 @@ uint8 WeaponInstance::inRange(ShootableMapObject ** t, PathNode * pn,
         cx = owner_->tileX() * 256 + owner_->offX();
         cy = owner_->tileY() * 256 + owner_->offY();
         cz = (owner_->visZ() + 1) * 128 + owner_->offZ();
-        assert((owner_->visZ() + 1) < m->mmax_z_);
+        assert((owner_->visZ() + 1
+            + owner_->offZ() == 0 ? 0 : 1) < m->mmax_z_);
     } else {
         cx = tile_x_ * 256 + off_x_;
         cy = tile_y_ * 256 + off_y_;
         cz = (vis_z_ + 1) * 128 + off_z_;
-        assert((vis_z_ + 1) < m->mmax_z_);
+        assert((vis_z_ + 1 + off_z_ == 0 ? 0 : 1) < m->mmax_z_);
     }
     double sx = (double) cx;
     double sy = (double) cy;
@@ -582,7 +698,7 @@ uint8 WeaponInstance::inRange(ShootableMapObject ** t, PathNode * pn,
         tx = (*t)->tileX() * 256 + (*t)->offX();
         ty = (*t)->tileY() * 256 + (*t)->offY();
         tz = ((*t)->visZ() + 1) * 128 + (*t)->offZ();
-        assert(((*t)->visZ() + 1) < m->mmax_z_);
+        assert(((*t)->visZ() + 1 + (*t)->offZ() == 0 ? 0 : 1) < m->mmax_z_);
     } else {
         tx = pn->tileX() * 256 + pn->offX();
         ty = pn->tileY() * 256 + pn->offY();
@@ -726,6 +842,7 @@ uint8 WeaponInstance::inRangeCPos(PathNode & cp, ShootableMapObject ** t,
     int cx = cp.tileX() * 256 + cp.offX();
     int cy = cp.tileY() * 256 + cp.offY();
     int cz = cp.tileZ() * 128 + cp.offZ() + 1;
+    assert(cz < m->mmax_z_ * 128);
     int tx = 0;
     int ty = 0;
     int tz = 0;
@@ -733,7 +850,7 @@ uint8 WeaponInstance::inRangeCPos(PathNode & cp, ShootableMapObject ** t,
         tx = (*t)->tileX() * 256 + (*t)->offX();
         ty = (*t)->tileY() * 256 + (*t)->offY();
         tz = ((*t)->visZ() + 1) * 128 + (*t)->offZ();
-        assert(((*t)->visZ() + 1) < m->mmax_z_);
+        assert(((*t)->visZ() + 1 + (*t)->offZ() == 0 ? 0 : 1) < m->mmax_z_);
     } else {
         tx = pn->tileX() * 256 + pn->offX();
         ty = pn->tileY() * 256 + pn->offY();
@@ -990,14 +1107,17 @@ void WeaponInstance::getInRangeOne(PathNode & cp,
 }
 
 void WeaponInstance::getInRangeAll(PathNode & cp,
-   std::vector<ShootableMapObject *> & targets, uint8 mask, bool checkTileOnly, int maxr)
+   std::vector<ShootableMapObject *> & targets, uint8 mask, bool checkTileOnly,
+   int maxr)
 {
     Mission *m = g_App.getGameSession().getMission();
     if (mask & MapObject::mt_Ped) {
         for (int i = 0; i < m->numPeds(); i++) {
             ShootableMapObject *ped = m->ped(i);
             if (!ped->isIgnored())
-                if (inRangeCPos(cp, &ped, NULL, false, checkTileOnly, maxr) == 1) {
+                if (inRangeCPos(cp, &ped, NULL, false, checkTileOnly,
+                    maxr) == 1)
+                {
                     targets.push_back(ped);
                 }
         }
@@ -1006,7 +1126,9 @@ void WeaponInstance::getInRangeAll(PathNode & cp,
         for (int i = 0; i < m->numStatics(); i++) {
             ShootableMapObject *st = m->statics(i);
             if (!st->isIgnored())
-                if (inRangeCPos(cp, &st, NULL, false, checkTileOnly, maxr) == 1) {
+                if (inRangeCPos(cp, &st, NULL, false, checkTileOnly,
+                    maxr) == 1)
+                {
                     targets.push_back(st);
                 }
         }
@@ -1015,7 +1137,9 @@ void WeaponInstance::getInRangeAll(PathNode & cp,
         for (int i = 0; i < m->numVehicles(); i++) {
             ShootableMapObject *v = m->vehicle(i);
             if (!v->isIgnored())
-                if (inRangeCPos(cp, &v, NULL, false, checkTileOnly, maxr) == 1) {
+                if (inRangeCPos(cp, &v, NULL, false, checkTileOnly,
+                    maxr) == 1)
+                {
                     targets.push_back(v);
                 }
         }
@@ -1024,7 +1148,9 @@ void WeaponInstance::getInRangeAll(PathNode & cp,
         for (int i = 0; i < m->numWeapons(); i++) {
             ShootableMapObject *w = m->weapon(i);
             if (!w->isIgnored())
-                if (inRangeCPos(cp, &w, NULL, false, checkTileOnly, maxr) == 1) {
+                if (inRangeCPos(cp, &w, NULL, false, checkTileOnly,
+                    maxr) == 1)
+                {
                     targets.push_back(w);
                 }
         }

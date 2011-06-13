@@ -759,7 +759,7 @@ void GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
                         if (mission_->getShootableTile(stx, sty, stz,
                             sox, soy))
                         {
-                            PathNode pn = PathNode(stx, sty, stz, sox, soy);
+                            PathNode pn(stx, sty, stz, sox, soy);
                             //if (
                                 pa->selectedWeapon()->inflictDamage(NULL, &pn, -1, true)
                                 //)
