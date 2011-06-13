@@ -26,7 +26,7 @@
 #ifndef FILE_H
 #define FILE_H
 
-#include <string.h>
+#include <string>
 #include <vector>
 #include <stdio.h>
 #include "common.h"

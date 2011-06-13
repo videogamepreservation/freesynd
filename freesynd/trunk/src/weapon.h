@@ -226,6 +226,11 @@ public:
         PathNode * pn = NULL, bool setBlocker = false,
         bool checkTileOnly = false, int maxr = -1, double * distTo = NULL);
 
+    typedef struct {
+        PathNode tp;
+        DamageInflictType d;
+        ShootableMapObject *smo;
+    }ShotDesc;
     int getShots(int elapsed, int tForReload, int tForShot);
     void getInRangeOne(PathNode & cp, ShootableMapObject * & target,
         uint8 mask, bool checkTileOnly = true, int maxr = -1);

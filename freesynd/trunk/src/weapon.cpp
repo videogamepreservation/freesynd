@@ -341,12 +341,6 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
 
     angle = (double)angle * ((double)(100 - accuracy) / 100.0);
 
-    typedef struct {
-        PathNode tp;
-        DamageInflictType d;
-        ShootableMapObject *smo;
-    }ShotDesc;
-
     ShotDesc base_shot;
     base_shot.smo = NULL;
     base_shot.d.dtype = pWeaponClass_->dmgType();
