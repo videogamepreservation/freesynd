@@ -679,13 +679,12 @@ uint8 WeaponInstance::inRange(ShootableMapObject ** t, PathNode * pn,
         cx = owner_->tileX() * 256 + owner_->offX();
         cy = owner_->tileY() * 256 + owner_->offY();
         cz = (owner_->visZ() + 1) * 128 + owner_->offZ();
-        assert((owner_->visZ() + 1
-            + owner_->offZ() == 0 ? 0 : 1) < m->mmax_z_);
+        assert(cz <= (m->mmax_z_ - 1) * 128);
     } else {
         cx = tile_x_ * 256 + off_x_;
         cy = tile_y_ * 256 + off_y_;
         cz = (vis_z_ + 1) * 128 + off_z_;
-        assert((vis_z_ + 1 + off_z_ == 0 ? 0 : 1) < m->mmax_z_);
+        assert(cz <= (m->mmax_z_ - 1) * 128);
     }
     double sx = (double) cx;
     double sy = (double) cy;
@@ -698,12 +697,12 @@ uint8 WeaponInstance::inRange(ShootableMapObject ** t, PathNode * pn,
         tx = (*t)->tileX() * 256 + (*t)->offX();
         ty = (*t)->tileY() * 256 + (*t)->offY();
         tz = ((*t)->visZ() + 1) * 128 + (*t)->offZ();
-        assert(((*t)->visZ() + 1 + (*t)->offZ() == 0 ? 0 : 1) < m->mmax_z_);
+        assert(tz <= (m->mmax_z_ - 1) * 128);
     } else {
         tx = pn->tileX() * 256 + pn->offX();
         ty = pn->tileY() * 256 + pn->offY();
         tz = pn->tileZ() * 128 + pn->offZ();
-        assert(pn->tileZ() < m->mmax_z_);
+        assert(tz <= (m->mmax_z_ - 1) * 128);
     }
 
     if (d >= maxr) {
@@ -783,15 +782,20 @@ uint8 WeaponInstance::inRange(ShootableMapObject ** t, PathNode * pn,
     toDefineXYZ startXYZ = {cx, cy, cz};
     toDefineXYZ endXYZ = {tx, ty, tz};
     MapObject *blockerObj = NULL;
-    if (owner_)
+    bool ownerState, targetState;
+    if (owner_) {
+        ownerState = owner_->isIgnored();
         owner_->setIsIgnored(true);
-    if (t && *t)
+    }
+    if (t && *t) {
+        targetState = (*t)->isIgnored();
         (*t)->setIsIgnored(true);
+    }
     m->blockerExists(&startXYZ, &endXYZ, d, &blockerObj);
     if (owner_)
-        owner_->setIsIgnored();
+        owner_->setIsIgnored(ownerState);
     if (t && *t)
-        (*t)->setIsIgnored();
+        (*t)->setIsIgnored(targetState);
 
     if (blockerObj) {
         if (block_mask == 1)
@@ -842,7 +846,7 @@ uint8 WeaponInstance::inRangeCPos(PathNode & cp, ShootableMapObject ** t,
     int cx = cp.tileX() * 256 + cp.offX();
     int cy = cp.tileY() * 256 + cp.offY();
     int cz = cp.tileZ() * 128 + cp.offZ() + 1;
-    assert(cz < m->mmax_z_ * 128);
+    assert(cz <= (m->mmax_z_ - 1) * 128);
     int tx = 0;
     int ty = 0;
     int tz = 0;
@@ -850,12 +854,12 @@ uint8 WeaponInstance::inRangeCPos(PathNode & cp, ShootableMapObject ** t,
         tx = (*t)->tileX() * 256 + (*t)->offX();
         ty = (*t)->tileY() * 256 + (*t)->offY();
         tz = ((*t)->visZ() + 1) * 128 + (*t)->offZ();
-        assert(((*t)->visZ() + 1 + (*t)->offZ() == 0 ? 0 : 1) < m->mmax_z_);
+        assert(tz <= (m->mmax_z_ - 1) * 128);
     } else {
         tx = pn->tileX() * 256 + pn->offX();
         ty = pn->tileY() * 256 + pn->offY();
         tz = pn->tileZ() * 128 + pn->offZ();
-        assert(pn->tileZ() < m->mmax_z_);
+        assert(tz <= (m->mmax_z_ - 1) * 128);
     }
 
     double d = 0;
@@ -949,15 +953,21 @@ uint8 WeaponInstance::inRangeCPos(PathNode & cp, ShootableMapObject ** t,
     toDefineXYZ startXYZ = {cx, cy, cz};
     toDefineXYZ endXYZ = {tx, ty, tz};
     MapObject *blockerObj = NULL;
-    if (owner_)
+
+    bool ownerState, targetState;
+    if (owner_) {
+        ownerState = owner_->isIgnored();
         owner_->setIsIgnored(true);
-    if (t && *t)
+    }
+    if (t && *t) {
+        targetState = (*t)->isIgnored();
         (*t)->setIsIgnored(true);
+    }
     m->blockerExists(&startXYZ, &endXYZ, d, &blockerObj);
     if (owner_)
-        owner_->setIsIgnored();
+        owner_->setIsIgnored(ownerState);
     if (t && *t)
-        (*t)->setIsIgnored();
+        (*t)->setIsIgnored(targetState);
 
     if (blockerObj) {
         if (block_mask == 1)
@@ -1065,7 +1075,7 @@ void WeaponInstance::getInRangeOne(PathNode & cp,
         }
     }
     if (mask & MapObject::mt_Vehicle) {
-        for (int i = 0; i < m->numVehicles() && (!found); i++) {
+        for (int i = 0; i < m->numVehicles(); i++) {
             ShootableMapObject *v = m->vehicle(i);
             if (!v->isIgnored())
                 if (inRangeCPos(cp, &v, NULL, false, checkTileOnly, maxr,
@@ -1085,7 +1095,7 @@ void WeaponInstance::getInRangeOne(PathNode & cp,
         }
     }
     if (mask & MapObject::mt_Weapon) {
-        for (int i = 0; i < m->numWeapons() && (!found); i++) {
+        for (int i = 0; i < m->numWeapons(); i++) {
             ShootableMapObject *w = m->weapon(i);
             if (!w->isIgnored())
                 if (inRangeCPos(cp, &w, NULL, false, checkTileOnly, maxr,
