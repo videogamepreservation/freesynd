@@ -2891,6 +2891,169 @@ void Mission::blockerExists(toDefineXYZ * startXYZ, toDefineXYZ * endXYZ,
 }
 
 
+uint8 Mission::inRangeCPos(toDefineXYZ * cp, ShootableMapObject ** t,
+    PathNode * pn, bool setBlocker, bool checkTileOnly, int maxr,
+    double * distTo)
+{
+    assert(maxr >= 0);
+
+    int cx = (*cp).x;
+    int cy = (*cp).y;
+    int cz = (*cp).z;
+    assert(cz <= (mmax_z_ - 1) * 128);
+    int tx = 0;
+    int ty = 0;
+    int tz = 0;
+    if (t && *t) {
+        tx = (*t)->tileX() * 256 + (*t)->offX();
+        ty = (*t)->tileY() * 256 + (*t)->offY();
+        tz = ((*t)->visZ() + 1) * 128 + (*t)->offZ();
+        assert(tz <= (mmax_z_ - 1) * 128);
+    } else {
+        tx = pn->tileX() * 256 + pn->offX();
+        ty = pn->tileY() * 256 + pn->offY();
+        tz = pn->tileZ() * 128 + pn->offZ();
+        assert(tz <= (mmax_z_ - 1) * 128);
+    }
+
+    double d = 0;
+    d = sqrt((double)((tx - cx) * (tx - cx) + (ty - cy) * (ty - cy)
+        + (tz - cz) * (tz - cz)));
+    uint8 block_mask = 1;
+
+    if (distTo)
+        *distTo = d;
+    if (d == 0)
+        return block_mask;
+
+    double sx = (double) cx;
+    double sy = (double) cy;
+    double sz = (double) cz;
+
+    if (d >= maxr) {
+        block_mask = 0;
+        if (pn == NULL)
+            return block_mask;
+        if (t && *t) {
+            tz -= 128;
+            *t = NULL;
+        }
+        double dist_k = (double)maxr / d;
+        tx = cx + (int)((tx - cx) * dist_k);
+        ty = cy + (int)((ty - cy) * dist_k);
+        tz = cz + (int)((tz - cz) * dist_k);
+        if (setBlocker) {
+            pn->setTileXYZ(tx / 256, ty / 256, tz / 128);
+            pn->setOffXYZ(tx % 256, ty % 256, tz % 128);
+            block_mask = 8;
+        }
+    }
+
+    // NOTE: these values are less then 1, if they are incremented time
+    // required to check range will be shorter less precise check, if
+    // decremented longer more precise. Increment is (n * 8)
+    double inc_x = ((tx - cx) * 8) / d;
+    double inc_y = ((ty - cy) * 8) / d;
+    double inc_z = ((tz - cz) * 8) / d;
+
+    int oldx = cx / 256;
+    int oldy = cy / 256;
+    int oldz = cz / 128;
+    if (cz % 128 != 0)
+        oldz++;
+    double dist_close = d;
+
+    while (dist_close > 16.0f) {
+        int nx = (int)sx / 256;
+        int ny = (int)sy / 256;
+        int nz = (int)sz / 128;
+        if (((int)sz) % 128 != 0)
+            nz++;
+        if (oldx != nx || oldy != ny || oldz != nz) {
+            unsigned char twd = mtsurfaces_[nx + ny * mmax_x_
+                + nz * mmax_m_xy].twd;
+            if (!(twd == 0x00 || twd == 0x0C || twd == 0x10)) {
+                if (setBlocker) {
+                    if (pn) {
+                        sx -= inc_x;
+                        sy -= inc_y;
+                        sz -= inc_z;
+                        pn->setTileXYZ((int)sx / 256, (int)sy / 256,
+                            (int)sz / 128);
+                        pn->setOffXYZ((int)sx % 256, (int)sy % 256,
+                            (int)sz % 128);
+                    }
+                    block_mask = 4;
+                    break;
+                }
+                block_mask = 0;
+                break;
+            }
+            oldx = nx;
+            oldy = ny;
+            oldz = nz;
+        }
+        sx += inc_x;
+        sy += inc_y;
+        sz += inc_z;
+        double dsx = sx - (double)tx;
+        double dsy = sy - (double)ty;
+        double dsz = sz - (double)tz;
+        dist_close = sqrt(dsx * dsx + dsy * dsy + dsz * dsz);
+    }
+    if (checkTileOnly)
+        return block_mask;
+
+    toDefineXYZ startXYZ = {cx, cy, cz};
+    toDefineXYZ endXYZ = {tx, ty, tz};
+    MapObject *blockerObj = NULL;
+
+    bool targetState;
+    if (t && *t) {
+        targetState = (*t)->isIgnored();
+        (*t)->setIsIgnored(true);
+    }
+    blockerExists(&startXYZ, &endXYZ, d, &blockerObj);
+    if (t && *t)
+        (*t)->setIsIgnored(targetState);
+
+    if (blockerObj) {
+        if (block_mask == 1)
+            block_mask = 0;
+        if (setBlocker){
+            if (pn) {
+                if (block_mask == 4) {
+                    int dcx = cx - startXYZ.x;
+                    int dcy = cy - startXYZ.y;
+                    int dcz = cz - startXYZ.z;
+                    double dist_blocker =
+                        sqrt((double) (dcx * dcx + dcy * dcy + dcz * dcz));
+                    dcx = cx - (int)sx;
+                    dcy = cy - (int)sy;
+                    dcz = cz - (int)sz;
+                    if (dist_blocker
+                        < sqrt((double) (dcx * dcx + dcy * dcy + dcz * dcz)))
+                    {
+                        block_mask = 0;
+                    }
+                }
+                if (block_mask == 0) {
+                    pn->setTileXYZ(startXYZ.x / 256, startXYZ.y / 256,
+                        startXYZ.z / 128);
+                    pn->setOffXYZ(startXYZ.x % 256, startXYZ.y % 256,
+                        startXYZ.z % 128);
+                }
+            }
+            if (t) {
+                *t = (ShootableMapObject *)blockerObj;
+                block_mask |= 2;
+            }
+        }
+    }
+
+    return block_mask;
+}
+
 bool Mission::getShootableTile(int &x, int &y, int &z, int &ox, int &oy) {
     bool gotit = false;
     int bx, by, box, boy;

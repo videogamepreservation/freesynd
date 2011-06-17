@@ -222,9 +222,6 @@ public:
     uint8 inRange(ShootableMapObject ** t, PathNode * pn = NULL,
         bool setBlocker = false, bool checkTileOnly = false,
         int maxr = -1);
-    uint8 inRangeCPos(PathNode & cp, ShootableMapObject ** t,
-        PathNode * pn = NULL, bool setBlocker = false,
-        bool checkTileOnly = false, int maxr = -1, double * distTo = NULL);
 
     typedef struct {
         PathNode tp;
