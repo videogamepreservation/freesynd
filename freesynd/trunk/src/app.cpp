@@ -400,6 +400,10 @@ void App::keyEvent(Key & key, const int modKeys) {
  * \param modKeys State of all modifier keys
  */
 void App::mouseDownEvent(int x, int y, int button, const int modKeys) {
+    if (playingFli_) {
+        skipFli_ = true;
+        return;
+    }
     if (menus_.showingMenu()) {
         menus_.mouseDownEvent(x, y, button, modKeys);
         return;
@@ -440,8 +444,11 @@ void App::waitForKeyPress() {
     playingFli_ = true;
     skipFli_ = false;
 
-    while (running_ && !skipFli_)
+    while (running_ && !skipFli_) {
+        // small pause while waiting for key, also mouse event
+        SDL_Delay(20);
         system_->handleEvents();
+    }
 
     playingFli_ = false;
 }
