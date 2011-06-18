@@ -217,21 +217,22 @@ public:
 
     void resetWeaponUsedTime() { weapon_used_time_ = 0; }
 
-    void shotTargetRandomizer(PathNode * cp, PathNode * tp, double angle);
+    void shotTargetRandomizer(toDefineXYZ * cp, toDefineXYZ * tp, double angle);
 
     uint8 inRange(ShootableMapObject ** t, PathNode * pn = NULL,
         bool setBlocker = false, bool checkTileOnly = false,
         int maxr = -1);
 
     typedef struct {
-        PathNode tp;
+        PathNode tpn;
+        toDefineXYZ tp;
         DamageInflictType d;
         ShootableMapObject *smo;
     }ShotDesc;
     int getShots(int elapsed, int tForReload, int tForShot);
-    void getInRangeOne(PathNode & cp, ShootableMapObject * & target,
+    void getInRangeOne(toDefineXYZ & cp, ShootableMapObject * & target,
         uint8 mask, bool checkTileOnly = true, int maxr = -1);
-    void getInRangeAll(PathNode & cp, std::vector<ShootableMapObject *> & targets,
+    void getInRangeAll(toDefineXYZ & cp, std::vector<ShootableMapObject *> & targets,
         uint8 mask, bool checkTileOnly = true, int maxr = -1);
 
 protected:

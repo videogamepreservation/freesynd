@@ -151,18 +151,18 @@ void WeaponInstance::draw(int x, int y) {
     g_App.gameSprites().drawFrame(pWeaponClass_->anim(), frame_, x, y);
 }
 
-void WeaponInstance::shotTargetRandomizer(PathNode * cp, PathNode * tp,
+void WeaponInstance::shotTargetRandomizer(toDefineXYZ * cp, toDefineXYZ * tp,
                                           double angle)
 {
     if (angle == 0)
         return;
-    int cx = cp->tileX() * 256 + cp->offX();
-    int cy = cp->tileY() * 256 + cp->offY();
-    int cz = cp->tileZ() * 128 + cp->offZ();
+    int cx = cp->x;
+    int cy = cp->y;
+    int cz = cp->z;
 
-    int tx = tp->tileX() * 256 + tp->offX();
-    int ty = tp->tileY() * 256 + tp->offY();
-    int tz = tp->tileZ() * 128 + tp->offZ();
+    int tx = tp->x;
+    int ty = tp->y;
+    int tz = tp->z;
     double dtx = (double)(tx - cx);
     double dty = (double)(ty - cy);
     double dtz = (double)(tz - cz);
@@ -263,8 +263,9 @@ void WeaponInstance::shotTargetRandomizer(PathNode * cp, PathNode * tp,
     assert(gtx >= 0 && gty >= 0 && gtz >= 0);
     assert(gtx <= max_x && gty <= max_y && gtz <= max_z);
 
-    tp->setTileXYZ(gtx / 256, gty / 256, gtz / 128);
-    tp->setOffXYZ(gtx % 256, gty % 256, gtz % 128);
+    tp->x = gtx;
+    tp->y = gty;
+    tp->z = gtz;
 }
 
 #if 0
@@ -383,7 +384,6 @@ bool ProjectileShot::animate(int elapsed, Mission *m) {
 bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
     int elapsed, bool ignoreBlocker)
 {
-
     if (ammo_remaining_ == 0)
         return false;
 
@@ -402,7 +402,8 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
     }
 
     ShootableMapObject * smp = tobj;
-    PathNode pn, cp;
+    PathNode pn;
+    toDefineXYZ cp;
     if(tp)
         pn = *tp;
     uint8 has_blocker = 1;
@@ -415,8 +416,9 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
     if (owner_) {
         xb = owner_->tileX() * 256 + owner_->offX();
         yb = owner_->tileY() * 256 + owner_->offY();
-        cp.setTileXYZ(owner_->tileX(), owner_->tileY(), owner_->visZ());
-        cp.setOffXYZ(owner_->offX(), owner_->offY(), owner_->offZ());
+        cp.x = xb;
+        cp.y = yb;
+        cp.z = owner_->tileZ() * 128 + owner_->offZ();
         if (tobj || tp) {
             if (tobj) {
                 txb = tobj->tileX() * 256 + tobj->offX();
@@ -433,8 +435,9 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
     } else {
         xb = tile_x_ * 256 + off_x_;
         yb = tile_y_ * 256 + off_y_;
-        cp.setTileXYZ(tile_x_, tile_y_, vis_z_);
-        cp.setOffXYZ(off_x_, off_y_, off_z_);
+        cp.x = xb;
+        cp.y = yb;
+        cp.z = tile_z_ * 128 + off_z_;
     }
     if ((has_blocker & 6) != 0) {
         if (!ignoreBlocker)
@@ -459,13 +462,16 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
     base_shot.d.dtype = pWeaponClass_->dmgType();
     base_shot.d.dvalue =  pWeaponClass_->damagePerShot();
     if (tobj) {
-        base_shot.tp.setTileXYZ(tobj->tileX(), tobj->tileY(),
-            tobj->visZ() + 1);
-        base_shot.tp.setOffXYZ(tobj->offX(), tobj->offY(), tobj->offZ());
+        base_shot.tp.x = tobj->tileX() * 256 + tobj->offX();
+        base_shot.tp.y = tobj->tileY() * 256 + tobj->offY();
+        base_shot.tp.z = tobj->tileZ() * 128 + tobj->offZ();
+        base_shot.tpn.setTileXYZ(tobj->tileX(), tobj->tileY(), tobj->tileZ());
+        base_shot.tpn.setOffXYZ(tobj->offX(), tobj->offY(), tobj->offZ());
     } else {
-        base_shot.tp.setTileXYZ(tp->tileX(), tp->tileY(),
-            tp->tileZ());
-        base_shot.tp.setOffXYZ(tp->offX(), tp->offY(), tp->offZ());
+        base_shot.tp.x = tp->tileX() * 256 + tp->offX();
+        base_shot.tp.y = tp->tileY() * 256 + tp->offY();
+        base_shot.tp.z = tp->tileZ() * 128 + tp->offZ();
+        base_shot.tpn = *tp;
     }
     unsigned int shot_prop = pWeaponClass_->shotProperty();
     std::vector <ShotDesc> all_shots;
@@ -511,8 +517,12 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
                 {
                     ShootableMapObject * smo = all_targets[indx];
                     ShotDesc sd;
-                    sd.tp = PathNode(smo->tileX(), smo->tileY(),
-                        smo->tileZ(), smo->offX(), smo->offY(),
+                    sd.tp.x = smo->tileX() * 256 + smo->offX();
+                    sd.tp.y = smo->tileY() * 256 + smo->offY();
+                    sd.tp.z = smo->tileZ() * 128 + smo->offZ();
+                    sd.tpn.setTileXYZ(smo->tileX(), smo->tileY(),
+                        smo->tileZ());
+                    sd.tpn.setOffXYZ(smo->offX(), smo->offY(),
                         smo->offZ());
                     sd.d = gen_shots[i].d;
                     sd.smo = smo;
@@ -530,7 +540,12 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
             case Weapon::spe_PointToPoint:
                 for (int i = 0; i < ammoused; i++) {
                     gen_shots.push_back(base_shot);
-                    shotTargetRandomizer(&cp, &(gen_shots.back().tp), angle);
+                    ShotDesc &last_one = gen_shots.back();
+                    shotTargetRandomizer(&cp, &(last_one.tp), angle);
+                    last_one.tpn.setTileXYZ(last_one.tp.x / 256,
+                        last_one.tp.y / 256, last_one.tp.z / 128);
+                    last_one.tpn.setOffXYZ(last_one.tp.x % 256,
+                        last_one.tp.y % 256, last_one.tp.z % 128);
                 }
                 if (shot_prop & Weapon::spe_RangeDamageOnReach) {
                     for (unsigned int i = 0; i < gen_shots.size(); i++) {
@@ -543,8 +558,12 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
                         {
                             ShootableMapObject * smo = all_targets[indx];
                             ShotDesc sd;
-                            sd.tp = PathNode(smo->tileX(), smo->tileY(),
-                                smo->tileZ(), smo->offX(), smo->offY(),
+                            sd.tp.x = smo->tileX() * 256 + smo->offX();
+                            sd.tp.y = smo->tileY() * 256 + smo->offY();
+                            sd.tp.z = smo->tileZ() * 128 + smo->offZ();
+                            sd.tpn.setTileXYZ(smo->tileX(), smo->tileY(),
+                                smo->tileZ());
+                            sd.tpn.setOffXYZ(smo->offX(), smo->offY(),
                                 smo->offZ());
                             sd.d = gen_shots[i].d;
                             sd.smo = smo;
@@ -558,7 +577,12 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
             case Weapon::spe_PointToManyPoints:
                 for (unsigned short i = 0; i < ammoused; i++) {
                     gen_shots.push_back(base_shot);
-                    shotTargetRandomizer(&cp, &(gen_shots.back().tp), angle);
+                    ShotDesc &last_one = gen_shots.back();
+                    shotTargetRandomizer(&cp, &(last_one.tp), angle);
+                    last_one.tpn.setTileXYZ(last_one.tp.x / 256,
+                        last_one.tp.y / 256, last_one.tp.z / 128);
+                    last_one.tpn.setOffXYZ(last_one.tp.x % 256,
+                        last_one.tp.y % 256, last_one.tp.z % 128);
                 }
                 if (shot_prop & Weapon::spe_RangeDamageOnReach) {
                 } else {
@@ -570,14 +594,14 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
 
     for (unsigned short i = 0; i < all_shots.size(); i++) {
         smp = all_shots[i].smo;
-        pn = all_shots[i].tp;
+        pn = all_shots[i].tpn;
         if (shot_prop & Weapon::spe_RangeDamageOnReach)
             has_blocker = 1;
         else
             has_blocker = inRange(&smp, &pn, true);
         d.ddir = -1;
-        txb = pn.tileX() * 256 + pn.offX();
-        tyb = pn.tileY() * 256 + pn.offY();
+        txb = all_shots[i].tp.x;
+        tyb = all_shots[i].tp.y;
         setDirection(txb - xb, tyb - yb, &(d.ddir));
 
         d.dvalue = all_shots[i].d.dvalue;
@@ -688,18 +712,14 @@ int WeaponInstance::getShots(int elapsed, int tForReload, int tForShot) {
     return shots;
 }
 
-void WeaponInstance::getInRangeOne(PathNode & cp,
+void WeaponInstance::getInRangeOne(toDefineXYZ & cp,
    ShootableMapObject * & target, uint8 mask, bool checkTileOnly, int maxr)
 {
     // TODO: this function should do auto-targetting, check for hostile needed
-    Mission *m = g_App.getGameSession().getMission();
-    bool found = false;
-    double dist = -1;
-    double d = -1;;
     toDefineXYZ cpXYZ;
-    cpXYZ.x = cp.tileX() * 256 + cp.offX();
-    cpXYZ.y = cp.tileY() * 256 + cp.offY();
-    cpXYZ.z = cp.tileZ() * 128 + cp.offZ();
+    cpXYZ.x = cp.x;
+    cpXYZ.y = cp.y;
+    cpXYZ.z = cp.z;
     bool ownerState;
     if (owner_) {
         ownerState = owner_->isIgnored();
@@ -708,144 +728,23 @@ void WeaponInstance::getInRangeOne(PathNode & cp,
     } else {
         cpXYZ.z += 1;
     }
+    
+    g_App.getGameSession().getMission()->getInRangeOne(&cpXYZ, target, mask,
+        checkTileOnly, maxr);
 
-    if (mask & MapObject::mt_Ped) {
-        for (int i = 0; i < m->numPeds(); i++) {
-            ShootableMapObject *ped = m->ped(i);
-            if (!ped->isIgnored())
-                if (m->inRangeCPos(&cpXYZ, &ped, NULL, false, checkTileOnly, maxr,
-                    &d) == 1)
-                {
-                    if (found) {
-                        if (d < dist) {
-                            target = ped;
-                            dist = d;
-                        }
-                    } else {
-                        dist = d;
-                        target = ped;
-                        found = true;
-                    }
-                }
-        }
-    }
-    if (mask & MapObject::mt_Static) {
-        for (int i = 0; i < m->numStatics(); i++) {
-            ShootableMapObject *st = m->statics(i);
-            if (!st->isIgnored())
-                if (m->inRangeCPos(&cpXYZ, &st, NULL, false, checkTileOnly, maxr,
-                    &d) == 1)
-                {
-                    if (found) {
-                        if (d < dist) {
-                            target = st;
-                            dist = d;
-                        }
-                    } else {
-                        dist = d;
-                        target = st;
-                        found = true;
-                    }
-                }
-        }
-    }
-    if (mask & MapObject::mt_Vehicle) {
-        for (int i = 0; i < m->numVehicles(); i++) {
-            ShootableMapObject *v = m->vehicle(i);
-            if (!v->isIgnored())
-                if (m->inRangeCPos(&cpXYZ, &v, NULL, false, checkTileOnly, maxr,
-                    &d) == 1)
-                {
-                    if (found) {
-                        if (d < dist) {
-                            target = v;
-                            dist = d;
-                        }
-                    } else {
-                        dist = d;
-                        target = v;
-                        found = true;
-                    }
-                }
-        }
-    }
-    if (mask & MapObject::mt_Weapon) {
-        for (int i = 0; i < m->numWeapons(); i++) {
-            ShootableMapObject *w = m->weapon(i);
-            if (!w->isIgnored())
-                if (m->inRangeCPos(&cpXYZ, &w, NULL, false, checkTileOnly, maxr,
-                    &d) == 1)
-                {
-                    if (found) {
-                        if (d < dist) {
-                            target = w;
-                            dist = d;
-                        }
-                    } else {
-                        dist = d;
-                        target = w;
-                        found = true;
-                    }
-                }
-        }
-    }
     if (owner_)
         owner_->setIsIgnored(ownerState);
 }
 
-void WeaponInstance::getInRangeAll(PathNode & cp,
+void WeaponInstance::getInRangeAll(toDefineXYZ & cp,
    std::vector<ShootableMapObject *> & targets, uint8 mask,
    bool checkTileOnly, int maxr)
 {
     // NOTE: no need to ignore owner_ here, as all in range are vulnerable
     toDefineXYZ cpXYZ;
-    cpXYZ.x = cp.tileX() * 256 + cp.offX();
-    cpXYZ.y = cp.tileY() * 256 + cp.offY();
-    cpXYZ.z = cp.tileZ() * 128 + cp.offZ() + 1;
-    Mission *m = g_App.getGameSession().getMission();
-
-    if (mask & MapObject::mt_Ped) {
-        for (int i = 0; i < m->numPeds(); i++) {
-            ShootableMapObject *ped = m->ped(i);
-            if (!ped->isIgnored())
-                if (m->inRangeCPos(&cpXYZ, &ped, NULL, false, checkTileOnly,
-                    maxr) == 1)
-                {
-                    targets.push_back(ped);
-                }
-        }
-    }
-    if (mask & MapObject::mt_Static) {
-        for (int i = 0; i < m->numStatics(); i++) {
-            ShootableMapObject *st = m->statics(i);
-            if (!st->isIgnored())
-                if (m->inRangeCPos(&cpXYZ, &st, NULL, false, checkTileOnly,
-                    maxr) == 1)
-                {
-                    targets.push_back(st);
-                }
-        }
-    }
-    if (mask & MapObject::mt_Vehicle) {
-        for (int i = 0; i < m->numVehicles(); i++) {
-            ShootableMapObject *v = m->vehicle(i);
-            if (!v->isIgnored())
-                if (m->inRangeCPos(&cpXYZ, &v, NULL, false, checkTileOnly,
-                    maxr) == 1)
-                {
-                    targets.push_back(v);
-                }
-        }
-    }
-    if (mask & MapObject::mt_Weapon) {
-        for (int i = 0; i < m->numWeapons(); i++) {
-            ShootableMapObject *w = m->weapon(i);
-            if (!w->isIgnored())
-                if (m->inRangeCPos(&cpXYZ, &w, NULL, false, checkTileOnly,
-                    maxr) == 1)
-                {
-                    targets.push_back(w);
-                }
-        }
-    }
+    cpXYZ.x = cp.x;
+    cpXYZ.y = cp.y;
+    cpXYZ.z = cp.z + 1;
+    g_App.getGameSession().getMission()->getInRangeAll(&cpXYZ, targets, mask,
+        checkTileOnly, maxr);
 }
