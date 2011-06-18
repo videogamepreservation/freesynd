@@ -271,7 +271,7 @@ void WeaponInstance::shotTargetRandomizer(toDefineXYZ * cp, toDefineXYZ * tp,
 #if 0
 class ProjectileShot {
 public:
-    ProjectileShot(PathNode &cp, PathNode &tp, MapObject::DamageType dt,
+    ProjectileShot(toDefineXYZ &cp, toDefineXYZ &tp, MapObject::DamageType dt,
         int d_value, int d_range, ShootableMapObject * ignrd_obj = NULL);
     bool animate(int elapsed, Mission *m);
     bool lifeOver() { return life_over_; }
@@ -297,15 +297,11 @@ protected:
     double inc_z_;
 };
 
-ProjectileShot::ProjectileShot(PathNode &cp, PathNode &tp, MapObject::DamageType dt,
+ProjectileShot::ProjectileShot(toDefineXYZ &cp, toDefineXYZ &tp, MapObject::DamageType dt,
         int d_value, int d_range, ShootableMapObject * ignrd_obj)
 {
-    cur_pos_.x = cp.tileX() * 256 + cp.offX();
-    cur_pos_.y = cp.tileY() * 256 + cp.offY();
-    cur_pos_.z = cp.tileZ() * 128 + cp.offZ();
-    target_pos_.x = tp.tileX() * 256 + tp.offX();
-    target_pos_.y = tp.tileY() * 256 + tp.offY();
-    target_pos_.z = tp.tileZ() * 128 + tp.offZ();
+    cur_pos_ = cp;
+    target_pos_ = tp;
     base_pos_ = cur_pos_;
     dmg_type_ = dt;
     dmg_value_ = d_value;
@@ -332,11 +328,13 @@ ProjectileShot::ProjectileShot(PathNode &cp, PathNode &tp, MapObject::DamageType
 bool ProjectileShot::animate(int elapsed, Mission *m) {
 
     bool max_range = false;
+    bool self_remove = false;
     if (cur_dist_ != 0) {
         double inc_dist = speed_ * elapsed / 1000;
         if ((cur_dist_ + inc_dist) > dist_max_) {
             inc_dist = dist_max_ - cur_dist_;
             max_range = true;
+            self_remove = true;
         }
         bool ignored_state;
 
@@ -348,26 +346,41 @@ bool ProjectileShot::animate(int elapsed, Mission *m) {
         target_pos_.x = (int)(cur_pos_.x + inc_x_ * speed_);
         if (target_pos_.x < 0) {
             target_pos_.x = 0;
-            max_range = true;
+            self_remove = true;
         } else if (target_pos_.x >= m->mmax_x_ * 256) {
             target_pos_.x = m->mmax_x_ * 256 - 1;
-            max_range = true;
+            self_remove = true;
         }
         target_pos_.y = (int)(cur_pos_.y + inc_y_ * speed_);
         if (target_pos_.y < 0) {
             target_pos_.y = 0;
-            max_range = true;
+            self_remove = true;
         } else if (target_pos_.y >= m->mmax_y_ * 256) {
             target_pos_.y = m->mmax_y_ * 256 - 1;
-            max_range = true;
+            self_remove = true;
         }
         target_pos_.z = (int)(cur_pos_.z + inc_z_ * speed_);
         if (target_pos_.z < 0) {
             target_pos_.z = 0;
-            max_range = true;
+            self_remove = true;
         } else if (target_pos_.z >= m->mmax_z_ * 128) {
             target_pos_.z = m->mmax_z_ * 128 - 1;
-            max_range = true;
+            self_remove = true;
+        }
+
+        PathNode pn(target_pos_.x / 256, target_pos_.y / 256,
+            target_pos_.z / 128, target_pos_.x % 256, target_pos_.y % 256,
+            target_pos_.z % 128);
+        uint8 block_mask = g_App.getGameSession().getMission()->inRangeCPos(
+            &cur_pos_, NULL, &pn, true, false);
+        if (block_mask == 1) {
+            cur_pos_ = target_pos_;
+        } else if (block_mask != 0) {
+            cur_pos_.x = pn.tileX() * 256 + pn.offX();
+            cur_pos_.y = pn.tileY() * 256 + pn.offY();
+            cur_pos_.z = pn.tileZ() * 128 + pn.offZ();
+            cur_dist_ = 0;
+            self_remove = true;
         }
 
         if (ignored_obj_) {

@@ -2439,7 +2439,7 @@ bool Mission::getWalkable(int &x, int &y, int &z, int &ox, int &oy) {
     int bz = mmax_z_;
     unsigned int cindx;
     unsigned char twd;
-    do{
+    do {
         bz--;
         bx = x * 256 + ox + 128 * bz;
         box = bx % 256;
@@ -2664,7 +2664,7 @@ bool Mission::getWalkable(int &x, int &y, int &z, int &ox, int &oy) {
                 }
             }
         }
-    }while (bz != 0 && !gotit);
+    } while (bz != 0 && !gotit);
     if (gotit) {
         x = bx;
         y = by;
@@ -3200,7 +3200,7 @@ bool Mission::getShootableTile(int &x, int &y, int &z, int &ox, int &oy) {
     int bx, by, box, boy;
     int bz = mmax_z_;
     unsigned char twd;
-    do{
+    do {
         bz--;
         bx = x * 256 + ox + 128 * bz;
         box = bx % 256;
@@ -3213,7 +3213,7 @@ bool Mission::getShootableTile(int &x, int &y, int &z, int &ox, int &oy) {
         twd = mtsurfaces_[bx + by * mmax_x_ + bz * mmax_m_xy].twd;
         if (!(twd == 0x00 || twd == 0x0C || twd == 0x10))
             gotit = true;
-    }while (bz != 0 && !gotit);
+    } while (bz != 0 && !gotit);
     if (gotit) {
         x = bx;
         y = by;
