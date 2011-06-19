@@ -245,4 +245,33 @@ protected:
     int weapon_used_time_;
 };
 
+class ProjectileShot {
+public:
+    ProjectileShot(toDefineXYZ &cp, toDefineXYZ &tp, MapObject::DamageType dt,
+        int d_value, int d_range, ShootableMapObject * ignrd_obj = NULL,
+        int range_max = 1);
+    ~ProjectileShot() {}
+    bool animate(int elapsed, Mission *m);
+    bool prjsLifeOver() { return life_over_; }
+
+protected:
+    toDefineXYZ cur_pos_;
+    toDefineXYZ target_pos_;
+    toDefineXYZ base_pos_;
+    MapObject::DamageType dmg_type_;
+    int dmg_value_;
+    int dmg_range_;
+    double dist_max_;
+    double dist_passed_;
+    double last_anim_dist_;
+    double cur_dist_;
+    double speed_;
+    bool life_over_;
+    // owner should be ignored
+    ShootableMapObject * ignored_obj_;
+    double inc_x_;
+    double inc_y_;
+    double inc_z_;
+};
+
 #endif

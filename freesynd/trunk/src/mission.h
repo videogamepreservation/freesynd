@@ -30,14 +30,13 @@
 #include "common.h"
 #include "mapobject.h"
 #include "pathsurfaces.h"
+#include "weapon.h"
 #include <string>
 #include <vector>
 #include <set>
 
 class VehicleInstance;
 class PedInstance;
-class WeaponInstance;
-class Static;
 class MapHelper;
 
 /*!
@@ -130,21 +129,36 @@ public:
 
     int numPeds() { return (int) peds_.size(); }
     PedInstance *ped(int i) { return peds_[i]; }
+
     int numVehicles() { return (int) vehicles_.size(); }
     VehicleInstance *vehicle(int i) { return vehicles_[i]; }
 
     int numWeapons() { return (int) weapons_.size(); }
     WeaponInstance *weapon(int i) { return weapons_[i]; }
+
     int numStatics() { return (int) statics_.size(); }
     Static *statics(int i) { return statics_[i]; }
+
     int numSfxObjects() { return (int) sfx_objects_.size(); }
     SFXObject *sfxObjects(int i) { return sfx_objects_[i]; }
+
+    int numPrjShots() { return (int) prj_shots_.size(); }
+    ProjectileShot *prjShots(int i) { return prj_shots_[i]; }
+
     void addSfxObject(SFXObject *so) {
         sfx_objects_.push_back(so);
     }
     void delSfxObject(int i) {
         delete sfx_objects_[i];
         sfx_objects_.erase((sfx_objects_.begin() + i));
+    }
+
+    void addPrjShot(ProjectileShot *prj) {
+        prj_shots_.push_back(prj);
+    }
+    void delPrjShot(int i) {
+        delete prj_shots_[i];
+        prj_shots_.erase((prj_shots_.begin() + i));
     }
 
     /*! Return the mission statistics. */
@@ -171,6 +185,7 @@ public:
     bool getWalkable(int &x, int &y, int &z, int &ox, int &oy);
     bool getShootableTile(int &x, int &y, int &z, int &ox, int &oy);
     void adjXYZ(int &x, int &y, int &z);
+
     void blockerExists(toDefineXYZ * startXYZ, toDefineXYZ * endXYZ,
         double dist, MapObject** blockerObj);
     uint8 inRangeCPos(toDefineXYZ * cp, ShootableMapObject ** t,
@@ -476,6 +491,7 @@ protected:
     std::vector<WeaponInstance *> weapons_;
     std::vector<Static *> statics_;
     std::vector<SFXObject *> sfx_objects_;
+    std::vector<ProjectileShot *> prj_shots_;
     std::vector<VehicleInstance *> cache_vehicles_;
     std::vector<PedInstance *> cache_peds_;
     std::vector<WeaponInstance *> cache_weapons_;

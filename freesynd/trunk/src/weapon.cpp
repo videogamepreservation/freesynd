@@ -103,6 +103,7 @@ WeaponInstance::WeaponInstance(Weapon * w) : ShootableMapObject(-1)
     rcv_damage_def_ = MapObject::ddmg_Invulnerable;
     weapon_used_time_ = 0;
     major_type_ = MapObject::mt_Weapon;
+    owner_ = NULL;
 }
 
 bool WeaponInstance::animate(int elapsed) {
@@ -268,37 +269,8 @@ void WeaponInstance::shotTargetRandomizer(toDefineXYZ * cp, toDefineXYZ * tp,
     tp->z = gtz;
 }
 
-#if 0
-class ProjectileShot {
-public:
-    ProjectileShot(toDefineXYZ &cp, toDefineXYZ &tp, MapObject::DamageType dt,
-        int d_value, int d_range, ShootableMapObject * ignrd_obj = NULL);
-    bool animate(int elapsed, Mission *m);
-    bool lifeOver() { return life_over_; }
-
-protected:
-    toDefineXYZ cur_pos_;
-    toDefineXYZ target_pos_;
-    toDefineXYZ base_pos_;
-    MapObject::DamageType dmg_type_;
-    int dmg_value_;
-    int dmg_range_;
-    double dist_max_;
-    double dist_passed_;
-    toDefineXYZ last_anim_pos_;
-    double cur_dist_;
-    // per second, current 200
-    double speed_;
-    bool life_over_;
-    // owner should be ignored
-    ShootableMapObject * ignored_obj_;
-    double inc_x_;
-    double inc_y_;
-    double inc_z_;
-};
-
 ProjectileShot::ProjectileShot(toDefineXYZ &cp, toDefineXYZ &tp, MapObject::DamageType dt,
-        int d_value, int d_range, ShootableMapObject * ignrd_obj)
+        int d_value, int d_range, ShootableMapObject * ignrd_obj, int range_max)
 {
     cur_pos_ = cp;
     target_pos_ = tp;
@@ -306,16 +278,14 @@ ProjectileShot::ProjectileShot(toDefineXYZ &cp, toDefineXYZ &tp, MapObject::Dama
     dmg_type_ = dt;
     dmg_value_ = d_value;
     dmg_range_ = d_range;
-    dist_max_ = 10000;
+    dist_max_ = range_max;
     dist_passed_ = 0;
     speed_ = 4000;
     life_over_ = false;
-    last_anim_pos_.x = -1;
-    last_anim_pos_.y = -1;
-    last_anim_pos_.z = -1;
-    double diffx = (double)(cur_pos_.x - target_pos_.x);
-    double diffy = (double)(cur_pos_.y - target_pos_.y);
-    double diffz = (double)(cur_pos_.z - target_pos_.z);
+    last_anim_dist_ = 0;
+    double diffx = (double)(target_pos_.x - cur_pos_.x);
+    double diffy = (double)(target_pos_.y - cur_pos_.y);
+    double diffz = (double)(target_pos_.z - cur_pos_.z);
     cur_dist_ = sqrt(diffx * diffx + diffy * diffy + diffz * diffz);
     if (cur_dist_ != 0) {
         inc_x_ = diffx / cur_dist_;
@@ -330,7 +300,7 @@ bool ProjectileShot::animate(int elapsed, Mission *m) {
     bool max_range = false;
     bool self_remove = false;
     if (cur_dist_ != 0) {
-        double inc_dist = speed_ * elapsed / 1000;
+        double inc_dist = speed_ * (double)elapsed / 1000;
         if ((cur_dist_ + inc_dist) > dist_max_) {
             inc_dist = dist_max_ - cur_dist_;
             max_range = true;
@@ -343,44 +313,92 @@ bool ProjectileShot::animate(int elapsed, Mission *m) {
             ignored_obj_->setIsIgnored(true);
         }
 
-        target_pos_.x = (int)(cur_pos_.x + inc_x_ * speed_);
-        if (target_pos_.x < 0) {
-            target_pos_.x = 0;
+        toDefineXYZ reached_pos;
+        reached_pos.x = cur_pos_.x + (int)(inc_x_ * inc_dist);
+        if (reached_pos.x < 0) {
+            reached_pos.x = 0;
             self_remove = true;
-        } else if (target_pos_.x >= m->mmax_x_ * 256) {
-            target_pos_.x = m->mmax_x_ * 256 - 1;
-            self_remove = true;
-        }
-        target_pos_.y = (int)(cur_pos_.y + inc_y_ * speed_);
-        if (target_pos_.y < 0) {
-            target_pos_.y = 0;
-            self_remove = true;
-        } else if (target_pos_.y >= m->mmax_y_ * 256) {
-            target_pos_.y = m->mmax_y_ * 256 - 1;
+        } else if (reached_pos.x >= m->mmax_x_ * 256) {
+            reached_pos.x = m->mmax_x_ * 256 - 1;
             self_remove = true;
         }
-        target_pos_.z = (int)(cur_pos_.z + inc_z_ * speed_);
-        if (target_pos_.z < 0) {
-            target_pos_.z = 0;
+        reached_pos.y = cur_pos_.y + (int)(inc_y_ * inc_dist);
+        if (reached_pos.y < 0) {
+            reached_pos.y = 0;
             self_remove = true;
-        } else if (target_pos_.z >= m->mmax_z_ * 128) {
-            target_pos_.z = m->mmax_z_ * 128 - 1;
+        } else if (reached_pos.y >= m->mmax_y_ * 256) {
+            reached_pos.y = m->mmax_y_ * 256 - 1;
+            self_remove = true;
+        }
+        reached_pos.z = cur_pos_.z + (int)(inc_z_ * inc_dist);
+        if (reached_pos.z < 0) {
+            reached_pos.z = 0;
+            self_remove = true;
+        } else if (reached_pos.z >= m->mmax_z_ * 128) {
+            reached_pos.z = m->mmax_z_ * 128 - 1;
             self_remove = true;
         }
 
-        PathNode pn(target_pos_.x / 256, target_pos_.y / 256,
-            target_pos_.z / 128, target_pos_.x % 256, target_pos_.y % 256,
-            target_pos_.z % 128);
-        uint8 block_mask = g_App.getGameSession().getMission()->inRangeCPos(
-            &cur_pos_, NULL, &pn, true, false);
+        PathNode pn(reached_pos.x / 256, reached_pos.y / 256,
+            reached_pos.z / 128, reached_pos.x % 256, reached_pos.y % 256,
+            reached_pos.z % 128);
+        ShootableMapObject * smo = NULL;
+        uint8 block_mask = m->inRangeCPos(
+            &cur_pos_, &smo, &pn, true, false, (int)inc_dist);
         if (block_mask == 1) {
-            cur_pos_ = target_pos_;
+            if (reached_pos.x == target_pos_.x
+                && reached_pos.y == target_pos_.y
+                && reached_pos.z == target_pos_.z)
+            {
+                cur_dist_ = 0;
+                self_remove = true;
+            }
         } else if (block_mask != 0) {
-            cur_pos_.x = pn.tileX() * 256 + pn.offX();
-            cur_pos_.y = pn.tileY() * 256 + pn.offY();
-            cur_pos_.z = pn.tileZ() * 128 + pn.offZ();
+            reached_pos.x = pn.tileX() * 256 + pn.offX();
+            reached_pos.y = pn.tileY() * 256 + pn.offY();
+            reached_pos.z = pn.tileZ() * 128 + pn.offZ();
             cur_dist_ = 0;
             self_remove = true;
+        }
+        double anim_d = 64;
+        double diffx = (double) (base_pos_.x - reached_pos.x);
+        double diffy = (double) (base_pos_.y - reached_pos.y);
+        double diffz = (double) (base_pos_.z - reached_pos.z);
+        double d = sqrt(diffx * diffx + diffy * diffy
+            + diffz * diffz);
+#if 0
+        if (last_anim_dist_ == 0) {
+            SFXObject *so = new SFXObject(m->map(),
+                SFXObject::sfxt_Smoke);
+            so->setPosition(base_pos_.x / 256, base_pos_.y / 256,
+                base_pos_.z / 128, base_pos_.x % 256, base_pos_.y % 256,
+                base_pos_.z % 128 );
+            so->setVisZ(cur_pos_.z / 256);
+            m->addSfxObject(so);
+        }
+#endif
+        int diff_dist = (int) ((d - last_anim_dist_) / anim_d);
+        if (diff_dist != 0) {
+            for (int i = 1; i <= diff_dist; i++) {
+                toDefineXYZ t;
+                last_anim_dist_ += anim_d;
+                t.x = base_pos_.x + (int)(last_anim_dist_ * inc_x_);
+                t.y = base_pos_.y + (int)(last_anim_dist_ * inc_y_);
+                t.z = base_pos_.z + (int)(last_anim_dist_ * inc_z_);
+                t.z += 256;
+                if (t.z > (m->mmax_z_ - 1) * 128)
+                    t.z = (m->mmax_z_ - 1) * 128;
+                SFXObject *so = new SFXObject(m->map(),
+                    SFXObject::sfxt_Smoke);
+                so->setPosition(t.x / 256, t.y / 256, t.z / 128, t.x % 256,
+                    t.y % 256, t.z % 128 );
+                so->setVisZ(t.z / 256);
+                m->addSfxObject(so);
+            }
+        }
+        cur_pos_ = reached_pos;
+        if (cur_dist_ != 0) {
+            cur_dist_ = d;
         }
 
         if (ignored_obj_) {
@@ -388,11 +406,12 @@ bool ProjectileShot::animate(int elapsed, Mission *m) {
         }
     }
 
-    if (cur_dist_ == 0 && !max_range) {
+    if (cur_dist_ == 0) {
     }
+    if (self_remove)
+        life_over_ = self_remove;
     return true;
 }
-#endif
 
 bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
     int elapsed, bool ignoreBlocker)
@@ -493,11 +512,6 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
     // TODO: define this somewhere
     int mask = MapObject::mt_Ped | MapObject::mt_Vehicle
         | MapObject::mt_Static | MapObject::mt_Weapon;
-    if (shot_prop & Weapon::spe_CreatesProjectile) {
-        // TODO: create projectile, 1 - spe_PointToPoint,
-        // many - spe_PointToManyPoints
-        return false;
-    }
 
     int ammoused = 1;
     if (shot_prop & Weapon::spe_UsesAmmo) {
@@ -511,6 +525,25 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
         }
     }
 
+    if (shot_prop & Weapon::spe_CreatesProjectile) {
+        cp.z += 128;
+        if (cp.z > (g_Session.getMission()->mmax_z_ - 1) * 128)
+            cp.z = (g_Session.getMission()->mmax_z_ - 1) * 128;
+        if (tobj)
+            base_shot.tp.z += 128;
+        else
+            base_shot.tp.z += 16;
+        if (base_shot.tp.z > (g_Session.getMission()->mmax_z_ - 1) * 128)
+            base_shot.tp.z = (g_Session.getMission()->mmax_z_ - 1) * 128;
+        for (int i = 0; i < ammoused; i++) {
+            ShotDesc shot_new = base_shot;
+            //shotTargetRandomizer(&cp, &(shot_new.tp), angle);
+            ProjectileShot *prjs = new ProjectileShot(cp, shot_new.tp,
+                shot_new.d.dtype, shot_new.d.dvalue, 512, owner_, range());
+            g_Session.getMission()->addPrjShot(prjs);
+        }
+        return true;
+    }
     if (shot_prop & Weapon::spe_NoTarget) {
         std::vector <ShotDesc> gen_shots;
         if (shot_prop & Weapon::spe_PointToPoint) {
@@ -697,7 +730,7 @@ uint8 WeaponInstance::inRange(ShootableMapObject ** t, PathNode * pn,
         cxyz.z = vis_z_ * 128 + off_z_ + 1;
     }
 
-    uint8 block_mask = g_App.getGameSession().getMission()->inRangeCPos(
+    uint8 block_mask = g_Session.getMission()->inRangeCPos(
         &cxyz, t, pn, setBlocker, checkTileOnly, maxr);
     if (owner_)
         owner_->setIsIgnored(ownerState);
@@ -742,7 +775,7 @@ void WeaponInstance::getInRangeOne(toDefineXYZ & cp,
         cpXYZ.z += 1;
     }
     
-    g_App.getGameSession().getMission()->getInRangeOne(&cpXYZ, target, mask,
+    g_Session.getMission()->getInRangeOne(&cpXYZ, target, mask,
         checkTileOnly, maxr);
 
     if (owner_)
@@ -758,6 +791,6 @@ void WeaponInstance::getInRangeAll(toDefineXYZ & cp,
     cpXYZ.x = cp.x;
     cpXYZ.y = cp.y;
     cpXYZ.z = cp.z + 1;
-    g_App.getGameSession().getMission()->getInRangeAll(&cpXYZ, targets, mask,
+    g_Session.getMission()->getInRangeAll(&cpXYZ, targets, mask,
         checkTileOnly, maxr);
 }

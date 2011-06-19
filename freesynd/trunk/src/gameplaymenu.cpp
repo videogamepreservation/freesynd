@@ -254,6 +254,14 @@ void GameplayMenu::handleTick(int elapsed)
         int diff = tick_count_ - last_animate_tick_;
         last_animate_tick_ = tick_count_;
 
+        for (int i = 0; i < mission_->numSfxObjects(); i++) {
+            change |= mission_->sfxObjects(i)->animate(diff);
+            if (mission_->sfxObjects(i)->sfxLifeOver()) {
+                mission_->delSfxObject(i);
+                i--;
+            }
+        }
+
         for (int i = 0; i < mission_->numPeds(); i++)
             change |= mission_->ped(i)->animate(diff, mission_);
 
@@ -266,10 +274,10 @@ void GameplayMenu::handleTick(int elapsed)
         for (int i = 0; i < mission_->numStatics(); i++)
             change |= mission_->statics(i)->animate(diff, mission_);
 
-        for (int i = 0; i < mission_->numSfxObjects(); i++) {
-            change |= mission_->sfxObjects(i)->animate(diff);
-            if (mission_->sfxObjects(i)->sfxLifeOver()) {
-                mission_->delSfxObject(i);
+        for (int i = 0; i < mission_->numPrjShots(); i++) {
+            change |= mission_->prjShots(i)->animate(diff, mission_);
+            if (mission_->prjShots(i)->prjsLifeOver()) {
+                mission_->delPrjShot(i);
                 i--;
             }
         }

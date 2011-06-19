@@ -36,9 +36,12 @@ of event/state:
  - map drawing still buggy
  - set weapons for enemy agents, because in gamedata weapons are not the same as
 in original gameplay or are not present at all
- - write mission editor, create new mission files using editor, based on original game mission files.
+ - write mission editor, create new mission files using editor, based on original
+game mission files.
  - Implements dragging in SelectMenu to pass a weapon from an agent to another.
  - resolve shooting issues: targeting, range damage
  - Manage Qwerty / azerty keyboard. Today only qwerty keyboard is used.
  - Add in select menu reload button for weapons
  - "no_sound"/"no_music" option for config file, or disabled in debug mode
+ - Configure menu, setting company/player name by pressing "Enter" key not only
+ by pressing "OK" button
