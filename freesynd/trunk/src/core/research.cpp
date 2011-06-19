@@ -192,15 +192,6 @@ void Research::improve(Weapon *pWeapon) {
  * Saves Research structure to the given file.
  */
 bool Research::saveToFile(std::ofstream &file) {
-    // id
-    file.write(reinterpret_cast<const char*>(&id_), sizeof(int));
-
-    // Research name : 15 caracters max
-    char buf[15];
-    memset(buf, '\0', 15);
-    fs_strcpy(buf, 15, name_.c_str()); 
-    file.write(buf, 15);
-    
     if (type_ == EQUIPS) {
         // Weapons specific infos
         int ival = weapon_;
@@ -212,6 +203,15 @@ bool Research::saveToFile(std::ofstream &file) {
         ival = modVersion_;
         file.write(reinterpret_cast<const char*>(&ival), sizeof(int));
     }
+
+    // id
+    file.write(reinterpret_cast<const char*>(&id_), sizeof(int));
+
+    // Research name : 15 caracters max
+    char buf[15];
+    memset(buf, '\0', 15);
+    fs_strcpy(buf, 15, name_.c_str()); 
+    file.write(buf, 15);
             
     // Current funding
     file.write(reinterpret_cast<const char*>(&currFunding_), sizeof(int));
@@ -231,7 +231,7 @@ bool Research::saveToFile(std::ofstream &file) {
         float pct = pt.percentage;
         file.write(reinterpret_cast<const char*>(&pct), sizeof(float));
         short hours = pt.hours;
-        file.write(reinterpret_cast<const char*>(&pct), sizeof(short));
+        file.write(reinterpret_cast<const char*>(&hours), sizeof(short));
         short coef = pt.coeffId;
         file.write(reinterpret_cast<const char*>(&coef), sizeof(short));
     }
@@ -240,5 +240,44 @@ bool Research::saveToFile(std::ofstream &file) {
 }
 
 bool Research::loadFromFile(std::ifstream &infile, EResType type) {
-    return false;
+    // id
+    infile.read(reinterpret_cast<char*>(&id_), sizeof(int));
+
+    // name
+    char buf[15];
+    memset(buf, '\0', 15);
+    infile.read(buf, 15);
+    name_.assign(buf);
+
+    // current funding
+    infile.read(reinterpret_cast<char*>(&currFunding_), sizeof(int));
+    //Status
+    int status=0;
+    infile.read(reinterpret_cast<char*>(&status), sizeof(int));
+    switch (status) {
+        case 0: status_ = NOT_STARTED;break;
+        case 1: status_ = STARTED;break;
+        case 2: status_ = SUSPENDED;break;
+        case 3: status_ = FINISHED;break;
+    }
+    // coeff index
+    infile.read(reinterpret_cast<char*>(&coeffInd_), sizeof(short));
+
+    // Progression list
+    // clear list before
+    progressList_.clear();
+    unsigned int nb=0;
+    infile.read(reinterpret_cast<char*>(&nb), sizeof(unsigned int));
+    for (unsigned int i=0; i<nb; i++) {
+        ProgressPoint pt;
+        infile.read(reinterpret_cast<char*>(&(pt.percentage)), sizeof(float));
+        infile.read(reinterpret_cast<char*>(&(pt.hours)), sizeof(short));
+        infile.read(reinterpret_cast<char*>(&(pt.coeffId)), sizeof(short));
+        progressList_.push_back(pt);
+    }
+
+    // Compute projection
+    updateProjection();
+
+    return true;
 }

@@ -52,6 +52,12 @@ public:
      */
     SequenceModel * getAvailableWeaponsSearch() { return &availableWeaponsSearch_; }
 
+    /*!
+     * Returns the current active research.
+     * \returb NULL if no research is active
+     */
+    Research *getActiveSearch() { return pCurrResearch_; }
+
     //! An unknown weapon has been found -> it will boost research
     bool handleWeaponDiscovered(Weapon *pWeapon);
     //! Starts research and suspends current search

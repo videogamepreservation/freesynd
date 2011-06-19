@@ -41,10 +41,10 @@ public:
     };
 
     enum EResStatus {
-        NOT_STARTED,
-        STARTED,
-        SUSPENDED,
-        FINISHED
+        NOT_STARTED = 0,
+        STARTED = 1,
+        SUSPENDED = 2,
+        FINISHED = 3
     };
 
     /*!

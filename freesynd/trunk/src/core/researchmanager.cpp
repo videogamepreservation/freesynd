@@ -351,11 +351,102 @@ bool ResearchManager::saveToFile(std::ofstream &file) {
 
     // Write the current search
     int ival = pCurrResearch_ ? pCurrResearch_->getId() : 0;
-    file.write(reinterpret_cast<const char*>(&isize), sizeof(int));
+    file.write(reinterpret_cast<const char*>(&ival), sizeof(int));
 
     return true;
 }
 
 bool ResearchManager::loadFromFile(std::ifstream &infile) {
-    return false;
+    // Destroy existing researchs
+    destroy();
+
+    // Research on mods
+    unsigned int nbRes = 0;
+    infile.read(reinterpret_cast<char*>(&nbRes), sizeof(unsigned int));
+    for (unsigned int iRes=0; iRes<nbRes; iRes++) {
+        Mod::EModType mt = Mod::Unknown;
+        Mod::EModVersion mv = Mod::MOD_V1;
+        int type = 0;
+        infile.read(reinterpret_cast<char*>(&type), sizeof(int));
+        switch (type) {
+            case 0: mt = Mod::MOD_LEGS;break;
+            case 1: mt = Mod::MOD_ARMS;break;
+            case 2: mt = Mod::MOD_CHEST;break;
+            case 3: mt = Mod::MOD_HEART;break;
+            case 4: mt = Mod::MOD_EYES;break;
+            case 5: mt = Mod::MOD_BRAIN;break;
+            default: mt = Mod::Unknown;
+        }
+
+        int ver = 0;
+        infile.read(reinterpret_cast<char*>(&ver), sizeof(int));
+        switch (ver) {
+            case 0: mv = Mod::MOD_V1;break;
+            case 1: mv = Mod::MOD_V2;break;
+            case 2: mv = Mod::MOD_V3;break;
+            default: mv = Mod::MOD_V1;
+        }
+
+        Research *pRes = loadResearch(mt, mv);
+        pRes->loadFromFile(infile, Research::MODS);
+        if (pRes == NULL) {
+            return false;
+        }
+        availableModsSearch_.add(pRes);
+    }
+
+    // Research on weapons
+    infile.read(reinterpret_cast<char*>(&nbRes), sizeof(unsigned int));
+    for (unsigned int iRes=0; iRes<nbRes; iRes++) {
+        int type = 0;
+        Weapon::WeaponType wt = Weapon::Unknown;
+        infile.read(reinterpret_cast<char*>(&type), sizeof(int));
+        switch (type) {
+            case 0: wt = Weapon::Persuadatron;break;
+            case 1: wt = Weapon::Pistol;break;
+            case 2: wt = Weapon::GaussGun;break;
+            case 3: wt = Weapon::Shotgun;break;
+            case 4: wt = Weapon::Uzi;break;
+            case 5: wt = Weapon::Minigun;break;
+            case 6: wt = Weapon::Laser;break;
+            case 7: wt = Weapon::Flamer;break;
+            case 8: wt = Weapon::LongRange;break;
+            case 9: wt = Weapon::Scanner;break;
+            case 10: wt = Weapon::MediKit;break;
+            case 11: wt = Weapon::TimeBomb;break;
+            case 12: wt = Weapon::AccessCard;break;
+            case 13: wt = Weapon::EnergyShield;break;
+            default: wt = Weapon::Unknown;
+        }
+
+        Research *pRes = loadResearch(wt);
+        pRes->loadFromFile(infile, Research::EQUIPS);
+        if (pRes == NULL) {
+            return false;
+        }
+        availableWeaponsSearch_.add(pRes);
+    }
+
+    int id = 0;
+    infile.read(reinterpret_cast<char*>(&id), sizeof(int));
+
+    if (id != 0) {
+        for (unsigned int i=0; i<availableModsSearch_.size(); i++) {
+            Research *pRes = availableModsSearch_.get(i);
+            if (pRes && pRes->getId() == id) {
+                pCurrResearch_ = pRes;
+                return true;
+            }
+        }
+
+        for (unsigned int i=0; i<availableWeaponsSearch_.size(); i++) {
+            Research *pRes = availableWeaponsSearch_.get(i);
+            if (pRes && pRes->getId() == id) {
+                pCurrResearch_ = pRes;
+                return true;
+            }
+        }
+    }
+
+    return true;
 }

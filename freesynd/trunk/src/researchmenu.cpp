@@ -162,7 +162,7 @@ void ResearchMenu::showResInfo() {
         getStatic(fundMaxLblId_)->setVisible(true);
 
         if (pSelectedRes_->getStatus() == Research::STARTED) {
-            showResGraph();
+            showResGraph(pSelectedRes_);
         } else {
             // Show start research button only if selected research
             // has not started yet
@@ -173,16 +173,16 @@ void ResearchMenu::showResInfo() {
     }
 }
 
-void ResearchMenu::showResGraph() {
+void ResearchMenu::showResGraph(Research *pRes) {
     redrawGraph();
-    pResForGraph_ = pSelectedRes_;
+    pResForGraph_ = pRes;
     getOption(researchId_)->setVisible(false);
     getOption(incrFundId_)->setVisible(true);
     getOption(decrFundId_)->setVisible(true);
     MenuText *pTxt = getStatic(fundCurrLblId_);
     pTxt->setVisible(true);
-    pTxt->setTextFormated("%d", pSelectedRes_->getCurrFunding());
-    getStatic(searchTitleLblId_)->setTextFormated("#RES_GRAP_TITLE", pSelectedRes_->getName().c_str());
+    pTxt->setTextFormated("%d", pResForGraph_->getCurrFunding());
+    getStatic(searchTitleLblId_)->setTextFormated("#RES_GRAP_TITLE", pResForGraph_->getName().c_str());
 }
 
 void ResearchMenu::handleTick(int elapsed)
@@ -216,6 +216,11 @@ void ResearchMenu::handleShow() {
 
     // Update the time
     updateClock();
+
+    // Display current active research
+    if (g_Session.researchManager().getActiveSearch()) {
+        showResGraph(g_Session.researchManager().getActiveSearch());
+    }
 }
 
 void ResearchMenu::handleRender()
@@ -278,6 +283,13 @@ void ResearchMenu::handleRender()
 
 void ResearchMenu::handleLeave() {
     g_System.hideCursor();
+    // reset window presentation
+    showFieldList();
+    showDetailsList();
+    getStatic(fundCurrLblId_)->setVisible(false);
+    getStatic(searchTitleLblId_)->setText("");
+    pSelectedRes_ = NULL;
+    pResForGraph_ = NULL;
 }
 
 void ResearchMenu::handleAction(const int actionId, void *ctx, const int modKeys)
@@ -323,7 +335,7 @@ void ResearchMenu::handleAction(const int actionId, void *ctx, const int modKeys
         showFieldList();
     } else if (actionId == researchId_) {
         g_Session.researchManager().start(pSelectedRes_);
-        showResGraph();
+        showResGraph(pSelectedRes_);
     } else if (actionId == incrFundId_) {
         if (pSelectedRes_->incrFunding()) {
             getStatic(fundCurrLblId_)->setTextFormated("%d", pSelectedRes_->getCurrFunding());
@@ -345,7 +357,7 @@ void ResearchMenu::handleGameEvent(GameEvent evt) {
         Research *pRes = static_cast<Research *> (evt.pCtxt_);
 
         // If current graph was for this reseach, make it disappear
-        if (pResForGraph_->getId() == pRes->getId()) {
+        if (pResForGraph_ && pResForGraph_->getId() == pRes->getId()) {
             pResForGraph_ = NULL;
             redrawGraph();
             getStatic(fundCurrLblId_)->setVisible(false);

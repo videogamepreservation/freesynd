@@ -52,7 +52,7 @@ protected:
     void hideDetailsList();
 
     void showResInfo();
-    void showResGraph();
+    void showResGraph(Research *pRes);
 
     void redrawGraph() { addDirtyRect(200, 110, 250, 250); } 
 

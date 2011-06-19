@@ -739,10 +739,20 @@ bool App::loadGameFromFile(int fileSlot) {
         agents_.loadFromFile(infile);
 
         // Read squad
-        for (int i=0; i<4; i++) {
+        for (int squadInd=0; squadInd<4; squadInd++) {
             int id = 0;
             infile.read(reinterpret_cast<char*>(&id), sizeof(int));
-            // TODO : finish
+            if (id != 0) {
+                for (int iAgnt=0; iAgnt<AgentManager::MAX_AGENT; iAgnt++) {
+                    Agent *pAgent = agents_.agent(iAgnt);
+                    if (pAgent && pAgent->getId() == id) {
+                        session_.setTeamMember(squadInd, pAgent);
+                        break;
+                    }
+                }
+            } else {
+                session_.setTeamMember(squadInd, NULL);
+            }
         }
 
         // Research

@@ -274,6 +274,11 @@ void SelectMenu::handleShow() {
     } else {
         getStatic(txtAgentId_)->setText("");
     }
+
+    for (int iAgnt=0; iAgnt<AgentManager::MAX_AGENT; iAgnt++) {
+        Agent *pAgentFromCryo = g_App.agents().agent(iAgnt);
+        pTeamLBox_->setSquadLine(g_Session.getTeamSlot(pAgentFromCryo), iAgnt);
+    }
 }
 
 void SelectMenu::handleRender() {

@@ -231,6 +231,17 @@ public:
         teamMembers_[n] = a;
     }
 
+    int getTeamSlot(Agent *pAgent) {
+        if (pAgent) {
+            for (int i=0; i<4; i++) {
+                if (pAgent == teamMembers_[i]) {
+                    return i;
+                }
+            }
+        }
+        return -1;
+    }
+
     //! Update state when finishing a mission
     void completeSelectedBlock();
 
