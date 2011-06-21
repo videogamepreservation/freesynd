@@ -95,7 +95,7 @@
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="1"
-			CharacterSet="1"
+			CharacterSet="0"
 			WholeProgramOptimization="1"
 			>
 			<Tool
@@ -118,7 +118,7 @@
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
 				AdditionalIncludeDirectories="..\..\src;&quot;..\..\..\..\libs\libpng-1.4.1\include&quot;;&quot;..\..\..\..\libs\SDL_image-1.2.10\include&quot;;&quot;..\..\..\..\libs\SDL_mixer-1.2.11\include&quot;;&quot;..\..\..\..\libs\SDL-1.2.14\include&quot;;&quot;..\..\..\..\libs\zlib-1.2.3\include&quot;"
-				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;SYSTEM_SDL;_CRT_SECURE_NO_WARNING"
+				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;SYSTEM_SDL;_CRT_SECURE_NO_WARNINGS"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"

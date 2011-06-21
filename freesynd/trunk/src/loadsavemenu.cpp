@@ -83,7 +83,6 @@ void LoadSaveMenu::handleAction(const int actionId, void *ctx, const int modKeys
                 menu_manager_->changeCurrentMenu("main");
             }
         }
-        // TODO complete loading
     } else if (actionId == saveButId_) {
         if (editNameId_ != -1 && files_[editNameId_].size() != 0) {
             if (g_App.saveGameToFile(editNameId_, files_[editNameId_])) {
