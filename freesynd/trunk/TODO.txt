@@ -15,7 +15,7 @@ viewing range(?), health recovery(?); mods properties should affect IPAs; damage
 recieved modifier, if we don't want to recalculate all the time; persuade power
 points; persuade points needed to persuade - this value will be added to agent
 that succesfully persuaded; weapon range modifier(?); accuracy modifier/property(?);
-   weapons: destructabillity(bomb); radius of damage; area(?) - bomb, gauss, laser;
+   weapons: destructabillity(bomb); radius of damage; area(?) - bomb;
    static objects: damage recieve value; destructable or not
  - A.L. - this one is complex
  - pathfinding directional to be used for simulation of people walking around city
@@ -45,3 +45,7 @@ game mission files.
  - "no_sound"/"no_music" option for config file, or disabled in debug mode
  - Configure menu, setting company/player name by pressing "Enter" key not only
  by pressing "OK" button
+
+ Very low priority stuff, maybe for v0.9:
+ - Save files portable, implementation that will read fixed endianess on
+different CPUs
