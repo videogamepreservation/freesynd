@@ -59,7 +59,7 @@ const char *File::fileFullPath(const char *filename, bool uppercase) {
     memset(buf, 0, 256);
     // We're sure that _path is less than 255 because setPath method
     // controls its length
-    fs_strcpy(buf, 240, _path);
+    strcpy(buf, _path);
 
     int start = strlen(_path);
     // Add 1 because strlen excludes the null caracter
@@ -138,11 +138,11 @@ FILE *File::loadTextFile(const char *filename) {
 void File::setPath(const char *path) {
     if (strlen(path) < 255) {
         LOG(Log::k_FLG_IO, "File", "setPath", ("Changing path to: '%s'\n", path));
-        fs_strcpy((char *) _path, 240, path);
+        strcpy((char *) _path, path);
     }
     else {
         FSERR(Log::k_FLG_IO, "File", "setPath", ("Warning: path '%s' too long, using CWD\n", _path));
-        fs_strcpy((char *) _path, 240, "./");
+        strcpy((char *) _path, "./");
     }
 }
 

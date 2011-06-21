@@ -177,7 +177,7 @@ void GameSession::completeSelectedBlock() {
     // Make the next missions available
     if (g_Blocks[selected_blck_].next != NULL) {
         char s[50];
-        fs_strcpy(s, 50, g_Blocks[selected_blck_].next);
+        strcpy(s, g_Blocks[selected_blck_].next);
         char *token = strtok(s, ":");
         while ( token != NULL ) {
             int id = atoi(token);
@@ -490,11 +490,11 @@ bool GameSession::saveToFile(std::ofstream &file) {
     char buf[25];
     memset(buf, '\0', 25);
     // Company name
-    fs_strcpy(buf, 25, company_name_.c_str());
+    strcpy(buf, company_name_.c_str());
     file.write(buf, 17);
     // User name
     memset(buf, '\0', 25);
-    fs_strcpy(buf, 25, username_.c_str());
+    strcpy(buf, username_.c_str());
     file.write(buf, 17);
     // Logo
     file.write(reinterpret_cast<const char*>(&logo_), sizeof(int));

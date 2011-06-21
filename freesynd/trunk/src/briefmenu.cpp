@@ -154,7 +154,7 @@ void BriefMenu::handleRender() {
         int sizeStr = strlen(pMission->briefing()) + 2;
         char *mbriefing = (char *)malloc(sizeStr);
         assert(mbriefing != NULL);
-        fs_strcpy(mbriefing, sizeStr, pMission->briefing());
+        strcpy(mbriefing, pMission->briefing());
         char *miss = mbriefing;
         char *nextline = miss - 1;
 

@@ -672,7 +672,7 @@ bool App::saveGameToFile(int fileSlot, std::string name) {
         char buf[25];
         memset(buf, '\0', 25);
         // Slot name is on 25 caracters max
-        fs_strcpy(buf, 25, name.c_str());
+        strcpy(buf, name.c_str());
         outfile.write(buf, 25);
         
         // Session

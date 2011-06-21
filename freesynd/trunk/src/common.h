@@ -127,14 +127,4 @@ inline bool bitClear(const uint32 value, int index) {
     return !bitSet(value, index);
 }
 
-// On windows use secure version of strcopy
-inline int fs_strcpy(char *dst, int size, const char *src) {
-#ifdef WIN_SECURE
-    return strcpy_s(dst, size, src);
-#else
-    strcpy(dst, src);
-    return 0;
-#endif
-}
-
 #endif

@@ -87,7 +87,7 @@ bool Agent::saveToFile(std::ofstream &file) {
     // Agent name : 15 caracters max
     char buf[15];
     memset(buf, '\0', 15);
-    fs_strcpy(buf, 15, name_.c_str());
+    strcpy(buf, name_.c_str());
     file.write(buf, 15);
     // gender : male = 1, female = 0
     unsigned char uchar = male_ ? 1 : 0;
