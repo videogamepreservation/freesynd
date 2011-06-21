@@ -152,7 +152,7 @@ void WeaponInstance::draw(int x, int y) {
     g_App.gameSprites().drawFrame(pWeaponClass_->anim(), frame_, x, y);
 }
 
-void WeaponInstance::shotTargetRandomizer(toDefineXYZ * cp, toDefineXYZ * tp,
+void ShotClass::shotTargetRandomizer(toDefineXYZ * cp, toDefineXYZ * tp,
                                           double angle)
 {
     if (angle == 0)
@@ -270,7 +270,8 @@ void WeaponInstance::shotTargetRandomizer(toDefineXYZ * cp, toDefineXYZ * tp,
 }
 
 ProjectileShot::ProjectileShot(toDefineXYZ &cp, toDefineXYZ &tp, MapObject::DamageType dt,
-        int d_value, int d_range, ShootableMapObject * ignrd_obj, int range_max)
+        int d_value, int d_range, ShootableMapObject * ignrd_obj, int range_max,
+        ShootableMapObject * w_owner)
 {
     cur_pos_ = cp;
     target_pos_ = tp;
@@ -293,6 +294,7 @@ ProjectileShot::ProjectileShot(toDefineXYZ &cp, toDefineXYZ &tp, MapObject::Dama
         inc_z_ = diffz / cur_dist_;
     }
     ignored_obj_ = ignrd_obj;
+    owner_ = w_owner;
 }
 
 bool ProjectileShot::animate(int elapsed, Mission *m) {
@@ -407,6 +409,31 @@ bool ProjectileShot::animate(int elapsed, Mission *m) {
     }
 
     if (cur_dist_ == 0) {
+        std::vector <Weapon::ShotDesc> all_shots;
+        toDefineXYZ cp = cur_pos_;
+        cp.z = ((cp.z >> 7) << 7) + 16;
+        std::vector <ShootableMapObject *> all_targets;
+        // TODO: define range somewhere in weapon
+        g_Session.getMission()->getInRangeAll(&cp, all_targets,
+            Weapon::stm_AllObjects, true, dmg_range_);
+        for (unsigned int indx = 0; indx < all_targets.size();
+            indx++)
+        {
+            ShootableMapObject * smo = all_targets[indx];
+            Weapon::ShotDesc sd;
+            sd.tp.x = smo->tileX() * 256 + smo->offX();
+            sd.tp.y = smo->tileY() * 256 + smo->offY();
+            sd.tp.z = smo->tileZ() * 128 + smo->offZ();
+            sd.tpn.setTileXYZ(smo->tileX(), smo->tileY(),
+                smo->tileZ());
+            sd.tpn.setOffXYZ(smo->offX(), smo->offY(),
+                smo->offZ());
+            sd.d.dtype = dmg_type_;
+            sd.d.dvalue = dmg_value_;
+            sd.smo = smo;
+            all_shots.push_back(sd);
+        }
+        makeShot(true, cp, SFXObject::sfxt_ExplosionBall, all_shots);
     }
     if (self_remove)
         life_over_ = self_remove;
@@ -479,7 +506,6 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
             return false;
 
     this->playSound();
-    DamageInflictType d;
     // 90% accuracy
     double accuracy = 0.9;
 
@@ -489,7 +515,7 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
 
     angle = angle * (1 - accuracy);
 
-    ShotDesc base_shot;
+    Weapon::ShotDesc base_shot;
     base_shot.smo = NULL;
     base_shot.d.dtype = pWeaponClass_->dmgType();
     base_shot.d.dvalue =  pWeaponClass_->damagePerShot();
@@ -506,12 +532,10 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
         base_shot.tpn = *tp;
     }
     unsigned int shot_prop = pWeaponClass_->shotProperty();
-    std::vector <ShotDesc> all_shots;
+    std::vector <Weapon::ShotDesc> all_shots;
     all_shots.reserve(20);
 
-    // TODO: define this somewhere
-    int mask = MapObject::mt_Ped | MapObject::mt_Vehicle
-        | MapObject::mt_Static | MapObject::mt_Weapon;
+    int mask = Weapon::stm_AllObjects;
 
     int ammoused = 1;
     if (shot_prop & Weapon::spe_UsesAmmo) {
@@ -536,7 +560,7 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
         if (base_shot.tp.z > (g_Session.getMission()->mmax_z_ - 1) * 128)
             base_shot.tp.z = (g_Session.getMission()->mmax_z_ - 1) * 128;
         for (int i = 0; i < ammoused; i++) {
-            ShotDesc shot_new = base_shot;
+            Weapon::ShotDesc shot_new = base_shot;
             //shotTargetRandomizer(&cp, &(shot_new.tp), angle);
             ProjectileShot *prjs = new ProjectileShot(cp, shot_new.tp,
                 shot_new.d.dtype, shot_new.d.dvalue, 512, owner_, range());
@@ -545,7 +569,7 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
         return true;
     }
     if (shot_prop & Weapon::spe_NoTarget) {
-        std::vector <ShotDesc> gen_shots;
+        std::vector <Weapon::ShotDesc> gen_shots;
         if (shot_prop & Weapon::spe_PointToPoint) {
         } else if (shot_prop & Weapon::spe_PointToManyPoints) {
         } else {
@@ -562,7 +586,7 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
                     indx++)
                 {
                     ShootableMapObject * smo = all_targets[indx];
-                    ShotDesc sd;
+                    Weapon::ShotDesc sd;
                     sd.tp.x = smo->tileX() * 256 + smo->offX();
                     sd.tp.y = smo->tileY() * 256 + smo->offY();
                     sd.tp.z = smo->tileZ() * 128 + smo->offZ();
@@ -579,14 +603,14 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
             all_shots = gen_shots;
         }
     } else {
-        std::vector <ShotDesc> gen_shots;
+        std::vector <Weapon::ShotDesc> gen_shots;
         switch((shot_prop & (Weapon::spe_PointToPoint
             | Weapon::spe_PointToManyPoints)))
         {
             case Weapon::spe_PointToPoint:
                 for (int i = 0; i < ammoused; i++) {
                     gen_shots.push_back(base_shot);
-                    ShotDesc &last_one = gen_shots.back();
+                    Weapon::ShotDesc &last_one = gen_shots.back();
                     shotTargetRandomizer(&cp, &(last_one.tp), angle);
                     last_one.tpn.setTileXYZ(last_one.tp.x / 256,
                         last_one.tp.y / 256, last_one.tp.z / 128);
@@ -597,13 +621,14 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
                     for (unsigned int i = 0; i < gen_shots.size(); i++) {
                         std::vector<ShootableMapObject *> all_targets;
 
+                        // TODO: define range somewhere in weapon
                         getInRangeAll(gen_shots[i].tp, all_targets, mask,
                             true, 512);
                         for (unsigned int indx = 0; indx < all_targets.size();
                             indx++)
                         {
                             ShootableMapObject * smo = all_targets[indx];
-                            ShotDesc sd;
+                            Weapon::ShotDesc sd;
                             sd.tp.x = smo->tileX() * 256 + smo->offX();
                             sd.tp.y = smo->tileY() * 256 + smo->offY();
                             sd.tp.z = smo->tileZ() * 128 + smo->offZ();
@@ -623,7 +648,7 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
             case Weapon::spe_PointToManyPoints:
                 for (unsigned short i = 0; i < ammoused; i++) {
                     gen_shots.push_back(base_shot);
-                    ShotDesc &last_one = gen_shots.back();
+                    Weapon::ShotDesc &last_one = gen_shots.back();
                     shotTargetRandomizer(&cp, &(last_one.tp), angle);
                     last_one.tpn.setTileXYZ(last_one.tp.x / 256,
                         last_one.tp.y / 256, last_one.tp.z / 128);
@@ -638,58 +663,7 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
         }
     }
 
-    for (unsigned short i = 0; i < all_shots.size(); i++) {
-        smp = all_shots[i].smo;
-        pn = all_shots[i].tpn;
-        if (shot_prop & Weapon::spe_RangeDamageOnReach)
-            has_blocker = 1;
-        else
-            has_blocker = inRange(&smp, &pn, true);
-        d.ddir = -1;
-        txb = all_shots[i].tp.x;
-        tyb = all_shots[i].tp.y;
-        setDirection(txb - xb, tyb - yb, &(d.ddir));
-
-        d.dvalue = all_shots[i].d.dvalue;
-        d.dtype = all_shots[i].d.dtype;
-        if ((has_blocker & 6) != 0) {
-            if ((has_blocker & 4) != 0) {
-                SFXObject *so = new SFXObject(g_Session.getMission()->map(),
-                    SFXObject::sfxt_BulletHit);
-                so->setPosition(pn.tileX(), pn.tileY(), pn.tileZ(), pn.offX(),
-                    pn.offY(), pn.offZ());
-                so->setVisZ(pn.tileZ());
-                g_Session.getMission()->addSfxObject(so);
-            } else if ((has_blocker & 2) != 0) {
-                if (smp) {
-                    if (smp->handleDamage(&d)) {
-                    }
-                    SFXObject *so = new SFXObject(g_Session.getMission()->map(),
-                        SFXObject::sfxt_BulletHit);
-                    so->setPosition(smp->tileX(), smp->tileY(), smp->tileZ() + 1,
-                        smp->offX(), smp->offY(), smp->offZ());
-                    so->setVisZ(smp->visZ() + 1);
-                    g_Session.getMission()->addSfxObject(so);
-                }
-            }
-        } else if (has_blocker == 8) {
-            SFXObject *so = new SFXObject(g_Session.getMission()->map(),
-                SFXObject::sfxt_BulletHit);
-            so->setPosition(pn.tileX(), pn.tileY(), pn.tileZ(), pn.offX(),
-                pn.offY(), pn.offZ());
-            so->setVisZ(pn.tileZ());
-            g_Session.getMission()->addSfxObject(so);
-        } else if (has_blocker == 1) {
-            if (smp)
-                smp->handleDamage(&d);
-            SFXObject *so = new SFXObject(g_Session.getMission()->map(),
-                SFXObject::sfxt_BulletHit);
-            so->setPosition(pn.tileX(), pn.tileY(), pn.tileZ(), pn.offX(),
-                pn.offY(), pn.offZ());
-            so->setVisZ(pn.tileZ());
-            g_Session.getMission()->addSfxObject(so);
-        }
-    }
+    makeShot(false, cp, SFXObject::sfxt_BulletHit, all_shots, this);
     return true;
 }
 
@@ -715,9 +689,11 @@ uint8 WeaponInstance::inRange(ShootableMapObject ** t, PathNode * pn,
         maxr = range();
 
     double d = 0;
-    bool ownerState;
+    bool ownerState, selfState;
     toDefineXYZ cxyz;
 
+    selfState = isIgnored();
+    setIsIgnored(true);
     if (owner_) {
         ownerState = owner_->isIgnored();
         owner_->setIsIgnored(true);
@@ -732,6 +708,8 @@ uint8 WeaponInstance::inRange(ShootableMapObject ** t, PathNode * pn,
 
     uint8 block_mask = g_Session.getMission()->inRangeCPos(
         &cxyz, t, pn, setBlocker, checkTileOnly, maxr);
+
+    setIsIgnored(selfState);
     if (owner_)
         owner_->setIsIgnored(ownerState);
 
@@ -766,7 +744,9 @@ void WeaponInstance::getInRangeOne(toDefineXYZ & cp,
     cpXYZ.x = cp.x;
     cpXYZ.y = cp.y;
     cpXYZ.z = cp.z;
-    bool ownerState;
+    bool ownerState, selfState;
+    selfState = isIgnored();
+    setIsIgnored(true);
     if (owner_) {
         ownerState = owner_->isIgnored();
         owner_->setIsIgnored(true);
@@ -778,6 +758,7 @@ void WeaponInstance::getInRangeOne(toDefineXYZ & cp,
     g_Session.getMission()->getInRangeOne(&cpXYZ, target, mask,
         checkTileOnly, maxr);
 
+    setIsIgnored(selfState);
     if (owner_)
         owner_->setIsIgnored(ownerState);
 }
@@ -790,7 +771,77 @@ void WeaponInstance::getInRangeAll(toDefineXYZ & cp,
     toDefineXYZ cpXYZ;
     cpXYZ.x = cp.x;
     cpXYZ.y = cp.y;
-    cpXYZ.z = cp.z + 1;
+    cpXYZ.z = cp.z + 16;
+
+    bool selfState;
+    selfState = isIgnored();
+    setIsIgnored(true);
+
     g_Session.getMission()->getInRangeAll(&cpXYZ, targets, mask,
         checkTileOnly, maxr);
+
+    setIsIgnored(selfState);
+}
+
+void ShotClass::makeShot(bool rangeGenerated, toDefineXYZ &cp, int anim_type,
+    std::vector <Weapon::ShotDesc> &all_shots, WeaponInstance * w)
+{
+    for (unsigned short i = 0; i < all_shots.size(); i++) {
+        ShootableMapObject * smp = all_shots[i].smo;
+        PathNode pn = all_shots[i].tpn;
+        MapObject::DamageInflictType d;
+        uint8 has_blocker = 0;
+        if (rangeGenerated)
+            has_blocker = 1;
+        else {
+            assert(w != NULL);
+            has_blocker = w->inRange(&smp, &pn, true);
+        }
+        d.ddir = -1;
+        if (smp) {
+            int txb = all_shots[i].tp.x;
+            int tyb = all_shots[i].tp.y;
+            smp->setDirection(txb - cp.x, tyb - cp.y, &(d.ddir));
+        }
+
+        d.dvalue = all_shots[i].d.dvalue;
+        d.dtype = all_shots[i].d.dtype;
+        if ((has_blocker & 6) != 0) {
+            if ((has_blocker & 4) != 0) {
+                SFXObject *so = new SFXObject(g_Session.getMission()->map(),
+                    anim_type);
+                so->setPosition(pn.tileX(), pn.tileY(), pn.tileZ(), pn.offX(),
+                    pn.offY(), pn.offZ());
+                so->setVisZ(pn.tileZ());
+                g_Session.getMission()->addSfxObject(so);
+            } else if ((has_blocker & 2) != 0) {
+                if (smp) {
+                    if (smp->handleDamage(&d)) {
+                    }
+                    SFXObject *so = new SFXObject(g_Session.getMission()->map(),
+                        anim_type);
+                    so->setPosition(smp->tileX(), smp->tileY(), smp->tileZ() + 1,
+                        smp->offX(), smp->offY(), smp->offZ());
+                    so->setVisZ(smp->visZ() + 1);
+                    g_Session.getMission()->addSfxObject(so);
+                }
+            }
+        } else if (has_blocker == 8) {
+            SFXObject *so = new SFXObject(g_Session.getMission()->map(),
+                anim_type);
+            so->setPosition(pn.tileX(), pn.tileY(), pn.tileZ(), pn.offX(),
+                pn.offY(), pn.offZ());
+            so->setVisZ(pn.tileZ());
+            g_Session.getMission()->addSfxObject(so);
+        } else if (has_blocker == 1) {
+            if (smp)
+                smp->handleDamage(&d);
+            SFXObject *so = new SFXObject(g_Session.getMission()->map(),
+                anim_type);
+            so->setPosition(pn.tileX(), pn.tileY(), pn.tileZ(), pn.offX(),
+                pn.offY(), pn.offZ());
+            so->setVisZ(pn.tileZ());
+            g_Session.getMission()->addSfxObject(so);
+        }
+    }
 }

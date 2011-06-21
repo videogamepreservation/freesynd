@@ -3216,6 +3216,7 @@ void PedInstance::destroyAllWeapons() {
         WeaponInstance * w = removeWeapon(0);
         w->setMap(-1);
         w->setOwner(NULL);
+        w->setIsIgnored(true);
     }
     selected_weapon_ = -1;
 }

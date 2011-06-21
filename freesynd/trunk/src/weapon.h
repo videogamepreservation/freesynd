@@ -158,6 +158,18 @@ public:
             (spe_Owner | spe_ChangeAttribute | spe_UsesAmmo),
     }WeaponShotPropertyType;
 
+    typedef enum {
+        stm_AllObjects = MapObject::mt_Ped | MapObject::mt_Vehicle
+        | MapObject::mt_Static | MapObject::mt_Weapon,
+    }SearchTargetMask;
+
+    typedef struct {
+        PathNode tpn;
+        toDefineXYZ tp;
+        MapObject::DamageInflictType d;
+        ShootableMapObject *smo;
+    }ShotDesc;
+
     unsigned int shotProperty() { return shot_property_; }
 
 protected:
@@ -180,10 +192,24 @@ protected:
     unsigned int shot_property_;
 };
 
+class ShotClass {
+public:
+    void setOwner(ShootableMapObject *owner) { owner_ = owner; }
+    ShootableMapObject *getOwner() { return owner_; }
+
+    void shotTargetRandomizer(toDefineXYZ * cp, toDefineXYZ * tp, double angle);
+
+protected:
+    void makeShot(bool rangeGenerated, toDefineXYZ &cp, int anim_type,
+        std::vector <Weapon::ShotDesc> &all_shots, WeaponInstance *w = NULL);
+protected:
+    ShootableMapObject *owner_;
+};
+
 /*!
  * Weapon instance class.
  */
-class WeaponInstance : public ShootableMapObject {
+class WeaponInstance : public ShootableMapObject, public ShotClass{
 public:
     WeaponInstance(Weapon *w);
 
@@ -194,9 +220,6 @@ public:
     void draw(int x, int y);
     bool inflictDamage(ShootableMapObject * tobj, PathNode * tp,
         int elapsed = -1, bool ignoreBlocker = false);
-
-    void setOwner(ShootableMapObject *owner) { owner_ = owner; }
-    ShootableMapObject *getOwner() { return owner_; }
 
     Weapon *getWeaponClass() { return pWeaponClass_; }
 
@@ -217,18 +240,10 @@ public:
 
     void resetWeaponUsedTime() { weapon_used_time_ = 0; }
 
-    void shotTargetRandomizer(toDefineXYZ * cp, toDefineXYZ * tp, double angle);
-
     uint8 inRange(ShootableMapObject ** t, PathNode * pn = NULL,
         bool setBlocker = false, bool checkTileOnly = false,
         int maxr = -1);
 
-    typedef struct {
-        PathNode tpn;
-        toDefineXYZ tp;
-        DamageInflictType d;
-        ShootableMapObject *smo;
-    }ShotDesc;
     int getShots(int elapsed, int tForReload, int tForShot);
     void getInRangeOne(toDefineXYZ & cp, ShootableMapObject * & target,
         uint8 mask, bool checkTileOnly = true, int maxr = -1);
@@ -238,18 +253,17 @@ public:
 protected:
     Weapon *pWeaponClass_;
     int ammo_remaining_;
-    ShootableMapObject *owner_;
     // if this value is smaller time_for_shot_ shot cannot be done 
     // if is greater then time_for_shot_ reload is in execution
     // if is greater then time_for_shot_ + time_reload_ then full shot is done
     int weapon_used_time_;
 };
 
-class ProjectileShot {
+class ProjectileShot: public ShotClass {
 public:
     ProjectileShot(toDefineXYZ &cp, toDefineXYZ &tp, MapObject::DamageType dt,
         int d_value, int d_range, ShootableMapObject * ignrd_obj = NULL,
-        int range_max = 1);
+        int range_max = 1, ShootableMapObject * w_owner = NULL);
     ~ProjectileShot() {}
     bool animate(int elapsed, Mission *m);
     bool prjsLifeOver() { return life_over_; }
@@ -273,5 +287,4 @@ protected:
     double inc_y_;
     double inc_z_;
 };
-
 #endif

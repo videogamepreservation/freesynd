@@ -54,7 +54,7 @@ Known issues with this release
   * The minimap is not complete.
   * PathFinding requires improvement
   * Mission debriefing is not operational
-  * Windows
+  * No animation for windows
   * Map drawing is buggy
 
 History
