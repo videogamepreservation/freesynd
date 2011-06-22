@@ -449,7 +449,7 @@ bool ProjectileShot::animate(int elapsed, Mission *m) {
         std::vector <ShootableMapObject *> all_targets;
         // TODO: define range somewhere in weapon
         g_Session.getMission()->getInRangeAll(&cp, all_targets,
-            Weapon::stm_AllObjects, true, dmg_range_);
+            Weapon::stm_AllObjects, true, dmg_range_ + 96);
         for (unsigned int indx = 0; indx < all_targets.size();
             indx++)
         {
@@ -475,11 +475,12 @@ bool ProjectileShot::animate(int elapsed, Mission *m) {
             cur_pos_.z = (m->mmax_z_ - 1) * 128;
         for (int i = 0; i < max_flames; i++) {
             target_pos_ = base_pos_;
-            shotTargetRandomizer(&cur_pos_, &target_pos_, 120.0, 320.0);
+            shotTargetRandomizer(&cur_pos_, &target_pos_, 120.0,
+                (double)dmg_range_ + 32.0);
             PathNode pn(target_pos_.x / 256, target_pos_.y / 256,
                 target_pos_.z / 128, target_pos_.x % 256, target_pos_.y % 256,
                 target_pos_.z % 128);
-            m->inRangeCPos(&cur_pos_, NULL, &pn, true, true, 320);
+            m->inRangeCPos(&cur_pos_, NULL, &pn, true, true, dmg_range_ + 32);
             SFXObject *so = new SFXObject(m->map(),
                 SFXObject::sfxt_LargeFire);
             so->setPosition(pn.tileX(), pn.tileY(), pn.tileZ(), pn.offX(),
@@ -616,7 +617,7 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
             Weapon::ShotDesc shot_new = base_shot;
             //shotTargetRandomizer(&cp, &(shot_new.tp), angle);
             ProjectileShot *prjs = new ProjectileShot(cp, shot_new.tp,
-                shot_new.d.dtype, shot_new.d.dvalue, 512, owner_, range());
+                shot_new.d.dtype, shot_new.d.dvalue, 384, owner_, range());
             g_Session.getMission()->addPrjShot(prjs);
         }
         return true;

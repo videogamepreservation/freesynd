@@ -404,6 +404,7 @@ SFXObject::SFXObject(int m, int type):MapObject(m), sfx_life_over_(false)
             break;
         case SFXObject::sfxt_ExplosionBall:
             anim_ = 391;
+            setFramesPerSec(6);
             break;
         case SFXObject::sfxt_LargeFire:
             anim_ = 243;
@@ -421,6 +422,14 @@ bool SFXObject::animate(int elapsed) {
 
     bool changed = MapObject::animate(elapsed);
     if (main_type_ == SFXObject::sfxt_ExplosionBall) {
+        int z = tile_z_ * 128 + off_z_;
+        // 500 per sec
+        z += (elapsed >> 1);
+        if (z > (g_Session.getMission()->mmax_z_ - 1) * 128)
+            z = (g_Session.getMission()->mmax_z_ - 1) * 128;
+        tile_z_ = z / 128;
+        vis_z_ = tile_z_;
+        off_z_ = z % 128;
     }
     if (frame_ >= g_App.gameSprites().lastFrame(anim_)
         && !leftTimeShowAnim(elapsed))
@@ -430,6 +439,13 @@ bool SFXObject::animate(int elapsed) {
 
 void SFXObject::correctZ() {
     if (main_type_ == SFXObject::sfxt_ExplosionBall) {
+        int z = tile_z_ * 128 + off_z_;
+        z += 512;
+        if (z > (g_Session.getMission()->mmax_z_ - 1) * 128)
+            z = (g_Session.getMission()->mmax_z_ - 1) * 128;
+        tile_z_ = z / 128;
+        vis_z_ = tile_z_;
+        off_z_ = z % 128;
     }
 }
 
