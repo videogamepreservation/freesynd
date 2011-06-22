@@ -232,9 +232,9 @@ void ShotClass::shotTargetRandomizer(toDefineXYZ * cp, toDefineXYZ * tp,
         }
     }
 
-    int max_x = g_Session.getMission()->mmax_x_ * 256 - 1;
-    int max_y = g_Session.getMission()->mmax_y_ * 256 - 1;
-    int max_z = g_Session.getMission()->mmax_z_ * 128 - 1;
+    int max_x = (g_Session.getMission()->mmax_x_ - 1) * 256;
+    int max_y = (g_Session.getMission()->mmax_y_ - 1) * 256;
+    int max_z = (g_Session.getMission()->mmax_z_ - 1) * 128;
     if (gtx > max_x) {
         if (cos(angx) == 0) {
             gtx = max_x;
@@ -326,8 +326,8 @@ bool ProjectileShot::animate(int elapsed, Mission *m) {
             reached_pos.x = 0;
             self_remove = true;
             do_recalc = true;
-        } else if (reached_pos.x >= m->mmax_x_ * 256) {
-            reached_pos.x = m->mmax_x_ * 256 - 1;
+        } else if (reached_pos.x > (m->mmax_x_ - 1) * 256) {
+            reached_pos.x = (m->mmax_x_ - 1) * 256;
             self_remove = true;
             do_recalc = true;
         }
@@ -343,8 +343,8 @@ bool ProjectileShot::animate(int elapsed, Mission *m) {
             reached_pos.y = 0;
             self_remove = true;
             do_recalc = true;
-        } else if (reached_pos.y >= m->mmax_y_ * 256) {
-            reached_pos.y = m->mmax_y_ * 256 - 1;
+        } else if (reached_pos.y > (m->mmax_y_ - 1) * 256) {
+            reached_pos.y = (m->mmax_y_ - 1) * 256;
             self_remove = true;
             do_recalc = true;
         }
@@ -361,8 +361,8 @@ bool ProjectileShot::animate(int elapsed, Mission *m) {
             reached_pos.z = 0;
             self_remove = true;
             do_recalc = true;
-        } else if (reached_pos.z >= m->mmax_z_ * 128) {
-            reached_pos.z = m->mmax_z_ * 128 - 1;
+        } else if (reached_pos.z > (m->mmax_z_ - 1) * 128) {
+            reached_pos.z = (m->mmax_z_ - 1) * 128;
             self_remove = true;
             do_recalc = true;
         }
