@@ -153,7 +153,7 @@ void WeaponInstance::draw(int x, int y) {
 }
 
 void ShotClass::shotTargetRandomizer(toDefineXYZ * cp, toDefineXYZ * tp,
-                                          double angle)
+                                  double angle, double dist_new)
 {
     if (angle == 0)
         return;
@@ -167,7 +167,11 @@ void ShotClass::shotTargetRandomizer(toDefineXYZ * cp, toDefineXYZ * tp,
     double dtx = (double)(tx - cx);
     double dty = (double)(ty - cy);
     double dtz = (double)(tz - cz);
-    double dist_cur = sqrt(dtx * dtx + dty * dty + dtz * dtz);
+    double dist_cur = 0;
+    if (dist_new != -1)
+        dist_cur = dist_new;
+    else
+        dist_cur = sqrt(dtx * dtx + dty * dty + dtz * dtz);
     if (dist_cur == 0)
         return;
 
@@ -228,9 +232,9 @@ void ShotClass::shotTargetRandomizer(toDefineXYZ * cp, toDefineXYZ * tp,
         }
     }
 
-    int max_x = g_App.getGameSession().getMission()->mmax_x_ * 256 - 1;
-    int max_y = g_App.getGameSession().getMission()->mmax_y_ * 256 - 1;
-    int max_z = g_App.getGameSession().getMission()->mmax_z_ * 128 - 1;
+    int max_x = g_Session.getMission()->mmax_x_ * 256 - 1;
+    int max_y = g_Session.getMission()->mmax_y_ * 256 - 1;
+    int max_z = g_Session.getMission()->mmax_z_ * 128 - 1;
     if (gtx > max_x) {
         if (cos(angx) == 0) {
             gtx = max_x;
@@ -316,29 +320,59 @@ bool ProjectileShot::animate(int elapsed, Mission *m) {
         }
 
         toDefineXYZ reached_pos;
+        bool do_recalc = false;
         reached_pos.x = cur_pos_.x + (int)(inc_x_ * inc_dist);
         if (reached_pos.x < 0) {
             reached_pos.x = 0;
             self_remove = true;
+            do_recalc = true;
         } else if (reached_pos.x >= m->mmax_x_ * 256) {
             reached_pos.x = m->mmax_x_ * 256 - 1;
             self_remove = true;
+            do_recalc = true;
         }
+        if (do_recalc) {
+            do_recalc = false;
+            if (inc_x_ != 0) {
+                inc_dist = (double)(reached_pos.x - cur_pos_.x) / inc_x_;
+            }
+        }
+
         reached_pos.y = cur_pos_.y + (int)(inc_y_ * inc_dist);
         if (reached_pos.y < 0) {
             reached_pos.y = 0;
             self_remove = true;
+            do_recalc = true;
         } else if (reached_pos.y >= m->mmax_y_ * 256) {
             reached_pos.y = m->mmax_y_ * 256 - 1;
             self_remove = true;
+            do_recalc = true;
         }
+        if (do_recalc) {
+            do_recalc = false;
+            if (inc_y_ != 0) {
+                inc_dist = (double)(reached_pos.y - cur_pos_.y) / inc_y_;
+                reached_pos.x = cur_pos_.x + (int)(inc_x_ * inc_dist);
+            }
+        }
+
         reached_pos.z = cur_pos_.z + (int)(inc_z_ * inc_dist);
         if (reached_pos.z < 0) {
             reached_pos.z = 0;
             self_remove = true;
+            do_recalc = true;
         } else if (reached_pos.z >= m->mmax_z_ * 128) {
             reached_pos.z = m->mmax_z_ * 128 - 1;
             self_remove = true;
+            do_recalc = true;
+        }
+        if (do_recalc) {
+            do_recalc = false;
+            if (inc_z_ != 0) {
+                inc_dist = (double)(reached_pos.z - cur_pos_.z) / inc_z_;
+                reached_pos.x = cur_pos_.x + (int)(inc_x_ * inc_dist);
+                reached_pos.y = cur_pos_.y + (int)(inc_y_ * inc_dist);
+            }
         }
 
         PathNode pn(reached_pos.x / 256, reached_pos.y / 256,
@@ -434,6 +468,25 @@ bool ProjectileShot::animate(int elapsed, Mission *m) {
             all_shots.push_back(sd);
         }
         makeShot(true, cp, SFXObject::sfxt_ExplosionBall, all_shots);
+        int max_flames = 20 + rand() % 8;
+        base_pos_ = cur_pos_;
+        cur_pos_.z += 16;
+        if (cur_pos_.z > (m->mmax_z_ - 1) * 128)
+            cur_pos_.z = (m->mmax_z_ - 1) * 128;
+        for (int i = 0; i < max_flames; i++) {
+            target_pos_ = base_pos_;
+            shotTargetRandomizer(&cur_pos_, &target_pos_, 120.0, 320.0);
+            PathNode pn(target_pos_.x / 256, target_pos_.y / 256,
+                target_pos_.z / 128, target_pos_.x % 256, target_pos_.y % 256,
+                target_pos_.z % 128);
+            m->inRangeCPos(&cur_pos_, NULL, &pn, true, true, 320);
+            SFXObject *so = new SFXObject(m->map(),
+                SFXObject::sfxt_LargeFire);
+            so->setPosition(pn.tileX(), pn.tileY(), pn.tileZ(), pn.offX(),
+                pn.offY(), pn.offZ());
+            so->setVisZ(pn.tileZ());
+            m->addSfxObject(so);
+        }
     }
     if (self_remove)
         life_over_ = self_remove;
@@ -813,6 +866,7 @@ void ShotClass::makeShot(bool rangeGenerated, toDefineXYZ &cp, int anim_type,
                 so->setPosition(pn.tileX(), pn.tileY(), pn.tileZ(), pn.offX(),
                     pn.offY(), pn.offZ());
                 so->setVisZ(pn.tileZ());
+                so->correctZ();
                 g_Session.getMission()->addSfxObject(so);
             } else if ((has_blocker & 2) != 0) {
                 if (smp) {
@@ -823,6 +877,7 @@ void ShotClass::makeShot(bool rangeGenerated, toDefineXYZ &cp, int anim_type,
                     so->setPosition(smp->tileX(), smp->tileY(), smp->tileZ() + 1,
                         smp->offX(), smp->offY(), smp->offZ());
                     so->setVisZ(smp->visZ() + 1);
+                    so->correctZ();
                     g_Session.getMission()->addSfxObject(so);
                 }
             }
@@ -832,6 +887,7 @@ void ShotClass::makeShot(bool rangeGenerated, toDefineXYZ &cp, int anim_type,
             so->setPosition(pn.tileX(), pn.tileY(), pn.tileZ(), pn.offX(),
                 pn.offY(), pn.offZ());
             so->setVisZ(pn.tileZ());
+            so->correctZ();
             g_Session.getMission()->addSfxObject(so);
         } else if (has_blocker == 1) {
             if (smp)
@@ -841,6 +897,7 @@ void ShotClass::makeShot(bool rangeGenerated, toDefineXYZ &cp, int anim_type,
             so->setPosition(pn.tileX(), pn.tileY(), pn.tileZ(), pn.offX(),
                 pn.offY(), pn.offZ());
             so->setVisZ(pn.tileZ());
+            so->correctZ();
             g_Session.getMission()->addSfxObject(so);
         }
     }

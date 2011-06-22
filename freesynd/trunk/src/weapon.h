@@ -197,7 +197,8 @@ public:
     void setOwner(ShootableMapObject *owner) { owner_ = owner; }
     ShootableMapObject *getOwner() { return owner_; }
 
-    void shotTargetRandomizer(toDefineXYZ * cp, toDefineXYZ * tp, double angle);
+    void shotTargetRandomizer(toDefineXYZ * cp, toDefineXYZ * tp, double angle,
+        double dist_new = -1);
 
 protected:
     void makeShot(bool rangeGenerated, toDefineXYZ &cp, int anim_type,

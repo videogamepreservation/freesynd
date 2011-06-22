@@ -236,6 +236,7 @@ public:
 
     void draw(int x, int y);
     bool animate(int elapsed);
+    void correctZ();
 
     typedef enum {
         sfxt_Unknown = 0,
