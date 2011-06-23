@@ -2907,7 +2907,7 @@ uint8 Mission::inRangeCPos(toDefineXYZ * cp, ShootableMapObject ** t,
     if (t && *t) {
         tx = (*t)->tileX() * 256 + (*t)->offX();
         ty = (*t)->tileY() * 256 + (*t)->offY();
-        tz = ((*t)->visZ() + 1) * 128 + (*t)->offZ();
+        tz = (*t)->visZ() * 128 + (*t)->offZ() + ((*t)->sizeZ() >> 1);
         assert(tz <= (mmax_z_ - 1) * 128);
     } else {
         tx = pn->tileX() * 256 + pn->offX();

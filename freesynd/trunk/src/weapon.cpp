@@ -608,7 +608,7 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
         if (cp.z > (g_Session.getMission()->mmax_z_ - 1) * 128)
             cp.z = (g_Session.getMission()->mmax_z_ - 1) * 128;
         if (tobj)
-            base_shot.tp.z += 128;
+            base_shot.tp.z += (tobj->sizeZ() >> 1);
         else
             base_shot.tp.z += 16;
         if (base_shot.tp.z > (g_Session.getMission()->mmax_z_ - 1) * 128)
@@ -753,7 +753,7 @@ uint8 WeaponInstance::inRange(ShootableMapObject ** t, PathNode * pn,
         owner_->setIsIgnored(true);
         cxyz.x = owner_->tileX() * 256 + owner_->offX();
         cxyz.y = owner_->tileY() * 256 + owner_->offY();
-        cxyz.z = owner_->visZ() * 128 + owner_->offZ() + 128;
+        cxyz.z = owner_->visZ() * 128 + owner_->offZ() + (owner_->sizeZ() >> 1);
     } else {
         cxyz.x = tile_x_ * 256 + off_x_;
         cxyz.y = tile_y_ * 256 + off_y_;
@@ -804,7 +804,7 @@ void WeaponInstance::getInRangeOne(toDefineXYZ & cp,
     if (owner_) {
         ownerState = owner_->isIgnored();
         owner_->setIsIgnored(true);
-        cpXYZ.z += 128;
+        cpXYZ.z += (owner_->sizeZ() >> 1);
     } else {
         cpXYZ.z += 1;
     }
