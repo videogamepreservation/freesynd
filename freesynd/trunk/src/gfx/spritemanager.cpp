@@ -276,12 +276,11 @@ int GameSpriteManager::lastFrame(int animNum)
     assert(animNum < (int) index_.size());
 
     GameSpriteFrame *f = &frames_[index_[animNum]];
-    while (1) {
+    while (f->next_frame_ != index_[animNum]) {
         f = &frames_[f->next_frame_];
-        if (f->next_frame_ == index_[animNum])
-            return frameNum;
         frameNum++;
     }
+    return frameNum;
 }
 
 int GameSpriteManager::getFrameFromFrameIndx(int frameIndx)

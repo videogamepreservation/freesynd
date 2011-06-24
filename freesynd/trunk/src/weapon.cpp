@@ -36,7 +36,8 @@ Weapon::Weapon(const char *w_name, int smallIcon, int bigIcon, int w_cost,
     Weapon::WeaponAnimIndex w_idx, snd::InGameSample w_sample,
     WeaponType w_type, MapObject::DamageType w_dmg_type,
     int w_ammo_per_shot, int w_time_for_shot, int w_time_reload,
-    unsigned int w_shot_property) {
+    unsigned int w_shot_property)
+{
 
     name_ = w_name;
     small_icon_ = smallIcon;
@@ -297,6 +298,7 @@ ProjectileShot::ProjectileShot(toDefineXYZ &cp, toDefineXYZ &tp, MapObject::Dama
         inc_y_ = diffy / cur_dist_;
         inc_z_ = diffz / cur_dist_;
     }
+    cur_dist_ = 0;
     ignored_obj_ = ignrd_obj;
     owner_ = w_owner;
 }
@@ -305,9 +307,10 @@ bool ProjectileShot::animate(int elapsed, Mission *m) {
 
     bool max_range = false;
     bool self_remove = false;
-    if (cur_dist_ != 0) {
+    if (!life_over_) {
         double inc_dist = speed_ * (double)elapsed / 1000;
         if ((cur_dist_ + inc_dist) > dist_max_) {
+            assert(cur_dist_ <= dist_max_);
             inc_dist = dist_max_ - cur_dist_;
             max_range = true;
             self_remove = true;
@@ -433,8 +436,11 @@ bool ProjectileShot::animate(int elapsed, Mission *m) {
             }
         }
         cur_pos_ = reached_pos;
-        if (cur_dist_ != 0) {
-            cur_dist_ = d;
+        if (cur_dist_ != 0 && !self_remove) {
+            if (d <= dist_max_)
+                cur_dist_ = d;
+            else
+                self_remove = true;
         }
 
         if (ignored_obj_) {

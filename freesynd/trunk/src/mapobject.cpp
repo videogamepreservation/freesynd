@@ -104,7 +104,7 @@ bool MapObject::animate(int elapsed)
     frame_ += (total_elapsed / frame_tics_);
     if (framewas == frame_)
         changed = false;
-    frame_ %= frames_per_sec_ << 2;
+    frame_ %= frames_per_sec_ << 3;
     return changed;
 }
 
@@ -423,15 +423,15 @@ bool SFXObject::animate(int elapsed) {
     bool changed = MapObject::animate(elapsed);
     if (main_type_ == SFXObject::sfxt_ExplosionBall) {
         int z = tile_z_ * 128 + off_z_;
-        // 500 per sec
-        z += (elapsed >> 1);
+        // 250 per sec
+        z += (elapsed >> 2);
         if (z > (g_Session.getMission()->mmax_z_ - 1) * 128)
             z = (g_Session.getMission()->mmax_z_ - 1) * 128;
         tile_z_ = z / 128;
         vis_z_ = tile_z_;
         off_z_ = z % 128;
     }
-    if (frame_ >= g_App.gameSprites().lastFrame(anim_)
+    if (frame_ > g_App.gameSprites().lastFrame(anim_)
         && !leftTimeShowAnim(elapsed))
         sfx_life_over_ = true;
     return changed;
@@ -861,13 +861,13 @@ bool Door::animate(int elapsed, Mission *obj)
             } while (p);
             break;
         case Static::sttdoor_Closing:
-            if (frame_ >= g_App.gameSprites().lastFrame(closing_anim_)) {
+            if (frame_ > g_App.gameSprites().lastFrame(closing_anim_)) {
                 state_ = Static::sttdoor_Closed;
                 frame_ = 0;
             }
             break;
         case Static::sttdoor_Opening:
-            if (frame_ >= g_App.gameSprites().lastFrame(opening_anim_)) {
+            if (frame_ > g_App.gameSprites().lastFrame(opening_anim_)) {
                 state_ = Static::sttdoor_Open;
                 is_ignored_ = true;
                 frame_ = 0;
@@ -1055,13 +1055,13 @@ bool LargeDoor::animate(int elapsed, Mission *obj)
             }
             break;
         case Static::sttdoor_Closing:
-            if (frame_ >= g_App.gameSprites().lastFrame(closing_anim_)) {
+            if (frame_ > g_App.gameSprites().lastFrame(closing_anim_)) {
                 state_ = Static::sttdoor_Closed;
                 frame_ = 0;
             }
             break;
         case Static::sttdoor_Opening:
-            if (frame_ >= g_App.gameSprites().lastFrame(opening_anim_)) {
+            if (frame_ > g_App.gameSprites().lastFrame(opening_anim_)) {
                 state_ = Static::sttdoor_Open;
                 is_ignored_ = true;
                 frame_ = 0;
@@ -1117,7 +1117,7 @@ bool Tree::handleDamage(MapObject::DamageInflictType *d) {
     health_ -= d->dvalue;
     if (health_ <= 0) {
         state_ = Static::stttree_Burning;
-        setTimeShowAnim(10000);
+        setTimeShowAnim(7000);
         is_ignored_ = true;
     }
     return true;
