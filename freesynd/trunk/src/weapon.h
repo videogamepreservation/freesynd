@@ -245,11 +245,12 @@ public:
         bool setBlocker = false, bool checkTileOnly = false,
         int maxr = -1);
 
-    int getShots(int elapsed, int tForReload, int tForShot);
+    int getShots(int elapsed = -1);
     void getInRangeOne(toDefineXYZ & cp, ShootableMapObject * & target,
         uint8 mask, bool checkTileOnly = true, int maxr = -1);
     void getInRangeAll(toDefineXYZ & cp, std::vector<ShootableMapObject *> & targets,
         uint8 mask, bool checkTileOnly = true, int maxr = -1);
+    bool isReloading();
 
 protected:
     Weapon *pWeaponClass_;

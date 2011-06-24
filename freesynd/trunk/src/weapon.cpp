@@ -110,8 +110,8 @@ WeaponInstance::WeaponInstance(Weapon * w) : ShootableMapObject(-1)
 bool WeaponInstance::animate(int elapsed) {
     if (owner_) {
         if (pWeaponClass_->getWeaponType() == Weapon::EnergyShield) {
-            int ammoused = getShots(elapsed, pWeaponClass_->timeForShot(),
-                pWeaponClass_->timeReload()) * pWeaponClass_->ammoPerShot();
+            int ammoused = getShots(elapsed)
+                * pWeaponClass_->ammoPerShot();
             if (((PedInstance *)owner_)->selectedWeapon()
                 && ((PedInstance *)owner_)->selectedWeapon() == this)
             {
@@ -506,10 +506,9 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
     if (ammo_remaining_ == 0)
         return false;
 
-    // TODO: if owner exists these two values should change(IPA, mods)
-    int time_for_shot = pWeaponClass_->timeForShot();
-    int time_reload = pWeaponClass_->timeReload();
-    int shots = getShots(elapsed, time_reload, time_for_shot);
+    int shots = getShots(elapsed);
+    if (shots == 0)
+        return false;
 
     if (pWeaponClass_->dmgType() == MapObject::dmg_None) {
         return false;
@@ -776,11 +775,17 @@ uint8 WeaponInstance::inRange(ShootableMapObject ** t, PathNode * pn,
     return block_mask;
 }
 
-int WeaponInstance::getShots(int elapsed, int tForReload, int tForShot) {
-    int time_full_shot = tForShot + tForReload;
+int WeaponInstance::getShots(int elapsed) {
+    int time_for_shot = pWeaponClass_->timeForShot();
+    int time_reload = pWeaponClass_->timeReload();
+#if 0
+    // TODO: if owner exists these two values should change(IPA, mods)
+    if (owner_)
+#endif
+    int time_full_shot = time_for_shot + time_reload;
     if (elapsed == -1)
         elapsed = time_full_shot;
-    if (weapon_used_time_ >= tForShot) {
+    if (weapon_used_time_ >= time_for_shot) {
         weapon_used_time_ += elapsed;
         if (weapon_used_time_ >= time_full_shot) {
             weapon_used_time_ -= time_full_shot;
@@ -791,7 +796,7 @@ int WeaponInstance::getShots(int elapsed, int tForReload, int tForShot) {
 
     int shots = weapon_used_time_ / time_full_shot;
     weapon_used_time_ %= time_full_shot;
-    if (weapon_used_time_ >= tForShot)
+    if (weapon_used_time_ >= time_for_shot)
         shots++;
     return shots;
 }
@@ -841,6 +846,14 @@ void WeaponInstance::getInRangeAll(toDefineXYZ & cp,
         checkTileOnly, maxr);
 
     setIsIgnored(selfState);
+}
+
+bool WeaponInstance::isReloading() {
+    int time_for_shot = pWeaponClass_->timeForShot();
+    int time_reload = pWeaponClass_->timeReload();
+    int time_full_shot = time_for_shot + time_reload;
+    return (weapon_used_time_ > time_for_shot
+        && weapon_used_time_ <= time_for_shot);
 }
 
 void ShotClass::makeShot(bool rangeGenerated, toDefineXYZ &cp, int anim_type,

@@ -203,7 +203,10 @@ public:
     void drawSelectorAnim(int x, int y);
 
     ShootableMapObject *target() { return target_; }
-    void setTarget(ShootableMapObject *t) { target_ = t; }
+    void setTarget(ShootableMapObject *t, PathNode *pn = NULL) {
+        target_ = t;
+        target_pos_ = pn;
+    }
 
     void startFiring() { firing_ = PedInstance::Firing_Fire; }
     void stopFiring();
@@ -333,6 +336,9 @@ protected:
 
     AnimationDrawn drawn_anim_;
     ShootableMapObject *target_;
+    PathNode *target_pos_;
+    ShootableMapObject *reach_obj_;
+    PathNode *reach_pos_;
     int sight_range_;
     bool is_hostile_;
     int reload_count_;

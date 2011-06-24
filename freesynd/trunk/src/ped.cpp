@@ -613,8 +613,9 @@ PedInstance::PedInstance(Ped *ped, int m) : ShootableMovableMapObject(m),
 ped_(ped), firing_(PedInstance::Firing_Not),
 drawn_anim_(PedInstance::StandAnim), target_(NULL), sight_range_(0),
 is_hostile_(false), reload_count_(0), selected_weapon_(-1),
-pickup_weapon_(0), putdown_weapon_(0), in_vehicle_(0),
-is_an_agent_(PedInstance::Not_Agent)
+pickup_weapon_(NULL), putdown_weapon_(NULL), in_vehicle_(NULL),
+is_an_agent_(PedInstance::Not_Agent), target_pos_(NULL), reach_obj_(NULL),
+reach_pos_(NULL)
 {
     hold_on_.wayFree = 0;
     rcv_damage_def_ = MapObject::ddmg_Ped;
@@ -624,6 +625,10 @@ is_an_agent_(PedInstance::Not_Agent)
 PedInstance::~PedInstance(){
     delete ped_;
     dest_path_.clear();
+    if (target_pos_)
+        delete target_pos_;
+    if (reach_pos_)
+        delete reach_pos_;
 }
 
 void PedInstance::draw(int x, int y, int scrollX, int scrollY) {
@@ -1039,7 +1044,7 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
             || in_vehicle_->tileZ() != z
             || in_vehicle_->offX() != ox
             || in_vehicle_->offY() != oy)
-        in_vehicle_ = 0;
+        in_vehicle_ = NULL;
     }
     if (pickup_weapon_) {
         if(pickup_weapon_->tileX() != x
@@ -3044,10 +3049,10 @@ bool PedInstance::movementP(Mission *m, int elapsed)
                     // TODO: "current action drop" function will be
                     // better for this purpose
                     if (in_vehicle_) {
-                        in_vehicle_ = 0;
+                        in_vehicle_ = NULL;
                     }
                     if (pickup_weapon_) {
-                        pickup_weapon_ = 0;
+                        pickup_weapon_ = NULL;
                     }
                     return updated;
                 } else
@@ -3059,10 +3064,10 @@ bool PedInstance::movementP(Mission *m, int elapsed)
                     speed_ = 0;
                     // TODO: same as above
                     if (in_vehicle_) {
-                        in_vehicle_ = 0;
+                        in_vehicle_ = NULL;
                     }
                     if (pickup_weapon_) {
-                        pickup_weapon_ = 0;
+                        pickup_weapon_ = NULL;
                     }
                     return updated;
                 } else
