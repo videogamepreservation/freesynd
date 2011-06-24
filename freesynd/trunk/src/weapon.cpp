@@ -608,6 +608,7 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
         }
     }
 
+    bool range_damage = (shot_prop & Weapon::spe_RangeDamageOnReach) != 0;
     if (shot_prop & Weapon::spe_CreatesProjectile) {
         cp.z += 128;
         if (cp.z > (g_Session.getMission()->mmax_z_ - 1) * 128)
@@ -635,7 +636,7 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
             base_shot.tp = cp;
             gen_shots.push_back(base_shot);
         }
-        if (shot_prop & Weapon::spe_RangeDamageOnReach) {
+        if (range_damage) {
             for (unsigned int i = 0; i < gen_shots.size(); i++) {
                 std::vector<ShootableMapObject *> all_targets;
 
@@ -676,7 +677,7 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
                     last_one.tpn.setOffXYZ(last_one.tp.x % 256,
                         last_one.tp.y % 256, last_one.tp.z % 128);
                 }
-                if (shot_prop & Weapon::spe_RangeDamageOnReach) {
+                if (range_damage) {
                     for (unsigned int i = 0; i < gen_shots.size(); i++) {
                         std::vector<ShootableMapObject *> all_targets;
 
@@ -714,7 +715,7 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
                     last_one.tpn.setOffXYZ(last_one.tp.x % 256,
                         last_one.tp.y % 256, last_one.tp.z % 128);
                 }
-                if (shot_prop & Weapon::spe_RangeDamageOnReach) {
+                if (range_damage) {
                 } else {
                     all_shots = gen_shots;
                 }
@@ -722,7 +723,7 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
         }
     }
 
-    makeShot(false, cp, SFXObject::sfxt_BulletHit, all_shots, this);
+    makeShot(range_damage, cp, SFXObject::sfxt_BulletHit, all_shots, this);
     return true;
 }
 

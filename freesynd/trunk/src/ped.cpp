@@ -3220,6 +3220,8 @@ void PedInstance::destroyAllWeapons() {
     while (weapons_.size()) {
         WeaponInstance * w = removeWeapon(0);
         w->setMap(-1);
+        w->setPosition(tile_x_, tile_y_, tile_z_, off_x_, off_y_, off_z_);
+        w->setVisZ(vis_z_);
         w->setOwner(NULL);
         w->setIsIgnored(true);
     }
