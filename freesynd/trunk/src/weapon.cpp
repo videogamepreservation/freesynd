@@ -305,150 +305,150 @@ ProjectileShot::ProjectileShot(toDefineXYZ &cp, toDefineXYZ &tp, MapObject::Dama
 
 bool ProjectileShot::animate(int elapsed, Mission *m) {
 
-    bool max_range = false;
+    assert(!life_over_);
+    bool draw_impact = false;
     bool self_remove = false;
-    if (!life_over_) {
-        double inc_dist = speed_ * (double)elapsed / 1000;
-        if ((cur_dist_ + inc_dist) > dist_max_) {
-            assert(cur_dist_ <= dist_max_);
-            inc_dist = dist_max_ - cur_dist_;
-            max_range = true;
-            self_remove = true;
-        }
-        bool ignored_state;
 
-        if (ignored_obj_) {
-            ignored_state = ignored_obj_->isIgnored();
-            ignored_obj_->setIsIgnored(true);
-        }
+    double inc_dist = speed_ * (double)elapsed / 1000;
+    if ((cur_dist_ + inc_dist) > dist_max_) {
+        assert(cur_dist_ <= dist_max_);
+        inc_dist = dist_max_ - cur_dist_;
+        self_remove = true;
+    }
+    bool ignored_state;
 
-        toDefineXYZ reached_pos;
-        bool do_recalc = false;
-        reached_pos.x = cur_pos_.x + (int)(inc_x_ * inc_dist);
-        if (reached_pos.x < 0) {
-            reached_pos.x = 0;
-            self_remove = true;
-            do_recalc = true;
-        } else if (reached_pos.x > (m->mmax_x_ - 1) * 256) {
-            reached_pos.x = (m->mmax_x_ - 1) * 256;
-            self_remove = true;
-            do_recalc = true;
-        }
-        if (do_recalc) {
-            do_recalc = false;
-            if (inc_x_ != 0) {
-                inc_dist = (double)(reached_pos.x - cur_pos_.x) / inc_x_;
-            }
-        }
+    if (ignored_obj_) {
+        ignored_state = ignored_obj_->isIgnored();
+        ignored_obj_->setIsIgnored(true);
+    }
 
-        reached_pos.y = cur_pos_.y + (int)(inc_y_ * inc_dist);
-        if (reached_pos.y < 0) {
-            reached_pos.y = 0;
-            self_remove = true;
-            do_recalc = true;
-        } else if (reached_pos.y > (m->mmax_y_ - 1) * 256) {
-            reached_pos.y = (m->mmax_y_ - 1) * 256;
-            self_remove = true;
-            do_recalc = true;
-        }
-        if (do_recalc) {
-            do_recalc = false;
-            if (inc_y_ != 0) {
-                inc_dist = (double)(reached_pos.y - cur_pos_.y) / inc_y_;
-                reached_pos.x = cur_pos_.x + (int)(inc_x_ * inc_dist);
-            }
-        }
-
-        reached_pos.z = cur_pos_.z + (int)(inc_z_ * inc_dist);
-        if (reached_pos.z < 0) {
-            reached_pos.z = 0;
-            self_remove = true;
-            do_recalc = true;
-        } else if (reached_pos.z > (m->mmax_z_ - 1) * 128) {
-            reached_pos.z = (m->mmax_z_ - 1) * 128;
-            self_remove = true;
-            do_recalc = true;
-        }
-        if (do_recalc) {
-            do_recalc = false;
-            if (inc_z_ != 0) {
-                inc_dist = (double)(reached_pos.z - cur_pos_.z) / inc_z_;
-                reached_pos.x = cur_pos_.x + (int)(inc_x_ * inc_dist);
-                reached_pos.y = cur_pos_.y + (int)(inc_y_ * inc_dist);
-            }
-        }
-
-        PathNode pn(reached_pos.x / 256, reached_pos.y / 256,
-            reached_pos.z / 128, reached_pos.x % 256, reached_pos.y % 256,
-            reached_pos.z % 128);
-        ShootableMapObject * smo = NULL;
-        uint8 block_mask = m->inRangeCPos(
-            &cur_pos_, &smo, &pn, true, false, (int)inc_dist);
-        if (block_mask == 1) {
-            if (reached_pos.x == target_pos_.x
-                && reached_pos.y == target_pos_.y
-                && reached_pos.z == target_pos_.z)
-            {
-                cur_dist_ = 0;
-                self_remove = true;
-            }
-        } else if (block_mask != 0) {
-            reached_pos.x = pn.tileX() * 256 + pn.offX();
-            reached_pos.y = pn.tileY() * 256 + pn.offY();
-            reached_pos.z = pn.tileZ() * 128 + pn.offZ();
-            cur_dist_ = 0;
-            self_remove = true;
-        }
-        double anim_d = 64;
-        double diffx = (double) (base_pos_.x - reached_pos.x);
-        double diffy = (double) (base_pos_.y - reached_pos.y);
-        double diffz = (double) (base_pos_.z - reached_pos.z);
-        double d = sqrt(diffx * diffx + diffy * diffy
-            + diffz * diffz);
-#if 0
-        if (last_anim_dist_ == 0) {
-            SFXObject *so = new SFXObject(m->map(),
-                SFXObject::sfxt_Smoke);
-            so->setPosition(base_pos_.x / 256, base_pos_.y / 256,
-                base_pos_.z / 128, base_pos_.x % 256, base_pos_.y % 256,
-                base_pos_.z % 128 );
-            so->setVisZ(cur_pos_.z / 256);
-            m->addSfxObject(so);
-        }
-#endif
-        int diff_dist = (int) ((d - last_anim_dist_) / anim_d);
-        if (diff_dist != 0) {
-            for (int i = 1; i <= diff_dist; i++) {
-                toDefineXYZ t;
-                last_anim_dist_ += anim_d;
-                t.x = base_pos_.x + (int)(last_anim_dist_ * inc_x_);
-                t.y = base_pos_.y + (int)(last_anim_dist_ * inc_y_);
-                t.z = base_pos_.z + (int)(last_anim_dist_ * inc_z_);
-                t.z += 256;
-                if (t.z > (m->mmax_z_ - 1) * 128)
-                    t.z = (m->mmax_z_ - 1) * 128;
-                SFXObject *so = new SFXObject(m->map(),
-                    SFXObject::sfxt_Smoke);
-                so->setPosition(t.x / 256, t.y / 256, t.z / 128, t.x % 256,
-                    t.y % 256, t.z % 128 );
-                so->setVisZ(t.z / 256);
-                m->addSfxObject(so);
-            }
-        }
-        cur_pos_ = reached_pos;
-        if (cur_dist_ != 0 && !self_remove) {
-            if (d <= dist_max_)
-                cur_dist_ = d;
-            else
-                self_remove = true;
-        }
-
-        if (ignored_obj_) {
-            ignored_obj_->setIsIgnored(ignored_state);
+    toDefineXYZ reached_pos;
+    bool do_recalc = false;
+    reached_pos.x = cur_pos_.x + (int)(inc_x_ * inc_dist);
+    if (reached_pos.x < 0) {
+        reached_pos.x = 0;
+        self_remove = true;
+        do_recalc = true;
+    } else if (reached_pos.x > (m->mmax_x_ - 1) * 256) {
+        reached_pos.x = (m->mmax_x_ - 1) * 256;
+        self_remove = true;
+        do_recalc = true;
+    }
+    if (do_recalc) {
+        do_recalc = false;
+        if (inc_x_ != 0) {
+            inc_dist = (double)(reached_pos.x - cur_pos_.x) / inc_x_;
         }
     }
 
-    if (cur_dist_ == 0) {
+    reached_pos.y = cur_pos_.y + (int)(inc_y_ * inc_dist);
+    if (reached_pos.y < 0) {
+        reached_pos.y = 0;
+        self_remove = true;
+        do_recalc = true;
+    } else if (reached_pos.y > (m->mmax_y_ - 1) * 256) {
+        reached_pos.y = (m->mmax_y_ - 1) * 256;
+        self_remove = true;
+        do_recalc = true;
+    }
+    if (do_recalc) {
+        do_recalc = false;
+        if (inc_y_ != 0) {
+            inc_dist = (double)(reached_pos.y - cur_pos_.y) / inc_y_;
+            reached_pos.x = cur_pos_.x + (int)(inc_x_ * inc_dist);
+        }
+    }
+
+    reached_pos.z = cur_pos_.z + (int)(inc_z_ * inc_dist);
+    if (reached_pos.z < 0) {
+        reached_pos.z = 0;
+        self_remove = true;
+        do_recalc = true;
+    } else if (reached_pos.z > (m->mmax_z_ - 1) * 128) {
+        reached_pos.z = (m->mmax_z_ - 1) * 128;
+        self_remove = true;
+        do_recalc = true;
+    }
+    if (do_recalc) {
+        do_recalc = false;
+        if (inc_z_ != 0) {
+            inc_dist = (double)(reached_pos.z - cur_pos_.z) / inc_z_;
+            reached_pos.x = cur_pos_.x + (int)(inc_x_ * inc_dist);
+            reached_pos.y = cur_pos_.y + (int)(inc_y_ * inc_dist);
+        }
+    }
+
+    PathNode pn(reached_pos.x / 256, reached_pos.y / 256,
+        reached_pos.z / 128, reached_pos.x % 256, reached_pos.y % 256,
+        reached_pos.z % 128);
+    ShootableMapObject * smo = NULL;
+    uint8 block_mask = m->inRangeCPos(
+        &cur_pos_, &smo, &pn, true, false, (int)inc_dist);
+    if (block_mask == 1) {
+        if (reached_pos.x == target_pos_.x
+            && reached_pos.y == target_pos_.y
+            && reached_pos.z == target_pos_.z)
+        {
+            draw_impact = true;
+            self_remove = true;
+        }
+    } else if (block_mask != 0) {
+        reached_pos.x = pn.tileX() * 256 + pn.offX();
+        reached_pos.y = pn.tileY() * 256 + pn.offY();
+        reached_pos.z = pn.tileZ() * 128 + pn.offZ();
+        draw_impact = true;
+        self_remove = true;
+    }
+    double anim_d = 64;
+    double diffx = (double) (base_pos_.x - reached_pos.x);
+    double diffy = (double) (base_pos_.y - reached_pos.y);
+    double diffz = (double) (base_pos_.z - reached_pos.z);
+    double d = sqrt(diffx * diffx + diffy * diffy
+        + diffz * diffz);
+#if 0
+    if (last_anim_dist_ == 0) {
+        SFXObject *so = new SFXObject(m->map(),
+            SFXObject::sfxt_Smoke);
+        so->setPosition(base_pos_.x / 256, base_pos_.y / 256,
+            base_pos_.z / 128, base_pos_.x % 256, base_pos_.y % 256,
+            base_pos_.z % 128 );
+        so->setVisZ(cur_pos_.z / 256);
+        m->addSfxObject(so);
+    }
+#endif
+
+    int diff_dist = (int) ((d - last_anim_dist_) / anim_d);
+    if (diff_dist != 0) {
+        for (int i = 1; i <= diff_dist; i++) {
+            toDefineXYZ t;
+            last_anim_dist_ += anim_d;
+            t.x = base_pos_.x + (int)(last_anim_dist_ * inc_x_);
+            t.y = base_pos_.y + (int)(last_anim_dist_ * inc_y_);
+            t.z = base_pos_.z + (int)(last_anim_dist_ * inc_z_);
+            t.z += 256;
+            if (t.z > (m->mmax_z_ - 1) * 128)
+                t.z = (m->mmax_z_ - 1) * 128;
+            SFXObject *so = new SFXObject(m->map(),
+                SFXObject::sfxt_Smoke);
+            so->setPosition(t.x / 256, t.y / 256, t.z / 128, t.x % 256,
+                t.y % 256, t.z % 128 );
+            so->setVisZ(t.z / 256);
+            m->addSfxObject(so);
+        }
+    }
+    cur_pos_ = reached_pos;
+    if (!self_remove) {
+        if (d <= dist_max_)
+            cur_dist_ = d;
+        else
+            self_remove = true;
+    }
+
+    if (ignored_obj_) {
+        ignored_obj_->setIsIgnored(ignored_state);
+    }
+
+    if (draw_impact) {
         std::vector <Weapon::ShotDesc> all_shots;
         toDefineXYZ cp = cur_pos_;
         cp.z = ((cp.z >> 7) << 7) + 16;
@@ -459,7 +459,7 @@ bool ProjectileShot::animate(int elapsed, Mission *m) {
         for (unsigned int indx = 0; indx < all_targets.size();
             indx++)
         {
-            ShootableMapObject * smo = all_targets[indx];
+            smo = all_targets[indx];
             Weapon::ShotDesc sd;
             sd.tp.x = smo->tileX() * 256 + smo->offX();
             sd.tp.y = smo->tileY() * 256 + smo->offY();
@@ -483,7 +483,7 @@ bool ProjectileShot::animate(int elapsed, Mission *m) {
             target_pos_ = base_pos_;
             shotTargetRandomizer(&cur_pos_, &target_pos_, 120.0,
                 (double)dmg_range_ + 32.0);
-            PathNode pn(target_pos_.x / 256, target_pos_.y / 256,
+            pn = PathNode(target_pos_.x / 256, target_pos_.y / 256,
                 target_pos_.z / 128, target_pos_.x % 256, target_pos_.y % 256,
                 target_pos_.z % 128);
             m->inRangeCPos(&cur_pos_, NULL, &pn, true, true, dmg_range_ + 32);
