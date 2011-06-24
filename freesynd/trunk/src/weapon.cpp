@@ -405,17 +405,6 @@ bool ProjectileShot::animate(int elapsed, Mission *m) {
     double diffz = (double) (base_pos_.z - reached_pos.z);
     double d = sqrt(diffx * diffx + diffy * diffy
         + diffz * diffz);
-#if 0
-    if (last_anim_dist_ == 0) {
-        SFXObject *so = new SFXObject(m->map(),
-            SFXObject::sfxt_Smoke);
-        so->setPosition(base_pos_.x / 256, base_pos_.y / 256,
-            base_pos_.z / 128, base_pos_.x % 256, base_pos_.y % 256,
-            base_pos_.z % 128 );
-        so->setVisZ(cur_pos_.z / 256);
-        m->addSfxObject(so);
-    }
-#endif
 
     int diff_dist = (int) ((d - last_anim_dist_) / anim_d);
     if (diff_dist != 0) {
@@ -432,7 +421,7 @@ bool ProjectileShot::animate(int elapsed, Mission *m) {
                 SFXObject::sfxt_Smoke);
             so->setPosition(t.x / 256, t.y / 256, t.z / 128, t.x % 256,
                 t.y % 256, t.z % 128 );
-            so->setVisZ(t.z / 256);
+            so->setVisZ();
             m->addSfxObject(so);
         }
     }
@@ -449,6 +438,13 @@ bool ProjectileShot::animate(int elapsed, Mission *m) {
     }
 
     if (draw_impact) {
+        SFXObject *so = new SFXObject(m->map(),
+            SFXObject::sfxt_ExplosionFire);
+        so->setPosition(cur_pos_.x / 256, cur_pos_.y / 256, cur_pos_.z / 128,
+            cur_pos_.x % 256, cur_pos_.y % 256, cur_pos_.z % 128);
+        so->setVisZ();
+        m->addSfxObject(so);
+
         std::vector <Weapon::ShotDesc> all_shots;
         toDefineXYZ cp = cur_pos_;
         cp.z = ((cp.z >> 7) << 7) + 16;
@@ -474,11 +470,13 @@ bool ProjectileShot::animate(int elapsed, Mission *m) {
             all_shots.push_back(sd);
         }
         makeShot(true, cp, SFXObject::sfxt_ExplosionBall, all_shots);
-        int max_flames = 20 + rand() % 8;
+
+        int max_flames = 16 + rand() % 8;
         base_pos_ = cur_pos_;
         cur_pos_.z += 16;
         if (cur_pos_.z > (m->mmax_z_ - 1) * 128)
             cur_pos_.z = (m->mmax_z_ - 1) * 128;
+        // TODO: exclude flames on water
         for (int i = 0; i < max_flames; i++) {
             target_pos_ = base_pos_;
             shotTargetRandomizer(&cur_pos_, &target_pos_, 120.0,
@@ -487,11 +485,11 @@ bool ProjectileShot::animate(int elapsed, Mission *m) {
                 target_pos_.z / 128, target_pos_.x % 256, target_pos_.y % 256,
                 target_pos_.z % 128);
             m->inRangeCPos(&cur_pos_, NULL, &pn, true, true, dmg_range_ + 32);
-            SFXObject *so = new SFXObject(m->map(),
+            so = new SFXObject(m->map(),
                 SFXObject::sfxt_LargeFire);
             so->setPosition(pn.tileX(), pn.tileY(), pn.tileZ(), pn.offX(),
                 pn.offY(), pn.offZ());
-            so->setVisZ(pn.tileZ());
+            so->setVisZ();
             m->addSfxObject(so);
         }
     }
@@ -886,7 +884,7 @@ void ShotClass::makeShot(bool rangeGenerated, toDefineXYZ &cp, int anim_type,
                     anim_type);
                 so->setPosition(pn.tileX(), pn.tileY(), pn.tileZ(), pn.offX(),
                     pn.offY(), pn.offZ());
-                so->setVisZ(pn.tileZ());
+                so->setVisZ();
                 so->correctZ();
                 g_Session.getMission()->addSfxObject(so);
             } else if ((has_blocker & 2) != 0) {
@@ -907,7 +905,7 @@ void ShotClass::makeShot(bool rangeGenerated, toDefineXYZ &cp, int anim_type,
                 anim_type);
             so->setPosition(pn.tileX(), pn.tileY(), pn.tileZ(), pn.offX(),
                 pn.offY(), pn.offZ());
-            so->setVisZ(pn.tileZ());
+            so->setVisZ();
             so->correctZ();
             g_Session.getMission()->addSfxObject(so);
         } else if (has_blocker == 1) {
@@ -917,7 +915,7 @@ void ShotClass::makeShot(bool rangeGenerated, toDefineXYZ &cp, int anim_type,
                 anim_type);
             so->setPosition(pn.tileX(), pn.tileY(), pn.tileZ(), pn.offX(),
                 pn.offY(), pn.offZ());
-            so->setVisZ(pn.tileZ());
+            so->setVisZ();
             so->correctZ();
             g_Session.getMission()->addSfxObject(so);
         }

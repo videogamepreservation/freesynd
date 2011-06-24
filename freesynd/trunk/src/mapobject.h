@@ -91,6 +91,11 @@ public:
     void setTileX(int x) { tile_x_ = x; }
     void setTileY(int y) { tile_y_ = y; }
     void setTileZ(int z) { tile_z_ = z; }
+    void setVisZ() {
+        vis_z_ = tile_z_;
+        if (off_z_ != 0)
+            vis_z_--;
+    }
     void setVisZ(int z) { vis_z_ = z; }
 
     int offX() { return off_x_; }
