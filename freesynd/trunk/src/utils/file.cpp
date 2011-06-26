@@ -35,6 +35,8 @@
 #include <windows.h>
 #else
 #include <dirent.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 #endif
 
 #include "file.h"
@@ -236,6 +238,51 @@ void File::getGameSavedNames(std::vector<std::string> &files) {
     }
 
 #else
+	DIR * rep = opendir(savePath.c_str());
+	struct dirent * ent;
+
+	if (rep == NULL) {
+		if (mkdir(savePath.c_str(), 0777) == -1) {  // Create the directory
+        	FSERR(Log::k_FLG_IO, "File", "getGameSavedNames", ("Cannot create save directory in %s", homePath_.c_str()))
+        	return;
+     	}
+		rep = opendir(savePath.c_str());
+	}
+
+	while ((ent = readdir(rep)) != NULL) {
+		std::string filename(ent->d_name);
+        size_t extPos = filename.find_last_of('.');
+		if (extPos == std::string::npos) {
+			continue;
+		}
+        std::string name = filename.substr(0, extPos);
+		std::string ext = filename.substr(extPos);
+		if (ext.compare(".fsg") == 0) {
+        	std::istringstream iss( name );
+	        int index;
+	        iss >> index;
+	        if (index < 10) {
+	            std::ifstream infile;
+	            char buf[25];
+	            getFullPathForSaveSlot(index, filename);
+	            infile.open(filename.c_str(), std::ios::in | std::ios::binary);
+
+	            if (infile.is_open()) {
+	                // Read version first
+	                unsigned char vMaj = 1, vMin = 0;
+	                infile.read(reinterpret_cast<char*>(&vMaj), sizeof(unsigned char));
+	                infile.read(reinterpret_cast<char*>(&vMin), sizeof(unsigned char));
+	                // Read slot name
+	                infile.read(buf, 25);
+	                files[index].assign(buf);
+
+	                infile.close();
+	            }
+			}
+        }
+    }
+
+	closedir(rep);
 
 #endif
 }

@@ -37,6 +37,9 @@
 #include <windows.h>
 #else
 #include <time.h>
+#include <dirent.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 #endif
 
 #ifdef SYSTEM_SDL
@@ -183,7 +186,15 @@ int main(int argc, char *argv[]) {
 #else
     // Under unix it's in the user home directory
     confPath.assign(getenv("HOME"));
-    confPath.append("/");
+    confPath.append("/.freesynd/");
+	// create dir if it does not exist
+	DIR * rep = opendir(confPath.c_str());
+	if (rep == NULL) {
+		if (mkdir(confPath.c_str(), 0777) == -1) {
+        	FSERR(Log::k_FLG_IO, "Freesynd", "main", ("Cannot create home directory in %s", confPath.c_str()))
+        	return -1;
+     	}
+	}
     
 #endif
     LOG(Log::k_FLG_INFO, "Main", "main", ("Initializing application..."))
