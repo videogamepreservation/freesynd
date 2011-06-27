@@ -49,3 +49,7 @@ game mission files.
  Very low priority stuff, maybe for v0.9:
  - Save files portable, implementation that will read fixed endianess on
 different CPUs
+ - Merge input feature from config/loadsave menus:
+configure - has caret blinking, loadsave doesn't have it, but has caret
+navigation with "left","right" keys and mouse caret positioning, insert/delete
+from caret position.
