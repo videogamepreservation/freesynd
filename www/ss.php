@@ -2,6 +2,17 @@
 
 // Our list of screenshots
 $screenshots = array(
+    '2011-06-27' => array(
+        'caption' => 'Things that were done, but not shown',
+        'shots' => array(
+            'ss10.png' => 'Configure Menu',
+            'ss11.png' => 'Load - Save Menu',
+            'ss12.png' => 'Brief Menu',
+            'ss13.png' => 'Research Menu',
+            'ss14.png' => 'Map Menu',
+            'ss15.png' => 'Small progress in gameplay view',
+        ),
+    ),
     '2005-01-31' => array(
         'caption' => 'Rendering a couple of FLI videos',
         'shots' => array(
