@@ -5,20 +5,21 @@ Original game data files
 ========================
 
 	Due to licence restrictions, we don't distribute the original game data files.
-You will have to dowload them by yourself (search for "abandonware syndicate"). In
-order to run FreeSynd, copy all files from the original Syndicate DATA directory 
-to the FreeSynd Data directory.
+You should have a copy of Syndicate or buy it. In order to run FreeSynd, copy
+all files from the original Syndicate DATA directory to the FreeSynd Data
+directory.
 	You can also copy all files (original files and FreeSynd data files) to a unique
 and distinct directory and tell Freesynd to read resources into it.	See the chapter
 "Configuring Freesynd" to specify that directory.
 
-====>Attention : Please, be sure to download files from the first version of Syndicate
+====>Attention : Please, be sure to have files from the first version of Syndicate
 as Freesynd does not support files from Syndicate Plus or Syndicate Wars.
 
 Required Libraries
 ==================
 
-	On Windows, all libraries are released with the game. You don't have to install anything.
+	On Windows, all libraries are released with the game. You don't have to install
+anything.
 	
 	In order to run FreeSynd under Linux, you first need to install:
  - libSDL-1.2
@@ -78,7 +79,8 @@ Then run those commands to build the game:
  ----------------
 	This is a list of all Preprocessor macros used when building the application:
   - _DEBUG : Activate debugging informations. Specify this macro at compile time
-  - SYSTEM_SDL : Tells that the underlying graphic system is SDL. Specify this macro at compile time.
+  - SYSTEM_SDL : Tells that the underlying graphic system is SDL. Specify this
+  macro at compile time.
   
 Configuring Freesynd
 ====================
