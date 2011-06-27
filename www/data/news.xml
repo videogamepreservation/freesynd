@@ -1,8 +1,12 @@
 <?xml version='1.0' standalone='yes'?>
 <news>
+	<item title="Research available" date="2011-06-27" author="Benoit Blancard">
+	With chamel back in the game, v0.5 is now back on track! I finally got rid of that load/save feature and 
+	a few updates later, the future release is ready to be packaged. This week is the target!
+	</item>
 	<item title="Research available" date="2011-04-16" author="Benoit Blancard">
 	One step forward to v0.5 with the ability to run research on weapons and mods. Everything should work
-	as in the original game. Now, I'm working on the load/research functionnality and I hope to complete it
+	as in the original game. Now, I'm working on the load/save functionnality and I hope to complete it
 	by the end of April (don't look at previous news).
 	
 	Next to it, I'm planning to reorganize the SVN repository a little bit. The idea is to keep the trunk directory

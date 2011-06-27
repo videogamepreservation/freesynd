@@ -1,14 +1,14 @@
 <?xml version='1.0' standalone='yes'?>
 <roadmap>
-	<date>2010-09-30</date>
-	<status>Release v0.5 is now under development. Release is scheduled at the end of 03/2011.</status>
+	<date>2011-06-27</date>
+	<status>V0.5 will be release between 27/06 and 03/07.</status>
 	<features>
 	  <feature id="3043686" status="D">Game Time</feature>
 	  <feature id="3072653" status="D">Use libsyndicate data info</feature>
 	  <feature id="3081550" status="D">Minimap basic</feature>
 	  <feature id="3086471" status="D">Implements Reseach functionnality</feature>
 	  <feature id="3086469" status="D">Tax influence on countries status</feature>
-	  <feature id="3086955" status="N">Possibility to load/save game</feature>
+	  <feature id="3086955" status="D">Possibility to load/save game</feature>
 	</features>
 	<bugs>
 		<bug id="3005294" status="P">Debriefing information is not displayed after ending the mission</bug>
