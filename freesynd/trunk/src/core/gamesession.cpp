@@ -487,13 +487,13 @@ int GameSession::updateCountries() {
 
 //! Save instance to file
 bool GameSession::saveToFile(std::ofstream &file) {
-    char buf[25];
+    char buf[16];
     // Company name
     strcpy(buf, company_name_.c_str());
-    file.write(buf, 16);
+    file.write(buf, 15);
     // User name
     strcpy(buf, username_.c_str());
-    file.write(buf, 16);
+    file.write(buf, 15);
     // Logo
     file.write(reinterpret_cast<const char*>(&logo_), sizeof(int));
     // Logo colour
@@ -532,15 +532,15 @@ bool GameSession::saveToFile(std::ofstream &file) {
 
 //! Load instance from file
 bool GameSession::loadFromFile(std::ifstream &infile) {
-    char buf[17];
+    char buf[16];
     // Read company name
-    buf[16] = 0;
-    infile.read(buf, 16);
+    buf[15] = 0;
+    infile.read(buf, 15);
     setCompanyName(buf);
 
     // Read user name
-    buf[16] = 0;
-    infile.read(buf, 16);
+    buf[15] = 0;
+    infile.read(buf, 15);
     setUserName(buf);
 
     int ival = 0;
