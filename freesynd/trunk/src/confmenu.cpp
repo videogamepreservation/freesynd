@@ -202,7 +202,7 @@ public:
             consumed = true;
         }
 
-        if (name_value_.size() < 16) {
+        if (name_value_.size() < 15) {
             if (key >= KEY_a && key <= KEY_z) {
                 name_value_ += key - KEY_a + 'A';
                 consumed = true;
@@ -219,7 +219,7 @@ public:
             }
         }
 
-        g_Screen.scale2x(310, 80, 120, 9, bkg_ + 155 + 40 * 320, 320);
+        g_Screen.scale2x(310, 80, 129, 9, bkg_ + 155 + 40 * 320, 320);
         g_App.fonts().drawText(313, 81, name_value_.c_str(), FontManager::SIZE_2, false);
         drawCaret();
 

@@ -208,9 +208,8 @@ bool Research::saveToFile(std::ofstream &file) {
     file.write(reinterpret_cast<const char*>(&id_), sizeof(int));
 
     // Research name : 15 caracters max
-    char buf[15];
-    memset(buf, '\0', 15);
-    strcpy(buf, name_.c_str()); 
+    char buf[16];
+    strcpy(buf, name_.c_str());
     file.write(buf, 15);
             
     // Current funding
@@ -244,8 +243,8 @@ bool Research::loadFromFile(std::ifstream &infile, EResType type) {
     infile.read(reinterpret_cast<char*>(&id_), sizeof(int));
 
     // name
-    char buf[15];
-    memset(buf, '\0', 15);
+    char buf[16];
+    buf[15] = 0;
     infile.read(buf, 15);
     name_.assign(buf);
 

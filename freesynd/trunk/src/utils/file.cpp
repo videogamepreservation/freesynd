@@ -219,6 +219,7 @@ void File::getGameSavedNames(std::vector<std::string> &files) {
             if (index < 10) {
                 std::ifstream infile;
                 char buf[26];
+                buf[25] = 0;
                 getFullPathForSaveSlot(index, filename);
                 infile.open(filename.c_str(), std::ios::in | std::ios::binary);
 
@@ -264,6 +265,7 @@ void File::getGameSavedNames(std::vector<std::string> &files) {
 	        if (index < 10) {
 	            std::ifstream infile;
 	            char buf[26];
+                buf[25] = 0;
 	            getFullPathForSaveSlot(index, filename);
 	            infile.open(filename.c_str(), std::ios::in | std::ios::binary);
 

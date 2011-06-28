@@ -670,7 +670,6 @@ bool App::saveGameToFile(int fileSlot, std::string name) {
         outfile.write(reinterpret_cast<const char*>(&vMin), sizeof(unsigned char));
 
         char buf[26];
-        memset(buf, '\0', 26);
         // Slot name is on 25 caracters max
         strcpy(buf, name.c_str());
         outfile.write(buf, 25);
@@ -720,8 +719,8 @@ bool App::loadGameFromFile(int fileSlot) {
         infile.read(reinterpret_cast<char*>(&vMaj), sizeof(unsigned char));
         infile.read(reinterpret_cast<char*>(&vMin), sizeof(unsigned char));
 
-        char buf[25];
-        memset(buf, '\0', 25);
+        char buf[26];
+        buf[25] = 0;
 
         reset();
         //Read slot name

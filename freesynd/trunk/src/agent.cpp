@@ -85,8 +85,7 @@ bool Agent::saveToFile(std::ofstream &file) {
     // id
     file.write(reinterpret_cast<const char*>(&id_), sizeof(int));
     // Agent name : 15 caracters max
-    char buf[15];
-    memset(buf, '\0', 15);
+    char buf[16];
     strcpy(buf, name_.c_str());
     file.write(buf, 15);
     // gender : male = 1, female = 0
@@ -138,8 +137,8 @@ bool Agent::loadFromFile(std::ifstream &infile) {
         agentCnt = id_ + 1;
     }
     // name
-    char buf[15];
-    memset(buf, '\0', 15);
+    char buf[16];
+    buf[15] = 0;
     infile.read(buf, 15);
     name_.assign(buf);
     // gender
