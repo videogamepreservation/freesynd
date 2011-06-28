@@ -4,12 +4,12 @@ Installation Instructions
 Original game data files
 ========================
 
-	Due to licence restrictions, we don't distribute the original game data files.
+  Due to licence restrictions, we don't distribute the original game data files.
 You should have a copy of Syndicate or buy it. In order to run FreeSynd, copy
 all files from the original Syndicate DATA directory to the FreeSynd Data
 directory.
-	You can also copy all files (original files and FreeSynd data files) to a unique
-and distinct directory and tell Freesynd to read resources into it.	See the chapter
+  You can also copy all files (original files and FreeSynd data files) to a unique
+and distinct directory and tell Freesynd to read resources into it. See the chapter
 "Configuring Freesynd" to specify that directory.
 
 ====>Attention : Please, be sure to have files from the first version of Syndicate
@@ -18,20 +18,20 @@ as Freesynd does not support files from Syndicate Plus or Syndicate Wars.
 Required Libraries
 ==================
 
-	On Windows, all libraries are released with the game. You don't have to install
+  On Windows, all libraries are released with the game. You don't have to install
 anything.
-	
-	In order to run FreeSynd under Linux, you first need to install:
- - libSDL-1.2
- - libSDL_mixer
- - libSDL_image
- - libpng
+  
+  In order to run FreeSynd under Linux, you first need to install:
+    - libSDL-1.2
+    - libSDL_mixer
+    - libSDL_image
+    - libpng
 
-	On a debian based distribution you can do this as simply as:
+  On a debian based distribution you can do this as simply as:
 apt-get install libsdl1.2debian
 apt-get install libsdl-mixer1.2
 
-	For other distributions, consult the appropriate documentation.
+  For other distributions, consult the appropriate documentation.
 
 Installation from released file
 ===============================
@@ -47,11 +47,11 @@ to add original Syndicate resources that are not bundled with Freesynd.
 
    Unzip/untar file in your prefered directory and enter the newly 
 created freesynd directory. Type the following commands:
-	./configure
-	make
-	make install
+      ./configure
+      make
+      make install
 
-	By default, FreeSynd will install its binaries in the 'bindir' and its data
+  By default, FreeSynd will install its binaries in the 'bindir' and its data
 in 'datarootdir/freesynd'. See chapter "Original game data files"
 to add original Syndicate resources that are not bundled with Freesynd.
 
@@ -62,22 +62,22 @@ Building from source
 
  * Windows
  ---------
-	You can build the project using Visual C++ 2008 or Dev-cpp. See Readme files in the freesynd/projects directory.
-	
+  You can build the project using Visual C++ 2008 or Dev-cpp. See Readme files in the freesynd/projects directory.
+  
  * Linux
  -------
    Enter the freesynd directory.
    Run the following commands to set the environment up :
-	autoconf
-	automake -ac
+      autoconf
+      automake -ac
 
 Then run those commands to build the game:
-	./configure
-	make
+      ./configure
+      make
 
  * List of MACROs
  ----------------
-	This is a list of all Preprocessor macros used when building the application:
+  This is a list of all Preprocessor macros used when building the application:
   - _DEBUG : Activate debugging informations. Specify this macro at compile time
   - SYSTEM_SDL : Tells that the underlying graphic system is SDL. Specify this
   macro at compile time.
@@ -85,7 +85,7 @@ Then run those commands to build the game:
 Configuring Freesynd
 ====================
 
-	Freesynd reads the file freesynd.ini to get its running configuration.
+  Freesynd reads the file freesynd.ini to get its running configuration.
 You can edit the file with any text editore to customize your installation.
 
     On Linux, the application looks for the file in the $HOME directory but 

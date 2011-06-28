@@ -156,6 +156,7 @@ void WeaponInstance::draw(int x, int y) {
 void ShotClass::shotTargetRandomizer(toDefineXYZ * cp, toDefineXYZ * tp,
                                   double angle, double dist_new)
 {
+    // TODO: finish
     if (angle == 0)
         return;
     int cx = cp->x;
@@ -176,30 +177,27 @@ void ShotClass::shotTargetRandomizer(toDefineXYZ * cp, toDefineXYZ * tp,
     if (dist_cur == 0)
         return;
 
-    double PI = 3.14159265;
-    double angx = 0;
+    const double PI = 3.14159265;
     angle /= (180.0 / PI);
-    angx = acos(dtx/dist_cur);
-    double angy = 0;
-    angy = acos(dty/dist_cur);
-    double angz = 0;
-    angz = acos(dtz/dist_cur);
+    double angx = acos(dtx/dist_cur);
+    double angy = acos(dty/dist_cur);
+    double angz = acos(dtz/dist_cur);
 
     double set_sign = 1;
     if (rand() % 2 == 1)
         set_sign = -1;
-    angx = angx + (angle / 2 * (double)(rand() % 100) / 100.0) * set_sign;
+    angx += ((angle * (double)(rand() % 100) / 200.0) * set_sign);
     int gtx = cx + (int)(cos(angx) * dist_cur);
 
     set_sign = 1;
     if (rand() % 2 == 1)
         set_sign = -1;
-    angy = angy + (angle / 2 * (double)(rand() % 100) / 100.0) * set_sign;
+    angy += ((angle * (double)(rand() % 100) / 200.0) * set_sign);
     int gty = cy + (int)(cos(angy) * dist_cur);
     set_sign = 1;
     if (rand() % 2 == 1)
         set_sign = -1;
-    angz = angz + (angle / 2 * (double)(rand() % 100) / 100.0) * set_sign;
+    angz += ((angle * (double)(rand() % 100) / 200.0) * set_sign);
     int gtz = cz + (int)(cos(angz) * dist_cur);
 
     if (gtx < 0) {
@@ -568,9 +566,10 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
 
     // angle is used to generate shot with randomizer
     // TODO: add angle per weapon(precision is higher for smaller angle)
-    double angle = 30;
+    // NOTE: disabled
+    double angle = 0;
 
-    angle = angle * (1 - accuracy);
+    angle *= (1 - accuracy);
 
     Weapon::ShotDesc base_shot;
     base_shot.smo = NULL;
