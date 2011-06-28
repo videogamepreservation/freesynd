@@ -64,10 +64,11 @@ Building from source
  ---------
   You can build the project using Visual C++ 2008 or Dev-cpp. See Readme files in the freesynd/projects directory.
   
- * Linux
+ * Linux or Mac OS X
  -------
    Enter the freesynd directory.
    Run the following commands to set the environment up :
+      aclocal
       autoconf
       automake -ac
 
