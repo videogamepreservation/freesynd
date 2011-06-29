@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.61])
-AC_INIT([freesynd], [0.5], [freesynd-user@lists.sourceforge.net])
+AC_INIT([freesynd], [0.6], [freesynd-user@lists.sourceforge.net])
 AM_INIT_AUTOMAKE
 AC_CONFIG_SRCDIR([src/freesynd.cpp])
 

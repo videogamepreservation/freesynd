@@ -1,4 +1,4 @@
-FreeSynd 0.5 : Release Notes
+FreeSynd 0.6 : Release Notes
 ----------------------------
 
 Description
@@ -7,6 +7,29 @@ This is a prelimary release for testing and development purposes.
 
 Changes
 -------
+  *
+
+Fixed Bugs
+----------
+  * :
+
+Features added
+----------
+  * :
+
+Known issues with this release
+------------------------------
+  * Agent AI is not operational.
+  * The minimap is not complete.
+  * PathFinding requires improvement
+  * Mission debriefing is not operational
+  * No animation for windows
+  * Map drawing is buggy
+
+History
+-------
+ v0.5
+ ----
   * Correct positioning by Z axis for all objects
   * Bug, too small space allocated for enhance/info cost values, destructor
  for Mission class was not able to deallocate briefing string
@@ -33,33 +56,16 @@ Changes
   * Added description to mission brief in 3 more languages
   * Z checking for inRange checking
   * Trees animations : normal, burning, damaged now in use
-
-Fixed Bugs
-----------
   * 3005295 : The tax rate for the region cannot be altered by player
   * 3031032 : Rewrite animation generation procedures
   * 3272545 : Team button not selected when clicking on inventory item
-
-Features added
-----------
   * 3043686 : Game time
   * 3072653 : Use libsyndicate data info
   * 3086469 : Tax influence on countries status
   * 3081550 : Minimap basic
   * 3086471 : Implements Reseach functionnality
   * 3086955 : Possibility to load/save game
-
-Known issues with this release
-------------------------------
-  * Agent AI is not operational.
-  * The minimap is not complete.
-  * PathFinding requires improvement
-  * Mission debriefing is not operational
-  * No animation for windows
-  * Map drawing is buggy
-
-History
--------
+ 
  v0.4
  ----
   * Minimap drawing is fixed, should be better now
