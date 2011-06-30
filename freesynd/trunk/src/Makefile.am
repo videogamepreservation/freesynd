@@ -78,3 +78,9 @@ dump_SOURCES = \
 	utils/file.cpp \
 	utils/portablefile.cpp \
 	utils/dernc.cpp
+
+default_ini.h: $(top_srcdir)/freesynd.ini
+	"$(top_srcdir)"/embed.sh "$<" "$@"
+
+freesynd.cpp: default_ini.h
+

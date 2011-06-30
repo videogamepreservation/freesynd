@@ -82,8 +82,9 @@ bool App::readConfiguration(const char *dir) {
         ConfigFile conf(path);
         conf.readInto(fullscreen_, "fullscreen", false);
         conf.readInto(playIntro_, "play_intro", true);
+        string defaultDataDir = string(dir) + "data/";
         string dataDir;
-        conf.readInto(dataDir, "data_dir");
+        conf.readInto(dataDir, "data_dir", defaultDataDir);
         File::setPath(dataDir.c_str());
         
         switch (conf.read("language", 0)) {
