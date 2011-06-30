@@ -153,7 +153,7 @@ bool AgentManager::saveToFile(PortableFile &file) {
     for (int i=0; i<AgentManager::MAX_AGENT; i++) {
         Agent *pAgent = agents_.get(i);
         // This flag tells if there is an agent on this slot
-        file.write8b(pAgent);
+        file.write8b(pAgent != 0);
         if (pAgent) {
             pAgent->saveToFile(file);
         }
