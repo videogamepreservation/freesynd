@@ -1,4 +1,5 @@
 // Richard J. Wagner  v2.1  24 May 2004  wagnerr@umich.edu
+// Modified by Joey Parrish, June 2011 joey.parrish@gmail.com
 
 // Copyright (c) 2004 Richard J. Wagner
 // 
@@ -48,7 +49,11 @@ ConfigFile::ConfigFile()
 void ConfigFile::remove( const string& key )
 {
 	// Remove key and its value
-	myContents.erase( myContents.find( key ) );
+	myContents.erase( key );
+	if (myLineNumbers.find( key ) != myLineNumbers.end()) {
+		myLines[myLineNumbers[key]].erase();
+		myLineNumbers.erase( key );
+	}
 	return;
 }
 
@@ -74,12 +79,15 @@ void ConfigFile::trim( string& s )
 std::ostream& operator<<( std::ostream& os, const ConfigFile& cf )
 {
 	// Save a ConfigFile to os
-	for( ConfigFile::mapci p = cf.myContents.begin();
-	     p != cf.myContents.end();
-		 ++p )
+	for( size_t i = 0;
+	     i != cf.myLines.size();
+		 ++i )
 	{
-		os << p->first << " " << cf.myDelimiter << " ";
-		os << p->second << std::endl;
+		os << cf.myLines[i] << std::endl;
+	}
+	if ( cf.mySentry != "" )
+	{
+		os << cf.mySentry << std::endl;
 	}
 	return os;
 }
@@ -110,6 +118,8 @@ std::istream& operator>>( std::istream& is, ConfigFile& cf )
 		{
 			std::getline( is, line );
 		}
+		int line_number = cf.myLines.size();
+		cf.myLines.push_back(line);
 		
 		// Ignore comments
 		line = line.substr( 0, line.find(comm) );
@@ -134,20 +144,41 @@ std::istream& operator>>( std::istream& is, ConfigFile& cf )
 				std::getline( is, nextline );
 				terminate = true;
 				
+				if ( is.eof() )
+				{
+					// don't add an extra blank line to the list.
+					continue;
+				}
+				
 				string nlcopy = nextline;
 				ConfigFile::trim(nlcopy);
-				if( nlcopy == "" ) continue;
+				if( nlcopy == "" )
+				{
+					cf.myLines.push_back(nextline);
+					continue;
+				}
 				
 				nextline = nextline.substr( 0, nextline.find(comm) );
 				if( nextline.find(delim) != string::npos )
+				{
+					cf.myLines.push_back(nextline);
 					continue;
+				}
 				if( sentry != "" && nextline.find(sentry) != string::npos )
+				{
+					cf.myLines.push_back(nextline);
 					continue;
+				}
 				
 				nlcopy = nextline;
 				ConfigFile::trim(nlcopy);
-				if( nlcopy != "" ) line += "\n";
+				if( nlcopy != "" )
+				{
+					cf.myLines[line_number] += "\n";
+					line += "\n";
+				}
 				line += nextline;
+				cf.myLines[line_number] += nextline;
 				terminate = false;
 			}
 			
@@ -155,6 +186,7 @@ std::istream& operator>>( std::istream& is, ConfigFile& cf )
 			ConfigFile::trim(key);
 			ConfigFile::trim(line);
 			cf.myContents[key] = line;  // overwrites if key is repeated
+			cf.myLineNumbers[key] = line_number;
 		}
 	}
 	
