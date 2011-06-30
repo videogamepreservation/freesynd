@@ -129,6 +129,14 @@ string ConfigFile::T_as_string( const T& t )
 
 
 /* static */
+template<>
+inline string ConfigFile::T_as_string<bool>( const bool& t )
+{
+    return t ? "true" : "false";
+}
+
+
+/* static */
 template<class T>
 T ConfigFile::string_as_T( const string& s )
 {
