@@ -511,6 +511,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\version.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\weapon.h"
 				>
 			</File>
