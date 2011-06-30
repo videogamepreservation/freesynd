@@ -37,6 +37,14 @@
 #include <fstream>
 #include <set>
 
+#ifdef __APPLE__
+// Carbon includes an AIFF header which conflicts with fliplayer.h
+// So we will redefine ChunkHeader temporarily to work around that.
+#define ChunkHeader CarbonChunkHeader
+#include <Carbon/Carbon.h>
+#undef ChunkHeader
+#endif
+
 #ifdef SYSTEM_SDL
 #include "system_sdl.h"
 #endif
@@ -76,6 +84,43 @@ static void addMissingSlash(string& str) {
     if (str[str.length() - 1] != '/') str.push_back('/');
 }
 
+#ifdef __APPLE__
+static bool getResourcePath(string& resourcePath)
+{
+    // let's check to see if we're inside an application bundle first.
+    CFBundleRef main = CFBundleGetMainBundle();
+    CFStringRef appid = NULL;
+    if (main) appid = CFBundleGetIdentifier(main);
+    if (!appid) return false;
+
+    // we're in an app bundle.
+    printf("OS X application bundle detected.\n");
+    CFURLRef url = CFBundleCopyResourcesDirectoryURL(main);
+    if (!url) {
+        // this shouldn't happen.
+        // FIXME: find a better (more graphical) way to alert the user.
+        printf("Unable to locate resources.\n");
+        exit(1);
+    }
+    FSRef fs;
+    if (!CFURLGetFSRef(url, &fs)) {
+        // this shouldn't happen.
+        // FIXME: find a better (more graphical) way to alert the user.
+        printf("Unable to translate URL.\n");
+        exit(1);
+    }
+
+    char *buf = (char *)malloc(1024);
+    FSRefMakePath(&fs, (UInt8 *)buf, 1024);
+    CFRelease(url);
+
+    resourcePath.assign(buf);
+    resourcePath.push_back('/');
+    free(buf);
+    return true;
+}
+#endif
+
 bool App::readConfiguration(const char *dir) {
     std::string path(dir);
     path.append("freesynd.ini");
@@ -93,8 +138,20 @@ bool App::readConfiguration(const char *dir) {
         addMissingSlash(dataDir);
         File::setDataPath(dataDir.c_str());
 
+#ifdef __APPLE__
+        string defaultOurDataDir;
+        if (getResourcePath(defaultOurDataDir)) {
+            // this is an app bundle, so let's default the data dir
+            // to the one included in the app bundle's resources.
+            defaultOurDataDir += "our_data/";
+        } else {
+            defaultOurDataDir = dataDir;
+        }
+#else
+        string defaultOurDataDir = dataDir;
+#endif
         string ourDataDir;
-        conf.readInto(ourDataDir, "freesynd_data_dir", dataDir);
+        conf.readInto(ourDataDir, "freesynd_data_dir", defaultOurDataDir);
         addMissingSlash(ourDataDir);
         File::setOurDataPath(ourDataDir.c_str());
         
