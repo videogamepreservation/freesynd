@@ -15,6 +15,7 @@ Fixed Bugs
 
 Features added
 ----------
+  * 3336699 : Made save files portable between byte orders.
   * :
 
 Known issues with this release
