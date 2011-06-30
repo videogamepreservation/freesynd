@@ -313,6 +313,7 @@ bool ProjectileShot::animate(int elapsed, Mission *m) {
         inc_dist = dist_max_ - cur_dist_;
         self_remove = true;
     }
+    cur_dist_ += inc_dist;
     bool ignored_state;
 
     if (ignored_obj_) {
@@ -322,7 +323,7 @@ bool ProjectileShot::animate(int elapsed, Mission *m) {
 
     toDefineXYZ reached_pos;
     bool do_recalc = false;
-    reached_pos.x = cur_pos_.x + (int)(inc_x_ * inc_dist);
+    reached_pos.x = base_pos_.x + (int)(inc_x_ * cur_dist_);
     if (reached_pos.x < 0) {
         reached_pos.x = 0;
         self_remove = true;
@@ -335,11 +336,11 @@ bool ProjectileShot::animate(int elapsed, Mission *m) {
     if (do_recalc) {
         do_recalc = false;
         if (inc_x_ != 0) {
-            inc_dist = (double)(reached_pos.x - cur_pos_.x) / inc_x_;
+            cur_dist_ = (double)(reached_pos.x - base_pos_.x) / inc_x_;
         }
     }
 
-    reached_pos.y = cur_pos_.y + (int)(inc_y_ * inc_dist);
+    reached_pos.y = base_pos_.y + (int)(inc_y_ * cur_dist_);
     if (reached_pos.y < 0) {
         reached_pos.y = 0;
         self_remove = true;
@@ -352,12 +353,12 @@ bool ProjectileShot::animate(int elapsed, Mission *m) {
     if (do_recalc) {
         do_recalc = false;
         if (inc_y_ != 0) {
-            inc_dist = (double)(reached_pos.y - cur_pos_.y) / inc_y_;
-            reached_pos.x = cur_pos_.x + (int)(inc_x_ * inc_dist);
+            cur_dist_ = (double)(reached_pos.y - base_pos_.y) / inc_y_;
+            reached_pos.x = base_pos_.x + (int)(inc_x_ * cur_dist_);
         }
     }
 
-    reached_pos.z = cur_pos_.z + (int)(inc_z_ * inc_dist);
+    reached_pos.z = base_pos_.z + (int)(inc_z_ * cur_dist_);
     if (reached_pos.z < 0) {
         reached_pos.z = 0;
         self_remove = true;
@@ -370,9 +371,9 @@ bool ProjectileShot::animate(int elapsed, Mission *m) {
     if (do_recalc) {
         do_recalc = false;
         if (inc_z_ != 0) {
-            inc_dist = (double)(reached_pos.z - cur_pos_.z) / inc_z_;
-            reached_pos.x = cur_pos_.x + (int)(inc_x_ * inc_dist);
-            reached_pos.y = cur_pos_.y + (int)(inc_y_ * inc_dist);
+            cur_dist_ = (double)(reached_pos.z - base_pos_.z) / inc_z_;
+            reached_pos.x = base_pos_.x + (int)(inc_x_ * cur_dist_);
+            reached_pos.y = base_pos_.y + (int)(inc_y_ * cur_dist_);
         }
     }
 
@@ -424,6 +425,8 @@ bool ProjectileShot::animate(int elapsed, Mission *m) {
         }
     }
     cur_pos_ = reached_pos;
+
+    // additional check for distance, just to be sure
     if (!self_remove) {
         if (d <= dist_max_)
             cur_dist_ = d;
@@ -436,6 +439,7 @@ bool ProjectileShot::animate(int elapsed, Mission *m) {
     }
 
     if (draw_impact) {
+        // NOTE: if projectile hits water should hit and flames be drawn?
         SFXObject *so = new SFXObject(m->map(),
             SFXObject::sfxt_ExplosionFire);
         so->setPosition(cur_pos_.x / 256, cur_pos_.y / 256, cur_pos_.z / 128,
@@ -613,7 +617,7 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
         if (tobj)
             base_shot.tp.z += (tobj->sizeZ() >> 1);
         else
-            base_shot.tp.z += 16;
+            base_shot.tp.z += 1;
         if (base_shot.tp.z > (g_Session.getMission()->mmax_z_ - 1) * 128)
             base_shot.tp.z = (g_Session.getMission()->mmax_z_ - 1) * 128;
         for (int i = 0; i < ammoused; i++) {

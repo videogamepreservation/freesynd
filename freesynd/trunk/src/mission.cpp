@@ -2973,6 +2973,8 @@ uint8 Mission::inRangeCPos(toDefineXYZ * cp, ShootableMapObject ** t,
             unsigned char twd = mtsurfaces_[nx + ny * mmax_x_
                 + nz * mmax_m_xy].twd;
             if (!(twd == 0x00 || twd == 0x0C || twd == 0x10)) {
+                if (block_mask != 8)
+                    block_mask = 0;
                 if (setBlocker) {
                     if (pn) {
                         sx -= inc_x;
@@ -2983,10 +2985,9 @@ uint8 Mission::inRangeCPos(toDefineXYZ * cp, ShootableMapObject ** t,
                         pn->setOffXYZ((int)sx % 256, (int)sy % 256,
                             (int)sz % 128);
                     }
-                    block_mask = 4;
+                    block_mask |= 4;
                     break;
                 }
-                block_mask = 0;
                 break;
             }
             oldx = nx;
@@ -3022,7 +3023,7 @@ uint8 Mission::inRangeCPos(toDefineXYZ * cp, ShootableMapObject ** t,
             block_mask = 0;
         if (setBlocker){
             if (pn) {
-                if (block_mask == 4) {
+                if (block_mask != 0) {
                     int dcx = cx - startXYZ.x;
                     int dcy = cy - startXYZ.y;
                     int dcz = cz - startXYZ.z;
