@@ -5,6 +5,7 @@
  *   Copyright (C) 2005  Stuart Binge  <skbinge@gmail.com>              *
  *   Copyright (C) 2005  Joost Peters  <joostp@users.sourceforge.net>   *
  *   Copyright (C) 2006  Trent Waddington <qg@biodome.org>              *
+ *   Copyright (C) 2011  Joey Parrish  <joey.parrish@gmail.com>         *
  *                                                                      *
  *    This program is free software;  you can redistribute it and / or  *
  *  modify it  under the  terms of the  GNU General  Public License as  *
@@ -30,6 +31,7 @@
 #include "common.h"
 #include "mod.h"
 #include "utils/seqmodel.h"
+#include "utils/portablefile.h"
 
 /*!
  * Modifications manager class.
@@ -56,9 +58,9 @@ public:
     SequenceModel * getAvalaibleMods() { return &mods_; }
 
     //! Save instance to file
-    bool saveToFile(std::ofstream &file);
+    bool saveToFile(PortableFile &file);
     //! Load instance from file
-    bool loadFromFile(std::ifstream &infile);
+    bool loadFromFile(PortableFile &infile, const format_version& v);
 
 protected:
     //! Loads the mod from file

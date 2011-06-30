@@ -3,6 +3,7 @@
  *  FreeSynd - a remake of the classic Bullfrog game "Syndicate".       *
  *                                                                      *
  *   Copyright (C) 2011  Benoit Blancard <benblan@users.sourceforge.net>*
+ *   Copyright (C) 2011  Joey Parrish  <joey.parrish@gmail.com>         *
  *                                                                      *
  *    This program is free software;  you can redistribute it and / or  *
  *  modify it  under the  terms of the  GNU General  Public License as  *
@@ -28,6 +29,7 @@
 #include "core/research.h"
 #include "core/gameevent.h"
 #include "utils/seqmodel.h"
+#include "utils/portablefile.h"
 
 class Research;
 
@@ -69,9 +71,9 @@ public:
     void removeListener(GameEventListener *pListener);
 
     //! Save instance to file
-    bool saveToFile(std::ofstream &file);
+    bool saveToFile(PortableFile &file);
     //! Load instance from file
-    bool loadFromFile(std::ifstream &infile);
+    bool loadFromFile(PortableFile &infile, const format_version& v);
 
 protected:
     Research *loadResearch(Weapon::WeaponType wt);

@@ -6,6 +6,7 @@
  *   Copyright (C) 2005  Joost Peters  <joostp@users.sourceforge.net>   *
  *   Copyright (C) 2006  Trent Waddington <qg@biodome.org>              *
  *   Copyright (C) 2011  Benoit Blancard <benblan@users.sourceforge.net>*
+ *   Copyright (C) 2011  Joey Parrish <joey.parrish@gmail.com>          *
  *                                                                      *
  *    This program is free software;  you can redistribute it and / or  *
  *  modify it  under the  terms of the  GNU General  Public License as  *
@@ -31,7 +32,7 @@
 
 const int LoadSaveMenu::X_ORIGIN = 165;
 const int LoadSaveMenu::Y_ORIGIN = 100;
-const int LoadSaveMenu::NAME_MAX_SIZE = 25;
+const int LoadSaveMenu::NAME_MAX_SIZE = 31;
 
 LoadSaveMenu::LoadSaveMenu(MenuManager * m):Menu(m, "loadsave", "mlosa.dat",
      "mlosaout.dat")
@@ -120,7 +121,7 @@ bool LoadSaveMenu::handleUnknownKey(Key key, const int modKeys) {
     } else if (key == KEY_END) {
         caretPosition_ = files_[editNameId_].size();
     } else if (menu_manager_->isPrintableKey(key)) {
-        if (files_[editNameId_].size() <= NAME_MAX_SIZE) {
+        if (files_[editNameId_].size() < NAME_MAX_SIZE) {
             std::string str;
             str += menu_manager_->getKeyAsChar(key);
             files_[editNameId_].insert(caretPosition_, str);

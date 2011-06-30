@@ -6,6 +6,7 @@
  *   Copyright (C) 2005  Joost Peters  <joostp@users.sourceforge.net>   *
  *   Copyright (C) 2006  Trent Waddington <qg@biodome.org>              *
  *   Copyright (C) 2006  Tarjei Knapstad <tarjei.knapstad@gmail.com>    *
+ *   Copyright (C) 2011  Joey Parrish  <joey.parrish@gmail.com>         *
  *                                                                      *
  *    This program is free software;  you can redistribute it and / or  *
  *  modify it  under the  terms of the  GNU General  Public License as  *
@@ -233,30 +234,25 @@ Mod *ModManager::loadMod(Mod::EModType mt, Mod::EModVersion ver) {
     return NULL;
 }
 
-bool ModManager::saveToFile(std::ofstream &file) {
-    unsigned int isize = mods_.size();
-    file.write(reinterpret_cast<const char*>(&isize), sizeof(unsigned int));
+bool ModManager::saveToFile(PortableFile &file) {
+    file.write32(mods_.size());
 
-    for(unsigned int i=0; i<isize; i++) {
+    for(unsigned int i=0; i<mods_.size(); i++) {
         Mod *pMod = mods_.get(i);
-        int type = pMod->getType();
-        file.write(reinterpret_cast<const char*>(&type), sizeof(int));
-        int ver = pMod->getVersion();
-        file.write(reinterpret_cast<const char*>(&ver), sizeof(int));
+        file.write32(pMod->getType());
+        file.write32(pMod->getVersion());
     }
     return true;
 }
 
-bool ModManager::loadFromFile(std::ifstream &infile) {
+bool ModManager::loadFromFile(PortableFile &infile, const format_version& v) {
 
-    int nbMods = 0;
-    infile.read(reinterpret_cast<char*>(&nbMods), sizeof(int));
+    int nbMods = infile.read32();
 
     for (int i=0;i<nbMods; i++) {
-        int type = 0;
+        int type = infile.read32();
         Mod::EModType mt = Mod::Unknown;
         Mod::EModVersion mv = Mod::MOD_V1;
-        infile.read(reinterpret_cast<char*>(&type), sizeof(int));
         switch (type) {
             case 0: mt = Mod::MOD_LEGS;break;
             case 1: mt = Mod::MOD_ARMS;break;
@@ -267,8 +263,7 @@ bool ModManager::loadFromFile(std::ifstream &infile) {
             default: mt = Mod::Unknown;
         }
 
-        int ver = 0;
-        infile.read(reinterpret_cast<char*>(&ver), sizeof(int));
+        int ver = infile.read32();
         switch (ver) {
             case 0: mv = Mod::MOD_V1;break;
             case 1: mv = Mod::MOD_V2;break;

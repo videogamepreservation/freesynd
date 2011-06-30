@@ -3,6 +3,7 @@
  *  FreeSynd - a remake of the classic Bullfrog game "Syndicate".       *
  *                                                                      *
  *   Copyright (C) 2010  Benoit Blancard <benblan@users.sourceforge.net>*
+ *   Copyright (C) 2011  Joey Parrish  <joey.parrish@gmail.com>         *
  *                                                                      *
  *    This program is free software;  you can redistribute it and / or  *
  *  modify it  under the  terms of the  GNU General  Public License as  *
@@ -28,6 +29,7 @@
 
 #include "../common.h"
 #include "researchmanager.h"
+#include "utils/portablefile.h"
 
 enum Status_Pop {
     STAT_VERY_HAPPY = 5,
@@ -269,9 +271,9 @@ public:
     int getTaxRevenue(int population, int rate);
 
     //! Save instance to file
-    bool saveToFile(std::ofstream &file);
+    bool saveToFile(PortableFile &file);
     //! Load instance from file
-    bool loadFromFile(std::ifstream &infile);
+    bool loadFromFile(PortableFile &infile, const format_version& v);
 
 private:
     //! Destroy GameSession resources

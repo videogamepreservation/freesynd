@@ -2,10 +2,6 @@
  *                                                                      *
  *  FreeSynd - a remake of the classic Bullfrog game "Syndicate".       *
  *                                                                      *
- *   Copyright (C) 2005  Stuart Binge  <skbinge@gmail.com>              *
- *   Copyright (C) 2005  Joost Peters  <joostp@users.sourceforge.net>   *
- *   Copyright (C) 2006  Trent Waddington <qg@biodome.org>              *
- *   Copyright (C) 2006  Tarjei Knapstad <tarjei.knapstad@gmail.com>    *
  *   Copyright (C) 2011  Joey Parrish  <joey.parrish@gmail.com>         *
  *                                                                      *
  *    This program is free software;  you can redistribute it and / or  *
@@ -23,52 +19,30 @@
  *  The full text of the license is also included in the file COPYING.  *
  *                                                                      *
  ************************************************************************/
-#ifndef AGENTMANAGER_H
-#define AGENTMANAGER_H
 
-#include "common.h"
-#include "agent.h"
-#include "utils/seqmodel.h"
-#include "utils/portablefile.h"
+#ifndef VERSION_H
+#define VERSION_H
 
-extern const char * const g_AgentNames[];
-extern const int g_NumAgentNames;
+class format_version
+{
+    public:
+        format_version(unsigned char vMaj, unsigned char vMin)
+            : major_(vMaj), minor_(vMin)
+        {
+        }
 
-/*!
- * Agent Manager class.
- *
- * Provides methods for managing player's agents.
- */
-class AgentManager {
-public:
-    /*! Max number of agents in cryo chamber.*/
-    static const int MAX_AGENT;
+        inline int major() const { return major_; }
+        inline int minor() const { return minor_; }
 
-    AgentManager();
-    ~AgentManager();
+        // example: v1.1 has combined value of 0x0101
+        inline int combined() const { return (major_ << 8) | minor_; }
 
-    void loadAgents();
-    void reset(bool onlyWomen = false);
-    void destroyAgentSlot(int n);
+        inline bool operator==(int value) const { return combined() == value; }
+        inline bool operator!=(int value) const { return combined() != value; }
 
-    Agent *agent(int n) {
-        assert(n < MAX_AGENT);
-        return agents_.get(n);
-    }
-
-    SequenceModel * getAgents() { return &agents_; }
-
-    //! Save instance to file
-    bool saveToFile(PortableFile &file);
-    //! Load instance from file
-    bool loadFromFile(PortableFile &infile, const format_version& v);
-
-protected:
-    /*!
-     * All available agents.
-     */
-    VectorModel<Agent *> agents_;
-    int nextName_;
+    private:
+        int major_;
+        int minor_;
 };
 
 #endif

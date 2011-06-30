@@ -324,6 +324,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\src\utils\portablefile.cpp"
+					>
+				</File>
+				<File
 					RelativePath="..\..\src\utils\log.cpp"
 					>
 				</File>
@@ -591,6 +595,10 @@
 				</File>
 				<File
 					RelativePath="..\..\src\utils\file.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\utils\portablefile.h"
 					>
 				</File>
 				<File

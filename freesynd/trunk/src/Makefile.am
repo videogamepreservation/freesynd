@@ -13,6 +13,7 @@ freesynd_SOURCES = common.h config.h keys.h utils/singleton.h  core/gameevent.h\
 	utils/log.cpp utils/log.h \
 	utils/configfile.cpp utils/configfile.h \
 	utils/seqmodel.cpp utils/seqmodel.h \
+	utils/portablefile.cpp utils/portablefile.h \
 	core/gamesession.cpp core/gamesession.h \
 	core/research.cpp core/research.h \
 	core/researchmanager.cpp core/researchmanager.h \
@@ -75,4 +76,5 @@ dump_SOURCES = \
 	gfx/tile.cpp \
 	gfx/tilemanager.cpp \
 	utils/file.cpp \
+	utils/portablefile.cpp \
 	utils/dernc.cpp

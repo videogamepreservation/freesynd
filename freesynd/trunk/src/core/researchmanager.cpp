@@ -3,6 +3,7 @@
  *  FreeSynd - a remake of the classic Bullfrog game "Syndicate".       *
  *                                                                      *
  *   Copyright (C) 2011  Benoit Blancard <benblan@users.sourceforge.net>*
+ *   Copyright (C) 2011  Joey Parrish  <joey.parrish@gmail.com>         *
  *                                                                      *
  *    This program is free software;  you can redistribute it and / or  *
  *  modify it  under the  terms of the  GNU General  Public License as  *
@@ -330,44 +331,39 @@ bool ResearchManager::handleWeaponDiscovered(Weapon *pWeapon) {
     return false;
 }
 
-bool ResearchManager::saveToFile(std::ofstream &file) {
+bool ResearchManager::saveToFile(PortableFile &file) {
     // Search on mods
-    unsigned int isize = availableModsSearch_.size();
-    file.write(reinterpret_cast<const char*>(&isize), sizeof(unsigned int));
+    file.write32(availableModsSearch_.size());
 
-    for (unsigned int iMod=0; iMod < isize; iMod++) {
+    for (unsigned int iMod=0; iMod < availableModsSearch_.size(); iMod++) {
         Research *pRes = availableModsSearch_.get(iMod);
         pRes->saveToFile(file);
     }
 
     // Search on weapons
-    isize = availableWeaponsSearch_.size();
-    file.write(reinterpret_cast<const char*>(&isize), sizeof(unsigned int));
+    file.write32(availableWeaponsSearch_.size());
 
-    for (unsigned int iWeap=0; iWeap < isize; iWeap++) {
+    for (unsigned int iWeap=0; iWeap < availableWeaponsSearch_.size(); iWeap++) {
         Research *pRes = availableWeaponsSearch_.get(iWeap);
         pRes->saveToFile(file);
     }
 
     // Write the current search
-    int ival = pCurrResearch_ ? pCurrResearch_->getId() : 0;
-    file.write(reinterpret_cast<const char*>(&ival), sizeof(int));
+    file.write32(pCurrResearch_ ? pCurrResearch_->getId() : 0);
 
     return true;
 }
 
-bool ResearchManager::loadFromFile(std::ifstream &infile) {
+bool ResearchManager::loadFromFile(PortableFile &infile, const format_version& v) {
     // Destroy existing researchs
     destroy();
 
     // Research on mods
-    unsigned int nbRes = 0;
-    infile.read(reinterpret_cast<char*>(&nbRes), sizeof(unsigned int));
+    unsigned int nbRes = infile.read32();
     for (unsigned int iRes=0; iRes<nbRes; iRes++) {
         Mod::EModType mt = Mod::Unknown;
         Mod::EModVersion mv = Mod::MOD_V1;
-        int type = 0;
-        infile.read(reinterpret_cast<char*>(&type), sizeof(int));
+        int type = infile.read32();
         switch (type) {
             case 0: mt = Mod::MOD_LEGS;break;
             case 1: mt = Mod::MOD_ARMS;break;
@@ -378,8 +374,7 @@ bool ResearchManager::loadFromFile(std::ifstream &infile) {
             default: mt = Mod::Unknown;
         }
 
-        int ver = 0;
-        infile.read(reinterpret_cast<char*>(&ver), sizeof(int));
+        int ver = infile.read32();
         switch (ver) {
             case 0: mv = Mod::MOD_V1;break;
             case 1: mv = Mod::MOD_V2;break;
@@ -388,7 +383,7 @@ bool ResearchManager::loadFromFile(std::ifstream &infile) {
         }
 
         Research *pRes = loadResearch(mt, mv);
-        pRes->loadFromFile(infile, Research::MODS);
+        pRes->loadFromFile(infile, Research::MODS, v);
         if (pRes == NULL) {
             return false;
         }
@@ -396,11 +391,10 @@ bool ResearchManager::loadFromFile(std::ifstream &infile) {
     }
 
     // Research on weapons
-    infile.read(reinterpret_cast<char*>(&nbRes), sizeof(unsigned int));
+    nbRes = infile.read32();
     for (unsigned int iRes=0; iRes<nbRes; iRes++) {
-        int type = 0;
+        int type = infile.read32();
         Weapon::WeaponType wt = Weapon::Unknown;
-        infile.read(reinterpret_cast<char*>(&type), sizeof(int));
         switch (type) {
             case 0: wt = Weapon::Persuadatron;break;
             case 1: wt = Weapon::Pistol;break;
@@ -420,16 +414,14 @@ bool ResearchManager::loadFromFile(std::ifstream &infile) {
         }
 
         Research *pRes = loadResearch(wt);
-        pRes->loadFromFile(infile, Research::EQUIPS);
+        pRes->loadFromFile(infile, Research::EQUIPS, v);
         if (pRes == NULL) {
             return false;
         }
         availableWeaponsSearch_.add(pRes);
     }
 
-    int id = 0;
-    infile.read(reinterpret_cast<char*>(&id), sizeof(int));
-
+    int id = infile.read32();
     if (id != 0) {
         for (unsigned int i=0; i<availableModsSearch_.size(); i++) {
             Research *pRes = availableModsSearch_.get(i);

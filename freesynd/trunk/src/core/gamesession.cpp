@@ -3,6 +3,7 @@
  *  FreeSynd - a remake of the classic Bullfrog game "Syndicate".       *
  *                                                                      *
  *   Copyright (C) 2010  Benoit Blancard <benblan@users.sourceforge.net>*
+ *   Copyright (C) 2011  Joey Parrish  <joey.parrish@gmail.com>         *
  *                                                                      *
  *    This program is free software;  you can redistribute it and / or  *
  *  modify it  under the  terms of the  GNU General  Public License as  *
@@ -486,88 +487,62 @@ int GameSession::updateCountries() {
 }
 
 //! Save instance to file
-bool GameSession::saveToFile(std::ofstream &file) {
-    char buf[16];
+bool GameSession::saveToFile(PortableFile &file) {
     // Company name
-    strcpy(buf, company_name_.c_str());
-    file.write(buf, 15);
+    file.write_string(company_name_, 16);
     // User name
-    strcpy(buf, username_.c_str());
-    file.write(buf, 15);
+    file.write_string(username_, 16);
     // Logo
-    file.write(reinterpret_cast<const char*>(&logo_), sizeof(int));
+    file.write32(logo_);
     // Logo colour
-    file.write(reinterpret_cast<const char*>(&logo_colour_), sizeof(int));
+    file.write32(logo_colour_);
     // Money
-    file.write(reinterpret_cast<const char*>(&money_), sizeof(int));
+    file.write32(money_);
     // Time
-    file.write(reinterpret_cast<const char*>(&time_year_), sizeof(int));
-    file.write(reinterpret_cast<const char*>(&time_day_), sizeof(int));
-    file.write(reinterpret_cast<const char*>(&time_hour_), sizeof(int));
+    file.write32(time_year_);
+    file.write32(time_day_);
+    file.write32(time_hour_);
 
     // Missions
     for (int i=0; i<GameSession::NB_MISSION; i++) {
-        int ival = g_Blocks[i].population;
-        file.write(reinterpret_cast<const char*>(&ival), sizeof(int));
-        ival = g_Blocks[i].tax;
-        file.write(reinterpret_cast<const char*>(&ival), sizeof(int));
-        ival = g_Blocks[i].popStatus;
-        file.write(reinterpret_cast<const char*>(&ival), sizeof(int));
-        ival = g_Blocks[i].daysToNextStatus;
-        file.write(reinterpret_cast<const char*>(&ival), sizeof(int));
-        ival = g_Blocks[i].daysStatusElapsed;
-        file.write(reinterpret_cast<const char*>(&ival), sizeof(int));
-        ival = g_Blocks[i].status;
-        file.write(reinterpret_cast<const char*>(&ival), sizeof(int));
-        uint8 ui8val = g_Blocks[i].colour;
-        file.write(reinterpret_cast<const char*>(&ui8val), sizeof(uint8));
-        unsigned char uchar = g_Blocks[i].infoLevel;
-        file.write(reinterpret_cast<const char*>(&uchar), sizeof(unsigned char));
-        ival = g_Blocks[i].enhanceLevel;
-        file.write(reinterpret_cast<const char*>(&uchar), sizeof(unsigned char));
+        file.write32(g_Blocks[i].population);
+        file.write32(g_Blocks[i].tax);
+        file.write32(g_Blocks[i].popStatus);
+        file.write32(g_Blocks[i].daysToNextStatus);
+        file.write32(g_Blocks[i].daysStatusElapsed);
+        file.write32(g_Blocks[i].status);
+        file.write8(g_Blocks[i].colour);
+        file.write8(g_Blocks[i].infoLevel);
+        // NOTE: format version 1.0 had a bug where infoLevel was written again instead of enhanceLevel.
+        file.write8(g_Blocks[i].enhanceLevel);
     }
 
     return true;
 }
 
 //! Load instance from file
-bool GameSession::loadFromFile(std::ifstream &infile) {
-    char buf[16];
+bool GameSession::loadFromFile(PortableFile &infile, const format_version& v) {
     // Read company name
-    buf[15] = 0;
-    infile.read(buf, 15);
-    setCompanyName(buf);
-
+    company_name_ = infile.read_string((v == 0x0100) ? 17 : 16, true);
     // Read user name
-    buf[15] = 0;
-    infile.read(buf, 15);
-    setUserName(buf);
+    username_ = infile.read_string((v == 0x0100) ? 17 : 16, true);
 
-    int ival = 0;
     // Read logo id
-    infile.read(reinterpret_cast<char*>(&ival), sizeof(int));
-    setLogo(ival);
-
+    logo_ = infile.read32();
     // Read logo colour
-    infile.read(reinterpret_cast<char*>(&ival), sizeof(int));
-    setLogoColour(ival);
-
+    logo_colour_ = infile.read32();
     // Read money
-    infile.read(reinterpret_cast<char*>(&ival), sizeof(int));
-    setMoney(ival);
-
+    money_ = infile.read32();
     // Read time
-    infile.read(reinterpret_cast<char*>(&time_year_), sizeof(int)); // Year
-    infile.read(reinterpret_cast<char*>(&time_day_), sizeof(int)); // Day
-    infile.read(reinterpret_cast<char*>(&time_hour_), sizeof(int)); // Hour
+    time_year_ = infile.read32();
+    time_day_ = infile.read32();
+    time_hour_ = infile.read32();
 
     // Missions
     for (int i=0; i<GameSession::NB_MISSION; i++) {
-        infile.read(reinterpret_cast<char*>(&ival), sizeof(int));
-        g_Blocks[i].population = ival;
-        infile.read(reinterpret_cast<char*>(&ival), sizeof(int));
-        g_Blocks[i].tax = ival;
-        infile.read(reinterpret_cast<char*>(&ival), sizeof(int));
+        g_Blocks[i].population = infile.read32();
+        g_Blocks[i].tax = infile.read32();
+        int ival = infile.read32();
         switch (ival) {
             case 0: g_Blocks[i].popStatus = STAT_REBEL;break;
             case 1: g_Blocks[i].popStatus = STAT_DISCONTENT;break;
@@ -578,12 +553,11 @@ bool GameSession::loadFromFile(std::ifstream &infile) {
             default: g_Blocks[i].popStatus = STAT_VERY_HAPPY;break;
         }
 
-        infile.read(reinterpret_cast<char*>(&ival), sizeof(int));
-        g_Blocks[i].daysToNextStatus = ival;
-        infile.read(reinterpret_cast<char*>(&ival), sizeof(int));
-        g_Blocks[i].daysStatusElapsed = ival;
+        g_Blocks[i].daysToNextStatus = infile.read32();
+        g_Blocks[i].daysStatusElapsed = infile.read32();
+
         // Read status
-        infile.read(reinterpret_cast<char*>(&ival), sizeof(int));
+        ival = infile.read32();
         switch (ival) {
             case 0: g_Blocks[i].status = BLK_UNAVAIL;break;
             case 1: g_Blocks[i].status = BLK_AVAIL;break;
@@ -593,9 +567,7 @@ bool GameSession::loadFromFile(std::ifstream &infile) {
         }
 
         // Read colour
-        uint8 ui8val = 0;
-        infile.read(reinterpret_cast<char*>(&ui8val), sizeof(uint8));
-        g_Blocks[i].colour = ui8val;
+        g_Blocks[i].colour = infile.read8();
         if (g_Blocks[i].status != BLK_FINISHED && g_Blocks[i].status != BLK_REBEL &&
             g_Blocks[i].colour == logo_colour_) {
             // Find a colour different from the user colour
@@ -605,11 +577,8 @@ bool GameSession::loadFromFile(std::ifstream &infile) {
 		    } while (g_Blocks[i].colour == getLogoColour());
         }
 
-        unsigned char uchar = 0;
-        infile.read(reinterpret_cast<char*>(&uchar), sizeof(unsigned char));
-        g_Blocks[i].infoLevel = uchar;
-        infile.read(reinterpret_cast<char*>(&uchar), sizeof(unsigned char));
-        g_Blocks[i].enhanceLevel = uchar;
+        g_Blocks[i].infoLevel = infile.read8();
+        g_Blocks[i].enhanceLevel = infile.read8();
     }
 
     return true;

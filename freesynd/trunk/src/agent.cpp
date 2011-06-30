@@ -6,6 +6,7 @@
  *   Copyright (C) 2005  Joost Peters  <joostp@users.sourceforge.net>   *
  *   Copyright (C) 2006  Trent Waddington <qg@biodome.org>              *
  *   Copyright (C) 2006  Tarjei Knapstad <tarjei.knapstad@gmail.com>    *
+ *   Copyright (C) 2011  Joey Parrish  <joey.parrish@gmail.com>         *
  *                                                                      *
  *    This program is free software;  you can redistribute it and / or  *
  *  modify it  under the  terms of the  GNU General  Public License as  *
@@ -81,21 +82,17 @@ void Agent::addMod(Mod *pNewMod) {
     }
 }
 
-bool Agent::saveToFile(std::ofstream &file) {
+bool Agent::saveToFile(PortableFile &file) {
     // id
-    file.write(reinterpret_cast<const char*>(&id_), sizeof(int));
-    // Agent name : 15 caracters max
-    char buf[16];
-    strcpy(buf, name_.c_str());
-    file.write(buf, 15);
+    file.write32(id_);
+    // Agent name : 13 characters max, nul-padded
+    file.write_string(name_, 13);
     // gender : male = 1, female = 0
-    unsigned char uchar = male_ ? 1 : 0;
-    file.write(reinterpret_cast<const char*>(&uchar), sizeof(unsigned char));
+    file.write8b(male_);
     // active : true = 1, false = 0
-    uchar = active_ ? 1 : 0;
-    file.write(reinterpret_cast<const char*>(&uchar), sizeof(unsigned char));
+    file.write8b(active_);
     // Health
-    file.write(reinterpret_cast<const char*>(&health_), sizeof(int));
+    file.write32(health_);
     // Mods
     int nb = 0;
     for (int i = 0; i < 6; i++) {
@@ -103,53 +100,43 @@ bool Agent::saveToFile(std::ofstream &file) {
             nb++;
         }
     }
-    file.write(reinterpret_cast<const char*>(&nb), sizeof(int));
+    file.write32(nb);
     for (int mIndex = 0; mIndex < 6; mIndex++) {
         Mod *pMod = slot(mIndex);
         if (pMod) {
-            int ival = pMod->getType();
-            file.write(reinterpret_cast<const char*>(&ival), sizeof(int));
-            ival = pMod->getVersion();
-            file.write(reinterpret_cast<const char*>(&ival), sizeof(int));
+            file.write32(pMod->getType());
+            file.write32(pMod->getVersion());
         }
     }
     // Weapons
     nb = numWeapons();
-    file.write(reinterpret_cast<const char*>(&nb), sizeof(int));
+    file.write32(nb);
     for (int wIndex = 0; wIndex < numWeapons(); wIndex++) {
         WeaponInstance *pWinst = weapon(wIndex);
-        int ival = pWinst->getWeaponType();
-        file.write(reinterpret_cast<const char*>(&ival), sizeof(int));
-        ival = pWinst->ammoRemaining();
-        file.write(reinterpret_cast<const char*>(&ival), sizeof(int));
+        file.write32(pWinst->getWeaponType());
+        file.write32(pWinst->ammoRemaining());
     }
     return true;
 }
 
-bool Agent::loadFromFile(std::ifstream &infile) {
+bool Agent::loadFromFile(PortableFile &infile, const format_version& v) {
     // if this instance has already been populated reset it
     clearSlots();
     removeAllWeapons();
     // id
-    infile.read(reinterpret_cast<char*>(&id_), sizeof(int));
+    id_ = infile.read32();
     // update counter
     if (agentCnt<=id_) {
         agentCnt = id_ + 1;
     }
     // name
-    char buf[16];
-    buf[15] = 0;
-    infile.read(buf, 15);
-    name_.assign(buf);
+    name_ = infile.read_string((v == 0x0100) ? 15 : 13, true);
     // gender
-    unsigned char uchar;
-    infile.read(reinterpret_cast<char*>(&uchar), sizeof(unsigned char));
-    male_ = uchar ? true : false;
+    male_ = infile.read8b();
     // active
-    infile.read(reinterpret_cast<char*>(&uchar), sizeof(unsigned char));
-    active_ = uchar ? true : false;
+    active_ = infile.read8b();
     // health
-    infile.read(reinterpret_cast<char*>(&health_), sizeof(int));
+    health_ = infile.read32();
     
     return true;
 }

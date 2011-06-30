@@ -8,6 +8,7 @@
  *   Copyright (C) 2006  Tarjei Knapstad <tarjei.knapstad@gmail.com>    *
  *   Copyright (C) 2010  Benoit Blancard <benblan@users.sourceforge.net>*
  *   Copyright (C) 2011  Bohdan Stelmakh <chamel@users.sourceforge.net> *
+ *   Copyright (C) 2011  Joey Parrish <joey.parrish@gmail.com>          *
  *                                                                      *
  *    This program is free software;  you can redistribute it and / or  *
  *  modify it  under the  terms of the  GNU General  Public License as  *
@@ -30,6 +31,8 @@
 #include "app.h"
 #include "utils/file.h"
 #include "confmenu.h"
+
+#define NAME_MAX_SIZE 16
 
 class CommonConfSubMenu : public Menu {
 public:
@@ -202,7 +205,7 @@ public:
             consumed = true;
         }
 
-        if (name_value_.size() < 15) {
+        if (name_value_.size() < NAME_MAX_SIZE) {
             if (key >= KEY_a && key <= KEY_z) {
                 name_value_ += key - KEY_a + 'A';
                 consumed = true;

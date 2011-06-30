@@ -8,6 +8,7 @@
  *   Copyright (C) 2006  Tarjei Knapstad <tarjei.knapstad@gmail.com>    *
  *   Copyright (C) 2010  Bohdan Stelmakh <chamel@users.sourceforge.net> *
  *   Copyright (C) 2011  Benoit Blancard <benblan@users.sourceforge.net>*
+ *   Copyright (C) 2011  Joey Parrish  <joey.parrish@gmail.com>         *
  *                                                                      *
  *    This program is free software;  you can redistribute it and / or  *
  *  modify it  under the  terms of the  GNU General  Public License as  *
@@ -233,27 +234,23 @@ Weapon * WeaponManager::loadWeapon(Weapon::WeaponType wt) {
     return pWeapon;
 }
 
-bool WeaponManager::saveToFile(std::ofstream &file) {
-    unsigned int isize = availableWeapons_.size();
-    file.write(reinterpret_cast<const char*>(&isize), sizeof(unsigned int));
+bool WeaponManager::saveToFile(PortableFile &file) {
+    file.write32(availableWeapons_.size());
 
-    for(unsigned int i=0; i<isize; i++) {
+    for(unsigned int i=0; i<availableWeapons_.size(); i++) {
         Weapon *pWeapon = availableWeapons_.get(i);
-        int ival = pWeapon->getWeaponType();
-        file.write(reinterpret_cast<const char*>(&ival), sizeof(int));
+        file.write32(pWeapon->getWeaponType());
     }
 
     return true;
 }
 
-bool WeaponManager::loadFromFile(std::ifstream &infile) {
-    int nbWeap = 0;
-    infile.read(reinterpret_cast<char*>(&nbWeap), sizeof(int));
+bool WeaponManager::loadFromFile(PortableFile &infile, const format_version& v) {
+    int nbWeap = infile.read32();
 
     for (int i=0;i<nbWeap; i++) {
-        int type = 0;
+        int type = infile.read32();
         Weapon::WeaponType wt = Weapon::Unknown;
-        infile.read(reinterpret_cast<char*>(&type), sizeof(int));
         switch (type) {
             case 0: wt = Weapon::Persuadatron;break;
             case 1: wt = Weapon::Pistol;break;

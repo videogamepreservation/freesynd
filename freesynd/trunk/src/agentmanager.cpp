@@ -6,6 +6,7 @@
  *   Copyright (C) 2005  Joost Peters  <joostp@users.sourceforge.net>   *
  *   Copyright (C) 2006  Trent Waddington <qg@biodome.org>              *
  *   Copyright (C) 2006  Tarjei Knapstad <tarjei.knapstad@gmail.com>    *
+ *   Copyright (C) 2011  Joey Parrish  <joey.parrish@gmail.com>         *
  *                                                                      *
  *    This program is free software;  you can redistribute it and / or  *
  *  modify it  under the  terms of the  GNU General  Public License as  *
@@ -28,7 +29,7 @@
 #include "app.h"
 
 
-const char *g_AgentNames[] = {
+const char * const g_AgentNames[] = {
     "AFSHAR",
     "ARNOLD",
     "BAIRD",
@@ -100,6 +101,7 @@ const char *g_AgentNames[] = {
     "WILLIS",
     0
 };
+const int g_NumAgentNames = (sizeof(g_AgentNames) / sizeof(char *)) - 1; // minus one accounts for the NULL at the end of the names list
 
 int const AgentManager::MAX_AGENT = 18;
 
@@ -146,13 +148,12 @@ void AgentManager::destroyAgentSlot(int n) {
     agents_.setAt(n, NULL);
 }
 
-bool AgentManager::saveToFile(std::ofstream &file) {
-    file.write(reinterpret_cast<const char*>(&nextName_), sizeof(int));
+bool AgentManager::saveToFile(PortableFile &file) {
+    file.write32(nextName_);
     for (int i=0; i<AgentManager::MAX_AGENT; i++) {
         Agent *pAgent = agents_.get(i);
         // This flag tells if there is an agent on this slot
-        unsigned char uchar = pAgent ? 1 : 0;
-        file.write(reinterpret_cast<const char*>(&uchar), sizeof(unsigned char));
+        file.write8b(pAgent);
         if (pAgent) {
             pAgent->saveToFile(file);
         }
@@ -160,27 +161,24 @@ bool AgentManager::saveToFile(std::ofstream &file) {
     return true;
 }
 
-bool AgentManager::loadFromFile(std::ifstream &infile) {
-    infile.read(reinterpret_cast<char*>(&nextName_), sizeof(int));
+bool AgentManager::loadFromFile(PortableFile &infile, const format_version& v) {
+    nextName_ = infile.read32();
     for (int i=0; i<AgentManager::MAX_AGENT; i++) {
-        unsigned char uchar;
-        infile.read(reinterpret_cast<char*>(&uchar), sizeof(unsigned char));
-        if (uchar) {
+        bool isAgent = infile.read8b();
+        if (isAgent) {
             Agent *pAgent = agents_.get(i);
             if (pAgent == NULL) {
                 // Create an empty agent
                 pAgent = new Agent("", true);
             }
-            pAgent->loadFromFile(infile);
+            pAgent->loadFromFile(infile, v);
 
             // Mods
-            int nb = 0;
-            infile.read(reinterpret_cast<char*>(&nb), sizeof(int));
+            int nb = infile.read32();
             for (int mIndex = 0; mIndex < nb; mIndex++) {
-                int type = 0;
+                int type = infile.read32();
                 Mod::EModType mt = Mod::Unknown;
                 Mod::EModVersion mv = Mod::MOD_V1;
-                infile.read(reinterpret_cast<char*>(&type), sizeof(int));
                 switch (type) {
                     case 0: mt = Mod::MOD_LEGS;break;
                     case 1: mt = Mod::MOD_ARMS;break;
@@ -191,8 +189,7 @@ bool AgentManager::loadFromFile(std::ifstream &infile) {
                     default: mt = Mod::Unknown;
                 }
 
-                int ver = 0;
-                infile.read(reinterpret_cast<char*>(&ver), sizeof(int));
+                int ver = infile.read32();
                 switch (ver) {
                     case 0: mv = Mod::MOD_V1;break;
                     case 1: mv = Mod::MOD_V2;break;
@@ -205,11 +202,10 @@ bool AgentManager::loadFromFile(std::ifstream &infile) {
                 }
             }
             // Weapons
-            infile.read(reinterpret_cast<char*>(&nb), sizeof(int));
+            nb = infile.read32();
             for (int wIndex = 0; wIndex < nb; wIndex++) {
-                int type = 0;
+                int type = infile.read32();
                 Weapon::WeaponType wt = Weapon::Unknown;
-                infile.read(reinterpret_cast<char*>(&type), sizeof(int));
                 switch (type) {
                     case 0: wt = Weapon::Persuadatron;break;
                     case 1: wt = Weapon::Pistol;break;
@@ -229,8 +225,7 @@ bool AgentManager::loadFromFile(std::ifstream &infile) {
                 }
                 if (wt != Weapon::Unknown) {
                     WeaponInstance *pInst = g_App.weapons().getWeapon(wt)->createInstance();
-                    int ammo = 0;
-                    infile.read(reinterpret_cast<char*>(&ammo), sizeof(int));
+                    int ammo = infile.read32();
                     pInst->setAmmoRemaining(ammo);
                     pAgent->addWeapon(pInst);
                 }

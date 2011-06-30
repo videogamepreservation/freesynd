@@ -3,6 +3,7 @@
  *  FreeSynd - a remake of the classic Bullfrog game "Syndicate".       *
  *                                                                      *
  *   Copyright (C) 2011  Benoit Blancard <benblan@users.sourceforge.net>*
+ *   Copyright (C) 2011  Joey Parrish  <joey.parrish@gmail.com>         *
  *                                                                      *
  *    This program is free software;  you can redistribute it and / or  *
  *  modify it  under the  terms of the  GNU General  Public License as  *
@@ -191,68 +192,54 @@ void Research::improve(Weapon *pWeapon) {
 /*!
  * Saves Research structure to the given file.
  */
-bool Research::saveToFile(std::ofstream &file) {
+bool Research::saveToFile(PortableFile &file) {
     if (type_ == EQUIPS) {
         // Weapons specific infos
-        int ival = weapon_;
-        file.write(reinterpret_cast<const char*>(&ival), sizeof(int));
+        file.write32(weapon_);
     } else {
         // Mods specific infos
-        int ival = modType_;
-        file.write(reinterpret_cast<const char*>(&ival), sizeof(int));
-        ival = modVersion_;
-        file.write(reinterpret_cast<const char*>(&ival), sizeof(int));
+        file.write32(modType_);
+        file.write32(modVersion_);
     }
 
     // id
-    file.write(reinterpret_cast<const char*>(&id_), sizeof(int));
+    file.write32(id_);
 
-    // Research name : 15 caracters max
-    char buf[16];
-    strcpy(buf, name_.c_str());
-    file.write(buf, 15);
+    // Research name : 15 characters max, nul-padded
+    file.write_string(name_, 15);
             
     // Current funding
-    file.write(reinterpret_cast<const char*>(&currFunding_), sizeof(int));
+    file.write32(currFunding_);
     // Current status
-    int status = status_;
-    file.write(reinterpret_cast<const char*>(&status), sizeof(int));
+    file.write32(status_);
     // Coeff index
-    file.write(reinterpret_cast<const char*>(&coeffInd_), sizeof(short));
+    file.write16(coeffInd_);
         
     // Progression points
-    unsigned int ival = progressList_.size();
-    file.write(reinterpret_cast<const char*>(&ival), sizeof(unsigned int));
+    file.write32(progressList_.size());
             
     for (std::list < ProgressPoint >::iterator it = progressList_.begin(); 
             it != progressList_.end(); it++) {
         ProgressPoint pt = *it;
-        float pct = pt.percentage;
-        file.write(reinterpret_cast<const char*>(&pct), sizeof(float));
-        short hours = pt.hours;
-        file.write(reinterpret_cast<const char*>(&hours), sizeof(short));
-        short coef = pt.coeffId;
-        file.write(reinterpret_cast<const char*>(&coef), sizeof(short));
+        file.write_float(pt.percentage);
+        file.write16(pt.hours);
+        file.write16(pt.coeffId);
     }
 
     return true;
 }
 
-bool Research::loadFromFile(std::ifstream &infile, EResType type) {
+bool Research::loadFromFile(PortableFile &infile, EResType type, const format_version& v) {
     // id
-    infile.read(reinterpret_cast<char*>(&id_), sizeof(int));
+    id_ = infile.read32();
 
     // name
-    char buf[16];
-    buf[15] = 0;
-    infile.read(buf, 15);
-    name_.assign(buf);
+    name_ = infile.read_string(15, true);
 
     // current funding
-    infile.read(reinterpret_cast<char*>(&currFunding_), sizeof(int));
+    currFunding_ = infile.read32();
     //Status
-    int status=0;
-    infile.read(reinterpret_cast<char*>(&status), sizeof(int));
+    int status = infile.read32();
     switch (status) {
         case 0: status_ = NOT_STARTED;break;
         case 1: status_ = STARTED;break;
@@ -260,18 +247,17 @@ bool Research::loadFromFile(std::ifstream &infile, EResType type) {
         case 3: status_ = FINISHED;break;
     }
     // coeff index
-    infile.read(reinterpret_cast<char*>(&coeffInd_), sizeof(short));
+    coeffInd_ = infile.read16();
 
     // Progression list
     // clear list before
     progressList_.clear();
-    unsigned int nb=0;
-    infile.read(reinterpret_cast<char*>(&nb), sizeof(unsigned int));
+    unsigned int nb = infile.read32();
     for (unsigned int i=0; i<nb; i++) {
         ProgressPoint pt;
-        infile.read(reinterpret_cast<char*>(&(pt.percentage)), sizeof(float));
-        infile.read(reinterpret_cast<char*>(&(pt.hours)), sizeof(short));
-        infile.read(reinterpret_cast<char*>(&(pt.coeffId)), sizeof(short));
+        pt.percentage = infile.read_float();
+        pt.hours = infile.read16();
+        pt.coeffId = infile.read16();
         progressList_.push_back(pt);
     }
 

@@ -7,6 +7,7 @@
  *   Copyright (C) 2006  Trent Waddington <qg@biodome.org>              *
  *   Copyright (C) 2010  Benoit Blancard <benblan@users.sourceforge.net>*
  *   Copyright (C) 2010  Bohdan Stelmakh <chamel@users.sourceforge.net> *
+ *   Copyright (C) 2011  Joey Parrish  <joey.parrish@gmail.com>         *
  *                                                                      *
  *    This program is free software;  you can redistribute it and / or  *
  *  modify it  under the  terms of the  GNU General  Public License as  *
@@ -47,6 +48,7 @@
 #include "utils/file.h"
 #include "utils/log.h"
 #include "utils/configfile.h"
+#include "utils/portablefile.h"
 
 App::App(): running_(true), playingFli_(false),
 skipFli_(false), screen_(new Screen(GAME_SCREEN_WIDTH, GAME_SCREEN_HEIGHT))
@@ -655,24 +657,21 @@ void App::run(const char *dir, int start_mission) {
 bool App::saveGameToFile(int fileSlot, std::string name) {
     LOG(Log::k_FLG_IO, "App", "saveGameToFile", ("Saving %s in slot %d", name.c_str(), fileSlot))
     
-    std::ofstream outfile;
+    PortableFile outfile;
     std::string path;
             
     File::getFullPathForSaveSlot(fileSlot, path);
     LOG(Log::k_FLG_IO, "App", "saveGameToFile", ("Saving to file %s", path.c_str()))
 
-    outfile.open(path.c_str(), std::ios::out | std::ios::trunc | std::ios::binary);
+    outfile.open_to_overwrite(path.c_str());
 
-    if (outfile.is_open()) {
+    if (outfile) {
         // write file format version
-        unsigned char vMaj = 1, vMin = 0;
-        outfile.write(reinterpret_cast<const char*>(&vMaj), sizeof(unsigned char));
-        outfile.write(reinterpret_cast<const char*>(&vMin), sizeof(unsigned char));
+        outfile.write8(1); // major
+        outfile.write8(1); // minor
 
-        char buf[26];
-        // Slot name is on 25 caracters max
-        strcpy(buf, name.c_str());
-        outfile.write(buf, 25);
+        // Slot name is 31 characters long, nul-padded
+        outfile.write_string(name, 31);
         
         // Session
         session_.saveToFile(outfile);
@@ -690,13 +689,11 @@ bool App::saveGameToFile(int fileSlot, std::string name) {
         for (int i=0; i<4; i++) {
             Agent *pAgent = session_.teamMember(i);
             int id = pAgent ? pAgent->getId() : 0;
-            outfile.write(reinterpret_cast<const char*>(&id), sizeof(int));
+            outfile.write32(id);
         }
 
         // save researches
         session_.researchManager().saveToFile(outfile);
-
-        outfile.close();
 
         return true;
     }
@@ -707,40 +704,60 @@ bool App::saveGameToFile(int fileSlot, std::string name) {
 bool App::loadGameFromFile(int fileSlot) {
 
     std::string path;
-    std::ifstream infile;
+    PortableFile infile;
 
     File::getFullPathForSaveSlot(fileSlot, path);
 
-    infile.open(path.c_str(), std::ios::in | std::ios::binary);
+    infile.open_to_read(path.c_str());
 
-    if (infile.is_open()) {
+    if (infile) {
+        // FIXME: detect original game saves
+
         // Read version
-        unsigned char vMaj = 1, vMin = 0;
-        infile.read(reinterpret_cast<char*>(&vMaj), sizeof(unsigned char));
-        infile.read(reinterpret_cast<char*>(&vMin), sizeof(unsigned char));
+        unsigned char vMaj = infile.read8();
+        unsigned char vMin = infile.read8();
+        format_version v(vMaj, vMin);
 
-        char buf[26];
-        buf[25] = 0;
+        // validate that this is a supported version.
+        if (v.major() == 1) {
+            // versions 1.0 and 1.1 are supported.
+
+            if (v.minor() > 1) {
+                // future version.
+                return false;
+            }
+        } else {
+            return false;
+        }
+
+        if (v == 0x0100) {
+            // the 1.0 format is in native byte order instead of big-endian.
+            infile.set_system_endian();
+        }
 
         reset();
-        //Read slot name
-        infile.read(buf, 25);
 
-        session_.loadFromFile(infile);
+        // Read slot name
+        std::string slotName;
+	// Original game: 20 chars on screen, 20 written, 19 read.
+	// v1.0: 25 characters.
+	// v1.1: 31 characters.
+        slotName = infile.read_string((v == 0x0100) ? 25 : 31, true);
+
+        session_.loadFromFile(infile, v);
 
         // Weapons
-        weapons_.loadFromFile(infile);
+        weapons_.loadFromFile(infile, v);
 
         // Mods
-        mods_.loadFromFile(infile);
+        mods_.loadFromFile(infile, v);
 
         // Agents
-        agents_.loadFromFile(infile);
+        agents_.loadFromFile(infile, v);
 
         // Read squad
         for (int squadInd=0; squadInd<4; squadInd++) {
-            int id = 0;
-            infile.read(reinterpret_cast<char*>(&id), sizeof(int));
+            int id = infile.read32();
             if (id != 0) {
                 for (int iAgnt=0; iAgnt<AgentManager::MAX_AGENT; iAgnt++) {
                     Agent *pAgent = agents_.agent(iAgnt);
@@ -755,9 +772,8 @@ bool App::loadGameFromFile(int fileSlot) {
         }
 
         // Research
-        session_.researchManager().loadFromFile(infile);
+        session_.researchManager().loadFromFile(infile, v);
 
-        infile.close();
         return true;
     }
 

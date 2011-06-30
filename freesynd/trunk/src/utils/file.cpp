@@ -6,6 +6,7 @@
  *   Copyright (C) 2005  Joost Peters  <joostp@users.sourceforge.net>   *
  *   Copyright (C) 2006  Trent Waddington <qg@biodome.org>              *
  *   Copyright (C) 2010  Benoit Blancard <benblan@users.sourceforge.net>*
+ *   Copyright (C) 2011  Joey Parrish  <joey.parrish@gmail.com>         *
  *                                                                      *
  *    This program is free software;  you can redistribute it and / or  *
  *  modify it  under the  terms of the  GNU General  Public License as  *
@@ -42,6 +43,7 @@
 #include "file.h"
 #include "dernc.h"
 #include "log.h"
+#include "portablefile.h"
 
 char File::_path[240] = "./data/";
 
@@ -49,7 +51,7 @@ std::string File::homePath_ = "./";
 
 /*!
  * The methods returns a new pointer to a string composed of the root path
- * and given file name. The absolute file name cannot exceed 256 caracters.
+ * and given file name. The absolute file name cannot exceed 256 characters.
  * No control is made on the result format or file existence.
  * \param filename The relative path to a file (must be null terminated).
  * \param uppercase If true, the resulting string will uppercased.
@@ -217,22 +219,22 @@ void File::getGameSavedNames(std::vector<std::string> &files) {
             int index;
             iss >> index;
             if (index < 10) {
-                std::ifstream infile;
-                char buf[26];
-                buf[25] = 0;
+                PortableFile infile;
                 getFullPathForSaveSlot(index, filename);
-                infile.open(filename.c_str(), std::ios::in | std::ios::binary);
+                infile.open_to_read(filename.c_str());
 
-                if (infile.is_open()) {
+                if (infile) {
+                    // FIXME: detect original game saves
                     // Read version first
-                    unsigned char vMaj = 1, vMin = 0;
-                    infile.read(reinterpret_cast<char*>(&vMaj), sizeof(unsigned char));
-                    infile.read(reinterpret_cast<char*>(&vMin), sizeof(unsigned char));
+                    unsigned char vMaj = infile.read8();
+                    unsigned char vMin = infile.read8();
+                    format_version v(vMaj, vMin);
                     // Read slot name
-                    infile.read(buf, 25);
-                    files[index].assign(buf);
-
-                    infile.close();
+                    if (v == 0x0100) {
+                        files[index] = infile.read_string(25, true);
+                    } else if (v == 0x0101) {
+                        files[index] = infile.read_string(31, true);
+                    }
                 }
             }
         } while (FindNextFile(hSearch, &File));
@@ -263,24 +265,23 @@ void File::getGameSavedNames(std::vector<std::string> &files) {
 	        int index;
 	        iss >> index;
 	        if (index < 10) {
-	            std::ifstream infile;
-	            char buf[26];
-                buf[25] = 0;
+	            PortableFile infile;
 	            getFullPathForSaveSlot(index, filename);
-	            infile.open(filename.c_str(), std::ios::in | std::ios::binary);
+	            infile.open_to_read(filename.c_str());
 
-	            if (infile.is_open()) {
+	            if (infile) {
 	                // Read version first
-	                unsigned char vMaj = 1, vMin = 0;
-	                infile.read(reinterpret_cast<char*>(&vMaj), sizeof(unsigned char));
-	                infile.read(reinterpret_cast<char*>(&vMin), sizeof(unsigned char));
+	                unsigned char vMaj = infile.read8();
+	                unsigned char vMin = infile.read8();
+                    format_version v(vMaj, vMin);
 	                // Read slot name
-	                infile.read(buf, 25);
-	                files[index].assign(buf);
-
-	                infile.close();
+                    if (v == 0x0100) {
+	                    files[index] = infile.read_string(25, true);
+                    } else if (v == 0x0101) {
+	                    files[index] = infile.read_string(31, true);
+	                }
 	            }
-			}
+		}
         }
     }
 
