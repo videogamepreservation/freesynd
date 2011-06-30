@@ -557,7 +557,7 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
         cp.y = yb;
         cp.z = tile_z_ * 128 + off_z_;
     }
-    if ((has_blocker & 6) != 0) {
+    if ((has_blocker & 14) != 0) {
         if (!ignoreBlocker)
             return false;
     } else if((has_blocker & 1) == 0)

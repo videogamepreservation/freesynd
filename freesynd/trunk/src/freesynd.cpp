@@ -36,6 +36,7 @@
 
 #ifdef _WIN32
 #include <windows.h>
+#include <io.h>
 #else
 #include <time.h>
 #include <dirent.h>
@@ -197,7 +198,7 @@ int main(int argc, char *argv[]) {
 	// create dir if it does not exist
 #ifdef _WIN32
 # define mkdir(path, mode) mkdir(path)
-#endif
+#else
 	DIR * rep = opendir(confPath.c_str());
 	if (rep == NULL) {
 		if (mkdir(confPath.c_str(), 0777) == -1) {
@@ -207,11 +208,16 @@ int main(int argc, char *argv[]) {
 	} else {
 		closedir(rep);
 	}
-
+#endif
 	// create the ini file if it doesn't exist.
 	std::string iniPath = confPath + "freesynd.ini";
+#ifdef _WIN32
+    if (_access(iniPath.c_str(), 2) != -1
+        && _access(iniPath.c_str(), 4) != -1) {
+#else
 	struct stat st;
 	if (stat(iniPath.c_str(), &st)) {
+#endif
 		FILE *f = fopen(iniPath.c_str(), "w");
 		if (!f) {
 			FSERR(Log::k_FLG_IO, "Freesynd", "main", ("Cannot create default ini file at %s", iniPath.c_str()))
