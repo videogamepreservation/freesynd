@@ -212,8 +212,7 @@ int main(int argc, char *argv[]) {
 	// create the ini file if it doesn't exist.
 	std::string iniPath = confPath + "freesynd.ini";
 #ifdef _WIN32
-    if (_access(iniPath.c_str(), 2) != -1
-        && _access(iniPath.c_str(), 4) != -1) {
+    if (_access(iniPath.c_str(), 0) != 0) {
 #else
 	struct stat st;
 	if (stat(iniPath.c_str(), &st)) {
