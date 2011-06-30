@@ -128,7 +128,7 @@ HFont::~HFont() {
 
 void HFont::load() {
     int size;
-    uint8 *data = File::loadFile("hfnt01.dat", size);
+    uint8 *data = File::loadOriginalFile("hfnt01.dat", size);
     for (int i = 0; i < 128; i++) {
         if (data[i * 5] || data[i * 5 + 1]) {
             if (data[i * 5] == 0xff && data[i * 5 + 1] == 0xff)

@@ -89,7 +89,7 @@ int dump_anims() {
         screen_data[i] = (png_byte*) calloc(1, sizeof(png_byte) * screen_width);
 
     int palsize;
-    uint8 *pal = File::loadFile("hpal02.dat", palsize);
+    uint8 *pal = File::loadOriginalFile("hpal02.dat", palsize);
     assert(palsize == 768);
 
     for (int i = 0; i < palsize / 3; ++i) {
@@ -158,7 +158,7 @@ int dump_maps() {
         screen_data[i] = (png_byte *)calloc(1, sizeof(png_byte) * screen_width);
 
     int palsize;
-    uint8 *pal = File::loadFile("hpal02.dat", palsize);
+    uint8 *pal = File::loadOriginalFile("hpal02.dat", palsize);
     assert(palsize == 768);
 
     mkdir("maps", 0755);

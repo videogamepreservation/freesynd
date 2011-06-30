@@ -420,7 +420,7 @@ void SystemSDL::setColor(uint8 index, uint8 r, uint8 g, uint8 b) {
 bool SystemSDL::loadCursorSprites() {
     cursor_rect_.w = cursor_rect_.h = CURSOR_WIDTH;
 
-    cursor_surf_ = IMG_Load(File::fileFullPath("cursors/cursors.png", false));
+    cursor_surf_ = IMG_Load(File::dataFullPath("cursors/cursors.png").c_str());
 
     if (!cursor_surf_) {
         printf("Cannot load cursors image: %s\n", IMG_GetError());

@@ -131,7 +131,7 @@ void MenuManager::destroy() {
 }
 
 void MenuManager::setLanguage(FS_Lang lang) {
-    std::string filename(File::fileFullPath("lang/", false));
+    std::string filename(File::dataFullPath("lang/"));
     switch (lang) {
         case ENGLISH:
             filename.append("english.lng");
@@ -208,7 +208,7 @@ void MenuManager::showMenu(Menu *pMenu, bool playAnim) {
         FliPlayer fliPlayer;
         uint8 *data;
         int size;
-        data = File::loadFile(pMenu->getShowAnimName(), size);
+        data = File::loadOriginalFile(pMenu->getShowAnimName(), size);
         fliPlayer.loadFliData(data, false);
         fliPlayer.play();
         delete[] data;
@@ -249,7 +249,7 @@ void MenuManager::leaveMenu(Menu *pMenu, bool playAnim) {
         FliPlayer fliPlayer;
         uint8 *data;
         int size;
-        data = File::loadFile(pMenu->getLeaveAnimName(), size);
+        data = File::loadOriginalFile(pMenu->getLeaveAnimName(), size);
         fliPlayer.loadFliData(data);
 		g_App.gameSounds().play(snd::MENU_CHANGE);
         fliPlayer.play();

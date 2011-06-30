@@ -133,7 +133,7 @@ mapblk_data_(NULL), select_tick_count_(0)
 
     // 64 x 44 x 50
     // Load map block informations
-    mapblk_data_ = File::loadFile("mmapblk.dat", mapblk_size_);
+    mapblk_data_ = File::loadOriginalFile("mmapblk.dat", mapblk_size_);
 
     blk_tick_count_ = 0;
     blink_status_ = true;

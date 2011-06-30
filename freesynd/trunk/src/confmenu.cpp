@@ -279,7 +279,7 @@ private:
 ConfMenu::ConfMenu(MenuManager *m) :
 Menu(m, "conf", "mconfup.dat", "mconfout.dat") {
     int size;
-    bkg_ = File::loadFile("mconscr.dat", size);
+    bkg_ = File::loadOriginalFile("mconscr.dat", size);
     submenu_logo_ = new ChangeLogoMenu(m, bkg_, this);
     submenu_company_name_ = new ChangeCompanyNameMenu(m, bkg_, this);
     submenu_name_ = new ChangeYourNameMenu(m, bkg_, this);

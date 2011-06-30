@@ -72,6 +72,10 @@ void App::destroy() {
     menus_.destroy();
 }
 
+static void addMissingSlash(string& str) {
+    if (str[str.length() - 1] != '/') str.push_back('/');
+}
+
 bool App::readConfiguration(const char *dir) {
     std::string path(dir);
     path.append("freesynd.ini");
@@ -82,10 +86,17 @@ bool App::readConfiguration(const char *dir) {
         ConfigFile conf(path);
         conf.readInto(fullscreen_, "fullscreen", false);
         conf.readInto(playIntro_, "play_intro", true);
+
         string defaultDataDir = string(dir) + "data/";
         string dataDir;
         conf.readInto(dataDir, "data_dir", defaultDataDir);
-        File::setPath(dataDir.c_str());
+        addMissingSlash(dataDir);
+        File::setDataPath(dataDir.c_str());
+
+        string ourDataDir;
+        conf.readInto(ourDataDir, "freesynd_data_dir", dataDir);
+        addMissingSlash(ourDataDir);
+        File::setOurDataPath(ourDataDir.c_str());
         
         switch (conf.read("language", 0)) {
             case 0:
@@ -458,7 +469,7 @@ void App::waitForKeyPress() {
 
 void App::setPalette(const char *fname, bool sixbit) {
     int size;
-    uint8 *data = File::loadFile(fname, size);
+    uint8 *data = File::loadOriginalFile(fname, size);
 
     if (sixbit)
         system_->setPalette6b3(data);
@@ -484,8 +495,8 @@ void App::run(const char *dir, int start_mission) {
     if (playIntro_ && start_mission == -1) {
         LOG(Log::k_FLG_GFX, "App", "run", ("Loading resource for the intro"))
         // this font is for the intro
-        tabData = File::loadFile("mfnt-0.tab", tabSize);
-        data = File::loadFile("mfnt-0.dat", size);
+        tabData = File::loadOriginalFile("mfnt-0.tab", tabSize);
+        data = File::loadOriginalFile("mfnt-0.dat", size);
         intro_font_sprites_.loadSprites(tabData, tabSize, data, true);
         LOG(Log::k_FLG_GFX, "App", "run", ("%d sprites loaded from mfnt-0.dat", tabSize / 6))
         delete[] tabData;
@@ -494,7 +505,7 @@ void App::run(const char *dir, int start_mission) {
 
         // play intro
         LOG(Log::k_FLG_GFX, "App", "run", ("Playing the intro"))
-        data = File::loadFile("intro.dat", size);
+        data = File::loadOriginalFile("intro.dat", size);
         fliPlayer.loadFliData(data);
         music().playTrack(MusicManager::TRACK_INTRO);
         fliPlayer.play(true);
@@ -506,7 +517,7 @@ void App::run(const char *dir, int start_mission) {
     }
 
     // load palette
-    data = File::loadFile("hpal01.dat", size);
+    data = File::loadOriginalFile("hpal01.dat", size);
     system_->setPalette6b3(data);
     delete[] data;
 
@@ -515,13 +526,13 @@ void App::run(const char *dir, int start_mission) {
 
     // load "req"
     // TODO: what's this for?
-    data = File::loadFile("hreq.dat", size);
+    data = File::loadOriginalFile("hreq.dat", size);
     delete[] data;
 
     // load mspr-0 sprites
     LOG(Log::k_FLG_GFX, "App", "run", ("Loading sprites from mspr-0.dat ..."))
-    tabData = File::loadFile("mspr-0.tab", tabSize);
-    data = File::loadFile("mspr-0.dat", size);
+    tabData = File::loadOriginalFile("mspr-0.tab", tabSize);
+    data = File::loadOriginalFile("mspr-0.dat", size);
     LOG(Log::k_FLG_GFX, "App", "run", ("%d sprites loaded", tabSize / 6))
     menu_sprites_.loadSprites(tabData, tabSize, data, true);
     delete[] tabData;
@@ -560,7 +571,7 @@ void App::run(const char *dir, int start_mission) {
 #endif
     //this is walk data
     // load "col01"
-    data = File::loadFile("col01.dat", size);
+    data = File::loadOriginalFile("col01.dat", size);
     // original walk data
     memcpy(walkdata_, data, 256);
     // walkdata_ patched version
@@ -590,7 +601,7 @@ void App::run(const char *dir, int start_mission) {
 
     if (start_mission == -1) {
         // play title
-        data = File::loadFile("mtitle.dat", size);
+        data = File::loadOriginalFile("mtitle.dat", size);
         fliPlayer.loadFliData(data);
         fliPlayer.play();
         delete[] data;
@@ -600,7 +611,7 @@ void App::run(const char *dir, int start_mission) {
 
         // play the groovy menu startup anim
 	    g_App.gameSounds().play(snd::MENU_UP);
-        data = File::loadFile("mscrenup.dat", size);
+        data = File::loadOriginalFile("mscrenup.dat", size);
         fliPlayer.loadFliData(data);
         fliPlayer.play();
         delete[] data;

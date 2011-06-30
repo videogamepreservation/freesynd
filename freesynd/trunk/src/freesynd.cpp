@@ -212,7 +212,7 @@ int main(int argc, char *argv[]) {
 	std::string iniPath = confPath + "freesynd.ini";
 	struct stat st;
 	if (stat(iniPath.c_str(), &st)) {
-		FILE *f = fopen(iniPath.c_str(), "wb+");
+		FILE *f = fopen(iniPath.c_str(), "w");
 		if (!f) {
 			FSERR(Log::k_FLG_IO, "Freesynd", "main", ("Cannot create default ini file at %s", iniPath.c_str()))
 			return -1;

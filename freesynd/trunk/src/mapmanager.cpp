@@ -42,10 +42,10 @@ bool MapManager::loadMap(int mapNum)
     char tmp[100];
     sprintf(tmp, "map%02d.dat", mapNum);
     int size;
-    uint8 *mapData = File::loadFile(tmp, size);
+    uint8 *mapData = File::loadOriginalFile(tmp, size);
 
     if (!tileManager_.loaded()) {
-        uint8 *data = File::loadFile("hblk01.dat", size);
+        uint8 *data = File::loadOriginalFile("hblk01.dat", size);
         tileManager_.loadTiles(data);
         delete[] data;
     }

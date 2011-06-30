@@ -61,7 +61,7 @@ void ResearchManager::destroy() {
  * \return NULL if a problem has happened
  */
 Research *ResearchManager::loadResearch(Weapon::WeaponType wt) {
-    std::string filename(File::fileFullPath("ref/research.dat", false));
+    std::string filename(File::dataFullPath("ref/research.dat"));
     try {
         // Loads configuration file
         ConfigFile conf(filename);
@@ -122,7 +122,7 @@ Research *ResearchManager::loadResearch(Weapon::WeaponType wt) {
 }
 
 Research *ResearchManager::loadResearch(Mod::EModType mt, Mod::EModVersion version) {
-    std::string filename(File::fileFullPath("ref/research.dat", false));
+    std::string filename(File::dataFullPath("ref/research.dat"));
     try {
         // Loads configuration file
         ConfigFile conf(filename);

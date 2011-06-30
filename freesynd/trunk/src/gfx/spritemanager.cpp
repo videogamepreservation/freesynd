@@ -104,22 +104,19 @@ void GameSpriteManager::load()
     uint8 *tabData, *data;
 #if 1
     // using http://rtfm.insomnia.org/~qg/syndicate.zip
-    tabData = File::loadFile("hspr-0.tab", tabSize);
-    data = File::loadFile("hspr-0.dat", size);
+    tabData = File::loadOriginalFile("hspr-0.tab", tabSize);
+    data = File::loadOriginalFile("hspr-0.dat", size);
     printf("Loaded %d sprites from hspr-0.dat\n", tabSize / 6);
-    loadSprites(tabData, tabSize, data);
-    delete[] tabData;
-    delete[] data;
 #else
-    tabData = File::loadFile("hspr-0-d.tab", tabSize);
-    data = File::loadFile("hspr-0-d.dat", size);
+    tabData = File::loadOriginalFile("hspr-0-d.tab", tabSize);
+    data = File::loadOriginalFile("hspr-0-d.dat", size);
     printf("Loading %d sprites from hspr-0-d.dat\n", tabSize / 6);
+#endif
     loadSprites(tabData, tabSize, data);
     delete[] tabData;
     delete[] data;
-#endif
 
-    FILE *fp = File::loadTextFile("HELE-0.TXT");
+    FILE *fp = File::openOriginalFile("HELE-0.TXT");
     if (fp) {
         char line[1024];
         while (fgets(line, 1024, fp)) {
@@ -137,7 +134,7 @@ void GameSpriteManager::load()
         fclose(fp);
     } else {
         // try original data file
-        data = File::loadFile("HELE-0.ANI", size);
+        data = File::loadOriginalFile("HELE-0.ANI", size);
         assert(size % 10 == 0);
         for (int i = 0; i < size / 10; i++) {
             GameSpriteFrameElement e;
@@ -171,7 +168,7 @@ void GameSpriteManager::load()
         }
     } 
 
-    fp = File::loadTextFile("HFRA-0.TXT");
+    fp = File::openOriginalFile("HFRA-0.TXT");
     if (fp) {
         char line[1024];
         while (fgets(line, 1024, fp)) {
@@ -188,7 +185,7 @@ void GameSpriteManager::load()
         fclose(fp);
     } else {
         // try original data file
-        data = File::loadFile("HFRA-0.ANI", size);
+        data = File::loadOriginalFile("HFRA-0.ANI", size);
         assert(size % 8 == 0);
         for (int i = 0; i < size / 8; i++) {
             GameSpriteFrame f;
@@ -206,7 +203,7 @@ void GameSpriteManager::load()
 
     printf("loaded %i frames\n", (int)frames_.size());
 
-    fp = File::loadTextFile("HSTA-0.TXT");
+    fp = File::openOriginalFile("HSTA-0.TXT");
     if (fp) {
         char line[1024];
         while (fgets(line, 1024, fp)) {
@@ -220,7 +217,7 @@ void GameSpriteManager::load()
         fclose(fp);
     } else {
         // try original data file
-        data = File::loadFile("HSTA-0.ANI", size);
+        data = File::loadOriginalFile("HSTA-0.ANI", size);
         assert(size % 2 == 0);
         for (int i = 0; i < size / 2; i++) {
             index_.push_back(data[i * 2] | (data[i * 2 + 1] << 8));

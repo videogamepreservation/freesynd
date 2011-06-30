@@ -58,8 +58,8 @@ bool SoundManager::loadSounds(SampleSet set)
     switch (set) {
     case SAMPLES_INTRO:
         {
-            tabData = File::loadFile("ISNDS-0.TAB", tabSize);
-            data = File::loadFile("ISNDS-0.DAT", size);
+            tabData = File::loadOriginalFile("ISNDS-0.TAB", tabSize);
+            data = File::loadOriginalFile("ISNDS-0.DAT", size);
             bool loaded = loadSounds(tabData, tabSize, data);
             delete[] tabData;
             delete[] data;
@@ -67,8 +67,8 @@ bool SoundManager::loadSounds(SampleSet set)
                 printf("Error : Could not load sounds from file ISNDS-0.DAT\n");
                 return false;
             }
-            tabData = File::loadFile("ISNDS-1.TAB", tabSize);
-            data = File::loadFile("ISNDS-1.DAT", size);
+            tabData = File::loadOriginalFile("ISNDS-1.TAB", tabSize);
+            data = File::loadOriginalFile("ISNDS-1.DAT", size);
             loadSounds(tabData, tabSize, data);
             delete[] tabData;
             delete[] data;
@@ -80,13 +80,13 @@ bool SoundManager::loadSounds(SampleSet set)
         break;
     case SAMPLES_GAME:
         {
-            tabData = File::loadFile("SOUND-0.TAB", tabSize);
-            data = File::loadFile("SOUND-0.DAT", size);
+            tabData = File::loadOriginalFile("SOUND-0.TAB", tabSize);
+            data = File::loadOriginalFile("SOUND-0.DAT", size);
             loadSounds(tabData, tabSize, data);
             delete[] tabData;
             delete[] data;
-            tabData = File::loadFile("SOUND-1.TAB", tabSize);
-            data = File::loadFile("SOUND-1.DAT", size);
+            tabData = File::loadOriginalFile("SOUND-1.TAB", tabSize);
+            data = File::loadOriginalFile("SOUND-1.DAT", size);
             loadSounds(tabData, tabSize, data);
             delete[] tabData;
             delete[] data;

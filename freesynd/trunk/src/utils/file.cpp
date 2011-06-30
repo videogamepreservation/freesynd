@@ -45,37 +45,34 @@
 #include "log.h"
 #include "portablefile.h"
 
-char File::_path[240] = "./data/";
-
+std::string File::dataPath_ = "./data";
+std::string File::ourDataPath_ = "./data";
 std::string File::homePath_ = "./";
 
 /*!
- * The methods returns a new pointer to a string composed of the root path
- * and given file name. The absolute file name cannot exceed 256 characters.
+ * The methods returns a string composed of the root path and given file name.
  * No control is made on the result format or file existence.
- * \param filename The relative path to a file (must be null terminated).
+ * \param filename The relative path to one of the original data files.
  * \param uppercase If true, the resulting string will uppercased.
- * \see setPath()
  */
-const char *File::fileFullPath(const char *filename, bool uppercase) {
-    static char buf[256];
+std::string File::originalDataFullPath(const std::string& filename, bool uppercase) {
+    std::string second_part = filename;
 
-    memset(buf, 0, 256);
-    // We're sure that _path is less than 255 because setPath method
-    // controls its length
-    strcpy(buf, _path);
-
-    int start = strlen(_path);
-    // Add 1 because strlen excludes the null caracter
-    int end = start + strlen(filename) + 1;
-
-    for (int i = start; i < end; ++i) {
-        buf[i] =
-            uppercase ? toupper(filename[i - start]) :
-            tolower(filename[i - start]);
+    std::string::iterator it;
+    for (it = second_part.begin(); it != second_part.end(); it++) {
+        (*it) = uppercase ? toupper(*it) : tolower(*it);
     }
 
-    return buf;
+    return dataPath_ + second_part;
+}
+
+/*!
+ * The methods returns a string composed of the root path and given file name.
+ * No control is made on the result format or file existence.
+ * \param filename The relative path to one of our data files.
+ */
+std::string File::dataFullPath(const std::string& filename) {
+    return ourDataPath_ + filename;
 }
 
 void File::getFullPathForSaveSlot(int slot, std::string &path) {
@@ -100,12 +97,10 @@ void File::getFullPathForSaveSlot(int slot, std::string &path) {
 /*!
  * \return NULL if file cannot be read.
  */
-uint8 *File::loadFileToMem(const char *filename, int &filesize) {
-    assert(filename);
-
-    FILE *fp = fopen(fileFullPath(filename, false), "rb");      //try lowercase first
-    if (!fp)                    //ok.. let's try uppercase
-        fp = fopen(fileFullPath(filename, true), "rb");
+uint8 *File::loadOriginalFileToMem(const std::string& filename, int &filesize) {
+    // try lowercase, then uppercase.
+    FILE *fp = fopen(originalDataFullPath(filename, false).c_str(), "rb");
+    if (!fp) fp = fopen(originalDataFullPath(filename, false).c_str(), "rb");
 
     if (fp) {
         fseek(fp, 0, SEEK_END);
@@ -115,7 +110,7 @@ uint8 *File::loadFileToMem(const char *filename, int &filesize) {
         size_t  n = fread(mem, 1, filesize, fp);
         if (n == 0) {
             FSERR(Log::k_FLG_IO, "File", "loadFileToMem", ("WARN: File '%s' (using path: '%s') is empty\n",
-               filename, _path));
+               filename.c_str(), dataPath_.c_str()));
          }
         fclose(fp);
         return mem;
@@ -123,43 +118,36 @@ uint8 *File::loadFileToMem(const char *filename, int &filesize) {
 
     // If we're here, there's a problem
     FSERR(Log::k_FLG_IO, "File", "loadFileToMem", ("ERROR: Couldn't open file '%s' (using path: '%s')\n",
-               filename, _path));
+       filename.c_str(), dataPath_.c_str()));
 
     filesize = 0;
     return NULL;
 }
 
-FILE *File::loadTextFile(const char *filename) {
-    assert(filename);
-
-    FILE *fp = fopen(fileFullPath(filename, false), "r"); // try lowercase
-    if (!fp)                    //ok.. let's try uppercase
-        fp = fopen(fileFullPath(filename, true), "r");
-
+FILE *File::openOriginalFile(const std::string& filename) {
+    // try lowercase, then uppercase.
+    FILE *fp = fopen(originalDataFullPath(filename, false).c_str(), "r");
+    if (!fp) fp = fopen(originalDataFullPath(filename, false).c_str(), "r");
     return fp;
 }
 
-void File::setPath(const char *path) {
-    if (strlen(path) < 255) {
-        LOG(Log::k_FLG_IO, "File", "setPath", ("Changing path to: '%s'\n", path));
-        strcpy((char *) _path, path);
-    }
-    else {
-        FSERR(Log::k_FLG_IO, "File", "setPath", ("Warning: path '%s' too long, using CWD\n", _path));
-        strcpy((char *) _path, "./");
-    }
+void File::setDataPath(const std::string& path) {
+    dataPath_ = path;
+    LOG(Log::k_FLG_IO, "File", "setDataPath", ("set data path to %s", path.c_str()));
 }
 
-void File::setHomePath(const char *path) {
-    if (path) {
-        homePath_.assign(path);
- 
-        LOG(Log::k_FLG_IO, "File", "setHomePath", ("set home path to %s", path));
-    }
+void File::setOurDataPath(const std::string& path) {
+    ourDataPath_ = path;
+    LOG(Log::k_FLG_IO, "File", "setOurDataPath", ("set our data path to %s", path.c_str()));
 }
 
-uint8 *File::loadFile(const char *filename, int &filesize) {
-    uint8 *data = loadFileToMem(filename, filesize);
+void File::setHomePath(const std::string& path) {
+    homePath_ = path;
+    LOG(Log::k_FLG_IO, "File", "setHomePath", ("set home path to %s", path.c_str()));
+}
+
+uint8 *File::loadOriginalFile(const std::string& filename, int &filesize) {
+    uint8 *data = loadOriginalFileToMem(filename, filesize);
     if (data) {
         if (READ_BE_UINT32(data) == RNC_SIGNATURE) {    //File is RNC compressed
             filesize = rnc::unpackedLength(data);
@@ -175,7 +163,7 @@ uint8 *File::loadFile(const char *filename, int &filesize) {
             }
 
             if (result != filesize) {
-                FSERR(Log::k_FLG_IO, "File", "loadFile", ("Uncompressed size mismatch for file %s!\n", filename));
+                FSERR(Log::k_FLG_IO, "File", "loadFile", ("Uncompressed size mismatch for file %s!\n", filename.c_str()));
                 filesize = 0;
                 delete[] buffer;
             }
@@ -184,6 +172,39 @@ uint8 *File::loadFile(const char *filename, int &filesize) {
         }
     }
     return data;
+}
+
+void File::processSaveFile(const std::string& filename, std::vector<std::string> &files) {
+    size_t extPos = filename.find_last_of('.');
+    if (extPos == std::string::npos) return;
+
+    std::string name = filename.substr(0, extPos);
+    std::string ext = filename.substr(extPos);
+    if (ext.compare(".fsg") != 0) return;
+
+    std::istringstream iss( name );
+    int index;
+    iss >> index;
+    if (index < 10) {
+        PortableFile infile;
+        std::string full_filename;
+        getFullPathForSaveSlot(index, full_filename);
+        infile.open_to_read(full_filename.c_str());
+
+        if (infile) {
+            // FIXME: detect original game saves
+            // Read version first
+            unsigned char vMaj = infile.read8();
+            unsigned char vMin = infile.read8();
+            format_version v(vMaj, vMin);
+            // Read slot name
+            if (v == 0x0100) {
+                files[index] = infile.read_string(25, true);
+            } else if (v == 0x0101) {
+                files[index] = infile.read_string(31, true);
+            }
+        }
+    }
 }
 
 /*!
@@ -195,7 +216,7 @@ void File::getGameSavedNames(std::vector<std::string> &files) {
     savePath.append("save");
 
 #ifdef _WIN32
-    SECURITY_ATTRIBUTES	sa;
+    SECURITY_ATTRIBUTES sa;
     WIN32_FIND_DATA File;
     HANDLE hSearch;
 
@@ -212,34 +233,9 @@ void File::getGameSavedNames(std::vector<std::string> &files) {
     hSearch = FindFirstFile(savePath.c_str(), &File);
     if (hSearch != INVALID_HANDLE_VALUE) {
         do {
-            std::string filename(File.cFileName);
-            size_t extPos = filename.find_last_of('.');
-            std::string name = filename.substr(0, extPos);
-            std::istringstream iss( name );
-            int index;
-            iss >> index;
-            if (index < 10) {
-                PortableFile infile;
-                getFullPathForSaveSlot(index, filename);
-                infile.open_to_read(filename.c_str());
-
-                if (infile) {
-                    // FIXME: detect original game saves
-                    // Read version first
-                    unsigned char vMaj = infile.read8();
-                    unsigned char vMin = infile.read8();
-                    format_version v(vMaj, vMin);
-                    // Read slot name
-                    if (v == 0x0100) {
-                        files[index] = infile.read_string(25, true);
-                    } else if (v == 0x0101) {
-                        files[index] = infile.read_string(31, true);
-                    }
-                }
-            }
+            processSaveFile(File.cFileName, files);
         } while (FindNextFile(hSearch, &File));
     }
-
 #else
 	DIR * rep = opendir(savePath.c_str());
 	struct dirent * ent;
@@ -253,39 +249,9 @@ void File::getGameSavedNames(std::vector<std::string> &files) {
 	}
 
 	while ((ent = readdir(rep)) != NULL) {
-		std::string filename(ent->d_name);
-        size_t extPos = filename.find_last_of('.');
-		if (extPos == std::string::npos) {
-			continue;
-		}
-        std::string name = filename.substr(0, extPos);
-		std::string ext = filename.substr(extPos);
-		if (ext.compare(".fsg") == 0) {
-        	std::istringstream iss( name );
-	        int index;
-	        iss >> index;
-	        if (index < 10) {
-	            PortableFile infile;
-	            getFullPathForSaveSlot(index, filename);
-	            infile.open_to_read(filename.c_str());
-
-	            if (infile) {
-	                // Read version first
-	                unsigned char vMaj = infile.read8();
-	                unsigned char vMin = infile.read8();
-                    format_version v(vMaj, vMin);
-	                // Read slot name
-                    if (v == 0x0100) {
-	                    files[index] = infile.read_string(25, true);
-                    } else if (v == 0x0101) {
-	                    files[index] = infile.read_string(31, true);
-	                }
-	            }
-		}
-        }
-    }
+		processSaveFile(ent->d_name, files);
+	}
 
 	closedir(rep);
-
 #endif
 }

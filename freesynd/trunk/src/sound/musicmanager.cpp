@@ -66,7 +66,7 @@ void MusicManager::loadMusic()
 	tracks_.back()->loadMusicFile("music/intro.mp3");
 #endif
 #else
-    data = File::loadFile("INTRO.XMI", size);
+    data = File::loadOriginalFile("INTRO.XMI", size);
     tracks = xmidi.convertXMidi(data, size);
     for (unsigned int i = 0; i < tracks.size(); ++i) {
         tracks_.push_back(new Music);
@@ -75,7 +75,7 @@ void MusicManager::loadMusic()
     delete[] data;
 #endif
 
-    data = File::loadFile("SYNGAME.XMI", size);
+    data = File::loadOriginalFile("SYNGAME.XMI", size);
     tracks = xmidi.convertXMidi(data, size);
     for (unsigned int i = 0; i < tracks.size(); ++i) {
 		if (i == 0) {

@@ -191,11 +191,11 @@ int Screen::numLogos()
 void Screen::drawLogo(int x, int y, int logo, int colour, bool mini)
 {
     if (data_logo_ == NULL) {
-        data_logo_ = File::loadFile("mlogos.dat", size_logo_);
+        data_logo_ = File::loadOriginalFile("mlogos.dat", size_logo_);
         data_logo_copy_ = new uint8[size_logo_];
     }
     if (data_mini_logo_ == NULL) {
-        data_mini_logo_ = File::loadFile("mminlogo.dat", size_mini_logo_);
+        data_mini_logo_ = File::loadOriginalFile("mminlogo.dat", size_mini_logo_);
         data_mini_logo_copy_ = new uint8[size_mini_logo_];
     }
 
