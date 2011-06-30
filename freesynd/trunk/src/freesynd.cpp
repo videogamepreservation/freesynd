@@ -197,7 +197,7 @@ int main(int argc, char *argv[]) {
 
 	// create dir if it does not exist
 #ifdef _WIN32
-# define mkdir(path, mode) mkdir(path)
+    // FIXME: create directory on windows
 #else
 	DIR * rep = opendir(confPath.c_str());
 	if (rep == NULL) {
