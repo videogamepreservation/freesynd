@@ -89,8 +89,9 @@ Configuring Freesynd
   Freesynd reads the file freesynd.ini to get its running configuration.
 You can edit the file with any text editore to customize your installation.
 
-    On Linux, the application looks for the file in the $HOME directory but 
-on Windows, it searches in the directory containing the freesynd.exe file. 
+    On Linux, the application looks for the file in the $HOME/.freesynd 
+directory but on Windows, it searches in the directory containing the 
+freesynd.exe file. 
 If the freesynd.ini is not found, then the application generates a new file 
 with default parameters values.
 
