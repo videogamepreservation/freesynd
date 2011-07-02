@@ -31,8 +31,16 @@
 #endif
 MapObject::MapObject(int m):map_(m), frame_(0), elapsed_carry_(0),
 frames_per_sec_(8), sub_type_(0), main_type_(0), dir_(0), is_ignored_(false),
-size_x_(1), size_y_(1), size_z_(1), major_type_(MapObject::mt_Undefined)
+size_x_(1), size_y_(1), size_z_(2), major_type_(MapObject::mt_Undefined)
 {
+}
+
+void MapObject::setTileVisZ(){
+    // from real z, we set tile based
+    vis_z_ = tile_z_;
+    if (off_z_ != 0)
+        tile_z_++;
+    assert(tile_z_ < g_Session.getMission()->mmax_z_);
 }
 
 int MapObject::screenX()
@@ -192,10 +200,10 @@ int MapObject::getDirection(int snum) {
 bool MapObject::isBlocker(toDefineXYZ * startXYZ, toDefineXYZ * endXYZ,
                double * inc_xyz)
 {
-    // NOTE: algorithm used check whether object is located within range
-    // defined by "start" and "end", then assuming that x ccord belongs to
-    // vector calculate y from x range and compare range by y, if it is ok,
-    // calculate z from y range, then if in range by z, recalculate x and y
+    // NOTE: algorithm used checks whether object is located within range
+    // defined by "start" and "end", then assuming that x coord belongs to
+    // vector calculates y from x range and compares range by y, if it is ok,
+    // calculates z from y range, then if in range by z, recalculates x and y
 
     // range_x check
     int range_x_h = tile_x_ * 256 + off_x_;
@@ -240,7 +248,7 @@ bool MapObject::isBlocker(toDefineXYZ * startXYZ, toDefineXYZ * endXYZ,
 
     // range_z check
     int range_z_l = vis_z_ * 128 + off_z_;
-    int range_z_h = range_z_l + size_z_ * 2;
+    int range_z_h = range_z_l + size_z_;
     range_z_h--;
     bool flipped_z = false;
     if (startXYZ->z > endXYZ->z) {

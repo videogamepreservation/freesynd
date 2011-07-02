@@ -184,18 +184,18 @@ void ShotClass::shotTargetRandomizer(toDefineXYZ * cp, toDefineXYZ * tp,
     double angz = acos(dtz/dist_cur);
 
     double set_sign = 1;
-    if (rand() % 2 == 1)
+    if (rand() % 100 < 50)
         set_sign = -1;
     angx += ((angle * (double)(rand() % 100) / 200.0) * set_sign);
     int gtx = cx + (int)(cos(angx) * dist_cur);
 
     set_sign = 1;
-    if (rand() % 2 == 1)
+    if (rand() % 100 < 50)
         set_sign = -1;
     angy += ((angle * (double)(rand() % 100) / 200.0) * set_sign);
     int gty = cy + (int)(cos(angy) * dist_cur);
     set_sign = 1;
-    if (rand() % 2 == 1)
+    if (rand() % 100 < 50)
         set_sign = -1;
     angz += ((angle * (double)(rand() % 100) / 200.0) * set_sign);
     int gtz = cz + (int)(cos(angz) * dist_cur);
@@ -413,14 +413,14 @@ bool ProjectileShot::animate(int elapsed, Mission *m) {
             t.x = base_pos_.x + (int)(last_anim_dist_ * inc_x_);
             t.y = base_pos_.y + (int)(last_anim_dist_ * inc_y_);
             t.z = base_pos_.z + (int)(last_anim_dist_ * inc_z_);
-            t.z += 256;
+            t.z += 128;
             if (t.z > (m->mmax_z_ - 1) * 128)
                 t.z = (m->mmax_z_ - 1) * 128;
             SFXObject *so = new SFXObject(m->map(),
                 SFXObject::sfxt_Smoke);
             so->setPosition(t.x / 256, t.y / 256, t.z / 128, t.x % 256,
                 t.y % 256, t.z % 128 );
-            so->setVisZ();
+            so->setTileVisZ();
             m->addSfxObject(so);
         }
     }
@@ -444,7 +444,7 @@ bool ProjectileShot::animate(int elapsed, Mission *m) {
             SFXObject::sfxt_ExplosionFire);
         so->setPosition(cur_pos_.x / 256, cur_pos_.y / 256, cur_pos_.z / 128,
             cur_pos_.x % 256, cur_pos_.y % 256, cur_pos_.z % 128);
-        so->setVisZ();
+        so->setTileVisZ();
         m->addSfxObject(so);
 
         std::vector <Weapon::ShotDesc> all_shots;
@@ -491,7 +491,7 @@ bool ProjectileShot::animate(int elapsed, Mission *m) {
                 SFXObject::sfxt_LargeFire);
             so->setPosition(pn.tileX(), pn.tileY(), pn.tileZ(), pn.offX(),
                 pn.offY(), pn.offZ());
-            so->setVisZ();
+            so->setTileVisZ();
             m->addSfxObject(so);
         }
     }
@@ -536,7 +536,10 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
         yb = owner_->tileY() * 256 + owner_->offY();
         cp.x = xb;
         cp.y = yb;
-        cp.z = owner_->tileZ() * 128 + owner_->offZ();
+        cp.z = owner_->visZ() * 128 + owner_->offZ()
+            + (owner_->sizeZ() >> 1);
+        if (cp.z > (g_Session.getMission()->mmax_z_ - 1) * 128)
+            cp.z = (g_Session.getMission()->mmax_z_ - 1) * 128;
         if (tobj || tp) {
             if (tobj) {
                 txb = tobj->tileX() * 256 + tobj->offX();
@@ -555,7 +558,7 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
         yb = tile_y_ * 256 + off_y_;
         cp.x = xb;
         cp.y = yb;
-        cp.z = tile_z_ * 128 + off_z_;
+        cp.z = vis_z_ * 128 + off_z_;
     }
     if ((has_blocker & 14) != 0) {
         if (!ignoreBlocker)
@@ -571,7 +574,7 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
     // angle is used to generate shot with randomizer
     // TODO: add angle per weapon(precision is higher for smaller angle)
     // NOTE: disabled
-    double angle = 0;
+    double angle = 2;
 
     angle *= (1 - accuracy);
 
@@ -582,14 +585,22 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
     if (tobj) {
         base_shot.tp.x = tobj->tileX() * 256 + tobj->offX();
         base_shot.tp.y = tobj->tileY() * 256 + tobj->offY();
-        base_shot.tp.z = tobj->tileZ() * 128 + tobj->offZ();
-        base_shot.tpn.setTileXYZ(tobj->tileX(), tobj->tileY(), tobj->tileZ());
-        base_shot.tpn.setOffXYZ(tobj->offX(), tobj->offY(), tobj->offZ());
+        base_shot.tp.z = tobj->visZ() * 128 + tobj->offZ() + (tobj->sizeZ() >> 1);
+        if (base_shot.tp.z > (g_Session.getMission()->mmax_z_ - 1) * 128)
+            base_shot.tp.z = (g_Session.getMission()->mmax_z_ - 1) * 128;
+        base_shot.tpn.setTileXYZ(tobj->tileX(), tobj->tileY(),
+            base_shot.tp.z / 128);
+        base_shot.tpn.setOffXYZ(tobj->offX(), tobj->offY(),
+            base_shot.tp.z % 128);
     } else {
         base_shot.tp.x = tp->tileX() * 256 + tp->offX();
         base_shot.tp.y = tp->tileY() * 256 + tp->offY();
-        base_shot.tp.z = tp->tileZ() * 128 + tp->offZ();
+        base_shot.tp.z = tp->tileZ() * 128 + tp->offZ() + 1;
+        if (base_shot.tp.z > (g_Session.getMission()->mmax_z_ - 1) * 128)
+            base_shot.tp.z = (g_Session.getMission()->mmax_z_ - 1) * 128;
         base_shot.tpn = *tp;
+        base_shot.tpn.setTileZ(base_shot.tp.z / 128);
+        base_shot.tpn.setOffZ(base_shot.tp.z % 128);
     }
     unsigned int shot_prop = pWeaponClass_->shotProperty();
     std::vector <Weapon::ShotDesc> all_shots;
@@ -611,15 +622,6 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
 
     bool range_damage = (shot_prop & Weapon::spe_RangeDamageOnReach) != 0;
     if (shot_prop & Weapon::spe_CreatesProjectile) {
-        cp.z += 128;
-        if (cp.z > (g_Session.getMission()->mmax_z_ - 1) * 128)
-            cp.z = (g_Session.getMission()->mmax_z_ - 1) * 128;
-        if (tobj)
-            base_shot.tp.z += (tobj->sizeZ() >> 1);
-        else
-            base_shot.tp.z += 1;
-        if (base_shot.tp.z > (g_Session.getMission()->mmax_z_ - 1) * 128)
-            base_shot.tp.z = (g_Session.getMission()->mmax_z_ - 1) * 128;
         for (int i = 0; i < ammoused; i++) {
             Weapon::ShotDesc shot_new = base_shot;
             //shotTargetRandomizer(&cp, &(shot_new.tp), angle);
@@ -887,7 +889,7 @@ void ShotClass::makeShot(bool rangeGenerated, toDefineXYZ &cp, int anim_type,
                     anim_type);
                 so->setPosition(pn.tileX(), pn.tileY(), pn.tileZ(), pn.offX(),
                     pn.offY(), pn.offZ());
-                so->setVisZ();
+                so->setTileVisZ();
                 so->correctZ();
                 g_Session.getMission()->addSfxObject(so);
             } else if ((has_blocker & 2) != 0) {
@@ -898,7 +900,7 @@ void ShotClass::makeShot(bool rangeGenerated, toDefineXYZ &cp, int anim_type,
                         anim_type);
                     so->setPosition(smp->tileX(), smp->tileY(), smp->tileZ() + 1,
                         smp->offX(), smp->offY(), smp->offZ());
-                    so->setVisZ(smp->visZ() + 1);
+                    so->setTileVisZ();
                     so->correctZ();
                     g_Session.getMission()->addSfxObject(so);
                 }
@@ -908,7 +910,7 @@ void ShotClass::makeShot(bool rangeGenerated, toDefineXYZ &cp, int anim_type,
                 anim_type);
             so->setPosition(pn.tileX(), pn.tileY(), pn.tileZ(), pn.offX(),
                 pn.offY(), pn.offZ());
-            so->setVisZ();
+            so->setTileVisZ();
             so->correctZ();
             g_Session.getMission()->addSfxObject(so);
         } else if (has_blocker == 1) {
@@ -918,7 +920,7 @@ void ShotClass::makeShot(bool rangeGenerated, toDefineXYZ &cp, int anim_type,
                 anim_type);
             so->setPosition(pn.tileX(), pn.tileY(), pn.tileZ(), pn.offX(),
                 pn.offY(), pn.offZ());
-            so->setVisZ();
+            so->setTileVisZ();
             so->correctZ();
             g_Session.getMission()->addSfxObject(so);
         }

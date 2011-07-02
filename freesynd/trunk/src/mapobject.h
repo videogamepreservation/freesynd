@@ -92,10 +92,13 @@ public:
     void setTileY(int y) { tile_y_ = y; }
     void setTileZ(int z) { tile_z_ = z; }
     void setVisZ() {
+        // from tile based, we set vis_z_
         vis_z_ = tile_z_;
         if (off_z_ != 0)
             vis_z_--;
+        assert(vis_z_ >= 0);
     }
+    void setTileVisZ();
     void setVisZ(int z) { vis_z_ = z; }
 
     int offX() { return off_x_; }
@@ -139,7 +142,7 @@ public:
     double distanceToPos(toDefineXYZ *xyz) {
         int cx = tile_x_ * 256 + off_x_ - (xyz->x);
         int cy = tile_y_ * 256 + off_y_ - (xyz->y);
-        int cz = vis_z_ * 128 + off_z_ - (xyz->z);
+        int cz = vis_z_ * 128 + off_z_ + (size_z_ >> 1) - (xyz->z);
         return sqrt((double) (cx * cx + cy * cy + cz * cz));
     }
 

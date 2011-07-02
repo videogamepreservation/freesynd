@@ -165,7 +165,7 @@ PedInstance *PedManager::loadInstance(uint8 * data, int map)
     newped->setVisZ(z);
     newped->setSizeX(32);
     newped->setSizeY(32);
-    newped->setSizeZ(128);
+    newped->setSizeZ(256);
     if (oz > 0)
         z++;
     //printf("x %i y %i z %i ox %i oy %i oz %i\n", gamdata->mapposx[1], gamdata->mapposy[1], z, gamdata->mapposx[0], gamdata->mapposy[0], oz);
