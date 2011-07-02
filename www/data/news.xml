@@ -1,6 +1,9 @@
 <?xml version='1.0' standalone='yes'?>
 <news>
-	<item title="Research available" date="2011-06-27" author="Benoit Blancard">
+	<item title="New v0.5 release" date="2011-07-02" author="Bohdan Stelmakh">
+	This was hard, but we did it. Get it from [[http://sourceforge.net/projects/freesynd/files/freesynd/freesynd-0.5/ sourceforge]].
+	</item>
+	<item title="Project status" date="2011-06-27" author="Benoit Blancard">
 	With chamel back in the game, v0.5 is now back on track! I finally got rid of that load/save feature and 
 	a few updates later, the future release is ready to be packaged. This week is the target!
 	</item>
