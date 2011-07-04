@@ -1,19 +1,14 @@
 <?xml version='1.0' standalone='yes'?>
 <roadmap>
-	<date>2011-06-27</date>
-	<status>V0.5 will be release between 27/06 and 03/07.</status>
+	<date>2011-07-04</date>
+	<status>Date for release of v0.6 is not set.</status>
 	<features>
-	  <feature id="3043686" status="D">Game Time</feature>
-	  <feature id="3072653" status="D">Use libsyndicate data info</feature>
-	  <feature id="3081550" status="D">Minimap basic</feature>
-	  <feature id="3086471" status="D">Implements Reseach functionnality</feature>
-	  <feature id="3086469" status="D">Tax influence on countries status</feature>
-	  <feature id="3086955" status="D">Possibility to load/save game</feature>
+	  <feature id="3337516" status="">Standardize text fields in configure and loadsave menus</feature>
+	  <feature id="3336699" status="D">Make save file format portable</feature>
+	  <feature id="3283536" status="">Manage separate directory for syndicate and freesynd</feature>
+	  <feature id="3202739" status="">keyboard type management</feature>
 	</features>
 	<bugs>
-		<bug id="3005294" status="P">Debriefing information is not displayed after ending the mission</bug>
-		<bug id="3031032" status="D">Rewrite animation generation procedures</bug>
-		<bug id="3036610" status="P">Rewrite map drawing</bug>
-		<bug id="3005295" status="D">The tax rate for the region cannot altered by the player</bug>
+		<bug id="3241136" status="">freesynd.exe has stopped working</bug>
 	</bugs>
 </roadmap>
