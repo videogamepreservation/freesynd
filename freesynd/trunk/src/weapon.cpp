@@ -147,6 +147,31 @@ bool WeaponInstance::animate(int elapsed) {
             {
                 deactivate();
                 map_ = -1;
+
+                int max_anims = 16 + rand() % 8;
+                Mission *m = g_Session.getMission();
+                toDefineXYZ cur_pos = {tile_x_ * 256 + off_x_,
+                    tile_y_ * 256 + off_y_, vis_z_ * 128 + off_z_};
+                toDefineXYZ base_pos = cur_pos;
+                cur_pos.z += 16;
+                if (cur_pos.z > (m->mmax_z_ - 1) * 128)
+                    cur_pos.z = (m->mmax_z_ - 1) * 128;
+                // TODO: exclude flameballs on water
+                for (int i = 0; i < max_anims; i++) {
+                    toDefineXYZ target_pos = base_pos;
+                    shotTargetRandomizer(&cur_pos, &target_pos, 120.0,
+                        384.0 + 32.0);
+                    PathNode pn(target_pos.x / 256, target_pos.y / 256,
+                        target_pos.z / 128, target_pos.x % 256,
+                        target_pos.y % 256, target_pos.z % 128);
+                    m->inRangeCPos(&cur_pos, NULL, &pn, true, true, 384 + 32);
+                    SFXObject *so = new SFXObject(m->map(),
+                        SFXObject::sfxt_ExplosionFire);
+                    so->setPosition(pn.tileX(), pn.tileY(), pn.tileZ(),
+                        pn.offX(), pn.offY(), pn.offZ());
+                    so->setTileVisZ();
+                    m->addSfxObject(so);
+                }
                 return true;
             }
             weapon_used_time_ = 0;
@@ -462,6 +487,8 @@ bool ProjectileShot::animate(int elapsed, Mission *m) {
         toDefineXYZ cp = cur_pos_;
         // off_z_ < 128, needs to be zero here
         cp.z = (cp.z & 0xFFFFFF80) + 16;
+        if (cp.z > (m->mmax_z_ - 1) * 128)
+            cp.z = (m->mmax_z_ - 1) * 128;
         std::vector <ShootableMapObject *> all_targets;
         // TODO: define range somewhere in weapon
         g_Session.getMission()->getInRangeAll(&cp, all_targets,
@@ -484,28 +511,6 @@ bool ProjectileShot::animate(int elapsed, Mission *m) {
             all_shots.push_back(sd);
         }
         makeShot(true, cp, SFXObject::sfxt_ExplosionBall, all_shots);
-
-        int max_flames = 16 + rand() % 8;
-        base_pos_ = cur_pos_;
-        cur_pos_.z += 16;
-        if (cur_pos_.z > (m->mmax_z_ - 1) * 128)
-            cur_pos_.z = (m->mmax_z_ - 1) * 128;
-        // TODO: exclude flames on water
-        for (int i = 0; i < max_flames; i++) {
-            target_pos_ = base_pos_;
-            shotTargetRandomizer(&cur_pos_, &target_pos_, 120.0,
-                (double)dmg_range_ + 32.0);
-            pn = PathNode(target_pos_.x / 256, target_pos_.y / 256,
-                target_pos_.z / 128, target_pos_.x % 256, target_pos_.y % 256,
-                target_pos_.z % 128);
-            m->inRangeCPos(&cur_pos_, NULL, &pn, true, true, dmg_range_ + 32);
-            so = new SFXObject(m->map(),
-                SFXObject::sfxt_LargeFire, 100 * (rand() % 16));
-            so->setPosition(pn.tileX(), pn.tileY(), pn.tileZ(), pn.offX(),
-                pn.offY(), pn.offZ());
-            so->setTileVisZ();
-            m->addSfxObject(so);
-        }
     }
     if (self_remove)
         life_over_ = self_remove;
@@ -661,7 +666,7 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
                 std::vector<ShootableMapObject *> all_targets;
 
                 getInRangeAll(gen_shots[i].tp, all_targets, mask,
-                    true, 512);
+                    true, 384);
                 for (unsigned int indx = 0; indx < all_targets.size();
                     indx++)
                 {
