@@ -105,6 +105,7 @@ WeaponInstance::WeaponInstance(Weapon * w) : ShootableMapObject(-1)
     weapon_used_time_ = 0;
     major_type_ = MapObject::mt_Weapon;
     owner_ = NULL;
+    activated_ = false;
 }
 
 bool WeaponInstance::animate(int elapsed) {
@@ -136,11 +137,20 @@ bool WeaponInstance::animate(int elapsed) {
                 weapon_used_time_ = 0;
             }
         }
-    } else if (weapon_used_time_ != 0) {
+    } else if (weapon_used_time_ != 0 || activated_) {
         weapon_used_time_ += elapsed;
         if (weapon_used_time_ > (pWeaponClass_->timeForShot()
             + pWeaponClass_->timeReload()))
+        {
+            if (activated_ && wt == Weapon::TimeBomb
+                && inflictDamage(NULL, NULL))
+            {
+                deactivate();
+                map_ = -1;
+                return true;
+            }
             weapon_used_time_ = 0;
+        }
     }
 
     if (map_ == -1)
@@ -593,7 +603,7 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
             base_shot.tp.z / 128);
         base_shot.tpn.setOffXYZ(tobj->offX(), tobj->offY(),
             base_shot.tp.z % 128);
-    } else {
+    } else if (tp) {
         base_shot.tp.x = tp->tileX() * 256 + tp->offX();
         base_shot.tp.y = tp->tileY() * 256 + tp->offY();
         base_shot.tp.z = tp->tileZ() * 128 + tp->offZ() + 1;
@@ -602,6 +612,13 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
         base_shot.tpn = *tp;
         base_shot.tpn.setTileZ(base_shot.tp.z / 128);
         base_shot.tpn.setOffZ(base_shot.tp.z % 128);
+    } else {
+        base_shot.tp = cp;
+        base_shot.tp.z++;
+        if (base_shot.tp.z > (g_Session.getMission()->mmax_z_ - 1) * 128)
+            base_shot.tp.z = (g_Session.getMission()->mmax_z_ - 1) * 128;
+        base_shot.tpn = PathNode(cp.x / 256, cp.y / 256, base_shot.tp.z / 128,
+            cp.x % 256, cp.y % 256, base_shot.tp.z % 128);
     }
     unsigned int shot_prop = pWeaponClass_->shotProperty();
     std::vector <Weapon::ShotDesc> all_shots;
@@ -637,7 +654,6 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
         if (shot_prop & Weapon::spe_PointToPoint) {
         } else if (shot_prop & Weapon::spe_PointToManyPoints) {
         } else {
-            base_shot.tp = cp;
             gen_shots.push_back(base_shot);
         }
         if (range_damage) {
@@ -859,6 +875,17 @@ bool WeaponInstance::isReloading() {
     int time_full_shot = time_for_shot + time_reload;
     return (weapon_used_time_ > time_for_shot
         && weapon_used_time_ <= time_for_shot);
+}
+
+void WeaponInstance::activate() {
+    if (pWeaponClass_->getWeaponType() == Weapon::TimeBomb)
+        activated_ = true;
+}
+
+void WeaponInstance::deactivate() {
+    activated_ = false;
+    if (pWeaponClass_->getWeaponType() == Weapon::TimeBomb)
+        weapon_used_time_ = 0;
 }
 
 void ShotClass::makeShot(bool rangeGenerated, toDefineXYZ &cp, int anim_type,

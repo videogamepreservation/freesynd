@@ -251,6 +251,8 @@ public:
     void getInRangeAll(toDefineXYZ & cp, std::vector<ShootableMapObject *> & targets,
         uint8 mask, bool checkTileOnly = true, int maxr = -1);
     bool isReloading();
+    void activate();
+    void deactivate();
 
 protected:
     Weapon *pWeaponClass_;
@@ -259,6 +261,7 @@ protected:
     // if is greater then time_for_shot_ reload is in execution
     // if is greater then time_for_shot_ + time_reload_ then full shot is done
     int weapon_used_time_;
+    bool activated_;
 };
 
 class ProjectileShot: public ShotClass {

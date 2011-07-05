@@ -408,6 +408,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
         w->setVisZ(vis_z_);
         w->setOwner(NULL);
         w->setIsIgnored();
+        w->activate();
         putdown_weapon_ = NULL;
         setDrawnAnim(PedInstance::PutdownAnim);
         if(speed() != 0){
@@ -423,6 +424,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
             pickup_weapon_->setMap(-1);
             pickup_weapon_->setOwner(this);
             pickup_weapon_->setIsIgnored(true);
+            pickup_weapon_->deactivate();
             pickup_weapon_ = NULL;
             setDrawnAnim(PedInstance::PickupAnim);
             return true;
@@ -868,6 +870,7 @@ void PedInstance::dropAllWeapons() {
         w->setVisZ(vis_z_);
         w->setOwner(NULL);
         w->setIsIgnored();
+        w->activate();
         n++;
     }
 
