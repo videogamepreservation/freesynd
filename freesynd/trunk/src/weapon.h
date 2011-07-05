@@ -198,7 +198,7 @@ public:
     ShootableMapObject *getOwner() { return owner_; }
 
     void shotTargetRandomizer(toDefineXYZ * cp, toDefineXYZ * tp, double angle,
-        double dist_new = -1);
+        double dist_new = -1, bool exclude_z = false);
 
 protected:
     void makeShot(bool rangeGenerated, toDefineXYZ &cp, int anim_type,

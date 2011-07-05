@@ -156,11 +156,11 @@ bool WeaponInstance::animate(int elapsed) {
                 cur_pos.z += 16;
                 if (cur_pos.z > (m->mmax_z_ - 1) * 128)
                     cur_pos.z = (m->mmax_z_ - 1) * 128;
-                // TODO: exclude flameballs on water
+                // TODO: exclude explosionfires on water
                 for (int i = 0; i < max_anims; i++) {
                     toDefineXYZ target_pos = base_pos;
                     shotTargetRandomizer(&cur_pos, &target_pos, 120.0,
-                        384.0 + 32.0);
+                        384.0 + 32.0, true);
                     PathNode pn(target_pos.x / 256, target_pos.y / 256,
                         target_pos.z / 128, target_pos.x % 256,
                         target_pos.y % 256, target_pos.z % 128);
@@ -190,7 +190,7 @@ void WeaponInstance::draw(int x, int y) {
 }
 
 void ShotClass::shotTargetRandomizer(toDefineXYZ * cp, toDefineXYZ * tp,
-                                  double angle, double dist_new)
+    double angle, double dist_new, bool exclude_z)
 {
     // TODO: finish
     if (angle == 0)
@@ -230,10 +230,12 @@ void ShotClass::shotTargetRandomizer(toDefineXYZ * cp, toDefineXYZ * tp,
         set_sign = -1;
     angy += ((angle * (double)(rand() % 100) / 200.0) * set_sign);
     int gty = cy + (int)(cos(angy) * dist_cur);
-    set_sign = 1;
-    if (rand() % 100 < 50)
-        set_sign = -1;
-    angz += ((angle * (double)(rand() % 100) / 200.0) * set_sign);
+    if (!exclude_z) {
+        set_sign = 1;
+        if (rand() % 100 < 50)
+            set_sign = -1;
+        angz += ((angle * (double)(rand() % 100) / 200.0) * set_sign);
+    }
     int gtz = cz + (int)(cos(angz) * dist_cur);
 
     if (gtx < 0) {
@@ -511,6 +513,27 @@ bool ProjectileShot::animate(int elapsed, Mission *m) {
             all_shots.push_back(sd);
         }
         makeShot(true, cp, SFXObject::sfxt_ExplosionBall, all_shots);
+         int max_flames = 16 + rand() % 8;
+        base_pos_ = cur_pos_;
+        cur_pos_.z += 16;
+        if (cur_pos_.z > (m->mmax_z_ - 1) * 128)
+            cur_pos_.z = (m->mmax_z_ - 1) * 128;
+        // TODO: exclude flames on water
+        for (int i = 0; i < max_flames; i++) {
+            target_pos_ = base_pos_;
+            shotTargetRandomizer(&cur_pos_, &target_pos_, 120.0,
+                (double)dmg_range_ + 32.0, true);
+            pn = PathNode(target_pos_.x / 256, target_pos_.y / 256,
+                target_pos_.z / 128, target_pos_.x % 256, target_pos_.y % 256,
+                target_pos_.z % 128);
+            m->inRangeCPos(&cur_pos_, NULL, &pn, true, true, dmg_range_ + 32);
+            so = new SFXObject(m->map(),
+                SFXObject::sfxt_LargeFire, 100 * (rand() % 16));
+            so->setPosition(pn.tileX(), pn.tileY(), pn.tileZ(), pn.offX(),
+                pn.offY(), pn.offZ());
+            so->setTileVisZ();
+            m->addSfxObject(so);
+        }
     }
     if (self_remove)
         life_over_ = self_remove;
