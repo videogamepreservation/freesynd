@@ -385,7 +385,8 @@ bool MapObject::isBlocker(toDefineXYZ * startXYZ, toDefineXYZ * endXYZ,
     return true;
 }
 
-SFXObject::SFXObject(int m, int type):MapObject(m), sfx_life_over_(false)
+SFXObject::SFXObject(int m, int type, int t_show):MapObject(m),
+    sfx_life_over_(false)
 {
     main_type_ = type;
     setTimeShowAnim(0);
@@ -416,7 +417,7 @@ SFXObject::SFXObject(int m, int type):MapObject(m), sfx_life_over_(false)
             break;
         case SFXObject::sfxt_LargeFire:
             anim_ = 243;
-            setTimeShowAnim(4000);
+            setTimeShowAnim(3000 + t_show);
             break;
     }
 }

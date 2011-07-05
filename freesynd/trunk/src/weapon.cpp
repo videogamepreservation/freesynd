@@ -108,8 +108,9 @@ WeaponInstance::WeaponInstance(Weapon * w) : ShootableMapObject(-1)
 }
 
 bool WeaponInstance::animate(int elapsed) {
+    Weapon::WeaponType wt = pWeaponClass_->getWeaponType();
     if (owner_) {
-        if (pWeaponClass_->getWeaponType() == Weapon::EnergyShield) {
+        if (wt == Weapon::EnergyShield) {
             int ammoused = getShots(elapsed)
                 * pWeaponClass_->ammoPerShot();
             if (((PedInstance *)owner_)->selectedWeapon()
@@ -127,7 +128,7 @@ bool WeaponInstance::animate(int elapsed) {
                 if (ammo_remaining_ > pWeaponClass_->ammo())
                     ammo_remaining_ = pWeaponClass_->ammo();
             }
-        } else if (pWeaponClass_->getWeaponType() == Weapon::MediKit) {
+        } else if (wt == Weapon::MediKit) {
             if (owner_->health() != owner_->startHealth()) {
                 owner_->setHealth(owner_->startHealth());
                 ammo_remaining_ = 0;
@@ -449,7 +450,8 @@ bool ProjectileShot::animate(int elapsed, Mission *m) {
 
         std::vector <Weapon::ShotDesc> all_shots;
         toDefineXYZ cp = cur_pos_;
-        cp.z = ((cp.z >> 7) << 7) + 16;
+        // off_z_ < 128, needs to be zero here
+        cp.z = (cp.z & 0xFFFFFF80) + 16;
         std::vector <ShootableMapObject *> all_targets;
         // TODO: define range somewhere in weapon
         g_Session.getMission()->getInRangeAll(&cp, all_targets,
@@ -488,7 +490,7 @@ bool ProjectileShot::animate(int elapsed, Mission *m) {
                 target_pos_.z % 128);
             m->inRangeCPos(&cur_pos_, NULL, &pn, true, true, dmg_range_ + 32);
             so = new SFXObject(m->map(),
-                SFXObject::sfxt_LargeFire);
+                SFXObject::sfxt_LargeFire, 100 * (rand() % 16));
             so->setPosition(pn.tileX(), pn.tileY(), pn.tileZ(), pn.offX(),
                 pn.offY(), pn.offZ());
             so->setTileVisZ();
@@ -573,7 +575,6 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
 
     // angle is used to generate shot with randomizer
     // TODO: add angle per weapon(precision is higher for smaller angle)
-    // NOTE: disabled
     double angle = 2;
 
     angle *= (1 - accuracy);

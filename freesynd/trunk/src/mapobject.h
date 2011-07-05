@@ -237,7 +237,7 @@ protected:
  */
 class SFXObject : public MapObject {
 public:
-    SFXObject(int m, int type);
+    SFXObject(int m, int type, int t_show = 0);
     virtual ~SFXObject() {}
 
     bool sfxLifeOver() { return sfx_life_over_; }
