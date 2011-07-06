@@ -77,7 +77,9 @@ public:
             WeaponAnimIndex w_idx, snd::InGameSample w_sample,
             WeaponType w_type, MapObject::DamageType w_dmg_type,
             int w_ammo_per_shot, int w_time_for_shot, int w_time_reload,
-            unsigned int w_shot_property);
+            unsigned int w_shot_property, int w_hit_anim, int w_obj_hit_anim,
+            int w_rd_anim, int w_trace_anim, int w_range_dmg,
+            double w_shot_angle, double w_shot_accuracy);
 
     const char *getName() { return name_.c_str(); }
 
@@ -170,7 +172,22 @@ public:
         ShootableMapObject *smo;
     }ShotDesc;
 
+    typedef struct {
+        // when weapon hits something other then object, ground
+        int hit_anim;
+        int obj_hit_anim;
+        int trace_anim;
+        // if weapon can do range damage this is used for range definition
+        // with animation
+        int rd_anim;
+    }HitAnims;
+
     unsigned int shotProperty() { return shot_property_; }
+
+    HitAnims * anims() { return &anims_; }
+    int rangeDmg() { return range_dmg_; }
+    double shotAngle() { return shot_angle_; }
+    double shotAcurracy() { return shot_accuracy_; }
 
 protected:
     std::string name_;
@@ -190,6 +207,12 @@ protected:
     /*! True when weapon was found and submit to search manager.*/
     bool submittedToSearch_;
     unsigned int shot_property_;
+    HitAnims anims_;
+    int range_dmg_;
+    // some weapons have wider shot
+    double shot_angle_;
+    // agent accuracy will be applied to this, later to shot_angle_
+    double shot_accuracy_;
 };
 
 class ShotClass {
@@ -201,8 +224,9 @@ public:
         double dist_new = -1, bool exclude_z = false);
 
 protected:
-    void makeShot(bool rangeGenerated, toDefineXYZ &cp, int anim_type,
-        std::vector <Weapon::ShotDesc> &all_shots, WeaponInstance *w = NULL);
+    void makeShot(bool rangeGenerated, toDefineXYZ &cp, int anim_hit,
+        std::vector <Weapon::ShotDesc> &all_shots, int anim_obj_hit,
+        WeaponInstance *w = NULL);
 protected:
     ShootableMapObject *owner_;
 };
@@ -267,7 +291,8 @@ protected:
 class ProjectileShot: public ShotClass {
 public:
     ProjectileShot(toDefineXYZ &cp, toDefineXYZ &tp, MapObject::DamageType dt,
-        int d_value, int d_range, ShootableMapObject * ignrd_obj = NULL,
+        int d_value, int d_range, Weapon::HitAnims *panims,
+        ShootableMapObject * ignrd_obj = NULL,
         int range_max = 1, ShootableMapObject * w_owner = NULL);
     ~ProjectileShot() {}
     bool animate(int elapsed, Mission *m);
@@ -291,5 +316,6 @@ protected:
     double inc_x_;
     double inc_y_;
     double inc_z_;
+    Weapon::HitAnims anims_;
 };
 #endif
