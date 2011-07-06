@@ -148,7 +148,7 @@ public:
             (spe_PointToPoint | spe_TargetReachInstant
             | spe_RangeDamageOnReach | spe_UsesAmmo),
         wspt_Flamer =
-            (spe_PointToPoint | spe_TargetReachInstant | spe_UsesAmmo),
+            (spe_PointToPoint | spe_TargetReachNeedTime | spe_UsesAmmo),
         wspt_LongRange =
             (spe_PointToPoint | spe_TargetReachInstant | spe_UsesAmmo),
         wspt_Scanner = (spe_Owner | spe_ChangeAttribute),
@@ -224,7 +224,7 @@ public:
         double dist_new = -1, bool exclude_z = false);
 
 protected:
-    void makeShot(bool rangeGenerated, toDefineXYZ &cp, int anim_hit,
+    void makeShot(bool rangeChecked, toDefineXYZ &cp, int anim_hit,
         std::vector <Weapon::ShotDesc> &all_shots, int anim_obj_hit,
         WeaponInstance *w = NULL);
 protected:

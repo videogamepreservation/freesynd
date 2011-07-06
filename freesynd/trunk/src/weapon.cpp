@@ -156,6 +156,7 @@ bool WeaponInstance::animate(int elapsed) {
             {
                 deactivate();
                 map_ = -1;
+                setIsIgnored(true);
 
                 Mission *m = g_Session.getMission();
                 int max_anims = 16 + rand() % 8;
@@ -340,9 +341,16 @@ ProjectileShot::ProjectileShot(toDefineXYZ &cp, toDefineXYZ &tp,
     anims_ = *panims;
     dist_max_ = range_max;
     dist_passed_ = 0;
-    speed_ = 4000;
+    // TODO: define speed somewhere in weapon, also animation shift by Z,
+    // animation step
+    if (dmg_range_ == 0) {
+        speed_ = 1500;
+        last_anim_dist_ = 128;
+    } else {
+        speed_ = 4000;
+        last_anim_dist_ = 0;
+    }
     life_over_ = false;
-    last_anim_dist_ = 0;
     double diffx = (double)(target_pos_.x - cur_pos_.x);
     double diffy = (double)(target_pos_.y - cur_pos_.y);
     double diffz = (double)(target_pos_.z - cur_pos_.z);
@@ -455,29 +463,35 @@ bool ProjectileShot::animate(int elapsed, Mission *m) {
         self_remove = true;
     }
     double anim_d = 64;
+    if (dmg_range_ == 0)
+        anim_d = 32;
     double diffx = (double) (base_pos_.x - reached_pos.x);
     double diffy = (double) (base_pos_.y - reached_pos.y);
     double diffz = (double) (base_pos_.z - reached_pos.z);
     double d = sqrt(diffx * diffx + diffy * diffy
         + diffz * diffz);
 
-    int diff_dist = (int) ((d - last_anim_dist_) / anim_d);
-    if (diff_dist != 0) {
-        for (int i = 1; i <= diff_dist; i++) {
-            toDefineXYZ t;
-            last_anim_dist_ += anim_d;
-            t.x = base_pos_.x + (int)(last_anim_dist_ * inc_x_);
-            t.y = base_pos_.y + (int)(last_anim_dist_ * inc_y_);
-            t.z = base_pos_.z + (int)(last_anim_dist_ * inc_z_);
-            t.z += 128;
-            if (t.z > (m->mmax_z_ - 1) * 128)
-                t.z = (m->mmax_z_ - 1) * 128;
-            SFXObject *so = new SFXObject(m->map(),
-                anims_.trace_anim);
-            so->setPosition(t.x / 256, t.y / 256, t.z / 128, t.x % 256,
-                t.y % 256, t.z % 128 );
-            so->setTileVisZ();
-            m->addSfxObject(so);
+    if (d > last_anim_dist_) {
+        int diff_dist = (int) ((d - last_anim_dist_) / anim_d);
+        if (diff_dist != 0) {
+            for (int i = 1; i <= diff_dist; i++) {
+                toDefineXYZ t;
+                last_anim_dist_ += anim_d;
+                t.x = base_pos_.x + (int)(last_anim_dist_ * inc_x_);
+                t.y = base_pos_.y + (int)(last_anim_dist_ * inc_y_);
+                t.z = base_pos_.z + (int)(last_anim_dist_ * inc_z_);
+                if (dmg_range_ != 0) {
+                    t.z += 128;
+                    if (t.z > (m->mmax_z_ - 1) * 128)
+                        t.z = (m->mmax_z_ - 1) * 128;
+                }
+                SFXObject *so = new SFXObject(m->map(),
+                    anims_.trace_anim);
+                so->setPosition(t.x / 256, t.y / 256, t.z / 128, t.x % 256,
+                    t.y % 256, t.z % 128 );
+                so->setTileVisZ();
+                m->addSfxObject(so);
+            }
         }
     }
     cur_pos_ = reached_pos;
@@ -495,61 +509,77 @@ bool ProjectileShot::animate(int elapsed, Mission *m) {
     }
 
     if (draw_impact) {
-        // NOTE: if projectile hits water should hit and flames be drawn?
-        SFXObject *so = new SFXObject(m->map(),
-            anims_.hit_anim);
-        so->setPosition(cur_pos_.x / 256, cur_pos_.y / 256, cur_pos_.z / 128,
-            cur_pos_.x % 256, cur_pos_.y % 256, cur_pos_.z % 128);
-        so->setTileVisZ();
-        m->addSfxObject(so);
-
         std::vector <Weapon::ShotDesc> all_shots;
-        toDefineXYZ cp = cur_pos_;
-        // off_z_ < 128, needs to be zero here
-        cp.z = (cp.z & 0xFFFFFF80) + 16;
-        if (cp.z > (m->mmax_z_ - 1) * 128)
-            cp.z = (m->mmax_z_ - 1) * 128;
-
-        std::vector <ShootableMapObject *> all_targets;
-        g_Session.getMission()->getInRangeAll(&cp, all_targets,
-            Weapon::stm_AllObjects, true, dmg_range_ + 96);
-        for (unsigned int indx = 0; indx < all_targets.size();
-            indx++)
-        {
-            smo = all_targets[indx];
+        if (dmg_range_ == 0) {
             Weapon::ShotDesc sd;
-            sd.tp.x = smo->tileX() * 256 + smo->offX();
-            sd.tp.y = smo->tileY() * 256 + smo->offY();
-            sd.tp.z = smo->tileZ() * 128 + smo->offZ();
-            sd.tpn.setTileXYZ(smo->tileX(), smo->tileY(),
-                smo->tileZ());
-            sd.tpn.setOffXYZ(smo->offX(), smo->offY(),
-                smo->offZ());
+            sd.tp = cur_pos_;
+            sd.tpn = pn;
             sd.d.dtype = dmg_type_;
             sd.d.dvalue = dmg_value_;
             sd.smo = smo;
             all_shots.push_back(sd);
-        }
-        makeShot(true, cp, anims_.hit_anim, all_shots, anims_.obj_hit_anim);
-        int max_flames = 16 + rand() % 8;
-        base_pos_ = cur_pos_;
-        cur_pos_.z += 16;
-        if (cur_pos_.z > (m->mmax_z_ - 1) * 128)
-            cur_pos_.z = (m->mmax_z_ - 1) * 128;
-        // TODO: exclude flames on water
-        for (int i = 0; i < max_flames; i++) {
-            target_pos_ = base_pos_;
-            shotTargetRandomizer(&cur_pos_, &target_pos_, 120.0,
-                (double)dmg_range_ + 32.0, true);
-            pn = PathNode(target_pos_.x / 256, target_pos_.y / 256,
-                target_pos_.z / 128, target_pos_.x % 256, target_pos_.y % 256,
-                target_pos_.z % 128);
-            m->inRangeCPos(&cur_pos_, NULL, &pn, true, true, dmg_range_ + 32);
-            so = new SFXObject(m->map(), anims_.rd_anim, 100 * (rand() % 16));
-            so->setPosition(pn.tileX(), pn.tileY(), pn.tileZ(), pn.offX(),
-                pn.offY(), pn.offZ());
+            makeShot(true, base_pos_, anims_.hit_anim, all_shots,
+                anims_.obj_hit_anim);
+        } else {
+            // NOTE: if projectile hits water, should hit and flames be drawn?
+            SFXObject *so = new SFXObject(m->map(),
+                anims_.hit_anim);
+            so->setPosition(cur_pos_.x / 256, cur_pos_.y / 256,
+                cur_pos_.z / 128, cur_pos_.x % 256, cur_pos_.y % 256,
+                cur_pos_.z % 128);
             so->setTileVisZ();
             m->addSfxObject(so);
+
+            toDefineXYZ cp = cur_pos_;
+            // off_z_ < 128, needs to be zero here
+            cp.z = (cp.z & 0xFFFFFF80) + 16;
+            if (cp.z > (m->mmax_z_ - 1) * 128)
+                cp.z = (m->mmax_z_ - 1) * 128;
+
+            std::vector <ShootableMapObject *> all_targets;
+            g_Session.getMission()->getInRangeAll(&cp, all_targets,
+                Weapon::stm_AllObjects, true, dmg_range_ + 96);
+            for (unsigned int indx = 0; indx < all_targets.size();
+                indx++)
+            {
+                smo = all_targets[indx];
+                Weapon::ShotDesc sd;
+                sd.tp.x = smo->tileX() * 256 + smo->offX();
+                sd.tp.y = smo->tileY() * 256 + smo->offY();
+                sd.tp.z = smo->tileZ() * 128 + smo->offZ();
+                sd.tpn.setTileXYZ(smo->tileX(), smo->tileY(),
+                    smo->tileZ());
+                sd.tpn.setOffXYZ(smo->offX(), smo->offY(),
+                    smo->offZ());
+                sd.d.dtype = dmg_type_;
+                sd.d.dvalue = dmg_value_;
+                sd.smo = smo;
+                all_shots.push_back(sd);
+            }
+            makeShot(true, cp, anims_.hit_anim, all_shots,
+                anims_.obj_hit_anim);
+            int max_flames = 16 + rand() % 8;
+            base_pos_ = cur_pos_;
+            cur_pos_.z += 16;
+            if (cur_pos_.z > (m->mmax_z_ - 1) * 128)
+                cur_pos_.z = (m->mmax_z_ - 1) * 128;
+            // TODO: exclude flames on water
+            for (int i = 0; i < max_flames; i++) {
+                target_pos_ = base_pos_;
+                shotTargetRandomizer(&cur_pos_, &target_pos_, 120.0,
+                    (double)dmg_range_ + 32.0, true);
+                pn = PathNode(target_pos_.x / 256, target_pos_.y / 256,
+                    target_pos_.z / 128, target_pos_.x % 256,
+                    target_pos_.y % 256, target_pos_.z % 128);
+                m->inRangeCPos(&cur_pos_, NULL, &pn, true, true,
+                    dmg_range_ + 32);
+                so = new SFXObject(m->map(), anims_.rd_anim,
+                    100 * (rand() % 16));
+                so->setPosition(pn.tileX(), pn.tileY(), pn.tileZ(),
+                    pn.offX(), pn.offY(), pn.offZ());
+                so->setTileVisZ();
+                m->addSfxObject(so);
+            }
         }
     }
     if (self_remove)
@@ -937,7 +967,7 @@ void WeaponInstance::deactivate() {
         weapon_used_time_ = 0;
 }
 
-void ShotClass::makeShot(bool rangeGenerated, toDefineXYZ &cp, int anim_hit,
+void ShotClass::makeShot(bool rangeChecked, toDefineXYZ &cp, int anim_hit,
     std::vector <Weapon::ShotDesc> &all_shots, int anim_obj_hit,
     WeaponInstance * w)
 {
@@ -946,7 +976,7 @@ void ShotClass::makeShot(bool rangeGenerated, toDefineXYZ &cp, int anim_hit,
         PathNode pn = all_shots[i].tpn;
         MapObject::DamageInflictType d;
         uint8 has_blocker = 0;
-        if (rangeGenerated)
+        if (rangeChecked)
             has_blocker = 1;
         else {
             assert(w != NULL);
@@ -1011,7 +1041,7 @@ void ShotClass::makeShot(bool rangeGenerated, toDefineXYZ &cp, int anim_hit,
                 if (anim_obj_hit!= SFXObject::sfxt_Unknown) {
                     SFXObject *so = new SFXObject(g_Session.getMission()->map(),
                         anim_obj_hit);
-                    so->setPosition(pn.tileX(), pn.tileY(), pn.tileZ(),
+                    so->setPosition(pn.tileX(), pn.tileY(), pn.tileZ() + 1,
                         pn.offX(), pn.offY(), pn.offZ());
                     so->setTileVisZ();
                     so->correctZ();

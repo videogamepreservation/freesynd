@@ -177,10 +177,11 @@ Weapon * WeaponManager::loadWeapon(Weapon::WeaponType wt) {
         SFXObject::sfxt_Unknown, SFXObject::sfxt_Unknown, 0, 30.0, 0.5);
             break;
         case Weapon::Flamer:
-            pWeapon = new Weapon("FLAMER", 21, 71, 1500, 1000, 512, 1, 4, 374,
+            // NOTE: range changed from 512 to 1152
+            pWeapon = new Weapon("FLAMER", 21, 71, 1500, 1000, 1152, 1, 4, 374,
         Weapon::Flamer_Anim, snd::FLAME, Weapon::Flamer, MapObject::dmg_Burn,
         10, 50, 50, Weapon::wspt_Flamer, SFXObject::sfxt_FlamerFire,
-        SFXObject::sfxt_FlamerFire, SFXObject::sfxt_Unknown,
+        SFXObject::sfxt_FlamerFire, SFXObject::sfxt_FlamerFire,
         SFXObject::sfxt_Unknown, 0, 2.0, 0.9);
             break;
         case Weapon::LongRange:
