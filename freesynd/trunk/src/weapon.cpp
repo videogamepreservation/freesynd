@@ -688,6 +688,10 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
         base_shot.tpn.setOffZ(base_shot.tp.z % 128);
     } else {
         base_shot.tp = cp;
+        // NOTE: it is assumed that object has off_z_ = 0, because
+        // if off_z_ != 0 tile_z_ = vis_z_ + 1, from this assumed that
+        // tile above is "air", if it will not be added tile will be "solid"
+        // trajectory checking will return failed response at start
         base_shot.tp.z++;
         if (base_shot.tp.z > (g_Session.getMission()->mmax_z_ - 1) * 128)
             base_shot.tp.z = (g_Session.getMission()->mmax_z_ - 1) * 128;
@@ -710,119 +714,122 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
                 } else
                     ammo_remaining_ -= ammoused;
         }
+        ammoused = pWeaponClass_->ammoPerShot();
     }
 
     bool range_damage = (shot_prop & Weapon::spe_RangeDamageOnReach) != 0;
-    if (shot_prop & Weapon::spe_CreatesProjectile) {
-        for (int i = 0; i < ammoused; i++) {
+
+    // every shot is treated separately
+    for (int sc = 0; sc < shots; sc++) {
+        if (shot_prop & Weapon::spe_CreatesProjectile) {
             Weapon::ShotDesc shot_new = base_shot;
             //shotTargetRandomizer(&cp, &(shot_new.tp), angle);
             ProjectileShot *prjs = new ProjectileShot(cp, shot_new.tp,
                 shot_new.d.dtype, shot_new.d.dvalue, pWeaponClass_->rangeDmg(),
                 pWeaponClass_->anims(), owner_, range());
             g_Session.getMission()->addPrjShot(prjs);
+            continue;
         }
-        return true;
-    }
-    if (shot_prop & Weapon::spe_NoTarget) {
-        std::vector <Weapon::ShotDesc> gen_shots;
-        if (shot_prop & Weapon::spe_PointToPoint) {
-        } else if (shot_prop & Weapon::spe_PointToManyPoints) {
-        } else {
-            gen_shots.push_back(base_shot);
-        }
-        if (range_damage) {
-            for (unsigned int i = 0; i < gen_shots.size(); i++) {
-                std::vector<ShootableMapObject *> all_targets;
+        if (shot_prop & Weapon::spe_NoTarget) {
+            std::vector <Weapon::ShotDesc> gen_shots;
+            if (shot_prop & Weapon::spe_PointToPoint) {
+            } else if (shot_prop & Weapon::spe_PointToManyPoints) {
+            } else {
+                gen_shots.push_back(base_shot);
+            }
+            if (range_damage) {
+                for (unsigned int i = 0; i < gen_shots.size(); i++) {
+                    std::vector<ShootableMapObject *> all_targets;
 
-                getInRangeAll(gen_shots[i].tp, all_targets, mask,
-                    true, pWeaponClass_->rangeDmg());
-                for (unsigned int indx = 0; indx < all_targets.size();
-                    indx++)
-                {
-                    ShootableMapObject * smo = all_targets[indx];
-                    Weapon::ShotDesc sd;
-                    sd.tp.x = smo->tileX() * 256 + smo->offX();
-                    sd.tp.y = smo->tileY() * 256 + smo->offY();
-                    sd.tp.z = smo->tileZ() * 128 + smo->offZ();
-                    sd.tpn.setTileXYZ(smo->tileX(), smo->tileY(),
-                        smo->tileZ());
-                    sd.tpn.setOffXYZ(smo->offX(), smo->offY(),
-                        smo->offZ());
-                    sd.d = gen_shots[i].d;
-                    sd.smo = smo;
-                    all_shots.push_back(sd);
+                    getInRangeAll(gen_shots[i].tp, all_targets, mask,
+                        true, pWeaponClass_->rangeDmg());
+                    for (unsigned int indx = 0; indx < all_targets.size();
+                        indx++)
+                    {
+                        ShootableMapObject * smo = all_targets[indx];
+                        Weapon::ShotDesc sd;
+                        sd.tp.x = smo->tileX() * 256 + smo->offX();
+                        sd.tp.y = smo->tileY() * 256 + smo->offY();
+                        sd.tp.z = smo->tileZ() * 128 + smo->offZ();
+                        sd.tpn.setTileXYZ(smo->tileX(), smo->tileY(),
+                            smo->tileZ());
+                        sd.tpn.setOffXYZ(smo->offX(), smo->offY(),
+                            smo->offZ());
+                        sd.d = gen_shots[i].d;
+                        sd.smo = smo;
+                        all_shots.push_back(sd);
+                    }
                 }
+            } else {
+                all_shots = gen_shots;
             }
         } else {
-            all_shots = gen_shots;
-        }
-    } else {
-        std::vector <Weapon::ShotDesc> gen_shots;
-        switch((shot_prop & (Weapon::spe_PointToPoint
-            | Weapon::spe_PointToManyPoints)))
-        {
-            case Weapon::spe_PointToPoint:
-                for (int i = 0; i < ammoused; i++) {
-                    gen_shots.push_back(base_shot);
-                    Weapon::ShotDesc &last_one = gen_shots.back();
-                    shotTargetRandomizer(&cp, &(last_one.tp), angle);
-                    last_one.tpn.setTileXYZ(last_one.tp.x / 256,
-                        last_one.tp.y / 256, last_one.tp.z / 128);
-                    last_one.tpn.setOffXYZ(last_one.tp.x % 256,
-                        last_one.tp.y % 256, last_one.tp.z % 128);
-                }
-                if (range_damage) {
-                    for (unsigned int i = 0; i < gen_shots.size(); i++) {
-                        std::vector<ShootableMapObject *> all_targets;
-
-                        getInRangeAll(gen_shots[i].tp, all_targets, mask,
-                            true, pWeaponClass_->rangeDmg());
-                        for (unsigned int indx = 0; indx < all_targets.size();
-                            indx++)
-                        {
-                            ShootableMapObject * smo = all_targets[indx];
-                            Weapon::ShotDesc sd;
-                            sd.tp.x = smo->tileX() * 256 + smo->offX();
-                            sd.tp.y = smo->tileY() * 256 + smo->offY();
-                            sd.tp.z = smo->tileZ() * 128 + smo->offZ();
-                            sd.tpn.setTileXYZ(smo->tileX(), smo->tileY(),
-                                smo->tileZ());
-                            sd.tpn.setOffXYZ(smo->offX(), smo->offY(),
-                                smo->offZ());
-                            sd.d = gen_shots[i].d;
-                            sd.smo = smo;
-                            all_shots.push_back(sd);
-                        }
-                        if (gen_shots[i].smo == NULL) {
-                            // drawing anim at point of impact
-                            all_shots.push_back(gen_shots[i]);
-                        }
+            std::vector <Weapon::ShotDesc> gen_shots;
+            switch((shot_prop & (Weapon::spe_PointToPoint
+                | Weapon::spe_PointToManyPoints)))
+            {
+                case Weapon::spe_PointToPoint:
+                    for (int i = 0; i < ammoused; i++) {
+                        gen_shots.push_back(base_shot);
+                        Weapon::ShotDesc &last_one = gen_shots.back();
+                        shotTargetRandomizer(&cp, &(last_one.tp), angle);
+                        last_one.tpn.setTileXYZ(last_one.tp.x / 256,
+                            last_one.tp.y / 256, last_one.tp.z / 128);
+                        last_one.tpn.setOffXYZ(last_one.tp.x % 256,
+                            last_one.tp.y % 256, last_one.tp.z % 128);
                     }
-                } else {
-                    all_shots = gen_shots;
-                }
-                break;
-            case Weapon::spe_PointToManyPoints:
-                for (unsigned short i = 0; i < ammoused; i++) {
-                    gen_shots.push_back(base_shot);
-                    Weapon::ShotDesc &last_one = gen_shots.back();
-                    shotTargetRandomizer(&cp, &(last_one.tp), angle);
-                    last_one.tpn.setTileXYZ(last_one.tp.x / 256,
-                        last_one.tp.y / 256, last_one.tp.z / 128);
-                    last_one.tpn.setOffXYZ(last_one.tp.x % 256,
-                        last_one.tp.y % 256, last_one.tp.z % 128);
-                }
-                if (range_damage) {
-                } else {
-                    all_shots = gen_shots;
-                }
-                break;
+                    if (range_damage) {
+                        for (unsigned int i = 0; i < gen_shots.size(); i++) {
+                            std::vector<ShootableMapObject *> all_targets;
+
+                            getInRangeAll(gen_shots[i].tp, all_targets, mask,
+                                true, pWeaponClass_->rangeDmg());
+                            for (unsigned int indx = 0; indx < all_targets.size();
+                                indx++)
+                            {
+                                ShootableMapObject * smo = all_targets[indx];
+                                Weapon::ShotDesc sd;
+                                sd.tp.x = smo->tileX() * 256 + smo->offX();
+                                sd.tp.y = smo->tileY() * 256 + smo->offY();
+                                sd.tp.z = smo->tileZ() * 128 + smo->offZ();
+                                sd.tpn.setTileXYZ(smo->tileX(), smo->tileY(),
+                                    smo->tileZ());
+                                sd.tpn.setOffXYZ(smo->offX(), smo->offY(),
+                                    smo->offZ());
+                                sd.d = gen_shots[i].d;
+                                sd.smo = smo;
+                                all_shots.push_back(sd);
+                            }
+                            if (gen_shots[i].smo == NULL) {
+                                // drawing anim at point of impact
+                                all_shots.push_back(gen_shots[i]);
+                            }
+                        }
+                    } else {
+                        all_shots = gen_shots;
+                    }
+                    break;
+                case Weapon::spe_PointToManyPoints:
+                    for (unsigned short i = 0; i < ammoused; i++) {
+                        gen_shots.push_back(base_shot);
+                        Weapon::ShotDesc &last_one = gen_shots.back();
+                        shotTargetRandomizer(&cp, &(last_one.tp), angle);
+                        last_one.tpn.setTileXYZ(last_one.tp.x / 256,
+                            last_one.tp.y / 256, last_one.tp.z / 128);
+                        last_one.tpn.setOffXYZ(last_one.tp.x % 256,
+                            last_one.tp.y % 256, last_one.tp.z % 128);
+                    }
+                    if (range_damage) {
+                    } else {
+                        all_shots = gen_shots;
+                    }
+                    break;
+            }
         }
+        makeShot(range_damage, cp, pWeaponClass_->anims()->hit_anim, all_shots,
+            pWeaponClass_->anims()->obj_hit_anim, this);
+        all_shots.clear();
     }
-    // TODO: make this instant
-    makeShot(range_damage, cp, pWeaponClass_->anims()->hit_anim, all_shots,
-        pWeaponClass_->anims()->obj_hit_anim, this);
     return true;
 }
 

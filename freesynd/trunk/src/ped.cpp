@@ -3180,11 +3180,14 @@ bool PedInstance::handleDamage(MapObject::DamageInflictType *d) {
     }
     if (health_ <= 0) {
         health_ = -1;
+        // TODO: "current action drop" function will be
+        // better for this purpose
         speed_ = 0;
         clearDestination();
         putdown_weapon_ = NULL;
         pickup_weapon_ = NULL;
         target_ = NULL;
+
         switch ((unsigned int)d->dtype) {
             case MapObject::dmg_Bullet:
                 setDrawnAnim(PedInstance::DieAnim);
