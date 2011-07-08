@@ -733,6 +733,8 @@ void GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
             }
         }
     } else if (button == 3) {
+        // NOTE: this click will not generate firing animation,
+        // no correct state handling for peds
         if (x >= 129) {
             int ox, oy;
             int tx =

@@ -265,9 +265,13 @@ public:
 
     void resetWeaponUsedTime() { weapon_used_time_ = 0; }
 
-    uint8 inRange(ShootableMapObject ** t, PathNode * pn = NULL,
+    uint8 inRange(toDefineXYZ & cp, ShootableMapObject ** t,
+        PathNode * pn = NULL, bool setBlocker = false,
+        bool checkTileOnly = false, int maxr = -1);
+    uint8 inRangeNoCP(ShootableMapObject ** t, PathNode * pn = NULL,
         bool setBlocker = false, bool checkTileOnly = false,
         int maxr = -1);
+
 
     int getShots(int elapsed = -1);
     void getInRangeOne(toDefineXYZ & cp, ShootableMapObject * & target,

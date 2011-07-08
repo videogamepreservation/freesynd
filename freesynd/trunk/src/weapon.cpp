@@ -606,18 +606,13 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
         return false;
     }
 
-    ShootableMapObject * smp = tobj;
-    PathNode pn;
-    toDefineXYZ cp;
-    if(tp)
-        pn = *tp;
-    uint8 has_blocker = 1;
-    if (tobj || tp)
-        has_blocker = inRange(&smp, &pn);
     int xb = 0;
     int yb = 0;
     int txb = 0;
     int tyb = 0;
+    // TODO: were when has owner add per weapon shift of position,
+    // per direction, to "cp" - current position
+    toDefineXYZ cp;
     if (owner_) {
         xb = owner_->tileX() * 256 + owner_->offX();
         yb = owner_->tileY() * 256 + owner_->offY();
@@ -645,8 +640,22 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
         yb = tile_y_ * 256 + off_y_;
         cp.x = xb;
         cp.y = yb;
-        cp.z = vis_z_ * 128 + off_z_;
+        // NOTE: it is assumed that object has off_z_ = 0, because
+        // if off_z_ != 0 tile_z_ = vis_z_ + 1, from this assumed that
+        // tile above is "air", if 1 will not be added, tile will be "solid",
+        // trajectory checking will return "failed" response at start
+        cp.z = vis_z_ * 128 + off_z_ + 1;
+        if (cp.z > (g_Session.getMission()->mmax_z_ - 1) * 128)
+            cp.z = (g_Session.getMission()->mmax_z_ - 1) * 128;
     }
+
+    ShootableMapObject * smp = tobj;
+    PathNode pn;
+    if(tp)
+        pn = *tp;
+    uint8 has_blocker = 1;
+    if (tobj || tp)
+        has_blocker = inRange(cp, &smp, &pn);
     if ((has_blocker & 14) != 0) {
         if (!ignoreBlocker)
             return false;
@@ -688,13 +697,6 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
         base_shot.tpn.setOffZ(base_shot.tp.z % 128);
     } else {
         base_shot.tp = cp;
-        // NOTE: it is assumed that object has off_z_ = 0, because
-        // if off_z_ != 0 tile_z_ = vis_z_ + 1, from this assumed that
-        // tile above is "air", if it will not be added tile will be "solid"
-        // trajectory checking will return failed response at start
-        base_shot.tp.z++;
-        if (base_shot.tp.z > (g_Session.getMission()->mmax_z_ - 1) * 128)
-            base_shot.tp.z = (g_Session.getMission()->mmax_z_ - 1) * 128;
         base_shot.tpn = PathNode(cp.x / 256, cp.y / 256, base_shot.tp.z / 128,
             cp.x % 256, cp.y % 256, base_shot.tp.z % 128);
     }
@@ -845,8 +847,8 @@ void WeaponInstance::playSound() {
 * 0b - target in range(1); 1b - blocker is object, "t" and "pn" are set(2)
 * 2b - blocker tile, "pn" is set(4), 3b - reachable point set
 */
-uint8 WeaponInstance::inRange(ShootableMapObject ** t, PathNode * pn,
-                         bool setBlocker, bool checkTileOnly, int maxr)
+uint8 WeaponInstance::inRange(toDefineXYZ & cp, ShootableMapObject ** t,
+    PathNode * pn, bool setBlocker, bool checkTileOnly, int maxr)
 {
     // NOTE: too many calculations of type tile*tilesize + off,
     // optimize this if possible everywhere, in freesynd
@@ -854,15 +856,31 @@ uint8 WeaponInstance::inRange(ShootableMapObject ** t, PathNode * pn,
     if (maxr == -1)
         maxr = range();
 
-    double d = 0;
-    bool ownerState, selfState;
-    toDefineXYZ cxyz;
+    bool ownerState, selfState = isIgnored();
 
-    selfState = isIgnored();
     setIsIgnored(true);
     if (owner_) {
         ownerState = owner_->isIgnored();
         owner_->setIsIgnored(true);
+    }
+
+    uint8 block_mask = g_Session.getMission()->inRangeCPos(
+        &cp, t, pn, setBlocker, checkTileOnly, maxr);
+
+    setIsIgnored(selfState);
+    if (owner_)
+        owner_->setIsIgnored(ownerState);
+
+    return block_mask;
+}
+
+uint8 WeaponInstance::inRangeNoCP(ShootableMapObject ** t, PathNode * pn,
+                         bool setBlocker, bool checkTileOnly, int maxr)
+{
+    toDefineXYZ cxyz;
+
+    // NOTE: calculations for Z should be the same as in inflictDamage for cp
+    if (owner_) {
         cxyz.x = owner_->tileX() * 256 + owner_->offX();
         cxyz.y = owner_->tileY() * 256 + owner_->offY();
         cxyz.z = owner_->visZ() * 128 + owner_->offZ() + (owner_->sizeZ() >> 1);
@@ -872,14 +890,7 @@ uint8 WeaponInstance::inRange(ShootableMapObject ** t, PathNode * pn,
         cxyz.z = vis_z_ * 128 + off_z_ + 1;
     }
 
-    uint8 block_mask = g_Session.getMission()->inRangeCPos(
-        &cxyz, t, pn, setBlocker, checkTileOnly, maxr);
-
-    setIsIgnored(selfState);
-    if (owner_)
-        owner_->setIsIgnored(ownerState);
-
-    return block_mask;
+    return inRange(cxyz, t, pn, setBlocker, checkTileOnly, maxr);
 }
 
 int WeaponInstance::getShots(int elapsed) {
@@ -912,22 +923,15 @@ void WeaponInstance::getInRangeOne(toDefineXYZ & cp,
    ShootableMapObject * & target, uint8 mask, bool checkTileOnly, int maxr)
 {
     // TODO: this function should do auto-targetting, check for hostile needed
-    toDefineXYZ cpXYZ;
-    cpXYZ.x = cp.x;
-    cpXYZ.y = cp.y;
-    cpXYZ.z = cp.z;
-    bool ownerState, selfState;
-    selfState = isIgnored();
+    bool ownerState, selfState = isIgnored();
     setIsIgnored(true);
+ 
     if (owner_) {
         ownerState = owner_->isIgnored();
         owner_->setIsIgnored(true);
-        cpXYZ.z += (owner_->sizeZ() >> 1);
-    } else {
-        cpXYZ.z += 1;
     }
-    
-    g_Session.getMission()->getInRangeOne(&cpXYZ, target, mask,
+   
+    g_Session.getMission()->getInRangeOne(&cp, target, mask,
         checkTileOnly, maxr);
 
     setIsIgnored(selfState);
@@ -940,16 +944,11 @@ void WeaponInstance::getInRangeAll(toDefineXYZ & cp,
    bool checkTileOnly, int maxr)
 {
     // NOTE: no need to ignore owner_ here, as all in range are vulnerable
-    toDefineXYZ cpXYZ;
-    cpXYZ.x = cp.x;
-    cpXYZ.y = cp.y;
-    cpXYZ.z = cp.z + 16;
 
-    bool selfState;
-    selfState = isIgnored();
+    bool selfState = isIgnored();
     setIsIgnored(true);
 
-    g_Session.getMission()->getInRangeAll(&cpXYZ, targets, mask,
+    g_Session.getMission()->getInRangeAll(&cp, targets, mask,
         checkTileOnly, maxr);
 
     setIsIgnored(selfState);
@@ -987,7 +986,7 @@ void ShotClass::makeShot(bool rangeChecked, toDefineXYZ &cp, int anim_hit,
             has_blocker = 1;
         else {
             assert(w != NULL);
-            has_blocker = w->inRange(&smp, &pn, true);
+            has_blocker = w->inRange(cp, &smp, &pn, true);
         }
         d.ddir = -1;
         if (smp) {

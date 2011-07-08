@@ -204,7 +204,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
             for (int i = 0; i < 4; i++) {
                 PedInstance * pinst = mission->ped(i);
                 if (pinst->health() > 0
-                    && selectedWeapon()->inRange(
+                    && selectedWeapon()->inRangeNoCP(
                         (ShootableMapObject **)(&pinst)) == 1) {
                     if (pinst->inVehicle())
                         setTarget(pinst->inVehicle());
