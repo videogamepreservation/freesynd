@@ -37,7 +37,7 @@
 #include "gfx/screen.h"
 #include "path.h"
 #include "gfx/fontmanager.h"
-#include "menumanager.h"
+#include "menus/menumanager.h"
 #include "mapmanager.h"
 #include "mission.h"
 #include "missionmanager.h"

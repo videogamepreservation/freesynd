@@ -252,55 +252,55 @@
 				Name="menus"
 				>
 				<File
-					RelativePath="..\..\src\briefmenu.cpp"
+					RelativePath="..\..\src\menus\briefmenu.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\src\confmenu.cpp"
+					RelativePath="..\..\src\menus\confmenu.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\src\debriefmenu.cpp"
+					RelativePath="..\..\src\menus\debriefmenu.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\src\gameplaymenu.cpp"
+					RelativePath="..\..\src\menus\gameplaymenu.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\src\loadingmenu.cpp"
+					RelativePath="..\..\src\menus\loadingmenu.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\src\loadsavemenu.cpp"
+					RelativePath="..\..\src\menus\loadsavemenu.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\src\logoutmenu.cpp"
+					RelativePath="..\..\src\menus\logoutmenu.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\src\mainmenu.cpp"
+					RelativePath="..\..\src\menus\mainmenu.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\src\mapmenu.cpp"
+					RelativePath="..\..\src\menus\mapmenu.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\src\menu.cpp"
+					RelativePath="..\..\src\menus\menu.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\src\menumanager.cpp"
+					RelativePath="..\..\src\menus\menumanager.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\src\researchmenu.cpp"
+					RelativePath="..\..\src\menus\researchmenu.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\src\selectmenu.cpp"
+					RelativePath="..\..\src\menus\selectmenu.cpp"
 					>
 				</File>
 				<File
@@ -324,11 +324,11 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\src\utils\portablefile.cpp"
+					RelativePath="..\..\src\utils\log.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\src\utils\log.cpp"
+					RelativePath="..\..\src\utils\portablefile.cpp"
 					>
 				</File>
 				<File
@@ -530,55 +530,55 @@
 				Name="menus"
 				>
 				<File
-					RelativePath="..\..\src\briefmenu.h"
+					RelativePath="..\..\src\menus\briefmenu.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\src\confmenu.h"
+					RelativePath="..\..\src\menus\confmenu.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\src\debriefmenu.h"
+					RelativePath="..\..\src\menus\debriefmenu.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\src\gameplaymenu.h"
+					RelativePath="..\..\src\menus\gameplaymenu.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\src\loadingmenu.h"
+					RelativePath="..\..\src\menus\loadingmenu.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\src\loadsavemenu.h"
+					RelativePath="..\..\src\menus\loadsavemenu.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\src\logoutmenu.h"
+					RelativePath="..\..\src\menus\logoutmenu.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\src\mainmenu.h"
+					RelativePath="..\..\src\menus\mainmenu.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\src\mapmenu.h"
+					RelativePath="..\..\src\menus\mapmenu.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\src\menu.h"
+					RelativePath="..\..\src\menus\menu.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\src\menumanager.h"
+					RelativePath="..\..\src\menus\menumanager.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\src\researchmenu.h"
+					RelativePath="..\..\src\menus\researchmenu.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\src\selectmenu.h"
+					RelativePath="..\..\src\menus\selectmenu.h"
 					>
 				</File>
 				<File
@@ -602,11 +602,11 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\src\utils\portablefile.h"
+					RelativePath="..\..\src\utils\log.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\src\utils\log.h"
+					RelativePath="..\..\src\utils\portablefile.h"
 					>
 				</File>
 				<File
