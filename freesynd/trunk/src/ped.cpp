@@ -3142,7 +3142,7 @@ bool PedInstance::movementP(Mission *m, int elapsed)
         switch (twd) {
             case 0x01:
                 vis_z_ = tile_z_ - 1;
-                off_z_ = 127 - (off_y_ / 2);
+                off_z_ = 127 - (off_y_ >> 1);
                 break;
             case 0x02:
                 vis_z_ = tile_z_ - 1;
@@ -3154,7 +3154,7 @@ bool PedInstance::movementP(Mission *m, int elapsed)
                 break;
             case 0x04:
                 vis_z_ = tile_z_ - 1;
-                off_z_ = 127 - (off_x_ / 2);
+                off_z_ = 127 - (off_x_ >> 1);
                 break;
             default:
                 vis_z_ = tile_z_;

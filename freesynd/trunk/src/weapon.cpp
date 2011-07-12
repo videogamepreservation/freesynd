@@ -641,10 +641,10 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
         cp.x = xb;
         cp.y = yb;
         // NOTE: it is assumed that object has off_z_ = 0, because
-        // if off_z_ != 0 tile_z_ = vis_z_ + 1, from this assumed that
-        // tile above is "air", if 1 will not be added, tile will be "solid",
+        // if off_z_ != 0 tile_z_ = vis_z_ + 16, from this assumed that
+        // tile above is "air", if 16 will not be added, tile will be "solid",
         // trajectory checking will return "failed" response at start
-        cp.z = vis_z_ * 128 + off_z_ + 1;
+        cp.z = vis_z_ * 128 + off_z_ + 16;
         if (cp.z > (g_Session.getMission()->mmax_z_ - 1) * 128)
             cp.z = (g_Session.getMission()->mmax_z_ - 1) * 128;
     }
@@ -671,6 +671,7 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
     double angle = pWeaponClass_->shotAngle();
 
     angle *= (1 - accuracy);
+    //angle = 0;
 
     Weapon::ShotDesc base_shot;
     base_shot.smo = NULL;
@@ -689,7 +690,7 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
     } else if (tp) {
         base_shot.tp.x = tp->tileX() * 256 + tp->offX();
         base_shot.tp.y = tp->tileY() * 256 + tp->offY();
-        base_shot.tp.z = tp->tileZ() * 128 + tp->offZ() + 1;
+        base_shot.tp.z = tp->tileZ() * 128 + tp->offZ() + 16;
         if (base_shot.tp.z > (g_Session.getMission()->mmax_z_ - 1) * 128)
             base_shot.tp.z = (g_Session.getMission()->mmax_z_ - 1) * 128;
         base_shot.tpn = *tp;
