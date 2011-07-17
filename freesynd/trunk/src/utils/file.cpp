@@ -45,8 +45,8 @@
 #include "log.h"
 #include "portablefile.h"
 
-std::string File::dataPath_ = "./data";
-std::string File::ourDataPath_ = "./data";
+std::string File::dataPath_ = "./data/";
+std::string File::ourDataPath_ = "./data/";
 std::string File::homePath_ = "./";
 
 /*!
@@ -100,7 +100,7 @@ void File::getFullPathForSaveSlot(int slot, std::string &path) {
 uint8 *File::loadOriginalFileToMem(const std::string& filename, int &filesize) {
     // try lowercase, then uppercase.
     FILE *fp = fopen(originalDataFullPath(filename, false).c_str(), "rb");
-    if (!fp) fp = fopen(originalDataFullPath(filename, false).c_str(), "rb");
+    if (!fp) fp = fopen(originalDataFullPath(filename, true).c_str(), "rb");
 
     if (fp) {
         fseek(fp, 0, SEEK_END);
@@ -127,7 +127,7 @@ uint8 *File::loadOriginalFileToMem(const std::string& filename, int &filesize) {
 FILE *File::openOriginalFile(const std::string& filename) {
     // try lowercase, then uppercase.
     FILE *fp = fopen(originalDataFullPath(filename, false).c_str(), "r");
-    if (!fp) fp = fopen(originalDataFullPath(filename, false).c_str(), "r");
+    if (!fp) fp = fopen(originalDataFullPath(filename, true).c_str(), "r");
     return fp;
 }
 
