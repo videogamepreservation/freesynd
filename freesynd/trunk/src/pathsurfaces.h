@@ -37,9 +37,10 @@
     }toDefineXYZ;
 
     typedef struct {
-        // 0 - not defined, 1b - base point, 2b - target point,
-        // 3b - link (when base point reaches target point or vice versa),
-        // 4b - walkable, 5b - constant, 6b - non walkable
+        // 0 - not defined, 0b - base point, 1b - target point,
+        // 2b - link (when base point reaches target point or vice versa),
+        // 3b - walkable, 4b - constant, 5b - non walkable, 6b - needs to
+        // be defined
         unsigned char t;
         // dirh(z + 1), dirm(z), dirl(z - 1) - directions
         // 0x01 = (x, y + 1, z); 0x02 = (x + 1, y + 1, z);
@@ -53,6 +54,7 @@
 
         unsigned short lvl;
     }floodPointDesc;
+
     #define m_fdNotDefined      0
     #define m_fdBasePoint       1
     #define m_fdTargetPoint     2

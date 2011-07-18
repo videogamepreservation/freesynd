@@ -286,7 +286,7 @@ void GameplayMenu::handleTick(int elapsed)
     selectable_agents_ = 0;
     for (int i = 0; i < 4; i++) {
         if (mission_->ped(i)) {
-            if(mission_->ped(i)->isAnAgent() == PedInstance::Agent_Active)
+            if(mission_->ped(i)->agentIs() == PedInstance::Agent_Active)
             {
                 if (mission_->ped(i)->health() > 0) {
                     selectable_agents_ |= 1 << i;
@@ -394,7 +394,7 @@ void GameplayMenu::handleRender()
 
         for (int i = 0; i < 4; i++)
             if (mission_->ped(i)) {
-                if(mission_->ped(i)->isAnAgent() == PedInstance::Agent_Active){
+                if(mission_->ped(i)->agentIs() == PedInstance::Agent_Active){
                     selectable_agents_ |= 1 << i;
                 }
             }

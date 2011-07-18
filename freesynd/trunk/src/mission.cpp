@@ -418,7 +418,7 @@ bool Mission::loadLevel(uint8 * levelData)
                 objd.targettype = MapObject::mt_Ped;
                 // maybe also guards should be eliminated?
                 objd.targetsubtype = 4;
-                objd.condition = 4;
+                objd.condition = 2;
                 objd.targetindx = pindx[cindx];
                 objd.msg = "ELIMINATE POLICE";
                 isset = true;
@@ -427,7 +427,7 @@ bool Mission::loadLevel(uint8 * levelData)
                 objd.type = objv_DestroyObject;
                 objd.targettype = MapObject::mt_Ped;
                 objd.targetsubtype = 2;
-                objd.condition = 4;
+                objd.condition = 2;
                 objd.targetindx = pindx[cindx];
                 objd.msg = "ELIMINATE AGENTS";
                 isset = true;
@@ -472,7 +472,7 @@ bool Mission::loadLevel(uint8 * levelData)
                 objd.poszo = obj.mapposz[0] & 0x7F;
                 if (objd.poszo != 0)
                     objd.poszt++;
-                objd.condition = 32;
+                objd.condition = 16;
                 objd.msg = "EVACUATE";
                 isset = true;
                 break;
@@ -639,7 +639,7 @@ void Mission::createFastKeys(int tilex, int tiley, int maxtilex, int maxtiley) {
     // peds
     for (unsigned int i = 0; i < 4; i++) {
         PedInstance *p = peds_[i];
-        if (p->isAnAgent() == PedInstance::Agent_Active && p->map() != -1) {
+        if (p->agentIs() == PedInstance::Agent_Active && p->map() != -1) {
             if (p->tileX() >= tilex && p->tileX() < maxtilex
                 && p->tileY() >= tiley && p->tileY() < maxtiley) {
                 fast_ped_cache_.insert(fastKey(p));
@@ -791,15 +791,15 @@ void Mission::start()
                     peds_[i]->addWeapon(wi);
                     wi->setOwner(peds_[i]);
                 }
-                peds_[i]->setIsAnAgent(PedInstance::Agent_Active);
+                peds_[i]->setAgentIs(PedInstance::Agent_Active);
             }else{
                 peds_[i]->setHealth(-1);
-                peds_[i]->setIsAnAgent(PedInstance::Agent_Non_Active);
+                peds_[i]->setAgentIs(PedInstance::Agent_Non_Active);
                 peds_[i]->setIsIgnored(true);
             }
         } else {
             peds_[i]->setHealth(-1);
-            peds_[i]->setIsAnAgent(PedInstance::Agent_Non_Active);
+            peds_[i]->setAgentIs(PedInstance::Agent_Non_Active);
             peds_[i]->setIsIgnored(true);
         }
     }    
@@ -825,7 +825,7 @@ void Mission::checkObjectives() {
             case objv_DestroyObject:
                 switch (objd.targettype) {
                     case 1: //ped
-                        if ((objd.condition & 4) == 0) {
+                        if ((objd.condition & 2) == 0) {
                             if (peds_[objd.targetindx]->health() <= 0) {
                                 status_ = COMPLETED;
                                 cur_objective_ ++;

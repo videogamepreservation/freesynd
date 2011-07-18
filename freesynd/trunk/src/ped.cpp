@@ -185,7 +185,7 @@ int Ped::lastPersuadeFrame() {
 
 bool PedInstance::animate(int elapsed, Mission *mission) {
 
-    if (is_an_agent_ == PedInstance::Agent_Non_Active)
+    if (agents_is_ == PedInstance::Agent_Non_Active)
         return true;
 
     bool updated = false;
@@ -359,7 +359,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
             break;
         case PedInstance::VaporizeAnim:
             if (frame_ > ped_->lastVaporizeFrame(getDirection())) {
-                if (is_an_agent_ == PedInstance::Agent_Active) {
+                if (agents_is_ == PedInstance::Agent_Active) {
                     setDrawnAnim(PedInstance::DeadAgentAnim);
                 } else {
                     setDrawnAnim(PedInstance::NoAnimation);
@@ -505,14 +505,14 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
         // miliseconds
         // TODO: this value should be influenced by IPA values
         int required = 1200;
-        if (is_an_agent_ == PedInstance::Agent_Active)
+        if (agents_is_ == PedInstance::Agent_Active)
             required = 500;
 
         if (weapon_idx == Weapon::Pistol_Anim
             || weapon_idx == Weapon::Shotgun_Anim)
         {
             required = 1500;
-            if (is_an_agent_ == PedInstance::Agent_Active)
+            if (agents_is_ == PedInstance::Agent_Active)
                 required = 750;
         }
 
@@ -570,7 +570,7 @@ void PedInstance::showPath(int scrollX, int scrollY) {
     int px = screenX();
     int py = screenY() - tile_z_ * TILE_HEIGHT/3 + TILE_HEIGHT/3;
 
-    if (is_an_agent_ == PedInstance::Agent_Non_Active)
+    if (agents_is_ == PedInstance::Agent_Non_Active)
         return;
 
     for (std::list<PathNode>::iterator it = dest_path_.begin();
@@ -616,7 +616,7 @@ ped_(ped), firing_(PedInstance::Firing_Not),
 drawn_anim_(PedInstance::StandAnim), target_(NULL), sight_range_(0),
 is_hostile_(false), reload_count_(0), selected_weapon_(-1),
 pickup_weapon_(NULL), putdown_weapon_(NULL), in_vehicle_(NULL),
-is_an_agent_(PedInstance::Not_Agent), target_pos_(NULL), reach_obj_(NULL),
+agents_is_(PedInstance::Not_Agent), target_pos_(NULL), reach_obj_(NULL),
 reach_pos_(NULL)
 {
     hold_on_.wayFree = 0;
@@ -635,7 +635,7 @@ PedInstance::~PedInstance(){
 
 void PedInstance::draw(int x, int y, int scrollX, int scrollY) {
 
-    if (is_an_agent_ == PedInstance::Agent_Non_Active)
+    if (agents_is_ == PedInstance::Agent_Non_Active)
         return;
 
     Weapon::WeaponAnimIndex weapon_idx =
@@ -709,7 +709,7 @@ void PedInstance::draw(int x, int y, int scrollX, int scrollY) {
 
 void PedInstance::drawSelectorAnim(int x, int y) {
 
-    if (is_an_agent_ == PedInstance::Agent_Non_Active)
+    if (agents_is_ == PedInstance::Agent_Non_Active)
         return;
 
     Weapon::WeaponAnimIndex weapon_idx =

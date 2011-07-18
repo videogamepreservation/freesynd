@@ -538,8 +538,8 @@ protected:
         uint8 targetsubtype;
         // index within vector of data
         uint16 targetindx;
-        // 0 - not defined, 1b - has sub objective, 2b - refers to all objects
-        // of subtype, 3b - completed, 4b - failed, 5b - check previous
+        // 0 - not defined, 0b - has sub objective, 1b - refers to all objects
+        // of subtype, 2b - completed, 3b - failed, 4b - check previous
         // objecives for fail
         uint32 condition;
         // indx for sub objective

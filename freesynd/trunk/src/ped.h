@@ -249,8 +249,8 @@ public:
         Agent_Active
     } ped_enum;
 
-    void setIsAnAgent(ped_enum set_agent_as) { is_an_agent_ = set_agent_as; }
-    ped_enum isAnAgent() { return is_an_agent_; }
+    void setAgentIs(ped_enum set_agent_as) { agents_is_ = set_agent_as; }
+    ped_enum agentIs() { return agents_is_; }
 
     int map();
     AnimationDrawn drawnAnim();
@@ -306,32 +306,34 @@ protected:
     } firing_;
 
 //--------------------------------------------------------------unused for now
-    // 0 - not defined, 1b - stand, 2b - walking, 3b - hit, 4b - firing,
-    // 5b - following, 6b - pickup/putdown, 7b - burning, 8b - in car
+    // 0 - not defined, 0b - stand, 1b - walking, 2b - hit, 3b - firing,
+    // 4b - following, 5b - pickup, 6b - putdown, 7b - burning, 8b - in car
     unsigned int action_state_;
-    // 0 - not defined, 1b - controled(persuaded), 2b - hostile (condition is
-    // hostile_desc_ + enemy_groups_), 3b - armed, 4b - supporter (no
+    // 0 - not defined, 0b - controled(persuaded), 1b - hostile (condition is
+    // hostile_desc_ + enemy_groups_), 2b - armed, 3b - supporter (no
     // active action should be done, ex. persuaded ped will shoot target
-    // of persuader only if persuader shoots at it), 5b - neutral (all unarmed
-    // are nuetral), 6b - enemy in range, 7b - is dead, 8b - not dead, 9b - no
-    // ammunition, 10b - emulates some groups, 11b - emulation failed (some
-    // actions should remove emulation for group, maybe temporary), 12b - A.L.
+    // of persuader only if persuader shoots at it), 4b - neutral (all unarmed
+    // are nuetral), 5b - enemy in range, 6b - is dead, 7b - not dead, 8b - no
+    // ammunition, 9b - emulates some groups, 10b - emulation failed (some
+    // actions should remove emulation for group, maybe temporary), 11b - A.L.
     // controled(maybe one day we would like to do remote control on persuaded)
     unsigned int desc_state_;
     // this inherits definition from desc_state_
     // ((target checked)desc_state_ & hostile_desc_) != 0 kill him
-    unsigned char hostile_desc_;
+    unsigned int hostile_desc_;
     std::set <unsigned char> enemy_groups_;
     std::set <unsigned char> emulated_groups_;
     std::set <unsigned char> emulated_failed_groups_;
-    // group ped belongs to
-    // 0 - neutral, 1 - our agents group, 2 - enemy agents group,
-    // 3 - guards, 4 - police
+    // group obj belongs to
+    // 0 - not defined, 0b - friend(for player), 1b - enemy(for player),
+    // 2b - neutral, 3b - conditional hostility(hostile_desc_)
+    // 8b - civilian(pedestrian), 9b - agent, 10b - police,
+    // 11b - guard, 12b - criminal
     // NOTE: this will be used in A.L., guards group can be as enemy agents group,
     // but what if we would like to make guards attack only territory intruders or
     // someone who has took something on controlled surface, or attacked one of
     // guards or etc.
-    unsigned char peds_group_;
+    unsigned char obj_group_;
 //--------------------------------------------------------------unused for now
 
     AnimationDrawn drawn_anim_;
@@ -345,7 +347,7 @@ protected:
     int selected_weapon_;
     WeaponInstance *pickup_weapon_, *putdown_weapon_;
     VehicleInstance *in_vehicle_;
-    ped_enum is_an_agent_;
+    ped_enum agents_is_;
     // IPA levels: white bar level,set level,exhaused level and forced level
     //uint8 lvl_adrena_reserve_;
     uint8 lvl_adrena_amount_;
