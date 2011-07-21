@@ -131,12 +131,12 @@ void SelectMenu::drawAgent()
     if (selected->slot(Mod::MOD_LEGS)) {
         legs = selected->slot(Mod::MOD_LEGS)->icon(selected->isMale());
         g_App.fonts().drawText(366, 250, selected->slot(Mod::MOD_LEGS)->getName(),
-                               FontManager::SIZE_1, false);
+                               false, FontManager::SIZE_1, false);
     }
     if (selected->slot(Mod::MOD_ARMS)) {
         arms = selected->slot(Mod::MOD_ARMS)->icon(selected->isMale());
         g_App.fonts().drawText(366, 226, selected->slot(Mod::MOD_ARMS)->getName(),
-                               FontManager::SIZE_1, false);
+                               false, FontManager::SIZE_1, false);
     }
 
     g_App.menuSprites().drawSpriteXYZ(arms, armsx, armsy, 0, false, true);
@@ -146,7 +146,7 @@ void SelectMenu::drawAgent()
     if (selected->slot(Mod::MOD_CHEST)) {
         int chest = selected->slot(Mod::MOD_CHEST)->icon(selected->isMale());
         g_App.fonts().drawText(366, 202,
-                               selected->slot(Mod::MOD_CHEST)->getName(), FontManager::SIZE_1,
+                               selected->slot(Mod::MOD_CHEST)->getName(), false, FontManager::SIZE_1,
                                false);
         int chestx = 216;
         int chesty = 146;
@@ -161,7 +161,7 @@ void SelectMenu::drawAgent()
     if (selected->slot(Mod::MOD_HEART)) {
         int heart = selected->slot(Mod::MOD_HEART)->icon(selected->isMale());
         g_App.fonts().drawText(366, 160,
-                               selected->slot(Mod::MOD_HEART)->getName(), FontManager::SIZE_1,
+                               selected->slot(Mod::MOD_HEART)->getName(), false, FontManager::SIZE_1,
                                false);
         g_App.menuSprites().drawSpriteXYZ(heart, 254, 166, 0, false, true);
     }
@@ -169,7 +169,7 @@ void SelectMenu::drawAgent()
     if (selected->slot(Mod::MOD_EYES)) {
         int eyes = selected->slot(Mod::MOD_EYES)->icon(selected->isMale());
         g_App.fonts().drawText(366, 136, selected->slot(Mod::MOD_EYES)->getName(),
-                               FontManager::SIZE_1, false);
+                               false, FontManager::SIZE_1, false);
         int eyesx = 238;
         if (!selected->isMale()) {
             eyesx += 2;
@@ -181,7 +181,7 @@ void SelectMenu::drawAgent()
     if (selected->slot(Mod::MOD_BRAIN)) {
         int brain = selected->slot(Mod::MOD_BRAIN)->icon(selected->isMale());
         g_App.fonts().drawText(366, 112,
-                               selected->slot(Mod::MOD_BRAIN)->getName(), FontManager::SIZE_1,
+                               selected->slot(Mod::MOD_BRAIN)->getName(), false, FontManager::SIZE_1,
                                false);
         int brainx = 238;
         if (!selected->isMale()) {
@@ -287,8 +287,8 @@ void SelectMenu::handleRender() {
     // write money
     char tmp[100];
     sprintf(tmp, "%d", g_App.getGameSession().getMoney());
-    g_App.fonts().drawText(560 - g_App.fonts().textWidth(tmp, FontManager::SIZE_2) / 2, 87,
-                           tmp, FontManager::SIZE_2, false);
+    g_App.fonts().drawText(560 - g_App.fonts().textWidth(tmp, false, FontManager::SIZE_2) / 2, 87,
+                           tmp, false, FontManager::SIZE_2, false);
 
     // write team member icons and health
     uint8 data[4], datag[4];

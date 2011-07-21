@@ -5,6 +5,7 @@
  *   Copyright (C) 2005  Stuart Binge  <skbinge@gmail.com>              *
  *   Copyright (C) 2005  Joost Peters  <joostp@users.sourceforge.net>   *
  *   Copyright (C) 2006  Trent Waddington <qg@biodome.org>              *
+ *   Copyright (C) 2011  Joey Parrish  <joey.parrish@gmail.com>         *
  *                                                                      *
  *    This program is free software;  you can redistribute it and / or  *
  *  modify it  under the  terms of the  GNU General  Public License as  *
@@ -30,6 +31,22 @@
 #include <map>
 
 /*!
+ * Font range description for 8-bit character sets.
+ */
+class FontRange {
+public:
+    FontRange();
+    FontRange(const std::string& valid_chars);
+
+    inline bool in_range(unsigned char c) {
+        return (char_present_[c / 32] & (1 << (c % 32))) != 0;
+    }
+
+private:
+    unsigned int char_present_[8]; // 256 bits
+};
+
+/*!
  * Font class.
  */
 class Font {
@@ -37,16 +54,23 @@ public:
     Font() {}
     virtual ~Font() {}
 
-    void setSpriteManager(SpriteManager *sprites, int offset = 0,
-            char base = '!');
-    void drawText(int x, int y, const char *text, bool x2 = true);
-    int textWidth(const char *text, bool x2 = true);
+    void setSpriteManager(SpriteManager *sprites, int offset, char base,
+            const std::string& valid_chars);
+    void setSpriteManager(SpriteManager *sprites, int offset, char base,
+            const FontRange& range);
+    // If dos is true, the text is in cp437, otherwise it's utf-8.
+    void drawText(int x, int y, const char *text, bool dos, bool x2 = true);
+    int textWidth(const char *text, bool dos, bool x2 = true);
     int textHeight(bool x2 = true);
 
 protected:
+    static unsigned char decode(const unsigned char * &c, bool dos);
+    static int decodeUTF8(const unsigned char * &c);
+    virtual Sprite *getSprite(unsigned char dos_char);
+
     SpriteManager *sprites_;
     int offset_;
-    char base_;
+    FontRange range_;
 };
 
 class HChar {

@@ -6,6 +6,7 @@
  *   Copyright (C) 2005  Joost Peters  <joostp@users.sourceforge.net>   *
  *   Copyright (C) 2006  Trent Waddington <qg@biodome.org>              *
  *   Copyright (C) 2006  Tarjei Knapstad <tarjei.knapstad@gmail.com>    *
+ *   Copyright (C) 2011  Joey Parrish  <joey.parrish@gmail.com>         *
  *                                                                      *
  *    This program is free software;  you can redistribute it and / or  *
  *  modify it  under the  terms of the  GNU General  Public License as  *
@@ -47,15 +48,15 @@ public:
     FontManager();
     ~FontManager();
 
-    bool loadFont(SpriteManager *sprites, EFontSize size, bool dark, int offset = 0,
-            char base = '!');
+    bool loadFont(SpriteManager *sprites, EFontSize size, bool dark, int offset,
+            char base, const std::string& valid_chars);
 
-    void drawText(int x, int y, const char *text, int size, bool dark,
+    void drawText(int x, int y, const char *text, bool dos, int size, bool dark,
             bool x2 = true);
 
-    void drawText(int x, int y, const char *text, EFontSize size, bool dark,
+    void drawText(int x, int y, const char *text, bool dos, EFontSize size, bool dark,
             bool x2 = true);
-    int textWidth(const char *text, EFontSize size, bool x2 = true);
+    int textWidth(const char *text, bool dos, EFontSize size, bool x2 = true);
     int textHeight(EFontSize size, bool x2 = true);
 
 protected:

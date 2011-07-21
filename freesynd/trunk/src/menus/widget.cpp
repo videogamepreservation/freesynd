@@ -62,7 +62,7 @@ void MenuText::updateText(const char *text) {
     }
     text_ = lbl;
 
-    int textWidth = g_App.fonts().textWidth(text_.c_str(), size_);
+    int textWidth = g_App.fonts().textWidth(text_.c_str(), false, size_);
     if (textWidth > width_) {
         width_ = textWidth;
     }
@@ -131,7 +131,7 @@ void MenuText::setDark(bool dark) {
  * already drawn on the background image.
  */
 void MenuText::draw() {
-    g_App.fonts().drawText(anchorX_, anchorY_, text_.c_str(), size_, dark_);
+    g_App.fonts().drawText(anchorX_, anchorY_, text_.c_str(), false, size_, dark_);
 }
 
 bool ActionWidget::isMouseOver(int x, int y) {
@@ -296,7 +296,7 @@ void ListBox::draw() {
     int i=0;
     for (std::list < std::string >::iterator it = labels_.begin();
          it != labels_.end(); it++, i++) {
-             g_App.fonts().drawText(getX(), getY() + i * 12, (*it).c_str(), FontManager::SIZE_1, focusedLine_ != i);
+             g_App.fonts().drawText(getX(), getY() + i * 12, (*it).c_str(), false, FontManager::SIZE_1, focusedLine_ != i);
     }
 }
 
@@ -347,7 +347,7 @@ const int TeamListBox::LINE_OFFSET = 20;
 TeamListBox::TeamListBox(Menu *peer, int x, int y, int width, int height, bool visible) :
         ListBox(peer, x, y, width, height, visible) {
     pTitle_ = new MenuText(x, y, width, "#SELECT_CRYO_TITLE", FontManager::SIZE_1, false);
-    lUnderline_ = g_App.fonts().textWidth(pTitle_->getText().c_str(), FontManager::SIZE_1);
+    lUnderline_ = g_App.fonts().textWidth(pTitle_->getText().c_str(), false, FontManager::SIZE_1);
     xUnderline_ = (x + x + width) / 2  - lUnderline_ / 2;
     yUnderline_ = y + g_App.fonts().textHeight(FontManager::SIZE_1);
     yOrigin_ = yUnderline_ + 2;
@@ -377,13 +377,13 @@ void TeamListBox::draw() {
                      if (squadLines_[ln] ==  i) {
                         char tmp[5];
                         sprintf(tmp, "%d", ln+1);
-                        g_App.fonts().drawText(getX(), yOrigin_ + i * 12, tmp, FontManager::SIZE_1, focusedLine_ != i);
+                        g_App.fonts().drawText(getX(), yOrigin_ + i * 12, tmp, false, FontManager::SIZE_1, focusedLine_ != i);
                         break;
                      }
                  }
-                 g_App.fonts().drawText(getX() + LINE_OFFSET, yOrigin_ + i * 12, (*it).c_str(), FontManager::SIZE_1, focusedLine_ != i);
+                 g_App.fonts().drawText(getX() + LINE_OFFSET, yOrigin_ + i * 12, (*it).c_str(), false, FontManager::SIZE_1, focusedLine_ != i);
              } else {
-                 g_App.fonts().drawText(getX() + LINE_OFFSET, yOrigin_ + i * 12, emptyLbl_.c_str(), FontManager::SIZE_1, focusedLine_ != i);
+                 g_App.fonts().drawText(getX() + LINE_OFFSET, yOrigin_ + i * 12, emptyLbl_.c_str(), false, FontManager::SIZE_1, focusedLine_ != i);
              }
     }
 }

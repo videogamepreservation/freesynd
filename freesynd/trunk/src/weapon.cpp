@@ -78,26 +78,26 @@ void Weapon::drawBigIcon(int x, int y) {
 
 void Weapon::drawInfo(int x, int y) {
     char tmp[100];
-    g_App.fonts().drawText(x, y, name_.c_str(), 0, false);
+    g_App.fonts().drawText(x, y, name_.c_str(), false, 0, false);
     sprintf(tmp, "COST   :%d", cost_);
-    g_App.fonts().drawText(x, y + 12, tmp, 0, false);
+    g_App.fonts().drawText(x, y + 12, tmp, false, 0, false);
     y += 24;
 
     if (ammo_ >= 0) {
         sprintf(tmp, "AMMO   :%d", ammo_);
-        g_App.fonts().drawText(x, y, tmp, 0, false);
+        g_App.fonts().drawText(x, y, tmp, false, 0, false);
         y += 12;
     }
 
     if (range_ >= 0) {
         sprintf(tmp, "RANGE  :%d", range_);
-        g_App.fonts().drawText(x, y, tmp, 0, false);
+        g_App.fonts().drawText(x, y, tmp, false, 0, false);
         y += 12;
     }
 
     if (damage_per_shot_ >= 0 && ammo_ >= 0) {
         sprintf(tmp, "SHOT   :%d", damage_per_shot_);
-        g_App.fonts().drawText(x, y, tmp, 0, false);
+        g_App.fonts().drawText(x, y, tmp, false, 0, false);
         y += 12;
     }
 }

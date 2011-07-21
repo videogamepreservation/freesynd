@@ -173,7 +173,7 @@ void BriefMenu::handleRender() {
                     memcpy(tmp, miss, nextline - miss);
                     tmp[nextline - miss] = 0;
                     nextline--;
-                } while (g_App.fonts().textWidth(tmp, FontManager::SIZE_2) > 470);
+                } while (g_App.fonts().textWidth(tmp, true, FontManager::SIZE_2) > 470);
 
                 delete[] tmp;
                 /* is this faster?
@@ -183,7 +183,7 @@ void BriefMenu::handleRender() {
                 do {
                     tmp = *nextline;
                     *nextline = 0;
-                    found = g_App.fonts().textWidth(miss, FontManager::SIZE_2) > 470;
+                    found = g_App.fonts().textWidth(miss, true, FontManager::SIZE_2) > 470;
                     *nextline = tmp;
                     nextline--;
                 } while (found);
@@ -218,7 +218,7 @@ void BriefMenu::handleRender() {
 
                     g_App.fonts().drawText(24,
                                            88 + (line_count -
-                                                 start_line_) * 16, miss,
+                                                 start_line_) * 16, miss, true,
                                                  FontManager::SIZE_2, false);
                     if (nextline)
                         *nextline = tmp;

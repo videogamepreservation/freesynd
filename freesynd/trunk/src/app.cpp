@@ -558,7 +558,8 @@ void App::run(const char *dir, int start_mission) {
         LOG(Log::k_FLG_GFX, "App", "run", ("%d sprites loaded from mfnt-0.dat", tabSize / 6))
         delete[] tabData;
         delete[] data;
-        intro_font_.setSpriteManager(&intro_font_sprites_, 1);
+
+        intro_font_.setSpriteManager(&intro_font_sprites_, 1, '!', "0x21-0x60,0x80-0xa8");
 
         // play intro
         LOG(Log::k_FLG_GFX, "App", "run", ("Playing the intro"))
@@ -594,14 +595,15 @@ void App::run(const char *dir, int start_mission) {
     menu_sprites_.loadSprites(tabData, tabSize, data, true);
     delete[] tabData;
     delete[] data;
-    fonts_.loadFont(&menu_sprites_, FontManager::SIZE_4, true, 1076, 'A');
-    fonts_.loadFont(&menu_sprites_, FontManager::SIZE_3, true, 802, 'A');
-    fonts_.loadFont(&menu_sprites_, FontManager::SIZE_2, true, 528, 'A');
-    fonts_.loadFont(&menu_sprites_, FontManager::SIZE_1, true, 254, 'A');
-    fonts_.loadFont(&menu_sprites_, FontManager::SIZE_4, false, 939, 'A');
-    fonts_.loadFont(&menu_sprites_, FontManager::SIZE_3, false, 665, 'A');
-    fonts_.loadFont(&menu_sprites_, FontManager::SIZE_2, false, 391, 'A');
-    fonts_.loadFont(&menu_sprites_, FontManager::SIZE_1, false, 117, 'A');
+
+    fonts_.loadFont(&menu_sprites_, FontManager::SIZE_4, true, 1076, 'A', "0x27,0x2c-0x2f,0x41-0x5a,0x5c,0x60,0x80-0x90,0x93-0x9a,0xa0-0xa7");
+    fonts_.loadFont(&menu_sprites_, FontManager::SIZE_3, true, 802, 'A', "0x21-0x5a,0x80-0x90,0x93-0x9a,0xa0-0xa8");
+    fonts_.loadFont(&menu_sprites_, FontManager::SIZE_2, true, 528, 'A', "0x21-0x60,0x80-0xa8");
+    fonts_.loadFont(&menu_sprites_, FontManager::SIZE_1, true, 254, 'A', "0x21-0x60,0x80-0xa8");
+    fonts_.loadFont(&menu_sprites_, FontManager::SIZE_4, false, 939, 'A', "0x27,0x2c-0x2f,0x41-0x5a,0x5c,0x60,0x80-0x90,0x93-0x9a,0xa0-0xa7");
+    fonts_.loadFont(&menu_sprites_, FontManager::SIZE_3, false, 665, 'A', "0x21-0x5a,0x80-0x90,0x93-0x9a,0xa0-0xa8");
+    fonts_.loadFont(&menu_sprites_, FontManager::SIZE_2, false, 391, 'A', "0x21-0x60,0x80-0xa8");
+    fonts_.loadFont(&menu_sprites_, FontManager::SIZE_1, false, 117, 'A', "0x21-0x60,0x80-0xa8");
     game_font_.load();
 
 #if 0

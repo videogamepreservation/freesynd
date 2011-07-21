@@ -157,7 +157,7 @@ public:
 
     void drawCaret(bool light = false) {
         g_Screen.drawRect(315 +
-                         g_App.fonts().textWidth(name_value_.c_str(), FontManager::SIZE_2),
+                         g_App.fonts().textWidth(name_value_.c_str(), false, FontManager::SIZE_2),
                          95, 10, 2, light ? 252 : 16);
     }
 
@@ -194,7 +194,7 @@ public:
         }
 
         g_Screen.scale2x(300, 77, 136, 13, data);
-        g_App.fonts().drawText(313, 81, name_value_.c_str(), FontManager::SIZE_2, false);
+        g_App.fonts().drawText(313, 81, name_value_.c_str(), false, FontManager::SIZE_2, false);
         drawCaret();
     }
 
@@ -223,7 +223,7 @@ public:
         }
 
         g_Screen.scale2x(310, 80, 129, 9, bkg_ + 155 + 40 * 320, 320);
-        g_App.fonts().drawText(313, 81, name_value_.c_str(), FontManager::SIZE_2, false);
+        g_App.fonts().drawText(313, 81, name_value_.c_str(), false, FontManager::SIZE_2, false);
         drawCaret();
 
         return consumed;
@@ -307,12 +307,12 @@ void ConfMenu::handleRender() {
 
     if (*g_App.getGameSession().getCompanyName()) {
         g_Screen.scale2x(28, 90, 120, 10, bkg_ + 14 + 45 * 320, 320);
-        g_App.fonts().drawText(28, 92, g_App.getGameSession().getCompanyName(), FontManager::SIZE_1, false);
+        g_App.fonts().drawText(28, 92, g_App.getGameSession().getCompanyName(), false, FontManager::SIZE_1, false);
     }
 
     if (*g_App.getGameSession().getUserName()) {
         g_Screen.scale2x(28, 112, 120, 10, bkg_ + 14 + 56 * 320, 320);
-        g_App.fonts().drawText(28, 114, g_App.getGameSession().getUserName(), FontManager::SIZE_1, false);
+        g_App.fonts().drawText(28, 114, g_App.getGameSession().getUserName(), false, FontManager::SIZE_1, false);
     }
 
     g_System.showCursor();

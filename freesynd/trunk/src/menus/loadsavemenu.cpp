@@ -142,7 +142,7 @@ void LoadSaveMenu::handleMouseDown(int x, int y, int button, const int modKeys) 
             int yUp = Y_ORIGIN + lineId*24;
             if (y > yUp && y < (yUp + 22)) {
                 editNameId_ = lineId;
-                int size = g_App.fonts().textWidth(files_[editNameId_].c_str(), FontManager::SIZE_2);
+                int size = g_App.fonts().textWidth(files_[editNameId_].c_str(), false, FontManager::SIZE_2);
 
                 // computes caret position
                 if (x > size + X_ORIGIN) {
@@ -153,7 +153,7 @@ void LoadSaveMenu::handleMouseDown(int x, int y, int button, const int modKeys) 
                     size_t pos = 1;
                     for (unsigned int i=0; i<files_[editNameId_].size(); i++, pos++) {
                         std::string sub = files_[editNameId_].substr(0, pos);
-                        if (x < X_ORIGIN + g_App.fonts().textWidth(sub.c_str(), FontManager::SIZE_2)) {
+                        if (x < X_ORIGIN + g_App.fonts().textWidth(sub.c_str(), false, FontManager::SIZE_2)) {
                             caretPosition_ = pos - 1;
                             break;
                         }
@@ -168,13 +168,13 @@ void LoadSaveMenu::handleMouseDown(int x, int y, int button, const int modKeys) 
 
 void LoadSaveMenu::drawCaret() {
         std::string start = files_[editNameId_].substr(0, caretPosition_);
-        int x = X_ORIGIN + g_App.fonts().textWidth(start.c_str(), FontManager::SIZE_2) + 1;
+        int x = X_ORIGIN + g_App.fonts().textWidth(start.c_str(), false, FontManager::SIZE_2) + 1;
         int y = Y_ORIGIN + editNameId_*24 + 20;
 
         // width of caret is the same of the letter above
         int length = 10;
         if (caretPosition_ < files_[editNameId_].size()) {
-            length = g_App.fonts().textWidth(files_[editNameId_].substr(caretPosition_, 1).c_str(), FontManager::SIZE_2);
+            length = g_App.fonts().textWidth(files_[editNameId_].substr(caretPosition_, 1).c_str(), false, FontManager::SIZE_2);
         }
 
         // Draw caret
@@ -186,9 +186,9 @@ void LoadSaveMenu::handleRender() {
 
     for (int i=0; i<10; i++) {
         if (files_[i].size() != 0) {
-            g_App.fonts().drawText(X_ORIGIN, y, files_[i].c_str(), FontManager::SIZE_2, i != editNameId_);
+            g_App.fonts().drawText(X_ORIGIN, y, files_[i].c_str(), false, FontManager::SIZE_2, i != editNameId_);
         } else if (editNameId_ != i) {
-            g_App.fonts().drawText(X_ORIGIN, y, emptyLbl_.c_str(), FontManager::SIZE_2, i != editNameId_);
+            g_App.fonts().drawText(X_ORIGIN, y, emptyLbl_.c_str(), false, FontManager::SIZE_2, i != editNameId_);
         }
         y += 24;
     }
