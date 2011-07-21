@@ -100,7 +100,7 @@ unsigned char Font::decode(const unsigned char * &c, bool dos)
     }
 
     int wc = decodeUTF8(c);
-    if (wc > sizeof(cp437)) return 0xff; // out-of-range
+    if (wc > (int)sizeof(cp437)) return 0xff; // out-of-range
     if (wc == 0) return 0;
     unsigned char value = cp437[wc];
     if (value == 0) return 0xff;
@@ -188,7 +188,7 @@ void Font::drawText(int x, int y, const char *text, bool dos, bool x2) {
     int ox = x;
     const unsigned char *c = (const unsigned char *)text;
     for (unsigned char cc = decode(c, dos); cc; cc = decode(c, dos)) {
-        if (cc < 0) {
+        if (cc == 0xff) {
             // invalid utf8 code, skip it.
             continue;
         }
@@ -221,7 +221,7 @@ int Font::textWidth(const char *text, bool dos, bool x2) {
     int x = 0;
     const unsigned char *c = (const unsigned char *)text;
     for (unsigned char cc = decode(c, dos); cc; cc = decode(c, dos)) {
-        if (cc < 0) {
+        if (cc == 0xff) {
             // invalid utf8 code, skip it.
             continue;
         }

@@ -613,11 +613,11 @@ void PedInstance::showPath(int scrollX, int scrollY) {
 
 PedInstance::PedInstance(Ped *ped, int m) : ShootableMovableMapObject(m),
 ped_(ped), firing_(PedInstance::Firing_Not),
-drawn_anim_(PedInstance::StandAnim), target_(NULL), sight_range_(0),
+drawn_anim_(PedInstance::StandAnim), target_(NULL), target_pos_(NULL),
+reach_obj_(NULL), reach_pos_(NULL), sight_range_(0),
 is_hostile_(false), reload_count_(0), selected_weapon_(-1),
 pickup_weapon_(NULL), putdown_weapon_(NULL), in_vehicle_(NULL),
-agents_is_(PedInstance::Not_Agent), target_pos_(NULL), reach_obj_(NULL),
-reach_pos_(NULL)
+agents_is_(PedInstance::Not_Agent)
 {
     hold_on_.wayFree = 0;
     rcv_damage_def_ = MapObject::ddmg_Ped;

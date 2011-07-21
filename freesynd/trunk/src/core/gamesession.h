@@ -201,7 +201,7 @@ public:
      * Sets the index of the current selected region on map menu.
      * \param index The region index (between 0 and 49 inclusive)
      */
-    void setSelectedBlockId(uint8 index) { if (index >= 0 && index < 50) selected_blck_ = index; }
+    void setSelectedBlockId(uint8 index) { if (index < 50) selected_blck_ = index; }
 
     /*!
      * Return the currently played mission.

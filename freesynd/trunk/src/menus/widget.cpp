@@ -308,7 +308,7 @@ void ListBox::handleMouseMotion(int x, int y, int state, const int modKeys) {
         if (i < pModel_->size()) {
             if (pModel_->getElement(i)) {
                 // If line contains something, highlight it
-                if (focusedLine_ != i) {
+                if (focusedLine_ != (int)i) {
                     redraw();
                     focusedLine_ = i;
                 }

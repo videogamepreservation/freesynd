@@ -48,7 +48,7 @@ protected:
 protected:
     static const int X_ORIGIN;
     static const int Y_ORIGIN;
-    static const int NAME_MAX_SIZE;
+    static const size_t NAME_MAX_SIZE;
 
     /*! Id of the load button.*/
     int loadButId_;

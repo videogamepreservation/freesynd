@@ -32,7 +32,7 @@
 
 const int LoadSaveMenu::X_ORIGIN = 165;
 const int LoadSaveMenu::Y_ORIGIN = 100;
-const int LoadSaveMenu::NAME_MAX_SIZE = 31;
+const size_t LoadSaveMenu::NAME_MAX_SIZE = 31;
 
 LoadSaveMenu::LoadSaveMenu(MenuManager * m):Menu(m, "loadsave", "mlosa.dat",
      "mlosaout.dat")

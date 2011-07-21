@@ -29,9 +29,10 @@
 #ifdef SYSTEM_SDL
 #include "system_sdl.h"
 #endif
-MapObject::MapObject(int m):map_(m), frame_(0), elapsed_carry_(0),
-frames_per_sec_(8), sub_type_(0), main_type_(0), dir_(0), is_ignored_(false),
-size_x_(1), size_y_(1), size_z_(2), major_type_(MapObject::mt_Undefined)
+MapObject::MapObject(int m):size_x_(1), size_y_(1), size_z_(2),
+map_(m), frame_(0), elapsed_carry_(0),
+frames_per_sec_(8), sub_type_(0), main_type_(0),
+major_type_(MapObject::mt_Undefined),dir_(0),is_ignored_(false)
 {
 }
 

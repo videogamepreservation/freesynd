@@ -3388,28 +3388,28 @@ bool Mission::getShootableTile(int &x, int &y, int &z, int &ox, int &oy,
                 if(!gotit && box < 128 && (bx - 1) >= 0) {
                     cindx--;
                     if (mdpoints_[cindx].t == m_fdWalkable) {
-                        int dx = 0;
-                        int dy = 0;
+                        int dx2 = 0;
+                        int dy2 = 0;
                         twd = mtsurfaces_[cindx].twd;
                         if (twd == 0x01) {
-                            dy = ((boy + 256) * 2) / 3;
-                            dx = (box + 256) - dy / 2;
-                            if (dx < 256 && dy < 256) {
+                            dy2 = ((boy + 256) * 2) / 3;
+                            dx2 = (box + 256) - dy2 / 2;
+                            if (dx2 < 256 && dy2 < 256) {
                                 bx--;
                                 by--;
                                 gotit = true;
-                                box = dx;
-                                boy = dy;
+                                box = dx2;
+                                boy = dy2;
                             }
                         } else if (twd == 0x04) {
-                            dx = ((box + 256) * 2) / 3;
-                            dy = (boy + 256) - dx / 2;
-                            if (dx < 256 && dy < 256) {
+                            dx2 = ((box + 256) * 2) / 3;
+                            dy2 = (boy + 256) - dx2 / 2;
+                            if (dx2 < 256 && dy2 < 256) {
                                 bx--;
                                 by--;
                                 gotit = true;
-                                box = dx;
-                                boy = dy;
+                                box = dx2;
+                                boy = dy2;
                             }
                         }
                     }
