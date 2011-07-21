@@ -55,7 +55,7 @@ public:
     ~Map();
 
     bool loadMap(uint8 *mapData);
-    void draw(int scrollX, int scrollY, MapHelper *helper = 0);
+    void draw(int scrollX, int scrollY, MapHelper *helper);
 
     int width() { return map_width_; }
     int height() { return map_height_; }

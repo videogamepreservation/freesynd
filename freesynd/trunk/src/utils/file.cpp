@@ -105,7 +105,8 @@ uint8 *File::loadOriginalFileToMem(const std::string& filename, int &filesize) {
     if (fp) {
         fseek(fp, 0, SEEK_END);
         filesize = ftell(fp);
-        uint8 *mem = new uint8[filesize];
+        uint8 *mem = new uint8[filesize + 1];
+        mem[filesize] = '\0';
         fseek(fp, 0, SEEK_SET);
         size_t  n = fread(mem, 1, filesize, fp);
         if (n == 0) {
@@ -152,7 +153,8 @@ uint8 *File::loadOriginalFile(const std::string& filename, int &filesize) {
         if (READ_BE_UINT32(data) == RNC_SIGNATURE) {    //File is RNC compressed
             filesize = rnc::unpackedLength(data);
             assert(filesize > 0);
-            uint8 *buffer = new uint8[filesize];
+            uint8 *buffer = new uint8[filesize + 1];
+            buffer[filesize] = '\0';
             int result = rnc::unpack(data, buffer);
             delete[] data;
 
