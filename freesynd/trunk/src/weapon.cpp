@@ -960,7 +960,7 @@ bool WeaponInstance::isReloading() {
     int time_reload = pWeaponClass_->timeReload();
     int time_full_shot = time_for_shot + time_reload;
     return (weapon_used_time_ > time_for_shot
-        && weapon_used_time_ <= time_for_shot);
+        && weapon_used_time_ <= time_full_shot);
 }
 
 void WeaponInstance::activate() {
