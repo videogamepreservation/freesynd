@@ -1,13 +1,14 @@
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 
-AC_PREREQ([2.61])
 AC_INIT([freesynd], [0.6], [freesynd-user@lists.sourceforge.net])
-AM_INIT_AUTOMAKE
+AC_PREREQ([2.61])
 AC_CONFIG_SRCDIR([src/freesynd.cpp])
+AM_INIT_AUTOMAKE
 
 # to find OS X's png.h without configure arguments:
-CPPFLAGS="$CPPFLAGS -I/usr/X11/include"
+CPPFLAGS="$CPPFLAGS -I/usr/X11/include -I/usr/local/include -I/usr/include"
+CPPFLAGS="$CPPFLAGS -I/usr/include/libpng -I/usr/local/include/libpng"
 
 # Checks for programs.
 AC_PROG_CXX

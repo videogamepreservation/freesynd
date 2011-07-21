@@ -35,7 +35,7 @@ class format_version
         inline int minor() const { return minor_; }
 
         // example: v1.1 has combined value of 0x0101
-        inline int combined() const { return (major_ << 8) | minor_; }
+        inline int combined() const { return ((major_ << 8) | minor_); }
 
         inline bool operator==(int value) const { return combined() == value; }
         inline bool operator!=(int value) const { return combined() != value; }
