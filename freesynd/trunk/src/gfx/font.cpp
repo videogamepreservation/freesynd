@@ -61,7 +61,7 @@ FontRange::FontRange(const std::string& valid_chars)
         if (it == std::string::npos) {
             // single value.
             char *endptr = NULL;
-            unsigned char value = strtol(section.c_str(), &endptr, 0);
+            unsigned char value = (uint8)strtol(section.c_str(), &endptr, 0);
             if (endptr == NULL || *endptr != '\0') {
                 fprintf(stderr, "Invalid font range specified: %s\n", valid_chars.c_str());
                 return;
@@ -70,12 +70,12 @@ FontRange::FontRange(const std::string& valid_chars)
         } else {
             // range of values.
             char *endptr = NULL;
-            unsigned char start = strtol(section.c_str(), &endptr, 0);
+            unsigned char start = (uint8)strtol(section.c_str(), &endptr, 0);
             if (endptr == NULL || *endptr != '-') {
                 fprintf(stderr, "Invalid font range specified: %s\n", valid_chars.c_str());
                 return;
             }
-            unsigned char end = strtol(section.c_str() + it + 1, &endptr, 0);
+            unsigned char end = (uint8)strtol(section.c_str() + it + 1, &endptr, 0);
             if (endptr == NULL || *endptr != '\0') {
                 fprintf(stderr, "Invalid font range specified: %s\n", valid_chars.c_str());
                 return;
