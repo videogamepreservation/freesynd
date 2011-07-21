@@ -259,7 +259,7 @@ std::string PortableFile::read_string()
     char buf[256];
     while (f_.good()) {
         f_.get(buf, 256, '\0');
-        int n = f_.gcount();
+        int n = (int)f_.gcount();
         value.append(buf, n);
         if (f_.peek() == '\0') {
             break;
@@ -277,7 +277,7 @@ std::string PortableFile::read_string(size_t length, bool strip_nul)
         int n = (length < 256) ? length : 256;
         f_.read(buf, n);
         length -= n;
-        value.append(buf, f_.gcount());
+        value.append(buf, (uint32)f_.gcount());
         if (f_.fail()) break;
     }
 
