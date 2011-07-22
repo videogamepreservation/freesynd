@@ -161,7 +161,7 @@ bool AgentManager::saveToFile(PortableFile &file) {
     return true;
 }
 
-bool AgentManager::loadFromFile(PortableFile &infile, const format_version& v) {
+bool AgentManager::loadFromFile(PortableFile &infile, const FormatVersion& v) {
     nextName_ = infile.read32();
     for (int i=0; i<AgentManager::MAX_AGENT; i++) {
         bool isAgent = infile.read8b();

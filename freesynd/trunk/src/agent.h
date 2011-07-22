@@ -78,7 +78,7 @@ public:
     //! Save instance to file
     bool saveToFile(PortableFile &file);
     //! Load instance from file
-    bool loadFromFile(PortableFile &infile, const format_version& v);
+    bool loadFromFile(PortableFile &infile, const FormatVersion& v);
 
 protected:
     /*! A counter to have unique IDs.*/

@@ -229,7 +229,7 @@ bool Research::saveToFile(PortableFile &file) {
     return true;
 }
 
-bool Research::loadFromFile(PortableFile &infile, EResType type, const format_version& v) {
+bool Research::loadFromFile(PortableFile &infile, EResType type, const FormatVersion& v) {
     // id
     id_ = infile.read32();
 

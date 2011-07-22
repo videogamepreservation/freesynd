@@ -95,7 +95,7 @@ public:
     //! Save instance to file
     bool saveToFile(PortableFile &file);
     //! Load instance from file
-    bool loadFromFile(PortableFile &infile, EResType type, const format_version& v);
+    bool loadFromFile(PortableFile &infile, EResType type, const FormatVersion& v);
 protected:
     void init(std::string name, int min);
     void updateProjection();

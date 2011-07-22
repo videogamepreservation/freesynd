@@ -245,7 +245,7 @@ bool ModManager::saveToFile(PortableFile &file) {
     return true;
 }
 
-bool ModManager::loadFromFile(PortableFile &infile, const format_version& v) {
+bool ModManager::loadFromFile(PortableFile &infile, const FormatVersion& v) {
 
     int nbMods = infile.read32();
 

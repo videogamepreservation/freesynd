@@ -354,7 +354,7 @@ bool ResearchManager::saveToFile(PortableFile &file) {
     return true;
 }
 
-bool ResearchManager::loadFromFile(PortableFile &infile, const format_version& v) {
+bool ResearchManager::loadFromFile(PortableFile &infile, const FormatVersion& v) {
     // Destroy existing researchs
     destroy();
 

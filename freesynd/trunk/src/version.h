@@ -22,31 +22,29 @@
 
 #ifndef VERSION_H
 #define VERSION_H
-#ifdef __OpenBSD__
-#undef major
-#undef minor
-#endif
 
-class format_version
+class FormatVersion
 {
     public:
-        format_version(unsigned char vMaj, unsigned char vMin)
-            : major_(vMaj), minor_(vMin)
+        FormatVersion(unsigned char vMaj, unsigned char vMin)
+            : major_version_(vMaj), minor_version_(vMin)
         {
         }
 
-        inline int major() const { return major_; }
-        inline int minor() const { return minor_; }
+        inline int majorVersion() const { return major_version_; }
+        inline int minorVersion() const { return minor_version_; }
 
         // example: v1.1 has combined value of 0x0101
-        inline int combined() const { return ((major_ << 8) | minor_); }
+        inline int combined() const {
+            return ((major_version_ << 8) | minor_version_);
+        }
 
         inline bool operator==(int value) const { return combined() == value; }
         inline bool operator!=(int value) const { return combined() != value; }
 
     private:
-        int major_;
-        int minor_;
+        int major_version_;
+        int minor_version_;
 };
 
 #endif

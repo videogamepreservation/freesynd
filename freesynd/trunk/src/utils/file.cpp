@@ -198,7 +198,7 @@ void File::processSaveFile(const std::string& filename, std::vector<std::string>
             // Read version first
             unsigned char vMaj = infile.read8();
             unsigned char vMin = infile.read8();
-            format_version v(vMaj, vMin);
+            FormatVersion v(vMaj, vMin);
             // Read slot name
             if (v == 0x0100) {
                 files[index] = infile.read_string(25, true);

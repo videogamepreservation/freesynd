@@ -119,7 +119,7 @@ bool Agent::saveToFile(PortableFile &file) {
     return true;
 }
 
-bool Agent::loadFromFile(PortableFile &infile, const format_version& v) {
+bool Agent::loadFromFile(PortableFile &infile, const FormatVersion& v) {
     // if this instance has already been populated reset it
     clearSlots();
     removeAllWeapons();

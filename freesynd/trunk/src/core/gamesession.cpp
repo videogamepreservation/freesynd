@@ -521,7 +521,7 @@ bool GameSession::saveToFile(PortableFile &file) {
 }
 
 //! Load instance from file
-bool GameSession::loadFromFile(PortableFile &infile, const format_version& v) {
+bool GameSession::loadFromFile(PortableFile &infile, const FormatVersion& v) {
     // Read company name
     company_name_ = infile.read_string((v == 0x0100) ? 17 : 16, true);
     // Read user name

@@ -65,7 +65,7 @@ add_executable (freesynd
 	weapon.cpp
 	weaponmanager.cpp
 )
-target_link_libraries (freesynd ${PNG_LIBRARY} ${SDL_LIBRARY} ${SDLIMAGE_LIBRARY} ${SDLMIXER_LIBRARY})
+target_link_libraries (freesynd ${PNG_LIBRARY} ${SDL_LIBRARY} ${SDLIMAGE_LIBRARY} ${SDLMIXER_LIBRARY} z)
 
 add_executable (dump
 	dump.cpp
@@ -80,7 +80,7 @@ add_executable (dump
 	utils/log.cpp
 	utils/portablefile.cpp
 )
-target_link_libraries (dump ${PNG_LIBRARY})
+target_link_libraries (dump ${PNG_LIBRARY} z)
 
 if (APPLE)
 	# Override certain properties to make the freesynd

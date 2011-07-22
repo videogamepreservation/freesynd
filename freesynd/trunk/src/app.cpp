@@ -787,13 +787,13 @@ bool App::loadGameFromFile(int fileSlot) {
         // Read version
         unsigned char vMaj = infile.read8();
         unsigned char vMin = infile.read8();
-        format_version v(vMaj, vMin);
+        FormatVersion v(vMaj, vMin);
 
         // validate that this is a supported version.
-        if (v.major() == 1) {
+        if (v.majorVersion() == 1) {
             // versions 1.0 and 1.1 are supported.
 
-            if (v.minor() > 1) {
+            if (v.minorVersion() > 1) {
                 // future version.
                 return false;
             }

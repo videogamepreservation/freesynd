@@ -275,7 +275,7 @@ bool WeaponManager::saveToFile(PortableFile &file) {
     return true;
 }
 
-bool WeaponManager::loadFromFile(PortableFile &infile, const format_version& v) {
+bool WeaponManager::loadFromFile(PortableFile &infile, const FormatVersion& v) {
     int nbWeap = infile.read32();
 
     for (int i=0;i<nbWeap; i++) {
