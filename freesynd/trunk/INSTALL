@@ -22,6 +22,7 @@ Required Libraries
 anything.
   
   In order to run FreeSynd under Linux, you first need to install:
+    - cmake-2.6 (minimum)
     - libSDL-1.2
     - libSDL_mixer
     - libSDL_image
@@ -47,7 +48,6 @@ to add original Syndicate resources that are not bundled with Freesynd.
 
    Unzip/untar file in your prefered directory and enter the newly 
 created freesynd directory. Type the following commands:
-      ./configure
       make
       make install
 
@@ -156,12 +156,9 @@ How to run the game
  -------
    Enter the freesynd directory.
    Run the following commands to set the environment up :
-      aclocal
-      autoconf
-      automake -ac
+      cmake ./
 
-Then run those commands to build the game:
-      ./configure
+   Then run those commands to build the game:
       make
 
  * List of MACROs
