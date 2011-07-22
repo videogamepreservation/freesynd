@@ -22,6 +22,10 @@
 
 #ifndef VERSION_H
 #define VERSION_H
+#ifdef __OpenBSD__
+#undef major
+#undef minor
+#endif
 
 class format_version
 {
