@@ -28,6 +28,8 @@
 #include "screen.h"
 #include "cp437.h"
 
+#include <cstdlib.h>
+
 FontRange::FontRange()
 {
     memset(char_present_, 0, sizeof(char_present_));
