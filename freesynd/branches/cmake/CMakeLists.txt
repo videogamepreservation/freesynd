@@ -19,6 +19,10 @@ if (WIN32 AND MSVC)
 	)
 	# Add extra definitions just for MSVC.
 	add_definitions (-D_CONSOLE -D_CRT_SECURE_NO_WARNINGS)
+	# Override default flags for release builds.
+	set (CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} /O2 /Oi /Ot /GL")
+	set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /O2 /Oi /Ot /GL")
+	set (CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} /LTCG")
 else ()
 	set (EXTRA_C_FLAGS "-Wall -Wshadow -Wimplicit -Wno-multichar")
 	set (EXTRA_CXX_FLAGS "${EXTRA_C_FLAGS} -Wreorder -Wnon-virtual-dtor")
