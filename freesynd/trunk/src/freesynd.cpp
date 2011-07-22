@@ -222,8 +222,7 @@ int main(int argc, char *argv[]) {
 			FSERR(Log::k_FLG_IO, "Freesynd", "main", ("Cannot create default ini file at %s", iniPath.c_str()))
 			return -1;
 		}
-
-		fprintf(f, "%s", embedded_default_ini);
+		fwrite(embedded_default_ini_data, 1, embedded_default_ini_size, f);
 		fclose(f);
 	}
     

@@ -9,6 +9,12 @@
 #include <sys/types.h>
 #include <fstream>
 
+#ifdef _WIN32
+# include <direct.h>
+# define mkdir(path, mode) _mkdir(path)
+# define snprintf _snprintf
+#endif
+
 class App : public Singleton<App> {
 public:
     App();
