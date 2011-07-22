@@ -67,7 +67,6 @@ set (SOURCES
 )
 
 if (WIN32 AND MSVC)
-#MS VSC++ only
 set(HEADERS
 	agent.h
 	agentmanager.h
@@ -138,11 +137,12 @@ set(HEADERS
 	utils/seqmodel.h
 	utils/singleton.h)
 	add_executable (freesynd ${SOURCES} ${HEADERS})
+  target_link_libraries (freesynd ${PNG_LIBRARY} ${SDL_LIBRARY} ${SDLIMAGE_LIBRARY} ${SDLMIXER_LIBRARY})
 else ()
 	add_executable (freesynd ${SOURCES})
+  target_link_libraries (freesynd ${PNG_LIBRARY} ${SDL_LIBRARY} ${SDLIMAGE_LIBRARY} ${SDLMIXER_LIBRARY} z)
 endif()
 
-target_link_libraries (freesynd ${PNG_LIBRARY} ${SDL_LIBRARY} ${SDLIMAGE_LIBRARY} ${SDLMIXER_LIBRARY} z)
 
 add_executable (dump
 	dump.cpp
@@ -157,7 +157,11 @@ add_executable (dump
 	utils/log.cpp
 	utils/portablefile.cpp
 )
-target_link_libraries (dump ${PNG_LIBRARY} z)
+if (WIN32 AND MSVC)
+  target_link_libraries (dump ${PNG_LIBRARY})
+else ()
+  target_link_libraries (dump ${PNG_LIBRARY} z)
+endif ()
 
 if (APPLE)
 	# Override certain properties to make the freesynd
