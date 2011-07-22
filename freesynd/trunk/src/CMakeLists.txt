@@ -6,7 +6,7 @@ include (tools/embed.cmake)
 embed_data (../freesynd.ini embedded_default_ini default_ini.h)
 include_directories (${CMAKE_CURRENT_BINARY_DIR})
 
-add_executable (freesynd
+set (SOURCES
 	agent.cpp
 	agentmanager.cpp
 	app.cpp
@@ -65,6 +65,83 @@ add_executable (freesynd
 	weapon.cpp
 	weaponmanager.cpp
 )
+
+if (WIN32 AND MSVC)
+#MS VSC++ only
+set(HEADERS
+	agent.h
+	agentmanager.h
+	app.h
+	common.h
+	config.h
+	cp437.h
+	keys.h
+	map.h
+	mapmanager.h
+	mapobject.h
+	mission.h
+	missionmanager.h
+	mod.h
+	modmanager.h
+	path.h
+	pathsurfaces.h
+	ped.h
+	pedmanager.h
+	system.h
+	system_sdl.h
+	vehicle.h
+	vehiclemanager.h
+	version.h
+	weapon.h
+	weaponholder.h
+	weaponmanager.h
+	core/gameevent.h
+	core/gamesession.h
+	core/research.h
+	core/researchmanager.h
+	gfx/dirtylist.h
+	gfx/fliplayer.h
+	gfx/font.h
+	gfx/fontmanager.h
+	gfx/screen.h
+	gfx/sprite.h
+	gfx/spritemanager.h
+	gfx/tile.h
+	gfx/tilemanager.h
+	menus/briefmenu.h
+	menus/confmenu.h
+	menus/debriefmenu.h
+	menus/gameplaymenu.h
+	menus/loadingmenu.h
+	menus/loadsavemenu.h
+	menus/logoutmenu.h
+	menus/mainmenu.h
+	menus/mapmenu.h
+	menus/menu.h
+	menus/menumanager.h
+	menus/researchmenu.h
+	menus/selectmenu.h
+	menus/widget.h
+	sound/audio.h
+	sound/music.h
+	sound/musicmanager.h
+	sound/sdlmixermusic.h
+	sound/sdlmixersound.h
+	sound/sound.h
+	sound/soundmanager.h
+	sound/xmidi.h
+	utils/configfile.h
+	utils/dernc.h
+	utils/file.h
+	utils/log.h
+	utils/portablefile.h
+	utils/seqmodel.h
+	utils/singleton.h)
+	add_executable (freesynd ${SOURCES} ${HEADERS})
+else ()
+	add_executable (freesynd ${SOURCES})
+endif()
+
 target_link_libraries (freesynd ${PNG_LIBRARY} ${SDL_LIBRARY} ${SDLIMAGE_LIBRARY} ${SDLMIXER_LIBRARY} z)
 
 add_executable (dump

@@ -28,7 +28,7 @@
 #include "screen.h"
 #include "cp437.h"
 
-#include <cstdlib.h>
+#include <stdlib.h>
 
 FontRange::FontRange()
 {
