@@ -123,14 +123,18 @@ void ResearchMenu::showFieldList() {
     pSelectedRes_ = NULL;
     getOption(researchId_)->setVisible(false);
     getOption(cancelSearchId_)->setVisible(false);
-    getOption(incrFundId_)->setVisible(false);
-    getOption(decrFundId_)->setVisible(false);
-
     getStatic(fieldTxtId_)->setVisible(false);
+
     getStatic(fundMinTxtId_)->setVisible(false);
     getStatic(fundMaxTxtId_)->setVisible(false);
     getStatic(fundMinLblId_)->setVisible(false);
     getStatic(fundMaxLblId_)->setVisible(false);
+    if (!pResForGraph_) {
+        getOption(incrFundId_)->setVisible(false);
+        getOption(decrFundId_)->setVisible(false);
+
+        getStatic(fundCurrLblId_)->setVisible(false);
+    }
 }
 
 /*!
@@ -288,6 +292,11 @@ void ResearchMenu::handleLeave() {
     showDetailsList();
     getStatic(fundCurrLblId_)->setVisible(false);
     getStatic(searchTitleLblId_)->setText("");
+
+    getOption(incrFundId_)->setVisible(false);
+    getOption(decrFundId_)->setVisible(false);
+    getStatic(fundCurrLblId_)->setVisible(false);
+
     pSelectedRes_ = NULL;
     pResForGraph_ = NULL;
 }
@@ -299,7 +308,7 @@ void ResearchMenu::handleAction(const int actionId, void *ctx, const int modKeys
         // get selected field
         std::pair<int, void *> * pPair = static_cast<std::pair<int, void *> *> (ctx);
         pSelectedRes_ = static_cast<Research *> (pPair->second);
-        
+
         // Hide list
         hideFieldList();
         // Show Research and Cancel buttons
@@ -337,14 +346,14 @@ void ResearchMenu::handleAction(const int actionId, void *ctx, const int modKeys
         g_Session.researchManager().start(pSelectedRes_);
         showResGraph(pSelectedRes_);
     } else if (actionId == incrFundId_) {
-        if (pSelectedRes_->incrFunding()) {
-            getStatic(fundCurrLblId_)->setTextFormated("%d", pSelectedRes_->getCurrFunding());
+        if (pResForGraph_->incrFunding()) {
+            getStatic(fundCurrLblId_)->setTextFormated("%d", pResForGraph_->getCurrFunding());
             // redraw graph
             redrawGraph();
         }
     } else if (actionId == decrFundId_) {
-        if (pSelectedRes_->decrFunding()) {
-            getStatic(fundCurrLblId_)->setTextFormated("%d", pSelectedRes_->getCurrFunding());
+        if (pResForGraph_->decrFunding()) {
+            getStatic(fundCurrLblId_)->setTextFormated("%d", pResForGraph_->getCurrFunding());
             // redraw graph
             redrawGraph();
         }
@@ -356,7 +365,7 @@ void ResearchMenu::handleGameEvent(GameEvent evt) {
         // A research has ended
         Research *pRes = static_cast<Research *> (evt.pCtxt_);
 
-        // If current graph was for this reseach, make it disappear
+        // If current graph was for this research, make it disappear
         if (pResForGraph_ && pResForGraph_->getId() == pRes->getId()) {
             pResForGraph_ = NULL;
             redrawGraph();
