@@ -175,7 +175,7 @@ bool App::readConfiguration(const char *dir) {
 
         return true;
     } catch (...) {
-      LOG(Log::k_FLG_GFX, "App", "readConfiguration", ("creating default configuration file in %s", path.c_str()))
+        LOG(Log::k_FLG_GFX, "App", "readConfiguration", ("creating default configuration file in %s", path.c_str()))
         ConfigFile conf;
         conf.add("fullscreen", false);
         conf.add("play_intro", true);
@@ -186,12 +186,12 @@ bool App::readConfiguration(const char *dir) {
 
         std::ofstream file(path.c_str(), std::ios::out | std::ios::trunc);
         if (file) {
-            file << conf;
-            file.close();
-            return true;
+        file << conf;
+        file.close();
+        return true;
         } else {
-	  printf("Error : Failed to create config file in %s\n", path.c_str());
-            return false;
+        printf("Error : Failed to create config file in %s\n", path.c_str());
+        return false;
         }
     }
 }
@@ -684,7 +684,9 @@ void App::run(const char *dir, int start_mission) {
     if (start_mission == -1) {
         // Regular scenario : start with the main menu
         menus_.changeCurrentMenu("main");
-    } else {
+    }
+#ifdef _DEBUG
+    else {
         // Debug scenario : start directly with the brief menu
         // in the given mission
         // First, we find the block associated with the given
@@ -700,6 +702,7 @@ void App::run(const char *dir, int start_mission) {
         // and normally it's the main menu which shows it
         g_System.showCursor();
     }
+#endif
 
     int lasttick = SDL_GetTicks();
     while (running_) {
@@ -810,9 +813,9 @@ bool App::loadGameFromFile(int fileSlot) {
 
         // Read slot name
         std::string slotName;
-	// Original game: 20 chars on screen, 20 written, 19 read.
-	// v1.0: 25 characters.
-	// v1.1: 31 characters.
+        // Original game: 20 chars on screen, 20 written, 19 read.
+        // v1.0: 25 characters.
+        // v1.1: 31 characters.
         slotName = infile.read_string((v == 0x0100) ? 25 : 31, true);
 
         session_.loadFromFile(infile, v);

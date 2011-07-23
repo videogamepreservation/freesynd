@@ -15,19 +15,18 @@ viewing range(?), health recovery(?); mods properties should affect IPAs; damage
 recieved modifier, if we don't want to recalculate all the time; persuade power
 points; persuade points needed to persuade - this value will be added to agent
 that succesfully persuaded; weapon range modifier(?); accuracy modifier/property(?);
-   weapons: destructabillity(bomb); radius of damage; area(?) - bomb;
    static objects: damage recieve value; destructable or not
  - A.L. - this one is complex
  - pathfinding directional to be used for simulation of people walking around city
  - damage inflicted by vehicles/weapons, variate by type of damage and range
  - state of vehicles/people/objects should change correctly due to gameplay:
    switch of state due to damage
-   damage type priority laser(highest)->explosion->burning->hit(lowest)
    when vehicle is destroyed, explosion should create damage to all in range
    change in behavior due to persuade
    "access card" make agent become police officer
    firing should have delay, correct delay per weapon(?)/ipa
    instant damage to objects
+ - resolve shooting issues: targeting, range damage
  - animation for objects need to be fixed, to correctly represent every stage
 of event/state:
    windows break when shot
@@ -38,11 +37,9 @@ of event/state:
 in original gameplay or are not present at all
  - write mission editor, create new mission files using editor, based on original
 game mission files.
- - Implements dragging in SelectMenu to pass a weapon from an agent to another.
- - resolve shooting issues: targeting, range damage
+ - Implement dragging in SelectMenu to pass a weapon from an agent to another.
  - Manage Qwerty / azerty keyboard. Today only qwerty keyboard is used.
  - Add in select menu reload button for weapons
- - "no_sound"/"no_music" option for config file, or disabled in debug mode
  - Configure menu, setting company/player name by pressing "Enter" key not only
  by pressing "OK" button
 
@@ -51,3 +48,5 @@ game mission files.
 configure - has caret blinking, loadsave doesn't have it, but has caret
 navigation with "left","right" keys and mouse caret positioning, insert/delete
 from caret position.
+ - Look at code that plays intro animation for possible errors.
+ - "no_sound"/"no_music" option for config file, or disabled in debug mode
