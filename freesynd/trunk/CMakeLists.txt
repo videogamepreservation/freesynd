@@ -52,7 +52,7 @@ if (NOT SDLMIXER_FOUND)
 endif ()
 
 find_package (PNG)
-if (NOT SDL_FOUND)
+if (NOT PNG_FOUND)
 	message (FATAL_ERROR "Unable to locate PNG")
 endif ()
 
