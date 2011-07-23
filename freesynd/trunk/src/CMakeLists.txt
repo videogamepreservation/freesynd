@@ -66,7 +66,6 @@ set (SOURCES
 	weaponmanager.cpp
 )
 
-if (WIN32 AND MSVC)
 set(HEADERS
 	agent.h
 	agentmanager.h
@@ -136,13 +135,10 @@ set(HEADERS
 	utils/portablefile.h
 	utils/seqmodel.h
 	utils/singleton.h)
-	add_executable (freesynd ${SOURCES} ${HEADERS})
-  target_link_libraries (freesynd ${PNG_LIBRARY} ${SDL_LIBRARY} ${SDLIMAGE_LIBRARY} ${SDLMIXER_LIBRARY})
-else ()
-	add_executable (freesynd ${SOURCES})
-  target_link_libraries (freesynd ${PNG_LIBRARY} ${SDL_LIBRARY} ${SDLIMAGE_LIBRARY} ${SDLMIXER_LIBRARY} z)
-endif()
 
+add_executable (freesynd ${SOURCES} ${HEADERS})
+
+target_link_libraries (freesynd ${PNG_LIBRARIES} ${SDL_LIBRARY} ${SDLIMAGE_LIBRARY} ${SDLMIXER_LIBRARY})
 
 add_executable (dump
 	dump.cpp
@@ -157,11 +153,8 @@ add_executable (dump
 	utils/log.cpp
 	utils/portablefile.cpp
 )
-if (WIN32 AND MSVC)
-  target_link_libraries (dump ${PNG_LIBRARY})
-else ()
-  target_link_libraries (dump ${PNG_LIBRARY} z)
-endif ()
+
+target_link_libraries (dump ${PNG_LIBRARIES})
 
 if (APPLE)
 	# Override certain properties to make the freesynd
