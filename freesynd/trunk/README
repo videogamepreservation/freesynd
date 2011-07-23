@@ -46,11 +46,8 @@ Just double click freesynd.exe and enjoy.
 Running options
 ---------------
 
-Edit the freesynd.ini file to specify those options:
- * fullscreen : (true/false) runs the game in fullscreen
- * play_intro : (true/false) plays the introduction
- * data_dir : sets the absolute path to the data directory.
- * language : (0/1/2/3) sets the application language
+Edit the freesynd.ini file to specify those options read in file INSTALL
+"Configuring Freesynd".
  
 Commands
 --------
