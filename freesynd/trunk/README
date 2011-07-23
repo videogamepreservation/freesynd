@@ -36,7 +36,7 @@ Runnning under Linux
 --------------------
 
 After installing the game, run this command:
-	freesynd
+	./freesynd
 
 Running under Windows
 ---------------------

@@ -183,6 +183,9 @@ with default parameters values.
 Here is a description a each parameter :
  * fullscreen : (true/false) Setting true will run the game in fullscreen
  * play_intro : (true/false) True will play the game introduction.
- * data_dir : data files directory
+ * data_dir : path to Original Syndicate "DATA" directory. Examples:
+C:\SYND\DATA\ ; /usr/share/SYND/DATA/
+ * freesynd_data_dir : path to Freesynd "data" directory. Usually this directory
+is located in same path as binary, only if you really need change this.
  * language :  0:english, 1:french, 2:italian, 3:deutch 
  
