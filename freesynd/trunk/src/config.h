@@ -26,13 +26,9 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-// Define this to enable sound effects
+// Define this to enable sound effects and music
 //#undef HAVE_SDL_MIXER
 #define HAVE_SDL_MIXER          1
-
-// Define this to enable music playback
-//#undef HAVE_SDL_MIXER_1_2_7
-#define HAVE_SDL_MIXER_1_2_7    1
 
 #define USE_INTRO_MP3           1
 #define USE_ASSASSINATE_MP3     1

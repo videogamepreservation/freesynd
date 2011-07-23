@@ -26,11 +26,7 @@
 #ifndef SYSTEM_SDL_H
 #define SYSTEM_SDL_H
 
-#ifdef _WIN32
 #include <SDL.h>
-#else
-#include <SDL/SDL.h>
-#endif
 
 #include "common.h"
 #include "system.h"

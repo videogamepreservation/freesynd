@@ -31,7 +31,7 @@
 #include "utils/file.h"
 #include "utils/log.h"
 
-#include "SDL_image.h"
+#include <SDL_image.h>
 
 SDL_Joystick *joy = NULL;
 
