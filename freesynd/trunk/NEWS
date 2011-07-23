@@ -7,7 +7,8 @@ This is a prelimary release for testing and development purposes.
 
 Changes
 -------
-  *
+  * CMake is used instead of autotools, used to generate Makefile for Unix's
+  and project files for MSVC++
 
 Fixed Bugs
 ----------
@@ -16,7 +17,7 @@ Fixed Bugs
 Features added
 ----------
   * 3336699 : Made save files portable between byte orders.
-  * :
+  * 3283536 : Manage separate directory for syndicate and freesynd
 
 Known issues with this release
 ------------------------------

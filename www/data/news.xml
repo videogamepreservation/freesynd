@@ -1,5 +1,12 @@
 <?xml version='1.0' standalone='yes'?>
 <news>
+	<item title="Project status" date="2011-07-23" author="Bohdan Stelmakh">
+	We have a new developer - Joey Parrish. He implemented few big changes:
+	- save files are portable over different CPU architectures;
+	- separate directories for Syndicate and Freesynd data directories;
+	- cmake instead of autotools, also cmake used to build project files for MSVC++,
+	for now it is without install part for Unix's.
+	</item>
 	<item title="New v0.5 release" date="2011-07-02" author="Bohdan Stelmakh">
 	This was hard, but we did it. Get it from [[http://sourceforge.net/projects/freesynd/files/freesynd/freesynd-0.5/ sourceforge]].
 	</item>

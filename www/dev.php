@@ -50,15 +50,17 @@ SVN commit notifications<br />
 
 <p>(listed in alphabetical order)</p>
 
-<a href="mailto:skbinge@gmail.com">Stuart Bing&euml;</a>
+<a href="mailto:skbinge-Please.Dont.Spam@gmail.com">Stuart Bing&euml;</a>
 (Developer)<br />
-<a href="mailto:xxxx@users.sourceforge.net">Benoit Blancard</a>
+<a href="mailto:benblan-Please.Dont.Spam@users.sourceforge.net">Benoit Blancard</a>
+(Developer)<br />
+<a href="mailto:joeyparrish-Please.Dont.Spam@users.sourceforge.net">Joey Parrish</a>
 (Developer)<br />
 <a href="mailto:j-Please.Dont.Spam@7fc1.org">Joost Peters</a>
 (Developer)<br />
 <a href="mailto:chamel-Please.Dont.Spam@users.sourceforge.net">Bohdan Stelmakh</a>
 (Developer)<br />
-<a href="mailto:qg@biodome.org">Trent Waddington</a>
+<a href="mailto:qg-Please.Dont.Spam@biodome.org">Trent Waddington</a>
 (Developer)<br />
 
 <?php printFooter(); ?>
