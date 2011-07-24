@@ -59,6 +59,11 @@ else
 fi
 
 
+# Work around a Mac bug.  "make clean" doesn't clean the .app, and CMake
+# will regenerate the .app structure during the configure phase anyway.
+rm -rf src/FreeSynd.app
+
+
 echo "Invoking CMake..."
 cmake "$srcdir" $options
 if [ $? -ne 0 ]; then
