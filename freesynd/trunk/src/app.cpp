@@ -122,7 +122,7 @@ static bool getResourcePath(string& resourcePath) {
 #ifdef _WIN32
 static string exeFolder() {
 	char buf[1024];
-	GetModuleFileName(GetCurrentProcess(), buf, 1024);
+	GetModuleFileName(NULL, buf, 1024);
 	string tmp(buf);
 	size_t pos = tmp.find_last_of('\\');
 	if (pos != std::string::npos) tmp.erase(pos + 1);
