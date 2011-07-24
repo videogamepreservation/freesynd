@@ -4,18 +4,10 @@ project (FreeSynd)
 if (WIN32 AND MSVC)
 	# Search the bundled libs directory when using MSVC.
 	set (CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH}
-		${CMAKE_SOURCE_DIR}/../../libs/SDL-1.2.14/win
-		${CMAKE_SOURCE_DIR}/../../libs/SDL_image-1.2.10/win
-		${CMAKE_SOURCE_DIR}/../../libs/SDL_mixer-1.2.11/win
-		${CMAKE_SOURCE_DIR}/../../libs/libpng-1.4.1/win
-		${CMAKE_SOURCE_DIR}/../../libs/zlib-1.2.3/win
+		${CMAKE_SOURCE_DIR}/../../libs/MSVC/lib
 	)
 	set (CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH}
-		${CMAKE_SOURCE_DIR}/../../libs/SDL-1.2.14/include
-		${CMAKE_SOURCE_DIR}/../../libs/SDL_image-1.2.10/include
-		${CMAKE_SOURCE_DIR}/../../libs/SDL_mixer-1.2.11/include
-		${CMAKE_SOURCE_DIR}/../../libs/libpng-1.4.1/include
-		${CMAKE_SOURCE_DIR}/../../libs/zlib-1.2.3/include
+		${CMAKE_SOURCE_DIR}/../../libs/MSVC/include
 	)
 	# Add extra definitions just for MSVC.
 	add_definitions (-D_CONSOLE -D_CRT_SECURE_NO_WARNINGS)
