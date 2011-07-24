@@ -181,14 +181,14 @@ bool Mission::loadLevel(uint8 * levelData)
             }
             pindx[i] = peds_.size();
             peds_.push_back(p);
-            if (i > 7) {
+            if (i < 4) {
+            } else if (i > 7) {
                 if (pedref.type_ped == PedInstance::m_tpAgent
                     || pedref.type_ped == PedInstance::m_tpGuard) {
                     p->setHostile(true);
                 }
                 p->setSightRange(7);
-            }
-            if (i > 3 && i < 8) {
+            } else if (i > 3 && i < 8) {
                 p->setHealth(-1);
                 p->setIsIgnored(true);
             }

@@ -294,6 +294,47 @@ public:
     bool handleDamage(MapObject::DamageInflictType *d);
     void destroyAllWeapons();
 
+    void setActionState(unsigned int action_state) {
+        action_state_ = action_state;
+    }
+    unsigned int actionState() { return desc_state_; }
+
+    void setDescState(unsigned int desc_state) {
+        desc_state_ = desc_state;
+    }
+    unsigned int descState() { return desc_state_; }
+
+    void setHostileDesc(unsigned int hostile_desc) {
+        hostile_desc_ = hostile_desc;
+    }
+    unsigned int hostileDesc() { return hostile_desc_; }
+
+    void setObjGroupDef(unsigned int obj_group_def) {
+        obj_group_def_ = obj_group_def;
+    }
+    unsigned int objGroupDef() { return obj_group_def_; }
+
+    void addEnemyGroupDef(unsigned int enemy_group_def) {
+        enemy_group_defs_.insert(enemy_group_def);
+    }
+    void rmEnemyGroupDef(unsigned int enemy_group_def) {
+        enemy_group_defs_.erase(enemy_group_def);
+    }
+
+    void addEmulatedGroupDef(unsigned int emulated_group_def) {
+        emulated_group_defs_.insert(emulated_group_def);
+    }
+    void rmEmulatedGroupDef(unsigned int emulated_group_def) {
+        emulated_group_defs_.erase(emulated_group_def);
+    }
+
+    void addHostilesFound(ShootableMapObject * hostile_found) {
+        hostiles_found_.insert(hostile_found);
+    }
+    void rmHostilesFound(ShootableMapObject * hostile_found) {
+        hostiles_found_.erase(hostile_found);
+    }
+
 protected:
     Ped *ped_;
     bool dead_;
@@ -321,10 +362,14 @@ protected:
     // this inherits definition from desc_state_
     // ((target checked)desc_state_ & hostile_desc_) != 0 kill him
     unsigned int hostile_desc_;
-    std::set <unsigned char> enemy_groups_;
-    std::set <unsigned char> emulated_groups_;
-    std::set <unsigned char> emulated_failed_groups_;
-    // group obj belongs to
+    std::set <unsigned int> enemy_group_defs_;
+    // if object is not hostile here enemy_group_defs_ and hostile_desc_ check
+    // is skipped
+    std::set <unsigned int> emulated_group_defs_;
+    //std::set <unsigned int> emulated_failed_groups_;
+    // dicovered hostiles are set here, check at end for hostile
+    std::set <ShootableMapObject *> hostiles_found_;
+    // ddefines group obj belongs to
     // 0 - not defined, 0b - friend(for player), 1b - enemy(for player),
     // 2b - neutral, 3b - conditional hostility(hostile_desc_)
     // 8b - civilian(pedestrian), 9b - agent, 10b - police,
@@ -333,12 +378,14 @@ protected:
     // but what if we would like to make guards attack only territory intruders or
     // someone who has took something on controlled surface, or attacked one of
     // guards or etc.
-    unsigned char obj_group_;
+    unsigned int obj_group_def_;
 //--------------------------------------------------------------unused for now
 
     AnimationDrawn drawn_anim_;
+    // target*, if in range movement should stop
     ShootableMapObject *target_;
     PathNode *target_pos_;
+    // reach*, wiil only stop when at same or desired distance(undefined for now)
     ShootableMapObject *reach_obj_;
     PathNode *reach_pos_;
     int sight_range_;
