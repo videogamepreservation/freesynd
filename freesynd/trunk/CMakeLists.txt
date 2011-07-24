@@ -58,6 +58,7 @@ endif ()
 
 if (NOT CMAKE_BUILD_TYPE OR CMAKE_BUILD_TYPE STREQUAL "debug")
 	set (BUILD_DEV_TOOLS TRUE)
+	add_definitions (-D_DEBUG)
 else ()
 	set (BUILD_DEV_TOOLS FALSE)
 endif ()
