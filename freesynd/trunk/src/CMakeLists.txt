@@ -140,21 +140,22 @@ add_executable (freesynd ${SOURCES} ${HEADERS})
 
 target_link_libraries (freesynd ${PNG_LIBRARIES} ${SDL_LIBRARY} ${SDLIMAGE_LIBRARY} ${SDLMIXER_LIBRARY})
 
-add_executable (dump
-	dump.cpp
-	gfx/sprite.cpp
-	gfx/spritemanager.cpp
-	gfx/tile.cpp
-	gfx/tilemanager.cpp
-	map.cpp
-	mapmanager.cpp
-	utils/dernc.cpp
-	utils/file.cpp
-	utils/log.cpp
-	utils/portablefile.cpp
-)
-
-target_link_libraries (dump ${PNG_LIBRARIES})
+if (BUILD_DEV_TOOLS)
+	add_executable (dump
+		dump.cpp
+		gfx/sprite.cpp
+		gfx/spritemanager.cpp
+		gfx/tile.cpp
+		gfx/tilemanager.cpp
+		map.cpp
+		mapmanager.cpp
+		utils/dernc.cpp
+		utils/file.cpp
+		utils/log.cpp
+		utils/portablefile.cpp
+	)
+	target_link_libraries (dump ${PNG_LIBRARIES})
+endif ()
 
 if (APPLE)
 	# Override certain properties to make the freesynd

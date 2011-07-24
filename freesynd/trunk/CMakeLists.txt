@@ -56,6 +56,12 @@ if (NOT PNG_FOUND)
 	message (FATAL_ERROR "Unable to locate PNG")
 endif ()
 
+if (NOT CMAKE_BUILD_TYPE OR CMAKE_BUILD_TYPE STREQUAL "debug")
+	set (BUILD_DEV_TOOLS TRUE)
+else ()
+	set (BUILD_DEV_TOOLS FALSE)
+endif ()
+
 # Make sure we can include from the libs we found.
 include_directories (${PNG_INCLUDE_DIR} ${SDL_INCLUDE_DIR} ${SDLIMAGE_INCLUDE_DIR} ${SDLMIXER_INCLUDE_DIR})
 
