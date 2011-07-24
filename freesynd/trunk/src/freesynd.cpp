@@ -122,7 +122,23 @@ void operator delete(void *p) {
 #endif
 
 void print_usage() {
-    printf("usage: freesynd [-h|--help] [-p|--path path-to-data] [-f|--full-screen]\n");
+    printf("usage: freesynd [options...]\n");
+    printf("    -h, --help            display this help and exit.\n");
+    printf("    -i, --ini <path>      specify the location of the FreeSynd config file.\n");
+
+#ifdef _WIN32
+    printf(" (default: freesynd.ini in the same folder as freesynd.exe)\n");
+#elif defined(__APPLE__)
+    printf(" (default: $HOME/Library/Application Support/FreeSynd/freesynd.ini)\n");
+#else
+    printf(" (default: $HOME/.freesynd/freesynd.ini)\n");
+#endif
+
+#ifdef _DEBUG
+    printf("    -m, --mission <num>   jump directly to the specified mission.\n");
+    printf("    -c, --cheat <codes>   apply the specified cheat codes.\n");
+    printf("                          separate multiple codes with a colon.\n");
+#endif
 }
 
 int main(int argc, char *argv[]) {
@@ -142,10 +158,11 @@ int main(int argc, char *argv[]) {
     int cheatCodeIndex = -1;
     // If different from -1, the game will start directly on mission
     // with the given id
-    int  start_mission = -1;
+    int start_mission = -1;
+    // This variable stores the path to the Freesynd configuration file.
+    std::string iniPath;
 
     for (int i = 1; i < argc; ++i) {
-
 #ifdef _DEBUG
         // This parameter is used in debug phase to accelerate the starting
         // of a game and to jump directly to a mission
@@ -168,6 +185,14 @@ int main(int argc, char *argv[]) {
             i++;
         }
 #endif
+        if (0 == strcmp("-h", argv[i]) || 0 == strcmp("--help", argv[i])) {
+            print_usage();
+            return 1;
+        }
+        if (0 == strcmp("-i", argv[i]) || 0 == strcmp("--ini", argv[i])) {
+            i++;
+            iniPath = argv[i];
+        }
     }
 
 #ifdef _DEBUG
@@ -175,61 +200,30 @@ int main(int argc, char *argv[]) {
     Log::initialize(Log::k_FLG_ALL, "game.log");
 #endif
 
-    // The variable stores the directory where
-    // Freesynd configuration file should be
-    std::string confPath;
-
+	if (iniPath.size() == 0) {
+		iniPath.assign(App::defaultIniFolder());
+		iniPath.append("/freesynd.ini");
 #ifdef _WIN32
-    // Under windows config file is in the same directory
-    // that the freesynd.exe file
-    confPath.append(argv[0]);
-    size_t pos = confPath.find_last_of('\\');
-    confPath.erase(pos + 1);
-#elif __APPLE__
-    // on OS X, applications tend to store config files in this sort of path
-    confPath.assign(getenv("HOME"));
-    confPath.append("/Library/Application Support/FreeSynd/");
+		if (_access(iniPath.c_str(), 0) != 0)
 #else
-    // Under unix it's in the user home directory
-    confPath.assign(getenv("HOME"));
-    confPath.append("/.freesynd/");
+		struct stat st;
+		if (stat(iniPath.c_str(), &st))
 #endif
-
-	// create dir if it does not exist
-#ifdef _WIN32
-    // FIXME: create directory on windows
-#else
-	DIR * rep = opendir(confPath.c_str());
-	if (rep == NULL) {
-		if (mkdir(confPath.c_str(), 0777) == -1) {
-			FSERR(Log::k_FLG_IO, "Freesynd", "main", ("Cannot create home directory in %s", confPath.c_str()))
-			return -1;
-	 	}
-	} else {
-		closedir(rep);
-	}
-#endif
-	// create the ini file if it doesn't exist.
-	std::string iniPath = confPath + "freesynd.ini";
-#ifdef _WIN32
-    if (_access(iniPath.c_str(), 0) != 0) {
-#else
-	struct stat st;
-	if (stat(iniPath.c_str(), &st)) {
-#endif
-		FILE *f = fopen(iniPath.c_str(), "w");
-		if (!f) {
-			FSERR(Log::k_FLG_IO, "Freesynd", "main", ("Cannot create default ini file at %s", iniPath.c_str()))
-			return -1;
+		{
+			FILE *f = fopen(iniPath.c_str(), "w");
+			if (!f) {
+				FSERR(Log::k_FLG_IO, "Freesynd", "main", ("Cannot create default ini file at %s", iniPath.c_str()))
+				return -1;
+			}
+			fwrite(embedded_default_ini_data, 1, embedded_default_ini_size, f);
+			fclose(f);
 		}
-		fwrite(embedded_default_ini_data, 1, embedded_default_ini_size, f);
-		fclose(f);
 	}
-    
+
     LOG(Log::k_FLG_INFO, "Main", "main", ("Initializing application..."))
     std::auto_ptr<App> app(new App());
 
-    if (app->initialize(confPath.c_str())) {
+    if (app->initialize(iniPath)) {
         // setting the cheat codes
         if (cheatCodeIndex != -1) {
             char s[50];
@@ -244,7 +238,7 @@ int main(int argc, char *argv[]) {
 
         LOG(Log::k_FLG_INFO, "Main", "main", ("Initializing application completed"))
 
-        app->run(confPath.c_str(), start_mission);
+        app->run(start_mission);
     } else {
         LOG(Log::k_FLG_INFO, "Main", "main", ("Initializing application failed"))
     }

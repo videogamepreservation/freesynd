@@ -171,7 +171,7 @@ if (APPLE)
 	)
 	include (tools/osx.cmake)
 	copy_resource_file (freesynd "Copying icon" ${CMAKE_SOURCE_DIR}/icon/sword.icns)
-	copy_resource_folder (freesynd "Copying data" ${CMAKE_SOURCE_DIR}/data our_data)
+	copy_resource_folder (freesynd "Copying data" ${CMAKE_SOURCE_DIR}/data)
 	include_libs (freesynd "Including non-standard OS X libraries")
 endif()
 

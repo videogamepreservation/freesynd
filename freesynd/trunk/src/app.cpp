@@ -31,6 +31,7 @@
 #include <windows.h>
 #else
 #include <unistd.h>
+#include <sys/stat.h>
 #endif
 
 #include <iostream>
@@ -85,8 +86,7 @@ static void addMissingSlash(string& str) {
 }
 
 #ifdef __APPLE__
-static bool getResourcePath(string& resourcePath)
-{
+static bool getResourcePath(string& resourcePath) {
     // let's check to see if we're inside an application bundle first.
     CFBundleRef main = CFBundleGetMainBundle();
     CFStringRef appid = NULL;
@@ -98,14 +98,12 @@ static bool getResourcePath(string& resourcePath)
     CFURLRef url = CFBundleCopyResourcesDirectoryURL(main);
     if (!url) {
         // this shouldn't happen.
-        // FIXME: find a better (more graphical) way to alert the user.
         printf("Unable to locate resources.\n");
         exit(1);
     }
     FSRef fs;
     if (!CFURLGetFSRef(url, &fs)) {
         // this shouldn't happen.
-        // FIXME: find a better (more graphical) way to alert the user.
         printf("Unable to translate URL.\n");
         exit(1);
     }
@@ -121,40 +119,86 @@ static bool getResourcePath(string& resourcePath)
 }
 #endif
 
-bool App::readConfiguration(const char *dir) {
-    std::string path(dir);
-    path.append("freesynd.ini");
-    
-    File::setHomePath(dir);
+#ifdef _WIN32
+static string exeFolder() {
+	char buf[1024];
+	GetModuleFileName(GetCurrentProcess(), buf, 1024);
+	string tmp(buf);
+	size_t pos = tmp.find_last_of('\\');
+	if (pos != std::string::npos) tmp.erase(pos + 1);
+	else tmp = ".";
+	return tmp;
+}
+#endif
+
+string App::defaultIniFolder()
+{
+	string folder;
+#ifdef _WIN32
+	// Under windows config file is in the same directory as freesynd.exe
+	folder.assign(exeFolder());
+	// Since we're defaulting to the exe's folder, no need to try to create a directory.
+#elif defined(__APPLE__)
+	// Make a symlink for convenience for *nix people who own Macs.
+	folder.assign(getenv("HOME"));
+	folder.append("/.freesynd");
+	symlink("Library/Application Support/FreeSynd", folder.c_str());
+	// On OS X, applications tend to store config files in this sort of path.
+	folder.assign(getenv("HOME"));
+	folder.append("/Library/Application Support/FreeSynd");
+	mkdir(folder.c_str(), 0755);
+#else
+	// Under unix it's in the user home directory
+	folder.assign(getenv("HOME"));
+	folder.append("/.freesynd");
+	mkdir(folder.c_str(), 0755);
+#endif
+	// note that we don't care if the mkdir() calls above succeed or not.
+	// if they fail because they already exist, then it's no problem.
+	// if they fail for any other reason, then we won't be able to open
+	// or create freesynd.ini, and we'll surely detect that below.
+
+	return folder;
+}
+
+bool App::readConfiguration() {
+    File::setHomePath(defaultIniFolder());
 
     try {
-        ConfigFile conf(path);
+        ConfigFile conf(iniPath_);
+        string origDataDir;
+        string ourDataDir;
         conf.readInto(fullscreen_, "fullscreen", false);
         conf.readInto(playIntro_, "play_intro", true);
+        bool origDataDirFound = conf.readInto(origDataDir, "data_dir");
+        bool ourDataDirFound = conf.readInto(ourDataDir, "freesynd_data_dir");
 
-        string defaultDataDir = string(dir) + "data/";
-        string dataDir;
-        conf.readInto(dataDir, "data_dir", defaultDataDir);
-        addMissingSlash(dataDir);
-        File::setDataPath(dataDir.c_str());
-
-#ifdef __APPLE__
-        string defaultOurDataDir;
-        if (getResourcePath(defaultOurDataDir)) {
-            // this is an app bundle, so let's default the data dir
-            // to the one included in the app bundle's resources.
-            defaultOurDataDir += "our_data/";
-        } else {
-            defaultOurDataDir = dataDir;
-        }
+        if (ourDataDirFound == false) {
+#ifdef _WIN32
+            ourDataDir = exeFolder() + "\\data";
+#elif defined(__APPLE__)
+            if (getResourcePath(ourDataDir)) {
+                // this is an app bundle, so let's default the data dir
+                // to the one included in the app bundle's resources.
+                ourDataDir += "data/";
+            } else {
+                LOG(Log::k_FLG_GFX, "App", "readConfiguration", ("Unable to locate app bundle resources.\n"));
+                return false;
+            }
 #else
-        string defaultOurDataDir = dataDir;
+            // FIXME: when we have install support, /usr/local needs to be a variable
+            ourDataDir = "/usr/local/share/freesynd/data";
 #endif
-        string ourDataDir;
-        conf.readInto(ourDataDir, "freesynd_data_dir", defaultOurDataDir);
+        }
         addMissingSlash(ourDataDir);
-        File::setOurDataPath(ourDataDir.c_str());
-        
+        File::setOurDataPath(ourDataDir);
+
+        if (origDataDirFound == false) {
+            origDataDir = ourDataDir;
+        }
+        addMissingSlash(origDataDir);
+        File::setDataPath(origDataDir);
+
         switch (conf.read("language", 0)) {
             case 0:
                 menus_.setLanguage(MenuManager::ENGLISH);
@@ -175,35 +219,17 @@ bool App::readConfiguration(const char *dir) {
 
         return true;
     } catch (...) {
-        LOG(Log::k_FLG_GFX, "App", "readConfiguration", ("creating default configuration file in %s", path.c_str()))
-        ConfigFile conf;
-        conf.add("fullscreen", false);
-        conf.add("play_intro", true);
-        conf.add("data_dir", "./");
-        conf.add("language", 0);
-
-        menus_.setLanguage(MenuManager::ENGLISH);
-
-        std::ofstream file(path.c_str(), std::ios::out | std::ios::trunc);
-        if (file) {
-        file << conf;
-        file.close();
-        return true;
-        } else {
-        printf("Error : Failed to create config file in %s\n", path.c_str());
+        LOG(Log::k_FLG_GFX, "App", "readConfiguration", ("failed to load config file \"%s\"\n", iniPath_.c_str()));
         return false;
-        }
     }
 }
 
-void App::updateIntroFlag(const char *dir) {
-    std::string path(dir);
-    path.append("freesynd.ini");
+void App::updateIntroFlag() {
     try {
-        ConfigFile conf(path);
+        ConfigFile conf(iniPath_);
         conf.add("play_intro", false);
 
-        std::ofstream file(path.c_str(), std::ios::out | std::ios::trunc);
+        std::ofstream file(iniPath_.c_str(), std::ios::out | std::ios::trunc);
         if (file) {
             file << conf;
             file.close();
@@ -217,13 +243,14 @@ void App::updateIntroFlag(const char *dir) {
 
 /*!
  * Initialize application.
- * \param dir True if application runs in full screen.
+ * \param iniPath The path to the config file.
  * \return True if initialization is ok.
  */
-bool App::initialize(const char *dir) {
-    
+bool App::initialize(const std::string& iniPath) {
+    iniPath_ = iniPath;
+
     LOG(Log::k_FLG_INFO, "App", "initialize", ("reading configuration..."))
-    if (!readConfiguration(dir)) {
+    if (!readConfiguration()) {
         LOG(Log::k_FLG_GFX, "App", "initialize", ("failed to read configuration..."))
         return false;
     }
@@ -538,10 +565,9 @@ void App::setPalette(const char *fname, bool sixbit) {
 
 /*!
  * This method defines the application loop.
- * \param dir Directory of the application config file
  * \param start_mission Mission id used to start the application
  */
-void App::run(const char *dir, int start_mission) {
+void App::run(int start_mission) {
     int size = 0, tabSize = 0;
     uint8 *data, *tabData;
 
@@ -571,7 +597,7 @@ void App::run(const char *dir, int start_mission) {
         delete[] data;
 
         // Update intro flag so intro won't be played next time
-        updateIntroFlag(dir);
+        updateIntroFlag();
     }
 
     // load palette

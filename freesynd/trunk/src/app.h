@@ -60,7 +60,7 @@ class App : public Singleton < App > {
     virtual ~App();
 
     //! Initialize application
-    bool initialize(const char *dir);
+    bool initialize(const std::string& iniPath);
 
     uint8 walkdata_[256];
     // patched version
@@ -137,7 +137,7 @@ class App : public Singleton < App > {
     }
 
     //! Main application method
-    void run(const char *dir, int start_mission);
+    void run(int start_mission);
     //! Reset the application data
     bool reset();
 
@@ -182,12 +182,14 @@ class App : public Singleton < App > {
     //! Load game from a file
     bool loadGameFromFile(int fileSlot);
 
+    static std::string defaultIniFolder();
+
 private:
     //! Reads the configuration file
-    bool readConfiguration(const char *dir);
+    bool readConfiguration();
 
     //! Sets the intro flag to false in the config file
-    void updateIntroFlag(const char *dir);
+    void updateIntroFlag();
 
     void cheatFunds() {
         session_.setMoney(100000000);
@@ -213,6 +215,8 @@ private:
     bool playIntro_;
     std::auto_ptr<Screen> screen_;
     std::auto_ptr<System> system_;
+
+    std::string iniPath_;
 
     SpriteManager menu_sprites_;
     GameSpriteManager game_sprites_;
