@@ -1,0 +1,73 @@
+#!/bin/sh
+
+debug_mode=""
+release_mode=""
+invalid_options=""
+
+while [ $# -ne 0 ]; do
+	if [ "$1" = "--debug" ]; then
+		debug_mode=on
+	elif [ "$1" = "--release" ]; then
+		release_mode=on
+	else
+		echo "Error: invalid option \"$1\"."
+		invalid_options=on
+	fi
+
+	shift
+done
+
+
+if [ -n "$debug_mode" -a -n "$release_mode" ]; then
+	echo "Error: you cannot specify both debug and release mode."
+	echo ""
+	invalid_options="on"
+elif [ -z "$debug_mode" -a -z "$release_mode" ]; then
+	invalid_options="on"
+fi
+
+
+if [ -n "$invalid_options" ]; then
+	cat <<EOF
+This project is built using CMake.
+If you are familiar with CMake, you may invoke it directly.
+If you are not familiar with CMake, this script can help select the best
+options for CMake and invoke it for you.
+
+Options:
+	--debug    build an executable with debugging information.
+	--release  build an optimized executable for release.
+EOF
+	exit 1
+fi
+
+
+srcdir=`dirname $0`
+echo "Checking for CMake..."
+cmake &>/dev/null
+if [ $? -eq 127 ]; then
+	echo "CMake not found.  CMake is required."
+fi
+echo "CMake found."
+echo ""
+
+
+if [ -n "$release_mode" ]; then
+	options="-DCMAKE_BUILD_TYPE=release"
+else
+	options="-DCMAKE_BUILD_TYPE=debug"
+fi
+
+
+echo "Invoking CMake..."
+cmake "$srcdir" $options
+if [ $? -ne 0 ]; then
+	echo "A CMake error occurred."
+	exit 1
+fi
+
+echo "CMake successful."
+echo ""
+make clean
+echo "Type \"make\" to build."
+exit 0
