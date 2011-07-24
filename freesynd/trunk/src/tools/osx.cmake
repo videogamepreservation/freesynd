@@ -15,7 +15,7 @@ endfunction ()
 function (get_framework_path var target)
 	get_target_property (exe ${target} LOCATION)
 	get_dotapp_dir (${exe} app_dir)
-	set (${var} "${app_dir}/Contents/Framework" PARENT_SCOPE)
+	set (${var} "${app_dir}/Contents/Frameworks" PARENT_SCOPE)
 endfunction ()
 
 function (get_exe_path var target)
@@ -71,7 +71,7 @@ function (include_libs target comment)
 		# The || clause is to get the target wiped out if this post-build
 		# operation fails for any reason.  Otherwise, you may re-run make
 		# and think that the target is fully built when it's not.
-		COMMAND ${CMAKE_SOURCE_DIR}/src/tools/include_libs.sh ${exe} ${framework_dir} ../Framework || (rm ${exe} \; exit 1)
+		COMMAND ${CMAKE_SOURCE_DIR}/src/tools/include_libs.sh ${exe} ${framework_dir} ../Frameworks || (rm ${exe} \; exit 1)
 		COMMENT ${comment}
 	)
 endfunction ()
