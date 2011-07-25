@@ -49,7 +49,7 @@ fi
 
 srcdir=`dirname $0`
 echo "Checking for CMake..."
-cmake &>/dev/null
+cmake >/dev/null 2>/dev/null
 if [ $? -eq 127 ]; then
 	echo "CMake not found.  CMake is required."
 fi
