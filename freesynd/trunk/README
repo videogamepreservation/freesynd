@@ -1,78 +1,75 @@
-
 FreeSynd 0.6
 ------------
-
-FreeSynd is a free cross-platform reimplementation of the classic Bullfrog 
-game, Syndicate.
-For more information see:
-
+FreeSynd is a free, cross-platform reimplementation of the classic Bullfrog 
+game "Syndicate". For more information see:
     http://freesynd.sourceforge.net/
-   
+
 License information
 -------------------
-
 FreeSynd is released under the GNU General Public Licence, version 2.
+See the file "COPYING" for information on this licence.
+
 Thanks to Tomasz Lis for some preliminary work on the level files. His code is
 used under GNU General Public Licence, version 2 or later with permission from
 author.
+
 Some code is based on "libsyndicate" library by Paul Chavent. It is
-re-licensed under GNU General Public Licence, version 2. Original license
-and code is located in svn source/trunk/libsyndicate/.
-See the file "COPYING" for informations on this licence.
-ConfigFile code is from Richard J. Wagner. For Licence information, see comments 
-in files config.cpp and config.h.
+re-licensed under GNU General Public Licence, version 2. The original license
+and code are located in svn under "libsyndicate".
+
+The ConfigFile class is based on code from Richard J. Wagner. For Licence
+information, see comments in the files src/utils/configfile.*
 
 
 What's new in this release?
 ---------------------------
-
 See the file "NEWS".
 
 Installing the game
 -------------------
-See the file "INSTALL" for informations on how to install the game
+See the file "INSTALL" for information on how to install the game.
 
-Runnning under Linux
+Running under Linux
 --------------------
-
-After installing the game, run this command:
-	./freesynd
+After installing the game, type "freesynd".
 
 Running under Windows
 ---------------------
-
 Just double click freesynd.exe and enjoy.
 
-Running options
----------------
+Running under Mac OS X
+----------------------
+Just double click the FreeSynd application.
 
-Edit the freesynd.ini file to specify those options read in file INSTALL
-"Configuring Freesynd".
+Configuration
+-------------
+Edit the freesynd.ini file to configure the game. The location of the file
+and a description of the options can be found in the file INSTALL under the
+heading "Configuring FreeSynd".
  
 Commands
 --------
-- Mission Selection :
- * 0   : Puts the selector on first mission
- * Left: Puts the selector on the next mission
- * Right : Puts the selector on the previous mission
+- Mission Selection:
+ * 0     : Puts the selector on first mission.
+ * Left  : Puts the selector on the next mission.
+ * Right : Puts the selector on the previous mission.
  * + / - : Increase / decrease tax rate on selected country by 1%.
-		   If control key is pressed while changing rates, increment/decrement by 10%
-           Rates above 30% will decrease population status down to rebellious : mission
-		   will have to be played again.
-		   Rates below 30% will increase population status up to VERY HAPPY.
+           If control key is held, the rates will change by 10%.
+           (Rates above 30% will downgrade the population status to rebellious
+           and the mission will have to be played again. Rates below 30% will
+           upgrade the population status to "very happy".)
  
-- In game :
- * F1  : Turns music on/off
- * F2  : Turns game sounds on/off
- * 1-4 : Numeric key selects the corresponding agent
- * 0   : Key 0 cycles between current selection and all 4 agents.
- * Ctrl + 0 : Inverts selection.
- * Ctrl + Left Click : sets a waypoint for the selected agents
- * Left,Right,Up, down : scrolls the map
+- In game:
+ * F1  : Turns music on/off.
+ * F2  : Turns game sounds on/off.
+ * 1-4 : Numeric key selects the corresponding agent.
+ * 0   : Key 0 cycles between all 4 agents.
+ * Ctrl + 0           : Inverts the selection.
+ * Ctrl + Left Click  : Sets a waypoint for the selected agents.
+ * Left,Right,Up,Down : Scrolls the map.
 
 Contact
 -------
-
 If you find a bug or would like to help the development of FreeSynd, please 
 stop by the sourceforge project bug tracker, drop us an email or visit the
 forums.
