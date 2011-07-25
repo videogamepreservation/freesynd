@@ -23,6 +23,11 @@ local_deps_of()
 	otool -L "$1" | cut -f 2 | grep ^/usr/local | cut -f 1 -d ' '
 }
 
+local_frameworks_of()
+{
+	otool -L "$1" | cut -f 2 | grep '^@executable_path.*\.framework' | cut -f 1 -d ' '
+}
+
 old_to_new()
 {
 	echo "$1" | sed -e "s|/usr/local/lib|@executable_path/$relative|"
@@ -59,5 +64,24 @@ for (( i = 0; i < ${#list[@]}; i++ )); do
 		debug "Modifying dependency of $cur from $dep to $new"
 		install_name_tool -change "$dep" "$new" "$cur"
 	done
+done
+
+
+list=()
+while read dep; do
+	base=`echo "$dep" | sed -e 's@\(\.framework\)/.*@\1@'`
+	base=`basename "$base"`
+	debug "Found framework $base"
+	list[${#list[@]}]=$base
+done < <(local_frameworks_of "$exe")
+
+for (( i = 0; i < ${#list[@]}; i++ )); do
+	dep="${list[$i]}"
+	debug "Including $dep"
+	new="$dst/$dep"
+	old="/Library/Frameworks/$dep"
+	cp -a "$old" "$new/"
+	find "$new" -type l       -print0 | xargs -0 rm
+	find "$new" -name Headers -print0 | xargs -0 rm -rf
 done
 
