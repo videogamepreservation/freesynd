@@ -17,8 +17,12 @@ if (WIN32 AND MSVC)
 	set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /O2 /Oi /Ot /GL")
 	set (CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} /LTCG")
 else ()
+	# Set extra warnings.
 	set (EXTRA_C_FLAGS "-Wall -Wshadow -Wimplicit -Wno-multichar")
 	set (EXTRA_CXX_FLAGS "${EXTRA_C_FLAGS} -Wreorder -Wnon-virtual-dtor")
+	# Set debug flag.
+	set (CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_RELEASE} -D_DEBUG")
+	set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_RELEASE} -D_DEBUG")
 endif ()
 
 # Set extra compiler flags, possibly different per-platform.
@@ -52,7 +56,6 @@ endif ()
 
 if (NOT CMAKE_BUILD_TYPE OR CMAKE_BUILD_TYPE STREQUAL "debug")
 	set (BUILD_DEV_TOOLS TRUE)
-	add_definitions (-D_DEBUG)
 else ()
 	set (BUILD_DEV_TOOLS FALSE)
 	# We only define an install target if we're doing a release build.
