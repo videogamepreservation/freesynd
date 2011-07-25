@@ -13,6 +13,8 @@ while [ $# -ne 0 ]; do
 	elif [ "$1" = "--prefix" ]; then
 		prefix="$2"
 		shift
+	elif echo "$1" | grep -q "^--prefix="; then
+		prefix=`echo "$1" | sed -e 's/^--prefix=//'`
 	else
 		echo "Error: invalid option \"$1\"."
 		invalid_options=on

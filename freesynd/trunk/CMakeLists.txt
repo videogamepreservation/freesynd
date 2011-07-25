@@ -31,7 +31,7 @@ set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${EXTRA_CXX_FLAGS}")
 
 # Set standard definitions for all platforms.
 add_definitions (-DSYSTEM_SDL)
-add_definitions (-DPREFIX=${CMAKE_INSTALL_PREFIX})
+add_definitions (-DPREFIX=\"${CMAKE_INSTALL_PREFIX}\")
 
 # Locate libs we depend on directly.
 find_package (SDL)
