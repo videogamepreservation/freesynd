@@ -1,9 +1,9 @@
-- Complete mission tree
-- MiniMap in game : more detailed map, display peds, guns, radar focus,
+ - Complete mission tree
+ - MiniMap in game : more detailed map, display peds, guns, radar focus,
     evacuation red circle
-- Mission objectives
-- Play sound in end mission animation
-- Remove debug info displayed in the console
+ - Mission objectives
+ - Play sound in end mission animation
+ - Remove debug info displayed in the console
  - Correct identification of object types during mission load, includes
 vehicles, people, static objects, weapons, also setup sfx for weapons
  - Adding properties to:
@@ -42,6 +42,7 @@ game mission files.
  - Add in select menu reload button for weapons
  - Configure menu, setting company/player name by pressing "Enter" key not only
  by pressing "OK" button
+ - Create a debian package
 
  Very low priority stuff, maybe for v0.9:
  - Merge input feature from config/loadsave menus:
@@ -50,3 +51,7 @@ navigation with "left","right" keys and mouse caret positioning, insert/delete
 from caret position.
  - Look at code that plays intro animation for possible errors.
  - "no_sound"/"no_music" option for config file, or disabled in debug mode
+ - Re-rip music files, which currently have the "ping" sound embedded in them
+ - Add mission failure music
+ - The built-in fonts have some characters that don't sit right vertically (Ö and Ü in certain sizes)
+ - Work on hyphenation rules in the text reflow code
