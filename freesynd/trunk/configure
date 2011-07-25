@@ -3,12 +3,16 @@
 debug_mode=""
 release_mode=""
 invalid_options=""
+prefix="/usr/local"
 
 while [ $# -ne 0 ]; do
 	if [ "$1" = "--debug" ]; then
 		debug_mode=on
 	elif [ "$1" = "--release" ]; then
 		release_mode=on
+	elif [ "$1" = "--prefix" ]; then
+		prefix="$2"
+		shift
 	else
 		echo "Error: invalid option \"$1\"."
 		invalid_options=on
@@ -35,8 +39,9 @@ If you are not familiar with CMake, this script can help select the best
 options for CMake and invoke it for you.
 
 Options:
-	--debug    build an executable with debugging information.
-	--release  build an optimized executable for release.
+	--debug          build an executable with debugging information.
+	--release        build an optimized executable for release.
+	--prefix <path>  specify the installation prefix.
 EOF
 	exit 1
 fi
@@ -57,6 +62,7 @@ if [ -n "$release_mode" ]; then
 else
 	options="-DCMAKE_BUILD_TYPE=debug"
 fi
+options="$options -DCMAKE_INSTALL_PREFIX=$prefix"
 
 
 # Work around a Mac bug.  "make clean" doesn't clean the .app, and CMake

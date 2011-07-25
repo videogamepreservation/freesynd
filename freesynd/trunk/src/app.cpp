@@ -186,8 +186,7 @@ bool App::readConfiguration() {
                 return false;
             }
 #else
-            // FIXME: when we have install support, /usr/local needs to be a variable
-            ourDataDir = "/usr/local/share/freesynd/data";
+            ourDataDir = PREFIX"/share/freesynd/data";
 #endif
         }
         addMissingSlash(ourDataDir);

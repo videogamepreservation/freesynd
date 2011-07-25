@@ -27,6 +27,7 @@ set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${EXTRA_CXX_FLAGS}")
 
 # Set standard definitions for all platforms.
 add_definitions (-DSYSTEM_SDL)
+add_definitions (-DPREFIX=${CMAKE_INSTALL_PREFIX})
 
 # Locate libs we depend on directly.
 find_package (SDL)
@@ -54,6 +55,11 @@ if (NOT CMAKE_BUILD_TYPE OR CMAKE_BUILD_TYPE STREQUAL "debug")
 	add_definitions (-D_DEBUG)
 else ()
 	set (BUILD_DEV_TOOLS FALSE)
+	# We only define an install target if we're doing a release build.
+	# Furthermore, on Mac, the data folder is a part of the app bundle.
+	if (NOT APPLE)
+		install (DIRECTORY data DESTINATION share/freesynd PATTERN .svn EXCLUDE)
+	endif ()
 endif ()
 
 # Make sure we can include from the libs we found.

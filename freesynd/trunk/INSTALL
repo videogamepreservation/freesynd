@@ -90,8 +90,6 @@ Building From Source
     The FreeSynd application will be in the "src" folder.
 
 
-After Building From Source
-==========================
 Installation
 ============
   * Windows
@@ -102,11 +100,11 @@ Installation
 
   * Linux
   -------
-    Coming soon...
+    make install
 
   * Mac
   -----
-    cp -a src/FreeSynd.app /Applications/
+    make install
 
 
 Running the Game
