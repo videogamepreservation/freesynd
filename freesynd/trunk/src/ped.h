@@ -320,12 +320,20 @@ public:
     void rmEnemyGroupDef(unsigned int enemy_group_def) {
         enemy_group_defs_.erase(enemy_group_def);
     }
+    bool isInEnemyGroupDef(unsigned int enemy_group_def) {
+        return enemy_group_defs_.find(enemy_group_def)
+            != enemy_group_defs_.end();
+    }
 
     void addEmulatedGroupDef(unsigned int emulated_group_def) {
         emulated_group_defs_.insert(emulated_group_def);
     }
     void rmEmulatedGroupDef(unsigned int emulated_group_def) {
         emulated_group_defs_.erase(emulated_group_def);
+    }
+    bool isEmulatedGroupDef(unsigned int emulated_group_def) {
+        return emulated_group_defs_.find(emulated_group_def)
+            != emulated_group_defs_.end();
     }
 
     void addHostilesFound(ShootableMapObject * hostile_found) {
@@ -334,6 +342,11 @@ public:
     void rmHostilesFound(ShootableMapObject * hostile_found) {
         hostiles_found_.erase(hostile_found);
     }
+    bool isInHostilesFound(ShootableMapObject * hostile_found) {
+        return hostiles_found_.find(hostile_found)
+            != hostiles_found_.end();
+    }
+    void verifyHostilesFound();
 
 protected:
     Ped *ped_;
