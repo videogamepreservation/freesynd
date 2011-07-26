@@ -71,6 +71,7 @@ public:
     void destroy();
 
     void setLanguage(FS_Lang lang);
+    std::string getMessage(const std::string & id);
     void getMessage(const std::string & id, std::string & msg);
 
     void addMenu(Menu *m) { menus_[m->name()] = m; }

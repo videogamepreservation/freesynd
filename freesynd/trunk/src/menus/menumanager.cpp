@@ -160,11 +160,15 @@ void MenuManager::setLanguage(FS_Lang lang) {
     }
 }
 
+std::string MenuManager::getMessage(const std::string & id) {
+    std::string msg;
+    getMessage(id, msg);
+    return msg;
+}
+
 void MenuManager::getMessage(const std::string & id, std::string & msg) {
-    if (language_) {
-        if (!language_->readInto(msg, id)) {
-            msg = "?";
-        }
+    if (!language_ || !language_->readInto(msg, id)) {
+        msg = "?";
     }
 }
 
