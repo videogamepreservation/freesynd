@@ -226,8 +226,8 @@ int main(int argc, char *argv[]) {
     if (app->initialize(iniPath)) {
         // setting the cheat codes
         if (cheatCodeIndex != -1) {
-            char s[50];
-            strcpy(s, argv[cheatCodeIndex]);
+            std::string cheats = argv[cheatCodeIndex];
+            char *s = (char *)cheats.c_str();
             char *token = strtok(s, ":");
             while ( token != NULL ) {
                 LOG(Log::k_FLG_INFO, "Main", "main", ("Cheat code activated : %s", token))
