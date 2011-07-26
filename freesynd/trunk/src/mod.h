@@ -52,7 +52,7 @@ public:
         MOD_V3 = 2
     };
 
-    Mod(const char *mod_name, EModType type, EModVersion version, int mod_cost, const char *mod_desc,
+    Mod(const std::string& mod_name, EModType type, EModVersion version, int mod_cost, const std::string& mod_desc,
             int mod_icon, int mod_iconF = 0);
 
     const char *getName() { return name_.c_str(); }
