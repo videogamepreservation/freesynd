@@ -138,16 +138,14 @@ std::istream& operator>>( std::istream& is, ConfigFile& cf )
 			// See if value continues on the next line
 			// Stop at blank line, next line with a key, end of stream,
 			// or end of file sentry
-			bool terminate = false;
-			while( !terminate && is )
+			while( is )
 			{
 				std::getline( is, nextline );
-				terminate = true;
 				
 				if ( is.eof() )
 				{
 					// don't add an extra blank line to the list.
-					continue;
+					break;
 				}
 				
 				string nlcopy = nextline;
@@ -155,19 +153,19 @@ std::istream& operator>>( std::istream& is, ConfigFile& cf )
 				if( nlcopy == "" )
 				{
 					cf.myLines.push_back(nextline);
-					continue;
+					break;
 				}
 				
 				nextline = nextline.substr( 0, nextline.find(comm) );
 				if( nextline.find(delim) != string::npos )
 				{
 					cf.myLines.push_back(nextline);
-					continue;
+					break;
 				}
 				if( sentry != "" && nextline.find(sentry) != string::npos )
 				{
 					cf.myLines.push_back(nextline);
-					continue;
+					break;
 				}
 				
 				nlcopy = nextline;
@@ -177,9 +175,8 @@ std::istream& operator>>( std::istream& is, ConfigFile& cf )
 					cf.myLines[line_number] += "\n";
 					line += "\n";
 				}
-				line += nextline;
-				cf.myLines[line_number] += nextline;
-				terminate = false;
+				line += nlcopy;
+				cf.myLines[line_number] += nlcopy;
 			}
 			
 			// Store key and value
