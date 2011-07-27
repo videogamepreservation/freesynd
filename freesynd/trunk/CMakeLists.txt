@@ -21,8 +21,8 @@ else ()
 	set (EXTRA_C_FLAGS "-Wall -Wshadow -Wimplicit -Wno-multichar")
 	set (EXTRA_CXX_FLAGS "${EXTRA_C_FLAGS} -Wreorder -Wnon-virtual-dtor")
 	# Set debug flag.
-	set (CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_RELEASE} -D_DEBUG")
-	set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_RELEASE} -D_DEBUG")
+	set (CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -D_DEBUG")
+	set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -D_DEBUG")
 endif ()
 
 # Set extra compiler flags, possibly different per-platform.
