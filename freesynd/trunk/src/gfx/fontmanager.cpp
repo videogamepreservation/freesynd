@@ -59,31 +59,33 @@ bool FontManager::loadFont(SpriteManager * sprites, EFontSize size, bool dark,
 }
 
 void FontManager::drawText(int x, int y, const char *text, bool dos, int size,
-                           bool dark, bool x2)
+                           bool dark, bool x2,
+                           bool changeColor, uint8 fromColor, uint8 toColor)
 {
     assert(size < 4);
     if (dark) {
         assert(dark_fonts_[size]);
 
-        dark_fonts_[size]->drawText(x, y, text, dos, x2);
+        dark_fonts_[size]->drawText(x, y, text, dos, x2, changeColor, fromColor, toColor);
     } else {
         assert(light_fonts_[size]);
 
-        light_fonts_[size]->drawText(x, y, text, dos, x2);
+        light_fonts_[size]->drawText(x, y, text, dos, x2, changeColor, fromColor, toColor);
     }
 }
 
 void FontManager::drawText(int x, int y, const char *text, bool dos, EFontSize size,
-                           bool dark, bool x2)
+                           bool dark, bool x2,
+                           bool changeColor, uint8 fromColor, uint8 toColor)
 {
     if (dark) {
         assert(dark_fonts_[size]);
 
-        dark_fonts_[size]->drawText(x, y, text, dos, x2);
+        dark_fonts_[size]->drawText(x, y, text, dos, x2, changeColor, fromColor, toColor);
     } else {
         assert(light_fonts_[size]);
 
-        light_fonts_[size]->drawText(x, y, text, dos, x2);
+        light_fonts_[size]->drawText(x, y, text, dos, x2, changeColor, fromColor, toColor);
     }
 }
 

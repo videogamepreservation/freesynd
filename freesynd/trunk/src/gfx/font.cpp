@@ -185,7 +185,7 @@ void Font::setSpriteManager(SpriteManager *sprites, int offset, char base, const
     setSpriteManager(sprites, offset, base, FontRange(valid_chars));
 }
 
-void Font::drawText(int x, int y, const char *text, bool dos, bool x2) {
+void Font::drawText(int x, int y, const char *text, bool dos, bool x2, bool changeColor, uint8 fromColor, uint8 toColor) {
     int sc = x2 ? 2 : 1;
     int ox = x;
     const unsigned char *c = (const unsigned char *)text;
@@ -205,14 +205,29 @@ void Font::drawText(int x, int y, const char *text, bool dos, bool x2) {
         }
         Sprite *s = getSprite(cc);
         if (s) {
+            int y_offset = 0;
             if (cc == ':')
-                s->draw(x, y + sc, 0, false, x2);
+                y_offset = sc;
             else if (cc == '.' || cc == ',')
-                s->draw(x, y + 4 * sc, 0, false, x2);
+                y_offset = 4 * sc;
             else if (cc == '-')
-                s->draw(x, y + 2 * sc, 0, false, x2);
-            else
-                s->draw(x, y, 0, false, x2);
+                y_offset = 2 * sc;
+
+            if (changeColor) {
+                uint8 *data = new uint8[s->width() * s->height()];
+                s->data(data);
+
+                for (int i = 0; i < s->width() * s->height(); i++)
+                    data[i] = (data[i] == fromColor ? toColor : 255);
+
+                if (x2)
+                    g_Screen.scale2x(x, y + y_offset, s->width(), s->height(), data);
+                else
+                    g_Screen.blit(x, y + y_offset, s->width(), s->height(), data);
+                delete[] data;
+            } else {
+                s->draw(x, y + y_offset, 0, false, x2);
+            }
             x += s->width() * sc - sc;
         }
     }

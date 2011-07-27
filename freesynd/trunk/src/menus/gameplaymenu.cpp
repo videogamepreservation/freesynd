@@ -1100,22 +1100,6 @@ void GameplayMenu::drawSelectAllButton() {
     }
 }
 
-static int drawChar(int x, int y, char ch, uint8 color) {
-    if (ch == ' ')
-        return g_App.menuSprites().sprite(665 - 'A')->width();
-
-    Sprite *s = g_App.menuSprites().sprite(665 + ch - 'A');
-    uint8 *data = new uint8[s->width() * s->height()];
-    s->data(data);
-
-    for (int i = 0; i < s->width() * s->height(); i++)
-        data[i] = (data[i] == 252 ? color : 255);
-
-    g_Screen.blit(x, y, s->width(), s->height(), data);
-    delete[] data;
-    return s->width();
-}
-
 void GameplayMenu::drawMissionHint(int elapsed) {
 
     elapsed += mission_hint_ticks_;
@@ -1205,24 +1189,9 @@ void GameplayMenu::drawMissionHint(int elapsed) {
         }
     }
 
-    // FIXME: handle UTF-8
-    int x = 0;
-    const char *t = str.c_str();
-
-    while (*t) {
-        if (*t == 0x20) {
-            x += g_App.menuSprites().sprite(665 - 'A')->width() - 1;
-            t++;
-        } else {
-            x += g_App.menuSprites().sprite(665 + *t++ - 'A')->width() - 1;
-        }
-    }
-
-    x = 64 - x / 2;
-
-    t = str.c_str();
-    while (*t)
-        x += drawChar(x, 46 + 44 + 10 + 46 + 44 + 2 - 1, *t++, txtColor) - 1;
+    int width = g_App.fonts().textWidth(str.c_str(), false, FontManager::SIZE_3, false);
+    int x = 64 - width / 2;
+    g_App.fonts().drawText(x, 46 + 44 + 10 + 46 + 44 + 2 - 1, str.c_str(), false, FontManager::SIZE_3, false, false, true, 252, txtColor);
 }
 
 void GameplayMenu::drawWeaponSelectors() {

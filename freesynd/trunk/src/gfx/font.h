@@ -59,7 +59,7 @@ public:
     void setSpriteManager(SpriteManager *sprites, int offset, char base,
             const FontRange& range);
     // If dos is true, the text is in cp437, otherwise it's utf-8.
-    void drawText(int x, int y, const char *text, bool dos, bool x2 = true);
+    void drawText(int x, int y, const char *text, bool dos, bool x2 = true, bool changeColor = false, uint8 fromColor = 0, uint8 toColor = 0);
     int textWidth(const char *text, bool dos, bool x2 = true);
     int textHeight(bool x2 = true);
 
