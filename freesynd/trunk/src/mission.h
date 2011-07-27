@@ -115,7 +115,7 @@ public:
     //---
 
     const char *briefing() { return briefing_.c_str(); }
-    void objectiveMsg(const char ** msg);
+    void objectiveMsg(std::string& msg);
 
     int infoCost(unsigned char lvl) {
         assert(lvl < MAX_INFO_ENHANCE_LVL);
@@ -553,8 +553,25 @@ protected:
         uint8 posyo;
         uint8 poszo;
         // This message should be setup during objective definition
-        const char* msg;
+        std::string msg;
         uint16 nxtobjindx;
+
+        void clear() {
+            type = (ObjectiveType)0;
+            targettype = (MapObject::MajorTypeEnum)0;
+            targetsubtype = 0;
+            targetindx = 0;
+            condition = 0;
+            subobjindx = 0;
+            posxt = 0;
+            posyt = 0;
+            poszt = 0;
+            posxo = 0;
+            posyo = 0;
+            poszo = 0;
+            msg.clear();
+            nxtobjindx = 0;
+        }
     }ObjectiveDesc;
 
     std::vector <ObjectiveDesc> objectives_;

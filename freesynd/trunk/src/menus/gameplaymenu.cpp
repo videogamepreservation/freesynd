@@ -1133,7 +1133,7 @@ void GameplayMenu::drawMissionHint(int elapsed) {
     bool text_pw = (pointing_at_weapon_ != -1
         && mission_->weapon(pointing_at_weapon_)->map() != -1);
 
-    const char *str = "";
+    std::string str;
 
     uint8 txtColor;
 
@@ -1143,15 +1143,15 @@ void GameplayMenu::drawMissionHint(int elapsed) {
         for (int i = 0; i < 4; i++) {
             if (isAgentSelected(i)){
                 if (mission_->ped(i)->speed()) {
-                    str = "GOING";
+                    str = g_App.menus().getMessage("HINT_GOING");
                 } else {
-                    str = "OBSERVING";
+                    str = g_App.menus().getMessage("HINT_OBSERVING");
                 }
                 if (mission_->ped(i)->wePickupWeapon()) {
-                    str = "PICKUP WEAPON";
+                    str = g_App.menus().getMessage("HINT_PICKUP_WEAPON");
                 }
                 if (mission_->ped(i)->drawnAnim() == PedInstance::HitAnim) {
-                    str = "HIT BY BULLET";
+                    str = g_App.menus().getMessage("HINT_HIT_BY_BULLET");
                 }
             }
         }
@@ -1167,14 +1167,14 @@ void GameplayMenu::drawMissionHint(int elapsed) {
         txtColor = inversed ? 0 : 11;
 
         if (mission_) {
-            mission_->objectiveMsg(&str);
+            mission_->objectiveMsg(str);
             if (mission_->failed()) {
                 if (!completed_) {
                     completed_ = true;
                     g_App.gameSounds().play(snd::SPEECH_MISSION_FAILED);
                 }
 
-                str = "MISSION FAILED";
+                str = g_App.menus().getMessage("HINT_MISSION_FAILED");
                 text_pw = false;
             }
 
@@ -1184,13 +1184,13 @@ void GameplayMenu::drawMissionHint(int elapsed) {
                     g_App.gameSounds().play(snd::SPEECH_MISSION_COMPLETED);
                 }
 
-                str = "MISSION COMPLETE";
+                str = g_App.menus().getMessage("HINT_MISSION_COMPLETE");
                 text_pw = false;
             }
 
             if (mission_hint_ > 40 && mission_hint_ < 61)
                 if (mission_->completed() || mission_->failed()) {
-                    str = "PRESS SPACE";
+                    str = g_App.menus().getMessage("HINT_PRESS_SPACE");
                     text_pw = false;
                 }
         }
@@ -1205,8 +1205,9 @@ void GameplayMenu::drawMissionHint(int elapsed) {
         }
     }
 
+    // FIXME: handle UTF-8
     int x = 0;
-    const char *t = str;
+    const char *t = str.c_str();
 
     while (*t) {
         if (*t == 0x20) {
@@ -1219,8 +1220,9 @@ void GameplayMenu::drawMissionHint(int elapsed) {
 
     x = 64 - x / 2;
 
-    while (*str)
-        x += drawChar(x, 46 + 44 + 10 + 46 + 44 + 2 - 1, *str++, txtColor) - 1;
+    t = str.c_str();
+    while (*t)
+        x += drawChar(x, 46 + 44 + 10 + 46 + 44 + 2 - 1, *t++, txtColor) - 1;
 }
 
 void GameplayMenu::drawWeaponSelectors() {

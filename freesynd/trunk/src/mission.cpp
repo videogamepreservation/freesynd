@@ -67,11 +67,11 @@ Mission::~Mission()
 
 #define copydata(x, y) memcpy(&level_data_.x, levelData + y, sizeof(level_data_.x))
 
-void Mission::objectiveMsg(const char ** msg) {
+void Mission::objectiveMsg(std::string& msg) {
     if (objectives_[cur_objective_].type == objv_None)
-        *msg = "";
+        msg = "";
     else
-        *msg = objectives_[cur_objective_].msg;
+        msg = objectives_[cur_objective_].msg;
 }
 
 bool Mission::loadLevel(uint8 * levelData)
@@ -341,7 +341,7 @@ bool Mission::loadLevel(uint8 * levelData)
     for (unsigned char i = 0; i < 6; i++) {
         bool isset = false;
         ObjectiveDesc objd;
-        memset(&objd, 0, sizeof(ObjectiveDesc));
+        objd.clear();
         LEVELDATA_OBJECTIVES & obj = level_data_.objectives[i];
         unsigned int bindx = READ_LE_UINT16(obj.offset), cindx = 0;
         // TODO: checking is implemented for correct offset, because
@@ -363,7 +363,7 @@ bool Mission::loadLevel(uint8 * levelData)
                         objd.type = objv_AquireControl;
                         objd.targettype = MapObject::mt_Ped;
                         objd.targetindx = pindx[cindx];
-                        objd.msg = "PERSUADE";
+                        objd.msg = g_App.menus().getMessage("GOAL_PERSUADE");
                     } else
                         printf("0x01 incorrect offset");
                 } else
@@ -377,7 +377,7 @@ bool Mission::loadLevel(uint8 * levelData)
                         objd.type = objv_DestroyObject;
                         objd.targettype = MapObject::mt_Ped;
                         objd.targetindx = pindx[cindx];
-                        objd.msg = "ASSASSINATE";
+                        objd.msg = g_App.menus().getMessage("GOAL_ASSASSINATE");
                     } else
                         printf("0x02 incorrect offset");
                 } else
@@ -391,7 +391,7 @@ bool Mission::loadLevel(uint8 * levelData)
                         objd.type = objv_Protect;
                         objd.targettype = MapObject::mt_Ped;
                         objd.targetindx = pindx[cindx];
-                        objd.msg = "PROTECT";
+                        objd.msg = g_App.menus().getMessage("GOAL_PROTECT");
                     } else
                         printf("0x03 incorrect offset");
                 } else
@@ -406,7 +406,7 @@ bool Mission::loadLevel(uint8 * levelData)
                         objd.type = objv_GetObject;
                         objd.targettype = MapObject::mt_Weapon;
                         objd.targetindx = windx[cindx];
-                        objd.msg = "TAKE WEAPON";
+                        objd.msg = g_App.menus().getMessage("GOAL_TAKE_WEAPON");
                     } else
                         printf("0x05 incorrect offset");
                 } else
@@ -420,7 +420,7 @@ bool Mission::loadLevel(uint8 * levelData)
                 objd.targetsubtype = 4;
                 objd.condition = 2;
                 objd.targetindx = pindx[cindx];
-                objd.msg = "ELIMINATE POLICE";
+                objd.msg = g_App.menus().getMessage("GOAL_ELIMINATE_POLICE");
                 isset = true;
                 break;
             case 0x0B:
@@ -429,7 +429,7 @@ bool Mission::loadLevel(uint8 * levelData)
                 objd.targetsubtype = 2;
                 objd.condition = 2;
                 objd.targetindx = pindx[cindx];
-                objd.msg = "ELIMINATE AGENTS";
+                objd.msg = g_App.menus().getMessage("GOAL_ELIMINATE_AGENTS");
                 isset = true;
                 break;
             case 0x0E:
@@ -440,7 +440,7 @@ bool Mission::loadLevel(uint8 * levelData)
                         objd.type = objv_DestroyObject;
                         objd.targettype = MapObject::mt_Vehicle;
                         objd.targetindx = vindx[cindx];
-                        objd.msg = "DESTROY VEHICLE";
+                        objd.msg = g_App.menus().getMessage("GOAL_DESTROY_VEHICLE");
                     } else
                         printf("0x0E incorrect offset");
                 } else
@@ -455,7 +455,7 @@ bool Mission::loadLevel(uint8 * levelData)
                         objd.type = objv_DestroyObject;
                         objd.targettype = MapObject::mt_Vehicle;
                         objd.targetindx = vindx[cindx];
-                        objd.msg = "USE VEHICLE";
+                        objd.msg = g_App.menus().getMessage("GOAL_USE_VEHICLE");
                     } else
                         printf("0x0F incorrect offset");
                 } else
@@ -473,14 +473,14 @@ bool Mission::loadLevel(uint8 * levelData)
                 if (objd.poszo != 0)
                     objd.poszt++;
                 objd.condition = 16;
-                objd.msg = "EVACUATE";
+                objd.msg = g_App.menus().getMessage("GOAL_EVACUATE");
                 isset = true;
                 break;
         }
         if (isset) {
             objectives_.push_back(objd);
         } else {
-            memset(&objd, 0, sizeof(ObjectiveDesc));
+            objd.clear();
             objectives_.push_back(objd);
             break;
         }
