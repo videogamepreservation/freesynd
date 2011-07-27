@@ -327,22 +327,60 @@ int dump_maps() {
 	return 0;
 }
 
+static void usage() {
+	printf("Usage: dump [-m] [-a] [-f] [-b] [-d <data dir>]\n");
+	printf("Options:\n");
+	printf("\t-m\tdump maps\n");
+	printf("\t-a\tdump animations\n");
+	printf("\t-f\tdump fonts\n");
+	printf("\t-b\tdump briefings\n");
+	exit(1);
+}
+
 int main(int argc, char **argv) {
+	const char *dataArg = "./data/";
+	int i;
+	int actions = 0;
 
-    if (argc == 2) {
-        if (0 == strcmp("-m", argv[1])) {
-	    dump_maps();
-        } else if (0 == strcmp("-a", argv[1])) {
-	    dump_anims();
-        } else if (0 == strcmp("-f", argv[1])) {
-	    dump_fonts();
-        } else if (0 == strcmp("-b", argv[1])) {
-	    dump_briefings();
-        }
+	for (i = 1; i < argc; i++) {
+		if (!strcmp("-m", argv[i])) {
+			actions++;
+		} else if (!strcmp("-a", argv[i])) {
+			actions++;
+		} else if (!strcmp("-f", argv[i])) {
+			actions++;
+		} else if (!strcmp("-b", argv[i])) {
+			actions++;
+		} else if (!strcmp("-d", argv[i])) {
+			i++;
+			dataArg = argv[i];
+		} else {
+			usage();
+		}
+	}
 
-    } else {
-      printf("usage : dump [-m|-a|-f|-b]\n");
-    }
+	if (!dataArg || !actions) usage();
+
+	std::string dataDir(dataArg);
+	if (dataDir[dataDir.size() - 1] != '\\' && dataDir[dataDir.size() - 1] != '/') {
+		dataDir.push_back('/');
+	}
+
+	File::setDataPath(dataDir);
+	File::setOurDataPath(dataDir);
+
+	for (i = 1; i < argc; i++) {
+		if (!strcmp("-m", argv[i])) {
+			dump_maps();
+		} else if (!strcmp("-a", argv[i])) {
+			dump_anims();
+		} else if (!strcmp("-f", argv[i])) {
+			dump_fonts();
+		} else if (!strcmp("-b", argv[i])) {
+			dump_briefings();
+		} else if (!strcmp("-d", argv[i])) {
+		}
+	}
 
 	return 0;
 }
