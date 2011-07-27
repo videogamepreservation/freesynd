@@ -72,7 +72,7 @@ public:
         Shotgun_Anim,
     } WeaponAnimIndex;
 
-    Weapon(const char *w_name, int smallIcon, int bigIcon, int w_cost,
+    Weapon(const std::string& w_name, int smallIcon, int bigIcon, int w_cost,
             int w_ammo, int w_range, int w_shot, int w_rank, int w_anim,
             WeaponAnimIndex w_idx, snd::InGameSample w_sample,
             WeaponType w_type, MapObject::DamageType w_dmg_type,

@@ -31,7 +31,7 @@
 #include "app.h"
 #include "gfx/screen.h"
 
-Weapon::Weapon(const char *w_name, int smallIcon, int bigIcon, int w_cost,
+Weapon::Weapon(const std::string& w_name, int smallIcon, int bigIcon, int w_cost,
     int w_ammo, int w_range, int w_shot, int w_rank, int w_anim,
     Weapon::WeaponAnimIndex w_idx, snd::InGameSample w_sample,
     WeaponType w_type, MapObject::DamageType w_dmg_type,
@@ -40,7 +40,6 @@ Weapon::Weapon(const char *w_name, int smallIcon, int bigIcon, int w_cost,
     int w_trace_anim, int w_rd_anim, int w_range_dmg, double w_shot_angle,
     double w_shot_accuracy)
 {
-
     name_ = w_name;
     small_icon_ = smallIcon;
     big_icon_ = bigIcon;

@@ -156,21 +156,24 @@ Weapon * WeaponManager::loadWeapon(Weapon::WeaponType wt) {
     Weapon *pWeapon = NULL;
     switch(wt) {
         case Weapon::Persuadatron:
-            pWeapon = new Weapon("PERSUADERTRON", 14, 64, 5000, -1, 256, -1,
+            pWeapon = new Weapon(g_App.menus().getMessage("WEAPON_PERSUADERTRON"),
+        14, 64, 5000, -1, 256, -1,
         -1, 367, Weapon::Unarmed_Anim, snd::PERSUADE, Weapon::Persuadatron,
         MapObject::dmg_Mental, 1, 150, 25, Weapon::wspt_Persuadatron,
         SFXObject::sfxt_Unknown, SFXObject::sfxt_Unknown,
         SFXObject::sfxt_Unknown, SFXObject::sfxt_Unknown, 0, 1.0, 1.0);
             break;
         case Weapon::Pistol:
-            pWeapon = new Weapon("PISTOL", 15, 65, 0, 13, 1280, 1, 1, 368,
+            pWeapon = new Weapon(g_App.menus().getMessage("WEAPON_PISTOL"),
+        15, 65, 0, 13, 1280, 1, 1, 368,
         Weapon::Pistol_Anim, snd::PISTOL, Weapon::Pistol,
         MapObject::dmg_Bullet, 1, 200, 600, Weapon::wspt_Pistol,
         SFXObject::sfxt_BulletHit, SFXObject::sfxt_BulletHit,
         SFXObject::sfxt_Unknown, SFXObject::sfxt_Unknown, 0, 5.0, 0.9);
             break;
         case Weapon::Minigun:
-            pWeapon = new Weapon("MINI-GUN", 19, 69, 10000, 500, 2304, 10, 6,
+            pWeapon = new Weapon(g_App.menus().getMessage("WEAPON_MINI_GUN"),
+        19, 69, 10000, 500, 2304, 10, 6,
         372, Weapon::Minigun_Anim, snd::MINIGUN, Weapon::Minigun,
         MapObject::dmg_Bullet, 5, 100, 100, Weapon::wspt_Minigun,
         SFXObject::sfxt_BulletHit, SFXObject::sfxt_BulletHit,
@@ -178,21 +181,24 @@ Weapon * WeaponManager::loadWeapon(Weapon::WeaponType wt) {
             break;
         case Weapon::Flamer:
             // NOTE: range changed from 512 to 1152
-            pWeapon = new Weapon("FLAMER", 21, 71, 1500, 1000, 1152, 1, 4, 374,
+            pWeapon = new Weapon(g_App.menus().getMessage("WEAPON_FLAMER"),
+        21, 71, 1500, 1000, 1152, 1, 4, 374,
         Weapon::Flamer_Anim, snd::FLAME, Weapon::Flamer, MapObject::dmg_Burn,
         10, 50, 50, Weapon::wspt_Flamer, SFXObject::sfxt_FlamerFire,
         SFXObject::sfxt_FlamerFire, SFXObject::sfxt_FlamerFire,
         SFXObject::sfxt_Unknown, 0, 2.0, 0.9);
             break;
         case Weapon::LongRange:
-            pWeapon = new Weapon("LONG RANGE", 22, 72, 1000, 30, 6144, 2, 3,
+            pWeapon = new Weapon(g_App.menus().getMessage("WEAPON_LONG_RANGE"),
+        22, 72, 1000, 30, 6144, 2, 3,
         375, Weapon::LongRange_Anim, snd::LONGRANGE, Weapon::LongRange,
         MapObject::dmg_Bullet, 1, 300, 400, Weapon::wspt_LongRange,
         SFXObject::sfxt_BulletHit, SFXObject::sfxt_BulletHit,
         SFXObject::sfxt_Unknown, SFXObject::sfxt_Unknown, 0, 1.0, 1.0);
             break;
         case Weapon::EnergyShield:
-            pWeapon = new Weapon("ENERGY SHIELD", 28, 78, 8000, 200, 768, 15,
+            pWeapon = new Weapon(g_App.menus().getMessage("WEAPON_ENERGY_SHIELD"),
+        28, 78, 8000, 200, 768, 15,
         -1, 381, Weapon::EnergyShield_Anim, snd::NO_SOUND,
         Weapon::EnergyShield, MapObject::dmg_None, 1, 75, 50,
         Weapon::wspt_EnergyShield, SFXObject::sfxt_Unknown,
@@ -200,21 +206,24 @@ Weapon * WeaponManager::loadWeapon(Weapon::WeaponType wt) {
         SFXObject::sfxt_Unknown, 0, 0.0, 0.0);
             break;
         case Weapon::Uzi:
-            pWeapon = new Weapon("UZI", 18, 68, 750, 50, 1792, 2, 5, 371,
+            pWeapon = new Weapon(g_App.menus().getMessage("WEAPON_UZI"),
+        18, 68, 750, 50, 1792, 2, 5, 371,
         Weapon::Uzi_Anim, snd::UZI, Weapon::Uzi, MapObject::dmg_Bullet, 1,
         150, 150, Weapon::wspt_Uzi, SFXObject::sfxt_BulletHit,
         SFXObject::sfxt_BulletHit, SFXObject::sfxt_Unknown,
         SFXObject::sfxt_Unknown, 0, 10.0, 0.7);
             break;
         case Weapon::Laser:
-            pWeapon = new Weapon("LASER", 20, 70, 35000, 5, 4096, 2000, 7, 373,
+            pWeapon = new Weapon(g_App.menus().getMessage("WEAPON_LASER"),
+        20, 70, 35000, 5, 4096, 2000, 7, 373,
         Weapon::Laser_Anim, snd::LASER, Weapon::Laser, MapObject::dmg_Laser,
         1, 200, 200, Weapon::wspt_Laser, SFXObject::sfxt_Fire_LongSmoke,
         SFXObject::sfxt_Unknown, SFXObject::sfxt_Unknown,
         SFXObject::sfxt_Unknown, 512, 5.0, 0.99);
             break;
         case Weapon::GaussGun:
-            pWeapon = new Weapon("GAUSS GUN", 16, 66, 50000, 3, 5120, 15000, 0,
+            pWeapon = new Weapon(g_App.menus().getMessage("WEAPON_GAUSS_GUN"),
+        16, 66, 50000, 3, 5120, 15000, 0,
         369, Weapon::Gauss_Anim, snd::GAUSSGUN, Weapon::GaussGun,
         MapObject::dmg_Explosion, 1, 350, 500, Weapon::wspt_GaussGun,
         SFXObject::sfxt_ExplosionFire,
@@ -222,28 +231,32 @@ Weapon * WeaponManager::loadWeapon(Weapon::WeaponType wt) {
         SFXObject::sfxt_LargeFire, 512, 5.0, 0.99);
             break;
         case Weapon::Shotgun:
-            pWeapon = new Weapon("SHOTGUN", 17, 67, 250, 12, 1024, 2, 2, 370,
+            pWeapon = new Weapon(g_App.menus().getMessage("WEAPON_SHOTGUN"),
+        17, 67, 250, 12, 1024, 2, 2, 370,
         Weapon::Shotgun_Anim, snd::SHOTGUN, Weapon::Shotgun,
         MapObject::dmg_Bullet, 2, 250, 200, Weapon::wspt_Shotgun,
         SFXObject::sfxt_BulletHit, SFXObject::sfxt_BulletHit,
         SFXObject::sfxt_Unknown, SFXObject::sfxt_Unknown, 0, 10.0, 0.7);
             break;
         case Weapon::MediKit:
-            pWeapon = new Weapon("MEDIKIT", 24, 74, 500, 1, 256, 1, -1, 377,
+            pWeapon = new Weapon(g_App.menus().getMessage("WEAPON_MEDIKIT"),
+        24, 74, 500, 1, 256, 1, -1, 377,
         Weapon::Unarmed_Anim, snd::NO_SOUND, Weapon::MediKit,
         MapObject::dmg_Heal, 1, 1, 1, Weapon::wspt_MediKit,
         SFXObject::sfxt_Unknown, SFXObject::sfxt_Unknown,
         SFXObject::sfxt_Unknown, SFXObject::sfxt_Unknown, 0, 0.0, 0.0);
             break;
         case Weapon::Scanner:
-            pWeapon = new Weapon("SCANNER", 23, 73, 500, -1, 4096, -1, -1, 376,
+            pWeapon = new Weapon(g_App.menus().getMessage("WEAPON_SCANNER"),
+        23, 73, 500, -1, 4096, -1, -1, 376,
         Weapon::Unarmed_Anim, snd::NO_SOUND, Weapon::Scanner,
         MapObject::dmg_None, 1, 1, 1, Weapon::wspt_Scanner,
         SFXObject::sfxt_Unknown, SFXObject::sfxt_Unknown,
         SFXObject::sfxt_Unknown, SFXObject::sfxt_Unknown, 0, 0.0, 0.0);
             break;
         case Weapon::AccessCard:
-            pWeapon = new Weapon("ACCESS CARD", 26, 76, 1000, -1, 256, -1, -1,
+            pWeapon = new Weapon(g_App.menus().getMessage("WEAPON_ACCESS_CARD"),
+        26, 76, 1000, -1, 256, -1, -1,
         379, Weapon::Unarmed_Anim, snd::NO_SOUND, Weapon::AccessCard,
         MapObject::dmg_None, 1, 1, 1, Weapon::wspt_AccessCard,
         SFXObject::sfxt_Unknown, SFXObject::sfxt_Unknown,
@@ -251,7 +264,8 @@ Weapon * WeaponManager::loadWeapon(Weapon::WeaponType wt) {
             break;
         case Weapon::TimeBomb:
         // NOTE: what is real number for "shot"? for now = 7500
-            pWeapon = new Weapon("TIME BOMB", 25, 75, 25000, -1, 1000, 7500, -1,
+            pWeapon = new Weapon(g_App.menus().getMessage("WEAPON_TIME_BOMB"),
+        25, 75, 25000, -1, 1000, 7500, -1,
         378, Weapon::Unarmed_Anim, snd::TIMEBOMB, Weapon::TimeBomb,
         MapObject::dmg_Explosion, 1, 15000, 1, Weapon::wspt_TimeBomb,
         SFXObject::sfxt_ExplosionFire, SFXObject::sfxt_ExplosionBall,
