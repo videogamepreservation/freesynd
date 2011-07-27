@@ -35,7 +35,7 @@ DebriefMenu::DebriefMenu(MenuManager *m) : Menu(m, "debrief", "mdebrief.dat",
     int left_x = 20;
     std::string str;
 
-    addStatic(100, y, "#DEBRIEF_TITLE", FontManager::SIZE_4, true);
+    addStatic(85, y, 545, "#DEBRIEF_TITLE", FontManager::SIZE_4, true);
     y = 100;
     menu_manager_->getMessage("DEBRIEF_SUBTITLE", str);
     addStatic(left_x, y, str.c_str(), FontManager::SIZE_2, false);
