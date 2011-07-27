@@ -41,7 +41,7 @@ BriefMenu::BriefMenu(MenuManager * m) :
 Menu(m, "brief", "mbrief.dat", "mbrieout.dat"),
 start_line_(0) {
     
-    addStatic(148, 35, "#BRIEF_TITLE", FontManager::SIZE_4, true);
+    addStatic(85, 35, 545, "#BRIEF_TITLE", FontManager::SIZE_4, true);
     txtTimeId_ = addStatic(500, 9, "", FontManager::SIZE_2, false);       // Time
 
     // Briefing scroll button

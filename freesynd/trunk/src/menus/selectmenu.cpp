@@ -38,7 +38,7 @@ cur_agent_(0), tick_count_(0), sel_all_(false)
     pSelectedWeap_ = NULL;
     selectedWInstId_ = 0;
     pSelectedMod_ = NULL;
-    addStatic(148, 35, "#SELECT_TITLE", FontManager::SIZE_4, true);
+    addStatic(85, 35, 545, "#SELECT_TITLE", FontManager::SIZE_4, true);
     txtTimeId_ = addStatic(500, 9, "", FontManager::SIZE_2, false);       // Time
 
     addOption(16, 234, 129, 25, "#SELECT_RES_BUT", FontManager::SIZE_2, KEY_F1, "research");
