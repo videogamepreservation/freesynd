@@ -113,6 +113,7 @@ void MusicManager::playTrack(MusicTrack track, int loops)
 
 void MusicManager::stopPlayback()
 {
+    if (disabled_) return;
     if (Audio::isInitialized()) {
         tracks_.at(current_track_)->stop();
         is_playing_ = false;

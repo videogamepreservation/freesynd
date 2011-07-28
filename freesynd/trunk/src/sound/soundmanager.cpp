@@ -148,6 +148,7 @@ void SoundManager::play(snd::InGameSample sample, int loops) {
  *
  */
 void SoundManager::stop(snd::InGameSample sample) {
+    if (disabled_) return;
     Sound *pSound = sound(sample);
 
     if (pSound) {
