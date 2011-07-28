@@ -31,7 +31,7 @@
 #include "utils/file.h"
 #include "utils/log.h"
 
-MusicManager::MusicManager():is_playing_(false)
+MusicManager::MusicManager(bool disabled):is_playing_(false), disabled_(disabled)
 {
     // -1 means music is not mute
     // other value stores music volume before mute
@@ -100,6 +100,7 @@ void MusicManager::loadMusic()
 
 void MusicManager::playTrack(MusicTrack track, int loops)
 {
+    if (disabled_) return;
     if (Audio::isInitialized()) {
         if (is_playing_) {
             tracks_.at(current_track_)->stopFadeOut();

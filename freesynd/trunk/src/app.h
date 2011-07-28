@@ -56,7 +56,7 @@
  */
 class App : public Singleton < App > {
   public:
-    App();
+    App(bool disable_sound);
     virtual ~App();
 
     //! Initialize application

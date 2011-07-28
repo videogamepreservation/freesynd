@@ -46,7 +46,7 @@ public:
         TRACK_MISSION_COMPLETED
     };
 
-    MusicManager();
+    MusicManager(bool disabled);
     ~MusicManager();
 
     void loadMusic();
@@ -68,6 +68,7 @@ protected:
      * we can restore it after a unmute.
      */
     int volumeBeforeMute_;
+    bool disabled_;
 };
 
 #endif

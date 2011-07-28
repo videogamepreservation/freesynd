@@ -59,13 +59,14 @@
 #include "utils/configfile.h"
 #include "utils/portablefile.h"
 
-App::App(): running_(true), playingFli_(false),
+App::App(bool disable_sound): running_(true), playingFli_(false),
 skipFli_(false), screen_(new Screen(GAME_SCREEN_WIDTH, GAME_SCREEN_HEIGHT))
 #ifdef SYSTEM_SDL
     , system_(new SystemSDL())
 #else
 #error A suitable System object has not been defined!
 #endif
+    , intro_sounds_(disable_sound), game_sounds_(disable_sound), music_(disable_sound)
 {
     fullscreen_ = false;
     playIntro_ = true;

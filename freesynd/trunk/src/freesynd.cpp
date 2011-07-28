@@ -125,6 +125,7 @@ void print_usage() {
     printf("usage: freesynd [options...]\n");
     printf("    -h, --help            display this help and exit.\n");
     printf("    -i, --ini <path>      specify the location of the FreeSynd config file.\n");
+    printf("    --nosound             disable all sound.\n");
 
 #ifdef _WIN32
     printf(" (default: freesynd.ini in the same folder as freesynd.exe)\n");
@@ -162,6 +163,8 @@ int main(int argc, char *argv[]) {
     // This variable stores the path to the Freesynd configuration file.
     std::string iniPath;
 
+    bool disable_sound = false;
+
     for (int i = 1; i < argc; ++i) {
 #ifdef _DEBUG
         // This parameter is used in debug phase to accelerate the starting
@@ -193,6 +196,9 @@ int main(int argc, char *argv[]) {
             i++;
             iniPath = argv[i];
         }
+        if (0 == strcmp("--nosound", argv[i])) {
+            disable_sound = true;
+        }
     }
 
 #ifdef _DEBUG
@@ -221,7 +227,7 @@ int main(int argc, char *argv[]) {
 	}
 
     LOG(Log::k_FLG_INFO, "Main", "main", ("Initializing application..."))
-    std::auto_ptr<App> app(new App());
+    std::auto_ptr<App> app(new App(disable_sound));
 
     if (app->initialize(iniPath)) {
         // setting the cheat codes

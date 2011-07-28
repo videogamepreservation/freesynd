@@ -30,7 +30,7 @@
 #include "utils/file.h"
 #include "utils/log.h"
 
-SoundManager::SoundManager():tabentry_startoffset_(58), tabentry_offset_(32)
+SoundManager::SoundManager(bool disabled):tabentry_startoffset_(58), tabentry_offset_(32), disabled_(disabled)
 {
     volumeBeforeMute_ = -1;
 }
@@ -135,6 +135,7 @@ bool SoundManager::loadSounds(uint8 * tabData, int tabSize,
  *
  */
 void SoundManager::play(snd::InGameSample sample, int loops) {
+    if (disabled_) return;
     Sound *pSound = sound(sample);
 
     if (pSound) {
