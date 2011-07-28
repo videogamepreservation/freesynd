@@ -348,6 +348,51 @@ public:
     }
     void verifyHostilesFound();
 
+    typedef enum {
+        og_dmUndefined = 0x0,
+        og_dmFriend = 0x0001,
+        og_dmEnemy = 0x0002,
+        og_dmNeutral = 0x0004,
+        og_dmPedestrian = 0x0100,
+        og_dmCivilian = 0x0100,
+        og_dmAgent = 0x0200,
+        og_dmPolice = 0x0400,
+        og_dmGuard = 0x0800,
+        og_dmCriminal = 0x1000
+    } objGroupDefMasks;
+
+    typedef enum {
+        pd_smUndefined = 0x0,
+        pd_smControlled = 0x0001,
+        pd_smArmed = 0x0002,
+        // no active action should be done, ex. persuaded ped will shoot target
+        // of persuader only if persuader shoots at it
+        pd_smSupporter = 0x0004,
+        pd_smEnemyInSight = 0x0008,
+        pd_smDead = 0x0010,
+        // only if all weapon has no ammunition, persuadatron excludes this
+        pd_smNoAmmunition = 0x0020,
+        // all non-player controllled peds should have this set
+        pd_smAutoAction = 0x0040,
+        // target can be position or object
+        pd_smHasShootTarget = 0x0080,
+        // target can be position or object
+        pd_smHasReachTarget = 0x0100
+    } pedDescStateMasks;
+
+    typedef enum {
+        pa_smNone = 0x0,
+        pa_smStanding = 0x0001,
+        pa_smWalking = 0x0002,
+        pa_smHit = 0x0004,
+        pa_smFiring = 0x0008,
+        pa_smFolowing = 0x0010,
+        pa_smPickUp = 0x0020,
+        pa_smPutDown = 0x0040,
+        pa_smBurning = 0x0080,
+        pa_smInCar = 0x0100
+    } pedActionStateMasks;
+
 protected:
     Ped *ped_;
     bool dead_;
@@ -360,17 +405,9 @@ protected:
     } firing_;
 
 //--------------------------------------------------------------unused for now
-    // 0 - not defined, 0b - stand, 1b - walking, 2b - hit, 3b - firing,
-    // 4b - following, 5b - pickup, 6b - putdown, 7b - burning, 8b - in car
+    // (pedActionStateMasks)
     unsigned int action_state_;
-    // 0 - not defined, 0b - controled(persuaded), 1b - hostile (condition is
-    // hostile_desc_ + enemy_groups_), 2b - armed, 3b - supporter (no
-    // active action should be done, ex. persuaded ped will shoot target
-    // of persuader only if persuader shoots at it), 4b - neutral (all unarmed
-    // are nuetral), 5b - enemy in range, 6b - is dead, 7b - not dead, 8b - no
-    // ammunition, 9b - emulates some groups, 10b - emulation failed (some
-    // actions should remove emulation for group, maybe temporary), 11b - A.L.
-    // controled(maybe one day we would like to do remote control on persuaded)
+    // (pedDescStateMasks)
     unsigned int desc_state_;
     // this inherits definition from desc_state_
     // ((target checked)desc_state_ & hostile_desc_) != 0 kill him
@@ -382,16 +419,16 @@ protected:
     //std::set <unsigned int> emulated_failed_groups_;
     // dicovered hostiles are set here, check at end for hostile
     std::set <ShootableMapObject *> hostiles_found_;
-    // ddefines group obj belongs to
-    // 0 - not defined, 0b - friend(for player), 1b - enemy(for player),
-    // 2b - neutral, 3b - conditional hostility(hostile_desc_)
-    // 8b - civilian(pedestrian), 9b - agent, 10b - police,
-    // 11b - guard, 12b - criminal
+    // defines group obj belongs to (objGroupDefMasks)
+    unsigned int obj_group_def_;
+    unsigned int old_obj_group_def_;
+    // not used, within a group identification number
     // NOTE: this will be used in A.L., guards group can be as enemy agents group,
     // but what if we would like to make guards attack only territory intruders or
     // someone who has took something on controlled surface, or attacked one of
     // guards or etc.
-    unsigned int obj_group_def_;
+    unsigned int obj_group_def_id_;
+    unsigned int old_obj_group_def_id_;
 //--------------------------------------------------------------unused for now
 
     AnimationDrawn drawn_anim_;
