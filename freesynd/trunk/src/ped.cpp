@@ -185,7 +185,7 @@ int Ped::lastPersuadeFrame() {
 
 bool PedInstance::animate(int elapsed, Mission *mission) {
 
-    if (agents_is_ == PedInstance::Agent_Non_Active)
+    if (agent_is_ == PedInstance::Agent_Non_Active)
         return true;
 
     bool updated = false;
@@ -359,7 +359,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
             break;
         case PedInstance::VaporizeAnim:
             if (frame_ > ped_->lastVaporizeFrame(getDirection())) {
-                if (agents_is_ == PedInstance::Agent_Active) {
+                if (agent_is_ == PedInstance::Agent_Active) {
                     setDrawnAnim(PedInstance::DeadAgentAnim);
                 } else {
                     setDrawnAnim(PedInstance::NoAnimation);
@@ -505,14 +505,14 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
         // miliseconds
         // TODO: this value should be influenced by IPA values
         int required = 1200;
-        if (agents_is_ == PedInstance::Agent_Active)
+        if (agent_is_ == PedInstance::Agent_Active)
             required = 500;
 
         if (weapon_idx == Weapon::Pistol_Anim
             || weapon_idx == Weapon::Shotgun_Anim)
         {
             required = 1500;
-            if (agents_is_ == PedInstance::Agent_Active)
+            if (agent_is_ == PedInstance::Agent_Active)
                 required = 750;
         }
 
@@ -540,7 +540,6 @@ PedInstance *Ped::createInstance(int map) {
 }
 
 void PedInstance::kill() {
-    dead_ = true;
 }
 
 bool isOnScreen(int scrollX, int scrollY, int x, int y) {
@@ -570,7 +569,7 @@ void PedInstance::showPath(int scrollX, int scrollY) {
     int px = screenX();
     int py = screenY() - tile_z_ * TILE_HEIGHT/3 + TILE_HEIGHT/3;
 
-    if (agents_is_ == PedInstance::Agent_Non_Active)
+    if (agent_is_ == PedInstance::Agent_Non_Active)
         return;
 
     for (std::list<PathNode>::iterator it = dest_path_.begin();
@@ -612,12 +611,16 @@ void PedInstance::showPath(int scrollX, int scrollY) {
 }
 
 PedInstance::PedInstance(Ped *ped, int m) : ShootableMovableMapObject(m),
-ped_(ped), firing_(PedInstance::Firing_Not),
-drawn_anim_(PedInstance::StandAnim), target_(NULL), target_pos_(NULL),
-reach_obj_(NULL), reach_pos_(NULL), sight_range_(0),
-is_hostile_(false), reload_count_(0), selected_weapon_(-1),
-pickup_weapon_(NULL), putdown_weapon_(NULL), in_vehicle_(NULL),
-agents_is_(PedInstance::Not_Agent)
+    ped_(ped), firing_(PedInstance::Firing_Not),
+    drawn_anim_(PedInstance::StandAnim), target_(NULL), target_pos_(NULL),
+    reach_obj_(NULL), reach_pos_(NULL), sight_range_(0),
+    is_hostile_(false), reload_count_(0), selected_weapon_(-1),
+    pickup_weapon_(NULL), putdown_weapon_(NULL), in_vehicle_(NULL),
+    agent_is_(PedInstance::Not_Agent), action_state_(PedInstance::pa_smNone),
+    desc_state_(PedInstance::pd_smUndefined),
+    obj_group_def_(PedInstance::og_dmUndefined),
+    hostile_desc_(PedInstance::pd_smUndefined),
+    old_obj_group_def_(PedInstance::og_dmUndefined)
 {
     hold_on_.wayFree = 0;
     rcv_damage_def_ = MapObject::ddmg_Ped;
@@ -635,7 +638,7 @@ PedInstance::~PedInstance(){
 
 void PedInstance::draw(int x, int y, int scrollX, int scrollY) {
 
-    if (agents_is_ == PedInstance::Agent_Non_Active)
+    if (agent_is_ == PedInstance::Agent_Non_Active)
         return;
 
     Weapon::WeaponAnimIndex weapon_idx =
@@ -709,7 +712,7 @@ void PedInstance::draw(int x, int y, int scrollX, int scrollY) {
 
 void PedInstance::drawSelectorAnim(int x, int y) {
 
-    if (agents_is_ == PedInstance::Agent_Non_Active)
+    if (agent_is_ == PedInstance::Agent_Non_Active)
         return;
 
     Weapon::WeaponAnimIndex weapon_idx =

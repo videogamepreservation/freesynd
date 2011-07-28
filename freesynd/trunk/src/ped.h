@@ -249,8 +249,8 @@ public:
         Agent_Active
     } ped_enum;
 
-    void setAgentIs(ped_enum set_agent_as) { agents_is_ = set_agent_as; }
-    ped_enum agentIs() { return agents_is_; }
+    void setAgentIs(ped_enum set_agent_as) { agent_is_ = set_agent_as; }
+    ped_enum agentIs() { return agent_is_; }
 
     int map();
     AnimationDrawn drawnAnim();
@@ -353,6 +353,7 @@ public:
         og_dmFriend = 0x0001,
         og_dmEnemy = 0x0002,
         og_dmNeutral = 0x0004,
+        // nainPedType << 8
         og_dmPedestrian = 0x0100,
         og_dmCivilian = 0x0100,
         og_dmAgent = 0x0200,
@@ -371,6 +372,7 @@ public:
         pd_smEnemyInSight = 0x0008,
         pd_smDead = 0x0010,
         // only if all weapon has no ammunition, persuadatron excludes this
+        // shoul not be used for hostile_desc_
         pd_smNoAmmunition = 0x0020,
         // all non-player controllled peds should have this set
         pd_smAutoAction = 0x0040,
@@ -395,7 +397,6 @@ public:
 
 protected:
     Ped *ped_;
-    bool dead_;
 
     enum {
         Firing_Not,
@@ -404,7 +405,6 @@ protected:
         Firing_Stop
     } firing_;
 
-//--------------------------------------------------------------unused for now
     // (pedActionStateMasks)
     unsigned int action_state_;
     // (pedDescStateMasks)
@@ -422,6 +422,7 @@ protected:
     // defines group obj belongs to (objGroupDefMasks)
     unsigned int obj_group_def_;
     unsigned int old_obj_group_def_;
+
     // not used, within a group identification number
     // NOTE: this will be used in A.L., guards group can be as enemy agents group,
     // but what if we would like to make guards attack only territory intruders or
@@ -429,22 +430,24 @@ protected:
     // guards or etc.
     unsigned int obj_group_def_id_;
     unsigned int old_obj_group_def_id_;
-//--------------------------------------------------------------unused for now
+    // not used
 
     AnimationDrawn drawn_anim_;
+
     // target*, if in range movement should stop
     ShootableMapObject *target_;
     PathNode *target_pos_;
     // reach*, wiil only stop when at same or desired distance(undefined for now)
     ShootableMapObject *reach_obj_;
     PathNode *reach_pos_;
+
     int sight_range_;
     bool is_hostile_;
     int reload_count_;
     int selected_weapon_;
     WeaponInstance *pickup_weapon_, *putdown_weapon_;
     VehicleInstance *in_vehicle_;
-    ped_enum agents_is_;
+    ped_enum agent_is_;
     // IPA levels: white bar level,set level,exhaused level and forced level
     //uint8 lvl_adrena_reserve_;
     uint8 lvl_adrena_amount_;

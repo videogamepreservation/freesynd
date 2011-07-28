@@ -165,6 +165,7 @@ bool Mission::loadLevel(uint8 * levelData)
                     p->putInVehicle(vehicles_[driverindx[i]]);
                     p->setMap(-1);
                     vehicles_[driverindx[i]]->forceSetDriver(p);
+                    p->setIsIgnored(true);
                 } else {
                     uint16 vin = READ_LE_UINT16(pedref.offset_of_vehicle);
                     if (vin != 0) {
@@ -182,13 +183,52 @@ bool Mission::loadLevel(uint8 * levelData)
             pindx[i] = peds_.size();
             peds_.push_back(p);
             if (i < 4) {
+                p->setObjGroupDef(PedInstance::og_dmFriend
+                    | PedInstance::og_dmAgent);
+
+                p->addEnemyGroupDef(PedInstance::og_dmEnemy
+                    | PedInstance::og_dmAgent);
+                p->addEnemyGroupDef(PedInstance::og_dmEnemy
+                    | PedInstance::og_dmGuard);
+                p->addEnemyGroupDef(PedInstance::og_dmEnemy
+                    | PedInstance::og_dmPolice);
+                p->addEnemyGroupDef(PedInstance::og_dmEnemy
+                    | PedInstance::og_dmCriminal);
+                p->addEnemyGroupDef(PedInstance::og_dmEnemy
+                    | PedInstance::og_dmCivilian);
+                // we will (auto)kill only armed, the rest can be persuaded
+                p->setHostileDesc(PedInstance::pd_smArmed);
+                // TODO: sightrange?
             } else if (i > 7) {
-                if (pedref.type_ped == PedInstance::m_tpAgent
-                    || pedref.type_ped == PedInstance::m_tpGuard) {
+                unsigned int mt = p->getMainType() << 8;
+                //unsigned int objD = p->descState();
+                if (mt == PedInstance::og_dmAgent
+                    || mt == PedInstance::og_dmGuard)
+                {
+                    p->setObjGroupDef(PedInstance::og_dmEnemy | mt);
+                    // they will kill persuaded and our agents
+                    p->addEnemyGroupDef(PedInstance::og_dmFriend
+                        | PedInstance::og_dmAgent);
+                    p->addEnemyGroupDef(PedInstance::og_dmFriend
+                        | PedInstance::og_dmGuard);
+                    p->addEnemyGroupDef(PedInstance::og_dmFriend
+                        | PedInstance::og_dmPolice);
+                    p->addEnemyGroupDef(PedInstance::og_dmFriend
+                        | PedInstance::og_dmCriminal);
+                    p->addEnemyGroupDef(PedInstance::og_dmFriend
+                        | PedInstance::og_dmCivilian);
                     p->setHostile(true);
+                } else if (mt == PedInstance::og_dmPolice) {
+                    p->setObjGroupDef(PedInstance::og_dmNeutral | mt);
+                    p->setHostileDesc(PedInstance::pd_smArmed);
+                } else {
+                    p->setObjGroupDef(PedInstance::og_dmNeutral | mt);
+                    // civilians and criminals
                 }
+                // TODO: not tile based? realworld including offset calculation?
                 p->setSightRange(7);
             } else if (i > 3 && i < 8) {
+                p->setMap(-1);
                 p->setHealth(-1);
                 p->setIsIgnored(true);
             }
@@ -790,6 +830,7 @@ void Mission::start()
                     weapons_.push_back(wi);
                     peds_[i]->addWeapon(wi);
                     wi->setOwner(peds_[i]);
+                    wi->setIsIgnored(true);
                 }
                 peds_[i]->setAgentIs(PedInstance::Agent_Active);
             }else{
@@ -925,8 +966,10 @@ MapObject * Mission::findAt(int tilex, int tiley, int tilez,
     switch(*majorT) {
         case MapObject::mt_Ped:
             for (unsigned int i = *searchIndex; i < peds_.size(); i++)
-                if (peds_[i]->tileX() == tilex && peds_[i]->tileY() == tiley
-                    && peds_[i]->tileZ() == tilez) {
+                if ((!peds_[i]->isIgnored()) && peds_[i]->tileX() == tilex
+                    && peds_[i]->tileY() == tiley
+                    && peds_[i]->tileZ() == tilez)
+                {
                     *searchIndex = i + 1;
                     *majorT = MapObject::mt_Ped;
                     return peds_[i];
@@ -936,9 +979,10 @@ MapObject * Mission::findAt(int tilex, int tiley, int tilez,
             *searchIndex = 0;
         case MapObject::mt_Weapon:
             for (unsigned int i = *searchIndex; i < weapons_.size(); i++)
-                if (weapons_[i]->map() != -1 && weapons_[i]->tileX() == tilex
+                if ((!weapons_[i]->isIgnored()) && weapons_[i]->tileX() == tilex
                     && weapons_[i]->tileY() == tiley
-                    && weapons_[i]->tileZ() == tilez) {
+                    && weapons_[i]->tileZ() == tilez)
+                {
                     *searchIndex = i + 1;
                     *majorT = MapObject::mt_Weapon;
                     return weapons_[i];
@@ -950,7 +994,8 @@ MapObject * Mission::findAt(int tilex, int tiley, int tilez,
             for (unsigned int i = *searchIndex; i < statics_.size(); i++)
                 if (statics_[i]->tileX() == tilex
                     && statics_[i]->tileY() == tiley
-                    && statics_[i]->tileZ() == tilez) {
+                    && statics_[i]->tileZ() == tilez)
+                {
                     *searchIndex = i + 1;
                     *majorT = MapObject::mt_Static;
                     return statics_[i];
@@ -962,7 +1007,8 @@ MapObject * Mission::findAt(int tilex, int tiley, int tilez,
             for (unsigned int i = *searchIndex; i < vehicles_.size(); i++)
                 if (vehicles_[i]->tileX() == tilex
                     && vehicles_[i]->tileY() == tiley
-                    && vehicles_[i]->tileZ() == tilez) {
+                    && vehicles_[i]->tileZ() == tilez)
+                {
                     *searchIndex = i + 1;
                     *majorT = MapObject::mt_Vehicle;
                     return vehicles_[i];
@@ -1212,7 +1258,7 @@ bool Mission::setSurfaces() {
                             upper_s = mtsurfaces_[xp + y + zp].twd;
                             if (isSurface(this_s) || this_s == 0x01) {
                                 if (sWalkable(this_s, upper_s)) {
-                                    sdirm |=0x04;
+                                    sdirm |= 0x04;
                                 } else {
                                     nxtfp->t = m_fdNonWalkable;
                                 }
