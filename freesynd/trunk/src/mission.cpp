@@ -850,7 +850,7 @@ void Mission::checkObjectives() {
 
 void Mission::end()
 {
-    for (unsigned int i = 4; i < peds_.size(); i++) {
+    for (unsigned int i = 8; i < peds_.size(); i++) {
         if (peds_[i]->health() <= 0)
             switch (peds_[i]->getMainType()) {
                 case PedInstance::m_tpAgent:
