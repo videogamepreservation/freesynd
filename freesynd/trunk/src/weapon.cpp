@@ -589,6 +589,7 @@ bool ProjectileShot::animate(int elapsed, Mission *m) {
 bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
     int elapsed, bool ignoreBlocker)
 {
+    // TODO : IPA influence
     if (ammo_remaining_ == 0)
         return false;
 
@@ -601,7 +602,8 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
     } else if (pWeaponClass_->dmgType() == MapObject::dmg_Heal) {
         // NOTE: not only self-healing in future?
         return false;
-    } else if (pWeaponClass_->dmgType() == MapObject::dmg_Mental) {
+    } else if (pWeaponClass_->dmgType() == MapObject::dmg_Heal) {
+        // NOTE: not only self-healing in future?
         return false;
     }
 
@@ -609,7 +611,7 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
     int yb = 0;
     int txb = 0;
     int tyb = 0;
-    // TODO: were when has owner add per weapon shift of position,
+    // TODO: when has owner add per weapon shift of position,
     // per direction, to "cp" - current position
     toDefineXYZ cp;
     if (owner_) {
@@ -922,7 +924,6 @@ int WeaponInstance::getShots(int elapsed) {
 void WeaponInstance::getInRangeOne(toDefineXYZ & cp,
    ShootableMapObject * & target, uint8 mask, bool checkTileOnly, int maxr)
 {
-    // TODO: this function should do auto-targetting, check for hostile needed
     bool ownerState, selfState = isIgnored();
     setIsIgnored(true);
  
@@ -931,8 +932,7 @@ void WeaponInstance::getInRangeOne(toDefineXYZ & cp,
         owner_->setIsIgnored(true);
     }
    
-    g_Session.getMission()->getInRangeOne(&cp, target, mask,
-        checkTileOnly, maxr);
+    getHostileInRange(&cp, target, mask, checkTileOnly, maxr);
 
     setIsIgnored(selfState);
     if (owner_)
@@ -1053,6 +1053,86 @@ void ShotClass::makeShot(bool rangeChecked, toDefineXYZ &cp, int anim_hit,
                     so->correctZ();
                     g_Session.getMission()->addSfxObject(so);
                 }
+            }
+        }
+    }
+}
+
+void WeaponInstance::getHostileInRange(toDefineXYZ * cp,
+    ShootableMapObject * & target, uint8 mask, bool checkTileOnly, int maxr)
+{
+    bool found = false;
+    double dist = -1;
+    double d = -1;
+    Mission * m = g_Session.getMission();
+
+    if (mask & MapObject::mt_Ped) {
+        for (int i = 0; i < m->numPeds(); i++) {
+            ShootableMapObject *p = m->ped(i);
+            if (!p->isIgnored() && ((PedInstance *)owner_)->checkHostileIs(p)
+                && m->inRangeCPos(cp, &p, NULL, false, checkTileOnly, maxr,
+                &d) == 1)
+            {
+                if (found) {
+                    if (d < dist) {
+                        target = p;
+                        dist = d;
+                    }
+                } else {
+                    dist = d;
+                    target = p;
+                    found = true;
+                }
+            }
+        }
+    }
+    if (mask & MapObject::mt_Vehicle) {
+        for (int i = 0; i < m->numVehicles(); i++) {
+            ShootableMapObject *v = m->vehicle(i);
+            if (!v->isIgnored() && ((PedInstance *)owner_)->checkHostileIs(v)
+                && m->inRangeCPos(cp, &v, NULL, false, checkTileOnly, maxr,
+                &d) == 1)
+            {
+                if (found) {
+                    if (d < dist) {
+                        target = v;
+                        dist = d;
+                    }
+                } else {
+                    dist = d;
+                    target = v;
+                    found = true;
+                }
+            }
+        }
+    }
+}
+
+void WeaponInstance::getNonFriendInRange(toDefineXYZ * cp,
+    ShootableMapObject * & target, bool checkTileOnly, int maxr)
+{
+    bool found = false;
+    double dist = -1;
+    double d = -1;
+    Mission * m = g_Session.getMission();
+
+    for (int i = 0; i < m->numPeds(); i++) {
+        ShootableMapObject *p = m->ped(i);
+        if (!p->isIgnored()
+            // TODO: do not ignore emulated, but for now ok
+            && (((PedInstance *)owner_)->checkFriendIs((PedInstance *)p))
+            && m->inRangeCPos(cp, &p, NULL, false, checkTileOnly, maxr,
+            &d) == 1)
+        {
+            if (found) {
+                if (d < dist) {
+                    target = p;
+                    dist = d;
+                }
+            } else {
+                dist = d;
+                target = p;
+                found = true;
             }
         }
     }

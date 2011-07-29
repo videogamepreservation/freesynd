@@ -191,8 +191,6 @@ public:
     uint8 inRangeCPos(toDefineXYZ * cp, ShootableMapObject ** t,
         PathNode * pn = NULL, bool setBlocker = false,
         bool checkTileOnly = false, int maxr = -1, double * distTo = NULL);
-    void getInRangeOne(toDefineXYZ * cp, ShootableMapObject * & target,
-        uint8 mask, bool checkTileOnly = true, int maxr = -1);
     void getInRangeAll(toDefineXYZ * cp, std::vector<ShootableMapObject *> & targets,
         uint8 mask, bool checkTileOnly = true, int maxr = -1);
 

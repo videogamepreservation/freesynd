@@ -50,6 +50,7 @@ public:
         dmg_Burn = 4,
         dmg_Explosion = 8,
         dmg_Hit = 16,
+        dmg_Physical = (dmg_Bullet | dmg_Laser | dmg_Burn | dmg_Explosion | dmg_Hit),
         dmg_Mental = 32,
         dmg_Heal = 64,
         dmg_All = 127,

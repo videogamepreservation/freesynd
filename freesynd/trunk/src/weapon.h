@@ -113,20 +113,20 @@ public:
     void submitToSearch() { submittedToSearch_ = true; }
 
     typedef enum {
-        spe_None = 0,
+        spe_None = 0x0,
         // can shoot only at owner
-        spe_Owner = 1,
-        spe_PointToPoint = 2,
-        spe_PointToManyPoints = 4,
-        spe_TargetReachInstant = 8,
-        spe_TargetReachNeedTime = 16,
-        spe_CreatesProjectile = 16,
-        spe_RangeDamageOnReach = 32,
+        spe_Owner = 0x0001,
+        spe_PointToPoint = 0x0002,
+        spe_PointToManyPoints = 0x0004,
+        spe_TargetReachInstant = 0x0008,
+        spe_TargetReachNeedTime = 0x0010,
+        spe_CreatesProjectile = 0x0010,
+        spe_RangeDamageOnReach = 0x0020,
         // ignore accuracy
-        spe_NoTarget = 64,
-        spe_UsesAmmo = 128,
-        spe_ChangeAttribute = 256,
-        spe_SelfDestruction = 512,
+        spe_NoTarget = 0x0040,
+        spe_UsesAmmo = 0x0080,
+        spe_ChangeAttribute = 0x0100,
+        spe_SelfDestruction = 0x0200
     }ShotPropertyEnum;
 
     typedef enum {
@@ -217,7 +217,10 @@ protected:
 
 class ShotClass {
 public:
-    void setOwner(ShootableMapObject *owner) { owner_ = owner; }
+    void setOwner(ShootableMapObject *owner) {
+        owner_ = owner;
+        last_owner_ = owner;
+    }
     ShootableMapObject *getOwner() { return owner_; }
 
     void shotTargetRandomizer(toDefineXYZ * cp, toDefineXYZ * tp, double angle,
@@ -229,6 +232,7 @@ protected:
         WeaponInstance *w = NULL);
 protected:
     ShootableMapObject *owner_;
+    ShootableMapObject *last_owner_;
 };
 
 /*!
@@ -281,6 +285,11 @@ public:
     bool isReloading();
     void activate();
     void deactivate();
+
+    void getHostileInRange(toDefineXYZ * cp, ShootableMapObject * & target,
+        uint8 mask, bool checkTileOnly = true, int maxr = -1);
+    void getNonFriendInRange(toDefineXYZ * cp,
+        ShootableMapObject * & target, bool checkTileOnly, int maxr);
 
 protected:
     Weapon *pWeaponClass_;

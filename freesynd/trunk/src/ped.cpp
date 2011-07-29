@@ -3177,7 +3177,8 @@ bool PedInstance::handleDamage(MapObject::DamageInflictType *d) {
         || (d->dtype & rcv_damage_def_) == 0)
         return false;
 
-    health_ -= d->dvalue;
+    if (d->dtype & MapObject::dmg_Physical)
+        health_ -= d->dvalue;
     if (d->ddir != -1) {
         dir_ = (d->ddir + 128) % 256;
     }
@@ -3258,7 +3259,7 @@ bool PedInstance::checkHostileIs(ShootableMapObject *obj,
 {
     bool hostile_rsp = false;
     if (obj->getMainType() == MapObject::mt_Vehicle) {
-        // TODO: add this check later create a list of all in vehicle
+        // TODO: add this check later, create a list of all in vehicle
     } else if (obj->getMainType() == MapObject::mt_Ped) {
         if (((PedInstance *)obj)->emulatedGroupDefsEmpty()) {
             hostile_rsp =
@@ -3280,4 +3281,17 @@ bool PedInstance::checkHostileIs(ShootableMapObject *obj,
         }
     }
     return hostile_rsp;
+}
+
+void PedInstance::verifyHostilesFound() {
+    for (std::set <ShootableMapObject *>::iterator it = hostiles_found_.begin();
+        it != hostiles_found_.end(); it++)
+    {
+        if ((*it)->health() <= 0 || ((*it)->getMainType() == MapObject::mt_Ped
+            && checkFriendIs((PedInstance *)(*it))))
+        {
+            hostiles_found_.erase(it);
+            it--;
+        }
+    }
 }
