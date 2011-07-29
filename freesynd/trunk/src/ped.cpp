@@ -3236,3 +3236,48 @@ void PedInstance::destroyAllWeapons() {
     }
     selected_weapon_ = -1;
 }
+
+bool PedInstance::isInEmulatedGroupDef(std::set <unsigned int> &r_egd,
+        unsigned int emulated_group_def)
+{
+    if (emulated_group_def != 0)
+        return emulated_group_defs_.find(emulated_group_def)
+            != emulated_group_defs_.end();
+    bool hostile_rsp = false;
+    for (std::set <unsigned int>::iterator it = r_egd.begin();
+        it != r_egd.end() && !hostile_rsp; it++)
+    {
+        hostile_rsp = emulated_group_defs_.find(*it)
+            != emulated_group_defs_.end();
+    }
+    return hostile_rsp;
+}
+
+bool PedInstance::checkHostileIs(ShootableMapObject *obj,
+    unsigned int hostile_desc_alt)
+{
+    bool hostile_rsp = false;
+    if (obj->getMainType() == MapObject::mt_Vehicle) {
+        // TODO: add this check later create a list of all in vehicle
+    } else if (obj->getMainType() == MapObject::mt_Ped) {
+        if (((PedInstance *)obj)->emulatedGroupDefsEmpty()) {
+            hostile_rsp =
+                isInEnemyGroupDef(((PedInstance *)obj)->objGroupDef());
+            if (!hostile_rsp) {
+                if (hostile_desc_alt == PedInstance::pd_smUndefined)
+                    hostile_desc_alt = hostile_desc_;
+                hostile_rsp =
+                    (((PedInstance *)obj)->descState() & hostile_desc_alt) != 0;
+            }
+        } else {
+            hostile_rsp =
+                ((PedInstance *)obj)->isInEmulatedGroupDef(enemy_group_defs_);
+        }
+        if (!hostile_rsp) {
+            hostile_rsp = isInHostilesFound(obj);
+        } else {
+            addHostilesFound(obj);
+        }
+    }
+    return hostile_rsp;
+}

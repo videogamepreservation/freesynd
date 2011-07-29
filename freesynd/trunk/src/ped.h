@@ -331,10 +331,9 @@ public:
     void rmEmulatedGroupDef(unsigned int emulated_group_def) {
         emulated_group_defs_.erase(emulated_group_def);
     }
-    bool isEmulatedGroupDef(unsigned int emulated_group_def) {
-        return emulated_group_defs_.find(emulated_group_def)
-            != emulated_group_defs_.end();
-    }
+    bool isInEmulatedGroupDef(std::set <unsigned int> &r_egd,
+        unsigned int emulated_group_def = 0);
+    bool emulatedGroupDefsEmpty() { return emulated_group_defs_.size() == 0; }
 
     void addHostilesFound(ShootableMapObject * hostile_found) {
         hostiles_found_.insert(hostile_found);
@@ -346,7 +345,18 @@ public:
         return hostiles_found_.find(hostile_found)
             != hostiles_found_.end();
     }
-    void verifyHostilesFound();
+    void verifyHostilesFound() {
+        for (std::set <ShootableMapObject *>::iterator it = hostiles_found_.begin();
+            it != hostiles_found_.end(); it++) {
+            if ((*it)->health() <= 0) {
+                hostiles_found_.erase(it);
+                it--;
+            }
+        }
+    }
+
+    bool checkHostileIs(ShootableMapObject *obj,
+        unsigned int hostile_desc_alt = 0);
 
     typedef enum {
         og_dmUndefined = 0x0,
