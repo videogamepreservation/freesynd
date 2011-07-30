@@ -112,7 +112,7 @@ public:
         vehicle_driver_ = vehicleDriver;
         all_passengers_.insert(vehicleDriver);
     }
-    bool handleDamage(MapObject::DamageInflictType *d);
+    bool handleDamage(ShootableMapObject::DamageInflictType *d);
 
 protected:
     Vehicle *vehicle_;

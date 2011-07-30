@@ -149,7 +149,7 @@ PedInstance *PedManager::loadInstance(uint8 * data, int map)
     newped->setStartHealth(hp);
 
     if (gamdata->state == 0x11) {
-        newped->setDrawnAnim(PedInstance::DeadAnim);
+        newped->setDrawnAnim(PedInstance::ad_DeadAnim);
         newped->setHealth(-1);
     } else
         newped->setHealth(hp);

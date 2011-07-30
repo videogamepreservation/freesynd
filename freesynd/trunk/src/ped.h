@@ -160,24 +160,25 @@ public:
     ~PedInstance();
 
     typedef enum {
-        NoAnimation,
-        HitAnim,
-        DieAnim,
-        DeadAnim,
-        DeadAgentAnim,
-        PickupAnim,
-        PutdownAnim,
-        WalkAnim,
-        StandAnim,
-        WalkFireAnim,
-        StandFireAnim,
-        VaporizeAnim,
-        SinkAnim,
-        StandBurnAnim,
-        WalkBurnAnim,
-        DieBurnAnim,
-        SmokeBurnAnim,
-        DeadBurnAnim,
+        ad_NoAnimation,
+        ad_HitAnim,
+        ad_DieAnim,
+        ad_DeadAnim,
+        ad_DeadAgentAnim,
+        ad_PickupAnim,
+        ad_PutdownAnim,
+        ad_WalkAnim,
+        ad_StandAnim,
+        ad_WalkFireAnim,
+        ad_StandFireAnim,
+        ad_VaporizeAnim,
+        ad_SinkAnim,
+        ad_StandBurnAnim,
+        ad_WalkBurnAnim,
+        ad_DieBurnAnim,
+        ad_SmokeBurnAnim,
+        ad_DeadBurnAnim,
+        ad_PersuadedAnim,
     }AnimationDrawn;
 
     typedef enum {
@@ -291,7 +292,7 @@ public:
         lvl_percep_effect_ = effect;
     }
 
-    bool handleDamage(MapObject::DamageInflictType *d);
+    bool handleDamage(ShootableMapObject::DamageInflictType *d);
     void destroyAllWeapons();
 
     void setActionState(unsigned int action_state) {

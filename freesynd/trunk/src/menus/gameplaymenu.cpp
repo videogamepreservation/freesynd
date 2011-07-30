@@ -1134,7 +1134,7 @@ void GameplayMenu::drawMissionHint(int elapsed) {
                 if (mission_->ped(i)->wePickupWeapon()) {
                     str = g_App.menus().getMessage("HINT_PICKUP_WEAPON");
                 }
-                if (mission_->ped(i)->drawnAnim() == PedInstance::HitAnim) {
+                if (mission_->ped(i)->drawnAnim() == PedInstance::ad_HitAnim) {
                     str = g_App.menus().getMessage("HINT_HIT_BY_BULLET");
                 }
             }

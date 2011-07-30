@@ -304,99 +304,104 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
     updated = MapObject::animate(elapsed);
     PedInstance::AnimationDrawn curanim = drawnAnim();
     switch (curanim) {
-        case PedInstance::HitAnim:
+        case PedInstance::ad_HitAnim:
             if (frame_ > ped_->lastHitFrame(getDirection())) {
                 if(speed_) {
-                    setDrawnAnim(PedInstance::WalkAnim);
+                    setDrawnAnim(PedInstance::ad_WalkAnim);
                 } else
-                    setDrawnAnim(PedInstance::StandAnim);
+                    setDrawnAnim(PedInstance::ad_StandAnim);
             } else 
                 if (health_ <= 0)
                     return updated;
             if (health_ > 0)
                 break;
-        case PedInstance::DieAnim:
+        case PedInstance::ad_DieAnim:
             if (frame_ <= ped_->lastDieFrame())
                 return updated;
-            setDrawnAnim(PedInstance::DeadAnim);
+            setDrawnAnim(PedInstance::ad_DeadAnim);
             return true;
             break;
-        case PedInstance::DeadAnim:
+        case PedInstance::ad_DeadAnim:
             return false;
             break;
-        case PedInstance::DeadAgentAnim:
+        case PedInstance::ad_DeadAgentAnim:
             return false;
             break;
-        case PedInstance::PickupAnim:
-        case PedInstance::PutdownAnim:
+        case PedInstance::ad_PickupAnim:
+        case PedInstance::ad_PutdownAnim:
             if (frame_ > ped_->lastPickupFrame()) {
                 if(speed_) {
-                    setDrawnAnim(PedInstance::WalkAnim);
+                    setDrawnAnim(PedInstance::ad_WalkAnim);
                 } else
-                    setDrawnAnim(PedInstance::StandAnim);
+                    setDrawnAnim(PedInstance::ad_StandAnim);
             } else
                 return updated;
             break;
-        case PedInstance::WalkAnim:
+        case PedInstance::ad_WalkAnim:
             break;
-        case PedInstance::StandAnim:
+        case PedInstance::ad_StandAnim:
             break;
-        case PedInstance::WalkFireAnim:
+        case PedInstance::ad_WalkFireAnim:
             if(frame_ > ped_->lastWalkFireFrame(getDirection(), weapon_idx)) {
                 if (speed_) {
-                    setDrawnAnim(PedInstance::WalkAnim);
+                    setDrawnAnim(PedInstance::ad_WalkAnim);
                 } else
-                    setDrawnAnim(PedInstance::StandAnim);
+                    setDrawnAnim(PedInstance::ad_StandAnim);
             }
             break;
-        case PedInstance::StandFireAnim:
+        case PedInstance::ad_StandFireAnim:
             if(frame_ > ped_->lastStandFireFrame(getDirection(), weapon_idx)) {
                 if (speed_) {
-                    setDrawnAnim(PedInstance::WalkAnim);
+                    setDrawnAnim(PedInstance::ad_WalkAnim);
                 } else
-                    setDrawnAnim(PedInstance::StandAnim);
+                    setDrawnAnim(PedInstance::ad_StandAnim);
             }
             break;
-        case PedInstance::VaporizeAnim:
+        case PedInstance::ad_VaporizeAnim:
             if (frame_ > ped_->lastVaporizeFrame(getDirection())) {
                 if (agent_is_ == PedInstance::Agent_Active) {
-                    setDrawnAnim(PedInstance::DeadAgentAnim);
+                    setDrawnAnim(PedInstance::ad_DeadAgentAnim);
                 } else {
-                    setDrawnAnim(PedInstance::NoAnimation);
+                    setDrawnAnim(PedInstance::ad_NoAnimation);
                 }
             }
             return updated;
-        case PedInstance::SinkAnim:
+        case PedInstance::ad_SinkAnim:
             // TODO: use this in future
             break;
-        case PedInstance::WalkBurnAnim:
+        case PedInstance::ad_WalkBurnAnim:
             updated |= movementP(mission, elapsed);
-        case PedInstance::StandBurnAnim:
+        case PedInstance::ad_StandBurnAnim:
             if (leftTimeShowAnim(elapsed))
                 return updated;
-            setDrawnAnim(PedInstance::DieBurnAnim);
+            setDrawnAnim(PedInstance::ad_DieBurnAnim);
             return updated;
-        case PedInstance::DieBurnAnim:
+        case PedInstance::ad_DieBurnAnim:
             if (frame_ > ped_->lastDieBurnFrame()) {
-                setDrawnAnim(PedInstance::SmokeBurnAnim);
+                setDrawnAnim(PedInstance::ad_SmokeBurnAnim);
                 setTimeShowAnim(7000);
             }
             return updated;
-        case PedInstance::SmokeBurnAnim:
+        case PedInstance::ad_SmokeBurnAnim:
             if (leftTimeShowAnim(elapsed))
                 return updated;
-            setDrawnAnim(PedInstance::DeadBurnAnim);
+            setDrawnAnim(PedInstance::ad_DeadBurnAnim);
             return updated;
-        case PedInstance::DeadBurnAnim:
+        case PedInstance::ad_DeadBurnAnim:
             return updated;
-        case PedInstance::NoAnimation:
+        case PedInstance::ad_PersuadedAnim:
+            if (frame_ > ped_->lastPersuadeFrame()) {
+                setDrawnAnim(PedInstance::ad_StandAnim);
+            }
+            return updated;
+        case PedInstance::ad_NoAnimation:
             return updated;
     }
 
-    if (curanim != PedInstance::HitAnim
-        && curanim != PedInstance::PickupAnim
-        && curanim != PedInstance::PutdownAnim
-        && curanim != PedInstance::StandFireAnim)
+    if (curanim != PedInstance::ad_HitAnim
+        && curanim != PedInstance::ad_PickupAnim
+        && curanim != PedInstance::ad_PutdownAnim
+        && curanim != PedInstance::ad_StandFireAnim)
     {
         updated |= movementP(mission, elapsed);
     }
@@ -410,7 +415,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
         w->setIsIgnored();
         w->activate();
         putdown_weapon_ = NULL;
-        setDrawnAnim(PedInstance::PutdownAnim);
+        setDrawnAnim(PedInstance::ad_PutdownAnim);
         if(speed() != 0){
             clearDestination();
             setSpeed(0);
@@ -426,7 +431,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
             pickup_weapon_->setIsIgnored(true);
             pickup_weapon_->deactivate();
             pickup_weapon_ = NULL;
-            setDrawnAnim(PedInstance::PickupAnim);
+            setDrawnAnim(PedInstance::ad_PickupAnim);
             return true;
         } else {
             if(health_ > 0) {
@@ -449,8 +454,11 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
         }
     }
 
-    if (target_ && health_ > 0 && firing_ == PedInstance::Firing_Not) {
-        if(target_->health() > 0) {
+    if (target_ && health_ > 0 && firing_ == PedInstance::Firing_Not) {    
+        if (target_->majorType() == MapObject::mjt_Ped
+            && checkFriendIs((PedInstance *)target_))
+            target_ = NULL;
+        if (target_ && target_->health() > 0) {
             if (selectedWeapon()
                 && selectedWeapon()->inflictDamage(target_, NULL)) {
                 firing_ = PedInstance::Firing_Fire;
@@ -467,27 +475,27 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
     if (weapon_idx == Weapon::Unarmed_Anim) {
         firing_ = PedInstance::Firing_Not;
         if (speed_) {
-            setDrawnAnim(PedInstance::WalkAnim);
+            setDrawnAnim(PedInstance::ad_WalkAnim);
         } else
-            setDrawnAnim(PedInstance::StandAnim);
+            setDrawnAnim(PedInstance::ad_StandAnim);
     }
 
     if (health_ > 0) {
         updated = true;
         if (firing_ == PedInstance::Firing_Not) {
-            if (curanim != PedInstance::HitAnim
-                && curanim != PedInstance::StandFireAnim
-                && curanim != PedInstance::WalkFireAnim) {
+            if (curanim != PedInstance::ad_HitAnim
+                && curanim != PedInstance::ad_StandFireAnim
+                && curanim != PedInstance::ad_WalkFireAnim) {
                 if (speed_) {
-                    setDrawnAnim(PedInstance::WalkAnim);
+                    setDrawnAnim(PedInstance::ad_WalkAnim);
                 } else
-                    setDrawnAnim(PedInstance::StandAnim);
+                    setDrawnAnim(PedInstance::ad_StandAnim);
             }
         } else if (firing_ == PedInstance::Firing_Fire) {
             if (speed_) {
-                setDrawnAnim(PedInstance::WalkFireAnim);
+                setDrawnAnim(PedInstance::ad_WalkFireAnim);
             } else
-                setDrawnAnim(PedInstance::StandFireAnim);
+                setDrawnAnim(PedInstance::ad_StandFireAnim);
 
             if (!(target_ && target_->health() > 0))
                 firing_ = PedInstance::Firing_Stop;
@@ -612,7 +620,7 @@ void PedInstance::showPath(int scrollX, int scrollY) {
 
 PedInstance::PedInstance(Ped *ped, int m) : ShootableMovableMapObject(m),
     ped_(ped), firing_(PedInstance::Firing_Not),
-    drawn_anim_(PedInstance::StandAnim), target_(NULL), target_pos_(NULL),
+    drawn_anim_(PedInstance::ad_StandAnim), target_(NULL), target_pos_(NULL),
     reach_obj_(NULL), reach_pos_(NULL), sight_range_(0),
     is_hostile_(false), reload_count_(0), selected_weapon_(-1),
     pickup_weapon_(NULL), putdown_weapon_(NULL), in_vehicle_(NULL),
@@ -624,7 +632,7 @@ PedInstance::PedInstance(Ped *ped, int m) : ShootableMovableMapObject(m),
 {
     hold_on_.wayFree = 0;
     rcv_damage_def_ = MapObject::ddmg_Ped;
-    major_type_ = MapObject::mt_Ped;
+    major_type_ = MapObject::mjt_Ped;
 }
 
 PedInstance::~PedInstance(){
@@ -655,57 +663,60 @@ void PedInstance::draw(int x, int y, int scrollX, int scrollY) {
     }
 
     switch(drawnAnim()){
-        case PedInstance::HitAnim:
+        case PedInstance::ad_HitAnim:
             ped_->drawHitFrame(x, y, getDirection(), frame_);
             break;
-        case PedInstance::DieAnim:
+        case PedInstance::ad_DieAnim:
             ped_->drawDieFrame(x, y, frame_);
             break;
-        case PedInstance::DeadAnim:
+        case PedInstance::ad_DeadAnim:
             ped_->drawDeadFrame(x, y, frame_);
             break;
-        case PedInstance::DeadAgentAnim:
+        case PedInstance::ad_DeadAgentAnim:
             break;
-        case PedInstance::PickupAnim:
+        case PedInstance::ad_PickupAnim:
             ped_->drawPickupFrame(x, y, frame_);
             break;
-        case PedInstance::PutdownAnim:
+        case PedInstance::ad_PutdownAnim:
             ped_->drawPickupFrame(x, y, frame_);
             break;
-        case PedInstance::WalkAnim:
+        case PedInstance::ad_WalkAnim:
             ped_->drawWalkFrame(x, y, getDirection(), frame_, weapon_idx);
             break;
-        case PedInstance::StandAnim:
+        case PedInstance::ad_StandAnim:
             ped_->drawStandFrame(x, y, getDirection(), frame_, weapon_idx);
             break;
-        case PedInstance::WalkFireAnim:
+        case PedInstance::ad_WalkFireAnim:
             ped_->drawWalkFireFrame(x, y, getDirection(), frame_, weapon_idx);
             break;
-        case PedInstance::StandFireAnim:
+        case PedInstance::ad_StandFireAnim:
             ped_->drawStandFireFrame(x, y, getDirection(), frame_, weapon_idx);
             break;
-        case PedInstance::VaporizeAnim:
+        case PedInstance::ad_VaporizeAnim:
             ped_->drawVaporizeFrame(x, y, getDirection(), frame_);
             break;
-        case PedInstance::SinkAnim:
+        case PedInstance::ad_SinkAnim:
             ped_->drawSinkFrame(x, y, frame_);
             break;
-        case PedInstance::StandBurnAnim:
+        case PedInstance::ad_StandBurnAnim:
             ped_->drawStandBurnFrame(x, y, frame_);
             break;
-        case PedInstance::WalkBurnAnim:
+        case PedInstance::ad_WalkBurnAnim:
             ped_->drawWalkBurnFrame(x, y, frame_);
             break;
-        case PedInstance::DieBurnAnim:
+        case PedInstance::ad_DieBurnAnim:
             ped_->drawDieBurnFrame(x, y, frame_);
             break;
-        case PedInstance::SmokeBurnAnim:
+        case PedInstance::ad_SmokeBurnAnim:
             ped_->drawSmokeBurnFrame(x, y, frame_);
             break;
-        case PedInstance::DeadBurnAnim:
+        case PedInstance::ad_DeadBurnAnim:
             ped_->drawDeadBurnFrame(x, y, frame_);
             break;
-        case PedInstance::NoAnimation:
+        case PedInstance::ad_PersuadedAnim:
+            ped_->drawPersuadeFrame(x, y, frame_);
+            break;
+        case PedInstance::ad_NoAnimation:
             break;
     }
 }
@@ -719,59 +730,62 @@ void PedInstance::drawSelectorAnim(int x, int y) {
         selectedWeapon() ? selectedWeapon()->index() : Weapon::Unarmed_Anim;
 
     switch(drawnAnim()) {
-        case PedInstance::HitAnim:
+        case PedInstance::ad_HitAnim:
             ped_->drawHitFrame(x, y, getDirection(), frame_);
             break;
-        case PedInstance::DieAnim:
+        case PedInstance::ad_DieAnim:
             ped_->drawDieFrame(x, y, frame_);
             break;
-        case PedInstance::DeadAnim:
+        case PedInstance::ad_DeadAnim:
             ped_->drawDeadFrame(x, y, frame_);
             break;
-        case PedInstance::DeadAgentAnim:
+        case PedInstance::ad_DeadAgentAnim:
             ped_->drawDeadAgentFrame(x, y, frame_);
             break;
-        case PedInstance::PickupAnim:
+        case PedInstance::ad_PickupAnim:
             ped_->drawPickupFrame(x, y, frame_);
             break;
-        case PedInstance::PutdownAnim:
+        case PedInstance::ad_PutdownAnim:
             ped_->drawPickupFrame(x, y, frame_);
             break;
-        case PedInstance::WalkAnim:
+        case PedInstance::ad_WalkAnim:
             ped_->drawWalkFrame(x, y, getDirection(), frame_, weapon_idx);
             break;
-        case PedInstance::StandAnim:
+        case PedInstance::ad_StandAnim:
             ped_->drawStandFrame(x, y, getDirection(), frame_, weapon_idx);
             break;
-        case PedInstance::WalkFireAnim:
+        case PedInstance::ad_WalkFireAnim:
             ped_->drawWalkFireFrame(x, y, getDirection(), frame_, weapon_idx);
             break;
-        case PedInstance::StandFireAnim:
+        case PedInstance::ad_StandFireAnim:
             ped_->drawStandFireFrame(x, y, getDirection(), frame_, weapon_idx);
             break;
-        case PedInstance::VaporizeAnim:
+        case PedInstance::ad_VaporizeAnim:
             ped_->drawVaporizeFrame(x, y, getDirection(), frame_);
             break;
-        case PedInstance::SinkAnim:
+        case PedInstance::ad_SinkAnim:
             ped_->drawSinkFrame(x, y, frame_);
             break;
-        case PedInstance::StandBurnAnim:
+        case PedInstance::ad_StandBurnAnim:
             ped_->drawStandBurnFrame(x, y, frame_);
             break;
-        case PedInstance::WalkBurnAnim:
+        case PedInstance::ad_WalkBurnAnim:
             ped_->drawWalkBurnFrame(x, y, frame_);
             break;
-        case PedInstance::DieBurnAnim:
+        case PedInstance::ad_DieBurnAnim:
             ped_->drawDieBurnFrame(x, y, frame_);
             break;
-        case PedInstance::SmokeBurnAnim:
+        case PedInstance::ad_SmokeBurnAnim:
             ped_->drawSmokeBurnFrame(x, y, frame_);
             break;
-        case PedInstance::DeadBurnAnim:
+        case PedInstance::ad_DeadBurnAnim:
             ped_->drawDeadBurnFrame(x, y, frame_);
             break;
-        case PedInstance::NoAnimation:
-            printf("hmm NoAnimation\n");
+        case PedInstance::ad_PersuadedAnim:
+            ped_->drawPersuadeFrame(x, y, frame_);
+            break;
+        case PedInstance::ad_NoAnimation:
+            printf("hmm ad_NoAnimation\n");
             break;
     }
 }
@@ -933,58 +947,61 @@ void PedInstance::setDrawnAnim(PedInstance::AnimationDrawn drawn_anim) {
     drawn_anim_ = drawn_anim;
     frame_ = 0;
     switch (drawn_anim_) {
-        case PedInstance::HitAnim:
+        case PedInstance::ad_HitAnim:
             setFramesPerSec(6);
             break;
-        case PedInstance::DieAnim:
+        case PedInstance::ad_DieAnim:
             setFramesPerSec(10);
             break;
-        case PedInstance::DeadAnim:
+        case PedInstance::ad_DeadAnim:
             setFramesPerSec(2);
             break;
-        case PedInstance::DeadAgentAnim:
+        case PedInstance::ad_DeadAgentAnim:
             setFramesPerSec(2);
             break;
-        case PedInstance::PickupAnim:
+        case PedInstance::ad_PickupAnim:
             setFramesPerSec(8);
             break;
-        case PedInstance::PutdownAnim:
+        case PedInstance::ad_PutdownAnim:
             setFramesPerSec(8);
             break;
-        case PedInstance::WalkAnim:
+        case PedInstance::ad_WalkAnim:
             setFramesPerSec(8);
             break;
-        case PedInstance::StandAnim:
+        case PedInstance::ad_StandAnim:
             setFramesPerSec(8);
             break;
-        case PedInstance::WalkFireAnim:
+        case PedInstance::ad_WalkFireAnim:
             setFramesPerSec(8);
             break;
-        case PedInstance::StandFireAnim:
+        case PedInstance::ad_StandFireAnim:
             setFramesPerSec(8);
             break;
-        case PedInstance::VaporizeAnim:
+        case PedInstance::ad_VaporizeAnim:
             setFramesPerSec(6);
             break;
-        case PedInstance::SinkAnim:
+        case PedInstance::ad_SinkAnim:
             setFramesPerSec(8);
             break;
-        case PedInstance::StandBurnAnim:
+        case PedInstance::ad_StandBurnAnim:
             setFramesPerSec(8);
             break;
-        case PedInstance::WalkBurnAnim:
+        case PedInstance::ad_WalkBurnAnim:
             setFramesPerSec(8);
             break;
-        case PedInstance::DieBurnAnim:
+        case PedInstance::ad_DieBurnAnim:
             setFramesPerSec(6);
             break;
-        case PedInstance::SmokeBurnAnim:
+        case PedInstance::ad_SmokeBurnAnim:
             setFramesPerSec(2);
             break;
-        case PedInstance::DeadBurnAnim:
+        case PedInstance::ad_DeadBurnAnim:
             setFramesPerSec(2);
             break;
-        case PedInstance::NoAnimation:
+        case PedInstance::ad_NoAnimation:
+            break;
+        case PedInstance::ad_PersuadedAnim:
+            setFramesPerSec(8);
             break;
     }
 }
@@ -3172,13 +3189,25 @@ bool PedInstance::movementP(Mission *m, int elapsed)
     return updated;
 }
 
-bool PedInstance::handleDamage(MapObject::DamageInflictType *d) {
+bool PedInstance::handleDamage(ShootableMapObject::DamageInflictType *d) {
     if (health_ <= 0 || rcv_damage_def_ == MapObject::ddmg_Invulnerable
         || (d->dtype & rcv_damage_def_) == 0)
         return false;
 
-    if (d->dtype & MapObject::dmg_Physical)
+    if ((d->dtype & MapObject::dmg_Physical) != 0)
         health_ -= d->dvalue;
+    else if (d->dtype == MapObject::dmg_Mental) {
+        speed_ = 0;
+        clearDestination();
+        putdown_weapon_ = NULL;
+        pickup_weapon_ = NULL;
+        target_ = NULL;
+        // TODO: check for required number of persuade points before applying
+        setObjGroupDef((obj_group_def_ & 0xFFFFFF00) |
+            (((PedInstance *)d->d_owner)->objGroupDef() & 0xFF));
+        setDrawnAnim(PedInstance::ad_PersuadedAnim);
+        return true;
+    }
     if (d->ddir != -1) {
         dir_ = (d->ddir + 128) % 256;
     }
@@ -3194,26 +3223,26 @@ bool PedInstance::handleDamage(MapObject::DamageInflictType *d) {
 
         switch ((unsigned int)d->dtype) {
             case MapObject::dmg_Bullet:
-                setDrawnAnim(PedInstance::DieAnim);
+                setDrawnAnim(PedInstance::ad_DieAnim);
                 break;
             case MapObject::dmg_Laser:
-                setDrawnAnim(PedInstance::VaporizeAnim);
+                setDrawnAnim(PedInstance::ad_VaporizeAnim);
                 destroyAllWeapons();
                 break;
             case MapObject::dmg_Burn:
                 // TODO: sometimes we will walk burning
-                setDrawnAnim(PedInstance::StandBurnAnim);
+                setDrawnAnim(PedInstance::ad_StandBurnAnim);
                 destroyAllWeapons();
                 setTimeShowAnim(4000);
                 break;
             case MapObject::dmg_Explosion:
                 // TODO: sometimes we will walk burning
-                setDrawnAnim(PedInstance::StandBurnAnim);
+                setDrawnAnim(PedInstance::ad_StandBurnAnim);
                 destroyAllWeapons();
                 setTimeShowAnim(4000);
                 break;
             case MapObject::dmg_Hit:
-                setDrawnAnim(PedInstance::HitAnim);
+                setDrawnAnim(PedInstance::ad_HitAnim);
                 break;
         }
         if (numWeapons())
@@ -3221,7 +3250,7 @@ bool PedInstance::handleDamage(MapObject::DamageInflictType *d) {
         is_ignored_ = true;
     } else {
         // TODO: agent sometimes can survive explosion, they need to walk burning?
-        setDrawnAnim(PedInstance::HitAnim);
+        setDrawnAnim(PedInstance::ad_HitAnim);
     }
     return true;
 }
@@ -3258,9 +3287,9 @@ bool PedInstance::checkHostileIs(ShootableMapObject *obj,
     unsigned int hostile_desc_alt)
 {
     bool hostile_rsp = false;
-    if (obj->getMainType() == MapObject::mt_Vehicle) {
+    if (obj->majorType() == MapObject::mjt_Vehicle) {
         // TODO: add this check later, create a list of all in vehicle
-    } else if (obj->getMainType() == MapObject::mt_Ped) {
+    } else if (obj->majorType() == MapObject::mjt_Ped) {
         if (((PedInstance *)obj)->emulatedGroupDefsEmpty()) {
             hostile_rsp =
                 isInEnemyGroupDef(((PedInstance *)obj)->objGroupDef());
@@ -3287,7 +3316,7 @@ void PedInstance::verifyHostilesFound() {
     for (std::set <ShootableMapObject *>::iterator it = hostiles_found_.begin();
         it != hostiles_found_.end(); it++)
     {
-        if ((*it)->health() <= 0 || ((*it)->getMainType() == MapObject::mt_Ped
+        if ((*it)->health() <= 0 || ((*it)->majorType() == MapObject::mjt_Ped
             && checkFriendIs((PedInstance *)(*it))))
         {
             hostiles_found_.erase(it);

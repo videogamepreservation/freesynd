@@ -67,13 +67,6 @@ public:
         ddmg_WeaponBomb = dmg_Bullet | dmg_Laser | dmg_Explosion,
     } DefDamageType;
 
-    typedef struct {
-        DamageType dtype;
-        int dvalue;
-        // direction damage comes from, should be angle 256 degree based
-        int ddir;
-    } DamageInflictType;
-
     void setPosition(int tile_x, int tile_y, int tile_z, int off_x = 0,
             int off_y = 0, int off_z = 0) {
         tile_x_ = tile_x;
@@ -200,11 +193,11 @@ public:
                double * inc_xyz);
 
     typedef enum {
-        mt_Undefined = 0,
-        mt_Ped = 1,
-        mt_Weapon = 2,
-        mt_Static = 4,
-        mt_Vehicle = 8,
+        mjt_Undefined = 0,
+        mjt_Ped = 1,
+        mjt_Weapon = 2,
+        mjt_Static = 4,
+        mjt_Vehicle = 8,
     } MajorTypeEnum;
 
     MajorTypeEnum majorType() { return major_type_; }
@@ -293,8 +286,15 @@ public:
 
         start_health_ = n;
     }
+    typedef struct {
+        DamageType dtype;
+        int dvalue;
+        // direction damage comes from, should be angle 256 degree based
+        int ddir;
+        ShootableMapObject * d_owner;
+    } DamageInflictType;
 
-    virtual bool handleDamage(MapObject::DamageInflictType * d) {
+    virtual bool handleDamage(ShootableMapObject::DamageInflictType * d) {
         if (health_ > 0) {
             health_ -= d->dvalue;
             return true;
@@ -404,7 +404,7 @@ public:
 
     void draw(int x, int y);
     bool animate(int elapsed, Mission *obj);
-    bool handleDamage(MapObject::DamageInflictType *d);
+    bool handleDamage(ShootableMapObject::DamageInflictType *d);
 
 protected:
     int anim_, burning_anim_, damaged_anim_;

@@ -123,37 +123,44 @@ public:
         spe_CreatesProjectile = 0x0010,
         spe_RangeDamageOnReach = 0x0020,
         // ignore accuracy
-        spe_NoTarget = 0x0040,
+        spe_ShootsWhileNoTarget = 0x0040,
         spe_UsesAmmo = 0x0080,
         spe_ChangeAttribute = 0x0100,
-        spe_SelfDestruction = 0x0200
+        spe_SelfDestruction = 0x0200,
+        spe_TargetObjectOnly = 0x0400,
+        spe_TargetAll = 0x0800
     }ShotPropertyEnum;
 
     typedef enum {
         wspt_None = spe_None,
         wspt_Persuadatron = (spe_PointToPoint | spe_TargetReachInstant
-            | spe_NoTarget),
+            | spe_ShootsWhileNoTarget | spe_TargetObjectOnly),
         wspt_Pistol =
-            (spe_PointToPoint | spe_TargetReachInstant | spe_UsesAmmo),
+            (spe_PointToPoint | spe_TargetReachInstant | spe_UsesAmmo
+            | spe_TargetAll),
         wspt_GaussGun =
             (spe_PointToPoint | spe_TargetReachNeedTime | spe_UsesAmmo
-            | spe_RangeDamageOnReach),
+            | spe_RangeDamageOnReach | spe_TargetAll),
         wspt_Shotgun =
-            (spe_PointToManyPoints | spe_TargetReachInstant | spe_UsesAmmo),
+            (spe_PointToManyPoints | spe_TargetReachInstant | spe_UsesAmmo
+            | spe_TargetAll),
         wspt_Uzi = (spe_PointToManyPoints | spe_TargetReachInstant
-            | spe_UsesAmmo),
+            | spe_UsesAmmo | spe_TargetAll),
         wspt_Minigun =
-            (spe_PointToManyPoints | spe_TargetReachInstant | spe_UsesAmmo),
+            (spe_PointToManyPoints | spe_TargetReachInstant | spe_UsesAmmo
+            | spe_TargetAll),
         wspt_Laser =
             (spe_PointToPoint | spe_TargetReachInstant
-            | spe_RangeDamageOnReach | spe_UsesAmmo),
+            | spe_RangeDamageOnReach | spe_UsesAmmo | spe_TargetAll),
         wspt_Flamer =
-            (spe_PointToPoint | spe_TargetReachNeedTime | spe_UsesAmmo),
+            (spe_PointToPoint | spe_TargetReachNeedTime | spe_UsesAmmo
+            | spe_TargetAll),
         wspt_LongRange =
-            (spe_PointToPoint | spe_TargetReachInstant | spe_UsesAmmo),
+            (spe_PointToPoint | spe_TargetReachInstant | spe_UsesAmmo
+            | spe_TargetAll),
         wspt_Scanner = (spe_Owner | spe_ChangeAttribute),
         wspt_MediKit = (spe_Owner | spe_UsesAmmo),
-        wspt_TimeBomb = (spe_NoTarget | spe_TargetReachInstant
+        wspt_TimeBomb = (spe_ShootsWhileNoTarget | spe_TargetReachInstant
             | spe_RangeDamageOnReach | spe_SelfDestruction),
         wspt_AccessCard = (spe_Owner | spe_ChangeAttribute),
         wspt_EnergyShield =
@@ -161,14 +168,14 @@ public:
     }WeaponShotPropertyType;
 
     typedef enum {
-        stm_AllObjects = MapObject::mt_Ped | MapObject::mt_Vehicle
-        | MapObject::mt_Static | MapObject::mt_Weapon,
+        stm_AllObjects = MapObject::mjt_Ped | MapObject::mjt_Vehicle
+        | MapObject::mjt_Static | MapObject::mjt_Weapon,
     }SearchTargetMask;
 
     typedef struct {
         PathNode tpn;
         toDefineXYZ tp;
-        MapObject::DamageInflictType d;
+        ShootableMapObject::DamageInflictType d;
         ShootableMapObject *smo;
     }ShotDesc;
 
@@ -180,11 +187,11 @@ public:
         // if weapon can do range damage this is used for range definition
         // with animation
         int rd_anim;
-    }HitAnims;
+    }ad_HitAnims;
 
     unsigned int shotProperty() { return shot_property_; }
 
-    HitAnims * anims() { return &anims_; }
+    ad_HitAnims * anims() { return &anims_; }
     int rangeDmg() { return range_dmg_; }
     double shotAngle() { return shot_angle_; }
     double shotAcurracy() { return shot_accuracy_; }
@@ -207,7 +214,7 @@ protected:
     /*! True when weapon was found and submit to search manager.*/
     bool submittedToSearch_;
     unsigned int shot_property_;
-    HitAnims anims_;
+    ad_HitAnims anims_;
     int range_dmg_;
     // some weapons have wider shot
     double shot_angle_;
@@ -289,7 +296,8 @@ public:
     void getHostileInRange(toDefineXYZ * cp, ShootableMapObject * & target,
         uint8 mask, bool checkTileOnly = true, int maxr = -1);
     void getNonFriendInRange(toDefineXYZ * cp,
-        ShootableMapObject * & target, bool checkTileOnly, int maxr);
+        ShootableMapObject * & target, bool checkTileOnly = true,
+        int maxr = -1);
 
 protected:
     Weapon *pWeaponClass_;
@@ -303,20 +311,17 @@ protected:
 
 class ProjectileShot: public ShotClass {
 public:
-    ProjectileShot(toDefineXYZ &cp, toDefineXYZ &tp, MapObject::DamageType dt,
-        int d_value, int d_range, Weapon::HitAnims *panims,
-        ShootableMapObject * ignrd_obj = NULL,
-        int range_max = 1, ShootableMapObject * w_owner = NULL);
+    ProjectileShot(toDefineXYZ &cp, Weapon::ShotDesc & sd, int d_range,
+        Weapon::ad_HitAnims *panims, ShootableMapObject * ignrd_obj = NULL,
+        int range_max = 1);
     ~ProjectileShot() {}
     bool animate(int elapsed, Mission *m);
     bool prjsLifeOver() { return life_over_; }
 
 protected:
     toDefineXYZ cur_pos_;
-    toDefineXYZ target_pos_;
     toDefineXYZ base_pos_;
-    MapObject::DamageType dmg_type_;
-    int dmg_value_;
+    Weapon::ShotDesc sd_prj_;
     int dmg_range_;
     double dist_max_;
     double dist_passed_;
@@ -329,6 +334,6 @@ protected:
     double inc_x_;
     double inc_y_;
     double inc_z_;
-    Weapon::HitAnims anims_;
+    Weapon::ad_HitAnims anims_;
 };
 #endif
