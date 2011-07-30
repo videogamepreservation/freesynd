@@ -669,7 +669,9 @@ void Mission::createFastKeys(int tilex, int tiley, int maxtilex, int maxtiley) {
     for (unsigned int i = 0; i < vehicles_.size(); i++) {
         VehicleInstance *v = vehicles_[i];
         if (v->tileX() >= tilex && v->tileX() < maxtilex
-            && v->tileY() >= tiley && v->tileY() < maxtiley) {
+            && v->tileY() >= tiley && v->tileY() < maxtiley)
+        {
+            // NOTE: a trick to make vehicles be drawn correctly z+1
             fast_vehicle_cache_.insert(fastKey(v->tileX(),
                 v->tileY(), v->tileZ() + 1));
             cache_vehicles_.push_back(v);
@@ -681,7 +683,8 @@ void Mission::createFastKeys(int tilex, int tiley, int maxtilex, int maxtiley) {
         PedInstance *p = peds_[i];
         if (p->agentIs() == PedInstance::Agent_Active && p->map() != -1) {
             if (p->tileX() >= tilex && p->tileX() < maxtilex
-                && p->tileY() >= tiley && p->tileY() < maxtiley) {
+                && p->tileY() >= tiley && p->tileY() < maxtiley)
+            {
                 fast_ped_cache_.insert(fastKey(p));
                 cache_peds_.push_back(p);
             }
@@ -691,7 +694,8 @@ void Mission::createFastKeys(int tilex, int tiley, int maxtilex, int maxtiley) {
         PedInstance *p = peds_[i];
         if (p->map() != -1) {
             if (p->tileX() >= tilex && p->tileX() < maxtilex
-                && p->tileY() >= tiley && p->tileY() < maxtiley) {
+                && p->tileY() >= tiley && p->tileY() < maxtiley)
+            {
                 fast_ped_cache_.insert(fastKey(p));
                 cache_peds_.push_back(p);
             }
@@ -703,7 +707,8 @@ void Mission::createFastKeys(int tilex, int tiley, int maxtilex, int maxtiley) {
         WeaponInstance *w = weapons_[i];
         if (w->map() != -1) {
             if (w->tileX() >= tilex && w->tileX() < maxtilex
-                && w->tileY() >= tiley && w->tileY() < maxtiley) {
+                && w->tileY() >= tiley && w->tileY() < maxtiley)
+            {
                 fast_weapon_cache_.insert(fastKey(w));
                 cache_weapons_.push_back(w);
             }
@@ -714,7 +719,8 @@ void Mission::createFastKeys(int tilex, int tiley, int maxtilex, int maxtiley) {
     for (unsigned int i = 0; i < statics_.size(); i++) {
         Static *s = statics_[i];
         if (s->tileX() >= tilex && s->tileX() < maxtilex
-            && s->tileY() >= tiley && s->tileY() < maxtiley) {
+            && s->tileY() >= tiley && s->tileY() < maxtiley)
+        {
             fast_statics_cache_.insert(fastKey(s));
             cache_statics_.push_back(s);
         }
@@ -724,7 +730,8 @@ void Mission::createFastKeys(int tilex, int tiley, int maxtilex, int maxtiley) {
     for (unsigned int i = 0; i < sfx_objects_.size(); i++) {
         SFXObject *so = sfx_objects_[i];
         if (so->tileX() >= tilex && so->tileX() < maxtilex
-            && so->tileY() >= tiley && so->tileY() < maxtiley) {
+            && so->tileY() >= tiley && so->tileY() < maxtiley)
+        {
             fast_sfx_objects_cache_.insert(fastKey(so));
             cache_sfx_objects_.push_back(so);
         }
@@ -746,8 +753,9 @@ void Mission::drawAt(int tilex, int tiley, int tilez, int x, int y,
         for (unsigned int i = 0; i < cache_vehicles_.size(); i++)
             if (cache_vehicles_[i]->tileX() == tilex
                 && cache_vehicles_[i]->tileY() == tiley
+                // NOTE: a trick to make vehicles be drawn correctly z+1
                 && (cache_vehicles_[i]->tileZ() + 1) == tilez)
-                cache_vehicles_[i]->draw(x, y + TILE_HEIGHT / 3);
+                cache_vehicles_[i]->draw(x, y);
     }
 
     if (fast_ped_cache_.find(key) != fast_ped_cache_.end()) {
@@ -756,7 +764,7 @@ void Mission::drawAt(int tilex, int tiley, int tilez, int x, int y,
             if (cache_peds_[i]->tileX() == tilex
                 && cache_peds_[i]->tileY() == tiley
                 && cache_peds_[i]->tileZ() == tilez) {
-                cache_peds_[i]->draw(x, y, scrollX, scrollY);
+                cache_peds_[i]->draw(x, y);
 #if 0
                 g_Screen.drawLine(x - TILE_WIDTH / 2, y,
                                   x + TILE_WIDTH / 2, y, 11);

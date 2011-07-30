@@ -43,6 +43,7 @@ public:
     MapObject(int m);
     virtual ~MapObject() {}
 
+    virtual void draw(int x, int y) = 0;
     typedef enum {
         dmg_None = 0,
         dmg_Bullet = 1,
@@ -344,7 +345,6 @@ class Static : public ShootableMapObject {
 public:
     static Static *loadInstance(uint8 *data, int m);
 
-    virtual void draw(int x, int y) = 0;
     virtual bool animate(int elapsed, Mission *obj) { return MapObject::animate(elapsed); }
     typedef enum {
         sttdoor_Open = 0,

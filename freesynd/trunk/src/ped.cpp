@@ -644,7 +644,7 @@ PedInstance::~PedInstance(){
         delete reach_pos_;
 }
 
-void PedInstance::draw(int x, int y, int scrollX, int scrollY) {
+void PedInstance::draw(int x, int y) {
 
     if (agent_is_ == PedInstance::Agent_Non_Active)
         return;

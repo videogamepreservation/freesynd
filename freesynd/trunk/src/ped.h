@@ -189,7 +189,7 @@ public:
         m_tpCriminal = 0x10,
     }mainPedType;
 
-    void draw(int x, int y, int scrollX, int scrollY);
+    void draw(int x, int y);
 
     void setFrame(int f) { frame_ = f; }
 

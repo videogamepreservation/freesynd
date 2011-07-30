@@ -102,6 +102,7 @@ bool VehicleInstance::animate(int elapsed)
 
 void VehicleInstance::draw(int x, int y)
 {
+    y += TILE_HEIGHT / 3;
     addOffs(x, y);
 
     // ensure on map
