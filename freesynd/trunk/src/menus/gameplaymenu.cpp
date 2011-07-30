@@ -512,7 +512,8 @@ void GameplayMenu::handleMouseMotion(int x, int y, int state, const int modKeys)
         PedInstance *p = mission_->ped(i);
         if (p->health() > 0 && p->map() != -1) {
             int px = p->screenX() - 10;
-            int py = p->screenY() - 10 - p->visZ() * TILE_HEIGHT/3;
+            int py = p->screenY() - (1 + p->visZ()) * TILE_HEIGHT/3
+                - (p->offZ() * TILE_HEIGHT/3) / 128;
 
             if (x - 129 + world_x_ >= px && y + world_y_ >= py &&
                 x - 129 + world_x_ < px + 21 && y + world_y_ < py + 34) {
@@ -545,10 +546,11 @@ void GameplayMenu::handleMouseMotion(int x, int y, int state, const int modKeys)
 
         if (w->map() != -1) {
             int px = w->screenX() - 10;
-            int py = w->screenY() - w->visZ() * TILE_HEIGHT/3;
+            int py = w->screenY() + 4 - w->visZ() * TILE_HEIGHT/3
+                - (w->offZ() * TILE_HEIGHT/3) / 128;
 
             if (x - 129 + world_x_ >= px && y + world_y_ >= py &&
-                x - 129 + world_x_ < px + 20 && y + world_y_ < py + 20) {
+                x - 129 + world_x_ < px + 20 && y + world_y_ < py + 15) {
                 pointing_at_weapon_ = i;
                 break;
             }
