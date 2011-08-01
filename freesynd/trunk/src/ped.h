@@ -411,6 +411,7 @@ protected:
         Firing_Stop
     } firing_;
 
+    std::vector <Mission::ObjectiveType> action_queue;
     // (pedActionStateMasks)
     unsigned int action_state_;
     // (pedDescStateMasks)

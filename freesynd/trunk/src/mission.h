@@ -473,6 +473,44 @@ public:
     unsigned int getMaxInfoLvl() {return max_info_lvl_; }
     unsigned int getMaxEnhanceLvl() {return max_enhance_lvl_; }
 
+    // this type is also used for action_queue_ for pedinstance
+    typedef enum {
+        objv_None = 0x0,
+        // Setup control over object where possible to lose this control
+        objv_AquireControl = 0x0001,
+        // Leave control over object where possible to lose this control
+        objv_LoseControl = 0x0002,
+        // Obtain inventory object
+        objv_GetObject = 0x0008,
+        // Object of defined subtype (of type) should be destroyed
+        // defined by indx
+        objv_DestroyObject = 0x0010,
+        // Use of object untill condition is met
+        objv_UseObject = 0x0020,
+        // Leave object
+        // NOTE: reserved in case we will need it
+        objv_PutObject = 0x0040,
+        // Objects should be at defined location
+        objv_ReachLocation = 0x0080,
+        objv_FollowObject = 0x0100,
+        // Objective for defined object(s), has sub-objective
+        // NOTE: this can be used to set objective(s) for single ped or group
+        objv_ExecuteObjective = 0x0200,
+        // Should wait some time
+        objv_Wait = 0x0400,
+        objv_AttackLocation = 0x0800,
+        // in range of current weapon or inrange of other friendly units:
+        // will execute objv_ReachLocation
+        objv_FindEnemy = 0x1000,
+        // in range of current weapon
+        objv_FindNonFriend = 0x2000,
+        objv_ExecuteObjectiveEnd = 0x4000,
+        objv_All = 0x8000,
+        // Protect object at all cost, command(s) after this should have
+        // objv_ExecuteObjectiveEnd
+        // objv_Protect = objv_FollowObject | objv_ExecuteObjective,
+    }ObjectiveType;
+
 protected:
     bool sWalkable(char thisTile, char upperTile);
     bool isSurface(char thisTile);
@@ -495,36 +533,6 @@ protected:
     std::vector<WeaponInstance *> cache_weapons_;
     std::vector<Static *> cache_statics_;
     std::vector<SFXObject *> cache_sfx_objects_;
-
-    typedef enum {
-        objv_None,
-        // Setup control over object where possible to lose this control
-        objv_AquireControl,
-        // Leave control over object where possible to lose this control
-        // NOTE: reserved in case we will need it
-        objv_LoseControl,
-        // Protect object at all cost
-        objv_Protect,
-        // Obtain inventory object
-        // NOTE: maybe in future we have not only weapons, costumes? drones?
-        objv_GetObject,
-        // Object of defined subtype (of type) should be destroyed
-        // defined by indx
-        objv_DestroyObject,
-        // Use of object untill condition is met
-        objv_UseObject,
-        // Leave object
-        // NOTE: reserved in case we will need it
-        objv_LeaveObject,
-        // Objects should be at defined location
-        objv_ReachLocation,
-        // Objective for defined object(s), has sub-objective
-        // NOTE: this can be used to set objective(s) for single ped or group
-        objv_ExecuteObjective,
-        // Should wait some time
-        // NOTE: reserved in case we will need it
-        objv_Wait
-    }ObjectiveType;
 
     typedef struct {
         // type of objective
@@ -555,8 +563,8 @@ protected:
         uint16 nxtobjindx;
 
         void clear() {
-            type = (ObjectiveType)0;
-            targettype = (MapObject::MajorTypeEnum)0;
+            type = (ObjectiveType)objv_None;
+            targettype = (MapObject::MajorTypeEnum)MapObject::mjt_Undefined;
             targetsubtype = 0;
             targetindx = 0;
             condition = 0;
