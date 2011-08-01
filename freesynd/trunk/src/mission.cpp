@@ -428,7 +428,8 @@ bool Mission::loadLevel(uint8 * levelData)
                 if (bindx > 0 && bindx < 0x5C02) {
                     cindx = (bindx - 2) / 92;
                     if ((cindx * 92 + 2) == bindx && pindx[cindx] != 0xFFFF) {
-                        objd.type = objv_Protect;
+                        //TODO: multiple commands are required here
+                        //objd.type = objv_Protect;
                         objd.targettype = MapObject::mjt_Ped;
                         objd.targetindx = pindx[cindx];
                         objd.msg = g_App.menus().getMessage("GOAL_PROTECT");
@@ -867,8 +868,8 @@ void Mission::checkObjectives() {
                 break;
             case objv_AquireControl:
                 break;
-            case objv_Protect:
-                break;
+            //case objv_Protect:
+                //break;
             case objv_GetObject:
                 break;
             case objv_DestroyObject:
