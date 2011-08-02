@@ -444,7 +444,7 @@ bool Mission::loadLevel(uint8 * levelData)
                     bindx -= 0x9562;
                     cindx = bindx / 36;
                     if ((cindx * 36) == bindx && windx[cindx] != 0xFFFF) {
-                        objd.type = objv_GetObject;
+                        objd.type = objv_PickUpObject;
                         objd.targettype = MapObject::mjt_Weapon;
                         objd.targetindx = windx[cindx];
                         objd.msg = g_App.menus().getMessage("GOAL_TAKE_WEAPON");
@@ -870,7 +870,7 @@ void Mission::checkObjectives() {
                 break;
             //case objv_Protect:
                 //break;
-            case objv_GetObject:
+            case objv_PickUpObject:
                 break;
             case objv_DestroyObject:
                 switch (objd.targettype) {

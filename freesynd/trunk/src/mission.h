@@ -481,31 +481,29 @@ public:
         // Leave control over object where possible to lose this control
         objv_LoseControl = 0x0002,
         // Obtain inventory object
-        objv_GetObject = 0x0008,
+        objv_PickUpObject = 0x0008,
         // Object of defined subtype (of type) should be destroyed
         // defined by indx
         objv_DestroyObject = 0x0010,
         // Use of object untill condition is met
         objv_UseObject = 0x0020,
-        // Leave object
-        // NOTE: reserved in case we will need it
-        objv_PutObject = 0x0040,
+        objv_PutDownObject = 0x0040,
         // Objects should be at defined location
         objv_ReachLocation = 0x0080,
         objv_FollowObject = 0x0100,
-        // Objective for defined object(s), has sub-objective
-        // NOTE: this can be used to set objective(s) for single ped or group
-        objv_ExecuteObjective = 0x0200,
         // Should wait some time
-        objv_Wait = 0x0400,
-        objv_AttackLocation = 0x0800,
+        objv_Wait = 0x0200,
+        objv_AttackLocation = 0x0400,
         // in range of current weapon or inrange of other friendly units:
         // will execute objv_ReachLocation
-        objv_FindEnemy = 0x1000,
+        objv_FindEnemy = 0x0800,
         // in range of current weapon
-        objv_FindNonFriend = 0x2000,
+        objv_FindNonFriend = 0x1000,
+        // Objective(action) for defined object(s), has sub-objective
+        // NOTE: this can be used to set objective(s) for single ped or group
+        objv_ExecuteObjective = 0x2000,
         objv_ExecuteObjectiveEnd = 0x4000,
-        objv_All = 0x8000,
+        objv_NonFinishable = 0x8000,
         // Protect object at all cost, command(s) after this should have
         // objv_ExecuteObjectiveEnd
         // objv_Protect = objv_FollowObject | objv_ExecuteObjective,
@@ -539,9 +537,8 @@ protected:
         ObjectiveType type;
         // 0 - not defined, 1 - ped, 2 - weapon, 3 - static, 4 - vehicle
         MapObject::MajorTypeEnum targettype;
-        // 0 - not defined, 1 - our agent, 2 - enemy agent, 3 - guards
-        // 4 - police, 5 - civilians
-        uint8 targetsubtype;
+        // (objGroupDefMasks)
+        uint32 targetsubtype;
         // index within vector of data
         uint16 targetindx;
         // 0 - not defined, 0b - has sub objective, 1b - refers to all objects

@@ -295,15 +295,15 @@ public:
     bool handleDamage(ShootableMapObject::DamageInflictType *d);
     void destroyAllWeapons();
 
-    void setActionState(unsigned int action_state) {
+    void setActionStateMasks(unsigned int action_state) {
         action_state_ = action_state;
     }
-    unsigned int actionState() { return desc_state_; }
+    unsigned int actionStateMasks() { return action_state_; }
 
-    void setDescState(unsigned int desc_state) {
+    void setDescStateMasks(unsigned int desc_state) {
         desc_state_ = desc_state;
     }
-    unsigned int descState() { return desc_state_; }
+    unsigned int descStateMasks() { return desc_state_; }
 
     void setHostileDesc(unsigned int hostile_desc) {
         hostile_desc_ = hostile_desc;
@@ -394,12 +394,79 @@ public:
         pa_smWalking = 0x0002,
         pa_smHit = 0x0004,
         pa_smFiring = 0x0008,
-        pa_smFolowing = 0x0010,
+        pa_smFollowing = 0x0010,
         pa_smPickUp = 0x0020,
         pa_smPutDown = 0x0040,
         pa_smBurning = 0x0080,
-        pa_smInCar = 0x0100
+        pa_smGetInCar = 0x0100,
+        // only driver can have this set after finished
+        pa_smUsingCar = 0x0200,
+        // passenger only
+        pa_smInCar = 0x0400,
+        pa_smLeaveCar = 0x0800,
     } pedActionStateMasks;
+
+    typedef struct {
+        Mission::ObjectiveType ot_execute;
+        PathNode t_pn;
+        ShootableMapObject *t_smo;
+        // 0 - not started, 1 - executing, 2 - finished, 3 - failed,
+        // 4 - suspended
+        uint8 state;
+        union {
+            struct {
+                // (objGroupDefMasks)
+                uint32 t_ogd;
+                // (pedDescStateMasks)
+                uint32 t_hostile_desc;
+            } enemy_var;
+            struct {
+                int32 elapsed;
+                // = -1 forever
+                int32 time_total;
+            } time_var;
+            struct {
+                int32 dir;
+                int32 dist;
+            } dist_var;
+        } multi_var;
+        uint32 condition;
+    } actionQueueType;
+
+    typedef struct {
+        // action state
+        uint32 as;
+        std::vector <actionQueueType> actions;
+        uint16 indx_last;
+    } actionQueueGroupType;
+
+    void setActQInQueue(actionQueueGroupType &as);
+    bool addActQToQueue(actionQueueGroupType &as);
+
+    void createActQStanding(actionQueueGroupType &as);
+    void createActQWalking(actionQueueGroupType &as, PathNode *tpn,
+        int32 dir = -1);
+    void createActQHit(actionQueueGroupType &as, PathNode *tpn,
+        int32 dir = -1);
+    void createActQFiring(actionQueueGroupType &as, PathNode &tpn,
+        ShootableMapObject *tsmo);
+    void createActQFollowing(actionQueueGroupType &as,
+        ShootableMapObject *tsmo);
+
+    void createActQPickUp(actionQueueGroupType &as,
+        ShootableMapObject *tsmo);
+    void createActQPutDown(actionQueueGroupType &as,
+        ShootableMapObject *tsmo);
+
+    void createActQBurning(actionQueueGroupType &as);
+
+    void createActQGetInCar(actionQueueGroupType &as,
+        ShootableMapObject *tsmo);
+    void createActQUsingCar(actionQueueGroupType &as, PathNode *tpn,
+        ShootableMapObject *tsmo, uint32 condition);
+    void createActQInCar(actionQueueGroupType &as, PathNode *tpn,
+        ShootableMapObject *tsmo, uint32 condition);
+    void createActQLeaveCar(actionQueueGroupType &as);
 
 protected:
     Ped *ped_;
@@ -411,7 +478,7 @@ protected:
         Firing_Stop
     } firing_;
 
-    std::vector <Mission::ObjectiveType> action_queue;
+    std::vector <actionQueueGroupType> action_queue_;
     // (pedActionStateMasks)
     unsigned int action_state_;
     // (pedDescStateMasks)

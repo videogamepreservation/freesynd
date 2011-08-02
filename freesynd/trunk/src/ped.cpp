@@ -3297,7 +3297,7 @@ bool PedInstance::checkHostileIs(ShootableMapObject *obj,
                 if (hostile_desc_alt == PedInstance::pd_smUndefined)
                     hostile_desc_alt = hostile_desc_;
                 hostile_rsp =
-                    (((PedInstance *)obj)->descState() & hostile_desc_alt) != 0;
+                    (((PedInstance *)obj)->descStateMasks() & hostile_desc_alt) != 0;
             }
         } else {
             hostile_rsp =
@@ -3323,4 +3323,187 @@ void PedInstance::verifyHostilesFound() {
             it--;
         }
     }
+}
+
+void PedInstance::createActQStanding(actionQueueGroupType &as) {
+    as.as = PedInstance::pa_smStanding;
+    as.actions.clear();
+    actionQueueType aq;
+    aq.ot_execute = Mission::objv_Wait;
+    aq.state = 0;
+    aq.multi_var.time_var.elapsed = 0;
+    aq.multi_var.time_var.time_total = -1;
+    as.actions.push_back(aq);
+}
+
+void PedInstance::createActQWalking(actionQueueGroupType &as, PathNode *tpn,
+    int32 dir)
+{
+    as.as = PedInstance::pa_smWalking;
+    as.actions.clear();
+    actionQueueType aq;
+    aq.ot_execute = Mission::objv_ReachLocation;
+    aq.state = 0;
+    aq.multi_var.dist_var.dir = dir;
+    if (dir == -1)
+        aq.t_pn = *tpn;
+    as.actions.push_back(aq);
+}
+
+void PedInstance::createActQHit(actionQueueGroupType &as, PathNode *tpn,
+    int32 dir)
+{
+    as.as = PedInstance::pa_smHit;
+    as.indx_last = 0;
+    as.actions.clear();
+    actionQueueType aq;
+    aq.ot_execute = Mission::objv_ReachLocation;
+    aq.state = 0;
+    // TODO: set directional movement to
+    aq.multi_var.dist_var.dir = dir;
+    if (dir == -1)
+        aq.t_pn = *tpn;
+    as.actions.push_back(aq);
+}
+
+void PedInstance::createActQFiring(actionQueueGroupType &as, PathNode &tpn,
+    ShootableMapObject *tsmo)
+{
+    as.as = PedInstance::pa_smFiring;
+    as.indx_last = 0;
+    as.actions.clear();
+    actionQueueType aq;
+    if (tsmo) {
+        aq.t_smo = tsmo;
+        aq.ot_execute = Mission::objv_DestroyObject;
+    } else {
+#ifdef _DEBUG
+        aq.t_smo = NULL;
+#endif
+        aq.t_pn = tpn;
+        aq.ot_execute = Mission::objv_AttackLocation;
+    }
+    aq.state = 0;
+    as.actions.push_back(aq);
+}
+
+void PedInstance::createActQFollowing(actionQueueGroupType &as,
+    ShootableMapObject *tsmo)
+{
+    as.as = PedInstance::pa_smFollowing;
+    as.indx_last = 0;
+    as.actions.clear();
+    actionQueueType aq;
+    aq.ot_execute = Mission::objv_FollowObject;
+    aq.state = 0;
+    aq.t_smo = tsmo;
+    aq.multi_var.dist_var.dist = 128;
+    as.actions.push_back(aq);
+}
+
+void PedInstance::createActQPickUp(actionQueueGroupType &as,
+    ShootableMapObject *tsmo)
+{
+    as.as = PedInstance::pa_smPickUp;
+    as.indx_last = 0;
+    as.actions.clear();
+    actionQueueType aq;
+    aq.ot_execute = Mission::objv_ReachLocation;
+    aq.state = 0;
+    aq.t_pn = PathNode(tsmo->tileX(), tsmo->tileY(), tsmo->tileZ(),
+        tsmo->offX(), tsmo->offY(), tsmo->offZ());
+    aq.multi_var.dist_var.dir = -1;
+    as.actions.push_back(aq);
+    aq.ot_execute = Mission::objv_PickUpObject;
+    aq.state = 0;
+    aq.t_smo = tsmo;
+    as.actions.push_back(aq);
+}
+
+void PedInstance::createActQPutDown(actionQueueGroupType &as,
+    ShootableMapObject *tsmo)
+{
+    as.as = PedInstance::pa_smPutDown;
+    as.indx_last = 0;
+    as.actions.clear();
+    actionQueueType aq;
+#if 0
+    aq.ot_execute = Mission::objv_ReachLocation;
+    aq.state = 0;
+    aq.t_pn = PathNode(tsmo->tileX(), tsmo->tileY(), tsmo->tileZ(),
+        tsmo->offX(), tsmo->offY(), tsmo->offZ());
+    aq.multi_var.dist_var.dir = -1;
+    as.actions.push_back(aq);
+#endif
+    aq.ot_execute = Mission::objv_PutDownObject;
+    aq.state = 0;
+    aq.t_smo = tsmo;
+    as.actions.push_back(aq);
+}
+
+void PedInstance::createActQBurning(actionQueueGroupType &as) {
+    as.as = PedInstance::pa_smBurning;
+    as.indx_last = 0;
+    as.actions.clear();
+    actionQueueType aq;
+    aq.ot_execute = Mission::objv_ReachLocation;
+    aq.multi_var.dist_var.dir = rand() % 256;
+    aq.multi_var.dist_var.dist = rand() % 256 + 128;
+    aq.state = 0;
+    as.actions.push_back(aq);
+    aq.ot_execute = Mission::objv_ReachLocation;
+    aq.multi_var.dist_var.dir = rand() % 256;
+    aq.multi_var.dist_var.dist = rand() % 256 + 128;
+    aq.state = 0;
+    as.actions.push_back(aq);
+    aq.ot_execute = Mission::objv_ReachLocation;
+    aq.multi_var.dist_var.dir = rand() % 256;
+    aq.multi_var.dist_var.dist = rand() % 256 + 128;
+    aq.state = 0;
+    as.actions.push_back(aq);
+    aq.ot_execute = Mission::objv_Wait;
+    aq.state = 0;
+    aq.multi_var.time_var.elapsed = 0;
+    aq.multi_var.time_var.time_total = 1000;
+    as.actions.push_back(aq);
+}
+
+void PedInstance::createActQGetInCar(actionQueueGroupType &as,
+    ShootableMapObject *tsmo)
+{
+    as.as = PedInstance::pa_smGetInCar;
+    as.indx_last = 0;
+    as.actions.clear();
+    actionQueueType aq;
+    aq.ot_execute = Mission::objv_ReachLocation;
+    aq.state = 0;
+    aq.t_pn = PathNode(tsmo->tileX(), tsmo->tileY(), tsmo->tileZ(),
+        tsmo->offX(), tsmo->offY(), tsmo->offZ());
+    aq.multi_var.dist_var.dir = -1;
+    as.actions.push_back(aq);
+    aq.ot_execute = Mission::objv_AquireControl;
+    aq.state = 0;
+    aq.t_smo = tsmo;
+    as.actions.push_back(aq);
+}
+
+void PedInstance::createActQUsingCar(actionQueueGroupType &as, PathNode *tpn,
+    ShootableMapObject *tsmo, uint32 condition)
+{
+}
+
+void PedInstance::createActQInCar(actionQueueGroupType &as, PathNode *tpn,
+    ShootableMapObject *tsmo, uint32 condition)
+{
+}
+
+void PedInstance::createActQLeaveCar(actionQueueGroupType &as) {
+    as.as = PedInstance::pa_smGetInCar;
+    as.indx_last = 0;
+    as.actions.clear();
+    actionQueueType aq;
+    aq.ot_execute = Mission::objv_LoseControl;
+    aq.state = 0;
+    aq.t_smo = NULL;
+    as.actions.push_back(aq);
 }
