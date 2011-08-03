@@ -3345,8 +3345,12 @@ void PedInstance::createActQWalking(actionQueueGroupType &as, PathNode *tpn,
     aq.ot_execute = Mission::objv_ReachLocation;
     aq.state = 0;
     aq.multi_var.dist_var.dir = dir;
-    if (dir == -1)
+    if (dir == -1) {
         aq.t_pn = *tpn;
+        aq.condition = 0;
+    } else {
+        aq.condition = 1;
+    }
     as.actions.push_back(aq);
 }
 
@@ -3361,6 +3365,8 @@ void PedInstance::createActQHit(actionQueueGroupType &as, PathNode *tpn,
     aq.state = 0;
     // TODO: set directional movement to
     aq.multi_var.dist_var.dir = dir;
+    aq.condition = 1;
+    // calculate direction from this point
     if (dir == -1)
         aq.t_pn = *tpn;
     as.actions.push_back(aq);
@@ -3388,7 +3394,7 @@ void PedInstance::createActQFiring(actionQueueGroupType &as, PathNode &tpn,
 }
 
 void PedInstance::createActQFollowing(actionQueueGroupType &as,
-    ShootableMapObject *tsmo)
+    ShootableMapObject *tsmo, uint32 condition, int32 dist)
 {
     as.as = PedInstance::pa_smFollowing;
     as.indx_last = 0;
@@ -3397,7 +3403,8 @@ void PedInstance::createActQFollowing(actionQueueGroupType &as,
     aq.ot_execute = Mission::objv_FollowObject;
     aq.state = 0;
     aq.t_smo = tsmo;
-    aq.multi_var.dist_var.dist = 128;
+    aq.multi_var.dist_var.dist = dist;
+    aq.condition = condition;
     as.actions.push_back(aq);
 }
 
@@ -3410,13 +3417,12 @@ void PedInstance::createActQPickUp(actionQueueGroupType &as,
     actionQueueType aq;
     aq.ot_execute = Mission::objv_ReachLocation;
     aq.state = 0;
-    aq.t_pn = PathNode(tsmo->tileX(), tsmo->tileY(), tsmo->tileZ(),
-        tsmo->offX(), tsmo->offY(), tsmo->offZ());
+    aq.t_smo = tsmo;
     aq.multi_var.dist_var.dir = -1;
+    aq.multi_var.dist_var.dist = 0;
+    aq.condition = 2;
     as.actions.push_back(aq);
     aq.ot_execute = Mission::objv_PickUpObject;
-    aq.state = 0;
-    aq.t_smo = tsmo;
     as.actions.push_back(aq);
 }
 
@@ -3427,14 +3433,6 @@ void PedInstance::createActQPutDown(actionQueueGroupType &as,
     as.indx_last = 0;
     as.actions.clear();
     actionQueueType aq;
-#if 0
-    aq.ot_execute = Mission::objv_ReachLocation;
-    aq.state = 0;
-    aq.t_pn = PathNode(tsmo->tileX(), tsmo->tileY(), tsmo->tileZ(),
-        tsmo->offX(), tsmo->offY(), tsmo->offZ());
-    aq.multi_var.dist_var.dir = -1;
-    as.actions.push_back(aq);
-#endif
     aq.ot_execute = Mission::objv_PutDownObject;
     aq.state = 0;
     aq.t_smo = tsmo;
@@ -3450,19 +3448,15 @@ void PedInstance::createActQBurning(actionQueueGroupType &as) {
     aq.multi_var.dist_var.dir = rand() % 256;
     aq.multi_var.dist_var.dist = rand() % 256 + 128;
     aq.state = 0;
+    aq.condition = 1;
     as.actions.push_back(aq);
-    aq.ot_execute = Mission::objv_ReachLocation;
     aq.multi_var.dist_var.dir = rand() % 256;
     aq.multi_var.dist_var.dist = rand() % 256 + 128;
-    aq.state = 0;
     as.actions.push_back(aq);
-    aq.ot_execute = Mission::objv_ReachLocation;
     aq.multi_var.dist_var.dir = rand() % 256;
     aq.multi_var.dist_var.dist = rand() % 256 + 128;
-    aq.state = 0;
     as.actions.push_back(aq);
     aq.ot_execute = Mission::objv_Wait;
-    aq.state = 0;
     aq.multi_var.time_var.elapsed = 0;
     aq.multi_var.time_var.time_total = 1000;
     as.actions.push_back(aq);
@@ -3477,13 +3471,13 @@ void PedInstance::createActQGetInCar(actionQueueGroupType &as,
     actionQueueType aq;
     aq.ot_execute = Mission::objv_ReachLocation;
     aq.state = 0;
-    aq.t_pn = PathNode(tsmo->tileX(), tsmo->tileY(), tsmo->tileZ(),
-        tsmo->offX(), tsmo->offY(), tsmo->offZ());
+    aq.t_smo = tsmo;
+    aq.condition = 2;
+    aq.multi_var.dist_var.dist = 0;
     aq.multi_var.dist_var.dir = -1;
     as.actions.push_back(aq);
     aq.ot_execute = Mission::objv_AquireControl;
     aq.state = 0;
-    aq.t_smo = tsmo;
     as.actions.push_back(aq);
 }
 
@@ -3498,7 +3492,7 @@ void PedInstance::createActQInCar(actionQueueGroupType &as, PathNode *tpn,
 }
 
 void PedInstance::createActQLeaveCar(actionQueueGroupType &as) {
-    as.as = PedInstance::pa_smGetInCar;
+    as.as = PedInstance::pa_smLeaveCar;
     as.indx_last = 0;
     as.actions.clear();
     actionQueueType aq;

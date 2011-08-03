@@ -430,6 +430,11 @@ public:
                 int32 dist;
             } dist_var;
         } multi_var;
+        // for objv_ReachLocation 0 - go to location, 1 - go to direction,
+        // 2 - go to position of object - if dist is set on reaching
+        // this value action complete
+        // for objv_FollowObject 0 - until dist is reached, 1 - in range
+        // of shot view
         uint32 condition;
     } actionQueueType;
 
@@ -437,6 +442,7 @@ public:
         // action state
         uint32 as;
         std::vector <actionQueueType> actions;
+        // index refers to last active in current group
         uint16 indx_last;
     } actionQueueGroupType;
 
@@ -451,7 +457,7 @@ public:
     void createActQFiring(actionQueueGroupType &as, PathNode &tpn,
         ShootableMapObject *tsmo);
     void createActQFollowing(actionQueueGroupType &as,
-        ShootableMapObject *tsmo);
+        ShootableMapObject *tsmo, uint32 condition, int32 dist = 128);
 
     void createActQPickUp(actionQueueGroupType &as,
         ShootableMapObject *tsmo);
@@ -503,8 +509,8 @@ protected:
     // someone who has took something on controlled surface, or attacked one of
     // guards or etc.
     unsigned int obj_group_def_id_;
-    unsigned int old_obj_group_def_id_;
     // not used
+    unsigned int old_obj_group_def_id_;
 
     AnimationDrawn drawn_anim_;
 
