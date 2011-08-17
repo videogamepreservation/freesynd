@@ -326,6 +326,10 @@ public:
     void clearDestination() {
         dest_path_.clear();
     }
+    void resetDest_Speed() {
+        dest_path_.clear();
+        speed_ = 0;
+    }
 
     FreeWay hold_on_;
 

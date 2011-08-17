@@ -410,8 +410,9 @@ public:
         Mission::ObjectiveType ot_execute;
         PathNode t_pn;
         ShootableMapObject *t_smo;
-        // 0 - not started, 1 - executing, 2 - finished, 3 - failed,
-        // 4 - suspended
+        // 0b - not started, 1b - executing, 2b - finished, 3b - failed,
+        // 4b - suspended, 5b - if finished all other actions in group are
+        // complete
         uint8 state;
         union {
             struct {
@@ -439,15 +440,24 @@ public:
     } actionQueueType;
 
     typedef struct {
-        // action state
+        // action state (pedActionStateMasks)
         uint32 as;
         std::vector <actionQueueType> actions;
         // index refers to last active in current group
-        uint16 indx_last;
+        // -1 - undef
+        int16 indx_last_exec;
+        // 0 - not set, 0b - stand/walking group(has walking action or action
+        // requires ped to stand), 1b - firing only(no wlaking action),
+        // (0b+1b) - walking + firing
+        // NOTE: a group should not interfere with actions of other group
+        uint32 group_desc;
     } actionQueueGroupType;
 
     void setActQInQueue(actionQueueGroupType &as);
     bool addActQToQueue(actionQueueGroupType &as);
+    void clearActQ() { actions_queue_.clear(); }
+    bool addDefActsToActions(actionQueueGroupType &as);
+    void clearDefActs() { default_actions_.clear(); }
 
     void createActQStanding(actionQueueGroupType &as);
     void createActQWalking(actionQueueGroupType &as, PathNode *tpn,
@@ -484,7 +494,8 @@ protected:
         Firing_Stop
     } firing_;
 
-    std::vector <actionQueueGroupType> action_queue_;
+    std::vector <actionQueueGroupType> actions_queue_;
+    std::vector <actionQueueGroupType> default_actions_;
     // (pedActionStateMasks)
     unsigned int action_state_;
     // (pedDescStateMasks)

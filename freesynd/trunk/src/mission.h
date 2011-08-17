@@ -473,7 +473,7 @@ public:
     unsigned int getMaxInfoLvl() {return max_info_lvl_; }
     unsigned int getMaxEnhanceLvl() {return max_enhance_lvl_; }
 
-    // this type is also used for action_queue_ for pedinstance
+    // this type is also used for actions_queue_ for pedinstance
     typedef enum {
         objv_None = 0x0,
         // Setup control over object where possible to lose this control

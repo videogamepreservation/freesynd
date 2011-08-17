@@ -183,6 +183,40 @@ int Ped::lastPersuadeFrame() {
     return g_App.gameSprites().lastFrame(persuade_anim_);
 }
 
+#if 0
+bool PedInstance::animate(int elapsed, Mission *mission) {
+
+    if (agent_is_ == PedInstance::Agent_Non_Active)
+        return true;
+
+    bool updated = false;
+    Weapon::WeaponAnimIndex weapon_idx =
+        selectedWeapon() ? selectedWeapon()->index() : Weapon::Unarmed_Anim;
+
+    if (actions_queue_.empty()) {
+        // TODO: use default_actions_ to fill it up
+    } else {
+        uint32 groups_processed = 0;
+        uint32 groups_max = 3;
+        for (std::vector <actionQueueGroupType>::iterator it =
+            actions_queue_.begin(); it != actions_queue_.end(); it++)
+        {
+            if ((it->group_desc & groups_processed) == 0) {
+                groups_processed |= it->group_desc;
+                for (std::vector <actionQueueType> ::iterator a_it
+                    = it->actions.begin(); a_it != it->actions.end(); a_it++)
+                {
+                }
+            } else
+                continue;
+            if (groups_processed == groups_max)
+                break;
+        }
+    }
+    return updated;
+}
+#endif
+#if 1
 bool PedInstance::animate(int elapsed, Mission *mission) {
 
     if (agent_is_ == PedInstance::Agent_Non_Active)
@@ -211,8 +245,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                     else
                         setTarget(pinst);
 
-                    clearDestination();
-                    speed_ = 0;
+                    resetDest_Speed();
                 }
             }
 
@@ -297,8 +330,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
 
     if (pickup_weapon_ && pickup_weapon_->map() == -1) {
         pickup_weapon_ = NULL;
-        clearDestination();
-        speed_ = 0;
+        resetDest_Speed();
     }
 
     updated = MapObject::animate(elapsed);
@@ -417,8 +449,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
         putdown_weapon_ = NULL;
         setDrawnAnim(PedInstance::ad_PutdownAnim);
         if(speed() != 0){
-            clearDestination();
-            setSpeed(0);
+            resetDest_Speed();
         }
         return true;
     }
@@ -460,7 +491,8 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
             target_ = NULL;
         if (target_ && target_->health() > 0) {
             if (selectedWeapon()
-                && selectedWeapon()->inflictDamage(target_, NULL)) {
+                && selectedWeapon()->inflictDamage(target_, NULL))
+            {
                 firing_ = PedInstance::Firing_Fire;
                 updated = true;
 
@@ -537,6 +569,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
 
     return updated;
 }
+#endif
 
 void PedInstance::stopFiring() {
     if (firing_ != PedInstance::Firing_Not)
@@ -3067,8 +3100,7 @@ bool PedInstance::movementP(Mission *m, int elapsed)
                     && abs(hold_on_.tiley - nxtTileY) <= hold_on_.yadj
                     && hold_on_.tilez == nxtTileZ)
                 {
-                    dest_path_.clear();
-                    speed_ = 0;
+                    resetDest_Speed();
                     // TODO: "current action drop" function will be
                     // better for this purpose
                     if (in_vehicle_) {
@@ -3082,9 +3114,9 @@ bool PedInstance::movementP(Mission *m, int elapsed)
                     hold_on_.wayFree = 0;
             } else {
                 if (hold_on_.tilex == nxtTileX && hold_on_.tiley == nxtTileY
-                    && hold_on_.tilez == nxtTileZ) {
-                    dest_path_.clear();
-                    speed_ = 0;
+                    && hold_on_.tilez == nxtTileZ)
+                {
+                    resetDest_Speed();
                     // TODO: same as above
                     if (in_vehicle_) {
                         in_vehicle_ = NULL;
@@ -3215,8 +3247,7 @@ bool PedInstance::handleDamage(ShootableMapObject::DamageInflictType *d) {
         health_ = -1;
         // TODO: "current action drop" function will be
         // better for this purpose
-        speed_ = 0;
-        clearDestination();
+        resetDest_Speed();
         putdown_weapon_ = NULL;
         pickup_weapon_ = NULL;
         target_ = NULL;
@@ -3330,7 +3361,7 @@ void PedInstance::createActQStanding(actionQueueGroupType &as) {
     as.actions.clear();
     actionQueueType aq;
     aq.ot_execute = Mission::objv_Wait;
-    aq.state = 0;
+    aq.state = 1;
     aq.multi_var.time_var.elapsed = 0;
     aq.multi_var.time_var.time_total = -1;
     as.actions.push_back(aq);
@@ -3343,7 +3374,7 @@ void PedInstance::createActQWalking(actionQueueGroupType &as, PathNode *tpn,
     as.actions.clear();
     actionQueueType aq;
     aq.ot_execute = Mission::objv_ReachLocation;
-    aq.state = 0;
+    aq.state = 1;
     aq.multi_var.dist_var.dir = dir;
     if (dir == -1) {
         aq.t_pn = *tpn;
@@ -3358,11 +3389,11 @@ void PedInstance::createActQHit(actionQueueGroupType &as, PathNode *tpn,
     int32 dir)
 {
     as.as = PedInstance::pa_smHit;
-    as.indx_last = 0;
+    as.indx_last_exec = -1;
     as.actions.clear();
     actionQueueType aq;
     aq.ot_execute = Mission::objv_ReachLocation;
-    aq.state = 0;
+    aq.state = 1;
     // TODO: set directional movement to
     aq.multi_var.dist_var.dir = dir;
     aq.condition = 1;
@@ -3376,7 +3407,7 @@ void PedInstance::createActQFiring(actionQueueGroupType &as, PathNode &tpn,
     ShootableMapObject *tsmo)
 {
     as.as = PedInstance::pa_smFiring;
-    as.indx_last = 0;
+    as.indx_last_exec = -1;
     as.actions.clear();
     actionQueueType aq;
     if (tsmo) {
@@ -3389,7 +3420,7 @@ void PedInstance::createActQFiring(actionQueueGroupType &as, PathNode &tpn,
         aq.t_pn = tpn;
         aq.ot_execute = Mission::objv_AttackLocation;
     }
-    aq.state = 0;
+    aq.state = 1;
     as.actions.push_back(aq);
 }
 
@@ -3397,11 +3428,11 @@ void PedInstance::createActQFollowing(actionQueueGroupType &as,
     ShootableMapObject *tsmo, uint32 condition, int32 dist)
 {
     as.as = PedInstance::pa_smFollowing;
-    as.indx_last = 0;
+    as.indx_last_exec = -1;
     as.actions.clear();
     actionQueueType aq;
     aq.ot_execute = Mission::objv_FollowObject;
-    aq.state = 0;
+    aq.state = 1;
     aq.t_smo = tsmo;
     aq.multi_var.dist_var.dist = dist;
     aq.condition = condition;
@@ -3412,11 +3443,11 @@ void PedInstance::createActQPickUp(actionQueueGroupType &as,
     ShootableMapObject *tsmo)
 {
     as.as = PedInstance::pa_smPickUp;
-    as.indx_last = 0;
+    as.indx_last_exec = -1;
     as.actions.clear();
     actionQueueType aq;
     aq.ot_execute = Mission::objv_ReachLocation;
-    aq.state = 0;
+    aq.state = 1;
     aq.t_smo = tsmo;
     aq.multi_var.dist_var.dir = -1;
     aq.multi_var.dist_var.dist = 0;
@@ -3430,24 +3461,24 @@ void PedInstance::createActQPutDown(actionQueueGroupType &as,
     ShootableMapObject *tsmo)
 {
     as.as = PedInstance::pa_smPutDown;
-    as.indx_last = 0;
+    as.indx_last_exec = -1;
     as.actions.clear();
     actionQueueType aq;
     aq.ot_execute = Mission::objv_PutDownObject;
-    aq.state = 0;
+    aq.state = 1;
     aq.t_smo = tsmo;
     as.actions.push_back(aq);
 }
 
 void PedInstance::createActQBurning(actionQueueGroupType &as) {
     as.as = PedInstance::pa_smBurning;
-    as.indx_last = 0;
+    as.indx_last_exec = -1;
     as.actions.clear();
     actionQueueType aq;
     aq.ot_execute = Mission::objv_ReachLocation;
     aq.multi_var.dist_var.dir = rand() % 256;
     aq.multi_var.dist_var.dist = rand() % 256 + 128;
-    aq.state = 0;
+    aq.state = 1;
     aq.condition = 1;
     as.actions.push_back(aq);
     aq.multi_var.dist_var.dir = rand() % 256;
@@ -3466,18 +3497,17 @@ void PedInstance::createActQGetInCar(actionQueueGroupType &as,
     ShootableMapObject *tsmo)
 {
     as.as = PedInstance::pa_smGetInCar;
-    as.indx_last = 0;
+    as.indx_last_exec = -1;
     as.actions.clear();
     actionQueueType aq;
     aq.ot_execute = Mission::objv_ReachLocation;
-    aq.state = 0;
+    aq.state = 1;
     aq.t_smo = tsmo;
     aq.condition = 2;
     aq.multi_var.dist_var.dist = 0;
     aq.multi_var.dist_var.dir = -1;
     as.actions.push_back(aq);
     aq.ot_execute = Mission::objv_AquireControl;
-    aq.state = 0;
     as.actions.push_back(aq);
 }
 
@@ -3493,11 +3523,52 @@ void PedInstance::createActQInCar(actionQueueGroupType &as, PathNode *tpn,
 
 void PedInstance::createActQLeaveCar(actionQueueGroupType &as) {
     as.as = PedInstance::pa_smLeaveCar;
-    as.indx_last = 0;
+    as.indx_last_exec = -1;
     as.actions.clear();
     actionQueueType aq;
     aq.ot_execute = Mission::objv_LoseControl;
-    aq.state = 0;
+    aq.state = 1;
     aq.t_smo = NULL;
     as.actions.push_back(aq);
 }
+
+void PedInstance::setActQInQueue(actionQueueGroupType &as) {
+    // NOTE: if action is invalidated all remaining actions in queue are
+    // invalid, they should be removed
+    bool remove_last = false;
+    for (std::vector <actionQueueGroupType>::iterator it = actions_queue_.begin();
+        it != actions_queue_.end(); it++)
+    {
+        if ((!remove_last)) {
+            if ((it->group_desc & as.group_desc) != 0) {
+                remove_last = true;
+                actions_queue_.erase(it);
+                it--;
+            }
+        } else {
+            actions_queue_.erase(it);
+            it--;
+        }
+    }
+    if ((as.group_desc & 1) != 0)
+        resetDest_Speed();
+    actions_queue_.push_back(as);
+}
+
+bool PedInstance::addActQToQueue(actionQueueGroupType &as) {
+    actions_queue_.push_back(as);
+    return true;
+}
+
+bool PedInstance::addDefActsToActions(actionQueueGroupType &as) {
+    /*
+    for (std::vector <actionQueueGroupType>::iterator it = actions_queue_.begin();
+        it != actions_queue_.end(); it++)
+    {
+    }
+    */
+    actions_queue_.push_back(as);
+    return true;
+}
+
+
