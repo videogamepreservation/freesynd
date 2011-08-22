@@ -429,10 +429,11 @@ public:
             struct {
                 int32 dir;
                 int32 dist;
+                int32 speed;
             } dist_var;
         } multi_var;
         // for objv_ReachLocation 0 - go to location, 1 - go to direction,
-        // 2 - go to position of object - if dist is set on reaching
+        // 2 - go to position of object; if dist is set, on reaching
         // this value action complete
         // for objv_FollowObject 0 - until dist is reached, 1 - in range
         // of shot view
@@ -445,7 +446,7 @@ public:
         std::vector <actionQueueType> actions;
         // index refers to last active in current group
         // -1 - undef
-        int16 indx_last_exec;
+        int16 indx_first_exec;
         // 0 - not set, 0b - stand/walking group(has walking action or action
         // requires ped to stand), 1b - firing only(no wlaking action),
         // (0b+1b) - walking + firing

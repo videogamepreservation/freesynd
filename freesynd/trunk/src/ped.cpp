@@ -198,14 +198,68 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
     } else {
         uint32 groups_processed = 0;
         uint32 groups_max = 3;
+        uint32 stt_mask = 0;
         for (std::vector <actionQueueGroupType>::iterator it =
             actions_queue_.begin(); it != actions_queue_.end(); it++)
         {
             if ((it->group_desc & groups_processed) == 0) {
                 groups_processed |= it->group_desc;
+                //stt_mask |= it->as;
                 for (std::vector <actionQueueType> ::iterator a_it
                     = it->actions.begin(); a_it != it->actions.end(); a_it++)
                 {
+                    if (it->indx_first_exec == -1)
+                        it->indx_first_exec = 0;
+                    actionQueueType & aqt = it->actions[it->indx_first_exec];
+                    // TODO: simultaneus actions of different groups?
+                    if ((aqt.ot_execute & Mission::objv_None) != 0)
+                    {
+                    }
+                    if ((aqt.ot_execute & Mission::objv_AquireControl) != 0)
+                    {
+                    }
+                    if ((aqt.ot_execute & Mission::objv_LoseControl) != 0)
+                    {
+                    }
+                    if ((aqt.ot_execute & Mission::objv_PickUpObject) != 0)
+                    {
+                    }
+                    if ((aqt.ot_execute & Mission::objv_DestroyObject) != 0)
+                    {
+                    }
+                    if ((aqt.ot_execute & Mission::objv_UseObject) != 0)
+                    {
+                    }
+                    if ((aqt.ot_execute & Mission::objv_PutDownObject) != 0)
+                    {
+                    }
+                    if ((aqt.ot_execute & Mission::objv_ReachLocation) != 0)
+                    {
+                    }
+                    if ((aqt.ot_execute & Mission::objv_FollowObject) != 0)
+                    {
+                    }
+                    if ((aqt.ot_execute & Mission::objv_Wait) != 0)
+                    {
+                    }
+                    if ((aqt.ot_execute & Mission::objv_AttackLocation) != 0)
+                    {
+                    }
+                    if ((aqt.ot_execute & Mission::objv_FindEnemy) != 0)
+                    {
+                    }
+                    if ((aqt.ot_execute & Mission::objv_FindNonFriend) != 0)
+                    {
+                    }
+                    if ((aqt.ot_execute & Mission::objv_ExecuteObjective) != 0)
+                    {
+                    }
+                    if ((aqt.ot_execute & Mission::objv_ExecuteObjectiveEnd) != 0)
+                    {
+                    }
+                    if ((aqt.ot_execute & Mission::objv_NonFinishable) != 0)
+                    {
+                    }
                 }
             } else
                 continue;
@@ -3389,7 +3443,7 @@ void PedInstance::createActQHit(actionQueueGroupType &as, PathNode *tpn,
     int32 dir)
 {
     as.as = PedInstance::pa_smHit;
-    as.indx_last_exec = -1;
+    as.indx_first_exec = -1;
     as.actions.clear();
     actionQueueType aq;
     aq.ot_execute = Mission::objv_ReachLocation;
@@ -3407,7 +3461,7 @@ void PedInstance::createActQFiring(actionQueueGroupType &as, PathNode &tpn,
     ShootableMapObject *tsmo)
 {
     as.as = PedInstance::pa_smFiring;
-    as.indx_last_exec = -1;
+    as.indx_first_exec = -1;
     as.actions.clear();
     actionQueueType aq;
     if (tsmo) {
@@ -3428,7 +3482,7 @@ void PedInstance::createActQFollowing(actionQueueGroupType &as,
     ShootableMapObject *tsmo, uint32 condition, int32 dist)
 {
     as.as = PedInstance::pa_smFollowing;
-    as.indx_last_exec = -1;
+    as.indx_first_exec = -1;
     as.actions.clear();
     actionQueueType aq;
     aq.ot_execute = Mission::objv_FollowObject;
@@ -3443,7 +3497,7 @@ void PedInstance::createActQPickUp(actionQueueGroupType &as,
     ShootableMapObject *tsmo)
 {
     as.as = PedInstance::pa_smPickUp;
-    as.indx_last_exec = -1;
+    as.indx_first_exec = -1;
     as.actions.clear();
     actionQueueType aq;
     aq.ot_execute = Mission::objv_ReachLocation;
@@ -3461,7 +3515,7 @@ void PedInstance::createActQPutDown(actionQueueGroupType &as,
     ShootableMapObject *tsmo)
 {
     as.as = PedInstance::pa_smPutDown;
-    as.indx_last_exec = -1;
+    as.indx_first_exec = -1;
     as.actions.clear();
     actionQueueType aq;
     aq.ot_execute = Mission::objv_PutDownObject;
@@ -3472,7 +3526,7 @@ void PedInstance::createActQPutDown(actionQueueGroupType &as,
 
 void PedInstance::createActQBurning(actionQueueGroupType &as) {
     as.as = PedInstance::pa_smBurning;
-    as.indx_last_exec = -1;
+    as.indx_first_exec = -1;
     as.actions.clear();
     actionQueueType aq;
     aq.ot_execute = Mission::objv_ReachLocation;
@@ -3497,7 +3551,7 @@ void PedInstance::createActQGetInCar(actionQueueGroupType &as,
     ShootableMapObject *tsmo)
 {
     as.as = PedInstance::pa_smGetInCar;
-    as.indx_last_exec = -1;
+    as.indx_first_exec = -1;
     as.actions.clear();
     actionQueueType aq;
     aq.ot_execute = Mission::objv_ReachLocation;
@@ -3523,7 +3577,7 @@ void PedInstance::createActQInCar(actionQueueGroupType &as, PathNode *tpn,
 
 void PedInstance::createActQLeaveCar(actionQueueGroupType &as) {
     as.as = PedInstance::pa_smLeaveCar;
-    as.indx_last_exec = -1;
+    as.indx_first_exec = -1;
     as.actions.clear();
     actionQueueType aq;
     aq.ot_execute = Mission::objv_LoseControl;
