@@ -8,6 +8,7 @@
  *   Copyright (C) 2006  Tarjei Knapstad <tarjei.knapstad@gmail.com>    *
  *   Copyright (C) 2010  Benoit Blancard <benblan@users.sourceforge.net>*
  *   Copyright (C) 2011  Bohdan Stelmakh <chamel@users.sourceforge.net> *
+ *   Copyright (C) 2011  Mark <mentor66@users.sourceforge.net>          *
  *                                                                      *
  *    This program is free software;  you can redistribute it and / or  *
  *  modify it  under the  terms of the  GNU General  Public License as  *
@@ -31,7 +32,8 @@
 #include "mod.h"
 #include "selectmenu.h"
 
-SelectMenu::SelectMenu(MenuManager * m):Menu(m, "select", "mselect.dat", "mselout.dat"),
+SelectMenu::SelectMenu(MenuManager * m):Menu(m, "select", "mselect.dat",
+    "mselout.dat"),
 cur_agent_(0), tick_count_(0), sel_all_(false)
 {
     tab_ = TAB_EQUIPS;
@@ -41,12 +43,18 @@ cur_agent_(0), tick_count_(0), sel_all_(false)
     addStatic(85, 35, 545, "#SELECT_TITLE", FontManager::SIZE_4, true);
     txtTimeId_ = addStatic(500, 9, "", FontManager::SIZE_2, false);       // Time
 
-    addOption(16, 234, 129, 25, "#SELECT_RES_BUT", FontManager::SIZE_2, KEY_F1, "research");
-    teamButId_ = addToggleAction(16, 262, 129, 25, "#SELECT_TEAM_BUT", FontManager::SIZE_2, KEY_F2, false);
-    modsButId_ = addToggleAction(16, 290, 129, 25, "#MENU_MODS_BUT", FontManager::SIZE_2, KEY_F3, false);
-    equipButId_ = addToggleAction(16, 318, 129, 25, "#MENU_EQUIP_BUT", FontManager::SIZE_2, KEY_F4, true);
-    addOption(16, 346, 129, 25, "#MENU_ACC_BUT", FontManager::SIZE_2, KEY_F5, "loading");
-    addOption(500, 347,  128, 25, "#MENU_MAIN_BUT", FontManager::SIZE_2, KEY_F6, "main");
+    addOption(16, 234, 129, 25, "#SELECT_RES_BUT", FontManager::SIZE_2, KEY_F1,
+        "research");
+    teamButId_ = addToggleAction(16, 262, 129, 25, "#SELECT_TEAM_BUT",
+        FontManager::SIZE_2, KEY_F2, false);
+    modsButId_ = addToggleAction(16, 290, 129, 25, "#MENU_MODS_BUT",
+        FontManager::SIZE_2, KEY_F3, false);
+    equipButId_ = addToggleAction(16, 318, 129, 25, "#MENU_EQUIP_BUT",
+        FontManager::SIZE_2, KEY_F4, true);
+    addOption(16, 346, 129, 25, "#MENU_ACC_BUT", FontManager::SIZE_2, KEY_F5,
+        "loading");
+    addOption(500, 347,  128, 25, "#MENU_MAIN_BUT", FontManager::SIZE_2, KEY_F6,
+        "main");
 
     // Team list
     pTeamLBox_ = addTeamListBox(502, 106, 124, 236, false);
@@ -58,15 +66,21 @@ cur_agent_(0), tick_count_(0), sel_all_(false)
     pModsLBox_ = addListBox(504, 110,  122, 230, tab_ == TAB_MODS);
     pModsLBox_->setModel(g_App.mods().getAvalaibleMods());
 
-    cancelButId_ = addOption(500, 270,  127, 22, "#MENU_CANCEL_BUT", FontManager::SIZE_2, KEY_F7, NULL, false);
-    purchaseButId_ = addOption(500, 320,  127, 22, "#SELECT_BUY_BUT", FontManager::SIZE_2, KEY_F8, NULL, false);
-    sellButId_ = addOption(500, 320,  127, 22, "#SELECT_SELL_BUT", FontManager::SIZE_2, KEY_F9, NULL, false);
+    cancelButId_ = addOption(500, 270,  127, 22, "#MENU_CANCEL_BUT",
+        FontManager::SIZE_2, KEY_F7, NULL, false);
+    reloadButId_ = addOption(500, 295,  127, 22, "#SELECT_RELOAD_BUT",
+        FontManager::SIZE_2, KEY_F10, NULL, false);
+    purchaseButId_ = addOption(500, 320,  127, 22, "#SELECT_BUY_BUT",
+        FontManager::SIZE_2, KEY_F8, NULL, false);
+    sellButId_ = addOption(500, 320,  127, 22, "#SELECT_SELL_BUT",
+        FontManager::SIZE_2, KEY_F9, NULL, false);
     setParentMenu("brief");
 
     // Agent name selected
     txtAgentId_ = addStatic(158, 86, "", FontManager::SIZE_2, false);
 
     rnd_ = 0;
+    rld_cost_ = -1;
 }
 
 SelectMenu::~SelectMenu()
@@ -130,13 +144,15 @@ void SelectMenu::drawAgent()
 
     if (selected->slot(Mod::MOD_LEGS)) {
         legs = selected->slot(Mod::MOD_LEGS)->icon(selected->isMale());
-        g_App.fonts().drawText(366, 250, selected->slot(Mod::MOD_LEGS)->getName(),
-                               false, FontManager::SIZE_1, false);
+        g_App.fonts().drawText(366, 250,
+            selected->slot(Mod::MOD_LEGS)->getName(),
+            false, FontManager::SIZE_1, false);
     }
     if (selected->slot(Mod::MOD_ARMS)) {
         arms = selected->slot(Mod::MOD_ARMS)->icon(selected->isMale());
-        g_App.fonts().drawText(366, 226, selected->slot(Mod::MOD_ARMS)->getName(),
-                               false, FontManager::SIZE_1, false);
+        g_App.fonts().drawText(366, 226,
+            selected->slot(Mod::MOD_ARMS)->getName(),
+            false, FontManager::SIZE_1, false);
     }
 
     g_App.menuSprites().drawSpriteXYZ(arms, armsx, armsy, 0, false, true);
@@ -146,8 +162,8 @@ void SelectMenu::drawAgent()
     if (selected->slot(Mod::MOD_CHEST)) {
         int chest = selected->slot(Mod::MOD_CHEST)->icon(selected->isMale());
         g_App.fonts().drawText(366, 202,
-                               selected->slot(Mod::MOD_CHEST)->getName(), false, FontManager::SIZE_1,
-                               false);
+            selected->slot(Mod::MOD_CHEST)->getName(), false,
+            FontManager::SIZE_1, false);
         int chestx = 216;
         int chesty = 146;
         if (!selected->isMale()) {
@@ -161,15 +177,16 @@ void SelectMenu::drawAgent()
     if (selected->slot(Mod::MOD_HEART)) {
         int heart = selected->slot(Mod::MOD_HEART)->icon(selected->isMale());
         g_App.fonts().drawText(366, 160,
-                               selected->slot(Mod::MOD_HEART)->getName(), false, FontManager::SIZE_1,
-                               false);
+            selected->slot(Mod::MOD_HEART)->getName(), false,
+            FontManager::SIZE_1, false);
         g_App.menuSprites().drawSpriteXYZ(heart, 254, 166, 0, false, true);
     }
 
     if (selected->slot(Mod::MOD_EYES)) {
         int eyes = selected->slot(Mod::MOD_EYES)->icon(selected->isMale());
-        g_App.fonts().drawText(366, 136, selected->slot(Mod::MOD_EYES)->getName(),
-                               false, FontManager::SIZE_1, false);
+        g_App.fonts().drawText(366, 136,
+            selected->slot(Mod::MOD_EYES)->getName(),
+            false, FontManager::SIZE_1, false);
         int eyesx = 238;
         if (!selected->isMale()) {
             eyesx += 2;
@@ -181,14 +198,13 @@ void SelectMenu::drawAgent()
     if (selected->slot(Mod::MOD_BRAIN)) {
         int brain = selected->slot(Mod::MOD_BRAIN)->icon(selected->isMale());
         g_App.fonts().drawText(366, 112,
-                               selected->slot(Mod::MOD_BRAIN)->getName(), false, FontManager::SIZE_1,
-                               false);
+            selected->slot(Mod::MOD_BRAIN)->getName(), false,
+            FontManager::SIZE_1, false);
         int brainx = 238;
         if (!selected->isMale()) {
             brainx += 2;
         }
-        g_App.menuSprites().drawSpriteXYZ(brain, brainx, 114, 0, false,
-                                          true);
+        g_App.menuSprites().drawSpriteXYZ(brain, brainx, 114, 0, false, true);
     }
     // restore lines over agent
 /*    g_Screen.blit(254, 124, 30, 2,
@@ -344,18 +360,18 @@ void SelectMenu::handleRender() {
 
     // Draw the selector around the selected agent
     switch (cur_agent_) {
-    case 0:
-        drawAgentSelector(20, 84);
-        break;
-    case 1:
-        drawAgentSelector(82, 84);
-        break;
-    case 2:
-        drawAgentSelector(20, 162);
-        break;
-    case 3:
-        drawAgentSelector(82, 162);
-        break;
+        case 0:
+            drawAgentSelector(20, 84);
+            break;
+        case 1:
+            drawAgentSelector(82, 84);
+            break;
+        case 2:
+            drawAgentSelector(20, 162);
+            break;
+        case 3:
+            drawAgentSelector(82, 162);
+            break;
     }
 
     drawAgent();
@@ -367,8 +383,8 @@ void SelectMenu::handleRender() {
         g_Screen.scale2x(502, 292, sizeof(ldata), 1, ldata);
         g_Screen.scale2x(502, 318, sizeof(ldata), 1, ldata);
         
-        pSelectedWeap_->drawBigIcon(502, 108);
-        pSelectedWeap_->drawInfo(504, 196);
+        pSelectedWeap_->drawBigIcon(502, 106);
+        pSelectedWeap_->drawInfo(504, 194, rld_cost_);
     
     } else if (pSelectedMod_) {
         uint8 ldata[62];
@@ -385,11 +401,13 @@ void SelectMenu::handleLeave() {
     g_System.hideCursor();
     // resetting menu
     tab_ = TAB_EQUIPS;
+    showItemList();
     pSelectedWeap_ = NULL;
     selectedWInstId_ = 0;
     pSelectedMod_ = NULL;
     rnd_ = 0;
     cur_agent_ = 0;
+    rld_cost_ = -1;
 }
 
 void SelectMenu::toggleAgent(int n)
@@ -473,13 +491,25 @@ void SelectMenu::handleMouseDown(int x, int y, int button, const int modKeys)
             for (int i = 0; i < 4; i++)
                 if (j * 4 + i < selected->numWeapons() &&
                     x >= 366 + i * 32 && x < 366 + i * 32 + 32 &&
-                    y >= 308 + j * 32 && y < 308 + j * 32 + 32) {
+                    y >= 308 + j * 32 && y < 308 + j * 32 + 32)
+                {
                     tab_ = TAB_EQUIPS;
                     pSelectedMod_ = NULL;
                     selectToggleAction(equipButId_);
                     selectedWInstId_ = i + j * 4 + 1;
                     pSelectedWeap_ = selected->weapon(selectedWInstId_ - 1)->getWeaponClass();
                     addDirtyRect(500, 105,  125, 235);
+                    if (rld_cost_ == -1) {
+                        WeaponInstance *wi = selected->weapon(selectedWInstId_ -1);
+                        if (pSelectedWeap_->ammo() > wi->ammoRemaining()) {
+                            showOption(KEY_F10);
+                            rld_cost_ = (pSelectedWeap_->ammo()
+                                - wi->ammoRemaining()) * pSelectedWeap_->ammoCost();
+                        } else {
+                            hideOption(KEY_F10);
+                            rld_cost_ = -1;
+                        }
+                    }
 
                     hideOption(KEY_F8);
                     showOption(KEY_F7);
@@ -506,7 +536,9 @@ void SelectMenu::showItemList() {
     pSelectedMod_ = NULL;
     pSelectedWeap_ = NULL;
     selectedWInstId_ = 0;
+    rld_cost_ = -1;
     getOption(cancelButId_)->setVisible(false);
+    getOption(reloadButId_)->setVisible(false);
     getOption(purchaseButId_)->setVisible(false);
     getOption(sellButId_)->setVisible(false);
 
@@ -580,6 +612,15 @@ void SelectMenu::handleAction(const int actionId, void *ctx, const int modKeys)
         showModWeaponPanel();
     } else if (actionId == cancelButId_) {
         showItemList();
+    } else if (actionId == reloadButId_) {
+        Agent *selected = g_Session.teamMember(cur_agent_);
+        WeaponInstance *wi = selected->weapon(selectedWInstId_ - 1);
+        if (g_Session.getMoney() >= rld_cost_) {
+            g_Session.setMoney(g_Session.getMoney() - rld_cost_);
+            wi->setAmmoRemaining(pSelectedWeap_->ammo());
+            hideOption(KEY_F10);
+            rld_cost_ = -1;
+        }
     } else if (actionId == purchaseButId_) {
         // Buying weapon
         if (pSelectedWeap_) {
@@ -601,7 +642,7 @@ void SelectMenu::handleAction(const int actionId, void *ctx, const int modKeys)
                 }
             }
             needRendering();
-        } else { // Buying mod
+        } else if (pSelectedMod_) {
             if (sel_all_) {
                 for (int n = 0; n < 4; n++) {
                     Agent *selected = g_Session.teamMember(n);

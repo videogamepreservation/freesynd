@@ -7,6 +7,7 @@
  *   Copyright (C) 2006  Trent Waddington <qg@biodome.org>              *
  *   Copyright (C) 2006  Tarjei Knapstad <tarjei.knapstad@gmail.com>    *
  *   Copyright (C) 2010  Bohdan Stelmakh <chamel@users.sourceforge.net> *
+ *   Copyright (C) 2011  Mark <mentor66@users.sourceforge.net>          *
  *                                                                      *
  *    This program is free software;  you can redistribute it and / or  *
  *  modify it  under the  terms of the  GNU General  Public License as  *
@@ -44,6 +45,7 @@ Weapon::Weapon(const std::string& w_name, int smallIcon, int bigIcon, int w_cost
     small_icon_ = smallIcon;
     big_icon_ = bigIcon;
     cost_ = w_cost;
+    ammo_cost_ = w_shot;
     ammo_= w_ammo;
     range_= w_range;
     damage_per_shot_ = w_shot;
@@ -75,7 +77,7 @@ void Weapon::drawBigIcon(int x, int y) {
     g_App.menuSprites().drawSpriteXYZ(big_icon_, x, y, 0, false, true);
 }
 
-void Weapon::drawInfo(int x, int y) {
+void Weapon::drawInfo(int x, int y,int rldCost) {
     char tmp[100];
     g_App.fonts().drawText(x, y, name_.c_str(), false, 0, false);
     sprintf(tmp, "COST   :%d", cost_);
@@ -96,6 +98,12 @@ void Weapon::drawInfo(int x, int y) {
 
     if (damage_per_shot_ >= 0 && ammo_ >= 0) {
         sprintf(tmp, "SHOT   :%d", damage_per_shot_);
+        g_App.fonts().drawText(x, y, tmp, false, 0, false);
+        y += 12;
+    }
+
+    if (rldCost != -1) {
+        sprintf(tmp, "RELOAD :%d", rldCost);
         g_App.fonts().drawText(x, y, tmp, false, 0, false);
         y += 12;
     }

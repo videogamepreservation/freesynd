@@ -7,6 +7,7 @@
  *   Copyright (C) 2006  Trent Waddington <qg@biodome.org>              *
  *   Copyright (C) 2006  Tarjei Knapstad <tarjei.knapstad@gmail.com>    *
  *   Copyright (C) 2010  Benoit Blancard <benblan@users.sourceforge.net>*
+ *   Copyright (C) 2011  Mark <mentor66@users.sourceforge.net>          *
  *                                                                      *
  *    This program is free software;  you can redistribute it and / or  *
  *  modify it  under the  terms of the  GNU General  Public License as  *
@@ -69,6 +70,8 @@ protected:
     /*! A counter used to draw the agent selector.*/
     int rnd_;
     bool sel_all_;
+    // reload cost
+    int rld_cost_;
     /*! Selected weapon on the weapon list.*/
     Weapon *pSelectedWeap_;
     /*! Selected weapon instance id on the current agent inventory.*/
@@ -87,6 +90,8 @@ protected:
     int equipButId_;
     /*! Id of the cancel button.*/
     int cancelButId_;
+    /*! Id of the reload button.*/
+    int reloadButId_;
     /*! Id of the purchase button.*/
     int purchaseButId_;
     /*! Id of the sell button.*/

@@ -185,7 +185,7 @@ void Option::draw() {
  * another menu if the field "to" has been set.
  */
 void Option::executeAction(const int modKeys) {
-    if (peer_) {
+    if (peer_ && this->isVisible()) {
         peer_->handleAction(getId(), NULL, modKeys);
     }
 

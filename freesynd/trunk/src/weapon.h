@@ -7,6 +7,7 @@
  *   Copyright (C) 2006  Trent Waddington <qg@biodome.org>              *
  *   Copyright (C) 2006  Tarjei Knapstad <tarjei.knapstad@gmail.com>    *
  *   Copyright (C) 2010  Bohdan Stelmakh <chamel@users.sourceforge.net> *
+ *   Copyright (C) 2011  Mark <mentor66@users.sourceforge.net>          *
  *                                                                      *
  *    This program is free software;  you can redistribute it and / or  *
  *  modify it  under the  terms of the  GNU General  Public License as  *
@@ -85,7 +86,7 @@ public:
 
     void drawSmallIcon(int x, int y);
     void drawBigIcon(int x, int y);
-    void drawInfo(int x, int y);
+    void drawInfo(int x, int y, int rldCost = -1);
 
     int cost() { return cost_; }
     int ammo() { return ammo_; }
@@ -195,11 +196,12 @@ public:
     int rangeDmg() { return range_dmg_; }
     double shotAngle() { return shot_angle_; }
     double shotAcurracy() { return shot_accuracy_; }
+    int ammoCost() { return ammo_cost_; }
 
 protected:
     std::string name_;
     int small_icon_, big_icon_;
-    int cost_, ammo_, range_, damage_per_shot_;
+    int cost_, ammo_cost_, ammo_, range_, damage_per_shot_;
     int anim_;
     int rank_;  //!> weapon rank
     WeaponType type_;

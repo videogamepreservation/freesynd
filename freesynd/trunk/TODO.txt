@@ -39,7 +39,6 @@ in original gameplay or are not present at all
 game mission files.
  - Implement dragging in SelectMenu to pass a weapon from an agent to another.
  - Manage Qwerty / azerty keyboard. Today only qwerty keyboard is used.
- - Add in select menu reload button for weapons
  - Configure menu, setting company/player name by pressing "Enter" key not only
  by pressing "OK" button
  - Create a debian package
@@ -56,3 +55,4 @@ from caret position.
  - Work on hyphenation rules in the text reflow code
  - Convert Italian and French translations to accented characters in UTF-8
  - Complete Italian and French translations
+ - Reload button translation for non-English languages
