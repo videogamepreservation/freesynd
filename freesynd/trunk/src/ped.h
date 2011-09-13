@@ -235,6 +235,7 @@ public:
     void selectNextWeapon();
     void selectBestWeapon();
     void dropWeapon(int n);
+    void dropWeapon(WeaponInstance *w);
     void dropAllWeapons();
     void pickupWeapon(WeaponInstance *w);
     bool wePickupWeapon();
@@ -437,6 +438,10 @@ public:
         // this value action complete
         // for objv_FollowObject 0 - until dist is reached, 1 - in range
         // of shot view
+        // for objv_AquireControl, for car, 0 - become passenger(or driver),
+        // 1 - become driver only if else failed
+        // for objv_AquireControl, for ped, 0 - controled or not is ok,
+        // 1 - controled if else failed
         uint32 condition;
     } actionQueueType;
 
@@ -448,10 +453,13 @@ public:
         // -1 - undef
         int16 indx_first_exec;
         // 0 - not set, 0b - stand/walking group(has walking action or action
-        // requires ped to stand), 1b - firing only(no wlaking action),
+        // requires ped to stand), 1b - firing only(no walking action),
         // (0b+1b) - walking + firing
         // NOTE: a group should not interfere with actions of other group
         uint32 group_desc;
+        // 0b - not started, 1b - executing, 2b - finished, 3b - failed,
+        // 4b - suspended
+        uint8 state;
     } actionQueueGroupType;
 
     void setActQInQueue(actionQueueGroupType &as);

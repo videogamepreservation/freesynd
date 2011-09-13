@@ -70,13 +70,13 @@ bool VehicleInstance::animate(int elapsed)
 
     if (health_ <= 0) {
         vehicle_driver_ = 0;
-        for (std::set <PedInstance *> ::iterator it = all_passengers_.begin();
-            it != all_passengers_.end(); it++) {
-                //TODO: inflict damage on explosion
-                (*it)->leaveVehicle();
+        while (!all_passengers_.empty())
+        {
+            PedInstance *p = *(all_passengers_.begin());
+            //TODO: inflict damage on explosion
+            p->leaveVehicle();
+            removeDriver(p);
         }
-        all_passengers_.clear();
-        dest_path_.clear();
     } else {
         updated = movementV(elapsed);
     }

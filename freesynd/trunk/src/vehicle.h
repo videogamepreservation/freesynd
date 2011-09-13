@@ -96,22 +96,35 @@ public:
         return vehicle_driver_;
     }
     void setDriver(PedInstance *vehicleDriver) {
-        if (vehicle_driver_ == 0)
+        if (vehicle_driver_ == NULL)
             vehicle_driver_ = vehicleDriver;
         all_passengers_.insert(vehicleDriver);
     }
     void removeDriver(PedInstance *vehicleDriver) {
         if (vehicle_driver_ == vehicleDriver) {
-            vehicle_driver_ = 0;
+            vehicle_driver_ = NULL;
             clearDestination();
             setSpeed(0);
         }
         all_passengers_.erase(all_passengers_.find(vehicleDriver));
+        ((MapObject *)vehicleDriver)->setPosition(tile_x_, tile_y_, tile_z_,
+            off_x_, off_y_, off_z_);
+        ((MapObject *)vehicleDriver)->setVisZ(tile_z_);
     }
     void forceSetDriver(PedInstance *vehicleDriver) {
         vehicle_driver_ = vehicleDriver;
         all_passengers_.insert(vehicleDriver);
     }
+    bool hasDriver() { return (vehicle_driver_ != NULL); }
+    bool isDriver(PedInstance *vehicleDriver) {
+        if (vehicle_driver_ == NULL)
+            return false;
+        return (vehicle_driver_ == vehicleDriver);
+    }
+    bool isInsideVehicle(PedInstance *p) {
+        return (all_passengers_.find(p) != all_passengers_.end());
+    }
+
     bool handleDamage(ShootableMapObject::DamageInflictType *d);
 
 protected:

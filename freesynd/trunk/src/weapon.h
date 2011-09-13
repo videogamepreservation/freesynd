@@ -227,10 +227,11 @@ protected:
 class ShotClass {
 public:
     void setOwner(ShootableMapObject *owner) {
+        last_owner_ = owner_;
         owner_ = owner;
-        last_owner_ = owner;
     }
     ShootableMapObject *getOwner() { return owner_; }
+    bool hasOwner() { return owner_ != NULL; }
 
     void shotTargetRandomizer(toDefineXYZ * cp, toDefineXYZ * tp, double angle,
         double dist_new = -1, bool exclude_z = false);

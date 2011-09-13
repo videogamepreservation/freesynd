@@ -593,6 +593,8 @@ bool ProjectileShot::animate(int elapsed, Mission *m) {
 bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
     int elapsed, bool ignoreBlocker)
 {
+    // TODO: add return value as int for diff fail events to handle correctly,
+    // check tobj completed action
     // TODO : IPA influence
     if (ammo_remaining_ == 0)
         return false;

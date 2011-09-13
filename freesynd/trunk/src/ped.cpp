@@ -204,7 +204,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
         {
             if ((it->group_desc & groups_processed) == 0) {
                 groups_processed |= it->group_desc;
-                //stt_mask |= it->as;
+                it->state = 2;
                 for (std::vector <actionQueueType> ::iterator a_it
                     = it->actions.begin(); a_it != it->actions.end(); a_it++)
                 {
@@ -214,24 +214,111 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                     // TODO: simultaneus actions of different groups?
                     if ((aqt.ot_execute & Mission::objv_None) != 0)
                     {
+                        printf("obj_None");
                     }
                     if ((aqt.ot_execute & Mission::objv_AquireControl) != 0)
                     {
+                        if (aqt.t_smo->majorType() == MapObject::mjt_Ped) {
+                            WeaponInstance *wi = selectedWeapon();
+                            if (wi && wi->getMainType()
+                                == Weapon::Persuadatron)
+                            {
+                                // TODO: proper handling for time, add condition
+                                // of failure to inflict damage
+                                if (aqt.state == 1)
+                                    aqt.state |= 2;
+                                wi->inflictDamage(aqt.t_smo, NULL, elapsed);
+                                if (checkFriendIs((PedInstance *)aqt.t_smo))
+                                    aqt.state |= 4;
+                            } else {
+                                aqt.state |= 8;
+                            }
+                        } else if (aqt.t_smo->majorType()
+                            == MapObject::mjt_Vehicle)
+                        {
+                            VehicleInstance *v = (VehicleInstance *)aqt.t_smo;
+                            if (aqt.condition == 0) {
+                                v->setDriver(this);
+                                if (v->isInsideVehicle(this)) {
+                                    in_vehicle_ = v;
+                                    aqt.state |= 4;
+                                    is_ignored_ = true;
+                                    map_ = -1;
+                                } else {
+                                    aqt.state |= 8;
+                                }
+                            } else if (aqt.condition == 1) {
+                                if (v->hasDriver()) {
+                                    if (v->isDriver(this))
+                                        aqt.state |= 4;
+                                    else
+                                        aqt.state |= 8;
+                                } else {
+                                    v->setDriver(this);
+                                    in_vehicle_ = v;
+                                    aqt.state |= 4;
+                                    is_ignored_ = true;
+                                    map_ = -1;
+                                }
+                            }
+                        }
                     }
                     if ((aqt.ot_execute & Mission::objv_LoseControl) != 0)
                     {
+                        if (aqt.t_smo->majorType() == MapObject::mjt_Ped) {
+                            // TODO: but not now
+                        } else if (aqt.t_smo->majorType()
+                            == MapObject::mjt_Vehicle)
+                        {
+                            VehicleInstance *v = (VehicleInstance *)aqt.t_smo;
+                            //NOTE: check if inside?
+                            v->removeDriver(this);
+                            map_ = v->map();
+                            is_ignored_ = false;
+                            in_vehicle_ = NULL;
+                            aqt.state |= 4;
+                        }
                     }
                     if ((aqt.ot_execute & Mission::objv_PickUpObject) != 0)
                     {
+                        WeaponInstance *wi = (WeaponInstance *)aqt.t_smo;
+                        if (wi->hasOwner() || weapons_.size() == 8)
+                            aqt.state |= 8;
+                        else {
+                            wi->setOwner(this);
+                            wi->setMap(-1);
+                            wi->setIsIgnored(true);
+                            aqt.state |= 4;
+                        }
                     }
                     if ((aqt.ot_execute & Mission::objv_DestroyObject) != 0)
                     {
+                        WeaponInstance *wi = selectedWeapon();
+                        if (!wi)
+                            selectBestWeapon();
+                        wi = selectedWeapon();
+                        if (wi) {
+                            wi->inflictDamage(aqt.t_smo, NULL, elapsed);
+                            // TODO: handle correctly
+                            if (aqt.t_smo->health() <= 0)
+                                aqt.state |= 4;
+                            else
+                                aqt.state |= 2;
+                        } else
+                            aqt.state |= 8;
                     }
                     if ((aqt.ot_execute & Mission::objv_UseObject) != 0)
                     {
                     }
                     if ((aqt.ot_execute & Mission::objv_PutDownObject) != 0)
                     {
+                        WeaponInstance *wi = (WeaponInstance *)aqt.t_smo;
+                        if (wi->getOwner() != this)
+                            aqt.state |= 8;
+                        else {
+                            dropWeapon(wi);
+                            aqt.state |= 4;
+                        }
                     }
                     if ((aqt.ot_execute & Mission::objv_ReachLocation) != 0)
                     {
@@ -351,11 +438,6 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
 
     if (in_vehicle_) {
         if (map_ == -1) {
-            tile_x_ = in_vehicle_->tileX();
-            tile_y_ = in_vehicle_->tileY();
-            tile_z_ = in_vehicle_->tileZ();
-            off_x_ = in_vehicle_->offX();
-            off_y_ = in_vehicle_->offY();
         } else if (samePosition(in_vehicle_)) {
             map_ = -1;
             in_vehicle_->setDriver(this);
@@ -959,28 +1041,48 @@ void PedInstance::dropWeapon(int n) {
     putdown_weapon_ = w;
 }
 
+void PedInstance::dropWeapon(WeaponInstance *wi) {
+    if (selectedWeapon() == wi) {
+        selected_weapon_ = -1;
+        if (wi->getWeaponType() == Weapon::EnergyShield)
+            setRcvDamageDef(MapObject::ddmg_PedWithEnergyShield);
+        else
+            setRcvDamageDef(MapObject::ddmg_Ped);
+    }
+    for (std::vector <WeaponInstance *>::iterator it
+        = weapons_.begin(); it != weapons_.end(); it++)
+    {
+        if ((*it) == wi) {
+            weapons_.erase(it);
+            break;
+        }
+    }
+    wi->setOwner(NULL);
+    wi->setMap(map_);
+    wi->setIsIgnored();
+    wi->setPosition(tile_x_, tile_y_, tile_z_, off_x_, off_y_, off_z_);
+    wi->setVisZ(vis_z_);
+    wi->activate();
+}
+
 void PedInstance::dropAllWeapons() {
 
     setRcvDamageDef(MapObject::ddmg_Ped);
     selected_weapon_ = -1;
 
-    std::vector < WeaponInstance * >::iterator it;
-    int n = 0;
-
-    for (it = weapons_.begin(); it != weapons_.end(); it++) {
-        WeaponInstance *w = weapons_[n];
+    for (std::vector < WeaponInstance * >::iterator it
+        = weapons_.begin(); it != weapons_.end(); it++)
+    {
+        WeaponInstance *w = *it;
         w->setMap(map());
+        // TODO: drop weapons not on same place
         w->setPosition(tile_x_, tile_y_, tile_z_, off_x_, off_y_, off_z_);
         w->setVisZ(vis_z_);
         w->setOwner(NULL);
         w->setIsIgnored();
         w->activate();
-        n++;
     }
-
-    while(weapons_.size())
-        weapons_.pop_back();
-
+    weapons_.clear();
 }
 
 void PedInstance::pickupWeapon(WeaponInstance * w) {
@@ -3412,6 +3514,8 @@ void PedInstance::verifyHostilesFound() {
 
 void PedInstance::createActQStanding(actionQueueGroupType &as) {
     as.as = PedInstance::pa_smStanding;
+    as.state = 1;
+    as.indx_first_exec = -1;
     as.actions.clear();
     actionQueueType aq;
     aq.ot_execute = Mission::objv_Wait;
@@ -3425,6 +3529,8 @@ void PedInstance::createActQWalking(actionQueueGroupType &as, PathNode *tpn,
     int32 dir)
 {
     as.as = PedInstance::pa_smWalking;
+    as.state = 1;
+    as.indx_first_exec = -1;
     as.actions.clear();
     actionQueueType aq;
     aq.ot_execute = Mission::objv_ReachLocation;
@@ -3443,6 +3549,7 @@ void PedInstance::createActQHit(actionQueueGroupType &as, PathNode *tpn,
     int32 dir)
 {
     as.as = PedInstance::pa_smHit;
+    as.state = 1;
     as.indx_first_exec = -1;
     as.actions.clear();
     actionQueueType aq;
@@ -3462,6 +3569,7 @@ void PedInstance::createActQFiring(actionQueueGroupType &as, PathNode &tpn,
 {
     as.as = PedInstance::pa_smFiring;
     as.indx_first_exec = -1;
+    as.state = 1;
     as.actions.clear();
     actionQueueType aq;
     if (tsmo) {
@@ -3483,6 +3591,7 @@ void PedInstance::createActQFollowing(actionQueueGroupType &as,
 {
     as.as = PedInstance::pa_smFollowing;
     as.indx_first_exec = -1;
+    as.state = 1;
     as.actions.clear();
     actionQueueType aq;
     aq.ot_execute = Mission::objv_FollowObject;
@@ -3498,6 +3607,7 @@ void PedInstance::createActQPickUp(actionQueueGroupType &as,
 {
     as.as = PedInstance::pa_smPickUp;
     as.indx_first_exec = -1;
+    as.state = 1;
     as.actions.clear();
     actionQueueType aq;
     aq.ot_execute = Mission::objv_ReachLocation;
@@ -3516,6 +3626,7 @@ void PedInstance::createActQPutDown(actionQueueGroupType &as,
 {
     as.as = PedInstance::pa_smPutDown;
     as.indx_first_exec = -1;
+    as.state = 1;
     as.actions.clear();
     actionQueueType aq;
     aq.ot_execute = Mission::objv_PutDownObject;
@@ -3527,6 +3638,7 @@ void PedInstance::createActQPutDown(actionQueueGroupType &as,
 void PedInstance::createActQBurning(actionQueueGroupType &as) {
     as.as = PedInstance::pa_smBurning;
     as.indx_first_exec = -1;
+    as.state = 1;
     as.actions.clear();
     actionQueueType aq;
     aq.ot_execute = Mission::objv_ReachLocation;
@@ -3552,6 +3664,7 @@ void PedInstance::createActQGetInCar(actionQueueGroupType &as,
 {
     as.as = PedInstance::pa_smGetInCar;
     as.indx_first_exec = -1;
+    as.state = 1;
     as.actions.clear();
     actionQueueType aq;
     aq.ot_execute = Mission::objv_ReachLocation;
@@ -3561,6 +3674,8 @@ void PedInstance::createActQGetInCar(actionQueueGroupType &as,
     aq.multi_var.dist_var.dist = 0;
     aq.multi_var.dist_var.dir = -1;
     as.actions.push_back(aq);
+    // TODO: change this
+    aq.condition = 0;
     aq.ot_execute = Mission::objv_AquireControl;
     as.actions.push_back(aq);
 }
@@ -3578,6 +3693,7 @@ void PedInstance::createActQInCar(actionQueueGroupType &as, PathNode *tpn,
 void PedInstance::createActQLeaveCar(actionQueueGroupType &as) {
     as.as = PedInstance::pa_smLeaveCar;
     as.indx_first_exec = -1;
+    as.state = 1;
     as.actions.clear();
     actionQueueType aq;
     aq.ot_execute = Mission::objv_LoseControl;
