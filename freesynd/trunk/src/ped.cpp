@@ -36,6 +36,8 @@
 #define EXECUTION_SPEED_TIME
 #endif
 
+//#define NEW_ANIMATE_HANDLING
+
 Ped::Ped() {
     memset(stand_anims_, 0, sizeof(stand_anims_));
     memset(walk_anims_, 0, sizeof(walk_anims_));
@@ -183,7 +185,7 @@ int Ped::lastPersuadeFrame() {
     return g_App.gameSprites().lastFrame(persuade_anim_);
 }
 
-#if 0
+#ifdef NEW_ANIMATE_HANDLING
 bool PedInstance::animate(int elapsed, Mission *mission) {
 
     if (agent_is_ == PedInstance::Agent_Non_Active)
@@ -322,6 +324,62 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                     }
                     if ((aqt.ot_execute & Mission::objv_ReachLocation) != 0)
                     {
+                        if (aqt.state == 1) {
+                            //TODO: IPA + mods
+                            int speed_set = 128;// aqt.multi_var.dist_var.speed
+                            if (aqt.condition == 0) {
+                                bool set_new_dest = true;
+                                if (aqt.multi_var.dist_var.dist != 0) {
+                                    toDefineXYZ xyz;
+                                    int dist_is = -1;
+                                    aqt.t_pn.convertPosToXYZ(&xyz);
+                                    dist_is = (int)distanceToPosXYZ(&xyz);
+                                    if (dist_is <= aqt.multi_var.dist_var.dist)
+                                        set_new_dest = false;
+                                }
+                                if (set_new_dest) {
+                                    aqt.state |= 2;
+                                    setDestinationP(mission, aqt.t_pn.tileX(),
+                                        aqt.t_pn.tileY(), aqt.t_pn.tileZ(),
+                                        aqt.t_pn.offX(), aqt.t_pn.offY(),
+                                        speed_set);
+                                    if (dest_path_.empty())
+                                        aqt.state |= 8;
+                                } else {
+                                    aqt.state |= 4;
+                                }
+                            } else if (aqt.condition == 1) {
+                                // TODO: directional movement
+                            } else if (aqt.condition == 2) {
+                                bool set_new_dest = true;
+                                if (aqt.multi_var.dist_var.dist != 0) {
+                                    int dist_is = -1;
+                                    dist_is = (int)distanceTo(
+                                        (MapObject *)aqt.t_smo);
+                                    if (dist_is <= aqt.multi_var.dist_var.dist)
+                                        set_new_dest = false;
+                                }
+                                if (set_new_dest) {
+                                    aqt.state |= 2;
+                                    setDestinationP(mission,
+                                        aqt.t_smo->tileX(), aqt.t_smo->tileY(),
+                                        aqt.t_smo->tileZ(), aqt.t_smo->offX(),
+                                        aqt.t_smo->offY(), speed_set);
+                                    if (dest_path_.empty())
+                                        aqt.state |= 8;
+                                } else {
+                                    aqt.state |= 4;
+                                }
+                            }
+                        }
+                        if ((aqt.state & 14) == 2) {
+                            //TODO: IPA + mods
+                            int speed_set = 128;
+                            if (aqt.condition == 0) {
+                            } else if (aqt.condition == 1) {
+                            } else if (aqt.condition == 2) {
+                            }
+                        }
                     }
                     if ((aqt.ot_execute & Mission::objv_FollowObject) != 0)
                     {
@@ -357,7 +415,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
     return updated;
 }
 #endif
-#if 1
+#ifndef NEW_ANIMATE_HANDLING
 bool PedInstance::animate(int elapsed, Mission *mission) {
 
     if (agent_is_ == PedInstance::Agent_Non_Active)
@@ -1236,9 +1294,6 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
     }
 #endif
 
-    //if (map_ == -1 || health_ <= 0)
-        //return;
-
     if(targetd->t == m_fdNonWalkable || map_ == -1 || health_ <= 0) {
         return;
     }
@@ -1250,6 +1305,7 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
         return;
     }
 
+#ifndef NEW_ANIMATE_HANDLING
     if (in_vehicle_) {
         if(in_vehicle_->tileX() != x
             || in_vehicle_->tileY() != y
@@ -1266,6 +1322,7 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
             || pickup_weapon_->offY() != oy)
         pickup_weapon_ = 0;
     }
+#endif
 
     if (tile_x_ == x && tile_y_ == y && tile_z_ == z) {
         dest_path_.push_back(PathNode(x, y, z, ox, oy));
@@ -3259,12 +3316,14 @@ bool PedInstance::movementP(Mission *m, int elapsed)
                     resetDest_Speed();
                     // TODO: "current action drop" function will be
                     // better for this purpose
+#ifndef NEW_ANIMATE_HANDLING
                     if (in_vehicle_) {
                         in_vehicle_ = NULL;
                     }
                     if (pickup_weapon_) {
                         pickup_weapon_ = NULL;
                     }
+#endif
                     return updated;
                 } else
                     hold_on_.wayFree = 0;
@@ -3274,12 +3333,14 @@ bool PedInstance::movementP(Mission *m, int elapsed)
                 {
                     resetDest_Speed();
                     // TODO: same as above
+#ifndef NEW_ANIMATE_HANDLING
                     if (in_vehicle_) {
                         in_vehicle_ = NULL;
                     }
                     if (pickup_weapon_) {
                         pickup_weapon_ = NULL;
                     }
+#endif
                     return updated;
                 } else
                     hold_on_.wayFree = 0;
@@ -3322,7 +3383,7 @@ bool PedInstance::movementP(Mission *m, int elapsed)
                 dy = diffy;
 
             updatePlacement(off_x_ + dx, off_y_ + dy);
-            // TODO : remove bool on return, make void?
+            // TODO :
             // what obstacles? cars? doors are already
             // setting stop signal, reuse it?
 #if 0
@@ -3385,11 +3446,13 @@ bool PedInstance::handleDamage(ShootableMapObject::DamageInflictType *d) {
     if ((d->dtype & MapObject::dmg_Physical) != 0)
         health_ -= d->dvalue;
     else if (d->dtype == MapObject::dmg_Mental) {
+#ifndef NEW_ANIMATE_HANDLING
         speed_ = 0;
         clearDestination();
         putdown_weapon_ = NULL;
         pickup_weapon_ = NULL;
         target_ = NULL;
+#endif
         // TODO: check for required number of persuade points before applying
         setObjGroupDef((obj_group_def_ & 0xFFFFFF00) |
             (((PedInstance *)d->d_owner)->objGroupDef() & 0xFF));
@@ -3403,10 +3466,12 @@ bool PedInstance::handleDamage(ShootableMapObject::DamageInflictType *d) {
         health_ = -1;
         // TODO: "current action drop" function will be
         // better for this purpose
+#ifndef NEW_ANIMATE_HANDLING
         resetDest_Speed();
         putdown_weapon_ = NULL;
         pickup_weapon_ = NULL;
         target_ = NULL;
+#endif
 
         switch ((unsigned int)d->dtype) {
             case MapObject::dmg_Bullet:
@@ -3526,7 +3591,7 @@ void PedInstance::createActQStanding(actionQueueGroupType &as) {
 }
 
 void PedInstance::createActQWalking(actionQueueGroupType &as, PathNode *tpn,
-    int32 dir)
+    ShootableMapObject *tsmo, int32 dir, int32 dist)
 {
     as.as = PedInstance::pa_smWalking;
     as.state = 1;
@@ -3536,9 +3601,15 @@ void PedInstance::createActQWalking(actionQueueGroupType &as, PathNode *tpn,
     aq.ot_execute = Mission::objv_ReachLocation;
     aq.state = 1;
     aq.multi_var.dist_var.dir = dir;
+    aq.multi_var.dist_var.dist = dist;
     if (dir == -1) {
-        aq.t_pn = *tpn;
-        aq.condition = 0;
+        if (tpn) {
+            aq.t_pn = *tpn;
+            aq.condition = 0;
+        } else {
+            aq.t_smo = tsmo;
+            aq.condition = 2;
+        }
     } else {
         aq.condition = 1;
     }

@@ -128,17 +128,30 @@ public:
     }
 
     double distanceTo(MapObject *t) {
-        int cx = tile_x_ * 256 + off_x_ - (t->tileX() * 256 + t->offX());
-        int cy = tile_y_ * 256 + off_y_ - (t->tileY() * 256 + t->offY());
-        int cz = vis_z_ * 128 + off_z_ - (t->visZ() * 128 + t->offZ());
+        int cx = tile_x_ * 256 + off_x_ - (t->tile_x_ * 256 + t->off_x_);
+        int cy = tile_y_ * 256 + off_y_ - (t->tile_y_ * 256 + t->off_y_);
+        int cz = vis_z_ * 128 + off_z_ - (t->vis_z_ * 128 + t->off_z_);
         return sqrt((double) (cx * cx + cy * cy + cz * cz));
     }
 
-    double distanceToPos(toDefineXYZ *xyz) {
+    double distanceToPosXYZ(toDefineXYZ *xyz) {
+        int cx = tile_x_ * 256 + off_x_ - (xyz->x);
+        int cy = tile_y_ * 256 + off_y_ - (xyz->y);
+        int cz = vis_z_ * 128 + off_z_  - (xyz->z);
+        return sqrt((double) (cx * cx + cy * cy + cz * cz));
+    }
+
+    double distanceToPosSz(toDefineXYZ *xyz) {
         int cx = tile_x_ * 256 + off_x_ - (xyz->x);
         int cy = tile_y_ * 256 + off_y_ - (xyz->y);
         int cz = vis_z_ * 128 + off_z_ + (size_z_ >> 1) - (xyz->z);
         return sqrt((double) (cx * cx + cy * cy + cz * cz));
+    }
+
+    void convertPosToXYZ(toDefineXYZ *xyz) {
+        xyz->x = tile_x_ * 256 + off_x_;
+        xyz->y = tile_y_ * 256 + off_y_;
+        xyz->z = vis_z_ * 128 + off_z_;
     }
 
     virtual bool animate(int elapsed);

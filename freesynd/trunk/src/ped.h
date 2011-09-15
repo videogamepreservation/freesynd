@@ -428,8 +428,10 @@ public:
                 int32 time_total;
             } time_var;
             struct {
+                // -1 is unset
                 int32 dir;
                 int32 dist;
+                // -1 is unset
                 int32 speed;
             } dist_var;
         } multi_var;
@@ -470,7 +472,7 @@ public:
 
     void createActQStanding(actionQueueGroupType &as);
     void createActQWalking(actionQueueGroupType &as, PathNode *tpn,
-        int32 dir = -1);
+        ShootableMapObject *tsmo, int32 dir = -1, int32 dist = 0);
     void createActQHit(actionQueueGroupType &as, PathNode *tpn,
         int32 dir = -1);
     void createActQFiring(actionQueueGroupType &as, PathNode &tpn,
