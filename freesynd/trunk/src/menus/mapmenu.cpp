@@ -110,11 +110,12 @@ MapMenu::MapMenu(MenuManager * m)
 :  Menu(m, "map", "mmap.dat", "mmapout.dat"),
 mapblk_data_(NULL), select_tick_count_(0)
 {
+	// 
     addOption(17, 347, 128, 25, "#MAP_BRIEF_BUT", FontManager::SIZE_2, KEY_F4, "brief");
-
     addOption(500, 347,  128, 25, "#MENU_MAIN_BUT", FontManager::SIZE_2, KEY_F5, "main");
 
-    txtCountryId_ = addStatic(268, 312, "", FontManager::SIZE_1, false);   // Country name
+    //txtCountryId_ = addStatic(268, 312, "", FontManager::SIZE_1, false);   // Country name
+	txtCountryId_ = addStatic(188, 312, 270, "", FontManager::SIZE_1, false);   // Country name
     addStatic(194, 332, "#MAP_POP", FontManager::SIZE_2, false);       // Pop label
     txtPopId_ = addStatic(268, 332, "", FontManager::SIZE_1, false);          // Pop value
     addStatic(194, 346, "#MAP_TAX", FontManager::SIZE_2, false);       // Tax label
