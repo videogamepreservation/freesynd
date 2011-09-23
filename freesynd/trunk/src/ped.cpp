@@ -36,7 +36,7 @@
 #define EXECUTION_SPEED_TIME
 #endif
 
-//#define NEW_ANIMATE_HANDLING
+#define NEW_ANIMATE_HANDLING
 
 Ped::Ped() {
     memset(stand_anims_, 0, sizeof(stand_anims_));
@@ -381,7 +381,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                             if (aqt.condition == 0 || aqt.condition == 2) {
                                 updated = movementP(mission, elapsed);
                                 if (speed_ == 0)
-                                    aqt.state | = 4;
+                                    aqt.state |= 4;
                             } else if (aqt.condition == 1) {
                                 // TODO: later
                             }
@@ -389,18 +389,106 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                     }
                     if ((aqt.ot_execute & Mission::objv_FollowObject) != 0)
                     {
-                        /*
-                        if (aqt.state == 1) {
+                        if (aqt.state == 1 || aqt.state == 17) {
+                            int speed_set = 128;
                             if (aqt.condition == 0) {
-                            }  else if (aqt.condition == 1) {
+                                bool set_new_dest = true;
+                                dist_to_pos_ = aqt.multi_var.dist_var.dist;
+                                int dist_is = -1;
+                                dist_is = (int)distanceTo(
+                                    (MapObject *)aqt.t_smo);
+                                if (dist_is <= dist_to_pos_)
+                                    set_new_dest = false;
+                                if (set_new_dest) {
+                                    aqt.state |= 2;
+                                    setDestinationP(mission,
+                                        aqt.t_smo->tileX(), aqt.t_smo->tileY(),
+                                        aqt.t_smo->tileZ(), aqt.t_smo->offX(),
+                                        aqt.t_smo->offY(), speed_set);
+                                    if (dest_path_.empty())
+                                        aqt.state |= 8;
+                                    if ((aqt.state & 16) != 0)
+                                        aqt.state ^= 16;
+                                } else {
+                                    aqt.state |= 16;
+                                }
+                            } else if (aqt.condition == 1) {
+                                WeaponInstance *wi = selectedWeapon();
+                                if (wi) {
+                                    bool set_new_dest = true;
+                                    if (wi->inRangeNoCP(&aqt.t_smo) != 0) {
+                                        set_new_dest = false;
+                                    }
+                                    if (set_new_dest) {
+                                        aqt.state |= 2;
+                                        setDestinationP(mission,
+                                            aqt.t_smo->tileX(), aqt.t_smo->tileY(),
+                                            aqt.t_smo->tileZ(), aqt.t_smo->offX(),
+                                            aqt.t_smo->offY(), speed_set);
+                                        if (dest_path_.empty())
+                                            aqt.state |= 8;
+                                        if ((aqt.state & 16) != 0)
+                                            aqt.state ^= 16;
+                                    } else {
+                                        aqt.state |= 16;
+                                    }
+                                } else {
+                                    aqt.state |= 8;
+                                }
                             }
                         }
-                        if ((aqt.state & 14) == 2) {
+                        if ((aqt.state & 30) == 2) {
+                            int speed_set = 128;
+                            speed_ = speed_set;
                             if (aqt.condition == 0) {
-                            }  else if (aqt.condition == 1) {
+                                updated = movementP(mission, elapsed);
+                                if (speed_ == 0) {
+                                    aqt.state ^= 2;
+                                    aqt.state |= 16;
+                                } else {
+                                    PathNode &rp = dest_path_.back();
+                                    if (rp.tileX() != aqt.t_smo->tileX()
+                                        || rp.tileY() != aqt.t_smo->tileY()
+                                        || rp.tileZ() != aqt.t_smo->tileZ()
+                                        || rp.offX() != aqt.t_smo->offX()
+                                        || rp.offY() != aqt.t_smo->offY()
+                                        || rp.offZ() != aqt.t_smo->offZ())
+                                    {
+                                        // resetting target position
+                                        dest_path_.clear();
+                                        speed_ = 0;
+                                        aqt.state ^= 2;
+                                    }
+                                }
+                            } else if (aqt.condition == 1) {
+                                WeaponInstance *wi = selectedWeapon();
+                                if (wi) {
+                                    updated = movementP(mission, elapsed);
+                                    if (wi->inRangeNoCP(&aqt.t_smo) == 0) {
+                                        aqt.state ^= 2;
+                                        aqt.state |= 16;
+                                        dest_path_.clear();
+                                        speed_ = 0;
+                                    } else {
+                                        PathNode &rp = dest_path_.back();
+                                        if (rp.tileX() != aqt.t_smo->tileX()
+                                            || rp.tileY() != aqt.t_smo->tileY()
+                                            || rp.tileZ() != aqt.t_smo->tileZ()
+                                            || rp.offX() != aqt.t_smo->offX()
+                                            || rp.offY() != aqt.t_smo->offY()
+                                            || rp.offZ() != aqt.t_smo->offZ())
+                                        {
+                                            // resetting target position
+                                            dest_path_.clear();
+                                            speed_ = 0;
+                                            aqt.state ^= 2;
+                                        }
+                                    }
+                                } else {
+                                    aqt.state |= 8;
+                                }
                             }
                         }
-                        */
                     }
                     if ((aqt.ot_execute & Mission::objv_Wait) != 0)
                     {
@@ -3331,7 +3419,8 @@ bool PedInstance::movementP(Mission *m, int elapsed)
                     && abs(hold_on_.tiley - nxtTileY) <= hold_on_.yadj
                     && hold_on_.tilez == nxtTileZ)
                 {
-                    resetDest_Speed();
+                    dest_path_.clear();
+                    speed_ = 0;
                     // TODO: "current action drop" function will be
                     // better for this purpose
 #ifndef NEW_ANIMATE_HANDLING
@@ -3349,7 +3438,8 @@ bool PedInstance::movementP(Mission *m, int elapsed)
                 if (hold_on_.tilex == nxtTileX && hold_on_.tiley == nxtTileY
                     && hold_on_.tilez == nxtTileZ)
                 {
-                    resetDest_Speed();
+                    dest_path_.clear();
+                    speed_ = 0;
                     // TODO: same as above
 #ifndef NEW_ANIMATE_HANDLING
                     if (in_vehicle_) {

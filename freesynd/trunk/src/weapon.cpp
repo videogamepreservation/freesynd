@@ -918,7 +918,7 @@ uint8 WeaponInstance::inRangeNoCP(ShootableMapObject ** t, PathNode * pn,
     } else {
         cxyz.x = tile_x_ * 256 + off_x_;
         cxyz.y = tile_y_ * 256 + off_y_;
-        cxyz.z = vis_z_ * 128 + off_z_ + 1;
+        cxyz.z = vis_z_ * 128 + off_z_ + 16;
     }
 
     return inRange(cxyz, t, pn, setBlocker, checkTileOnly, maxr);
