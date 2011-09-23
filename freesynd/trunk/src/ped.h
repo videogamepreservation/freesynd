@@ -428,8 +428,9 @@ public:
                 int32 time_total;
             } time_var;
             struct {
-                // -1 is unset
+                // move into this direction, -1 is unset
                 int32 dir;
+                // dist to target pos/object
                 int32 dist;
                 // -1 is unset
                 int32 speed;

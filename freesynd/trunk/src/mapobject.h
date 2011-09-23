@@ -348,6 +348,9 @@ public:
 
 protected:
     int speed_;
+    int dir_move_;
+    // on reaching this distance object should stop
+    int dist_to_pos_;
     std::list<PathNode> dest_path_;
 
     bool updatePlacement(int nOffX, int nOffY);

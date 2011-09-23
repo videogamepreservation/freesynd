@@ -329,12 +329,13 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                             int speed_set = 128;// aqt.multi_var.dist_var.speed
                             if (aqt.condition == 0) {
                                 bool set_new_dest = true;
-                                if (aqt.multi_var.dist_var.dist != 0) {
+                                dist_to_pos_ = aqt.multi_var.dist_var.dist;
+                                if (dist_to_pos_ != 0) {
                                     toDefineXYZ xyz;
                                     int dist_is = -1;
                                     aqt.t_pn.convertPosToXYZ(&xyz);
                                     dist_is = (int)distanceToPosXYZ(&xyz);
-                                    if (dist_is <= aqt.multi_var.dist_var.dist)
+                                    if (dist_is <= dist_to_pos_)
                                         set_new_dest = false;
                                 }
                                 if (set_new_dest) {
@@ -352,11 +353,12 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                                 // TODO: directional movement
                             } else if (aqt.condition == 2) {
                                 bool set_new_dest = true;
-                                if (aqt.multi_var.dist_var.dist != 0) {
+                                dist_to_pos_ = aqt.multi_var.dist_var.dist;
+                                if (dist_to_pos_ != 0) {
                                     int dist_is = -1;
                                     dist_is = (int)distanceTo(
                                         (MapObject *)aqt.t_smo);
-                                    if (dist_is <= aqt.multi_var.dist_var.dist)
+                                    if (dist_is <= dist_to_pos_)
                                         set_new_dest = false;
                                 }
                                 if (set_new_dest) {
@@ -375,14 +377,30 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                         if ((aqt.state & 14) == 2) {
                             //TODO: IPA + mods
                             int speed_set = 128;
-                            if (aqt.condition == 0) {
+                            speed_ = speed_set;
+                            if (aqt.condition == 0 || aqt.condition == 2) {
+                                updated = movementP(mission, elapsed);
+                                if (speed_ == 0)
+                                    aqt.state | = 4;
                             } else if (aqt.condition == 1) {
-                            } else if (aqt.condition == 2) {
+                                // TODO: later
                             }
                         }
                     }
                     if ((aqt.ot_execute & Mission::objv_FollowObject) != 0)
                     {
+                        /*
+                        if (aqt.state == 1) {
+                            if (aqt.condition == 0) {
+                            }  else if (aqt.condition == 1) {
+                            }
+                        }
+                        if ((aqt.state & 14) == 2) {
+                            if (aqt.condition == 0) {
+                            }  else if (aqt.condition == 1) {
+                            }
+                        }
+                        */
                     }
                     if ((aqt.ot_execute & Mission::objv_Wait) != 0)
                     {
@@ -3361,7 +3379,7 @@ bool PedInstance::movementP(Mission *m, int elapsed)
             tile_y_ = nxtTileY;
             tile_x_ = nxtTileX;
             dest_path_.pop_front();
-            if (dest_path_.size() == 0)
+            if (dest_path_.empty())
                 speed_ = 0;
             updated = true;
         } else {
@@ -3369,6 +3387,18 @@ bool PedInstance::movementP(Mission *m, int elapsed)
 
             int dx = 0, dy = 0;
             double d = sqrt((double)(diffx * diffx + diffy * diffy));
+#ifdef NEW_ANIMATE_HANDLING
+            bool reached_dist = false;
+            if (dist_to_pos_ != 0) {
+                toDefineXYZ xyz;
+                dest_path_.back().convertPosToXYZ(&xyz);
+                double dist_cur = distanceToPosXYZ(&xyz);
+                if (dist_cur > (double)dist_to_pos_) {
+                    d = (double)dist_to_pos_;
+                    reached_dist = true;
+                }
+            }
+#endif
 
             if (abs(diffx) > 0)
                 // dx = diffx * (speed_ * elapsed / 1000) / d;
@@ -3396,13 +3426,22 @@ bool PedInstance::movementP(Mission *m, int elapsed)
 #endif
             if(nxtTileX == tile_x_ && nxtTileY == tile_y_)
                 tile_z_ = nxtTileZ;
-            if(nxtTileX == tile_x_ && nxtTileY == tile_y_
-                && nxtTileZ == tile_z_ 
-                && dest_path_.front().offX() == off_x_
-                && dest_path_.front().offY() == off_y_)
-                dest_path_.pop_front();
-            if (dest_path_.size() == 0)
+#ifdef NEW_ANIMATE_HANDLING
+            if (reached_dist) {
+                dest_path_.clear();
                 speed_ = 0;
+            } else {
+#endif
+                if(nxtTileX == tile_x_ && nxtTileY == tile_y_
+                    && nxtTileZ == tile_z_ 
+                    && dest_path_.front().offX() == off_x_
+                    && dest_path_.front().offY() == off_y_)
+                    dest_path_.pop_front();
+                if (dest_path_.size() == 0)
+                    speed_ = 0;
+#ifdef NEW_ANIMATE_HANDLING
+            }
+#endif
 
             updated = true;
         }
