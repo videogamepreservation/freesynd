@@ -36,7 +36,7 @@
 #define EXECUTION_SPEED_TIME
 #endif
 
-#define NEW_ANIMATE_HANDLING
+//#define NEW_ANIMATE_HANDLING
 
 Ped::Ped() {
     memset(stand_anims_, 0, sizeof(stand_anims_));
@@ -195,6 +195,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
     Weapon::WeaponAnimIndex weapon_idx =
         selectedWeapon() ? selectedWeapon()->index() : Weapon::Unarmed_Anim;
 
+    // NOTE: some actions have remaining time, it is lost for now
     if (actions_queue_.empty()) {
         // TODO: use default_actions_ to fill it up
     } else {
@@ -295,19 +296,25 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                     }
                     if ((aqt.ot_execute & Mission::objv_DestroyObject) != 0)
                     {
-                        WeaponInstance *wi = selectedWeapon();
-                        if (!wi)
-                            selectBestWeapon();
-                        wi = selectedWeapon();
-                        if (wi) {
-                            wi->inflictDamage(aqt.t_smo, NULL, elapsed);
-                            // TODO: handle correctly
-                            if (aqt.t_smo->health() <= 0)
-                                aqt.state |= 4;
-                            else
-                                aqt.state |= 2;
-                        } else
-                            aqt.state |= 8;
+                        if (aqt.t_smo->health() <= 0)
+                            aqt.state |= 4;
+                        else {
+                            WeaponInstance *wi = selectedWeapon();
+                            if (!wi)
+                                selectBestWeapon();
+                            wi = selectedWeapon();
+                            if (wi && (wi->shotProperty()
+                                & Weapon::spe_DamageAll) != 0)
+                            {
+                                wi->inflictDamage(aqt.t_smo, NULL, elapsed);
+                                // TODO: handle correctly
+                                if (aqt.t_smo->health() <= 0)
+                                    aqt.state |= 4;
+                                else
+                                    aqt.state |= 2;
+                            } else
+                                aqt.state |= 8;
+                        }
                     }
                     if ((aqt.ot_execute & Mission::objv_UseObject) != 0)
                     {
@@ -492,9 +499,30 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                     }
                     if ((aqt.ot_execute & Mission::objv_Wait) != 0)
                     {
+                        if (aqt.state == 1) {
+                            aqt.multi_var.time_var.elapsed = 0;
+                            aqt.state |= 2;
+                        }
+                        if (aqt.state == 3) {
+                            aqt.multi_var.time_var.elapsed += elapsed;
+                            if (aqt.multi_var.time_var.elapsed
+                                >= aqt.multi_var.time_var.time_total)
+                                aqt.state |= 4;
+                        }
                     }
                     if ((aqt.ot_execute & Mission::objv_AttackLocation) != 0)
                     {
+                        WeaponInstance *wi = selectedWeapon();
+                        if (!wi)
+                            selectBestWeapon();
+                        if (wi && (wi->shotProperty()
+                            & Weapon::spe_DamageAll) != 0)
+                        {
+                            // TODO: ptoper handling
+                            wi->inflictDamage(NULL, &aqt.t_pn, elapsed);
+                            aqt.state |= 2;
+                        } else
+                            aqt.state |= 8;
                     }
                     if ((aqt.ot_execute & Mission::objv_FindEnemy) != 0)
                     {

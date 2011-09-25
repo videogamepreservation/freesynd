@@ -421,6 +421,7 @@ public:
                 uint32 t_ogd;
                 // (pedDescStateMasks)
                 uint32 t_hostile_desc;
+                uint32 shots;
             } enemy_var;
             struct {
                 int32 elapsed;

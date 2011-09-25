@@ -117,48 +117,52 @@ public:
         spe_None = 0x0,
         // can shoot only at owner
         spe_Owner = 0x0001,
+
         spe_PointToPoint = 0x0002,
         spe_PointToManyPoints = 0x0004,
+
         spe_TargetReachInstant = 0x0008,
+
         spe_TargetReachNeedTime = 0x0010,
         spe_CreatesProjectile = 0x0010,
+
         spe_RangeDamageOnReach = 0x0020,
         // ignore accuracy
         spe_ShootsWhileNoTarget = 0x0040,
         spe_UsesAmmo = 0x0080,
         spe_ChangeAttribute = 0x0100,
         spe_SelfDestruction = 0x0200,
-        spe_TargetObjectOnly = 0x0400,
-        spe_TargetAll = 0x0800
+        spe_TargetPedOnly = 0x0400,
+        spe_DamageAll = 0x0800
     }ShotPropertyEnum;
 
     typedef enum {
         wspt_None = spe_None,
         wspt_Persuadatron = (spe_PointToPoint | spe_TargetReachInstant
-            | spe_ShootsWhileNoTarget | spe_TargetObjectOnly),
+            | spe_ShootsWhileNoTarget | spe_TargetPedOnly),
         wspt_Pistol =
             (spe_PointToPoint | spe_TargetReachInstant | spe_UsesAmmo
-            | spe_TargetAll),
+            | spe_DamageAll),
         wspt_GaussGun =
             (spe_PointToPoint | spe_TargetReachNeedTime | spe_UsesAmmo
-            | spe_RangeDamageOnReach | spe_TargetAll),
+            | spe_RangeDamageOnReach | spe_DamageAll),
         wspt_Shotgun =
             (spe_PointToManyPoints | spe_TargetReachInstant | spe_UsesAmmo
-            | spe_TargetAll),
+            | spe_DamageAll),
         wspt_Uzi = (spe_PointToManyPoints | spe_TargetReachInstant
-            | spe_UsesAmmo | spe_TargetAll),
+            | spe_UsesAmmo | spe_DamageAll),
         wspt_Minigun =
             (spe_PointToManyPoints | spe_TargetReachInstant | spe_UsesAmmo
-            | spe_TargetAll),
+            | spe_DamageAll),
         wspt_Laser =
             (spe_PointToPoint | spe_TargetReachInstant
-            | spe_RangeDamageOnReach | spe_UsesAmmo | spe_TargetAll),
+            | spe_RangeDamageOnReach | spe_UsesAmmo | spe_DamageAll),
         wspt_Flamer =
             (spe_PointToPoint | spe_TargetReachNeedTime | spe_UsesAmmo
-            | spe_TargetAll),
+            | spe_DamageAll),
         wspt_LongRange =
             (spe_PointToPoint | spe_TargetReachInstant | spe_UsesAmmo
-            | spe_TargetAll),
+            | spe_DamageAll),
         wspt_Scanner = (spe_Owner | spe_ChangeAttribute),
         wspt_MediKit = (spe_Owner | spe_UsesAmmo),
         wspt_TimeBomb = (spe_ShootsWhileNoTarget | spe_TargetReachInstant
@@ -265,6 +269,7 @@ public:
     int range() { return pWeaponClass_->range(); }
     int ammo() { return pWeaponClass_->ammo(); }
     int rank() { return pWeaponClass_->rank(); }
+    unsigned int shotProperty() { return pWeaponClass_->shotProperty(); }
     const char * name() { return pWeaponClass_->getName(); }
 
     Weapon::WeaponAnimIndex index() { return pWeaponClass_->index(); }

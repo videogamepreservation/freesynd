@@ -594,7 +594,8 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
     int elapsed, bool ignoreBlocker)
 {
     // TODO: add return value as int for diff fail events to handle correctly,
-    // check tobj completed action
+    // check tobj completed action, additional parameter for shots needed,
+    // time remaining, shots done
     // TODO : IPA influence
     if (ammo_remaining_ == 0)
         return false;
@@ -610,10 +611,7 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
     } else if (pWeaponClass_->dmgType() == MapObject::dmg_Heal) {
         // NOTE: not only self-healing in future?
         return false;
-    } else if (pWeaponClass_->dmgType() == MapObject::dmg_Heal) {
-        // NOTE: not only self-healing in future?
-        return false;
-    } else if ((shot_prop & Weapon::spe_TargetObjectOnly) != 0 && tp) {
+    } else if ((shot_prop & Weapon::spe_TargetPedOnly) != 0 && tp) {
         // NOTE: Persuadatron will not shoot on ground
         return false;
     }
