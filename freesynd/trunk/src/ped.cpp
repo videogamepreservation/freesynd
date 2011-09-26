@@ -512,6 +512,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                     }
                     if ((aqt.ot_execute & Mission::objv_AttackLocation) != 0)
                     {
+                        // TODO: additional conditions, single shot?
                         WeaponInstance *wi = selectedWeapon();
                         if (!wi)
                             selectBestWeapon();
@@ -3613,6 +3614,7 @@ bool PedInstance::handleDamage(ShootableMapObject::DamageInflictType *d) {
         // TODO: check for required number of persuade points before applying
         setObjGroupDef((obj_group_def_ & 0xFFFFFF00) |
             (((PedInstance *)d->d_owner)->objGroupDef() & 0xFF));
+        setObjGroupID(((PedInstance *)d->d_owner)->objGroupID());
         setDrawnAnim(PedInstance::ad_PersuadedAnim);
         return true;
     }
@@ -3676,15 +3678,15 @@ void PedInstance::destroyAllWeapons() {
     selected_weapon_ = -1;
 }
 
-bool PedInstance::isInEmulatedGroupDef(std::set <unsigned int> &r_egd,
+bool PedInstance::isInEmulatedGroupDef(std::set <unsigned int> *r_egd,
         unsigned int emulated_group_def)
 {
     if (emulated_group_def != 0)
         return emulated_group_defs_.find(emulated_group_def)
             != emulated_group_defs_.end();
     bool hostile_rsp = false;
-    for (std::set <unsigned int>::iterator it = r_egd.begin();
-        it != r_egd.end() && !hostile_rsp; it++)
+    for (std::set <unsigned int>::iterator it = r_egd->begin();
+        it != r_egd->end() && !hostile_rsp; it++)
     {
         hostile_rsp = emulated_group_defs_.find(*it)
             != emulated_group_defs_.end();
@@ -3699,18 +3701,23 @@ bool PedInstance::checkHostileIs(ShootableMapObject *obj,
     if (obj->majorType() == MapObject::mjt_Vehicle) {
         // TODO: add this check later, create a list of all in vehicle
     } else if (obj->majorType() == MapObject::mjt_Ped) {
-        if (((PedInstance *)obj)->emulatedGroupDefsEmpty()) {
-            hostile_rsp =
-                isInEnemyGroupDef(((PedInstance *)obj)->objGroupDef());
-            if (!hostile_rsp) {
-                if (hostile_desc_alt == PedInstance::pd_smUndefined)
-                    hostile_desc_alt = hostile_desc_;
+        if (((PedInstance *)obj)->objGroupID() == 0) {
+            if (((PedInstance *)obj)->emulatedGroupDefsEmpty()) {
                 hostile_rsp =
-                    (((PedInstance *)obj)->descStateMasks() & hostile_desc_alt) != 0;
+                    isInEnemyGroupDef(((PedInstance *)obj)->objGroupDef());
+                if (!hostile_rsp) {
+                    if (hostile_desc_alt == PedInstance::pd_smUndefined)
+                        hostile_desc_alt = hostile_desc_;
+                    hostile_rsp =
+                        (((PedInstance *)obj)->descStateMasks() & hostile_desc_alt) != 0;
+                }
+            } else {
+                hostile_rsp =
+                    ((PedInstance *)obj)->isInEmulatedGroupDef(&enemy_group_defs_);
             }
         } else {
-            hostile_rsp =
-                ((PedInstance *)obj)->isInEmulatedGroupDef(enemy_group_defs_);
+            hostile_rsp = enemy_group_ids_.find(((PedInstance *)obj)->objGroupID())
+                != enemy_group_ids_.end();
         }
         if (!hostile_rsp) {
             hostile_rsp = isInHostilesFound(obj);
@@ -3721,16 +3728,30 @@ bool PedInstance::checkHostileIs(ShootableMapObject *obj,
     return hostile_rsp;
 }
 
+bool PedInstance::checkFriendIs(PedInstance *p) {
+    if (p->objGroupID() == 0) {
+        if (p->emulatedGroupDefsEmpty())
+            return (p->objGroupDef() & 0xFF) == (obj_group_def_ & 0xFF);
+        else
+            return p->isInEmulatedGroupDef(NULL, obj_group_def_);
+    }
+    return (p->objGroupID() == obj_group_id_);
+}
+
 void PedInstance::verifyHostilesFound() {
+    std::vector <ShootableMapObject *> rm_set;
     for (std::set <ShootableMapObject *>::iterator it = hostiles_found_.begin();
         it != hostiles_found_.end(); it++)
     {
         if ((*it)->health() <= 0 || ((*it)->majorType() == MapObject::mjt_Ped
             && checkFriendIs((PedInstance *)(*it))))
         {
-            hostiles_found_.erase(it);
-            it--;
+            rm_set.push_back(*it);
         }
+    }
+    while (!rm_set.empty()) {
+        hostiles_found_.erase(hostiles_found_.find(rm_set.back()));
+        rm_set.pop_back();
     }
 }
 
@@ -3933,19 +3954,12 @@ void PedInstance::createActQLeaveCar(actionQueueGroupType &as) {
 void PedInstance::setActQInQueue(actionQueueGroupType &as) {
     // NOTE: if action is invalidated all remaining actions in queue are
     // invalid, they should be removed
-    bool remove_last = false;
     for (std::vector <actionQueueGroupType>::iterator it = actions_queue_.begin();
         it != actions_queue_.end(); it++)
     {
-        if ((!remove_last)) {
-            if ((it->group_desc & as.group_desc) != 0) {
-                remove_last = true;
-                actions_queue_.erase(it);
-                it--;
-            }
-        } else {
-            actions_queue_.erase(it);
-            it--;
+        if ((it->group_desc & as.group_desc) != 0) {
+            actions_queue_.erase(it, actions_queue_.end());
+            break;
         }
     }
     if ((as.group_desc & 1) != 0)

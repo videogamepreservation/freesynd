@@ -316,6 +316,11 @@ public:
     }
     unsigned int objGroupDef() { return obj_group_def_; }
 
+    void setObjGroupID(unsigned int obj_group_id) {
+        obj_group_id_ = obj_group_id;
+    }
+    unsigned int objGroupID() { return obj_group_id_; }
+
     void addEnemyGroupDef(unsigned int enemy_group_def) {
         enemy_group_defs_.insert(enemy_group_def);
     }
@@ -333,9 +338,20 @@ public:
     void rmEmulatedGroupDef(unsigned int emulated_group_def) {
         emulated_group_defs_.erase(emulated_group_def);
     }
-    bool isInEmulatedGroupDef(std::set <unsigned int> &r_egd,
+    bool isInEmulatedGroupDef(std::set <unsigned int> *r_egd,
         unsigned int emulated_group_def = 0);
     bool emulatedGroupDefsEmpty() { return emulated_group_defs_.size() == 0; }
+
+    void addEnemyGroupID(unsigned int enemy_group_id) {
+        enemy_group_ids_.insert(enemy_group_id);
+    }
+    void rmEnemyGroupID(unsigned int enemy_group_id) {
+        enemy_group_ids_.erase(enemy_group_id);
+    }
+    bool isInEnemyGroupID(unsigned int enemy_group_id) {
+        return enemy_group_ids_.find(enemy_group_id)
+            != enemy_group_ids_.end();
+    }
 
     void addHostilesFound(ShootableMapObject * hostile_found) {
         hostiles_found_.insert(hostile_found);
@@ -351,16 +367,14 @@ public:
 
     bool checkHostileIs(ShootableMapObject *obj,
         unsigned int hostile_desc_alt = 0);
-    bool checkFriendIs(PedInstance *p) {
-        return (p->objGroupDef() & 0xFF) == (obj_group_def_ & 0xFF);
-    }
+    bool checkFriendIs(PedInstance *p);
 
     typedef enum {
         og_dmUndefined = 0x0,
         og_dmFriend = 0x0001,
         og_dmEnemy = 0x0002,
         og_dmNeutral = 0x0004,
-        // nainPedType << 8
+        // mainPedType << 8
         og_dmPedestrian = 0x0100,
         og_dmCivilian = 0x0100,
         og_dmAgent = 0x0200,
@@ -446,6 +460,8 @@ public:
         // 1 - become driver only if else failed
         // for objv_AquireControl, for ped, 0 - controled or not is ok,
         // 1 - controled if else failed
+        // for objv_FindEnemy; 0 - scout - will not attack, 1 - search and
+        // destroy
         uint32 condition;
     } actionQueueType;
 
@@ -522,19 +538,15 @@ protected:
     std::set <unsigned int> emulated_group_defs_;
     //std::set <unsigned int> emulated_failed_groups_;
     // dicovered hostiles are set here, check at end for hostile
+    std::set <unsigned int> enemy_group_ids_;
     std::set <ShootableMapObject *> hostiles_found_;
     // defines group obj belongs to (objGroupDefMasks)
     unsigned int obj_group_def_;
     unsigned int old_obj_group_def_;
 
-    // not used, within a group identification number
-    // NOTE: this will be used in A.L., guards group can be as enemy agents group,
-    // but what if we would like to make guards attack only territory intruders or
-    // someone who has took something on controlled surface, or attacked one of
-    // guards or etc.
-    unsigned int obj_group_def_id_;
-    // not used
-    unsigned int old_obj_group_def_id_;
+    // a group identification number, 0 - all group IDs
+    unsigned int obj_group_id_;
+    unsigned int old_obj_group_id_;
 
     AnimationDrawn drawn_anim_;
 
