@@ -332,7 +332,7 @@ void BriefMenu::handleAction(const int actionId, void *ctx, const int modKeys) {
     }
 }
 
-void BriefMenu::handleMouseDown(int x, int y, int button, const int modKeys) {
+bool BriefMenu::handleMouseDown(int x, int y, int button, const int modKeys) {
 
     unsigned char scroll_step = 30 / (10 - (g_Session.getSelectedBlock().enhanceLevel << 1));
 
@@ -358,7 +358,10 @@ void BriefMenu::handleMouseDown(int x, int y, int button, const int modKeys) {
                 minimap_scroll_y_ = pMission->mmax_y_ - 1;
         }
         needRendering();
+		return true;
     }
+
+	return false;
 }
 
 void BriefMenu::drawMinimap(int elapsed) {

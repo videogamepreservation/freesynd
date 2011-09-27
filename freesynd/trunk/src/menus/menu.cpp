@@ -40,6 +40,7 @@ name_(menu_name), showAnim_(showAnim), leaveAnim_(leaveAnim),
 parent_menu_(NULL), background_(NULL)
 {
     focusedWgId_ = -1;
+	pCaptureInput_ = NULL;
     menuManager->addMenu(this);
 }
 
@@ -49,6 +50,7 @@ name_(menu_name), showAnim_(""), leaveAnim_(""),
 parent_menu_(parent), background_(NULL)
 {
     focusedWgId_ = -1;
+	pCaptureInput_ = NULL;
     menuManager->addMenu(this);
 }
 
@@ -123,6 +125,12 @@ void Menu::leave() {
         pAction->handleFocusLost();
         focusedWgId_ = -1;
     }
+
+	// Reset capture
+	if (pCaptureInput_ != NULL) {
+		pCaptureInput_->handleCaptureLost();
+		pCaptureInput_ = NULL;
+	}
 
     // Give control to menu instance
     handleLeave();
@@ -301,6 +309,21 @@ TeamListBox * Menu::addTeamListBox(int x, int y, int width, int height, bool vis
     return pBox;
 }
 
+TextField * Menu::addTextField(int x, int y, int width, int height, FontManager::EFontSize size, int maxSize, bool displayEmpty, bool visible) {
+	TextField *pTextField = new TextField(this, x, y, width, height, size, maxSize, displayEmpty, visible);
+	actions_.push_back(pTextField);
+
+	return pTextField;
+}
+
+void Menu::captureInputBy(TextField *pTextfield) {
+	if (pTextfield != pCaptureInput_ && pCaptureInput_ != NULL) {
+		pCaptureInput_->handleCaptureLost();
+	}
+
+	pCaptureInput_ = pTextfield;
+}
+
 /*!
  * Handles the key pressed event.
  * \param key The key that was pressed
@@ -308,6 +331,14 @@ TeamListBox * Menu::addTeamListBox(int x, int y, int width, int height, bool vis
  */
 void Menu::keyEvent(Key key, const int modKeys)
 {
+	// first pass the event to the textfield that has the cursor
+	if (pCaptureInput_ != NULL) {
+		if (pCaptureInput_->handleKey(key, modKeys)) {
+			return;
+		}
+	}
+
+	// Then look for a mapped key to execute an action
     if (hotKeys_.find(key) != hotKeys_.end()) {
         Option *opt = hotKeys_[key];
         
@@ -380,12 +411,19 @@ void Menu::mouseMotionEvent(int x, int y, int state, const int modKeys)
  */
 void Menu::mouseDownEvent(int x, int y, int button, const int modKeys)
 {
+	// First pass the event to the menu
+	if (handleMouseDown(x, y, button, modKeys)) {
+		// Menu has processed the event, so don't pass it to widget
+		return;
+	}
+
+	// The event was not processed by the menu, so give a chance to a widget
     for (std::list < ActionWidget * >::iterator it = actions_.begin();
          it != actions_.end(); it++) {
         ActionWidget *m = *it;
 
         if (!m->isVisible()) {
-            // Button is not visible so it doesn't count
+            // Widget is not visible so it doesn't count
             continue;
         }
 
@@ -394,7 +432,6 @@ void Menu::mouseDownEvent(int x, int y, int button, const int modKeys)
             return;
         }
     }
-    handleMouseDown(x, y, button, modKeys);
 }
 
 /*!

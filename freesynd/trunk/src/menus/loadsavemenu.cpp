@@ -49,23 +49,32 @@ LoadSaveMenu::LoadSaveMenu(MenuManager * m):Menu(m, "loadsave", "mlosa.dat",
     // Main menu button
     addOption(501, 346, 126, 25, "#MENU_MAIN_BUT", FontManager::SIZE_2, KEY_F5, "main");
 
-    g_App.menus().getMessage("MENU_LB_EMPTY", emptyLbl_);
+	std::string label;
+    g_App.menus().getMessage("MENU_LB_EMPTY", label);
+	TextField::setEmptyLabel(label);
     
+	int y = Y_ORIGIN;
     for (int i=0; i<10; i++) {
-        files_.push_back("");
+		pTextFields_[i] = addTextField(X_ORIGIN, y, 370, 22, FontManager::SIZE_2, NAME_MAX_SIZE, true, true);
+		y += 24;
     }
 
     // by default no line is edited
     editNameId_ = -1;
-    caretPosition_ = 0;
 }
 
 void LoadSaveMenu::handleShow()
 {
-    for (int i=0; i<10; i++) {
-        files_[i].erase();
+    // List of savefile names.
+    std::vector<std::string> files;
+	for (int i=0; i<10; i++) {
+        files.push_back("");
     }
-    File::getGameSavedNames(files_);
+    File::getGameSavedNames(files);
+
+	for (int i=0; i<10; i++) {
+		pTextFields_[i]->setText(files[i].c_str());
+    }
 
     menu_manager_->saveBackground();
     g_System.showCursor();
@@ -73,6 +82,9 @@ void LoadSaveMenu::handleShow()
 
 void LoadSaveMenu::handleLeave() {
     g_System.hideCursor();
+	if (editNameId_ != -1) {
+		pTextFields_[editNameId_]->setDark(true);
+	}
     editNameId_ = -1;
 }
 
@@ -85,8 +97,8 @@ void LoadSaveMenu::handleAction(const int actionId, void *ctx, const int modKeys
             }
         }
     } else if (actionId == saveButId_) {
-        if (editNameId_ != -1 && files_[editNameId_].size() != 0) {
-            if (g_App.saveGameToFile(editNameId_, files_[editNameId_])) {
+        if (editNameId_ != -1 && pTextFields_[editNameId_]->getText().size() != 0) {
+            if (g_App.saveGameToFile(editNameId_, pTextFields_[editNameId_]->getText())) {
                 editNameId_ = -1;
                 menu_manager_->changeCurrentMenu("main");
             }
@@ -94,106 +106,18 @@ void LoadSaveMenu::handleAction(const int actionId, void *ctx, const int modKeys
     }
 }
 
-bool LoadSaveMenu::handleUnknownKey(Key key, const int modKeys) {
-    if (editNameId_ == -1) {
-        return false;
-    }
+bool LoadSaveMenu::handleMouseDown(int x, int y, int button, const int modKeys) {
+	for (int i=0; i<10; i++) {
+		if (pTextFields_[i]->isMouseOver(x, y)) {
+			if (editNameId_ != -1 && editNameId_ != i) {
+				pTextFields_[editNameId_]->setDark(true);
+			}
+			editNameId_ = i;
+			pTextFields_[i]->setDark(false);
+			break;
+		}
+	}
 
-    if (key == KEY_LEFT) {
-        if (caretPosition_ > 0) {
-            caretPosition_--;
-        }
-    } else if (key == KEY_RIGHT) {
-        if (caretPosition_ < files_[editNameId_].size()) {
-            caretPosition_++;
-        }
-    } else if (key == KEY_BACKSPACE) {
-        if (caretPosition_ > 0) {
-            files_[editNameId_].erase(caretPosition_ - 1, 1);
-            caretPosition_--;
-        }
-    } else if (key == KEY_DELETE) {
-        if (caretPosition_ < files_[editNameId_].size()) {
-            files_[editNameId_].erase(caretPosition_, 1);
-        }
-    } else if (key == KEY_HOME) {
-        caretPosition_ = 0;
-    } else if (key == KEY_END) {
-        caretPosition_ = files_[editNameId_].size();
-    } else if (menu_manager_->isPrintableKey(key)) {
-        if (files_[editNameId_].size() < NAME_MAX_SIZE) {
-            std::string str;
-            str += menu_manager_->getKeyAsChar(key);
-            files_[editNameId_].insert(caretPosition_, str);
-            caretPosition_++;
-        }
-    } else {
-        return false;
-    }
-
-    redrawList();
-    return true;
-}
-
-void LoadSaveMenu::handleMouseDown(int x, int y, int button, const int modKeys) {
-    if (x > 165 && x < 535) {
-        // Gets the line which was clicked
-        for (int lineId=0; lineId<10; lineId++) {
-            int yUp = Y_ORIGIN + lineId*24;
-            if (y > yUp && y < (yUp + 22)) {
-                editNameId_ = lineId;
-                int size = g_App.fonts().textWidth(files_[editNameId_].c_str(), false, FontManager::SIZE_2);
-
-                // computes caret position
-                if (x > size + X_ORIGIN) {
-                    // Clicked after the text so caret is at the end
-                    caretPosition_ = files_[editNameId_].size();
-                } else {
-                    // Clicked in the text so computes what exact letter
-                    size_t pos = 1;
-                    for (unsigned int i=0; i<files_[editNameId_].size(); i++, pos++) {
-                        std::string sub = files_[editNameId_].substr(0, pos);
-                        if (x < X_ORIGIN + g_App.fonts().textWidth(sub.c_str(), false, FontManager::SIZE_2)) {
-                            caretPosition_ = pos - 1;
-                            break;
-                        }
-                    }
-                }
-                redrawList();
-                return;
-            }
-        }
-    }
-}
-
-void LoadSaveMenu::drawCaret() {
-        std::string start = files_[editNameId_].substr(0, caretPosition_);
-        int x = X_ORIGIN + g_App.fonts().textWidth(start.c_str(), false, FontManager::SIZE_2) + 1;
-        int y = Y_ORIGIN + editNameId_*24 + 20;
-
-        // width of caret is the same of the letter above
-        int length = 10;
-        if (caretPosition_ < files_[editNameId_].size()) {
-            length = g_App.fonts().textWidth(files_[editNameId_].substr(caretPosition_, 1).c_str(), false, FontManager::SIZE_2);
-        }
-
-        // Draw caret
-        g_Screen.drawRect(x, y, length, 2, 252);
-}
-
-void LoadSaveMenu::handleRender() {
-    int y = Y_ORIGIN + 4;
-
-    for (int i=0; i<10; i++) {
-        if (files_[i].size() != 0) {
-            g_App.fonts().drawText(X_ORIGIN, y, files_[i].c_str(), false, FontManager::SIZE_2, i != editNameId_);
-        } else if (editNameId_ != i) {
-            g_App.fonts().drawText(X_ORIGIN, y, emptyLbl_.c_str(), false, FontManager::SIZE_2, i != editNameId_);
-        }
-        y += 24;
-    }
-
-    if (editNameId_ != -1) {
-        drawCaret();
-    }
+	// We always return false so the event can be passed to the widgets.
+	return false;
 }

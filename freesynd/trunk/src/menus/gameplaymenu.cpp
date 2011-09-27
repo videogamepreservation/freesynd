@@ -588,7 +588,7 @@ void GameplayMenu::handleMouseMotion(int x, int y, int state, const int modKeys)
         g_System.usePointerCursor();
 }
 
-void GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
+bool GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
 {
     bool change = false; /* Indicator whether we need menu redraw */
     bool ctrl = false;  // Is control button pressed
@@ -819,6 +819,8 @@ void GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
 
     if (change)
         render();
+
+	return true;
 }
 
 void GameplayMenu::handleMouseUp(int x, int y, int button, const int modKeys) {

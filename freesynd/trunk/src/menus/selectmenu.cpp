@@ -424,7 +424,7 @@ void SelectMenu::toggleAgent(int n)
     }
 }
 
-void SelectMenu::handleMouseDown(int x, int y, int button, const int modKeys)
+bool SelectMenu::handleMouseDown(int x, int y, int button, const int modKeys)
 {
     if (x >= 20 && x <= 140) {
         if (y >= 84 && y <= 150) {
@@ -519,6 +519,8 @@ void SelectMenu::handleMouseDown(int x, int y, int button, const int modKeys)
                     pWeaponsLBox_->setVisible(false);
                 }
     }
+
+	return false;
 }
 
 void SelectMenu::showModWeaponPanel() {

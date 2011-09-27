@@ -371,7 +371,7 @@ void MapMenu::handleLeave() {
     g_System.hideCursor();
 }
 
-void MapMenu::handleMouseDown(int x, int y, int button, const int modKeys)
+bool MapMenu::handleMouseDown(int x, int y, int button, const int modKeys)
 {
     // Checks among the missions which one has been clicked on
     for (int i = 0; i < 50; i++) {
@@ -389,10 +389,12 @@ void MapMenu::handleMouseDown(int x, int y, int button, const int modKeys)
                         handleBlockSelected();
                         needRendering();
                      }
-                return;
+                return true;
             }
         }
     }
+
+	return false;
 }
 
 void MapMenu::handleAction(const int actionId, void *ctx, const int modKeys) {

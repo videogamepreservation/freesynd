@@ -142,6 +142,13 @@ bool ActionWidget::isMouseOver(int x, int y) {
             y < y_ + height_);
 }
 
+void ActionWidget::setenabled(bool enabled) {
+	if (enabled != enabled_) {
+		enabled_ = enabled;
+		redraw();
+	}
+}
+
 Option::Option(Menu *peer, int x, int y, int width, int height, const char *text, FontManager::EFontSize size,
             const char *to, bool visible, bool centered, int darkWidgetId, int lightWidgetId) 
             : ActionWidget(peer, x, y, width, height, visible), text_(x, y, width - 4, text, size, true, true, centered) {
@@ -419,4 +426,136 @@ void TeamListBox::setSquadLine(int squadSlot, unsigned int line) {
         squadLines_[squadSlot] = line;
         redraw();
     }
+}
+
+// By default there's no empty label
+std::string TextField::emptyLbl_ = "";
+
+TextField::TextField(Menu *peer, int x, int y, int width, int height, FontManager::EFontSize size,
+            int maxSize, bool displayEmpty, bool visible) 
+            : ActionWidget(peer, x, y, width, height, visible), text_(x, y, width, "", size, true, visible, false) {
+
+    // Position the button text in the middle of height
+    // add 1 pixel to height to compensate lost of division
+    text_.setLocation(text_.getX(), y_ + (height_ / 2) - (text_.getHeight() / 2) + 1);
+	isDisplayEmpty_ = displayEmpty;
+	caretPosition_ = 0;
+	isInEdition_ = false;
+	maxSize_ = maxSize;
+}
+
+TextField::~TextField() {
+}
+
+/*!
+ * Draw the widget at the current position.
+ * Actually, only a text is drawn (see Font). The borders are
+ * already drawn on the background image.
+ */
+void TextField::draw() {
+    text_.draw();
+	if (isInEdition_) {
+		text_.draw();
+		drawCaret();
+	} else if (isDisplayEmpty_ && text_.getText().size() == 0) {
+		g_App.fonts().drawText(getX(), text_.getY(), emptyLbl_.c_str(), false, FontManager::SIZE_2, true);
+    } else {
+        text_.draw();
+    }
+}
+
+void TextField::handleCaptureLost() {
+	isInEdition_ = false;
+	redraw();
+}
+
+bool TextField::handleKey(Key key, const int modKeys) {
+	if (key == KEY_LEFT) {
+		// Move caret to the left until start of the text
+        if (caretPosition_ > 0) {
+            caretPosition_--;
+        }
+    } else if (key == KEY_RIGHT) {
+		// Move caret to the right until the end of the text
+		if (caretPosition_ < text_.getText().size()) {
+            caretPosition_++;
+        }
+    } else if (key == KEY_BACKSPACE) {
+		// Erase one character before caret
+        if (caretPosition_ > 0) {
+			std::string str = text_.getText();
+            str.erase(caretPosition_ - 1, 1);
+			text_.setText(str.c_str());
+            caretPosition_--;
+        }
+    } else if (key == KEY_DELETE) {
+        if (caretPosition_ < text_.getText().size()) {
+			std::string str = text_.getText();
+			str.erase(caretPosition_, 1);
+            //text_.getText().erase(caretPosition_, 1);
+			text_.setText(str.c_str());
+        }
+    } else if (key == KEY_HOME) {
+        caretPosition_ = 0;
+    } else if (key == KEY_END) {
+        caretPosition_ = text_.getText().size();
+    } else if (MenuManager::isPrintableKey(key)) {
+        if (text_.getText().size() < maxSize_) {
+            std::string str = text_.getText().substr(0, caretPosition_);
+            str += MenuManager::getKeyAsChar(key);
+			str += text_.getText().substr(caretPosition_, text_.getText().size());
+			text_.setText(str.c_str());
+            caretPosition_++;
+        }
+    } else {
+        return false;
+    }
+
+	redraw();
+	return true;
+}
+
+void TextField::handleMouseDown(int x, int y, int button, const int modKeys) {
+	isInEdition_ = true;
+	peer_->captureInputBy(this);
+
+	int size = g_App.fonts().textWidth(text_.getText().c_str(), false, text_.getSize());
+
+    // computes caret position
+    if (x > size + getX()) {
+        // Clicked after the text so caret is at the end
+        caretPosition_ = text_.getText().size();
+    } else {
+        // Clicked in the text so computes what exact letter
+        size_t pos = 1;
+        for (unsigned int i=0; i<text_.getText().size(); i++, pos++) {
+            std::string sub = text_.getText().substr(0, pos);
+			if (x < getX() + g_App.fonts().textWidth(sub.c_str(), false, text_.getSize())) {
+                caretPosition_ = pos - 1;
+                break;
+            }
+        }
+    }
+
+	redraw();
+}
+
+void TextField::setText(const char* text) {
+	text_.setText(text);
+	redraw();
+}
+
+void TextField::drawCaret() {
+        std::string start = text_.getText().substr(0, caretPosition_);
+		int x = getX() + g_App.fonts().textWidth(start.c_str(), false, text_.getSize()) + 1;
+        int y = text_.getY() + g_App.fonts().textHeight(text_.getSize(), true);
+
+        // width of caret is the same of the letter above
+        int length = 10;
+        if (caretPosition_ < text_.getText().size()) {
+            length = g_App.fonts().textWidth(text_.getText().substr(caretPosition_, 1).c_str(), false, text_.getSize());
+        }
+
+        // Draw caret
+        g_Screen.drawRect(x, y, length, 2, 252);
 }

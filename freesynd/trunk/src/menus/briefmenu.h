@@ -43,11 +43,12 @@ public:
     void handleRender();
     void handleLeave();
     void handleAction(const int actionId, void *ctx, const int modKeys);
-    void handleMouseDown(int x, int y, int button, const int modKeys);
     
 protected:
     void updateClock();
     void drawMinimap(int elapsed);
+
+	bool handleMouseDown(int x, int y, int button, const int modKeys);
 
 protected:
     int start_line_;

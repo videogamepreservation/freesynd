@@ -34,16 +34,12 @@ public:
     LoadSaveMenu(MenuManager *m);
 
     void handleShow();
-    void handleRender();
     void handleLeave();
 
     void handleAction(const int actionId, void *ctx, const int modKeys);
-    bool handleUnknownKey(Key key, const int modKeys);
-    void handleMouseDown(int x, int y, int button, const int modKeys);
 
 protected:
-    void drawCaret();
-    void redrawList() { addDirtyRect(X_ORIGIN, Y_ORIGIN, 370, 250); } 
+    bool handleMouseDown(int x, int y, int button, const int modKeys);
 
 protected:
     static const int X_ORIGIN;
@@ -54,14 +50,10 @@ protected:
     int loadButId_;
     /*! Id of the save button.*/
     int saveButId_;
-    /*! List od savefile names.*/
-    std::vector<std::string> files_;
-    /*! Label for empty lines.*/
-    std::string emptyLbl_;
     /*! The id of the line currently being edited. -1 if no line selected.*/
     short editNameId_;
-    /*! Position of caret in the name.*/
-    size_t caretPosition_;
+	/*! There are 10 text fields in the menu to enter file names.*/
+	TextField *pTextFields_[10];
 };
 
 #endif

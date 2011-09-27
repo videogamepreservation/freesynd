@@ -91,6 +91,8 @@ public:
     ListBox * addListBox(int x, int y, int width, int height, bool visible = true);
     //! Creates a specific list box for team selection and returns a pointer on it
     TeamListBox * addTeamListBox(int x, int y, int width, int height, bool visible = true);
+	//! Creates a new textfield widget and returns a pointer on it
+	TextField * addTextField(int x, int y, int width, int height, FontManager::EFontSize size, int maxSize, bool displayEmpty = false, bool visible = false);
 
     ActionWidget * getActionWidget(int buttonId);
     Option * getOption(int buttonId);
@@ -140,10 +142,7 @@ public:
         }
     }
 
-    virtual void handleTick(int elapsed) {}
-    virtual void handleMouseDown(int x, int y, int button, const int modKeys) {}
-    virtual void handleMouseUp(int x, int y, int button, const int modKeys) {}
-    virtual void handleMouseMotion(int x, int y, int state, const int modKeys) {}
+	virtual void handleTick(int elapsed) {}
 
     //! Callback function : Childs can reimplement
     /*! 
@@ -176,7 +175,18 @@ public:
 
     void selectToggleAction(int id) { group_.selectButton(id); }
 
+	void captureInputBy(TextField *pTextfield);
+
 protected:
+	
+	//! Handle mouse down event.
+	/*!
+	 * \return true if the menu has processed the event, and it must not be processed anymore.
+	 */
+    virtual bool handleMouseDown(int x, int y, int button, const int modKeys) { return false; }
+    virtual void handleMouseUp(int x, int y, int button, const int modKeys) {}
+    virtual void handleMouseMotion(int x, int y, int state, const int modKeys) {}
+
     void redrawOptions();
     void needRendering();
     void addDirtyRect(int x, int y, int width, int height);
@@ -201,6 +211,8 @@ protected:
     int clear_x_, clear_y_, clear_w_, clear_h_;
     /*! The id of the widget that currently has focus.*/
     int focusedWgId_;
+	/*! The current textfield that holds the cursor and so capture all key events.*/
+	TextField *pCaptureInput_;
 };
 
 #endif

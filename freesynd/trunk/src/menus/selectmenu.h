@@ -42,10 +42,11 @@ public:
     void handleShow();
     void handleRender();
     void handleLeave();
-    void handleMouseDown(int x, int y, int button, const int modKeys);
     void handleAction(const int actionId, void *ctx, const int modKeys);
 
 protected:
+	bool handleMouseDown(int x, int y, int button, const int modKeys);
+
     void updateClock();
     //! Draws a focus around the selected agent picture
     void drawAgentSelector(int x, int y);

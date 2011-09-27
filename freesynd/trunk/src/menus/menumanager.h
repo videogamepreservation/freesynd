@@ -63,6 +63,9 @@ public:
         GERMAN = 3
     };
 
+	static bool isPrintableKey(Key key);
+    static char getKeyAsChar(Key key);
+
     MenuManager();
     ~MenuManager();
     
@@ -108,9 +111,6 @@ public:
     void mouseDownEvent(int x, int y, int button, const int modKeys);
     //! Handles mouse button released
     void mouseUpEvent(int x, int y, int button, const int modKeys);
-
-    bool isPrintableKey(Key key);
-    char getKeyAsChar(Key key);
 
     FS_Lang currLanguage(void) {return curr_language_; }
 

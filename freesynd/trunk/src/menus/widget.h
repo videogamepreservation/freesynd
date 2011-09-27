@@ -147,6 +147,9 @@ public:
     void setDark(bool dark);
     bool isDark() { return dark_; }
 
+	/*! Returns the font size. */
+	FontManager::EFontSize getSize() { return size_; }
+
 protected:
     /*!
      * Utility method to update text and compute associated data.
@@ -177,10 +180,15 @@ class Sprite;
  */
 class ActionWidget : public Widget {
 public:
-    ActionWidget(Menu *peer, int x, int y, int width, int height, bool visible) 
+    ActionWidget(Menu *peer, int x, int y, int width, int height, bool visible, bool isEnabled = true) 
         : Widget(x, y, width, height, visible) {
             peer_ = peer;
+			enabled_ = isEnabled;
     }
+
+	void setenabled(bool enabled);
+
+	bool isenabled() { return enabled_; }
 
     //! Tells whether the pointer is over the widget or not
     bool isMouseOver(int x, int y);
@@ -197,6 +205,7 @@ public:
 
 protected:
     Menu *peer_;
+	bool enabled_;
 };
 
 //! A button widget.
@@ -363,6 +372,54 @@ protected:
     int yOrigin_;
     /*! Stores the lines for the current squad members.*/
     int squadLines_[4];
+};
+
+//! A text field widget.
+/*!
+ * 
+ */
+class TextField : public ActionWidget {
+public:
+	static void setEmptyLabel(std::string str) { emptyLbl_ = str; }
+
+    //! Constructs a new textfield.
+    TextField(Menu *peer, int x, int y, int width, int height, FontManager::EFontSize size,
+            int maxSize, bool displayEmpty, bool visible);
+
+    ~TextField();
+
+	void setText(const char* text);
+	std::string getText() { return text_.getText(); }
+
+	void setDark(bool dark) { text_.setDark(dark); }
+    bool isDark() { return text_.isDark(); }
+
+    //! Draw the widget on screen
+    void draw();
+
+    void handleMouseDown(int x, int y, int button, const int modKeys);
+
+	void handleCaptureLost();
+
+	bool handleKey(Key key, const int modKeys);
+
+protected:
+	void drawCaret();
+
+protected:
+	/*! Label for empty lines.*/
+    static std::string emptyLbl_;
+
+	/*! This holds the text value.*/
+    MenuText text_;
+	/*! Displays or not a default string if textfield is empty.*/
+	bool isDisplayEmpty_;
+	/*! Position of caret in the name.*/
+    size_t caretPosition_;
+	/*! Tells whether the field is being edited.*/
+	bool isInEdition_;
+	/*! Maximum size of the text.*/
+	int maxSize_;
 };
 
 #endif // WIDGET_H
