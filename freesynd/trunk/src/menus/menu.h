@@ -50,14 +50,6 @@ public:
 
     const char *name() { return name_.c_str(); }
 
-    void setClearArea(uint8 *background, int x, int y, int w, int h) {
-        background_ = background;
-        clear_x_ = x;
-        clear_y_ = y;
-        clear_w_ = w;
-        clear_h_ = h;
-    }
-
     virtual bool isSubMenu() {
         return leaveAnim_.size() == 0;
     }
@@ -207,8 +199,6 @@ protected:
     /*! A group of mutual exclusive ToggleAction.*/
     Group group_;
     const char *parent_menu_;
-    uint8 *background_;
-    int clear_x_, clear_y_, clear_w_, clear_h_;
     /*! The id of the widget that currently has focus.*/
     int focusedWgId_;
 	/*! The current textfield that holds the cursor and so capture all key events.*/

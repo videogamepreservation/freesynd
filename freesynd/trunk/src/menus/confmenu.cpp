@@ -33,291 +33,277 @@
 #include "confmenu.h"
 
 #define NAME_MAX_SIZE 16
+#define MAX_COLOUR 8
 
-class CommonConfSubMenu : public Menu {
-public:
-    CommonConfSubMenu(MenuManager *m, const char *menu_name, uint8 *bkg,
-            ConfMenu *confMenu) : Menu(m, menu_name, "", ""), bkg_(bkg) {
-        setParentMenu("conf");
-    }
+int g_Colours[MAX_COLOUR] = { 6, 7, 14, 3, 11, 12, 13, 15 };
 
-    virtual void handleRender() {
-        uint8 data[68 * 13];
-        memset(data, 255, 68 * 13);
-
-        for (int i = 4; i < 66; i++) {
-            data[i + 0 * 68] = 16;
-            data[i + 11 * 68] = 16;
-        }
-
-        for (int j = 0; j < 12; j++) {
-            data[4 + j * 68] = 16;
-            data[66 + j * 68] = 16;
-        }
-
-        g_Screen.scale2x(283, 122, 68, 13, data);
-        g_Screen.scale2x(468, 122, 68, 13, data);
-
-        g_System.showCursor();
-    }
-
-protected:
-    uint8 *bkg_;
-};
-
-int g_Colours[8] = { 6, 7, 14, 3, 11, 12, 13, 15 };
-
-class ChangeLogoMenu : public CommonConfSubMenu {
-public:
-    ChangeLogoMenu(MenuManager *m, uint8 *bkg, ConfMenu *confMenu) :
-    CommonConfSubMenu(m, "changeLogo", bkg, confMenu), logo_(g_App.getGameSession().getLogo()),
-    colour_(0) {
-        setClearArea(bkg_, 283, 28, 328, 120);
-        addStatic(280, 32, 330, "#CONF_COL_LOGO_MSG", FontManager::SIZE_2, false);
-        leftColButId_ = addImageOption(405, 58, KEY_F1, Sprite::MSPR_LEFT_ARROW_D, Sprite::MSPR_LEFT_ARROW_L);
-        rightColButId_ = addImageOption(435, 58, KEY_F2, Sprite::MSPR_RIGHT_ARROW_D, Sprite::MSPR_RIGHT_ARROW_L);
-
-        addStatic(475, 60, "#CONF_COL_TITLE", FontManager::SIZE_2, false);
-        leftLogoButId_ = addImageOption(405, 94, KEY_F3, Sprite::MSPR_LEFT_ARROW_D, Sprite::MSPR_LEFT_ARROW_L);
-        rightLogoButId_ = addImageOption(435, 94, KEY_F4, Sprite::MSPR_RIGHT_ARROW_D, Sprite::MSPR_RIGHT_ARROW_L);
-
-        addStatic(475, 96, "#CONF_LOGO_TITLE", FontManager::SIZE_2, false);
-        okButId_ = addOption(291, 122, 125, 23, "#CONF_OK_BUT", FontManager::SIZE_2, KEY_F5, "conf");
-        addOption(476, 122, 123, 23, "#MENU_CANCEL_BUT", FontManager::SIZE_2, KEY_F6, "conf");
-
-        for (unsigned int i = 0; i < sizeof(g_Colours) / sizeof(int); i++) {
-            if (g_Colours[i] == g_App.getGameSession().getLogoColour())
-                colour_ = i;
-        }
-    }
-
-    virtual void handleRender() {
-        CommonConfSubMenu::handleRender();
-        g_Screen.drawLogo(336, 55, logo_, g_Colours[colour_]);
-    }
-
-    virtual void handleAction(const int actionId, void *ctx, const int modKeys) {
-        if (actionId == leftColButId_) {
-            if (colour_ > 0)
-                colour_--;
-            else
-                colour_ = sizeof(g_Colours) / sizeof(int) - 1;
-
-            g_Screen.drawLogo(336, 55, logo_, g_Colours[colour_]);
-        }
-
-        if (actionId == rightColButId_) {
-            if ((unsigned int) colour_ < sizeof(g_Colours) / sizeof(int) - 1)
-                colour_++;
-            else
-                colour_ = 0;
-
-            g_Screen.drawLogo(336, 55, logo_, g_Colours[colour_]);
-        }
-
-        if (actionId == leftLogoButId_) {
-            if (logo_ > 0)
-                logo_--;
-            else
-                logo_ = g_Screen.numLogos() - 1;
-
-            g_Screen.drawLogo(336, 55, logo_, g_Colours[colour_]);
-        }
-
-        if (actionId == rightLogoButId_) {
-            if (logo_ < g_Screen.numLogos() - 1)
-                logo_++;
-            else
-                logo_ = 0;
-
-            g_Screen.drawLogo(336, 55, logo_, g_Colours[colour_]);
-        }
-
-        if (actionId == okButId_) {
-            g_App.getGameSession().setLogo(logo_);
-            g_App.getGameSession().setLogoColour(g_Colours[colour_]);
-        }
-    }
-
-protected:
-    int logo_, colour_;
-    int rightColButId_;
-    int leftColButId_;
-    int leftLogoButId_;
-    int rightLogoButId_;
-    int okButId_;
-};
-
-class ChangeNameMenu : public CommonConfSubMenu {
-public:
-    ChangeNameMenu(MenuManager *m, const char *menu_name, uint8 *bkg,
-            ConfMenu *confMenu) :
-    CommonConfSubMenu(m, menu_name, bkg, confMenu), tick_count_(0),
-    light_last_tick_(false) {}
-
-    void drawCaret(bool light = false) {
-        g_Screen.drawRect(315 +
-                         g_App.fonts().textWidth(name_value_.c_str(), false, FontManager::SIZE_2),
-                         95, 10, 2, light ? 252 : 16);
-    }
-
-    virtual void handleTick(int elapsed) {
-        tick_count_+= elapsed;
-        tick_count_ %= 200;
-
-        if (tick_count_ < 100) {
-            if (light_last_tick_) {
-                light_last_tick_ = false;
-                drawCaret(light_last_tick_);
-            }
-        } else {
-            if (!light_last_tick_) {
-                light_last_tick_ = true;
-                drawCaret(light_last_tick_);
-            }
-        }
-    }
-
-    virtual void handleRender() {
-        CommonConfSubMenu::handleRender();
-        uint8 data[136 * 13];
-        memset(data, 255, 136 * 13);
-
-        for (int i = 4; i < 134; i++) {
-            data[i + 0 * 136] = 16;
-            data[i + 11 * 136] = 16;
-        }
-
-        for (int j = 0; j < 12; j++) {
-            data[4 + j * 136] = 16;
-            data[134 + j * 136] = 16;
-        }
-
-        g_Screen.scale2x(300, 77, 136, 13, data);
-        g_App.fonts().drawText(313, 81, name_value_.c_str(), false, FontManager::SIZE_2, false);
-        drawCaret();
-    }
-
-    virtual bool handleUnknownKey(Key key, const int modKeys) {
-        bool consumed = false;
-        if (key == KEY_BACKSPACE) {
-            name_value_ = name_value_.substr(0, name_value_.size() - 1);
-            consumed = true;
-        }
-
-        if (name_value_.size() < NAME_MAX_SIZE) {
-            if (key >= KEY_a && key <= KEY_z) {
-                name_value_ += key - KEY_a + 'A';
-                consumed = true;
-            }
-
-            if (key >= KEY_0 && key <= KEY_9) {
-                name_value_ += key - KEY_0 + '0';
-                consumed = true;
-            }
-
-            if (key == KEY_SPACE) {
-                name_value_ += ' ';
-                consumed = true;
-            }
-        }
-
-        g_Screen.scale2x(310, 80, 129, 9, bkg_ + 155 + 40 * 320, 320);
-        g_App.fonts().drawText(313, 81, name_value_.c_str(), false, FontManager::SIZE_2, false);
-        drawCaret();
-
-        return consumed;
-    }
-
-protected:
-    std::string name_value_;
-    int tick_count_;
-    bool light_last_tick_;
-};
-
-class ChangeCompanyNameMenu : public ChangeNameMenu {
-public:
-    ChangeCompanyNameMenu(MenuManager *m, uint8 *bkg, ConfMenu *confMenu) :
-    ChangeNameMenu(m, "changeCompany", bkg, confMenu) {
-        setClearArea(bkg, 283, 28, 328, 120);
-        addStatic(280, 32, 330, "#CONF_COM_NAME_MSG", FontManager::SIZE_2, false);
-        okButId_ = addOption(291, 122, 125, 23, "#CONF_OK_BUT", FontManager::SIZE_2, KEY_F5, "conf");
-        addOption(476, 122, 123, 23, "#MENU_CANCEL_BUT", FontManager::SIZE_2, KEY_F6, "conf");
-        name_value_ = g_App.getGameSession().getCompanyName();
-    }
-
-    virtual void handleAction(const int actionId, void *ctx, const int modKeys) {
-        if (actionId == okButId_) {
-            g_App.getGameSession().setCompanyName(name_value_.c_str());
-            g_App.setCheatCode(name_value_.c_str());
-        }
-    }
-
-private:
-    int okButId_;
-};
-
-class ChangeYourNameMenu : public ChangeNameMenu {
-public:
-    ChangeYourNameMenu(MenuManager *m, uint8 *bkg, ConfMenu *confMenu) :
-    ChangeNameMenu(m, "changeName", bkg, confMenu) {
-        setClearArea(bkg, 283, 28, 328, 120);
-        addStatic(280, 32, 330, "#CONF_YOUR_NAME_MSG", FontManager::SIZE_2, false);
-        okButId_ = addOption(291, 122, 125, 23, "#CONF_OK_BUT", FontManager::SIZE_2, KEY_F5, "conf");
-        addOption(476, 122, 123, 23, "#MENU_CANCEL_BUT", FontManager::SIZE_2, KEY_F6, "conf");
-        name_value_ = g_App.getGameSession().getUserName();
-    }
-
-    virtual void handleAction(const int actionId, void *ctx, const int modKeys) {
-        if (actionId == okButId_)
-            g_App.getGameSession().setUserName(name_value_.c_str());
-    }
-private:
-    int okButId_;
-};
 
 ConfMenu::ConfMenu(MenuManager *m) :
 Menu(m, "conf", "mconfup.dat", "mconfout.dat") {
-    int size;
-    bkg_ = File::loadOriginalFile("mconscr.dat", size);
-    submenu_logo_ = new ChangeLogoMenu(m, bkg_, this);
-    submenu_company_name_ = new ChangeCompanyNameMenu(m, bkg_, this);
-    submenu_name_ = new ChangeYourNameMenu(m, bkg_, this);
-    setClearArea(bkg_, 283, 28, 328, 120);
-    addStatic(280, 32, 330, "#CONF_MAIN_MSG", FontManager::SIZE_2, false);
-    addOption(325, 65, 240, 20, "#CONF_COL_LOGO_BUT", FontManager::SIZE_2, KEY_F1, "changeLogo", true, false, Sprite::MSPR_BULLET_D, Sprite::MSPR_BULLET_L);
-    addOption(325, 90, 240, 20, "#CONF_COM_NAME_BUT", FontManager::SIZE_2, KEY_F2, "changeCompany", true, false, Sprite::MSPR_BULLET_D, Sprite::MSPR_BULLET_L);
-    addOption(325, 115, 240, 20, "#CONF_YOUR_NAME_BUT", FontManager::SIZE_2, KEY_F3, "changeName", true, false, Sprite::MSPR_BULLET_D, Sprite::MSPR_BULLET_L);
+	setParentMenu("main");
+
+	toAcceptLogo_ = 0;
+	toAcceptColourId_ = 0;
+	tempLogo_ = 0;
+	tempColourId_ = 0;
+    
+	panelMsgId_ = addStatic(280, 32, 330, "#CONF_MAIN_MSG", FontManager::SIZE_2, false);
+    
+	logoButId_ = addOption(325, 65, 240, 20, "#CONF_COL_LOGO_BUT", FontManager::SIZE_2, KEY_F1, NULL, true, false, Sprite::MSPR_BULLET_D, Sprite::MSPR_BULLET_L);
+    compNameButId_ = addOption(325, 90, 240, 20, "#CONF_COM_NAME_BUT", FontManager::SIZE_2, KEY_F2, NULL, true, false, Sprite::MSPR_BULLET_D, Sprite::MSPR_BULLET_L);
+    userNameButId_ = addOption(325, 115, 240, 20, "#CONF_YOUR_NAME_BUT", FontManager::SIZE_2, KEY_F3, NULL, true, false, Sprite::MSPR_BULLET_D, Sprite::MSPR_BULLET_L);
     // Accept button
-    addOption(17, 347, 128, 25, "#MENU_ACC_BUT", FontManager::SIZE_2, KEY_F4, "main");
+    acceptButId_ = addOption(17, 347, 128, 25, "#MENU_ACC_BUT", FontManager::SIZE_2, KEY_F4, "main");
     // Main menu button
-    addOption(500, 347,  128, 25, "#MENU_MAIN_BUT", FontManager::SIZE_2, KEY_F5, "main");
-    setParentMenu("main");
+    menuButId_ = addOption(500, 347,  128, 25, "#MENU_MAIN_BUT", FontManager::SIZE_2, KEY_F10, "main");
+
+	createPanels();
+
+	// Sub panel Ok and Cancel buttons
+    okButId_ = addOption(291, 122, 125, 23, "#CONF_OK_BUT", FontManager::SIZE_2, KEY_F5, NULL, false);
+    cancelButId_ = addOption(476, 122, 123, 23, "#MENU_CANCEL_BUT", FontManager::SIZE_2, KEY_F6, NULL, false);
+
+	toAcceptCmpNameTxtId_ = addStatic(32, 93, "", FontManager::SIZE_1, true);
+	toAcceptUsrNameTxtId_ = addStatic(32, 115, "", FontManager::SIZE_1, true);
+
+	currPanel_ = PNL_MAIN;
+
+	// Initialize data for the buttons frame
+    memset(butFrameData_, 255, 68 * 13);
+    for (int i = 4; i < 66; i++) {
+        butFrameData_[i + 0 * 68] = 16;
+        butFrameData_[i + 11 * 68] = 16;
+    }
+
+    for (int j = 0; j < 12; j++) {
+        butFrameData_[4 + j * 68] = 16;
+        butFrameData_[66 + j * 68] = 16;
+    }
+
+	// Initialize data for the text field frame
+	memset(tfFrameData_, 255, 136 * 13);
+
+    for (int i = 4; i < 134; i++) {
+        tfFrameData_[i + 0 * 136] = 16;
+        tfFrameData_[i + 11 * 136] = 16;
+    }
+
+    for (int j = 0; j < 12; j++) {
+        tfFrameData_[4 + j * 136] = 16;
+        tfFrameData_[134 + j * 136] = 16;
+    }
 }
 
 ConfMenu::~ConfMenu() {
-    delete[] bkg_;
-    delete submenu_logo_;
-    delete submenu_company_name_;
-    delete submenu_name_;
+}
+
+void ConfMenu::createPanels() {
+	// Color picker
+	colStaticId_ = addStatic(475, 60, "#CONF_COL_TITLE", FontManager::SIZE_2, false);
+	getStatic(colStaticId_)->setVisible(false);
+	leftColButId_ = addImageOption(405, 58, KEY_F9, Sprite::MSPR_LEFT_ARROW_D, Sprite::MSPR_LEFT_ARROW_L, false);
+    rightColButId_ = addImageOption(435, 58, KEY_F2, Sprite::MSPR_RIGHT_ARROW_D, Sprite::MSPR_RIGHT_ARROW_L, false);
+
+	// Logo picker
+    leftLogoButId_ = addImageOption(405, 94, KEY_F3, Sprite::MSPR_LEFT_ARROW_D, Sprite::MSPR_LEFT_ARROW_L, false);
+    rightLogoButId_ = addImageOption(435, 94, KEY_F4, Sprite::MSPR_RIGHT_ARROW_D, Sprite::MSPR_RIGHT_ARROW_L, false);
+    logoStaticId_ = addStatic(475, 96, "#CONF_LOGO_TITLE", FontManager::SIZE_2, false);
+	getStatic(logoStaticId_)->setVisible(false);
+
+	// Change names textfields
+	pUserNameTF_ = addTextField(312, 79, 255, 21, FontManager::SIZE_2, NAME_MAX_SIZE);
+	pCompNameTF_ = addTextField(312, 79, 255, 21, FontManager::SIZE_2, NAME_MAX_SIZE);
 }
 
 void ConfMenu::handleRender() {
-    g_Screen.drawLogo(28, 22, g_App.getGameSession().getLogo(), g_App.getGameSession().getLogoColour());
+	// Draw the current logo
+    g_Screen.drawLogo(28, 22, toAcceptLogo_, g_Colours[toAcceptColourId_]);
 
-    if (*g_App.getGameSession().getCompanyName()) {
-        g_Screen.scale2x(28, 90, 120, 10, bkg_ + 14 + 45 * 320, 320);
-        g_App.fonts().drawText(28, 92, g_App.getGameSession().getCompanyName(), false, FontManager::SIZE_1, false);
+	if (currPanel_ == PNL_LOGO) {
+		// Draw the selected logo
+		g_Screen.drawLogo(336, 55, tempLogo_, g_Colours[tempColourId_]);
+	} else if (currPanel_ == PNL_CMPNM || currPanel_ == PNL_USRNM) {
+		// draw a frame around the textfield
+        g_Screen.scale2x(300, 77, 136, 13, tfFrameData_);
+	}
+
+	if (currPanel_ != PNL_MAIN) {
+		// draw frame around ok and cancel buttons
+        g_Screen.scale2x(283, 122, 68, 13, butFrameData_);
+        g_Screen.scale2x(468, 122, 68, 13, butFrameData_);
+	}
+}
+
+void ConfMenu::handleShow() {
+	menu_manager_->saveBackground();
+
+	toAcceptLogo_ = g_App.getGameSession().getLogo();
+
+	for (unsigned int i = 0; i < sizeof(g_Colours) / sizeof(int); i++) {
+        if (g_Colours[i] == g_App.getGameSession().getLogoColour())
+            toAcceptColourId_ = i;
     }
 
-    if (*g_App.getGameSession().getUserName()) {
-        g_Screen.scale2x(28, 112, 120, 10, bkg_ + 14 + 56 * 320, 320);
-        g_App.fonts().drawText(28, 114, g_App.getGameSession().getUserName(), false, FontManager::SIZE_1, false);
-    }
+	getStatic(toAcceptUsrNameTxtId_)->setText(g_Session.getUserName());
+	getStatic(toAcceptCmpNameTxtId_)->setText(g_Session.getCompanyName());
 
-    g_System.showCursor();
+	g_System.showCursor();
 }
 
 void ConfMenu::handleLeave() {
+	showMainPanel();
+
     g_System.hideCursor();
+}
+
+void ConfMenu::handleAction(const int actionId, void *ctx, const int modKeys) {
+	if (actionId == logoButId_) {
+		showLogoPanel();
+	} else if (actionId == userNameButId_) {
+		showUserNamePanel();
+	} else if (actionId == compNameButId_) {
+		showCompanyNamePanel();
+	} else if (actionId == leftColButId_) {
+		tempColourId_--;
+		if (tempColourId_ < 0) {
+			tempColourId_ = MAX_COLOUR - 1;
+		}
+		redrawPanel();
+	} else if (actionId == rightColButId_) {
+		tempColourId_ = (tempColourId_ + 1) % MAX_COLOUR;
+		redrawPanel();
+	} else if (actionId == leftLogoButId_) {
+		tempLogo_--;
+		if (tempLogo_ < 0 ) {
+			tempLogo_ = g_Screen.numLogos() - 1;
+		}
+		redrawPanel();
+	} else if (actionId == rightLogoButId_) {
+		tempLogo_ = (tempLogo_ + 1) % g_Screen.numLogos();
+		redrawPanel();
+	} else if (actionId == okButId_) {
+		if (currPanel_ == PNL_LOGO) {
+			toAcceptColourId_ = tempColourId_;
+			toAcceptLogo_ = tempLogo_;
+		} else if (currPanel_ == PNL_USRNM) {
+			getStatic(toAcceptUsrNameTxtId_)->setText(pUserNameTF_->getText().c_str());
+		} else {
+			getStatic(toAcceptCmpNameTxtId_)->setText(pCompNameTF_->getText().c_str());
+		}
+		redrawLogo();
+		showMainPanel();
+	} else if (actionId == cancelButId_) {
+		showMainPanel();
+	} else if (actionId == acceptButId_) {
+		g_Session.setCompanyName(getStatic(toAcceptCmpNameTxtId_)->getText().c_str());
+		g_Session.setUserName(getStatic(toAcceptUsrNameTxtId_)->getText().c_str());
+		g_Session.setLogo(toAcceptLogo_);
+		g_Session.setLogoColour(g_Colours[toAcceptColourId_]);
+	}
+}
+
+bool ConfMenu::handleUnknownKey(Key key, const int modKeys) {
+	if (currPanel_ != PNL_MAIN) {
+		if (key == KEY_ESCAPE) {
+			showMainPanel();
+			return true;
+		} else if (key == KEY_RETURN) {
+			showMainPanel();
+			return true;
+		}
+	}
+
+	return false;
+}
+
+void ConfMenu::showMainPanel() {
+	getOption(logoButId_)->setVisible(true);
+	getOption(userNameButId_)->setVisible(true);
+	getOption(compNameButId_)->setVisible(true);
+	getStatic(panelMsgId_)->setText("#CONF_MAIN_MSG");
+
+	getOption(okButId_)->setVisible(false);
+	getOption(cancelButId_)->setVisible(false);
+	getOption(acceptButId_)->setenabled(true);
+	getOption(menuButId_)->setenabled(true);
+
+	if (currPanel_ == PNL_LOGO) {
+		getOption(leftColButId_)->setVisible(false);
+		getOption(rightColButId_)->setVisible(false);
+		getOption(leftLogoButId_)->setVisible(false);
+		getOption(rightLogoButId_)->setVisible(false);
+
+		getStatic(colStaticId_)->setVisible(false);
+		getStatic(logoStaticId_)->setVisible(false);
+	} else if (currPanel_ == PNL_USRNM) {
+		pUserNameTF_->setVisible(false);
+		pUserNameTF_->setText("");
+		captureInputBy(NULL);
+	} else if (currPanel_ == PNL_CMPNM) {
+		pCompNameTF_->setVisible(false);
+		pCompNameTF_->setText("");
+		captureInputBy(NULL);
+	}
+
+	redrawPanel();
+	currPanel_ = PNL_MAIN;
+}
+
+void ConfMenu::hideMainPanel() {
+	getOption(logoButId_)->setVisible(false);
+	getOption(userNameButId_)->setVisible(false);
+	getOption(compNameButId_)->setVisible(false);
+
+	getOption(acceptButId_)->setenabled(false);
+	getOption(menuButId_)->setenabled(false);
+
+	redrawPanel();
+}
+
+void ConfMenu::showLogoPanel() {
+	currPanel_ = PNL_LOGO;
+	getStatic(panelMsgId_)->setText("#CONF_COL_LOGO_MSG");
+	getOption(leftColButId_)->setVisible(true);
+	getOption(rightColButId_)->setVisible(true);
+	getOption(leftLogoButId_)->setVisible(true);
+	getOption(rightLogoButId_)->setVisible(true);
+
+	getOption(okButId_)->setVisible(true);
+	getOption(cancelButId_)->setVisible(true);
+
+	getStatic(colStaticId_)->setVisible(true);
+	getStatic(logoStaticId_)->setVisible(true);
+
+	tempColourId_ = toAcceptColourId_;
+	tempLogo_ = toAcceptLogo_;
+
+	hideMainPanel();
+}
+
+void ConfMenu::showUserNamePanel() {
+	currPanel_ = PNL_USRNM;
+	getStatic(panelMsgId_)->setText("#CONF_YOUR_NAME_MSG");
+
+	pUserNameTF_->setText(getStatic(toAcceptUsrNameTxtId_)->getText().c_str());
+	pUserNameTF_->setVisible(true);
+	captureInputBy(pUserNameTF_);
+
+	getOption(okButId_)->setVisible(true);
+	getOption(cancelButId_)->setVisible(true);
+
+	hideMainPanel();
+}
+
+void ConfMenu::showCompanyNamePanel() {
+	currPanel_ = PNL_CMPNM;
+	getStatic(panelMsgId_)->setText("#CONF_COM_NAME_MSG");
+
+	pCompNameTF_->setText(getStatic(toAcceptCmpNameTxtId_)->getText().c_str());
+	pCompNameTF_->setVisible(true);
+	captureInputBy(pCompNameTF_);
+
+	getOption(okButId_)->setVisible(true);
+	getOption(cancelButId_)->setVisible(true);
+
+	hideMainPanel();
 }

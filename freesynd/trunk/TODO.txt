@@ -39,15 +39,9 @@ in original gameplay or are not present at all
 game mission files.
  - Implement dragging in SelectMenu to pass a weapon from an agent to another.
  - Manage Qwerty / azerty keyboard. Today only qwerty keyboard is used.
- - Configure menu, setting company/player name by pressing "Enter" key not only
- by pressing "OK" button
  - Create a debian package
 
  Very low priority stuff, maybe for v0.9:
- - Merge input feature from config/loadsave menus:
-configure - has caret blinking, loadsave doesn't have it, but has caret
-navigation with "left","right" keys and mouse caret positioning, insert/delete
-from caret position.
  - Look at code that plays intro animation for possible errors.
  - "no_sound"/"no_music" option for config file, or disabled in debug mode
  - Add mission failure music
@@ -56,3 +50,5 @@ from caret position.
  - Convert Italian and French translations to accented characters in UTF-8
  - Complete Italian and French translations
  - Reload button translation for non-English languages
+ - Remove method Menu::isSubMenu() since ConfMenu does not work with submenu anymore
+ - Rework the key mapping

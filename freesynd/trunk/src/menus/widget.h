@@ -399,6 +399,7 @@ public:
 
     void handleMouseDown(int x, int y, int button, const int modKeys);
 
+	void handleCaptureGained();
 	void handleCaptureLost();
 
 	bool handleKey(Key key, const int modKeys);

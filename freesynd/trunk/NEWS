@@ -18,6 +18,7 @@ Features added
 ----------
   * 3336699 : Made save files portable between byte orders.
   * 3283536 : Manage separate directory for syndicate and freesynd
+  * 3337516 : Standardize text fields in configure and loadsave menus
 
 Known issues with this release
 ------------------------------

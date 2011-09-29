@@ -27,10 +27,6 @@
 #ifndef CONFMENU_H
 #define CONFMENU_H
 
-class ChangeLogoMenu;
-class ChangeCompanyNameMenu;
-class ChangeNameMenu;
-
 /*!
  * Configuration Menu class.
  */
@@ -40,15 +36,81 @@ public:
     ~ConfMenu();
 
     virtual void handleRender();
+	void handleShow();
     void handleLeave();
 
-    virtual void handleAction(const int actionId, void *ctx, const int modKeys) {}
+    void handleAction(const int actionId, void *ctx, const int modKeys);
 
 protected:
-    uint8 *bkg_;
-    ChangeLogoMenu *submenu_logo_;
-    ChangeCompanyNameMenu *submenu_company_name_;
-    ChangeNameMenu *submenu_name_;
+
+	bool handleUnknownKey(Key key, const int modKeys);
+
+	void createPanels();
+	void showLogoPanel();
+	void showUserNamePanel();
+	void showCompanyNamePanel();
+	void showMainPanel();
+	void hideMainPanel();
+
+	void redrawLogo() { addDirtyRect(28, 22, 150, 110); }
+	void redrawPanel() { addDirtyRect(278, 20, 340 , 135); }
+
+protected:
+	/*! 
+	 * This enum identifies the panel which is currently displayed.
+	 */
+	enum EPanel {
+        PNL_MAIN = 0,
+        PNL_LOGO = 1,
+        PNL_USRNM = 2,
+		PNL_CMPNM = 3
+    };
+
+	/*! This array holds the values for drawing a frame
+	 *  around the ok and cancel button in the sub panels. */
+	uint8 butFrameData_[68 * 13];
+	/*! This array holds the values for drawing a frame
+	 *  around the textfield in the user and company name panels. */
+	uint8 tfFrameData_[136 * 13];
+
+	/*! keep track of the current panel.*/
+	EPanel currPanel_;
+	/*! Button to open the change logo panel.*/
+	int logoButId_;
+	/*! Button to open the change company name panel.*/
+	int compNameButId_;
+	/*! Button to open the change user name panel.*/
+	int userNameButId_;
+	/*! Button in the main window to accept change.*/
+	int acceptButId_;
+	/*! Button in the main window to cancel change.*/
+	int menuButId_;
+	int panelMsgId_;
+
+	// Logo Panel
+	int leftColButId_;
+	int rightColButId_;
+	int leftLogoButId_;
+	int rightLogoButId_;
+	int logoStaticId_;
+	int colStaticId_;
+
+	// Change names panel
+	TextField *pUserNameTF_;
+	TextField *pCompNameTF_;
+
+	// Common buttons
+	int okButId_;
+	int cancelButId_;
+
+	/*! Id of the menu text that stores the username that will be accepted.*/
+	int toAcceptUsrNameTxtId_;
+	/*! Id of the menu text that stores the company name that will be accepted.*/
+	int toAcceptCmpNameTxtId_;
+	int toAcceptLogo_;
+	int toAcceptColourId_;
+	int tempLogo_;
+	int tempColourId_;
 };
 
 #endif

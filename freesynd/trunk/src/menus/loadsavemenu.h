@@ -39,9 +39,6 @@ public:
     void handleAction(const int actionId, void *ctx, const int modKeys);
 
 protected:
-    bool handleMouseDown(int x, int y, int button, const int modKeys);
-
-protected:
     static const int X_ORIGIN;
     static const int Y_ORIGIN;
     static const size_t NAME_MAX_SIZE;

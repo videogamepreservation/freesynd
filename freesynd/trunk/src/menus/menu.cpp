@@ -37,7 +37,7 @@ Menu::Menu(MenuManager * menuManager, const char *menu_name,
            const char *showAnim,
            const char *leaveAnim):menu_manager_(menuManager),
 name_(menu_name), showAnim_(showAnim), leaveAnim_(leaveAnim),
-parent_menu_(NULL), background_(NULL)
+parent_menu_(NULL)
 {
     focusedWgId_ = -1;
 	pCaptureInput_ = NULL;
@@ -47,7 +47,7 @@ parent_menu_(NULL), background_(NULL)
 Menu::Menu(MenuManager * menuManager, const char *menu_name,
            const char *parent):menu_manager_(menuManager),
 name_(menu_name), showAnim_(""), leaveAnim_(""),
-parent_menu_(parent), background_(NULL)
+parent_menu_(parent)
 {
     focusedWgId_ = -1;
 	pCaptureInput_ = NULL;
@@ -93,13 +93,6 @@ void Menu::addDirtyRect(int x, int y, int width, int height) {
 
 void Menu::render()
 {
-
-    if (background_) {
-        g_Screen.scale2x(clear_x_, clear_y_, clear_w_ / 2, clear_h_ / 2,
-                         background_ + (clear_x_ / 2) +
-                         (clear_y_ / 2) * 320, 320);
-    }
-
     handleRender();
 
     for (std::list < MenuText >::iterator it = statics_.begin();
@@ -322,6 +315,10 @@ void Menu::captureInputBy(TextField *pTextfield) {
 	}
 
 	pCaptureInput_ = pTextfield;
+
+	if (pCaptureInput_ != NULL) {
+		pCaptureInput_->handleCaptureGained();
+	}
 }
 
 /*!
@@ -342,7 +339,9 @@ void Menu::keyEvent(Key key, const int modKeys)
     if (hotKeys_.find(key) != hotKeys_.end()) {
         Option *opt = hotKeys_[key];
         
-        opt->executeAction(modKeys);
+		if (opt->isVisible() && opt->isenabled()) {
+	        opt->executeAction(modKeys);
+		}
 
         return;
     }
@@ -376,13 +375,13 @@ void Menu::mouseMotionEvent(int x, int y, int state, const int modKeys)
         }
     }
 
-    // See if the mouse is hovering a button
+    // See if the mouse is hovering an action widget
     for (std::list < ActionWidget * >::iterator it = actions_.begin();
          it != actions_.end(); it++) {
         ActionWidget *m = *it;
 
-        if (!m->isVisible()) {
-            // Button is not visible so it doesn't count
+		if (!m->isVisible() || !m->isenabled()) {
+            // action is not visible or not enabled so it doesn't count
             continue;
         }
 
@@ -422,8 +421,8 @@ void Menu::mouseDownEvent(int x, int y, int button, const int modKeys)
          it != actions_.end(); it++) {
         ActionWidget *m = *it;
 
-        if (!m->isVisible()) {
-            // Widget is not visible so it doesn't count
+        if (!m->isVisible() || !m->isenabled()) {
+            // Widget is not visible or enabled so it doesn't count
             continue;
         }
 

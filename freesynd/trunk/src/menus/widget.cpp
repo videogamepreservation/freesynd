@@ -464,8 +464,18 @@ void TextField::draw() {
     }
 }
 
+void TextField::handleCaptureGained() {
+	isInEdition_ = true;
+	// by default set the caret at the end of the text
+	caretPosition_ = text_.getText().size();
+	setDark(false);
+	redraw();
+}
+
 void TextField::handleCaptureLost() {
 	isInEdition_ = false;
+	caretPosition_ = 0;
+	setDark(true);
 	redraw();
 }
 
@@ -516,7 +526,6 @@ bool TextField::handleKey(Key key, const int modKeys) {
 }
 
 void TextField::handleMouseDown(int x, int y, int button, const int modKeys) {
-	isInEdition_ = true;
 	peer_->captureInputBy(this);
 
 	int size = g_App.fonts().textWidth(text_.getText().c_str(), false, text_.getSize());

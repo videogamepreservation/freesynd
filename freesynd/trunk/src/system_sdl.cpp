@@ -178,6 +178,7 @@ Key SystemSDL::checkValidKey(SDL_keysym keysym) {
     switch(keysym.sym) {
         case SDLK_ESCAPE: key = KEY_ESCAPE; break;
         case SDLK_BACKSPACE: key = KEY_BACKSPACE; break;
+		case SDLK_RETURN: key = KEY_RETURN; break;
         case SDLK_SPACE: key = KEY_SPACE; break;
         case SDLK_BACKQUOTE: key = KEY_BACKQUOTE; break;
         case SDLK_DELETE: key = KEY_DELETE; break;
