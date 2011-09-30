@@ -348,27 +348,28 @@ public:
         }
         void add(uint32 first, uint32 second = 0) {
             Mmuu32_t::iterator it = this->find(first);
-            if (second == 0) {
-                if (it->second != 0) {
-                    // non-zeros should be removed, second value equal zero
-                    // should be the only present
-                    this->rm(first);
-                    it = this->end();
-                }
-            }
             if (it != this->end()) {
-                bool found = false;
-                do {
-                    if (it->first != first)
-                        break;
-                    if (it->second == second) {
-                        found = true;
-                        break;
+                if (second == 0) {
+                    if (it->second != 0) {
+                        // non-zeros should be removed, second value equal zero
+                        // should be the only present
+                        this->rm(first);
+                        this->insert(std::pair<uint32, uint32>(first, second));
                     }
-                    it++;
-                } while (it != this->end());
-                if (!found)
-                    this->insert(std::pair<uint32, uint32>(first, second));
+                } else {
+                    bool found = false;
+                    do {
+                        if (it->first != first)
+                            break;
+                        if (it->second == second) {
+                            found = true;
+                            break;
+                        }
+                        it++;
+                    } while (it != this->end());
+                    if (!found)
+                        this->insert(std::pair<uint32, uint32>(first, second));
+                }
             } else
                 this->insert(std::pair<uint32, uint32>(first, second));
         }
@@ -452,11 +453,11 @@ public:
         }
     };
 
-    void addEnemyGroupDef(uint32 eg_id, uint32 eg_def);
+    void addEnemyGroupDef(uint32 eg_id, uint32 eg_def = 0);
     void rmEnemyGroupDef(uint32 eg_id, uint32 eg_def = 0);
     bool isInEnemyGroupDef(uint32 eg_id, uint32 eg_def = 0);
 
-    void addEmulatedGroupDef(uint32 eg_id, uint32 eg_def);
+    void addEmulatedGroupDef(uint32 eg_id, uint32 eg_def = 0);
     void rmEmulatedGroupDef(uint32 eg_id, uint32 eg_def = 0);
     bool isInEmulatedGroupDef(uint32 eg_id, uint32 eg_def = 0);
     bool isInEmulatedGroupDef(Mmuu32_t &r_egd,

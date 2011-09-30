@@ -28,6 +28,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
+#include <string>
 
 #include "gfx/screen.h"
 #include "app.h"
@@ -152,7 +153,16 @@ bool Mission::loadLevel(uint8 * levelData)
         fclose(staticsFp);
     }
 #endif
-
+#ifdef _DEBUG
+    std::map <uint32, std::string> obj_ids;
+    // NOTE: not very useful way of remembering "Who is who"
+    obj_ids[0] = "Undefined";
+    obj_ids[1] = "Players Agents or Persuaded";
+    obj_ids[2] = "Enemy Agents";
+    obj_ids[3] = "Enemy Guards";
+    obj_ids[4] = "Policemen";
+    obj_ids[5] = "Civilians";
+#endif
     for (int i = 0; i < 256; i++) {
         LEVELDATA_PEOPLE & pedref = level_data_.people[i];
         if(pedref.type == 0x0 || pedref.desc == 0x0D || pedref.desc == 0x0C)
@@ -183,48 +193,30 @@ bool Mission::loadLevel(uint8 * levelData)
             pindx[i] = peds_.size();
             peds_.push_back(p);
             if (i < 4) {
-                p->setObjGroupDef(PedInstance::og_dmFriend
-                    | PedInstance::og_dmAgent);
-                /*
-                p->addEnemyGroupDef(PedInstance::og_dmEnemy
-                    | PedInstance::og_dmAgent);
-                p->addEnemyGroupDef(PedInstance::og_dmEnemy
-                    | PedInstance::og_dmGuard);
-                p->addEnemyGroupDef(PedInstance::og_dmEnemy
-                    | PedInstance::og_dmPolice);
-                p->addEnemyGroupDef(PedInstance::og_dmEnemy
-                    | PedInstance::og_dmCriminal);
-                p->addEnemyGroupDef(PedInstance::og_dmEnemy
-                    | PedInstance::og_dmCivilian);
-                // we will (auto)kill only armed, the rest can be persuaded
-                */
+                p->setObjGroupID(1);
+                p->setObjGroupDef(PedInstance::og_dmAgent);
+                p->addEnemyGroupDef(2);
+                p->addEnemyGroupDef(3);
                 p->setHostileDesc(PedInstance::pd_smArmed);
                 // TODO: sightrange?
             } else if (i > 7) {
                 unsigned int mt = p->getMainType() << 8;
                 //unsigned int objD = p->descState();
-                if (mt == PedInstance::og_dmAgent
-                    || mt == PedInstance::og_dmGuard)
-                {
-                    p->setObjGroupDef(PedInstance::og_dmEnemy | mt);
-                    // they will kill persuaded and our agents
-                    /*
-                    p->addEnemyGroupDef(PedInstance::og_dmFriend
-                        | PedInstance::og_dmAgent);
-                    p->addEnemyGroupDef(PedInstance::og_dmFriend
-                        | PedInstance::og_dmGuard);
-                    p->addEnemyGroupDef(PedInstance::og_dmFriend
-                        | PedInstance::og_dmPolice);
-                    p->addEnemyGroupDef(PedInstance::og_dmFriend
-                        | PedInstance::og_dmCriminal);
-                    p->addEnemyGroupDef(PedInstance::og_dmFriend
-                        | PedInstance::og_dmCivilian);
-                        */
+                if (mt == PedInstance::og_dmAgent) {
+                    p->setObjGroupID(2);
+                    p->setObjGroupDef(PedInstance::og_dmAgent);
+                    p->addEnemyGroupDef(1);
+                } else if (mt == PedInstance::og_dmGuard) {
+                    p->setObjGroupID(3);
+                    p->setObjGroupDef(PedInstance::og_dmEnemy);
+                    p->addEnemyGroupDef(1);
                     p->setHostile(true);
                 } else if (mt == PedInstance::og_dmPolice) {
-                    p->setObjGroupDef(PedInstance::og_dmNeutral | mt);
+                    p->setObjGroupID(4);
+                    p->setObjGroupDef(PedInstance::og_dmPolice);
                     p->setHostileDesc(PedInstance::pd_smArmed);
                 } else {
+                    p->setObjGroupID(5);
                     p->setObjGroupDef(PedInstance::og_dmNeutral | mt);
                     // civilians and criminals
                 }

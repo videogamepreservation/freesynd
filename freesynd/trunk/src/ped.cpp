@@ -36,7 +36,7 @@
 #define EXECUTION_SPEED_TIME
 #endif
 
-#define NEW_ANIMATE_HANDLING
+//#define NEW_ANIMATE_HANDLING
 
 Ped::Ped() {
     memset(stand_anims_, 0, sizeof(stand_anims_));
@@ -3745,7 +3745,7 @@ bool PedInstance::checkFriendIs(PedInstance *p) {
     if (!hostiles_found_.empty()) {
         if (hostiles_found_.find((ShootableMapObject *)p) !=
             hostiles_found_.end())
-            return true;
+            return false;
     }
     return (p->objGroupID() == obj_group_id_);
 }
