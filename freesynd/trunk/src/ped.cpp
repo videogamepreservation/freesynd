@@ -36,7 +36,7 @@
 #define EXECUTION_SPEED_TIME
 #endif
 
-//#define NEW_ANIMATE_HANDLING
+#define NEW_ANIMATE_HANDLING
 
 Ped::Ped() {
     memset(stand_anims_, 0, sizeof(stand_anims_));
@@ -3678,20 +3678,36 @@ void PedInstance::destroyAllWeapons() {
     selected_weapon_ = -1;
 }
 
-bool PedInstance::isInEmulatedGroupDef(std::set <unsigned int> *r_egd,
-        unsigned int emulated_group_def)
+void PedInstance::addEnemyGroupDef(uint32 eg_id, uint32 eg_def) {
+    enemy_group_defs_.add(eg_id, eg_def);
+}
+
+void PedInstance::rmEnemyGroupDef(uint32 eg_id, uint32 eg_def) {
+    enemy_group_defs_.rm(eg_id, eg_def);
+}
+
+bool PedInstance::isInEnemyGroupDef(uint32 eg_id, uint32 eg_def) {
+    return enemy_group_defs_.isIn(eg_id, eg_def);
+}
+
+void PedInstance::addEmulatedGroupDef(uint32 eg_id, uint32 eg_def) {
+    emulated_group_defs_.add(eg_id, eg_def);
+}
+void PedInstance::rmEmulatedGroupDef(uint32 eg_id, uint32 eg_def) {
+    emulated_group_defs_.rm(eg_id, eg_def);
+}
+
+bool PedInstance::isInEmulatedGroupDef(uint32 eg_id, uint32 eg_def) {
+    return emulated_group_defs_.isIn(eg_id, eg_def);
+}
+
+bool PedInstance::isInEmulatedGroupDef(PedInstance::Mmuu32_t &r_egd,
+        bool id_only)
 {
-    if (emulated_group_def != 0)
-        return emulated_group_defs_.find(emulated_group_def)
-            != emulated_group_defs_.end();
-    bool hostile_rsp = false;
-    for (std::set <unsigned int>::iterator it = r_egd->begin();
-        it != r_egd->end() && !hostile_rsp; it++)
-    {
-        hostile_rsp = emulated_group_defs_.find(*it)
-            != emulated_group_defs_.end();
+    if (id_only) {
+        return emulated_group_defs_.isIn_KeyOnly(r_egd);
     }
-    return hostile_rsp;
+    return emulated_group_defs_.isIn_All(r_egd);
 }
 
 bool PedInstance::checkHostileIs(ShootableMapObject *obj,
@@ -3701,23 +3717,19 @@ bool PedInstance::checkHostileIs(ShootableMapObject *obj,
     if (obj->majorType() == MapObject::mjt_Vehicle) {
         // TODO: add this check later, create a list of all in vehicle
     } else if (obj->majorType() == MapObject::mjt_Ped) {
-        if (((PedInstance *)obj)->objGroupID() == 0) {
-            if (((PedInstance *)obj)->emulatedGroupDefsEmpty()) {
+        if (((PedInstance *)obj)->emulatedGroupDefsEmpty()) {
+            hostile_rsp =
+                isInEnemyGroupDef(((PedInstance *)obj)->objGroupID(),
+                ((PedInstance *)obj)->objGroupDef());
+            if (!hostile_rsp) {
+                if (hostile_desc_alt == PedInstance::pd_smUndefined)
+                    hostile_desc_alt = hostile_desc_;
                 hostile_rsp =
-                    isInEnemyGroupDef(((PedInstance *)obj)->objGroupDef());
-                if (!hostile_rsp) {
-                    if (hostile_desc_alt == PedInstance::pd_smUndefined)
-                        hostile_desc_alt = hostile_desc_;
-                    hostile_rsp =
-                        (((PedInstance *)obj)->descStateMasks() & hostile_desc_alt) != 0;
-                }
-            } else {
-                hostile_rsp =
-                    ((PedInstance *)obj)->isInEmulatedGroupDef(&enemy_group_defs_);
+                    (((PedInstance *)obj)->descStateMasks() & hostile_desc_alt) != 0;
             }
         } else {
-            hostile_rsp = enemy_group_ids_.find(((PedInstance *)obj)->objGroupID())
-                != enemy_group_ids_.end();
+            hostile_rsp =
+                ((PedInstance *)obj)->isInEmulatedGroupDef(enemy_group_defs_);
         }
         if (!hostile_rsp) {
             hostile_rsp = isInHostilesFound(obj);
@@ -3729,11 +3741,11 @@ bool PedInstance::checkHostileIs(ShootableMapObject *obj,
 }
 
 bool PedInstance::checkFriendIs(PedInstance *p) {
-    if (p->objGroupID() == 0) {
-        if (p->emulatedGroupDefsEmpty())
-            return (p->objGroupDef() & 0xFF) == (obj_group_def_ & 0xFF);
-        else
-            return p->isInEmulatedGroupDef(NULL, obj_group_def_);
+    // TODO: friend list check add
+    if (!hostiles_found_.empty()) {
+        if (hostiles_found_.find((ShootableMapObject *)p) !=
+            hostiles_found_.end())
+            return true;
     }
     return (p->objGroupID() == obj_group_id_);
 }
@@ -3982,5 +3994,3 @@ bool PedInstance::addDefActsToActions(actionQueueGroupType &as) {
     actions_queue_.push_back(as);
     return true;
 }
-
-

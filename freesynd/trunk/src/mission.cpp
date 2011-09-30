@@ -185,7 +185,7 @@ bool Mission::loadLevel(uint8 * levelData)
             if (i < 4) {
                 p->setObjGroupDef(PedInstance::og_dmFriend
                     | PedInstance::og_dmAgent);
-
+                /*
                 p->addEnemyGroupDef(PedInstance::og_dmEnemy
                     | PedInstance::og_dmAgent);
                 p->addEnemyGroupDef(PedInstance::og_dmEnemy
@@ -197,6 +197,7 @@ bool Mission::loadLevel(uint8 * levelData)
                 p->addEnemyGroupDef(PedInstance::og_dmEnemy
                     | PedInstance::og_dmCivilian);
                 // we will (auto)kill only armed, the rest can be persuaded
+                */
                 p->setHostileDesc(PedInstance::pd_smArmed);
                 // TODO: sightrange?
             } else if (i > 7) {
@@ -207,6 +208,7 @@ bool Mission::loadLevel(uint8 * levelData)
                 {
                     p->setObjGroupDef(PedInstance::og_dmEnemy | mt);
                     // they will kill persuaded and our agents
+                    /*
                     p->addEnemyGroupDef(PedInstance::og_dmFriend
                         | PedInstance::og_dmAgent);
                     p->addEnemyGroupDef(PedInstance::og_dmFriend
@@ -217,6 +219,7 @@ bool Mission::loadLevel(uint8 * levelData)
                         | PedInstance::og_dmCriminal);
                     p->addEnemyGroupDef(PedInstance::og_dmFriend
                         | PedInstance::og_dmCivilian);
+                        */
                     p->setHostile(true);
                 } else if (mt == PedInstance::og_dmPolice) {
                     p->setObjGroupDef(PedInstance::og_dmNeutral | mt);

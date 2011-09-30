@@ -321,37 +321,147 @@ public:
     }
     unsigned int objGroupID() { return obj_group_id_; }
 
-    void addEnemyGroupDef(unsigned int enemy_group_def) {
-        enemy_group_defs_.insert(enemy_group_def);
-    }
-    void rmEnemyGroupDef(unsigned int enemy_group_def) {
-        enemy_group_defs_.erase(enemy_group_def);
-    }
-    bool isInEnemyGroupDef(unsigned int enemy_group_def) {
-        return enemy_group_defs_.find(enemy_group_def)
-            != enemy_group_defs_.end();
-    }
+    class Mmuu32_t: public std::multimap<uint32, uint32> {
+    public:
+        Mmuu32_t() {}
+        ~Mmuu32_t() {}
+        void rm(uint32 first, uint32 second = 0) {
+            Mmuu32_t::iterator it = this->find(first);
+            if (it == this->end())
+                return;
+            if (second == 0) {
+                // removing all of this id
+                Mmuu32_t::iterator its = it;
+                do {
+                    it++;
+                } while (it->first == first && it != this->end());
+                this->erase(its, it);
+            } else {
+                do {
+                    if (it->second == second) {
+                        this->erase(it);
+                        break;
+                    }
+                    it++;
+                } while (it->first == first && it != this->end());
+            }
+        }
+        void add(uint32 first, uint32 second = 0) {
+            Mmuu32_t::iterator it = this->find(first);
+            if (second == 0) {
+                if (it->second != 0) {
+                    // non-zeros should be removed, second value equal zero
+                    // should be the only present
+                    this->rm(first);
+                    it = this->end();
+                }
+            }
+            if (it != this->end()) {
+                bool found = false;
+                do {
+                    if (it->first != first)
+                        break;
+                    if (it->second == second) {
+                        found = true;
+                        break;
+                    }
+                    it++;
+                } while (it != this->end());
+                if (!found)
+                    this->insert(std::pair<uint32, uint32>(first, second));
+            } else
+                this->insert(std::pair<uint32, uint32>(first, second));
+        }
+        bool isIn(uint32 first, uint32 second = 0) {
+            Mmuu32_t::iterator it = this->find(first);
+            bool found = false;
+            if (it != this->end()) {
+                if (second == 0)
+                    found = true;
+                else {
+                    do {
+                        if (it->second == second) {
+                            this->erase(it);
+                            found = true;
+                            break;
+                        }
+                        it++;
+                    } while (it->first == first && it != this->end());
+                }
+            }
+            return found;
+        }
+        bool isIn_KeyOnly(Mmuu32_t &mm) {
+            if (mm.empty() || this->empty())
+                return false;
+            bool found = false;
+            Mmuu32_t::iterator it_this = this->begin();
+            uint32 first_value = it_this->first;
+            do {
+                Mmuu32_t::iterator it_mm = mm.find(first_value);
+                found = it_mm != mm.end();
+                if (found)
+                    break;
+                if (it_this->first != first_value)
+                    first_value = it_this->first;
+                else {
+                    it_this++;
+                    continue;
+                }
+            } while (it_this != this->end());
+            return found;
+        }
+        bool isIn_All(Mmuu32_t &mm) {
+            if (mm.empty() || this->empty())
+                return false;
+            bool found = false;
+            Mmuu32_t::iterator it_this = this->begin();
+            uint32 first_value = it_this->first;
+            uint32 second_value = it_this->second;
+            do {
+                Mmuu32_t::iterator it_mm = mm.find(first_value);
+                found = it_mm != mm.end();
+                if (found) {
+                    if (second_value == 0 || it_mm->second == 0)
+                        break;
+                    std::pair<Mmuu32_t::iterator, Mmuu32_t::iterator> rng =
+                        mm.equal_range(first_value);
+                    found = false;
+                    for (Mmuu32_t::iterator it = rng.first;
+                        it != rng.second; it++)
+                    {
+                        if (it->second == second_value) {
+                            found = true;
+                            break;
+                        }
+                    }
+                }
+                if (!found) {
+                    if (it_this->first != first_value) {
+                        first_value = it_this->first;
+                        second_value = it_this->second;
+                    } else {
+                        if (it_this->second != second_value)
+                            second_value = it_this->second;
+                        it_this++;
+                        continue;
+                    }
+                }
+            } while (it_this != this->end());
+            return found;
+        }
+    };
 
-    void addEmulatedGroupDef(unsigned int emulated_group_def) {
-        emulated_group_defs_.insert(emulated_group_def);
-    }
-    void rmEmulatedGroupDef(unsigned int emulated_group_def) {
-        emulated_group_defs_.erase(emulated_group_def);
-    }
-    bool isInEmulatedGroupDef(std::set <unsigned int> *r_egd,
-        unsigned int emulated_group_def = 0);
+    void addEnemyGroupDef(uint32 eg_id, uint32 eg_def);
+    void rmEnemyGroupDef(uint32 eg_id, uint32 eg_def = 0);
+    bool isInEnemyGroupDef(uint32 eg_id, uint32 eg_def = 0);
+
+    void addEmulatedGroupDef(uint32 eg_id, uint32 eg_def);
+    void rmEmulatedGroupDef(uint32 eg_id, uint32 eg_def = 0);
+    bool isInEmulatedGroupDef(uint32 eg_id, uint32 eg_def = 0);
+    bool isInEmulatedGroupDef(Mmuu32_t &r_egd,
+        bool id_only = true);
     bool emulatedGroupDefsEmpty() { return emulated_group_defs_.size() == 0; }
-
-    void addEnemyGroupID(unsigned int enemy_group_id) {
-        enemy_group_ids_.insert(enemy_group_id);
-    }
-    void rmEnemyGroupID(unsigned int enemy_group_id) {
-        enemy_group_ids_.erase(enemy_group_id);
-    }
-    bool isInEnemyGroupID(unsigned int enemy_group_id) {
-        return enemy_group_ids_.find(enemy_group_id)
-            != enemy_group_ids_.end();
-    }
 
     void addHostilesFound(ShootableMapObject * hostile_found) {
         hostiles_found_.insert(hostile_found);
@@ -371,9 +481,11 @@ public:
 
     typedef enum {
         og_dmUndefined = 0x0,
+        //unused-----
         og_dmFriend = 0x0001,
         og_dmEnemy = 0x0002,
         og_dmNeutral = 0x0004,
+        //unsued-----
         // mainPedType << 8
         og_dmPedestrian = 0x0100,
         og_dmCivilian = 0x0100,
@@ -532,14 +644,16 @@ protected:
     // this inherits definition from desc_state_
     // ((target checked)desc_state_ & hostile_desc_) != 0 kill him
     unsigned int hostile_desc_;
-    std::set <unsigned int> enemy_group_defs_;
+    Mmuu32_t enemy_group_defs_;
     // if object is not hostile here enemy_group_defs_ and hostile_desc_ check
     // is skipped
-    std::set <unsigned int> emulated_group_defs_;
+    Mmuu32_t emulated_group_defs_;
+    Mmuu32_t friend_group_defs_;
     //std::set <unsigned int> emulated_failed_groups_;
     // dicovered hostiles are set here, check at end for hostile
-    std::set <unsigned int> enemy_group_ids_;
     std::set <ShootableMapObject *> hostiles_found_;
+    //unused for now
+    //std::set <ShootableMapObject *> friends_found_;
     // defines group obj belongs to (objGroupDefMasks)
     unsigned int obj_group_def_;
     unsigned int old_obj_group_def_;
