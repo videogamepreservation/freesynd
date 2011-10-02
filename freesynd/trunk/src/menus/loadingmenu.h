@@ -34,7 +34,6 @@ class LoadingMenu : public Menu {
 public:
     LoadingMenu(MenuManager *m);
 
-    bool isSubMenu() { return false; }
     void handleTick(int elapsed);
 
 protected:

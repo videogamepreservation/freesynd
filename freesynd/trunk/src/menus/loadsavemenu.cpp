@@ -43,11 +43,11 @@ LoadSaveMenu::LoadSaveMenu(MenuManager * m):Menu(m, "loadsave", "mlosa.dat",
     addStatic(0, 40, g_Screen.gameScreenWidth(), "#LS_TITLE", FontManager::SIZE_4, true);
 
     // Load button
-    loadButId_ = addOption(46, 346, 99, 25, "#LS_LOAD_BUT", FontManager::SIZE_2, KEY_F2);
+    loadButId_ = addOption(46, 346, 99, 25, "#LS_LOAD_BUT", FontManager::SIZE_2);
     // Save button
-    saveButId_ = addOption(147, 346, 99, 25, "#LS_SAVE_BUT", FontManager::SIZE_2, KEY_F3);
+    saveButId_ = addOption(147, 346, 99, 25, "#LS_SAVE_BUT", FontManager::SIZE_2);
     // Main menu button
-    addOption(501, 346, 126, 25, "#MENU_MAIN_BUT", FontManager::SIZE_2, KEY_F5, "main");
+    addOption(501, 346, 126, 25, "#MENU_MAIN_BUT", FontManager::SIZE_2, "main");
 
 	std::string label;
     g_App.menus().getMessage("MENU_LB_EMPTY", label);

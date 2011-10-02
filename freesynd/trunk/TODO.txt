@@ -48,7 +48,5 @@ game mission files.
  - The built-in fonts have some characters that don't sit right vertically (Ö and Ü in certain sizes)
  - Work on hyphenation rules in the text reflow code
  - Convert Italian and French translations to accented characters in UTF-8
- - Complete Italian and French translations
+ - Complete Italian translation
  - Reload button translation for non-English languages
- - Remove method Menu::isSubMenu() since ConfMenu does not work with submenu anymore
- - Rework the key mapping

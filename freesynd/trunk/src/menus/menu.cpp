@@ -167,47 +167,6 @@ int Menu::addStatic(int x, int y, int width, const char *text, FontManager::EFon
 }
 
 /*!
- * Returns the MenuText widget with the given id.
- * \return NULL if no widget is found
- */
-MenuText * Menu::getStatic(int staticId) {
-    for (std::list < MenuText >::iterator it = statics_.begin();
-         it != statics_.end(); it++) {
-        MenuText & m = *it;
-        
-        if (m.getId() == staticId) {
-            return &m;
-        }
-    }
-
-    return NULL;
-}
-
-/*! 
- * Creates a new button that has no text but an image.
- * Widget's size will be the same as the image used. Dark image
- * and light image should be the same size.
- * \param x X coordinate
- * \param y Y coordinate
- * \param key Acceleration key
- * \param dark_widget Widget drawn in front of the button when it's not highlighted
- * \param light_widget Widget drawn in front of the button when it's highlighted
- * \param visible True if button is visible on screen
- * \returns The newly created widget id.
- */
-int Menu::addImageOption(int x, int y, Key key, int dark_widget, int light_widget, bool visible) {
-
-    Sprite *spr = g_App.menuSprites().sprite(dark_widget);
-   
-    Option *m = new Option(this, x, y, spr->width() * 2, spr->height() * 2, "", 
-                FontManager::SIZE_1, NULL, visible, true, dark_widget, light_widget);
-    hotKeys_[key] = m;
-    actions_.push_back(m);
-
-    return m->getId();
-}
-
-/*!
  * Creates and adds a button to the menu.
  * \param x X coordinate
  * \param y Y coordinate
@@ -217,54 +176,51 @@ int Menu::addImageOption(int x, int y, Key key, int dark_widget, int light_widge
  * text is a property in the current language file and it is
  * replaced by its value.
  * \param size Font size
- * \param key Acceleration key
  * \param to Name of the next menu when button is clicked
  * \param visible True if button is visible on screen
  * \param centered True if text must centered regarding button width
  * \param dark_widget Widget drawn in front of the button when it's not highlighted
  * \param light_widget Widget drawn in front of the button when it's highlighted
  */
-int Menu::addOption(int x, int y, int width, int height, const char *text, FontManager::EFontSize size, Key key,
+int Menu::addOption(int x, int y, int width, int height, const char *text, FontManager::EFontSize size,
             const char *to, bool visible, bool centered, int dark_widget, int light_widget) {
     
-    Option *m = new Option(this, x, y, width, height, text, size, to, visible, centered, dark_widget, light_widget);
-    hotKeys_[key] = m;
+    Option *pOption = new Option(this, x, y, width, height, text, size, to, visible, centered, dark_widget, light_widget);
+	actions_.push_back(pOption);
+
+	if (pOption->getHotKey() != KEY_UNKNOWN) {
+		// The option already has an acceleration key
+		registerHotKey(pOption->getHotKey(), pOption->getId());
+	}
+
+    return pOption->getId();
+}
+
+/*! 
+ * Creates a new button that has no text but an image.
+ * Widget's size will be the same as the image used. Dark image
+ * and light image should be the same size.
+ * \param x X coordinate
+ * \param y Y coordinate
+ * \param dark_widget Widget drawn in front of the button when it's not highlighted
+ * \param light_widget Widget drawn in front of the button when it's highlighted
+ * \param visible True if button is visible on screen
+ * \returns The newly created widget id.
+ */
+int Menu::addImageOption(int x, int y, int dark_widget, int light_widget, bool visible) {
+
+    Sprite *spr = g_App.menuSprites().sprite(dark_widget);
+   
+    Option *m = new Option(this, x, y, spr->width() * 2, spr->height() * 2, "", 
+                FontManager::SIZE_1, NULL, visible, true, dark_widget, light_widget);
     actions_.push_back(m);
 
     return m->getId();
 }
 
-/*!
- * Returns a pointer to the action widget with the given id.
- * \param id The id of the widget.
- * \return NULL if no widget has that id.
- */
-ActionWidget * Menu::getActionWidget(int id) {
-    for (std::list < ActionWidget * >::iterator it = actions_.begin();
-         it != actions_.end(); it++) {
-
-        if (id == (*it)->getId()) {
-            return *it;
-        }
-    }
-
-    return NULL;
-}
-
-Option * Menu::getOption(int optionId) {
-    ActionWidget *pAction = getActionWidget(optionId);
-
-    if (pAction) {
-        return dynamic_cast<Option *> (pAction);
-    }
-
-    return NULL;
-}
-
-int Menu::addToggleAction(int x, int y, int width, int height, const char *text, FontManager::EFontSize size, Key key, bool selected) {
+int Menu::addToggleAction(int x, int y, int width, int height, const char *text, FontManager::EFontSize size, bool selected) {
     ToggleAction *a = new ToggleAction(this, x, y, width, height, text, size, selected, &group_);
     group_.addButton(a);
-    hotKeys_[key] = a;
     actions_.push_back(a);
 
     return a->getId();
@@ -307,6 +263,63 @@ TextField * Menu::addTextField(int x, int y, int width, int height, FontManager:
 	actions_.push_back(pTextField);
 
 	return pTextField;
+}
+
+/*!
+ * Returns the MenuText widget with the given id.
+ * \return NULL if no widget is found
+ */
+MenuText * Menu::getStatic(int staticId) {
+    for (std::list < MenuText >::iterator it = statics_.begin();
+         it != statics_.end(); it++) {
+        MenuText & m = *it;
+        
+        if (m.getId() == staticId) {
+            return &m;
+        }
+    }
+
+    return NULL;
+}
+
+/*!
+ * Returns a pointer to the action widget with the given id.
+ * \param id The id of the widget.
+ * \return NULL if no widget has that id.
+ */
+ActionWidget * Menu::getActionWidget(int id) {
+    for (std::list < ActionWidget * >::iterator it = actions_.begin();
+         it != actions_.end(); it++) {
+
+        if (id == (*it)->getId()) {
+            return *it;
+        }
+    }
+
+    return NULL;
+}
+
+Option * Menu::getOption(int optionId) {
+    ActionWidget *pAction = getActionWidget(optionId);
+
+    if (pAction) {
+        return dynamic_cast<Option *> (pAction);
+    }
+
+    return NULL;
+}
+
+/*!
+ * Adds an acceleration key to the given option so it can be activated by that key.
+ * If id is not an option id, then nothing is done.
+ * \param key The hot key
+ * \param optId The option id
+ */
+void  Menu::registerHotKey(Key key, int optId) {
+	Option *pOption = getOption(optId);
+	if (pOption) {
+		hotKeys_[key] = pOption;
+	}
 }
 
 void Menu::captureInputBy(TextField *pTextfield) {

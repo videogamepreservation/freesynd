@@ -216,15 +216,16 @@ protected:
  */
 class Option : public ActionWidget {
 public:
-
-    /*! The name of the next menu.*/
-    const char *to_;
+	//! Returns the Key associated with the given caracter.
+	static Key getKeyForChar(char c);
 
     //! Constructs a new button.
     Option(Menu *peer, int x, int y, int width, int height, const char *text, FontManager::EFontSize size,
             const char *to, bool visible, bool centered = true, int dark_widget = 0, int light_widget = 0);
 
     ~Option();
+
+	Key getHotKey() { return hotKey_; }
 
     //! Draw the widget on screen
     void draw();
@@ -240,6 +241,8 @@ public:
 protected:
 
     MenuText text_;
+	/*! The name of the next menu.*/
+    const char *to_;
     /*! 
      * The widget to display when button is dark.
      * When id is zero, there is no widget.
@@ -250,6 +253,10 @@ protected:
      * When id is zero, there is no widget.
      */
     Sprite *lightWidget_;
+	/*!
+	 * This button can have an acceleration key.
+	 */
+	Key hotKey_;
 };
 
 class ToggleAction;

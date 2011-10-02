@@ -33,11 +33,16 @@ MainMenu::MainMenu(MenuManager * m):Menu(m, "main", "moption.dat",
 {
     addStatic(0, 40, g_Screen.gameScreenWidth(), "#MAIN_TITLE", FontManager::SIZE_4, true);
 
-    addOption(201, 130, 300, 25, "#MAIN_CONF", FontManager::SIZE_3, KEY_F1, "conf", true, false);
-    addOption(201, 164, 300, 25, "#MAIN_BEGIN", FontManager::SIZE_3, KEY_F2, "map", true, false);
-    addOption(201, 198, 300, 25, "#MAIN_LOAD_SAVE", FontManager::SIZE_3, KEY_F3, "loadsave", true, false);
-    resetButId_ = addOption(201, 232, 300, 25, "#MAIN_RESET", FontManager::SIZE_3, KEY_F4, "main", true, false);
-    quitButId_ = addOption(201, 266, 300, 25, "#MAIN_QUIT", FontManager::SIZE_3, KEY_F5, NULL, true, false);
+    int id = addOption(201, 130, 300, 25, "#MAIN_CONF", FontManager::SIZE_3, "conf", true, false);
+	registerHotKey(KEY_F1, id);
+    id = addOption(201, 164, 300, 25, "#MAIN_BEGIN", FontManager::SIZE_3, "map", true, false);
+	registerHotKey(KEY_F2, id);
+    id = addOption(201, 198, 300, 25, "#MAIN_LOAD_SAVE", FontManager::SIZE_3, "loadsave", true, false);
+	registerHotKey(KEY_F3, id);
+    resetButId_ = addOption(201, 232, 300, 25, "#MAIN_RESET", FontManager::SIZE_3, "main", true, false);
+	registerHotKey(KEY_F4, resetButId_);
+    quitButId_ = addOption(201, 266, 300, 25, "#MAIN_QUIT", FontManager::SIZE_3, NULL, true, false);
+	registerHotKey(KEY_F5, quitButId_);
 }
 
 void MainMenu::handleShow()

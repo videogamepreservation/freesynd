@@ -35,7 +35,6 @@ class LogoutMenu : public Menu {
 public:
     LogoutMenu(MenuManager *m);
 
-    bool isSubMenu() { return false; }
     void handleTick(int elapsed);
 
 protected:

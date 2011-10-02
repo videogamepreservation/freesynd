@@ -36,8 +36,6 @@ class GameplayMenu : public Menu {
 public:
     GameplayMenu(MenuManager *m);
 
-    bool isSubMenu() { return false; }
-
     void handleTick(int elapsed);
     void handleShow();
     void handleRender();

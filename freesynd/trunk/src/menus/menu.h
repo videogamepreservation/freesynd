@@ -50,9 +50,7 @@ public:
 
     const char *name() { return name_.c_str(); }
 
-    virtual bool isSubMenu() {
-        return leaveAnim_.size() == 0;
-    }
+	void setParentMenu(const char *m) { parent_menu_ = m; }
 
     /*! Returns true if an animation has been defined when opening the menu.*/
     bool hasShowAnim() { return showAnim_.size() != 0; }
@@ -63,22 +61,17 @@ public:
     /*! Returns the leaving animation file name. */
     const char * getLeaveAnimName() { return leaveAnim_.c_str(); }
     
-    void render();
-    //! Does common actions before leaving
-    void leave();
     //! Creates a new text label and returns its id
     int addStatic(int x, int y, const char *text, FontManager::EFontSize size, bool dark);
     //! Creates a new text label with a fixed size and returns its id
     int addStatic(int x, int y, int width, const char *text, FontManager::EFontSize size, bool dark);
-    //! Returns the MenuText with given id
-    MenuText * getStatic(int staticId);
-    //! Creates a new button that has no text but an image
-    int addImageOption(int x, int y, Key key, int dark_widget, int light_widget, bool visible = true);
     //! Creates a new button and returns its id
-    int addOption(int x, int y, int width, int height, const char *text, FontManager::EFontSize size, Key key,
+    int addOption(int x, int y, int width, int height, const char *text, FontManager::EFontSize size,
             const char *to = NULL, bool visible = true, bool centered = true, int dark_widget = 0, int light_widget = 0);
+	//! Creates a new button that has no text but an image
+    int addImageOption(int x, int y, int dark_widget, int light_widget, bool visible = true);
     //! Creates a new toggle button and returns its id
-    int addToggleAction(int x, int y, int width, int height, const char *text, FontManager::EFontSize size, Key key, bool selected);
+    int addToggleAction(int x, int y, int width, int height, const char *text, FontManager::EFontSize size, bool selected);
     //! Creates a new list box and returns a pointer on it
     ListBox * addListBox(int x, int y, int width, int height, bool visible = true);
     //! Creates a specific list box for team selection and returns a pointer on it
@@ -86,21 +79,16 @@ public:
 	//! Creates a new textfield widget and returns a pointer on it
 	TextField * addTextField(int x, int y, int width, int height, FontManager::EFontSize size, int maxSize, bool displayEmpty = false, bool visible = false);
 
+	//! Returns the MenuText with given id
+    MenuText * getStatic(int staticId);
+	//! Returns the ActionWidget with the given id
     ActionWidget * getActionWidget(int buttonId);
+	//! Returns the Option with the given id
     Option * getOption(int buttonId);
+	//! Adds a mapping between a Key and an Option
+	void registerHotKey(Key key, int optId);
 
-    void setParentMenu(const char *m) { parent_menu_ = m; }
-
-    //! Handles key pressed
-    void keyEvent(Key key, const int modKeys);
-    //! Handles mouse moved
-    void mouseMotionEvent(int x, int y, int state, const int modKeys);
-    //! Handles mouse button pressed
-    void mouseDownEvent(int x, int y, int button, const int modKeys);
-    //! Handles mouse button released
-    void mouseUpEvent(int x, int y, int button, const int modKeys);
-
-    //! Hides the given button
+	//! Hides the given button
     /*!
      * Search for the option mapped to the given key
      * and disables its visible property.
@@ -134,9 +122,11 @@ public:
         }
     }
 
-	virtual void handleTick(int elapsed) {}
+	void render();
+    //! Does common actions before leaving
+    void leave();
 
-    //! Callback function : Childs can reimplement
+	//! Callback function : Childs can reimplement
     /*! 
      * Called just after the opening animation is played (if one has
      * been defined) and before the menu is rendered for the first time.
@@ -155,6 +145,17 @@ public:
      * been defined) and the menu closed.
      */
     virtual void handleLeave() {}
+
+    //! Handles key pressed
+    void keyEvent(Key key, const int modKeys);
+    //! Handles mouse moved
+    void mouseMotionEvent(int x, int y, int state, const int modKeys);
+    //! Handles mouse button pressed
+    void mouseDownEvent(int x, int y, int button, const int modKeys);
+    //! Handles mouse button released
+    void mouseUpEvent(int x, int y, int button, const int modKeys);
+
+	virtual void handleTick(int elapsed) {}
 
     //! Callback function : Childs can reimplement
     /*! 
@@ -178,12 +179,11 @@ protected:
     virtual bool handleMouseDown(int x, int y, int button, const int modKeys) { return false; }
     virtual void handleMouseUp(int x, int y, int button, const int modKeys) {}
     virtual void handleMouseMotion(int x, int y, int state, const int modKeys) {}
+	virtual bool handleUnknownKey(Key key, const int modKeys) { return false;}
 
     void redrawOptions();
     void needRendering();
     void addDirtyRect(int x, int y, int width, int height);
-
-    virtual bool handleUnknownKey(Key key, const int modKeys) { return false;}
 
 protected:
     MenuManager *menu_manager_;

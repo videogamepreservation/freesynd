@@ -188,14 +188,14 @@ void MenuManager::changeCurrentMenu(const char *name)
     Menu *m = menus_[name];
     bool currentWasSubMenu = false;
     if (current_) {
-        // plays the leaving animation only if the menu
-        // is not a submenu (see confMenu)
-        currentWasSubMenu = current_->isSubMenu();
-        leaveMenu(current_, !m->isSubMenu());
+		// Give the possibility to the old menu
+		// to clean before leaving
+        leaveMenu(current_);
     }
     current_ = m;
     if (m) {
-        showMenu(m, !currentWasSubMenu);
+		// Show new Menu
+        showMenu(m);
     }
 }
 
@@ -205,8 +205,8 @@ void MenuManager::changeCurrentMenu(const char *name)
  * \param pMenu The menu to show.
  * \param playAnim True if the intro can be played.
  */
-void MenuManager::showMenu(Menu *pMenu, bool playAnim) {
-    if (pMenu->hasShowAnim() && playAnim) {
+void MenuManager::showMenu(Menu *pMenu) {
+    if (pMenu->hasShowAnim()) {
         // Stop processing event during menu transitions
         drop_events_ = true;
         FliPlayer fliPlayer;
@@ -245,10 +245,10 @@ void MenuManager::showMenu(Menu *pMenu, bool playAnim) {
  * \param pMenu The closing menu
  * \param playAnim True to play the animation.
  */
-void MenuManager::leaveMenu(Menu *pMenu, bool playAnim) {
+void MenuManager::leaveMenu(Menu *pMenu) {
     pMenu->leave();
 
-    if (pMenu->hasLeaveAnim() && playAnim) {
+    if (pMenu->hasLeaveAnim()) {
         drop_events_ = true;
         FliPlayer fliPlayer;
         uint8 *data;

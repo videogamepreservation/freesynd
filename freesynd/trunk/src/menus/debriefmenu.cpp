@@ -82,8 +82,8 @@ DebriefMenu::DebriefMenu(MenuManager *m) : Menu(m, "debrief", "mdebrief.dat",
     y += 14;
     txtNewWeap2Id_ = addStatic(left_x, y, "", FontManager::SIZE_2, false);
 
-    addOption(16, 346, 129, 25, "#MENU_ACC_BUT", FontManager::SIZE_2, KEY_F5, "map");
-    addOption(500, 347,  128, 25, "#MENU_MAIN_BUT", FontManager::SIZE_2, KEY_F6, "main");
+    addOption(16, 346, 129, 25, "#MENU_ACC_BUT", FontManager::SIZE_2, "map");
+    addOption(500, 347,  128, 25, "#MENU_MAIN_BUT", FontManager::SIZE_2, "main");
 }
 
 /*!

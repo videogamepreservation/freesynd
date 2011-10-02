@@ -149,12 +149,45 @@ void ActionWidget::setenabled(bool enabled) {
 	}
 }
 
+/*! 
+ * Returns the Key associated with the given caracter.
+ * \param c a caracter between a and z. No space.
+ * \returns KEY_UNKNOWN if caracter is not a letter
+ */
+Key Option::getKeyForChar(char c) {
+	Key ret = KEY_UNKNOWN;
+	if ('a' <= c && 'z' >= c) {
+		ret = static_cast < Key > (KEY_a + (c - 'a'));
+	} else if ('A' <= c && 'Z' >= c) {
+		ret = static_cast < Key > (KEY_a + (c - 'A'));
+	}
+	return ret;
+}
+
 Option::Option(Menu *peer, int x, int y, int width, int height, const char *text, FontManager::EFontSize size,
             const char *to, bool visible, bool centered, int darkWidgetId, int lightWidgetId) 
             : ActionWidget(peer, x, y, width, height, visible), text_(x, y, width - 4, text, size, true, true, centered) {
         to_ = to;
         darkWidget_ = NULL;
         lightWidget_ = NULL;
+		hotKey_ = KEY_UNKNOWN;
+
+		// If button label contains a '&' caracter, then the next
+		// caracter is the acceleration key for that button
+		std::string lbl(text_.getText());
+		size_t pos;
+		pos = lbl.find_first_of('&');
+		if (pos != std::string::npos ) {
+			// check if the caracter is not the last one
+			if (pos < (lbl.size() - 1)) {
+				char c = lbl.at(pos + 1);
+				hotKey_ = getKeyForChar(c);
+				// remove the '&' from the string
+				lbl.erase(pos, 1);
+			}
+			// update button label
+			text_.setText(lbl.c_str());
+		}
 
         // Position the button text in the middle of height
         // add 1 pixel to height to compensate lost of division

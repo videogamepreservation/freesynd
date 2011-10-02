@@ -116,9 +116,9 @@ public:
 
 protected:
     //! Shows the menu opening animation
-    void showMenu(Menu *pMenu, bool playAnim);
+    void showMenu(Menu *pMenu);
     //! Shows the menu closing animation
-    void leaveMenu(Menu *pMenu, bool playAnim);
+    void leaveMenu(Menu *pMenu);
 
 protected:
     /** The list of currently loaded menus.*/

@@ -45,23 +45,25 @@ start_line_(0) {
     txtTimeId_ = addStatic(500, 9, "", FontManager::SIZE_2, false);       // Time
 
     // Briefing scroll button
-    nextButId_ = addImageOption(461, 316, KEY_F6, Sprite::MSPR_RIGHT_ARROW2_D, Sprite::MSPR_RIGHT_ARROW2_L);
-    prevButId_ = addImageOption(427, 316, KEY_F7, Sprite::MSPR_LEFT_ARROW2_D, Sprite::MSPR_LEFT_ARROW2_L, false);
+    nextButId_ = addImageOption(461, 316, Sprite::MSPR_RIGHT_ARROW2_D, Sprite::MSPR_RIGHT_ARROW2_L);
+	registerHotKey(KEY_RIGHT, nextButId_);
+    prevButId_ = addImageOption(427, 316, Sprite::MSPR_LEFT_ARROW2_D, Sprite::MSPR_LEFT_ARROW2_L, false);
+	registerHotKey(KEY_LEFT, prevButId_);
 
     // Accept button
-    addOption(17, 347, 128, 25, "#MENU_ACC_BUT", FontManager::SIZE_2, KEY_F3, "select");
+    addOption(17, 347, 128, 25, "#MENU_ACC_BUT", FontManager::SIZE_2, "select");
     // Map button
-    addOption(148, 347, 99, 25, "#BRIEF_MAP", FontManager::SIZE_2, KEY_F4, "map");
+    addOption(148, 347, 99, 25, "#BRIEF_MAP", FontManager::SIZE_2, "map");
     // Main menu button
-    addOption(500, 347,  128, 25, "#MENU_MAIN_BUT", FontManager::SIZE_2, KEY_F5, "main");
+    addOption(500, 347,  128, 25, "#MENU_MAIN_BUT", FontManager::SIZE_2, "main");
 
     // Money
     txtMoneyId_ = addStatic(500, 87, 127, "0", FontManager::SIZE_2, false);     // textfield
     // Info
-    infosButId_ = addOption(500, 118, 127, 10, "#BRIEF_INFO", FontManager::SIZE_2, KEY_F1); // info button
+    infosButId_ = addOption(500, 118, 127, 10, "#BRIEF_INFO", FontManager::SIZE_2); // info button
     txtInfoId_ = addStatic(500, 140, 127, "0", FontManager::SIZE_2, false);
     // Enhancement
-    enhButId_ = addOption(500, 169, 127, 10, "#BRIEF_ENH", FontManager::SIZE_2, KEY_F2);
+    enhButId_ = addOption(500, 169, 127, 10, "#BRIEF_ENH", FontManager::SIZE_2);
     txtEnhId_ = addStatic(500, 195, 127, "0", FontManager::SIZE_2, false);
 
     setParentMenu("map");

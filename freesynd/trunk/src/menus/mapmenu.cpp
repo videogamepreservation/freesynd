@@ -111,8 +111,8 @@ MapMenu::MapMenu(MenuManager * m)
 mapblk_data_(NULL), select_tick_count_(0)
 {
 	// 
-    addOption(17, 347, 128, 25, "#MAP_BRIEF_BUT", FontManager::SIZE_2, KEY_F4, "brief");
-    addOption(500, 347,  128, 25, "#MENU_MAIN_BUT", FontManager::SIZE_2, KEY_F5, "main");
+    addOption(17, 347, 128, 25, "#MAP_BRIEF_BUT", FontManager::SIZE_2, "brief");
+    addOption(500, 347,  128, 25, "#MENU_MAIN_BUT", FontManager::SIZE_2, "main");
 
     //txtCountryId_ = addStatic(268, 312, "", FontManager::SIZE_1, false);   // Country name
 	txtCountryId_ = addStatic(188, 312, 270, "", FontManager::SIZE_1, false);   // Country name
@@ -127,8 +127,10 @@ mapblk_data_(NULL), select_tick_count_(0)
 
     // Tax cursors
     txtTaxPctId_ = addStatic(350, 346, "@   30%", FontManager::SIZE_1, false);
-    decrTaxButId_ = addImageOption(375, 346, KEY_MINUS, Sprite::MSPR_TAX_DECR, Sprite::MSPR_TAX_DECR, false);
-    incrTaxButId_ = addImageOption(435, 346, KEY_PLUS, Sprite::MSPR_TAX_INCR, Sprite::MSPR_TAX_INCR, false);
+    decrTaxButId_ = addImageOption(375, 346, Sprite::MSPR_TAX_DECR, Sprite::MSPR_TAX_DECR, false);
+	registerHotKey(KEY_MINUS, decrTaxButId_);
+    incrTaxButId_ = addImageOption(435, 346, Sprite::MSPR_TAX_INCR, Sprite::MSPR_TAX_INCR, false);
+	registerHotKey(KEY_PLUS, incrTaxButId_);
     
     setParentMenu("main");
 

@@ -41,10 +41,10 @@ ResearchMenu::ResearchMenu(MenuManager * m):Menu(m, "research", "mresrch.dat", "
     txtTimeId_ = addStatic(500, 9, "", FontManager::SIZE_2, false);     // Time
     moneyTxtId_ = addStatic(500, 87, 128, "0", FontManager::SIZE_2, false);     // Money
 
-    modsButId_ = addToggleAction(16, 290, 129, 25, "#MENU_MODS_BUT", FontManager::SIZE_2, KEY_F1, tab_ == TAB_MODS);
-    equipButId_ = addToggleAction(16, 318, 129, 25,  "#MENU_EQUIP_BUT", FontManager::SIZE_2, KEY_F2, tab_ == TAB_EQUIPS);
-    addOption(16, 346, 129, 25,  "#MENU_ACC_BUT", FontManager::SIZE_2, KEY_F3, "select");
-    addOption(500, 347,  128, 25, "#MENU_MAIN_BUT", FontManager::SIZE_2, KEY_F4, "main");
+    modsButId_ = addToggleAction(16, 290, 129, 25, "#MENU_MODS_BUT", FontManager::SIZE_2, tab_ == TAB_MODS);
+    equipButId_ = addToggleAction(16, 318, 129, 25,  "#MENU_EQUIP_BUT", FontManager::SIZE_2, tab_ == TAB_EQUIPS);
+    addOption(16, 346, 129, 25,  "#MENU_ACC_BUT", FontManager::SIZE_2, "select");
+    addOption(500, 347,  128, 25, "#MENU_MAIN_BUT", FontManager::SIZE_2, "main");
 
     pFieldEquipLBox_ = addListBox(20, 84,  122, 120, tab_ == TAB_EQUIPS);
     pFieldEquipLBox_->setModel(g_Session.researchManager().getAvailableWeaponsSearch());
@@ -57,11 +57,11 @@ ResearchMenu::ResearchMenu(MenuManager * m):Menu(m, "research", "mresrch.dat", "
     pModsLBox_->setModel(g_App.mods().getAvalaibleMods());
 
     // Close Mods/Equips details button
-    cancelDescId_ = addOption(500, 320,  127, 22,  "#MENU_CANCEL_BUT", FontManager::SIZE_2, KEY_F5, NULL, false);
+    cancelDescId_ = addOption(500, 320,  127, 22,  "#MENU_CANCEL_BUT", FontManager::SIZE_2, NULL, false);
     // Start research button
-    researchId_ = addOption(16, 158, 129, 25,  "#RES_RES_BUT", FontManager::SIZE_2, KEY_F6, NULL, false);
+    researchId_ = addOption(16, 158, 129, 25,  "#RES_RES_BUT", FontManager::SIZE_2, NULL, false);
     // Close search details button
-    cancelSearchId_ = addOption(16, 184, 129, 25,  "#MENU_CANCEL_BUT", FontManager::SIZE_2, KEY_F7, NULL, false);
+    cancelSearchId_ = addOption(16, 184, 129, 25,  "#MENU_CANCEL_BUT", FontManager::SIZE_2, NULL, false);
 
     fieldTxtId_ = addStatic(20, 86, "", FontManager::SIZE_1, false);    // Search name
     fundMinLblId_ = addStatic(20, 105, "#RES_MIN_FUND_LBL", FontManager::SIZE_1, true);    // Funding Minimun label
@@ -71,8 +71,10 @@ ResearchMenu::ResearchMenu(MenuManager * m):Menu(m, "research", "mresrch.dat", "
     getStatic(fundMaxLblId_)->setVisible(false);
     fundMaxTxtId_ = addStatic(20, 143, "", FontManager::SIZE_1, false);    // Search maximum
 
-    incrFundId_ = addOption(16, 210, 129, 25,  "#RES_INC_FUND_BUT", FontManager::SIZE_2, KEY_F8, NULL, false);
-    decrFundId_ = addOption(16, 260, 129, 25,  "#RES_DEC_FUND_BUT", FontManager::SIZE_2, KEY_F9, NULL, false);
+    incrFundId_ = addOption(16, 210, 129, 25,  "#RES_INC_FUND_BUT", FontManager::SIZE_2, NULL, false);
+	registerHotKey(KEY_PLUS, incrFundId_);
+    decrFundId_ = addOption(16, 260, 129, 25,  "#RES_DEC_FUND_BUT", FontManager::SIZE_2, NULL, false);
+	registerHotKey(KEY_MINUS, decrFundId_);
     fundCurrLblId_ = addStatic(16, 242, 129, "", FontManager::SIZE_2, false);    // Current Funding label
     searchTitleLblId_ = addStatic(158, 86, "", FontManager::SIZE_2, false);    // Current search title
     setParentMenu("select");
