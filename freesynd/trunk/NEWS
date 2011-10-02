@@ -9,6 +9,7 @@ Changes
 -------
   * CMake is used instead of autotools, used to generate Makefile for Unix's
   and project files for MSVC++
+  * Reload button functional(mentor66)
 
 Fixed Bugs
 ----------
