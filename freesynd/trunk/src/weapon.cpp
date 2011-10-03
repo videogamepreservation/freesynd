@@ -871,11 +871,6 @@ void WeaponInstance::playSound() {
     g_App.gameSounds().play(pWeaponClass_->getSound());
 }
 
-/*
-* returns mask where bits are:
-* 0b - target in range(1); 1b - blocker is object, "t" and "pn" are set(2)
-* 2b - blocker tile, "pn" is set(4), 3b - reachable point set
-*/
 uint8 WeaponInstance::inRange(toDefineXYZ & cp, ShootableMapObject ** t,
     PathNode * pn, bool setBlocker, bool checkTileOnly, int maxr)
 {
@@ -1038,9 +1033,8 @@ void ShotClass::makeShot(bool rangeChecked, toDefineXYZ &cp, int anim_hit,
                 }
             } else if ((has_blocker & 2) != 0) {
                 assert(smp != 0);
-                if (anim_obj_hit!= SFXObject::sfxt_Unknown) {
-                    if (smp->handleDamage(&d)) {
-                    }
+                smp->handleDamage(&d);
+                if (anim_obj_hit != SFXObject::sfxt_Unknown) {
                     SFXObject *so = new SFXObject(g_Session.getMission()->map(),
                         anim_obj_hit);
                     so->setPosition(smp->tileX(), smp->tileY(), smp->tileZ() + 1,
@@ -1072,7 +1066,7 @@ void ShotClass::makeShot(bool rangeChecked, toDefineXYZ &cp, int anim_hit,
             }
             if (smp) {
                 smp->handleDamage(&d);
-                if (anim_obj_hit!= SFXObject::sfxt_Unknown) {
+                if (anim_obj_hit != SFXObject::sfxt_Unknown) {
                     SFXObject *so = new SFXObject(g_Session.getMission()->map(),
                         anim_obj_hit);
                     so->setPosition(pn.tileX(), pn.tileY(), pn.tileZ() + 1,

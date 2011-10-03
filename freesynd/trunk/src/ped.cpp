@@ -297,7 +297,8 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                     if ((aqt.ot_execute & Mission::objv_DestroyObject) != 0)
                     {
                         if (aqt.t_smo->health() <= 0)
-                            aqt.state |= 4;
+                            // not object did it as such he failed
+                            aqt.state |= 8;
                         else {
                             WeaponInstance *wi = selectedWeapon();
                             if (!wi)
@@ -381,7 +382,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                                 }
                             }
                         }
-                        if ((aqt.state & 14) == 2) {
+                        if ((aqt.state & 14) == 3) {
                             //TODO: IPA + mods
                             int speed_set = 128;
                             speed_ = speed_set;
@@ -519,7 +520,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                         if (wi && (wi->shotProperty()
                             & Weapon::spe_DamageAll) != 0)
                         {
-                            // TODO: ptoper handling
+                            // TODO: proper handling
                             wi->inflictDamage(NULL, &aqt.t_pn, elapsed);
                             aqt.state |= 2;
                         } else
@@ -527,6 +528,43 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                     }
                     if ((aqt.ot_execute & Mission::objv_FindEnemy) != 0)
                     {
+                        if (!hostiles_found_.empty())
+                            verifyHostilesFound();
+                        if (hostiles_found_.empty()) {
+                            if (obj_group_def_ == og_dmAgent
+                                || obj_group_def_ == og_dmPolice
+                                || obj_group_def_ == og_dmGuard)
+                            {
+                                int num_peds = mission->numPeds();
+                                for (int i = 0; i < num_peds; i++) {
+                                    PedInstance *p = mission->ped(i);
+                                    if (p->objGroupDef() == obj_group_def_
+                                        && checkFriendIs(p))
+                                    {
+                                        std::set <ShootableMapObject *>::iterator
+                                            it_s, it_e;
+                                        if (p->getHostilesFoundIt(it_s, it_e)) {
+                                            do {
+                                            } while (it_s != it_e);
+                                        }
+                                    } else {
+                                        ;
+                                    }
+                                }
+                            } else {
+                                int num_peds = mission->numPeds();
+                                for (int i = 0; i < num_peds; i++) {
+                                    PedInstance *p = mission->ped(i);
+                                    if (1)
+                                    {
+                                    }
+                                }
+                            }
+                        }
+                        if (hostiles_found_.empty()) {
+                            aqt.state |= 8;
+                        } else {
+                        }
                     }
                     if ((aqt.ot_execute & Mission::objv_FindNonFriend) != 0)
                     {
@@ -3756,7 +3794,7 @@ void PedInstance::verifyHostilesFound() {
         it != hostiles_found_.end(); it++)
     {
         if ((*it)->health() <= 0 || ((*it)->majorType() == MapObject::mjt_Ped
-            && checkFriendIs((PedInstance *)(*it))))
+            && checkFriendIs((PedInstance *)(*it))) || (!inSightRange(*it)))
         {
             rm_set.push_back(*it);
         }

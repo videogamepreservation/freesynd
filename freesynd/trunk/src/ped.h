@@ -475,6 +475,15 @@ public:
             != hostiles_found_.end();
     }
     void verifyHostilesFound();
+    bool getHostilesFoundIt(std::set <ShootableMapObject *>::iterator &it_s,
+        std::set <ShootableMapObject *>::iterator &it_e)
+    {
+        if (hostiles_found_.empty())
+            return false;
+        it_s = hostiles_found_.begin();
+        it_e = hostiles_found_.end();
+        return true;
+    }
 
     bool checkHostileIs(ShootableMapObject *obj,
         unsigned int hostile_desc_alt = 0);
@@ -652,6 +661,7 @@ protected:
     Mmuu32_t friend_group_defs_;
     //std::set <unsigned int> emulated_failed_groups_;
     // dicovered hostiles are set here, check at end for hostile
+    // they should be within sight range
     std::set <ShootableMapObject *> hostiles_found_;
     //unused for now
     //std::set <ShootableMapObject *> friends_found_;

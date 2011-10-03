@@ -2847,7 +2847,7 @@ WeaponInstance *Mission::createWeaponInstance(uint8 * data)
 }
 
 /*
-* This function looks only for statics and vehicles
+* This function looks for statics, vehicles, peds
 */
 void Mission::blockerExists(toDefineXYZ * startXYZ, toDefineXYZ * endXYZ,
                             double dist, MapObject** blockerObj)
@@ -2926,7 +2926,12 @@ void Mission::blockerExists(toDefineXYZ * startXYZ, toDefineXYZ * endXYZ,
     }
 }
 
-
+/*
+* returns mask where bits are:
+* 0b - target in range(1); 1b - blocker is object, "t" and "pn" are set(2)
+* 2b - blocker tile, "pn" is set(4), 3b - reachable point set
+*/
+//TODO: separate mask for pn blocker object
 uint8 Mission::inRangeCPos(toDefineXYZ * cp, ShootableMapObject ** t,
     PathNode * pn, bool setBlocker, bool checkTileOnly, int maxr,
     double * distTo)
@@ -3105,6 +3110,7 @@ uint8 Mission::inRangeCPos(toDefineXYZ * cp, ShootableMapObject ** t,
                         startXYZ.z / 128);
                     pn->setOffXYZ(startXYZ.x % 256, startXYZ.y % 256,
                         startXYZ.z % 128);
+                    block_mask |= 2;
                 }
             }
             if (t) {
