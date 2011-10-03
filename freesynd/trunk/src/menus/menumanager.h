@@ -36,18 +36,6 @@
 class SpriteManager;
 class ConfigFile;
 
-class MainMenu;
-class ConfMenu;
-class LoadSaveMenu;
-class MapMenu;
-class BriefMenu;
-class SelectMenu;
-class ResearchMenu;
-class LoadingMenu;
-class GameplayMenu;
-class DebriefMenu;
-class LogoutMenu;
-
 /*!
  * Menu manager class.
  */
@@ -69,7 +57,7 @@ public:
     MenuManager();
     ~MenuManager();
     
-    void createAllMenus();
+   // void createAllMenus();
     //! Destroy all menus and resources
     void destroy();
 
@@ -77,15 +65,13 @@ public:
     std::string getMessage(const std::string & id);
     void getMessage(const std::string & id, std::string & msg);
 
-    void addMenu(Menu *m) { menus_[m->name()] = m; }
-
     void handleTick(int elapsed) {
         if (current_)
             current_->handleTick(elapsed);
     }
 
     //! Switch from menu and plays the transition animation.
-    void changeCurrentMenu(const char *name);
+    void changeCurrentMenu(int menuId);
 
     //! Take a snapshot of the screen.
     void saveBackground();
@@ -115,6 +101,8 @@ public:
     FS_Lang currLanguage(void) {return curr_language_; }
 
 protected:
+	//! Returns a menu with the given id
+	Menu * getMenu(int menuId);
     //! Shows the menu opening animation
     void showMenu(Menu *pMenu);
     //! Shows the menu closing animation
@@ -122,7 +110,7 @@ protected:
 
 protected:
     /** The list of currently loaded menus.*/
-    std::map<std::string, Menu *> menus_;
+    std::map<int, Menu *> menus_;
     /** The current menu being displayed.*/
     Menu *current_;
     /** This flag prevents the input events from being processed.*/
@@ -136,18 +124,6 @@ protected:
     /*! Language file. */
     ConfigFile  *language_;
     FS_Lang curr_language_;
-
-    MainMenu *menu_main_;
-    ConfMenu *menu_conf_;
-    LoadSaveMenu *menu_load_save_;
-    MapMenu *menu_map_;
-    BriefMenu *menu_brief_;
-    SelectMenu *menu_select_;
-    ResearchMenu *menu_research_;
-    LoadingMenu *menu_loading_;
-    GameplayMenu *menu_gameplay_;
-    DebriefMenu *menu_debrief_;
-    LogoutMenu *menu_logout_;
 };
 
 #endif

@@ -38,7 +38,7 @@
 #define EXECUTION_SPEED_TIME
 #endif
 BriefMenu::BriefMenu(MenuManager * m) :
-Menu(m, "brief", "mbrief.dat", "mbrieout.dat"),
+Menu(m, MENU_BRIEF, MENU_MAP, "mbrief.dat", "mbrieout.dat"),
 start_line_(0) {
     
     addStatic(85, 35, 545, "#BRIEF_TITLE", FontManager::SIZE_4, true);
@@ -51,11 +51,11 @@ start_line_(0) {
 	registerHotKey(KEY_LEFT, prevButId_);
 
     // Accept button
-    addOption(17, 347, 128, 25, "#MENU_ACC_BUT", FontManager::SIZE_2, "select");
+    addOption(17, 347, 128, 25, "#MENU_ACC_BUT", FontManager::SIZE_2, MENU_SELECT);
     // Map button
-    addOption(148, 347, 99, 25, "#BRIEF_MAP", FontManager::SIZE_2, "map");
+	addOption(148, 347, 99, 25, "#BRIEF_MAP", FontManager::SIZE_2, MENU_MAP);
     // Main menu button
-    addOption(500, 347,  128, 25, "#MENU_MAIN_BUT", FontManager::SIZE_2, "main");
+    addOption(500, 347,  128, 25, "#MENU_MAIN_BUT", FontManager::SIZE_2, MENU_MAIN);
 
     // Money
     txtMoneyId_ = addStatic(500, 87, 127, "0", FontManager::SIZE_2, false);     // textfield
@@ -65,8 +65,6 @@ start_line_(0) {
     // Enhancement
     enhButId_ = addOption(500, 169, 127, 10, "#BRIEF_ENH", FontManager::SIZE_2);
     txtEnhId_ = addStatic(500, 195, 127, "0", FontManager::SIZE_2, false);
-
-    setParentMenu("map");
 }
 
 BriefMenu::~BriefMenu() {

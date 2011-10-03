@@ -28,7 +28,7 @@
 #include "app.h"
 #include "debriefmenu.h"
 
-DebriefMenu::DebriefMenu(MenuManager *m) : Menu(m, "debrief", "mdebrief.dat",
+DebriefMenu::DebriefMenu(MenuManager *m) : Menu(m, MENU_DEBRIEF, MENU_MAIN, "mdebrief.dat",
      "mdeout.dat") {
     int y = 35;
     int right_x = 310;
@@ -82,8 +82,8 @@ DebriefMenu::DebriefMenu(MenuManager *m) : Menu(m, "debrief", "mdebrief.dat",
     y += 14;
     txtNewWeap2Id_ = addStatic(left_x, y, "", FontManager::SIZE_2, false);
 
-    addOption(16, 346, 129, 25, "#MENU_ACC_BUT", FontManager::SIZE_2, "map");
-    addOption(500, 347,  128, 25, "#MENU_MAIN_BUT", FontManager::SIZE_2, "main");
+	addOption(16, 346, 129, 25, "#MENU_ACC_BUT", FontManager::SIZE_2, MENU_MAP);
+    addOption(500, 347,  128, 25, "#MENU_MAIN_BUT", FontManager::SIZE_2, MENU_MAIN);
 }
 
 /*!

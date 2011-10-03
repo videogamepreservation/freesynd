@@ -32,7 +32,7 @@
 #include "mod.h"
 #include "selectmenu.h"
 
-SelectMenu::SelectMenu(MenuManager * m):Menu(m, "select", "mselect.dat",
+SelectMenu::SelectMenu(MenuManager * m):Menu(m, MENU_SELECT, MENU_BRIEF, "mselect.dat",
     "mselout.dat"),
 cur_agent_(0), tick_count_(0), sel_all_(false)
 {
@@ -43,12 +43,12 @@ cur_agent_(0), tick_count_(0), sel_all_(false)
     addStatic(85, 35, 545, "#SELECT_TITLE", FontManager::SIZE_4, true);
     txtTimeId_ = addStatic(500, 9, "", FontManager::SIZE_2, false);       // Time
 
-    addOption(16, 234, 129, 25, "#SELECT_RES_BUT", FontManager::SIZE_2, "research");
+    addOption(16, 234, 129, 25, "#SELECT_RES_BUT", FontManager::SIZE_2, MENU_RESEARCH);
     teamButId_ = addToggleAction(16, 262, 129, 25, "#SELECT_TEAM_BUT", FontManager::SIZE_2, false);
     modsButId_ = addToggleAction(16, 290, 129, 25, "#MENU_MODS_BUT", FontManager::SIZE_2, false);
     equipButId_ = addToggleAction(16, 318, 129, 25, "#MENU_EQUIP_BUT", FontManager::SIZE_2, true);
-    addOption(16, 346, 129, 25, "#MENU_ACC_BUT", FontManager::SIZE_2, "loading");
-    addOption(500, 347,  128, 25, "#MENU_MAIN_BUT", FontManager::SIZE_2, "main");
+	addOption(16, 346, 129, 25, "#MENU_ACC_BUT", FontManager::SIZE_2, MENU_LOADING);
+    addOption(500, 347,  128, 25, "#MENU_MAIN_BUT", FontManager::SIZE_2, MENU_MAIN);
 
     // Team list
     pTeamLBox_ = addTeamListBox(502, 106, 124, 236, false);
@@ -61,14 +61,13 @@ cur_agent_(0), tick_count_(0), sel_all_(false)
     pModsLBox_->setModel(g_App.mods().getAvalaibleMods());
 
     cancelButId_ = addOption(500, 270,  127, 22, "#MENU_CANCEL_BUT",
-        FontManager::SIZE_2, NULL, false);
+        FontManager::SIZE_2, MENU_NO_MENU, false);
     reloadButId_ = addOption(500, 295,  127, 22, "#SELECT_RELOAD_BUT",
-        FontManager::SIZE_2, NULL, false);
+        FontManager::SIZE_2, MENU_NO_MENU, false);
     purchaseButId_ = addOption(500, 320,  127, 22, "#SELECT_BUY_BUT",
-        FontManager::SIZE_2, NULL, false);
+        FontManager::SIZE_2, MENU_NO_MENU, false);
     sellButId_ = addOption(500, 320,  127, 22, "#SELECT_SELL_BUT",
-        FontManager::SIZE_2, NULL, false);
-    setParentMenu("brief");
+        FontManager::SIZE_2, MENU_NO_MENU, false);
 
     // Agent name selected
     txtAgentId_ = addStatic(158, 86, "", FontManager::SIZE_2, false);

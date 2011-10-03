@@ -221,7 +221,7 @@ public:
 
     //! Constructs a new button.
     Option(Menu *peer, int x, int y, int width, int height, const char *text, FontManager::EFontSize size,
-            const char *to, bool visible, bool centered = true, int dark_widget = 0, int light_widget = 0);
+            int to, bool visible, bool centered = true, int dark_widget = 0, int light_widget = 0);
 
     ~Option();
 
@@ -241,8 +241,8 @@ public:
 protected:
 
     MenuText text_;
-	/*! The name of the next menu.*/
-    const char *to_;
+	/*! The id of the next menu.*/
+    int to_;
     /*! 
      * The widget to display when button is dark.
      * When id is zero, there is no widget.

@@ -43,14 +43,27 @@ class MenuManager;
  */
 class Menu {
 public:
-    Menu(MenuManager *menuManager, const char *name, const char *showAnim,
-            const char *leaveAnim);
-    Menu(MenuManager *menuManager, const char *name, const char *parent);
+	static const int MENU_NO_MENU;
+	static const int MENU_MAIN;
+	static const int MENU_BRIEF;
+	static const int MENU_CONF;
+	static const int MENU_DEBRIEF;
+	static const int MENU_GAMEPLAY;
+	static const int MENU_LOADING;
+	static const int MENU_LOGOUT;
+	static const int MENU_RESEARCH;
+	static const int MENU_SELECT;
+	static const int MENU_LDSAVE;
+	static const int MENU_MAP;
+
+	/*!
+	 * Menu constructor.
+	 */
+    Menu(MenuManager *menuManager, int id, int parentId, 
+		const char *showAnim = "", const char *leaveAnim = "");
     virtual ~Menu();
 
-    const char *name() { return name_.c_str(); }
-
-	void setParentMenu(const char *m) { parent_menu_ = m; }
+    int getId() { return id_; }
 
     /*! Returns true if an animation has been defined when opening the menu.*/
     bool hasShowAnim() { return showAnim_.size() != 0; }
@@ -67,7 +80,7 @@ public:
     int addStatic(int x, int y, int width, const char *text, FontManager::EFontSize size, bool dark);
     //! Creates a new button and returns its id
     int addOption(int x, int y, int width, int height, const char *text, FontManager::EFontSize size,
-            const char *to = NULL, bool visible = true, bool centered = true, int dark_widget = 0, int light_widget = 0);
+            int to = -1, bool visible = true, bool centered = true, int dark_widget = 0, int light_widget = 0);
 	//! Creates a new button that has no text but an image
     int addImageOption(int x, int y, int dark_widget, int light_widget, bool visible = true);
     //! Creates a new toggle button and returns its id
@@ -187,8 +200,10 @@ protected:
 
 protected:
     MenuManager *menu_manager_;
-    /*! A unique name to identify this menu.*/
-    std::string name_;
+    /*! A unique id to identify this menu.*/
+    int id_;
+	/*! Parent menu when leaving this menu.*/
+	int parentId_;
     std::string showAnim_, leaveAnim_;
     /*! The list of all static widgets (MenuText).*/
     std::list<MenuText> statics_;
@@ -198,7 +213,6 @@ protected:
     std::map<Key, Option *> hotKeys_;
     /*! A group of mutual exclusive ToggleAction.*/
     Group group_;
-    const char *parent_menu_;
     /*! The id of the widget that currently has focus.*/
     int focusedWgId_;
 	/*! The current textfield that holds the cursor and so capture all key events.*/

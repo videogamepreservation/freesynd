@@ -165,7 +165,7 @@ Key Option::getKeyForChar(char c) {
 }
 
 Option::Option(Menu *peer, int x, int y, int width, int height, const char *text, FontManager::EFontSize size,
-            const char *to, bool visible, bool centered, int darkWidgetId, int lightWidgetId) 
+            int to, bool visible, bool centered, int darkWidgetId, int lightWidgetId) 
             : ActionWidget(peer, x, y, width, height, visible), text_(x, y, width - 4, text, size, true, true, centered) {
         to_ = to;
         darkWidget_ = NULL;
@@ -229,7 +229,7 @@ void Option::executeAction(const int modKeys) {
         peer_->handleAction(getId(), NULL, modKeys);
     }
 
-    if (to_) {
+    if (to_ != -1) {
         g_App.menus().changeCurrentMenu(to_);
         return;
     }

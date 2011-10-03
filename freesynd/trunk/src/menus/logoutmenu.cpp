@@ -27,7 +27,7 @@
 #include "logoutmenu.h"
 #include "app.h"
 
-LogoutMenu::LogoutMenu(MenuManager * m):Menu(m, "logout", "", ""),
+LogoutMenu::LogoutMenu(MenuManager * m):Menu(m, MENU_LOGOUT, MENU_MAIN),
 tick_count_(0)
 {
     addStatic(0, 180, g_Screen.gameScreenWidth(), "#LGOUT_TITLE", FontManager::SIZE_4, false);

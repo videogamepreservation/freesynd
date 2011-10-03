@@ -107,12 +107,12 @@ extern int g_Colours[8];
  * \param m The menu manager.
  */
 MapMenu::MapMenu(MenuManager * m)
-:  Menu(m, "map", "mmap.dat", "mmapout.dat"),
+	:  Menu(m, MENU_MAP, MENU_MAIN, "mmap.dat", "mmapout.dat"),
 mapblk_data_(NULL), select_tick_count_(0)
 {
 	// 
-    addOption(17, 347, 128, 25, "#MAP_BRIEF_BUT", FontManager::SIZE_2, "brief");
-    addOption(500, 347,  128, 25, "#MENU_MAIN_BUT", FontManager::SIZE_2, "main");
+    addOption(17, 347, 128, 25, "#MAP_BRIEF_BUT", FontManager::SIZE_2, MENU_BRIEF);
+	addOption(500, 347,  128, 25, "#MENU_MAIN_BUT", FontManager::SIZE_2, MENU_MAIN);
 
     //txtCountryId_ = addStatic(268, 312, "", FontManager::SIZE_1, false);   // Country name
 	txtCountryId_ = addStatic(188, 312, 270, "", FontManager::SIZE_1, false);   // Country name
@@ -131,8 +131,6 @@ mapblk_data_(NULL), select_tick_count_(0)
 	registerHotKey(KEY_MINUS, decrTaxButId_);
     incrTaxButId_ = addImageOption(435, 346, Sprite::MSPR_TAX_INCR, Sprite::MSPR_TAX_INCR, false);
 	registerHotKey(KEY_PLUS, incrTaxButId_);
-    
-    setParentMenu("main");
 
     // 64 x 44 x 50
     // Load map block informations

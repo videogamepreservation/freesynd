@@ -34,10 +34,9 @@ const int LoadSaveMenu::X_ORIGIN = 165;
 const int LoadSaveMenu::Y_ORIGIN = 100;
 const size_t LoadSaveMenu::NAME_MAX_SIZE = 31;
 
-LoadSaveMenu::LoadSaveMenu(MenuManager * m):Menu(m, "loadsave", "mlosa.dat",
+LoadSaveMenu::LoadSaveMenu(MenuManager * m):Menu(m, MENU_LDSAVE, MENU_MAIN, "mlosa.dat",
      "mlosaout.dat")
 {
-    setParentMenu("main");
 
     // Title
     addStatic(0, 40, g_Screen.gameScreenWidth(), "#LS_TITLE", FontManager::SIZE_4, true);
@@ -47,7 +46,7 @@ LoadSaveMenu::LoadSaveMenu(MenuManager * m):Menu(m, "loadsave", "mlosa.dat",
     // Save button
     saveButId_ = addOption(147, 346, 99, 25, "#LS_SAVE_BUT", FontManager::SIZE_2);
     // Main menu button
-    addOption(501, 346, 126, 25, "#MENU_MAIN_BUT", FontManager::SIZE_2, "main");
+    addOption(501, 346, 126, 25, "#MENU_MAIN_BUT", FontManager::SIZE_2, MENU_MAIN);
 
 	std::string label;
     g_App.menus().getMessage("MENU_LB_EMPTY", label);
@@ -93,14 +92,14 @@ void LoadSaveMenu::handleAction(const int actionId, void *ctx, const int modKeys
         if (editNameId_ != -1) {
             if (g_App.loadGameFromFile(editNameId_)) {
                 editNameId_ = -1;
-                menu_manager_->changeCurrentMenu("main");
+				menu_manager_->changeCurrentMenu(Menu::MENU_MAIN);
             }
         }
     } else if (actionId == saveButId_) {
         if (editNameId_ != -1 && pTextFields_[editNameId_]->getText().size() != 0) {
             if (g_App.saveGameToFile(editNameId_, pTextFields_[editNameId_]->getText())) {
                 editNameId_ = -1;
-                menu_manager_->changeCurrentMenu("main");
+                menu_manager_->changeCurrentMenu(Menu::MENU_MAIN);
             }
         }
     }

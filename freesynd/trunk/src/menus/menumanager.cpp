@@ -26,9 +26,13 @@
 
 #include <stdio.h>
 #include <assert.h>
+
 #include "app.h"
+#include "system.h"
+#include "utils/configfile.h"
 #include "utils/file.h"
 #include "utils/log.h"
+#include "gfx/fliplayer.h"
 #include "mainmenu.h"
 #include "confmenu.h"
 #include "mapmenu.h"
@@ -40,9 +44,7 @@
 #include "gameplaymenu.h"
 #include "debriefmenu.h"
 #include "logoutmenu.h"
-#include "gfx/fliplayer.h"
-#include "system.h"
-#include "utils/configfile.h"
+
 
 MenuManager::MenuManager(): dirtyList_(g_Screen.gameScreenWidth(), g_Screen.gameScreenHeight())
 {
@@ -53,17 +55,6 @@ MenuManager::MenuManager(): dirtyList_(g_Screen.gameScreenWidth(), g_Screen.game
     language_ = NULL;
     
     current_ = NULL;
-    menu_main_ = NULL;
-    menu_conf_ = NULL;
-    menu_load_save_ = NULL;
-    menu_map_ = NULL;
-    menu_brief_ = NULL;
-    menu_select_ = NULL;
-    menu_research_ = NULL;
-    menu_loading_ = NULL;
-    menu_gameplay_ = NULL;
-    menu_debrief_ = NULL;
-    menu_logout_ = NULL;
 }
 
 MenuManager::~MenuManager()
@@ -74,51 +65,6 @@ MenuManager::~MenuManager()
  */
 void MenuManager::destroy() {
     LOG(Log::k_FLG_MEM, "MenuManager", "~MenuManager", ("Destruction..."))
-
-    if (menu_main_) {
-        delete menu_main_;
-        menu_main_ = NULL;
-    }
-    if (menu_conf_) {
-        delete menu_conf_;
-        menu_conf_ = NULL;
-    }
-    if (menu_load_save_) {
-        delete menu_load_save_;
-        menu_load_save_ = NULL;
-    }
-    if (menu_map_) {
-        delete menu_map_;
-        menu_map_ = NULL;
-    }
-    if (menu_brief_) {
-        delete menu_brief_;
-        menu_brief_ = NULL;
-    }
-    if (menu_select_) {
-        delete menu_select_;
-        menu_select_ = NULL;
-    }
-    if (menu_research_) {
-        delete menu_research_;
-        menu_research_ = NULL;
-    }
-    if (menu_loading_) {
-        delete menu_loading_;
-        menu_loading_ = NULL;
-    }
-    if (menu_gameplay_) {
-        delete menu_gameplay_;
-        menu_gameplay_ = NULL;
-    }
-    if (menu_debrief_) {
-        delete menu_debrief_;
-        menu_debrief_ = NULL;
-    }
-    if (menu_logout_) {
-        delete menu_logout_;
-        menu_logout_ = NULL;
-    }
 
     if (background_) {
         delete[] background_;
@@ -172,31 +118,78 @@ void MenuManager::getMessage(const std::string & id, std::string & msg) {
     }
 }
 
+Menu * MenuManager::getMenu(int menuId) {
+	// look in the cache
+	if (menus_.find(menuId) != menus_.end()) {
+		return menus_[menuId];
+	}
+
+	// menu is not in cache so create it
+	// some menus are not saved in cache as they are not accessed many times
+	Menu *pMenu = NULL;
+	bool putInCache = true;
+
+	if (menuId == Menu::MENU_MAIN) {
+		pMenu =  new MainMenu(this);
+		putInCache = false;
+	} else if (menuId == Menu::MENU_BRIEF) {
+		pMenu =  new BriefMenu(this);
+	} else if (menuId == Menu::MENU_CONF) {
+		pMenu =  new ConfMenu(this);
+		putInCache = false;
+	} else if (menuId == Menu::MENU_DEBRIEF) {
+		pMenu =  new DebriefMenu(this);
+	} else if (menuId == Menu::MENU_GAMEPLAY) {
+		pMenu =  new GameplayMenu(this);
+	} else if (menuId == Menu::MENU_LOADING) {
+		pMenu =  new LoadingMenu(this);
+		putInCache = false;
+	} else if (menuId == Menu::MENU_LOGOUT) {
+		pMenu =  new LogoutMenu(this);
+		putInCache = false;
+	} else if (menuId == Menu::MENU_RESEARCH) {
+		pMenu =  new ResearchMenu(this);
+	} else if (menuId == Menu::MENU_SELECT) {
+		pMenu =  new SelectMenu(this);
+	} else if (menuId == Menu::MENU_LDSAVE) {
+		pMenu =  new LoadSaveMenu(this);
+		putInCache = false;
+	} else if (menuId == Menu::MENU_MAP) {
+		pMenu =  new MapMenu(this);
+	} else {
+		FSERR(Log::k_FLG_UI, "MenuManager", "changeCurrentMenu", ("Cannot open Menu : unknown id"));
+	}
+
+	if (putInCache && pMenu) {
+		menus_[menuId] = pMenu;
+	}
+
+	return pMenu;
+}
+
 /*!
  * Change the current menu with the one with the given name.
  * Plays the transition animations between the two menus.
- * \param name The name of the new menu.
+ * \param name The id of the new menu.
  */
-void MenuManager::changeCurrentMenu(const char *name)
+void MenuManager::changeCurrentMenu(int menuId)
 {
-    if (name == NULL)
-        name = "main";
-    if (menus_.find(name) == menus_.end()) {
-        printf("Failed to find menu: %s\n", name);
-        return;
-    }
-    Menu *m = menus_[name];
-    bool currentWasSubMenu = false;
-    if (current_) {
+	Menu *pMenu = getMenu(menuId);
+	if (pMenu == NULL) {
+		return;
+	}
+
+	if (current_) {
 		// Give the possibility to the old menu
 		// to clean before leaving
         leaveMenu(current_);
+		// If menu is not in cache, it means it must be destroyed
+		if (menus_.find(current_->getId()) == menus_.end()) {
+			delete current_;
+		}
     }
-    current_ = m;
-    if (m) {
-		// Show new Menu
-        showMenu(m);
-    }
+    current_ = pMenu;
+    showMenu(pMenu);
 }
 
 /*!
@@ -351,29 +344,6 @@ void MenuManager::mouseUpEvent(int x, int y, int button, const int modKeys)
     if (current_ && !drop_events_) {
         current_->mouseUpEvent(x, y, button, modKeys);
     }
-}
-
-/*!
- * Creates all the menus used in the application.
- */
-void MenuManager::createAllMenus()
-{
-    // TODO : only creates the first menu
-    // and creates menus on first access
-    menu_main_ = new MainMenu(this);
-
-    menu_conf_ = new ConfMenu(this);
-    menu_load_save_ = new LoadSaveMenu(this);
-    menu_map_ = new MapMenu(this);
-    menu_brief_ = new BriefMenu(this);
-    menu_select_ = new SelectMenu(this);
-    menu_research_ = new ResearchMenu(this);
-    menu_loading_ = new LoadingMenu(this);
-    menu_gameplay_ = new GameplayMenu(this);
-    menu_debrief_ = new DebriefMenu(this);
-    menu_logout_ = new LogoutMenu(this);
-
-    // still to go:  mendlose.dat, mendwin.dat
 }
 
 bool MenuManager::isPrintableKey(Key key) {

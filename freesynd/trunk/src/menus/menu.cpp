@@ -32,26 +32,28 @@
 #include "gfx/fliplayer.h"
 #include "gfx/screen.h"
 
+const int Menu::MENU_NO_MENU = -1;
+const int Menu::MENU_MAIN = 0;
+const int Menu::MENU_BRIEF = 1;
+const int Menu::MENU_CONF = 2;
+const int Menu::MENU_DEBRIEF = 3;
+const int Menu::MENU_GAMEPLAY = 4;
+const int Menu::MENU_LOADING = 5;
+const int Menu::MENU_LOGOUT = 6;
+const int Menu::MENU_RESEARCH = 7;
+const int Menu::MENU_SELECT = 8;
+const int Menu::MENU_LDSAVE = 9;
+const int Menu::MENU_MAP = 10;
 
-Menu::Menu(MenuManager * menuManager, const char *menu_name,
-           const char *showAnim,
-           const char *leaveAnim):menu_manager_(menuManager),
-name_(menu_name), showAnim_(showAnim), leaveAnim_(leaveAnim),
-parent_menu_(NULL)
+Menu::Menu(MenuManager * menuManager, int id, int parentId, 
+           const char *showAnim, const char *leaveAnim) :
+	showAnim_(showAnim), leaveAnim_(leaveAnim)
 {
+	id_ = id;
+	parentId_ = parentId;
+	menu_manager_ = menuManager;
     focusedWgId_ = -1;
 	pCaptureInput_ = NULL;
-    menuManager->addMenu(this);
-}
-
-Menu::Menu(MenuManager * menuManager, const char *menu_name,
-           const char *parent):menu_manager_(menuManager),
-name_(menu_name), showAnim_(""), leaveAnim_(""),
-parent_menu_(parent)
-{
-    focusedWgId_ = -1;
-	pCaptureInput_ = NULL;
-    menuManager->addMenu(this);
 }
 
 Menu::~Menu() {
@@ -176,14 +178,14 @@ int Menu::addStatic(int x, int y, int width, const char *text, FontManager::EFon
  * text is a property in the current language file and it is
  * replaced by its value.
  * \param size Font size
- * \param to Name of the next menu when button is clicked
+ * \param to Id of the next menu when button is clicked
  * \param visible True if button is visible on screen
  * \param centered True if text must centered regarding button width
  * \param dark_widget Widget drawn in front of the button when it's not highlighted
  * \param light_widget Widget drawn in front of the button when it's highlighted
  */
 int Menu::addOption(int x, int y, int width, int height, const char *text, FontManager::EFontSize size,
-            const char *to, bool visible, bool centered, int dark_widget, int light_widget) {
+            int to, bool visible, bool centered, int dark_widget, int light_widget) {
     
     Option *pOption = new Option(this, x, y, width, height, text, size, to, visible, centered, dark_widget, light_widget);
 	actions_.push_back(pOption);
@@ -362,7 +364,7 @@ void Menu::keyEvent(Key key, const int modKeys)
     // Pressing Escape changes the current menu to its parent(like a back)
     // if menu has not already consummed key event
     if (!handleUnknownKey(key, modKeys) && key == KEY_ESCAPE) {
-        menu_manager_->changeCurrentMenu(parent_menu_);
+        menu_manager_->changeCurrentMenu(parentId_);
         return;
     }
 }

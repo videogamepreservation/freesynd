@@ -39,8 +39,7 @@ int g_Colours[MAX_COLOUR] = { 6, 7, 14, 3, 11, 12, 13, 15 };
 
 
 ConfMenu::ConfMenu(MenuManager *m) :
-Menu(m, "conf", "mconfup.dat", "mconfout.dat") {
-	setParentMenu("main");
+Menu(m, MENU_CONF, MENU_MAIN, "mconfup.dat", "mconfout.dat") {
 
 	toAcceptLogo_ = 0;
 	toAcceptColourId_ = 0;
@@ -49,19 +48,19 @@ Menu(m, "conf", "mconfup.dat", "mconfout.dat") {
     
 	panelMsgId_ = addStatic(280, 32, 330, "#CONF_MAIN_MSG", FontManager::SIZE_2, false);
     
-	logoButId_ = addOption(325, 65, 240, 20, "#CONF_COL_LOGO_BUT", FontManager::SIZE_2, NULL, true, false, Sprite::MSPR_BULLET_D, Sprite::MSPR_BULLET_L);
-    compNameButId_ = addOption(325, 90, 240, 20, "#CONF_COM_NAME_BUT", FontManager::SIZE_2, NULL, true, false, Sprite::MSPR_BULLET_D, Sprite::MSPR_BULLET_L);
-    userNameButId_ = addOption(325, 115, 240, 20, "#CONF_YOUR_NAME_BUT", FontManager::SIZE_2, NULL, true, false, Sprite::MSPR_BULLET_D, Sprite::MSPR_BULLET_L);
+	logoButId_ = addOption(325, 65, 240, 20, "#CONF_COL_LOGO_BUT", FontManager::SIZE_2, MENU_NO_MENU, true, false, Sprite::MSPR_BULLET_D, Sprite::MSPR_BULLET_L);
+    compNameButId_ = addOption(325, 90, 240, 20, "#CONF_COM_NAME_BUT", FontManager::SIZE_2, MENU_NO_MENU, true, false, Sprite::MSPR_BULLET_D, Sprite::MSPR_BULLET_L);
+    userNameButId_ = addOption(325, 115, 240, 20, "#CONF_YOUR_NAME_BUT", FontManager::SIZE_2, MENU_NO_MENU, true, false, Sprite::MSPR_BULLET_D, Sprite::MSPR_BULLET_L);
     // Accept button
-    acceptButId_ = addOption(17, 347, 128, 25, "#MENU_ACC_BUT", FontManager::SIZE_2, "main");
+    acceptButId_ = addOption(17, 347, 128, 25, "#MENU_ACC_BUT", FontManager::SIZE_2, MENU_MAIN);
     // Main menu button
-    menuButId_ = addOption(500, 347,  128, 25, "#MENU_MAIN_BUT", FontManager::SIZE_2, "main");
+    menuButId_ = addOption(500, 347,  128, 25, "#MENU_MAIN_BUT", FontManager::SIZE_2, MENU_MAIN);
 
 	createPanels();
 
 	// Sub panel Ok and Cancel buttons
-    okButId_ = addOption(291, 122, 125, 23, "#CONF_OK_BUT", FontManager::SIZE_2, NULL, false);
-    cancelButId_ = addOption(476, 122, 123, 23, "#MENU_CANCEL_BUT", FontManager::SIZE_2, NULL, false);
+    okButId_ = addOption(291, 122, 125, 23, "#CONF_OK_BUT", FontManager::SIZE_2, MENU_NO_MENU, false);
+    cancelButId_ = addOption(476, 122, 123, 23, "#MENU_CANCEL_BUT", FontManager::SIZE_2, MENU_NO_MENU, false);
 
 	toAcceptCmpNameTxtId_ = addStatic(32, 93, "", FontManager::SIZE_1, true);
 	toAcceptUsrNameTxtId_ = addStatic(32, 115, "", FontManager::SIZE_1, true);
@@ -208,6 +207,15 @@ bool ConfMenu::handleUnknownKey(Key key, const int modKeys) {
 			showMainPanel();
 			return true;
 		} else if (key == KEY_RETURN) {
+			if (currPanel_ == PNL_LOGO) {
+				toAcceptColourId_ = tempColourId_;
+				toAcceptLogo_ = tempLogo_;
+			} else if (currPanel_ == PNL_USRNM) {
+				getStatic(toAcceptUsrNameTxtId_)->setText(pUserNameTF_->getText().c_str());
+			} else {
+				getStatic(toAcceptCmpNameTxtId_)->setText(pCompNameTF_->getText().c_str());
+			}
+			redrawLogo();
 			showMainPanel();
 			return true;
 		}

@@ -705,11 +705,9 @@ void App::run(int start_mission) {
             gameSprites().load();
     }
 
-    menus_.createAllMenus();
-
     if (start_mission == -1) {
         // Regular scenario : start with the main menu
-        menus_.changeCurrentMenu("main");
+		menus_.changeCurrentMenu(Menu::MENU_MAIN);
     }
 #ifdef _DEBUG
     else {
@@ -723,7 +721,7 @@ void App::run(int start_mission) {
             }
         }
         // Then we go to the brief menu
-        menus_.changeCurrentMenu("brief");
+		menus_.changeCurrentMenu(Menu::MENU_BRIEF);
         // show the cursor because at first it's hidden
         // and normally it's the main menu which shows it
         g_System.showCursor();

@@ -41,14 +41,13 @@
 const int SCROLL_STEP = 16;
 
 GameplayMenu::GameplayMenu(MenuManager *m) :
-Menu(m, "Gameplay", "", "mscrenup.dat"),
+Menu(m, MENU_GAMEPLAY, MENU_DEBRIEF, "", "mscrenup.dat"),
 tick_count_(0), last_animate_tick_(0), last_motion_tick_(0),
 last_motion_x_(320), last_motion_y_(240), mission_hint_ticks_(0), 
 mission_hint_(0), mission_(0), world_x_(0),
 world_y_(0), selected_agents_(0),
 pointing_at_ped_(-1), pointing_at_vehicle_(-1) 
 {
-    setParentMenu("debrief");
     scroll_x_ = 0;
     scroll_y_ = 0;
     showPath_ = false;
@@ -876,7 +875,7 @@ bool GameplayMenu::handleUnknownKey(Key key, const int modKeys) {
                 leaveAnim_ = "mlosegam.dat";
             }
             // Go to debrief menu
-            menu_manager_->changeCurrentMenu("debrief");
+			menu_manager_->changeCurrentMenu(Menu::MENU_DEBRIEF);
             return true;
         }
     } else if (key == KEY_ESCAPE) {

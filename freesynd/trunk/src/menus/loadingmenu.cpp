@@ -29,7 +29,7 @@
 #include "app.h"
 #include "loadingmenu.h"
 
-LoadingMenu::LoadingMenu(MenuManager * m):Menu(m, "loading", "", ""),
+LoadingMenu::LoadingMenu(MenuManager * m):Menu(m, MENU_LOADING, MENU_MAIN),
 tick_count_(-500)
 {
     addStatic(0, 180, g_Screen.gameScreenWidth(), "#LDGAME_TITLE", FontManager::SIZE_4, false);
@@ -40,7 +40,7 @@ void LoadingMenu::handleTick(int elapsed)
     tick_count_ += elapsed;
     if (tick_count_ >= 2000) {
         g_Session.getMission()->setSurfaces();
-        menu_manager_->changeCurrentMenu("Gameplay");
+        menu_manager_->changeCurrentMenu(Menu::MENU_GAMEPLAY);
         tick_count_ = -500;
     }
     assert(tick_count_ < 2000);
