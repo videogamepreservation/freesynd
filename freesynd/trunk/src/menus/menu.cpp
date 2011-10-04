@@ -214,7 +214,7 @@ int Menu::addImageOption(int x, int y, int dark_widget, int light_widget, bool v
     Sprite *spr = g_App.menuSprites().sprite(dark_widget);
    
     Option *m = new Option(this, x, y, spr->width() * 2, spr->height() * 2, "", 
-                FontManager::SIZE_1, NULL, visible, true, dark_widget, light_widget);
+		FontManager::SIZE_1, MENU_NO_MENU, visible, true, dark_widget, light_widget);
     actions_.push_back(m);
 
     return m->getId();

@@ -104,3 +104,14 @@ void LoadSaveMenu::handleAction(const int actionId, void *ctx, const int modKeys
         }
     }
 }
+
+bool LoadSaveMenu::handleMouseDown(int x, int y, int button, const int modKeys) {
+	for (int i=0; i<10; i++) {
+		if (pTextFields_[i]->isMouseOver(x, y)) {
+			editNameId_ = i;
+			break;
+		}
+	}
+
+	return false;
+}

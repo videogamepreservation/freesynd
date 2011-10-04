@@ -270,7 +270,7 @@ void Group::selectButton(int id) {
 
 ToggleAction::ToggleAction(Menu *peer, int x, int y, int width, int height, 
                             const char *text, FontManager::EFontSize size, bool selected, Group *pGroup)
-: Option(peer, x, y, width, height, text, size, NULL, true) {
+: Option(peer, x, y, width, height, text, size, -1, true) {
     group_ = pGroup;
     setSelected(selected);
 }
