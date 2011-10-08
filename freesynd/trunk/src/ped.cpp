@@ -1024,10 +1024,10 @@ PedInstance::PedInstance(Ped *ped, int m) : ShootableMovableMapObject(m),
     reach_obj_(NULL), reach_pos_(NULL), sight_range_(0),
     is_hostile_(false), reload_count_(0), selected_weapon_(-1),
     pickup_weapon_(NULL), putdown_weapon_(NULL), in_vehicle_(NULL),
-    agent_is_(PedInstance::Not_Agent), action_state_(PedInstance::pa_smNone),
+    action_state_(PedInstance::pa_smNone), agent_is_(PedInstance::Not_Agent),
     desc_state_(PedInstance::pd_smUndefined),
-    obj_group_def_(PedInstance::og_dmUndefined),
     hostile_desc_(PedInstance::pd_smUndefined),
+    obj_group_def_(PedInstance::og_dmUndefined),
     old_obj_group_def_(PedInstance::og_dmUndefined)
 {
     hold_on_.wayFree = 0;
