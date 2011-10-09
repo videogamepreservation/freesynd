@@ -7,20 +7,73 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 
-<head>
-<title>The FreeSynd Project :: <?php echo $title; ?></title>
-<meta http-equiv="Content-Type" content="<?php echo $contenttype; ?>" />
-<meta http-equiv="Content-Script-Type" content="text/javascript" />
-<link rel="stylesheet" href="default.css" title="FreeSynd" media="screen, projection, tv" />
-<script type="text/javascript" src="clock.js"></script>
-</head>
+<?php
+// Provide the proper XML MIME type to browsers that can accept it
+$contenttype = (stristr($_SERVER['HTTP_ACCEPT'], 'application/xhtml+xml') ?
+    'application/xhtml+xml' : 'text/html') . '; charset=UTF-8';
+header("Content-type: $contenttype");
+header("Content-Script-Type: text/javascript");
 
-<body onload="updateTime(); updateTimezone(); updateDate();">
+$requested_url = (strstr($_SERVER['PHP_SELF'], '.php') ?
+    basename($_SERVER['PHP_SELF']) : 'index.php');
+	
+$fs_path = strstr($_SERVER['PHP_SELF'], $requested_url, true);
 
-<div class="clock" id="time"><div class="clock_bdr"><?php printStartTime(); ?></div></div>
-<div class="clock" id="date"><div class="clock_bdr"><?php printStartDate(); ?></div></div>
+switch ($requested_url) {
+case 'index.php':
+    $title_img = img('titlebar/news.png', 'News', 98, 23);
+    break;
 
-<div class="purp" id="logo"><div class="purp_bdr"><img src="images/freesynd.png" alt="FreeSynd" style="width:189px;height:23px;" /></div></div>
+case 'about.php':
+    $title_img = img('titlebar/about.png', 'About', 117, 23);
+    break;
+
+case 'ss.php':
+    $title_img = img('titlebar/ss.png', 'Screenshots', 261, 23);
+    break;
+
+case 'dl.php':
+    $title_img = img('titlebar/dl.png', 'Download', 195, 23);
+    break;
+
+case 'dev.php':
+    $title_img = img('titlebar/dev.png', 'Development', 267, 23);
+    break;
+
+case 'ff.php':
+    $title_img = img('titlebar/ff.png', 'File Formats', 263, 23);
+    break;
+
+case 'links.php':
+    $title_img = img('titlebar/links.png', 'Links', 103, 23);
+    break;
+
+default:
+    $title_img = '';
+}
+
+$title = "News";
+
+?>
+
+  <head>
+    <title>The FreeSynd Project :: <?php echo $title; ?></title>
+    <meta http-equiv="Content-Type" content="<?php echo $contenttype; ?>" />
+    <meta http-equiv="Content-Script-Type" content="text/javascript" />
+    <link rel="stylesheet" href="default.css" title="FreeSynd" media="screen, projection, tv" />
+	
+	<link rel="alternate feed" type="application/rss+xml" title="Freesynd News" href="data/rss-news.xml" />
+	<link rel="alternate feed" type="application/rss+xml" title="Freesynd Recent Activity" href="http://sourceforge.net/export/rss2_keepsake.php?group_id=93282" />
+
+    <script type="text/javascript" src="clock.js"></script>
+  </head>
+
+  <body onload="updateTime(); updateTimezone(); updateDate();">
+
+    <div class="clock" id="time"><div class="clock_bdr"><?php printStartTime(); ?></div></div>
+    <div class="clock" id="date"><div class="clock_bdr"><?php printStartDate(); ?></div></div>
+
+    <div class="purp" id="logo"><div class="purp_bdr"><img src="images/freesynd.png" alt="FreeSynd" style="width:189px;height:23px;" /></div></div>
 
 <div id="sidebar"><ul id="linklist">
 <li class="teal"><a href="index.php" id="sb_news"><img src="images/bg.png" alt="News" style="width:0;height:0;" /></a></li>

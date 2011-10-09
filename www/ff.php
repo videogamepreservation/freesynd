@@ -1,4 +1,5 @@
 <?php $title = 'File Formats'; require_once 'include/common.php'; ?>
+<?php printHeader(); ?>
 
 <h2>Contents</h2>
 

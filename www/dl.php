@@ -1,4 +1,5 @@
 <?php $title = 'Download'; require_once 'include/common.php'; ?>
+<?php printHeader(); ?>
 
 <h3>Getting the binaries</h3>
 

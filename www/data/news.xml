@@ -1,20 +1,32 @@
 <?xml version='1.0' standalone='yes'?>
 <news>
-	<item title="Project status" date="2011-07-23" author="Bohdan Stelmakh">
+	<item title="RSS feeds" date="2011-10-09" author="Benoit Blancard"
+	rssDesc="A new RSS Feed is available to follow the website news." id="8">
+	As the development of Freesynd is not very fast, it can be tedious for our users
+	to visit the website from time to time just to check if something has changed. So, we decided
+	to set up a RSS feed so people would follow in an easier way the project's life. See the Project Communication
+	section on the Development page for the addresses.
+	</item>
+	
+	<item title="Project status" date="2011-07-23" author="Bohdan Stelmakh"
+	rssDesc="A new developer has arrived with new features..." id="7">
 	We have a new developer - Joey Parrish. He implemented few big changes:
 	- save files are portable over different CPU architectures;
 	- separate directories for Syndicate and Freesynd data directories;
 	- cmake instead of autotools, also cmake used to build project files for MSVC++,
 	for now it is without install part for Unix's.
 	</item>
-	<item title="New v0.5 release" date="2011-07-02" author="Bohdan Stelmakh">
+	<item title="New v0.5 release" date="2011-07-02" author="Bohdan Stelmakh"
+		rssDesc="The development version 0.5 of Freesynd is available for download." id="6">
 	This was hard, but we did it. Get it from [[http://sourceforge.net/projects/freesynd/files/freesynd/freesynd-0.5/ sourceforge]].
 	</item>
-	<item title="Project status" date="2011-06-27" author="Benoit Blancard">
+	<item title="Project status" date="2011-06-27" author="Benoit Blancard"
+		rssDesc="With chamel back in the game, v0.5 is now back on track!" id="5">
 	With chamel back in the game, v0.5 is now back on track! I finally got rid of that load/save feature and 
 	a few updates later, the future release is ready to be packaged. This week is the target!
 	</item>
-	<item title="Research available" date="2011-04-16" author="Benoit Blancard">
+	<item title="Research available" date="2011-04-16" author="Benoit Blancard"
+		rssDesc="It's now possible to make research on weapons and mods." id="4">
 	One step forward to v0.5 with the ability to run research on weapons and mods. Everything should work
 	as in the original game. Now, I'm working on the load/save functionnality and I hope to complete it
 	by the end of April (don't look at previous news).
@@ -22,14 +34,16 @@
 	Next to it, I'm planning to reorganize the SVN repository a little bit. The idea is to keep the trunk directory
 	only for freesynd source code. All other directories will go one level up, the first will be the www directory.
 	</item>
-	<item title="Project status" date="2011-03-03" author="Benoit Blancard">
+	<item title="Project status" date="2011-03-03" author="Benoit Blancard"
+		rssDesc="After quite a long period of inactivity, Freesynd development has started again." id="3">
 	After quite a long period of inactivity, Freesynd development has started again. Holidays, new year's eve resolutions
 	have delayed the release of the v0.5 version. On top of that, we lost one of our contributor : chamel. See you!
 	
 	I'm planning to release v0.5 at the end of March. The goal of this version is to complete all work on menus so that
 	future development will be focused on the gameplay. Next stop : end of march!
 	</item>
-	<item title="New v0.4 release" date="2010-09-27" author="Benoit Blancard">
+	<item title="New v0.4 release" date="2010-09-27" author="Benoit Blancard"
+		rssDesc="The development version 0.4 of Freesynd is available for download." id="2">
 The v0.4 development release is now available from [[https://sourceforge.net/project/showfiles.php?group_id=93282 sourceforge]]. Again,
 this release contains mainly bug fixes and enhancement. Read the release notes to have a complete view of the work done.
 
@@ -39,7 +53,8 @@ So you'll have to download the original game to use its data files (use -p optio
 Enjoy!
 	</item>
 	
-	<item title="New v0.3 release" date="2010-07-21" author="Benoit Blancard">
+	<item title="New v0.3 release" date="2010-07-21" author="Benoit Blancard"
+		rssDesc="The development version 0.3 of Freesynd is available for download." id="1">
 Freesynd is still alive! A new development release is available from [[https://sourceforge.net/project/showfiles.php?group_id=93282 sourceforge]].
 This v0.3 release contains mainly bug fixes and minor evolutions but it's still a step toward the v1.0. 
 	

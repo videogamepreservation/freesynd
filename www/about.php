@@ -1,4 +1,5 @@
 <?php $title = 'About'; require_once 'include/common.php'; ?>
+<?php printHeader(); ?>
 
 <h3>GREETINGS, OPERATIVE. WELCOME TO THE FREESYND PROJECT.</h3>
 

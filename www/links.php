@@ -1,4 +1,5 @@
 <?php $title = 'Links'; require_once 'include/common.php'; ?>
+<?php printHeader(); ?>
 
 <h3>Libraries</h3>
 

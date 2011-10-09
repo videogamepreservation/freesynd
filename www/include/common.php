@@ -1,8 +1,13 @@
 <?php
 
+function printHeader()
+{
+    require 'include/header-inc.php';
+}
+
 function printFooter()
 {
-    require 'include/footer';
+    require 'include/footer-inc.php';
 }
 
 function detectBrowser()
@@ -75,9 +80,10 @@ function replaceLink($str) {
 }
 
 
-function newsItem($title, $content, $submitter, $date)
+function newsItem($title, $content, $submitter, $date, $id)
 {
 	// News title
+	echo '<a name="n' . $id . '">&nbsp;</a>';
     echo '<h3>' . htmlentities($title) . "</h3>\n";
 	// News content
 	$arr = explode("\n", $content);
@@ -163,11 +169,11 @@ function printNews() {
 		$xml = simplexml_load_file('data/news.xml');
 		
 		foreach ($xml->item as $item) {
-			newsItem($item['title'], $item, $item['author'], $item['date']);
+			newsItem($item['title'], $item, $item['author'], $item['date'], $item['id']);
 		}
 
 	} else {
-		echo "No roadmap defined.\n";
+		echo "No news defined.\n";
 	}
 }
 
@@ -260,49 +266,5 @@ function printStartDate()
 
     echo img('clock/nc.png', 'nc', 11, 5);
 }
-
-// Provide the proper XML MIME type to browsers that can accept it
-$contenttype = (stristr($_SERVER['HTTP_ACCEPT'], 'application/xhtml+xml') ?
-    'application/xhtml+xml' : 'text/html') . '; charset=UTF-8';
-header("Content-type: $contenttype");
-header("Content-Script-Type: text/javascript");
-
-$requested_url = (strstr($_SERVER['PHP_SELF'], '.php') ?
-    basename($_SERVER['PHP_SELF']) : 'index.php');
-
-switch ($requested_url) {
-case 'index.php':
-    $title_img = img('titlebar/news.png', 'News', 98, 23);
-    break;
-
-case 'about.php':
-    $title_img = img('titlebar/about.png', 'About', 117, 23);
-    break;
-
-case 'ss.php':
-    $title_img = img('titlebar/ss.png', 'Screenshots', 261, 23);
-    break;
-
-case 'dl.php':
-    $title_img = img('titlebar/dl.png', 'Download', 195, 23);
-    break;
-
-case 'dev.php':
-    $title_img = img('titlebar/dev.png', 'Development', 267, 23);
-    break;
-
-case 'ff.php':
-    $title_img = img('titlebar/ff.png', 'File Formats', 263, 23);
-    break;
-
-case 'links.php':
-    $title_img = img('titlebar/links.png', 'Links', 103, 23);
-    break;
-
-default:
-    $title_img = '';
-}
-
-require 'include/header';
 
 ?>

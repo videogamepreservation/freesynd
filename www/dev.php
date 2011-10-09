@@ -1,4 +1,5 @@
 <?php $title = 'Development'; require_once 'include/common.php'; ?>
+<?php printHeader(); ?>
 
 <h2>Project Communication</h2>
 <p>There are different forms of communication used by the FreeSynd team - mailing lists, trackers, forums. 
@@ -35,6 +36,13 @@ SVN commit notifications<br />
 <small>
 (<a href="http://lists.sourceforge.net/lists/listinfo/freesynd-cvs">Subscribe/Manage</a> |
 <a href="http://sourceforge.net/mailarchive/forum.php?forum=freesynd-cvs">Archive</a>)
+</small>
+<br /><br />
+
+RSS Feeds<br />
+<small>
+<a href="http://sourceforge.net/export/rss2_keepsake.php?group_id=93282">SourceForge.net - Recent activity for Freesynd</a><br/>
+<a href="http://freesynd.sourceforge.net/data/rss-news.xml">Freesynd News</a>
 </small>
 </p>
 

@@ -46,6 +46,8 @@ $title = ($invalid ? 'Screenshots' : "Screenshot ($ss_file)");
 
 require_once 'include/common.php';
 
+printHeader();
+
 print "<div class=\"cent_algn\">\n";
 
 if ($invalid) {
