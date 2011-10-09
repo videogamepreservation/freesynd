@@ -427,7 +427,7 @@ protected:
 	/*! Tells whether the field is being edited.*/
 	bool isInEdition_;
 	/*! Maximum size of the text.*/
-	int maxSize_;
+	size_t maxSize_;
 };
 
 #endif // WIDGET_H
