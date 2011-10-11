@@ -464,8 +464,10 @@ public:
         bool id_only = true);
     bool emulatedGroupDefsEmpty() { return emulated_group_defs_.size() == 0; }
 
+    typedef std::pair<ShootableMapObject *, double> Pairsmod_t;
+    typedef std::map <ShootableMapObject *, double> Msmod_t;
     void addHostilesFound(ShootableMapObject * hostile_found) {
-        hostiles_found_.insert(hostile_found);
+        hostiles_found_.insert(Pairsmod_t(hostile_found, -1.0));
     }
     void rmHostilesFound(ShootableMapObject * hostile_found) {
         hostiles_found_.erase(hostile_found);
@@ -474,9 +476,8 @@ public:
         return hostiles_found_.find(hostile_found)
             != hostiles_found_.end();
     }
-    void verifyHostilesFound();
-    bool getHostilesFoundIt(std::set <ShootableMapObject *>::iterator &it_s,
-        std::set <ShootableMapObject *>::iterator &it_e)
+    void verifyHostilesFound(Mission *m);
+    bool getHostilesFoundIt(Msmod_t::iterator &it_s, Msmod_t::iterator &it_e)
     {
         if (hostiles_found_.empty())
             return false;
@@ -513,16 +514,15 @@ public:
         // of persuader only if persuader shoots at it
         pd_smSupporter = 0x0004,
         pd_smEnemyInSight = 0x0008,
-        pd_smDead = 0x0010,
         // only if all weapon has no ammunition, persuadatron excludes this
         // shoul not be used for hostile_desc_
-        pd_smNoAmmunition = 0x0020,
+        pd_smNoAmmunition = 0x0010,
         // all non-player controllled peds should have this set
-        pd_smAutoAction = 0x0040,
+        pd_smAutoAction = 0x0020,
         // target can be position or object
-        pd_smHasShootTarget = 0x0080,
+        pd_smHasShootTarget = 0x0040,
         // target can be position or object
-        pd_smHasReachTarget = 0x0100
+        pd_smHasReachTarget = 0x0080
     } pedDescStateMasks;
 
     typedef enum {
@@ -541,11 +541,16 @@ public:
         // passenger only
         pa_smInCar = 0x0400,
         pa_smLeaveCar = 0x0800,
+        pa_smDead = 0x1000,
+        // this object should be ignored in all Ai procedures
+        pa_smUnavailable = 0x2000,
+        pa_smCheckExcluded = pa_smDead | pa_smUnavailable
     } pedActionStateMasks;
 
     typedef struct {
         Mission::ObjectiveType ot_execute;
         PathNode t_pn;
+        // objv_FindEnemy sets this value, others use
         ShootableMapObject *t_smo;
         // 0b - not started, 1b - executing, 2b - finished, 3b - failed,
         // 4b - suspended, 5b - if finished all other actions in group are
@@ -660,9 +665,8 @@ protected:
     Mmuu32_t emulated_group_defs_;
     Mmuu32_t friend_group_defs_;
     //std::set <unsigned int> emulated_failed_groups_;
-    // dicovered hostiles are set here, check at end for hostile
-    // they should be within sight range
-    std::set <ShootableMapObject *> hostiles_found_;
+    // dicovered hostiles are set here, only within sight range
+    Msmod_t hostiles_found_;
     //unused for now
     //std::set <ShootableMapObject *> friends_found_;
     // defines group obj belongs to (objGroupDefMasks)

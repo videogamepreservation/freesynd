@@ -2931,7 +2931,8 @@ void Mission::blockerExists(toDefineXYZ * startXYZ, toDefineXYZ * endXYZ,
 * 0b - target in range(1); 1b - blocker is object, "t" and "pn" are set(2)
 * 2b - blocker tile, "pn" is set(4), 3b - reachable point set
 */
-//TODO: separate mask for pn blocker object
+//TODO: separate mask for pn blocker object, when called checkTileOnly
+// should be properly set(agents might ignore civilians, cars. etc)
 uint8 Mission::inRangeCPos(toDefineXYZ * cp, ShootableMapObject ** t,
     PathNode * pn, bool setBlocker, bool checkTileOnly, int maxr,
     double * distTo)
