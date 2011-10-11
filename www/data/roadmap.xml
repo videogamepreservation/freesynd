@@ -3,7 +3,7 @@
 	<date>2011-07-04</date>
 	<status>Date for release of v0.6 is not set.</status>
 	<features>
-	  <feature id="3337516" status="">Standardize text fields in configure and loadsave menus</feature>
+	  <feature id="3337516" status="D">Standardize text fields in configure and loadsave menus</feature>
 	  <feature id="3336699" status="D">Make save file format portable</feature>
 	  <feature id="3283536" status="D">Manage separate directory for syndicate and freesynd</feature>
 	  <feature id="3202739" status="">keyboard type management</feature>
