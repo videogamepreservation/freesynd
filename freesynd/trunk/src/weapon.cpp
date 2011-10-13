@@ -459,7 +459,7 @@ bool ProjectileShot::animate(int elapsed, Mission *m) {
             draw_impact = true;
             self_remove = true;
         }
-    } else if (block_mask != 0) {
+    } else {
         reached_pos.x = pn.tileX() * 256 + pn.offX();
         reached_pos.y = pn.tileY() * 256 + pn.offY();
         reached_pos.z = pn.tileZ() * 128 + pn.offZ();
@@ -666,7 +666,7 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
     uint8 has_blocker = 1;
     if (tobj || tp)
         has_blocker = inRange(cp, &smp, &pn);
-    if ((has_blocker & 14) != 0) {
+    if ((has_blocker & 30) != 0) {
         if (!ignoreBlocker)
             return false;
     } else if((has_blocker & 1) == 0)
@@ -1020,8 +1020,8 @@ void ShotClass::makeShot(bool rangeChecked, toDefineXYZ &cp, int anim_hit,
         d.dvalue = all_shots[i].d.dvalue;
         d.dtype = all_shots[i].d.dtype;
         d.d_owner = all_shots[i].d.d_owner;
-        if ((has_blocker & 6) != 0) {
-            if ((has_blocker & 4) != 0) {
+        if ((has_blocker & 22) != 0) {
+            if ((has_blocker & 16) != 0) {
                 if (anim_hit != SFXObject::sfxt_Unknown) {
                     SFXObject *so = new SFXObject(g_Session.getMission()->map(),
                         anim_hit);
@@ -1031,7 +1031,7 @@ void ShotClass::makeShot(bool rangeChecked, toDefineXYZ &cp, int anim_hit,
                     so->correctZ();
                     g_Session.getMission()->addSfxObject(so);
                 }
-            } else if ((has_blocker & 2) != 0) {
+            } else if ((has_blocker & 6) != 0) {
                 assert(smp != 0);
                 smp->handleDamage(&d);
                 if (anim_obj_hit != SFXObject::sfxt_Unknown) {
@@ -1044,7 +1044,7 @@ void ShotClass::makeShot(bool rangeChecked, toDefineXYZ &cp, int anim_hit,
                     g_Session.getMission()->addSfxObject(so);
                 }
             }
-        } else if (has_blocker == 8) {
+        } else if ((has_blocker & 8) != 0) {
             if (anim_hit != SFXObject::sfxt_Unknown) {
                 SFXObject *so = new SFXObject(g_Session.getMission()->map(),
                     anim_hit);
@@ -1094,6 +1094,9 @@ void WeaponInstance::getHostileInRange(toDefineXYZ * cp,
             if (!p->isIgnored() && ((PedInstance *)owner_)->checkHostileIs(p)
                 && m->inRangeCPos(cp, &p, NULL, false, checkTileOnly, maxr,
                 &d) == 1)
+                // TODO: inrange if checktileonly = false might return "7"
+                // different handling for this we might shoot if blocker
+                // is not friendly
             {
                 if (found) {
                     if (d < dist) {
@@ -1144,7 +1147,10 @@ void WeaponInstance::getNonFriendInRange(toDefineXYZ * cp,
     for (int i = 0; i < m->numPeds(); i++) {
         ShootableMapObject *p = m->ped(i);
         if (!p->isIgnored()
-            // TODO: do not ignore emulated, but for now ok
+            // TODO: do not ignore emulated, but for now ok,
+            // inrange if checktileonly = false might return "7"
+            // different handling for this we might shoot if blocker
+            // is not friendly
             && !(((PedInstance *)owner_)->checkFriendIs((PedInstance *)p))
             && m->inRangeCPos(cp, &p, NULL, false, checkTileOnly, maxr,
             &d) == 1)
