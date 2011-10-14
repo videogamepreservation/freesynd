@@ -401,6 +401,7 @@ void SelectMenu::handleLeave() {
     rnd_ = 0;
     cur_agent_ = 0;
     rld_cost_ = -1;
+    sel_all_ = false;
 }
 
 void SelectMenu::toggleAgent(int n)

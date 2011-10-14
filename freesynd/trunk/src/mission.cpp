@@ -48,7 +48,7 @@ Mission::Mission()
     max_x_ = 0;
     max_y_ = 0;
     cur_objective_ = 0;
-    minimap_c_ = 0;
+    minimap_c_ = NULL;
 }
 
 Mission::~Mission()
@@ -61,9 +61,14 @@ Mission::~Mission()
         delete weapons_[i];
     for (unsigned int i = 0; i < sfx_objects_.size(); i++)
         delete sfx_objects_[i];
+    for (unsigned int i = 0; i < prj_shots_.size(); i++)
+        delete prj_shots_[i];
+    // TODO: free statics
     clrSurfaces();
-    if (minimap_c_)
+    if (minimap_c_) {
         free(minimap_c_);
+        minimap_c_ = NULL;
+    }
 }
 
 #define copydata(x, y) memcpy(&level_data_.x, levelData + y, sizeof(level_data_.x))
@@ -949,9 +954,6 @@ void Mission::end()
                 }
             }
         }
-    for (unsigned int i = 0; i < sfx_objects_.size(); i++)
-        delete sfx_objects_[i];
-    sfx_objects_.clear();
 }
 
 void Mission::addWeapon(WeaponInstance * w)
@@ -2750,7 +2752,7 @@ void Mission::createMinimap() {
         return;
 
     minimap_c_ = (unsigned char *)( malloc(m->maxX() * m->maxY()) );
-    if(minimap_c_ == 0) {
+    if(minimap_c_ == NULL) {
         printf("ERROR: memory allocation failed in Mission::createMinimap");
         return;
     }

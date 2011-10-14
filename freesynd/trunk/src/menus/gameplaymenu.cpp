@@ -44,9 +44,9 @@ GameplayMenu::GameplayMenu(MenuManager *m) :
 Menu(m, MENU_GAMEPLAY, MENU_DEBRIEF, "", "mscrenup.dat"),
 tick_count_(0), last_animate_tick_(0), last_motion_tick_(0),
 last_motion_x_(320), last_motion_y_(240), mission_hint_ticks_(0), 
-mission_hint_(0), mission_(0), world_x_(0),
+mission_hint_(0), mission_(NULL), world_x_(0),
 world_y_(0), selected_agents_(0),
-pointing_at_ped_(-1), pointing_at_vehicle_(-1) 
+pointing_at_ped_(-1), pointing_at_vehicle_(-1), pointing_at_weapon_(-1) 
 {
     scroll_x_ = 0;
     scroll_y_ = 0;
@@ -362,13 +362,6 @@ void GameplayMenu::improveScroll(int &newScrollX, int &newScrollY)
 }
 
 void GameplayMenu::handleShow() {
-    
-}
-
-int qanim = 200, qframe = 0;
-
-void GameplayMenu::handleRender()
-{
     if (mission_ == NULL) {
         mission_ = g_Session.getMission();
         mission_->start();
@@ -407,7 +400,12 @@ void GameplayMenu::handleRender()
         g_System.showCursor();
         pressed_btn_select_all_ = false;
     }
+}
 
+int qanim = 200, qframe = 0;
+
+void GameplayMenu::handleRender()
+{
     g_Screen.clear(0);
     mission_->drawMap(world_x_, world_y_);
     g_Screen.drawRect(0,0, 129, GAME_SCREEN_HEIGHT);
@@ -475,9 +473,24 @@ void GameplayMenu::handleLeave()
     g_System.hideCursor();
     g_App.setPalette("mselect.pal");
     mission_->end();
-
-    mission_ = NULL;
     
+    tick_count_ = 0;
+    last_animate_tick_ = 0;
+    last_motion_tick_ = 0;
+    last_motion_x_ = 320;
+    last_motion_y_ = 240;
+    mission_hint_ticks_ = 0;
+    mission_hint_ = 0;
+    world_x_ = 0;
+    world_y_ = 0;
+    selected_agents_ = 0;
+    pointing_at_ped_ = -1;
+    pointing_at_vehicle_ = -1;
+    pointing_at_weapon_ = -1;
+    mission_ = NULL;
+    scroll_x_ = 0;
+    scroll_y_ = 0;
+    showPath_ = false;
 }
 
 void GameplayMenu::handleMouseMotion(int x, int y, int state, const int modKeys)
