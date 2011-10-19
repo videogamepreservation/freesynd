@@ -297,8 +297,9 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                     if ((aqt.ot_execute & Mission::objv_DestroyObject) != 0)
                     {
                         if (aqt.t_smo->health() <= 0)
-                            // not object did it as such he failed
-                            aqt.state |= 8;
+                            // not object did it as such he failed,
+                            // but goal reached
+                            aqt.state |= 12;
                         else {
                             WeaponInstance *wi = selectedWeapon();
                             if (!wi)
@@ -307,6 +308,8 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                             if (wi && (wi->shotProperty()
                                 & Weapon::spe_DamageAll) != 0)
                             {
+                                // TODO: set ignoreblocker properly,
+                                // more info from weapon
                                 wi->inflictDamage(aqt.t_smo, NULL, elapsed);
                                 // TODO: handle correctly
                                 if (aqt.t_smo->health() <= 0)
@@ -424,7 +427,10 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                                 WeaponInstance *wi = selectedWeapon();
                                 if (wi) {
                                     bool set_new_dest = true;
-                                    if (wi->inRangeNoCP(&aqt.t_smo) != 0) {
+                                    // TODO: set checktile check value based
+                                    // on mode
+                                    if (wi->inRangeNoCP(&aqt.t_smo, NULL,
+                                        false, false) == 1) {
                                         set_new_dest = false;
                                     }
                                     if (set_new_dest) {
@@ -520,7 +526,8 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                         if (wi && (wi->shotProperty()
                             & Weapon::spe_DamageAll) != 0)
                         {
-                            // TODO: proper handling
+                            // TODO: proper handling, ignoreblocker,
+                            // more info from weapon needed
                             wi->inflictDamage(NULL, &aqt.t_pn, elapsed);
                             aqt.state |= 2;
                         } else
@@ -528,13 +535,15 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                     }
                     if ((aqt.ot_execute & Mission::objv_FindEnemy) != 0)
                     {
+                        // TODO: check inside of vehicles too, is_ignored_?
                         if (!hostiles_found_.empty())
                             verifyHostilesFound(mission);
                         Msmod_t smo_dist;
                         if (hostiles_found_.empty()) {
                             // TODO: check for weapons, get the largest shooting
                             // range and put it here
-                            int shot_rng = 0;
+                            int shot_rng = 1;
+                            int view_rng = (sight_range_ << 8);
                             toDefineXYZ cur_xyz;
                             convertPosToXYZ(&cur_xyz);
                             cur_xyz.z += (size_z_ >> 1);
@@ -548,7 +557,9 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                                     if ((actionStateMasks() &
                                         pa_smCheckExcluded) != 0
                                         || hostiles_found_.find(p)
-                                        != hostiles_found_.end())
+                                        != hostiles_found_.end()
+                                        || smo_dist.find(p)
+                                        != smo_dist.end())
                                         continue;
                                     if (p->objGroupDef() == obj_group_def_
                                         && checkFriendIs(p))
@@ -561,10 +572,11 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                                                 // TODO: inrange check here might
                                                 // reduce speed, check
                                                 if (//inSightRange((MapObject *)(smo))
+                                                    //&&
                                                     mission->inRangeCPos(
                                                     &cur_xyz,
                                                     &smo, NULL, false, false,
-                                                    (sight_range_ << 8), &distTo)
+                                                    view_rng, &distTo)
                                                     == 1)
                                                 {
                                                     hostiles_found_.insert(
@@ -582,14 +594,15 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                                             } while (it_s != it_e);
                                         }
                                     } else if (checkHostileIs(p) ) {
-                                        // TODO: hostile_desc to checkHostileIs?
+                                        // TODO: hostile_desc_alt to checkHostileIs?
                                         double distTo = 0;
-                                        if (//inSightRange((MapObject *)(p))
+                                        if (//inSightRange((MapObject *)(p)) &&
+                                            // TODO: set ignoreblocker based
                                             mission->inRangeCPos(
                                             &cur_xyz,
                                             (ShootableMapObject **)(&p),
                                             NULL, false, false,
-                                            (sight_range_ << 8), &distTo)
+                                            view_rng, &distTo)
                                             == 1)
                                         {
                                             hostiles_found_.insert(
@@ -609,14 +622,15 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                                         != hostiles_found_.end())
                                         continue;
                                     if (checkHostileIs(p) ) {
-                                        // TODO: hostile_desc to checkHostileIs?
+                                        // TODO: hostile_desc_alt to checkHostileIs?
                                         double distTo = 0;
-                                        if (inSightRange((MapObject *)(p))
-                                            && mission->inRangeCPos(
+                                        if (//inSightRange((MapObject *)(p))
+                                            //&&
+                                            mission->inRangeCPos(
                                             &cur_xyz,
                                             (ShootableMapObject **)(&p),
                                             NULL, false, false,
-                                            sight_range_ * 256, &distTo)
+                                            view_rng, &distTo)
                                             == 1)
                                         {
                                             hostiles_found_.insert(
@@ -628,8 +642,8 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                                 }
                             }
                         }
-                        // TODO: possible check for most dangerous weapon
-                        // or object is one of objectives to destroy, for
+                        // NOTE: possible check for most dangerous weapon
+                        // or object, if is one of objectives to destroy, for
                         // now only distance check
                         if (hostiles_found_.empty()) {
                             if (smo_dist.empty())
@@ -661,13 +675,59 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                     }
                     if ((aqt.ot_execute & Mission::objv_FindNonFriend) != 0)
                     {
+                        // TODO : check inside of vehicles, is_ignored_?
+                        // NOTE : can be done as objv_FindEnemy with objects
+                        // passing within same group + def
+                        Msmod_t nf_dist;
+                        toDefineXYZ cur_xyz;
+                        convertPosToXYZ(&cur_xyz);
+                        cur_xyz.z += (size_z_ >> 1);
+                        int num_peds = mission->numPeds();
+                        int view_rng = (sight_range_ << 8);
+                        for (int i = 0; i < num_peds; i++) {
+                            PedInstance *p = mission->ped(i);
+                            if ((actionStateMasks() &
+                                pa_smCheckExcluded) != 0)
+                                continue;
+                            if (!checkFriendIs(p) ) {
+                                double distTo = 0;
+                                if (//inSightRange((MapObject *)(p))
+                                    //&&
+                                    mission->inRangeCPos(
+                                    &cur_xyz,
+                                    (ShootableMapObject **)(&p),
+                                    NULL, false, false,
+                                    view_rng, &distTo)
+                                    == 1)
+                                {
+                                    nf_dist.insert(Pairsmod_t(
+                                        (ShootableMapObject *)p, distTo));
+                                }
+                            }
+                        }
+                        if (nf_dist.empty())
+                            aqt.state |= 8;
+                        else {
+                            Msmod_t::iterator it = nf_dist.begin();
+                            Pairsmod_t closest = *it;
+                            it++;
+                            while (it != nf_dist.end()) {
+                                if (it->second < closest.second) {
+                                    closest = *it;
+                                }
+                            }
+                            aqt.t_smo = closest.first;
+                            aqt.state |= 4;
+                        }
                     }
+                    /*
                     if ((aqt.ot_execute & Mission::objv_ExecuteObjective) != 0)
                     {
                     }
                     if ((aqt.ot_execute & Mission::objv_ExecuteObjectiveEnd) != 0)
                     {
                     }
+                    */
                     if ((aqt.ot_execute & Mission::objv_NonFinishable) != 0)
                     {
                     }
@@ -3873,6 +3933,8 @@ bool PedInstance::checkHostileIs(ShootableMapObject *obj,
 
 bool PedInstance::checkFriendIs(PedInstance *p) {
     // TODO: friend list check add
+    if (p->isInEmulatedGroupDef(obj_group_id_))
+        return true;
     if (!hostiles_found_.empty()) {
         if (hostiles_found_.find((ShootableMapObject *)p) !=
             hostiles_found_.end())

@@ -1147,8 +1147,7 @@ void WeaponInstance::getNonFriendInRange(toDefineXYZ * cp,
     for (int i = 0; i < m->numPeds(); i++) {
         ShootableMapObject *p = m->ped(i);
         if (!p->isIgnored()
-            // TODO: do not ignore emulated, but for now ok,
-            // inrange if checktileonly = false might return "7"
+            // TODO: inrange if checktileonly = false might return "7"
             // different handling for this we might shoot if blocker
             // is not friendly
             && !(((PedInstance *)owner_)->checkFriendIs((PedInstance *)p))
