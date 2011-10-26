@@ -55,6 +55,7 @@ MenuManager::MenuManager(): dirtyList_(g_Screen.gameScreenWidth(), g_Screen.game
     language_ = NULL;
     
     current_ = NULL;
+	nextMenuId_ = -1;
 }
 
 MenuManager::~MenuManager()
@@ -157,7 +158,7 @@ Menu * MenuManager::getMenu(int menuId) {
 	} else if (menuId == Menu::MENU_MAP) {
 		pMenu =  new MapMenu(this);
 	} else {
-		FSERR(Log::k_FLG_UI, "MenuManager", "changeCurrentMenu", ("Cannot open Menu : unknown id"));
+		FSERR(Log::k_FLG_UI, "MenuManager", "getMenu", ("Cannot open Menu : unknown id"));
 	}
 
 	if (putInCache && pMenu) {
@@ -170,11 +171,11 @@ Menu * MenuManager::getMenu(int menuId) {
 /*!
  * Change the current menu with the one with the given name.
  * Plays the transition animations between the two menus.
- * \param name The id of the new menu.
  */
-void MenuManager::changeCurrentMenu(int menuId)
+void MenuManager::changeCurrentMenu()
 {
-	Menu *pMenu = getMenu(menuId);
+	// Get the next menu
+	Menu *pMenu = getMenu(nextMenuId_);
 	if (pMenu == NULL) {
 		return;
 	}
@@ -189,7 +190,14 @@ void MenuManager::changeCurrentMenu(int menuId)
 		}
     }
     current_ = pMenu;
+	nextMenuId_ = -1;
     showMenu(pMenu);
+}
+
+void MenuManager::gotoMenu(int menuId) {
+	nextMenuId_ = menuId;
+	// stop listening for events until window changed
+	drop_events_ = true;
 }
 
 /*!

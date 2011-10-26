@@ -888,7 +888,7 @@ bool GameplayMenu::handleUnknownKey(Key key, const int modKeys) {
                 leaveAnim_ = "mlosegam.dat";
             }
             // Go to debrief menu
-			menu_manager_->changeCurrentMenu(Menu::MENU_DEBRIEF);
+			menu_manager_->gotoMenu(Menu::MENU_DEBRIEF);
             return true;
         }
     } else if (key == KEY_ESCAPE) {

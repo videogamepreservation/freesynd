@@ -230,7 +230,7 @@ void Option::executeAction(const int modKeys) {
     }
 
     if (to_ != -1) {
-        g_App.menus().changeCurrentMenu(to_);
+        g_App.menus().gotoMenu(to_);
         return;
     }
 }

@@ -62,5 +62,5 @@ void MainMenu::handleAction(const int actionId, void *ctx, const int modKeys)
     if (actionId == resetButId_)
         g_App.reset();
     if (actionId == quitButId_)
-		menu_manager_->changeCurrentMenu(Menu::MENU_LOGOUT);
+		menu_manager_->gotoMenu(Menu::MENU_LOGOUT);
 }

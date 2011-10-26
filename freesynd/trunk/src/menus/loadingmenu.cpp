@@ -41,6 +41,6 @@ void LoadingMenu::handleTick(int elapsed)
     if (tick_count_ >= 2000) {
         g_Session.getMission()->setSurfaces();
         tick_count_ = -500;
-        menu_manager_->changeCurrentMenu(Menu::MENU_GAMEPLAY);
+        menu_manager_->gotoMenu(Menu::MENU_GAMEPLAY);
     }
 }

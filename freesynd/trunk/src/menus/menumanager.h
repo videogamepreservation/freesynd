@@ -68,10 +68,14 @@ public:
     void handleTick(int elapsed) {
         if (current_)
             current_->handleTick(elapsed);
+
+		if (nextMenuId_ != -1) {
+			changeCurrentMenu();
+		}
     }
 
-    //! Switch from menu and plays the transition animation.
-    void changeCurrentMenu(int menuId);
+	// Change the menu
+	void gotoMenu(int menuId);
 
     //! Take a snapshot of the screen.
     void saveBackground();
@@ -107,12 +111,16 @@ protected:
     void showMenu(Menu *pMenu);
     //! Shows the menu closing animation
     void leaveMenu(Menu *pMenu);
+	//! Switch from menu and plays the transition animation.
+    void changeCurrentMenu();
 
 protected:
     /** The list of currently loaded menus.*/
     std::map<int, Menu *> menus_;
     /** The current menu being displayed.*/
     Menu *current_;
+	/** The id of the next menu. -1 by default.*/
+	int nextMenuId_;
     /** This flag prevents the input events from being processed.*/
     bool drop_events_;
     /** This array stores a copy of the back buffer to reset the screen.*/

@@ -364,7 +364,7 @@ void Menu::keyEvent(Key key, const int modKeys)
     // Pressing Escape changes the current menu to its parent(like a back)
     // if menu has not already consummed key event
     if (!handleUnknownKey(key, modKeys) && key == KEY_ESCAPE) {
-        menu_manager_->changeCurrentMenu(parentId_);
+        menu_manager_->gotoMenu(parentId_);
         return;
     }
 }

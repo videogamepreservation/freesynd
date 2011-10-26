@@ -92,14 +92,14 @@ void LoadSaveMenu::handleAction(const int actionId, void *ctx, const int modKeys
         if (editNameId_ != -1) {
             if (g_App.loadGameFromFile(editNameId_)) {
                 editNameId_ = -1;
-				menu_manager_->changeCurrentMenu(Menu::MENU_MAIN);
+				menu_manager_->gotoMenu(Menu::MENU_MAIN);
             }
         }
     } else if (actionId == saveButId_) {
         if (editNameId_ != -1 && pTextFields_[editNameId_]->getText().size() != 0) {
             if (g_App.saveGameToFile(editNameId_, pTextFields_[editNameId_]->getText())) {
                 editNameId_ = -1;
-                menu_manager_->changeCurrentMenu(Menu::MENU_MAIN);
+                menu_manager_->gotoMenu(Menu::MENU_MAIN);
             }
         }
     }
