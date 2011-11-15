@@ -200,6 +200,7 @@ public:
     void showPath(int scrollX, int scrollY);
 
     void kill();
+    void switchActionStateTo(uint32 as);
     bool animate(int elapsed, Mission *mission);
     void drawSelectorAnim(int x, int y);
 
@@ -544,18 +545,22 @@ public:
         pa_smDead = 0x1000,
         // this object should be ignored in all Ai procedures
         pa_smUnavailable = 0x2000,
-        pa_smCheckExcluded = pa_smDead | pa_smUnavailable
+        pa_smCheckExcluded = pa_smDead | pa_smUnavailable,
+        pa_smAll = 0xFFFF
     } pedActionStateMasks;
 
     typedef struct {
+        // action state (pedActionStateMasks)
+        uint32 as;
         Mission::ObjectiveType ot_execute;
         PathNode t_pn;
         // objv_FindEnemy sets this value, others use
         ShootableMapObject *t_smo;
         // 0b - not started, 1b - executing, 2b - finished, 3b - failed,
-        // 4b - suspended, 5b - if finished all other actions in group are
-        // complete
+        // 4b - suspended
         uint8 state;
+        // same as in actionQueueGroupType
+        uint32 group_desc;
         union {
             struct {
                 // (objGroupDefMasks)
@@ -586,22 +591,19 @@ public:
         // for objv_AquireControl, for car, 0 - become passenger(or driver),
         // 1 - become driver only if else failed
         // for objv_AquireControl, for ped, 0 - controled or not is ok,
-        // 1 - controled if else failed
+        // 1 - controlled if else failed
         // for objv_FindEnemy; 0 - scout - will not attack, 1 - search and
         // destroy
         uint32 condition;
     } actionQueueType;
 
     typedef struct {
-        // action state (pedActionStateMasks)
-        uint32 as;
         std::vector <actionQueueType> actions;
-        // index refers to last active in current group
-        // -1 - undef
-        int16 indx_first_exec;
-        // 0 - not set, 0b - stand/walking group(has walking action or action
-        // requires ped to stand), 1b - firing only(no walking action),
-        // (0b+1b) - walking + firing
+        // index refers action state of which defines state of group
+        uint32 main_act;
+        // 0 - not set, 0b - stand/walking group(has walking action or
+        // action requires ped to stand), 1b - firing only(no walking action),
+        // (0b+1b) - walking + firing, 2b - decision making
         // NOTE: a group should not interfere with actions of other group
         uint32 group_desc;
         // 0b - not started, 1b - executing, 2b - finished, 3b - failed,
