@@ -84,8 +84,6 @@ public:
 
     const char *getName() { return name_.c_str(); }
 
-    void drawSmallIcon(int x, int y);
-    void drawBigIcon(int x, int y);
     void drawInfo(int x, int y, int rldCost = -1);
 
     int cost() { return cost_; }
@@ -95,6 +93,8 @@ public:
     int rank() { return rank_; }
     int anim() { return anim_; }
     snd::InGameSample getSound() { return sample_; }
+	int getSmallIconId() { return small_icon_; }
+	int getBigIconId() { return big_icon_; }
 
     int selector() {
         return small_icon_ == 28 ? 1618 : small_icon_ - 14 + 1602;

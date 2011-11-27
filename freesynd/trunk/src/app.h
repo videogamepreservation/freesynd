@@ -72,16 +72,12 @@ class App : public Singleton < App > {
         return session_;
     }
 
-    SpriteManager &menuSprites() {
-        return menu_sprites_;
-    }
-
     GameSpriteManager &gameSprites() {
         return game_sprites_;
     }
 
     FontManager &fonts() {
-        return fonts_;
+		return menus_.fonts();
     }
 
     Font &introFont() {
@@ -218,9 +214,7 @@ private:
 
     std::string iniPath_;
 
-    SpriteManager menu_sprites_;
     GameSpriteManager game_sprites_;
-    FontManager fonts_;
     HFont game_font_;
     Font intro_font_;
     SpriteManager intro_font_sprites_;

@@ -148,9 +148,9 @@ void SelectMenu::drawAgent()
             false, FontManager::SIZE_1, false);
     }
 
-    g_App.menuSprites().drawSpriteXYZ(arms, armsx, armsy, 0, false, true);
-    g_App.menuSprites().drawSpriteXYZ(torso, 224, torsoy, 0, false, true);
-    g_App.menuSprites().drawSpriteXYZ(legs, 224, legsy, 0, false, true);
+    menuSprites().drawSpriteXYZ(arms, armsx, armsy, 0, false, true);
+    menuSprites().drawSpriteXYZ(torso, 224, torsoy, 0, false, true);
+    menuSprites().drawSpriteXYZ(legs, 224, legsy, 0, false, true);
 
     if (selected->slot(Mod::MOD_CHEST)) {
         int chest = selected->slot(Mod::MOD_CHEST)->icon(selected->isMale());
@@ -163,7 +163,7 @@ void SelectMenu::drawAgent()
             chestx += 8;
             chesty += 2;
         }
-        g_App.menuSprites().drawSpriteXYZ(chest, chestx, chesty, 0, false,
+        menu_manager_->menuSprites().drawSpriteXYZ(chest, chestx, chesty, 0, false,
                                           true);
     }
 
@@ -172,7 +172,7 @@ void SelectMenu::drawAgent()
         g_App.fonts().drawText(366, 160,
             selected->slot(Mod::MOD_HEART)->getName(), false,
             FontManager::SIZE_1, false);
-        g_App.menuSprites().drawSpriteXYZ(heart, 254, 166, 0, false, true);
+        menu_manager_->menuSprites().drawSpriteXYZ(heart, 254, 166, 0, false, true);
     }
 
     if (selected->slot(Mod::MOD_EYES)) {
@@ -184,7 +184,7 @@ void SelectMenu::drawAgent()
         if (!selected->isMale()) {
             eyesx += 2;
         }
-        g_App.menuSprites().drawSpriteXYZ(eyes, eyesx, 116, 0, false,
+        menuSprites().drawSpriteXYZ(eyes, eyesx, 116, 0, false,
                                           true);
     }
 
@@ -197,7 +197,7 @@ void SelectMenu::drawAgent()
         if (!selected->isMale()) {
             brainx += 2;
         }
-        g_App.menuSprites().drawSpriteXYZ(brain, brainx, 114, 0, false, true);
+        menuSprites().drawSpriteXYZ(brain, brainx, 114, 0, false, true);
     }
     // restore lines over agent
 /*    g_Screen.blit(254, 124, 30, 2,
@@ -225,7 +225,7 @@ void SelectMenu::drawAgent()
             if (j * 4 + i < selected->numWeapons()) {
                 WeaponInstance *wi = selected->weapon(j * 4 + i);
                 Weapon *pW = wi->getWeaponClass();
-                pW->drawSmallIcon(366 + i * 32, 308 + j * 32);
+				menuSprites().drawSpriteXYZ(pW->getSmallIconId(), 366 + i * 32, 308 + j * 32, 0, false, true);
                 uint8 data[3];
                 memset(data, 204, 3);
                 if (pW->ammo() != -1) {
@@ -309,7 +309,7 @@ void SelectMenu::handleRender() {
     Agent *t4 = g_Session.teamMember(3);
     if (t1) {
         if (t1->isActive()) {
-            g_App.menuSprites().drawSpriteXYZ(Sprite::MSPR_SELECT_1, 20, 84, 0, false, true);
+            menuSprites().drawSpriteXYZ(Sprite::MSPR_SELECT_1, 20, 84, 0, false, true);
             for (int i = 0; i < t1->health() * 35 / 255; i++)
                 g_Screen.scale2x(68, 122 - i, 3, 1, data);
         } else {
@@ -319,7 +319,7 @@ void SelectMenu::handleRender() {
     }
     if (t2) {
         if (t2->isActive()) {
-            g_App.menuSprites().drawSpriteXYZ(Sprite::MSPR_SELECT_2, 82, 84, 0, false, true);
+            menuSprites().drawSpriteXYZ(Sprite::MSPR_SELECT_2, 82, 84, 0, false, true);
             for (int i = 0; i < t2->health() * 35 / 255; i++)
                 g_Screen.scale2x(132, 122 - i, 3, 1, data);
         } else {
@@ -329,7 +329,7 @@ void SelectMenu::handleRender() {
     }
     if (t3) {
         if (t3->isActive()) {
-            g_App.menuSprites().drawSpriteXYZ(Sprite::MSPR_SELECT_3, 20, 162, 0, false, true);
+            menuSprites().drawSpriteXYZ(Sprite::MSPR_SELECT_3, 20, 162, 0, false, true);
             for (int i = 0; i < t3->health() * 35 / 255; i++)
                 g_Screen.scale2x(68, 200 - i, 3, 1, data);
         } else {
@@ -339,7 +339,7 @@ void SelectMenu::handleRender() {
     }
     if (t4) {
         if (t4->isActive()) {
-            g_App.menuSprites().drawSpriteXYZ(Sprite::MSPR_SELECT_4, 82, 162, 0, false, true);
+            menuSprites().drawSpriteXYZ(Sprite::MSPR_SELECT_4, 82, 162, 0, false, true);
             for (int i = 0; i < t4->health() * 35 / 255; i++)
                 g_Screen.scale2x(132, 200 - i, 3, 1, data);
         } else {
@@ -348,7 +348,7 @@ void SelectMenu::handleRender() {
         }
     }
     if (sel_all_) {
-        g_App.menuSprites().drawSpriteXYZ(77, 20, 152, 0, false, true);
+        menuSprites().drawSpriteXYZ(77, 20, 152, 0, false, true);
     }
 
     // Draw the selector around the selected agent
@@ -376,7 +376,7 @@ void SelectMenu::handleRender() {
         g_Screen.scale2x(502, 292, sizeof(ldata), 1, ldata);
         g_Screen.scale2x(502, 318, sizeof(ldata), 1, ldata);
         
-        pSelectedWeap_->drawBigIcon(502, 106);
+		menuSprites().drawSpriteXYZ(pSelectedWeap_->getBigIconId(), 502, 106, 0, false, true);
         pSelectedWeap_->drawInfo(504, 194, rld_cost_);
     
     } else if (pSelectedMod_) {

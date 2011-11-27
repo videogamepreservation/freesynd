@@ -48,11 +48,8 @@ public:
     FontManager();
     ~FontManager();
 
-    bool loadFont(SpriteManager *sprites, EFontSize size, bool dark, int offset,
+    bool loadFont(SpriteManager *sprites, EFontSize size, int darkOffset, int lightOffset,
             char base, const std::string& valid_chars);
-
-    void drawText(int x, int y, const char *text, bool dos, int size, bool dark,
-            bool x2 = true, bool changeColor = false, uint8 fromColor = 0, uint8 toColor = 0);
 
     void drawText(int x, int y, const char *text, bool dos, EFontSize size, bool dark,
             bool x2 = true, bool changeColor = false, uint8 fromColor = 0, uint8 toColor = 0);
@@ -60,8 +57,7 @@ public:
     int textHeight(EFontSize size, bool x2 = true);
 
 protected:
-    Font * dark_fonts_[4];
-    Font *light_fonts_[4];
+    Font * menuFonts_[4];
 };
 
 #endif

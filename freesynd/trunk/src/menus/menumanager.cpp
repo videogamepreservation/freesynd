@@ -46,7 +46,9 @@
 #include "logoutmenu.h"
 
 
-MenuManager::MenuManager(): dirtyList_(g_Screen.gameScreenWidth(), g_Screen.gameScreenHeight())
+MenuManager::MenuManager(): 
+	dirtyList_(g_Screen.gameScreenWidth(), g_Screen.gameScreenHeight()),
+	menuSprites_(), fonts_()
 {
     drop_events_ = false;
     background_ = new uint8[g_Screen.gameScreenWidth() * g_Screen.gameScreenHeight()];
@@ -60,6 +62,42 @@ MenuManager::MenuManager(): dirtyList_(g_Screen.gameScreenWidth(), g_Screen.game
 
 MenuManager::~MenuManager()
 {}
+
+bool MenuManager::initialize() {
+	// Loads menu sprites
+	int size = 0, tabSize = 0;
+	uint8 *data, *tabData;
+    LOG(Log::k_FLG_GFX, "MenuManager", "initialize", ("Loading menu sprites ..."))
+    tabData = File::loadOriginalFile("mspr-0.tab", tabSize);
+	data = File::loadOriginalFile("mspr-0.dat", size);
+	
+	if (tabData && data) {
+		menuSprites_.loadSprites(tabData, tabSize, data, true);
+		
+		LOG(Log::k_FLG_GFX, "MenuManager", "initialize", ("%d sprites loaded", tabSize / 6))
+		delete[] tabData;
+		delete[] data;
+	} else {
+		if (tabData) {
+			delete[] tabData;
+		}
+
+		if (data) {
+			delete[] data;
+		}
+
+		return false;
+	}
+	
+    // Loads menu fonts
+	LOG(Log::k_FLG_GFX, "MenuManager", "initialize", ("Loading fonts ..."))
+	fonts_.loadFont(&menuSprites_, FontManager::SIZE_4, 1076, 939, 'A', "0x27,0x2c-0x2f,0x41-0x5a,0x5c,0x60,0x80-0x90,0x93-0x9a,0xa0-0xa7");
+    fonts_.loadFont(&menuSprites_, FontManager::SIZE_3, 802, 665, 'A', "0x21-0x5a,0x80-0x90,0x93-0x9a,0xa0-0xa8");
+    fonts_.loadFont(&menuSprites_, FontManager::SIZE_2, 528, 391, 'A', "0x21-0x60,0x80-0xa8");
+    fonts_.loadFont(&menuSprites_, FontManager::SIZE_1, 254, 117, 'A', "0x21-0x60,0x80-0xa8");
+
+	return true;
+}
 
 /*!
  * Destroy all menus and resources.

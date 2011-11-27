@@ -31,70 +31,42 @@
 FontManager::FontManager()
 {
     for (int i = 0; i < 4; i++)
-        dark_fonts_[i] = light_fonts_[i] = NULL;
+        menuFonts_[i] = NULL;
 }
 
 FontManager::~FontManager()
 {
     for (int i = 0; i < 4; i++) {
-        delete dark_fonts_[i];
-        delete light_fonts_[i];
+        delete menuFonts_[i];
     }
 }
 
-bool FontManager::loadFont(SpriteManager * sprites, EFontSize size, bool dark,
-                           int offset, char base, const std::string& valid_chars)
+bool FontManager::loadFont(SpriteManager * sprites, EFontSize size,
+                           int darkOffset, int lightOffset, char base, const std::string& valid_chars)
 {
     assert(sprites);
 
-    if (dark) {
-        dark_fonts_[size] = new Font();
-        dark_fonts_[size]->setSpriteManager(sprites, offset, base, valid_chars);
-    } else {
-        light_fonts_[size] = new Font();
-        light_fonts_[size]->setSpriteManager(sprites, offset, base, valid_chars);
-    }
+	menuFonts_[size] = new Font();
+    menuFonts_[size]->setSpriteManager(sprites, darkOffset, lightOffset, base, valid_chars);
 
     return true;
-}
-
-void FontManager::drawText(int x, int y, const char *text, bool dos, int size,
-                           bool dark, bool x2,
-                           bool changeColor, uint8 fromColor, uint8 toColor)
-{
-    assert(size < 4);
-    if (dark) {
-        assert(dark_fonts_[size]);
-
-        dark_fonts_[size]->drawText(x, y, text, dos, x2, changeColor, fromColor, toColor);
-    } else {
-        assert(light_fonts_[size]);
-
-        light_fonts_[size]->drawText(x, y, text, dos, x2, changeColor, fromColor, toColor);
-    }
 }
 
 void FontManager::drawText(int x, int y, const char *text, bool dos, EFontSize size,
                            bool dark, bool x2,
                            bool changeColor, uint8 fromColor, uint8 toColor)
 {
-    if (dark) {
-        assert(dark_fonts_[size]);
+    assert(menuFonts_[size]);
 
-        dark_fonts_[size]->drawText(x, y, text, dos, x2, changeColor, fromColor, toColor);
-    } else {
-        assert(light_fonts_[size]);
-
-        light_fonts_[size]->drawText(x, y, text, dos, x2, changeColor, fromColor, toColor);
-    }
+    menuFonts_[size]->drawText(x, y, text, dos, !dark, x2, changeColor, fromColor, toColor);
 }
 
 int FontManager::textWidth(const char *text, bool dos, EFontSize size, bool x2)
 {
-    return dark_fonts_[size]->textWidth(text, dos, x2);
+    return menuFonts_[size]->textWidth(text, dos, x2);
 }
 
 int FontManager::textHeight(EFontSize size, bool x2)
 {
-    return dark_fonts_[size]->textHeight(x2);
+    return menuFonts_[size]->textHeight(x2);
 }

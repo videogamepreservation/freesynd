@@ -194,8 +194,8 @@ Option::Option(Menu *peer, int x, int y, int width, int height, const char *text
         text_.setLocation(text_.getX(), y_ + (height_ / 2) - (text_.getHeight() / 2) + 1);
 
         if (darkWidgetId != 0) {
-            darkWidget_ = g_App.menuSprites().sprite(darkWidgetId);
-            lightWidget_ = g_App.menuSprites().sprite(lightWidgetId);
+            darkWidget_ = peer->menuSprites().sprite(darkWidgetId);
+            lightWidget_ = peer->menuSprites().sprite(lightWidgetId);
             // there's a small pad between heading widget ant text
             text_.setLocation(text_.getX() + darkWidget_->width() * 2 + 8, text_.getY());
         }

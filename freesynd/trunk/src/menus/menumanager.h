@@ -56,14 +56,24 @@ public:
 
     MenuManager();
     ~MenuManager();
+
+	bool initialize();
     
-   // void createAllMenus();
     //! Destroy all menus and resources
     void destroy();
 
     void setLanguage(FS_Lang lang);
     std::string getMessage(const std::string & id);
     void getMessage(const std::string & id, std::string & msg);
+
+	//! Return the menu sprites manager
+	SpriteManager &menuSprites() {
+        return menuSprites_;
+    }
+
+	FontManager &fonts() {
+        return fonts_;
+    }
 
     void handleTick(int elapsed) {
         if (current_)
@@ -132,6 +142,11 @@ protected:
     /*! Language file. */
     ConfigFile  *language_;
     FS_Lang curr_language_;
+
+	/*! Sprite manager for menu sprites.*/
+	SpriteManager menuSprites_;
+	/*! Font manager.*/
+	FontManager fonts_;
 };
 
 #endif

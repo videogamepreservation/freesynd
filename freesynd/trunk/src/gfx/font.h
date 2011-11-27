@@ -58,18 +58,22 @@ public:
             const std::string& valid_chars);
     void setSpriteManager(SpriteManager *sprites, int offset, char base,
             const FontRange& range);
+	void setSpriteManager(SpriteManager *sprites, int darkOffset, int lightOffset, char base,
+            const std::string& valid_chars);
     // If dos is true, the text is in cp437, otherwise it's utf-8.
     void drawText(int x, int y, const char *text, bool dos, bool x2 = true, bool changeColor = false, uint8 fromColor = 0, uint8 toColor = 0);
+	void drawText(int x, int y, const char *text, bool dos, bool lighted, bool x2 = true, bool changeColor = false, uint8 fromColor = 0, uint8 toColor = 0);
     int textWidth(const char *text, bool dos, bool x2 = true);
     int textHeight(bool x2 = true);
 
 protected:
     static unsigned char decode(const unsigned char * &c, bool dos);
     static int decodeUTF8(const unsigned char * &c);
-    virtual Sprite *getSprite(unsigned char dos_char);
+    virtual Sprite *getSprite(unsigned char dos_char, bool highlighted);
 
     SpriteManager *sprites_;
     int offset_;
+	int lightOffset_;
     FontRange range_;
 };
 

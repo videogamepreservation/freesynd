@@ -161,18 +161,18 @@ int Font::decodeUTF8(const unsigned char * &c)
     }
 }
 
-Sprite *Font::getSprite(unsigned char dos_char) {
+Sprite *Font::getSprite(unsigned char dos_char, bool highlighted) {
     if (range_.in_range(dos_char) == false) {
         // use '?' as default character.
         if (range_.in_range('?') == true) {
-            return sprites_->sprite('?' + offset_);
+			return sprites_->sprite('?' + highlighted ? lightOffset_ : offset_);
         } else {
             // NULL causes the missing glyph to be skipped.
             // no space will be consumed on-screen.
             return NULL;
         }
     }
-    return sprites_->sprite(dos_char + offset_);
+    return sprites_->sprite(dos_char + (highlighted ? lightOffset_ : offset_));
 }
 
 void Font::setSpriteManager(SpriteManager *sprites, int offset, char base, const FontRange& range) {
@@ -185,8 +185,20 @@ void Font::setSpriteManager(SpriteManager *sprites, int offset, char base, const
     setSpriteManager(sprites, offset, base, FontRange(valid_chars));
 }
 
+void Font::setSpriteManager(SpriteManager *sprites, int darkOffset, int lightOffset, char base,
+            const std::string& valid_chars) {
+	sprites_ = sprites;
+    offset_ = darkOffset - base;
+	lightOffset_ = lightOffset - base;
+    range_ = FontRange(valid_chars);
+}
+
 void Font::drawText(int x, int y, const char *text, bool dos, bool x2, bool changeColor, uint8 fromColor, uint8 toColor) {
-    int sc = x2 ? 2 : 1;
+    drawText(x, y, text, dos, false, x2, changeColor, fromColor, toColor);
+}
+
+void Font::drawText(int x, int y, const char *text, bool dos, bool highlighted, bool x2, bool changeColor, uint8 fromColor, uint8 toColor) {
+	int sc = x2 ? 2 : 1;
     int ox = x;
     const unsigned char *c = (const unsigned char *)text;
     for (unsigned char cc = decode(c, dos); cc; cc = decode(c, dos)) {
@@ -195,7 +207,7 @@ void Font::drawText(int x, int y, const char *text, bool dos, bool x2, bool chan
             continue;
         }
         if (cc == ' ') {
-            x += getSprite('A')->width() * sc - sc;
+            x += getSprite('A', false)->width() * sc - sc;
             continue;
         }
         if (cc == '\n') {
@@ -203,7 +215,7 @@ void Font::drawText(int x, int y, const char *text, bool dos, bool x2, bool chan
             y += textHeight() - sc;
             continue;
         }
-        Sprite *s = getSprite(cc);
+        Sprite *s = getSprite(cc, highlighted);
         if (s) {
             int y_offset = 0;
             if (cc == ':')
@@ -243,10 +255,10 @@ int Font::textWidth(const char *text, bool dos, bool x2) {
             continue;
         }
         if (cc == ' ') {
-            x += getSprite('A')->width() * sc - sc;
+            x += getSprite('A', false)->width() * sc - sc;
             continue;
         }
-        Sprite *s = getSprite(cc);
+        Sprite *s = getSprite(cc, false);
         if (s) {
             x += s->width() * sc - sc;
         }
@@ -256,7 +268,7 @@ int Font::textWidth(const char *text, bool dos, bool x2) {
 
 int Font::textHeight(bool x2) {
     int sc = x2 ? 2 : 1;
-    return getSprite('A')->height() * sc;
+    return getSprite('A', false)->height() * sc;
 }
 
 HChar::HChar():width_(0), height_(0), bits_(0) {

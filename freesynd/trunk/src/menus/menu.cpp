@@ -65,6 +65,10 @@ Menu::~Menu() {
     actions_.clear();
 }
 
+SpriteManager & Menu::menuSprites() {
+	return menu_manager_->menuSprites();
+}
+
 void Menu::redrawOptions()
 {
     for (std::list < ActionWidget * >::iterator it = actions_.begin();
@@ -211,7 +215,7 @@ int Menu::addOption(int x, int y, int width, int height, const char *text, FontM
  */
 int Menu::addImageOption(int x, int y, int dark_widget, int light_widget, bool visible) {
 
-    Sprite *spr = g_App.menuSprites().sprite(dark_widget);
+	Sprite *spr = menu_manager_->menuSprites().sprite(dark_widget);
    
     Option *m = new Option(this, x, y, spr->width() * 2, spr->height() * 2, "", 
 		FontManager::SIZE_1, MENU_NO_MENU, visible, true, dark_widget, light_widget);
@@ -458,4 +462,8 @@ void Menu::mouseDownEvent(int x, int y, int button, const int modKeys)
 void Menu::mouseUpEvent(int x, int y, int button, const int modKeys)
 {
     handleMouseUp(x, y, button, modKeys);
+}
+
+Font * Menu::getMenuFont() {
+	return NULL;
 }

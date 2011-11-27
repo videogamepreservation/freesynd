@@ -73,6 +73,9 @@ public:
     bool hasLeaveAnim() { return leaveAnim_.size() != 0; }
     /*! Returns the leaving animation file name. */
     const char * getLeaveAnimName() { return leaveAnim_.c_str(); }
+
+	//! Returns the sprites used in menus
+	SpriteManager &menuSprites();
     
     //! Creates a new text label and returns its id
     int addStatic(int x, int y, const char *text, FontManager::EFontSize size, bool dark);
@@ -197,6 +200,8 @@ protected:
     void redrawOptions();
     void needRendering();
     void addDirtyRect(int x, int y, int width, int height);
+
+	Font * getMenuFont();
 
 protected:
     MenuManager *menu_manager_;

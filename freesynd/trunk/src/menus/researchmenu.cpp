@@ -237,7 +237,7 @@ void ResearchMenu::handleRender()
         memset(ldata, 16, sizeof(ldata));
         g_Screen.scale2x(502, 318, sizeof(ldata), 1, ldata);
 
-        pSelectedWeapon_->drawBigIcon(502, 108);
+		menuSprites().drawSpriteXYZ(pSelectedWeapon_->getBigIconId(), 502, 108, 0, false, true);
         pSelectedWeapon_->drawInfo(504, 196);
     }
 
