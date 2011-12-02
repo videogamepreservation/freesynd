@@ -4,15 +4,14 @@
 <h3>GREETINGS, OPERATIVE. WELCOME TO THE FREESYND PROJECT.</h3>
 
 <p>FreeSynd is a cross-platform, <a href="http://www.gnu.org/licenses/gpl.html">
-GPL</a>ed reimplementation of the classic Bullfrog game, Syndicate.</p>
+GPL</a>ed reimplementation of engine for the classic Bullfrog game, Syndicate.</p>
 
 <div class="warning">THE FREESYND PROJECT IS IN NO WAY AFFILIATED WITH
 ELECTRONIC ARTS AND/OR BULLFROG ENTERTAINMENT.<br />
 SYNDICATE and BULLFROG are trademarks of Electronic Arts. SYNDICATE is
 Copyright &copy; 1994 Electronic Arts. SYNDICATE WARS is Copyright &copy; 1997
-Electronic Arts.<br /> <!-- Please note that an original copy of Syndicate is
-required to use FreeSynd; we do not redistribute the original data files here,
-and we won't make an exception for you - so don't bother asking. --> </div>
+Electronic Arts.<br /> PLEASE NOTE that an original copy of Syndicate is
+required to use FreeSynd.</div>
 
 <h3>The original Syndicate introduction:</h3>
 

@@ -1,6 +1,8 @@
 <?php $title = 'Development'; require_once 'include/common.php'; ?>
 <?php printHeader(); ?>
-
+<h2>Project Goal</h2>
+<p>Create an engine for Syndicate game, multiplatform, without original bugs and a
+little bit more advanced gameplay.</p>
 <h2>Project Communication</h2>
 <p>There are different forms of communication used by the FreeSynd team - mailing lists, trackers, forums. 
 If you wish to get in contact with the team, join the
