@@ -201,6 +201,7 @@ public:
 
     void kill();
     void switchActionStateTo(uint32 as);
+    void switchActionStateFrom(uint32 as);
     bool animate(int elapsed, Mission *mission);
     void drawSelectorAnim(int x, int y);
 

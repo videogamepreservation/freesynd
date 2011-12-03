@@ -193,10 +193,12 @@ void PedInstance::switchActionStateTo(uint32 as) {
         case pa_smStanding:
             action_state_ &= (pa_smAll ^(pa_smFollowing | pa_smFiring
                 | pa_smUsingCar | pa_smInCar));
+            action_state_ |= pa_smStanding;
             break;
         case pa_smWalking:
             action_state_ &= (pa_smAll ^(pa_smFollowing | pa_smFiring
                 | pa_smUsingCar | pa_smInCar));
+            action_state_ |= pa_smWalking;
             break;
         case pa_smHit:
             action_state_ = pa_smHit;
@@ -206,7 +208,8 @@ void PedInstance::switchActionStateTo(uint32 as) {
             break;
         case pa_smFollowing:
             action_state_ &= (pa_smAll ^(pa_smStanding | pa_smWalking
-                | pa_smFollowing | pa_smFiring | pa_smUsingCar | pa_smInCar));
+                | pa_smFiring | pa_smUsingCar | pa_smInCar));
+            action_state_ |= pa_smFollowing;
             break;
         case pa_smPickUp:
             action_state_ = pa_smPickUp;
@@ -231,6 +234,58 @@ void PedInstance::switchActionStateTo(uint32 as) {
             break;
         case pa_smDead:
             action_state_ = pa_smDead;
+            break;
+        case pa_smUnavailable:
+            action_state_ = pa_smUnavailable;
+            break;
+    }
+}
+
+void PedInstance::switchActionStateFrom(uint32 as) {
+    switch(as) {
+        case pa_smNone:
+            printf("Ped has undefined state");
+            break;
+        case pa_smStanding:
+            action_state_ ^= pa_smStanding;
+            break;
+        case pa_smWalking:
+            action_state_ ^= pa_smWalking;
+            action_state_ |= pa_smStanding;
+            break;
+        case pa_smHit:
+            action_state_ ^= pa_smHit;
+            break;
+        case pa_smFiring:
+            action_state_ ^= pa_smFiring;
+            break;
+        case pa_smFollowing:
+            action_state_ ^= pa_smFollowing;
+            break;
+        case pa_smPickUp:
+            action_state_ = pa_smPickUp;
+            break;
+        case pa_smPutDown:
+            action_state_ ^= pa_smPutDown;
+            break;
+        case pa_smBurning:
+            action_state_ ^= pa_smBurning;
+            break;
+        case pa_smGetInCar:
+            action_state_ ^= (pa_smStanding | pa_smGetInCar);
+            break;
+        case pa_smUsingCar:
+            action_state_ ^= (pa_smStanding | pa_smUsingCar);
+            break;
+        case pa_smInCar:
+            action_state_ ^= (pa_smStanding | pa_smInCar);
+            break;
+        case pa_smLeaveCar:
+            action_state_ ^= (pa_smStanding | pa_smLeaveCar);
+            break;
+        case pa_smDead:
+            action_state_ = pa_smDead;
+            printf("It's alive!");
             break;
         case pa_smUnavailable:
             action_state_ = pa_smUnavailable;
@@ -788,8 +843,10 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                     if ((aqt.state & 16) != 0) {
                     } else if ((aqt.state & 8) != 0) {
                     } else if ((aqt.state & 4) != 0) {
+                        switchActionStateTo(aqt.as);
                         acts_g_prcssd |= aqt.group_desc;
                     } else if ((aqt.state & 2) != 0) {
+                        switchActionStateTo(aqt.as);
                         acts_g_prcssd |= aqt.group_desc;
                     } else if ((aqt.state & 1) != 0) {
                         printf("should not get here");
