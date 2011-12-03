@@ -1205,7 +1205,7 @@ void GameplayMenu::drawMissionHint(int elapsed) {
         }
     }
 
-    int width = g_App.fonts().textWidth(str.c_str(), false, FontManager::SIZE_3, false);
+    int width = gameFont()->textWidth(str.c_str(), false, false);
     int x = 64 - width / 2;
 	gameFont()->drawText(x, 46 + 44 + 10 + 46 + 44 + 2 - 1, str.c_str(), txtColor);
 }

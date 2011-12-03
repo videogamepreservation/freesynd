@@ -586,7 +586,7 @@ void App::run(int start_mission) {
         data = File::loadOriginalFile("intro.dat", size);
         fliPlayer.loadFliData(data);
         music().playTrack(MusicManager::TRACK_INTRO);
-        fliPlayer.play(true, fonts().introFont());
+        fliPlayer.play(true, menus_.fonts().introFont());
         music().stopPlayback();
         delete[] data;
 

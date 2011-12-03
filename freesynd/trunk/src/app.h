@@ -36,7 +36,6 @@
 #include "system.h"
 #include "gfx/screen.h"
 #include "path.h"
-#include "gfx/fontmanager.h"
 #include "menus/menumanager.h"
 #include "mapmanager.h"
 #include "mission.h"
@@ -74,10 +73,6 @@ class App : public Singleton < App > {
 
     GameSpriteManager &gameSprites() {
         return game_sprites_;
-    }
-
-    FontManager &fonts() {
-		return menus_.fonts();
     }
 
     MenuManager &menus() {

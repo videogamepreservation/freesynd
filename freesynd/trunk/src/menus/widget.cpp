@@ -25,28 +25,31 @@ void Widget::setVisible(bool visible) {
     }
 }
 
-MenuText::MenuText(int x, int y, const char *text, FontManager::EFontSize size, 
-                   bool dark, bool visible): 
-            Widget(x, y, 0, 0, visible), dark_(dark), size_(size) {
-
+MenuText::MenuText(int x, int y, const char *text, MenuFont *pFont, 
+                   bool highlighted, bool visible): 
+            Widget(x, y, 0, 0, visible) {
+		highlighted_ = highlighted;
         centered_ = false;
         anchorX_ = x;
         anchorY_ = y;
+		pFont_ = pFont;
         // Height is fixed by font size
-        height_ = g_App.fonts().textHeight(size_);
+        height_ = pFont->textHeight();
 
         updateText(text);
 }
 
-MenuText::MenuText(int x, int y, int width, const char *text, FontManager::EFontSize size, 
-                   bool dark, bool visible, bool centered): 
-            Widget(x, y, width, 0, visible), dark_(dark), size_(size) {
+MenuText::MenuText(int x, int y, int width, const char *text, MenuFont *pFont, 
+                   bool highlighted, bool visible, bool centered): 
+            Widget(x, y, width, 0, visible) {
         
+		highlighted_ = highlighted;
         centered_ = centered;
         anchorX_ = x;
         anchorY_ = y;
+		pFont_ = pFont;
         // Height is fixed by font size
-        height_ = g_App.fonts().textHeight(size_);
+        height_ = pFont->textHeight();
 
         updateText(text);
     }
@@ -62,7 +65,7 @@ void MenuText::updateText(const char *text) {
     }
     text_ = lbl;
 
-    int textWidth = g_App.fonts().textWidth(text_.c_str(), false, size_);
+    int textWidth = pFont_->textWidth(text_.c_str(), false);
     if (textWidth > width_) {
         width_ = textWidth;
     }
@@ -121,7 +124,7 @@ void MenuText::setLocation(int x, int y) {
 }
 
 void MenuText::setDark(bool dark) {
-    dark_ = dark;
+    highlighted_ = !dark;
     redraw();
 }
 
@@ -131,7 +134,7 @@ void MenuText::setDark(bool dark) {
  * already drawn on the background image.
  */
 void MenuText::draw() {
-    g_App.fonts().drawText(anchorX_, anchorY_, text_.c_str(), false, size_, dark_);
+    pFont_->drawText(anchorX_, anchorY_, text_.c_str(), highlighted_);
 }
 
 bool ActionWidget::isMouseOver(int x, int y) {
@@ -164,9 +167,9 @@ Key Option::getKeyForChar(char c) {
 	return ret;
 }
 
-Option::Option(Menu *peer, int x, int y, int width, int height, const char *text, FontManager::EFontSize size,
+Option::Option(Menu *peer, int x, int y, int width, int height, const char *text, MenuFont *pFont,
             int to, bool visible, bool centered, int darkWidgetId, int lightWidgetId) 
-            : ActionWidget(peer, x, y, width, height, visible), text_(x, y, width - 4, text, size, true, true, centered) {
+            : ActionWidget(peer, x, y, width, height, visible), text_(x, y, width - 4, text, pFont, false, true, centered) {
         to_ = to;
         darkWidget_ = NULL;
         lightWidget_ = NULL;
@@ -269,8 +272,8 @@ void Group::selectButton(int id) {
 }
 
 ToggleAction::ToggleAction(Menu *peer, int x, int y, int width, int height, 
-                            const char *text, FontManager::EFontSize size, bool selected, Group *pGroup)
-: Option(peer, x, y, width, height, text, size, -1, true) {
+                            const char *text, MenuFont *pFont, bool selected, Group *pGroup)
+: Option(peer, x, y, width, height, text, pFont, -1, true) {
     group_ = pGroup;
     setSelected(selected);
 }
@@ -304,10 +307,11 @@ void ToggleAction::handleSelectionAquire() {
     setSelected(true);
 }
 
-ListBox::ListBox(Menu *peer, int x, int y, int width, int height, bool visible) :
+ListBox::ListBox(Menu *peer, int x, int y, int width, int height, MenuFont *pFont, bool visible) :
         ActionWidget(peer, x, y, width, height, visible) {
     focusedLine_ = -1;
     pModel_ = NULL;
+	pFont_ = pFont;
 }
 
 ListBox::~ListBox() {
@@ -336,7 +340,7 @@ void ListBox::draw() {
     int i=0;
     for (std::list < std::string >::iterator it = labels_.begin();
          it != labels_.end(); it++, i++) {
-             g_App.fonts().drawText(getX(), getY() + i * 12, (*it).c_str(), false, FontManager::SIZE_1, focusedLine_ != i);
+             pFont_->drawText(getX(), getY() + i * 12, (*it).c_str(), focusedLine_ == i);
     }
 }
 
@@ -384,12 +388,12 @@ void ListBox::handleFocusLost() {
 
 const int TeamListBox::LINE_OFFSET = 20;
 
-TeamListBox::TeamListBox(Menu *peer, int x, int y, int width, int height, bool visible) :
-        ListBox(peer, x, y, width, height, visible) {
-    pTitle_ = new MenuText(x, y, width, "#SELECT_CRYO_TITLE", FontManager::SIZE_1, false);
-    lUnderline_ = g_App.fonts().textWidth(pTitle_->getText().c_str(), false, FontManager::SIZE_1);
+TeamListBox::TeamListBox(Menu *peer, int x, int y, int width, int height, MenuFont *pFont, bool visible) :
+        ListBox(peer, x, y, width, height, pFont, visible) {
+    pTitle_ = new MenuText(x, y, width, "#SELECT_CRYO_TITLE", pFont, false);
+    lUnderline_ = pFont_->textWidth(pTitle_->getText().c_str(), false);
     xUnderline_ = (x + x + width) / 2  - lUnderline_ / 2;
-    yUnderline_ = y + g_App.fonts().textHeight(FontManager::SIZE_1);
+    yUnderline_ = y + pFont_->textHeight();
     yOrigin_ = yUnderline_ + 2;
     for (int i=0; i<4; i++) {
         squadLines_[i] = i;
@@ -417,13 +421,13 @@ void TeamListBox::draw() {
                      if (squadLines_[ln] ==  i) {
                         char tmp[5];
                         sprintf(tmp, "%d", ln+1);
-                        g_App.fonts().drawText(getX(), yOrigin_ + i * 12, tmp, false, FontManager::SIZE_1, focusedLine_ != i);
+                        pFont_->drawText(getX(), yOrigin_ + i * 12, tmp, focusedLine_ == i);
                         break;
                      }
                  }
-                 g_App.fonts().drawText(getX() + LINE_OFFSET, yOrigin_ + i * 12, (*it).c_str(), false, FontManager::SIZE_1, focusedLine_ != i);
+                 pFont_->drawText(getX() + LINE_OFFSET, yOrigin_ + i * 12, (*it).c_str(), focusedLine_ == i);
              } else {
-                 g_App.fonts().drawText(getX() + LINE_OFFSET, yOrigin_ + i * 12, emptyLbl_.c_str(), false, FontManager::SIZE_1, focusedLine_ != i);
+                 pFont_->drawText(getX() + LINE_OFFSET, yOrigin_ + i * 12, emptyLbl_.c_str(), focusedLine_ == i);
              }
     }
 }
@@ -464,9 +468,9 @@ void TeamListBox::setSquadLine(int squadSlot, unsigned int line) {
 // By default there's no empty label
 std::string TextField::emptyLbl_ = "";
 
-TextField::TextField(Menu *peer, int x, int y, int width, int height, FontManager::EFontSize size,
+TextField::TextField(Menu *peer, int x, int y, int width, int height, MenuFont *pFont,
             int maxSize, bool displayEmpty, bool visible) 
-            : ActionWidget(peer, x, y, width, height, visible), text_(x, y, width, "", size, true, visible, false) {
+            : ActionWidget(peer, x, y, width, height, visible), text_(x, y, width, "", pFont, false, visible, false) {
 
     // Position the button text in the middle of height
     // add 1 pixel to height to compensate lost of division
@@ -491,7 +495,7 @@ void TextField::draw() {
 		text_.draw();
 		drawCaret();
 	} else if (isDisplayEmpty_ && text_.getText().size() == 0) {
-		g_App.fonts().drawText(getX(), text_.getY(), emptyLbl_.c_str(), false, FontManager::SIZE_2, true);
+		text_.getFont()->drawText(getX(), text_.getY(), emptyLbl_.c_str(), false);
     } else {
         text_.draw();
     }
@@ -501,14 +505,14 @@ void TextField::handleCaptureGained() {
 	isInEdition_ = true;
 	// by default set the caret at the end of the text
 	caretPosition_ = text_.getText().size();
-	setDark(false);
+	setHighlighted(true);
 	redraw();
 }
 
 void TextField::handleCaptureLost() {
 	isInEdition_ = false;
 	caretPosition_ = 0;
-	setDark(true);
+	setHighlighted(false);
 	redraw();
 }
 
@@ -561,7 +565,7 @@ bool TextField::handleKey(Key key, const int modKeys) {
 void TextField::handleMouseDown(int x, int y, int button, const int modKeys) {
 	peer_->captureInputBy(this);
 
-	int size = g_App.fonts().textWidth(text_.getText().c_str(), false, text_.getSize());
+	int size = text_.getFont()->textWidth(text_.getText().c_str(), false);
 
     // computes caret position
     if (x > size + getX()) {
@@ -572,7 +576,7 @@ void TextField::handleMouseDown(int x, int y, int button, const int modKeys) {
         size_t pos = 1;
         for (unsigned int i=0; i<text_.getText().size(); i++, pos++) {
             std::string sub = text_.getText().substr(0, pos);
-			if (x < getX() + g_App.fonts().textWidth(sub.c_str(), false, text_.getSize())) {
+			if (x < getX() + text_.getFont()->textWidth(sub.c_str(), false)) {
                 caretPosition_ = pos - 1;
                 break;
             }
@@ -589,13 +593,13 @@ void TextField::setText(const char* text) {
 
 void TextField::drawCaret() {
         std::string start = text_.getText().substr(0, caretPosition_);
-		int x = getX() + g_App.fonts().textWidth(start.c_str(), false, text_.getSize()) + 1;
-        int y = text_.getY() + g_App.fonts().textHeight(text_.getSize(), true);
+		int x = getX() + text_.getFont()->textWidth(start.c_str(), false) + 1;
+        int y = text_.getY() +text_.getFont()->textHeight(true);
 
         // width of caret is the same of the letter above
         int length = 10;
         if (caretPosition_ < text_.getText().size()) {
-            length = g_App.fonts().textWidth(text_.getText().substr(caretPosition_, 1).c_str(), false, text_.getSize());
+            length = text_.getFont()->textWidth(text_.getText().substr(caretPosition_, 1).c_str(), false);
         }
 
         // Draw caret

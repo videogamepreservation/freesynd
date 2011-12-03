@@ -51,6 +51,8 @@ protected:
     //! Draws a focus around the selected agent picture
     void drawAgentSelector(int x, int y);
     void drawAgent();
+	void drawSelectedWeaponInfos(int x, int y, int rldCost);
+	void drawSelectedModInfos(int x, int y);
 
     void toggleAgent(int n);
 
@@ -83,6 +85,8 @@ protected:
     int txtAgentId_;
     /*! Id of the text widget for time.*/
     int txtTimeId_;
+	/*! Id of the text field displaying current amount of money.*/
+    int moneyTxtId_;
     /*! Id of the team toogle button.*/
     int teamButId_;
     /*! Id of the mods toogle button.*/

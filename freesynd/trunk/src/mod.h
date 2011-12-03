@@ -64,8 +64,6 @@ public:
     const char *desc() { return desc_.c_str(); }
     int icon(bool isMale) { return isMale ? icon_ : icon_f_; }
 
-    void drawInfo(int x, int y);
-
 protected:
     std::string name_, desc_;
     /*! Type of modification.*/

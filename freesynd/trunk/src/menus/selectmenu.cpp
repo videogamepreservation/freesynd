@@ -42,6 +42,7 @@ cur_agent_(0), tick_count_(0), sel_all_(false)
     pSelectedMod_ = NULL;
     addStatic(85, 35, 545, "#SELECT_TITLE", FontManager::SIZE_4, true);
     txtTimeId_ = addStatic(500, 9, "", FontManager::SIZE_2, false);       // Time
+	moneyTxtId_ = addStatic(500, 87, 128, "0", FontManager::SIZE_2, false);     // Money
 
     addOption(16, 234, 129, 25, "#SELECT_RES_BUT", FontManager::SIZE_2, MENU_RESEARCH);
     teamButId_ = addToggleAction(16, 262, 129, 25, "#SELECT_TEAM_BUT", FontManager::SIZE_2, false);
@@ -137,15 +138,15 @@ void SelectMenu::drawAgent()
 
     if (selected->slot(Mod::MOD_LEGS)) {
         legs = selected->slot(Mod::MOD_LEGS)->icon(selected->isMale());
-        g_App.fonts().drawText(366, 250,
+        getMenuFont(FontManager::SIZE_1)->drawText(366, 250,
             selected->slot(Mod::MOD_LEGS)->getName(),
-            false, FontManager::SIZE_1, false);
+            false);
     }
     if (selected->slot(Mod::MOD_ARMS)) {
         arms = selected->slot(Mod::MOD_ARMS)->icon(selected->isMale());
-        g_App.fonts().drawText(366, 226,
+       getMenuFont(FontManager::SIZE_1)->drawText(366, 226,
             selected->slot(Mod::MOD_ARMS)->getName(),
-            false, FontManager::SIZE_1, false);
+            false);
     }
 
     menuSprites().drawSpriteXYZ(arms, armsx, armsy, 0, false, true);
@@ -154,9 +155,8 @@ void SelectMenu::drawAgent()
 
     if (selected->slot(Mod::MOD_CHEST)) {
         int chest = selected->slot(Mod::MOD_CHEST)->icon(selected->isMale());
-        g_App.fonts().drawText(366, 202,
-            selected->slot(Mod::MOD_CHEST)->getName(), false,
-            FontManager::SIZE_1, false);
+        getMenuFont(FontManager::SIZE_1)->drawText(366, 202,
+            selected->slot(Mod::MOD_CHEST)->getName(), false);
         int chestx = 216;
         int chesty = 146;
         if (!selected->isMale()) {
@@ -169,17 +169,15 @@ void SelectMenu::drawAgent()
 
     if (selected->slot(Mod::MOD_HEART)) {
         int heart = selected->slot(Mod::MOD_HEART)->icon(selected->isMale());
-        g_App.fonts().drawText(366, 160,
-            selected->slot(Mod::MOD_HEART)->getName(), false,
-            FontManager::SIZE_1, false);
+        getMenuFont(FontManager::SIZE_1)->drawText(366, 160,
+            selected->slot(Mod::MOD_HEART)->getName(), false);
         menu_manager_->menuSprites().drawSpriteXYZ(heart, 254, 166, 0, false, true);
     }
 
     if (selected->slot(Mod::MOD_EYES)) {
         int eyes = selected->slot(Mod::MOD_EYES)->icon(selected->isMale());
-        g_App.fonts().drawText(366, 136,
-            selected->slot(Mod::MOD_EYES)->getName(),
-            false, FontManager::SIZE_1, false);
+        getMenuFont(FontManager::SIZE_1)->drawText(366, 136,
+            selected->slot(Mod::MOD_EYES)->getName(), false);
         int eyesx = 238;
         if (!selected->isMale()) {
             eyesx += 2;
@@ -190,9 +188,8 @@ void SelectMenu::drawAgent()
 
     if (selected->slot(Mod::MOD_BRAIN)) {
         int brain = selected->slot(Mod::MOD_BRAIN)->icon(selected->isMale());
-        g_App.fonts().drawText(366, 112,
-            selected->slot(Mod::MOD_BRAIN)->getName(), false,
-            FontManager::SIZE_1, false);
+        getMenuFont(FontManager::SIZE_1)->drawText(366, 112,
+            selected->slot(Mod::MOD_BRAIN)->getName(), false);
         int brainx = 238;
         if (!selected->isMale()) {
             brainx += 2;
@@ -266,6 +263,51 @@ void SelectMenu::updateClock() {
     char tmp[100];
     g_Session.getTimeAsStr(tmp);
     getStatic(txtTimeId_)->setText(tmp);
+
+	// update money
+    getStatic(moneyTxtId_)->setTextFormated("%d", g_Session.getMoney());
+}
+
+void SelectMenu::drawSelectedWeaponInfos(int x, int y, int rldCost) {
+	char tmp[100];
+	
+    getMenuFont(FontManager::SIZE_1)->drawText(x, y, pSelectedWeap_->getName(), false);
+	sprintf(tmp, "COST   :%d", pSelectedWeap_->cost());
+    getMenuFont(FontManager::SIZE_1)->drawText(x, y + 12, tmp, false);
+    y += 24;
+
+    if (pSelectedWeap_->ammo() >= 0) {
+		sprintf(tmp, "AMMO   :%d", pSelectedWeap_->ammo());
+        getMenuFont(FontManager::SIZE_1)->drawText(x, y, tmp, false);
+        y += 12;
+    }
+
+    if (pSelectedWeap_->range() >= 0) {
+		sprintf(tmp, "RANGE  :%d", pSelectedWeap_->range());
+        getMenuFont(FontManager::SIZE_1)->drawText(x, y, tmp, false);
+        y += 12;
+    }
+
+    if (pSelectedWeap_->damagePerShot() >= 0 && pSelectedWeap_->ammo() >= 0) {
+		sprintf(tmp, "SHOT   :%d", pSelectedWeap_->damagePerShot());
+        getMenuFont(FontManager::SIZE_1)->drawText(x, y, tmp, false);
+        y += 12;
+    }
+
+    if (rldCost != -1) {
+        sprintf(tmp, "RELOAD :%d", rldCost);
+        getMenuFont(FontManager::SIZE_1)->drawText(x, y, tmp, false);
+        y += 12;
+    }
+}
+
+void SelectMenu::drawSelectedModInfos(int x, int y)
+{
+	getMenuFont(FontManager::SIZE_1)->drawText(x, y, pSelectedMod_->getName(), false);
+    char tmp[100];
+	sprintf(tmp, "COST   :%d", pSelectedMod_->cost());
+    getMenuFont(FontManager::SIZE_1)->drawText(504, y + 14, tmp, false);
+	getMenuFont(FontManager::SIZE_1)->drawText(504, y + 28, pSelectedMod_->desc(), false);
 }
 
 void SelectMenu::handleShow() {
@@ -292,12 +334,6 @@ void SelectMenu::handleShow() {
 
 void SelectMenu::handleRender() {
     g_Screen.drawLogo(18, 14, g_App.getGameSession().getLogo(), g_App.getGameSession().getLogoColour());
-
-    // write money
-    char tmp[100];
-    sprintf(tmp, "%d", g_App.getGameSession().getMoney());
-    g_App.fonts().drawText(560 - g_App.fonts().textWidth(tmp, false, FontManager::SIZE_2) / 2, 87,
-                           tmp, false, FontManager::SIZE_2, false);
 
     // write team member icons and health
     uint8 data[4], datag[4];
@@ -377,7 +413,7 @@ void SelectMenu::handleRender() {
         g_Screen.scale2x(502, 318, sizeof(ldata), 1, ldata);
         
 		menuSprites().drawSpriteXYZ(pSelectedWeap_->getBigIconId(), 502, 106, 0, false, true);
-        pSelectedWeap_->drawInfo(504, 194, rld_cost_);
+        drawSelectedWeaponInfos(504, 194, rld_cost_);
     
     } else if (pSelectedMod_) {
         uint8 ldata[62];
@@ -386,7 +422,7 @@ void SelectMenu::handleRender() {
         g_Screen.scale2x(502, 292, sizeof(ldata), 1, ldata);
         g_Screen.scale2x(502, 318, sizeof(ldata), 1, ldata);
 
-        pSelectedMod_->drawInfo(504, 108);
+        drawSelectedModInfos(504, 108);
     }
 }
 

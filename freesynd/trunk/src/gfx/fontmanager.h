@@ -71,11 +71,6 @@ public:
         return pIntroFont_;
     }
 
-    void drawText(int x, int y, const char *text, bool dos, EFontSize size, bool dark,
-            bool x2 = true, bool changeColor = false, uint8 fromColor = 0, uint8 toColor = 0);
-    int textWidth(const char *text, bool dos, EFontSize size, bool x2 = true);
-    int textHeight(EFontSize size, bool x2 = true);
-
 protected:
 	//! Create a menu font for the given size
 	MenuFont * createMenuFontForSize(SpriteManager *sprites, EFontSize size, int darkOffset, int lightOffset,

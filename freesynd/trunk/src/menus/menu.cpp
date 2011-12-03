@@ -148,7 +148,7 @@ void Menu::leave() {
  */
 int Menu::addStatic(int x, int y, const char *text, FontManager::EFontSize size, bool dark) {
 
-    MenuText m(x, y, text, size, dark, true);
+    MenuText m(x, y, text, getMenuFont(size), !dark, true);
     statics_.push_back(m);
     return m.getId();
 }
@@ -167,7 +167,7 @@ int Menu::addStatic(int x, int y, const char *text, FontManager::EFontSize size,
  * \returns The newly created widget id.
  */
 int Menu::addStatic(int x, int y, int width, const char *text, FontManager::EFontSize size, bool dark) {
-    MenuText m(x, y, width, text, size, dark, true);
+    MenuText m(x, y, width, text, getMenuFont(size), !dark, true);
     statics_.push_back(m);
     return m.getId();
 }
@@ -191,7 +191,7 @@ int Menu::addStatic(int x, int y, int width, const char *text, FontManager::EFon
 int Menu::addOption(int x, int y, int width, int height, const char *text, FontManager::EFontSize size,
             int to, bool visible, bool centered, int dark_widget, int light_widget) {
     
-    Option *pOption = new Option(this, x, y, width, height, text, size, to, visible, centered, dark_widget, light_widget);
+    Option *pOption = new Option(this, x, y, width, height, text, getMenuFont(size), to, visible, centered, dark_widget, light_widget);
 	actions_.push_back(pOption);
 
 	if (pOption->getHotKey() != KEY_UNKNOWN) {
@@ -218,14 +218,14 @@ int Menu::addImageOption(int x, int y, int dark_widget, int light_widget, bool v
 	Sprite *spr = menu_manager_->menuSprites().sprite(dark_widget);
    
     Option *m = new Option(this, x, y, spr->width() * 2, spr->height() * 2, "", 
-		FontManager::SIZE_1, MENU_NO_MENU, visible, true, dark_widget, light_widget);
+		getMenuFont(FontManager::SIZE_1), MENU_NO_MENU, visible, true, dark_widget, light_widget);
     actions_.push_back(m);
 
     return m->getId();
 }
 
 int Menu::addToggleAction(int x, int y, int width, int height, const char *text, FontManager::EFontSize size, bool selected) {
-    ToggleAction *a = new ToggleAction(this, x, y, width, height, text, size, selected, &group_);
+    ToggleAction *a = new ToggleAction(this, x, y, width, height, text, getMenuFont(size), selected, &group_);
     group_.addButton(a);
     actions_.push_back(a);
 
@@ -242,7 +242,7 @@ int Menu::addToggleAction(int x, int y, int width, int height, const char *text,
  * \return A pointer on the widget.
  */
 ListBox * Menu::addListBox(int x, int y, int width, int height, bool visible) {
-    ListBox *pBox = new ListBox(this, x, y, width, height, visible);
+	ListBox *pBox = new ListBox(this, x, y, width, height, getMenuFont(FontManager::SIZE_1), visible);
     actions_.push_back(pBox);
 
     return pBox;
@@ -258,14 +258,14 @@ ListBox * Menu::addListBox(int x, int y, int width, int height, bool visible) {
  * \return A pointer on the widget.
  */
 TeamListBox * Menu::addTeamListBox(int x, int y, int width, int height, bool visible) {
-    TeamListBox *pBox = new TeamListBox(this, x, y, width, height, visible);
+    TeamListBox *pBox = new TeamListBox(this, x, y, width, height, getMenuFont(FontManager::SIZE_1), visible);
     actions_.push_back(pBox);
 
     return pBox;
 }
 
 TextField * Menu::addTextField(int x, int y, int width, int height, FontManager::EFontSize size, int maxSize, bool displayEmpty, bool visible) {
-	TextField *pTextField = new TextField(this, x, y, width, height, size, maxSize, displayEmpty, visible);
+	TextField *pTextField = new TextField(this, x, y, width, height, getMenuFont(size), maxSize, displayEmpty, visible);
 	actions_.push_back(pTextField);
 
 	return pTextField;

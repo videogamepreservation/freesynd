@@ -39,7 +39,7 @@ DebriefMenu::DebriefMenu(MenuManager *m) : Menu(m, MENU_DEBRIEF, MENU_MAIN, "mde
     y = 100;
     menu_manager_->getMessage("DEBRIEF_SUBTITLE", str);
     addStatic(left_x, y, str.c_str(), FontManager::SIZE_2, false);
-    separatorSize_ = g_App.fonts().textWidth(str.c_str(), false, FontManager::SIZE_2);
+    separatorSize_ = getMenuFont(FontManager::SIZE_2)->textWidth(str.c_str(), false);
 
     y = 118;
     addStatic(left_x, y, "#DEBRIEF_STATUS", FontManager::SIZE_2, false);

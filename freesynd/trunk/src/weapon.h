@@ -84,8 +84,6 @@ public:
 
     const char *getName() { return name_.c_str(); }
 
-    void drawInfo(int x, int y, int rldCost = -1);
-
     int cost() { return cost_; }
     int ammo() { return ammo_; }
     int range() { return range_; }

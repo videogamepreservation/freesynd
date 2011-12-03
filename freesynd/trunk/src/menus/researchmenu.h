@@ -53,6 +53,10 @@ protected:
 
     void showResInfo();
     void showResGraph(Research *pRes);
+	//! Draws infos on the selected weapon
+	void drawSelectedWeaponInfos(int x, int y);
+	//! Draws infos on the selected mod
+	void drawSelectedModInfos(int x, int y);
 
     void redrawGraph() { addDirtyRect(200, 110, 250, 250); } 
 

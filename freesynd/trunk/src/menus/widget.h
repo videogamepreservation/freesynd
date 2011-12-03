@@ -123,14 +123,14 @@ public:
     /*!
      * Use this constructor to left align text. Widget width will depend on text and font.
      */
-    MenuText(int x, int y, const char *text, FontManager::EFontSize size, bool dark,
+    MenuText(int x, int y, const char *text, MenuFont *pFont, bool highlighted,
             bool visible = true);
 
     /*!
      * Use this constructor to specify text alignment. Widget width will be fixed but text position
      * will depend of font size and text length.
      */
-    MenuText(int x, int y, int width, const char *text, FontManager::EFontSize size, bool dark,
+    MenuText(int x, int y, int width, const char *text, MenuFont *pFont, bool highlighted,
             bool visible = true, bool centered = true);
 
     virtual ~MenuText() {}
@@ -144,11 +144,12 @@ public:
     void setTextFormated(const char * format, ...);
     std::string getText() { return text_; }
 
+	// TODO : rename in set/getHighlighted
     void setDark(bool dark);
-    bool isDark() { return dark_; }
+    bool isDark() { return !highlighted_; }
 
 	/*! Returns the font size. */
-	FontManager::EFontSize getSize() { return size_; }
+	MenuFont * getFont() { return pFont_; }
 
 protected:
     /*!
@@ -159,7 +160,7 @@ protected:
 protected:
     /*! The text to be displayed.*/
     std::string text_;
-    bool dark_;
+    bool highlighted_;
     /*! True means the text is centered, false the text is anchored
      * to the left.
      */
@@ -168,8 +169,8 @@ protected:
     int anchorX_;
     /*! Real location of text.*/
     int anchorY_;
-    /*! Size of text font. */
-    FontManager::EFontSize size_;
+    /*! Font used to draw the text. */
+    MenuFont *pFont_;
 };
 
 class Menu;
@@ -220,7 +221,7 @@ public:
 	static Key getKeyForChar(char c);
 
     //! Constructs a new button.
-    Option(Menu *peer, int x, int y, int width, int height, const char *text, FontManager::EFontSize size,
+    Option(Menu *peer, int x, int y, int width, int height, const char *text, MenuFont *pFont,
             int to, bool visible, bool centered = true, int dark_widget = 0, int light_widget = 0);
 
     ~Option();
@@ -291,7 +292,7 @@ class ToggleAction : public Option {
 public:
     //! Constructs a new button.
     ToggleAction(Menu *peer, int x, int y, int width, int height, 
-                    const char *text, FontManager::EFontSize size, bool selected, Group *pGroup);
+                    const char *text, MenuFont *pFont, bool selected, Group *pGroup);
 
     void executeAction(const int modKeys);
 
@@ -318,7 +319,7 @@ protected:
 class ListBox : public ActionWidget , public ModelListener {
 public:
     //! Constructs a new list box.
-    ListBox(Menu *peer, int x, int y, int width, int height, bool visible = true);
+    ListBox(Menu *peer, int x, int y, int width, int height, MenuFont *pFont, bool visible = true);
 
     virtual ~ListBox();
 
@@ -341,6 +342,8 @@ protected:
     SequenceModel *pModel_;
     /*! The line that the mouse is on. -1 if no line is hovered.*/
     int focusedLine_;
+	/*! Font used to draw the text. */
+    MenuFont *pFont_;
 };
 
 /*!
@@ -351,7 +354,7 @@ protected:
 class TeamListBox : public ListBox {
 public:
     //! Constructs a new list box.
-    TeamListBox(Menu *peer, int x, int y, int width, int height, bool visible = true);
+    TeamListBox(Menu *peer, int x, int y, int width, int height, MenuFont *pFont, bool visible = true);
 
     ~TeamListBox();
 
@@ -390,7 +393,7 @@ public:
 	static void setEmptyLabel(std::string str) { emptyLbl_ = str; }
 
     //! Constructs a new textfield.
-    TextField(Menu *peer, int x, int y, int width, int height, FontManager::EFontSize size,
+    TextField(Menu *peer, int x, int y, int width, int height, MenuFont *pFont,
             int maxSize, bool displayEmpty, bool visible);
 
     ~TextField();
@@ -398,8 +401,8 @@ public:
 	void setText(const char* text);
 	std::string getText() { return text_.getText(); }
 
-	void setDark(bool dark) { text_.setDark(dark); }
-    bool isDark() { return text_.isDark(); }
+	void setHighlighted(bool highlighted) { text_.setDark(!highlighted); }
+    bool isHighlighted() { return !text_.isDark(); }
 
     //! Draw the widget on screen
     void draw();

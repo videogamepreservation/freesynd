@@ -42,11 +42,3 @@ icon_f_(mod_iconF)
         icon_f_ = icon_;
 }
 
-void Mod::drawInfo(int x, int y)
-{
-	g_App.fonts().drawText(x, y, name_.c_str(), false, FontManager::SIZE_1, false);
-    char tmp[100];
-    sprintf(tmp, "COST   :%d", cost_);
-    g_App.fonts().drawText(504, y + 14, tmp, false, FontManager::SIZE_1, false);
-    g_App.fonts().drawText(504, y + 28, desc_.c_str(), false, FontManager::SIZE_1, false);
-}

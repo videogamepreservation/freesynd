@@ -190,6 +190,42 @@ void ResearchMenu::showResGraph(Research *pRes) {
     getStatic(searchTitleLblId_)->setTextFormated("#RES_GRAP_TITLE", pResForGraph_->getName().c_str());
 }
 
+void ResearchMenu::drawSelectedWeaponInfos(int x, int y) {
+	char tmp[100];
+	
+    getMenuFont(FontManager::SIZE_1)->drawText(x, y, pSelectedWeapon_->getName(), false);
+	sprintf(tmp, "COST   :%d", pSelectedWeapon_->cost());
+    getMenuFont(FontManager::SIZE_1)->drawText(x, y + 12, tmp, false);
+    y += 24;
+
+    if (pSelectedWeapon_->ammo() >= 0) {
+		sprintf(tmp, "AMMO   :%d", pSelectedWeapon_->ammo());
+        getMenuFont(FontManager::SIZE_1)->drawText(x, y, tmp, false);
+        y += 12;
+    }
+
+    if (pSelectedWeapon_->range() >= 0) {
+		sprintf(tmp, "RANGE  :%d", pSelectedWeapon_->range());
+        getMenuFont(FontManager::SIZE_1)->drawText(x, y, tmp, false);
+        y += 12;
+    }
+
+    if (pSelectedWeapon_->damagePerShot() >= 0 && pSelectedWeapon_->ammo() >= 0) {
+		sprintf(tmp, "SHOT   :%d", pSelectedWeapon_->damagePerShot());
+        getMenuFont(FontManager::SIZE_1)->drawText(x, y, tmp, false);
+        y += 12;
+    }
+}
+
+void ResearchMenu::drawSelectedModInfos(int x, int y)
+{
+	getMenuFont(FontManager::SIZE_1)->drawText(x, y, pSelectedMod_->getName(), false);
+    char tmp[100];
+	sprintf(tmp, "COST   :%d", pSelectedMod_->cost());
+    getMenuFont(FontManager::SIZE_1)->drawText(504, y + 14, tmp, false);
+	getMenuFont(FontManager::SIZE_1)->drawText(504, y + 28, pSelectedMod_->desc(), false);
+}
+
 void ResearchMenu::handleTick(int elapsed)
 {
     if (g_Session.updateTime(elapsed)) {
@@ -238,7 +274,7 @@ void ResearchMenu::handleRender()
         g_Screen.scale2x(502, 318, sizeof(ldata), 1, ldata);
 
 		menuSprites().drawSpriteXYZ(pSelectedWeapon_->getBigIconId(), 502, 108, 0, false, true);
-        pSelectedWeapon_->drawInfo(504, 196);
+        drawSelectedWeaponInfos(504, 196);
     }
 
     if (pSelectedMod_) {
@@ -246,7 +282,7 @@ void ResearchMenu::handleRender()
         memset(ldata, 16, sizeof(ldata));
         g_Screen.scale2x(502, 318, sizeof(ldata), 1, ldata);
 
-        pSelectedMod_->drawInfo(504, 108);
+        drawSelectedModInfos(504, 108);
     }
 
     if (pSelectedRes_) {

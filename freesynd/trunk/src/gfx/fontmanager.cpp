@@ -77,25 +77,3 @@ MenuFont * FontManager::createMenuFontForSize(SpriteManager * sprites, EFontSize
     return pFont;
 }
 
-void FontManager::drawText(int x, int y, const char *text, bool dos, EFontSize size,
-                           bool dark, bool x2,
-                           bool changeColor, uint8 fromColor, uint8 toColor)
-{
-    assert(menuFonts_[size]);
-
-	if (dos) {
-	    menuFonts_[size]->drawTextCp437(x, y, text, !dark, x2);
-	} else {
-		menuFonts_[size]->drawText(x, y, text, !dark, x2);
-	}
-}
-
-int FontManager::textWidth(const char *text, bool dos, EFontSize size, bool x2)
-{
-    return menuFonts_[size]->textWidth(text, dos, x2);
-}
-
-int FontManager::textHeight(EFontSize size, bool x2)
-{
-    return menuFonts_[size]->textHeight(x2);
-}

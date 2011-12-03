@@ -69,38 +69,6 @@ Weapon::Weapon(const std::string& w_name, int smallIcon, int bigIcon, int w_cost
     shot_accuracy_ = w_shot_accuracy;
 }
 
-void Weapon::drawInfo(int x, int y,int rldCost) {
-    char tmp[100];
-    g_App.fonts().drawText(x, y, name_.c_str(), false, FontManager::SIZE_1, false);
-    sprintf(tmp, "COST   :%d", cost_);
-    g_App.fonts().drawText(x, y + 12, tmp, false, FontManager::SIZE_1, false);
-    y += 24;
-
-    if (ammo_ >= 0) {
-        sprintf(tmp, "AMMO   :%d", ammo_);
-        g_App.fonts().drawText(x, y, tmp, false, FontManager::SIZE_1, false);
-        y += 12;
-    }
-
-    if (range_ >= 0) {
-        sprintf(tmp, "RANGE  :%d", range_);
-        g_App.fonts().drawText(x, y, tmp, false, FontManager::SIZE_1, false);
-        y += 12;
-    }
-
-    if (damage_per_shot_ >= 0 && ammo_ >= 0) {
-        sprintf(tmp, "SHOT   :%d", damage_per_shot_);
-        g_App.fonts().drawText(x, y, tmp, false, FontManager::SIZE_1, false);
-        y += 12;
-    }
-
-    if (rldCost != -1) {
-        sprintf(tmp, "RELOAD :%d", rldCost);
-        g_App.fonts().drawText(x, y, tmp, false, FontManager::SIZE_1, false);
-        y += 12;
-    }
-}
-
 WeaponInstance *Weapon::createInstance() {
     return new WeaponInstance(this);
 }
