@@ -58,23 +58,63 @@ public:
             const std::string& valid_chars);
     void setSpriteManager(SpriteManager *sprites, int offset, char base,
             const FontRange& range);
-	void setSpriteManager(SpriteManager *sprites, int darkOffset, int lightOffset, char base,
-            const std::string& valid_chars);
     // If dos is true, the text is in cp437, otherwise it's utf-8.
-    void drawText(int x, int y, const char *text, bool dos, bool x2 = true, bool changeColor = false, uint8 fromColor = 0, uint8 toColor = 0);
-	void drawText(int x, int y, const char *text, bool dos, bool lighted, bool x2 = true, bool changeColor = false, uint8 fromColor = 0, uint8 toColor = 0);
+    void drawText(int x, int y, const char *text, bool dos, bool x2 = true);
     int textWidth(const char *text, bool dos, bool x2 = true);
     int textHeight(bool x2 = true);
 
 protected:
     static unsigned char decode(const unsigned char * &c, bool dos);
     static int decodeUTF8(const unsigned char * &c);
-    virtual Sprite *getSprite(unsigned char dos_char, bool highlighted);
+    virtual Sprite *getSprite(unsigned char dos_char);
 
     SpriteManager *sprites_;
     int offset_;
-	int lightOffset_;
     FontRange range_;
+};
+
+/*! 
+ * Font used in menu and widget. Text can be highlighted or dark.
+ * Text can be in UTF-8 or Cp437.
+ */
+class MenuFont : public Font {
+public:
+	MenuFont();
+
+	void setSpriteManager(SpriteManager *sprites, int darkOffset, int lightOffset, char base,
+            const std::string& valid_chars);
+
+	//! draws a UTF-8 text at the given position
+	void drawText(int x, int y, const char *text, bool lighted, bool x2 = true) {
+		drawText(x, y, false, text, lighted, x2);
+	};
+	//! draws a Cp437 text at the given position
+	void drawTextCp437(int x, int y, const char *text, bool lighted, bool x2 = true) {
+		drawText(x, y, true, text, lighted, x2);
+	};
+
+protected:
+	//! returns the sprite which can be highlighted or not
+	virtual Sprite *getSprite(unsigned char dos_char, bool highlighted);
+	//! draws a text at the given position
+	void drawText(int x, int y, bool dos, const char *text, bool lighted, bool x2 = true);
+
+protected:
+    int lightOffset_;
+};
+
+/*! 
+ * GameFont is the font used during gameplay (for displaying hints).
+ * It uses the same sprites as the menu fonts but only in size 3 and it
+ * changes its color to a specified color.
+ * It uses only UTF-8 text in input.
+ */
+class GameFont : public Font {
+public:
+	GameFont();
+
+	//! draw a UTF-8 text at the given position with the given color
+	void drawText(int x, int y, const char *text, uint8 toColor);
 };
 
 class HChar {

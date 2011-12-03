@@ -50,6 +50,8 @@ typedef struct FrameTypeChunkHeader {
     uint16 heightOverride;
 } FrameTypeChunkHeader;
 
+class Font;
+
 /*!
  * Fli Player class.
  */
@@ -58,7 +60,7 @@ public:
     FliPlayer() : fli_data_(0), offscreen_(0) {}
     virtual ~FliPlayer();
 
-    bool play(bool intro = false);
+    bool play(bool intro = false, Font *pIntroFont = NULL);
     void loadFliData(uint8 *buf, bool skipable = true);
     bool decodeFrame();
     void copyCurrentFrameToScreen();

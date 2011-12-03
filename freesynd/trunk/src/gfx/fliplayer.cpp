@@ -457,7 +457,7 @@ void FliPlayer::copyCurrentFrameToScreen() {
                      0, false);
 }
 
-bool FliPlayer::play(bool intro) {
+bool FliPlayer::play(bool intro, Font *pIntroFont) {
     if (!fli_data_)
         return false;
 
@@ -489,7 +489,7 @@ bool FliPlayer::play(bool intro) {
                                 captions[g_rg_sample_offsets_and_timings[i].m2];
                     }
                 }
-            g_App.introFont().drawText(10, 360, caption, false);
+            pIntroFont->drawText(10, 360, caption, false);
         }
         cur_frame++;
 

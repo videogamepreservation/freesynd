@@ -80,14 +80,6 @@ class App : public Singleton < App > {
 		return menus_.fonts();
     }
 
-    Font &introFont() {
-        return intro_font_;
-    }
-
-    HFont &gameFont() {
-        return game_font_;
-    }
-
     MenuManager &menus() {
         return menus_;
     }
@@ -215,9 +207,6 @@ private:
     std::string iniPath_;
 
     GameSpriteManager game_sprites_;
-    HFont game_font_;
-    Font intro_font_;
-    SpriteManager intro_font_sprites_;
     MenuManager menus_;
     MissionManager missions_;
     AgentManager agents_;

@@ -261,7 +261,7 @@ bool App::initialize(const std::string& iniPath) {
     }
 
 	LOG(Log::k_FLG_INFO, "App", "initialize", ("initializing menus..."))
-	if (!menus_.initialize()) {
+	if (!menus_.initialize(playIntro_)) {
 		return false;
 	}
 
@@ -574,30 +574,19 @@ void App::setPalette(const char *fname, bool sixbit) {
  */
 void App::run(int start_mission) {
     int size = 0, tabSize = 0;
-    uint8 *data, *tabData;
+    uint8 *data;
 
     FliPlayer fliPlayer;
 
     // Play intro only the first time the application is run
     // start_mission is available only in DEBUG mode to jump to a mission
     if (playIntro_ && start_mission == -1) {
-        LOG(Log::k_FLG_GFX, "App", "run", ("Loading resource for the intro"))
-        // this font is for the intro
-        tabData = File::loadOriginalFile("mfnt-0.tab", tabSize);
-        data = File::loadOriginalFile("mfnt-0.dat", size);
-        intro_font_sprites_.loadSprites(tabData, tabSize, data, true);
-        LOG(Log::k_FLG_GFX, "App", "run", ("%d sprites loaded from mfnt-0.dat", tabSize / 6))
-        delete[] tabData;
-        delete[] data;
-
-        intro_font_.setSpriteManager(&intro_font_sprites_, 1, '!', "0x21-0x60,0x80-0xa8");
-
         // play intro
         LOG(Log::k_FLG_GFX, "App", "run", ("Playing the intro"))
         data = File::loadOriginalFile("intro.dat", size);
         fliPlayer.loadFliData(data);
         music().playTrack(MusicManager::TRACK_INTRO);
-        fliPlayer.play(true);
+        fliPlayer.play(true, fonts().introFont());
         music().stopPlayback();
         delete[] data;
 
@@ -617,8 +606,6 @@ void App::run(int start_mission) {
     // TODO: what's this for?
     data = File::loadOriginalFile("hreq.dat", size);
     delete[] data;
-
-    game_font_.load();
 
 #if 0
     system_->updateScreen();

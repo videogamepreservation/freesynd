@@ -7,6 +7,7 @@
  *   Copyright (C) 2006  Trent Waddington <qg@biodome.org>              *
  *   Copyright (C) 2006  Tarjei Knapstad <tarjei.knapstad@gmail.com>    *
  *   Copyright (C) 2011  Joey Parrish  <joey.parrish@gmail.com>         *
+ *   Copyright (C) 2011  Benoit Blancard <benblan@users.sourceforge.net>*
  *                                                                      *
  *    This program is free software;  you can redistribute it and / or  *
  *  modify it  under the  terms of the  GNU General  Public License as  *
@@ -32,6 +33,9 @@ FontManager::FontManager()
 {
     for (int i = 0; i < 4; i++)
         menuFonts_[i] = NULL;
+
+	pIntroFont_ = NULL;
+	pGameFont_ = NULL;
 }
 
 FontManager::~FontManager()
@@ -39,17 +43,38 @@ FontManager::~FontManager()
     for (int i = 0; i < 4; i++) {
         delete menuFonts_[i];
     }
+
+	if (pIntroFont_) {
+		delete pIntroFont_;
+	}
 }
 
-bool FontManager::loadFont(SpriteManager * sprites, EFontSize size,
+bool FontManager::loadFonts(SpriteManager *pMenuSprites, SpriteManager *pIntroFontSprites_) {
+	assert(pMenuSprites);
+
+	menuFonts_[SIZE_4] = createMenuFontForSize(pMenuSprites, FontManager::SIZE_4, 1076, 939, 'A', "0x27,0x2c-0x2f,0x41-0x5a,0x5c,0x60,0x80-0x90,0x93-0x9a,0xa0-0xa7");
+    menuFonts_[SIZE_3] = createMenuFontForSize(pMenuSprites, FontManager::SIZE_3, 802, 665, 'A', "0x21-0x5a,0x80-0x90,0x93-0x9a,0xa0-0xa8");
+    menuFonts_[SIZE_2] = createMenuFontForSize(pMenuSprites, FontManager::SIZE_2, 528, 391, 'A', "0x21-0x60,0x80-0xa8");
+    menuFonts_[SIZE_1] = createMenuFontForSize(pMenuSprites, FontManager::SIZE_1, 254, 117, 'A', "0x21-0x60,0x80-0xa8");
+
+	pGameFont_ = new GameFont();
+	pGameFont_->setSpriteManager(pMenuSprites, 665, 'A', "0x21-0x5a,0x80-0x90,0x93-0x9a,0xa0-0xa8");
+
+	if (pIntroFontSprites_) {
+		pIntroFont_ = new Font();
+		pIntroFont_->setSpriteManager(pIntroFontSprites_, 1, '!', "0x21-0x60,0x80-0xa8");
+	}
+
+	return true;
+}
+
+MenuFont * FontManager::createMenuFontForSize(SpriteManager * sprites, EFontSize size,
                            int darkOffset, int lightOffset, char base, const std::string& valid_chars)
 {
-    assert(sprites);
+	MenuFont * pFont = new MenuFont();
+    pFont->setSpriteManager(sprites, darkOffset, lightOffset, base, valid_chars);
 
-	menuFonts_[size] = new Font();
-    menuFonts_[size]->setSpriteManager(sprites, darkOffset, lightOffset, base, valid_chars);
-
-    return true;
+    return pFont;
 }
 
 void FontManager::drawText(int x, int y, const char *text, bool dos, EFontSize size,
@@ -58,7 +83,11 @@ void FontManager::drawText(int x, int y, const char *text, bool dos, EFontSize s
 {
     assert(menuFonts_[size]);
 
-    menuFonts_[size]->drawText(x, y, text, dos, !dark, x2, changeColor, fromColor, toColor);
+	if (dos) {
+	    menuFonts_[size]->drawTextCp437(x, y, text, !dark, x2);
+	} else {
+		menuFonts_[size]->drawText(x, y, text, !dark, x2);
+	}
 }
 
 int FontManager::textWidth(const char *text, bool dos, EFontSize size, bool x2)

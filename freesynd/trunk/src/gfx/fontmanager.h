@@ -33,7 +33,7 @@
 class SpriteManager;
 
 /*!
- * Font manager class.
+ * Manager for all fonts used in the application.
  */
 class FontManager {
 public:
@@ -48,8 +48,28 @@ public:
     FontManager();
     ~FontManager();
 
-    bool loadFont(SpriteManager *sprites, EFontSize size, int darkOffset, int lightOffset,
-            char base, const std::string& valid_chars);
+	//! Creates all fonts
+	bool loadFonts(SpriteManager *pMenuSprites, SpriteManager *pIntroFontSprites_);
+
+	/*! 
+	 * Returns the font used in menus.
+	 * \param size Size of the font
+	 */
+	MenuFont * getMenuFont(FontManager::EFontSize size) { return menuFonts_[size]; }
+
+	/*!
+	 * Returns the font used in the gameplay menu.
+	 */
+	GameFont *gameFont() {
+        return pGameFont_;
+    }
+
+	/*!
+	 * Returns the font used in the intro animation.
+	 */
+	Font * introFont() {
+        return pIntroFont_;
+    }
 
     void drawText(int x, int y, const char *text, bool dos, EFontSize size, bool dark,
             bool x2 = true, bool changeColor = false, uint8 fromColor = 0, uint8 toColor = 0);
@@ -57,7 +77,17 @@ public:
     int textHeight(EFontSize size, bool x2 = true);
 
 protected:
-    Font * menuFonts_[4];
+	//! Create a menu font for the given size
+	MenuFont * createMenuFontForSize(SpriteManager *sprites, EFontSize size, int darkOffset, int lightOffset,
+            char base, const std::string& valid_chars);
+
+protected:
+	/*!
+	 * Menu fonts have different sizes.
+	 */
+    MenuFont * menuFonts_[4];
+	GameFont *pGameFont_;
+	Font *pIntroFont_;
 };
 
 #endif

@@ -58,45 +58,79 @@ MenuManager::MenuManager():
     
     current_ = NULL;
 	nextMenuId_ = -1;
+
+	pIntroFontSprites_ = NULL;
 }
 
 MenuManager::~MenuManager()
 {}
 
-bool MenuManager::initialize() {
-	// Loads menu sprites
+/*!
+ * Initialize the menu manager.
+ * \param loadIntroFont If true loads the intro sprites and font
+ */
+bool MenuManager::initialize(bool loadIntroFont) {
+	bool res = false;
 	int size = 0, tabSize = 0;
 	uint8 *data, *tabData;
-    LOG(Log::k_FLG_GFX, "MenuManager", "initialize", ("Loading menu sprites ..."))
+
+	// Loads menu sprites
+	LOG(Log::k_FLG_GFX, "MenuManager", "initialize", ("Loading menu sprites ..."))
     tabData = File::loadOriginalFile("mspr-0.tab", tabSize);
+	if (!tabData) {
+		FSERR(Log::k_FLG_UI, "MenuManager", "initialize", ("Failed reading file %s", "mspr-0.tab"));
+		return false;
+	}
 	data = File::loadOriginalFile("mspr-0.dat", size);
-	
-	if (tabData && data) {
-		menuSprites_.loadSprites(tabData, tabSize, data, true);
-		
-		LOG(Log::k_FLG_GFX, "MenuManager", "initialize", ("%d sprites loaded", tabSize / 6))
+	if (!data) {
+		FSERR(Log::k_FLG_UI, "MenuManager", "initialize", ("Failed reading file %s", "mspr-0.dat"));
 		delete[] tabData;
-		delete[] data;
-	} else {
-		if (tabData) {
-			delete[] tabData;
-		}
-
-		if (data) {
-			delete[] data;
-		}
-
 		return false;
 	}
 	
-    // Loads menu fonts
-	LOG(Log::k_FLG_GFX, "MenuManager", "initialize", ("Loading fonts ..."))
-	fonts_.loadFont(&menuSprites_, FontManager::SIZE_4, 1076, 939, 'A', "0x27,0x2c-0x2f,0x41-0x5a,0x5c,0x60,0x80-0x90,0x93-0x9a,0xa0-0xa7");
-    fonts_.loadFont(&menuSprites_, FontManager::SIZE_3, 802, 665, 'A', "0x21-0x5a,0x80-0x90,0x93-0x9a,0xa0-0xa8");
-    fonts_.loadFont(&menuSprites_, FontManager::SIZE_2, 528, 391, 'A', "0x21-0x60,0x80-0xa8");
-    fonts_.loadFont(&menuSprites_, FontManager::SIZE_1, 254, 117, 'A', "0x21-0x60,0x80-0xa8");
+	res = menuSprites_.loadSprites(tabData, tabSize, data, true);
+	delete[] tabData;
+	delete[] data;
+	if (res) {
+		LOG(Log::k_FLG_GFX, "MenuManager", "initialize", ("%d sprites loaded", tabSize / 6))
+	} else {
+		FSERR(Log::k_FLG_UI, "MenuManager", "initialize", ("Failed loading menu sprites"));
+		return false;
+	}
 
-	return true;
+	// loads intro sprites
+	if (loadIntroFont) {
+		LOG(Log::k_FLG_GFX, "MenuManager", "initialize", ("Loading intro sprites ..."))
+
+        tabData = File::loadOriginalFile("mfnt-0.tab", tabSize);
+		if (!tabData) {
+			FSERR(Log::k_FLG_UI, "MenuManager", "initialize", ("Failed reading file %s", "mfnt-0.tab"));
+			return false;
+		}
+        data = File::loadOriginalFile("mfnt-0.dat", size);
+		if (!data) {
+			FSERR(Log::k_FLG_UI, "MenuManager", "initialize", ("Failed reading file %s", "mfnt-0.dat"));
+			delete[] tabData;
+			return false;
+		}
+
+		pIntroFontSprites_ = new SpriteManager();
+        res = pIntroFontSprites_->loadSprites(tabData, tabSize, data, true);
+        delete[] tabData;
+        delete[] data;
+		if (res) {
+			LOG(Log::k_FLG_GFX, "MenuManager", "initialize", ("%d sprites loaded", tabSize / 6))
+		} else {
+			FSERR(Log::k_FLG_UI, "MenuManager", "initialize", ("Failed loading intro sprites"));
+			return false;
+		}
+	}
+	
+    // Loads fonts
+	LOG(Log::k_FLG_GFX, "MenuManager", "initialize", ("Loading fonts ..."))
+	res = fonts_.loadFonts(&menuSprites_, pIntroFontSprites_);
+
+	return res;
 }
 
 /*!
@@ -113,6 +147,11 @@ void MenuManager::destroy() {
         delete language_;
         language_ = NULL;
     }
+
+	if (pIntroFontSprites_) {
+		delete pIntroFontSprites_;
+        pIntroFontSprites_ = NULL;
+	}
 }
 
 void MenuManager::setLanguage(FS_Lang lang) {

@@ -464,6 +464,10 @@ void Menu::mouseUpEvent(int x, int y, int button, const int modKeys)
     handleMouseUp(x, y, button, modKeys);
 }
 
-Font * Menu::getMenuFont() {
-	return NULL;
+MenuFont * Menu::getMenuFont(FontManager::EFontSize size) { 
+	return menu_manager_->fonts().getMenuFont(size); 
+}
+
+GameFont *Menu::gameFont() {
+	return menu_manager_->fonts().gameFont();
 }

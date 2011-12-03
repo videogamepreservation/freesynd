@@ -57,7 +57,7 @@ public:
     MenuManager();
     ~MenuManager();
 
-	bool initialize();
+	bool initialize(bool loadIntroFont);
     
     //! Destroy all menus and resources
     void destroy();
@@ -145,6 +145,8 @@ protected:
 
 	/*! Sprite manager for menu sprites.*/
 	SpriteManager menuSprites_;
+	/*! Sprite manager for intro font. */
+	SpriteManager *pIntroFontSprites_;
 	/*! Font manager.*/
 	FontManager fonts_;
 };

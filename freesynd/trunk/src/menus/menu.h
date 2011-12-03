@@ -201,7 +201,10 @@ protected:
     void needRendering();
     void addDirtyRect(int x, int y, int width, int height);
 
-	Font * getMenuFont();
+	//! Convenient method to return the menu font with the given size
+	MenuFont * getMenuFont(FontManager::EFontSize size);
+	//! Convenient method to return the game font
+	GameFont *gameFont();
 
 protected:
     MenuManager *menu_manager_;
