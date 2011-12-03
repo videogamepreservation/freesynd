@@ -355,13 +355,13 @@ void ResearchMenu::handleAction(const int actionId, void *ctx, const int modKeys
         std::pair<int, void *> * pPair = static_cast<std::pair<int, void *> *> (ctx);
         pSelectedMod_ = static_cast<Mod *> (pPair->second);
         hideDetailsList();
-        showOption(KEY_F5);
+        getOption(cancelDescId_)->setVisible(true);
 
     } else if (actionId == pEquipsLBox_->getId()) { // Selection of an avalaible weapon
         std::pair<int, void *> * pPair = static_cast<std::pair<int, void *> *> (ctx);
         pSelectedWeapon_ = static_cast<Weapon *> (pPair->second);
         hideDetailsList();
-        showOption(KEY_F5);
+        getOption(cancelDescId_)->setVisible(true);
 
     } else if (actionId == modsButId_) {
         if (tab_ != TAB_MODS) {

@@ -104,40 +104,6 @@ public:
 	//! Adds a mapping between a Key and an Option
 	void registerHotKey(Key key, int optId);
 
-	//! Hides the given button
-    /*!
-     * Search for the option mapped to the given key
-     * and disables its visible property.
-     * \param key The key associated to the option.
-     */
-    void hideOption(Key key) {
-        if (hotKeys_.find(key) == hotKeys_.end())
-            return;
-
-        Option *opt = hotKeys_[key];
-
-        if (opt->isVisible()) {
-            opt->setVisible(false);
-        }
-    }
-
-    //! Shows the given button
-    /*!
-     * Search for the option mapped to the given key
-     * and enables its visible property.
-     * \param key The key associated to the option.
-     */
-    void showOption(Key key) {
-        if (hotKeys_.find(key) == hotKeys_.end())
-            return;
-
-        Option *opt = hotKeys_[key];
-
-        if (!opt->isVisible()) {
-            opt->setVisible(true);
-        }
-    }
-
 	void render();
     //! Does common actions before leaving
     void leave();

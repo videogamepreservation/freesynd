@@ -51,7 +51,7 @@ protected:
     //! Draws a focus around the selected agent picture
     void drawAgentSelector(int x, int y);
     void drawAgent();
-	void drawSelectedWeaponInfos(int x, int y, int rldCost);
+	void drawSelectedWeaponInfos(int x, int y);
 	void drawSelectedModInfos(int x, int y);
 
     void toggleAgent(int n);
@@ -67,14 +67,13 @@ protected:
     };
 
     ETab tab_;
+	/*! Id of the currently selected agent.*/
     int cur_agent_;
     /*! Counter to update the rnd_ field.*/
     int tick_count_;
     /*! A counter used to draw the agent selector.*/
     int rnd_;
     bool sel_all_;
-    // reload cost
-    int rld_cost_;
     /*! Selected weapon on the weapon list.*/
     Weapon *pSelectedWeap_;
     /*! Selected weapon instance id on the current agent inventory.*/

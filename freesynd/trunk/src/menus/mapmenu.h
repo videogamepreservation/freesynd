@@ -86,6 +86,9 @@ protected:
     int incrTaxButId_;
     /*! Id of the decrement tax percentage button.*/
     int decrTaxButId_;
+
+	/*! Id of the briefing button.*/
+    int briefButId_;
 };
 
 #endif

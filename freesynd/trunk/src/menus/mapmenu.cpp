@@ -111,7 +111,7 @@ MapMenu::MapMenu(MenuManager * m)
 mapblk_data_(NULL), select_tick_count_(0)
 {
 	// 
-    addOption(17, 347, 128, 25, "#MAP_BRIEF_BUT", FontManager::SIZE_2, MENU_BRIEF);
+    briefButId_ = addOption(17, 347, 128, 25, "#MAP_BRIEF_BUT", FontManager::SIZE_2, MENU_BRIEF);
 	addOption(500, 347,  128, 25, "#MENU_MAIN_BUT", FontManager::SIZE_2, MENU_MAIN);
 
     //txtCountryId_ = addStatic(268, 312, "", FontManager::SIZE_1, false);   // Country name
@@ -155,15 +155,15 @@ void MapMenu::handleBlockSelected() {
     if (blk.status == BLK_FINISHED) { // A mission is finished
         // Brief is available only if replay mission cheat is set
         if (g_Session.canReplayMission()) {
-            showOption(KEY_F4);
+            getOption(briefButId_)->setVisible(true);
         } else {
-            hideOption(KEY_F4);
+            getOption(briefButId_)->setVisible(false);
         }
     } else if (blk.status == BLK_UNAVAIL) { // A mission is unavailable
-        hideOption(KEY_F4);
+        getOption(briefButId_)->setVisible(false);
     } else {
         // Brief is available because mission is either available or on rebellion
-        showOption(KEY_F4);
+        getOption(briefButId_)->setVisible(true);
     }
 
     // Update the country informations
@@ -214,8 +214,8 @@ void MapMenu::handleBlockSelected() {
 #endif
         getStatic(txtTaxValueId_)->setText(tmp);
 
-        showOption(KEY_MINUS);
-        showOption(KEY_PLUS);
+		getOption(decrTaxButId_)->setVisible(true);
+        getOption(incrTaxButId_)->setVisible(true);
 
 #ifdef WIN_SECURE
         sprintf_s(tmp, 100, "@   %d%%", tax);
@@ -243,8 +243,8 @@ void MapMenu::handleBlockSelected() {
             getStatic(txtTaxPctId_)->setText("");
         }
 
-        hideOption(KEY_MINUS);
-        hideOption(KEY_PLUS);
+        getOption(decrTaxButId_)->setVisible(false);
+        getOption(incrTaxButId_)->setVisible(false);
     }
 
     //addDirtyRect(192, 310, 260, 70);

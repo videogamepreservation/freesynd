@@ -390,7 +390,7 @@ const int TeamListBox::LINE_OFFSET = 20;
 
 TeamListBox::TeamListBox(Menu *peer, int x, int y, int width, int height, MenuFont *pFont, bool visible) :
         ListBox(peer, x, y, width, height, pFont, visible) {
-    pTitle_ = new MenuText(x, y, width, "#SELECT_CRYO_TITLE", pFont, false);
+    pTitle_ = new MenuText(x, y, width, "#SELECT_CRYO_TITLE", pFont, true);
     lUnderline_ = pFont_->textWidth(pTitle_->getText().c_str(), false);
     xUnderline_ = (x + x + width) / 2  - lUnderline_ / 2;
     yUnderline_ = y + pFont_->textHeight();

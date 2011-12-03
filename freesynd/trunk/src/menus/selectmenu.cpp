@@ -74,7 +74,6 @@ cur_agent_(0), tick_count_(0), sel_all_(false)
     txtAgentId_ = addStatic(158, 86, "", FontManager::SIZE_2, false);
 
     rnd_ = 0;
-    rld_cost_ = -1;
 }
 
 SelectMenu::~SelectMenu()
@@ -268,7 +267,7 @@ void SelectMenu::updateClock() {
     getStatic(moneyTxtId_)->setTextFormated("%d", g_Session.getMoney());
 }
 
-void SelectMenu::drawSelectedWeaponInfos(int x, int y, int rldCost) {
+void SelectMenu::drawSelectedWeaponInfos(int x, int y) {
 	char tmp[100];
 	
     getMenuFont(FontManager::SIZE_1)->drawText(x, y, pSelectedWeap_->getName(), false);
@@ -294,10 +293,16 @@ void SelectMenu::drawSelectedWeaponInfos(int x, int y, int rldCost) {
         y += 12;
     }
 
-    if (rldCost != -1) {
-        sprintf(tmp, "RELOAD :%d", rldCost);
-        getMenuFont(FontManager::SIZE_1)->drawText(x, y, tmp, false);
-        y += 12;
+	if (selectedWInstId_ > 0 ) {
+		WeaponInstance *wi = g_Session.teamMember(cur_agent_)->weapon(selectedWInstId_ - 1);
+		if (pSelectedWeap_->ammo() > wi->ammoRemaining()) {
+			int rldCost = (pSelectedWeap_->ammo()
+									- wi->ammoRemaining()) * pSelectedWeap_->ammoCost();
+		
+			sprintf(tmp, "RELOAD :%d", rldCost);
+			getMenuFont(FontManager::SIZE_1)->drawText(x, y, tmp, false);
+			y += 12;
+		}
     }
 }
 
@@ -413,7 +418,7 @@ void SelectMenu::handleRender() {
         g_Screen.scale2x(502, 318, sizeof(ldata), 1, ldata);
         
 		menuSprites().drawSpriteXYZ(pSelectedWeap_->getBigIconId(), 502, 106, 0, false, true);
-        drawSelectedWeaponInfos(504, 194, rld_cost_);
+        drawSelectedWeaponInfos(504, 194);
     
     } else if (pSelectedMod_) {
         uint8 ldata[62];
@@ -436,7 +441,6 @@ void SelectMenu::handleLeave() {
     pSelectedMod_ = NULL;
     rnd_ = 0;
     cur_agent_ = 0;
-    rld_cost_ = -1;
     sel_all_ = false;
 }
 
@@ -515,6 +519,7 @@ bool SelectMenu::handleMouseDown(int x, int y, int button, const int modKeys)
         }
     }
 
+	// Checks if the user clicked on item in the current agent inventory
     Agent *selected = g_Session.teamMember(cur_agent_);
     if (selected) {
         for (int j = 0; j < 2; j++)
@@ -523,39 +528,44 @@ bool SelectMenu::handleMouseDown(int x, int y, int button, const int modKeys)
                     x >= 366 + i * 32 && x < 366 + i * 32 + 32 &&
                     y >= 308 + j * 32 && y < 308 + j * 32 + 32)
                 {
+					// The user has actually selected a weapon from the inventory :
+					// 1/ selects the EQUIPS toggle button
                     tab_ = TAB_EQUIPS;
                     pSelectedMod_ = NULL;
                     selectToggleAction(equipButId_);
-                    selectedWInstId_ = i + j * 4 + 1;
-                    pSelectedWeap_ = selected->weapon(selectedWInstId_ - 1)->getWeaponClass();
-                    addDirtyRect(500, 105,  125, 235);
-                    if (rld_cost_ == -1) {
-                        WeaponInstance *wi = selected->weapon(selectedWInstId_ -1);
-                        if (pSelectedWeap_->ammo() > wi->ammoRemaining()) {
-                            showOption(KEY_F10);
-                            rld_cost_ = (pSelectedWeap_->ammo()
-                                - wi->ammoRemaining()) * pSelectedWeap_->ammoCost();
-                        } else {
-                            hideOption(KEY_F10);
-                            rld_cost_ = -1;
-                        }
-                    }
+					// 2/ computes the id of the selected weapon and selects it
+					int newId = i + j * 4 + 1;
 
-                    hideOption(KEY_F8);
-                    showOption(KEY_F7);
-                    showOption(KEY_F9);
-                    pTeamLBox_->setVisible(false);
-                    pModsLBox_->setVisible(false);
-                    pWeaponsLBox_->setVisible(false);
+					if (newId != selectedWInstId_) { // Do something only if a different weapon is selected
+						selectedWInstId_ = newId;
+						WeaponInstance *wi = selected->weapon(selectedWInstId_ -1);
+						pSelectedWeap_ = wi->getWeaponClass();
+						addDirtyRect(500, 105,  125, 235);
+						// 3/ see if reload button should be displayed
+						bool displayReload = pSelectedWeap_->ammo() > wi->ammoRemaining();
+						getOption(reloadButId_)->setVisible(displayReload);
+
+						// 4/ hides the purchase button for the sell button
+						getOption(purchaseButId_)->setVisible(false);
+						getOption(cancelButId_)->setVisible(true);
+						getOption(sellButId_)->setVisible(true);
+						pTeamLBox_->setVisible(false);
+						pModsLBox_->setVisible(false);
+						pWeaponsLBox_->setVisible(false);
+					}
                 }
     }
 
 	return false;
 }
 
+/*!
+ * Hides the list of Mods or Weapon and shows the purchase and cancel buttons
+ * that appear on the detail panel.
+ */
 void SelectMenu::showModWeaponPanel() {
-    showOption(KEY_F7);
-    showOption(KEY_F8);
+	getOption(purchaseButId_)->setVisible(true);
+	getOption(cancelButId_)->setVisible(true);
     if (tab_ == TAB_MODS) {
         pModsLBox_->setVisible(false);
     } else {
@@ -568,7 +578,6 @@ void SelectMenu::showItemList() {
     pSelectedMod_ = NULL;
     pSelectedWeap_ = NULL;
     selectedWInstId_ = 0;
-    rld_cost_ = -1;
     getOption(cancelButId_)->setVisible(false);
     getOption(reloadButId_)->setVisible(false);
     getOption(purchaseButId_)->setVisible(false);
@@ -647,11 +656,14 @@ void SelectMenu::handleAction(const int actionId, void *ctx, const int modKeys)
     } else if (actionId == reloadButId_) {
         Agent *selected = g_Session.teamMember(cur_agent_);
         WeaponInstance *wi = selected->weapon(selectedWInstId_ - 1);
-        if (g_Session.getMoney() >= rld_cost_) {
-            g_Session.setMoney(g_Session.getMoney() - rld_cost_);
+		int rldCost = (pSelectedWeap_->ammo()
+						- wi->ammoRemaining()) * pSelectedWeap_->ammoCost();
+
+        if (g_Session.getMoney() >= rldCost) {
+            g_Session.setMoney(g_Session.getMoney() - rldCost);
             wi->setAmmoRemaining(pSelectedWeap_->ammo());
-            hideOption(KEY_F10);
-            rld_cost_ = -1;
+            getOption(reloadButId_)->setVisible(false);
+			getStatic(moneyTxtId_)->setTextFormated("%d", g_Session.getMoney());
         }
     } else if (actionId == purchaseButId_) {
         // Buying weapon
@@ -663,6 +675,7 @@ void SelectMenu::handleAction(const int actionId, void *ctx, const int modKeys)
                         && g_Session.getMoney() >= pSelectedWeap_->cost()) {
                         g_Session.setMoney(g_Session.getMoney() - pSelectedWeap_->cost());
                         selected->addWeapon(pSelectedWeap_->createInstance());
+						getStatic(moneyTxtId_)->setTextFormated("%d", g_Session.getMoney());
                     }
                 }
             } else {
@@ -671,6 +684,7 @@ void SelectMenu::handleAction(const int actionId, void *ctx, const int modKeys)
                     && g_Session.getMoney() >= pSelectedWeap_->cost()) {
                     g_Session.setMoney(g_Session.getMoney() - pSelectedWeap_->cost());
                     selected->addWeapon(pSelectedWeap_->createInstance());
+					getStatic(moneyTxtId_)->setTextFormated("%d", g_Session.getMoney());
                 }
             }
             needRendering();
@@ -682,6 +696,7 @@ void SelectMenu::handleAction(const int actionId, void *ctx, const int modKeys)
                         && g_Session.getMoney() >= pSelectedMod_->cost()) {
                         selected->addMod(pSelectedMod_);
                         g_Session.setMoney(g_Session.getMoney() - pSelectedMod_->cost());
+						getStatic(moneyTxtId_)->setTextFormated("%d", g_Session.getMoney());
                     }
                 }
             } else {
@@ -690,6 +705,7 @@ void SelectMenu::handleAction(const int actionId, void *ctx, const int modKeys)
                     && g_Session.getMoney() >= pSelectedMod_->cost()) {
                     selected->addMod(pSelectedMod_);
                     g_Session.setMoney(g_Session.getMoney() - pSelectedMod_->cost());
+					getStatic(moneyTxtId_)->setTextFormated("%d", g_Session.getMoney());
                 }
             }
             showItemList();
@@ -700,6 +716,7 @@ void SelectMenu::handleAction(const int actionId, void *ctx, const int modKeys)
         Agent *selected = g_Session.teamMember(cur_agent_);
         WeaponInstance *pWi = selected->removeWeapon(selectedWInstId_ - 1);
         g_Session.setMoney(g_Session.getMoney() + pWi->getWeaponClass()->cost());
+		getStatic(moneyTxtId_)->setTextFormated("%d", g_Session.getMoney());
         delete pWi;
         showItemList();
     }
