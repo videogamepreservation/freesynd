@@ -31,7 +31,7 @@
 MainMenu::MainMenu(MenuManager * m):Menu(m, MENU_MAIN, MENU_MAIN, "moption.dat",
      "moptout.dat")
 {
-    addStatic(0, 40, g_Screen.gameScreenWidth(), "#MAIN_TITLE", FontManager::SIZE_4, true);
+    addStatic(0, 40, g_Screen.gameScreenWidth(), "#MAIN_TITLE", FontManager::SIZE_4, false);
 
     int id = addOption(201, 130, 300, 25, "#MAIN_CONF", FontManager::SIZE_3, MENU_CONF, true, false);
 	registerHotKey(KEY_F1, id);

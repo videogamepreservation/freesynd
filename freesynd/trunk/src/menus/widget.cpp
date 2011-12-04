@@ -123,8 +123,8 @@ void MenuText::setLocation(int x, int y) {
     anchorY_ += dy;
 }
 
-void MenuText::setDark(bool dark) {
-    highlighted_ = !dark;
+void MenuText::setHighlighted(bool highlighted) {
+    highlighted_ = highlighted;
     redraw();
 }
 
@@ -214,10 +214,11 @@ Option::~Option() {
  */
 void Option::draw() {
     int x = x_;
-    if (text_.isDark() && darkWidget_ != NULL) {
-        darkWidget_->draw(x, y_, 0, false, true);
-    } else if (lightWidget_ != NULL) {
+
+    if (text_.isHighlighted() && lightWidget_ != NULL) {
         lightWidget_->draw(x, y_, 0, false, true);
+    } else if (darkWidget_ != NULL) {
+        darkWidget_->draw(x, y_, 0, false, true);
     }
 
     text_.draw();
@@ -239,11 +240,11 @@ void Option::executeAction(const int modKeys) {
 }
 
 void Option::handleFocusGained() {
-    text_.setDark(false);
+    text_.setHighlighted(true);
     redraw();
 }
 void Option::handleFocusLost() {
-    text_.setDark(true);
+    text_.setHighlighted(false);
     redraw();
 }
 
@@ -281,7 +282,7 @@ ToggleAction::ToggleAction(Menu *peer, int x, int y, int width, int height,
 void ToggleAction::setSelected(bool isSelected) {
     selected_ = isSelected;
     // When a ToggleAction is selected it lighted
-    text_.setDark(!selected_);
+    text_.setHighlighted(selected_);
     redraw();
 }
 

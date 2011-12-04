@@ -32,7 +32,7 @@
 LoadingMenu::LoadingMenu(MenuManager * m):Menu(m, MENU_LOADING, MENU_MAIN),
 tick_count_(-500)
 {
-    addStatic(0, 180, g_Screen.gameScreenWidth(), "#LDGAME_TITLE", FontManager::SIZE_4, false);
+    addStatic(0, 180, g_Screen.gameScreenWidth(), "#LDGAME_TITLE", FontManager::SIZE_4, true);
 }
 
 void LoadingMenu::handleTick(int elapsed)

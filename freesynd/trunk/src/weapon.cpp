@@ -30,7 +30,8 @@
 #include <assert.h>
 
 #include "app.h"
-#include "gfx/screen.h"
+#include "weapon.h"
+#include "ped.h"
 
 Weapon::Weapon(const std::string& w_name, int smallIcon, int bigIcon, int w_cost,
     int w_ammo, int w_range, int w_shot, int w_rank, int w_anim,

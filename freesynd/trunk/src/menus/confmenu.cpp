@@ -46,7 +46,7 @@ Menu(m, MENU_CONF, MENU_MAIN, "mconfup.dat", "mconfout.dat") {
 	tempLogo_ = 0;
 	tempColourId_ = 0;
     
-	panelMsgId_ = addStatic(280, 32, 330, "#CONF_MAIN_MSG", FontManager::SIZE_2, false);
+	panelMsgId_ = addStatic(280, 32, 330, "#CONF_MAIN_MSG", FontManager::SIZE_2, true);
     
 	logoButId_ = addOption(325, 65, 240, 20, "#CONF_COL_LOGO_BUT", FontManager::SIZE_2, MENU_NO_MENU, true, false, Sprite::MSPR_BULLET_D, Sprite::MSPR_BULLET_L);
     compNameButId_ = addOption(325, 90, 240, 20, "#CONF_COM_NAME_BUT", FontManager::SIZE_2, MENU_NO_MENU, true, false, Sprite::MSPR_BULLET_D, Sprite::MSPR_BULLET_L);
@@ -62,8 +62,8 @@ Menu(m, MENU_CONF, MENU_MAIN, "mconfup.dat", "mconfout.dat") {
     okButId_ = addOption(291, 122, 125, 23, "#CONF_OK_BUT", FontManager::SIZE_2, MENU_NO_MENU, false);
     cancelButId_ = addOption(476, 122, 123, 23, "#MENU_CANCEL_BUT", FontManager::SIZE_2, MENU_NO_MENU, false);
 
-	toAcceptCmpNameTxtId_ = addStatic(32, 93, "", FontManager::SIZE_1, true);
-	toAcceptUsrNameTxtId_ = addStatic(32, 115, "", FontManager::SIZE_1, true);
+	toAcceptCmpNameTxtId_ = addStatic(32, 93, "", FontManager::SIZE_1, false);
+	toAcceptUsrNameTxtId_ = addStatic(32, 115, "", FontManager::SIZE_1, false);
 
 	currPanel_ = PNL_MAIN;
 
@@ -98,7 +98,7 @@ ConfMenu::~ConfMenu() {
 
 void ConfMenu::createPanels() {
 	// Color picker
-	colStaticId_ = addStatic(475, 60, "#CONF_COL_TITLE", FontManager::SIZE_2, false);
+	colStaticId_ = addStatic(475, 60, "#CONF_COL_TITLE", FontManager::SIZE_2, true);
 	getStatic(colStaticId_)->setVisible(false);
 	leftColButId_ = addImageOption(405, 58, Sprite::MSPR_LEFT_ARROW_D, Sprite::MSPR_LEFT_ARROW_L, false);
     rightColButId_ = addImageOption(435, 58, Sprite::MSPR_RIGHT_ARROW_D, Sprite::MSPR_RIGHT_ARROW_L, false);
@@ -106,7 +106,7 @@ void ConfMenu::createPanels() {
 	// Logo picker
     leftLogoButId_ = addImageOption(405, 94, Sprite::MSPR_LEFT_ARROW_D, Sprite::MSPR_LEFT_ARROW_L, false);
     rightLogoButId_ = addImageOption(435, 94, Sprite::MSPR_RIGHT_ARROW_D, Sprite::MSPR_RIGHT_ARROW_L, false);
-    logoStaticId_ = addStatic(475, 96, "#CONF_LOGO_TITLE", FontManager::SIZE_2, false);
+    logoStaticId_ = addStatic(475, 96, "#CONF_LOGO_TITLE", FontManager::SIZE_2, true);
 	getStatic(logoStaticId_)->setVisible(false);
 
 	// Change names textfields

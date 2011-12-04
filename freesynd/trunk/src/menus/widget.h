@@ -144,9 +144,8 @@ public:
     void setTextFormated(const char * format, ...);
     std::string getText() { return text_; }
 
-	// TODO : rename in set/getHighlighted
-    void setDark(bool dark);
-    bool isDark() { return !highlighted_; }
+    void setHighlighted(bool highlighted);
+    bool isHighlighted() { return highlighted_; }
 
 	/*! Returns the font size. */
 	MenuFont * getFont() { return pFont_; }
@@ -401,8 +400,8 @@ public:
 	void setText(const char* text);
 	std::string getText() { return text_.getText(); }
 
-	void setHighlighted(bool highlighted) { text_.setDark(!highlighted); }
-    bool isHighlighted() { return !text_.isDark(); }
+	void setHighlighted(bool highlighted) { text_.setHighlighted(highlighted); }
+    bool isHighlighted() { return text_.isHighlighted(); }
 
     //! Draw the widget on screen
     void draw();

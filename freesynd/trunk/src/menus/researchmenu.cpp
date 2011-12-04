@@ -37,9 +37,9 @@ ResearchMenu::ResearchMenu(MenuManager * m):Menu(m, MENU_RESEARCH, MENU_SELECT, 
     pSelectedRes_ = NULL;
     pResForGraph_ = NULL;
 
-    addStatic(228, 35, "#RES_TITLE", FontManager::SIZE_4, true);          //Title
-    txtTimeId_ = addStatic(500, 9, "", FontManager::SIZE_2, false);     // Time
-    moneyTxtId_ = addStatic(500, 87, 128, "0", FontManager::SIZE_2, false);     // Money
+    addStatic(228, 35, "#RES_TITLE", FontManager::SIZE_4, false);          //Title
+    txtTimeId_ = addStatic(500, 9, "", FontManager::SIZE_2, true);     // Time
+    moneyTxtId_ = addStatic(500, 87, 128, "0", FontManager::SIZE_2, true);     // Money
 
     modsButId_ = addToggleAction(16, 290, 129, 25, "#MENU_MODS_BUT", FontManager::SIZE_2, tab_ == TAB_MODS);
     equipButId_ = addToggleAction(16, 318, 129, 25,  "#MENU_EQUIP_BUT", FontManager::SIZE_2, tab_ == TAB_EQUIPS);
@@ -63,20 +63,20 @@ ResearchMenu::ResearchMenu(MenuManager * m):Menu(m, MENU_RESEARCH, MENU_SELECT, 
     // Close search details button
     cancelSearchId_ = addOption(16, 184, 129, 25,  "#MENU_CANCEL_BUT", FontManager::SIZE_2, MENU_NO_MENU, false);
 
-    fieldTxtId_ = addStatic(20, 86, "", FontManager::SIZE_1, false);    // Search name
-    fundMinLblId_ = addStatic(20, 105, "#RES_MIN_FUND_LBL", FontManager::SIZE_1, true);    // Funding Minimun label
+    fieldTxtId_ = addStatic(20, 86, "", FontManager::SIZE_1, true);    // Search name
+    fundMinLblId_ = addStatic(20, 105, "#RES_MIN_FUND_LBL", FontManager::SIZE_1, false);    // Funding Minimun label
     getStatic(fundMinLblId_)->setVisible(false);
-    fundMinTxtId_ = addStatic(20, 117, "", FontManager::SIZE_1, false);    // Funding Minimun
-    fundMaxLblId_ = addStatic(20, 130, "#RES_MAX_FUND_LBL", FontManager::SIZE_1, true);    // Funding max label
+    fundMinTxtId_ = addStatic(20, 117, "", FontManager::SIZE_1, true);    // Funding Minimun
+    fundMaxLblId_ = addStatic(20, 130, "#RES_MAX_FUND_LBL", FontManager::SIZE_1, false);    // Funding max label
     getStatic(fundMaxLblId_)->setVisible(false);
-    fundMaxTxtId_ = addStatic(20, 143, "", FontManager::SIZE_1, false);    // Search maximum
+    fundMaxTxtId_ = addStatic(20, 143, "", FontManager::SIZE_1, true);    // Search maximum
 
     incrFundId_ = addOption(16, 210, 129, 25,  "#RES_INC_FUND_BUT", FontManager::SIZE_2, MENU_NO_MENU, false);
 	registerHotKey(KEY_PLUS, incrFundId_);
     decrFundId_ = addOption(16, 260, 129, 25,  "#RES_DEC_FUND_BUT", FontManager::SIZE_2, MENU_NO_MENU, false);
 	registerHotKey(KEY_MINUS, decrFundId_);
-    fundCurrLblId_ = addStatic(16, 242, 129, "", FontManager::SIZE_2, false);    // Current Funding label
-    searchTitleLblId_ = addStatic(158, 86, "", FontManager::SIZE_2, false);    // Current search title
+    fundCurrLblId_ = addStatic(16, 242, 129, "", FontManager::SIZE_2, true);    // Current Funding label
+    searchTitleLblId_ = addStatic(158, 86, "", FontManager::SIZE_2, true);    // Current search title
 
     g_Session.researchManager().addListener(this);
 }

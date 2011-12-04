@@ -39,7 +39,7 @@ LoadSaveMenu::LoadSaveMenu(MenuManager * m):Menu(m, MENU_LDSAVE, MENU_MAIN, "mlo
 {
 
     // Title
-    addStatic(0, 40, g_Screen.gameScreenWidth(), "#LS_TITLE", FontManager::SIZE_4, true);
+    addStatic(0, 40, g_Screen.gameScreenWidth(), "#LS_TITLE", FontManager::SIZE_4, false);
 
     // Load button
     loadButId_ = addOption(46, 346, 99, 25, "#LS_LOAD_BUT", FontManager::SIZE_2);

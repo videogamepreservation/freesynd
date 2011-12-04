@@ -40,9 +40,9 @@ cur_agent_(0), tick_count_(0), sel_all_(false)
     pSelectedWeap_ = NULL;
     selectedWInstId_ = 0;
     pSelectedMod_ = NULL;
-    addStatic(85, 35, 545, "#SELECT_TITLE", FontManager::SIZE_4, true);
-    txtTimeId_ = addStatic(500, 9, "", FontManager::SIZE_2, false);       // Time
-	moneyTxtId_ = addStatic(500, 87, 128, "0", FontManager::SIZE_2, false);     // Money
+    addStatic(85, 35, 545, "#SELECT_TITLE", FontManager::SIZE_4, false);
+    txtTimeId_ = addStatic(500, 9, "", FontManager::SIZE_2, true);       // Time
+	moneyTxtId_ = addStatic(500, 87, 128, "0", FontManager::SIZE_2, true);     // Money
 
     addOption(16, 234, 129, 25, "#SELECT_RES_BUT", FontManager::SIZE_2, MENU_RESEARCH);
     teamButId_ = addToggleAction(16, 262, 129, 25, "#SELECT_TEAM_BUT", FontManager::SIZE_2, false);
@@ -71,7 +71,7 @@ cur_agent_(0), tick_count_(0), sel_all_(false)
         FontManager::SIZE_2, MENU_NO_MENU, false);
 
     // Agent name selected
-    txtAgentId_ = addStatic(158, 86, "", FontManager::SIZE_2, false);
+    txtAgentId_ = addStatic(158, 86, "", FontManager::SIZE_2, true);
 
     rnd_ = 0;
 }

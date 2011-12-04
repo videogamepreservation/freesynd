@@ -143,12 +143,12 @@ void Menu::leave() {
  * text is a property in the current language file and it is
  * replaced by its value.
  * \param size Font size
- * \param dark True means text is not highlighted
+ * \param highlighted True means text is highlighted
  * \returns The newly created widget id.
  */
-int Menu::addStatic(int x, int y, const char *text, FontManager::EFontSize size, bool dark) {
+int Menu::addStatic(int x, int y, const char *text, FontManager::EFontSize size, bool highlighted) {
 
-    MenuText m(x, y, text, getMenuFont(size), !dark, true);
+    MenuText m(x, y, text, getMenuFont(size), highlighted, true);
     statics_.push_back(m);
     return m.getId();
 }
@@ -163,11 +163,11 @@ int Menu::addStatic(int x, int y, const char *text, FontManager::EFontSize size,
  * text is a property in the current language file and it is
  * replaced by its value.
  * \param size Font size
- * \param dark True means text is not highlighted
+ * \param highlighted True means text is highlighted
  * \returns The newly created widget id.
  */
-int Menu::addStatic(int x, int y, int width, const char *text, FontManager::EFontSize size, bool dark) {
-    MenuText m(x, y, width, text, getMenuFont(size), !dark, true);
+int Menu::addStatic(int x, int y, int width, const char *text, FontManager::EFontSize size, bool highlighted) {
+    MenuText m(x, y, width, text, getMenuFont(size), highlighted, true);
     statics_.push_back(m);
     return m.getId();
 }

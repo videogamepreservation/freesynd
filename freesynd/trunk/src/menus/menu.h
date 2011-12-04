@@ -78,9 +78,9 @@ public:
 	SpriteManager &menuSprites();
     
     //! Creates a new text label and returns its id
-    int addStatic(int x, int y, const char *text, FontManager::EFontSize size, bool dark);
+    int addStatic(int x, int y, const char *text, FontManager::EFontSize size, bool highlighted);
     //! Creates a new text label with a fixed size and returns its id
-    int addStatic(int x, int y, int width, const char *text, FontManager::EFontSize size, bool dark);
+    int addStatic(int x, int y, int width, const char *text, FontManager::EFontSize size, bool highlighted);
     //! Creates a new button and returns its id
     int addOption(int x, int y, int width, int height, const char *text, FontManager::EFontSize size,
             int to = -1, bool visible = true, bool centered = true, int dark_widget = 0, int light_widget = 0);

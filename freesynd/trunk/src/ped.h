@@ -27,13 +27,17 @@
 #ifndef PED_H
 #define PED_H
 
+#include <map>
+#include <list>
+
 #include "common.h"
 #include "mapobject.h"
 #include "pathsurfaces.h"
 #include "gfx/spritemanager.h"
 #include "weaponholder.h"
 #include "weapon.h"
-#include <list>
+#include "mission.h"
+
 
 class WeaponInstance;
 class PedInstance;

@@ -27,8 +27,7 @@
 #include <string.h>
 #include <assert.h>
 
-#include "app.h"
-#include "gfx/screen.h"
+#include "mod.h"
 
 Mod::Mod(const std::string& mod_name, EModType type, EModVersion version, 
          int mod_cost, const std::string& mod_desc,

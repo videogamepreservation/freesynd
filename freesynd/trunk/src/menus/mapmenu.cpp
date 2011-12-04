@@ -114,19 +114,19 @@ mapblk_data_(NULL), select_tick_count_(0)
     briefButId_ = addOption(17, 347, 128, 25, "#MAP_BRIEF_BUT", FontManager::SIZE_2, MENU_BRIEF);
 	addOption(500, 347,  128, 25, "#MENU_MAIN_BUT", FontManager::SIZE_2, MENU_MAIN);
 
-    //txtCountryId_ = addStatic(268, 312, "", FontManager::SIZE_1, false);   // Country name
-	txtCountryId_ = addStatic(188, 312, 270, "", FontManager::SIZE_1, false);   // Country name
-    addStatic(194, 332, "#MAP_POP", FontManager::SIZE_2, false);       // Pop label
-    txtPopId_ = addStatic(268, 332, "", FontManager::SIZE_1, false);          // Pop value
-    addStatic(194, 346, "#MAP_TAX", FontManager::SIZE_2, false);       // Tax label
-    txtTaxValueId_ = addStatic(268, 346, "", FontManager::SIZE_1, false);       // Tax value
-    txtOwnLblId_ = addStatic(194, 360, "#MAP_OWN", FontManager::SIZE_2, false);       // Own label
-    txtOwnId_ = addStatic(268, 360, "", FontManager::SIZE_1, false);          // Own status
+    //txtCountryId_ = addStatic(268, 312, "", FontManager::SIZE_1, true);   // Country name
+	txtCountryId_ = addStatic(188, 312, 270, "", FontManager::SIZE_1, true);   // Country name
+    addStatic(194, 332, "#MAP_POP", FontManager::SIZE_2, true);       // Pop label
+    txtPopId_ = addStatic(268, 332, "", FontManager::SIZE_1, true);          // Pop value
+    addStatic(194, 346, "#MAP_TAX", FontManager::SIZE_2, true);       // Tax label
+    txtTaxValueId_ = addStatic(268, 346, "", FontManager::SIZE_1, true);       // Tax value
+    txtOwnLblId_ = addStatic(194, 360, "#MAP_OWN", FontManager::SIZE_2, true);       // Own label
+    txtOwnId_ = addStatic(268, 360, "", FontManager::SIZE_1, true);          // Own status
 
-    txtTimeId_ = addStatic(500, 9, "", FontManager::SIZE_2, false);       // Time
+    txtTimeId_ = addStatic(500, 9, "", FontManager::SIZE_2, true);       // Time
 
     // Tax cursors
-    txtTaxPctId_ = addStatic(350, 346, "@   30%", FontManager::SIZE_1, false);
+    txtTaxPctId_ = addStatic(350, 346, "@   30%", FontManager::SIZE_1, true);
     decrTaxButId_ = addImageOption(375, 346, Sprite::MSPR_TAX_DECR, Sprite::MSPR_TAX_DECR, false);
 	registerHotKey(KEY_MINUS, decrTaxButId_);
     incrTaxButId_ = addImageOption(435, 346, Sprite::MSPR_TAX_INCR, Sprite::MSPR_TAX_INCR, false);

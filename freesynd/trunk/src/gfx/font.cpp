@@ -275,13 +275,14 @@ void MenuFont::drawText(int x, int y, bool dos, const char *text, bool highlight
 	int sc = x2 ? 2 : 1;
     int ox = x;
     const unsigned char *c = (const unsigned char *)text;
+	Sprite *pDef = getSprite('A', false);
     for (unsigned char cc = decode(c, dos); cc; cc = decode(c, dos)) {
         if (cc == 0xff) {
             // invalid utf8 code, skip it.
             continue;
         }
         if (cc == ' ') {
-            x += getSprite('A', false)->width() * sc - sc;
+            x += pDef->width() * sc - sc;
             continue;
         }
         if (cc == '\n') {
@@ -294,10 +295,11 @@ void MenuFont::drawText(int x, int y, bool dos, const char *text, bool highlight
             int y_offset = 0;
             if (cc == ':')
                 y_offset = sc;
-            else if (cc == '.' || cc == ',')
-                y_offset = 4 * sc;
-            else if (cc == '-')
-                y_offset = 2 * sc;
+            else if (cc == '.' || cc == ',' || cc == '-')
+				y_offset = pDef->height() *sc - getSprite(cc, false)->height() * sc;
+			else if (cc == '/') {
+				y_offset = (pDef->height() *sc)/2 - (getSprite('/', false)->height() * sc) / 2;
+			}
 
             s->draw(x, y + y_offset, 0, false, x2);
             
@@ -320,6 +322,7 @@ void GameFont::drawText(int x, int y, const char *text, uint8 toColor) {
     int ox = x;
 	uint8 fromColor = 252;
     const unsigned char *c = (const unsigned char *)text;
+	Sprite *pDef = getSprite('A');
     for (unsigned char cc = decode(c, false); cc; cc = decode(c, false)) {
         if (cc == 0xff) {
             // invalid utf8 code, skip it.
@@ -327,7 +330,7 @@ void GameFont::drawText(int x, int y, const char *text, uint8 toColor) {
         }
         if (cc == ' ') {
 			// If char is a space, only move the drawing origin to the left
-            x += getSprite('A')->width() * sc - sc;
+            x += pDef->width() * sc - sc;
             continue;
         }
         if (cc == '\n') {
@@ -343,10 +346,11 @@ void GameFont::drawText(int x, int y, const char *text, uint8 toColor) {
 			// Add some offset correct for special caracters as ':' '.' ',' '-'
             if (cc == ':')
                 y_offset = sc;
-            else if (cc == '.' || cc == ',')
-                y_offset = 4 * sc;
-            else if (cc == '-')
-                y_offset = 2 * sc;
+            else if (cc == '.' || cc == ',' || cc == '-')
+                y_offset = pDef->height() *sc - getSprite(cc)->height() * sc;
+			else if (cc == '/') {
+				y_offset = (pDef->height() *sc)/2 - (getSprite('/')->height() * sc) / 2;
+			}
 
             uint8 *data = new uint8[s->width() * s->height()];
             s->data(data);
