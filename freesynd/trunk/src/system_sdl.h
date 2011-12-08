@@ -53,6 +53,7 @@ public:
     void updateScreen();
     void handleEvents();
     void delay(int msec);
+	int getTicks();
 
     void setPalette6b3(const uint8 *pal, int cols = 256);
     void setPalette8b3(const uint8 *pal, int cols = 256);

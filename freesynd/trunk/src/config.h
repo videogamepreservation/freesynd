@@ -34,4 +34,7 @@
 #define USE_ASSASSINATE_MP3     1
 #define USE_OGG_INSTEAD_OF_MP3  1
 
+// Define this to display frame rate during gameplay
+//define TRACK_FPS  1
+
 #endif

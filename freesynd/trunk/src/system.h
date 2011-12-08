@@ -39,6 +39,7 @@ struct System : public Singleton<System> {
     virtual void updateScreen() = 0;
     virtual void handleEvents() = 0;
     virtual void delay(int msec) = 0;
+	virtual int getTicks() = 0;
 
     virtual void setPalette6b3(const uint8 *pal, int cols = 256) = 0;
     virtual void setPalette8b3(const uint8 *pal, int cols = 256) = 0;

@@ -361,6 +361,10 @@ void SystemSDL::delay(int msec) {
     SDL_Delay(msec);
 }
 
+int SystemSDL::getTicks() {
+	return SDL_GetTicks();
+}
+
 bool like(int a, int b) {
     return a == b || a == b - 1 || a == b + 1;
 }
