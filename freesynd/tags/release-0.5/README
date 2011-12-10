@@ -1,0 +1,81 @@
+
+FreeSynd 0.5
+------------
+
+FreeSynd is a free cross-platform reimplementation of the classic Bullfrog 
+game, Syndicate.
+For more information see:
+
+    http://freesynd.sourceforge.net/
+   
+License information
+-------------------
+
+FreeSynd is released under the GNU General Public Licence, version 2.
+Thanks to Tomasz Lis for some preliminary work on the level files. His code is
+used under GNU General Public Licence, version 2 or later with permission from
+author.
+Some code is based on "libsyndicate" library by Paul Chavent. It is
+re-licensed under GNU General Public Licence, version 2. Original license
+and code is located in svn source/trunk/libsyndicate/.
+See the file "COPYING" for informations on this licence.
+ConfigFile code is from Richard J. Wagner. For Licence information, see comments 
+in files config.cpp and config.h.
+
+
+What's new in this release?
+---------------------------
+
+See the file "NEWS".
+
+Installing the game
+-------------------
+See the file "INSTALL" for informations on how to install the game
+
+Runnning under Linux
+--------------------
+
+After installing the game, run this command:
+	freesynd
+
+Running under Windows
+---------------------
+
+Just double click freesynd.exe and enjoy.
+
+Running options
+---------------
+
+Edit the freesynd.ini file to specify those options:
+ * fullscreen : (true/false) runs the game in fullscreen
+ * play_intro : (true/false) plays the introduction
+ * data_dir : sets the absolute path to the data directory.
+ * language : (0/1/2/3) sets the application language
+ 
+Commands
+--------
+- Mission Selection :
+ * 0   : Puts the selector on first mission
+ * Left: Puts the selector on the next mission
+ * Right : Puts the selector on the previous mission
+ * + / - : Increase / decrease tax rate on selected country by 1%.
+		   If control key is pressed while changing rates, increment/decrement by 10%
+           Rates above 30% will decrease population status down to rebellious : mission
+		   will have to be played again.
+		   Rates below 30% will increase population status up to VERY HAPPY.
+ 
+- In game :
+ * F1  : Turns music on/off
+ * F2  : Turns game sounds on/off
+ * 1-4 : Numeric key selects the corresponding agent
+ * 0   : Key 0 cycles between current selection and all 4 agents.
+ * Ctrl + 0 : Inverts selection.
+ * Ctrl + Left Click : sets a waypoint for the selected agents
+ * Left,Right,Up, down : scrolls the map
+
+Contact
+-------
+
+If you find a bug or would like to help the development of FreeSynd, please 
+stop by the sourceforge project bug tracker, drop us an email or visit the
+forums.
