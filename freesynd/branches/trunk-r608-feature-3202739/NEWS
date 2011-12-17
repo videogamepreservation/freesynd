@@ -24,6 +24,7 @@ Features added
     inserting a '&' caracter before the letter in the button label in the
 	language file. Works only for letters.
   * Menus are now created when first accessed not all once.
+  * In the Map menu, pressing PageUp or PageDown increases/decreases tax from 10%
 
 Known issues with this release
 ------------------------------

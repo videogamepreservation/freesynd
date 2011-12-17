@@ -26,6 +26,7 @@
 #include <string>
 #include <list>
 
+#include "keys.h"
 #include "gfx/fontmanager.h"
 #include "utils/seqmodel.h"
 
@@ -216,8 +217,6 @@ protected:
  */
 class Option : public ActionWidget {
 public:
-	//! Returns the Key associated with the given caracter.
-	static Key getKeyForChar(char c);
 
     //! Constructs a new button.
     Option(Menu *peer, int x, int y, int width, int height, const char *text, MenuFont *pFont,

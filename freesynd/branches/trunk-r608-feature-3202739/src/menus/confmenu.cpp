@@ -203,10 +203,10 @@ void ConfMenu::handleAction(const int actionId, void *ctx, const int modKeys) {
 
 bool ConfMenu::handleUnknownKey(Key key, const int modKeys) {
 	if (currPanel_ != PNL_MAIN) {
-		if (key == KEY_ESCAPE) {
+		if (key.keyFunc == KFC_ESCAPE) {
 			showMainPanel();
 			return true;
-		} else if (key == KEY_RETURN) {
+		} else if (key.keyFunc == KFC_RETURN) {
 			if (currPanel_ == PNL_LOGO) {
 				toAcceptColourId_ = tempColourId_;
 				toAcceptLogo_ = tempLogo_;

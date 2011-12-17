@@ -152,28 +152,14 @@ void ActionWidget::setenabled(bool enabled) {
 	}
 }
 
-/*! 
- * Returns the Key associated with the given caracter.
- * \param c a caracter between a and z. No space.
- * \returns KEY_UNKNOWN if caracter is not a letter
- */
-Key Option::getKeyForChar(char c) {
-	Key ret = KEY_UNKNOWN;
-	if ('a' <= c && 'z' >= c) {
-		ret = static_cast < Key > (KEY_a + (c - 'a'));
-	} else if ('A' <= c && 'Z' >= c) {
-		ret = static_cast < Key > (KEY_a + (c - 'A'));
-	}
-	return ret;
-}
-
 Option::Option(Menu *peer, int x, int y, int width, int height, const char *text, MenuFont *pFont,
             int to, bool visible, bool centered, int darkWidgetId, int lightWidgetId) 
             : ActionWidget(peer, x, y, width, height, visible), text_(x, y, width - 4, text, pFont, false, true, centered) {
         to_ = to;
         darkWidget_ = NULL;
         lightWidget_ = NULL;
-		hotKey_ = KEY_UNKNOWN;
+		hotKey_.keyFunc = KFC_UNKNOWN;
+		hotKey_.unicode = 0;
 
 		// If button label contains a '&' caracter, then the next
 		// caracter is the acceleration key for that button
@@ -183,8 +169,8 @@ Option::Option(Menu *peer, int x, int y, int width, int height, const char *text
 		if (pos != std::string::npos ) {
 			// check if the caracter is not the last one
 			if (pos < (lbl.size() - 1)) {
-				char c = lbl.at(pos + 1);
-				hotKey_ = getKeyForChar(c);
+				// TODO : retrouver le codePoint
+				hotKey_.unicode = 0;
 				// remove the '&' from the string
 				lbl.erase(pos, 1);
 			}
@@ -518,17 +504,17 @@ void TextField::handleCaptureLost() {
 }
 
 bool TextField::handleKey(Key key, const int modKeys) {
-	if (key == KEY_LEFT) {
+	if (key.keyFunc == KFC_LEFT) {
 		// Move caret to the left until start of the text
         if (caretPosition_ > 0) {
             caretPosition_--;
         }
-    } else if (key == KEY_RIGHT) {
+    } else if (key.keyFunc == KFC_RIGHT) {
 		// Move caret to the right until the end of the text
 		if (caretPosition_ < text_.getText().size()) {
             caretPosition_++;
         }
-    } else if (key == KEY_BACKSPACE) {
+    } else if (key.keyFunc == KFC_BACKSPACE) {
 		// Erase one character before caret
         if (caretPosition_ > 0) {
 			std::string str = text_.getText();
@@ -536,16 +522,16 @@ bool TextField::handleKey(Key key, const int modKeys) {
 			text_.setText(str.c_str());
             caretPosition_--;
         }
-    } else if (key == KEY_DELETE) {
+    } else if (key.keyFunc == KFC_DELETE) {
         if (caretPosition_ < text_.getText().size()) {
 			std::string str = text_.getText();
 			str.erase(caretPosition_, 1);
             //text_.getText().erase(caretPosition_, 1);
 			text_.setText(str.c_str());
         }
-    } else if (key == KEY_HOME) {
+    } else if (key.keyFunc == KFC_HOME) {
         caretPosition_ = 0;
-    } else if (key == KEY_END) {
+    } else if (key.keyFunc == KFC_END) {
         caretPosition_ = text_.getText().size();
     } else if (MenuManager::isPrintableKey(key)) {
         if (text_.getText().size() < maxSize_) {

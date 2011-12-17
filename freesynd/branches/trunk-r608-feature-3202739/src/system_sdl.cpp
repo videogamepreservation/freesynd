@@ -88,6 +88,7 @@ bool SystemSDL::initialize(bool fullscreen) {
 
     // Keyboard init
     SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY, SDL_DEFAULT_REPEAT_INTERVAL);
+	SDL_EnableUNICODE(1);
 
     // Audio initialisation
     if (!Audio::init()) {
@@ -169,28 +170,27 @@ void SystemSDL::updateScreen() {
 }
 
 /*!
- * Using the keysym parameter, verify if this is a key that is 
- * used in the game and returns the corresponding entry in the Key enumaration.
- * \ returns If key code is not valid, returns KEY_UNKNOWN.
+ * Using the keysym parameter, verify if the given key is a function key (ie
+ * a not printable key) returns the corresponding entry in the KeyFunc enumeration.
+ * \returns If key code is not a function key, returns KEY_UNKNOWN.
  */
-Key SystemSDL::checkValidKey(SDL_keysym keysym) {
-    Key key = KEY_UNKNOWN;
+KeyFunc SystemSDL::checkKeyFunc(SDL_keysym keysym) {
+    KeyFunc key = KFC_UNKNOWN;
     switch(keysym.sym) {
-        case SDLK_ESCAPE: key = KEY_ESCAPE; break;
-        case SDLK_BACKSPACE: key = KEY_BACKSPACE; break;
-		case SDLK_RETURN: key = KEY_RETURN; break;
-        case SDLK_SPACE: key = KEY_SPACE; break;
-        case SDLK_BACKQUOTE: key = KEY_BACKQUOTE; break;
-        case SDLK_DELETE: key = KEY_DELETE; break;
+        case SDLK_ESCAPE: key = KFC_ESCAPE; break;
+        case SDLK_BACKSPACE: key = KFC_BACKSPACE; break;
+		case SDLK_RETURN: key = KFC_RETURN; break;
+        case SDLK_DELETE: key = KFC_DELETE; break;
         case SDLK_UP:
         case SDLK_DOWN:
         case SDLK_RIGHT:
         case SDLK_LEFT:
+		case SDLK_INSERT:
         case SDLK_HOME:
         case SDLK_END:
         case SDLK_PAGEUP:
         case SDLK_PAGEDOWN:
-            key = static_cast < Key > (KEY_UP + (keysym.sym - SDLK_UP));
+            key = static_cast < KeyFunc > (KFC_UP + (keysym.sym - SDLK_UP));
             break;
         case SDLK_F1:
         case SDLK_F2:
@@ -204,30 +204,7 @@ Key SystemSDL::checkValidKey(SDL_keysym keysym) {
         case SDLK_F10:
         case SDLK_F11:
         case SDLK_F12:
-            key = static_cast < Key > (KEY_F1 + (keysym.sym - SDLK_F1));
-            break;
-
-        case SDLK_a:case SDLK_b:case SDLK_c:case SDLK_d:case SDLK_e:
-        case SDLK_f:case SDLK_g:case SDLK_h:case SDLK_i:case SDLK_j:
-        case SDLK_k:case SDLK_l:case SDLK_m:case SDLK_n:case SDLK_o:
-        case SDLK_p:case SDLK_q:case SDLK_r:case SDLK_s:case SDLK_t:
-        case SDLK_u:case SDLK_v:case SDLK_w:case SDLK_x:case SDLK_y:case SDLK_z:
-            key = static_cast < Key > (KEY_a + (keysym.sym - SDLK_a));
-            break;
-
-        case SDLK_0:case SDLK_1:case SDLK_2:case SDLK_3:case SDLK_4:
-        case SDLK_5:case SDLK_6:case SDLK_7:case SDLK_8:case SDLK_9:
-            key = static_cast < Key > (KEY_0 + (keysym.sym - SDLK_0));
-            break;
-
-        case SDLK_KP0:case SDLK_KP1:case SDLK_KP2:case SDLK_KP3:case SDLK_KP4:
-        case SDLK_KP5:case SDLK_KP6:case SDLK_KP7:case SDLK_KP8:case SDLK_KP9:
-            key = static_cast < Key > (KEY_0 + (keysym.sym - SDLK_KP0));
-            break;
-
-        case SDLK_PLUS:case SDLK_COMMA:case SDLK_MINUS:case SDLK_PERIOD:
-        case SDLK_SLASH:
-            key = static_cast < Key > (KEY_PLUS + (keysym.sym - SDLK_PLUS));
+            key = static_cast < KeyFunc > (KFC_F1 + (keysym.sym - SDLK_F1));
             break;
         default:
             // unused key
@@ -280,19 +257,19 @@ void SystemSDL::handleEvents() {
                     isKeyMod = true;
                     break;
                 default:
+					// We pass the event only if it's not a allowed modifier key
+					// Plus, the application receives event only when key is pressed
+					// not released.
+					Key key;
+					key.unicode = 0;
+					key.keyFunc = checkKeyFunc(event.key.keysym);
+					if (key.keyFunc == KFC_UNKNOWN) {
+						key.unicode = event.key.keysym.unicode;
+					}
+					g_App.keyEvent(key, keyModState_);
                     break;
-            }
-
-            // We pass the event only if it's not a allowed modifier key
-            // Plus, the application receives event only when key is pressed
-            // not released.
-            if (!isKeyMod) {
-                Key key = checkValidKey(event.key.keysym);
-                if (key != KEY_UNKNOWN) {
-                    g_App.keyEvent(key, keyModState_);
-                }
-            }
-            }
+            } // end inner bracket
+            } // end case SDL_KEYDOWN
             break;
         case SDL_KEYUP:
             {

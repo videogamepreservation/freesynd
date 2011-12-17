@@ -128,9 +128,9 @@ mapblk_data_(NULL), select_tick_count_(0)
     // Tax cursors
     txtTaxPctId_ = addStatic(350, 346, "@   30%", FontManager::SIZE_1, true);
     decrTaxButId_ = addImageOption(375, 346, Sprite::MSPR_TAX_DECR, Sprite::MSPR_TAX_DECR, false);
-	registerHotKey(KEY_MINUS, decrTaxButId_);
+	registerHotKey(K_MINUS, decrTaxButId_);
     incrTaxButId_ = addImageOption(435, 346, Sprite::MSPR_TAX_INCR, Sprite::MSPR_TAX_INCR, false);
-	registerHotKey(KEY_PLUS, incrTaxButId_);
+	registerHotKey(K_PLUS, incrTaxButId_);
 
     // 64 x 44 x 50
     // Load map block informations
@@ -422,15 +422,27 @@ void MapMenu::handleAction(const int actionId, void *ctx, const int modKeys) {
 bool MapMenu::handleUnknownKey(Key key, const int modKeys)
 {
     bool consumed = false;
-    if (key == KEY_0) {
+    if (key.unicode == K_DGT_0) {
         g_Session.setSelectedBlockId(0);
         consumed = true;
-    } else if (key == KEY_LEFT && (g_Session.getSelectedBlockId() > 0)) {
+	} else if (key.keyFunc == KFC_LEFT && (g_Session.getSelectedBlockId() > 0)) {
         g_Session.setSelectedBlockId(g_Session.getSelectedBlockId() - 1);
         consumed = true;
-    } else if (key == KEY_RIGHT && g_Session.getSelectedBlockId() < 49) {
+	} else if (key.keyFunc == KFC_RIGHT && g_Session.getSelectedBlockId() < 49) {
         g_Session.setSelectedBlockId(g_Session.getSelectedBlockId() + 1);
         consumed = true;
+    } else if (key.keyFunc == KFC_PAGEUP) {
+		// Pressing PageUp increase tax of 10 percents
+		Block blk = g_Session.getBlock(g_Session.getSelectedBlockId());
+		if (blk.status == BLK_FINISHED) {
+			consumed = g_Session.addToTaxRate(10);
+		}
+    } else if (key.keyFunc == KFC_PAGEDOWN ) {
+		// Pressing PageDown decrease tax of 10 percents
+		Block blk = g_Session.getBlock(g_Session.getSelectedBlockId());
+		if (blk.status == BLK_FINISHED) {
+			consumed = g_Session.addToTaxRate(-10);
+		}
     }
 
     if (consumed) {

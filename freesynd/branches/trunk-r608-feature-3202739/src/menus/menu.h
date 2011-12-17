@@ -101,8 +101,10 @@ public:
     ActionWidget * getActionWidget(int buttonId);
 	//! Returns the Option with the given id
     Option * getOption(int buttonId);
-	//! Adds a mapping between a Key and an Option
-	void registerHotKey(Key key, int optId);
+	//! Adds a mapping between a Function Key and an Option
+	void registerHotKey(KeyFunc key, int optId);
+	//! Adds a mapping between a Printable Key and an Option
+	void registerHotKey(uint16 unicode, int optId);
 
 	void render();
     //! Does common actions before leaving
@@ -173,6 +175,17 @@ protected:
 	GameFont *gameFont();
 
 protected:
+	class HotKey {
+	public:
+		HotKey(KeyFunc code, uint16 unicode, Option *pOpt) {
+			key.keyFunc = code;
+			key.unicode = unicode;
+			pOption = pOpt;
+		}
+		Key key;
+		Option *pOption; 
+	};
+
     MenuManager *menu_manager_;
     /*! A unique id to identify this menu.*/
     int id_;
@@ -184,7 +197,7 @@ protected:
     /*! The list of all dynamic widgets (Option).*/
     std::list<ActionWidget *> actions_;
     /*! An association between key and option for hotkeys.*/
-    std::map<Key, Option *> hotKeys_;
+	std::list<HotKey> hotKeys_;
     /*! A group of mutual exclusive ToggleAction.*/
     Group group_;
     /*! The id of the widget that currently has focus.*/

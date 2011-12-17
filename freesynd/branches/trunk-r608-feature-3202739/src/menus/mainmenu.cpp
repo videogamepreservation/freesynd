@@ -34,15 +34,15 @@ MainMenu::MainMenu(MenuManager * m):Menu(m, MENU_MAIN, MENU_MAIN, "moption.dat",
     addStatic(0, 40, g_Screen.gameScreenWidth(), "#MAIN_TITLE", FontManager::SIZE_4, false);
 
     int id = addOption(201, 130, 300, 25, "#MAIN_CONF", FontManager::SIZE_3, MENU_CONF, true, false);
-	registerHotKey(KEY_F1, id);
+	registerHotKey(KFC_F1, id);
     id = addOption(201, 164, 300, 25, "#MAIN_BEGIN", FontManager::SIZE_3, MENU_MAP, true, false);
-	registerHotKey(KEY_F2, id);
+	registerHotKey(KFC_F2, id);
     id = addOption(201, 198, 300, 25, "#MAIN_LOAD_SAVE", FontManager::SIZE_3, MENU_LDSAVE, true, false);
-	registerHotKey(KEY_F3, id);
+	registerHotKey(KFC_F3, id);
 	resetButId_ = addOption(201, 232, 300, 25, "#MAIN_RESET", FontManager::SIZE_3, MENU_MAIN, true, false);
-	registerHotKey(KEY_F4, resetButId_);
+	registerHotKey(KFC_F4, resetButId_);
     quitButId_ = addOption(201, 266, 300, 25, "#MAIN_QUIT", FontManager::SIZE_3, MENU_NO_MENU, true, false);
-	registerHotKey(KEY_F5, quitButId_);
+	registerHotKey(KFC_F5, quitButId_);
 }
 
 void MainMenu::handleShow()
