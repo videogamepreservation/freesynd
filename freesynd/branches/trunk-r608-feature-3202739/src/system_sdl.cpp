@@ -265,6 +265,17 @@ void SystemSDL::handleEvents() {
 					key.keyFunc = checkKeyFunc(event.key.keysym);
 					if (key.keyFunc == KFC_UNKNOWN) {
 						key.unicode = event.key.keysym.unicode;
+#if 0
+						printf( "Scancode: 0x%02X", event.key.keysym.scancode );
+						printf( ", Name: %s", SDL_GetKeyName( event.key.keysym.sym ) );
+						printf(", Unicode: " );
+						if( event.key.keysym.unicode < 0x80 && event.key.keysym.unicode > 0 ){
+							printf( "%c (0x%04X)\n", (char)event.key.keysym.unicode,
+									event.key.keysym.unicode );
+						} else{
+							printf( "? (0x%04X)\n", event.key.keysym.unicode );
+						}
+#endif
 					}
 					g_App.keyEvent(key, keyModState_);
                     break;

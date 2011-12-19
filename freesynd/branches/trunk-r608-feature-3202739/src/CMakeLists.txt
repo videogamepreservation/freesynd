@@ -140,7 +140,11 @@ set(HEADERS
 	utils/log.h
 	utils/portablefile.h
 	utils/seqmodel.h
-	utils/singleton.h)
+	utils/singleton.h
+	utils/utf8.h
+	utils/utf8/checked.h
+	utils/utf8/core.h
+	utils/utf8/unchecked.h)
 
 add_executable (freesynd ${SOURCES} ${HEADERS})
 

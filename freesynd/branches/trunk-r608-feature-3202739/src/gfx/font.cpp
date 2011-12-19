@@ -246,6 +246,11 @@ int Font::textHeight(bool x2) {
     return getSprite('A')->height() * sc;
 }
 
+// returns true if given code point is printable with the font
+bool Font::isPrintable(uint16 unicode) {
+	return unicode != 0;
+}
+
 MenuFont::MenuFont() : Font() {
 }
 
@@ -253,7 +258,7 @@ Sprite *MenuFont::getSprite(unsigned char dos_char, bool highlighted) {
     if (range_.in_range(dos_char) == false) {
         // use '?' as default character.
         if (range_.in_range('?') == true) {
-			return sprites_->sprite('?' + highlighted ? lightOffset_ : offset_);
+			return sprites_->sprite('?' + (highlighted ? lightOffset_ : offset_));
         } else {
             // NULL causes the missing glyph to be skipped.
             // no space will be consumed on-screen.
@@ -295,7 +300,7 @@ void MenuFont::drawText(int x, int y, bool dos, const char *text, bool highlight
             int y_offset = 0;
             if (cc == ':')
                 y_offset = sc;
-            else if (cc == '.' || cc == ',' || cc == '-')
+            else if (cc == '.' || cc == ',' || cc == '-' || cc == '_')
 				y_offset = pDef->height() *sc - getSprite(cc, false)->height() * sc;
 			else if (cc == '/') {
 				y_offset = (pDef->height() *sc)/2 - (getSprite('/', false)->height() * sc) / 2;

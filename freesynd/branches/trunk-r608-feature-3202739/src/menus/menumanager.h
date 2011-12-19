@@ -51,9 +51,6 @@ public:
         GERMAN = 3
     };
 
-	static bool isPrintableKey(Key key);
-    static char getKeyAsChar(Key key);
-
     MenuManager();
     ~MenuManager();
 
