@@ -73,8 +73,8 @@ protected:
     //! Loads the graphic file that contains the cursor sprites.
     bool loadCursorSprites();
 
-    //! Checks if the given SDL key code maps to a function key
-    KeyFunc checkKeyFunc(SDL_keysym sym);
+    //! Sets the key arguments with some key codes
+    void checkKeyCodes(SDL_keysym sym, Key &key);
 
 protected:
     /*! A constant that holds the cursor icon width and height.*/

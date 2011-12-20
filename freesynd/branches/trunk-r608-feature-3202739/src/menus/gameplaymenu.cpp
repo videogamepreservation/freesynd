@@ -923,31 +923,31 @@ bool GameplayMenu::handleUnknownKey(Key key, const int modKeys) {
      * selection and all 4 agents. Ctrl + 0 inverts selection.
      * Individual keys select the specified agent unless ctrl is pressed -
      * then they add/remove agent from current selection. */
-	if (key.unicode == K_DGT_0) {
+	if (key.keyVirt == KVT_NUMPAD0) {
         /* This code is exactly the same as for clicking on "group-button"
          * as you can see above. */
         selectAllAgents(ctrl);
         change = true;
     }
-    else if (key.unicode == K_DGT_1) {
+    else if (key.keyVirt == KVT_NUMPAD1) {
         if ((selectable_agents_ & (1 << 0)) != 0) {
             selectAgent(0, ctrl);
             change = true;
         }
     }
-    else if (key.unicode == K_DGT_2) {
+    else if (key.keyVirt == KVT_NUMPAD2) {
         if ((selectable_agents_ & (1 << 1)) != 0) {
             selectAgent(1, ctrl);
             change = true;
         }
     }
-    else if (key.unicode == K_DGT_3) {
+    else if (key.keyVirt == KVT_NUMPAD3) {
         if ((selectable_agents_ & (1 << 2)) != 0) {
             selectAgent(2, ctrl);
             change = true;
         }
     }
-    else if (key.unicode == K_DGT_4) {
+    else if (key.keyVirt == KVT_NUMPAD4) {
         if ((selectable_agents_ & (1 << 3)) != 0) {
             selectAgent(3, ctrl);
             change = true;

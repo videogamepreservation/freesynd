@@ -79,10 +79,29 @@ const int KMD_SHIFT = KMD_LSHIFT | KMD_RSHIFT;
 const int KMD_ALT = KMD_LALT | KMD_RALT;
 
 /*! 
+ * Virtual key represents the physical key on a keyboard.
+ */
+enum KeyVirtual {
+	KVT_UNKNOWN = 0,
+	KVT_NUMPAD0 = 1,
+	KVT_NUMPAD1 = 2,
+	KVT_NUMPAD2 = 3,
+	KVT_NUMPAD3 = 4,
+	KVT_NUMPAD4 = 5,
+	KVT_NUMPAD5 = 6,
+	KVT_NUMPAD6 = 7,
+	KVT_NUMPAD7 = 8,
+	KVT_NUMPAD8 = 9,
+	KVT_NUMPAD9 = 10
+	
+};
+
+/*! 
  * All available key codes.
  */
 typedef struct Key {
 	KeyFunc keyFunc;
+	KeyVirtual keyVirt;		/**< Virtual key : KVT_UNKNOWN if not set. */
 	uint16 unicode;			/**< Unicode for printable characters. */
 } Key;
 

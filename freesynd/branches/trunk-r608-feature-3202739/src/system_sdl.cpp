@@ -174,13 +174,14 @@ void SystemSDL::updateScreen() {
  * a not printable key) returns the corresponding entry in the KeyFunc enumeration.
  * \returns If key code is not a function key, returns KEY_UNKNOWN.
  */
-KeyFunc SystemSDL::checkKeyFunc(SDL_keysym keysym) {
-    KeyFunc key = KFC_UNKNOWN;
+void SystemSDL::checkKeyCodes(SDL_keysym keysym, Key &key) {
+	key.keyFunc = KFC_UNKNOWN;
+	key.keyVirt = KVT_UNKNOWN;
     switch(keysym.sym) {
-        case SDLK_ESCAPE: key = KFC_ESCAPE; break;
-        case SDLK_BACKSPACE: key = KFC_BACKSPACE; break;
-		case SDLK_RETURN: key = KFC_RETURN; break;
-        case SDLK_DELETE: key = KFC_DELETE; break;
+        case SDLK_ESCAPE: key.keyFunc = KFC_ESCAPE; break;
+        case SDLK_BACKSPACE: key.keyFunc = KFC_BACKSPACE; break;
+		case SDLK_RETURN: key.keyFunc = KFC_RETURN; break;
+        case SDLK_DELETE: key.keyFunc = KFC_DELETE; break;
         case SDLK_UP:
         case SDLK_DOWN:
         case SDLK_RIGHT:
@@ -190,7 +191,7 @@ KeyFunc SystemSDL::checkKeyFunc(SDL_keysym keysym) {
         case SDLK_END:
         case SDLK_PAGEUP:
         case SDLK_PAGEDOWN:
-            key = static_cast < KeyFunc > (KFC_UP + (keysym.sym - SDLK_UP));
+            key.keyFunc = static_cast < KeyFunc > (KFC_UP + (keysym.sym - SDLK_UP));
             break;
         case SDLK_F1:
         case SDLK_F2:
@@ -204,14 +205,16 @@ KeyFunc SystemSDL::checkKeyFunc(SDL_keysym keysym) {
         case SDLK_F10:
         case SDLK_F11:
         case SDLK_F12:
-            key = static_cast < KeyFunc > (KFC_F1 + (keysym.sym - SDLK_F1));
+            key.keyFunc = static_cast < KeyFunc > (KFC_F1 + (keysym.sym - SDLK_F1));
+            break;
+		case SDLK_0:case SDLK_1:case SDLK_2:case SDLK_3:case SDLK_4:
+		case SDLK_5:case SDLK_6:case SDLK_7:case SDLK_8:case SDLK_9:
+			key.keyVirt = static_cast < KeyVirtual > (KVT_NUMPAD0 + (keysym.sym - SDLK_0));
             break;
         default:
             // unused key
             break;
     }
-
-    return key;
 }
 
 /*!
@@ -262,10 +265,10 @@ void SystemSDL::handleEvents() {
 					// not released.
 					Key key;
 					key.unicode = 0;
-					key.keyFunc = checkKeyFunc(event.key.keysym);
+					checkKeyCodes(event.key.keysym, key);
 					if (key.keyFunc == KFC_UNKNOWN) {
 						key.unicode = event.key.keysym.unicode;
-#if 0
+#if 1
 						printf( "Scancode: 0x%02X", event.key.keysym.scancode );
 						printf( ", Name: %s", SDL_GetKeyName( event.key.keysym.sym ) );
 						printf(", Unicode: " );
@@ -336,7 +339,7 @@ void SystemSDL::handleEvents() {
             break;
 
         case SDL_QUIT:
-            g_App.quit();
+			g_App.menus().gotoMenu(Menu::MENU_LOGOUT);
             break;
 
         default:
