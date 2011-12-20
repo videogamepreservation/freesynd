@@ -83,11 +83,7 @@ const int KMD_ALT = KMD_LALT | KMD_RALT;
  */
 typedef struct Key {
 	KeyFunc keyFunc;
-	uint16 unicode;			/**< translated character */
-
-	bool equals(Key & other) {
-		return (other.keyFunc == keyFunc && other.unicode == unicode);
-	}
+	uint16 unicode;			/**< Unicode for printable characters. */
 } Key;
 
 // A list of macros to ease unicode comparisons (case insensitive)

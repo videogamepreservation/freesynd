@@ -20,6 +20,9 @@ and code are located in svn under "libsyndicate".
 The ConfigFile class is based on code from Richard J. Wagner. For Licence
 information, see comments in the files src/utils/configfile.*
 
+Freesynd includes UTF8-CPP, a library by Nemanja Trifunovic for handling UTF-8 string.
+It is freely available. See licence in the utils/utf8.h and utils/utf8/*.h files.
+
 
 What's new in this release?
 ---------------------------
@@ -70,8 +73,6 @@ Commands
  * Left,Right,Up,Down : Scrolls the map.
  
  - Debug Mode :
-  * In any menu :
-    * Ctrl-Q : in any menu, instantly ends the application
 
 Contact
 -------

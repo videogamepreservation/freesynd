@@ -164,20 +164,43 @@ Option::Option(Menu *peer, int x, int y, int width, int height, const char *text
 
 		// If button label contains a '&' caracter, then the next
 		// caracter is the acceleration key for that button
-		std::string lbl(text_.getText());
-		size_t pos;
-		pos = lbl.find_first_of('&');
-		if (pos != std::string::npos ) {
-			// check if the caracter is not the last one
-			if (pos < (lbl.size() - 1)) {
-				// TODO : retrouver le codePoint
-				hotKey_.unicode = 0;
-				// remove the '&' from the string
-				lbl.erase(pos, 1);
+		// only 'a-zA-Z' characters are available
+		char src[100];
+		size_t size = text_.getText().size();
+
+		memset(src, 0, 100);
+		memcpy(src, text_.getText().c_str(), size);
+		size_t nbCdpt = utf8::distance(src, src + size);
+
+		char tmp[100];
+		char *itSrc = src;
+		char *itDst = tmp;
+		memset(tmp, 0, 100);
+
+		size_t i = 0;
+		bool foundAmp = false;
+		while (i<nbCdpt) {
+			i++;
+			int cp = utf8::next(itSrc, src + size);
+			if (cp == '&') {
+				if (!foundAmp) {
+					// found '&' : skip it
+					foundAmp = true;
+					continue;
+				}
+			} else if (foundAmp && hotKey_.unicode == 0) {
+				if (cp >= 'A' && cp <= 'z') {
+					hotKey_.unicode = cp;
+				}
 			}
-			// update button label
-			text_.setText(lbl.c_str());
+			// copy char
+			itDst = utf8::append(cp, itDst);
 		}
+		text_.setText(tmp);
+			
+		//////////////////////////
+
+
 
         // Position the button text in the middle of height
         // add 1 pixel to height to compensate lost of division

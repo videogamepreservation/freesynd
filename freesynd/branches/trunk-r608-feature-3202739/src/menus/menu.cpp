@@ -372,7 +372,13 @@ void Menu::keyEvent(Key key, const int modKeys)
 	// Then look for a mapped key to execute an action
 	for (std::list < HotKey >::iterator it = hotKeys_.begin();
          it != hotKeys_.end(); it++) {
-			if ((*it).key.equals(key)) {
+			 uint16 c = key.unicode;
+			 // Hotkey can only be character from 'A' to 'Z'
+			 if (c >= 'a' && c <= 'z') {
+				 // so uppercase it
+				 c -= 32;
+			 }
+			 if ((*it).key.keyFunc == key.keyFunc && (*it).key.unicode == c) {
 				Option *opt = (*it).pOption;
 				if (opt->isVisible() && opt->isenabled()) {
 					opt->executeAction(modKeys);
@@ -389,14 +395,6 @@ void Menu::keyEvent(Key key, const int modKeys)
 			menu_manager_->gotoMenu(parentId_);
 			return;
 		}
-
-		// In debug, allow to quit the application from anywhere
-		// by pressing CTRL-Q
-#ifdef _DEBUG
-		if ((modKeys & KMD_CTRL) && isLetterQ(key.unicode)) {
-			g_App.quit();
-		}
-#endif
     }
 }
 
