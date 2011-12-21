@@ -63,6 +63,9 @@ public:
     int textWidth(const char *text, bool dos, bool x2 = true);
     int textHeight(bool x2 = true);
 
+	// returns true if given code point is printable with the font
+	bool isPrintable(uint16 unicode);
+
 protected:
     static unsigned char decode(const unsigned char * &c, bool dos);
     static int decodeUTF8(const unsigned char * &c);

@@ -28,7 +28,7 @@
 
 #include <SDL.h>
 
-#include "common.h"
+#include "keys.h"
 #include "system.h"
 
 //! Implementation of the System interface for SDL.
@@ -73,8 +73,8 @@ protected:
     //! Loads the graphic file that contains the cursor sprites.
     bool loadCursorSprites();
 
-    //! Returns a Key for the given SDL key code
-    Key checkValidKey(SDL_keysym sym);
+    //! Sets the key arguments with some key codes
+    void checkKeyCodes(SDL_keysym sym, Key &key);
 
 protected:
     /*! A constant that holds the cursor icon width and height.*/

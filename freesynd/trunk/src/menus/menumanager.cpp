@@ -430,22 +430,3 @@ void MenuManager::mouseUpEvent(int x, int y, int button, const int modKeys)
         current_->mouseUpEvent(x, y, button, modKeys);
     }
 }
-
-bool MenuManager::isPrintableKey(Key key) {
-    return (key >= KEY_a && key <= KEY_z) ||
-            (key >= KEY_0 && key <= KEY_9) ||
-            (key == KEY_SPACE);
-}
-
-char MenuManager::getKeyAsChar(Key key) {
-    if (key >= KEY_a && key <= KEY_z) {
-        return key - KEY_a + 'A';
-
-    } else if (key >= KEY_0 && key <= KEY_9) {
-        return key - KEY_0 + '0';
-    } else if(key == KEY_SPACE) {
-        return ' ';
-    }
-
-    return 0;
-}

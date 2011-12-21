@@ -31,7 +31,6 @@
 #include <cassert>
 
 #include "utils/singleton.h"
-#include "keys.h"
 #include "version.h"
 
 // TODO: Add a configuration scheme to allow setting these during runtime

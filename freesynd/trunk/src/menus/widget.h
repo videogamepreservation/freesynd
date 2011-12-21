@@ -26,6 +26,7 @@
 #include <string>
 #include <list>
 
+#include "keys.h"
 #include "gfx/fontmanager.h"
 #include "utils/seqmodel.h"
 
@@ -216,8 +217,6 @@ protected:
  */
 class Option : public ActionWidget {
 public:
-	//! Returns the Key associated with the given caracter.
-	static Key getKeyForChar(char c);
 
     //! Constructs a new button.
     Option(Menu *peer, int x, int y, int width, int height, const char *text, MenuFont *pFont,
@@ -416,6 +415,13 @@ public:
 protected:
 	void drawCaret();
 
+	// Removes one character backward
+	void handleBackSpace();
+	// Removes one character forward
+	void handleDelete();
+	// Insert new character at caret position
+	void handleCharacter(Key key);
+
 protected:
 	/*! Label for empty lines.*/
     static std::string emptyLbl_;
@@ -426,6 +432,8 @@ protected:
 	bool isDisplayEmpty_;
 	/*! Position of caret in the name.*/
     size_t caretPosition_;
+	/*! Vertical position of the caret.*/
+	int yCaret_;
 	/*! Tells whether the field is being edited.*/
 	bool isInEdition_;
 	/*! Maximum size of the text.*/

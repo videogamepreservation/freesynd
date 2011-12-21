@@ -20,6 +20,9 @@ and code are located in svn under "libsyndicate".
 The ConfigFile class is based on code from Richard J. Wagner. For Licence
 information, see comments in the files src/utils/configfile.*
 
+Freesynd includes UTF8-CPP, a library by Nemanja Trifunovic for handling UTF-8 string.
+It is freely available. See licence in the utils/utf8.h and utils/utf8/*.h files.
+
 
 What's new in this release?
 ---------------------------
@@ -54,10 +57,11 @@ Commands
  * Left  : Puts the selector on the next mission.
  * Right : Puts the selector on the previous mission.
  * + / - : Increase / decrease tax rate on selected country by 1%.
-           If control key is held, the rates will change by 10%.
+           If control key is held while clicking with the mouse on the button , the rates will change by 10%.
            (Rates above 30% will downgrade the population status to rebellious
            and the mission will have to be played again. Rates below 30% will
            upgrade the population status to "very happy".)
+ * Page Up / Page Down : Increase / decrease tax rate on selected country by 10%.
  
 - In game:
  * F1  : Turns music on/off.
@@ -67,6 +71,8 @@ Commands
  * Ctrl + 0           : Inverts the selection.
  * Ctrl + Left Click  : Sets a waypoint for the selected agents.
  * Left,Right,Up,Down : Scrolls the map.
+ 
+ - Debug Mode :
 
 Contact
 -------

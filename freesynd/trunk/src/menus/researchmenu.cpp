@@ -72,9 +72,9 @@ ResearchMenu::ResearchMenu(MenuManager * m):Menu(m, MENU_RESEARCH, MENU_SELECT, 
     fundMaxTxtId_ = addStatic(20, 143, "", FontManager::SIZE_1, true);    // Search maximum
 
     incrFundId_ = addOption(16, 210, 129, 25,  "#RES_INC_FUND_BUT", FontManager::SIZE_2, MENU_NO_MENU, false);
-	registerHotKey(KEY_PLUS, incrFundId_);
+	registerHotKey(K_PLUS, incrFundId_);
     decrFundId_ = addOption(16, 260, 129, 25,  "#RES_DEC_FUND_BUT", FontManager::SIZE_2, MENU_NO_MENU, false);
-	registerHotKey(KEY_MINUS, decrFundId_);
+	registerHotKey(K_MINUS, decrFundId_);
     fundCurrLblId_ = addStatic(16, 242, 129, "", FontManager::SIZE_2, true);    // Current Funding label
     searchTitleLblId_ = addStatic(158, 86, "", FontManager::SIZE_2, true);    // Current search title
 

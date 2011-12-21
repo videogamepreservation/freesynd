@@ -884,12 +884,12 @@ bool GameplayMenu::handleUnknownKey(Key key, const int modKeys) {
     }
 
 #ifdef _DEBUG
-    if (key == KEY_h) {
+	if (isLetterH(key.unicode)) {
         mission_->setStatus(Mission::COMPLETED);
         return true;
     }
 
-    if (key == KEY_g) {
+    if (isLetterG(key.unicode)) {
         mission_->setStatus(Mission::FAILED);
         return true;
     }
@@ -897,7 +897,7 @@ bool GameplayMenu::handleUnknownKey(Key key, const int modKeys) {
 
     // SPACE is pressed when the mission failed or succeeded to return
     // to menu
-    if (key == KEY_SPACE) {
+	if (key.unicode == K_SPACE) {
         if (mission_->completed() || mission_->failed()) {
             if (mission_->completed()) {
                 g_Session.completeSelectedBlock();
@@ -912,7 +912,7 @@ bool GameplayMenu::handleUnknownKey(Key key, const int modKeys) {
 			menu_manager_->gotoMenu(Menu::MENU_DEBRIEF);
             return true;
         }
-    } else if (key == KEY_ESCAPE) {
+	} else if (key.keyFunc == KFC_ESCAPE) {
         // Abort mission
         mission_->setStatus(Mission::ABORTED);
         // Return false so when can still go to parent menu with escape
@@ -923,48 +923,48 @@ bool GameplayMenu::handleUnknownKey(Key key, const int modKeys) {
      * selection and all 4 agents. Ctrl + 0 inverts selection.
      * Individual keys select the specified agent unless ctrl is pressed -
      * then they add/remove agent from current selection. */
-    if (key == KEY_0 || key == KEY_BACKQUOTE) {
+	if (key.keyVirt == KVT_NUMPAD0) {
         /* This code is exactly the same as for clicking on "group-button"
          * as you can see above. */
         selectAllAgents(ctrl);
         change = true;
     }
-    else if (key == KEY_1) {
+    else if (key.keyVirt == KVT_NUMPAD1) {
         if ((selectable_agents_ & (1 << 0)) != 0) {
             selectAgent(0, ctrl);
             change = true;
         }
     }
-    else if (key == KEY_2) {
+    else if (key.keyVirt == KVT_NUMPAD2) {
         if ((selectable_agents_ & (1 << 1)) != 0) {
             selectAgent(1, ctrl);
             change = true;
         }
     }
-    else if (key == KEY_3) {
+    else if (key.keyVirt == KVT_NUMPAD3) {
         if ((selectable_agents_ & (1 << 2)) != 0) {
             selectAgent(2, ctrl);
             change = true;
         }
     }
-    else if (key == KEY_4) {
+    else if (key.keyVirt == KVT_NUMPAD4) {
         if ((selectable_agents_ & (1 << 3)) != 0) {
             selectAgent(3, ctrl);
             change = true;
         }
-    } else if (key == KEY_LEFT) { // Scroll the map to the left
+	} else if (key.keyFunc == KFC_LEFT) { // Scroll the map to the left
         scroll_x_ = -SCROLL_STEP;
-    } else if (key == KEY_RIGHT) { // Scroll the map to the right
+    } else if (key.keyFunc == KFC_RIGHT) { // Scroll the map to the right
         scroll_x_ = SCROLL_STEP;
-    } else if (key == KEY_UP) { // Scroll the map to the top
+    } else if (key.keyFunc == KFC_UP) { // Scroll the map to the top
         scroll_y_ = -SCROLL_STEP;
-    } else if (key == KEY_DOWN) { // Scroll the map to the bottom
+    } else if (key.keyFunc == KFC_DOWN) { // Scroll the map to the bottom
         scroll_y_ = SCROLL_STEP;
-    } else if (key == KEY_F1) { // Music Control
+    } else if (key.keyFunc == KFC_F1) { // Music Control
         g_App.music().toggleMusic();
-    } else if (key == KEY_F2) { // Sound Control
+    } else if (key.keyFunc == KFC_F2) { // Sound Control
         g_App.gameSounds().toggleSound();
-    } else if (key == KEY_d) { // all agents are killed with 'd'
+    } else if (isLetterD(key.unicode)) { // all agents are killed with 'd'
         for (int i = 8; i < mission_->numPeds(); i++)
             mission_->ped(i)->setHealth(0);
     } else {

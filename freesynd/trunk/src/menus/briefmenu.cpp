@@ -46,9 +46,9 @@ start_line_(0) {
 
     // Briefing scroll button
     nextButId_ = addImageOption(461, 316, Sprite::MSPR_RIGHT_ARROW2_D, Sprite::MSPR_RIGHT_ARROW2_L);
-	registerHotKey(KEY_RIGHT, nextButId_);
+	registerHotKey(KFC_RIGHT, nextButId_);
     prevButId_ = addImageOption(427, 316, Sprite::MSPR_LEFT_ARROW2_D, Sprite::MSPR_LEFT_ARROW2_L, false);
-	registerHotKey(KEY_LEFT, prevButId_);
+	registerHotKey(KFC_LEFT, prevButId_);
 
     // Accept button
     addOption(17, 347, 128, 25, "#MENU_ACC_BUT", FontManager::SIZE_2, MENU_SELECT);

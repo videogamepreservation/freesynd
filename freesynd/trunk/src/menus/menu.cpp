@@ -194,9 +194,9 @@ int Menu::addOption(int x, int y, int width, int height, const char *text, FontM
     Option *pOption = new Option(this, x, y, width, height, text, getMenuFont(size), to, visible, centered, dark_widget, light_widget);
 	actions_.push_back(pOption);
 
-	if (pOption->getHotKey() != KEY_UNKNOWN) {
+	if (pOption->getHotKey().keyFunc != KFC_UNKNOWN || pOption->getHotKey().unicode != 0) {
 		// The option already has an acceleration key
-		registerHotKey(pOption->getHotKey(), pOption->getId());
+		registerHotKey(pOption->getHotKey().unicode, pOption->getId());
 	}
 
     return pOption->getId();
@@ -317,14 +317,29 @@ Option * Menu::getOption(int optionId) {
 
 /*!
  * Adds an acceleration key to the given option so it can be activated by that key.
- * If id is not an option id, then nothing is done.
- * \param key The hot key
+ * If id is not an existing option id, then nothing is done.
+ * \param code The hot key
  * \param optId The option id
  */
-void  Menu::registerHotKey(Key key, int optId) {
+void  Menu::registerHotKey(KeyFunc code, int optId) {
 	Option *pOption = getOption(optId);
 	if (pOption) {
-		hotKeys_[key] = pOption;
+		HotKey hc(code, 0, pOption);
+		hotKeys_.push_back(hc);
+	}
+}
+
+/*!
+ * Adds an acceleration key to the given option so it can be activated by that key.
+ * If id is not an option id, then nothing is done.
+ * \param unicode The hot key
+ * \param optId The option id
+ */
+void  Menu::registerHotKey(uint16 unicode, int optId) {
+	Option *pOption = getOption(optId);
+	if (pOption) {
+		HotKey hc(KFC_UNKNOWN, unicode, pOption);
+		hotKeys_.push_back(hc);
 	}
 }
 
@@ -355,21 +370,31 @@ void Menu::keyEvent(Key key, const int modKeys)
 	}
 
 	// Then look for a mapped key to execute an action
-    if (hotKeys_.find(key) != hotKeys_.end()) {
-        Option *opt = hotKeys_[key];
-        
-		if (opt->isVisible() && opt->isenabled()) {
-	        opt->executeAction(modKeys);
-		}
-
-        return;
+	for (std::list < HotKey >::iterator it = hotKeys_.begin();
+         it != hotKeys_.end(); it++) {
+			 uint16 c = key.unicode;
+			 // Hotkey can only be character from 'A' to 'Z'
+			 if (c >= 'a' && c <= 'z') {
+				 // so uppercase it
+				 c -= 32;
+			 }
+			 if ((*it).key.keyFunc == key.keyFunc && (*it).key.unicode == c) {
+				Option *opt = (*it).pOption;
+				if (opt->isVisible() && opt->isenabled()) {
+					opt->executeAction(modKeys);
+				}
+				return;
+			}
     }
 
-    // Pressing Escape changes the current menu to its parent(like a back)
-    // if menu has not already consummed key event
-    if (!handleUnknownKey(key, modKeys) && key == KEY_ESCAPE) {
-        menu_manager_->gotoMenu(parentId_);
-        return;
+	// Finally pass the event to the menu instance
+    if (!handleUnknownKey(key, modKeys)) {
+		// Menu has not consummed key event :
+		// Pressing Escape changes the current menu to its parent(like a back)
+		if (key.keyFunc == KFC_ESCAPE) {
+			menu_manager_->gotoMenu(parentId_);
+			return;
+		}
     }
 }
 

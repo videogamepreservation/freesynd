@@ -476,22 +476,6 @@ void App::keyEvent(Key & key, const int modKeys) {
         menus_.keyEvent(key, modKeys);
         return;
     }
-
-    // TODO : this part is never reached because the app
-    // is either playing a Fli or showing a menu
-    // Maybe checked if menus has treated the current event
-    // and if not run this code
-#ifdef _DEBUG
-    switch (key) {
-    case KEY_ESCAPE:
-    case KEY_q:
-        quit();
-        break;
-
-    default:
-        break;
-    }
-#endif
 }
 
 /*!

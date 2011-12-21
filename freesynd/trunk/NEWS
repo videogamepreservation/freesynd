@@ -20,10 +20,12 @@ Features added
   * 3336699 : Made save files portable between byte orders.
   * 3283536 : Manage separate directory for syndicate and freesynd
   * 3337516 : Standardize text fields in configure and loadsave menus
+  * 3202739 : keyboard type management
   * It's now possible to define an acceleration key for a button by
     inserting a '&' caracter before the letter in the button label in the
 	language file. Works only for letters.
   * Menus are now created when first accessed not all once.
+  * In the Map menu, pressing PageUp or PageDown increases/decreases tax from 10%
 
 Known issues with this release
 ------------------------------
