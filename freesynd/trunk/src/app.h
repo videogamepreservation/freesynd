@@ -148,17 +148,14 @@ class App : public Singleton < App > {
         return skipFli_;
     }
 
+	void skipPlayingFli() {
+		if (playingFli_) {
+			skipFli_ = true;
+		}
+	}
+
     void waitForKeyPress();
     void setPalette(const char *fname, bool sixbit = true);
-
-    //! Handles key pressed
-    void keyEvent(Key & key, const int modKeys);
-    //! Handles mouse button pressed
-    void mouseDownEvent(int x, int y, int button, const int modKeys);
-    //! Handles mouse button released
-    void mouseUpEvent(int x, int y, int button, const int modKeys);
-    //! Handles mouse moved
-    void mouseMotionEvent(int x, int y, int state, const int modKeys);
 
     //! Save game to a file
     bool saveGameToFile(int fileSlot, std::string name);

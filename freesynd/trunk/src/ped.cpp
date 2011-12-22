@@ -30,9 +30,6 @@
 #include <math.h>
 
 #if 0
-#ifdef SYSTEM_SDL
-#include "system_sdl.h"
-#endif
 #define EXECUTION_SPEED_TIME
 #endif
 

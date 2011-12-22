@@ -27,8 +27,53 @@
 #define SYSTEM_H
 
 #include "common.h"
+#include "keys.h"
 
 class Sprite;
+
+enum FS_EventType {
+	EVT_NONE = 0,		// No event in the queue
+	EVT_QUIT = 1,		// Quit event
+	EVT_MSE_MOTION = 2,	// Mouse motion
+	EVT_MSE_UP = 3,
+	EVT_MSE_DOWN = 4,
+	EVT_KEY_DOWN = 5
+};
+
+/** The "quit requested" event */
+struct FS_QuitEvent {
+	FS_EventType type;
+};
+
+struct FS_MouseMotionEvent {
+	FS_EventType type;	/**< SDL_MOUSEMOTION */
+	uint8 state;	/**< The current button state */
+	uint16 x, y;	/**< The X/Y coordinates of the mouse */
+	int keyMods;
+};
+
+struct FS_MouseButtonEvent {
+	FS_EventType type;	/**< SDL_MOUSEMOTION */
+	uint8 button;	/**< The current button state */
+	uint16 x, y;	/**< The X/Y coordinates of the mouse */
+	int keyMods;
+};
+
+struct FS_KeyEvent {
+	FS_EventType type;	/**< EVT_KEY_DOWN */
+	Key key;
+	int keyMods;
+};
+
+/** General event structure */
+union FS_Event {
+	FS_EventType type;
+	
+	FS_QuitEvent quit;
+	FS_MouseMotionEvent motion;
+	FS_MouseButtonEvent button;
+	FS_KeyEvent key;
+};
 
 /*! 
  * Abstract interface that all systems/ports should implement.
@@ -37,7 +82,8 @@ struct System : public Singleton<System> {
     virtual ~System() {}
     virtual bool initialize(bool fullscreen) = 0;
     virtual void updateScreen() = 0;
-    virtual void handleEvents() = 0;
+	//! Pumps an event from the event queue
+	virtual bool pumpEvents(FS_Event *pEvtOut) = 0;
     virtual void delay(int msec) = 0;
 	virtual int getTicks() = 0;
 
@@ -64,5 +110,9 @@ struct System : public Singleton<System> {
 };
 
 #define g_System    System::singleton()
+
+#ifdef SYSTEM_SDL
+#include "system_sdl.h"
+#endif
 
 #endif

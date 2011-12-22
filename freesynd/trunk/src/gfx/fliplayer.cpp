@@ -466,7 +466,7 @@ bool FliPlayer::play(bool intro, Font *pIntroFont) {
 	int cur_frame = 0;
     while (hasFrames() && g_App.isRunning()
            && (!g_App.skipFli() || !skipable_)) {
-        g_System.handleEvents();
+			   g_App.menus().handleEvents();
 
         if (!decodeFrame())
             break;

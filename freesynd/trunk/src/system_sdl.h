@@ -29,7 +29,6 @@
 #include <SDL.h>
 
 #include "keys.h"
-#include "system.h"
 
 //! Implementation of the System interface for SDL.
 /*!
@@ -51,7 +50,8 @@ public:
     bool initialize(bool fullscreen);
 
     void updateScreen();
-    void handleEvents();
+	//! Pumps an event from the event queue
+	bool pumpEvents(FS_Event *pEvtOut);
     void delay(int msec);
 	int getTicks();
 

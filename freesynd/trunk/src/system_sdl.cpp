@@ -25,8 +25,7 @@
 
 #include "config.h"
 #include "gfx/screen.h"
-#include "system_sdl.h"
-#include "app.h"
+#include "system.h"
 #include "sound/audio.h"
 #include "utils/file.h"
 #include "utils/log.h"
@@ -217,6 +216,7 @@ void SystemSDL::checkKeyCodes(SDL_keysym keysym, Key &key) {
     }
 }
 
+//! Pumps an event from the event queue
 /*!
  * Watch the event queue and dispatch events.
  * - keyboard events : when a modifier key is pressed,
@@ -225,69 +225,68 @@ void SystemSDL::checkKeyCodes(SDL_keysym keysym, Key &key) {
  * when a regular key is pressed. So that the application knows
  * if multiple modifier keys are pressed at the same time (ie Ctrl/Shift)
  */
-void SystemSDL::handleEvents() {
-    static SDL_Event event;
+bool SystemSDL::pumpEvents(FS_Event *pEvtOut) {
+	SDL_Event evtIn;
 
-    while (SDL_PollEvent(&event)) {
-        switch (event.type) {
-        case SDL_KEYDOWN:
+	pEvtOut->type = EVT_NONE;
+
+    if (SDL_PollEvent(&evtIn)) {
+        switch (evtIn.type) {
+		case SDL_QUIT:
+			pEvtOut->quit.type = EVT_QUIT;
+			break;
+		case SDL_KEYDOWN:
             {
             // Check if key pressed is a modifier
-            bool isKeyMod = false;
-            switch(event.key.keysym.sym) {
+            switch(evtIn.key.keysym.sym) {
                 case SDLK_RSHIFT:
                     keyModState_ = keyModState_ | KMD_RSHIFT; 
-                    isKeyMod = true;
                     break;
                 case SDLK_LSHIFT:
                     keyModState_ = keyModState_ | KMD_LSHIFT; 
-                    isKeyMod = true;
                     break;
                 case SDLK_RCTRL:
                     keyModState_ = keyModState_ | KMD_RCTRL; 
-                    isKeyMod = true;
                     break;
                 case SDLK_LCTRL:
                     keyModState_ = keyModState_ | KMD_LCTRL; 
-                    isKeyMod = true;
                     break;
                 case SDLK_RALT:
                     keyModState_ = keyModState_ | KMD_RALT; 
-                    isKeyMod = true;
                     break;
                 case SDLK_LALT:
                     keyModState_ = keyModState_ | KMD_LALT; 
-                    isKeyMod = true;
                     break;
                 default:
 					// We pass the event only if it's not a allowed modifier key
 					// Plus, the application receives event only when key is pressed
 					// not released.
+					pEvtOut->type = EVT_KEY_DOWN;
 					Key key;
 					key.unicode = 0;
-					checkKeyCodes(event.key.keysym, key);
+					checkKeyCodes(evtIn.key.keysym, key);
 					if (key.keyFunc == KFC_UNKNOWN) {
-						key.unicode = event.key.keysym.unicode;
+						key.unicode = evtIn.key.keysym.unicode;
 #if 1
-						printf( "Scancode: 0x%02X", event.key.keysym.scancode );
-						printf( ", Name: %s", SDL_GetKeyName( event.key.keysym.sym ) );
+						printf( "Scancode: 0x%02X", evtIn.key.keysym.scancode );
+						printf( ", Name: %s", SDL_GetKeyName( evtIn.key.keysym.sym ) );
 						printf(", Unicode: " );
-						if( event.key.keysym.unicode < 0x80 && event.key.keysym.unicode > 0 ){
-							printf( "%c (0x%04X)\n", (char)event.key.keysym.unicode,
-									event.key.keysym.unicode );
+						if( evtIn.key.keysym.unicode < 0x80 && evtIn.key.keysym.unicode > 0 ){
+							printf( "%c (0x%04X)\n", (char)evtIn.key.keysym.unicode,
+									evtIn.key.keysym.unicode );
 						} else{
-							printf( "? (0x%04X)\n", event.key.keysym.unicode );
+							printf( "? (0x%04X)\n", evtIn.key.keysym.unicode );
 						}
 #endif
 					}
-					g_App.keyEvent(key, keyModState_);
+					pEvtOut->key.key = key;
                     break;
-            } // end inner bracket
+				} // end switch
             } // end case SDL_KEYDOWN
             break;
         case SDL_KEYUP:
             {
-            switch(event.key.keysym.sym) {
+            switch(evtIn.key.keysym.sym) {
                 case SDLK_RSHIFT:
                     keyModState_ = keyModState_ & !KMD_RSHIFT;
                     break;
@@ -311,41 +310,34 @@ void SystemSDL::handleEvents() {
             }
             }
             break;
-#ifdef GP2X
-        case SDL_JOYBUTTONDOWN:
-        case SDL_JOYBUTTONUP:
-            Key key = static_cast < Key > (event.jbutton.button);
-            keyMod = KMD_NONE;
-            g_App.keyEvent(key, KMD_NONE);
+		case SDL_MOUSEBUTTONUP:
+			pEvtOut->button.type = EVT_MSE_UP;
+			pEvtOut->button.x = evtIn.button.x;
+            pEvtOut->button.y = cursor_y_ = evtIn.button.y;
+			pEvtOut->button.button = evtIn.button.button;
+			pEvtOut->button.keyMods = keyModState_;
             break;
-#endif
-
-        case SDL_MOUSEBUTTONUP:
-            g_App.mouseUpEvent(event.button.x, event.button.y,
-                               event.button.button, keyModState_);
-            break;
-
         case SDL_MOUSEBUTTONDOWN:
-            g_App.mouseDownEvent(event.button.x, event.button.y,
-                                 event.button.button, keyModState_);
+            pEvtOut->button.type = EVT_MSE_DOWN;
+			pEvtOut->button.x = evtIn.button.x;
+            pEvtOut->button.y = cursor_y_ = evtIn.button.y;
+			pEvtOut->button.button = evtIn.button.button;
+			pEvtOut->button.keyMods = keyModState_;
             break;
-
-        case SDL_MOUSEMOTION:
-            update_cursor_ = true;
-            cursor_x_ = event.motion.x;
-            cursor_y_ = event.motion.y;
-            g_App.mouseMotionEvent(event.motion.x, event.motion.y,
-                                   event.motion.state, keyModState_);
+		case SDL_MOUSEMOTION:
+			update_cursor_ = true;
+			pEvtOut->motion.type = EVT_MSE_MOTION;
+			pEvtOut->motion.x = cursor_x_ = evtIn.motion.x;
+            pEvtOut->motion.y = cursor_y_ = evtIn.motion.y;
+			pEvtOut->motion.state = evtIn.motion.state;
+			pEvtOut->motion.keyMods = keyModState_;
             break;
-
-        case SDL_QUIT:
-			g_App.menus().gotoMenu(Menu::MENU_LOGOUT);
-            break;
-
         default:
             break;
         }
-    }
+	}
+
+	return pEvtOut->type != EVT_NONE;
 }
 
 void SystemSDL::delay(int msec) {

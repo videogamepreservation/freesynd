@@ -72,6 +72,9 @@ public:
         return fonts_;
     }
 
+	/*! Reads events from the event queue and dispatches them.*/
+	void handleEvents();
+
     void handleTick(int elapsed) {
         if (current_)
             current_->handleTick(elapsed);
@@ -99,15 +102,6 @@ public:
 
     //! Returns true if a menu is being displayed
     bool showingMenu() { return current_ != NULL; }
-
-    //! Handles key pressed
-    void keyEvent(Key key, const int modKeys);
-    //! Handles mouse moved
-    void mouseMotionEvent(int x, int y, int state, const int modKeys);
-    //! Handles mouse button pressed
-    void mouseDownEvent(int x, int y, int button, const int modKeys);
-    //! Handles mouse button released
-    void mouseUpEvent(int x, int y, int button, const int modKeys);
 
     FS_Lang currLanguage(void) {return curr_language_; }
 

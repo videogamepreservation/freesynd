@@ -367,66 +367,42 @@ void MenuManager::renderMenu() {
     }
 }
 
-/*!
- * Handles the key pressed event.
- * Actually, passes the event to the current menu.
- * \param key The key that was pressed
- * \param modKeys State of all modifier keys
- */
-void MenuManager::keyEvent(Key key, const int modKeys)
-{
-    if (current_ && !drop_events_) {
-        current_->keyEvent(key, modKeys);
-    }
-}
-
-/*!
- * Handles the mouse motion event.
- * Actually, passes the event to the current menu.
- * \param x X screen coordinate
- * \param y Y screen coordinate
- * \param state If button is pressed during mouse motion.
- * \param modKeys State of all modifier keys
- */
-void MenuManager::mouseMotionEvent(int x, int y, int state, const int modKeys)
-{
-    if (current_ && !drop_events_)
-        current_->mouseMotionEvent(x, y, state, modKeys);
-}
-
-/*!
- * Handles the mouse down event.
- * Actually, passes the event to the current menu.
- * \param x X screen coordinate
- * \param y Y screen coordinate
- * \param button What button was pressed
- * \param modKeys State of all modifier keys
- */
-void MenuManager::mouseDownEvent(int x, int y, int button, const int modKeys)
-{
+void MenuManager::handleEvents() {
+	FS_Event evt;
+	while(g_System.pumpEvents(&evt)) {
+		switch(evt.type) {
+		case EVT_QUIT:
+			gotoMenu(Menu::MENU_LOGOUT);
+			break;
+		case EVT_MSE_MOTION:
+			if (current_ && !drop_events_)
+				current_->mouseMotionEvent(evt.motion.x, evt.motion.y, evt.motion.state, evt.motion.keyMods);
+			break;
+		case EVT_MSE_DOWN:
 #ifdef _DEBUG
-    // Display mouse coordinate
-    if (modKeys & KMD_SHIFT) {
-        printf("Mouse is at %d, %d\n", x, y);
-    }
+			// Display mouse coordinate
+			if (evt.button.keyMods & KMD_SHIFT) {
+				printf("Mouse is at %d, %d\n", evt.motion.x, evt.motion.y);
+			}
 #endif
 
-    if (current_ && !drop_events_) {
-        current_->mouseDownEvent(x, y, button, modKeys);
-    }
-}
+			g_App.skipPlayingFli();
 
-/*!
- * Handles the mouse up event.
- * Actually, passes the event to the current menu.
- * \param x X screen coordinate
- * \param y Y screen coordinate
- * \param button What button was released
- * \param modKeys State of all modifier keys
- */
-void MenuManager::mouseUpEvent(int x, int y, int button, const int modKeys)
-{
-    if (current_ && !drop_events_) {
-        current_->mouseUpEvent(x, y, button, modKeys);
-    }
+			if (current_ && !drop_events_) {
+				current_->mouseDownEvent(evt.button.x, evt.button.y, evt.button.button, evt.button.keyMods);
+			}
+			break;
+		case EVT_MSE_UP:
+			if (current_ && !drop_events_) {
+				current_->mouseUpEvent(evt.button.x, evt.button.y, evt.button.button, evt.button.keyMods);
+			}
+			break;
+		case EVT_KEY_DOWN:
+			g_App.skipPlayingFli();
+			if (current_ && !drop_events_) {
+				current_->keyEvent(evt.key.key, evt.key.keyMods);
+			}
+			break;
+		}
+	}
 }

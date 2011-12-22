@@ -46,10 +46,6 @@
 #undef ChunkHeader
 #endif
 
-#ifdef SYSTEM_SDL
-#include "system_sdl.h"
-#endif
-
 #include "gfx/fliplayer.h"
 #include "gfx/spritemanager.h"
 #include "gfx/screen.h"
@@ -456,77 +452,6 @@ bool App::reset() {
     return true;
 }
 
-/*!
- * Handles the key pressed event.
- * Actually, passes the event to the menu manager.
- * \param key The key that was pressed
- * \param modKeys State of all modifier keys
- */
-void App::keyEvent(Key & key, const int modKeys) {
-
-    // TODO : There should be a special menu that 
-    // would play Fli so that playing Fli would not
-    // be a special event in the application.
-    if (playingFli_) {
-        skipFli_ = true;
-        return;
-    }
-
-    if (menus_.showingMenu()) {
-        menus_.keyEvent(key, modKeys);
-        return;
-    }
-}
-
-/*!
- * Handles the mouse down event.
- * Actually, passes the event to the menu manager.
- * \param x X screen coordinate
- * \param y Y screen coordinate
- * \param button What button was pressed
- * \param modKeys State of all modifier keys
- */
-void App::mouseDownEvent(int x, int y, int button, const int modKeys) {
-    if (playingFli_) {
-        skipFli_ = true;
-        return;
-    }
-    if (menus_.showingMenu()) {
-        menus_.mouseDownEvent(x, y, button, modKeys);
-        return;
-    }
-}
-
-/*!
- * Handles the mouse up event.
- * Actually, passes the event to the menu manager.
- * \param x X screen coordinate
- * \param y Y screen coordinate
- * \param button What button was released
- * \param modKeys State of all modifier keys
- */
-void App::mouseUpEvent(int x, int y, int button, const int modKeys) {
-    if (menus_.showingMenu()) {
-        menus_.mouseUpEvent(x, y, button, modKeys);
-        return;
-    }
-}
-
-/*!
- * Handles the mouse motion event.
- * Actually, passes the event to the menu manager.
- * \param x X screen coordinate
- * \param y Y screen coordinate
- * \param state If button is pressed during mouse motion.
- * \param modKeys State of all modifier keys
- */
-void App::mouseMotionEvent(int x, int y, int state, const int modKeys) {
-    if (menus_.showingMenu()) {
-        menus_.mouseMotionEvent(x, y, state, modKeys);
-        return;
-    }
-}
-
 void App::waitForKeyPress() {
     playingFli_ = true;
     skipFli_ = false;
@@ -534,7 +459,7 @@ void App::waitForKeyPress() {
     while (running_ && !skipFli_) {
         // small pause while waiting for key, also mouse event
         SDL_Delay(20);
-        system_->handleEvents();
+        menus_.handleEvents();
     }
 
     playingFli_ = false;
@@ -689,7 +614,7 @@ void App::run(int start_mission) {
 
     int lasttick = SDL_GetTicks();
     while (running_) {
-        system_->handleEvents();
+		menus_.handleEvents();
         int curtick = SDL_GetTicks();
         int diff_ticks = curtick - lasttick;
         if (diff_ticks < 30) {
