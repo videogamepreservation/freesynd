@@ -160,7 +160,7 @@ void DebriefMenu::checkNewWeaponFound() {
     }
 }
 
-void DebriefMenu::handleRender() {
+void DebriefMenu::handleRender(DirtyList &dirtyList) {
     // Display team logo
     g_Screen.drawLogo(18, 14, g_App.getGameSession().getLogo(), g_App.getGameSession().getLogoColour());
 

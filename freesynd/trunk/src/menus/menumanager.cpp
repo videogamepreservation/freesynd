@@ -309,9 +309,9 @@ void MenuManager::showMenu(Menu *pMenu) {
     int x,y;
     int state = g_System.getMousePos(&x, &y);
     pMenu->mouseMotionEvent(x, y, state, KMD_NONE);
-    
-    // First draw completly the menu
-    pMenu->render();
+
+	// Adds a dirty rect to force menu rendering
+	addRect(0, 0, g_Screen.gameScreenWidth(), g_Screen.gameScreenHeight());
 
     // reopen the event processing
     drop_events_ = false;
@@ -361,7 +361,7 @@ void MenuManager::renderMenu() {
                 g_Screen.blitRect(rect->x, rect->y, rect->width, rect->height, background_, false, g_Screen.gameScreenWidth());
             }
         }
-        current_->render();
+        current_->render(dirtyList_);
         // flush dirty list
         dirtyList_.flush();
     }

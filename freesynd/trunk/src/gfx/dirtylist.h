@@ -44,6 +44,9 @@ public:
 
     void flush();
 
+	//! Returns true if the given rect intersects with any dirty rect in the list
+	bool intersectsList(int x, int y, int width, int height);
+
 private:
     struct Link
 	{

@@ -309,7 +309,7 @@ void GameplayMenu::handleTick(int elapsed)
     }
 
     if (change) {
-        render();
+        needRendering();
         // force pointing_at_ped / vehicle to update
         handleMouseMotion(last_motion_x_, last_motion_y_, 0, KMD_NONE);
     }
@@ -404,7 +404,7 @@ void GameplayMenu::handleShow() {
 
 int qanim = 200, qframe = 0;
 
-void GameplayMenu::handleRender()
+void GameplayMenu::handleRender(DirtyList &dirtyList)
 {
     g_Screen.clear(0);
     mission_->drawMap(world_x_, world_y_);
@@ -851,7 +851,8 @@ bool GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
     }
 
     if (change)
-        render();
+        //render();
+		needRendering();
 
 	return true;
 }

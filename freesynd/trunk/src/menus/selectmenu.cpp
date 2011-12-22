@@ -337,7 +337,7 @@ void SelectMenu::handleShow() {
     }
 }
 
-void SelectMenu::handleRender() {
+void SelectMenu::handleRender(DirtyList &dirtyList) {
     g_Screen.drawLogo(18, 14, g_App.getGameSession().getLogo(), g_App.getGameSession().getLogoColour());
 
     // write team member icons and health

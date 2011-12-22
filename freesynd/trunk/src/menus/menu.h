@@ -32,6 +32,7 @@
 #include "keys.h"
 #include "common.h"
 #include "menus/widget.h"
+#include "gfx/dirtylist.h"
 
 class FontManager;
 class Menu;
@@ -106,7 +107,6 @@ public:
 	//! Adds a mapping between a Printable Key and an Option
 	void registerHotKey(uint16 unicode, int optId);
 
-	void render();
     //! Does common actions before leaving
     void leave();
 
@@ -116,12 +116,9 @@ public:
      * been defined) and before the menu is rendered for the first time.
      */
     virtual void handleShow() {}
-
-    //! Callback function : Childs can reimplement
-    /*! 
-     * Called each time a menu is rendered.
-     */
-    virtual void handleRender() {}
+    
+	//! Main render function
+	void render(DirtyList &dirtyList);
 
     //! Callback function : Childs can reimplement
     /*! 
@@ -155,6 +152,12 @@ public:
 	void captureInputBy(TextField *pTextfield);
 
 protected:
+
+	//! Callback function : Childs can reimplement
+    /*! 
+     * Called each time a menu is rendered.
+     */
+    virtual void handleRender(DirtyList &dirtyList) {}
 	
 	//! Handle mouse down event.
 	/*!
@@ -165,7 +168,6 @@ protected:
     virtual void handleMouseMotion(int x, int y, int state, const int modKeys) {}
 	virtual bool handleUnknownKey(Key key, const int modKeys) { return false;}
 
-    void redrawOptions();
     void needRendering();
     void addDirtyRect(int x, int y, int width, int height);
 

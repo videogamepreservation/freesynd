@@ -136,7 +136,7 @@ void BriefMenu::handleShow() {
     g_System.showCursor();
 }
 
-void BriefMenu::handleRender() {
+void BriefMenu::handleRender(DirtyList &dirtyList) {
 
     g_Screen.drawLogo(18, 14, g_Session.getLogo(), g_Session.getLogoColour());
 

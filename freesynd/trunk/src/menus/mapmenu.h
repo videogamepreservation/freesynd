@@ -41,11 +41,11 @@ public:
 
     void handleTick(int elapsed);
     void handleShow();
-    void handleRender();
     void handleLeave();
     void handleAction(const int actionId, void *ctx, const int modKeys);
 
 protected:
+	void handleRender(DirtyList &dirtyList);
     bool handleUnknownKey(Key key, const int modKeys);
 	bool handleMouseDown(int x, int y, int button, const int modKeys);
     //! Utility method to draw the mission selector

@@ -36,7 +36,7 @@ public:
     DebriefMenu(MenuManager *m);
 
     void handleShow();
-    void handleRender();
+    void handleRender(DirtyList &dirtyList);
     void handleLeave();
 
     void handleGameEvent(GameEvent evt);

@@ -342,7 +342,7 @@ void MapMenu::handleShow() {
     updateClock();
 }
 
-void MapMenu::handleRender()
+void MapMenu::handleRender(DirtyList &dirtyList)
 {
     // Draws all countries
     for (int i = 0; i < GameSession::NB_MISSION; i++) {

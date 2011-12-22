@@ -37,7 +37,7 @@ public:
 
     void handleTick(int elapsed);
     void handleShow();
-    void handleRender();
+    void handleRender(DirtyList &dirtyList);
     void handleLeave();
     void handleAction(const int actionId, void *ctx, const int modKeys);
     void handleGameEvent(GameEvent evt);

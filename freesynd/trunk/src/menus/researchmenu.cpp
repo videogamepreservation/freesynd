@@ -264,7 +264,7 @@ void ResearchMenu::handleShow() {
     }
 }
 
-void ResearchMenu::handleRender()
+void ResearchMenu::handleRender(DirtyList &dirtyList)
 {
     g_Screen.drawLogo(18, 14, g_App.getGameSession().getLogo(), g_App.getGameSession().getLogoColour());
 

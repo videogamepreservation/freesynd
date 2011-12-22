@@ -38,7 +38,7 @@ public:
 
     void handleTick(int elapsed);
     void handleShow();
-    void handleRender();
+    void handleRender(DirtyList &dirtyList);
     void handleLeave();
 
 protected:

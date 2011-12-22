@@ -35,7 +35,7 @@ public:
     ConfMenu(MenuManager *m);
     ~ConfMenu();
 
-    virtual void handleRender();
+    virtual void handleRender(DirtyList &dirtyList);
 	void handleShow();
     void handleLeave();
 
