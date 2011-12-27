@@ -155,7 +155,6 @@ class App : public Singleton < App > {
 	}
 
     void waitForKeyPress();
-    void setPalette(const char *fname, bool sixbit = true);
 
     //! Save game to a file
     bool saveGameToFile(int fileSlot, std::string name);
@@ -167,6 +166,9 @@ class App : public Singleton < App > {
 private:
     //! Reads the configuration file
     bool readConfiguration();
+
+	//! Loads walk data
+	bool loadWalkData();
 
     //! Sets the intro flag to false in the config file
     void updateIntroFlag();

@@ -30,6 +30,7 @@ set (SOURCES
 	menus/briefmenu.cpp
 	menus/confmenu.cpp
 	menus/debriefmenu.cpp
+	menus/flimenu.cpp
 	menus/gameplaymenu.cpp
 	menus/loadingmenu.cpp
 	menus/loadsavemenu.cpp
@@ -115,6 +116,7 @@ set(HEADERS
 	menus/briefmenu.h
 	menus/confmenu.h
 	menus/debriefmenu.h
+	menus/flimenu.h
 	menus/gameplaymenu.h
 	menus/loadingmenu.h
 	menus/loadsavemenu.h

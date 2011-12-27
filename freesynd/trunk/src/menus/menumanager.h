@@ -97,6 +97,10 @@ public:
         dirtyList_.addRect(x, y, width, height);
     }
 
+	//! Sets the default palette
+	void setDefaultPalette();
+	void setPalette(const char *fname, bool sixbit = true);
+
     //! Displays the current menu
     void renderMenu();
 

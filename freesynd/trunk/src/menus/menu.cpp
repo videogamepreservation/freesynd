@@ -28,7 +28,8 @@
 #include <string.h>
 #include <assert.h>
 
-#include "app.h"
+#include "menus/menu.h"
+#include "menus/menumanager.h"
 #include "gfx/fliplayer.h"
 #include "gfx/screen.h"
 
@@ -44,6 +45,8 @@ const int Menu::MENU_RESEARCH = 7;
 const int Menu::MENU_SELECT = 8;
 const int Menu::MENU_LDSAVE = 9;
 const int Menu::MENU_MAP = 10;
+const int Menu::MENU_FLI_SUCCESS = 11;
+const int Menu::MENU_FLI_FAILED = 12;
 
 Menu::Menu(MenuManager * menuManager, int id, int parentId, 
            const char *showAnim, const char *leaveAnim) :

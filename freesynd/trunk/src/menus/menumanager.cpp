@@ -44,6 +44,7 @@
 #include "gameplaymenu.h"
 #include "debriefmenu.h"
 #include "logoutmenu.h"
+#include "flimenu.h"
 
 
 MenuManager::MenuManager(): 
@@ -154,6 +155,25 @@ void MenuManager::destroy() {
 	}
 }
 
+void MenuManager::setDefaultPalette() {
+	setPalette("mselect.pal", true);
+}
+
+void MenuManager::setPalette(const char *fname, bool sixbit) {
+    LOG(Log::k_FLG_GFX, "MenuManager", "setPalette", ("Setting palette : %s", fname))
+	int size;
+    uint8 *data = File::loadOriginalFile(fname, size);
+
+	if (data) {
+		if (sixbit)
+			g_System.setPalette6b3(data);
+		else
+			g_System.setPalette8b3(data);
+
+		delete[] data;
+	}
+}
+
 void MenuManager::setLanguage(FS_Lang lang) {
     std::string filename(File::dataFullPath("lang/"));
     switch (lang) {
@@ -234,6 +254,17 @@ Menu * MenuManager::getMenu(int menuId) {
 		putInCache = false;
 	} else if (menuId == Menu::MENU_MAP) {
 		pMenu =  new MapMenu(this);
+	} else if (menuId == Menu::MENU_FLI_SUCCESS || menuId == Menu::MENU_FLI_FAILED) {
+		FliMenu *pFliMenu =  new FliMenu(this, menuId, Menu::MENU_DEBRIEF);
+		if (menuId == Menu::MENU_FLI_SUCCESS) {
+			pFliMenu->addFliDesc("mgamewin.dat", 66, false, true);
+		} else {
+			int a = rand() % 2;
+			pFliMenu->addFliDesc( a == 0 ? "mlosegam.dat" : "mendlose.dat", 66, false, true);
+		}
+		pFliMenu->addFliDesc("mscrenup.dat", 66, false, false, snd::MENU_AFTER_MISSION);
+		pMenu = pFliMenu;
+		putInCache = false;
 	} else {
 		FSERR(Log::k_FLG_UI, "MenuManager", "getMenu", ("Cannot open Menu : unknown id"));
 	}

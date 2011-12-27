@@ -220,6 +220,43 @@ bool App::readConfiguration() {
     }
 }
 
+bool App::loadWalkData() {
+	int size = 0;
+    uint8 *data;
+
+	// reads data from file
+    data = File::loadOriginalFile("col01.dat", size);
+	if (!data) {
+		return false;
+	}
+
+    // original walk data
+    memcpy(walkdata_, data, 256);
+    // walkdata_ patched version
+    // 0x00 - non-surface/non-walkable(if above surface is walkable)
+    // 0x01 - stairs low y + 1, high y - 1
+    // 0x02 - stairs low y - 1, high y + 1
+    // 0x03 - stairs low x - 1, high x + 1
+    // 0x04 - stairs low x + 1, high x - 1
+    // 0x05-0x09, 0x0B,0x0D-0x0F - simple surfaces(0x0D is not so simple)
+    // also some of them are roads for vehicles, look tile picture for info
+    // 0x0C - fences
+    // 0x0A - non-surface/non-walkable
+    // 0x10 - non-surface/non-walkable, always above train stop
+    // 0x11, 0x12 - train entering surface
+    memcpy(walkdata_p_, data, 256);
+    // little patch to enable full surface description
+    // and eliminate unnecessary data
+    walkdata_p_[0x02] = 0x00;
+    walkdata_p_[0x80] = 0x11;
+    walkdata_p_[0x81] = 0x12;
+    walkdata_p_[0x8F] = 0x00;
+    walkdata_p_[0x93] = 0x00;
+    delete[] data;
+
+	return true;
+}
+
 void App::updateIntroFlag() {
     try {
         ConfigFile conf(iniPath_);
@@ -260,6 +297,14 @@ bool App::initialize(const std::string& iniPath) {
 	if (!menus_.initialize(playIntro_)) {
 		return false;
 	}
+
+	if (!loadWalkData()) {
+		return false;
+	}
+
+	LOG(Log::k_FLG_INFO, "App", "initialize", ("loading game sprites..."))
+	if (!gameSprites().loaded())
+		gameSprites().load();
 
     LOG(Log::k_FLG_INFO, "App", "initialize", ("Loading intro sounds..."))
     if (!intro_sounds_.loadSounds(SoundManager::SAMPLES_INTRO)) {
@@ -465,21 +510,10 @@ void App::waitForKeyPress() {
     playingFli_ = false;
 }
 
-void App::setPalette(const char *fname, bool sixbit) {
-    int size;
-    uint8 *data = File::loadOriginalFile(fname, size);
-
-    if (sixbit)
-        system_->setPalette6b3(data);
-    else
-        system_->setPalette8b3(data);
-
-    delete[] data;
-}
-
 /*!
  * This method defines the application loop.
- * \param start_mission Mission id used to start the application
+ * \param start_mission Mission id used to start the application in debug mode
+ * In standard mode start_mission is always -1.
  */
 void App::run(int start_mission) {
     int size = 0, tabSize = 0;
@@ -494,7 +528,7 @@ void App::run(int start_mission) {
         LOG(Log::k_FLG_GFX, "App", "run", ("Playing the intro"))
         data = File::loadOriginalFile("intro.dat", size);
         fliPlayer.loadFliData(data);
-        music().playTrack(MusicManager::TRACK_INTRO);
+        music().playTrack(msc::TRACK_INTRO);
         fliPlayer.play(true, menus_.fonts().introFont());
         music().stopPlayback();
         delete[] data;
@@ -504,17 +538,7 @@ void App::run(int start_mission) {
     }
 
     // load palette
-    data = File::loadOriginalFile("hpal01.dat", size);
-    system_->setPalette6b3(data);
-    delete[] data;
-
-    // load palette
-    setPalette("mselect.pal");
-
-    // load "req"
-    // TODO: what's this for?
-    data = File::loadOriginalFile("hreq.dat", size);
-    delete[] data;
+    menus().setDefaultPalette();
 
 #if 0
     system_->updateScreen();
@@ -538,35 +562,6 @@ void App::run(int start_mission) {
     waitForKeyPress();
     exit(1);
 #endif
-    //this is walk data
-    // load "col01"
-    data = File::loadOriginalFile("col01.dat", size);
-    // original walk data
-    memcpy(walkdata_, data, 256);
-    // walkdata_ patched version
-    // 0x00 - non-surface/non-walkable(if above surface is walkable)
-    // 0x01 - stairs low y + 1, high y - 1
-    // 0x02 - stairs low y - 1, high y + 1
-    // 0x03 - stairs low x - 1, high x + 1
-    // 0x04 - stairs low x + 1, high x - 1
-    // 0x05-0x09, 0x0B,0x0D-0x0F - simple surfaces(0x0D is not so simple)
-    // also some of them are roads for vehicles, look tile picture for info
-    // 0x0C - fences
-    // 0x0A - non-surface/non-walkable
-    // 0x10 - non-surface/non-walkable, always above train stop
-    // 0x11, 0x12 - train entering surface
-    memcpy(walkdata_p_, data, 256);
-    // little patch to enable full surface description
-    // and eliminate unnecessary data
-    walkdata_p_[0x02] = 0x00;
-    walkdata_p_[0x80] = 0x11;
-    walkdata_p_[0x81] = 0x12;
-    walkdata_p_[0x8F] = 0x00;
-    walkdata_p_[0x93] = 0x00;
-    delete[] data;
-
-    // load palette
-    setPalette("mselect.pal");
 
     if (start_mission == -1) {
         // play title
@@ -574,8 +569,7 @@ void App::run(int start_mission) {
         fliPlayer.loadFliData(data);
         fliPlayer.play();
         delete[] data;
-        if (!gameSprites().loaded())
-            gameSprites().load();
+
         waitForKeyPress();
 
         // play the groovy menu startup anim
@@ -584,16 +578,10 @@ void App::run(int start_mission) {
         fliPlayer.loadFliData(data);
         fliPlayer.play();
         delete[] data;
-    } else {
-        if (!gameSprites().loaded())
-            gameSprites().load();
-    }
 
-    if (start_mission == -1) {
-        // Regular scenario : start with the main menu
+        // start with the main menu
 		menus_.gotoMenu(Menu::MENU_MAIN);
     }
-#ifdef _DEBUG
     else {
         // Debug scenario : start directly with the brief menu
         // in the given mission
@@ -602,15 +590,12 @@ void App::run(int start_mission) {
         for (int i = 0; i < 50; i++) {
             if (session_.getBlock(i).mis_id == start_mission) {
                 session_.setSelectedBlockId(i);
+				break;
             }
         }
         // Then we go to the brief menu
 		menus_.gotoMenu(Menu::MENU_BRIEF);
-        // show the cursor because at first it's hidden
-        // and normally it's the main menu which shows it
-        g_System.showCursor();
     }
-#endif
 
     int lasttick = SDL_GetTicks();
     while (running_) {

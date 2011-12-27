@@ -30,6 +30,18 @@
 #include "config.h"
 #include "common.h"
 
+namespace msc {
+	enum MusicTrack {
+        TRACK_INTRO,
+        TRACK_ASSASSINATE,
+        TRACK_DANGER,
+        TRACK_GAME_COMPLETED,
+        TRACK_MISSION_FAILED,
+        TRACK_MISSION_COMPLETED,
+		NO_TRACK = -1
+    };
+};
+
 #ifdef HAVE_SDL_MIXER
 
 // Load the SDL_Mixer implementation

@@ -37,20 +37,11 @@
  */
 class MusicManager {
 public:
-    enum MusicTrack {
-        TRACK_INTRO,
-        TRACK_ASSASSINATE,
-        TRACK_DANGER,
-        TRACK_GAME_COMPLETED,
-        TRACK_MISSION_FAILED,
-        TRACK_MISSION_COMPLETED
-    };
-
     MusicManager(bool disabled);
     ~MusicManager();
 
     void loadMusic();
-    void playTrack(MusicTrack track, int loops = -1);
+    void playTrack(msc::MusicTrack track, int loops = -1);
     void stopPlayback();
     //! Sets the music volume to the given level
     void setVolume(int volume);
@@ -61,7 +52,7 @@ public:
 
 protected:
     std::vector<Music *> tracks_;
-    MusicTrack current_track_;
+    msc::MusicTrack current_track_;
     bool is_playing_;
     /*! 
      * Saves the volume level before a mute so

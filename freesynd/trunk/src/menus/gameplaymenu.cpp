@@ -366,11 +366,11 @@ void GameplayMenu::handleShow() {
         mission_ = g_Session.getMission();
         mission_->start();
         completed_ = false;
-        g_App.music().playTrack(MusicManager::TRACK_ASSASSINATE);
+        g_App.music().playTrack(msc::TRACK_ASSASSINATE);
 
         char spal[20];
         sprintf(spal,"hpal0%i.dat",g_Session.getSelectedBlock().mis_id % 5 + 1);
-        g_App.setPalette(spal);
+		menu_manager_->setPalette(spal);
         g_Screen.clear(0);
         world_x_ = mission_->startX();
         world_y_ = mission_->startY();
@@ -492,7 +492,7 @@ void GameplayMenu::handleLeave()
     g_App.music().stopPlayback();
 
     g_System.hideCursor();
-    g_App.setPalette("mselect.pal");
+	menu_manager_->setDefaultPalette();
     mission_->end();
     
     tick_count_ = 0;
@@ -900,17 +900,19 @@ bool GameplayMenu::handleUnknownKey(Key key, const int modKeys) {
     // to menu
 	if (key.unicode == K_SPACE) {
         if (mission_->completed() || mission_->failed()) {
+			// Do not display default leaving animation because 
+			// a success/failed animation will be played
+			leaveAnim_ = "";
             if (mission_->completed()) {
                 g_Session.completeSelectedBlock();
-                // Set win animation
-                leaveAnim_ = "mgamewin.dat";
+                // Display success animation
+				menu_manager_->gotoMenu(Menu::MENU_FLI_SUCCESS);
             }
             else if (mission_->failed()) {
-                // set lose animation
-                leaveAnim_ = "mlosegam.dat";
+                
+				menu_manager_->gotoMenu(Menu::MENU_FLI_FAILED);
             }
-            // Go to debrief menu
-			menu_manager_->gotoMenu(Menu::MENU_DEBRIEF);
+
             return true;
         }
 	} else if (key.keyFunc == KFC_ESCAPE) {

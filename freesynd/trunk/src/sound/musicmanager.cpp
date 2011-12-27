@@ -98,7 +98,7 @@ void MusicManager::loadMusic()
     delete[] data;
 }
 
-void MusicManager::playTrack(MusicTrack track, int loops)
+void MusicManager::playTrack(msc::MusicTrack track, int loops)
 {
     if (disabled_) return;
     if (Audio::isInitialized()) {

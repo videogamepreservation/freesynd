@@ -56,6 +56,8 @@ public:
 	static const int MENU_SELECT;
 	static const int MENU_LDSAVE;
 	static const int MENU_MAP;
+	static const int MENU_FLI_SUCCESS;
+	static const int MENU_FLI_FAILED;
 
 	/*!
 	 * Menu constructor.
