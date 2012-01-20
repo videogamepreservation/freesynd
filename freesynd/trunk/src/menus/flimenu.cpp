@@ -26,43 +26,43 @@
 #include "gfx/screen.h"
 
 const FrameEvent intro[] = {
-	{ 1,  msc::TRACK_INTRO, snd::NO_SOUND, 0x0, "" }, // Play track
-	{ 15, msc::NO_TRACK, snd::NO_SOUND,		0x0, "CITY NAME : NEW HESSEN EUROPE" }, 
-	{ 39, msc::NO_TRACK, snd::NO_SOUND,		0x0, "" }, // clear subtitle
-	{ 44, msc::NO_TRACK, snd::NO_SOUND,		0x0, "DATELINE :1/85 NV (NEW CALENDER)" },
-	{ 62, msc::NO_TRACK, snd::NO_SOUND,		0x0, "" }, // clear subtitle
-	{ 67, msc::NO_TRACK, snd::NO_SOUND,		0x0, "TIME : 18:20 HRS" },
-	{ 85, msc::NO_TRACK, snd::NO_SOUND,		0x0, "" }, // clear
-	{ 90, msc::NO_TRACK, snd::NO_SOUND,		0x0, "NEW SUBJECTS REQUIRED FOR RECRUITMENT" },
-	{ 117, msc::NO_TRACK, snd::NO_SOUND,	0x0, "" }, // clear
-	{ 121, msc::NO_TRACK, snd::NO_SOUND,	0x0, "POSSIBLE SUBJECT LOCATED" },
-	{ 135, msc::NO_TRACK, snd::NO_SOUND,	0x0, "" }, // clear
-	{ 138, msc::NO_TRACK, snd::NO_SOUND,	0x0, "SUBJECT STATISTICS : MALE" },
-	{ 153, msc::NO_TRACK, snd::NO_SOUND,	0x0, "SUBJECT STATISTICS : HEIGHT :1.85M" },
-	{ 165, msc::NO_TRACK, snd::NO_SOUND,	0x0, "SUBJECT STATISTICS : WEIGHT :70KGS" },
-	{ 178, msc::NO_TRACK, snd::NO_SOUND,	0x0, "" }, // Clear
-	{ 180, msc::NO_TRACK, snd::NO_SOUND,	0x0, "SUBJECT ACCEPTED" },
-	{ 200, msc::NO_TRACK, snd::NO_SOUND,	0x0, "" }, // clear
-	{ 234, msc::NO_TRACK, snd::NO_SOUND,	0x0, "ACQUIRE SUBJECT" },
-	{ 271, msc::NO_TRACK, snd::NO_SOUND,	0x0, "" },//clear
-	{ 291, msc::NO_TRACK, snd::NO_SOUND,	0x0, "RETURN TO HEADQUARTERS" },
-	{ 333, msc::NO_TRACK, snd::NO_SOUND,	0x0, "" }, // Clear
-	{ 359, msc::NO_TRACK, snd::NO_SOUND,	0x0, "PREPARE SUBJECT FOR BIOGENETIC ENGINEERING" },
-	{ 406, msc::NO_TRACK, snd::NO_SOUND,	0x0, "" }, // clear
-	{ 442, msc::NO_TRACK, snd::NO_SOUND,	0x0, "LEONARDO DEVICE ACTIVATED" },
-	{ 467, msc::NO_TRACK, snd::NO_SOUND,	0x0, "" }, // clear
-	{ 473, msc::NO_TRACK, snd::NO_SOUND,	0x0, "GENERATING REPLACEMENT LIMB" },
-	{ 502, msc::NO_TRACK, snd::NO_SOUND,	0x0, "" }, // clear
-	{ 548, msc::NO_TRACK, snd::NO_SOUND,	0x0, "OPERATION COMPLETED" },
-	{ 562, msc::NO_TRACK, snd::NO_SOUND,	0x0, "" },
-	{ 569, msc::NO_TRACK, snd::NO_SOUND,	0x0, "APPLY POLYMORPHIC RUBBER COATING" },
-	{ 610, msc::NO_TRACK, snd::NO_SOUND,	0x0, "" },
-	{ 639, msc::NO_TRACK, snd::NO_SOUND,	0x0, "SYSTEM CHECK" },
-	{ 673, msc::NO_TRACK, snd::NO_SOUND,	0x0, "" },
-	{ 848, msc::NO_TRACK, snd::NO_SOUND,	0x0, "PREPARE FOR MISSION" },
-	{ 892, msc::NO_TRACK, snd::NO_SOUND,	0x0, "" },
-	{ 904, msc::NO_TRACK, snd::NO_SOUND,	0x0, "BEGIN MISSION" },
-	{ 960, msc::NO_TRACK, snd::NO_SOUND,	0x0, "" },
+	{ 1,  msc::TRACK_INTRO, snd::NO_SOUND, 0x0, NULL }, // Play track
+	{ 15, msc::NO_TRACK, snd::NO_SOUND,		0x0, "INTRO_0" }, 
+	{ 39, msc::NO_TRACK, snd::NO_SOUND,		0x0, NULL }, // clear subtitle
+	{ 44, msc::NO_TRACK, snd::NO_SOUND,		0x0, "INTRO_1" },
+	{ 62, msc::NO_TRACK, snd::NO_SOUND,		0x0, NULL }, // clear subtitle
+	{ 67, msc::NO_TRACK, snd::NO_SOUND,		0x0, "INTRO_2" },
+	{ 85, msc::NO_TRACK, snd::NO_SOUND,		0x0, NULL }, // clear
+	{ 90, msc::NO_TRACK, snd::NO_SOUND,		0x0, "INTRO_3" },
+	{ 117, msc::NO_TRACK, snd::NO_SOUND,	0x0, NULL }, // clear
+	{ 121, msc::NO_TRACK, snd::NO_SOUND,	0x0, "INTRO_4" },
+	{ 135, msc::NO_TRACK, snd::NO_SOUND,	0x0, NULL }, // clear
+	{ 138, msc::NO_TRACK, snd::NO_SOUND,	0x0, "INTRO_5" },
+	{ 153, msc::NO_TRACK, snd::NO_SOUND,	0x0, "INTRO_6" },
+	{ 165, msc::NO_TRACK, snd::NO_SOUND,	0x0, "INTRO_7" },
+	{ 178, msc::NO_TRACK, snd::NO_SOUND,	0x0, NULL }, // Clear
+	{ 180, msc::NO_TRACK, snd::NO_SOUND,	0x0, "INTRO_8" },
+	{ 200, msc::NO_TRACK, snd::NO_SOUND,	0x0, NULL }, // clear
+	{ 234, msc::NO_TRACK, snd::NO_SOUND,	0x0, "INTRO_9" },
+	{ 271, msc::NO_TRACK, snd::NO_SOUND,	0x0, NULL },//clear
+	{ 291, msc::NO_TRACK, snd::NO_SOUND,	0x0, "INTRO_10" },
+	{ 333, msc::NO_TRACK, snd::NO_SOUND,	0x0, NULL }, // Clear
+	{ 359, msc::NO_TRACK, snd::NO_SOUND,	0x0, "INTRO_11" },
+	{ 406, msc::NO_TRACK, snd::NO_SOUND,	0x0, NULL }, // clear
+	{ 442, msc::NO_TRACK, snd::NO_SOUND,	0x0, "INTRO_12" },
+	{ 467, msc::NO_TRACK, snd::NO_SOUND,	0x0, NULL }, // clear
+	{ 473, msc::NO_TRACK, snd::NO_SOUND,	0x0, "INTRO_13" },
+	{ 502, msc::NO_TRACK, snd::NO_SOUND,	0x0, NULL }, // clear
+	{ 548, msc::NO_TRACK, snd::NO_SOUND,	0x0, "INTRO_14" },
+	{ 562, msc::NO_TRACK, snd::NO_SOUND,	0x0, NULL },
+	{ 569, msc::NO_TRACK, snd::NO_SOUND,	0x0, "INTRO_15" },
+	{ 610, msc::NO_TRACK, snd::NO_SOUND,	0x0, NULL },
+	{ 639, msc::NO_TRACK, snd::NO_SOUND,	0x0, "INTRO_16" },
+	{ 673, msc::NO_TRACK, snd::NO_SOUND,	0x0, NULL },
+	{ 848, msc::NO_TRACK, snd::NO_SOUND,	0x0, "INTRO_17" },
+	{ 892, msc::NO_TRACK, snd::NO_SOUND,	0x0, NULL },
+	{ 904, msc::NO_TRACK, snd::NO_SOUND,	0x0, "INTRO_18" },
+	{ 960, msc::NO_TRACK, snd::NO_SOUND,	0x0, NULL },
 	{-1, msc::NO_TRACK, snd::NO_SOUND, 0x0, NULL }
 };
 
@@ -226,7 +226,9 @@ void FliMenu::handleTick(int elapsed)
 					}
 					// Draw subtitle
 					if (desc.evtList[i].subtitle != NULL) {
-						currSubTitle_ = desc.evtList[i].subtitle;
+						menu_manager_->getMessage(desc.evtList[i].subtitle, currSubTitle_);
+					} else {
+						currSubTitle_ = "";
 					}
                 }
 			}

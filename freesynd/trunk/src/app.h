@@ -135,25 +135,6 @@ class App : public Singleton < App > {
     //! Destroy all components
     void destroy();
 
-    void startedPlayingFli() {
-        playingFli_ = true;
-        skipFli_ = false;
-    }
-
-    void finishedPlayingFli() {
-        playingFli_ = false;
-    }
-
-    bool skipFli() {
-        return skipFli_;
-    }
-
-	void skipPlayingFli() {
-		if (playingFli_) {
-			skipFli_ = true;
-		}
-	}
-
     void waitForKeyPress();
 
     //! Save game to a file
@@ -190,7 +171,7 @@ private:
 private:
     GameSession session_;
 
-    bool running_, playingFli_, skipFli_;
+    bool running_;
     /*! True means the game will run in fullscreen. */
     bool fullscreen_;
     /*! True means the intro will be played.*/

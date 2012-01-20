@@ -53,15 +53,16 @@ typedef struct FrameTypeChunkHeader {
 class Font;
 
 /*!
- * Fli Player class.
+ * A player for fli animation.
  */
 class FliPlayer {
 public:
     FliPlayer() : fli_data_(0), offscreen_(0) {}
     virtual ~FliPlayer();
 
+	//! Play an entire animation without interruption
     bool play(bool intro = false, Font *pIntroFont = NULL);
-    void loadFliData(uint8 *buf, bool skipable = true);
+    void loadFliData(uint8 *buf);
     bool decodeFrame();
     void copyCurrentFrameToScreen();
 
@@ -87,7 +88,6 @@ protected:
     const uint8 *offscreen_;
     uint8 palette_[256 * 3];
     FliHeader fli_info_;
-    bool skipable_;
 };
 
 #endif

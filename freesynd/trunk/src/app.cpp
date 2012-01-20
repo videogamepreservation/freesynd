@@ -54,8 +54,8 @@
 #include "utils/configfile.h"
 #include "utils/portablefile.h"
 
-App::App(bool disable_sound): running_(true), playingFli_(false),
-skipFli_(false), screen_(new Screen(GAME_SCREEN_WIDTH, GAME_SCREEN_HEIGHT))
+App::App(bool disable_sound): running_(true),
+screen_(new Screen(GAME_SCREEN_WIDTH, GAME_SCREEN_HEIGHT))
 #ifdef SYSTEM_SDL
     , system_(new SystemSDL())
 #else
@@ -305,10 +305,12 @@ bool App::initialize(const std::string& iniPath) {
 	if (!gameSprites().loaded())
 		gameSprites().load();
 
-    LOG(Log::k_FLG_INFO, "App", "initialize", ("Loading intro sounds..."))
-    if (!intro_sounds_.loadSounds(SoundManager::SAMPLES_INTRO)) {
-        return false;
-    }
+	if (playIntro_) {
+		LOG(Log::k_FLG_INFO, "App", "initialize", ("Loading intro sounds..."))
+		if (!intro_sounds_.loadSounds(SoundManager::SAMPLES_INTRO)) {
+			return false;
+		}
+	}
 
     LOG(Log::k_FLG_INFO, "App", "initialize", ("Loading game sounds..."))
     if (!game_sounds_.loadSounds(SoundManager::SAMPLES_GAME)) {
@@ -497,16 +499,12 @@ bool App::reset() {
 }
 
 void App::waitForKeyPress() {
-    playingFli_ = true;
-    skipFli_ = false;
 
-    while (running_ && !skipFli_) {
+    while (running_) {
         // small pause while waiting for key, also mouse event
         SDL_Delay(20);
         menus_.handleEvents();
     }
-
-    playingFli_ = false;
 }
 
 /*!

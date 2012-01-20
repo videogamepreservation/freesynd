@@ -24,12 +24,12 @@
 
 #include <cstdio>
 
-#include "common.h"
 #include "fliplayer.h"
 #include "screen.h"
+#include "utils/log.h"
 #include "app.h"
 
-#if 1 // TMN: Data for playing samples during intro video. Hardcoded from intro.exe.
+#if 0 // TMN: Data for playing samples during intro video. Hardcoded from intro.exe.
 
 //#include <pshpack1.h>
 struct sample_timings {
@@ -191,29 +191,6 @@ const sample_timings g_rg_sample_offsets_and_timings[] = {
 	{  -1, 0x00, 0x00, 0x00, 0x00, 0x00 }
 };
 
-const char *captions[] = {
-	"",
-	"CITY NAME : NEW HESSEN EUROPE",
-	"DATELINE :1/85 NV (NEW CALENDER)",
-	"TIME : 18:20 HRS",
-	"NEW SUBJECTS REQUIRED FOR RECRUITMENT",
-	"POSSIBLE SUBJECT LOCATED",
-	"SUBJECT STATISTICS : MALE",
-	"SUBJECT STATISTICS : HEIGHT :1.85M",
-	"SUBJECT STATISTICS : WEIGHT :70KGS",
-	"SUBJECT ACCEPTED",
-	"ACQUIRE SUBJECT",
-	"RETURN TO HEADQUARTERS",
-	"PREPARE SUBJECT FOR BIOGENETIC ENGINEERING",
-	"LEONARDO DEVICE ACTIVATED",
-	"GENERATING REPLACEMENT LIMB",
-	"OPERATION COMPLETED",
-	"APPLY POLYMORPHIC RUBBER COATING",
-	"SYSTEM CHECK",
-	"PREPARE FOR MISSION",
-	"BEGIN MISSION",
-};
-
 #endif
 
 FliPlayer::~FliPlayer() {
@@ -221,9 +198,8 @@ FliPlayer::~FliPlayer() {
         delete[] offscreen_;
 }
 
-void FliPlayer::loadFliData(uint8 *data, bool skipable) {
+void FliPlayer::loadFliData(uint8 *data) {
     fli_data_ = data;
-    skipable_ = skipable;
 
     fli_info_.size = READ_LE_UINT32(fli_data_);
     fli_data_ += 4;
@@ -237,9 +213,7 @@ void FliPlayer::loadFliData(uint8 *data, bool skipable) {
     fli_data_ += 2;
 
     if (fli_info_.type != 0xAF12) {     //simple check to verify it is indeed a (Bullfrog) FLI
-        printf
-            ("FliPlayer::loadFliData(): attempted to load non-FLI data (type = 0x%04X)\n",
-             fli_info_.type);
+		FSERR(Log::k_FLG_GFX, "FliPlayer", "loadFliData()", ("Attempted to load non-FLI data (type = 0x%04X)\n", fli_info_.type));
         fli_info_.width = fli_info_.height = 100;
         fli_info_.numFrames = 0;
         return;
@@ -263,7 +237,7 @@ bool FliPlayer::isValidChunk(uint16 type) {
         return true;
 
     default:
-        printf("ERROR: isValidChunk(0x%04X) is NOT a valid chunk\n", type);
+		FSERR(Log::k_FLG_GFX, "FliPlayer", "isValidChunk()", ("ERROR: isValidChunk(0x%04X) is NOT a valid chunk\n", type));
         return false;
     }
 }
@@ -462,42 +436,20 @@ bool FliPlayer::play(bool intro, Font *pIntroFont) {
         return false;
 
     g_Screen.clear(0);
-    g_App.startedPlayingFli();
 	int cur_frame = 0;
-    while (hasFrames() && g_App.isRunning()
-           && (!g_App.skipFli() || !skipable_)) {
-			   g_App.menus().handleEvents();
+    while (hasFrames()) {
+		// Consumes events now so they won't be piled up after the animation
+		g_App.menus().handleEvents();
 
         if (!decodeFrame())
             break;
         copyCurrentFrameToScreen();
 
-        if (intro) {
-            static const char *caption = "";
-            for (unsigned int i = 0;
-                    g_rg_sample_offsets_and_timings[i].m0 != -1; i++)
-                if (g_rg_sample_offsets_and_timings[i].m0 > cur_frame)
-                    break;
-                else if (g_rg_sample_offsets_and_timings[i].m0 == cur_frame) {
-                    if (g_rg_sample_offsets_and_timings[i].m1 == 0x41) {
-                        g_System.delay(
-                                40 * g_rg_sample_offsets_and_timings[i].m2);
-                    }
-
-                    if (g_rg_sample_offsets_and_timings[i].m1 == 0x54) {
-                        caption =
-                                captions[g_rg_sample_offsets_and_timings[i].m2];
-                    }
-                }
-            pIntroFont->drawText(10, 360, caption, false);
-        }
         cur_frame++;
 
         g_System.updateScreen();
         g_System.delay(1000 / (intro ? 10 : 15));      //fps
     }
-
-    g_App.finishedPlayingFli();
 
     //clear the backscreen
     //bzero(Screen::pixels(), GAME_SCREEN_WIDTH * GAME_SCREEN_HEIGHT);

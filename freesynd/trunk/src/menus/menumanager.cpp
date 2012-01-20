@@ -310,7 +310,7 @@ void MenuManager::showMenu(Menu *pMenu) {
         uint8 *data;
         int size;
         data = File::loadOriginalFile(pMenu->getShowAnimName(), size);
-        fliPlayer.loadFliData(data, false);
+        fliPlayer.loadFliData(data);
         fliPlayer.play();
         delete[] data;
 
@@ -405,8 +405,6 @@ void MenuManager::handleEvents() {
 			}
 #endif
 
-			g_App.skipPlayingFli();
-
 			if (current_ && !drop_events_) {
 				current_->mouseDownEvent(evt.button.x, evt.button.y, evt.button.button, evt.button.keyMods);
 			}
@@ -417,7 +415,6 @@ void MenuManager::handleEvents() {
 			}
 			break;
 		case EVT_KEY_DOWN:
-			g_App.skipPlayingFli();
 			if (current_ && !drop_events_) {
 				current_->keyEvent(evt.key.key, evt.key.keyMods);
 			}
