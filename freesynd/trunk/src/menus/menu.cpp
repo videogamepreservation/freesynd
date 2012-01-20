@@ -47,6 +47,8 @@ const int Menu::MENU_LDSAVE = 9;
 const int Menu::MENU_MAP = 10;
 const int Menu::MENU_FLI_SUCCESS = 11;
 const int Menu::MENU_FLI_FAILED = 12;
+const int Menu::MENU_FLI_TITLE = 13;
+const int Menu::MENU_FLI_INTRO = 14;
 
 Menu::Menu(MenuManager * menuManager, int id, int parentId, 
            const char *showAnim, const char *leaveAnim) :
@@ -57,6 +59,7 @@ Menu::Menu(MenuManager * menuManager, int id, int parentId,
 	menu_manager_ = menuManager;
     focusedWgId_ = -1;
 	pCaptureInput_ = NULL;
+	isCachable_ = true;
 }
 
 Menu::~Menu() {

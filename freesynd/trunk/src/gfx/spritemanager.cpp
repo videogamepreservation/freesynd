@@ -24,7 +24,8 @@
 
 #include <stdio.h>
 #include <assert.h>
-#include "app.h"
+
+#include "gfx/spritemanager.h"
 #include "utils/file.h"
 
 SpriteManager::SpriteManager():sprites_(0), sprite_count_(0)

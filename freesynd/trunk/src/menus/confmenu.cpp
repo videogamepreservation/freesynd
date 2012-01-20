@@ -40,7 +40,7 @@ int g_Colours[MAX_COLOUR] = { 6, 7, 14, 3, 11, 12, 13, 15 };
 
 ConfMenu::ConfMenu(MenuManager *m) :
 Menu(m, MENU_CONF, MENU_MAIN, "mconfup.dat", "mconfout.dat") {
-
+	isCachable_ = false;
 	toAcceptLogo_ = 0;
 	toAcceptColourId_ = 0;
 	tempLogo_ = 0;

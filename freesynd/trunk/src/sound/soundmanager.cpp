@@ -134,13 +134,13 @@ bool SoundManager::loadSounds(uint8 * tabData, int tabSize,
 /*!
  *
  */
-void SoundManager::play(snd::InGameSample sample, int loops) {
+void SoundManager::play(snd::InGameSample sample, int channel, int loops) {
     if (disabled_) return;
     Sound *pSound = sound(sample);
 
     if (pSound) {
-        // All menu sounds are played on channel 1 else on channel 0
-        pSound->play(loops, sample >= snd::MENU_UP ? 1 : 0);
+        // Sound is played on first available channel (value -1)
+		pSound->play(loops, -1);
     }
 }
 

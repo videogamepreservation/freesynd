@@ -58,6 +58,8 @@ public:
 	static const int MENU_MAP;
 	static const int MENU_FLI_SUCCESS;
 	static const int MENU_FLI_FAILED;
+	static const int MENU_FLI_TITLE;
+	static const int MENU_FLI_INTRO;
 
 	/*!
 	 * Menu constructor.
@@ -76,6 +78,8 @@ public:
     bool hasLeaveAnim() { return leaveAnim_.size() != 0; }
     /*! Returns the leaving animation file name. */
     const char * getLeaveAnimName() { return leaveAnim_.c_str(); }
+	//! Returns true is Menu can be put in cache
+	bool isCachable() { return isCachable_; }
 
 	//! Returns the sprites used in menus
 	SpriteManager &menuSprites();
@@ -208,6 +212,8 @@ protected:
     int focusedWgId_;
 	/*! The current textfield that holds the cursor and so capture all key events.*/
 	TextField *pCaptureInput_;
+	/*! Tells if the menu is kept in cache even after leaving it or destroy it.*/
+	bool isCachable_;
 };
 
 #endif

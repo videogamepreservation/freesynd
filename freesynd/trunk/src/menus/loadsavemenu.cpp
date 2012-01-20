@@ -37,7 +37,7 @@ const size_t LoadSaveMenu::NAME_MAX_SIZE = 31;
 LoadSaveMenu::LoadSaveMenu(MenuManager * m):Menu(m, MENU_LDSAVE, MENU_MAIN, "mlosa.dat",
      "mlosaout.dat")
 {
-
+	isCachable_ = false;
     // Title
     addStatic(0, 40, g_Screen.gameScreenWidth(), "#LS_TITLE", FontManager::SIZE_4, false);
 

@@ -46,7 +46,6 @@
 #undef ChunkHeader
 #endif
 
-#include "gfx/fliplayer.h"
 #include "gfx/spritemanager.h"
 #include "gfx/screen.h"
 #include "sound/audio.h"
@@ -516,26 +515,6 @@ void App::waitForKeyPress() {
  * In standard mode start_mission is always -1.
  */
 void App::run(int start_mission) {
-    int size = 0, tabSize = 0;
-    uint8 *data;
-
-    FliPlayer fliPlayer;
-
-    // Play intro only the first time the application is run
-    // start_mission is available only in DEBUG mode to jump to a mission
-    if (playIntro_ && start_mission == -1) {
-        // play intro
-        LOG(Log::k_FLG_GFX, "App", "run", ("Playing the intro"))
-        data = File::loadOriginalFile("intro.dat", size);
-        fliPlayer.loadFliData(data);
-        music().playTrack(msc::TRACK_INTRO);
-        fliPlayer.play(true, menus_.fonts().introFont());
-        music().stopPlayback();
-        delete[] data;
-
-        // Update intro flag so intro won't be played next time
-        updateIntroFlag();
-    }
 
     // load palette
     menus().setDefaultPalette();
@@ -564,23 +543,14 @@ void App::run(int start_mission) {
 #endif
 
     if (start_mission == -1) {
-        // play title
-        data = File::loadOriginalFile("mtitle.dat", size);
-        fliPlayer.loadFliData(data);
-        fliPlayer.play();
-        delete[] data;
-
-        waitForKeyPress();
-
-        // play the groovy menu startup anim
-	    g_App.gameSounds().play(snd::MENU_UP);
-        data = File::loadOriginalFile("mscrenup.dat", size);
-        fliPlayer.loadFliData(data);
-        fliPlayer.play();
-        delete[] data;
-
-        // start with the main menu
-		menus_.gotoMenu(Menu::MENU_MAIN);
+		if (playIntro_) {
+			menus_.gotoMenu(Menu::MENU_FLI_INTRO);
+			// Update intro flag so intro won't be played next time
+			updateIntroFlag();
+		} else {
+			// play title before going to main menu
+			menus_.gotoMenu(Menu::MENU_FLI_TITLE);
+		}
     }
     else {
         // Debug scenario : start directly with the brief menu

@@ -28,6 +28,18 @@
 #include "sound/sound.h"
 #include "sound/music.h"
 
+struct FrameEvent {
+	/*! frame Id.*/
+	uint16 frame;
+	/*! start music.*/
+	msc::MusicTrack	music;
+	/*! Game sound to play.*/
+	snd::InGameSample	sound;
+	uint8	sndChan;
+	/*! Operation on subtitle.*/
+	const char* subtitle;
+};
+
 /*!
  * A description of the fli animation to be played.
  */
@@ -35,15 +47,13 @@ struct FliDesc {
 	/*! Name of the file containing the animation.*/
 	std::string name;
 	/*! Speed of animation : delay between 2 frames.*/
-	uint8 fps;
+	uint8 frameDelay;
 	/*! True means user has to press key or mouse to go to 
 	 * next animation or next menu after the end of animation.*/
 	bool waitKeyPressed;
 	/*! True means animation can be skipped by pressing key or mouse.*/
 	bool skipable;
-	// TODO : use a table
-	snd::InGameSample sound;
-	msc::MusicTrack music;
+	const FrameEvent *evtList;
 };
 
 /*!
@@ -51,26 +61,13 @@ struct FliDesc {
  */
 class FliMenu : public Menu {
 public:
-    FliMenu(MenuManager *m, int menuId, int nextMenu);
+    FliMenu(MenuManager *m, int menuId);
     ~FliMenu();
 
     void handleTick(int elapsed);
     void handleShow();
     
     void handleLeave();
-
-	//! Adds a new description
-	void addFliDesc(const char *anim, uint8 fps, bool waitKey, bool skipable) {
-		addFliDesc(anim, fps, waitKey, skipable, msc::NO_TRACK, snd::NO_SOUND);
-	}
-	//! Adds a new description
-	void addFliDesc(const char *anim, uint8 fps, bool waitKey, bool skipable, snd::InGameSample sound) {
-		addFliDesc(anim, fps, waitKey, skipable, msc::NO_TRACK, sound);
-	}
-	//! Adds a new description
-	void addFliDesc(const char *anim, uint8 fps, bool waitKey, bool skipable, msc::MusicTrack music) {
-		addFliDesc(anim, fps, waitKey, skipable, music, snd::NO_SOUND);
-	}
     
 protected:
 	void handleRender(DirtyList &dirtyList);
@@ -81,7 +78,7 @@ protected:
 
 	bool loadNextFli();
 
-	void addFliDesc(const char *anim, uint8 fps, bool waitKey, bool skipable, msc::MusicTrack music, snd::InGameSample sound);
+	void addFliDesc(const char *anim, uint8 frameDelay, bool waitKey, bool skipable, const FrameEvent *events);
 
 protected:
 	/*! The Fli player.*/
@@ -90,6 +87,7 @@ protected:
 	std::vector<FliDesc> fliList_;
 	/*! Index of the next animation to play.*/
 	size_t fliIndex_;
+	uint16 frameIndex_;
 	/*! Timer to control animation speed.*/
 	int frameDelay_;
 	/*! Content of current animation.*/
@@ -98,6 +96,8 @@ protected:
 	bool playingFli_;
 	/*! Id of the menu to go after all animations have been played.*/
 	int nextMenu_;
+	/*! Content of a subtitle to draw during animation. Used in intro.*/
+	std::string currSubTitle_;
 };
 
 #endif

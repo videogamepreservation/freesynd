@@ -47,8 +47,8 @@ public:
 
     bool loadSounds(SampleSet set);
 
-    //! Plays the sound a number a time
-    void play(snd::InGameSample sample, int loops = 0);
+    //! Plays the sound a number a time on the given channel
+    void play(snd::InGameSample sample, int channel = 0, int loops = 0);
     //! Stops the sound
     void stop(snd::InGameSample sample);
 

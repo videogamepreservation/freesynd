@@ -225,51 +225,39 @@ Menu * MenuManager::getMenu(int menuId) {
 	// menu is not in cache so create it
 	// some menus are not saved in cache as they are not accessed many times
 	Menu *pMenu = NULL;
-	bool putInCache = true;
 
 	if (menuId == Menu::MENU_MAIN) {
 		pMenu =  new MainMenu(this);
-		putInCache = false;
 	} else if (menuId == Menu::MENU_BRIEF) {
 		pMenu =  new BriefMenu(this);
 	} else if (menuId == Menu::MENU_CONF) {
 		pMenu =  new ConfMenu(this);
-		putInCache = false;
 	} else if (menuId == Menu::MENU_DEBRIEF) {
 		pMenu =  new DebriefMenu(this);
 	} else if (menuId == Menu::MENU_GAMEPLAY) {
 		pMenu =  new GameplayMenu(this);
 	} else if (menuId == Menu::MENU_LOADING) {
 		pMenu =  new LoadingMenu(this);
-		putInCache = false;
 	} else if (menuId == Menu::MENU_LOGOUT) {
 		pMenu =  new LogoutMenu(this);
-		putInCache = false;
 	} else if (menuId == Menu::MENU_RESEARCH) {
 		pMenu =  new ResearchMenu(this);
 	} else if (menuId == Menu::MENU_SELECT) {
 		pMenu =  new SelectMenu(this);
 	} else if (menuId == Menu::MENU_LDSAVE) {
 		pMenu =  new LoadSaveMenu(this);
-		putInCache = false;
 	} else if (menuId == Menu::MENU_MAP) {
 		pMenu =  new MapMenu(this);
-	} else if (menuId == Menu::MENU_FLI_SUCCESS || menuId == Menu::MENU_FLI_FAILED) {
-		FliMenu *pFliMenu =  new FliMenu(this, menuId, Menu::MENU_DEBRIEF);
-		if (menuId == Menu::MENU_FLI_SUCCESS) {
-			pFliMenu->addFliDesc("mgamewin.dat", 66, false, true);
-		} else {
-			int a = rand() % 2;
-			pFliMenu->addFliDesc( a == 0 ? "mlosegam.dat" : "mendlose.dat", 66, false, true);
-		}
-		pFliMenu->addFliDesc("mscrenup.dat", 66, false, false, snd::MENU_AFTER_MISSION);
-		pMenu = pFliMenu;
-		putInCache = false;
+	} else if (menuId == Menu::MENU_FLI_SUCCESS ||
+		menuId == Menu::MENU_FLI_FAILED || 
+		menuId == Menu::MENU_FLI_TITLE|| 
+		menuId == Menu::MENU_FLI_INTRO) {
+		pMenu =  new FliMenu(this, menuId);
 	} else {
 		FSERR(Log::k_FLG_UI, "MenuManager", "getMenu", ("Cannot open Menu : unknown id"));
 	}
 
-	if (putInCache && pMenu) {
+	if (pMenu && pMenu->isCachable()) {
 		menus_[menuId] = pMenu;
 	}
 
