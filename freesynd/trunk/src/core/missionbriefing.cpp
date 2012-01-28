@@ -2,9 +2,7 @@
  *                                                                      *
  *  FreeSynd - a remake of the classic Bullfrog game "Syndicate".       *
  *                                                                      *
- *   Copyright (C) 2005  Stuart Binge  <skbinge@gmail.com>              *
- *   Copyright (C) 2005  Joost Peters  <joostp@users.sourceforge.net>   *
- *   Copyright (C) 2006  Trent Waddington <qg@biodome.org>              *
+ *   Copyright (C) 2012  Benoit Blancard <benblan@users.sourceforge.net>*
  *                                                                      *
  *    This program is free software;  you can redistribute it and / or  *
  *  modify it  under the  terms of the  GNU General  Public License as  *
@@ -22,29 +20,58 @@
  *                                                                      *
  ************************************************************************/
 
-#ifndef MISSIONMANAGER_H
-#define MISSIONMANAGER_H
+#include "core/missionbriefing.h"
 
-#include <map>
+const int MissionBriefing::kMaxInfos = MAX_INFOS;
+const int MissionBriefing::kMaxEnht = MAX_ENHT;
 
-#include "common.h"
+MissionBriefing::MissionBriefing() {
+    briefing_ = "";
+    i_nb_infos_ = 0;
+    i_nb_enhts_ = 0;
 
-class Mission;
-class MissionBriefing;
+    for (int i = 0; i < kMaxInfos; i++) {
+        a_info_costs_[i] = 0;
+    }
+
+    for (int i = 0; i < kMaxEnht; i++) {
+        a_enhts_costs_[i] = 0;
+    }
+}
 
 /*!
- * Mission manager class.
- * Stores information about all missions.
+ * Loads briefing text, infos and enhancement from a mission file.
+ * The file is divided in three sections : infos, enhancement and briefing.
+ * Each section is separated by the '|' character.
+ * Each string in a section is separated with an EOL.
+ * \param missData
+ * \param size
  */
-class MissionManager {
-public:
-    MissionManager();
-    Mission *loadMission(int n);
-    //! Loads briefing for the given mission id
-	MissionBriefing *loadBriefing(int n);
+bool MissionBriefing::loadBriefing(uint8 * missData, int size) {
+    char *miss = reinterpret_cast<char *>(missData);
+    miss[size - 1] = 0;
 
-protected:
-     std::map<int, Mission *> missions_;
-};
+    // reading infos
+    i_nb_infos_ = 0;
+    while (*miss != '|') {
+        a_info_costs_[i_nb_infos_++] = atoi(miss);
+        miss = strchr(miss, '\n') + 1;
+    }
 
-#endif
+    miss += 2;
+
+    // reading enhancements
+    i_nb_enhts_ = 0;
+    while (*miss != '|') {
+        a_enhts_costs_[i_nb_enhts_++] = atoi(miss);
+        miss = strchr(miss, '\n') + 1;
+    }
+
+    miss += 2;
+
+    // reading briefing text
+    if (miss) {
+        briefing_ = miss;
+    }
+    return true;
+}

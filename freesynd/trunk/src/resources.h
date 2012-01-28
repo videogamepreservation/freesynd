@@ -2,9 +2,7 @@
  *                                                                      *
  *  FreeSynd - a remake of the classic Bullfrog game "Syndicate".       *
  *                                                                      *
- *   Copyright (C) 2005  Stuart Binge  <skbinge@gmail.com>              *
- *   Copyright (C) 2005  Joost Peters  <joostp@users.sourceforge.net>   *
- *   Copyright (C) 2006  Trent Waddington <qg@biodome.org>              *
+ *   Copyright (C) 2012  Benoit Blancard <benblan@users.sourceforge.net>*
  *                                                                      *
  *    This program is free software;  you can redistribute it and / or  *
  *  modify it  under the  terms of the  GNU General  Public License as  *
@@ -22,29 +20,19 @@
  *                                                                      *
  ************************************************************************/
 
-#ifndef MISSIONMANAGER_H
-#define MISSIONMANAGER_H
+#ifndef FS_RESOURCES_H
+#define FS_RESOURCES_H
 
-#include <map>
+//! File for mission briefing in english
+#define MISSION_PATTERN_EN "miss%02d.dat"
+//! File for mission briefing in french
+#define MISSION_PATTERN_FR "miss1%02d.dat"
+//! File for mission briefing in italian
+#define MISSION_PATTERN_IT "miss2%02d.dat"
+//! File for mission briefing in german
+#define MISSION_PATTERN_GE "miss3%02d.dat"
 
-#include "common.h"
-
-class Mission;
-class MissionBriefing;
-
-/*!
- * Mission manager class.
- * Stores information about all missions.
- */
-class MissionManager {
-public:
-    MissionManager();
-    Mission *loadMission(int n);
-    //! Loads briefing for the given mission id
-	MissionBriefing *loadBriefing(int n);
-
-protected:
-     std::map<int, Mission *> missions_;
-};
+//! Mission content
+#define GAME_PATTERN "game%02d.dat"
 
 #endif

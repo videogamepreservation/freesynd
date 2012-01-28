@@ -29,52 +29,69 @@
 #include "mission.h"
 #include "missionmanager.h"
 #include "utils/file.h"
+#include "utils/log.h"
+#include "resources.h"
+#include "core/missionbriefing.h"
 
 MissionManager::MissionManager()
 {
 }
 
-Mission *MissionManager::loadMission(int n)
-{
-    Mission *m = new Mission();
-
-    printf("loading mission %i\n", n);
-
-    char tmp[100];
+/*!
+ * Loads the briefing for the given mission id.
+ * \param n Mission id
+ * \return NULL if mission could not be loaded
+ */
+MissionBriefing *MissionManager::loadBriefing(int n) {
+	char tmp[100];
+    // Briefing file depends on the current language
     switch(g_App.menus().currLanguage()) {
         case MenuManager::ENGLISH:
-            sprintf(tmp, "miss%02d.dat", n);
+            sprintf(tmp, MISSION_PATTERN_EN, n);
             break;
         case MenuManager::FRENCH:
-            sprintf(tmp, "miss1%02d.dat", n);
+            sprintf(tmp, MISSION_PATTERN_FR, n);
             break;
         case MenuManager::ITALIAN:
-            sprintf(tmp, "miss2%02d.dat", n);
+            sprintf(tmp, MISSION_PATTERN_IT, n);
             break;
         case MenuManager::GERMAN:
-            sprintf(tmp, "miss3%02d.dat", n);
+            sprintf(tmp, MISSION_PATTERN_GE, n);
             break;
     }
     int size;
     uint8 *data = File::loadOriginalFile(tmp, size);
     if (data == NULL) {
-        delete m;
         return NULL;
     }
 
-    if (!m->loadMission(data, size)) {
+    // Create Briefing
+	MissionBriefing *p_mb = new MissionBriefing();
+    // Loads briefing text
+    if (!p_mb->loadBriefing(data, size)) {
         delete[] data;
-        delete m;
+        delete p_mb;
         return NULL;
     }
     delete[] data;
 
-    sprintf(tmp, "game%02d.dat", n);
-    data = File::loadOriginalFile(tmp, size);
+	return p_mb;
+}
+
+Mission *MissionManager::loadMission(int n)
+{
+    LOG(Log::k_FLG_IO, "MissionManager", "loadMission()", ("loading mission %i\n", n));
+
+    char tmp[100];
+    int size;
+    
+    sprintf(tmp, GAME_PATTERN, n);
+    uint8 *data = File::loadOriginalFile(tmp, size);
     if (data == NULL) {
-        delete m;
         return NULL;
     }
+
+    Mission *m = new Mission();
 
     if (!m->loadLevel(data)) {
         delete[] data;

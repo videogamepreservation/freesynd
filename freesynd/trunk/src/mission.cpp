@@ -540,40 +540,6 @@ bool Mission::loadLevel(uint8 * levelData)
     return true;
 }
 
-bool Mission::loadMission(uint8 * missData, int size)
-{
-    char *miss = (char *) missData;
-    miss[size - 1] = 0;
-
-    memset(info_costs_, 0, sizeof(int) * MAX_INFO_ENHANCE_LVL);
-    memset(enhance_costs_, 0, sizeof(int) * MAX_INFO_ENHANCE_LVL);
-
-    int i = 0;
-
-    while (*miss != '|') {
-        info_costs_[i++] = atoi(miss);
-        miss = strchr(miss, '\n') + 1;
-    }
-    max_info_lvl_ = i;
-
-    miss += 2;
-    i = 0;
-
-    while (*miss != '|') {
-        enhance_costs_[i++] = atoi(miss);
-        miss = strchr(miss, '\n') + 1;
-    }
-    max_enhance_lvl_ = i;
-
-    miss += 2;
-
-    briefing_ = "";
-    if (miss) {
-        briefing_ = miss;
-    }
-    return true;
-}
-
 bool Mission::loadMap()
 {
     return g_App.maps().loadMap(map_);

@@ -11,6 +11,7 @@ set (SOURCES
 	agentmanager.cpp
 	app.cpp
 	core/gamesession.cpp
+	core/missionbriefing.cpp
 	core/research.cpp
 	core/researchmanager.cpp
 	default_ini.h
@@ -92,6 +93,7 @@ set(HEADERS
 	pathsurfaces.h
 	ped.h
 	pedmanager.h
+	resources.h
 	system.h
 	system_sdl.h
 	vehicle.h
@@ -102,6 +104,7 @@ set(HEADERS
 	weaponmanager.h
 	core/gameevent.h
 	core/gamesession.h
+	core/missionbriefing.h
 	core/research.h
 	core/researchmanager.h
 	gfx/dirtylist.h

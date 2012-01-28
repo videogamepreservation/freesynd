@@ -72,7 +72,6 @@ typedef struct {
  */
 class Mission : public MapHelper {
 public:
-#define MAX_INFO_ENHANCE_LVL    10
     /*!
      * List of all possible mission status. 
      */
@@ -85,7 +84,7 @@ public:
 
     Mission();
     virtual ~Mission();
-    bool loadMission(uint8 *missData, int size);
+
     bool loadLevel(uint8 *levelData);
     bool loadMap();
 
@@ -114,18 +113,7 @@ public:
         int maxtilex, int maxtiley);
     //---
 
-    const char *briefing() { return briefing_.c_str(); }
     void objectiveMsg(std::string& msg);
-
-    int infoCost(unsigned char lvl) {
-        assert(lvl < MAX_INFO_ENHANCE_LVL);
-        return info_costs_[lvl];
-    }
-
-    int enhanceCost(unsigned char lvl) {
-        assert(lvl < MAX_INFO_ENHANCE_LVL);
-        return enhance_costs_[lvl];
-    }
 
     int numPeds() { return (int) peds_.size(); }
     PedInstance *ped(int i) { return peds_[i]; }
@@ -470,9 +458,6 @@ public:
         return minimap_overlay_[x + y * mmax_x_];
     }
 
-    unsigned int getMaxInfoLvl() {return max_info_lvl_; }
-    unsigned int getMaxEnhanceLvl() {return max_enhance_lvl_; }
-
     // this type is also used for actions_queue_ for pedinstance
     typedef enum {
         objv_None = 0x0,
@@ -588,11 +573,6 @@ protected:
      */
     Status status_;
 
-    int info_costs_[10];
-    unsigned char max_info_lvl_;
-    int enhance_costs_[10];
-    unsigned char max_enhance_lvl_;
-    std::string briefing_;
     int map_, min_x_, min_y_, max_x_, max_y_;
 
     std::set<int> fast_vehicle_cache_, fast_ped_cache_, fast_weapon_cache_,

@@ -162,7 +162,7 @@ void DebriefMenu::checkNewWeaponFound() {
 
 void DebriefMenu::handleRender(DirtyList &dirtyList) {
     // Display team logo
-    g_Screen.drawLogo(18, 14, g_App.getGameSession().getLogo(), g_App.getGameSession().getLogoColour());
+    g_Screen.drawLogo(18, 14, g_Session.getLogo(), g_Session.getLogoColour());
 
     // Draws separator line between title and statistics
     g_Screen.drawLine(20, 117, 20 + separatorSize_, 117, 252);

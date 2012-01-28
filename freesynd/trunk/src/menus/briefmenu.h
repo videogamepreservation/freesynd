@@ -28,10 +28,10 @@
 #ifndef BRIEFMENU_H
 #define BRIEFMENU_H
 
-class Mission;
+class MissionBriefing;
 
 /*!
- * Brief Menu class.
+ * Brief Menu class. 
  */
 class BriefMenu : public Menu {
 public:
@@ -72,6 +72,8 @@ protected:
     int nextButId_;
     /*! Id of the scroll previous button.*/
     int prevButId_;
+    /*! Briefing informations on current mission.*/
+	MissionBriefing *p_briefing_;
 };
 
 #endif

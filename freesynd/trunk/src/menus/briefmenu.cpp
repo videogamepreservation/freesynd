@@ -30,27 +30,27 @@
 #include "app.h"
 #include "utils/file.h"
 #include "briefmenu.h"
+#include "core/missionbriefing.h"
 
 #if 0
 #define EXECUTION_SPEED_TIME
 #endif
-BriefMenu::BriefMenu(MenuManager * m) :
-Menu(m, MENU_BRIEF, MENU_MAP, "mbrief.dat", "mbrieout.dat"),
-start_line_(0) {
-    
+BriefMenu::BriefMenu(MenuManager * m)
+    : Menu(m, MENU_BRIEF, MENU_MAP, "mbrief.dat", "mbrieout.dat"),
+        start_line_(0) {
     addStatic(85, 35, 545, "#BRIEF_TITLE", FontManager::SIZE_4, false);
     txtTimeId_ = addStatic(500, 9, "", FontManager::SIZE_2, true);       // Time
 
     // Briefing scroll button
     nextButId_ = addImageOption(461, 316, Sprite::MSPR_RIGHT_ARROW2_D, Sprite::MSPR_RIGHT_ARROW2_L);
-	registerHotKey(KFC_RIGHT, nextButId_);
+    registerHotKey(KFC_RIGHT, nextButId_);
     prevButId_ = addImageOption(427, 316, Sprite::MSPR_LEFT_ARROW2_D, Sprite::MSPR_LEFT_ARROW2_L, false);
-	registerHotKey(KFC_LEFT, prevButId_);
+    registerHotKey(KFC_LEFT, prevButId_);
 
     // Accept button
     addOption(17, 347, 128, 25, "#MENU_ACC_BUT", FontManager::SIZE_2, MENU_SELECT);
     // Map button
-	addOption(148, 347, 99, 25, "#BRIEF_MAP", FontManager::SIZE_2, MENU_MAP);
+    addOption(148, 347, 99, 25, "#BRIEF_MAP", FontManager::SIZE_2, MENU_MAP);
     // Main menu button
     addOption(500, 347,  128, 25, "#MENU_MAIN_BUT", FontManager::SIZE_2, MENU_MAIN);
 
@@ -101,7 +101,12 @@ void BriefMenu::handleShow() {
     pMission->loadMap();
 
     pMission->createMinimap();
+
+	// Loads mission briefing
+	p_briefing_ = g_App.missions().loadBriefing(cur_miss);
     
+    // Initialize minimap origin by looking for the position
+    // of the first found agent on the map
     bool found = false;
     int maxx = pMission->mmax_x_;
     int maxy = pMission->mmax_y_;
@@ -109,6 +114,8 @@ void BriefMenu::handleShow() {
     for (int x = 0; x < maxx && (!found); x++) {
         for (int y = 0; y < maxy && (!found); y++) {
             if (pMission->getMinimapOverlay(x, y) == 1) {
+                // We found a tile with an agent on it
+                // stop searching and memorize position
                 minimap_scroll_x_ = x;
                 minimap_scroll_y_ = y;
                 found = true;
@@ -122,14 +129,17 @@ void BriefMenu::handleShow() {
 
     updateClock();
 
-    if (g_Session.getSelectedBlock().infoLevel < pMission->getMaxInfoLvl()) {
+    // Initialize the informations label with current cost
+    if (g_Session.getSelectedBlock().infoLevel < p_briefing_->nb_infos()) {
         getStatic(txtInfoId_)->setTextFormated("%d",
-            pMission->infoCost(g_Session.getSelectedBlock().infoLevel));
+            p_briefing_->infoCost(g_Session.getSelectedBlock().infoLevel));
     } else
         getStatic(txtInfoId_)->setText("");
-    if (g_Session.getSelectedBlock().enhanceLevel < pMission->getMaxEnhanceLvl()) {
+
+    // Initialize the enhancements label with current cost
+    if (g_Session.getSelectedBlock().enhanceLevel < p_briefing_->nb_enhts()) {
         getStatic(txtEnhId_)->setTextFormated("%d",
-            pMission->enhanceCost(g_Session.getSelectedBlock().enhanceLevel));
+            p_briefing_->enhanceCost(g_Session.getSelectedBlock().enhanceLevel));
     } else
         getStatic(txtEnhId_)->setText("");
 
@@ -140,18 +150,16 @@ void BriefMenu::handleRender(DirtyList &dirtyList) {
 
     g_Screen.drawLogo(18, 14, g_Session.getLogo(), g_Session.getLogoColour());
 
-    Mission *pMission = g_Session.getMission();
-
     // write briefing
 #ifdef EXECUTION_SPEED_TIME
     printf("---------------------------");
     printf("start time %i.%i\n", SDL_GetTicks()/1000, SDL_GetTicks()%1000);
 #endif
-    if (pMission->briefing()) {
-        int sizeStr = strlen(pMission->briefing()) + 2;
+    if (p_briefing_) {
+        int sizeStr = strlen(p_briefing_->briefing()) + 2;
         char *mbriefing = (char *)malloc(sizeStr);
         assert(mbriefing != NULL);
-        strcpy(mbriefing, pMission->briefing());
+        strcpy(mbriefing, p_briefing_->briefing());
         char *miss = mbriefing;
         char *nextline = miss - 1;
 
@@ -270,6 +278,7 @@ void BriefMenu::handleRender(DirtyList &dirtyList) {
 }
 
 void BriefMenu::handleLeave() {
+    delete p_briefing_;
     g_System.hideCursor();
 }
 
@@ -277,14 +286,14 @@ void BriefMenu::handleAction(const int actionId, void *ctx, const int modKeys) {
     Mission *pMission = g_Session.getMission();
     if (actionId == infosButId_) {
         // Buy some informations
-        if (g_Session.getSelectedBlock().infoLevel < pMission->getMaxInfoLvl()) {
-            g_Session.setMoney(g_Session.getMoney() - pMission->infoCost(g_Session.getSelectedBlock().infoLevel));
+        if (g_Session.getSelectedBlock().infoLevel < p_briefing_->nb_infos()) {
+            g_Session.setMoney(g_Session.getMoney() - p_briefing_->infoCost(g_Session.getSelectedBlock().infoLevel));
             g_Session.getSelectedBlock().infoLevel += 1;
             
             getStatic(txtMoneyId_)->setTextFormated("%d", g_Session.getMoney());
-            if (g_Session.getSelectedBlock().infoLevel < pMission->getMaxInfoLvl()) {
+            if (g_Session.getSelectedBlock().infoLevel < p_briefing_->nb_infos()) {
                 getStatic(txtInfoId_)->setTextFormated("%d",
-                    pMission->infoCost(g_Session.getSelectedBlock().infoLevel));
+                    p_briefing_->infoCost(g_Session.getSelectedBlock().infoLevel));
             } else
                 getStatic(txtInfoId_)->setText("");
         }
@@ -294,15 +303,15 @@ void BriefMenu::handleAction(const int actionId, void *ctx, const int modKeys) {
 
     if (actionId == enhButId_) {
         // Buy some map enhancement
-        if (g_Session.getSelectedBlock().enhanceLevel < pMission->getMaxEnhanceLvl()) {
+        if (g_Session.getSelectedBlock().enhanceLevel < p_briefing_->nb_enhts()) {
             g_Session.setMoney(g_Session.getMoney() - 
-                pMission->enhanceCost(g_Session.getSelectedBlock().enhanceLevel));
+                p_briefing_->enhanceCost(g_Session.getSelectedBlock().enhanceLevel));
             g_Session.getSelectedBlock().enhanceLevel += 1;
             
             getStatic(txtMoneyId_)->setTextFormated("%d", g_Session.getMoney());
-            if (g_Session.getSelectedBlock().enhanceLevel < pMission->getMaxEnhanceLvl()) {
+            if (g_Session.getSelectedBlock().enhanceLevel < p_briefing_->nb_enhts()) {
                 getStatic(txtEnhId_)->setTextFormated("%d",
-                    pMission->enhanceCost(g_Session.getSelectedBlock().enhanceLevel));
+                    p_briefing_->enhanceCost(g_Session.getSelectedBlock().enhanceLevel));
             } else
                 getStatic(txtEnhId_)->setText("");
         }
@@ -328,36 +337,54 @@ void BriefMenu::handleAction(const int actionId, void *ctx, const int modKeys) {
     }
 }
 
+/*!
+ * Handles the mouse click.
+ * If the user clicks on the minimap with the left button, the minimap scrolls
+ * in the corresponding direction.
+ * \return True if the user clicked on the minimap so event is consumed
+ */
 bool BriefMenu::handleMouseDown(int x, int y, int button, const int modKeys) {
-
-    unsigned char scroll_step = 30 / (10 - (g_Session.getSelectedBlock().enhanceLevel << 1));
+    // scrolling step depends on the level of details of the minimap
+    unsigned char scroll_step = 30 /
+        (10 - (g_Session.getSelectedBlock().enhanceLevel << 1));
 
     Mission *pMission = g_Session.getMission();
+    // Minimap is between (504, 220) and (624, 340)
     if (button == 1 && x >= 504 && x < 624
         && y >= 220 && y < 340) {
         if (x >= 504 && x < 544) {
+            // User clicked on the left of the map
+            // so scroll to the left
             minimap_scroll_x_ -= scroll_step;
             if (minimap_scroll_x_ < 0)
                 minimap_scroll_x_ = 0;
         } else if (x >= 584 && x < 624) {
+            // User clicked on the right of the map
+            // so scroll to the right
             minimap_scroll_x_ += scroll_step;
             if (minimap_scroll_x_ > pMission->mmax_x_)
                 minimap_scroll_x_ = pMission->mmax_x_ - 1;
         }
+
         if (y >= 220 && y < 260) {
+            // User clicked on the top of the map
+            // so scroll up
             minimap_scroll_y_ -= scroll_step;
             if (minimap_scroll_y_ < 0)
                 minimap_scroll_y_ = 0;
         } else if (y >= 300 && y < 340) {
+            // User clicked on the bottom of the map
+            // so scroll down
             minimap_scroll_y_ += scroll_step;
             if (minimap_scroll_y_ > pMission->mmax_y_)
                 minimap_scroll_y_ = pMission->mmax_y_ - 1;
         }
+        // Redraw map
         needRendering();
-		return true;
+        return true;
     }
 
-	return false;
+    return false;
 }
 
 void BriefMenu::drawMinimap(int elapsed) {
