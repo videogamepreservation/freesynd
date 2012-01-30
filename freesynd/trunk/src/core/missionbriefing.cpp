@@ -20,6 +20,8 @@
  *                                                                      *
  ************************************************************************/
 
+#include <stdlib.h>
+
 #include "core/missionbriefing.h"
 
 const int MissionBriefing::kMaxInfos = MAX_INFOS;
