@@ -33,6 +33,7 @@
 #include "gfx/fliplayer.h"
 #include "utils/file.h"
 
+//#define NEW_ANIMATE_HANDLING
 #ifdef _WIN32
 #include <windows.h>
 #endif
@@ -759,9 +760,15 @@ bool GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
                                 sox = 63 + 128 * (i % 2);
                                 soy = 63 + 128 * (i >> 1);
                             }
-
+#ifdef NEW_ANIMATE_HANDLING
+                            PedInstance::actionQueueGroupType as;
+                            PathNode tpn = PathNode(stx, sty, stz, sox, soy, 0);
+                            mission_->ped(i)->createActQWalking(as, &tpn, NULL);
+                            mission_->ped(i)->addActQToQueue(as);
+#else
                             mission_->ped(i)->setDestinationP(mission_, stx, sty, stz,
                                     sox, soy, 320);
+#endif
                         }
                     }
                 }

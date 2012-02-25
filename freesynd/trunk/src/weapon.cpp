@@ -998,7 +998,7 @@ void ShotClass::makeShot(bool rangeChecked, toDefineXYZ &cp, int anim_hit,
                 if (anim_obj_hit != SFXObject::sfxt_Unknown) {
                     SFXObject *so = new SFXObject(g_Session.getMission()->map(),
                         anim_obj_hit);
-                    so->setPosition(smp->tileX(), smp->tileY(), smp->tileZ() + 1,
+                    so->setPosition(smp->tileX(), smp->tileY(), smp->visZ() + 1,
                         smp->offX(), smp->offY(), smp->offZ());
                     so->setTileVisZ();
                     so->correctZ();
@@ -1030,7 +1030,7 @@ void ShotClass::makeShot(bool rangeChecked, toDefineXYZ &cp, int anim_hit,
                 if (anim_obj_hit != SFXObject::sfxt_Unknown) {
                     SFXObject *so = new SFXObject(g_Session.getMission()->map(),
                         anim_obj_hit);
-                    so->setPosition(pn.tileX(), pn.tileY(), pn.tileZ() + 1,
+                    so->setPosition(pn.tileX(), pn.tileY(), pn.tileZ(),
                         pn.offX(), pn.offY(), pn.offZ());
                     so->setTileVisZ();
                     so->correctZ();

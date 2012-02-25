@@ -206,6 +206,7 @@ public:
     void kill();
     void switchActionStateTo(uint32 as);
     void switchActionStateFrom(uint32 as);
+    void setActionStateToDrawnAnim(void);
     bool animate(int elapsed, Mission *mission);
     void drawSelectorAnim(int x, int y);
 
@@ -261,8 +262,9 @@ public:
     ped_enum agentIs() { return agent_is_; }
 
     int map();
-    AnimationDrawn drawnAnim();
+    AnimationDrawn drawnAnim(void);
     void setDrawnAnim(AnimationDrawn drawn_anim);
+    void handleDrawnAnim(int elapsed);
 
     typedef struct {
         toDefineXYZ coords;
@@ -521,7 +523,7 @@ public:
         pd_smSupporter = 0x0004,
         pd_smEnemyInSight = 0x0008,
         // only if all weapon has no ammunition, persuadatron excludes this
-        // shoul not be used for hostile_desc_
+        // should not be used for hostile_desc_
         pd_smNoAmmunition = 0x0010,
         // all non-player controllled peds should have this set
         pd_smAutoAction = 0x0020,
