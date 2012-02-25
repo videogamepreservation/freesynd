@@ -68,6 +68,9 @@ public:
     void usePointerCursor();
     void useTargetCursor();
     void usePickupCursor();
+    int getKeyModState() {
+        return keyModState_;
+    }
 
 protected:
     //! Loads the graphic file that contains the cursor sprites.

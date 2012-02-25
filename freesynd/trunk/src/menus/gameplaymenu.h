@@ -81,9 +81,6 @@ protected:
     int scroll_y_;
     unsigned int selected_agents_;
     unsigned int selectable_agents_;
-    /*! Flag to tell if path between checkpoints must be drawn. */
-    //TODO : see if this could be computed dynamically
-    bool showPath_;
     int pointing_at_ped_, pointing_at_vehicle_, pointing_at_weapon_;
     int mm_tx_, mm_ty_;
     bool completed_;

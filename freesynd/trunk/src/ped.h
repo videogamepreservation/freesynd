@@ -278,9 +278,6 @@ public:
     void setDestinationP(Mission *m, int x, int y, int z,
         int ox = 128, int oy = 128, int new_speed = 160);
 
-    void addDestinationP(Mission *m, int x, int y, int z,
-        int ox = 128, int oy = 128, int new_speed = 160);
-
     bool movementP(Mission *m, int elapsed);
 
     void setAllAdrenaLevels(uint8 amount, uint8 depend, uint8 effect) {
@@ -604,13 +601,23 @@ public:
         uint32 condition;
     } actionQueueType;
 
+    typedef enum {
+        gd_mNone = 0,
+        gd_mStandWalk = 1,
+        gd_mFire = 2,
+        gd_mThink = 4,
+        gd_mExclusive = 8
+    } groupDescMasks;
+
     typedef struct {
         std::vector <actionQueueType> actions;
         // index refers action state of which defines state of group
         uint32 main_act;
         // 0 - not set, 0b - stand/walking group(has walking action or
         // action requires ped to stand), 1b - firing only(no walking action),
-        // (0b+1b) - walking + firing, 2b - decision making
+        // (0b+1b) - walking + firing, 2b - decision making(thinking),
+        // 3b - exclusive, no other action can be executed in parallel with it
+        // and all before it should be completed
         // NOTE: a group should not interfere with actions of other group
         uint32 group_desc;
         // 0b - not started, 1b - executing, 2b - finished, 3b - failed,

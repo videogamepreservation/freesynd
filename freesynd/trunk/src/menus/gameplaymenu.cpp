@@ -51,7 +51,6 @@ pointing_at_ped_(-1), pointing_at_vehicle_(-1), pointing_at_weapon_(-1)
 {
     scroll_x_ = 0;
     scroll_y_ = 0;
-    showPath_ = false;
 }
 
 /*!
@@ -417,7 +416,8 @@ void GameplayMenu::handleRender(DirtyList &dirtyList)
     drawWeaponSelectors();
     drawMiniMap();
 
-    if (showPath_) {
+#ifdef _DEBUG
+    if (g_System.getKeyModState() & KMD_LALT) {
         if (isAgentSelected(0))
             mission_->ped(0)->showPath(world_x_, world_y_);
 
@@ -430,7 +430,6 @@ void GameplayMenu::handleRender(DirtyList &dirtyList)
         if (isAgentSelected(3))
             mission_->ped(3)->showPath(world_x_, world_y_);
     }
-#ifdef _DEBUG
     // drawing of different sprites
 //    g_App.gameSprites().sprite(9 * 40 + 1)->draw(0, 0, 0, false, true);
 #if 0
@@ -512,7 +511,6 @@ void GameplayMenu::handleLeave()
     mission_ = NULL;
     scroll_x_ = 0;
     scroll_y_ = 0;
-    showPath_ = false;
 }
 
 void GameplayMenu::handleMouseMotion(int x, int y, int state, const int modKeys)
@@ -532,10 +530,6 @@ void GameplayMenu::handleMouseMotion(int x, int y, int state, const int modKeys)
     } else if (last_motion_y_ > GAME_SCREEN_HEIGHT - 5) {
         scroll_y_ = SCROLL_STEP;
     }
-
-    // what's the use of Left Alt?
-    if (modKeys & KMD_LALT)
-        return;
 
     pointing_at_ped_ = -1;
 #ifdef _DEBUG
@@ -742,34 +736,32 @@ bool GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
                         int soy = oy;
                         if (!(mission_->getWalkable(stx, sty, stz, sox, soy)))
                             continue;
-                        if (modKeys & KMD_CTRL) {
-                            showPath_ = true;
-                            mission_->ped(i)->addDestinationP(mission_,stx, sty, stz,
-                                    sox, soy, 320);
-                        } else {
-                            showPath_ = false;
-                            if (selectedAgentsCount() > 1) {
-                                //TODO: current group position is like
-                                // in original this can make non-tile
-                                // oriented
-                                //int sox = (i % 2) * (i - 2) * 16;
-                                //int soy = ((i + 1) % 2) * (i - 1) * 8;
+                        if (selectedAgentsCount() > 1) {
+                            //TODO: current group position is like
+                            // in original this can make non-tile
+                            // oriented
+                            //int sox = (i % 2) * (i - 2) * 16;
+                            //int soy = ((i + 1) % 2) * (i - 1) * 8;
 
-                                //this should be romoved if non-tile
-                                //position needed
-                                sox = 63 + 128 * (i % 2);
-                                soy = 63 + 128 * (i >> 1);
-                            }
-#ifdef NEW_ANIMATE_HANDLING
-                            PedInstance::actionQueueGroupType as;
-                            PathNode tpn = PathNode(stx, sty, stz, sox, soy, 0);
-                            mission_->ped(i)->createActQWalking(as, &tpn, NULL);
-                            mission_->ped(i)->addActQToQueue(as);
-#else
-                            mission_->ped(i)->setDestinationP(mission_, stx, sty, stz,
-                                    sox, soy, 320);
-#endif
+                            //this should be romoved if non-tile
+                            //position needed
+                            sox = 63 + 128 * (i % 2);
+                            soy = 63 + 128 * (i >> 1);
                         }
+#ifdef NEW_ANIMATE_HANDLING
+                        PedInstance::actionQueueGroupType as;
+                        PathNode tpn = PathNode(stx, sty, stz, sox, soy, 0);
+                        mission_->ped(i)->createActQWalking(as, &tpn, NULL);
+                        as.main_act = 0;
+                        as.group_desc = PedInstance::gd_mStandWalk;
+                        if (modKeys & KMD_CTRL)
+                            mission_->ped(i)->addActQToQueue(as);
+                        else
+                            mission_->ped(i)->setActQInQueue(as);
+#else
+                        mission_->ped(i)->setDestinationP(mission_, stx, sty, stz,
+                                sox, soy, 320);
+#endif
                     }
                 }
             }
