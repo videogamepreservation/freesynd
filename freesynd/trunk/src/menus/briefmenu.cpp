@@ -32,12 +32,17 @@
 #include "briefmenu.h"
 #include "core/missionbriefing.h"
 
+const int BriefMenu::MINIMAP_X = 504;
+const int BriefMenu::MINIMAP_Y = 220;
+const int BriefMenu::MINIMAP_WIDTH = 120;
+const int BriefMenu::MINIMAP_HEIGHT = 120;
+
 #if 0
 #define EXECUTION_SPEED_TIME
 #endif
 BriefMenu::BriefMenu(MenuManager * m)
     : Menu(m, MENU_BRIEF, MENU_MAP, "mbrief.dat", "mbrieout.dat"),
-        start_line_(0) {
+        start_line_(0), mm_renderer_() {
     addStatic(85, 35, 545, "#BRIEF_TITLE", FontManager::SIZE_4, false);
     txtTimeId_ = addStatic(500, 9, "", FontManager::SIZE_2, true);       // Time
 
@@ -72,7 +77,10 @@ void BriefMenu::handleTick(int elapsed)
     if (g_Session.updateTime(elapsed)) {
         updateClock();
     }
-    drawMinimap(elapsed);
+    
+    if (mm_renderer_.handleTick(elapsed)) {
+        redrawMiniMap();
+    }
 }
 
 /*! 
@@ -105,27 +113,10 @@ void BriefMenu::handleShow() {
 	// Loads mission briefing
 	p_briefing_ = g_App.missions().loadBriefing(cur_miss);
     
-    // Initialize minimap origin by looking for the position
-    // of the first found agent on the map
-    bool found = false;
-    int maxx = pMission->mmax_x_;
-    int maxy = pMission->mmax_y_;
-
-    for (int x = 0; x < maxx && (!found); x++) {
-        for (int y = 0; y < maxy && (!found); y++) {
-            if (pMission->getMinimapOverlay(x, y) == 1) {
-                // We found a tile with an agent on it
-                // stop searching and memorize position
-                minimap_scroll_x_ = x;
-                minimap_scroll_y_ = y;
-                found = true;
-            }
-        }
-    }
-
-    minimap_blink_ticks_ = 0;
-    minimap_blink_ = 0;
     start_line_ = 0;
+
+    // reset minimap renderer with current mission
+    mm_renderer_.init(pMission, g_Session.getSelectedBlock().enhanceLevel);
 
     updateClock();
 
@@ -144,6 +135,13 @@ void BriefMenu::handleShow() {
         getStatic(txtEnhId_)->setText("");
 
     g_System.showCursor();
+}
+
+/*!
+ * Helpfull method to order minimap redraw by inserting a dirty rect.
+ */
+void BriefMenu::redrawMiniMap() {
+    addDirtyRect(MINIMAP_X, MINIMAP_Y, MINIMAP_WIDTH, MINIMAP_HEIGHT);
 }
 
 void BriefMenu::handleRender(DirtyList &dirtyList) {
@@ -274,7 +272,8 @@ void BriefMenu::handleRender(DirtyList &dirtyList) {
     // g_Screen.scale2x(10, 100, pMission->mmax_x_, pMission->mmax_y_,
     //     pMission->minimap_overlay_,0, false);
 
-    drawMinimap(0);
+    // draw minimap
+    mm_renderer_.render();
 }
 
 void BriefMenu::handleLeave() {
@@ -307,6 +306,10 @@ void BriefMenu::handleAction(const int actionId, void *ctx, const int modKeys) {
             g_Session.setMoney(g_Session.getMoney() - 
                 p_briefing_->enhanceCost(g_Session.getSelectedBlock().enhanceLevel));
             g_Session.getSelectedBlock().enhanceLevel += 1;
+            // zoom in the minimap
+            mm_renderer_.setEnhancementLevel(
+                g_Session.getSelectedBlock().enhanceLevel);
+            redrawMiniMap();
             
             getStatic(txtMoneyId_)->setTextFormated("%d", g_Session.getMoney());
             if (g_Session.getSelectedBlock().enhanceLevel < p_briefing_->nb_enhts()) {
@@ -344,40 +347,18 @@ void BriefMenu::handleAction(const int actionId, void *ctx, const int modKeys) {
  * \return True if the user clicked on the minimap so event is consumed
  */
 bool BriefMenu::handleMouseDown(int x, int y, int button, const int modKeys) {
-    // scrolling step depends on the level of details of the minimap
-    unsigned char scroll_step = 30 /
-        (10 - (g_Session.getSelectedBlock().enhanceLevel << 1));
-
-    Mission *pMission = g_Session.getMission();
-    // Minimap is between (504, 220) and (624, 340)
-    if (button == 1 && x >= 504 && x < 624
-        && y >= 220 && y < 340) {
-        if (x >= 504 && x < 544) {
-            // User clicked on the left of the map
-            // so scroll to the left
-            minimap_scroll_x_ -= scroll_step;
-            if (minimap_scroll_x_ < 0)
-                minimap_scroll_x_ = 0;
+    if (button == 1 && x >= MINIMAP_X && x < (MINIMAP_X + MINIMAP_WIDTH)
+        && y >= MINIMAP_Y && y < (MINIMAP_Y + MINIMAP_HEIGHT)) {
+        if (x >= MINIMAP_X && x < 544) {
+            mm_renderer_.scrollLeft();
         } else if (x >= 584 && x < 624) {
-            // User clicked on the right of the map
-            // so scroll to the right
-            minimap_scroll_x_ += scroll_step;
-            if (minimap_scroll_x_ > pMission->mmax_x_)
-                minimap_scroll_x_ = pMission->mmax_x_ - 1;
+             mm_renderer_.scrollRight();
         }
 
-        if (y >= 220 && y < 260) {
-            // User clicked on the top of the map
-            // so scroll up
-            minimap_scroll_y_ -= scroll_step;
-            if (minimap_scroll_y_ < 0)
-                minimap_scroll_y_ = 0;
+        if (y >= MINIMAP_Y && y < 260) {
+             mm_renderer_.scrollUp();
         } else if (y >= 300 && y < 340) {
-            // User clicked on the bottom of the map
-            // so scroll down
-            minimap_scroll_y_ += scroll_step;
-            if (minimap_scroll_y_ > pMission->mmax_y_)
-                minimap_scroll_y_ = pMission->mmax_y_ - 1;
+             mm_renderer_.scrollDown();
         }
         // Redraw map
         needRendering();
@@ -385,117 +366,4 @@ bool BriefMenu::handleMouseDown(int x, int y, int button, const int modKeys) {
     }
 
     return false;
-}
-
-void BriefMenu::drawMinimap(int elapsed) {
-
-    Mission *pMission = g_Session.getMission();
-    int maxx = pMission->mmax_x_;
-    int maxy = pMission->mmax_y_;
-    //printf("x %i, y %i\n", maxx, maxy);
-    unsigned char clvl = g_Session.getSelectedBlock().enhanceLevel;
-    bool addenemies = false;
-
-    if (clvl == 4) {
-        addenemies = true;
-    }
-    unsigned char pixperblock = 10 - (clvl << 1);
-    short fullblocks = 120 / pixperblock;
-    short halfblocks = fullblocks / 2;
-    short modblocks = fullblocks % 2;
-    short bxl = minimap_scroll_x_ - halfblocks + 1;
-    short bxr = minimap_scroll_x_ + halfblocks + modblocks;
-    short byl = minimap_scroll_y_ - halfblocks + 1;
-    short byr = minimap_scroll_y_ + halfblocks + modblocks;
-
-    // checking borders for correctness, map will be always on center
-    if (bxl < 0) {
-        bxl = 0;
-        if (bxr >= maxx) {
-            bxr = maxx - 1;
-        } else {
-            bxr = fullblocks >= maxx ? maxx - 1 : (fullblocks) - 1;
-        }
-    }
-    if (bxr >= maxx) {
-        bxr = maxx - 1;
-        bxl = (maxx - (fullblocks)) < 0 ? 0 : (maxx - (fullblocks));
-    }
-
-    if (byl < 0) {
-        byl = 0;
-        if (byr >= maxy) {
-            byr = maxy - 1;
-        } else {
-            byr = fullblocks >= maxy ? maxy - 1 : (fullblocks) - 1;
-        }
-    }
-    if (byr >= maxy) {
-        byr = maxy - 1;
-        byl = (maxy - (fullblocks)) < 0 ? 0 : (maxy - (fullblocks));
-    }
-
-    short sx = 504;
-    short sy = 220;
-    if ((bxr - bxl + 1) < (fullblocks)) {
-        sx += ((fullblocks - (bxr - bxl + 1)) >> 1) * pixperblock;
-    }
-    if ((byr - byl + 1) < (fullblocks)) {
-        sy += ((fullblocks - (byr - byl + 1)) >> 1) * pixperblock;
-    }
-
-    if (elapsed == 0) {
-        for (short x = bxl; x <= bxr; x++) {
-            short xc = sx + (x - bxl) * pixperblock;
-            for (short y = byl; y <= byr; y++) {
-                unsigned char c = pMission->getMinimapOverlay(x, y);
-                switch (c) {
-                    case 0:
-                        c = pMission->getMinimapColour(x, y);
-                        break;
-                    case 1:
-                        c = 14;
-                        break;
-                    case 2:
-                        if (addenemies)
-                            c = 14;
-                        else
-                            c = pMission->getMinimapColour(x, y);
-                }
-                g_Screen.drawRect(xc, sy + (y - byl) * pixperblock, pixperblock,
-                    pixperblock, c);
-            }
-        }
-    } else {
-        // drawing blinking only
-        elapsed += minimap_blink_ticks_;
-        int inc = elapsed / 50;
-        minimap_blink_ticks_ = elapsed % 50;
-        minimap_blink_ += inc;
-        unsigned char cour = 14;
-        unsigned char cenemy = 14;
-        minimap_blink_ %= 20;
-        if ((minimap_blink_ % 10)  > 6) {
-            cour = 12;
-            cenemy = 5;
-        }
-        for (short x = bxl; x <= bxr; x++) {
-            short xc = sx + (x - bxl) * pixperblock;
-            for (short y = byl; y <= byr; y++) {
-                unsigned char c = pMission->getMinimapOverlay(x, y);
-                switch (c) {
-                    case 0:
-                        break;
-                    case 1:
-                        g_Screen.drawRect(xc, sy + (y - byl) * pixperblock, pixperblock,
-                            pixperblock, cour);
-                        break;
-                    case 2:
-                        if (addenemies)
-                            g_Screen.drawRect(xc, sy + (y - byl) * pixperblock, pixperblock,
-                                pixperblock, cenemy);
-                }
-            }
-        }
-    }
 }

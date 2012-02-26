@@ -5,9 +5,6 @@
  *   Copyright (C) 2005  Stuart Binge  <skbinge@gmail.com>              *
  *   Copyright (C) 2005  Joost Peters  <joostp@users.sourceforge.net>   *
  *   Copyright (C) 2006  Trent Waddington <qg@biodome.org>              *
- *   Copyright (C) 2006  Tarjei Knapstad <tarjei.knapstad@gmail.com>    *
- *   Copyright (C) 2010  Benoit Blancard <benblan@users.sourceforge.net>*
- *   Copyright (C) 2010  Bohdan Stelmakh <chamel@users.sourceforge.net> *
  *                                                                      *
  *    This program is free software;  you can redistribute it and / or  *
  *  modify it  under the  terms of the  GNU General  Public License as  *
@@ -25,61 +22,60 @@
  *                                                                      *
  ************************************************************************/
 
-#ifndef BRIEFMENU_H
-#define BRIEFMENU_H
+#ifndef MINIMAPRENDERER_H
+#define MINIMAPRENDERER_H
 
-#include "menus/minimaprenderer.h"
+#include <map>
 
+#include "common.h"
+
+class Mission;
 class MissionBriefing;
 
 /*!
- * Brief Menu class. 
+ * Renderer for minimap.
+ * This class is used to display a minimap in the briefing menu.
  */
-class BriefMenu : public Menu {
+class MinimapRenderer {
 public:
-    BriefMenu(MenuManager *m);
-    ~BriefMenu();
+    //! Class Constructor.
+    MinimapRenderer();
+    //! Reset the class with a new mission
+    void init(Mission *pMission, uint8 enh_level);
 
-    void handleTick(int elapsed);
-    void handleShow();
-    void handleRender(DirtyList &dirtyList);
-    void handleLeave();
-    void handleAction(const int actionId, void *ctx, const int modKeys);
+    //! update the class with elapsed time
+    bool handleTick(int elapsed);
+
+    //! Render the minimap
+    void render();
+
+    //! Sets all parameters that depend on enhancement level
+    void setEnhancementLevel(uint8 enh_level);
+
+    //! Scrolls the minimap to the right
+    void scrollRight();
+    //! Scrolls the minimap to the left
+    void scrollLeft();
+    //! Scrolls the minimap to the top
+    void scrollUp();
+    //! Scrolls the minimap to the bottom
+    void scrollDown();
     
 protected:
-    static const int MINIMAP_X;
-    static const int MINIMAP_Y;
-    static const int MINIMAP_WIDTH;
-    static const int MINIMAP_HEIGHT;
-
-    void updateClock();
-    void redrawMiniMap();
-
-	bool handleMouseDown(int x, int y, int button, const int modKeys);
-
-protected:
-    int start_line_;
-
-    /*! Id of the text widget for time.*/
-    int txtTimeId_;
-    /*! Id of the text widget for money.*/
-    int txtMoneyId_;
-    /*! Id of the text widget for info.*/
-    int txtInfoId_;
-    /*! Id of the text widget for enhance.*/
-    int txtEnhId_;
-    /*! Id of the infos button.*/
-    int infosButId_;
-    /*! Id of the enhance button.*/
-    int enhButId_;
-    /*! Id of the scroll next button.*/
-    int nextButId_;
-    /*! Id of the scroll previous button.*/
-    int prevButId_;
-    /*! Briefing informations on current mission.*/
-	MissionBriefing *p_briefing_;
-    /*! Class that draws the minimap.*/
-    MinimapRenderer mm_renderer_;
+    /*! X coord in the minimap system.*/
+    uint16 minimap_scroll_x_;
+    /*! Y coord in the minimap system.*/
+    uint16 minimap_scroll_y_;
+    /*! A counter to control the blinking on the minimap.*/
+    int minimap_blink_ticks_;
+    /*! Helps controling blinking.*/
+    int minimap_blink_;
+    /*! The scrolling step : depends on the enhancement level.*/
+    uint8 scroll_step_;
+    /*! The mission that contains the minimap.*/
+    Mission *p_mission_;
+    /*! Current enhacement level.*/
+    uint8 enh_level_;
 };
 
 #endif

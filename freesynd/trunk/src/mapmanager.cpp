@@ -37,7 +37,7 @@ MapManager::~MapManager()
         delete maps_[i];
 }
 
-bool MapManager::loadMap(int mapNum)
+Map * MapManager::loadMap(int mapNum)
 {
     char tmp[100];
     sprintf(tmp, "map%02d.dat", mapNum);
@@ -73,7 +73,7 @@ bool MapManager::loadMap(int mapNum)
 
     delete[] mapData;
 
-    return true;
+    return maps_[mapNum];
 }
 
 bool MapManager::drawMap(int mapNum, int scrollx, int scrolly,

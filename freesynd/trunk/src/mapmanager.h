@@ -39,7 +39,7 @@ public:
     MapManager();
     ~MapManager();
 
-    bool loadMap(int mapNum);
+    Map * loadMap(int mapNum);
     bool drawMap(int mapNum, int scrollx, int scrolly, MapHelper *helper);
     Map *map(int mapNum);
     int mapWidth(int mapNum);

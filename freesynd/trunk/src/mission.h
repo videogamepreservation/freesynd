@@ -31,13 +31,14 @@
 #include "mapobject.h"
 #include "pathsurfaces.h"
 #include "weapon.h"
+#include "map.h"
+
 #include <string>
 #include <vector>
 #include <set>
 
 class VehicleInstance;
 class PedInstance;
-class MapHelper;
 
 /*!
  * A structure that holds mission statistics.

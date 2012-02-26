@@ -542,7 +542,7 @@ bool Mission::loadLevel(uint8 * levelData)
 
 bool Mission::loadMap()
 {
-    return g_App.maps().loadMap(map_);
+    return g_App.maps().loadMap(map_) != NULL;
 }
 
 int Mission::mapWidth()

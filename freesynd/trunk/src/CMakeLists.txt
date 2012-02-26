@@ -28,6 +28,7 @@ set (SOURCES
 	map.cpp
 	mapobject.cpp
 	mapmanager.cpp
+	menus/minimaprenderer.cpp
 	menus/briefmenu.cpp
 	menus/confmenu.cpp
 	menus/debriefmenu.cpp
@@ -116,6 +117,7 @@ set(HEADERS
 	gfx/spritemanager.h
 	gfx/tile.h
 	gfx/tilemanager.h
+	menus/minimaprenderer.h
 	menus/briefmenu.h
 	menus/confmenu.h
 	menus/debriefmenu.h

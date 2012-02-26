@@ -310,12 +310,13 @@ int dump_maps() {
 
         fclose(f);
 
-        if (!maps.loadMap(i))
+        Map *p_map = maps.loadMap(i);
+        if (!p_map)
             continue;
 
         clear_screen();
         printf("drawing map %i\n", i);
-        maps.drawMap(i, screen_width / 2, screen_height / 2, &helper);
+        p_map->draw(screen_width / 2, screen_height / 2, &helper);
 	char dest[100];
 	sprintf(dest, "maps/map%i.png", i);
         write_png(dest);
