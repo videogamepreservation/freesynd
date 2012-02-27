@@ -8,7 +8,7 @@
 	  <feature id="3283536" status="D">Manage separate directory for syndicate and freesynd</feature>
 	  <feature id="3202739" status="D">keyboard type management</feature>
 	  <feature id="3473410" status="">The radar is missing</feature>
-	  <feature id="3473415" status="">Junction balls are not animated</feature>
+	  <feature id="3473415" status="D">Junction balls are not animated</feature>
 	  <feature id="3461415" status="D">Cycle only through available missions in map menu</feature>
 	</features>
 	<bugs>

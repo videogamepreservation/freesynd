@@ -38,7 +38,6 @@ in original gameplay or are not present at all
  - write mission editor, create new mission files using editor, based on original
 game mission files.
  - Implement dragging in SelectMenu to pass a weapon from an agent to another.
- - Manage Qwerty / azerty keyboard. Today only qwerty keyboard is used.
  - Create a debian package
 
  Very low priority stuff, maybe for v0.9:

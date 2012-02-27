@@ -385,7 +385,7 @@ bool MapObject::isBlocker(toDefineXYZ * startXYZ, toDefineXYZ * endXYZ,
 }
 
 SFXObject::SFXObject(int m, int type, int t_show):MapObject(m),
-    sfx_life_over_(false)
+    sfx_life_over_(false), elapsed_left_(0)
 {
     main_type_ = type;
     setTimeShowAnim(0);
@@ -432,7 +432,8 @@ bool SFXObject::animate(int elapsed) {
     if (main_type_ == SFXObject::sfxt_ExplosionBall) {
         int z = tile_z_ * 128 + off_z_;
         // 250 per sec
-        z += (elapsed >> 2);
+        z += ((elapsed + elapsed_left_) >> 2);
+        elapsed_left_ = elapsed &3;
         if (z > (g_Session.getMission()->mmax_z_ - 1) * 128)
             z = (g_Session.getMission()->mmax_z_ - 1) * 128;
         tile_z_ = z / 128;
@@ -522,31 +523,35 @@ Static *Static::loadInstance(uint8 * data, int m)
             break;
         case 0x05:// 1040-1043, 1044 - damaged
             // crossroad things
-            s = new EtcObj(m, curanim, curanim, curanim);
+            s = new Semaphore(m, 1040, 1044);
             s->setSizeX(64);
             s->setSizeY(64);
             s->setSizeZ(64);
+            s->state_ = sttsem_Stt0;
             break;
         case 0x06:
             // crossroad things
-            s = new EtcObj(m, curanim, curanim, curanim);
+            s = new Semaphore(m, 1040, 1044);
             s->setSizeX(64);
             s->setSizeY(64);
             s->setSizeZ(64);
+            s->state_ = sttsem_Stt1;
             break;
         case 0x07:
             // crossroad things
-            s = new EtcObj(m, curanim, curanim, curanim);
+            s = new Semaphore(m, 1040, 1044);
             s->setSizeX(64);
             s->setSizeY(64);
             s->setSizeZ(64);
+            s->state_ = sttsem_Stt2;
             break;
         case 0x08:
             // crossroad things
-            s = new EtcObj(m, curanim, curanim, curanim);
+            s = new Semaphore(m, 1040, 1044);
             s->setSizeX(64);
             s->setSizeY(64);
             s->setSizeZ(64);
+            s->state_ = sttsem_Stt3;
             break;
         case 0x0B:
             // 0x0270 animation, is this object present in original game?
@@ -661,7 +666,7 @@ Static *Static::loadInstance(uint8 * data, int m)
             s->setStartHealth(1);
             break;
         case 0x19:
-            // trash can / mail box
+            // trash bin / mail box
             s = new EtcObj(m, curanim, curanim, curanim);
             s->setSizeX(64);
             s->setSizeY(64);
@@ -1169,3 +1174,67 @@ void NeonSign::draw(int x, int y)
     addOffs(x, y);
     g_App.gameSprites().drawFrame(anim_, frame_, x, y);
 }
+
+Semaphore::Semaphore(int m, int anim, int damagedAnim):Static(m),
+anim_(anim), damaged_anim_(damagedAnim), elapsed_left_(0), up_down_(1)
+{
+    rcv_damage_def_ = MapObject::ddmg_StaticGeneral;
+    major_type_ = MapObject::mjt_Static;
+    setFramesPerSec(2);
+}
+
+bool Semaphore::animate(int elapsed, Mission *obj) {
+    if (state_ == Static::sttsem_Damaged)
+        return false;
+
+    int chng = (elapsed + elapsed_left_) >> 3;
+    if (chng) {
+     int oz = off_z_ + chng * up_down_;
+     if (oz > 127) {
+         oz = 127 - (oz & 0x7F);
+         up_down_ -= 2;
+     } else if (oz < 0) {
+         oz = -oz;
+         up_down_ += 2;
+     }
+     off_z_ = oz;
+     if (oz == 0)
+         vis_z_ = tile_z_ - 1;
+     else
+        setVisZ();
+    }
+
+    chng = (elapsed + elapsed_left_) >> 6;
+    elapsed_left_ = elapsed & 63;
+    if (chng) {
+     // Direction is used as storage for animation change, not my idea
+     dir_ += chng;
+     dir_ &= 0xFF;
+     state_ = dir_ >> 6;
+     state_++;
+     if (state_ > Static::sttsem_Stt3)
+         state_ = Static::sttsem_Stt0;
+    }
+
+    return MapObject::animate(elapsed);
+}
+
+bool Semaphore::handleDamage(ShootableMapObject::DamageInflictType *d) {
+    if (health_ <= 0 || rcv_damage_def_ == MapObject::ddmg_Invulnerable
+        || (d->dtype & rcv_damage_def_) == 0)
+        return false;
+
+    health_ -= d->dvalue;
+    if (health_ <= 0) {
+        state_ = Static::sttsem_Damaged;
+        is_ignored_ = true;
+    }
+    return true;
+}
+
+void Semaphore::draw(int x, int y)
+{
+    addOffs(x, y);
+    g_App.gameSprites().drawFrame(anim_ +  state_, frame_, x, y);
+}
+

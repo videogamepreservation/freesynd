@@ -224,15 +224,22 @@ protected:
     // these are not true sizes, but halfs of full size by respective coord
     int size_x_, size_y_, size_z_;
     int map_;
+    // animation frame changing
     int frame_;
+    // time left, if frame needs to be drawn every 'n' milliseconds
+    // elapsed time % 'n' = time left
     int elapsed_carry_;
+    // how often this frame should be drawn per seccond
     int frames_per_sec_;
     int sub_type_, main_type_;
     // 0 - not defined, 1 - ped, 2 - weapon, 3 - static, 4 - vehicle
     MajorTypeEnum major_type_;
     DefDamageType rcv_damage_def_;
+    // objects direction
     int dir_;
+    // looped animations time to show them is set here
     int time_show_anim_;
+    // looped animations playing time
     int time_showing_anim_;
     // object is not included in view/shot trajectory calculation
     bool is_ignored_;
@@ -267,6 +274,7 @@ public:
 protected:
     int anim_;
     bool sfx_life_over_;
+    int elapsed_left_;
 };
 
 /*!
@@ -379,6 +387,15 @@ public:
         stttree_Damaged,
     }stateTrees;
 
+    //semaphore, 4 animations + damaged
+    typedef enum {
+        sttsem_Stt0 = 0,
+        sttsem_Stt1,
+        sttsem_Stt2,
+        sttsem_Stt3,
+        sttsem_Damaged,
+    }stateSemaphores;
+
 protected:
     Static(int m):ShootableMapObject(m) {}
     virtual ~Static() {}
@@ -470,6 +487,25 @@ public:
 
 protected:
     int anim_;
+};
+
+/*!
+ * Semaphore map object class.
+ * That thing that bounces on crossroad.
+ */
+class Semaphore : public Static {
+public:
+    Semaphore(int m, int anim, int damagedAnim);
+    virtual ~Semaphore() {}
+
+    bool animate(int elapsed, Mission *obj);
+    bool handleDamage(ShootableMapObject::DamageInflictType *d);
+    void draw(int x, int y);
+
+protected:
+    int anim_, damaged_anim_;
+    int elapsed_left_;
+    int up_down_;
 };
 
 

@@ -13,7 +13,7 @@ Changes
 
 Fixed Bugs
 ----------
-  * :
+  * : Brief minimap not showing enemy agents
 
 Features added
 ----------
@@ -22,6 +22,7 @@ Features added
   * 3337516 : Standardize text fields in configure and loadsave menus
   * 3202739 : keyboard type management
   * 3461415 : Cycle only through available missions in map menu
+  * 3473415 : Junction balls are not animated
   * It's now possible to define an acceleration key for a button by
     inserting a '&' caracter before the letter in the button label in the
 	language file. Works only for letters.
