@@ -6,12 +6,13 @@ MinimapRenderer::MinimapRenderer() {
     scroll_step_ = 0;
 }
 
-void MinimapRenderer::init(Mission *pMission, uint8 enh_level)
+void MinimapRenderer::init(Mission *pMission, uint8 enh_level, uint8 max_enh_level)
 {
     // Initialize minimap origin by looking for the position
     // of the first found agent on the map
     p_mission_ = pMission;
     setEnhancementLevel(enh_level);
+    max_enh_level_ = max_enh_level;
 
     bool found = false;
     int maxx = pMission->mmax_x_;
@@ -45,7 +46,7 @@ bool MinimapRenderer::handleTick(int elapsed)
 
     if (minimap_blink_ticks_ > 500) {
         minimap_blink_ticks_ = 0;
-        minimap_blink_ = 1 - minimap_blink_;
+        minimap_blink_ ^= 1;
         return true;
     }
 
@@ -80,7 +81,7 @@ void MinimapRenderer::render()
 {
     int maxx = p_mission_->mmax_x_;
     int maxy = p_mission_->mmax_y_;
-    bool addenemies = (enh_level_ == 4);
+    bool addenemies = (enh_level_ == max_enh_level_);
 
     unsigned char pixperblock = 10 - (enh_level_ << 1);
     short fullblocks = 120 / pixperblock;

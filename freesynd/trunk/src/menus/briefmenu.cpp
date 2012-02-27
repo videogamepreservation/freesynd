@@ -116,7 +116,8 @@ void BriefMenu::handleShow() {
     start_line_ = 0;
 
     // reset minimap renderer with current mission
-    mm_renderer_.init(pMission, g_Session.getSelectedBlock().enhanceLevel);
+    mm_renderer_.init(pMission, g_Session.getSelectedBlock().enhanceLevel,
+        p_briefing_->nb_enhts());
 
     updateClock();
 
@@ -267,7 +268,8 @@ void BriefMenu::handleRender(DirtyList &dirtyList) {
     printf("end time %i.%i\n", SDL_GetTicks()/1000, SDL_GetTicks()%1000);
 #endif
     // NOTE: enhance levels: 0 = 10px(5), 1 = 8px(4), 2 = 6px(3), 3 - 4px(2),
-    // 4 - 2px(1) + enemy peds; x = 502(251), y = 218(109), 124x124(62x62)
+    // 4 - 2px(1); x = 502(251), y = 218(109), 124x124(62x62)
+    // enemy peds are at maximum enhance lvl
     // 640x400(320x200), (504, 220) = (252, 110)
     // g_Screen.scale2x(10, 100, pMission->mmax_x_, pMission->mmax_y_,
     //     pMission->minimap_overlay_,0, false);

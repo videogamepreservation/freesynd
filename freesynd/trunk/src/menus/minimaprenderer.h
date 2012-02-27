@@ -41,7 +41,7 @@ public:
     //! Class Constructor.
     MinimapRenderer();
     //! Reset the class with a new mission
-    void init(Mission *pMission, uint8 enh_level);
+    void init(Mission *pMission, uint8 enh_level, uint8 max_enh_level);
 
     //! update the class with elapsed time
     bool handleTick(int elapsed);
@@ -76,6 +76,8 @@ protected:
     Mission *p_mission_;
     /*! Current enhacement level.*/
     uint8 enh_level_;
+    /*! Maximum enhacement level, at this level enemies are drawn*/
+    uint8 max_enh_level_;
 };
 
 #endif
