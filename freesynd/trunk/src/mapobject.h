@@ -396,6 +396,18 @@ public:
         sttsem_Damaged,
     }stateSemaphores;
 
+    typedef enum {
+        // NOTE: should be the same name as Class
+        smt_None = 0,
+        smt_Advertisement,
+        smt_Semaphore,
+        smt_Door,
+        smt_LargeDoor,
+        smt_Tree,
+        smt_Window,
+        smt_NeonSign
+    }staticMainType;
+
 protected:
     Static(int m):ShootableMapObject(m) {}
     virtual ~Static() {}
@@ -504,7 +516,13 @@ public:
 
 protected:
     int anim_, damaged_anim_;
-    int elapsed_left_;
+    // used to make animation of movement up/down,
+    // when damaged, stores time not consumed for movement down
+    int elapsed_left_smaller_;
+    // animation color rotation,
+    // when damaged, stores target Z distance to fall
+    int elapsed_left_bigger_;
+    // switch for moving up or down
     int up_down_;
 };
 

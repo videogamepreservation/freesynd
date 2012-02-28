@@ -26,7 +26,7 @@
 #include "common.h"
 
     typedef struct {
-        // tile walkable data from g_App.walkable_p_[]
+        // tile walkable data from g_App.walkdata_p_[]
         unsigned char twd;
     }surfaceDesc;
 

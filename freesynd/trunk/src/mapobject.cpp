@@ -524,34 +524,42 @@ Static *Static::loadInstance(uint8 * data, int m)
         case 0x05:// 1040-1043, 1044 - damaged
             // crossroad things
             s = new Semaphore(m, 1040, 1044);
-            s->setSizeX(64);
-            s->setSizeY(64);
-            s->setSizeZ(64);
+            s->setSizeX(48);
+            s->setSizeY(48);
+            s->setSizeZ(48);
             s->state_ = sttsem_Stt0;
+            s->setHealth(1);
+            s->setStartHealth(1);
             break;
         case 0x06:
             // crossroad things
             s = new Semaphore(m, 1040, 1044);
-            s->setSizeX(64);
-            s->setSizeY(64);
-            s->setSizeZ(64);
+            s->setSizeX(48);
+            s->setSizeY(48);
+            s->setSizeZ(48);
             s->state_ = sttsem_Stt1;
+            s->setHealth(1);
+            s->setStartHealth(1);
             break;
         case 0x07:
             // crossroad things
             s = new Semaphore(m, 1040, 1044);
-            s->setSizeX(64);
-            s->setSizeY(64);
-            s->setSizeZ(64);
+            s->setSizeX(48);
+            s->setSizeY(48);
+            s->setSizeZ(48);
             s->state_ = sttsem_Stt2;
+            s->setHealth(1);
+            s->setStartHealth(1);
             break;
         case 0x08:
             // crossroad things
             s = new Semaphore(m, 1040, 1044);
-            s->setSizeX(64);
-            s->setSizeY(64);
-            s->setSizeZ(64);
+            s->setSizeX(48);
+            s->setSizeY(48);
+            s->setSizeZ(48);
             s->state_ = sttsem_Stt3;
+            s->setHealth(1);
+            s->setStartHealth(1);
             break;
         case 0x0B:
             // 0x0270 animation, is this object present in original game?
@@ -675,7 +683,7 @@ Static *Static::loadInstance(uint8 * data, int m)
         case 0x1A:
             // advertisement on wall
             s = new EtcObj(m, curanim, curanim, curanim);
-            s->setMainType(1);
+            s->setMainType(smt_Advertisement);
             s->setIsIgnored(true);
             break;
         case 0x1C:
@@ -686,7 +694,7 @@ Static *Static::loadInstance(uint8 * data, int m)
         case 0x1F:
             // advertisement on wall + brokem signal
             s = new EtcObj(m, curanim, curanim, curanim);
-            s->setMainType(1);
+            s->setMainType(smt_Advertisement);
             s->setIsIgnored(true);
             break;
         case 0x20:
@@ -750,8 +758,8 @@ Static *Static::loadInstance(uint8 * data, int m)
         z--;
         int oz = gamdata->mapposz[0] & 0x7F;
         s->setVisZ(z);
-        // patch for advertisement on wall
-        if (s->getMainType() == 1)
+        // trick to draw
+        if (s->getMainType() == Static::smt_Advertisement)
             z += 2;
 
         if (oz > 0)
@@ -759,7 +767,7 @@ Static *Static::loadInstance(uint8 * data, int m)
         s->setPosition(gamdata->mapposx[1], gamdata->mapposy[1],
                        z, gamdata->mapposx[0],
                        gamdata->mapposy[0], oz);
-        s->setMainType(gamdata->sub_type);
+        //s->setMainType(gamdata->sub_type);
         s->setDirection(gamdata->orientation);
     }
 
@@ -773,6 +781,7 @@ opening_anim_(openingAnim)
     state_ = Static::sttdoor_Closed;
     rcv_damage_def_ = MapObject::ddmg_Invulnerable;
     major_type_ = MapObject::mjt_Static;
+    main_type_ = Static::smt_Door;
 }
 
 void Door::draw(int x, int y)
@@ -896,6 +905,7 @@ closing_anim_(closingAnim), opening_anim_(openingAnim)
     state_ = Static::sttdoor_Closed;
     rcv_damage_def_ = MapObject::ddmg_Invulnerable;
     major_type_ = MapObject::mjt_Static;
+    main_type_ = Static::smt_LargeDoor;
 }
 
 void LargeDoor::draw(int x, int y)
@@ -1090,6 +1100,7 @@ anim_(anim), burning_anim_(burningAnim), damaged_anim_(damagedAnim)
     rcv_damage_def_ = MapObject::ddmg_StaticTree;
     major_type_ = MapObject::mjt_Static;
     state_ = Static::stttree_Healthy;
+    main_type_ = Static::smt_Tree;
 }
 
 void Tree::draw(int x, int y)
@@ -1141,6 +1152,7 @@ anim_(anim), breaking_anim_(breakingAnim), damaged_anim_(damagedAnim)
 {
     rcv_damage_def_ = MapObject::ddmg_StaticWindow;
     major_type_ = MapObject::mjt_Static;
+    main_type_ = Static::smt_Window;
 }
 
 void WindowObj::draw(int x, int y)
@@ -1167,6 +1179,7 @@ anim_(anim)
 {
     rcv_damage_def_ = MapObject::ddmg_Invulnerable;
     major_type_ = MapObject::mjt_Static;
+    main_type_ = Static::smt_NeonSign;
 }
 
 void NeonSign::draw(int x, int y)
@@ -1176,25 +1189,44 @@ void NeonSign::draw(int x, int y)
 }
 
 Semaphore::Semaphore(int m, int anim, int damagedAnim):Static(m),
-anim_(anim), damaged_anim_(damagedAnim), elapsed_left_(0), up_down_(1)
+anim_(anim), damaged_anim_(damagedAnim), elapsed_left_smaller_(0),
+elapsed_left_bigger_(0), up_down_(1)
 {
     rcv_damage_def_ = MapObject::ddmg_StaticGeneral;
     major_type_ = MapObject::mjt_Static;
+    main_type_ = Static::smt_Semaphore;
     setFramesPerSec(2);
 }
 
 bool Semaphore::animate(int elapsed, Mission *obj) {
-    if (state_ == Static::sttsem_Damaged)
-        return false;
+    if (state_ == Static::sttsem_Damaged) {
+        if (elapsed_left_bigger_ == 0)
+            return false;
+        int chng = (elapsed + elapsed_left_smaller_) >> 1;
+        elapsed_left_smaller_ = elapsed & 2;
+        elapsed_left_bigger_ -= chng;
+        if (elapsed_left_bigger_ < 0) {
+            chng += elapsed_left_bigger_;
+            elapsed_left_bigger_ = 0;
+        }
+        int z = vis_z_ * 128 + off_z_ - chng;
+        tile_z_ = z / 128;
+        off_z_ = z % 128;
+        setTileVisZ();
+        if (elapsed_left_bigger_ == 0)
+            vis_z_=vis_z_;
+        return true;
+    }
 
-    int chng = (elapsed + elapsed_left_) >> 3;
+    int chng = (elapsed + elapsed_left_smaller_) >> 2;
+    elapsed_left_smaller_ = elapsed & 4;
     if (chng) {
      int oz = off_z_ + chng * up_down_;
      if (oz > 127) {
          oz = 127 - (oz & 0x7F);
          up_down_ -= 2;
-     } else if (oz < 0) {
-         oz = -oz;
+     } else if (oz < 64) {
+         oz = 64 + (64 - oz);
          up_down_ += 2;
      }
      off_z_ = oz;
@@ -1204,8 +1236,8 @@ bool Semaphore::animate(int elapsed, Mission *obj) {
         setVisZ();
     }
 
-    chng = (elapsed + elapsed_left_) >> 6;
-    elapsed_left_ = elapsed & 63;
+    chng = (elapsed + elapsed_left_bigger_) >> 6;
+    elapsed_left_bigger_ = elapsed & 63;
     if (chng) {
      // Direction is used as storage for animation change, not my idea
      dir_ += chng;
@@ -1227,6 +1259,20 @@ bool Semaphore::handleDamage(ShootableMapObject::DamageInflictType *d) {
     health_ -= d->dvalue;
     if (health_ <= 0) {
         state_ = Static::sttsem_Damaged;
+        // To make this thing reach the ground need to get solid surface 0x0F
+        Mission * m = g_Session.getMission();
+        int z = tile_z_;
+        int indx = tile_x_ + tile_y_ * m->mmax_x_ + tile_z_ * m->mmax_m_xy;
+        elapsed_left_bigger_ = 0;
+        while (z != 0) {
+            z--;
+            indx -= m->mmax_m_xy;
+            int twd = m->mtsurfaces_[indx].twd;
+            if (twd == 0x0F) {
+                elapsed_left_bigger_ = (vis_z_ - z) * 128 + off_z_;
+                break;
+            }
+        };
         is_ignored_ = true;
     }
     return true;
