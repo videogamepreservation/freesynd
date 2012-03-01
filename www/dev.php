@@ -48,6 +48,12 @@ RSS Feeds<br />
 </small>
 </p>
 
+IRC Channel<br />
+<small>
+irc://irc.freenode.net/#freesynd
+</small>
+</p>
+
 <hr />
 
 <h2>Roadmap</h2>
