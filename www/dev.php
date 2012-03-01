@@ -46,11 +46,13 @@ RSS Feeds<br />
 <a href="http://sourceforge.net/export/rss2_keepsake.php?group_id=93282">SourceForge.net - Recent activity for Freesynd</a><br/>
 <a href="http://freesynd.sourceforge.net/data/rss-news.xml">Freesynd News</a>
 </small>
-</p>
+<br /><br />
 
 IRC Channel<br />
 <small>
+<a href="irc://irc.freenode.net/#freesynd" >
 irc://irc.freenode.net/#freesynd
+</a>
 </small>
 </p>
 
