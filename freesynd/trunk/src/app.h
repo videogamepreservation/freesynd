@@ -148,6 +148,9 @@ private:
     //! Reads the configuration file
     bool readConfiguration();
 
+    //! Tests Syndicate original data for existence and correctness
+    bool testOriginalData();
+
 	//! Loads walk data
 	bool loadWalkData();
 

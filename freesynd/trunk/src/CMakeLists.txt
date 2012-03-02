@@ -58,6 +58,7 @@ set (SOURCES
 	sound/xmidi.cpp
 	system_sdl.cpp
 	utils/configfile.cpp
+	utils/ccrc32.cpp
 	utils/dernc.cpp
 	utils/file.cpp
 	utils/log.cpp
@@ -142,6 +143,7 @@ set(HEADERS
 	sound/soundmanager.h
 	sound/xmidi.h
 	utils/configfile.h
+	utils/ccrc32.h
 	utils/dernc.h
 	utils/file.h
 	utils/log.h

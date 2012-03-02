@@ -49,6 +49,7 @@
 #include "gfx/spritemanager.h"
 #include "gfx/screen.h"
 #include "sound/audio.h"
+#include "utils/ccrc32.h"
 #include "utils/file.h"
 #include "utils/log.h"
 #include "utils/configfile.h"
@@ -219,6 +220,87 @@ bool App::readConfiguration() {
     }
 }
 
+bool App::testOriginalData() {
+    bool test_files = true;
+    ConfigFile conf(iniPath_);
+    conf.readInto(test_files, "test_data", true);
+    if (test_files == false)
+        return true;
+
+    std::string crcflname = File::dataFullPath("ref/original_data.crc");
+    std::ifstream od(crcflname);
+    if (od.fail()) {
+        LOG(Log::k_FLG_GFX, "App", "testOriginalData",
+            ("Checksums file for original data is not found. Look at INSTALL/README file for possible solutions."));
+        return false;
+    }
+    printf("Testing original Syndicate data...\n");
+    LOG(Log::k_FLG_GFX, "App", "testOriginalData", ("Testing original Syndicate data..."));
+    CCRC32 crc32_test;
+    crc32_test.Initialize();
+    bool rsp = true;
+    while (od) {
+        std::string line;
+        std::getline(od, line);
+        if (line.size() > 0) {
+            std::string::size_type pos = line.find(' ');
+            if (pos != std::string::npos) {
+                std::string flname = line.substr(0, pos);
+                std::string str_crc32 = line.substr(pos+1);
+                uint32 ui_crc32 = 0;
+                uint32 multiply = 1 << (4 * 7);
+                // String hex to uint32
+                for (char i = 0; i < 8; i++) {
+                    char c = str_crc32[i];
+                    if ( c >= '0' && c <= '9')
+                        c -= '0';
+                    if ( c >= 'a' && c <= 'z')
+                        c -= 'a' - 10;
+                    ui_crc32 += c * multiply;
+                    multiply >>= 4;
+                }
+                int sz;
+                uint8 *data = File::loadOriginalFileToMem(flname, sz);
+                if (!data) {
+                    LOG(Log::k_FLG_GFX, "App", "testOriginalData", ("file not found \"%s\"\n", flname.c_str()));
+                    printf("file not found \"%s\". Look at INSTALL/README file for possible solutions.\n", flname.c_str());
+                    rsp = false;
+                    continue;
+                }
+                if (ui_crc32 != crc32_test.FullCRC(data, sz)) {
+                    rsp = false;
+                    LOG(Log::k_FLG_GFX, "App", "testOriginalData", ("file test failed \"%s\"\n", flname.c_str()));
+#ifdef _DEBUG
+                    printf("file test failed \"%s\"\n", flname.c_str());
+#endif
+                }
+                delete[] data;
+            }
+        }
+    }
+    if (rsp == false) {
+        printf("Test failed.\n");
+    } else {
+        try {
+            conf.add("test_data", false);
+
+            std::ofstream file(iniPath_.c_str(), std::ios::out | std::ios::trunc);
+            if (file) {
+                file << conf;
+                file.close();
+            } else {
+                LOG(Log::k_FLG_GFX, "App", "testOriginalData", ("Could not update configuration file!"))
+            }
+        } catch (...) {
+            LOG(Log::k_FLG_GFX, "App", "testOriginalData", ("Could not update configuration file!"))
+        }
+        printf("Test passed. crc32 for data is correct.\n");
+        LOG(Log::k_FLG_GFX, "App", "testOriginalData", ("Test passed. CRC32 for data is correct."));
+    }
+    od.close();
+    return rsp;
+}
+
 bool App::loadWalkData() {
 	int size = 0;
     uint8 *data;
@@ -284,6 +366,12 @@ bool App::initialize(const std::string& iniPath) {
     LOG(Log::k_FLG_INFO, "App", "initialize", ("reading configuration..."))
     if (!readConfiguration()) {
         LOG(Log::k_FLG_GFX, "App", "initialize", ("failed to read configuration..."))
+        return false;
+    }
+
+    LOG(Log::k_FLG_INFO, "App", "initialize", ("testing original Syndicate data..."))
+    if (!testOriginalData()) {
+        LOG(Log::k_FLG_GFX, "App", "initialize", ("failed to test original Syndicate data..."))
         return false;
     }
 

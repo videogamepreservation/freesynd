@@ -55,10 +55,10 @@ public:
     static void getFullPathForSaveSlot(int slot, std::string &path);
     //! Returns the list of game saved names
     static void getGameSavedNames(std::vector<std::string> &files);
+    static uint8 *loadOriginalFileToMem(const std::string& filename, int &filesize);
 
 private:
     static void processSaveFile(const std::string& filename, std::vector<std::string> &files);
-    static uint8 *loadOriginalFileToMem(const std::string& filename, int &filesize);
     /*! The path to the original game data.*/
     static std::string dataPath_;
     /*! The path to our data files.*/
