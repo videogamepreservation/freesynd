@@ -2904,7 +2904,7 @@ void Mission::blockerExists(toDefineXYZ * startXYZ, toDefineXYZ * endXYZ,
 //TODO: separate mask for pn blocker object, when called checkTileOnly
 // should be properly set(agents might ignore civilians, cars. etc)
 uint8 Mission::inRangeCPos(toDefineXYZ * cp, ShootableMapObject ** t,
-    PathNode * pn, bool setBlocker, bool checkTileOnly, int maxr,
+    PathNode * pn, bool setBlocker, bool checkTileOnly, double maxr,
     double * distTo)
 {
     assert(maxr >= 0);
@@ -3096,7 +3096,7 @@ uint8 Mission::inRangeCPos(toDefineXYZ * cp, ShootableMapObject ** t,
 
 void Mission::getInRangeAll(toDefineXYZ * cp,
    std::vector<ShootableMapObject *> & targets, uint8 mask,
-   bool checkTileOnly, int maxr)
+   bool checkTileOnly, double maxr)
 {
     if (mask & MapObject::mjt_Ped) {
         for (int i = 0; i < numPeds(); i++) {

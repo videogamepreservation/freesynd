@@ -1677,7 +1677,7 @@ void PedInstance::setDrawnAnim(PedInstance::AnimationDrawn drawn_anim) {
             setFramesPerSec(6);
             break;
         case PedInstance::ad_DieAnim:
-            setFramesPerSec(6);
+            setFramesPerSec(8);
             break;
         case PedInstance::ad_DeadAnim:
             setFramesPerSec(2);

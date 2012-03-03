@@ -179,9 +179,9 @@ public:
         double dist, MapObject** blockerObj);
     uint8 inRangeCPos(toDefineXYZ * cp, ShootableMapObject ** t,
         PathNode * pn = NULL, bool setBlocker = false,
-        bool checkTileOnly = false, int maxr = -1, double * distTo = NULL);
+        bool checkTileOnly = false, double maxr = -1.0, double * distTo = NULL);
     void getInRangeAll(toDefineXYZ * cp, std::vector<ShootableMapObject *> & targets,
-        uint8 mask, bool checkTileOnly = true, int maxr = -1);
+        uint8 mask, bool checkTileOnly = true, double maxr = -1.0);
 
     typedef struct {
         uint8 unkn10[6];

@@ -342,6 +342,7 @@ bool ProjectileShot::animate(int elapsed, Mission *m) {
         inc_dist = dist_max_ - cur_dist_;
         self_remove = true;
     }
+    double was_dist = cur_dist_;
     cur_dist_ += inc_dist;
     bool ignored_state;
 
@@ -410,8 +411,10 @@ bool ProjectileShot::animate(int elapsed, Mission *m) {
         reached_pos.z / 128, reached_pos.x % 256, reached_pos.y % 256,
         reached_pos.z % 128);
     ShootableMapObject * smo = NULL;
+    // maxr here is set to maximum that projectile can fly from its
+    // current position
     uint8 block_mask = m->inRangeCPos(
-        &cur_pos_, &smo, &pn, true, false, (int)inc_dist);
+        &cur_pos_, &smo, &pn, true, false, dist_max_ - was_dist);
     if (block_mask == 1) {
         if (reached_pos.x == sd_prj_.tp.x
             && reached_pos.y == sd_prj_.tp.y
