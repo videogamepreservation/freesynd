@@ -245,6 +245,9 @@ bool App::testOriginalData() {
         if (line.size() > 0) {
             std::string::size_type pos = line.find(' ');
             if (pos != std::string::npos) {
+                // skipping commented
+                if (line[0] == '#' || line[0] == ';')
+                    continue;
                 std::string flname = line.substr(0, pos);
                 std::string str_crc32 = line.substr(pos+1);
                 uint32 ui_crc32 = 0;

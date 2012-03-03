@@ -59,8 +59,8 @@ game96.dat 8aed8e9a
 game97.dat 615d3852
 game98.dat 865f738f
 game99.dat d235ad10
-gamedg.dll e5da30c6
-gamefm.dll 5b41b585
+#gamedg.dll e5da30c6
+#gamefm.dll 5b41b585
 hblk01.dat 8d879d22
 hele-0.ani e4a3b8cf
 hfnt01.dat 597b03b7
@@ -375,8 +375,8 @@ mselout.dat c1836b3c
 mspr-0.dat fa6284e0
 mspr-0.tab 80ffa179
 mtitle.dat c99ee44f
-sample.ad e0cbb9d8
-sample.opl e0cbb9d8
+#sample.ad e0cbb9d8
+#sample.opl e0cbb9d8
 sound-0.dat 5ca847bc
 sound-0.tab 52b6464f
 sound-1.dat 54c9d120
