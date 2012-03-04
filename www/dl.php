@@ -5,8 +5,8 @@
 
 <p>See the releases on <a href="https://sourceforge.net/project/showfiles.php?group_id=93282">sourceforge</a>.</p>
 
-<b>PLEASE NOTE that an original copy of Syndicate is
-required to use FreeSynd; we do not redistribute the original data files here.</b>
+<p class="warning">PLEASE NOTE: an ORIGINAL copy of Syndicate (not Plus) is
+required to use FreeSynd,<br /> we do not redistribute the original data files here.</p>
 
 <hr />
 
@@ -23,11 +23,11 @@ enter if the login command asks for a password):</p>
 
 <p>The available modules, and what they contain, are as follows:</p>
 
-<pre>freesynd           FreeSynd source code
+<pre>freesynd                FreeSynd source code
 freesynd-experimental   Experimentation around freesynd
 libs                    Windows libraries for compiling and running the game
-www                FreeSynd website code (which may or may not be up to date)
-scripts		   Tools to help in development
+www                     FreeSynd website code (which may or may not be up to date)
+scripts	                Tools to help in development
 </pre>
 
 <br />
@@ -36,7 +36,6 @@ scripts		   Tools to help in development
 href="http://freesynd.svn.sourceforge.net/viewvc/freesynd/">ViewSVN interface</a>. You might also want to take a look at the <a
 href="http://sourceforge.net/projects/freesynd/">project page</a> on
 SourceForge.</p>
-<p>Please don't bother with CVS, we don't use it anymore.</p>
 
 <hr />
 
