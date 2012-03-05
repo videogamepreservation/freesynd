@@ -690,40 +690,51 @@ bool GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
                         world_y_ + y, oy);
 
             for (int i = 0; i < 4; i++) {
+                PedInstance *ped = mission_->ped(i);
                 if (isAgentSelected(i)) {
                     if (pointing_at_weapon_ != -1) {
-                        mission_->ped(i)->pickupWeapon(
+#ifdef NEW_ANIMATE_HANDLING
+                        PedInstance::actionQueueGroupType as;
+                        as.group_desc = PedInstance::gd_mExclusive;
+                        ped->createActQPickUp(as,
+                            mission_->weapon(pointing_at_weapon_));
+                        as.main_act = as.actions.size() - 1;
+                        if (modKeys & KMD_CTRL)
+                            ped->addActQToQueue(as);
+                        else
+                            ped->setActQInQueue(as);
+#else
+                        ped->pickupWeapon(
                                 mission_->weapon(pointing_at_weapon_));
+#endif
                     } else if (pointing_at_vehicle_ != -1) {
-                        if (mission_->ped(i)->inVehicle()) {;
-                            mission_->ped(i)->inVehicle()->removeDriver(mission_->ped(i));
-                            mission_->ped(i)->leaveVehicle();
+                        if (ped->inVehicle()) {;
+                            ped->inVehicle()->removeDriver(ped);
+                            ped->leaveVehicle();
                         } else {
                             if (mission_->vehicle(pointing_at_vehicle_)->
                                     health() > 0)
-                                mission_->ped(i)->putInVehicle(
-                                        mission_->vehicle(
-                                                pointing_at_vehicle_));
+                                ped->putInVehicle( mission_->vehicle(
+                                    pointing_at_vehicle_));
                         }
-                    } else if (mission_->ped(i)->inVehicle()) {
-                        if (mission_->ped(i)
-                            == mission_->ped(i)->inVehicle()->getDriver()) {
+                    } else if (ped->inVehicle()) {
+                        if (ped == ped->inVehicle()->getDriver()) {
                             int stx = tx;
                             int sty = ty;
                             //int sox = ox;
                             //int soy = oy;
-                            stx = tx * 256 + ox + 128 * mission_->ped(i)->inVehicle()->tileZ();
+                            stx = tx * 256 + ox + 128 * ped->inVehicle()->tileZ();
                             //sox = stx % 256;
                             stx = stx / 256;
-                            sty = ty * 256 + oy + 128 * mission_->ped(i)->inVehicle()->tileZ();
+                            sty = ty * 256 + oy + 128 * ped->inVehicle()->tileZ();
                             //soy = sty % 256;
                             sty = sty / 256;
                             if (modKeys & KMD_CTRL) {
-                                mission_->ped(i)->inVehicle()->
+                                ped->inVehicle()->
                                     addDestinationV(stx, sty, 0,
                                     128, 128, 480);
                             } else {
-                                mission_->ped(i)->inVehicle()->
+                                ped->inVehicle()->
                                     setDestinationV(mission_, stx, sty, 0, 
                                     128, 128, 480);
                             }
@@ -751,13 +762,13 @@ bool GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
 #ifdef NEW_ANIMATE_HANDLING
                         PedInstance::actionQueueGroupType as;
                         PathNode tpn = PathNode(stx, sty, stz, sox, soy, 0);
-                        mission_->ped(i)->createActQWalking(as, &tpn, NULL);
-                        as.main_act = 0;
-                        as.group_desc = PedInstance::gd_mStandWalk;
+                        ped->createActQWalking(as, &tpn, NULL);
+                         as.main_act = as.actions.size() - 1;
+                        as.group_desc = PedInstance::gd_mExclusive;
                         if (modKeys & KMD_CTRL)
-                            mission_->ped(i)->addActQToQueue(as);
+                            ped->addActQToQueue(as);
                         else
-                            mission_->ped(i)->setActQInQueue(as);
+                            ped->setActQInQueue(as);
 #else
                         mission_->ped(i)->setDestinationP(mission_, stx, sty, stz,
                                 sox, soy, 320);
@@ -827,18 +838,33 @@ bool GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
                         // TODO: when more then one agent is selecting weapon,
                         // the chosen ones should be same type and less ammo
                         // or best in rank
+                        PedInstance *ped = mission_->ped(a);
                         if (isAgentSelected(a)) {
-                            if (i + j * 4 < mission_->ped(a)->numWeapons()) {
+                            if (i + j * 4 < ped->numWeapons()) {
                                 if (button == 1) {
-                                    if (mission_->ped(a)->selectedWeapon()
-                                            == mission_->ped(a)->weapon(i + j * 4))
-                                        mission_->ped(a)->setSelectedWeapon(-1);
+                                    if (ped->selectedWeapon()
+                                            == ped->weapon(i + j * 4))
+                                        ped->setSelectedWeapon(-1);
                                     else {
-                                        mission_->ped(a)->setSelectedWeapon(
+                                        ped->setSelectedWeapon(
                                                 i + j * 4);
                                     }
                                 } else
-                                    mission_->ped(a)->dropWeapon(i + j * 4);
+#ifdef NEW_ANIMATE_HANDLING
+                                {
+                                    PedInstance::actionQueueGroupType as;
+                                    as.main_act = 0;
+                                    as.group_desc = PedInstance::gd_mExclusive;
+                                    ped->createActQPutDown(as,
+                                        ped->weapon(i + j * 4));
+                                    if (modKeys & KMD_CTRL)
+                                        ped->addActQToQueue(as);
+                                    else
+                                        ped->setActQInQueue(as);
+                                }
+#else
+                                    ped->dropWeapon(i + j * 4);
+#endif
 
                                 change = true;
                             }

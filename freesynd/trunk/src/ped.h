@@ -556,7 +556,8 @@ public:
     typedef struct {
         // action state (pedActionStateMasks)
         uint32 as;
-        Mission::ObjectiveType ot_execute;
+        // Mission::ObjectiveType
+        uint32 ot_execute;
         PathNode t_pn;
         // objv_FindEnemy sets this value, others use
         ShootableMapObject *t_smo;

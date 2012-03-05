@@ -184,7 +184,7 @@ int Ped::lastPersuadeFrame() {
 void PedInstance::switchActionStateTo(uint32 as) {
     switch(as) {
         case pa_smNone:
-            printf("Ped has undefined state");
+            //printf("Ped has undefined state");
             break;
         case pa_smStanding:
             action_state_ &= (pa_smAll ^(pa_smFollowing | pa_smFiring
@@ -240,7 +240,7 @@ void PedInstance::switchActionStateTo(uint32 as) {
 void PedInstance::switchActionStateFrom(uint32 as) {
     switch(as) {
         case pa_smNone:
-            printf("Ped has undefined state");
+            //printf("Ped has undefined state");
             break;
         case pa_smStanding:
             action_state_ &= pa_smAll ^ pa_smStanding;
@@ -259,10 +259,8 @@ void PedInstance::switchActionStateFrom(uint32 as) {
             action_state_ &= pa_smAll ^ pa_smFollowing;
             break;
         case pa_smPickUp:
-            action_state_ &= pa_smAll ^ pa_smPickUp;
-            break;
         case pa_smPutDown:
-            action_state_ &= pa_smAll ^ pa_smPutDown;
+            action_state_ = pa_smStanding;
             break;
         case pa_smBurning:
             action_state_ &= pa_smAll ^ pa_smBurning;
@@ -299,6 +297,10 @@ void PedInstance::setActionStateToDrawnAnim(void) {
         setDrawnAnim(PedInstance::ad_WalkAnim);
     } else if ((action_state_ & pa_smStanding) != 0) {
         setDrawnAnim(PedInstance::ad_StandAnim);
+    } else if ((action_state_ & pa_smPickUp) != 0) {
+        setDrawnAnim(PedInstance::ad_PickupAnim);
+    } else if ((action_state_ & pa_smPutDown) != 0) {
+        setDrawnAnim(PedInstance::ad_PutdownAnim);
     }
 }
 
@@ -412,14 +414,16 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                 }
                 if ((aqt.ot_execute & Mission::objv_PickUpObject) != 0)
                 {
-                    WeaponInstance *wi = (WeaponInstance *)aqt.t_smo;
-                    if (wi->hasOwner() || weapons_.size() == 8)
-                        aqt.state |= 8;
-                    else {
-                        wi->setOwner(this);
-                        wi->setMap(-1);
-                        wi->setIsIgnored(true);
-                        aqt.state |= 4;
+                    if (aqt.state == 1) {
+                        WeaponInstance *wi = (WeaponInstance *)aqt.t_smo;
+                        if (wi->hasOwner() || weapons_.size() == 8)
+                            aqt.state |= 8;
+                        else {
+                            wi->setOwner(this);
+                            wi->setMap(-1);
+                            wi->setIsIgnored(true);
+                            //aqt.state |= 4;
+                        }
                     }
                 }
                 if ((aqt.ot_execute & Mission::objv_DestroyObject) != 0)
@@ -453,12 +457,14 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                 }
                 if ((aqt.ot_execute & Mission::objv_PutDownObject) != 0)
                 {
-                    WeaponInstance *wi = (WeaponInstance *)aqt.t_smo;
-                    if (wi->getOwner() != this)
-                        aqt.state |= 8;
-                    else {
-                        dropWeapon(wi);
-                        aqt.state |= 4;
+                    if (aqt.state == 1) {
+                        WeaponInstance *wi = (WeaponInstance *)aqt.t_smo;
+                        if (wi->getOwner() != this)
+                            aqt.state |= 8;
+                        else {
+                            dropWeapon(wi);
+                            //aqt.state |= 4;
+                        }
                     }
                 }
                 if ((aqt.ot_execute & Mission::objv_ReachLocation) != 0)
@@ -4328,6 +4334,9 @@ void PedInstance::createActQPickUp(actionQueueGroupType &as,
     as.actions.push_back(aq);
     aq.as = PedInstance::pa_smPickUp;
     aq.ot_execute = Mission::objv_PickUpObject;
+    aq.ot_execute |= Mission::objv_Wait;
+    aq.multi_var.time_var.elapsed = 0;
+    aq.multi_var.time_var.time_total = 500;
     aq.group_desc = PedInstance::gd_mExclusive;
     as.actions.push_back(aq);
 }
@@ -4343,7 +4352,9 @@ void PedInstance::createActQPutDown(actionQueueGroupType &as,
     aq.ot_execute = Mission::objv_PutDownObject;
     aq.state = 1;
     aq.t_smo = tsmo;
-    aq.group_desc = PedInstance::gd_mExclusive;
+    aq.ot_execute |= Mission::objv_Wait;
+    aq.multi_var.time_var.elapsed = 0;
+    aq.multi_var.time_var.time_total = 500;
     as.actions.push_back(aq);
 }
 
@@ -4372,6 +4383,7 @@ void PedInstance::createActQBurning(actionQueueGroupType &as) {
     as.actions.push_back(aq);
     aq.as = PedInstance::pa_smBurning;
     aq.ot_execute = Mission::objv_Wait;
+    aq.as = PedInstance::pa_smNone;
     aq.multi_var.time_var.elapsed = 0;
     aq.multi_var.time_var.time_total = 1000;
     aq.group_desc = PedInstance::gd_mExclusive;
