@@ -131,7 +131,15 @@ function roadmapItem($id, $content, $status)
 		$statusLabel = '(Canceled)';
 		$style = ' style = "text-decoration:line-through"';
 		break;
-    }
+	case 'T': // item is being tested
+		$statusLabel = '(Testing)';
+		$style = ' style = "text-decoration:underline"';
+		break;
+	case 'I': // item is being coded
+		$statusLabel = '(Coding)';
+		$style = ' style = "text-decoration:underline"';
+		break;
+  }
 	
 	echo '<li><span' . $style . '>' . getLinkToIssue($id, $id) . '&nbsp;' . $content . '</span>&nbsp;' . $statusLabel . "</li>\n";
 }

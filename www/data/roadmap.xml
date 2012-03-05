@@ -12,7 +12,7 @@
 	  <feature id="3461415" status="D">Cycle only through available missions in map menu</feature>
 	</features>
 	<bugs>
-		<bug id="3241136" status="">freesynd.exe has stopped working</bug>
+		<bug id="3241136" status="T">freesynd.exe has stopped working</bug>
 		<bug id="3005294 " status="">Debriefing information is not displayed after ending the mission</bug>
 	</bugs>
 </roadmap>
