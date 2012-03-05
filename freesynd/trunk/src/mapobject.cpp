@@ -399,6 +399,7 @@ SFXObject::SFXObject(int m, int type, int t_show):MapObject(m),
             break;
         case SFXObject::sfxt_FlamerFire:
             anim_ = 383;
+            setFramesPerSec(10);
             break;
         case SFXObject::sfxt_Smoke:
             anim_ = 244;

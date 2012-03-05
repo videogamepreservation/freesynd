@@ -80,7 +80,7 @@ public:
             int w_ammo_per_shot, int w_time_for_shot, int w_time_reload,
             unsigned int w_shot_property, int w_hit_anim, int w_obj_hit_anim,
             int w_rd_anim, int w_trace_anim, int w_range_dmg,
-            double w_shot_angle, double w_shot_accuracy);
+            double w_shot_angle, double w_shot_accuracy, int w_shot_speed = 0);
 
     const char *getName() { return name_.c_str(); }
 
@@ -199,6 +199,7 @@ public:
     double shotAngle() { return shot_angle_; }
     double shotAcurracy() { return shot_accuracy_; }
     int ammoCost() { return ammo_cost_; }
+    int shotSpeed() { return shot_speed_; }
 
 protected:
     std::string name_;
@@ -224,6 +225,8 @@ protected:
     double shot_angle_;
     // agent accuracy will be applied to this, later to shot_angle_
     double shot_accuracy_;
+    // only projectiles have this set (gauss, flamer)
+    int shot_speed_;
 };
 
 class ShotClass {
@@ -319,7 +322,7 @@ class ProjectileShot: public ShotClass {
 public:
     ProjectileShot(toDefineXYZ &cp, Weapon::ShotDesc & sd, int d_range,
         Weapon::ad_HitAnims *panims, ShootableMapObject * ignrd_obj = NULL,
-        int range_max = 1);
+        int range_max = 1, int shot_speed = 0);
     ~ProjectileShot() {}
     bool animate(int elapsed, Mission *m);
     bool prjsLifeOver() { return life_over_; }

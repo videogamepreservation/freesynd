@@ -3084,11 +3084,19 @@ uint8 Mission::inRangeCPos(toDefineXYZ * cp, ShootableMapObject ** t,
                 }
             }
             if (t) {
-                *t = (ShootableMapObject *)blockerObj;
-                block_mask |= 2;
+                if ((pn && block_mask == 4) || (pn == NULL)) {
+                    *t = (ShootableMapObject *)blockerObj;
+                    block_mask |= 2;
+                } else
+                    *t = NULL;
             }
         } else
             block_mask |= 6;
+    } else {
+        if (setBlocker) {
+            if (block_mask != 1 && t)
+                *t = NULL;
+        }
     }
 
     return block_mask;

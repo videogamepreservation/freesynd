@@ -186,7 +186,7 @@ Weapon * WeaponManager::loadWeapon(Weapon::WeaponType wt) {
         Weapon::Flamer_Anim, snd::FLAME, Weapon::Flamer, MapObject::dmg_Burn,
         10, 50, 50, Weapon::wspt_Flamer, SFXObject::sfxt_FlamerFire,
         SFXObject::sfxt_FlamerFire, SFXObject::sfxt_FlamerFire,
-        SFXObject::sfxt_Unknown, 0, 2.0, 0.9);
+        SFXObject::sfxt_Unknown, 0, 2.0, 0.9, 2200);
             break;
         case Weapon::LongRange:
             pWeapon = new Weapon(g_App.menus().getMessage("WEAPON_LONG_RANGE"),
@@ -228,7 +228,7 @@ Weapon * WeaponManager::loadWeapon(Weapon::WeaponType wt) {
         MapObject::dmg_Explosion, 1, 350, 500, Weapon::wspt_GaussGun,
         SFXObject::sfxt_ExplosionFire,
         SFXObject::sfxt_ExplosionBall, SFXObject::sfxt_Smoke,
-        SFXObject::sfxt_LargeFire, 512, 5.0, 0.99);
+        SFXObject::sfxt_LargeFire, 512, 5.0, 0.99, 4000);
             break;
         case Weapon::Shotgun:
             pWeapon = new Weapon(g_App.menus().getMessage("WEAPON_SHOTGUN"),

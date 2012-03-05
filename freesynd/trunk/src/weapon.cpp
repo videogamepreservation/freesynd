@@ -40,7 +40,7 @@ Weapon::Weapon(const std::string& w_name, int smallIcon, int bigIcon, int w_cost
     int w_ammo_per_shot, int w_time_for_shot, int w_time_reload,
     unsigned int w_shot_property, int w_hit_anim, int w_obj_hit_anim,
     int w_trace_anim, int w_rd_anim, int w_range_dmg, double w_shot_angle,
-    double w_shot_accuracy)
+    double w_shot_accuracy, int w_shot_speed) : shot_speed_(w_shot_speed)
 {
     name_ = w_name;
     small_icon_ = smallIcon;
@@ -297,7 +297,7 @@ void ShotClass::shotTargetRandomizer(toDefineXYZ * cp, toDefineXYZ * tp,
 
 ProjectileShot::ProjectileShot(toDefineXYZ &cp, Weapon::ShotDesc & sd,
     int d_range, Weapon::ad_HitAnims *panims, ShootableMapObject * ignrd_obj,
-    int range_max)
+    int range_max, int shot_speed)
 {
     cur_pos_ = cp;
     base_pos_ = cur_pos_;
@@ -306,13 +306,11 @@ ProjectileShot::ProjectileShot(toDefineXYZ &cp, Weapon::ShotDesc & sd,
     anims_ = *panims;
     dist_max_ = range_max;
     dist_passed_ = 0;
-    // TODO: define speed somewhere in weapon, also animation shift by Z,
-    // animation step
+    speed_ = shot_speed;
+    // TODO: animation shift by Z and last_anim_dist_
     if (dmg_range_ == 0) {
-        speed_ = 1500;
         last_anim_dist_ = 128;
     } else {
-        speed_ = 4000;
         last_anim_dist_ = 0;
     }
     life_over_ = false;
@@ -703,7 +701,7 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
             //shotTargetRandomizer(&cp, &(shot_new.tp), angle);
             ProjectileShot *prjs = new ProjectileShot(cp, shot_new,
                 pWeaponClass_->rangeDmg(), pWeaponClass_->anims(),
-                owner_, range());
+                owner_, range(), pWeaponClass_->shotSpeed());
             g_Session.getMission()->addPrjShot(prjs);
             continue;
         }
@@ -736,7 +734,10 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
                 for (unsigned int i = 0; i < gen_shots.size(); i++) {
                     std::vector<ShootableMapObject *> all_targets;
 
-                    getInRangeAll(gen_shots[i].tp, all_targets, mask,
+                    Weapon::ShotDesc &sdc = gen_shots[i];
+                    inRange(cp, &sdc.smo, &sdc.tpn, true);
+                    sdc.tpn.convertPosToXYZ(&sdc.tp);
+                    getInRangeAll(sdc.tp, all_targets, mask,
                         true, pWeaponClass_->rangeDmg());
                     for (unsigned int indx = 0; indx < all_targets.size();
                         indx++)
@@ -750,7 +751,7 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
                             smo->tileZ());
                         sd.tpn.setOffXYZ(smo->offX(), smo->offY(),
                             smo->offZ());
-                        sd.d = gen_shots[i].d;
+                        sd.d = sdc.d;
                         sd.smo = smo;
                         all_shots.push_back(sd);
                     }
@@ -777,7 +778,10 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
                         for (unsigned int i = 0; i < gen_shots.size(); i++) {
                             std::vector<ShootableMapObject *> all_targets;
 
-                            getInRangeAll(gen_shots[i].tp, all_targets, mask,
+                            Weapon::ShotDesc &sdc = gen_shots[i];
+                            inRange(cp, &sdc.smo, &sdc.tpn, true);
+                            sdc.tpn.convertPosToXYZ(&sdc.tp);
+                            getInRangeAll(sdc.tp, all_targets, mask,
                                 true, pWeaponClass_->rangeDmg());
                             for (unsigned int indx = 0; indx < all_targets.size();
                                 indx++)
@@ -791,13 +795,13 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
                                     smo->tileZ());
                                 sd.tpn.setOffXYZ(smo->offX(), smo->offY(),
                                     smo->offZ());
-                                sd.d = gen_shots[i].d;
+                                sd.d = sdc.d;
                                 sd.smo = smo;
                                 all_shots.push_back(sd);
                             }
-                            if (gen_shots[i].smo == NULL) {
+                            if (sdc.smo == NULL) {
                                 // drawing anim at point of impact
-                                all_shots.push_back(gen_shots[i]);
+                                all_shots.push_back(sdc);
                             }
                         }
                     } else {
