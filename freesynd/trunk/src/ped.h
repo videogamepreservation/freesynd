@@ -566,7 +566,7 @@ public:
         uint8 state;
         // same as in actionQueueGroupType
         uint32 group_desc;
-        union {
+        struct {
             struct {
                 // (objGroupDefMasks)
                 uint32 t_ogd;
