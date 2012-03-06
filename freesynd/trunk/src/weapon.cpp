@@ -430,9 +430,12 @@ bool ProjectileShot::animate(int elapsed, Mission *m) {
         draw_impact = true;
         self_remove = true;
     }
+    // TODO : set this somewhere?
+    // gauss
     double anim_d = 64;
     if (dmg_range_ == 0)
-        anim_d = 32;
+        //flamer
+        anim_d = 64;
     double diffx = (double) (base_pos_.x - reached_pos.x);
     double diffy = (double) (base_pos_.y - reached_pos.y);
     double diffz = (double) (base_pos_.z - reached_pos.z);

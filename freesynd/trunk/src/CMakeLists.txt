@@ -50,6 +50,7 @@ set (SOURCES
 	modmanager.cpp
 	ped.cpp
 	pedmanager.cpp
+	pedpathfinding.cpp
 	sound/audio.cpp
 	sound/musicmanager.cpp
 	sound/sdlmixermusic.cpp
