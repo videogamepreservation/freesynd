@@ -215,7 +215,7 @@ Option::Option(Menu *peer, int x, int y, int width, int height, const char *text
 }
 
 Option::~Option() {
-    to_ = NULL; 
+    to_ = 0; 
 }
 /*!
  * Draw the widget at the current position.

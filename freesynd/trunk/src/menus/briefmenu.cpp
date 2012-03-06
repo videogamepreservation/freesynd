@@ -284,7 +284,6 @@ void BriefMenu::handleLeave() {
 }
 
 void BriefMenu::handleAction(const int actionId, void *ctx, const int modKeys) {
-    Mission *pMission = g_Session.getMission();
     if (actionId == infosButId_) {
         // Buy some informations
         if (g_Session.getSelectedBlock().infoLevel < p_briefing_->nb_infos()) {

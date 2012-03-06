@@ -228,7 +228,7 @@ bool App::testOriginalData() {
         return true;
 
     std::string crcflname = File::dataFullPath("ref/original_data.crc");
-    std::ifstream od(crcflname);
+    std::ifstream od(crcflname.c_str());
     if (od.fail()) {
         LOG(Log::k_FLG_GFX, "App", "testOriginalData",
             ("Checksums file for original data is not found. Look at INSTALL/README file for possible solutions."));

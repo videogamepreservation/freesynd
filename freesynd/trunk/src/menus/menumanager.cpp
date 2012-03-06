@@ -419,6 +419,8 @@ void MenuManager::handleEvents() {
 				current_->keyEvent(evt.key.key, evt.key.keyMods);
 			}
 			break;
+        case EVT_NONE:
+            break;
 		}
 	}
 }
