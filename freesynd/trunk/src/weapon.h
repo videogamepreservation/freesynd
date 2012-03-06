@@ -263,7 +263,8 @@ public:
     bool animate(int elapsed);
     void draw(int x, int y);
     bool inflictDamage(ShootableMapObject * tobj, PathNode * tp,
-        int elapsed = -1, bool ignoreBlocker = false);
+        int *elapsed = NULL, bool ignoreBlocker = false,
+        int *make_shots = NULL);
 
     Weapon *getWeaponClass() { return pWeaponClass_; }
 
@@ -293,7 +294,7 @@ public:
         int maxr = -1);
 
 
-    int getShots(int elapsed = -1);
+    int getShots(int *elapsed = NULL, int make_shots = 0);
     void getInRangeOne(toDefineXYZ & cp, ShootableMapObject * & target,
         uint8 mask, bool checkTileOnly = true, int maxr = -1);
     void getInRangeAll(toDefineXYZ & cp, std::vector<ShootableMapObject *> & targets,

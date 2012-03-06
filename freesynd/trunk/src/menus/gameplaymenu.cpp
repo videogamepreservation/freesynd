@@ -794,14 +794,14 @@ bool GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
                         && pa->selectedWeapon()) {
                     if (pointing_at_ped_ != -1
                         && pa->selectedWeapon()->inflictDamage(
-                            mission_->ped(pointing_at_ped_), NULL, -1, true))
+                            mission_->ped(pointing_at_ped_), NULL, NULL, true))
                     {
                         pa->startFiring();
                         pa->setTarget(mission_->ped(pointing_at_ped_));
                     } else if (pointing_at_vehicle_ != -1
                             && pa->selectedWeapon()->inflictDamage(
-                            mission_->vehicle(pointing_at_vehicle_), NULL, -1,
-                            true))
+                            mission_->vehicle(pointing_at_vehicle_), NULL,
+                            NULL, true))
                     {
                         pa->startFiring();
                         pa->setTarget(mission_->ped(pointing_at_vehicle_));
@@ -817,7 +817,7 @@ bool GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
                         {
                             PathNode pn(stx, sty, stz, sox, soy, oz);
                             //if (
-                                pa->selectedWeapon()->inflictDamage(NULL, &pn, -1, true)
+                                pa->selectedWeapon()->inflictDamage(NULL, &pn, NULL, true)
                                 //)
                                 ;
                         }

@@ -33,6 +33,8 @@
 #include "weapon.h"
 #include "ped.h"
 
+#define Z_SHIFT_TO_AIR   8
+
 Weapon::Weapon(const std::string& w_name, int smallIcon, int bigIcon, int w_cost,
     int w_ammo, int w_range, int w_shot, int w_rank, int w_anim,
     Weapon::WeaponAnimIndex w_idx, snd::InGameSample w_sample,
@@ -89,7 +91,8 @@ bool WeaponInstance::animate(int elapsed) {
     Weapon::WeaponType wt = pWeaponClass_->getWeaponType();
     if (owner_) {
         if (wt == Weapon::EnergyShield) {
-            int ammoused = getShots(elapsed)
+            int tm_left = elapsed;
+            int ammoused = getShots(&tm_left)
                 * pWeaponClass_->ammoPerShot();
             if (((PedInstance *)owner_)->selectedWeapon()
                 && ((PedInstance *)owner_)->selectedWeapon() == this)
@@ -130,7 +133,7 @@ bool WeaponInstance::animate(int elapsed) {
                 int max_anims = 16 + rand() % 8;
                 toDefineXYZ cur_pos = {tile_x_ * 256 + off_x_,
                     tile_y_ * 256 + off_y_, vis_z_ * 128 + off_z_};
-                // TODO: make a function, also used in projectileshot::animate
+                // TODO: make as function, also used in projectileshot::animate
                 SFXObject *so = new SFXObject(m->map(),
                     pWeaponClass_->anims()->hit_anim);
                 so->setPosition(cur_pos.x / 256, cur_pos.y / 256, cur_pos.z / 128,
@@ -177,7 +180,6 @@ void WeaponInstance::draw(int x, int y) {
 void ShotClass::shotTargetRandomizer(toDefineXYZ * cp, toDefineXYZ * tp,
     double angle, double dist_new, bool exclude_z)
 {
-    // TODO: the generated points are in rect should be in circle
     if (angle == 0)
         return;
     int cx = cp->x;
@@ -523,12 +525,14 @@ bool ProjectileShot::animate(int elapsed, Mission *m) {
             }
             makeShot(true, cp, anims_.hit_anim, all_shots,
                 anims_.obj_hit_anim);
+            // TODO: make as function, also used in weaponinstance::animate
+            // or rewrite
             int max_flames = 16 + rand() % 8;
             base_pos_ = cur_pos_;
             cur_pos_.z += 16;
             if (cur_pos_.z > (m->mmax_z_ - 1) * 128)
                 cur_pos_.z = (m->mmax_z_ - 1) * 128;
-            // TODO: exclude flames on water
+            // TODO: exclude flames on water, put these flames to the ground
             for (int i = 0; i < max_flames; i++) {
                 reached_pos = base_pos_;
                 shotTargetRandomizer(&cur_pos_, &reached_pos, 120.0,
@@ -553,7 +557,7 @@ bool ProjectileShot::animate(int elapsed, Mission *m) {
 }
 
 bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
-    int elapsed, bool ignoreBlocker)
+    int *elapsed, bool ignoreBlocker, int *make_shots)
 {
     // TODO: add return value as int for diff fail events to handle correctly,
     // check tobj completed action, additional parameter for shots needed,
@@ -613,10 +617,10 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
         cp.x = xb;
         cp.y = yb;
         // NOTE: it is assumed that object has off_z_ = 0, because
-        // if off_z_ != 0 tile_z_ = vis_z_ + 16, from this assumed that
-        // tile above is "air", if 16 will not be added, tile will be "solid",
+        // if off_z_ != 0 tile_z_ = vis_z_ + Z_SHIFT_TO_AIR, from this assumed that
+        // tile above is "air", if Z_SHIFT_TO_AIR will not be added, tile will be "solid",
         // trajectory checking will return "failed" response at start
-        cp.z = vis_z_ * 128 + off_z_ + 16;
+        cp.z = vis_z_ * 128 + off_z_ + Z_SHIFT_TO_AIR;
         if (cp.z > (g_Session.getMission()->mmax_z_ - 1) * 128)
             cp.z = (g_Session.getMission()->mmax_z_ - 1) * 128;
     }
@@ -663,7 +667,7 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
     } else if (tp) {
         base_shot.tp.x = tp->tileX() * 256 + tp->offX();
         base_shot.tp.y = tp->tileY() * 256 + tp->offY();
-        base_shot.tp.z = tp->tileZ() * 128 + tp->offZ() + 16;
+        base_shot.tp.z = tp->tileZ() * 128 + tp->offZ() + Z_SHIFT_TO_AIR;
         if (base_shot.tp.z > (g_Session.getMission()->mmax_z_ - 1) * 128)
             base_shot.tp.z = (g_Session.getMission()->mmax_z_ - 1) * 128;
         base_shot.tpn = *tp;
@@ -879,13 +883,13 @@ uint8 WeaponInstance::inRangeNoCP(ShootableMapObject ** t, PathNode * pn,
     } else {
         cxyz.x = tile_x_ * 256 + off_x_;
         cxyz.y = tile_y_ * 256 + off_y_;
-        cxyz.z = vis_z_ * 128 + off_z_ + 16;
+        cxyz.z = vis_z_ * 128 + off_z_ + Z_SHIFT_TO_AIR;
     }
 
     return inRange(cxyz, t, pn, setBlocker, checkTileOnly, maxr);
 }
 
-int WeaponInstance::getShots(int elapsed) {
+int WeaponInstance::getShots(int *elapsed, int make_shots) {
     int time_for_shot = pWeaponClass_->timeForShot();
     int time_reload = pWeaponClass_->timeReload();
 #if 0
@@ -893,16 +897,17 @@ int WeaponInstance::getShots(int elapsed) {
     if (owner_)
 #endif
     int time_full_shot = time_for_shot + time_reload;
-    if (elapsed == -1)
-        elapsed = time_full_shot;
+    int elapsed_l = time_full_shot;
+    if (elapsed != NULL)
+        elapsed_l = *elapsed;
     if (weapon_used_time_ >= time_for_shot) {
-        weapon_used_time_ += elapsed;
+        weapon_used_time_ += elapsed_l;
         if (weapon_used_time_ >= time_full_shot) {
             weapon_used_time_ -= time_full_shot;
         } else
-            return false;
+            return 0;
     } else
-        weapon_used_time_ += elapsed;
+        weapon_used_time_ += elapsed_l;
 
     int shots = weapon_used_time_ / time_full_shot;
     weapon_used_time_ %= time_full_shot;

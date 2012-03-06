@@ -360,7 +360,8 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                             // of failure to inflict damage
                             if (aqt.state == 1)
                                 aqt.state |= 2;
-                            wi->inflictDamage(aqt.t_smo, NULL, elapsed);
+                            int tm_left = elapsed;
+                            wi->inflictDamage(aqt.t_smo, NULL, &tm_left);
                             if (checkFriendIs((PedInstance *)aqt.t_smo))
                                 aqt.state |= 4;
                         } else {
@@ -422,6 +423,8 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                             wi->setOwner(this);
                             wi->setMap(-1);
                             wi->setIsIgnored(true);
+                            wi->deactivate();
+                            weapons_.push_back(wi);
                             //aqt.state |= 4;
                         }
                     }
@@ -442,7 +445,8 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                         {
                             // TODO: set ignoreblocker properly,
                             // more info from weapon
-                            wi->inflictDamage(aqt.t_smo, NULL, elapsed);
+                            int tm_left = elapsed;
+                            wi->inflictDamage(aqt.t_smo, NULL, &tm_left);
                             // TODO: handle correctly
                             if (aqt.t_smo->health() <= 0)
                                 aqt.state |= 4;
@@ -662,7 +666,8 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                     {
                         // TODO: proper handling, ignoreblocker,
                         // more info from weapon needed
-                        wi->inflictDamage(NULL, &aqt.t_pn, elapsed);
+                        int tm_left = elapsed;
+                        wi->inflictDamage(NULL, &aqt.t_pn, &tm_left);
                         aqt.state |= 2;
                     } else
                         aqt.state |= 8;
