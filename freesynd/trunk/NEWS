@@ -10,10 +10,13 @@ Changes
   * CMake is used instead of autotools, used to generate Makefile for Unix's
   and project files for MSVC++
   * Reload button functional(mentor66)
+  * Weapons: flamethrower, laser, gauss, minigun, uzi, shotgun, time bomb,
+ persuadetron (animation only)
+ 
 
 Fixed Bugs
 ----------
-  * : Brief minimap not showing enemy agents
+  * Brief minimap not showing enemy agents
 
 Features added
 ----------
@@ -25,18 +28,19 @@ Features added
   * 3473415 : Junction balls are not animated
   * It's now possible to define an acceleration key for a button by
     inserting a '&' caracter before the letter in the button label in the
-	language file. Works only for letters.
+    language file. Works only for letters.
   * Menus are now created when first accessed not all once.
   * In the Map menu, pressing PageUp or PageDown increases/decreases tax from 10%
 
 Known issues with this release
 ------------------------------
   * Agent AI is not operational.
-  * The minimap is not complete.
+  * The gameplay minimap is not complete.
   * PathFinding requires improvement
   * Mission debriefing is not operational
   * No animation for windows
   * Map drawing is buggy
+  * Not all weapons correctly function.
 
 History
 -------

@@ -8,7 +8,9 @@ Original Game Data Files
 files. You should have a copy of Syndicate or buy it. In order to run
 FreeSynd, either copy all files from the original Syndicate "DATA" directory
 into the FreeSynd "data" directory, or edit the FreeSynd configuration to
-indicate where the original game's "DATA" directory is.
+indicate where the original game's "DATA" directory is. At first run
+Freesynd will test files located in your Syndicate "DATA" directory to
+verify that required files are present and are correct.
 
 ====> Attention: Please, be sure to have files from the first version of
 Syndicate as FreeSynd does not support files from Syndicate Plus or Syndicate
