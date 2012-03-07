@@ -62,6 +62,7 @@ int m):ShootableMovableMapObject(m), vehicle_(vehicle), vehicle_driver_(NULL)
     hold_on_.wayFree = 0;
     rcv_damage_def_ = MapObject::ddmg_Vehicle;
     vehicle_->setVehicleAnim(Vehicle::NormalAnim);
+    major_type_ = MapObject::mjt_Vehicle;
 }
 
 bool VehicleInstance::animate(int elapsed)

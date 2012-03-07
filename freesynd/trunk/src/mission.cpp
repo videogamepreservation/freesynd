@@ -3060,6 +3060,8 @@ uint8 Mission::inRangeCPos(toDefineXYZ * cp, ShootableMapObject ** t,
     if (blockerObj) {
         if (setBlocker){
             if (pn) {
+                if (block_mask == 1)
+                    block_mask = 0;
                 if (block_mask != 0) {
                     int dcx = cx - startXYZ.x;
                     int dcy = cy - startXYZ.y;

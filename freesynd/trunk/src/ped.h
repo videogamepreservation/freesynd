@@ -247,7 +247,7 @@ public:
     void pickupWeapon(WeaponInstance *w);
     bool wePickupWeapon();
 
-    VehicleInstance *inVehicle() { return map_ == -1 ? in_vehicle_ : 0; }
+    VehicleInstance *inVehicle();
 
     void putInVehicle(VehicleInstance *v);
     void leaveVehicle();
@@ -655,7 +655,8 @@ public:
         ShootableMapObject *tsmo, uint32 condition);
     void createActQInCar(actionQueueGroupType &as, PathNode *tpn,
         ShootableMapObject *tsmo, uint32 condition);
-    void createActQLeaveCar(actionQueueGroupType &as);
+    void createActQLeaveCar(actionQueueGroupType &as,
+        ShootableMapObject *tsmo);
 
 protected:
     Ped *ped_;

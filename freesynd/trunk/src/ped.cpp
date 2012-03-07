@@ -271,7 +271,7 @@ void PedInstance::switchActionStateFrom(uint32 as) {
             action_state_ &= pa_smAll ^ (pa_smStanding | pa_smInCar);
             break;
         case pa_smLeaveCar:
-            action_state_ &= pa_smAll ^ (pa_smStanding | pa_smLeaveCar);
+            action_state_ = pa_smStanding;
             break;
         case pa_smDead:
             action_state_ = pa_smDead;
@@ -367,30 +367,38 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                         == MapObject::mjt_Vehicle)
                     {
                         VehicleInstance *v = (VehicleInstance *)aqt.t_smo;
-                        if (aqt.condition == 0) {
-                            v->setDriver(this);
-                            if (v->isInsideVehicle(this)) {
-                                in_vehicle_ = v;
-                                aqt.state |= 4;
-                                is_ignored_ = true;
-                                map_ = -1;
-                            } else {
-                                aqt.state |= 8;
-                            }
-                        } else if (aqt.condition == 1) {
-                            if (v->hasDriver()) {
-                                if (v->isDriver(this))
-                                    aqt.state |= 4;
-                                else
-                                    aqt.state |= 8;
-                            } else {
+                        if (v->health() > 0 && (action_state_
+                            & (PedInstance::pa_smInCar
+                            | PedInstance::pa_smUsingCar)) == 0)
+                        {
+                            if (aqt.condition == 0) {
                                 v->setDriver(this);
-                                in_vehicle_ = v;
-                                aqt.state |= 4;
-                                is_ignored_ = true;
-                                map_ = -1;
+                                if (v->isInsideVehicle(this)) {
+                                    in_vehicle_ = v;
+                                    aqt.state |= 4;
+                                    is_ignored_ = true;
+                                    map_ = -1;
+                                    action_state_ |= pa_smInCar;
+                                } else {
+                                    aqt.state |= 8;
+                                }
+                            } else if (aqt.condition == 1) {
+                                if (v->hasDriver()) {
+                                    if (v->isDriver(this))
+                                        aqt.state |= 4;
+                                    else
+                                        aqt.state |= 8;
+                                } else {
+                                    v->setDriver(this);
+                                    in_vehicle_ = v;
+                                    aqt.state |= 4;
+                                    is_ignored_ = true;
+                                    map_ = -1;
+                                    action_state_ |= pa_smUsingCar;
+                                }
                             }
-                        }
+                        } else
+                            aqt.state |= 8;
                     }
                 }
                 if ((aqt.ot_execute & Mission::objv_LoseControl) != 0)
@@ -401,12 +409,14 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                         == MapObject::mjt_Vehicle)
                     {
                         VehicleInstance *v = (VehicleInstance *)aqt.t_smo;
-                        //NOTE: check if inside?
+                        if (v->isInsideVehicle(this)) {
                         v->removeDriver(this);
-                        map_ = v->map();
-                        is_ignored_ = false;
-                        in_vehicle_ = NULL;
-                        aqt.state |= 4;
+                            map_ = v->map();
+                            is_ignored_ = false;
+                            in_vehicle_ = NULL;
+                            aqt.state |= 4;
+                        } else
+                            aqt.state |= 8;
                     }
                 }
                 if ((aqt.ot_execute & Mission::objv_PickUpObject) != 0)
@@ -784,24 +794,24 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                         if (smo_dist.empty())
                             aqt.state |= 8;
                         else {
-                            Msmod_t::iterator it = smo_dist.begin();
-                            Pairsmod_t closest = *it;
-                            it++;
-                            while (it != smo_dist.end()) {
-                                if (it->second < closest.second) {
-                                    closest = *it;
+                            Msmod_t::iterator it_msmod = smo_dist.begin();
+                            Pairsmod_t closest = *it_msmod;
+                            it_msmod++;
+                            while (it_msmod != smo_dist.end()) {
+                                if (it_msmod->second < closest.second) {
+                                    closest = *it_msmod;
                                 }
                             }
                             aqt.t_smo = closest.first;
                             aqt.state |= 4;
                         }
                     } else {
-                        Msmod_t::iterator it = hostiles_found_.begin();
-                        Pairsmod_t closest = *it;
-                        it++;
-                        while (it != hostiles_found_.end()) {
-                            if (it->second < closest.second) {
-                                closest = *it;
+                        Msmod_t::iterator it_msmod = hostiles_found_.begin();
+                        Pairsmod_t closest = *it_msmod;
+                        it_msmod++;
+                        while (it_msmod != hostiles_found_.end()) {
+                            if (it_msmod->second < closest.second) {
+                                closest = *it_msmod;
                             }
                         }
                         aqt.t_smo = closest.first;
@@ -843,12 +853,12 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                     if (nf_dist.empty())
                         aqt.state |= 8;
                     else {
-                        Msmod_t::iterator it = nf_dist.begin();
-                        Pairsmod_t closest = *it;
-                        it++;
-                        while (it != nf_dist.end()) {
-                            if (it->second < closest.second) {
-                                closest = *it;
+                        Msmod_t::iterator it_msmod = nf_dist.begin();
+                        Pairsmod_t closest = *it_msmod;
+                        it_msmod++;
+                        while (it_msmod != nf_dist.end()) {
+                            if (it_msmod->second < closest.second) {
+                                closest = *it_msmod;
                             }
                         }
                         aqt.t_smo = closest.first;
@@ -1643,6 +1653,16 @@ bool PedInstance::wePickupWeapon() {
     return pickup_weapon_ != NULL;
 }
 
+VehicleInstance *PedInstance::inVehicle()
+{
+#ifdef NEW_ANIMATE_HANDLING
+    return (action_state_ & (PedInstance::pa_smInCar
+        | PedInstance::pa_smUsingCar)) != 0 ? in_vehicle_ : NULL;
+#else
+    return map_ == -1 ? in_vehicle_ : NULL;
+#endif
+}
+
 void PedInstance::putInVehicle(VehicleInstance * v) {
     assert(map_ != -1);
     in_vehicle_ = v;
@@ -1653,6 +1673,10 @@ void PedInstance::leaveVehicle() {
     map_ = in_vehicle_->map();
     in_vehicle_ = NULL;
     is_ignored_ = false;
+#ifdef NEW_ANIMATE_HANDLING
+    switchActionStateFrom(action_state_ & (PedInstance::pa_smInCar
+        | PedInstance::pa_smUsingCar));
+#endif
 }
 
 int PedInstance::map() {
@@ -2189,7 +2213,6 @@ void PedInstance::verifyHostilesFound(Mission *m) {
 
 void PedInstance::createActQStanding(actionQueueGroupType &as) {
     as.state = 1;
-    as.main_act = 0;
     as.actions.clear();
     actionQueueType aq;
     aq.ot_execute = Mission::objv_Wait;
@@ -2205,7 +2228,6 @@ void PedInstance::createActQWalking(actionQueueGroupType &as, PathNode *tpn,
     ShootableMapObject *tsmo, int32 dir, int32 dist)
 {
     as.state = 1;
-    as.main_act = 0;
     as.actions.clear();
     actionQueueType aq;
     aq.as = PedInstance::pa_smWalking;
@@ -2232,7 +2254,6 @@ void PedInstance::createActQHit(actionQueueGroupType &as, PathNode *tpn,
     int32 dir)
 {
     as.state = 1;
-    as.main_act = 0;
     as.actions.clear();
     actionQueueType aq;
     aq.as = PedInstance::pa_smHit;
@@ -2251,7 +2272,6 @@ void PedInstance::createActQHit(actionQueueGroupType &as, PathNode *tpn,
 void PedInstance::createActQFiring(actionQueueGroupType &as, PathNode &tpn,
     ShootableMapObject *tsmo)
 {
-    as.main_act = 0;
     as.state = 1;
     as.actions.clear();
     actionQueueType aq;
@@ -2274,7 +2294,6 @@ void PedInstance::createActQFiring(actionQueueGroupType &as, PathNode &tpn,
 void PedInstance::createActQFollowing(actionQueueGroupType &as,
     ShootableMapObject *tsmo, uint32 condition, int32 dist)
 {
-    as.main_act = 0;
     as.state = 1;
     as.actions.clear();
     actionQueueType aq;
@@ -2291,7 +2310,6 @@ void PedInstance::createActQFollowing(actionQueueGroupType &as,
 void PedInstance::createActQPickUp(actionQueueGroupType &as,
     ShootableMapObject *tsmo)
 {
-    as.main_act = 1;
     as.state = 1;
     as.actions.clear();
     actionQueueType aq;
@@ -2315,7 +2333,6 @@ void PedInstance::createActQPickUp(actionQueueGroupType &as,
 void PedInstance::createActQPutDown(actionQueueGroupType &as,
     ShootableMapObject *tsmo)
 {
-    as.main_act = 0;
     as.state = 1;
     as.actions.clear();
     actionQueueType aq;
@@ -2330,7 +2347,6 @@ void PedInstance::createActQPutDown(actionQueueGroupType &as,
 }
 
 void PedInstance::createActQBurning(actionQueueGroupType &as) {
-    as.main_act = 3;
     as.state = 1;
     as.actions.clear();
     actionQueueType aq;
@@ -2354,7 +2370,6 @@ void PedInstance::createActQBurning(actionQueueGroupType &as) {
     as.actions.push_back(aq);
     aq.as = PedInstance::pa_smBurning;
     aq.ot_execute = Mission::objv_Wait;
-    aq.as = PedInstance::pa_smNone;
     aq.multi_var.time_var.elapsed = 0;
     aq.multi_var.time_var.time_total = 1000;
     aq.group_desc = PedInstance::gd_mExclusive;
@@ -2364,7 +2379,6 @@ void PedInstance::createActQBurning(actionQueueGroupType &as) {
 void PedInstance::createActQGetInCar(actionQueueGroupType &as,
     ShootableMapObject *tsmo)
 {
-    as.main_act = 1;
     as.state = 1;
     as.actions.clear();
     actionQueueType aq;
@@ -2395,15 +2409,16 @@ void PedInstance::createActQInCar(actionQueueGroupType &as, PathNode *tpn,
 {
 }
 
-void PedInstance::createActQLeaveCar(actionQueueGroupType &as) {
-    as.main_act = 0;
+void PedInstance::createActQLeaveCar(actionQueueGroupType &as,
+        ShootableMapObject *tsmo)
+{
     as.state = 1;
     as.actions.clear();
     actionQueueType aq;
     aq.as = PedInstance::pa_smLeaveCar;
     aq.ot_execute = Mission::objv_LoseControl;
     aq.state = 1;
-    aq.t_smo = NULL;
+    aq.t_smo = tsmo;
     aq.group_desc = PedInstance::gd_mExclusive;
     as.actions.push_back(aq);
 }

@@ -708,14 +708,38 @@ bool GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
                                 mission_->weapon(pointing_at_weapon_));
 #endif
                     } else if (pointing_at_vehicle_ != -1) {
-                        if (ped->inVehicle()) {;
+                        if (ped->inVehicle()) {
+#ifdef NEW_ANIMATE_HANDLING
+                            PedInstance::actionQueueGroupType as;
+                            ped->createActQLeaveCar(as,
+                                mission_->vehicle(pointing_at_vehicle_));
+                            as.main_act = as.actions.size() - 1;
+                            as.group_desc = PedInstance::gd_mExclusive;
+                            if (modKeys & KMD_CTRL)
+                                ped->addActQToQueue(as);
+                            else
+                                ped->setActQInQueue(as);
+#else
                             ped->inVehicle()->removeDriver(ped);
                             ped->leaveVehicle();
-                        } else {
-                            if (mission_->vehicle(pointing_at_vehicle_)->
+#endif
+                        } else if (mission_->vehicle(pointing_at_vehicle_)->
                                     health() > 0)
-                                ped->putInVehicle( mission_->vehicle(
-                                    pointing_at_vehicle_));
+                        {
+#ifdef NEW_ANIMATE_HANDLING
+                            PedInstance::actionQueueGroupType as;
+                            ped->createActQGetInCar(as,
+                                mission_->vehicle(pointing_at_vehicle_));
+                            as.main_act = as.actions.size() - 1;
+                            as.group_desc = PedInstance::gd_mExclusive;
+                            if (modKeys & KMD_CTRL)
+                                ped->addActQToQueue(as);
+                            else
+                                ped->setActQInQueue(as);
+#else
+                            ped->putInVehicle(mission_->vehicle(
+                                pointing_at_vehicle_));
+#endif
                         }
                     } else if (ped->inVehicle()) {
                         if (ped == ped->inVehicle()->getDriver()) {
