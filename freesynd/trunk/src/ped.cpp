@@ -347,81 +347,90 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                 }
                 if ((aqt.ot_execute & Mission::objv_AquireControl) != 0)
                 {
-                    if (aqt.t_smo->majorType() == MapObject::mjt_Ped) {
-                        WeaponInstance *wi = selectedWeapon();
-                        if (wi && wi->getMainType()
-                            == Weapon::Persuadatron)
-                        {
-                            // TODO: proper handling for time, add condition
-                            // of failure to inflict damage
-                            if (aqt.state == 1)
-                                aqt.state |= 2;
-                            int tm_left = elapsed;
-                            wi->inflictDamage(aqt.t_smo, NULL, &tm_left);
-                            if (checkFriendIs((PedInstance *)aqt.t_smo))
-                                aqt.state |= 4;
-                        } else {
-                            aqt.state |= 8;
-                        }
-                    } else if (aqt.t_smo->majorType()
-                        == MapObject::mjt_Vehicle)
-                    {
-                        VehicleInstance *v = (VehicleInstance *)aqt.t_smo;
-                        if (v->health() > 0 && (action_state_
-                            & (PedInstance::pa_smInCar
-                            | PedInstance::pa_smUsingCar)) == 0)
-                        {
-                            if (aqt.condition == 0) {
-                                v->setDriver(this);
-                                if (v->isInsideVehicle(this)) {
-                                    in_vehicle_ = v;
+                    if (aqt.state == 1) {
+                        if (aqt.t_smo->majorType() == MapObject::mjt_Ped) {
+                            WeaponInstance *wi = selectedWeapon();
+                            if (wi && wi->getMainType()
+                                == Weapon::Persuadatron)
+                            {
+                                // TODO: proper handling for time, add condition
+                                // of failure to inflict damage
+                                if (aqt.state == 1)
+                                    aqt.state |= 2;
+                                int tm_left = elapsed;
+                                wi->inflictDamage(aqt.t_smo, NULL, &tm_left);
+                                if (checkFriendIs((PedInstance *)aqt.t_smo))
                                     aqt.state |= 4;
-                                    is_ignored_ = true;
-                                    map_ = -1;
-                                    action_state_ |= pa_smInCar;
-                                } else {
-                                    aqt.state |= 8;
-                                }
-                            } else if (aqt.condition == 1) {
-                                if (v->hasDriver()) {
-                                    if (v->isDriver(this))
-                                        aqt.state |= 4;
-                                    else
-                                        aqt.state |= 8;
-                                } else {
-                                    v->setDriver(this);
-                                    in_vehicle_ = v;
-                                    aqt.state |= 4;
-                                    is_ignored_ = true;
-                                    map_ = -1;
-                                    action_state_ |= pa_smUsingCar;
-                                }
+                            } else {
+                                aqt.state |= 8;
                             }
-                        } else
-                            aqt.state |= 8;
+                        } else if (aqt.t_smo->majorType()
+                                   == MapObject::mjt_Vehicle)
+                        {
+                            VehicleInstance *v = (VehicleInstance *)aqt.t_smo;
+                            if (v->health() > 0 && (action_state_
+                                & (PedInstance::pa_smInCar
+                                | PedInstance::pa_smUsingCar)) == 0)
+                            {
+                                if (aqt.condition == 0) {
+                                    v->setDriver(this);
+                                    if (v->isInsideVehicle(this)) {
+                                        in_vehicle_ = v;
+                                        aqt.state |= 4;
+                                        is_ignored_ = true;
+                                        map_ = -1;
+                                        action_state_ |= pa_smInCar;
+                                    } else {
+                                        aqt.state |= 8;
+                                    }
+                                } else if (aqt.condition == 1) {
+                                    if (v->hasDriver()) {
+                                        if (v->isDriver(this))
+                                            aqt.state |= 4;
+                                        else
+                                            aqt.state |= 8;
+                                    } else {
+                                        v->setDriver(this);
+                                        in_vehicle_ = v;
+                                        aqt.state |= 4;
+                                        is_ignored_ = true;
+                                        map_ = -1;
+                                        action_state_ |= pa_smUsingCar;
+                                    }
+                                }
+                            } else
+                                aqt.state |= 8;
+                        }
                     }
                 }
                 if ((aqt.ot_execute & Mission::objv_LoseControl) != 0)
                 {
-                    if (aqt.t_smo->majorType() == MapObject::mjt_Ped) {
-                        // TODO: but not now
-                    } else if (aqt.t_smo->majorType()
-                        == MapObject::mjt_Vehicle)
-                    {
-                        VehicleInstance *v = (VehicleInstance *)aqt.t_smo;
-                        if (v->isInsideVehicle(this)) {
-                        v->removeDriver(this);
-                            map_ = v->map();
-                            is_ignored_ = false;
-                            in_vehicle_ = NULL;
-                            aqt.state |= 4;
-                        } else
-                            aqt.state |= 8;
+                    if (aqt.state == 1) {
+                        if (aqt.t_smo->majorType() == MapObject::mjt_Ped) {
+                            // TODO: but not now
+                        } else if (aqt.t_smo->majorType()
+                                   == MapObject::mjt_Vehicle)
+                        {
+                            VehicleInstance *v = (VehicleInstance *)aqt.t_smo;
+                            if (v->isInsideVehicle(this)) {
+                                v->removeDriver(this);
+                                map_ = v->map();
+                                is_ignored_ = false;
+                                in_vehicle_ = NULL;
+                                aqt.state |= 4;
+                            } else
+                                aqt.state |= 8;
+                        }
                     }
                 }
                 if ((aqt.ot_execute & Mission::objv_PickUpObject) != 0)
                 {
+                    //TODO: better state checking
+                    if (action_state_ & (PedInstance::pa_smInCar
+                        | PedInstance::pa_smUsingCar) != 0)
+                        aqt.state |= 8;
                     if (aqt.state == 1) {
+                        if ((action_state_ & ()) == 0)
                         WeaponInstance *wi = (WeaponInstance *)aqt.t_smo;
                         if (wi->hasOwner() || weapons_.size() == 8)
                             aqt.state |= 8;
@@ -467,6 +476,10 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                 }
                 if ((aqt.ot_execute & Mission::objv_PutDownObject) != 0)
                 {
+                    //TODO: better state checking
+                    if (action_state_ & (PedInstance::pa_smInCar
+                        | PedInstance::pa_smUsingCar) != 0)
+                        aqt.state |= 8;
                     if (aqt.state == 1) {
                         WeaponInstance *wi = (WeaponInstance *)aqt.t_smo;
                         if (wi->getOwner() != this)
@@ -479,6 +492,12 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                 }
                 if ((aqt.ot_execute & Mission::objv_ReachLocation) != 0)
                 {
+                    //TODO: for now we fail while trying to walk
+                    // in car
+                    //TODO: better state checking
+                    if (action_state_ & (PedInstance::pa_smInCar
+                        | PedInstance::pa_smUsingCar) != 0)
+                        aqt.state |= 8;
                     if (aqt.state == 1) {
                         //TODO: IPA + mods
                         int speed_set = 128;// aqt.multi_var.dist_var.speed
