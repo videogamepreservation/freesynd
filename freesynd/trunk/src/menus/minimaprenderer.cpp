@@ -1,18 +1,44 @@
-#include "minimaprenderer.h"
+/************************************************************************
+ *                                                                      *
+ *  FreeSynd - a remake of the classic Bullfrog game "Syndicate".       *
+ *                                                                      *
+ *   Copyright (C) 2012  Benoit Blancard <benblan@users.sourceforge.net>*
+ *                                                                      *
+ *    This program is free software;  you can redistribute it and / or  *
+ *  modify it  under the  terms of the  GNU General  Public License as  *
+ *  published by the Free Software Foundation; either version 2 of the  *
+ *  License, or (at your option) any later version.                     *
+ *                                                                      *
+ *    This program is  distributed in the hope that it will be useful,  *
+ *  but WITHOUT  ANY WARRANTY;without even  the impliedwarranty of      *
+ *  MERCHANTABILITY  or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU  *
+ *  General Public License for more details.                            *
+ *                                                                      *
+ *    You can view the GNU  General Public License, online, at the GNU  *
+ *  project'sweb  site;  see <http://www.gnu.org/licenses/gpl.html>.  *
+ *  The full text of the license is also included in the file COPYING.  *
+ *                                                                      *
+ ************************************************************************/
+
+#include "menus/minimaprenderer.h"
 #include "mission.h"
 #include "gfx/screen.h"
+#include "app.h"
 
 MinimapRenderer::MinimapRenderer() {
     scroll_step_ = 0;
 }
 
-void MinimapRenderer::init(Mission *pMission, uint8 enh_level, uint8 max_enh_level)
+void MinimapRenderer::init(Mission *pMission, EZoom zoom, bool draw_enemies)
 {
     // Initialize minimap origin by looking for the position
     // of the first found agent on the map
     p_mission_ = pMission;
-    setEnhancementLevel(enh_level);
-    max_enh_level_ = max_enh_level;
+    zoom_ = zoom;
+    scroll_step_ = 30 / (10 - zoom_);
+    b_draw_enemies_ = draw_enemies;
+    minimap_blink_ticks_ = 0;
+    minimap_blink_ = 0;
 
     bool found = false;
     int maxx = pMission->mmax_x_;
@@ -29,15 +55,25 @@ void MinimapRenderer::init(Mission *pMission, uint8 enh_level, uint8 max_enh_lev
             }
         }
     }
-
-    minimap_blink_ticks_ = 0;
-    minimap_blink_ = 0;
 }
 
-void MinimapRenderer::setEnhancementLevel(uint8 enh_level) { 
-    enh_level_ = enh_level;
+void MinimapRenderer::zoomOut() { 
+    switch (zoom_) {
+    case ZOOM_X2:
+        zoom_ = ZOOM_X1;
+        break;
+    case ZOOM_X3:
+        zoom_ = ZOOM_X2;
+        break;
+    case ZOOM_X4:
+        zoom_ = ZOOM_X3;
+        break;
+    default:
+        break;
+    }
+
     // scrolling step depends on the level of details of the minimap
-    scroll_step_ = 30 / (10 - (enh_level << 1));
+    scroll_step_ = 30 / (10 - (zoom_));
 }
 
 bool MinimapRenderer::handleTick(int elapsed)
@@ -73,17 +109,17 @@ void MinimapRenderer::scrollUp() {
 
 void MinimapRenderer::scrollDown() {
     minimap_scroll_y_ += scroll_step_;
-    if (minimap_scroll_y_ > p_mission_->mmax_y_)
+    if (minimap_scroll_y_ > p_mission_->mmax_y_) {
         minimap_scroll_y_ = p_mission_->mmax_y_ - 1;
+    }
 }
 
 void MinimapRenderer::render() 
 {
     int maxx = p_mission_->mmax_x_;
     int maxy = p_mission_->mmax_y_;
-    bool addenemies = (enh_level_ == max_enh_level_);
 
-    unsigned char pixperblock = 10 - (enh_level_ << 1);
+    unsigned char pixperblock = 10 - zoom_;
     short fullblocks = 120 / pixperblock;
     short halfblocks = fullblocks / 2;
     short modblocks = fullblocks % 2;
@@ -134,16 +170,16 @@ void MinimapRenderer::render()
             unsigned char c = p_mission_->getMinimapOverlay(x, y);
             switch (c) {
                 case 0:
-                    c = p_mission_->getMinimapColour(x, y);
+                    c = p_mission_->getMiniMap()->getColourAt(x, y);
                     break;
                 case 1:
                     c = minimap_blink_ ? 14 : 12;
                     break;
                 case 2:
-                    if (addenemies)
+                    if (b_draw_enemies_)
                         c = minimap_blink_ ? 14 : 5;
                     else
-                        c = p_mission_->getMinimapColour(x, y);
+                        c = p_mission_->getMiniMap()->getColourAt(x, y);
             }
             g_Screen.drawRect(xc, sy + (y - byl) * pixperblock, pixperblock,
                 pixperblock, c);

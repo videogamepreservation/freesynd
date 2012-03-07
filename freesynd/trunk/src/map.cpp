@@ -31,6 +31,7 @@
 #include "gfx/screen.h"
 #include "map.h"
 #include "gfx/tilemanager.h"
+#include "utils/Log.h"
 
 #if 0
 #define EXECUTION_SPEED_TIME
@@ -270,4 +271,57 @@ void Map::draw(int scrollX, int scrollY, MapHelper * helper)
     printf("end time %i.%i\n", SDL_GetTicks()/1000, SDL_GetTicks()%1000);
 #endif
 
+}
+
+/*!
+ * Construct the minimap from the given map.
+ * \param p_map
+ */
+MiniMap::MiniMap(Map *p_map) {
+    // walkdata based colours
+    uint8 minimap_colours_[] = {
+        8,  7,  7,  7,
+        7,  7, 10, 10,
+       10, 10,  0, 10,
+       15, 15, 10, 10,
+       0,   0,  0,  0,
+    };
+
+    mmax_x_ = p_map->maxX();
+    mmax_y_ = p_map->maxY();
+
+    a_minimap_ = (uint8 *)( malloc(mmax_x_ * mmax_y_) );
+    if(a_minimap_ == NULL) {
+        FSERR(Log::k_FLG_MEM, "MiniMap", "MiniMap", ("memory allocation failed"));
+        return;
+    }
+    for (unsigned short y = 0; y < mmax_y_; y++) {
+        unsigned short yadd = y * mmax_x_;
+        for (unsigned short x = 0; x < mmax_x_; x++) {
+            int colorIdx = g_App.walkdata_[p_map->tileAt(x, y, 0)];
+            a_minimap_[x + yadd] = minimap_colours_[colorIdx];
+        }
+    }
+}
+
+MiniMap::~MiniMap() {
+    if (a_minimap_) {
+        free(a_minimap_);
+        a_minimap_ = NULL;
+    }
+}
+
+/*!
+ * Return the color at the given point.
+ * \param x
+ * \param y
+ */
+uint8 MiniMap::getColourAt(int x, int y) {
+
+    if (x < 0 || y < 0 || x >= mmax_x_ || y >= mmax_y_)
+        return 0;
+
+    if (a_minimap_ != 0)
+        return a_minimap_[x + y * mmax_x_];
+    return 0;
 }

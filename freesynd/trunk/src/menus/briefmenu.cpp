@@ -116,8 +116,21 @@ void BriefMenu::handleShow() {
     start_line_ = 0;
 
     // reset minimap renderer with current mission
-    mm_renderer_.init(pMission, g_Session.getSelectedBlock().enhanceLevel,
-        p_briefing_->nb_enhts());
+    uint8 enh_lvl = g_Session.getSelectedBlock().enhanceLevel;
+    MinimapRenderer::EZoom zoom;
+    if (enh_lvl == 0) {
+        zoom = MinimapRenderer::ZOOM_X4;
+    } else if (enh_lvl == 1) {
+        zoom = MinimapRenderer::ZOOM_X3;
+    } else if (enh_lvl == 2) {
+        zoom = MinimapRenderer::ZOOM_X2;
+    } else {
+        zoom = MinimapRenderer::ZOOM_X1;
+    }
+    bool drawEnemies = 
+        g_Session.getSelectedBlock().enhanceLevel == p_briefing_->nb_enhts();
+
+    mm_renderer_.init(pMission, zoom, drawEnemies);
 
     updateClock();
 
@@ -125,15 +138,21 @@ void BriefMenu::handleShow() {
     if (g_Session.getSelectedBlock().infoLevel < p_briefing_->nb_infos()) {
         getStatic(txtInfoId_)->setTextFormated("%d",
             p_briefing_->infoCost(g_Session.getSelectedBlock().infoLevel));
-    } else
+        getOption(infosButId_)->setenabled(true);
+    } else {
         getStatic(txtInfoId_)->setText("");
+        getOption(infosButId_)->setenabled(false);
+    }
 
     // Initialize the enhancements label with current cost
     if (g_Session.getSelectedBlock().enhanceLevel < p_briefing_->nb_enhts()) {
         getStatic(txtEnhId_)->setTextFormated("%d",
             p_briefing_->enhanceCost(g_Session.getSelectedBlock().enhanceLevel));
-    } else
+        getOption(enhButId_)->setenabled(true);
+    } else {
         getStatic(txtEnhId_)->setText("");
+        getOption(enhButId_)->setenabled(false);
+    }
 
     g_System.showCursor();
 }
@@ -308,8 +327,11 @@ void BriefMenu::handleAction(const int actionId, void *ctx, const int modKeys) {
                 p_briefing_->enhanceCost(g_Session.getSelectedBlock().enhanceLevel));
             g_Session.getSelectedBlock().enhanceLevel += 1;
             // zoom in the minimap
-            mm_renderer_.setEnhancementLevel(
-                g_Session.getSelectedBlock().enhanceLevel);
+            mm_renderer_.zoomOut();
+            if (g_Session.getSelectedBlock().enhanceLevel == p_briefing_->nb_enhts()) {
+                mm_renderer_.setDrawEnemies(true);
+                getOption(enhButId_)->setenabled(false);
+            }
             redrawMiniMap();
             
             getStatic(txtMoneyId_)->setTextFormated("%d", g_Session.getMoney());

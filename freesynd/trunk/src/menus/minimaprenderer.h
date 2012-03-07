@@ -38,10 +38,17 @@ class MissionBriefing;
  */
 class MinimapRenderer {
 public:
+    enum EZoom {
+        ZOOM_X1 = 6,
+        ZOOM_X2 = 4,
+        ZOOM_X3 = 2,
+        ZOOM_X4 = 0
+    };
+
     //! Class Constructor.
     MinimapRenderer();
     //! Reset the class with a new mission
-    void init(Mission *pMission, uint8 enh_level, uint8 max_enh_level);
+    void init(Mission *pMission, EZoom zoom, bool drawEnemies);
 
     //! update the class with elapsed time
     bool handleTick(int elapsed);
@@ -50,7 +57,9 @@ public:
     void render();
 
     //! Sets all parameters that depend on enhancement level
-    void setEnhancementLevel(uint8 enh_level);
+    void zoomOut();
+    //! Sets the flag whether to draw enemies on the minimap or not
+    void setDrawEnemies(bool draw) { b_draw_enemies_ = draw; }
 
     //! Scrolls the minimap to the right
     void scrollRight();
@@ -74,10 +83,10 @@ protected:
     uint8 scroll_step_;
     /*! The mission that contains the minimap.*/
     Mission *p_mission_;
-    /*! Current enhacement level.*/
-    uint8 enh_level_;
-    /*! Maximum enhacement level, at this level enemies are drawn*/
-    uint8 max_enh_level_;
+    /*! Current zoom level.*/
+    EZoom zoom_;
+    /*! IF true, enemies are drawn on the minimap.*/
+    bool b_draw_enemies_;
 };
 
 #endif

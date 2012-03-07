@@ -1396,7 +1396,7 @@ void GameplayMenu::drawMiniMap() {
 
     for (int j = 0; j < 17; j++) {
         for (int i = 0; i < 17; i++) {
-            uint8 gcolour = mission_->getMinimapColour(tx + i, ty + j);
+            uint8 gcolour = mission_->getMiniMap()->getColourAt(tx + i, ty + j);
             for (char inc = 0; inc < 8; inc ++) {
                 memset(minimap_layer + (j + 2) * 8 * 8 * 21 + (i + 2) * 8
                     + inc * 8 * 21, gcolour, 8);

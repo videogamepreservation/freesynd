@@ -48,7 +48,7 @@ Mission::Mission()
     max_x_ = 0;
     max_y_ = 0;
     cur_objective_ = 0;
-    minimap_c_ = NULL;
+    p_minimap_ = NULL;
 }
 
 Mission::~Mission()
@@ -65,9 +65,9 @@ Mission::~Mission()
         delete prj_shots_[i];
     // TODO: free statics
     clrSurfaces();
-    if (minimap_c_) {
-        free(minimap_c_);
-        minimap_c_ = NULL;
+
+    if (p_minimap_) {
+        delete p_minimap_;
     }
 }
 
@@ -2703,42 +2703,16 @@ void Mission::adjXYZ(int &x, int &y, int &z) {
 }
 
 void Mission::createMinimap() {
-    // walkdata based colours
-    int minimap_colours_[] = {
-        8,  7,  7,  7,
-        7,  7, 10, 10,
-       10, 10,  0, 10,
-       15, 15, 10, 10,
-       0,   0,  0,  0,
-    };
     Map *m = g_App.maps().map(map_);
 
     if (!(g_App.maps().mapDimensions(map_,
         &mmax_x_, &mmax_y_, &mmax_z_)))
         return;
 
-    minimap_c_ = (unsigned char *)( malloc(m->maxX() * m->maxY()) );
-    if(minimap_c_ == NULL) {
-        printf("ERROR: memory allocation failed in Mission::createMinimap");
-        return;
+    if (p_minimap_) {
+        delete p_minimap_;
     }
-    for (unsigned short y = 0; y < mmax_y_; y++) {
-        unsigned short yadd = y * mmax_x_;
-        for (unsigned short x = 0; x < mmax_x_; x++) {
-            minimap_c_[x + yadd] =
-                minimap_colours_[g_App.walkdata_[m->tileAt(x, y, 0)]];
-        }
-    }
-}
-
-unsigned char Mission::getMinimapColour(int x, int y) {
-
-    if (x < 0 || y < 0 || x >= mmax_x_ || y >= mmax_y_)
-        return 0;
-
-    if (minimap_c_ != 0)
-        return minimap_c_[x + y * mmax_x_];
-    return 0;
+    p_minimap_ = new MiniMap(m);
 }
 
 WeaponInstance *Mission::createWeaponInstance(uint8 * data)

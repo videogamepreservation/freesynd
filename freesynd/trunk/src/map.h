@@ -81,4 +81,24 @@ protected:
     int map_width_, map_height_;
 };
 
+/*!
+ * A MiniMap is a small representation of the real map.
+ */
+class MiniMap {
+public:
+    MiniMap(Map *p_map);
+    ~MiniMap();
+
+    uint8 MiniMap::getColourAt(int x, int y);
+
+private:
+    /* An array with the same size of the real map but containing
+     a color for each type of tile. */
+    uint8 *a_minimap_;
+    /* Size of the minimap (same as the map).*/
+    int mmax_x_;
+    /* Height of the minimap (same as the map).*/
+    int mmax_y_;
+};
+
 #endif

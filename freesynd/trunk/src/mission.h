@@ -453,11 +453,12 @@ public:
     int mmax_m_all, mmax_m_xy;
 
     void createMinimap();
-    unsigned char getMinimapColour(int x, int y);
     // 0 - not present, 1 - our agent, 2 - enemy agent
     unsigned char getMinimapOverlay(int x, int y) {
         return minimap_overlay_[x + y * mmax_x_];
     }
+
+    MiniMap * getMiniMap() { return p_minimap_; }
 
     // this type is also used for actions_queue_ for pedinstance
     typedef enum {
@@ -582,7 +583,7 @@ protected:
     MissionStats stats_;
     // minimap in colours, map z = 0 tiles transformed based on
     // walkdata->minimap_colours_ in function createMinimap
-    unsigned char *minimap_c_;
+    MiniMap *p_minimap_;
     unsigned char minimap_overlay_[128*128];
 };
 
