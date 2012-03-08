@@ -7,7 +7,7 @@ $screenshots = array(
         'shots' => array(
             'ss16.png' => 'Burning trees',
             'ss17.png' => 'More effective way of burning trees',
-            'ss18.png' => 'He want shoot anymore',
+            'ss18.png' => 'He won\'t shoot anymore',
         ),
     ),
     '2011-06-27' => array(
