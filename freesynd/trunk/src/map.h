@@ -89,7 +89,7 @@ public:
     MiniMap(Map *p_map);
     ~MiniMap();
 
-    uint8 MiniMap::getColourAt(int x, int y);
+    uint8 getColourAt(int x, int y);
 
 private:
     /* An array with the same size of the real map but containing
