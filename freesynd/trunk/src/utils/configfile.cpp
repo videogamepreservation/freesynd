@@ -122,6 +122,8 @@ std::istream& operator>>( std::istream& is, ConfigFile& cf )
         cf.myLines.push_back(line);
         
         // Ignore comments
+        // TODO: we will loose commented line here, this is bad
+        // if it will be modified
         line = line.substr( 0, line.find(comm) );
         
         // Check for end of file sentry
@@ -129,7 +131,7 @@ std::istream& operator>>( std::istream& is, ConfigFile& cf )
         
         // Parse the line if it contains a delimiter
         pos delimPos = line.find( delim );
-        if( delimPos < string::npos )
+        if( delimPos != string::npos )
         {
             // Extract the key
             string key = line.substr( 0, delimPos );
@@ -156,10 +158,16 @@ std::istream& operator>>( std::istream& is, ConfigFile& cf )
                     break;
                 }
                 
-                nextline = nextline.substr( 0, nextline.find(comm) );
+                if (nextline.find(comm) != 0) {
+                    // TODO: we will loose commented line here, this is bad
+                    nextline = nextline.substr( 0, nextline.find(comm) );
+                } else {
+                    // Comment will be processed later
+                    break;
+                }
                 if( nextline.find(delim) != string::npos )
                 {
-                    cf.myLines.push_back(nextline);
+                    // we will process it at next run correctly
                     break;
                 }
                 if( sentry != "" && nextline.find(sentry) != string::npos )

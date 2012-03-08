@@ -241,10 +241,7 @@ void ConfigFile::add( string key, const T& value )
     trim(v);
     mapci p = myContents.find(key);
     if (p == myContents.end()) {
-        myLineNumbers[key] = myLines.size() + 1;
-        // TODO: we have a bug somewhere, line positions are not correctly
-        // stored and key-to-value results in two keys with different values
-        myLines.push_back("\n");
+        myLineNumbers[key] = myLines.size();
         // we need to be sure that we have a line availiable to add key
         myLines.push_back("");
     }
