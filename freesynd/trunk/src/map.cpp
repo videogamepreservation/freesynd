@@ -31,7 +31,7 @@
 #include "gfx/screen.h"
 #include "map.h"
 #include "gfx/tilemanager.h"
-#include "utils/Log.h"
+#include "utils/log.h"
 
 #if 0
 #define EXECUTION_SPEED_TIME

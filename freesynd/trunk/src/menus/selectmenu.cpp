@@ -34,7 +34,7 @@
 
 SelectMenu::SelectMenu(MenuManager * m):Menu(m, MENU_SELECT, MENU_BRIEF, "mselect.dat",
     "mselout.dat"),
-cur_agent_(0), tick_count_(0), sel_all_(false)
+cur_agent_(0), tick_count_(0), rnd_(0), sel_all_(false)
 {
     tab_ = TAB_EQUIPS;
     pSelectedWeap_ = NULL;
@@ -72,8 +72,6 @@ cur_agent_(0), tick_count_(0), sel_all_(false)
 
     // Agent name selected
     txtAgentId_ = addStatic(158, 86, "", FontManager::SIZE_2, true);
-
-    rnd_ = 0;
 }
 
 SelectMenu::~SelectMenu()
