@@ -2,6 +2,14 @@
 
 // Our list of screenshots
 $screenshots = array(
+    '2012-03-08' => array(
+        'caption' => 'Few weapons',
+        'shots' => array(
+            'ss16.png' => 'Burning trees',
+            'ss17.png' => 'More effective way of burning trees',
+            'ss18.png' => 'He want shoot anymore',
+        ),
+    ),
     '2011-06-27' => array(
         'caption' => 'Things that were done, but not shown',
         'shots' => array(
