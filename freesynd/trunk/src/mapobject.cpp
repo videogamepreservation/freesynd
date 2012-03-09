@@ -410,6 +410,7 @@ SFXObject::SFXObject(int m, int type, int t_show):MapObject(m),
             break;
         case SFXObject::sfxt_ExplosionFire:
             anim_ = 390;
+            setFramesPerSec(6);
             break;
         case SFXObject::sfxt_ExplosionBall:
             anim_ = 391;
@@ -461,6 +462,7 @@ void SFXObject::correctZ() {
 
 ShootableMapObject::ShootableMapObject(int m):MapObject(m)
 {
+    rcv_damage_def_ = MapObject::ddmg_Invulnerable;
 }
 
 ShootableMovableMapObject::
@@ -780,7 +782,6 @@ anim_(anim), closing_anim_(closingAnim),open_anim_(openAnim),
 opening_anim_(openingAnim)
 {
     state_ = Static::sttdoor_Closed;
-    rcv_damage_def_ = MapObject::ddmg_Invulnerable;
     major_type_ = MapObject::mjt_Static;
     main_type_ = Static::smt_Door;
 }
@@ -904,7 +905,6 @@ LargeDoor::LargeDoor(int m, int anim, int closingAnim, int openingAnim):Static(m
 closing_anim_(closingAnim), opening_anim_(openingAnim)
 {
     state_ = Static::sttdoor_Closed;
-    rcv_damage_def_ = MapObject::ddmg_Invulnerable;
     major_type_ = MapObject::mjt_Static;
     main_type_ = Static::smt_LargeDoor;
 }
@@ -1178,7 +1178,6 @@ void EtcObj::draw(int x, int y)
 NeonSign::NeonSign(int m, int anim):Static(m),
 anim_(anim)
 {
-    rcv_damage_def_ = MapObject::ddmg_Invulnerable;
     major_type_ = MapObject::mjt_Static;
     main_type_ = Static::smt_NeonSign;
 }

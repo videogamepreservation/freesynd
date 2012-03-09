@@ -478,7 +478,7 @@ void App::cheatEquipFancyWeapons() {
         agents_.agent(i)->addWeapon(
             weapons_.getWeapon(Weapon::Minigun)->createInstance());
         agents_.agent(i)->addWeapon(
-            weapons_.getWeapon(Weapon::Pistol)->createInstance());
+            weapons_.getWeapon(Weapon::TimeBomb)->createInstance());
         agents_.agent(i)->addWeapon(
             weapons_.getWeapon(Weapon::GaussGun)->createInstance());
         agents_.agent(i)->addWeapon(

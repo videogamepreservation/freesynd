@@ -317,11 +317,11 @@ public:
     } DamageInflictType;
 
     virtual bool handleDamage(ShootableMapObject::DamageInflictType * d) {
-        if (health_ > 0) {
-            health_ -= d->dvalue;
-            return true;
-        }
-        return false;
+        if (health_ <= 0 || rcv_damage_def_ == MapObject::ddmg_Invulnerable
+            || (d->dtype & rcv_damage_def_) == 0)
+            return false;
+        health_ -= d->dvalue;
+        return true;
     }
 
   protected:

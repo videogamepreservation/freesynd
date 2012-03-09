@@ -63,7 +63,7 @@ Mission::~Mission()
         delete sfx_objects_[i];
     for (unsigned int i = 0; i < prj_shots_.size(); i++)
         delete prj_shots_[i];
-    // TODO: free statics
+    // TODO: free statics ?
     clrSurfaces();
 
     if (p_minimap_) {
@@ -2794,7 +2794,7 @@ WeaponInstance *Mission::createWeaponInstance(uint8 * data)
 void Mission::blockerExists(toDefineXYZ * startXYZ, toDefineXYZ * endXYZ,
                             double dist, MapObject** blockerObj)
 {
-    // TODO: add check for weapons when will add all weapons
+    // TODO: add check for weapons, when all weapons will be added
     double inc_xyz[3];
     inc_xyz[0] = (endXYZ->x - startXYZ->x) / dist;
     inc_xyz[1] = (endXYZ->y - startXYZ->y) / dist;
@@ -2875,8 +2875,6 @@ void Mission::blockerExists(toDefineXYZ * startXYZ, toDefineXYZ * endXYZ,
 * 4b - blocker tile, "pn" is set(16)
 * NOTE: only if "pn" or "t" are not null, variables are set
 */
-//TODO: separate mask for pn blocker object, when called checkTileOnly
-// should be properly set(agents might ignore civilians, cars. etc)
 uint8 Mission::inRangeCPos(toDefineXYZ * cp, ShootableMapObject ** t,
     PathNode * pn, bool setBlocker, bool checkTileOnly, double maxr,
     double * distTo)

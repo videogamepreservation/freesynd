@@ -80,7 +80,6 @@ WeaponInstance::WeaponInstance(Weapon * w) : ShootableMapObject(-1)
 {
     pWeaponClass_ = w;
     ammo_remaining_ = w->ammo();
-    rcv_damage_def_ = MapObject::ddmg_Invulnerable;
     weapon_used_time_ = 0;
     major_type_ = MapObject::mjt_Weapon;
     owner_ = NULL;
@@ -130,36 +129,18 @@ bool WeaponInstance::animate(int elapsed) {
                 setIsIgnored(true);
 
                 Mission *m = g_Session.getMission();
-                int max_anims = 16 + rand() % 8;
                 toDefineXYZ cur_pos = {tile_x_ * 256 + off_x_,
                     tile_y_ * 256 + off_y_, vis_z_ * 128 + off_z_};
-                // TODO: make as function, also used in projectileshot::animate
                 SFXObject *so = new SFXObject(m->map(),
                     pWeaponClass_->anims()->hit_anim);
                 so->setPosition(cur_pos.x / 256, cur_pos.y / 256, cur_pos.z / 128,
                     cur_pos.x % 256, cur_pos.y % 256, cur_pos.z % 128);
                 so->setTileVisZ();
                 m->addSfxObject(so);
-                toDefineXYZ base_pos = cur_pos;
-                cur_pos.z += 16;
-                if (cur_pos.z > (m->mmax_z_ - 1) * 128)
-                    cur_pos.z = (m->mmax_z_ - 1) * 128;
-                // TODO: exclude explosionfires on water
-                for (int i = 0; i < max_anims; i++) {
-                    toDefineXYZ target_pos = base_pos;
-                    shotTargetRandomizer(&cur_pos, &target_pos, 120.0,
-                        pWeaponClass_->rangeDmg() + 32.0, true);
-                    PathNode pn(target_pos.x / 256, target_pos.y / 256,
-                        target_pos.z / 128, target_pos.x % 256,
-                        target_pos.y % 256, target_pos.z % 128);
-                    m->inRangeCPos(&cur_pos, NULL, &pn, true, true, 384 + 32);
-                    so = new SFXObject(m->map(),
-                        pWeaponClass_->anims()->rd_anim);
-                    so->setPosition(pn.tileX(), pn.tileY(), pn.tileZ(),
-                        pn.offX(), pn.offY(), pn.offZ());
-                    so->setTileVisZ();
-                    m->addSfxObject(so);
-                }
+
+                int max_anims = 16 + rand() % 8;
+                rangeDamageAnim(cur_pos, (double)pWeaponClass_->rangeDmg(),
+                    max_anims, pWeaponClass_->anims()->rd_anim);
                 return true;
             }
             weapon_used_time_ = 0;
@@ -531,27 +512,8 @@ bool ProjectileShot::animate(int elapsed, Mission *m) {
             // TODO: make as function, also used in weaponinstance::animate
             // or rewrite
             int max_flames = 16 + rand() % 8;
-            base_pos_ = cur_pos_;
-            cur_pos_.z += 16;
-            if (cur_pos_.z > (m->mmax_z_ - 1) * 128)
-                cur_pos_.z = (m->mmax_z_ - 1) * 128;
-            // TODO: exclude flames on water, put these flames to the ground
-            for (int i = 0; i < max_flames; i++) {
-                reached_pos = base_pos_;
-                shotTargetRandomizer(&cur_pos_, &reached_pos, 120.0,
-                    (double)dmg_range_ + 32.0, true);
-                pn = PathNode(reached_pos.x / 256, reached_pos.y / 256,
-                    reached_pos.z / 128, reached_pos.x % 256,
-                    reached_pos.y % 256, reached_pos.z % 128);
-                m->inRangeCPos(&cur_pos_, NULL, &pn, true, true,
-                    dmg_range_ + 32);
-                so = new SFXObject(m->map(), anims_.rd_anim,
-                    100 * (rand() % 16));
-                so->setPosition(pn.tileX(), pn.tileY(), pn.tileZ(),
-                    pn.offX(), pn.offY(), pn.offZ());
-                so->setTileVisZ();
-                m->addSfxObject(so);
-            }
+            rangeDamageAnim(cur_pos_, (double)dmg_range_, max_flames,
+                anims_.rd_anim);
         }
     }
     if (self_remove)
@@ -1141,5 +1103,37 @@ void WeaponInstance::getNonFriendInRange(toDefineXYZ * cp,
                 found = true;
             }
         }
+    }
+}
+
+bool WeaponInstance::handleDamage(ShootableMapObject::DamageInflictType * d)
+{
+    return true;
+}
+
+void ShotClass::rangeDamageAnim(toDefineXYZ &cp, double dmg_rng,
+    int max_anims, int rngdamg_anim)
+{
+    Mission *m = g_Session.getMission();
+    toDefineXYZ base_pos_ = cp;
+    cp.z += 16;
+    if (cp.z > (m->mmax_z_ - 1) * 128)
+        cp.z = (m->mmax_z_ - 1) * 128;
+    // TODO: exclude flames on water, put these flames to the ground,
+    // don't draw in air(, stairs problem?)
+    dmg_rng *= 1.1;
+    for (char i = 0; i < max_anims; i++) {
+        toDefineXYZ target_pos = base_pos_;
+        shotTargetRandomizer(&cp, &target_pos, 120.0, dmg_rng, true);
+        PathNode pn = PathNode(target_pos.x / 256, target_pos.y / 256,
+            target_pos.z / 128, target_pos.x % 256,
+            target_pos.y % 256, target_pos.z % 128);
+        m->inRangeCPos(&cp, NULL, &pn, true, true, dmg_rng);
+        SFXObject *so = new SFXObject(m->map(), rngdamg_anim,
+                           100 * (rand() % 16));
+        so->setPosition(pn.tileX(), pn.tileY(), pn.tileZ(),
+                        pn.offX(), pn.offY(), pn.offZ());
+        so->setTileVisZ();
+        m->addSfxObject(so);
     }
 }

@@ -240,6 +240,8 @@ public:
 
     void shotTargetRandomizer(toDefineXYZ * cp, toDefineXYZ * tp, double angle,
         double dist_new = -1, bool exclude_z = false);
+    void rangeDamageAnim(toDefineXYZ &cp, double dmg_rng,
+        int max_anims, int rngdamg_anim);
 
 protected:
     void makeShot(bool rangeChecked, toDefineXYZ &cp, int anim_hit,
@@ -308,6 +310,7 @@ public:
     void getNonFriendInRange(toDefineXYZ * cp,
         ShootableMapObject * & target, bool checkTileOnly = true,
         int maxr = -1);
+    bool handleDamage(ShootableMapObject::DamageInflictType * d);
 
 protected:
     Weapon *pWeaponClass_;
