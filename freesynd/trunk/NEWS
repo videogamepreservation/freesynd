@@ -16,6 +16,7 @@ Changes
 
 Fixed Bugs
 ----------
+  * 3241136 : freesynd.exe has stopped working
   * Brief minimap not showing enemy agents
 
 Features added

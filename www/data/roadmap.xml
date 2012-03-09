@@ -7,12 +7,12 @@
 	  <feature id="3336699" status="D">Make save file format portable</feature>
 	  <feature id="3283536" status="D">Manage separate directory for syndicate and freesynd</feature>
 	  <feature id="3202739" status="D">keyboard type management</feature>
-	  <feature id="3473410" status="">The radar is missing</feature>
+	  <feature id="3473410" status="P">The radar is missing</feature>
 	  <feature id="3473415" status="D">Junction balls are not animated</feature>
 	  <feature id="3461415" status="D">Cycle only through available missions in map menu</feature>
 	</features>
 	<bugs>
-		<bug id="3241136" status="T">freesynd.exe has stopped working</bug>
-		<bug id="3005294 " status="">Debriefing information is not displayed after ending the mission</bug>
+		<bug id="3241136" status="D">freesynd.exe has stopped working</bug>
+		<bug id="3005294 " status="P">Debriefing information is not displayed after ending the mission</bug>
 	</bugs>
 </roadmap>
