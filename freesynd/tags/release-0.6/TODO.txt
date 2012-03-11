@@ -1,0 +1,51 @@
+ - Complete mission tree
+ - MiniMap in game : more detailed map, display peds, guns, radar focus,
+    evacuation red circle
+ - Mission objectives
+ - Play sound in end mission animation
+ - Remove debug info displayed in the console
+ - Correct identification of object types during mission load, includes
+vehicles, people, static objects, weapons, also setup sfx for weapons
+ - Adding properties to:
+   vehicle: max people can hold; speed per type; damage can inflict/recieve per type;
+radius of damage when destroyed
+   people: add IPA levels and their modification through gameplay menu and influence
+of these levels on different properties of people - speed, inteligence, accuracy,
+viewing range(?), health recovery(?); mods properties should affect IPAs; damage
+recieved modifier, if we don't want to recalculate all the time; persuade power
+points; persuade points needed to persuade - this value will be added to agent
+that succesfully persuaded; weapon range modifier(?); accuracy modifier/property(?);
+   static objects: damage recieve value; destructable or not
+ - A.L. - this one is complex
+ - pathfinding directional to be used for simulation of people walking around city
+ - damage inflicted by vehicles/weapons, variate by type of damage and range
+ - state of vehicles/people/objects should change correctly due to gameplay:
+   switch of state due to damage
+   when vehicle is destroyed, explosion should create damage to all in range
+   change in behavior due to persuade
+   "access card" make agent become police officer
+   firing should have delay, correct delay per weapon(?)/ipa
+   instant damage to objects
+ - resolve shooting issues: targeting, range damage
+ - animation for objects need to be fixed, to correctly represent every stage
+of event/state:
+   windows break when shot
+   different objects burn
+ - object positioning during drawing
+ - map drawing still buggy
+ - set weapons for enemy agents, because in gamedata weapons are not the same as
+in original gameplay or are not present at all
+ - write mission editor, create new mission files using editor, based on original
+game mission files.
+ - Implement dragging in SelectMenu to pass a weapon from an agent to another.
+ - Create a debian package
+
+ Very low priority stuff, maybe for v0.9:
+ - Look at code that plays intro animation for possible errors.
+ - "no_sound"/"no_music" option for config file, or disabled in debug mode
+ - Add mission failure music
+ - The built-in fonts have some characters that don't sit right vertically (Ö and Ü in certain sizes)
+ - Work on hyphenation rules in the text reflow code
+ - Convert Italian and French translations to accented characters in UTF-8
+ - Complete Italian translation
+ - Reload button translation for non-English languages

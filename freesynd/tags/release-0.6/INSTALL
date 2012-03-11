@@ -1,0 +1,168 @@
+Installation Instructions
+*************************
+
+
+Original Game Data Files
+========================
+  Due to licence restrictions, we don't distribute the original game data
+files. You should have a copy of Syndicate or buy it. In order to run
+FreeSynd, either copy all files from the original Syndicate "DATA" directory
+into the FreeSynd "data" directory, or edit the FreeSynd configuration to
+indicate where the original game's "DATA" directory is. At first run
+Freesynd will test files located in your Syndicate "DATA" directory to
+verify that required files are present and are correct.
+
+====> Attention: Please, be sure to have files from the first version of
+Syndicate as FreeSynd does not support files from Syndicate Plus or Syndicate
+Wars.
+
+
+Required Libraries
+==================
+  On Windows, all libraries are released with the game. You don't have to
+install anything.
+  
+  In order to run FreeSynd under Linux, you first need to install:
+    - libSDL-1.2
+    - libSDL_mixer
+    - libSDL_image
+    - libpng
+
+  Most popular Linux distributions already have packages for these libraries.
+
+  For other distributions, consult the appropriate documentation.
+
+
+Binary Installation
+===============================
+  * Windows Installation
+  ----------------------
+    Unzip the file in any directory you want. See chapter "Original Game Data
+  Files" to add original Syndicate resources that are not bundled with
+  FreeSynd.
+
+  * Mac Installation
+  ------------------
+    Unzip the application bundle and drag it to your "Applications" folder.
+
+
+Building From Source
+====================
+  * Windows - Visual C++
+  ----------------------
+    Install CMake from http://www.cmake.org/ .
+    Run cmake-gui.
+    Set "Source" to the main source folder.
+    Set "Build" to the folder where your project files should be located.
+    Click "Configure" and select your version of Visual Studio.
+    Click "Finish".
+    Click "Generate" to generate Visual Studio project files.
+    Run Visual Studio.
+    Select "File | Open Solution" and pick "freesynd.sln" in the build folder.
+    From "Build | Configuration Manager...", choose the configuration you want.
+    Select "Build | Clean Solution".
+    Select "Build | Build Solution".
+
+  * Windows - MinGW
+  -----------------
+    Install CMake from http://www.cmake.org/ .
+    Add the location of cmake.exe to your PATH environment variable.
+    Install libraries listed in the chapter "Required Libraries".
+    From the main source folder, run: cmake . -G "MinGW Makefiles"
+    Finally, run: make
+    The freesynd.exe file will be in the "src" folder.
+
+  * Linux
+  -------
+    Use your distribution's package manager to install CMake and all of
+    the libraries listed in the chapter "Required Libraries".
+    From the main source folder, run: cmake .
+    Finally, run: make
+    The freesynd binary will be in the "src" folder.
+
+  * Mac
+  -----
+    Install CMake from http://www.cmake.org/ .
+    Install SDL.framework from http://www.libsdl.org/download-1.2.php
+    Install SDL_image.framework from http://www.libsdl.org/projects/SDL_image/
+    Install SDL_mixer.framework from http://www.libsdl.org/projects/SDL_mixer/
+    Run: export PATH="$PATH:/Applications/CMake 2.8-4.app/Contents/bin"
+    From the main source folder, run: cmake .
+    Finally, run: make
+    The FreeSynd application will be in the "src" folder.
+
+
+Installation
+============
+  * Windows
+  ---------
+    On Windows, freesynd.exe needs to live in a folder with the "data" folder
+  and all of the .dll files from "libs/MSVC/lib". If you have built FreeSynd
+  from source, create a folder and copy these things into it.
+
+  * Linux
+  -------
+    make install
+
+  * Mac
+  -----
+    make install
+
+
+Running the Game
+================
+  * Windows
+  ---------
+    Double-click on freesynd.exe.
+
+  * Linux
+  -------
+    Type "freesynd".
+
+  * Mac
+  -----
+    Double-click on the FreeSynd application.
+
+
+Configuring FreeSynd
+====================
+  FreeSynd reads the file freesynd.ini to get its running configuration.
+You can edit the file with any text editor to customize your installation.
+When you run FreeSynd, a default ini file will be created for you if it does
+not already exist.
+
+  The location of freesynd.ini is different on each platform.
+  * Windows: the folder containing freesynd.exe
+  * Linux: $HOME/.freesynd/
+  * Mac: $HOME/Library/Application Support/FreeSynd/
+
+  (For Mac users who prefer the Linux/Unix way of doing things, a symlink will
+be created at $HOME/.freesynd for your convenience.)
+
+  The default location of freesynd.ini can be overridden on the command line.
+Run freesynd --help to see usage information.
+
+  Here is a description of each of the config file parameters:
+    * fullscreen: (true/false) If true, the game will run in fullscreen mode.
+    * play_intro: (true/false) If true, the introduction will be played.
+    * freesynd_data_dir: Path to the FreeSynd "data" directory. This parameter
+    should have a sensible default. Only set this if you really need to.
+    * data_dir: Path to the original Syndicate "DATA" directory. By default,
+    this will be the same as freesynd_data_dir.
+    * language: 0:english, 1:français, 2:italiano, 3:deutsch 
+
+  After launch, play_intro will be turned off automatically.
+
+
+Saved Games
+===========
+  Saved games are located in a different place on each platform.  
+
+  * Windows: the folder containing freesynd.exe, + "save"
+  * Linux: $HOME/.freesynd/save/
+  * Mac: $HOME/Library/Application Support/FreeSynd/save/
+
+  You may note that this location is based on the default ini file location.
+The saved games location will not be affected by specifying a different path
+for the ini file on the command line.
+
