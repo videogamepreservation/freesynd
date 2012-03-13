@@ -20,7 +20,7 @@
  *                                                                      *
  ************************************************************************/
 
-//#define NEW_ANIMATE_HANDLING
+#define NEW_ANIMATE_HANDLING
 #include "common.h"
 #include "app.h"
 #include "pathsurfaces.h"

@@ -15,9 +15,9 @@
 	
 	<item title="Project status" date="2011-07-23" author="Bohdan Stelmakh"
 	rssDesc="A new developer has arrived with new features..." id="7">
-	We have a new developer - Joey Parrish. He implemented few big changes:
-	- save files are portable over different CPU architectures;
-	- separate directories for Syndicate and Freesynd data directories;
+	We have a new developer - Joey Parrish. He implemented few big changes:{{br /}}
+	- save files are portable over different CPU architectures;{{br /}}
+	- separate directories for Syndicate and Freesynd data directories;{{br /}}
 	- cmake instead of autotools, also cmake used to build project files for MSVC++,
 	for now it is without install part for Unix's.
 	</item>

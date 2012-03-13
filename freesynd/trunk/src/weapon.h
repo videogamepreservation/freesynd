@@ -264,7 +264,7 @@ public:
 
     bool animate(int elapsed);
     void draw(int x, int y);
-    bool inflictDamage(ShootableMapObject * tobj, PathNode * tp,
+    uint16 inflictDamage(ShootableMapObject * tobj, PathNode * tp,
         int *elapsed = NULL, bool ignoreBlocker = false,
         int *make_shots = NULL);
 

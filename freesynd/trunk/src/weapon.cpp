@@ -116,36 +116,39 @@ bool WeaponInstance::animate(int elapsed) {
                 weapon_used_time_ = 0;
             }
         }
-    } else if (weapon_used_time_ != 0 || activated_) {
+    } else if (activated_) {
+        int tm_left = elapsed;
+        if (activated_ && wt == Weapon::TimeBomb
+            && (inflictDamage(NULL, NULL, &tm_left)) == 0)
+        {
+            deactivate();
+            map_ = -1;
+            setIsIgnored(true);
+
+            Mission *m = g_Session.getMission();
+            toDefineXYZ cur_pos = {tile_x_ * 256 + off_x_,
+                tile_y_ * 256 + off_y_, vis_z_ * 128 + off_z_};
+            SFXObject *so = new SFXObject(m->map(),
+                pWeaponClass_->anims()->hit_anim);
+            so->setPosition(cur_pos.x / 256, cur_pos.y / 256, cur_pos.z / 128,
+                cur_pos.x % 256, cur_pos.y % 256, cur_pos.z % 128);
+            so->setTileVisZ();
+            m->addSfxObject(so);
+
+            int max_anims = 16 + rand() % 8;
+            rangeDamageAnim(cur_pos, (double)pWeaponClass_->rangeDmg(),
+                max_anims, pWeaponClass_->anims()->rd_anim);
+            return true;
+        }
+    }/*
+    else if (weapon_used_time_ != 0 ) {
         weapon_used_time_ += elapsed;
         if (weapon_used_time_ > (pWeaponClass_->timeForShot()
             + pWeaponClass_->timeReload()))
         {
-            if (activated_ && wt == Weapon::TimeBomb
-                && inflictDamage(NULL, NULL))
-            {
-                deactivate();
-                map_ = -1;
-                setIsIgnored(true);
-
-                Mission *m = g_Session.getMission();
-                toDefineXYZ cur_pos = {tile_x_ * 256 + off_x_,
-                    tile_y_ * 256 + off_y_, vis_z_ * 128 + off_z_};
-                SFXObject *so = new SFXObject(m->map(),
-                    pWeaponClass_->anims()->hit_anim);
-                so->setPosition(cur_pos.x / 256, cur_pos.y / 256, cur_pos.z / 128,
-                    cur_pos.x % 256, cur_pos.y % 256, cur_pos.z % 128);
-                so->setTileVisZ();
-                m->addSfxObject(so);
-
-                int max_anims = 16 + rand() % 8;
-                rangeDamageAnim(cur_pos, (double)pWeaponClass_->rangeDmg(),
-                    max_anims, pWeaponClass_->anims()->rd_anim);
-                return true;
-            }
             weapon_used_time_ = 0;
         }
-    }
+    }*/
 
     if (map_ == -1)
         return false;
@@ -521,7 +524,14 @@ bool ProjectileShot::animate(int elapsed, Mission *m) {
     return true;
 }
 
-bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
+/*!
+ * \return mask of different actions done
+ * 0b - no ammo (1), 1b - not enough time for single shot (2),
+ * 2b - weapon does no damage (4), 3b - weapon's target is wrong (8),
+ * 4b - an object blocker (16), 5b - a tile blocking (32), 6b - too far (64)
+ * 0 - successful shot
+*/
+uint16 WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
     int *elapsed, bool ignoreBlocker, int *make_shots)
 {
     // TODO: add return value as int for diff fail events to handle correctly,
@@ -529,22 +539,27 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
     // time remaining, shots done
     // TODO : IPA influence
     if (ammo_remaining_ == 0)
-        return false;
+        return 1;
 
-    int shots = getShots(elapsed);
+    int shots = 0;
+    if (make_shots)
+        shots = *make_shots;
+    shots = getShots(elapsed, shots);
     if (shots == 0)
-        return false;
+        return 2;
+    if (make_shots)
+        *make_shots = shots;
 
     unsigned int shot_prop = pWeaponClass_->shotProperty();
 
     if (pWeaponClass_->dmgType() == MapObject::dmg_None) {
-        return false;
+        return 4;
     } else if (pWeaponClass_->dmgType() == MapObject::dmg_Heal) {
         // NOTE: not only self-healing in future?
-        return false;
+        return 4;
     } else if ((shot_prop & Weapon::spe_TargetPedOnly) != 0 && tp) {
         // NOTE: Persuadatron will not shoot on ground
-        return false;
+        return 8;
     }
 
     int xb = 0;
@@ -598,11 +613,16 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
     if (tobj || tp)
         has_blocker = inRange(cp, &smp, &pn);
     if ((has_blocker & 30) != 0) {
-        if (!ignoreBlocker)
-            return false;
-    } else if((has_blocker & 1) == 0)
-        if (!ignoreBlocker)
-            return false;
+        if (!ignoreBlocker) {
+            if ((has_blocker & 6) != 0)
+                has_blocker = 16;
+            else if ((has_blocker & 16) != 0)
+                has_blocker = 32;
+            else if ((has_blocker & 8) != 0)
+                has_blocker = 64;
+            return has_blocker;
+        }
+    }
 
     this->playSound();
     // 90% accuracy agent * acurracy weapon
@@ -798,7 +818,7 @@ bool WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
             pWeaponClass_->anims()->obj_hit_anim, this);
         all_shots.clear();
     }
-    return true;
+    return 0;
 }
 
 /*!
@@ -861,23 +881,42 @@ int WeaponInstance::getShots(int *elapsed, int make_shots) {
     // TODO: if owner exists these two values should change(IPA, mods)
     if (owner_)
 #endif
+// TODO check in weaponinstance animate double consuming of elapsed
     int time_full_shot = time_for_shot + time_reload;
-    int elapsed_l = time_full_shot;
-    if (elapsed != NULL)
-        elapsed_l = *elapsed;
+    int elapsed_l = *elapsed;
     if (weapon_used_time_ >= time_for_shot) {
         weapon_used_time_ += elapsed_l;
         if (weapon_used_time_ >= time_full_shot) {
+            // reloading after previous shot
             weapon_used_time_ -= time_full_shot;
-        } else
+        } else {
+            // reload consumed all time, no time for shooting
+            *elapsed = 0;
             return 0;
+        }
     } else
         weapon_used_time_ += elapsed_l;
 
+    if (weapon_used_time_ == 0) {
+        *elapsed = 0;
+        return 0;
+    }
     int shots = weapon_used_time_ / time_full_shot;
     weapon_used_time_ %= time_full_shot;
-    if (weapon_used_time_ >= time_for_shot)
+    bool adjusted = false;
+    if (weapon_used_time_ >= time_for_shot) {
         shots++;
+        adjusted = true;
+    }
+    if (make_shots != 0 && shots != 0 && make_shots < shots) {
+        // we might have some time left here
+        if (adjusted)
+            shots--;
+        *elapsed = time_full_shot  * (shots - make_shots);
+        *elapsed += weapon_used_time_;
+        weapon_used_time_ = 0;
+    } else
+        *elapsed = 0;
     return shots;
 }
 
@@ -1108,6 +1147,8 @@ void WeaponInstance::getNonFriendInRange(toDefineXYZ * cp,
 
 bool WeaponInstance::handleDamage(ShootableMapObject::DamageInflictType * d)
 {
+    if (health_ > 0)
+        printf("hit");
     return true;
 }
 
@@ -1123,6 +1164,7 @@ void ShotClass::rangeDamageAnim(toDefineXYZ &cp, double dmg_rng,
     // don't draw in air(, stairs problem?)
     dmg_rng *= 1.1;
     for (char i = 0; i < max_anims; i++) {
+        // TODO: bad randoming for animations, something better needed
         toDefineXYZ target_pos = base_pos_;
         shotTargetRandomizer(&cp, &target_pos, 120.0, dmg_rng, true);
         PathNode pn = PathNode(target_pos.x / 256, target_pos.y / 256,

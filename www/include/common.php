@@ -79,6 +79,22 @@ function replaceLink($str) {
 	return $res;
 }
 
+function replaceHTMLTag($str) {
+	$res = $str;
+	$start = 0;
+	$end = 0;
+	
+	while (($start = stripos($res,'{{')) !== false) {
+		if (($end = stripos($res, '}}', $start)) !== false) {
+			$tag = ' <' . trim(substr($res, $start + 2, $end - $start - 2)) . '> ';
+			$res = substr($res, 0, $start) . $tag . substr($res, $end + 2);
+		} else {
+			return $str;
+		}
+	}
+	return $res;
+}
+
 
 function newsItem($title, $content, $submitter, $date, $id)
 {
@@ -92,6 +108,7 @@ function newsItem($title, $content, $submitter, $date, $id)
 	foreach ($arr as &$line) {
 		$trimLine = trim($line);
 		$trimLine = replaceLink($trimLine);
+		$trimLine = replaceHTMLTag($trimLine);
 		if (strlen($trimLine) == 0 && $openedPar == true) {
 			echo "</p>\n";
 			$openedPar = false;

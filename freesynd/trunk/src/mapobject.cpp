@@ -374,12 +374,12 @@ bool MapObject::isBlocker(toDefineXYZ * startXYZ, toDefineXYZ * endXYZ,
         }
     }
 
-    startXYZ->x = range_x_l;
-    startXYZ->y = range_y_l;
-    startXYZ->z = range_z_l;
-    endXYZ->x = range_x_h;
-    endXYZ->y = range_y_h;
-    endXYZ->z = range_z_h;
+    startXYZ->x = range_x_h;
+    startXYZ->y = range_y_h;
+    startXYZ->z = range_z_h;
+    endXYZ->x = range_x_l;
+    endXYZ->y = range_y_l;
+    endXYZ->z = range_z_l;
 
     return true;
 }

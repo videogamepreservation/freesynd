@@ -33,7 +33,7 @@
 #include "gfx/fliplayer.h"
 #include "utils/file.h"
 
-//#define NEW_ANIMATE_HANDLING
+#define NEW_ANIMATE_HANDLING
 #ifdef _WIN32
 #include <windows.h>
 #endif
@@ -815,20 +815,51 @@ bool GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
             for (int i = 0; i < 4; i++) {
                 PedInstance * pa = mission_->ped(i);
                 if (isAgentSelected(i)
-                        && pa->selectedWeapon()) {
+#ifdef NEW_ANIMATE_HANDLING
+#else
+                        && pa->selectedWeapon()
+#endif
+                   ) {
                     if (pointing_at_ped_ != -1
-                        && pa->selectedWeapon()->inflictDamage(
-                            mission_->ped(pointing_at_ped_), NULL, NULL, true))
+#ifdef NEW_ANIMATE_HANDLING
+                    ) {
+                        PedInstance::actionQueueGroupType as;
+                        as.main_act = 0;
+                        as.group_desc = PedInstance::gd_mExclusive;
+                        pa->createActQFiring(as, NULL,
+                            mission_->ped(pointing_at_ped_), true);
+                        if (modKeys & KMD_CTRL)
+                            pa->addActQToQueue(as);
+                        else
+                            pa->setActQInQueue(as);
+#else
+                        && (pa->selectedWeapon()->inflictDamage(
+                            mission_->ped(pointing_at_ped_), NULL, NULL,
+                            true)) == 0)
                     {
                         pa->startFiring();
                         pa->setTarget(mission_->ped(pointing_at_ped_));
+#endif
                     } else if (pointing_at_vehicle_ != -1
-                            && pa->selectedWeapon()->inflictDamage(
+#ifdef NEW_ANIMATE_HANDLING
+                           ) {
+                        PedInstance::actionQueueGroupType as;
+                        as.main_act = 0;
+                        as.group_desc = PedInstance::gd_mExclusive;
+                        pa->createActQFiring(as, NULL,
+                            mission_->vehicle(pointing_at_vehicle_), true);
+                        if (modKeys & KMD_CTRL)
+                            pa->addActQToQueue(as);
+                        else
+                            pa->setActQInQueue(as);
+#else
+                            && (pa->selectedWeapon()->inflictDamage(
                             mission_->vehicle(pointing_at_vehicle_), NULL,
-                            NULL, true))
+                            NULL, true)) == 0)
                     {
                         pa->startFiring();
                         pa->setTarget(mission_->ped(pointing_at_vehicle_));
+#endif
                     } else {
                         int stx = tx;
                         int sty = ty;
@@ -840,10 +871,21 @@ bool GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
                             sox, soy, oz))
                         {
                             PathNode pn(stx, sty, stz, sox, soy, oz);
+#ifdef NEW_ANIMATE_HANDLING
+                            PedInstance::actionQueueGroupType as;
+                            as.main_act = 0;
+                            as.group_desc = PedInstance::gd_mExclusive;
+                            pa->createActQFiring(as, &pn, NULL, true);
+                            if (modKeys & KMD_CTRL)
+                                pa->addActQToQueue(as);
+                            else
+                                pa->setActQInQueue(as);
+#else
                             //if (
                                 pa->selectedWeapon()->inflictDamage(NULL, &pn, NULL, true)
                                 //)
                                 ;
+#endif
                         }
                     }
                 }
@@ -910,8 +952,12 @@ void GameplayMenu::handleMouseUp(int x, int y, int button, const int modKeys) {
     if (button == 3) {
         for (int i = 0; i < 4; i++) {
             if (isAgentSelected(i)
+#ifdef NEW_ANIMATE_HANDLING
+            ) {
+#else
                     && mission_->ped(i)->selectedWeapon()) {
                 mission_->ped(i)->stopFiring();
+#endif
             }
         }
     }

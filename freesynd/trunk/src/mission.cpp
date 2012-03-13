@@ -2868,8 +2868,8 @@ void Mission::blockerExists(toDefineXYZ * startXYZ, toDefineXYZ * endXYZ,
     }
 }
 
-/*
-* returns mask where bits are:
+/*!
+* \return mask where bits are:
 * 0b - target in range(1); 1b - blocker is object, "t" is set(2)
 * 2b - blocker object, "pn" is set(4), 3b - reachable point set,
 * 4b - blocker tile, "pn" is set(16)
@@ -3030,26 +3030,27 @@ uint8 Mission::inRangeCPos(toDefineXYZ * cp, ShootableMapObject ** t,
         (*t)->setIsIgnored(targetState);
 
     if (blockerObj) {
+        bool blockerObj_is_closer = false;
+        if (block_mask != 0) {
+            int dcx = cx - startXYZ.x;
+            int dcy = cy - startXYZ.y;
+            int dcz = cz - startXYZ.z;
+            int dist_blocker =
+                (dcx * dcx + dcy * dcy + dcz * dcz);
+            dcx = cx - (int)sx;
+            dcy = cy - (int)sy;
+            dcz = cz - (int)sz;
+            if (dist_blocker
+                    < (dcx * dcx + dcy * dcy + dcz * dcz))
+            {
+                blockerObj_is_closer = true;
+            }
+        }
         if (setBlocker){
             if (pn) {
                 if (block_mask == 1)
                     block_mask = 0;
-                if (block_mask != 0) {
-                    int dcx = cx - startXYZ.x;
-                    int dcy = cy - startXYZ.y;
-                    int dcz = cz - startXYZ.z;
-                    double dist_blocker =
-                        sqrt((double) (dcx * dcx + dcy * dcy + dcz * dcz));
-                    dcx = cx - (int)sx;
-                    dcy = cy - (int)sy;
-                    dcz = cz - (int)sz;
-                    if (dist_blocker
-                        < sqrt((double) (dcx * dcx + dcy * dcy + dcz * dcz)))
-                    {
-                        block_mask = 0;
-                    }
-                }
-                if (block_mask == 0) {
+                if (blockerObj_is_closer) {
                     pn->setTileXYZ(startXYZ.x / 256, startXYZ.y / 256,
                         startXYZ.z / 128);
                     pn->setOffXYZ(startXYZ.x % 256, startXYZ.y % 256,
@@ -3058,14 +3059,19 @@ uint8 Mission::inRangeCPos(toDefineXYZ * cp, ShootableMapObject ** t,
                 }
             }
             if (t) {
-                if ((pn && block_mask == 4) || (pn == NULL)) {
+                if (blockerObj_is_closer) {
                     *t = (ShootableMapObject *)blockerObj;
                     block_mask |= 2;
                 } else
                     *t = NULL;
             }
-        } else
-            block_mask |= 6;
+        } else if (blockerObj_is_closer) {
+            if (t && *t) {
+                if (*t != blockerObj)
+                    block_mask |= 6;
+            } else
+                block_mask |= 6;
+        }
     } else {
         if (setBlocker) {
             if (block_mask != 1 && t)

@@ -41,7 +41,7 @@ namespace utf8
     class invalid_code_point : public exception {
         uint32_t cp;
     public:
-        invalid_code_point(uint32_t cp) : cp(cp) {}
+        invalid_code_point(uint32_t cp_s) : cp(cp_s) {}
         virtual const char* what() const throw() { return "Invalid code point"; }
         uint32_t code_point() const {return cp;}
     };
@@ -272,11 +272,11 @@ namespace utf8
       public:
       iterator () {};
       explicit iterator (const octet_iterator& octet_it,
-                         const octet_iterator& range_start,
-                         const octet_iterator& range_end) :
-               it(octet_it), range_start(range_start), range_end(range_end)
+                         const octet_iterator& range_start_s,
+                         const octet_iterator& range_end_s) :
+               it(octet_it), range_start(range_start_s), range_end(range_end_s)
       {
-          if (it < range_start || it > range_end)
+          if (it < range_start_s || it > range_end_s)
               throw std::out_of_range("Invalid utf-8 iterator position");
       }
       // the default "big three" are OK

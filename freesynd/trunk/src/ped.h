@@ -572,7 +572,10 @@ public:
                 uint32 t_ogd;
                 // (pedDescStateMasks)
                 uint32 t_hostile_desc;
-                uint32 shots;
+                // how many shots to do, 0 = shoot until cancelled
+                uint32 make_shots;
+                uint32 shots_done;
+                bool forced_shot;
             } enemy_var;
             struct {
                 int32 elapsed;
@@ -624,10 +627,13 @@ public:
         // 0b - not started, 1b - executing, 2b - finished, 3b - failed,
         // 4b - suspended
         uint8 state;
+        uint32 group_id;
     } actionQueueGroupType;
 
-    void setActQInQueue(actionQueueGroupType &as);
-    bool addActQToQueue(actionQueueGroupType &as);
+    void setActQInQueue(actionQueueGroupType &as,
+        bool set_id = false);
+    bool addActQToQueue(actionQueueGroupType &as,
+        bool set_id = false);
     void clearActQ() { actions_queue_.clear(); }
     bool addDefActsToActions(actionQueueGroupType &as);
     void clearDefActs() { default_actions_.clear(); }
@@ -637,8 +643,9 @@ public:
         ShootableMapObject *tsmo, int32 dir = -1, int32 dist = 0);
     void createActQHit(actionQueueGroupType &as, PathNode *tpn,
         int32 dir = -1);
-    void createActQFiring(actionQueueGroupType &as, PathNode &tpn,
-        ShootableMapObject *tsmo);
+    void createActQFiring(actionQueueGroupType &as, PathNode *tpn,
+        ShootableMapObject *tsmo = NULL, bool forced_shot = false,
+        int make_shots = 0);
     void createActQFollowing(actionQueueGroupType &as,
         ShootableMapObject *tsmo, uint32 condition, int32 dist = 128);
 
@@ -672,6 +679,7 @@ protected:
     std::vector <actionQueueGroupType> default_actions_;
     // (pedActionStateMasks)
     unsigned int action_state_;
+    uint32 action_grp_id_;
     // (pedDescStateMasks)
     unsigned int desc_state_;
     // this inherits definition from desc_state_
