@@ -3050,7 +3050,7 @@ uint8 Mission::inRangeCPos(toDefineXYZ * cp, ShootableMapObject ** t,
             block_mask = 0;
             blockerObj_is_closer = true;
         }
-        if (setBlocker){
+        if (setBlocker) {
             if (pn && blockerObj_is_closer) {
                 pn->setTileXYZ(startXYZ.x / 256, startXYZ.y / 256,
                     startXYZ.z / 128);

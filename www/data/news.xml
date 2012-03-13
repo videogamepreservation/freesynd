@@ -1,6 +1,6 @@
 <?xml version='1.0' standalone='yes'?>
 <news>
-	<item title="Release 0.6" date="2012-10-09" author="Bohdan Stelmakh"
+	<item title="Release 0.6" date="2012-03-11" author="Bohdan Stelmakh"
 	rssDesc="The development version 0.6 of Freesynd is available for download." id="9">
     After a lot of coding new version of Freesynd is ready for testing.
 	Get it from [[http://sourceforge.net/projects/freesynd/files/freesynd/freesynd-0.6/ sourceforge]].
