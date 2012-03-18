@@ -901,15 +901,24 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                 }
                 if ((aqt.state & 16) != 0) {
                 } else if ((aqt.state & 8) != 0) {
+                    if ((aqt.state & 2) != 0)
+                        switchActionStateFrom(aqt.as);
+                    if ((aqt.group_desc & PedInstance::gd_mExclusive) != 0)
+                        it->state |= 8;
                 } else if ((aqt.state & 4) != 0) {
                     switchActionStateFrom(aqt.as);
                     acts_g_prcssd |= aqt.group_desc;
                 } else if ((aqt.state & 2) != 0) {
+                    if ((aqt.group_desc & PedInstance::gd_mExclusive) != 0)
+                        it->state |= 2;
                     switchActionStateTo(aqt.as);
                     acts_g_prcssd |= aqt.group_desc;
-                } else if ((aqt.state & 1) != 0) {
+                }
+#ifdef _DEBUG
+                else if ((aqt.state & 1) != 0) {
                     printf("should not get here");
                 }
+#endif
                 if ((aqt.group_desc & PedInstance::gd_mExclusive) != 0
                     && (aqt.state & 12) == 0)
                     break;
@@ -2004,8 +2013,7 @@ bool PedInstance::movementP(Mission *m, int elapsed)
                 used_time = 0;
 
             updatePlacement(off_x_ + dx, off_y_ + dy);
-            // TODO :
-            // what obstacles? cars? doors are already
+            // TODO : what obstacles? cars? doors are already
             // setting stop signal, reuse it?
 #if 0
             if (updatePlacement(off_x_ + dx, off_y_ + dy)) {
@@ -2472,11 +2480,13 @@ void PedInstance::setActQInQueue(actionQueueGroupType &as,
     // invalid, they should be removed
     if ((as.group_desc & PedInstance::gd_mExclusive) != 0)
         actions_queue_.clear();
+        // TODO: proper action/group cancelling required
     else {
         for (std::vector <actionQueueGroupType>::iterator it = actions_queue_.begin();
             it != actions_queue_.end(); it++)
         {
             if ((it->group_desc & as.group_desc) != 0) {
+                // TODO: proper action/group cancelling required
                 actions_queue_.erase(it, actions_queue_.end());
                 break;
             }
@@ -2507,4 +2517,21 @@ bool PedInstance::addDefActsToActions(actionQueueGroupType &as) {
     */
     actions_queue_.push_back(as);
     return true;
+}
+
+void PedInstance::discardActG(uint32 id) {
+    for (std::vector <actionQueueGroupType>::iterator it = actions_queue_.begin();
+        it != actions_queue_.end(); it++)
+    {
+        if (it->group_id == id) {
+            // TODO: proper action/group cancelling required
+            it->state |= 8;
+            break;
+        }
+    }
+}
+
+void PedInstance::discardActG(std::vector <actionQueueGroupType>::iterator it_a) {
+    if (it_a->state != 2) {
+    }
 }

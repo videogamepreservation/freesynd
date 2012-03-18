@@ -6,7 +6,7 @@
  *   Copyright (C) 2005  Joost Peters  <joostp@users.sourceforge.net>   *
  *   Copyright (C) 2006  Trent Waddington <qg@biodome.org>              *
  *   Copyright (C) 2006  Tarjei Knapstad <tarjei.knapstad@gmail.com>    *
- *   Copyright (C) 2007  Davor Ocelic <docelic@mail.inet.hr>			*
+ *   Copyright (C) 2007  Davor Ocelic <docelic@mail.inet.hr>            *
  *   Copyright (C) 2010  Benoit Blancard <benblan@users.sourceforge.net>*
  *   Copyright (C) 2010  Bohdan Stelmakh <chamel@users.sourceforge.net> *
  *                                                                      *
@@ -21,7 +21,7 @@
  *  General Public License for more details.                            *
  *                                                                      *
  *    You can view the GNU  General Public License, online, at the GNU  *
- *  project'sweb  site;  see <http://www.gnu.org/licenses/gpl.html>.  *
+ *  project'sweb  site;  see <http://www.gnu.org/licenses/gpl.html>.    *
  *  The full text of the license is also included in the file COPYING.  *
  *                                                                      *
  ************************************************************************/

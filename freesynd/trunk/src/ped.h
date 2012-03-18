@@ -664,6 +664,9 @@ public:
         ShootableMapObject *tsmo, uint32 condition);
     void createActQLeaveCar(actionQueueGroupType &as,
         ShootableMapObject *tsmo);
+    
+    void discardActG(uint32 id);
+    void discardActG(std::vector <actionQueueGroupType>::iterator it_a);
 
 protected:
     Ped *ped_;

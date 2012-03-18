@@ -887,14 +887,14 @@ bool Door::animate(int elapsed, Mission *obj)
             } while (p);
             break;
         case Static::sttdoor_Closing:
-            if (frame_ > g_App.gameSprites().lastFrame(closing_anim_)) {
+            if (frame_ >= g_App.gameSprites().lastFrame(closing_anim_)) {
                 state_ = Static::sttdoor_Closed;
                 is_ignored_ = false;
                 frame_ = 0;
             }
             break;
         case Static::sttdoor_Opening:
-            if (frame_ > g_App.gameSprites().lastFrame(opening_anim_)) {
+            if (frame_ >= g_App.gameSprites().lastFrame(opening_anim_)) {
                 state_ = Static::sttdoor_Open;
                 is_ignored_ = true;
                 frame_ = 0;
@@ -1084,14 +1084,14 @@ bool LargeDoor::animate(int elapsed, Mission *obj)
             }
             break;
         case Static::sttdoor_Closing:
-            if (frame_ > g_App.gameSprites().lastFrame(closing_anim_)) {
+            if (frame_ >= g_App.gameSprites().lastFrame(closing_anim_)) {
                 state_ = Static::sttdoor_Closed;
                 is_ignored_ = false;
                 frame_ = 0;
             }
             break;
         case Static::sttdoor_Opening:
-            if (frame_ > g_App.gameSprites().lastFrame(opening_anim_)) {
+            if (frame_ >= g_App.gameSprites().lastFrame(opening_anim_)) {
                 state_ = Static::sttdoor_Open;
                 is_ignored_ = true;
                 frame_ = 0;
