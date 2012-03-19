@@ -1,26 +1,45 @@
-FreeSynd 0.6 : Release Notes
+FreeSynd 0.? : Release Notes
 ----------------------------
 
+   when vehicle is destroyed, explosion should create damage to all in range
 Description
 -----------
 This is a prelimary release for testing and development purposes.
 
 Changes
 -------
+ * Vehicle creates explosion and damages everything nearby
+
+Fixed Bugs
+----------
+  * Pathfinding out of memory/segfault error
+  * :
+
+Features added
+----------
+  * :
+
+Known issues with this release
+------------------------------
+  * Agent AI is not operational.
+  * The gameplay minimap is not complete.
+  * PathFinding requires improvement (smooth path)
+  * Mission debriefing is not operational
+  * No animation for windows
+  * Map drawing is buggy
+  * Not all weapons correctly function.
+
+History
+-------
+ v0.6
+ ----
   * CMake is used instead of autotools, used to generate Makefile for Unix's
   and project files for MSVC++
   * Reload button functional(mentor66)
   * Weapons: flamethrower, laser, gauss, minigun, uzi, shotgun, time bomb,
  persuadetron (animation only)
- 
-
-Fixed Bugs
-----------
   * 3241136 : freesynd.exe has stopped working
   * Brief minimap not showing enemy agents
-
-Features added
-----------
   * 3336699 : Made save files portable between byte orders.
   * 3283536 : Manage separate directory for syndicate and freesynd
   * 3337516 : Standardize text fields in configure and loadsave menus
@@ -33,18 +52,6 @@ Features added
   * Menus are now created when first accessed not all once.
   * In the Map menu, pressing PageUp or PageDown increases/decreases tax from 10%
 
-Known issues with this release
-------------------------------
-  * Agent AI is not operational.
-  * The gameplay minimap is not complete.
-  * PathFinding requires improvement
-  * Mission debriefing is not operational
-  * No animation for windows
-  * Map drawing is buggy
-  * Not all weapons correctly function.
-
-History
--------
  v0.5
  ----
   * Correct positioning by Z axis for all objects

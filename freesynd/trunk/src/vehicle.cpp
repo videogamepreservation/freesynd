@@ -69,16 +69,7 @@ bool VehicleInstance::animate(int elapsed)
 {
     bool updated = false;
 
-    if (health_ <= 0) {
-        vehicle_driver_ = 0;
-        while (!all_passengers_.empty())
-        {
-            PedInstance *p = *(all_passengers_.begin());
-            //TODO: inflict damage on explosion
-            p->leaveVehicle();
-            removeDriver(p);
-        }
-    } else {
+    if (health_ > 0) {
         updated = movementV(elapsed);
     }
 
@@ -157,96 +148,96 @@ bool VehicleInstance::walkable(int x, int y, int z)
         || (isRoad > 0x05 && isRoad < 0x0A));
 }
 
-uint32 VehicleInstance::tileDir(int x, int y, int z) {
-    int dir = 0;
+uint16 VehicleInstance::tileDir(int x, int y, int z) {
+    uint16 dir = 0;
 
     switch(g_App.maps().map(map())->tileAt(x, y, z)){
         case 80:
             if(g_App.maps().map(map())->tileAt(x + 1, y, z) == 80)
-                dir = (0)|(0xFFFFFF00);
+                dir = (0)|(0xFFF0);
             if(g_App.maps().map(map())->tileAt(x - 1, y, z) == 80)
-                dir = (4<<16)|(0xFF00FFFF);
+                dir = (4<<8)|(0xF0FF);
             break;
         case 81:
             if(g_App.maps().map(map())->tileAt(x, y - 1, z) == 81)
-                dir = (2<<8)|(0xFFFF00FF);
+                dir = (2<<4)|(0xFF0F);
             if(g_App.maps().map(map())->tileAt(x, y + 1, z) == 81)
-                dir = (6<<24)|(0x00FFFFFF);
+                dir = (6<<12)|(0x0FFF);
             break;
         case 106:
-            dir = (0)|(2<<8)|(6<<24)|(0x00FF0000);
+            dir = (0)|(2<<4)|(6<<12)|(0x0F00);
 
             if(g_App.maps().map(map())->tileAt(x + 1, y - 1, z) != 118)
-                dir |= 0x00FFFF00;
+                dir |= 0x0FF0;
             if(g_App.maps().map(map())->tileAt(x + 1, y + 1, z) != 118)
-                dir |= 0xFFFF0000;
+                dir |= 0xFF00;
 
             break;
         case 107:
-            dir = (2<<8)|(4<<16)|(6<<24)|(0x000000FF);
+            dir = (2<<4)|(4<<8)|(6<<12)|(0x000F);
 
             if(g_App.maps().map(map())->tileAt(x - 1, y - 1, z) != 118)
-                dir |= 0xFF0000FF;
+                dir |= 0xF00F;
             if(g_App.maps().map(map())->tileAt(x - 1, y + 1, z) != 118)
-                dir |= 0x0000FFFF;
+                dir |= 0x00FF;
 
             break;
         case 108:
-            dir = (0)|(2<<8)|(4<<16)|(0xFF000000);
+            dir = (0)|(2<<4)|(4<<8)|(0xF000);
 
             if(g_App.maps().map(map())->tileAt(x + 1, y - 1, z) != 118)
-                dir |= 0xFF0000FF;
+                dir |= 0xF00F;
             if(g_App.maps().map(map())->tileAt(x - 1, y - 1, z) != 118)
-                dir |= 0xFFFF0000;
+                dir |= 0xFF00;
 
             break;
         case 109:
-            dir = (0)|(4<<16)|(6<<24)|(0x0000FF00);
+            dir = (0)|(4<<8)|(6<<12)|(0x00F0);
 
             if(g_App.maps().map(map())->tileAt(x + 1, y + 1, z) != 118)
-                dir |= 0x0000FFFF;
+                dir |= 0x00FF;
             if(g_App.maps().map(map())->tileAt(x - 1, y + 1, z) != 118)
-                dir |= 0x00FFFF00;
+                dir |= 0x0FF0;
 
             break;
         case 110:
-            dir = (0) | (2<<8)|(0xFFFF0000);
+            dir = (0) | (2<<4)|(0xFF00);
             break;
         case 111:
-            dir = (0) | (6<<24)|(0x00FFFF00);
+            dir = (0) | (6<<12)|(0x0FF0);
             break;
         case 112:
-            dir = (2<<8)|(4<<16)|(0xFF0000FF);
+            dir = (2<<4)|(4<<8)|(0xF00F);
             break;
         case 113:
-            dir = (4<<16)|(6<<24)|(0x0000FFFF);
+            dir = (4<<8)|(6<<12)|(0x00FF);
             break;
         case 120:
-            dir = (0)|(2<<8)|(0xFFFF0000);
+            dir = (0)|(2<<4)|(0xFF00);
             break;
         case 121:
-            dir = (0)|(6<<24)|(0x00FFFF00);
+            dir = (0)|(6<<12)|(0x0FF0);
             break;
         case 122:
-            dir = (4<<16)|(6<<24)|(0x0000FFFF);
+            dir = (4<<8)|(6<<12)|(0x00FF);
             break;
         case 123:
-            dir = (2<<8)|(4<<16)|(0xFF0000FF);
+            dir = (2<<4)|(4<<8)|(0xF00F);
             break;
         case 225:
             if(g_App.walkdata_[g_App.maps().map(map())->tileAt(x + 1, y, z)] == 0x0E)
-                dir = (0)|(0xFFFFFF00);
+                dir = (0)|(0xFFF0);
             if(g_App.walkdata_[g_App.maps().map(map())->tileAt(x - 1, y, z)] == 0x0E)
-                dir = (4<<16)|(0xFF00FFFF);
+                dir = (4<<8)|(0xF0FF);
             break;
         case 226:
             if(g_App.walkdata_[g_App.maps().map(map())->tileAt(x, y - 1, z)] == 0x0E)
-                dir = (2<<8)|(0xFFFF00FF);
+                dir = (2<<4)|(0xFF0F);
             if(g_App.walkdata_[g_App.maps().map(map())->tileAt(x, y + 1, z)] == 0x0E)
-                dir = (6<<24)|(0x00FFFFFF);
+                dir = (6<<12)|(0x0FFF);
             break;
         default:
-            dir = 0xFFFFFFFF;
+            dir = 0xFFFF;
     }
 
     return dir;
@@ -257,26 +248,26 @@ bool VehicleInstance::dirWalkable(PathNode *p, int x, int y, int z) {
     if(!(walkable(x,y,z)))
         return false;
 
-    uint32 dirStart = tileDir(p->tileX(),p->tileY(),p->tileZ());
-    uint32 dirEnd = tileDir(x,y,z);
-    if (dirStart == 0xFFFFFFFF || dirEnd == 0xFFFFFFFF)
+    uint16 dirStart = tileDir(p->tileX(),p->tileY(),p->tileZ());
+    uint16 dirEnd = tileDir(x,y,z);
+    if (dirStart == 0xFFFF || dirEnd == 0xFFFF)
         return true;
 
-    if (((dirStart & 0xFF000000) != 0xFF000000)
-        || ((dirEnd & 0xFF000000) != 0xFF000000))
-        if ((dirStart & 0xFF000000) == (dirEnd & 0xFF000000))
+    if (((dirStart & 0xF000) != 0xF000)
+        || ((dirEnd & 0xF000) != 0xF000))
+        if ((dirStart & 0xF000) == (dirEnd & 0xF000))
                 return true;
-    if (((dirStart & 0x00FF0000) != 0x00FF0000)
-        || ((dirEnd & 0x00FF0000) != 0x00FF0000))
-        if ((dirStart & 0x00FF0000) == (dirEnd & 0x00FF0000))
+    if (((dirStart & 0x0F00) != 0x0F00)
+        || ((dirEnd & 0x0F00) != 0x0F00))
+        if ((dirStart & 0x0F00) == (dirEnd & 0x0F00))
                 return true;
-    if (((dirStart & 0x0000FF00) != 0x0000FF00)
-        || ((dirEnd & 0x0000FF00) != 0x0000FF00))
-        if ((dirStart & 0x0000FF00) == (dirEnd & 0x0000FF00))
+    if (((dirStart & 0x00F0) != 0x00F0)
+        || ((dirEnd & 0x00F0) != 0x00F0))
+        if ((dirStart & 0x00F0) == (dirEnd & 0x00F0))
                 return true;
-    if (((dirStart & 0x000000FF) != 0x000000FF)
-        || ((dirEnd & 0x000000FF) != 0x000000FF))
-        if ((dirStart & 0x000000FF) == (dirEnd & 0x000000FF))
+    if (((dirStart & 0x000F) != 0x000F)
+        || ((dirEnd & 0x000F) != 0x000F))
+        if ((dirStart & 0x000F) == (dirEnd & 0x000F))
                 return true;
 
     return false;
@@ -359,7 +350,8 @@ void VehicleInstance::setDestinationV(Mission *m, int x, int y, int z, int ox,
         PathNode p;
         std::set < PathNode >::iterator pit;
         for (std::set < PathNode >::iterator it = open.begin();
-             it != open.end(); it++) {
+             it != open.end(); it++)
+        {
             float d =
                 sqrt((float) (x - it->tileX()) * (x - it->tileX()) +
                      (y - it->tileY()) * (y - it->tileY()));
@@ -378,7 +370,8 @@ void VehicleInstance::setDestinationV(Mission *m, int x, int y, int z, int ox,
         closed.insert(p);
 
         if ((p.tileX() == x && p.tileY() == y && p.tileZ() == z)
-            || watchDog < 0) {
+            || watchDog < 0)
+        {
             if (watchDog < 0) {
                 p = closest;
                 dest_path_.
@@ -397,31 +390,31 @@ void VehicleInstance::setDestinationV(Mission *m, int x, int y, int z, int ox,
         }
 
         std::list < PathNode > neighbours;
-        uint32 goodDir = tileDir(p.tileX(), p.tileY(), p.tileZ());
+        uint16 goodDir = tileDir(p.tileX(), p.tileY(), p.tileZ());
 
         if (p.tileX() > 0) {
             if (dirWalkable(&p,p.tileX() - 1, p.tileY(), p.tileZ())
-                && ((goodDir & 0xFF000000) == 0x06000000 || goodDir == 0xFFFFFFFF))
+                && ((goodDir & 0xF000) == 0x6000 || goodDir == 0xFFFF))
                 neighbours.
                     push_back(PathNode(p.tileX() - 1, p.tileY(), p.tileZ()));
         }
 
         if (p.tileX() < g_App.maps().map(map())->maxX()) {
             if (dirWalkable(&p,p.tileX() + 1, p.tileY(), p.tileZ())
-                && ((goodDir & 0x0000FF00) == 0x00000200 || goodDir == 0xFFFFFFFF))
+                && ((goodDir & 0x00F0) == 0x0020 || goodDir == 0xFFFF))
                 neighbours.
                     push_back(PathNode(p.tileX() + 1, p.tileY(), p.tileZ()));
         }
 
         if (p.tileY() > 0)
             if (dirWalkable(&p,p.tileX(), p.tileY() - 1, p.tileZ())
-                && ((goodDir & 0x00FF0000) == 0x00040000 || goodDir == 0xFFFFFFFF))
+                && ((goodDir & 0x0F00) == 0x0400 || goodDir == 0xFFFF))
                 neighbours.
                     push_back(PathNode(p.tileX(), p.tileY() - 1, p.tileZ()));
 
         if (p.tileY() < g_App.maps().map(map())->maxY())
             if (dirWalkable(&p,p.tileX(), p.tileY() + 1, p.tileZ())
-                && ((goodDir & 0x000000FF) == 0x0 || goodDir == 0xFFFFFFFF))
+                && ((goodDir & 0x000F) == 0x0 || goodDir == 0xFFFF))
                 neighbours.
                     push_back(PathNode(p.tileX(), p.tileY() + 1, p.tileZ()));
 
@@ -447,26 +440,26 @@ void VehicleInstance::setDestinationV(Mission *m, int x, int y, int z, int ox,
             // visual representation
             // maybe offsets depend on type or tileZ?
             switch(tileDir(it->tileX(), it->tileY(), it->tileZ())) {
-                case 0xFFFFFF00:
-                case 0xFFFF0200:
+                case 0xFFF0:
+                case 0xFF20:
                     it->setOffX(200);
                     it->setOffY(32);
                     break;
-                case 0xFF04FFFF:
+                case 0xF4FF:
                     it->setOffX(32);
                     it->setOffY(200);
                     break;
-                case 0xFFFF02FF:
-                case 0xFF0402FF:
+                case 0xFF2F:
+                case 0xF42F:
                     it->setOffX(32);
                     it->setOffY(32);
                     break;
-                case 0x06FFFFFF:
-                case 0x0604FFFF:
+                case 0x6FFF:
+                case 0x64FF:
                     it->setOffX(32);
                     it->setOffY(200);
                     break;
-                case 0x06FFFF00:
+                case 0x6FF0:
                     it->setOffX(200);
                     it->setOffY(200);
                     break;
@@ -547,6 +540,14 @@ bool VehicleInstance::movementV(int elapsed)
         printf("Destination Unknown, full speed driving = %i ... doing full stop\n", speed_);
         speed_ = 0;
     }
+    if (all_passengers_.size() != 0) {
+        for (std::set<PedInstance *>::iterator it = all_passengers_.begin();
+            it != all_passengers_.end(); it++
+        ) {
+            (*it)->setPosition(tile_x_, tile_y_, tile_z_, off_x_, off_y_, off_z_);
+            (*it)->setVisZ(tile_z_);
+        }
+    }
 
     return updated;
 }
@@ -556,8 +557,9 @@ bool VehicleInstance::handleDamage(ShootableMapObject::DamageInflictType *d) {
     if (health_ < 0 || d->dtype == MapObject::dmg_Mental)
         return false;
     health_ -= d->dvalue;
-    if (health_ <= 0){
+    if (health_ <= 0) {
         speed_ = 0;
+        is_ignored_ = true;
         clearDestination();
         switch ((unsigned int)d->dtype) {
             case MapObject::dmg_Bullet:
@@ -568,6 +570,34 @@ bool VehicleInstance::handleDamage(ShootableMapObject::DamageInflictType *d) {
                 setTimeShowAnim(10000);
                 break;
         }
-    } // NOTE: maybe reduce speed on hit?
+        vehicle_driver_ = NULL;
+        while (all_passengers_.size() != 0)
+        {
+            PedInstance *p = *(all_passengers_.begin());
+            p->leaveVehicle();
+            removeDriver(p);
+        }
+        Mission *m = g_Session.getMission();
+        std::vector<ShootableMapObject *> all_targets;
+        DamageInflictType dit;
+        dit.d_owner = this;
+        dit.dvalue = 16;
+        dit.dtype = MapObject::dmg_Explosion;
+        dit.ddir = -1;
+        toDefineXYZ xyz;
+        this->convertPosToXYZ(&xyz);
+        xyz.z += 8;
+        m->getInRangeAll(&xyz, all_targets, Weapon::stm_AllObjects,
+            true, 512.0);
+        for (std::vector<ShootableMapObject *>::iterator it = all_targets.begin();
+            it != all_targets.end(); it++
+        ) {
+        // TODO: set directiom?
+            (*it)->handleDamage(&dit);
+        }
+        rangeDamageAnim(xyz, 512, 16, SFXObject::sfxt_ExplosionFire);
+    } else {// NOTE: maybe reduce speed on hit?
+        // TODO: let passengers know that vehicle is attacked
+    }
     return true;
 }

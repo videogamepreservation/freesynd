@@ -251,6 +251,7 @@ public:
 
     void putInVehicle(VehicleInstance *v);
     void leaveVehicle();
+    bool setVehicleIgnore(bool ignored);
 
     typedef enum {
         Not_Agent,

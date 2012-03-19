@@ -837,20 +837,24 @@ uint8 WeaponInstance::inRange(toDefineXYZ & cp, ShootableMapObject ** t,
     if (maxr == -1)
         maxr = range();
 
-    bool ownerState, selfState = isIgnored();
+    bool ownerState, vehicleState, selfState = isIgnored();
 
     setIsIgnored(true);
     if (owner_) {
         ownerState = owner_->isIgnored();
         owner_->setIsIgnored(true);
+        vehicleState = ((PedInstance *)owner_)->setVehicleIgnore(true);
     }
 
     uint8 block_mask = g_Session.getMission()->inRangeCPos(
         &cp, t, pn, setBlocker, checkTileOnly, maxr);
 
     setIsIgnored(selfState);
-    if (owner_)
+    if (owner_) {
         owner_->setIsIgnored(ownerState);
+        if (vehicleState)
+            ((PedInstance *)owner_)->setVehicleIgnore(false);
+    }
 
     return block_mask;
 }
@@ -923,19 +927,23 @@ int WeaponInstance::getShots(int *elapsed, int make_shots) {
 void WeaponInstance::getInRangeOne(toDefineXYZ & cp,
    ShootableMapObject * & target, uint8 mask, bool checkTileOnly, int maxr)
 {
-    bool ownerState, selfState = isIgnored();
+    bool ownerState, vehicleState, selfState = isIgnored();
     setIsIgnored(true);
  
     if (owner_) {
         ownerState = owner_->isIgnored();
         owner_->setIsIgnored(true);
+        vehicleState = ((PedInstance *)owner_)->setVehicleIgnore(true);
     }
    
     getHostileInRange(&cp, target, mask, checkTileOnly, maxr);
 
     setIsIgnored(selfState);
-    if (owner_)
+    if (owner_) {
         owner_->setIsIgnored(ownerState);
+        if (vehicleState)
+            ((PedInstance *)owner_)->setVehicleIgnore(false);
+    }
 }
 
 void WeaponInstance::getInRangeAll(toDefineXYZ & cp,
@@ -976,7 +984,7 @@ void ShotClass::makeShot(bool rangeChecked, toDefineXYZ &cp, int anim_hit,
     std::vector <Weapon::ShotDesc> &all_shots, int anim_obj_hit,
     WeaponInstance * w)
 {
-    for (unsigned short i = 0; i < all_shots.size(); i++) {
+    for (uint16 i = 0; i < all_shots.size(); i++) {
         ShootableMapObject * smp = all_shots[i].smo;
         PathNode pn = all_shots[i].tpn;
         ShootableMapObject::DamageInflictType d;
@@ -987,6 +995,7 @@ void ShotClass::makeShot(bool rangeChecked, toDefineXYZ &cp, int anim_hit,
             assert(w != NULL);
             has_blocker = w->inRange(cp, &smp, &pn, true);
         }
+        // TODO: set directiom?
         d.ddir = -1;
         if (smp) {
             int txb = all_shots[i].tp.x;

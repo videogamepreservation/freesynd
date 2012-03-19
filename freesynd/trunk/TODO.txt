@@ -15,13 +15,14 @@ viewing range(?), health recovery(?); mods properties should affect IPAs; damage
 recieved modifier, if we don't want to recalculate all the time; persuade power
 points; persuade points needed to persuade - this value will be added to agent
 that succesfully persuaded; weapon range modifier(?); accuracy modifier/property(?);
-   static objects: damage recieve value; destructable or not
+ - static objects: damage recieve value; destructable or not
  - A.L. - this one is complex
- - pathfinding directional to be used for simulation of people walking around city
+ - pathfinding directional will be used for simulation of people walking
+around the city
+ - pathfinding directional, vehicles, for peds driving in the city
  - damage inflicted by vehicles/weapons, variate by type of damage and range
  - state of vehicles/people/objects should change correctly due to gameplay:
    switch of state due to damage
-   when vehicle is destroyed, explosion should create damage to all in range
    change in behavior due to persuade
    "access card" make agent become police officer
    firing should have delay, correct delay per weapon(?)/ipa
@@ -44,7 +45,8 @@ game mission files.
  - Look at code that plays intro animation for possible errors.
  - "no_sound"/"no_music" option for config file, or disabled in debug mode
  - Add mission failure music
- - The built-in fonts have some characters that don't sit right vertically (Ö and Ü in certain sizes)
+ - The built-in fonts have some characters that don't sit right vertically
+(Ö and Ü in certain sizes)
  - Work on hyphenation rules in the text reflow code
  - Convert Italian and French translations to accented characters in UTF-8
  - Complete Italian translation

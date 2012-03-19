@@ -1711,6 +1711,17 @@ void PedInstance::leaveVehicle() {
 #endif
 }
 
+
+bool PedInstance::setVehicleIgnore(bool ignored) {
+    if ((action_state_ & (PedInstance::pa_smInCar
+        | PedInstance::pa_smUsingCar)) != 0)
+    {
+        in_vehicle_->setIsIgnored(ignored);
+        return true;
+    }
+    return false;
+}
+
 int PedInstance::map() {
 #ifdef _DEBUG
     if (map_ == -1) {

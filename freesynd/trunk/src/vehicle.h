@@ -30,6 +30,7 @@
 #include <string>
 #include "mapobject.h"
 #include "path.h"
+#include "weapon.h"
 
 class VehicleInstance;
 
@@ -74,7 +75,8 @@ protected:
 /*!
  * Vehicle instance class.
  */
-class VehicleInstance : public ShootableMovableMapObject {
+class VehicleInstance : public ShootableMovableMapObject, private ShotClass
+{
 public:
     VehicleInstance(Vehicle *vehicle, int m);
     virtual ~VehicleInstance() { delete vehicle_;}
@@ -133,7 +135,7 @@ protected:
     std::set <PedInstance *> all_passengers_;
 
     bool walkable(int x, int y, int z);
-    uint32 tileDir(int x, int y, int z);
+    uint16 tileDir(int x, int y, int z);
     bool dirWalkable(PathNode *p, int x, int y, int z);
 };
 

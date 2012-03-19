@@ -231,6 +231,8 @@ protected:
 
 class ShotClass {
 public:
+    ShotClass() : owner_(NULL), last_owner_(NULL){};
+    ~ShotClass(){};
     void setOwner(ShootableMapObject *owner) {
         last_owner_ = owner_;
         owner_ = owner;
