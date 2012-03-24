@@ -872,14 +872,22 @@ bool GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
                         {
                             PathNode pn(stx, sty, stz, sox, soy, oz);
 #ifdef NEW_ANIMATE_HANDLING
+#if 0
+                            printf("shooting at\n x = %i, y=%i, z=%i\n",
+                                   stx, sty, stz);
+                            printf("shooting pos\n ox = %i, oy=%i, oz=%i\n",
+                                   sox, soy, oz);
+#endif
                             PedInstance::actionQueueGroupType as;
                             as.main_act = 0;
                             as.group_desc = PedInstance::gd_mExclusive;
-                            pa->createActQFiring(as, &pn, NULL, true);
-                            if (modKeys & KMD_CTRL)
+                            if (modKeys & KMD_CTRL) {
+                                pa->createActQFiring(as, &pn, NULL, true);
                                 pa->addActQToQueue(as);
-                            else
+                            } else {
+                                pa->createActQFiring(as, &pn, NULL, true, 1);
                                 pa->setActQInQueue(as);
+                            }
 #else
                             //if (
                                 pa->selectedWeapon()->inflictDamage(NULL, &pn, NULL, true)

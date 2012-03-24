@@ -461,13 +461,24 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                         ) {
                             // TODO: more info from weapon
                             int tm_left = elapsed;
-                            int shots_done = aqt.multi_var.enemy_var.make_shots;
+                            uint32 make_shots = aqt.multi_var.enemy_var.make_shots;
+                            uint32 shots_done = make_shots
+                                - aqt.multi_var.enemy_var.shots_done;
                             wi->inflictDamage(aqt.t_smo, NULL, &tm_left,
                                 aqt.multi_var.enemy_var.forced_shot, &shots_done);
                             // TODO: handle correctly
-                            if (aqt.t_smo->health() <= 0)
+                            if (make_shots == 0 && aqt.t_smo->health() <= 0)
                                 aqt.state |= 4;
-                            else
+                            else if (shots_done != 0) {
+                                if (make_shots == 0 || make_shots
+                                    > shots_done
+                                    + aqt.multi_var.enemy_var.shots_done)
+                                {
+                                    aqt.multi_var.enemy_var.shots_done = shots_done;
+                                    aqt.state |= 2;
+                                } else
+                                    aqt.state |= 4;
+                            } else
                                 aqt.state |= 2;
                         } else
                             aqt.state |= 8;
@@ -684,7 +695,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                 }
                 if ((aqt.ot_execute & Mission::objv_AttackLocation) != 0)
                 {
-                    // TODO: additional conditions, single shot?
+                    // TODO: additional conditions
                     WeaponInstance *wi = selectedWeapon();
                     if (!wi)
                         selectBestWeapon();
@@ -694,10 +705,22 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                     ) {
                         // TODO: more info from weapon needed
                         int tm_left = elapsed;
-                        int shots_done = aqt.multi_var.enemy_var.make_shots;
+                        uint32 make_shots = aqt.multi_var.enemy_var.make_shots;
+                        uint32 shots_done = make_shots
+                            - aqt.multi_var.enemy_var.shots_done;
                         wi->inflictDamage(NULL, &aqt.t_pn, &tm_left,
                             aqt.multi_var.enemy_var.forced_shot, &shots_done);
-                        aqt.state |= 2;
+                        if (shots_done != 0) {
+                            if (make_shots == 0 || make_shots
+                                > shots_done
+                                + aqt.multi_var.enemy_var.shots_done)
+                            {
+                                aqt.multi_var.enemy_var.shots_done = shots_done;
+                                aqt.state |= 2;
+                            } else
+                                aqt.state |= 4;
+                        } else
+                            aqt.state |= 2;
                     } else
                         aqt.state |= 8;
                 }

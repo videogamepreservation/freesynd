@@ -375,16 +375,16 @@ public:
 
     virtual bool animate(int elapsed, Mission *obj) { return MapObject::animate(elapsed); }
     typedef enum {
-        sttdoor_Open = 0,
+        sttdoor_Closed = 0,
         sttdoor_Closing,
-        sttdoor_Closed,
+        sttdoor_Open,
         sttdoor_Opening
     }stateDoors;
 
     typedef enum {
         stttree_Healthy = 0,
         stttree_Burning,
-        stttree_Damaged,
+        stttree_Damaged
     }stateTrees;
 
     //semaphore, 4 animations + damaged
@@ -393,8 +393,15 @@ public:
         sttsem_Stt1,
         sttsem_Stt2,
         sttsem_Stt3,
-        sttsem_Damaged,
+        sttsem_Damaged
     }stateSemaphores;
+    
+    typedef enum {
+        sttwnd_Closed = 0,
+        sttwnd_Open,
+        sttwnd_Breaking,
+        sttwnd_Damaged
+    }stateWindows;
 
     typedef enum {
         // NOTE: should be the same name as Class
@@ -464,13 +471,16 @@ protected:
  */
 class WindowObj : public Static {
 public:
-    WindowObj(int m, int anim, int breakingAnim , int damagedAnim);
+    WindowObj(int m, int anim, int openAnim, int breakingAnim,
+              int damagedAnim);
     virtual ~WindowObj() {}
 
+    bool animate(int elapsed, Mission *obj);
     void draw(int x, int y);
+    bool handleDamage(ShootableMapObject::DamageInflictType *d);
 
 protected:
-    int anim_, breaking_anim_, damaged_anim_;
+    int anim_, open_anim_, breaking_anim_, damaged_anim_;
 };
 
 /*!
