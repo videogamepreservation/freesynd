@@ -37,6 +37,15 @@ MapManager::~MapManager()
         delete maps_[i];
 }
 
+/*!
+ * Currently loads all tiles.
+ * \return True if everything is ok
+ */
+bool MapManager::initialize()
+{
+    return tileManager_.loadTiles();
+}
+
 Map * MapManager::loadMap(int mapNum)
 {
     char tmp[100];
@@ -44,13 +53,7 @@ Map * MapManager::loadMap(int mapNum)
     int size;
     uint8 *mapData = File::loadOriginalFile(tmp, size);
 
-    if (!tileManager_.loaded()) {
-        uint8 *data = File::loadOriginalFile("hblk01.dat", size);
-        tileManager_.loadTiles(data);
-        delete[] data;
-    }
-
-    maps_[mapNum] = new Map(&tileManager_);
+    maps_[mapNum] = new Map(&tileManager_, mapNum);
     maps_[mapNum]->loadMap(mapData);
     // patch for "YUKON" map
     if (mapNum == 0x27) {

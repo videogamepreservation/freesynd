@@ -29,20 +29,24 @@
 #include "tile.h"
 
 /*!
- * Tile manager class.
+ * Tile manager loads and holds all the game tiles.
  */
 class TileManager {
 public:
     TileManager();
-    bool loadTiles(uint8 *tileData);
-    bool drawTileTo(uint8 *screen, int swidth, int sheight, int tileNum,
-            int x, int y, bool clear = false);
+    //! Loads tiles from the file
+    bool loadTiles();
 
-    bool loaded() { return tilesLoaded_ > 0; }
+    //! Returns tile with the given index
+    Tile * getTile(uint8 index);
 
 protected:
-    int tilesLoaded_;
-    Tile tile_[NUMtile_S];
+    //! Load a given tile
+    Tile * loadTile(uint8 *tileData, uint8 id);
+
+protected:
+    //! All the tiles in the game
+    Tile *a_tiles_[NUMtile_S];
 };
 
 #endif

@@ -396,6 +396,11 @@ bool App::initialize(const std::string& iniPath) {
 	if (!gameSprites().loaded())
 		gameSprites().load();
 
+    LOG(Log::k_FLG_INFO, "App", "initialize", ("loading game tileset..."))
+	if (!maps().initialize()) {
+		return false;
+    }
+
 	if (playIntro_) {
 		LOG(Log::k_FLG_INFO, "App", "initialize", ("Loading intro sounds..."))
 		if (!intro_sounds_.loadSounds(SoundManager::SAMPLES_INTRO)) {

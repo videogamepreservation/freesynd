@@ -39,6 +39,8 @@ public:
     MapManager();
     ~MapManager();
 
+    //! Initialize the manager
+    bool initialize();
     Map * loadMap(int mapNum);
     bool drawMap(int mapNum, int scrollx, int scrolly, MapHelper *helper);
     Map *map(int mapNum);

@@ -51,14 +51,23 @@
  */
 class Tile {
 public:
-    Tile();
-    bool loadTile(uint8 *tileData, uint32 offset);
+    Tile(uint8 id, uint8 *tile_Data, bool all_alpha);
+    ~Tile();
+
+    //! Returns the tile id 
+    uint8 id() { return i_id_; }
+
+    //! Draws the tile to the given surface
     bool drawTo(uint8 *screen, int swidth, int sheight, int x, int y,
             bool clear = false);
 
 protected:
-    uint8 tile_Data_[TILE_WIDTH * TILE_HEIGHT];
-    bool all_alpha_;
+    /*! Each tile has a unique id.*/
+    uint8 i_id_;
+    /*! The pixels that compose the tile.*/
+    uint8 *a_pixels_;
+    /*! A quick flag to tell that all pixel are transparent.*/
+    bool b_all_alpha_;
 };
 
 #endif

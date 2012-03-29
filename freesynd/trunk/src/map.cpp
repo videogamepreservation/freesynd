@@ -37,35 +37,37 @@
 #define EXECUTION_SPEED_TIME
 #endif
 
-Map::Map(TileManager * tileManager):map_data_(NULL),
-tile_manager_(tileManager)
+Map::Map(TileManager * tileManager, uint16 i_id) : tile_manager_(tileManager)
 {
+    i_id_ = i_id;
+    a_tiles_ = NULL;
 }
 
 Map::~Map()
 {
-    delete[] map_data_;
+    delete[] a_tiles_;
 }
 
 bool Map::loadMap(uint8 * mapData)
 {
-
     max_x_ = READ_LE_UINT32(mapData + 0);
     max_y_ = READ_LE_UINT32(mapData + 4);
     max_z_ = READ_LE_UINT32(mapData + 8);
 
-    if (map_data_)
-        delete[] map_data_;
-    map_data_ = new uint8[max_x_ * max_y_ * max_z_];
     uint32 *lookup = new uint32[max_x_ * max_y_];
-
+    a_tiles_ = new Tile*[max_x_ * max_y_ * max_z_];
+    
     for (int i = 0; i < max_x_ * max_y_; i++)
         lookup[i] = READ_LE_UINT32(mapData + 12 + i * 4);
     for (int h = 0; h < max_y_; h++)
         for (int w = 0; w < max_x_; w++) {
             int idx = h * max_x_ + w;
-            memcpy(map_data_ + idx * max_z_, mapData + 12 + lookup[idx],
-                   max_z_);
+
+            for (int z=0; z < max_z_; z++) {
+                int tileNum = *(mapData + 12 + lookup[idx] + z);
+                a_tiles_[idx * max_z_ + z] = tile_manager_->getTile(tileNum);
+                
+            }
         }
     delete[] lookup;
 
@@ -73,6 +75,13 @@ bool Map::loadMap(uint8 * mapData)
     map_height_ = (max_x_ + max_y_ + max_z_) * TILE_HEIGHT / 3;
 
     return true;
+}
+
+void Map::mapDimensions(int *x, int *y, int *z)
+{
+    *x = maxX();
+    *y = maxY();
+    *z = maxZ();
 }
 
 float scalexPx = 256.0f;
@@ -152,7 +161,8 @@ int Map::tileAt(int x, int y, int z)
         return z < 2 ? 6 : 0;
     if (z < 0 || z >= max_z_)
         return 0;
-    return map_data_[(y * max_x_ + x) * max_z_ + z];
+
+    return a_tiles_[(y * max_x_ + x) * max_z_ + z]->id();
 }
 
 void Map::patchMap(int x, int y, int z, uint8 tileNum)
@@ -160,7 +170,7 @@ void Map::patchMap(int x, int y, int z, uint8 tileNum)
     assert((x >= 0 && x < max_x_)
         && (y >= 0 && y < max_y_)
         && (z >= 0 && z < max_z_));
-    map_data_[(y * max_x_ + x) * max_z_ + z] = tileNum;
+    a_tiles_[(y * max_x_ + x) * max_z_ + z] = tile_manager_->getTile(tileNum);
 }
 
 bool Map::stairsAt(int x, int y, int z)
@@ -234,16 +244,16 @@ void Map::draw(int scrollX, int scrollY, MapHelper * helper)
                     && coord_h >= scrollY - TILE_HEIGHT * 2
                     && coord_h + TILE_HEIGHT * 2 < cmh) {
                     if (z < max_z_) {
-                        int tile = map_data_[(h * max_x_ + w) * max_z_ + z];
-                        if (tile > 4) {
+                        Tile *p_tile = a_tiles_[(h * max_x_ + w) * max_z_ + z];
+                        if (p_tile->id() > 4) {
                         int dx = 0, dy = 0;
                             if (screen_w - scrollX < 0)
                                 dx = -(screen_w - scrollX);
                             if (coord_h - scrollY < 0)
                                 dy = -(coord_h - scrollY);
                             if (dx < TILE_WIDTH && dy < TILE_HEIGHT) {
-                                tile_manager_->drawTileTo(buf, TILE_WIDTH,
-                                                     TILE_HEIGHT, tile, 0, 0, true);
+                                p_tile->drawTo(buf, TILE_WIDTH,
+                                                     TILE_HEIGHT, 0, 0, true);
                                 g_Screen.blit(screen_w - cmx +
                                               dx, coord_h - scrollY + dy,
                                               TILE_WIDTH - dx,

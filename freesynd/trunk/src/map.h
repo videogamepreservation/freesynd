@@ -29,9 +29,7 @@
 
 #define NUM_MAPS               59
 
-/*!
- * Tile manager class.
- */
+class Tile;
 class TileManager;
 
 /*!
@@ -51,14 +49,16 @@ public:
  */
 class Map {
 public:
-    Map(TileManager *tileManager);
+    Map(TileManager *tileManager, uint16 i_id);
     ~Map();
 
     bool loadMap(uint8 *mapData);
     void draw(int scrollX, int scrollY, MapHelper *helper);
 
+    uint16 id() { return i_id_; }
     int width() { return map_width_; }
     int height() { return map_height_; }
+    void mapDimensions(int *x, int *y, int *z);
 
     int tileToScreenX(int x, int y, int z, int pX, int pY);
     int tileToScreenY(int x, int y, int z, int pX, int pY);
@@ -75,8 +75,11 @@ public:
     bool stairsAt(int x, int y, int z);
 
 protected:
+    /*!  Every map has a unique which is used to identify the 
+    name of the file containing map data.*/
+    uint16 i_id_;
     int max_x_, max_y_, max_z_;
-    uint8 *map_data_;
+    Tile **a_tiles_;
     TileManager *tile_manager_;
     int map_width_, map_height_;
 };

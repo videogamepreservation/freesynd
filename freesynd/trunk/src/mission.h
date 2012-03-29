@@ -89,7 +89,8 @@ public:
     bool loadLevel(uint8 *levelData);
     bool loadMap();
 
-    int map() { return map_; }
+    int map() { return i_map_id_; }
+    void set_map(Map *p_map) { p_map_ = p_map; }
 
     int mapWidth();
     int mapHeight();
@@ -452,7 +453,6 @@ public:
     // initialized in setSurfaces, used for in-class calculations
     int mmax_m_all, mmax_m_xy;
 
-    void createMinimap();
     // 0 - not present, 1 - our agent, 2 - enemy agent
     unsigned char getMinimapOverlay(int x, int y) {
         return minimap_overlay_[x + y * mmax_x_];
@@ -502,6 +502,8 @@ protected:
     bool isStairs(char thisTile);
 
     WeaponInstance *createWeaponInstance(uint8 *data);
+
+    void createMinimap();
 
 protected:
     LEVELDATA level_data_;
@@ -575,7 +577,15 @@ protected:
      */
     Status status_;
 
-    int map_, min_x_, min_y_, max_x_, max_y_;
+    int min_x_, min_y_, max_x_, max_y_;
+    /*!
+     * The id of the map for that mission.
+     */
+    uint16 i_map_id_;
+    /*!
+     * A pointer to the map.
+     */
+    Map *p_map_;
 
     std::set<int> fast_vehicle_cache_, fast_ped_cache_, fast_weapon_cache_,
             fast_statics_cache_, fast_sfx_objects_cache_;

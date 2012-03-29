@@ -100,6 +100,8 @@ Mission *MissionManager::loadMission(int n)
     }
     delete[] data;
 
+    m->loadMap();
+
     missions_[n] = m;
     return m;
 }

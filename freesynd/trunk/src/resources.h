@@ -35,4 +35,7 @@
 //! Mission content
 #define GAME_PATTERN "game%02d.dat"
 
+//! File containing all game tiles
+#define TILE_SET "hblk01.dat"
+
 #endif

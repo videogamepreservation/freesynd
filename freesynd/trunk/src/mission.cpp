@@ -42,7 +42,8 @@ Mission::Mission()
     mtsurfaces_ = NULL;
     mdpoints_ = NULL;
     mdpoints_cp_ = NULL;
-    map_ = 0;
+    i_map_id_ = 0;
+    p_map_ = NULL;
     min_x_= 0;
     min_y_ = 0;
     max_x_ = 0;
@@ -96,8 +97,8 @@ bool Mission::loadLevel(uint8 * levelData)
     copydata(objectives, 113974);
     copydata(u11, 114058);
 
-    map_ = READ_LE_UINT16(level_data_.mapinfos.map);
-    printf("map to load %X\n", map_);
+    i_map_id_ = READ_LE_UINT16(level_data_.mapinfos.map);
+    printf("map to load %X\n", i_map_id_);
     min_x_ = READ_LE_UINT16(level_data_.mapinfos.min_x) / 2;
     min_y_ = READ_LE_UINT16(level_data_.mapinfos.min_y) / 2;
     max_x_ = READ_LE_UINT16(level_data_.mapinfos.max_x) / 2;
@@ -135,7 +136,7 @@ bool Mission::loadLevel(uint8 * levelData)
         if (car.type == 0x0)
             continue;
         VehicleInstance *v =
-            g_App.vehicles().loadInstance((uint8 *) & car, map_);
+            g_App.vehicles().loadInstance((uint8 *) & car, i_map_id_);
         if (v) {
             vindx[i] = vehicles_.size();
             vehicles_.push_back(v);
@@ -173,7 +174,7 @@ bool Mission::loadLevel(uint8 * levelData)
         if(pedref.type == 0x0 || pedref.desc == 0x0D || pedref.desc == 0x0C)
             continue;
         PedInstance *p =
-            g_App.peds().loadInstance((uint8 *) & pedref, map_);
+            g_App.peds().loadInstance((uint8 *) & pedref, i_map_id_);
         if (p) {
             if (pedref.desc == 0x05) {
                 if (driverindx[i] != 0xFFFF) {
@@ -303,7 +304,7 @@ bool Mission::loadLevel(uint8 * levelData)
         LEVELDATA_STATICS & sref = level_data_.statics[i];
         if(sref.desc == 0)
             continue;
-        Static *s = Static::loadInstance((uint8 *) & sref, map_);
+        Static *s = Static::loadInstance((uint8 *) & sref, i_map_id_);
         if (s)
             statics_.push_back(s);
     }
@@ -343,7 +344,7 @@ bool Mission::loadLevel(uint8 * levelData)
                     delete w;
                 }
             } else {
-                w->setMap(map_);
+                w->setMap(i_map_id_);
                 w->setOwner(NULL);
                 windx[i] = weapons_.size();
                 weapons_.push_back(w);
@@ -542,23 +543,28 @@ bool Mission::loadLevel(uint8 * levelData)
 
 bool Mission::loadMap()
 {
-    return g_App.maps().loadMap(map_) != NULL;
+    p_map_ = g_App.maps().loadMap(i_map_id_);
+    if (p_map_ != NULL) {
+        createMinimap();
+        return true;
+    }
+    return false;
 }
 
 int Mission::mapWidth()
 {
-    return g_App.maps().mapWidth(map_);
+    return p_map_->width();
 }
 
 int Mission::mapHeight()
 {
-    return g_App.maps().mapHeight(map_);
+    return p_map_->height();
 }
 
 int Mission::startX()
 {
     int x =
-        g_App.maps().tileToScreenX(map_, peds_[0]->tileX(),
+        p_map_->tileToScreenX(peds_[0]->tileX(),
         peds_[0]->tileY(), mmax_z_ - 1, 0,
                                    0);
     x -= (GAME_SCREEN_WIDTH - 129) / 2;
@@ -570,7 +576,7 @@ int Mission::startX()
 int Mission::startY()
 {
     int y =
-        g_App.maps().tileToScreenY(map_, peds_[0]->tileX(),
+        p_map_->tileToScreenY(peds_[0]->tileX(),
                                    peds_[0]->tileY(), mmax_z_ - 1, 0,
                                    0);
     y -= GAME_SCREEN_HEIGHT / 2;
@@ -581,22 +587,22 @@ int Mission::startY()
 
 int Mission::minScreenX()
 {
-    return g_App.maps().tileToScreenX(map_, min_x_, min_y_, 0, 0, 0);
+    return p_map_->tileToScreenX(min_x_, min_y_, 0, 0, 0);
 }
 
 int Mission::minScreenY()
 {
-    return g_App.maps().tileToScreenY(map_, min_x_, min_y_, 0, 0, 0);
+    return p_map_->tileToScreenY(min_x_, min_y_, 0, 0, 0);
 }
 
 int Mission::maxScreenX()
 {
-    return g_App.maps().tileToScreenX(map_, max_x_, max_y_, 0, 0, 0);
+    return p_map_->tileToScreenX(max_x_, max_y_, 0, 0, 0);
 }
 
 int Mission::maxScreenY()
 {
-    return g_App.maps().tileToScreenY(map_, max_x_, max_y_, 0, 0, 0);
+    return p_map_->tileToScreenY(max_x_, max_y_, 0, 0, 0);
 }
 
 int fastKey(int tx, int ty, int tz)
@@ -707,7 +713,7 @@ void Mission::createFastKeys(int tilex, int tiley, int maxtilex, int maxtiley) {
 
 void Mission::drawMap(int scrollx, int scrolly)
 {
-    g_App.maps().drawMap(map_, scrollx, scrolly, this);
+    p_map_->draw(scrollx, scrolly, this);
 }
 
 void Mission::drawAt(int tilex, int tiley, int tilez, int x, int y,
@@ -924,7 +930,7 @@ void Mission::end()
 
 void Mission::addWeapon(WeaponInstance * w)
 {
-    w->setMap(map_);
+    w->setMap(p_map_->id());
     for (unsigned int i = 0; i < weapons_.size(); i++)
         if (weapons_[i] == w)
             return;
@@ -1040,12 +1046,11 @@ bool Mission::setSurfaces() {
     mmax_m_xy = mmax_x_ * mmax_y_;
     memset((void *)mtsurfaces_, 0, mmax_m_all * sizeof(surfaceDesc));
     memset((void *)mdpoints_, 0, mmax_m_all * sizeof(floodPointDesc));
-    Map *m = g_App.maps().map(map_);
     for (int ix = 0; ix < mmax_x_; ix++) {
         for (int iy = 0; iy < mmax_y_; iy++) {
             for (int iz = 0; iz < mmax_z_; iz++) {
                 mtsurfaces_[ix + iy * mmax_x_ + iz * mmax_m_xy].twd =
-                    g_App.walkdata_p_[m->tileAt(ix, iy, iz)];
+                    g_App.walkdata_p_[p_map_->tileAt(ix, iy, iz)];
             }
         }
     }
@@ -2703,16 +2708,12 @@ void Mission::adjXYZ(int &x, int &y, int &z) {
 }
 
 void Mission::createMinimap() {
-    Map *m = g_App.maps().map(map_);
-
-    if (!(g_App.maps().mapDimensions(map_,
-        &mmax_x_, &mmax_y_, &mmax_z_)))
-        return;
+    p_map_->mapDimensions(&mmax_x_, &mmax_y_, &mmax_z_);
 
     if (p_minimap_) {
         delete p_minimap_;
     }
-    p_minimap_ = new MiniMap(m);
+    p_minimap_ = new MiniMap(p_map_);
 }
 
 WeaponInstance *Mission::createWeaponInstance(uint8 * data)
