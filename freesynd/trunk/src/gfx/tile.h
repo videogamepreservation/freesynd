@@ -28,8 +28,6 @@
 #include "common.h"
 
 // TODO: Convert these to const int's -- we are using C++, yes? :-)
-#define NUMtile_S               256
-
 #define TILE_WIDTH              64
 #define TILE_HEIGHT             48
 
@@ -44,18 +42,54 @@
 #define SUBTILE_ROW_LENGTH      (BLOCK_LENGTH * BLOCKS_PER_SUBTILE_ROW)
 
 #define TILE_INDEX_SIZE         (SUBTILES_PERtile_ * 4)
-#define TILE_HEADER_LENGTH      (NUMtile_S * TILE_INDEX_SIZE)
+#define TILE_HEADER_LENGTH      (256 * TILE_INDEX_SIZE)
 
 /*!
  * Tile class.
  */
 class Tile {
 public:
-    Tile(uint8 id, uint8 *tile_Data, bool all_alpha);
+
+    /*!
+     * A tile type.
+     */
+    enum EType {
+        kNone,       // non-surface/non-walkable(if above surface is walkable)
+        kSlopeSN,
+        kSlopeNS,
+        kSlopeEW,
+        kSlopeWE,
+        kGround,
+        kRoadSideEW,
+        kRoadSideWE,
+        kRoadSideSN,
+        kRoadSideNS,
+        kWall,
+        kRoadCurve,
+        kHandrailLight,
+        kRoof,
+        kRoadPedCross,
+        kRoadMark,
+        kUnknown,   // non-surface/non-walkable, always above train stop
+        kNbTypes
+    };
+
+    Tile(uint8 id, uint8 *tile_Data, bool all_alpha, EType type);
     ~Tile();
 
     //! Returns the tile id 
     uint8 id() { return i_id_; }
+    //! Returns the tile type
+    EType type() { return e_type_; }
+    //! Convenience method to tell whether this tile is a road type or not
+    bool isRoad() {
+        return  (e_type_ == kRoadCurve || e_type_ == kRoadPedCross ||
+                (e_type_ > kGround && e_type_ < kWall));
+    }
+    //! Convenience method to tell whether this tile is a stair type or not
+    bool isStairs() {
+        return e_type_ > kNone && e_type_ < kGround;
+    }
 
     //! Draws the tile to the given surface
     bool drawTo(uint8 *screen, int swidth, int sheight, int x, int y,
@@ -68,6 +102,8 @@ protected:
     uint8 *a_pixels_;
     /*! A quick flag to tell that all pixel are transparent.*/
     bool b_all_alpha_;
+    /*! The tile type. */
+    EType e_type_;
 };
 
 #endif

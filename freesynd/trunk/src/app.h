@@ -61,7 +61,6 @@ class App : public Singleton < App > {
     //! Initialize application
     bool initialize(const std::string& iniPath);
 
-    uint8 walkdata_[256];
     // patched version
     uint8 walkdata_p_[256];
 

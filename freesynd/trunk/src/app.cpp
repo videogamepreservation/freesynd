@@ -314,23 +314,11 @@ bool App::loadWalkData() {
 		return false;
 	}
 
-    // original walk data
-    memcpy(walkdata_, data, 256);
-    // walkdata_ patched version
-    // 0x00 - non-surface/non-walkable(if above surface is walkable)
-    // 0x01 - stairs low y + 1, high y - 1
-    // 0x02 - stairs low y - 1, high y + 1
-    // 0x03 - stairs low x - 1, high x + 1
-    // 0x04 - stairs low x + 1, high x - 1
-    // 0x05-0x09, 0x0B,0x0D-0x0F - simple surfaces(0x0D is not so simple)
-    // also some of them are roads for vehicles, look tile picture for info
-    // 0x0C - fences
-    // 0x0A - non-surface/non-walkable
-    // 0x10 - non-surface/non-walkable, always above train stop
-    // 0x11, 0x12 - train entering surface
     memcpy(walkdata_p_, data, 256);
     // little patch to enable full surface description
     // and eliminate unnecessary data
+    // 0x10 - non-surface/non-walkable, always above train stop
+    // 0x11, 0x12 - train entering surface
     walkdata_p_[0x02] = 0x00;
     walkdata_p_[0x80] = 0x11;
     walkdata_p_[0x81] = 0x12;

@@ -70,9 +70,9 @@ public:
     int maxZ() { return max_z_; }
 
     int maxZAt(int x, int y);
+    Tile * getTileAt(int x, int y, int z);
     int tileAt(int x, int y, int z);
     void patchMap(int x, int y, int z, uint8 tileNum);
-    bool stairsAt(int x, int y, int z);
 
 protected:
     /*!  Every map has a unique which is used to identify the 

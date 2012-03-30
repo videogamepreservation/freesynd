@@ -29,9 +29,10 @@
 #include "tile.h"
 
 
-Tile::Tile(uint8 id, uint8 *tile_Data, bool all_alpha)
+Tile::Tile(uint8 id, uint8 *tile_Data, bool all_alpha, EType type)
 {
     i_id_ = id;
+    e_type_ = type;
     a_pixels_ = new uint8[TILE_WIDTH * TILE_HEIGHT];
     memcpy(a_pixels_, tile_Data, TILE_WIDTH * TILE_HEIGHT);
     b_all_alpha_ = all_alpha;

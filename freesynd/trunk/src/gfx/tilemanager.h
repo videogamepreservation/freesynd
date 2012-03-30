@@ -33,7 +33,11 @@
  */
 class TileManager {
 public:
+    /*! The total number of tiles.*/
+    static const int kNumOfTiles;
+
     TileManager();
+    ~TileManager();
     //! Loads tiles from the file
     bool loadTiles();
 
@@ -42,11 +46,13 @@ public:
 
 protected:
     //! Load a given tile
-    Tile * loadTile(uint8 *tileData, uint8 id);
+    Tile * loadTile(uint8 *tileData, uint8 id, Tile::EType type);
+    //! Returns the good enum for the given data
+    Tile::EType toTileType(uint8 data);
 
 protected:
     //! All the tiles in the game
-    Tile *a_tiles_[NUMtile_S];
+    Tile **a_tiles_;
 };
 
 #endif

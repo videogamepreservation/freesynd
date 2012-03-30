@@ -37,5 +37,7 @@
 
 //! File containing all game tiles
 #define TILE_SET "hblk01.dat"
+//! File containing all tile types
+#define TILE_TYPES "col01.dat"
 
 #endif

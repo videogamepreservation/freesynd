@@ -116,36 +116,35 @@ void VehicleInstance::draw(int x, int y)
 
 bool VehicleInstance::walkable(int x, int y, int z)
 {
-    uint8 thisTile = g_App.maps().map(map())->tileAt(x, y, z);
-    uint8 isRoad = g_App.walkdata_[thisTile];
+    Tile *p_this_tile = g_App.maps().map(map())->getTileAt(x, y, z);
+    uint8 this_tile_id = p_this_tile->id();
 
-    if(thisTile == 80) {
-        uint8 nearTile = g_App.walkdata_[g_App.maps().map(map())->tileAt(x, y - 1, z)];
-        if((nearTile < 0x06 || nearTile > 0x09) && nearTile != 0x0E)
+    if(this_tile_id == 80) {
+        Tile::EType near_type = g_App.maps().map(map())->getTileAt(x, y - 1, z)->type();
+        if((near_type < Tile::kRoadSideEW || near_type > Tile::kRoadSideNS) && near_type != Tile::kRoadPedCross)
             return false;
-        nearTile = g_App.walkdata_[g_App.maps().map(map())->tileAt(x, y + 1, z)];
-        if((nearTile < 0x06 || nearTile > 0x09) && nearTile != 0x0E)
+        near_type = g_App.maps().map(map())->getTileAt(x, y + 1, z)->type();
+         if((near_type < Tile::kRoadSideEW || near_type > Tile::kRoadSideNS) && near_type != Tile::kRoadPedCross)
             return false;
         return true;
     }
-    if(thisTile == 81) {
-        uint8 nearTile = g_App.walkdata_[g_App.maps().map(map())->tileAt(x - 1, y, z)];
-        if((nearTile < 0x06 || nearTile > 0x09) && nearTile != 0x0E)
+    if(this_tile_id == 81) {
+        Tile::EType near_type = g_App.maps().map(map())->getTileAt(x - 1, y, z)->type();
+         if((near_type < Tile::kRoadSideEW || near_type > Tile::kRoadSideNS) && near_type != Tile::kRoadPedCross)
             return false;
-        nearTile = g_App.walkdata_[g_App.maps().map(map())->tileAt(x + 1, y, z)];
-        if((nearTile < 0x06 || nearTile > 0x09) && nearTile != 0x0E)
+        near_type = g_App.maps().map(map())->getTileAt(x + 1, y, z)->type();
+         if((near_type < Tile::kRoadSideEW || near_type > Tile::kRoadSideNS) && near_type != Tile::kRoadPedCross)
             return false;
         return true;
     }
-    if(thisTile == 72) {
+    if(this_tile_id == 72) {
         return false;
     }
 
-    if(thisTile == 119) {
+    if(this_tile_id == 119) {
         return false;
     }
-    return  (isRoad == 0x0B || isRoad == 0x0E
-        || (isRoad > 0x05 && isRoad < 0x0A));
+    return  p_this_tile->isRoad();
 }
 
 uint16 VehicleInstance::tileDir(int x, int y, int z) {
@@ -225,15 +224,15 @@ uint16 VehicleInstance::tileDir(int x, int y, int z) {
             dir = (2<<4)|(4<<8)|(0xF00F);
             break;
         case 225:
-            if(g_App.walkdata_[g_App.maps().map(map())->tileAt(x + 1, y, z)] == 0x0E)
+            if(g_App.maps().map(map())->getTileAt(x + 1, y, z)->type() == Tile::kRoadPedCross)
                 dir = (0)|(0xFFF0);
-            if(g_App.walkdata_[g_App.maps().map(map())->tileAt(x - 1, y, z)] == 0x0E)
+            if(g_App.maps().map(map())->getTileAt(x - 1, y, z)->type() == Tile::kRoadPedCross)
                 dir = (4<<8)|(0xF0FF);
             break;
         case 226:
-            if(g_App.walkdata_[g_App.maps().map(map())->tileAt(x, y - 1, z)] == 0x0E)
+            if(g_App.maps().map(map())->getTileAt(x, y - 1, z)->type() == Tile::kRoadPedCross)
                 dir = (2<<4)|(0xFF0F);
-            if(g_App.walkdata_[g_App.maps().map(map())->tileAt(x, y + 1, z)] == 0x0E)
+            if(g_App.maps().map(map())->getTileAt(x, y + 1, z)->type() == Tile::kRoadPedCross)
                 dir = (6<<12)|(0x0FFF);
             break;
         default:

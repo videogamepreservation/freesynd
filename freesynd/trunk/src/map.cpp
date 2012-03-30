@@ -153,6 +153,19 @@ int Map::maxZAt(int x, int y)
     return max_z_ - 1;
 }
 
+Tile * Map::getTileAt(int x, int y, int z)
+{
+    if (x < 0 || x >= max_x_ || y < 0 || y >= max_y_) {
+        return tile_manager_->getTile(z < 2 ? 6 : 0);
+    }
+    
+    if (z < 0 || z >= max_z_) {
+        return tile_manager_->getTile(0);
+    }
+
+    return a_tiles_[(y * max_x_ + x) * max_z_ + z];
+}
+
 int Map::tileAt(int x, int y, int z)
 {
     if (x < 0 || x >= max_x_)
@@ -171,12 +184,6 @@ void Map::patchMap(int x, int y, int z, uint8 tileNum)
         && (y >= 0 && y < max_y_)
         && (z >= 0 && z < max_z_));
     a_tiles_[(y * max_x_ + x) * max_z_ + z] = tile_manager_->getTile(tileNum);
-}
-
-bool Map::stairsAt(int x, int y, int z)
-{
-    uint8 isStairs = g_App.walkdata_[tileAt(x, y, z)];
-    return  isStairs > 0 && isStairs < 5;
 }
 
 
@@ -308,8 +315,8 @@ MiniMap::MiniMap(Map *p_map) {
     for (unsigned short y = 0; y < mmax_y_; y++) {
         unsigned short yadd = y * mmax_x_;
         for (unsigned short x = 0; x < mmax_x_; x++) {
-            int colorIdx = g_App.walkdata_[p_map->tileAt(x, y, 0)];
-            a_minimap_[x + yadd] = minimap_colours_[colorIdx];
+            Tile::EType type = p_map->getTileAt(x, y, 0)->type();
+            a_minimap_[x + yadd] = minimap_colours_[type];
         }
     }
 }
