@@ -265,7 +265,7 @@ public:
     int map();
     AnimationDrawn drawnAnim(void);
     void setDrawnAnim(AnimationDrawn drawn_anim);
-    void handleDrawnAnim(int elapsed);
+    bool handleDrawnAnim(int elapsed);
 
     typedef struct {
         toDefineXYZ coords;

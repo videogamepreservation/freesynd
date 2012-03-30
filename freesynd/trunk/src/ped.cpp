@@ -290,9 +290,15 @@ void PedInstance::setActionStateToDrawnAnim(void) {
     } else if ((action_state_ & pa_smDead) != 0) {
         //setDrawnAnim(PedInstance::ad_DeadAnim);
     } else if ((action_state_ & pa_smWalking) != 0) {
-        setDrawnAnim(PedInstance::ad_WalkAnim);
+        if ((action_state_ & pa_smFiring) != 0)
+            setDrawnAnim(PedInstance::ad_WalkFireAnim);
+        else
+            setDrawnAnim(PedInstance::ad_WalkAnim);
     } else if ((action_state_ & pa_smStanding) != 0) {
-        setDrawnAnim(PedInstance::ad_StandAnim);
+        if ((action_state_ & pa_smFiring) != 0)
+            setDrawnAnim(PedInstance::ad_StandFireAnim);
+        else
+            setDrawnAnim(PedInstance::ad_StandAnim);
     } else if ((action_state_ & pa_smPickUp) != 0) {
         setDrawnAnim(PedInstance::ad_PickupAnim);
     } else if ((action_state_ & pa_smPutDown) != 0) {
@@ -401,7 +407,9 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                                 }
                             } else
                                 aqt.state |= 8;
-                        }
+                        } else
+                            // type cannot be aquired
+                            aqt.state |= 8;
                     }
                 }
                 if ((aqt.ot_execute & Mission::objv_LoseControl) != 0)
@@ -958,8 +966,8 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                 break;
         }
     }
-    handleDrawnAnim(elapsed);
-    setActionStateToDrawnAnim();
+    if (handleDrawnAnim(elapsed))
+        setActionStateToDrawnAnim();
     updated = MapObject::animate(elapsed);
     return updated;
 }
@@ -1821,73 +1829,52 @@ void PedInstance::setDrawnAnim(PedInstance::AnimationDrawn drawn_anim) {
         case PedInstance::ad_DeadBurnAnim:
             setFramesPerSec(2);
             break;
-        case PedInstance::ad_NoAnimation:
-            break;
         case PedInstance::ad_PersuadedAnim:
             setFramesPerSec(8);
+            break;
+        case PedInstance::ad_NoAnimation:
             break;
     }
 }
 
-void PedInstance::handleDrawnAnim(int elapsed) {
+bool PedInstance::handleDrawnAnim(int elapsed) {
     Weapon::WeaponAnimIndex weapon_idx =
         selectedWeapon() ? selectedWeapon()->index() : Weapon::Unarmed_Anim;
 
-    //TODO: returns remove?
     PedInstance::AnimationDrawn curanim = drawnAnim();
+    bool answer = true;
     switch (curanim) {
         case PedInstance::ad_HitAnim:
-            if (frame_ > ped_->lastHitFrame(getDirection())) {
-                if(speed_) {
-                    setDrawnAnim(PedInstance::ad_WalkAnim);
-                } else
-                    setDrawnAnim(PedInstance::ad_StandAnim);
-            } else 
-                if (health_ <= 0)
-                    return;
-            if (health_ > 0)
-                break;
+            if (frame_ < ped_->lastHitFrame(getDirection()))
+                answer = false;
+            break;
         case PedInstance::ad_DieAnim:
-            if (frame_ < ped_->lastDieFrame())
-                return;
+            if (frame_ < ped_->lastDieFrame()) {
+                answer = false;
+                break;
+            }
             setDrawnAnim(PedInstance::ad_DeadAnim);
-            return;
             break;
         case PedInstance::ad_DeadAnim:
-            return;
             break;
         case PedInstance::ad_DeadAgentAnim:
-            return;
             break;
         case PedInstance::ad_PickupAnim:
         case PedInstance::ad_PutdownAnim:
-            if (frame_ >= ped_->lastPickupFrame()) {
-                if(speed_) {
-                    setDrawnAnim(PedInstance::ad_WalkAnim);
-                } else
-                    setDrawnAnim(PedInstance::ad_StandAnim);
-            } else
-                return;
+            if (frame_ < ped_->lastPickupFrame())
+                answer = false;
             break;
         case PedInstance::ad_WalkAnim:
             break;
         case PedInstance::ad_StandAnim:
             break;
         case PedInstance::ad_WalkFireAnim:
-            if(frame_ >= ped_->lastWalkFireFrame(getDirection(), weapon_idx)) {
-                if (speed_) {
-                    setDrawnAnim(PedInstance::ad_WalkAnim);
-                } else
-                    setDrawnAnim(PedInstance::ad_StandAnim);
-            }
+            if(frame_ < ped_->lastWalkFireFrame(getDirection(), weapon_idx))
+                answer = false;
             break;
         case PedInstance::ad_StandFireAnim:
-            if(frame_ >= ped_->lastStandFireFrame(getDirection(), weapon_idx)) {
-                if (speed_) {
-                    setDrawnAnim(PedInstance::ad_WalkAnim);
-                } else
-                    setDrawnAnim(PedInstance::ad_StandAnim);
-            }
+            if(frame_ < ped_->lastStandFireFrame(getDirection(), weapon_idx))
+                answer = false;
             break;
         case PedInstance::ad_VaporizeAnim:
             if (frame_ >= ped_->lastVaporizeFrame(getDirection())) {
@@ -1896,38 +1883,44 @@ void PedInstance::handleDrawnAnim(int elapsed) {
                 } else {
                     setDrawnAnim(PedInstance::ad_NoAnimation);
                 }
-            }
-            return;
+            } else
+                answer = false;
+            break;
         case PedInstance::ad_SinkAnim:
             // TODO: use this in future
             break;
         case PedInstance::ad_WalkBurnAnim:
         case PedInstance::ad_StandBurnAnim:
-            if (leftTimeShowAnim(elapsed))
-                return;
+            if (leftTimeShowAnim(elapsed)) {
+                answer = false;
+                break;
+            }
             setDrawnAnim(PedInstance::ad_DieBurnAnim);
-            return;
+            break;
         case PedInstance::ad_DieBurnAnim:
             if (frame_ >= ped_->lastDieBurnFrame()) {
                 setDrawnAnim(PedInstance::ad_SmokeBurnAnim);
                 setTimeShowAnim(7000);
-            }
-            return;
+            } else
+                answer = false;
+            break;
         case PedInstance::ad_SmokeBurnAnim:
-            if (leftTimeShowAnim(elapsed))
-                return;
-            setDrawnAnim(PedInstance::ad_DeadBurnAnim);
-            return;
-        case PedInstance::ad_DeadBurnAnim:
-            return;
-        case PedInstance::ad_PersuadedAnim:
-            if (frame_ >= ped_->lastPersuadeFrame()) {
-                setDrawnAnim(PedInstance::ad_StandAnim);
+            if (leftTimeShowAnim(elapsed)) {
+                answer = false;
+                break;
             }
-            return;
+            setDrawnAnim(PedInstance::ad_DeadBurnAnim);
+            break;
+        case PedInstance::ad_DeadBurnAnim:
+            break;
+        case PedInstance::ad_PersuadedAnim:
+            if (frame_ < ped_->lastPersuadeFrame())
+                answer = false;
+            break;
         case PedInstance::ad_NoAnimation:
-            return;
+            break;
     }
+    return answer;
 }
 
 bool PedInstance::movementP(Mission *m, int elapsed)
@@ -2512,19 +2505,24 @@ void PedInstance::setActQInQueue(actionQueueGroupType &as,
 {
     // NOTE: if action is invalidated all remaining actions in queue are
     // invalid, they should be removed
-    if ((as.group_desc & PedInstance::gd_mExclusive) != 0)
-        actions_queue_.clear();
-        // TODO: proper action/group cancelling required
-    else {
-        for (std::vector <actionQueueGroupType>::iterator it = actions_queue_.begin();
-            it != actions_queue_.end(); it++)
+    if ((as.group_desc & PedInstance::gd_mExclusive) != 0) {
+        for (std::vector <actionQueueGroupType>::iterator it =
+            actions_queue_.begin(); it != actions_queue_.end(); it++)
         {
-            if ((it->group_desc & as.group_desc) != 0) {
-                // TODO: proper action/group cancelling required
-                actions_queue_.erase(it, actions_queue_.end());
-                break;
-            }
+                discardActG(it);
         }
+        setActionStateToDrawnAnim();
+    } else {
+        bool discarding = false;
+        for (std::vector <actionQueueGroupType>::iterator it =
+            actions_queue_.begin(); it != actions_queue_.end(); it++)
+        {
+            if (discarding) {
+                discardActG(it);
+            } else if ((it->group_desc & as.group_desc) != 0)
+                discarding = true;
+        }
+        setActionStateToDrawnAnim();
     }
     if (set_id) {
         as.group_id = action_grp_id_++;
@@ -2554,18 +2552,28 @@ bool PedInstance::addDefActsToActions(actionQueueGroupType &as) {
 }
 
 void PedInstance::discardActG(uint32 id) {
-    for (std::vector <actionQueueGroupType>::iterator it = actions_queue_.begin();
-        it != actions_queue_.end(); it++)
+    for (std::vector <actionQueueGroupType>::iterator it =
+        actions_queue_.begin(); it != actions_queue_.end(); it++)
     {
         if (it->group_id == id) {
-            // TODO: proper action/group cancelling required
-            it->state |= 8;
+            discardActG(it);
+            setActionStateToDrawnAnim();
             break;
         }
     }
 }
 
-void PedInstance::discardActG(std::vector <actionQueueGroupType>::iterator it_a) {
-    if (it_a->state != 2) {
+void PedInstance::discardActG(std::vector <actionQueueGroupType>::iterator it_a)
+{
+    if ((it_a->state & 14) == 2) {
+        for (std::vector <actionQueueType>::iterator it =
+            it_a->actions.begin(); it != it_a->actions.end(); it++
+        ) {
+            if (((it->state & 14) == 2)) {
+                it->state |= 8;
+                switchActionStateFrom(it->as);
+            }
+        }
+        it_a->state |= 8;
     }
 }
