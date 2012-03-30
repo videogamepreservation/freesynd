@@ -304,11 +304,17 @@ void PedInstance::setActionStateToDrawnAnim(void) {
     } else if ((action_state_ & pa_smPutDown) != 0) {
         setDrawnAnim(PedInstance::ad_PutdownAnim);
     }
+#ifdef _DEBUG
+    if (action_state_ == 0)
+        printf("undefined action_state_\n");
+#endif
 }
 
 #ifdef NEW_ANIMATE_HANDLING
 bool PedInstance::animate(int elapsed, Mission *mission) {
-    // TODO: proper handling for exclusive states, switching
+    // TODO: proper handling for exclusive states, switching;
+    // animation can be lost because of too big value of elapsed
+    // state = 2 will not appear and drawing will not be set (firing)
 
     if (agent_is_ == PedInstance::Agent_Non_Active)
         return true;
@@ -968,7 +974,8 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
     }
     if (handleDrawnAnim(elapsed))
         setActionStateToDrawnAnim();
-    updated = MapObject::animate(elapsed);
+    if (is_frame_drawn_)
+        updated = MapObject::animate(elapsed);
     return updated;
 }
 #endif
@@ -1447,6 +1454,7 @@ void PedInstance::draw(int x, int y) {
         firing_ = PedInstance::Firing_Not;
         target_ = 0;
     }
+    is_frame_drawn_ = true;
 
     switch(drawnAnim()){
         case PedInstance::ad_HitAnim:
@@ -1571,7 +1579,9 @@ void PedInstance::drawSelectorAnim(int x, int y) {
             ped_->drawPersuadeFrame(x, y, frame_);
             break;
         case PedInstance::ad_NoAnimation:
+#ifdef _DEBUG
             printf("hmm ad_NoAnimation\n");
+#endif
             break;
     }
 }
@@ -1692,7 +1702,7 @@ void PedInstance::dropAllWeapons() {
     {
         WeaponInstance *w = *it;
         w->setMap(map());
-        // TODO: drop weapons not on same place
+        // TODO: drop weapons not on same place, stairs problem
         w->setPosition(tile_x_, tile_y_, tile_z_, off_x_, off_y_, off_z_);
         w->setVisZ(vis_z_);
         w->setOwner(NULL);
@@ -1777,6 +1787,7 @@ void PedInstance::setDrawnAnim(PedInstance::AnimationDrawn drawn_anim) {
 
     drawn_anim_ = drawn_anim;
     frame_ = 0;
+    is_frame_drawn_ = false;
     switch (drawn_anim_) {
         case PedInstance::ad_HitAnim:
             setFramesPerSec(6);

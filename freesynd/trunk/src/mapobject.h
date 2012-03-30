@@ -218,31 +218,38 @@ public:
     void setMajorType(MajorTypeEnum mt) { major_type_ = mt; }
 
 protected:
-    // vis_z_ is location used for adjusting object drawing/calculations
-    // tile_z_ represents true location for tile
+    /*! vis_z_ is location used for adjusting object drawing/calculations
+     * tile_z_ represents true location for tile
+     */
     int tile_x_, tile_y_, tile_z_, vis_z_, off_x_, off_y_, off_z_;
-    // these are not true sizes, but halfs of full size by respective coord
+    //! these are not true sizes, but halfs of full size by respective coord
     int size_x_, size_y_, size_z_;
     int map_;
-    // animation frame changing
+    //! animation frame changing
     int frame_;
-    // time left, if frame needs to be drawn every 'n' milliseconds
-    // elapsed time % 'n' = time left
+    /*! time left, if frame needs to be drawn every 'n' milliseconds
+     * elapsed time % 'n' = time left
+     */
     int elapsed_carry_;
-    // how often this frame should be drawn per seccond
+    //! how often this frame should be drawn per seccond
     int frames_per_sec_;
     int sub_type_, main_type_;
-    // 0 - not defined, 1 - ped, 2 - weapon, 3 - static, 4 - vehicle
+    //! 0 - not defined, 1 - ped, 2 - weapon, 3 - static, 4 - vehicle
     MajorTypeEnum major_type_;
     DefDamageType rcv_damage_def_;
-    // objects direction
+    //! objects direction
     int dir_;
-    // looped animations time to show them is set here
+    //! looped animations time to show them is set here
     int time_show_anim_;
-    // looped animations playing time
+    //! looped animations playing time
     int time_showing_anim_;
-    // object is not included in view/shot trajectory calculation
+    //! object is not included in view/shot trajectory calculation
     bool is_ignored_;
+    /*! animation to draw can, change this varible should provide check
+     * whether first frame was drawn successfully, only if successful
+     * MapObject::animate should be called
+     */
+    bool is_frame_drawn_;
 
     void addOffs(int &x, int &y);
 };
@@ -311,7 +318,7 @@ public:
     typedef struct {
         DamageType dtype;
         int dvalue;
-        // direction damage comes from, should be angle 256 degree based
+        //! direction damage comes from, should be angle 256 degree based
         int ddir;
         ShootableMapObject * d_owner;
     } DamageInflictType;
@@ -357,7 +364,7 @@ public:
 protected:
     int speed_;
     int dir_move_;
-    // on reaching this distance object should stop
+    //! on reaching this distance object should stop
     int dist_to_pos_;
     std::list<PathNode> dest_path_;
 
@@ -526,13 +533,15 @@ public:
 
 protected:
     int anim_, damaged_anim_;
-    // used to make animation of movement up/down,
-    // when damaged, stores time not consumed for movement down
+    /*! used to make animation of movement up/down,
+     * when damaged, stores time not consumed for movement down
+     */
     int elapsed_left_smaller_;
-    // animation color rotation,
-    // when damaged, stores target Z distance to fall
+    /*! animation color rotation,
+     * when damaged, stores target Z distance to fall
+     */
     int elapsed_left_bigger_;
-    // switch for moving up or down
+    //! switch for moving up or down
     int up_down_;
 };
 

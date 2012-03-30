@@ -140,15 +140,14 @@ bool WeaponInstance::animate(int elapsed) {
                 max_anims, pWeaponClass_->anims()->rd_anim);
             return true;
         }
-    }/*
-    else if (weapon_used_time_ != 0 ) {
+    } else if (weapon_used_time_ != 0 ) {
         weapon_used_time_ += elapsed;
         if (weapon_used_time_ > (pWeaponClass_->timeForShot()
             + pWeaponClass_->timeReload()))
         {
             weapon_used_time_ = 0;
         }
-    }*/
+    }
 
     if (map_ == -1)
         return false;

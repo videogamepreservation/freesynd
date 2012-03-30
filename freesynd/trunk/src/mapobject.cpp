@@ -30,7 +30,8 @@
 MapObject::MapObject(int m):size_x_(1), size_y_(1), size_z_(2),
 map_(m), frame_(0), elapsed_carry_(0),
 frames_per_sec_(8), sub_type_(0), main_type_(0),
-major_type_(MapObject::mjt_Undefined),dir_(0),is_ignored_(false)
+major_type_(MapObject::mjt_Undefined),dir_(0),is_ignored_(false),
+is_frame_drawn_(false)
 {
 }
 

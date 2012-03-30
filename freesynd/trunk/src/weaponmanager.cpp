@@ -184,7 +184,7 @@ Weapon * WeaponManager::loadWeapon(Weapon::WeaponType wt) {
             pWeapon = new Weapon(g_App.menus().getMessage("WEAPON_FLAMER"),
         21, 71, 1500, 1000, 1152, 1, 4, 374,
         Weapon::Flamer_Anim, snd::FLAME, Weapon::Flamer, MapObject::dmg_Burn,
-        10, 50, 50, Weapon::wspt_Flamer, SFXObject::sfxt_FlamerFire,
+        10, 70, 50, Weapon::wspt_Flamer, SFXObject::sfxt_FlamerFire,
         SFXObject::sfxt_FlamerFire, SFXObject::sfxt_FlamerFire,
         SFXObject::sfxt_Unknown, 0, 2.0, 0.9, 2200);
             break;
