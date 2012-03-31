@@ -48,6 +48,8 @@ bool MapManager::initialize()
 
 Map * MapManager::loadMap(int mapNum)
 {
+    if (maps_.find(mapNum) != maps_.end())
+        return maps_[mapNum];
     char tmp[100];
     sprintf(tmp, "map%02d.dat", mapNum);
     int size;

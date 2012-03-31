@@ -379,6 +379,7 @@ protected:
 class Static : public ShootableMapObject {
 public:
     static Static *loadInstance(uint8 *data, int m);
+    virtual ~Static() {}
 
     virtual bool animate(int elapsed, Mission *obj) { return MapObject::animate(elapsed); }
     typedef enum {
@@ -424,7 +425,6 @@ public:
 
 protected:
     Static(int m):ShootableMapObject(m) {}
-    virtual ~Static() {}
     unsigned int state_;
 };
 

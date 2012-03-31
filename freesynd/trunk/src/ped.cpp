@@ -2039,13 +2039,16 @@ bool PedInstance::movementP(Mission *m, int elapsed)
             if (abs(dy) > abs(diffy))
                 dy = diffy;
             if (dx || dy) {
+                int prv_time = used_time;
                 if (dx) {
-                    used_time -= ((double) dx * 1000.0 * d) / (diffx * speed_);
+                    used_time -= (int)(((double) dx * 1000.0 * d)
+                        / (double)(diffx * speed_));
                 } else if (dy) {
-                    used_time -= ((double) dy * 1000.0 * d) / (diffy * speed_);
+                    used_time -= (int)(((double) dy * 1000.0 * d)
+                        / (double)(diffy * speed_));
                 } else
                     used_time = 0;
-                if (used_time < 0)
+                if (used_time < 0 || prv_time == used_time)
                     used_time = 0;
             } else
                 used_time = 0;

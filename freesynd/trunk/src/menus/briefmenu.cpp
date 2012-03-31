@@ -42,7 +42,7 @@ const int BriefMenu::MINIMAP_HEIGHT = 120;
 #endif
 BriefMenu::BriefMenu(MenuManager * m)
     : Menu(m, MENU_BRIEF, MENU_MAP, "mbrief.dat", "mbrieout.dat"),
-        start_line_(0), mm_renderer_() {
+        start_line_(0), p_briefing_(NULL), mm_renderer_() {
     addStatic(85, 35, 545, "#BRIEF_TITLE", FontManager::SIZE_4, false);
     txtTimeId_ = addStatic(500, 9, "", FontManager::SIZE_2, true);       // Time
 
@@ -236,8 +236,8 @@ void BriefMenu::handleRender(DirtyList &dirtyList) {
                     }
 
                     getMenuFont(FontManager::SIZE_2)->drawTextCp437(24,
-                                           88 + (line_count - start_line_) * 16, 
-										   miss, true);
+                                           88 + (line_count - start_line_) * 16,
+                                           miss, true);
                     if (nextline)
                         *nextline = tmp;
                 }
@@ -295,6 +295,7 @@ void BriefMenu::handleRender(DirtyList &dirtyList) {
 
 void BriefMenu::handleLeave() {
     delete p_briefing_;
+    p_briefing_ = NULL;
     g_System.hideCursor();
 }
 

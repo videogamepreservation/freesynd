@@ -64,7 +64,8 @@ Mission::~Mission()
         delete sfx_objects_[i];
     for (unsigned int i = 0; i < prj_shots_.size(); i++)
         delete prj_shots_[i];
-    // TODO: free statics ?
+    for (unsigned int i = 0; i < statics_.size(); i++)
+        delete statics_[i];
     clrSurfaces();
 
     if (p_minimap_) {
