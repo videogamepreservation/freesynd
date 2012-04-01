@@ -280,6 +280,7 @@ bool SystemSDL::pumpEvents(FS_Event *pEvtOut) {
 #endif
 					}
 					pEvtOut->key.key = key;
+                    pEvtOut->key.keyMods = keyModState_;
                     break;
 				} // end switch
             } // end case SDL_KEYDOWN

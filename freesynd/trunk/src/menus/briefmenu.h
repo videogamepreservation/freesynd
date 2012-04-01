@@ -47,19 +47,39 @@ public:
     void handleAction(const int actionId, void *ctx, const int modKeys);
     
 protected:
-    static const int MINIMAP_X;
-    static const int MINIMAP_Y;
-    static const int MINIMAP_WIDTH;
-    static const int MINIMAP_HEIGHT;
+    /*! Origin of the minimap on the screen.*/
+    static const int kMiniMapScreenX;
+    /*! Origin of the minimap on the screen.*/
+    static const int kMiniMapScreenY;
+    static const int kMiniMapWidth;
+    static const int kMiniMapHeight;
+    /*! Number of line on a briefing page.*/
+    static const int kMaxLinePerPage;
 
     void updateClock();
     void redrawMiniMap();
+    void redrawBriefing();
 
 	bool handleMouseDown(int x, int y, int button, const int modKeys);
+    //! Return the zoom level from the enhancement level
+    MinimapRenderer::EZoom toZoomLevel(uint8 enh_lvl);
+
+    //! Renders the current page of briefing
+    void render_briefing_text();
+    //! Update the current briefing page
+    void update_briefing_text();
+    //! Convenience methode to read a word in the briefing text
+    bool read_next_word(std::string & brief, std::string & line);
 
 protected:
+    /*!
+     * Index of the first line in the briefing text to display
+     */
     int start_line_;
-
+    /*!
+     * This array stores only the lines that are currently displayed.
+     */
+    std::string *a_page_;
     /*! Id of the text widget for time.*/
     int txtTimeId_;
     /*! Id of the text widget for money.*/

@@ -83,13 +83,18 @@ class MissionBriefing {
     }
 
     /*!
-     * Returns the mission briefing as text.
+     * Returns the mission briefing as text for the given level.
+     * \param infoLvl Value of 0 is the default information.
+     * \return empty string if level is greater than available infos.
      */
-    const char * briefing() { return briefing_.c_str(); }
+    const char * briefing(uint8 infoLvl) { 
+        return infoLvl <= i_nb_infos_ ?a_briefing_[infoLvl].c_str() : ""; 
+    }
 
  private:
-    /*! Briefing text.*/
-    std::string briefing_;
+    /*! Briefing text is stored in an array. Each entry is the text for
+     * the current level of information.*/
+    std::string a_briefing_[MAX_INFOS];
     /*! The total number of available infos.*/
     int i_nb_infos_;
     /*! An array of prices for each available informations for the mission.*/

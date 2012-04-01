@@ -32,10 +32,11 @@
 #include "briefmenu.h"
 #include "core/missionbriefing.h"
 
-const int BriefMenu::MINIMAP_X = 504;
-const int BriefMenu::MINIMAP_Y = 220;
-const int BriefMenu::MINIMAP_WIDTH = 120;
-const int BriefMenu::MINIMAP_HEIGHT = 120;
+const int BriefMenu::kMiniMapScreenX = 504;
+const int BriefMenu::kMiniMapScreenY = 220;
+const int BriefMenu::kMiniMapWidth = 120;
+const int BriefMenu::kMiniMapHeight = 120;
+const int BriefMenu::kMaxLinePerPage = 14;
 
 #if 0
 #define EXECUTION_SPEED_TIME
@@ -49,7 +50,7 @@ BriefMenu::BriefMenu(MenuManager * m)
     // Briefing scroll button
     nextButId_ = addImageOption(461, 316, Sprite::MSPR_RIGHT_ARROW2_D, Sprite::MSPR_RIGHT_ARROW2_L);
     registerHotKey(KFC_RIGHT, nextButId_);
-    prevButId_ = addImageOption(427, 316, Sprite::MSPR_LEFT_ARROW2_D, Sprite::MSPR_LEFT_ARROW2_L, false);
+    prevButId_ = addImageOption(427, 316, Sprite::MSPR_LEFT_ARROW2_D, Sprite::MSPR_LEFT_ARROW2_L);
     registerHotKey(KFC_LEFT, prevButId_);
 
     // Accept button
@@ -67,9 +68,12 @@ BriefMenu::BriefMenu(MenuManager * m)
     // Enhancement
     enhButId_ = addOption(500, 169, 127, 10, "#BRIEF_ENH", FontManager::SIZE_2);
     txtEnhId_ = addStatic(500, 195, 127, "0", FontManager::SIZE_2, true);
+
+    a_page_ = new std::string[kMaxLinePerPage];
 }
 
 BriefMenu::~BriefMenu() {
+    delete [] a_page_;
 }
 
 void BriefMenu::handleTick(int elapsed)
@@ -96,6 +100,24 @@ void BriefMenu::updateClock() {
     getStatic(txtMoneyId_)->setTextFormated("%d", g_Session.getMoney());
 }
 
+/*!
+ * Return the zoom level in the minimap corresponding to the enhancement
+ * level.
+ * \param enh_lvl Level of enhancement already bought by player
+ * \return The zoom level in the minimap
+ */
+MinimapRenderer::EZoom BriefMenu::toZoomLevel(uint8 enh_lvl) {
+    if (enh_lvl == 0) {
+        return MinimapRenderer::ZOOM_X4;
+    } else if (enh_lvl == 1) {
+        return MinimapRenderer::ZOOM_X3;
+    } else if (enh_lvl == 2) {
+        return MinimapRenderer::ZOOM_X2;
+    } else {
+        return MinimapRenderer::ZOOM_X1;
+    }
+}
+
 void BriefMenu::handleShow() {
 
     menu_manager_->saveBackground();
@@ -108,23 +130,19 @@ void BriefMenu::handleShow() {
 
 	// Loads mission briefing
 	p_briefing_ = g_App.missions().loadBriefing(cur_miss);
-    
+    assert(p_briefing_ != NULL);
+
     start_line_ = 0;
+    getOption(prevButId_)->setVisible(false);
+    getOption(nextButId_)->setVisible(false);
+    update_briefing_text();
 
     // reset minimap renderer with current mission
     uint8 enh_lvl = g_Session.getSelectedBlock().enhanceLevel;
-    MinimapRenderer::EZoom zoom;
-    if (enh_lvl == 0) {
-        zoom = MinimapRenderer::ZOOM_X4;
-    } else if (enh_lvl == 1) {
-        zoom = MinimapRenderer::ZOOM_X3;
-    } else if (enh_lvl == 2) {
-        zoom = MinimapRenderer::ZOOM_X2;
-    } else {
-        zoom = MinimapRenderer::ZOOM_X1;
-    }
-    bool drawEnemies = 
-        g_Session.getSelectedBlock().enhanceLevel == p_briefing_->nb_enhts();
+    MinimapRenderer::EZoom zoom =
+        toZoomLevel(enh_lvl);
+    
+    bool drawEnemies = enh_lvl == p_briefing_->nb_enhts();
 
     mm_renderer_.init(pMission, zoom, drawEnemies);
 
@@ -141,9 +159,9 @@ void BriefMenu::handleShow() {
     }
 
     // Initialize the enhancements label with current cost
-    if (g_Session.getSelectedBlock().enhanceLevel < p_briefing_->nb_enhts()) {
+    if (enh_lvl < p_briefing_->nb_enhts()) {
         getStatic(txtEnhId_)->setTextFormated("%d",
-            p_briefing_->enhanceCost(g_Session.getSelectedBlock().enhanceLevel));
+            p_briefing_->enhanceCost(enh_lvl));
         getOption(enhButId_)->setenabled(true);
     } else {
         getStatic(txtEnhId_)->setText("");
@@ -157,7 +175,100 @@ void BriefMenu::handleShow() {
  * Helpfull method to order minimap redraw by inserting a dirty rect.
  */
 void BriefMenu::redrawMiniMap() {
-    addDirtyRect(MINIMAP_X, MINIMAP_Y, MINIMAP_WIDTH, MINIMAP_HEIGHT);
+    addDirtyRect(kMiniMapScreenX, kMiniMapScreenY, kMiniMapWidth, kMiniMapHeight);
+}
+
+/*!
+ * Helpfull method to order briefing redraw by inserting a dirty rect.
+ */
+void BriefMenu::redrawBriefing() {
+    addDirtyRect(22, 86, 474, 256);
+}
+
+/*!
+ * Draws the text stored in the a_page field.
+ */
+void BriefMenu::render_briefing_text() {
+    for (int i = 0; i < kMaxLinePerPage; i++) {
+        getMenuFont(FontManager::SIZE_2)->
+            drawTextCp437(24, 88 + i * 16, a_page_[i].c_str(), true);
+    }
+}
+
+/*! 
+ * Reads a word (up to next separator : white space, new line or end of text)
+ * and adds the word to the given line if it fits whithin the limit.
+ * \return true if the line is complete
+ */
+bool BriefMenu::read_next_word(std::string & brief, std::string & line)
+{
+    std::string new_line(line);
+    size_t idx = 0;
+    char last_char;
+
+    // reads until a separator is met
+    do {
+        last_char = brief.at(idx++);
+        if (last_char != '\n') {
+            new_line.push_back(last_char);
+        }
+    } while ((idx < brief.size()) && (last_char != ' ' && last_char != '\n'));
+
+    if (getMenuFont(FontManager::SIZE_2)->textWidth(new_line.c_str(), true) > 470) {
+        // new line is too big so we can add the line as it is
+        return true;
+    }
+
+    // we didn't reached the limit so add the word to the current line
+    line.assign(new_line);
+    // remove what has been read from briefing text
+    brief.erase(0, idx);
+
+    if (idx == brief.size() || last_char == '\n') {
+        // we reach the end of text or a new line so we can add the line
+        return true;
+    }
+
+    return false;
+}
+
+/*!
+ * Called when next or previous button was clicked or when info was bought.
+ * Updates the array of lines to be displayed.
+ */
+void BriefMenu::update_briefing_text() 
+{
+    int line_count = 0;
+
+    // first, clear array
+    for (int i = 0; i < kMaxLinePerPage; i++) {
+        a_page_[i].erase();
+    }
+
+    for (int lvl = 0; lvl <= g_Session.getSelectedBlock().infoLevel; lvl++) {
+        std::string brief(p_briefing_->briefing(lvl));
+        std::string line;
+
+        int idx = 0;
+        while (brief.size() != 0 && 
+                line_count < (start_line_ + kMaxLinePerPage + 1)) {
+            bool add = read_next_word(brief, line);
+
+            if (add) {
+                if (line_count >= start_line_ && line_count < (start_line_ + kMaxLinePerPage)) {
+                    a_page_[line_count - start_line_].assign(line);
+                }
+                line_count++;
+                line.erase();
+            }
+        }
+    }
+
+    // Previous button is visible only if not on the first page
+    getOption(prevButId_)->setVisible(start_line_ != 0);
+    // Next button is visible only if there are line after the lines currently displayed
+    getOption(nextButId_)->setVisible(line_count > (start_line_ + kMaxLinePerPage));
+    redrawBriefing();
 }
 
 void BriefMenu::handleRender(DirtyList &dirtyList) {
@@ -169,114 +280,8 @@ void BriefMenu::handleRender(DirtyList &dirtyList) {
     printf("---------------------------");
     printf("start time %i.%i\n", SDL_GetTicks()/1000, SDL_GetTicks()%1000);
 #endif
-    if (p_briefing_) {
-        int sizeStr = strlen(p_briefing_->briefing()) + 2;
-        char *mbriefing = (char *)malloc(sizeStr);
-        assert(mbriefing != NULL);
-        strcpy(mbriefing, p_briefing_->briefing());
-        char *miss = mbriefing;
-        char *nextline = miss - 1;
-
-        do
-            nextline = strchr(nextline + 1, '\x0a');
-        while (nextline && (nextline[0] != '\x0a' || nextline[1] != '\x0a'));
-
-        int line_count = 0;
-        int lvls = 0;
-
-        do {
-            if (nextline) {
-                char *tmp = new char[nextline - miss + 1];
-
-                do {
-                    memcpy(tmp, miss, nextline - miss);
-                    tmp[nextline - miss] = 0;
-                    nextline--;
-                } while (getMenuFont(FontManager::SIZE_2)->textWidth(tmp, true) > 470);
-
-                delete[] tmp;
-                /* is this faster?
-                char tmp;
-                bool found;
-
-                do {
-                    tmp = *nextline;
-                    *nextline = 0;
-                    found = g_App.fonts().textWidth(miss, true, FontManager::SIZE_2) > 470;
-                    *nextline = tmp;
-                    nextline--;
-                } while (found);
-                */
-
-                nextline++;
-
-                while (nextline[0] != '\x0a' && nextline[0] != ' '
-                       && nextline[0] != 0) {
-                    nextline--;
-                }
-            }
-
-            if (*miss == '|') {
-                lvls++;
-
-                if (lvls > g_Session.getSelectedBlock().infoLevel) {
-                    getOption(nextButId_)->setVisible(false);
-                    break;
-                }
-
-                nextline = miss + 1;
-            }
-            else {
-                if (line_count >= start_line_) {
-                    char tmp = 0;
-
-                    if (nextline) {
-                        tmp = *nextline;
-                        *nextline = 0;
-                    }
-
-                    getMenuFont(FontManager::SIZE_2)->drawTextCp437(24,
-                                           88 + (line_count - start_line_) * 16,
-                                           miss, true);
-                    if (nextline)
-                        *nextline = tmp;
-                }
-
-                line_count++;
-            }
-            if (nextline && nextline[0] == '\x0a') {
-                miss = nextline + 2;
-
-                if (line_count != 14)
-                    line_count++;
-            }
-            else
-                miss = nextline;
-
-            if (miss && *miss) {
-                nextline = miss - 1;
-
-                do
-                    nextline = strchr(nextline + 1, '\x0a');
-                while (nextline
-                        && (nextline[0] != '\x0a' || nextline[1] != '\x0a'));
-
-                if (*miss == ' ')
-                    miss++;
-
-                if (nextline == NULL)
-                    nextline = miss + strlen(miss);
-
-                while (strchr(miss, '\x0a')
-                       && strchr(miss, '\x0a') < nextline) {
-                    *strchr(miss, '\x0a') = ' ';
-                }
-            }
-            else
-                getOption(nextButId_)->setVisible(false);
-        } while (miss && *miss && line_count < start_line_ + 14);
-
-        free(mbriefing);        // using free because allocated this
+    if (dirtyList.intersectsList(22, 86, 460, 220)) {
+        render_briefing_text();
     }
 #ifdef EXECUTION_SPEED_TIME
     printf("+++++++++++++++++++++++++++");
@@ -310,11 +315,12 @@ void BriefMenu::handleAction(const int actionId, void *ctx, const int modKeys) {
             if (g_Session.getSelectedBlock().infoLevel < p_briefing_->nb_infos()) {
                 getStatic(txtInfoId_)->setTextFormated("%d",
                     p_briefing_->infoCost(g_Session.getSelectedBlock().infoLevel));
-            } else
+            } else {
+                getOption(infosButId_)->setenabled(false);
                 getStatic(txtInfoId_)->setText("");
+            }
+            update_briefing_text();
         }
-
-        getOption(nextButId_)->setVisible(true);
     }
 
     if (actionId == enhButId_) {
@@ -342,21 +348,14 @@ void BriefMenu::handleAction(const int actionId, void *ctx, const int modKeys) {
 
     if (actionId == nextButId_) {
         // Next page
-        start_line_ += 14;
-        getOption(prevButId_)->setVisible(true);
-        needRendering();
+        start_line_ += kMaxLinePerPage;
+        update_briefing_text();
     }
 
     if (actionId == prevButId_) {
         // Previous page
-        start_line_ -= 14;
-
-        if (start_line_ <= 0) {
-            start_line_ = 0;
-            getOption(prevButId_)->setVisible(false);
-        }
-        getOption(nextButId_)->setVisible(true);
-        needRendering();
+        start_line_ -= kMaxLinePerPage;
+        update_briefing_text();
     }
 }
 
@@ -367,21 +366,22 @@ void BriefMenu::handleAction(const int actionId, void *ctx, const int modKeys) {
  * \return True if the user clicked on the minimap so event is consumed
  */
 bool BriefMenu::handleMouseDown(int x, int y, int button, const int modKeys) {
-    if (button == 1 && x >= MINIMAP_X && x < (MINIMAP_X + MINIMAP_WIDTH)
-        && y >= MINIMAP_Y && y < (MINIMAP_Y + MINIMAP_HEIGHT)) {
-        if (x >= MINIMAP_X && x < 544) {
+    if (button == 1 && x >= kMiniMapScreenX
+        && x < (kMiniMapScreenX + kMiniMapWidth)
+        && y >= kMiniMapScreenY && y < (kMiniMapScreenY + kMiniMapHeight)) {
+        if (x >= kMiniMapScreenX && x < 544) {
             mm_renderer_.scrollLeft();
         } else if (x >= 584 && x < 624) {
              mm_renderer_.scrollRight();
         }
 
-        if (y >= MINIMAP_Y && y < 260) {
+        if (y >= kMiniMapScreenY && y < 260) {
              mm_renderer_.scrollUp();
         } else if (y >= 300 && y < 340) {
              mm_renderer_.scrollDown();
         }
         // Redraw map
-        needRendering();
+        redrawMiniMap();
         return true;
     }
 

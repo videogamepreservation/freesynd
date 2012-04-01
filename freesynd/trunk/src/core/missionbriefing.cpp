@@ -21,6 +21,7 @@
  ************************************************************************/
 
 #include <stdlib.h>
+#include <string>
 
 #include "core/missionbriefing.h"
 
@@ -28,7 +29,6 @@ const int MissionBriefing::kMaxInfos = MAX_INFOS;
 const int MissionBriefing::kMaxEnht = MAX_ENHT;
 
 MissionBriefing::MissionBriefing() {
-    briefing_ = "";
     i_nb_infos_ = 0;
     i_nb_enhts_ = 0;
 
@@ -73,7 +73,21 @@ bool MissionBriefing::loadBriefing(uint8 * missData, int size) {
 
     // reading briefing text
     if (miss) {
-        briefing_ = miss;
+        std::string tmp(miss);
+
+        int start = 0;
+        // We store the default information plus
+        // the additional informations for each level on info
+        for (int i = 0; i < i_nb_infos_+1; i++) {
+            int idx = tmp.find_first_of('|', start);
+            if (std::string::npos != idx) {
+                a_briefing_[i].assign(tmp.substr(start, idx - start));
+                start = idx + 1;
+            } else {
+                a_briefing_[i].assign(tmp.substr(start));
+            }
+        }
     }
+
     return true;
 }

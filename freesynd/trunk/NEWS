@@ -13,7 +13,8 @@ Changes
 Fixed Bugs
 ----------
   * Pathfinding out of memory/segfault error
-  * :
+  * Modifier keys where not passed to the key event
+  * Next and previous button in the briefing where not updated correctly.
 
 Features added
 ----------

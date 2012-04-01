@@ -156,6 +156,12 @@ set(HEADERS
 	utils/utf8/core.h
 	utils/utf8/unchecked.h)
 
+source_group(Sources REGULAR_EXPRESSION .*.cpp)
+source_group(Headers REGULAR_EXPRESSION .*.h)
+source_group(menus REGULAR_EXPRESSION .*menu.cpp FILES widget.cpp)
+source_group(menus REGULAR_EXPRESSION .*menu.h FILES widget.cpp)
+source_group(utils FILES log.cpp log.h)
+
 add_executable (freesynd ${SOURCES} ${HEADERS})
 
 target_link_libraries (freesynd ${PNG_LIBRARIES} ${SDL_LIBRARY} ${SDLIMAGE_LIBRARY} ${SDLMIXER_LIBRARY})
