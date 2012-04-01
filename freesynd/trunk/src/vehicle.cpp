@@ -474,8 +474,9 @@ void VehicleInstance::setDestinationV(Mission *m, int x, int y, int z, int ox,
 bool VehicleInstance::movementV(int elapsed)
 {
     bool updated = false;
+    int used_time = elapsed;
 
-    if (!dest_path_.empty()) {
+    while (dest_path_.size() && used_time != 0) {
         if (hold_on_.wayFree == 1) {
             return updated;
         } else if (hold_on_.wayFree == 2){
@@ -506,16 +507,32 @@ bool VehicleInstance::movementV(int elapsed)
             double d = sqrt((double)(diffx * diffx + diffy * diffy));
 
             if (abs(diffx) > 0)
-                // dx = diffx * (speed_ * elapsed / 1000) / d;
-                dx = (int)((diffx * (speed_ * elapsed) / d) / 1000);
+                // dx = diffx * (speed_ * used_time / 1000) / d;
+                dx = (int)((diffx * (speed_ * used_time) / d) / 1000);
             if (abs(diffy) > 0)
-                // dy = diffy * (speed_ * elapsed / 1000) / d;
-                dy = (int)((diffy * (speed_ * elapsed) / d) / 1000);
+                // dy = diffy * (speed_ * used_time / 1000) / d;
+                dy = (int)((diffy * (speed_ * used_time) / d) / 1000);
 
             if (abs(dx) > abs(diffx))
                 dx = diffx;
             if (abs(dy) > abs(diffy))
                 dy = diffy;
+            
+            if (dx || dy) {
+                int prv_time = used_time;
+                if (dx) {
+                    used_time -= (int)(((double) dx * 1000.0 * d)
+                        / (double)(diffx * speed_));
+                } else if (dy) {
+                    used_time -= (int)(((double) dy * 1000.0 * d)
+                        / (double)(diffy * speed_));
+                } else
+                    used_time = 0;
+                if (used_time < 0 || prv_time == used_time)
+                    used_time = 0;
+            } else
+                used_time = 0;
+
             updatePlacement(off_x_ + dx, off_y_ + dy);
 #if 0
             if (updatePlacement(off_x_ + dx, off_y_ + dy)) {
@@ -535,8 +552,11 @@ bool VehicleInstance::movementV(int elapsed)
 
             updated = true;
         }
-    } else if (speed_) {
-        printf("Destination Unknown, full speed driving = %i ... doing full stop\n", speed_);
+    }
+    
+    if (dest_path_.empty() && speed_) {
+        printf("Destination Unknown, full speed driving = %i ... doing full stop\n",
+               speed_);
         speed_ = 0;
     }
     if (all_passengers_.size() != 0) {

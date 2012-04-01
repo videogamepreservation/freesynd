@@ -74,7 +74,7 @@ public:
         kNbTypes
     };
 
-    Tile(uint8 id, uint8 *tile_Data, bool all_alpha, EType type);
+    Tile(uint8 id_set, uint8 *tile_Data, bool all_alpha, EType type_set);
     ~Tile();
 
     //! Returns the tile id 

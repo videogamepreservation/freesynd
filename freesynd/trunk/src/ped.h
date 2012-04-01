@@ -638,6 +638,7 @@ public:
     void clearActQ() { actions_queue_.clear(); }
     bool addDefActsToActions(actionQueueGroupType &as);
     void clearDefActs() { default_actions_.clear(); }
+    void dropActQ();
 
     void createActQStanding(actionQueueGroupType &as);
     void createActQWalking(actionQueueGroupType &as, PathNode *tpn,

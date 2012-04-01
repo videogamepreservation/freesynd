@@ -41,7 +41,6 @@ Ped::Ped() {
 bool Ped::drawStandFrame(int x, int y, int dir, int frame,
                          Weapon::WeaponAnimIndex weapon)
 {
-
     assert(weapon < NUM_ANIMS);
     return g_App.gameSprites().drawFrame(
             stand_anims_[weapon] + dir, frame, x, y);
@@ -55,7 +54,6 @@ int Ped::lastStandFrame(int dir, Weapon::WeaponAnimIndex weapon) {
 bool Ped::drawWalkFrame(int x, int y, int dir, int frame,
                         Weapon::WeaponAnimIndex weapon)
 {
-
     assert(weapon < NUM_ANIMS);
     return g_App.gameSprites().drawFrame(
             walk_anims_[weapon] + dir, frame, x, y);
@@ -275,7 +273,7 @@ void PedInstance::switchActionStateFrom(uint32 as) {
             break;
         case pa_smDead:
             action_state_ = pa_smDead;
-            printf("It's alive!");
+            printf("It's alive!\n");
             break;
         case pa_smUnavailable:
             action_state_ = pa_smUnavailable;
@@ -2145,14 +2143,13 @@ bool PedInstance::handleDamage(ShootableMapObject::DamageInflictType *d) {
     }
     if (health_ <= 0) {
         health_ = -1;
-        // TODO: "current action drop" function will be
-        // better for this purpose
 #ifndef NEW_ANIMATE_HANDLING
         resetDest_Speed();
         putdown_weapon_ = NULL;
         pickup_weapon_ = NULL;
         target_ = NULL;
 #else
+        dropActQ();
         switchActionStateTo(PedInstance::pa_smDead);
 #endif
 
@@ -2363,6 +2360,10 @@ void PedInstance::createActQFiring(actionQueueGroupType &as, PathNode *tpn,
     actionQueueType aq;
     aq.as = PedInstance::pa_smFiring;
     aq.group_desc = PedInstance::gd_mFire;
+    // TODO: use condition to set more information for action execution
+    // continuos shooting until ammo ends(or all weapons ammo),
+    // until target detroyed, etc.
+    // TODO: define weapon type to use or weapon by damage type to use
     if (tsmo) {
         aq.t_smo = tsmo;
         aq.ot_execute = Mission::objv_DestroyObject;
@@ -2520,11 +2521,7 @@ void PedInstance::setActQInQueue(actionQueueGroupType &as,
     // NOTE: if action is invalidated all remaining actions in queue are
     // invalid, they should be removed
     if ((as.group_desc & PedInstance::gd_mExclusive) != 0) {
-        for (std::vector <actionQueueGroupType>::iterator it =
-            actions_queue_.begin(); it != actions_queue_.end(); it++)
-        {
-                discardActG(it);
-        }
+        dropActQ();
         setActionStateToDrawnAnim();
     } else {
         bool discarding = false;
@@ -2589,5 +2586,13 @@ void PedInstance::discardActG(std::vector <actionQueueGroupType>::iterator it_a)
             }
         }
         it_a->state |= 8;
+    }
+}
+
+void PedInstance::dropActQ() {
+    for (std::vector <actionQueueGroupType>::iterator it =
+        actions_queue_.begin(); it != actions_queue_.end(); it++)
+    {
+            discardActG(it);
     }
 }

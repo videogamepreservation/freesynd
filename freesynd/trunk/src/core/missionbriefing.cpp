@@ -79,7 +79,7 @@ bool MissionBriefing::loadBriefing(uint8 * missData, int size) {
         // We store the default information plus
         // the additional informations for each level on info
         for (int i = 0; i < i_nb_infos_+1; i++) {
-            int idx = tmp.find_first_of('|', start);
+            std::size_t idx = tmp.find_first_of('|', start);
             if (std::string::npos != idx) {
                 a_briefing_[i].assign(tmp.substr(start, idx - start));
                 start = idx + 1;

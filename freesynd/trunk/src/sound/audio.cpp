@@ -96,7 +96,7 @@ bool Audio::init(EFrequency freq, EFormat fmt, EChannel chan, int chunksize) {
             break;
     }
 
-    if (Mix_OpenAudio(freq, format, channel, chunksize) < 0) {
+    if (Mix_OpenAudio(frequency, format, channel, chunksize) < 0) {
         error("Audio", "init", "Failed to initialize SDL Mixer.");
         return false;
     }

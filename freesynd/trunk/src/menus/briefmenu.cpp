@@ -249,7 +249,6 @@ void BriefMenu::update_briefing_text()
         std::string brief(p_briefing_->briefing(lvl));
         std::string line;
 
-        int idx = 0;
         while (brief.size() != 0 && 
                 line_count < (start_line_ + kMaxLinePerPage + 1)) {
             bool add = read_next_word(brief, line);
