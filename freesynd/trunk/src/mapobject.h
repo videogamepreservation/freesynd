@@ -217,6 +217,11 @@ public:
     MajorTypeEnum majorType() { return major_type_; }
     void setMajorType(MajorTypeEnum mt) { major_type_ = mt; }
 
+    void setStateMasks(unsigned int state) {
+        state_ = state;
+    }
+    unsigned int stateMasks() { return state_; }
+
 protected:
     /*! vis_z_ is location used for adjusting object drawing/calculations
      * tile_z_ represents true location for tile
@@ -239,9 +244,9 @@ protected:
     DefDamageType rcv_damage_def_;
     //! objects direction
     int dir_;
-    //! looped animations time to show them is set here
+    //! looped animations, time to show them is set here
     int time_show_anim_;
-    //! looped animations playing time
+    //! looped animations, playing time
     int time_showing_anim_;
     //! object is not included in view/shot trajectory calculation
     bool is_ignored_;
@@ -250,6 +255,7 @@ protected:
      * MapObject::animate should be called
      */
     bool is_frame_drawn_;
+    uint32 state_;
 
     void addOffs(int &x, int &y);
 };
@@ -425,7 +431,6 @@ public:
 
 protected:
     Static(int m):ShootableMapObject(m) {}
-    unsigned int state_;
 };
 
 /*!

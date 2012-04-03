@@ -302,11 +302,6 @@ public:
     bool handleDamage(ShootableMapObject::DamageInflictType *d);
     void destroyAllWeapons();
 
-    void setActionStateMasks(unsigned int action_state) {
-        action_state_ = action_state;
-    }
-    unsigned int actionStateMasks() { return action_state_; }
-
     void setDescStateMasks(unsigned int desc_state) {
         desc_state_ = desc_state;
     }
@@ -552,7 +547,7 @@ public:
         pa_smUnavailable = 0x2000,
         pa_smCheckExcluded = pa_smDead | pa_smUnavailable,
         pa_smAll = 0xFFFF
-    } pedActionStateMasks;
+    } pedActionStateMasks; // MapObject::state_
 
     typedef struct {
         // action state (pedActionStateMasks)
@@ -682,8 +677,6 @@ protected:
 
     std::vector <actionQueueGroupType> actions_queue_;
     std::vector <actionQueueGroupType> default_actions_;
-    // (pedActionStateMasks)
-    unsigned int action_state_;
     uint32 action_grp_id_;
     // (pedDescStateMasks)
     unsigned int desc_state_;

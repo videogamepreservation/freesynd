@@ -54,24 +54,24 @@ public:
      * A tile type.
      */
     enum EType {
-        kNone,       // non-surface/non-walkable(if above surface is walkable)
-        kSlopeSN,
-        kSlopeNS,
-        kSlopeEW,
-        kSlopeWE,
-        kGround,
-        kRoadSideEW,
-        kRoadSideWE,
-        kRoadSideSN,
-        kRoadSideNS,
-        kWall,
-        kRoadCurve,
-        kHandrailLight,
-        kRoof,
-        kRoadPedCross,
-        kRoadMark,
-        kUnknown,   // non-surface/non-walkable, always above train stop
-        kNbTypes
+        kNone = 0x00,       // non-surface/non-walkable(if above surface is walkable)
+        kSlopeSN = 0x01,
+        kSlopeNS = 0x02,
+        kSlopeEW = 0x03,
+        kSlopeWE = 0x04,
+        kGround = 0x05,
+        kRoadSideEW = 0x06,
+        kRoadSideWE = 0x07,
+        kRoadSideSN = 0x08,
+        kRoadSideNS = 0x09,
+        kWall = 0x0A,
+        kRoadCurve = 0x0B,
+        kHandrailLight = 0x0C,
+        kRoof = 0x0D,
+        kRoadPedCross = 0x0E,
+        kRoadMark = 0x0F,
+        kUnknown = 0x10,   // non-surface/non-walkable, always above train stop
+        kNbTypes  = 0x11,
     };
 
     Tile(uint8 id_set, uint8 *tile_Data, bool all_alpha, EType type_set);

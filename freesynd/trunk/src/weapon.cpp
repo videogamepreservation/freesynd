@@ -84,6 +84,7 @@ WeaponInstance::WeaponInstance(Weapon * w) : ShootableMapObject(-1)
     major_type_ = MapObject::mjt_Weapon;
     owner_ = NULL;
     activated_ = false;
+    time_consumed_ = false;
 }
 
 bool WeaponInstance::animate(int elapsed) {
@@ -113,6 +114,15 @@ bool WeaponInstance::animate(int elapsed) {
                 owner_->setHealth(owner_->startHealth());
                 ammo_remaining_ = 0;
                 ((PedInstance *)owner_)->selectNextWeapon();
+                weapon_used_time_ = 0;
+            }
+        } else if (time_consumed_) {
+            time_consumed_ = false;
+        } else if (weapon_used_time_ != 0 ) {
+            weapon_used_time_ += elapsed;
+            if (weapon_used_time_ > (pWeaponClass_->timeForShot()
+                + pWeaponClass_->timeReload()))
+            {
                 weapon_used_time_ = 0;
             }
         }
@@ -534,32 +544,11 @@ uint16 WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
     int *elapsed, bool ignoreBlocker, uint32 *make_shots)
 {
     // TODO: add return value as int for diff fail events to handle correctly,
-    // check tobj completed action, additional parameter for shots needed,
+    // check tobj completed action,
     // time remaining, shots done
     // TODO : IPA influence
     if (ammo_remaining_ == 0)
         return 1;
-
-    uint32 shots = 0;
-    if (make_shots)
-        shots = *make_shots;
-    shots = getShots(elapsed, shots);
-    if (make_shots)
-        *make_shots = shots;
-    if (shots == 0)
-        return 2;
-
-    unsigned int shot_prop = pWeaponClass_->shotProperty();
-
-    if (pWeaponClass_->dmgType() == MapObject::dmg_None) {
-        return 4;
-    } else if (pWeaponClass_->dmgType() == MapObject::dmg_Heal) {
-        // NOTE: not only self-healing in future?
-        return 4;
-    } else if ((shot_prop & Weapon::spe_TargetPedOnly) != 0 && tp) {
-        // NOTE: Persuadatron will not shoot on ground
-        return 8;
-    }
 
     int xb = 0;
     int yb = 0;
@@ -602,6 +591,27 @@ uint16 WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
         cp.z = vis_z_ * 128 + off_z_ + Z_SHIFT_TO_AIR;
         if (cp.z > (g_Session.getMission()->mmax_z_ - 1) * 128)
             cp.z = (g_Session.getMission()->mmax_z_ - 1) * 128;
+    }
+
+    uint32 shots = 0;
+    if (make_shots)
+        shots = *make_shots;
+    shots = getShots(elapsed, shots);
+    if (make_shots)
+        *make_shots = shots;
+    if (shots == 0)
+        return 2;
+
+    unsigned int shot_prop = pWeaponClass_->shotProperty();
+
+    if (pWeaponClass_->dmgType() == MapObject::dmg_None) {
+        return 4;
+    } else if (pWeaponClass_->dmgType() == MapObject::dmg_Heal) {
+        // NOTE: not only self-healing in future?
+        return 4;
+    } else if ((shot_prop & Weapon::spe_TargetPedOnly) != 0 && tp) {
+        // NOTE: Persuadatron will not shoot on ground
+        return 8;
     }
 
     ShootableMapObject * smp = tobj;
@@ -888,6 +898,7 @@ int WeaponInstance::getShots(int *elapsed, uint32 make_shots) {
 // TODO check in weaponinstance animate double consuming of elapsed
     int time_full_shot = time_for_shot + time_reload;
     int elapsed_l = *elapsed;
+    time_consumed_ = true;
     // TODO: adjust shots in getshots for availiable ammo
     if (weapon_used_time_ >= time_for_shot) {
         weapon_used_time_ += elapsed_l;
@@ -997,7 +1008,7 @@ void ShotClass::makeShot(bool rangeChecked, toDefineXYZ &cp, int anim_hit,
             assert(w != NULL);
             has_blocker = w->inRange(cp, &smp, &pn, true);
         }
-        // TODO: set directiom?
+        // TODO: set direction?
         d.ddir = -1;
         if (smp) {
             int txb = all_shots[i].tp.x;

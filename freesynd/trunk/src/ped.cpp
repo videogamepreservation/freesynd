@@ -181,52 +181,52 @@ void PedInstance::switchActionStateTo(uint32 as) {
             //printf("Ped has undefined state");
             break;
         case pa_smStanding:
-            action_state_ &= (pa_smAll ^(pa_smFollowing | pa_smFiring
+            state_ &= (pa_smAll ^(pa_smFollowing | pa_smFiring
                 | pa_smUsingCar | pa_smInCar));
-            action_state_ |= pa_smStanding;
+            state_ |= pa_smStanding;
             break;
         case pa_smWalking:
-            action_state_ &= (pa_smAll ^(pa_smFollowing | pa_smFiring
+            state_ &= (pa_smAll ^(pa_smFollowing | pa_smFiring
                 | pa_smUsingCar | pa_smInCar));
-            action_state_ |= pa_smWalking;
+            state_ |= pa_smWalking;
             break;
         case pa_smHit:
-            action_state_ = pa_smHit;
+            state_ = pa_smHit;
             break;
         case pa_smFiring:
-            action_state_ |= pa_smFiring;
+            state_ |= pa_smFiring;
             break;
         case pa_smFollowing:
-            action_state_ &= (pa_smAll ^(pa_smStanding | pa_smWalking
+            state_ &= (pa_smAll ^(pa_smStanding | pa_smWalking
                 | pa_smFiring | pa_smUsingCar | pa_smInCar));
-            action_state_ |= pa_smFollowing;
+            state_ |= pa_smFollowing;
             break;
         case pa_smPickUp:
-            action_state_ = pa_smPickUp;
+            state_ = pa_smPickUp;
             break;
         case pa_smPutDown:
-            action_state_ = pa_smPutDown;
+            state_ = pa_smPutDown;
             break;
         case pa_smBurning:
-            action_state_ = pa_smBurning;
+            state_ = pa_smBurning;
             break;
         case pa_smGetInCar:
-            action_state_ = pa_smStanding | pa_smGetInCar;
+            state_ = pa_smStanding | pa_smGetInCar;
             break;
         case pa_smUsingCar:
-            action_state_ = pa_smStanding | pa_smUsingCar;
+            state_ = pa_smStanding | pa_smUsingCar;
             break;
         case pa_smInCar:
-            action_state_ = pa_smStanding | pa_smInCar;
+            state_ = pa_smStanding | pa_smInCar;
             break;
         case pa_smLeaveCar:
-            action_state_ = pa_smStanding | pa_smLeaveCar;
+            state_ = pa_smStanding | pa_smLeaveCar;
             break;
         case pa_smDead:
-            action_state_ = pa_smDead;
+            state_ = pa_smDead;
             break;
         case pa_smUnavailable:
-            action_state_ = pa_smUnavailable;
+            state_ = pa_smUnavailable;
             break;
     }
 }
@@ -237,74 +237,74 @@ void PedInstance::switchActionStateFrom(uint32 as) {
             //printf("Ped has undefined state");
             break;
         case pa_smStanding:
-            action_state_ &= pa_smAll ^ pa_smStanding;
+            state_ &= pa_smAll ^ pa_smStanding;
             break;
         case pa_smWalking:
-            action_state_ &= pa_smAll ^ pa_smWalking;
-            action_state_ |= pa_smStanding;
+            state_ &= pa_smAll ^ pa_smWalking;
+            state_ |= pa_smStanding;
             break;
         case pa_smHit:
-            action_state_ &= pa_smAll ^ pa_smHit;
+            state_ &= pa_smAll ^ pa_smHit;
             break;
         case pa_smFiring:
-            action_state_ &= pa_smAll ^ pa_smFiring;
+            state_ &= pa_smAll ^ pa_smFiring;
             break;
         case pa_smFollowing:
-            action_state_ &= pa_smAll ^ pa_smFollowing;
+            state_ &= pa_smAll ^ pa_smFollowing;
             break;
         case pa_smPickUp:
         case pa_smPutDown:
-            action_state_ = pa_smStanding;
+            state_ = pa_smStanding;
             break;
         case pa_smBurning:
-            action_state_ &= pa_smAll ^ pa_smBurning;
+            state_ &= pa_smAll ^ pa_smBurning;
             break;
         case pa_smGetInCar:
-            action_state_ &= pa_smAll ^ (pa_smStanding | pa_smGetInCar);
+            state_ &= pa_smAll ^ (pa_smStanding | pa_smGetInCar);
             break;
         case pa_smUsingCar:
-            action_state_ &= pa_smAll ^ (pa_smStanding | pa_smUsingCar);
+            state_ &= pa_smAll ^ (pa_smStanding | pa_smUsingCar);
             break;
         case pa_smInCar:
-            action_state_ &= pa_smAll ^ (pa_smStanding | pa_smInCar);
+            state_ &= pa_smAll ^ (pa_smStanding | pa_smInCar);
             break;
         case pa_smLeaveCar:
-            action_state_ = pa_smStanding;
+            state_ = pa_smStanding;
             break;
         case pa_smDead:
-            action_state_ = pa_smDead;
+            state_ = pa_smDead;
             printf("It's alive!\n");
             break;
         case pa_smUnavailable:
-            action_state_ = pa_smUnavailable;
+            state_ = pa_smUnavailable;
             break;
     }
 }
 
 void PedInstance::setActionStateToDrawnAnim(void) {
     // TODO: complete
-    if ((action_state_ & pa_smUnavailable) != 0) {
+    if ((state_ & pa_smUnavailable) != 0) {
         setDrawnAnim(PedInstance::ad_NoAnimation);
-    } else if ((action_state_ & pa_smDead) != 0) {
+    } else if ((state_ & pa_smDead) != 0) {
         //setDrawnAnim(PedInstance::ad_DeadAnim);
-    } else if ((action_state_ & pa_smWalking) != 0) {
-        if ((action_state_ & pa_smFiring) != 0)
+    } else if ((state_ & pa_smWalking) != 0) {
+        if ((state_ & pa_smFiring) != 0)
             setDrawnAnim(PedInstance::ad_WalkFireAnim);
         else
             setDrawnAnim(PedInstance::ad_WalkAnim);
-    } else if ((action_state_ & pa_smStanding) != 0) {
-        if ((action_state_ & pa_smFiring) != 0)
+    } else if ((state_ & pa_smStanding) != 0) {
+        if ((state_ & pa_smFiring) != 0)
             setDrawnAnim(PedInstance::ad_StandFireAnim);
         else
             setDrawnAnim(PedInstance::ad_StandAnim);
-    } else if ((action_state_ & pa_smPickUp) != 0) {
+    } else if ((state_ & pa_smPickUp) != 0) {
         setDrawnAnim(PedInstance::ad_PickupAnim);
-    } else if ((action_state_ & pa_smPutDown) != 0) {
+    } else if ((state_ & pa_smPutDown) != 0) {
         setDrawnAnim(PedInstance::ad_PutdownAnim);
     }
 #ifdef _DEBUG
-    if (action_state_ == 0)
-        printf("undefined action_state_\n");
+    if (state_ ==  pa_smNone)
+        printf("undefined state_\n");
 #endif
 }
 
@@ -379,7 +379,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                                    == MapObject::mjt_Vehicle)
                         {
                             VehicleInstance *v = (VehicleInstance *)aqt.t_smo;
-                            if (v->health() > 0 && (action_state_
+                            if (v->health() > 0 && (state_
                                 & (PedInstance::pa_smInCar
                                 | PedInstance::pa_smUsingCar)) == 0)
                             {
@@ -390,7 +390,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                                         aqt.state |= 4;
                                         is_ignored_ = true;
                                         map_ = -1;
-                                        action_state_ |= pa_smInCar;
+                                        state_ |= pa_smInCar;
                                     } else {
                                         aqt.state |= 8;
                                     }
@@ -406,7 +406,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                                         aqt.state |= 4;
                                         is_ignored_ = true;
                                         map_ = -1;
-                                        action_state_ |= pa_smUsingCar;
+                                        state_ |= pa_smUsingCar;
                                     }
                                 }
                             } else
@@ -439,7 +439,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                 if ((aqt.ot_execute & Mission::objv_PickUpObject) != 0)
                 {
                     //TODO: better state checking
-                    if ((action_state_ & (PedInstance::pa_smInCar
+                    if ((state_ & (PedInstance::pa_smInCar
                         | PedInstance::pa_smUsingCar)) != 0)
                         aqt.state |= 8;
                     if (aqt.state == 1) {
@@ -502,7 +502,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                 if ((aqt.ot_execute & Mission::objv_PutDownObject) != 0)
                 {
                     //TODO: better state checking
-                    if ((action_state_ & (PedInstance::pa_smInCar
+                    if ((state_ & (PedInstance::pa_smInCar
                         | PedInstance::pa_smUsingCar)) != 0)
                         aqt.state |= 8;
                     if (aqt.state == 1) {
@@ -520,7 +520,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                     //TODO: for now we fail while trying to walk
                     // in car
                     //TODO: better state checking
-                    if ((action_state_ & (PedInstance::pa_smInCar
+                    if ((state_ & (PedInstance::pa_smInCar
                         | PedInstance::pa_smUsingCar)) != 0)
                         aqt.state |= 8;
                     if (aqt.state == 1) {
@@ -757,7 +757,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                             int num_peds = mission->numPeds();
                             for (int i = 0; i < num_peds; i++) {
                                 PedInstance *p = mission->ped(i);
-                                if ((actionStateMasks() &
+                                if ((stateMasks() &
                                     pa_smCheckExcluded) != 0
                                     || hostiles_found_.find(p)
                                     != hostiles_found_.end()
@@ -819,7 +819,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                             int num_peds = mission->numPeds();
                             for (int i = 0; i < num_peds; i++) {
                                 PedInstance *p = mission->ped(i);
-                                if ((actionStateMasks() &
+                                if ((stateMasks() &
                                     pa_smCheckExcluded) != 0
                                     || hostiles_found_.find(p)
                                     != hostiles_found_.end())
@@ -889,7 +889,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                     int view_rng = (sight_range_ << 8);
                     for (int i = 0; i < num_peds; i++) {
                         PedInstance *p = mission->ped(i);
-                        if ((actionStateMasks() &
+                        if ((stateMasks() &
                             pa_smCheckExcluded) != 0)
                             continue;
                         if (!checkFriendIs(p) ) {
@@ -970,9 +970,12 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                 break;
         }
     }
+
     if (handleDrawnAnim(elapsed))
         setActionStateToDrawnAnim();
-    if (is_frame_drawn_)
+    // TODO: if object is not in drawing region of map draw is not called
+    // and animation is not updated
+    //if (is_frame_drawn_)
         updated = MapObject::animate(elapsed);
     return updated;
 }
@@ -1409,7 +1412,7 @@ void PedInstance::showPath(int scrollX, int scrollY) {
 
 PedInstance::PedInstance(Ped *ped, int m) : ShootableMovableMapObject(m),
     ped_(ped), firing_(PedInstance::Firing_Not),
-    action_state_(PedInstance::pa_smNone), action_grp_id_(1),
+    action_grp_id_(1),
     desc_state_(PedInstance::pd_smUndefined),
     hostile_desc_(PedInstance::pd_smUndefined),
     obj_group_def_(PedInstance::og_dmUndefined),
@@ -1424,6 +1427,7 @@ PedInstance::PedInstance(Ped *ped, int m) : ShootableMovableMapObject(m),
     hold_on_.wayFree = 0;
     rcv_damage_def_ = MapObject::ddmg_Ped;
     major_type_ = MapObject::mjt_Ped;
+    state_ = PedInstance::pa_smNone;
 }
 
 PedInstance::~PedInstance(){
@@ -1727,7 +1731,7 @@ bool PedInstance::wePickupWeapon() {
 VehicleInstance *PedInstance::inVehicle()
 {
 #ifdef NEW_ANIMATE_HANDLING
-    return (action_state_ & (PedInstance::pa_smInCar
+    return (state_ & (PedInstance::pa_smInCar
         | PedInstance::pa_smUsingCar)) != 0 ? in_vehicle_ : NULL;
 #else
     return map_ == -1 ? in_vehicle_ : NULL;
@@ -1745,14 +1749,14 @@ void PedInstance::leaveVehicle() {
     in_vehicle_ = NULL;
     is_ignored_ = false;
 #ifdef NEW_ANIMATE_HANDLING
-    switchActionStateFrom(action_state_ & (PedInstance::pa_smInCar
+    switchActionStateFrom(state_ & (PedInstance::pa_smInCar
         | PedInstance::pa_smUsingCar));
 #endif
 }
 
 
 bool PedInstance::setVehicleIgnore(bool ignored) {
-    if ((action_state_ & (PedInstance::pa_smInCar
+    if ((state_ & (PedInstance::pa_smInCar
         | PedInstance::pa_smUsingCar)) != 0)
     {
         in_vehicle_->setIsIgnored(ignored);
@@ -2525,14 +2529,21 @@ void PedInstance::setActQInQueue(actionQueueGroupType &as,
         setActionStateToDrawnAnim();
     } else {
         bool discarding = false;
+        std::vector <actionQueueGroupType>::iterator it_s
+            = actions_queue_.end();
         for (std::vector <actionQueueGroupType>::iterator it =
             actions_queue_.begin(); it != actions_queue_.end(); it++)
         {
             if (discarding) {
                 discardActG(it);
-            } else if ((it->group_desc & as.group_desc) != 0)
+            } else if ((it->group_desc & as.group_desc) != 0) {
                 discarding = true;
+                it_s = it;
+                it--;
+            }
         }
+        if (it_s != actions_queue_.end())
+            actions_queue_.erase(it_s, actions_queue_.end());
         setActionStateToDrawnAnim();
     }
     if (set_id) {
@@ -2595,4 +2606,5 @@ void PedInstance::dropActQ() {
     {
             discardActG(it);
     }
+    actions_queue_.clear();
 }

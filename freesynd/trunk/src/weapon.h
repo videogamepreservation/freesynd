@@ -212,20 +212,20 @@ protected:
     WeaponAnimIndex idx_;
     snd::InGameSample sample_;
     int ammo_per_shot_;
-    // time weapon uses to do a single shot
+    //! time weapon uses to do a single shot
     int time_for_shot_;
-    // time required to make weapon ready to shoot
+    //! time required to make weapon ready to shoot
     int time_reload_;
     /*! True when weapon was found and submit to search manager.*/
     bool submittedToSearch_;
     unsigned int shot_property_;
     ad_HitAnims anims_;
     int range_dmg_;
-    // some weapons have wider shot
+    //! some weapons have wider shot
     double shot_angle_;
-    // agent accuracy will be applied to this, later to shot_angle_
+    //! agent accuracy will be applied to this, later to shot_angle_
     double shot_accuracy_;
-    // only projectiles have this set (gauss, flamer)
+    //! only projectiles have this set (gauss, flamer)
     int shot_speed_;
 };
 
@@ -317,11 +317,17 @@ public:
 protected:
     Weapon *pWeaponClass_;
     int ammo_remaining_;
-    // if this value is smaller time_for_shot_ shot cannot be done 
-    // if is greater then time_for_shot_ reload is in execution
-    // if is greater then time_for_shot_ + time_reload_ then full shot is done
+    /*! if this value is smaller time_for_shot_ shot cannot be done 
+    * if is greater then time_for_shot_ reload is in execution
+    * if is greater then time_for_shot_ + time_reload_ then full shot is done
+    * */
     int weapon_used_time_;
     bool activated_;
+    /*! used to avoid double consuming of same elapsed time,
+    * if ped shoots, time is consumed and should not be reused by weapon,
+    * NOTE: ped animate executed before weapon animate
+    */
+    bool time_consumed_;
 };
 
 class ProjectileShot: public ShotClass {

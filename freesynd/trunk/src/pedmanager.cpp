@@ -151,10 +151,10 @@ PedInstance *PedManager::loadInstance(uint8 * data, int map)
     if (gamdata->state == 0x11) {
         newped->setDrawnAnim(PedInstance::ad_DeadAnim);
         newped->setHealth(-1);
-        newped->setActionStateMasks(PedInstance::pa_smDead);
+        newped->setStateMasks(PedInstance::pa_smDead);
     } else {
         newped->setHealth(hp);
-        newped->setActionStateMasks(PedInstance::pa_smStanding);
+        newped->setStateMasks(PedInstance::pa_smStanding);
     }
     // this is tile based Z we get, realword Z is in gamdata,
     // for correct calculations of viewpoint, target hit etc.

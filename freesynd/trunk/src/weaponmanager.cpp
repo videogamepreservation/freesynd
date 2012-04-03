@@ -225,7 +225,7 @@ Weapon * WeaponManager::loadWeapon(Weapon::WeaponType wt) {
             pWeapon = new Weapon(g_App.menus().getMessage("WEAPON_GAUSS_GUN"),
         16, 66, 50000, 3, 5120, 15000, 0,
         369, Weapon::Gauss_Anim, snd::GAUSSGUN, Weapon::GaussGun,
-        MapObject::dmg_Explosion, 1, 350, 500, Weapon::wspt_GaussGun,
+        MapObject::dmg_Explosion, 1, 350, 1500, Weapon::wspt_GaussGun,
         SFXObject::sfxt_ExplosionFire,
         SFXObject::sfxt_ExplosionBall, SFXObject::sfxt_Smoke,
         SFXObject::sfxt_LargeFire, 512, 5.0, 0.99, 4000);
