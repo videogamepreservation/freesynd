@@ -383,12 +383,11 @@ public:
                 else {
                     do {
                         if (it->second == second) {
-                            this->erase(it);
                             found = true;
                             break;
                         }
                         it++;
-                    } while (it->first == first && it != this->end());
+                    } while (it != this->end() && it->first == first);
                 }
             }
             return found;
@@ -684,8 +683,8 @@ protected:
     // ((target checked)desc_state_ & hostile_desc_) != 0 kill him
     unsigned int hostile_desc_;
     Mmuu32_t enemy_group_defs_;
-    // if object is not hostile here enemy_group_defs_ and hostile_desc_ check
-    // is skipped
+    // if object is not hostile here, enemy_group_defs_ check
+    // is skipped, but not hostiles_found_ or desc_state_
     Mmuu32_t emulated_group_defs_;
     Mmuu32_t friend_group_defs_;
     //std::set <unsigned int> emulated_failed_groups_;
@@ -693,11 +692,11 @@ protected:
     Msmod_t hostiles_found_;
     //unused for now
     //std::set <ShootableMapObject *> friends_found_;
-    // defines group obj belongs to (objGroupDefMasks)
+    //! defines group obj belongs to (objGroupDefMasks), not unique
     unsigned int obj_group_def_;
     unsigned int old_obj_group_def_;
 
-    // a group identification number, 0 - all group IDs
+    //! a unique group identification number, 0 - all group IDs
     unsigned int obj_group_id_;
     unsigned int old_obj_group_id_;
 

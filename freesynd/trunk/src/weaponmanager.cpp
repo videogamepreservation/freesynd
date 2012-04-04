@@ -177,7 +177,7 @@ Weapon * WeaponManager::loadWeapon(Weapon::WeaponType wt) {
         372, Weapon::Minigun_Anim, snd::MINIGUN, Weapon::Minigun,
         MapObject::dmg_Bullet, 5, 100, 100, Weapon::wspt_Minigun,
         SFXObject::sfxt_BulletHit, SFXObject::sfxt_BulletHit,
-        SFXObject::sfxt_Unknown, SFXObject::sfxt_Unknown, 0, 30.0, 0.5);
+        SFXObject::sfxt_Unknown, SFXObject::sfxt_Unknown, 0, 60.0, 0.5);
             break;
         case Weapon::Flamer:
             // NOTE: range changed from 512 to 1152
@@ -192,7 +192,7 @@ Weapon * WeaponManager::loadWeapon(Weapon::WeaponType wt) {
             pWeapon = new Weapon(g_App.menus().getMessage("WEAPON_LONG_RANGE"),
         22, 72, 1000, 30, 6144, 2, 3,
         375, Weapon::LongRange_Anim, snd::LONGRANGE, Weapon::LongRange,
-        MapObject::dmg_Bullet, 1, 300, 400, Weapon::wspt_LongRange,
+        MapObject::dmg_Bullet, 1, 900, 400, Weapon::wspt_LongRange,
         SFXObject::sfxt_BulletHit, SFXObject::sfxt_BulletHit,
         SFXObject::sfxt_Unknown, SFXObject::sfxt_Unknown, 0, 1.0, 1.0);
             break;
@@ -211,7 +211,7 @@ Weapon * WeaponManager::loadWeapon(Weapon::WeaponType wt) {
         Weapon::Uzi_Anim, snd::UZI, Weapon::Uzi, MapObject::dmg_Bullet, 1,
         150, 150, Weapon::wspt_Uzi, SFXObject::sfxt_BulletHit,
         SFXObject::sfxt_BulletHit, SFXObject::sfxt_Unknown,
-        SFXObject::sfxt_Unknown, 0, 10.0, 0.7);
+        SFXObject::sfxt_Unknown, 0, 20.0, 0.7);
             break;
         case Weapon::Laser:
             pWeapon = new Weapon(g_App.menus().getMessage("WEAPON_LASER"),
@@ -236,7 +236,7 @@ Weapon * WeaponManager::loadWeapon(Weapon::WeaponType wt) {
         Weapon::Shotgun_Anim, snd::SHOTGUN, Weapon::Shotgun,
         MapObject::dmg_Bullet, 2, 250, 200, Weapon::wspt_Shotgun,
         SFXObject::sfxt_BulletHit, SFXObject::sfxt_BulletHit,
-        SFXObject::sfxt_Unknown, SFXObject::sfxt_Unknown, 0, 10.0, 0.7);
+        SFXObject::sfxt_Unknown, SFXObject::sfxt_Unknown, 0, 60.0, 0.7);
             break;
         case Weapon::MediKit:
             pWeapon = new Weapon(g_App.menus().getMessage("WEAPON_MEDIKIT"),

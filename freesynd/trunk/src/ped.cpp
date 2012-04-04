@@ -757,7 +757,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                             int num_peds = mission->numPeds();
                             for (int i = 0; i < num_peds; i++) {
                                 PedInstance *p = mission->ped(i);
-                                if ((stateMasks() &
+                                if ((state_ &
                                     pa_smCheckExcluded) != 0
                                     || hostiles_found_.find(p)
                                     != hostiles_found_.end()
@@ -819,8 +819,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                             int num_peds = mission->numPeds();
                             for (int i = 0; i < num_peds; i++) {
                                 PedInstance *p = mission->ped(i);
-                                if ((stateMasks() &
-                                    pa_smCheckExcluded) != 0
+                                if ((state_ & pa_smCheckExcluded) != 0
                                     || hostiles_found_.find(p)
                                     != hostiles_found_.end())
                                     continue;
@@ -889,8 +888,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                     int view_rng = (sight_range_ << 8);
                     for (int i = 0; i < num_peds; i++) {
                         PedInstance *p = mission->ped(i);
-                        if ((stateMasks() &
-                            pa_smCheckExcluded) != 0)
+                        if ((state_ & pa_smCheckExcluded) != 0)
                             continue;
                         if (!checkFriendIs(p) ) {
                             double distTo = 0;
@@ -2242,36 +2240,37 @@ bool PedInstance::checkHostileIs(ShootableMapObject *obj,
     if (obj->majorType() == MapObject::mjt_Vehicle) {
         // TODO: add this check later, create a list of all in vehicle
     } else if (obj->majorType() == MapObject::mjt_Ped) {
-        if (((PedInstance *)obj)->emulatedGroupDefsEmpty()) {
-            hostile_rsp =
-                isInEnemyGroupDef(((PedInstance *)obj)->objGroupID(),
-                ((PedInstance *)obj)->objGroupDef());
+        hostile_rsp = !checkFriendIs((PedInstance *)obj);
+        if (!hostile_rsp) {
+            if (((PedInstance *)obj)->emulatedGroupDefsEmpty()) {
+                hostile_rsp =
+                    isInEnemyGroupDef(((PedInstance *)obj)->objGroupID(),
+                    ((PedInstance *)obj)->objGroupDef());
+            } else {
+                hostile_rsp =
+                    ((PedInstance *)obj)->isInEmulatedGroupDef(enemy_group_defs_);
+            }
             if (!hostile_rsp) {
                 if (hostile_desc_alt == PedInstance::pd_smUndefined)
                     hostile_desc_alt = hostile_desc_;
                 hostile_rsp =
-                    (((PedInstance *)obj)->descStateMasks() & hostile_desc_alt) != 0;
+                    (((PedInstance *)obj)->descStateMasks()
+                    & hostile_desc_alt) != 0;
             }
-        } else {
-            hostile_rsp =
-                ((PedInstance *)obj)->isInEmulatedGroupDef(enemy_group_defs_);
-        }
-        if (!hostile_rsp) {
-            hostile_rsp = hostiles_found_.find(obj) != hostiles_found_.end();
         }
     }
     return hostile_rsp;
 }
 
 bool PedInstance::checkFriendIs(PedInstance *p) {
-    // TODO: friend list check add
+    // Friend can be hostile, but still he will be a friend
+    // to be sure that object is hostile use checkHostileIs
+    // and check hostiles_found_(isInHostilesFound)
     if (p->isInEmulatedGroupDef(obj_group_id_))
         return true;
-    if (!hostiles_found_.empty()) {
-        if (hostiles_found_.find((ShootableMapObject *)p) !=
-            hostiles_found_.end())
-            return false;
-    }
+    if (friend_group_defs_.find(p->objGroupDef()) !=
+        friend_group_defs_.end())
+        return true;
     return (p->objGroupID() == obj_group_id_);
 }
 
@@ -2367,7 +2366,7 @@ void PedInstance::createActQFiring(actionQueueGroupType &as, PathNode *tpn,
     // TODO: use condition to set more information for action execution
     // continuos shooting until ammo ends(or all weapons ammo),
     // until target detroyed, etc.
-    // TODO: define weapon type to use or weapon by damage type to use
+    // TODO: define weapon type and/or weapon by damage type to use
     if (tsmo) {
         aq.t_smo = tsmo;
         aq.ot_execute = Mission::objv_DestroyObject;

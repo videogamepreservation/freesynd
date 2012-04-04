@@ -5,7 +5,7 @@
  - Play sound in end mission animation
  - Remove debug info displayed in the console
  - Correct identification of object types during mission load, includes
-vehicles, people, static objects, weapons, also setup sfx for weapons
+vehicles, people, static objects, weapons
  - Adding properties to:
    vehicle: max people can hold; speed per type; damage can inflict/recieve per type;
 radius of damage when destroyed
@@ -27,7 +27,8 @@ around the city
    "access card" make agent become police officer
    firing should have delay, correct delay per weapon(?)/ipa
    instant damage to objects
- - resolve shooting issues: targeting, range damage
+ - resolve shooting issues: targeting
+ - agent explode with mod chest lvl 2 or 3
  - animation for objects need to be fixed, to correctly represent every stage
 of event/state:
    windows break when shot
@@ -43,7 +44,7 @@ game mission files.
 
  Very low priority stuff, maybe for v0.9:
  - Look at code that plays intro animation for possible errors.
- - "no_sound"/"no_music" option for config file, or disabled in debug mode
+ - "no_sound"/"no_music" option for config file
  - Add mission failure music
  - The built-in fonts have some characters that don't sit right vertically
 (Ö and Ü in certain sizes)

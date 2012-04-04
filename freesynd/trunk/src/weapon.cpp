@@ -175,6 +175,7 @@ void ShotClass::shotTargetRandomizer(toDefineXYZ * cp, toDefineXYZ * tp,
 {
     if (angle == 0)
         return;
+    //angle *= (double)(rand() % 100) / 100.0;
     int cx = cp->x;
     int cy = cp->y;
     int cz = cp->z;
@@ -546,7 +547,7 @@ uint16 WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
     // TODO: add return value as int for diff fail events to handle correctly,
     // check tobj completed action,
     // time remaining, shots done
-    // TODO : IPA influence
+    // TODO : IPA+mods influence
     if (ammo_remaining_ == 0)
         return 1;
 
@@ -673,22 +674,18 @@ uint16 WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
             cp.x % 256, cp.y % 256, base_shot.tp.z % 128);
     }
     std::vector <Weapon::ShotDesc> all_shots;
-    all_shots.reserve(20);
+    all_shots.reserve(32);
 
     int mask = Weapon::stm_AllObjects;
 
     int ammoused = 1;
-    // TODO: adjust shots in getshots for availiable ammo
     if (shot_prop & Weapon::spe_UsesAmmo) {
-        if (pWeaponClass_->ammo() > 0) {
-            ammoused = shots * pWeaponClass_->ammoPerShot();
-                if (ammoused > ammo_remaining_) {
-                    ammoused = ammo_remaining_;
-                    ammo_remaining_ = 0;
-                } else
-                    ammo_remaining_ -= ammoused;
+        ammoused = shots * pWeaponClass_->ammoPerShot();
+        if (ammoused > ammo_remaining_) {
+            ammoused = ammo_remaining_;
+            ammo_remaining_ = 0;
         } else
-            ammoused = pWeaponClass_->ammoPerShot();
+            ammo_remaining_ -= ammoused;
     }
 
     bool range_damage = (shot_prop & Weapon::spe_RangeDamageOnReach) != 0;
@@ -898,8 +895,8 @@ int WeaponInstance::getShots(int *elapsed, uint32 make_shots) {
 // TODO check in weaponinstance animate double consuming of elapsed
     int time_full_shot = time_for_shot + time_reload;
     int elapsed_l = *elapsed;
+    *elapsed = 0;
     time_consumed_ = true;
-    // TODO: adjust shots in getshots for availiable ammo
     if (weapon_used_time_ >= time_for_shot) {
         weapon_used_time_ += elapsed_l;
         if (weapon_used_time_ >= time_full_shot) {
@@ -907,15 +904,21 @@ int WeaponInstance::getShots(int *elapsed, uint32 make_shots) {
             weapon_used_time_ -= time_full_shot;
         } else {
             // reload consumed all time, no time for shooting
-            *elapsed = 0;
             return 0;
         }
     } else
         weapon_used_time_ += elapsed_l;
 
     if (weapon_used_time_ == 0) {
-        *elapsed = 0;
         return 0;
+    }
+    elapsed_l = 0;
+
+    uint32 shots_can_do = 0xFFFFFFFF;
+    if (pWeaponClass_->shotProperty() & Weapon::spe_UsesAmmo) {
+        shots_can_do = ammo_remaining_ / pWeaponClass_->ammoPerShot();
+        if (ammo_remaining_ % pWeaponClass_->ammoPerShot())
+            shots_can_do++;
     }
     uint32 shots = weapon_used_time_ / time_full_shot;
     weapon_used_time_ %= time_full_shot;
@@ -924,16 +927,34 @@ int WeaponInstance::getShots(int *elapsed, uint32 make_shots) {
         shots++;
         adjusted = true;
     }
+    // Adjusting time consumed and shots done to ammo
+    // that can be used
+    if (shots_can_do < shots) {
+        if (adjusted) {
+            shots--;
+            adjusted = false;
+        }
+        if (shots_can_do < shots) {
+         elapsed_l = time_full_shot * (shots - shots_can_do);
+         shots = shots_can_do;
+        } else
+            elapsed_l = weapon_used_time_;
+        weapon_used_time_ = 0;
+    }
+
     if (make_shots != 0 && shots != 0 && make_shots < shots) {
         // we might have some time left here
         if (adjusted)
             shots--;
-        *elapsed = time_full_shot  * (shots - make_shots);
-        *elapsed += weapon_used_time_;
+        if (make_shots < shots) {
+         *elapsed = time_full_shot  * (shots - make_shots) + elapsed_l;
+         *elapsed += weapon_used_time_;
+         shots = make_shots;
+        } else
+            *elapsed = elapsed_l + weapon_used_time_;
         weapon_used_time_ = 0;
-        shots = make_shots;
     } else
-        *elapsed = 0;
+        *elapsed = elapsed_l;
     return shots;
 }
 
@@ -1090,7 +1111,8 @@ void WeaponInstance::getHostileInRange(toDefineXYZ * cp,
     if (mask & MapObject::mjt_Ped) {
         for (int i = 0; i < m->numPeds(); i++) {
             ShootableMapObject *p = m->ped(i);
-            if (!p->isIgnored() && ((PedInstance *)owner_)->checkHostileIs(p)
+            if (!p->isIgnored() && (((PedInstance *)owner_)->checkHostileIs(p)
+                || ((PedInstance *)owner_)->isInHostilesFound(p))
                 && m->inRangeCPos(cp, &p, NULL, false, checkTileOnly, maxr,
                 &d) == 1)
                 // TODO: inrange if checktileonly = false might return "7"
@@ -1113,7 +1135,8 @@ void WeaponInstance::getHostileInRange(toDefineXYZ * cp,
     if (mask & MapObject::mjt_Vehicle) {
         for (int i = 0; i < m->numVehicles(); i++) {
             ShootableMapObject *v = m->vehicle(i);
-            if (!v->isIgnored() && ((PedInstance *)owner_)->checkHostileIs(v)
+            if (!v->isIgnored() && (((PedInstance *)owner_)->checkHostileIs(v)
+                || ((PedInstance *)owner_)->isInHostilesFound(v))
                 && m->inRangeCPos(cp, &v, NULL, false, checkTileOnly, maxr,
                 &d) == 1)
             {
