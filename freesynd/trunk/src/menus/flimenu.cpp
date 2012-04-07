@@ -212,7 +212,7 @@ void FliMenu::handleTick(int elapsed)
 			frameDelay_ = 0;
 
 			// handle events
-			for (unsigned int i = 0; desc.evtList[i].frame != -1; i++) {
+			for (uint16 i = 0; desc.evtList[i].frame != (uint16)-1; i++) {
                 if (desc.evtList[i].frame > frameIndex_)
                     break;
                 else if (desc.evtList[i].frame == frameIndex_) {

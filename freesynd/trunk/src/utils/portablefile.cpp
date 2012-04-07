@@ -31,7 +31,9 @@ static const unsigned char * const endianness_test_ptr = (unsigned char *)&endia
 // but on Windows those are not macros or inline functions and require linking
 // against the winsock libraries.  To avoid the extra dependency, I'm using
 // the generic macros below on all platforms.
-
+#ifdef swap64
+#undef swap64
+#endif
 #define swap64(x) ( \
                      ((uint64)(x) << 56) | \
                     (((uint64)(x) << 40) & 0x00ff000000000000ULL) | \
@@ -43,6 +45,9 @@ static const unsigned char * const endianness_test_ptr = (unsigned char *)&endia
                      ((uint64)(x) >> 56) \
                   )
 
+#ifdef swap32
+#undef swap32
+#endif
 #define swap32(x) ( \
                      ((uint32)(x) << 24) | \
                     (((uint32)(x) <<  8) & 0x00ff0000) | \
@@ -50,6 +55,9 @@ static const unsigned char * const endianness_test_ptr = (unsigned char *)&endia
                      ((uint32)(x) >> 24) \
                   )
 
+#ifdef swap16
+#undef swap16
+#endif
 #define swap16(x) ( \
                      ((uint16)(x) <<  8) | \
                      ((uint16)(x) >>  8) \
