@@ -122,6 +122,7 @@ bool SoundManager::loadSounds(uint8 * tabData, int tabSize,
             uint8 *sample = new uint8[soundsize];
             memcpy(sample, soundData, soundsize);
             sounds_.back()->loadSound(sample, soundsize);
+            delete []sample;
         }
         soundData += soundsize;
         offset += soundsize;

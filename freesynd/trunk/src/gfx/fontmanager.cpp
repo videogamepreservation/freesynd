@@ -34,8 +34,8 @@ FontManager::FontManager()
     for (int i = 0; i < 4; i++)
         menuFonts_[i] = NULL;
 
-	pIntroFont_ = NULL;
-	pGameFont_ = NULL;
+    pIntroFont_ = NULL;
+    pGameFont_ = NULL;
 }
 
 FontManager::~FontManager()
@@ -44,9 +44,11 @@ FontManager::~FontManager()
         delete menuFonts_[i];
     }
 
-	if (pIntroFont_) {
-		delete pIntroFont_;
-	}
+    if (pIntroFont_) {
+        delete pIntroFont_;
+    }
+    if (pGameFont_)
+        delete pGameFont_;
 }
 
 bool FontManager::loadFonts(SpriteManager *pMenuSprites, SpriteManager *pIntroFontSprites_) {

@@ -64,7 +64,15 @@ MenuManager::MenuManager():
 }
 
 MenuManager::~MenuManager()
-{}
+{
+    if (current_) {
+        if (menus_.find(current_->getId()) == menus_.end())
+            delete current_;
+    }
+    for (std::map<int, Menu*>::iterator it = menus_.begin();
+        it != menus_.end(); it++)
+        delete it->second;
+}
 
 /*!
  * Initialize the menu manager.
@@ -283,6 +291,7 @@ void MenuManager::changeCurrentMenu()
 		// If menu is not in cache, it means it must be destroyed
 		if (menus_.find(current_->getId()) == menus_.end()) {
 			delete current_;
+            current_ = NULL;
 		}
     }
     current_ = pMenu;

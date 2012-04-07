@@ -548,6 +548,10 @@ uint16 WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
     // check tobj completed action,
     // time remaining, shots done
     // TODO : IPA+mods influence
+
+    // TODO: to fix animation of firing/correct start better to set it here
+    // for ped, create a function for ped to check whether is shooting animation
+    // drawn, and apply if not
     if (ammo_remaining_ == 0)
         return 1;
 

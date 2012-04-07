@@ -80,6 +80,7 @@ const int TileManager::kNumOfTiles = 256;
 TileManager::TileManager()
 {
     a_tiles_ = new Tile*[kNumOfTiles];
+    memset(a_tiles_, 0, sizeof(Tile*) * kNumOfTiles);
 }
 
 /*!
@@ -87,6 +88,9 @@ TileManager::TileManager()
  */
 TileManager::~TileManager()
 {
+    for (uint32 i = 0; i < (uint32)kNumOfTiles; i++) {
+        delete a_tiles_[i];
+    }
     delete [] a_tiles_;
 }
 

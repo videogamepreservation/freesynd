@@ -71,10 +71,31 @@ namespace RNC_INTERNAL {
         }
     }
 
+    static void bitAdvance8(BitStream &bit_stream, int count,
+            uint8 *&packed_data, uint8 *packed_data_end) {
+        bit_stream.bit_buffer >>= count;
+        bit_stream.bit_count -= count;
+        if (bit_stream.bit_count < 16) {
+            packed_data += 2;
+            if (packed_data < packed_data_end) {
+                bit_stream.bit_buffer |=
+                    ((uint32)(*packed_data) << bit_stream.bit_count);
+                bit_stream.bit_count += 16;
+            }
+        }
+    }
+
     uint32 bitRead(BitStream &bit_stream, uint32 mask, int count,
             uint8 *&packed_data) {
         uint32 result = bitPeek(bit_stream, mask);
         bitAdvance(bit_stream, count, packed_data);
+        return result;
+    }
+
+    uint32 bitRead8(BitStream &bit_stream, uint32 mask, int count,
+            uint8 *&packed_data, uint8 *packed_data_end) {
+        uint32 result = bitPeek(bit_stream, mask);
+        bitAdvance8(bit_stream, count, packed_data, packed_data_end);
         return result;
     }
 
@@ -111,7 +132,8 @@ namespace RNC_INTERNAL {
     }
 
     int readHuffmanData(HuffmanTable &huffman_table,
-            BitStream &bit_stream, uint8 *&packed_data) {
+            BitStream &bit_stream, uint8 *&packed_data,
+            uint8 *packed_data_end) {
         int i;
         uint32 mask;
 
@@ -123,16 +145,24 @@ namespace RNC_INTERNAL {
 
         if (i == huffman_table.node_count)
             return -1;
-        bitAdvance(bit_stream, huffman_table.table[i].code_length,
+        if ((packed_data + 2) < packed_data_end)
+            bitAdvance(bit_stream, huffman_table.table[i].code_length,
                    packed_data);
+        else
+            bitAdvance8(bit_stream, huffman_table.table[i].code_length,
+                   packed_data, packed_data_end);
 
         uint32 result = huffman_table.table[i].value;
 
         if (result >= 2) {
             result = 1 << (result - 1);
-            result |=
-                bitRead(bit_stream, result - 1,
+            if ((packed_data + 2) < packed_data_end)
+                result |= bitRead(bit_stream, result - 1,
                         huffman_table.table[i].value - 1, packed_data);
+            else
+                result |= bitRead8(bit_stream, result - 1,
+                        huffman_table.table[i].value - 1, packed_data,
+                        packed_data_end);
         }
 
         return result;
@@ -150,6 +180,16 @@ namespace RNC_INTERNAL {
         // Replace with the data at the current input position
         bit_stream.bit_buffer |=
             (READ_LE_UINT16(packed_data) << bit_stream.bit_count);
+        bit_stream.bit_count += 16;
+    }
+
+    void bitReadFix8(BitStream &bit_stream, uint8 *&packed_data) {
+        bit_stream.bit_count -= 16;
+        // Remove the top 16 bits
+        bit_stream.bit_buffer &= (1 << bit_stream.bit_count) - 1;
+        // Replace with the data at the current input position
+        bit_stream.bit_buffer |=
+            ((uint32)(*packed_data) << bit_stream.bit_count);
         bit_stream.bit_count += 16;
     }
 
@@ -236,24 +276,30 @@ int rnc::unpack(uint8 *packed_data, uint8 *unpacked_data) {
         ch_count = bitRead(bit_stream, 0xffff, 16, input);
 
         while (1) {
-            length = readHuffmanData(raw_huff_tbl, bit_stream, input);
+            length = readHuffmanData(raw_huff_tbl, bit_stream, input,
+                input_end);
             if (length == -1)
                 return HUF_DECODE_ERROR;
 
             if (length) {
                 while (length--)
                     *output++ = *input++;
-                bitReadFix(bit_stream, input);
+                if ((input + 1) < input_end)
+                    bitReadFix(bit_stream, input);
+                else
+                    bitReadFix8(bit_stream, input);
             }
 
             if (--ch_count <= 0)
                 break;
 
-            position = readHuffmanData(dist_huff_tbl, bit_stream, input);
+            position = readHuffmanData(dist_huff_tbl, bit_stream, input,
+                input_end);
             if (position == -1)
                 return HUF_DECODE_ERROR;
 
-            length = readHuffmanData(len_huff_tbl, bit_stream, input);
+            length = readHuffmanData(len_huff_tbl, bit_stream, input,
+                input_end);
             if (length == -1)
                 return HUF_DECODE_ERROR;
 
