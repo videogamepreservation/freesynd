@@ -220,10 +220,13 @@ bool TileManager::loadTiles()
  */
 Tile * TileManager::getTile(uint8 tileNum) {
     //make sure the tile is loaded
+    // TODO : tileNum always < kNumOfTiles! uint16 tileNum?
+#if 0
     if (tileNum >= kNumOfTiles) {
         FSERR(Log::k_FLG_GFX, "TileManager", "getTile", ("tile %d not loaded!", tileNum));
         return NULL;
     }
+#endif
 
     return a_tiles_[tileNum];
 }

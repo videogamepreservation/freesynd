@@ -91,7 +91,7 @@ bool MinimapRenderer::handleTick(int elapsed)
 
 void MinimapRenderer::scrollRight() {
     minimap_scroll_x_ += scroll_step_;
-    if (minimap_scroll_x_ > p_mission_->mmax_x_)
+    if (minimap_scroll_x_ >= p_mission_->mmax_x_)
         minimap_scroll_x_ = p_mission_->mmax_x_ - 1;
 }
 
@@ -109,7 +109,7 @@ void MinimapRenderer::scrollUp() {
 
 void MinimapRenderer::scrollDown() {
     minimap_scroll_y_ += scroll_step_;
-    if (minimap_scroll_y_ > p_mission_->mmax_y_) {
+    if (minimap_scroll_y_ >= p_mission_->mmax_y_) {
         minimap_scroll_y_ = p_mission_->mmax_y_ - 1;
     }
 }

@@ -72,9 +72,9 @@ public:
     
 protected:
     /*! X coord in the minimap system.*/
-    uint16 minimap_scroll_x_;
+    int16 minimap_scroll_x_;
     /*! Y coord in the minimap system.*/
-    uint16 minimap_scroll_y_;
+    int16 minimap_scroll_y_;
     /*! A counter to control the blinking on the minimap.*/
     int minimap_blink_ticks_;
     /*! Helps controling blinking.*/
