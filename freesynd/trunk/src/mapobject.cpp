@@ -200,7 +200,12 @@ int MapObject::getDirection(int snum) {
 bool MapObject::isBlocker(toDefineXYZ * startXYZ, toDefineXYZ * endXYZ,
                double * inc_xyz)
 {
-    // NOTE: algorithm used checks whether object is located within range
+    // TODO: better set values of size for object, use to values
+    // for single coordinate, rel_x_start(-vlaue) and rel_x_end(+value).
+    // Vehicle and other objects with different directions will be handleDamage
+    // correctly
+
+    // NOTE: algorithm used, checks whether object is located within range
     // defined by "start" and "end", then assuming that x coord belongs to
     // vector calculates y from x range and compares range by y, if it is ok,
     // calculates z from y range, then if in range by z, recalculates x and y
@@ -254,7 +259,7 @@ bool MapObject::isBlocker(toDefineXYZ * startXYZ, toDefineXYZ * endXYZ,
     if (startXYZ->z > endXYZ->z) {
         high_num = startXYZ->z;
         low_num = endXYZ->z;
-        flipped_z = false;
+        flipped_z = true;
     } else {
         low_num = startXYZ->z;
         high_num = endXYZ->z;
@@ -271,13 +276,8 @@ bool MapObject::isBlocker(toDefineXYZ * startXYZ, toDefineXYZ * endXYZ,
     int range_g_l = 0;
     int range_g_h = 0;
     if (inc_xyz[0] != 0) {
-        if (flipped_x) {
-            d_h = ((double)(range_x_l - startXYZ->x)) / inc_xyz[0];
-            d_l = ((double)(range_x_h - startXYZ->x)) / inc_xyz[0];
-        } else {
-            d_l = ((double)(range_x_l - startXYZ->x)) / inc_xyz[0];
-            d_h = ((double)(range_x_h - startXYZ->x)) / inc_xyz[0];
-        }
+        d_l = ((double)(range_x_l - startXYZ->x)) / inc_xyz[0];
+        d_h = ((double)(range_x_h - startXYZ->x)) / inc_xyz[0];
         range_g_l = (int)(d_l * inc_xyz[1] + startXYZ->y);
         range_g_h = (int)(d_h * inc_xyz[1] + startXYZ->y);
         if (range_g_h < range_g_l) {
@@ -296,13 +296,8 @@ bool MapObject::isBlocker(toDefineXYZ * startXYZ, toDefineXYZ * endXYZ,
     }
 
     if (inc_xyz[1] != 0) {
-        if (flipped_y) {
-            d_h = ((double)(range_y_l - startXYZ->y)) / inc_xyz[1];
-            d_l = ((double)(range_y_h - startXYZ->y)) / inc_xyz[1];
-        } else {
-            d_l = ((double)(range_y_l - startXYZ->y)) / inc_xyz[1];
-            d_h = ((double)(range_y_h - startXYZ->y)) / inc_xyz[1];
-        }
+        d_l = ((double)(range_y_l - startXYZ->y)) / inc_xyz[1];
+        d_h = ((double)(range_y_h - startXYZ->y)) / inc_xyz[1];
     }
     if (inc_xyz[1] != 0 || inc_xyz[0] != 0) {
         range_g_l = (int)(d_l * inc_xyz[2] + startXYZ->z);
@@ -322,11 +317,6 @@ bool MapObject::isBlocker(toDefineXYZ * startXYZ, toDefineXYZ * endXYZ,
             range_z_h = high_num;
     }
 
-    if (flipped_z) {
-        low_num = range_z_l;
-        range_z_l = range_z_h;
-        range_z_h = low_num;
-    }
     if (inc_xyz[2] != 0) {
         d_l = ((double)(range_z_l - startXYZ->z)) / inc_xyz[2];
         d_h = ((double)(range_z_h - startXYZ->z)) / inc_xyz[2];
@@ -341,8 +331,8 @@ bool MapObject::isBlocker(toDefineXYZ * startXYZ, toDefineXYZ * endXYZ,
         }
         if (low_num > range_y_h || high_num < range_y_l)
             return false;
-        range_y_l = range_g_l;
-        range_y_h = range_g_h;
+        range_y_l = low_num;
+        range_y_h = high_num;
 
         range_g_l = (int)(d_l * inc_xyz[0] + startXYZ->x);
         range_g_h = (int)(d_h * inc_xyz[0] + startXYZ->x);
@@ -355,8 +345,8 @@ bool MapObject::isBlocker(toDefineXYZ * startXYZ, toDefineXYZ * endXYZ,
         }
         if (low_num > range_x_h || high_num < range_x_l)
             return false;
-        range_x_l = range_g_l;
-        range_x_h = range_g_h;
+        range_x_l = low_num;
+        range_x_h = high_num;
     } else {
         if (inc_xyz[1] != 0) {
             range_g_l = (int)(d_l * inc_xyz[0] + startXYZ->x);
@@ -370,17 +360,35 @@ bool MapObject::isBlocker(toDefineXYZ * startXYZ, toDefineXYZ * endXYZ,
             }
             if (low_num > range_x_h || high_num < range_x_l)
                 return false;
-            range_x_l = range_g_l;
-            range_x_h = range_g_h;
+            range_x_l = low_num;
+            range_x_h = high_num;
         }
     }
 
-    startXYZ->x = range_x_h;
-    startXYZ->y = range_y_h;
-    startXYZ->z = range_z_h;
-    endXYZ->x = range_x_l;
-    endXYZ->y = range_y_l;
-    endXYZ->z = range_z_l;
+    // restoring coordinates to their respective low/high values
+    if (flipped_x) {
+        startXYZ->x = range_x_h;
+        endXYZ->x = range_x_l;
+    } else {
+        startXYZ->x = range_x_l;
+        endXYZ->x = range_x_h;
+    }
+
+    if (flipped_y) {
+        startXYZ->y = range_y_h;
+        endXYZ->y = range_y_l;
+    } else {
+        startXYZ->y = range_y_l;
+        endXYZ->y = range_y_h;
+    }
+
+    if (flipped_z) {
+        startXYZ->z = range_z_h;
+        endXYZ->z = range_z_l;
+    } else {
+        startXYZ->z = range_z_l;
+        endXYZ->z = range_z_h;
+    }
 
     return true;
 }
