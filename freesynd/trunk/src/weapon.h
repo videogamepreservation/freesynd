@@ -164,7 +164,8 @@ public:
         wspt_Scanner = (spe_Owner | spe_ChangeAttribute),
         wspt_MediKit = (spe_Owner | spe_UsesAmmo),
         wspt_TimeBomb = (spe_ShootsWhileNoTarget | spe_TargetReachInstant
-            | spe_RangeDamageOnReach | spe_SelfDestruction),
+            | spe_RangeDamageOnReach | spe_SelfDestruction
+            | spe_DamageAll),
         wspt_AccessCard = (spe_Owner | spe_ChangeAttribute),
         wspt_EnergyShield =
             (spe_Owner | spe_ChangeAttribute | spe_UsesAmmo),
@@ -218,7 +219,7 @@ protected:
     int time_reload_;
     /*! True when weapon was found and submit to search manager.*/
     bool submittedToSearch_;
-    unsigned int shot_property_;
+    uint32 shot_property_;
     ad_HitAnims anims_;
     int range_dmg_;
     //! some weapons have wider shot

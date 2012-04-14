@@ -552,6 +552,8 @@ uint16 WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
     // TODO: to fix animation of firing/correct start better to set it here
     // for ped, create a function for ped to check whether is shooting animation
     // drawn, and apply if not
+
+    // for weapons that are not using ammo ammo_remaining_ = -1
     if (ammo_remaining_ == 0)
         return 1;
 

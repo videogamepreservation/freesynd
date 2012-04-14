@@ -338,7 +338,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
             if ((it->group_desc & PedInstance::gd_mExclusive) != 0
                 && groups_processed != 0)
                 break;
-            
+
             // TODO: xor finished and failed
             uint32 acts_g_prcssd = 0;
             for (uint32 indx = 0; indx < it->actions.size(); indx++)
@@ -372,9 +372,8 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                                 wi->inflictDamage(aqt.t_smo, NULL, &tm_left);
                                 if (checkFriendIs((PedInstance *)aqt.t_smo))
                                     aqt.state |= 4;
-                            } else {
+                            } else
                                 aqt.state |= 8;
-                            }
                         } else if (aqt.t_smo->majorType()
                                    == MapObject::mjt_Vehicle)
                         {
@@ -391,9 +390,8 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                                         is_ignored_ = true;
                                         map_ = -1;
                                         state_ |= pa_smInCar;
-                                    } else {
+                                    } else
                                         aqt.state |= 8;
-                                    }
                                 } else if (aqt.condition == 1) {
                                     if (v->hasDriver()) {
                                         if (v->isDriver(this))
@@ -568,9 +566,8 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                                     aqt.t_smo->offY(), speed_set);
                                 if (dest_path_.empty())
                                     aqt.state |= 8;
-                            } else {
+                            } else
                                 aqt.state |= 4;
-                            }
                         }
                     }
                     if ((aqt.state & 15) == 3) {
@@ -608,9 +605,8 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                                     aqt.state |= 8;
                                 if ((aqt.state & 16) != 0)
                                     aqt.state ^= 16;
-                            } else {
+                            } else
                                 aqt.state |= 16;
-                            }
                         } else if (aqt.condition == 1) {
                             WeaponInstance *wi = selectedWeapon();
                             if (wi) {
@@ -631,12 +627,10 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                                         aqt.state |= 8;
                                     if ((aqt.state & 16) != 0)
                                         aqt.state ^= 16;
-                                } else {
+                                } else
                                     aqt.state |= 16;
-                                }
-                            } else {
+                            } else
                                 aqt.state |= 8;
-                            }
                         }
                     }
                     if ((aqt.state & 30) == 2) {
@@ -686,9 +680,8 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                                         aqt.state ^= 2;
                                     }
                                 }
-                            } else {
+                            } else
                                 aqt.state |= 8;
-                            }
                         }
                     }
                 }
@@ -713,8 +706,8 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                         selectBestWeapon();
                     if (wi //&& (wi->shotProperty()
                         //& Weapon::spe_DamageAll) != 0
-                        && wi->ammoRemaining() > 0
-                    ) {
+                        && wi->ammoRemaining() > 0)
+                    {
                         // TODO: more info from weapon needed
                         int tm_left = elapsed;
                         uint32 make_shots = aqt.multi_var.enemy_var.make_shots;
@@ -971,7 +964,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
 
     if (handleDrawnAnim(elapsed))
         setActionStateToDrawnAnim();
-    // TODO: if object is not in drawing region of map draw is not called
+    // TODO: if object is not in drawing region of map, draw is not called
     // and animation is not updated
     //if (is_frame_drawn_)
         updated = MapObject::animate(elapsed);
@@ -1428,9 +1421,9 @@ PedInstance::PedInstance(Ped *ped, int m) : ShootableMovableMapObject(m),
     state_ = PedInstance::pa_smNone;
 }
 
-PedInstance::~PedInstance(){
+PedInstance::~PedInstance()
+{
     delete ped_;
-    dest_path_.clear();
     if (target_pos_)
         delete target_pos_;
     if (reach_pos_)

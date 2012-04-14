@@ -268,26 +268,26 @@ void SelectMenu::updateClock() {
 void SelectMenu::drawSelectedWeaponInfos(int x, int y) {
 	char tmp[100];
 	
-    getMenuFont(FontManager::SIZE_1)->drawText(x, y, pSelectedWeap_->getName(), false);
+    getMenuFont(FontManager::SIZE_1)->drawText(x, y, pSelectedWeap_->getName(), true);
 	sprintf(tmp, "COST   :%d", pSelectedWeap_->cost());
-    getMenuFont(FontManager::SIZE_1)->drawText(x, y + 12, tmp, false);
+    getMenuFont(FontManager::SIZE_1)->drawText(x, y + 12, tmp, true);
     y += 24;
 
     if (pSelectedWeap_->ammo() >= 0) {
 		sprintf(tmp, "AMMO   :%d", pSelectedWeap_->ammo());
-        getMenuFont(FontManager::SIZE_1)->drawText(x, y, tmp, false);
+        getMenuFont(FontManager::SIZE_1)->drawText(x, y, tmp, true);
         y += 12;
     }
 
     if (pSelectedWeap_->range() >= 0) {
 		sprintf(tmp, "RANGE  :%d", pSelectedWeap_->range());
-        getMenuFont(FontManager::SIZE_1)->drawText(x, y, tmp, false);
+        getMenuFont(FontManager::SIZE_1)->drawText(x, y, tmp, true);
         y += 12;
     }
 
     if (pSelectedWeap_->damagePerShot() >= 0 && pSelectedWeap_->ammo() >= 0) {
 		sprintf(tmp, "SHOT   :%d", pSelectedWeap_->damagePerShot());
-        getMenuFont(FontManager::SIZE_1)->drawText(x, y, tmp, false);
+        getMenuFont(FontManager::SIZE_1)->drawText(x, y, tmp, true);
         y += 12;
     }
 
@@ -298,7 +298,7 @@ void SelectMenu::drawSelectedWeaponInfos(int x, int y) {
 									- wi->ammoRemaining()) * pSelectedWeap_->ammoCost();
 		
 			sprintf(tmp, "RELOAD :%d", rldCost);
-			getMenuFont(FontManager::SIZE_1)->drawText(x, y, tmp, false);
+			getMenuFont(FontManager::SIZE_1)->drawText(x, y, tmp, true);
 			y += 12;
 		}
     }
@@ -306,11 +306,11 @@ void SelectMenu::drawSelectedWeaponInfos(int x, int y) {
 
 void SelectMenu::drawSelectedModInfos(int x, int y)
 {
-	getMenuFont(FontManager::SIZE_1)->drawText(x, y, pSelectedMod_->getName(), false);
+	getMenuFont(FontManager::SIZE_1)->drawText(x, y, pSelectedMod_->getName(), true);
     char tmp[100];
 	sprintf(tmp, "COST   :%d", pSelectedMod_->cost());
-    getMenuFont(FontManager::SIZE_1)->drawText(504, y + 14, tmp, false);
-	getMenuFont(FontManager::SIZE_1)->drawText(504, y + 28, pSelectedMod_->desc(), false);
+    getMenuFont(FontManager::SIZE_1)->drawText(504, y + 14, tmp, true);
+	getMenuFont(FontManager::SIZE_1)->drawText(504, y + 28, pSelectedMod_->desc(), true);
 }
 
 void SelectMenu::handleShow() {
