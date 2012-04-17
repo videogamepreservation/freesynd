@@ -826,12 +826,14 @@ bool GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
                         PedInstance::actionQueueGroupType as;
                         as.main_act = 0;
                         as.group_desc = PedInstance::gd_mExclusive;
-                        pa->createActQFiring(as, NULL,
-                            mission_->ped(pointing_at_ped_), true);
-                        if (modKeys & KMD_CTRL)
-                            pa->addActQToQueue(as);
-                        else
-                            pa->setActQInQueue(as);
+                        if (pa->createActQFiring(as, NULL,
+                            mission_->ped(pointing_at_ped_), true))
+                        {
+                            if (modKeys & KMD_CTRL)
+                                pa->addActQToQueue(as);
+                            else
+                                pa->setActQInQueue(as);
+                        }
 #else
                         && (pa->selectedWeapon()->inflictDamage(
                             mission_->ped(pointing_at_ped_), NULL, NULL,
@@ -846,12 +848,14 @@ bool GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
                         PedInstance::actionQueueGroupType as;
                         as.main_act = 0;
                         as.group_desc = PedInstance::gd_mExclusive;
-                        pa->createActQFiring(as, NULL,
-                            mission_->vehicle(pointing_at_vehicle_), true);
-                        if (modKeys & KMD_CTRL)
-                            pa->addActQToQueue(as);
-                        else
-                            pa->setActQInQueue(as);
+                        if (pa->createActQFiring(as, NULL,
+                            mission_->vehicle(pointing_at_vehicle_), true))
+                        {
+                            if (modKeys & KMD_CTRL)
+                                pa->addActQToQueue(as);
+                            else
+                                pa->setActQInQueue(as);
+                        }
 #else
                             && (pa->selectedWeapon()->inflictDamage(
                             mission_->vehicle(pointing_at_vehicle_), NULL,
@@ -882,11 +886,11 @@ bool GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
                             as.main_act = 0;
                             as.group_desc = PedInstance::gd_mExclusive;
                             if (modKeys & KMD_CTRL) {
-                                pa->createActQFiring(as, &pn, NULL, true);
-                                pa->addActQToQueue(as);
+                                if (pa->createActQFiring(as, &pn, NULL, true))
+                                    pa->addActQToQueue(as);
                             } else {
-                                pa->createActQFiring(as, &pn, NULL, true, 1);
-                                pa->setActQInQueue(as);
+                                if (pa->createActQFiring(as, &pn, NULL, true, 1))
+                                    pa->setActQInQueue(as);
                             }
 #else
                             //if (

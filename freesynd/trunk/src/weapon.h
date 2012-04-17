@@ -43,7 +43,7 @@ public:
 
     WeaponInstance *createInstance();
     typedef enum {
-        Persuadatron = 0,
+        Unknown = 0,
         Pistol = 1,
         GaussGun = 2,
         Shotgun = 3,
@@ -57,7 +57,7 @@ public:
         TimeBomb = 11,
         AccessCard = 12,
         EnergyShield = 13,
-        Unknown = 14
+        Persuadatron = 14,
     } WeaponType;
 
     typedef enum {
@@ -113,7 +113,7 @@ public:
 
     typedef enum {
         spe_None = 0x0,
-        // can shoot only at owner
+        // can target only owner
         spe_Owner = 0x0001,
 
         spe_PointToPoint = 0x0002,
@@ -131,41 +131,40 @@ public:
         spe_ChangeAttribute = 0x0100,
         spe_SelfDestruction = 0x0200,
         spe_TargetPedOnly = 0x0400,
-        spe_DamageAll = 0x0800
+        spe_CanShoot = 0x0800
     }ShotPropertyEnum;
 
     typedef enum {
         wspt_None = spe_None,
         wspt_Persuadatron = (spe_PointToPoint | spe_TargetReachInstant
-            | spe_ShootsWhileNoTarget | spe_TargetPedOnly),
+            | spe_ShootsWhileNoTarget | spe_TargetPedOnly | spe_CanShoot),
         wspt_Pistol =
             (spe_PointToPoint | spe_TargetReachInstant | spe_UsesAmmo
-            | spe_DamageAll),
+            | spe_CanShoot),
         wspt_GaussGun =
             (spe_PointToPoint | spe_TargetReachNeedTime | spe_UsesAmmo
-            | spe_RangeDamageOnReach | spe_DamageAll),
+            | spe_RangeDamageOnReach | spe_CanShoot),
         wspt_Shotgun =
             (spe_PointToManyPoints | spe_TargetReachInstant | spe_UsesAmmo
-            | spe_DamageAll),
+            | spe_CanShoot),
         wspt_Uzi = (spe_PointToManyPoints | spe_TargetReachInstant
-            | spe_UsesAmmo | spe_DamageAll),
+            | spe_UsesAmmo | spe_CanShoot),
         wspt_Minigun =
             (spe_PointToManyPoints | spe_TargetReachInstant | spe_UsesAmmo
-            | spe_DamageAll),
+            | spe_CanShoot),
         wspt_Laser =
             (spe_PointToPoint | spe_TargetReachInstant
-            | spe_RangeDamageOnReach | spe_UsesAmmo | spe_DamageAll),
+            | spe_RangeDamageOnReach | spe_UsesAmmo | spe_CanShoot),
         wspt_Flamer =
             (spe_PointToPoint | spe_TargetReachNeedTime | spe_UsesAmmo
-            | spe_DamageAll),
+            | spe_CanShoot),
         wspt_LongRange =
             (spe_PointToPoint | spe_TargetReachInstant | spe_UsesAmmo
-            | spe_DamageAll),
+            | spe_CanShoot),
         wspt_Scanner = (spe_Owner | spe_ChangeAttribute),
         wspt_MediKit = (spe_Owner | spe_UsesAmmo),
         wspt_TimeBomb = (spe_ShootsWhileNoTarget | spe_TargetReachInstant
-            | spe_RangeDamageOnReach | spe_SelfDestruction
-            | spe_DamageAll),
+            | spe_RangeDamageOnReach | spe_SelfDestruction),
         wspt_AccessCard = (spe_Owner | spe_ChangeAttribute),
         wspt_EnergyShield =
             (spe_Owner | spe_ChangeAttribute | spe_UsesAmmo),
@@ -181,6 +180,8 @@ public:
         toDefineXYZ tp;
         ShootableMapObject::DamageInflictType d;
         ShootableMapObject *smo;
+        // Actual target of shooting, because smo might be blocker object
+        ShootableMapObject *target_object;
     }ShotDesc;
 
     typedef struct {
@@ -232,7 +233,8 @@ protected:
 
 class ShotClass {
 public:
-    ShotClass() : owner_(NULL), last_owner_(NULL){};
+    ShotClass(ShootableMapObject *tobj = NULL) : owner_(NULL), last_owner_(NULL),
+        target_object_(tobj){};
     ~ShotClass(){};
     void setOwner(ShootableMapObject *owner) {
         last_owner_ = owner_;
@@ -253,6 +255,7 @@ protected:
 protected:
     ShootableMapObject *owner_;
     ShootableMapObject *last_owner_;
+    ShootableMapObject *target_object_;
 };
 
 /*!
@@ -314,6 +317,18 @@ public:
         ShootableMapObject * & target, bool checkTileOnly = true,
         int maxr = -1);
     bool handleDamage(ShootableMapObject::DamageInflictType * d);
+
+    bool canShoot() {
+        return (pWeaponClass_->shotProperty() & Weapon::spe_CanShoot) != 0;
+    }
+
+    bool doesMentalDmg() {
+        return pWeaponClass_->dmgType() == MapObject::dmg_Mental;
+    }
+
+    bool doesPhysicalDmg() {
+        return (pWeaponClass_->dmgType() & MapObject::dmg_Physical) != 0;
+    }
 
 protected:
     Weapon *pWeaponClass_;

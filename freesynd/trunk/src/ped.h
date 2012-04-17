@@ -257,10 +257,12 @@ public:
         Not_Agent,
         Agent_Non_Active,
         Agent_Active
-    } ped_enum;
+    } agentAndNonEnum;
 
-    void setAgentIs(ped_enum set_agent_as) { agent_is_ = set_agent_as; }
-    ped_enum agentIs() { return agent_is_; }
+    void setAgentIs(agentAndNonEnum set_agent_as) { agent_is_ = set_agent_as; }
+    agentAndNonEnum agentIs() { return agent_is_; }
+    // our agent
+    bool isOurAgent() { return agent_is_ == Agent_Active; }
 
     int map();
     AnimationDrawn drawnAnim(void);
@@ -270,11 +272,11 @@ public:
     typedef struct {
         toDefineXYZ coords;
         floodPointDesc *p;
-    }toSetDesc;
+    } toSetDesc;
     typedef struct {
         unsigned short indxs;
         unsigned short n;
-    }lvlNodesDesc;
+    } lvlNodesDesc;
 
     void setDestinationP(Mission *m, int x, int y, int z,
         int ox = 128, int oy = 128, int new_speed = 160);
@@ -549,6 +551,24 @@ public:
     } pedActionStateMasks; // MapObject::state_
 
     typedef struct {
+        union {
+            // weapon index from weapons_ in mission_
+            uint32 indx;
+            // use only this weapon for attack
+            WeaponInstance *wi;
+            // use only this type of weapon
+            Weapon::WeaponType wpn_type;
+            // use weapon that inflicts this type of damage
+            MapObject::DamageType dmg_type;
+        } wpn;
+        // union description
+        // 0 - not used, 1 - indx, 2 - pointer, 3 - weapon type,
+        // 4 - damage type strict (type == dmg_type),
+        // 5 - damage type non-strict (type & dmg_type != 0)
+        uint8 desc;
+    } pedWeaponToUse;
+
+    typedef struct {
         // action state (pedActionStateMasks)
         uint32 as;
         // Mission::ObjectiveType
@@ -571,6 +591,10 @@ public:
                 uint32 make_shots;
                 uint32 shots_done;
                 bool forced_shot;
+                pedWeaponToUse weapon;
+                // upon reaching this value action is complete;
+                // health dropped to this value( or persuade resistance points?)
+                int32 value;
             } enemy_var;
             struct {
                 int32 elapsed;
@@ -639,9 +663,10 @@ public:
         ShootableMapObject *tsmo, int32 dir = -1, int32 dist = 0);
     void createActQHit(actionQueueGroupType &as, PathNode *tpn,
         int32 dir = -1);
-    void createActQFiring(actionQueueGroupType &as, PathNode *tpn,
+    bool createActQFiring(actionQueueGroupType &as, PathNode *tpn,
         ShootableMapObject *tsmo = NULL, bool forced_shot = false,
-        int make_shots = 0);
+        int make_shots = 0, pedWeaponToUse *pw_to_use = NULL,
+        int32 value = -1);
     void createActQFollowing(actionQueueGroupType &as,
         ShootableMapObject *tsmo, uint32 condition, int32 dist = 128);
 
@@ -715,7 +740,7 @@ protected:
     int selected_weapon_;
     WeaponInstance *pickup_weapon_, *putdown_weapon_;
     VehicleInstance *in_vehicle_;
-    ped_enum agent_is_;
+    agentAndNonEnum agent_is_;
     // IPA levels: white bar level,set level,exhaused level and forced level
     //uint8 lvl_adrena_reserve_;
     uint8 lvl_adrena_amount_;

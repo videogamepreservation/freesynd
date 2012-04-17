@@ -153,6 +153,9 @@ public:
 
     /*! Return the mission statistics. */
     MissionStats *getStatistics() { return &stats_; }
+    void incStatisticsShots(int shots) { stats_.nbOfShots += shots; }
+    void incStatisticsHits() { stats_.nbOfHits++; }
+    void incStatisticsHits(int hits) { stats_.nbOfHits += hits; }
 
     void start();
     //! Forces mission status

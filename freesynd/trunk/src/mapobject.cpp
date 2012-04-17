@@ -393,7 +393,7 @@ bool MapObject::isBlocker(toDefineXYZ * startXYZ, toDefineXYZ * endXYZ,
     return true;
 }
 
-SFXObject::SFXObject(int m, int type, int t_show):MapObject(m),
+SFXObject::SFXObject(int m, int type, int t_show) : MapObject(m),
     sfx_life_over_(false), elapsed_left_(0)
 {
     main_type_ = type;
@@ -439,22 +439,26 @@ void SFXObject::draw(int x, int y) {
 
 bool SFXObject::animate(int elapsed) {
 
-    bool changed = MapObject::animate(elapsed);
-    if (main_type_ == SFXObject::sfxt_ExplosionBall) {
-        int z = tile_z_ * 128 + off_z_;
-        // 250 per sec
-        z += ((elapsed + elapsed_left_) >> 2);
-        elapsed_left_ = elapsed &3;
-        if (z > (g_Session.getMission()->mmax_z_ - 1) * 128)
-            z = (g_Session.getMission()->mmax_z_ - 1) * 128;
-        tile_z_ = z / 128;
-        vis_z_ = tile_z_;
-        off_z_ = z % 128;
+    if (is_frame_drawn_) {
+        bool changed = MapObject::animate(elapsed);
+        if (main_type_ == SFXObject::sfxt_ExplosionBall) {
+            int z = tile_z_ * 128 + off_z_;
+            // 250 per sec
+            z += ((elapsed + elapsed_left_) >> 2);
+            elapsed_left_ = elapsed &3;
+            if (z > (g_Session.getMission()->mmax_z_ - 1) * 128)
+                z = (g_Session.getMission()->mmax_z_ - 1) * 128;
+            tile_z_ = z / 128;
+            vis_z_ = tile_z_;
+            off_z_ = z % 128;
+        }
+        if (frame_ > g_App.gameSprites().lastFrame(anim_)
+            && !leftTimeShowAnim(elapsed))
+            sfx_life_over_ = true;
+        return changed;
     }
-    if (frame_ > g_App.gameSprites().lastFrame(anim_)
-        && !leftTimeShowAnim(elapsed))
-        sfx_life_over_ = true;
-    return changed;
+    is_frame_drawn_ = true;
+    return false;
 }
 
 void SFXObject::correctZ() {
@@ -983,7 +987,7 @@ bool LargeDoor::animate(int elapsed, Mission *obj)
             }
             assert(i != 0 && j != 0);
             *j = -1;
-            for(*i = -2; *i < 3; *i += 1) {
+            for(*i = -2; *i < 3; (*i)++) {
                 mt = MapObject::mjt_Vehicle; si = 0;
                 v = (VehicleInstance *)(obj->findAt(x + inc_rel,
                     y + rel_inc,z, &mt, &si, true));
@@ -999,7 +1003,7 @@ bool LargeDoor::animate(int elapsed, Mission *obj)
                 }
             }
             *j = 1;
-            for(*i = -2; *i < 3; *i += 1) {
+            for(*i = -2; *i < 3; (*i)++) {
                 mt = MapObject::mjt_Vehicle; si = 0;
                 v = (VehicleInstance *)(obj->findAt(x + inc_rel,
                     y + rel_inc,z,&mt,&si,true));
@@ -1068,7 +1072,7 @@ bool LargeDoor::animate(int elapsed, Mission *obj)
                 v->hold_on_.wayFree = 1;
             }
             *j = -1;
-            for ( *i = -1; *i <= 1; *i += 1 ) {
+            for ( *i = -1; *i <= 1; (*i)++ ) {
                 mt = MapObject::mjt_Ped; si = 0;
                 do {
                     p = (PedInstance *)(obj->findAt(x + rel_inc,
@@ -1089,7 +1093,7 @@ bool LargeDoor::animate(int elapsed, Mission *obj)
                 } while (p);
             }
             *j = 1;
-            for ( *i = -1; *i <= 1; *i += 1 ) {
+            for ( *i = -1; *i <= 1; (*i)++ ) {
                 mt = MapObject::mjt_Ped; si = 0;
                 do {
                     p = (PedInstance *)(obj->findAt(x + rel_inc,

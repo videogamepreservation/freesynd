@@ -358,61 +358,63 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                 }
                 if ((aqt.ot_execute & Mission::objv_AquireControl) != 0)
                 {
-                    if (aqt.state == 1) {
-                        if (aqt.t_smo->majorType() == MapObject::mjt_Ped) {
-                            WeaponInstance *wi = selectedWeapon();
-                            if (wi && wi->getMainType()
-                                == Weapon::Persuadatron)
-                            {
-                                // TODO: proper handling for time, add condition
-                                // of failure to inflict damage
-                                if (aqt.state == 1)
-                                    aqt.state |= 2;
-                                int tm_left = elapsed;
-                                wi->inflictDamage(aqt.t_smo, NULL, &tm_left);
+                    if (aqt.t_smo->majorType() == MapObject::mjt_Ped) {
+                        // TODO: make it properly, check selected weapon
+                        // if not the one in weapon.desc select it,
+                        // check owner
+                        // NOTE: don't put weapon to the ground
+                        WeaponInstance *wi = aqt.multi_var.enemy_var.weapon.wpn.wi;
+                        if (wi->getWeaponType()
+                            == Weapon::Persuadatron)
+                        {
+                            // TODO: proper handling for time, add condition
+                            // of failure to inflict damage
+                            if (aqt.state == 1)
+                                aqt.state |= 2;
+                            int tm_left = elapsed;
+                            if (wi->inflictDamage(aqt.t_smo, NULL, &tm_left))
                                 if (checkFriendIs((PedInstance *)aqt.t_smo))
                                     aqt.state |= 4;
-                            } else
-                                aqt.state |= 8;
-                        } else if (aqt.t_smo->majorType()
-                                   == MapObject::mjt_Vehicle)
-                        {
-                            VehicleInstance *v = (VehicleInstance *)aqt.t_smo;
-                            if (v->health() > 0 && (state_
-                                & (PedInstance::pa_smInCar
-                                | PedInstance::pa_smUsingCar)) == 0)
-                            {
-                                if (aqt.condition == 0) {
-                                    v->setDriver(this);
-                                    if (v->isInsideVehicle(this)) {
-                                        in_vehicle_ = v;
-                                        aqt.state |= 4;
-                                        is_ignored_ = true;
-                                        map_ = -1;
-                                        state_ |= pa_smInCar;
-                                    } else
-                                        aqt.state |= 8;
-                                } else if (aqt.condition == 1) {
-                                    if (v->hasDriver()) {
-                                        if (v->isDriver(this))
-                                            aqt.state |= 4;
-                                        else
-                                            aqt.state |= 8;
-                                    } else {
-                                        v->setDriver(this);
-                                        in_vehicle_ = v;
-                                        aqt.state |= 4;
-                                        is_ignored_ = true;
-                                        map_ = -1;
-                                        state_ |= pa_smUsingCar;
-                                    }
-                                }
-                            } else
-                                aqt.state |= 8;
                         } else
-                            // type cannot be aquired
                             aqt.state |= 8;
-                    }
+                    } else if (aqt.t_smo->majorType()
+                                == MapObject::mjt_Vehicle)
+                    {
+                        VehicleInstance *v = (VehicleInstance *)aqt.t_smo;
+                        if (v->health() > 0 && (state_
+                            & (PedInstance::pa_smInCar
+                            | PedInstance::pa_smUsingCar)) == 0)
+                        {
+                            if (aqt.condition == 0) {
+                                v->setDriver(this);
+                                if (v->isInsideVehicle(this)) {
+                                    in_vehicle_ = v;
+                                    aqt.state |= 4;
+                                    is_ignored_ = true;
+                                    map_ = -1;
+                                    state_ |= pa_smInCar;
+                                } else
+                                    aqt.state |= 8;
+                            } else if (aqt.condition == 1) {
+                                if (v->hasDriver()) {
+                                    if (v->isDriver(this))
+                                        aqt.state |= 4;
+                                    else
+                                        aqt.state |= 8;
+                                } else {
+                                    v->setDriver(this);
+                                    in_vehicle_ = v;
+                                    aqt.state |= 4;
+                                    is_ignored_ = true;
+                                    map_ = -1;
+                                    state_ |= pa_smUsingCar;
+                                }
+                            }
+                        } else
+                            aqt.state |= 8;
+                    } else
+                        // type cannot be aquired
+                        aqt.state |= 8;
                 }
                 if ((aqt.ot_execute & Mission::objv_LoseControl) != 0)
                 {
@@ -461,14 +463,15 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                         // but goal reached
                         aqt.state |= 12;
                     else {
+                        // TODO: make it properly, check selected weapon
+                        // if not the one in weapon.desc select it,
+                        // check owner
                         WeaponInstance *wi = selectedWeapon();
                         if (!wi)
                             selectBestWeapon();
                         wi = selectedWeapon();
-                        if (wi //&& (wi->shotProperty()
-                            //& Weapon::spe_DamageAll) != 0
-                            && wi->ammoRemaining() > 0
-                        ) {
+                        if (wi && wi->ammoRemaining() > 0)
+                        {
                             // TODO: more info from weapon
                             int tm_left = elapsed;
                             uint32 make_shots = aqt.multi_var.enemy_var.make_shots;
@@ -476,7 +479,8 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                                 - aqt.multi_var.enemy_var.shots_done;
                             wi->inflictDamage(aqt.t_smo, NULL, &tm_left,
                                 aqt.multi_var.enemy_var.forced_shot, &shots_done);
-                            // TODO: handle correctly
+                            // TODO: handle correctly, use info returned from
+                            // inflictDamage, needs use of condition
                             if (make_shots == 0 && aqt.t_smo->health() <= 0)
                                 aqt.state |= 4;
                             else if (shots_done != 0) {
@@ -705,7 +709,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                     if (!wi)
                         selectBestWeapon();
                     if (wi //&& (wi->shotProperty()
-                        //& Weapon::spe_DamageAll) != 0
+                        //& Weapon::spe_CanShoot) != 0
                         && wi->ammoRemaining() > 0)
                     {
                         // TODO: more info from weapon needed
@@ -962,12 +966,14 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
         }
     }
 
+    if (is_frame_drawn_) {
+        updated = MapObject::animate(elapsed);
+        // TODO: find better way to bind state and animation, then
+        // extending with "wait" (putdown/pickup, others)
+    } else
+        is_frame_drawn_ = true;
     if (handleDrawnAnim(elapsed))
         setActionStateToDrawnAnim();
-    // TODO: if object is not in drawing region of map, draw is not called
-    // and animation is not updated
-    //if (is_frame_drawn_)
-        updated = MapObject::animate(elapsed);
     return updated;
 }
 #endif
@@ -1443,11 +1449,12 @@ void PedInstance::draw(int x, int y) {
     if (x < 129 || y < 0 || map_ == -1)
         return;
 
+#ifndef NEW_ANIMATE_HANDLING
     if (selectedWeapon() == 0) {
         firing_ = PedInstance::Firing_Not;
         target_ = 0;
     }
-    is_frame_drawn_ = true;
+#endif
 
     switch(drawnAnim()){
         case PedInstance::ad_HitAnim:
@@ -1869,7 +1876,6 @@ bool PedInstance::handleDrawnAnim(int elapsed) {
                 answer = false;
             break;
         case PedInstance::ad_WalkAnim:
-            break;
         case PedInstance::ad_StandAnim:
             break;
         case PedInstance::ad_WalkFireAnim:
@@ -2348,33 +2354,87 @@ void PedInstance::createActQHit(actionQueueGroupType &as, PathNode *tpn,
     as.actions.push_back(aq);
 }
 
-void PedInstance::createActQFiring(actionQueueGroupType &as, PathNode *tpn,
-    ShootableMapObject *tsmo, bool forced_shot, int make_shots)
+bool PedInstance::createActQFiring(actionQueueGroupType &as, PathNode *tpn,
+    ShootableMapObject *tsmo, bool forced_shot, int make_shots, 
+    pedWeaponToUse *pw_to_use, int32 value)
 {
     as.state = 1;
     as.actions.clear();
     actionQueueType aq;
-    aq.as = PedInstance::pa_smFiring;
     aq.group_desc = PedInstance::gd_mFire;
-    // TODO: use condition to set more information for action execution
-    // continuos shooting until ammo ends(or all weapons ammo),
-    // until target detroyed, etc.
-    // TODO: define weapon type and/or weapon by damage type to use
-    if (tsmo) {
-        aq.t_smo = tsmo;
-        aq.ot_execute = Mission::objv_DestroyObject;
-        aq.multi_var.enemy_var.make_shots = make_shots;
-        aq.multi_var.enemy_var.shots_done = 0;
-        aq.multi_var.enemy_var.forced_shot = forced_shot;
+    bool can_shoot = false;
+    bool does_phys_dmg = false;
+    if (pw_to_use) {
+        switch (pw_to_use->desc) {
+            // indx used
+            // TODO: use it later, convert indx to weapon pointer
+            case 1:
+                break;
+            // pointer
+            case 2:
+                can_shoot = pw_to_use->wpn.wi->canShoot();
+                does_phys_dmg = pw_to_use->wpn.wi->doesPhysicalDmg();
+                break;
+            // weapon type
+            // TODO: create a way for checking can_shoot and does_phys_dmg
+            case 3:
+                break;
+            // strict damage type
+            case 4:
+            // non-strict damage type
+            case 5:
+                // TODO: check inventory for shootable weapons? or check in action queue processing?
+                // for availiable, search the ground?
+                can_shoot = true;
+                does_phys_dmg = pw_to_use->wpn.dmg_type & MapObject::dmg_Physical;
+                break;
+        }
+        aq.multi_var.enemy_var.weapon = *pw_to_use;
     } else {
-        aq.t_pn = *tpn;
-        aq.ot_execute = Mission::objv_AttackLocation;
+        WeaponInstance *wi = selectedWeapon();
+        if (wi) {
+            can_shoot = wi->canShoot();
+            does_phys_dmg = wi->doesPhysicalDmg();
+            aq.multi_var.enemy_var.weapon.desc = 2;
+            aq.multi_var.enemy_var.weapon.wpn.wi = wi;
+        } else
+            return false;
+    }
+
+    if (!can_shoot)
+        return false;
+
+    aq.multi_var.enemy_var.value = value;
+    if (does_phys_dmg) {
+        aq.as = PedInstance::pa_smFiring;
+        // TODO: use condition to set more information for action execution
+        // continuos shooting until ammo ends(or all weapons ammo),
+        // until target destroyed, type of damage that will complete action
         aq.multi_var.enemy_var.make_shots = make_shots;
         aq.multi_var.enemy_var.shots_done = 0;
         aq.multi_var.enemy_var.forced_shot = forced_shot;
+        if (tsmo) {
+            aq.t_smo = tsmo;
+            aq.ot_execute = Mission::objv_DestroyObject;
+        } else {
+            aq.t_pn = *tpn;
+            aq.ot_execute = Mission::objv_AttackLocation;
+            aq.multi_var.enemy_var.shots_done = 0;
+        }
+    } else {
+        if (tsmo && tsmo->majorType() == MapObject::mjt_Ped) {
+            aq.as = PedInstance::pa_smNone;
+            aq.multi_var.enemy_var.make_shots = make_shots;
+            aq.multi_var.enemy_var.shots_done = 0;
+            aq.multi_var.enemy_var.forced_shot = forced_shot;
+            aq.t_smo = tsmo;
+            aq.ot_execute = Mission::objv_AquireControl;
+        } else
+            return false;
     }
     aq.state = 1;
     as.actions.push_back(aq);
+    return true;
 }
 
 void PedInstance::createActQFollowing(actionQueueGroupType &as,

@@ -145,7 +145,7 @@ bool WeaponInstance::animate(int elapsed) {
             so->setTileVisZ();
             m->addSfxObject(so);
 
-            int max_anims = 16 + rand() % 8;
+            int max_anims = 24 + rand() % 8;
             rangeDamageAnim(cur_pos, (double)pWeaponClass_->rangeDmg(),
                 max_anims, pWeaponClass_->anims()->rd_anim);
             return true;
@@ -175,7 +175,8 @@ void ShotClass::shotTargetRandomizer(toDefineXYZ * cp, toDefineXYZ * tp,
 {
     if (angle == 0)
         return;
-    //angle *= (double)(rand() % 100) / 100.0;
+
+    angle *= (double)(69 + (rand() & 0x1F)) / 100.0;
     int cx = cp->x;
     int cy = cp->y;
     int cz = cp->z;
@@ -322,6 +323,7 @@ ProjectileShot::ProjectileShot(toDefineXYZ &cp, Weapon::ShotDesc & sd,
     cur_dist_ = 0;
     ignored_obj_ = ignrd_obj;
     owner_ = sd.d.d_owner;
+    target_object_ = sd.target_object;
 }
 
 bool ProjectileShot::animate(int elapsed, Mission *m) {
@@ -481,6 +483,8 @@ bool ProjectileShot::animate(int elapsed, Mission *m) {
             sd.tpn = pn;
             sd.d = sd_prj_.d;
             sd.smo = smo;
+            sd.d.d_owner = owner_;
+            sd.target_object = target_object_;
             all_shots.push_back(sd);
             makeShot(true, base_pos_, anims_.hit_anim, all_shots,
                 anims_.obj_hit_anim);
@@ -518,13 +522,13 @@ bool ProjectileShot::animate(int elapsed, Mission *m) {
                 // TODO: set direction, if object servives it will need it
                 sd.d = sd_prj_.d;
                 sd.smo = smo;
+                sd.d.d_owner = owner_;
+                sd.target_object = target_object_;
                 all_shots.push_back(sd);
             }
             makeShot(true, cp, anims_.hit_anim, all_shots,
                 anims_.obj_hit_anim);
-            // TODO: make as function, also used in weaponinstance::animate
-            // or rewrite
-            int max_flames = 16 + rand() % 8;
+            int max_flames = 24 + rand() % 8;
             rangeDamageAnim(cur_pos_, (double)dmg_range_, max_flames,
                 anims_.rd_anim);
         }
@@ -557,6 +561,9 @@ uint16 WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
     if (ammo_remaining_ == 0)
         return 1;
 
+    // NOTE: this block of code defines direction for shooter and damaged person
+    // it is placed before shots calculation to set direction for shooter even if not
+    // enough time is for shot
     int xb = 0;
     int yb = 0;
     int txb = 0;
@@ -564,6 +571,7 @@ uint16 WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
     // TODO: when has owner add per weapon shift of position,
     // per direction, to "cp" - current position
     toDefineXYZ cp;
+    Mission *m = g_Session.getMission();
     if (owner_) {
         xb = owner_->tileX() * 256 + owner_->offX();
         yb = owner_->tileY() * 256 + owner_->offY();
@@ -571,8 +579,8 @@ uint16 WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
         cp.y = yb;
         cp.z = owner_->visZ() * 128 + owner_->offZ()
             + (owner_->sizeZ() >> 1);
-        if (cp.z > (g_Session.getMission()->mmax_z_ - 1) * 128)
-            cp.z = (g_Session.getMission()->mmax_z_ - 1) * 128;
+        if (cp.z > (m->mmax_z_ - 1) * 128)
+            cp.z = (m->mmax_z_ - 1) * 128;
         if (tobj || tp) {
             if (tobj) {
                 txb = tobj->tileX() * 256 + tobj->offX();
@@ -596,8 +604,8 @@ uint16 WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
         // tile above is "air", if Z_SHIFT_TO_AIR will not be added, tile will be "solid",
         // trajectory checking will return "failed" response at start
         cp.z = vis_z_ * 128 + off_z_ + Z_SHIFT_TO_AIR;
-        if (cp.z > (g_Session.getMission()->mmax_z_ - 1) * 128)
-            cp.z = (g_Session.getMission()->mmax_z_ - 1) * 128;
+        if (cp.z > (m->mmax_z_ - 1) * 128)
+            cp.z = (m->mmax_z_ - 1) * 128;
     }
 
     uint32 shots = 0;
@@ -640,6 +648,14 @@ uint16 WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
         }
     }
 
+    
+    if (owner_
+#ifdef _DEBUG
+        && owner_->majorType() == MapObject::mjt_Ped
+#endif
+        &&((PedInstance *)owner_)->isOurAgent()) {
+        m->incStatisticsShots((int32)shots);
+    }
     this->playSound();
     // 90% accuracy agent * acurracy weapon
     double accuracy = 0.9 * pWeaponClass_->shotAcurracy();
@@ -647,20 +663,20 @@ uint16 WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
     // angle is used to generate random shot with randomizer
     double angle = pWeaponClass_->shotAngle();
 
-    angle *= (1 - accuracy);
-    //angle = 0;
+    angle *= (1.0 - accuracy);
 
     Weapon::ShotDesc base_shot;
     base_shot.smo = NULL;
     base_shot.d.dtype = pWeaponClass_->dmgType();
     base_shot.d.dvalue =  pWeaponClass_->damagePerShot();
     base_shot.d.d_owner = owner_;
+    base_shot.target_object = tobj;
     if (tobj) {
         base_shot.tp.x = tobj->tileX() * 256 + tobj->offX();
         base_shot.tp.y = tobj->tileY() * 256 + tobj->offY();
         base_shot.tp.z = tobj->visZ() * 128 + tobj->offZ() + (tobj->sizeZ() >> 1);
-        if (base_shot.tp.z > (g_Session.getMission()->mmax_z_ - 1) * 128)
-            base_shot.tp.z = (g_Session.getMission()->mmax_z_ - 1) * 128;
+        if (base_shot.tp.z > (m->mmax_z_ - 1) * 128)
+            base_shot.tp.z = (m->mmax_z_ - 1) * 128;
         base_shot.tpn.setTileXYZ(tobj->tileX(), tobj->tileY(),
             base_shot.tp.z / 128);
         base_shot.tpn.setOffXYZ(tobj->offX(), tobj->offY(),
@@ -669,8 +685,8 @@ uint16 WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
         base_shot.tp.x = tp->tileX() * 256 + tp->offX();
         base_shot.tp.y = tp->tileY() * 256 + tp->offY();
         base_shot.tp.z = tp->tileZ() * 128 + tp->offZ() + Z_SHIFT_TO_AIR;
-        if (base_shot.tp.z > (g_Session.getMission()->mmax_z_ - 1) * 128)
-            base_shot.tp.z = (g_Session.getMission()->mmax_z_ - 1) * 128;
+        if (base_shot.tp.z > (m->mmax_z_ - 1) * 128)
+            base_shot.tp.z = (m->mmax_z_ - 1) * 128;
         base_shot.tpn = *tp;
         base_shot.tpn.setTileZ(base_shot.tp.z / 128);
         base_shot.tpn.setOffZ(base_shot.tp.z % 128);
@@ -700,11 +716,11 @@ uint16 WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
     for (uint32 sc = 0; sc < shots; sc++) {
         if (shot_prop & Weapon::spe_CreatesProjectile) {
             Weapon::ShotDesc shot_new = base_shot;
-            //shotTargetRandomizer(&cp, &(shot_new.tp), angle);
+            shotTargetRandomizer(&cp, &(shot_new.tp), angle);
             ProjectileShot *prjs = new ProjectileShot(cp, shot_new,
                 pWeaponClass_->rangeDmg(), pWeaponClass_->anims(),
                 owner_, range(), pWeaponClass_->shotSpeed());
-            g_Session.getMission()->addPrjShot(prjs);
+            m->addPrjShot(prjs);
             continue;
         }
         if (shot_prop & Weapon::spe_ShootsWhileNoTarget) {
@@ -755,6 +771,8 @@ uint16 WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
                             smo->offZ());
                         sd.d = sdc.d;
                         sd.smo = smo;
+                        sd.d.d_owner = sdc.d.d_owner;
+                        sd.target_object = sdc.target_object;
                         all_shots.push_back(sd);
                     }
                 }
@@ -799,6 +817,8 @@ uint16 WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
                                     smo->offZ());
                                 sd.d = sdc.d;
                                 sd.smo = smo;
+                                sd.d.d_owner = sdc.d.d_owner;
+                                sd.target_object = sdc.target_object;
                                 all_shots.push_back(sd);
                             }
                             if (sdc.smo == NULL) {
@@ -898,7 +918,7 @@ int WeaponInstance::getShots(int *elapsed, uint32 make_shots) {
     // TODO: if owner exists these two values should change(IPA, mods)
     if (owner_)
 #endif
-// TODO check in weaponinstance animate double consuming of elapsed
+    // TODO check in weaponinstance animate double consuming of elapsed
     int time_full_shot = time_for_shot + time_reload;
     int elapsed_l = *elapsed;
     *elapsed = 0;
@@ -1010,7 +1030,7 @@ bool WeaponInstance::isReloading() {
 }
 
 void WeaponInstance::activate() {
-    if (pWeaponClass_->getWeaponType() == Weapon::TimeBomb)
+    //if (pWeaponClass_->getWeaponType() == Weapon::TimeBomb)
         activated_ = true;
 }
 
@@ -1024,9 +1044,11 @@ void ShotClass::makeShot(bool rangeChecked, toDefineXYZ &cp, int anim_hit,
     std::vector <Weapon::ShotDesc> &all_shots, int anim_obj_hit,
     WeaponInstance * w)
 {
-    for (uint16 i = 0; i < all_shots.size(); i++) {
-        ShootableMapObject * smp = all_shots[i].smo;
-        PathNode pn = all_shots[i].tpn;
+    Mission *m = g_Session.getMission();
+    for (std::vector <Weapon::ShotDesc>::iterator it_a = all_shots.begin();
+         it_a != all_shots.end(); it_a++) {
+        ShootableMapObject * smp = it_a->smo;
+        PathNode pn = it_a->tpn;
         ShootableMapObject::DamageInflictType d;
         uint8 has_blocker = 0;
         if (rangeChecked)
@@ -1038,68 +1060,92 @@ void ShotClass::makeShot(bool rangeChecked, toDefineXYZ &cp, int anim_hit,
         // TODO: set direction?
         d.ddir = -1;
         if (smp) {
-            int txb = all_shots[i].tp.x;
-            int tyb = all_shots[i].tp.y;
+            int txb = it_a->tp.x;
+            int tyb = it_a->tp.y;
             smp->setDirection(txb - cp.x, tyb - cp.y, &(d.ddir));
         }
 
-        d.dvalue = all_shots[i].d.dvalue;
-        d.dtype = all_shots[i].d.dtype;
-        d.d_owner = all_shots[i].d.d_owner;
+        d.dvalue = it_a->d.dvalue;
+        d.dtype = it_a->d.dtype;
+        d.d_owner = it_a->d.d_owner;
         if ((has_blocker & 22) != 0) {
             if ((has_blocker & 16) != 0) {
                 if (anim_hit != SFXObject::sfxt_Unknown) {
-                    SFXObject *so = new SFXObject(g_Session.getMission()->map(),
+                    SFXObject *so = new SFXObject(m->map(),
                         anim_hit);
                     so->setPosition(pn.tileX(), pn.tileY(), pn.tileZ(),
                         pn.offX(), pn.offY(), pn.offZ());
                     so->setTileVisZ();
                     so->correctZ();
-                    g_Session.getMission()->addSfxObject(so);
+                    m->addSfxObject(so);
                 }
             } else if ((has_blocker & 6) != 0) {
                 assert(smp != 0);
-                smp->handleDamage(&d);
+                // TODO: more information needed, handle return value
+                // pass info to shot owner if exist
+                if (smp->handleDamage(&d)) {
+                    if (it_a->target_object == smp
+                        && it_a->d.d_owner
+#ifdef _DEBUG
+                        && it_a->d.d_owner->majorType() == MapObject::mjt_Ped
+#endif
+                        && ((PedInstance *)it_a->d.d_owner)->isOurAgent())
+                    {
+                        m->incStatisticsHits();
+                    }
+                }
                 if (anim_obj_hit != SFXObject::sfxt_Unknown) {
-                    SFXObject *so = new SFXObject(g_Session.getMission()->map(),
+                    SFXObject *so = new SFXObject(m->map(),
                         anim_obj_hit);
                     so->setPosition(smp->tileX(), smp->tileY(), smp->visZ() + 1,
                         smp->offX(), smp->offY(), smp->offZ());
                     so->setTileVisZ();
                     so->correctZ();
-                    g_Session.getMission()->addSfxObject(so);
+                    m->addSfxObject(so);
                 }
             }
         } else if ((has_blocker & 8) != 0) {
             if (anim_hit != SFXObject::sfxt_Unknown) {
-                SFXObject *so = new SFXObject(g_Session.getMission()->map(),
+                SFXObject *so = new SFXObject(m->map(),
                     anim_hit);
                 so->setPosition(pn.tileX(), pn.tileY(), pn.tileZ(), pn.offX(),
                     pn.offY(), pn.offZ());
                 so->setTileVisZ();
                 so->correctZ();
-                g_Session.getMission()->addSfxObject(so);
+                m->addSfxObject(so);
             }
         } else if (has_blocker == 1) {
             if (smp == NULL && anim_hit != SFXObject::sfxt_Unknown) {
-                SFXObject *so = new SFXObject(g_Session.getMission()->map(),
+                SFXObject *so = new SFXObject(m->map(),
                     anim_hit);
                 so->setPosition(pn.tileX(), pn.tileY(), pn.tileZ(), pn.offX(),
                     pn.offY(), pn.offZ());
                 so->setTileVisZ();
                 so->correctZ();
-                g_Session.getMission()->addSfxObject(so);
+                m->addSfxObject(so);
             }
             if (smp) {
-                smp->handleDamage(&d);
+                // TODO: more information needed, handle return value
+                // pass info to shot owner if exist
+                if (smp->handleDamage(&d)) {
+                    if (it_a->target_object == smp
+                        &&it_a->d.d_owner
+#ifdef _DEBUG
+                        && it_a->d.d_owner->majorType() == MapObject::mjt_Ped
+#endif
+                        && ((PedInstance *)it_a->d.d_owner)->isOurAgent())
+                    {
+                        m->incStatisticsHits();
+                    }
+                }
                 if (anim_obj_hit != SFXObject::sfxt_Unknown) {
-                    SFXObject *so = new SFXObject(g_Session.getMission()->map(),
+                    SFXObject *so = new SFXObject(m->map(),
                         anim_obj_hit);
                     so->setPosition(pn.tileX(), pn.tileY(), pn.tileZ(),
                         pn.offX(), pn.offY(), pn.offZ());
                     so->setTileVisZ();
                     so->correctZ();
-                    g_Session.getMission()->addSfxObject(so);
+                    m->addSfxObject(so);
                 }
             }
         }

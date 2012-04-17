@@ -136,6 +136,8 @@ void DebriefMenu::updateStatsFields(Mission *pMission) {
     if (pStats->nbOfShots == 0) {
         getStatic(txtPrecisionId_)->setText("#DEBRIEF_NO_BULLET");
     } else {
+        // NOTE: we count persudatron direct uses too, although don't count
+        // hits for objects other then original target
         int precision = (pStats->nbOfHits * 100) / pStats->nbOfShots ;
         getStatic(txtPrecisionId_)->setTextFormated("%i%%", precision);
     }
