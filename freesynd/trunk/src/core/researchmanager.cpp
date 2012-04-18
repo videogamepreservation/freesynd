@@ -398,21 +398,50 @@ bool ResearchManager::loadFromFile(PortableFile &infile, const FormatVersion& v)
         int type = infile.read32();
         Weapon::WeaponType wt = Weapon::Unknown;
         switch (type) {
-            case 0: wt = Weapon::Persuadatron;break;
-            case 1: wt = Weapon::Pistol;break;
-            case 2: wt = Weapon::GaussGun;break;
-            case 3: wt = Weapon::Shotgun;break;
-            case 4: wt = Weapon::Uzi;break;
-            case 5: wt = Weapon::Minigun;break;
-            case 6: wt = Weapon::Laser;break;
-            case 7: wt = Weapon::Flamer;break;
-            case 8: wt = Weapon::LongRange;break;
-            case 9: wt = Weapon::Scanner;break;
-            case 10: wt = Weapon::MediKit;break;
-            case 11: wt = Weapon::TimeBomb;break;
-            case 12: wt = Weapon::AccessCard;break;
-            case 13: wt = Weapon::EnergyShield;break;
-            default: wt = Weapon::Unknown;
+            case Weapon::Persuadatron:
+                wt = Weapon::Persuadatron;
+                break;
+            case Weapon::Pistol:
+                wt = Weapon::Pistol;
+                break;
+            case Weapon::GaussGun:
+                wt = Weapon::GaussGun;
+                break;
+            case Weapon::Shotgun:
+                wt = Weapon::Shotgun;
+                break;
+            case Weapon::Uzi:
+                wt = Weapon::Uzi;
+                break;
+            case Weapon::Minigun:
+                wt = Weapon::Minigun;
+                break;
+            case Weapon::Laser:
+                wt = Weapon::Laser;
+                break;
+            case Weapon::Flamer:
+                wt = Weapon::Flamer;
+                break;
+            case Weapon::LongRange:
+                wt = Weapon::LongRange;
+                break;
+            case Weapon::Scanner:
+                wt = Weapon::Scanner;
+                break;
+            case Weapon::MediKit:
+                wt = Weapon::MediKit;
+                break;
+            case Weapon::TimeBomb:
+                wt = Weapon::TimeBomb;
+                break;
+            case Weapon::AccessCard:
+                wt = Weapon::AccessCard;
+                break;
+            case Weapon::EnergyShield:
+                wt = Weapon::EnergyShield;
+                break;
+            default:
+                wt = Weapon::Unknown;
         }
 
         Research *pRes = loadResearch(wt);

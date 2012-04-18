@@ -58,6 +58,7 @@ protected:
 
     void showModWeaponPanel();
     void showItemList();
+    void updateSelectedWeapon();
 
 protected:
     enum ETab {

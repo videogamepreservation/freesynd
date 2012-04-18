@@ -291,9 +291,9 @@ void SelectMenu::drawSelectedWeaponInfos(int x, int y) {
         y += 12;
     }
 
-	if (selectedWInstId_ > 0 ) {
+	if (selectedWInstId_ > 0 && g_App.weapons().isAvailable(pSelectedWeap_)) {
 		WeaponInstance *wi = g_Session.teamMember(cur_agent_)->weapon(selectedWInstId_ - 1);
-		if (pSelectedWeap_->ammo() > wi->ammoRemaining()) {
+		if (wi->needsReloading()) {
 			int rldCost = (pSelectedWeap_->ammo()
 									- wi->ammoRemaining()) * pSelectedWeap_->ammoCost();
 		
@@ -463,7 +463,9 @@ bool SelectMenu::handleMouseDown(int x, int y, int button, const int modKeys)
             if (x >= 82) {
                 if (button == 3)
                     toggleAgent(1);
-                else {
+                else if (cur_agent_ != 1) {
+                    if (selectedWInstId_ != 0)
+                        updateSelectedWeapon();
                     cur_agent_ = 1;
                     if (g_Session.teamMember(1)) {
                         getStatic(txtAgentId_)->setTextFormated("#SELECT_SUBTITLE", g_Session.teamMember(1)->getName());
@@ -474,7 +476,9 @@ bool SelectMenu::handleMouseDown(int x, int y, int button, const int modKeys)
             } else {
                 if (button == 3)
                     toggleAgent(0);
-                else {
+                else if (cur_agent_ != 0) {
+                    if (selectedWInstId_ != 0)
+                        updateSelectedWeapon();
                     cur_agent_ = 0;
                     if (g_Session.teamMember(0)) {
                         getStatic(txtAgentId_)->setTextFormated("#SELECT_SUBTITLE", g_Session.teamMember(0)->getName());
@@ -493,7 +497,9 @@ bool SelectMenu::handleMouseDown(int x, int y, int button, const int modKeys)
             if (x >= 82) {
                 if (button == 3)
                     toggleAgent(3);
-                else {
+                else if (cur_agent_ != 3) {
+                    if (selectedWInstId_ != 0)
+                        updateSelectedWeapon();
                     cur_agent_ = 3;
                     if (g_Session.teamMember(3)) {
                         getStatic(txtAgentId_)->setTextFormated("#SELECT_SUBTITLE", g_Session.teamMember(3)->getName());
@@ -504,7 +510,9 @@ bool SelectMenu::handleMouseDown(int x, int y, int button, const int modKeys)
             } else {
                 if (button == 3)
                     toggleAgent(2);
-                else {
+                else if (cur_agent_ != 2) {
+                    if (selectedWInstId_ != 0)
+                        updateSelectedWeapon();
                     cur_agent_ = 2;
                     if (g_Session.teamMember(2)) {
                         getStatic(txtAgentId_)->setTextFormated("#SELECT_SUBTITLE", g_Session.teamMember(2)->getName());
@@ -520,38 +528,41 @@ bool SelectMenu::handleMouseDown(int x, int y, int button, const int modKeys)
 	// Checks if the user clicked on item in the current agent inventory
     Agent *selected = g_Session.teamMember(cur_agent_);
     if (selected) {
-        for (int j = 0; j < 2; j++)
-            for (int i = 0; i < 4; i++)
-                if (j * 4 + i < selected->numWeapons() &&
-                    x >= 366 + i * 32 && x < 366 + i * 32 + 32 &&
-                    y >= 308 + j * 32 && y < 308 + j * 32 + 32)
-                {
-					// The user has actually selected a weapon from the inventory :
-					// 1/ selects the EQUIPS toggle button
-                    tab_ = TAB_EQUIPS;
-                    pSelectedMod_ = NULL;
-                    selectToggleAction(equipButId_);
-					// 2/ computes the id of the selected weapon and selects it
-					int newId = i + j * 4 + 1;
+        if (x >= 366 && x < 366 + 4 * 32
+            && y >= 308 && y < 308 + 2 * 32)
+        {
+            int newId = (x - 366) / 32 + ((y - 308) / 32) * 4;
+            if (newId < selected->numWeapons())
+            {
+                // The user has actually selected a weapon from the inventory :
+                // 1/ selects the EQUIPS toggle button
+                tab_ = TAB_EQUIPS;
+                pSelectedMod_ = NULL;
+                selectToggleAction(equipButId_);
+                // 2/ computes the id of the selected weapon and selects it
+                newId++;
 
-					if (newId != selectedWInstId_) { // Do something only if a different weapon is selected
-						selectedWInstId_ = newId;
-						WeaponInstance *wi = selected->weapon(selectedWInstId_ -1);
-						pSelectedWeap_ = wi->getWeaponClass();
-						addDirtyRect(500, 105,  125, 235);
-						// 3/ see if reload button should be displayed
-						bool displayReload = pSelectedWeap_->ammo() > wi->ammoRemaining();
-						getOption(reloadButId_)->setVisible(displayReload);
+                if (newId != selectedWInstId_) { // Do something only if a different weapon is selected
+                    selectedWInstId_ = newId;
+                    WeaponInstance *wi = selected->weapon(selectedWInstId_ -1);
+                    pSelectedWeap_ = wi->getWeaponClass();
+                    addDirtyRect(500, 105,  125, 235);
+                    // 3/ see if reload button should be displayed,
+                    // if weapon is not researched it will not be reloadable
+                    bool displayReload = wi->needsReloading()
+                        && g_App.weapons().isAvailable(pSelectedWeap_);
+                    getOption(reloadButId_)->setVisible(displayReload);
 
-						// 4/ hides the purchase button for the sell button
-						getOption(purchaseButId_)->setVisible(false);
-						getOption(cancelButId_)->setVisible(true);
-						getOption(sellButId_)->setVisible(true);
-						pTeamLBox_->setVisible(false);
-						pModsLBox_->setVisible(false);
-						pWeaponsLBox_->setVisible(false);
-					}
+                    // 4/ hides the purchase button for the sell button
+                    getOption(purchaseButId_)->setVisible(false);
+                    getOption(cancelButId_)->setVisible(true);
+                    getOption(sellButId_)->setVisible(true);
+                    pTeamLBox_->setVisible(false);
+                    pModsLBox_->setVisible(false);
+                    pWeaponsLBox_->setVisible(false);
                 }
+            }
+        }
     }
 
 	return false;
@@ -716,6 +727,33 @@ void SelectMenu::handleAction(const int actionId, void *ctx, const int modKeys)
         g_Session.setMoney(g_Session.getMoney() + pWi->getWeaponClass()->cost());
 		getStatic(moneyTxtId_)->setTextFormated("%d", g_Session.getMoney());
         delete pWi;
+        showItemList();
+    }
+}
+
+void SelectMenu::updateSelectedWeapon() {
+    assert(selectedWInstId_ != 0);
+
+    Agent *selected = g_Session.teamMember(cur_agent_);
+    if (selected == NULL) {
+        tab_ = TAB_EQUIPS;
+        showItemList();
+        return;
+    }
+
+    WeaponInstance *wi = selected->weapon(selectedWInstId_ - 1);
+
+    // if weapon is researched it can be bought
+    if (g_App.weapons().isAvailable(wi->getWeaponClass())) {
+        selectedWInstId_ = 0;
+        getOption(sellButId_)->setVisible(false);
+        getOption(purchaseButId_)->setVisible(true);
+        if (wi->needsReloading()) {
+            getOption(reloadButId_)->setVisible(false);
+        }
+        getOption(cancelButId_)->setVisible(true);
+    } else {
+        tab_ = TAB_EQUIPS;
         showItemList();
     }
 }

@@ -330,6 +330,10 @@ public:
         return (pWeaponClass_->dmgType() & MapObject::dmg_Physical) != 0;
     }
 
+    bool needsReloading() {
+        return pWeaponClass_->ammo() > ammo_remaining_;
+    }
+
 protected:
     Weapon *pWeaponClass_;
     int ammo_remaining_;
