@@ -2386,7 +2386,8 @@ bool PedInstance::createActQFiring(actionQueueGroupType &as, PathNode *tpn,
                 // TODO: check inventory for shootable weapons? or check in action queue processing?
                 // for availiable, search the ground?
                 can_shoot = true;
-                does_phys_dmg = pw_to_use->wpn.dmg_type & MapObject::dmg_Physical;
+                does_phys_dmg = (pw_to_use->wpn.dmg_type
+                    & MapObject::dmg_Physical) != 0;
                 break;
         }
         aq.multi_var.enemy_var.weapon = *pw_to_use;

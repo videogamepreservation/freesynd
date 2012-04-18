@@ -78,12 +78,11 @@ std::string File::dataFullPath(const std::string& filename) {
 void File::getFullPathForSaveSlot(int slot, std::string &path) {
     path.erase();
 
-    path.append(homePath_).append("save");
-#ifdef _WIN32
-    path.append("\\");
-#else
-    path.append("/");
-#endif
+    path.append(homePath_);
+    char c = path[path.size() - 1];
+    if (c != '\\' && c != '/')
+        path.append("/");
+    path.append("save/");
 
     std::ostringstream out;
     if (slot < 10) {
@@ -215,6 +214,9 @@ void File::processSaveFile(const std::string& filename, std::vector<std::string>
  */
 void File::getGameSavedNames(std::vector<std::string> &files) {
     std::string savePath(homePath_);
+    char c = savePath[savePath.size() - 1];
+    if (c != '\\' && c != '/')
+        savePath.append("/");
     savePath.append("save");
 
 #ifdef _WIN32
