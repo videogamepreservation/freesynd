@@ -69,7 +69,7 @@ Sprite::Sprite()
 :  width_(0)
     , height_(0)
     , stride_(0)
-    , sprite_data_(0)
+    , sprite_data_(NULL)
 {
 }
 
@@ -79,7 +79,7 @@ Sprite::~Sprite()
         delete[] sprite_data_;
 
     width_ = height_ = stride_ = 0;
-    sprite_data_ = 0;
+    sprite_data_ = NULL;
 }
 
 void Sprite::loadSpriteFromPNG(const char *filename)
@@ -126,7 +126,7 @@ void Sprite::loadSpriteFromPNG(const char *filename)
     } else {
         if (sprite_data_)
             delete[] sprite_data_;
-        
+
         sprite_data_ = new uint8[w * h];
         width_ = w;
         height_ = h;

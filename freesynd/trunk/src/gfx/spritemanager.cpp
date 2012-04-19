@@ -28,7 +28,7 @@
 #include "gfx/spritemanager.h"
 #include "utils/file.h"
 
-SpriteManager::SpriteManager():sprites_(0), sprite_count_(0)
+SpriteManager::SpriteManager():sprites_(NULL), sprite_count_(0)
 {
 }
 
@@ -42,7 +42,7 @@ void SpriteManager::clear()
     if (sprites_)
         delete[] sprites_;
 
-    sprites_ = 0;
+    sprites_ = NULL;
     sprite_count_ = 0;
 }
 

@@ -76,7 +76,6 @@ cur_agent_(0), tick_count_(0), rnd_(0), sel_all_(false)
 
 SelectMenu::~SelectMenu()
 {
-    pTeamLBox_ = NULL;
 }
 
 /*!
@@ -215,26 +214,27 @@ void SelectMenu::drawAgent()
 
     // write inventory
     for (int j = 0; j < 2; j++)
-        for (int i = 0; i < 4; i++)
-            if (j * 4 + i < selected->numWeapons()) {
-                WeaponInstance *wi = selected->weapon(j * 4 + i);
-                Weapon *pW = wi->getWeaponClass();
-				menuSprites().drawSpriteXYZ(pW->getSmallIconId(), 366 + i * 32, 308 + j * 32, 0, false, true);
-                uint8 data[3];
-                memset(data, 204, 3);
-                if (pW->ammo() != -1) {
-                    int n = wi->ammoRemaining();
-                    if (pW->ammo() == 0)
-                        n = 24;
-                    else {
-                        n *= 24;
-                        n /= pW->ammo();
-                    }
-                    for (int k = 0; k < n; k++)
-                        g_Screen.scale2x(366 + i * 32 + k + 4,
-                                         308 + j * 32 + 22, 1, 3, data);
+        for (int i = 0; i < 4
+            && (j * 4 + i < selected->numWeapons()); i++)
+        {
+            WeaponInstance *wi = selected->weapon(j * 4 + i);
+            Weapon *pW = wi->getWeaponClass();
+			menuSprites().drawSpriteXYZ(pW->getSmallIconId(),
+                366 + i * 32, 308 + j * 32, 0, false, true);
+            uint8 data[3] = {204, 204, 204};
+            if (pW->ammo() != -1) {
+                int n = wi->ammoRemaining();
+                if (pW->ammo() == 0)
+                    n = 24;
+                else {
+                    n *= 24;
+                    n /= pW->ammo();
                 }
+                for (int k = 0; k < n; k++)
+                    g_Screen.scale2x(366 + i * 32 + k + 4,
+                                        308 + j * 32 + 22, 1, 3, data);
             }
+        }
 }
 
 void SelectMenu::handleTick(int elapsed)
@@ -296,7 +296,7 @@ void SelectMenu::drawSelectedWeaponInfos(int x, int y) {
 		if (wi->needsReloading()) {
 			int rldCost = (pSelectedWeap_->ammo()
 									- wi->ammoRemaining()) * pSelectedWeap_->ammoCost();
-		
+
 			sprintf(tmp, "RELOAD :%d", rldCost);
 			getMenuFont(FontManager::SIZE_1)->drawText(x, y, tmp, true);
 			y += 12;
@@ -333,6 +333,7 @@ void SelectMenu::handleShow() {
         Agent *pAgentFromCryo = g_App.agents().agent(iAgnt);
         pTeamLBox_->setSquadLine(g_Session.getTeamSlot(pAgentFromCryo), iAgnt);
     }
+    showItemList();
 }
 
 void SelectMenu::handleRender(DirtyList &dirtyList) {
@@ -431,12 +432,9 @@ void SelectMenu::handleRender(DirtyList &dirtyList) {
 
 void SelectMenu::handleLeave() {
     g_System.hideCursor();
-    // resetting menu
+    // resetting menu, all other variables are reset in handleShow
+    // with showItemList()
     tab_ = TAB_EQUIPS;
-    showItemList();
-    pSelectedWeap_ = NULL;
-    selectedWInstId_ = 0;
-    pSelectedMod_ = NULL;
     rnd_ = 0;
     cur_agent_ = 0;
     sel_all_ = false;

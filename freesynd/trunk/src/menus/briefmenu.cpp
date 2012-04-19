@@ -74,6 +74,7 @@ BriefMenu::BriefMenu(MenuManager * m)
 
 BriefMenu::~BriefMenu() {
     delete [] a_page_;
+    a_page_ = NULL;
 }
 
 void BriefMenu::handleTick(int elapsed)

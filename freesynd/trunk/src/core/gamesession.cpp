@@ -156,7 +156,7 @@ Block & GameSession::getSelectedBlock() {
     return g_Blocks[selected_blck_];
 }
 
-void GameSession::setMission(Mission *pMission) { 
+void GameSession::setMission(Mission *pMission) {
     if ((pMission == NULL && mission_) || pMission != mission_) {
         if (mission_) {
             delete mission_;
@@ -286,11 +286,7 @@ bool GameSession::updateTime(int elapsed) {
  * \param dest Buffer that will contains the resulting string.
  */
 void GameSession::getTimeAsStr(char *dest) {
-#ifdef WIN_SECURE
-    sprintf_s(dest, 100, "%02d:%d:%dNC", time_hour_, time_day_, time_year_);
-#else
     sprintf(dest, "%02d:%d:%dNC", time_hour_, time_day_, time_year_);
-#endif
 }
 
 /*!
@@ -574,7 +570,7 @@ bool GameSession::loadFromFile(PortableFile &infile, const FormatVersion& v) {
             do {
                 int index = rand() % (sizeof(g_Colours) / sizeof(int));
                 g_Blocks[i].colour = g_Colours[index];
-		    } while (g_Blocks[i].colour == getLogoColour());
+            } while (g_Blocks[i].colour == getLogoColour());
         }
 
         g_Blocks[i].infoLevel = infile.read8();

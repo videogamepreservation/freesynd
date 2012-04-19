@@ -194,8 +194,10 @@ const sample_timings g_rg_sample_offsets_and_timings[] = {
 #endif
 
 FliPlayer::~FliPlayer() {
-    if (offscreen_)
+    if (offscreen_) {
         delete[] offscreen_;
+        offscreen_ = NULL;
+    }
 }
 
 void FliPlayer::loadFliData(uint8 *data) {

@@ -65,13 +65,6 @@ MenuManager::MenuManager():
 
 MenuManager::~MenuManager()
 {
-    if (current_) {
-        if (menus_.find(current_->getId()) == menus_.end())
-            delete current_;
-    }
-    for (std::map<int, Menu*>::iterator it = menus_.begin();
-        it != menus_.end(); it++)
-        delete it->second;
 }
 
 /*!
@@ -79,67 +72,67 @@ MenuManager::~MenuManager()
  * \param loadIntroFont If true loads the intro sprites and font
  */
 bool MenuManager::initialize(bool loadIntroFont) {
-	bool res = false;
-	int size = 0, tabSize = 0;
-	uint8 *data, *tabData;
+    bool res = false;
+    int size = 0, tabSize = 0;
+    uint8 *data, *tabData;
 
-	// Loads menu sprites
-	LOG(Log::k_FLG_GFX, "MenuManager", "initialize", ("Loading menu sprites ..."))
+    // Loads menu sprites
+    LOG(Log::k_FLG_GFX, "MenuManager", "initialize", ("Loading menu sprites ..."))
     tabData = File::loadOriginalFile("mspr-0.tab", tabSize);
-	if (!tabData) {
-		FSERR(Log::k_FLG_UI, "MenuManager", "initialize", ("Failed reading file %s", "mspr-0.tab"));
-		return false;
-	}
-	data = File::loadOriginalFile("mspr-0.dat", size);
-	if (!data) {
-		FSERR(Log::k_FLG_UI, "MenuManager", "initialize", ("Failed reading file %s", "mspr-0.dat"));
-		delete[] tabData;
-		return false;
-	}
-	
-	res = menuSprites_.loadSprites(tabData, tabSize, data, true);
-	delete[] tabData;
-	delete[] data;
-	if (res) {
-		LOG(Log::k_FLG_GFX, "MenuManager", "initialize", ("%d sprites loaded", tabSize / 6))
-	} else {
-		FSERR(Log::k_FLG_UI, "MenuManager", "initialize", ("Failed loading menu sprites"));
-		return false;
-	}
+    if (!tabData) {
+        FSERR(Log::k_FLG_UI, "MenuManager", "initialize", ("Failed reading file %s", "mspr-0.tab"));
+        return false;
+    }
+    data = File::loadOriginalFile("mspr-0.dat", size);
+    if (!data) {
+        FSERR(Log::k_FLG_UI, "MenuManager", "initialize", ("Failed reading file %s", "mspr-0.dat"));
+        delete[] tabData;
+        return false;
+    }
 
-	// loads intro sprites
-	if (loadIntroFont) {
-		LOG(Log::k_FLG_GFX, "MenuManager", "initialize", ("Loading intro sprites ..."))
+    res = menuSprites_.loadSprites(tabData, tabSize, data, true);
+    delete[] tabData;
+    delete[] data;
+    if (res) {
+        LOG(Log::k_FLG_GFX, "MenuManager", "initialize", ("%d sprites loaded", tabSize / 6))
+    } else {
+        FSERR(Log::k_FLG_UI, "MenuManager", "initialize", ("Failed loading menu sprites"));
+        return false;
+    }
+
+    // loads intro sprites
+    if (loadIntroFont) {
+        LOG(Log::k_FLG_GFX, "MenuManager", "initialize", ("Loading intro sprites ..."))
 
         tabData = File::loadOriginalFile("mfnt-0.tab", tabSize);
-		if (!tabData) {
-			FSERR(Log::k_FLG_UI, "MenuManager", "initialize", ("Failed reading file %s", "mfnt-0.tab"));
-			return false;
-		}
+        if (!tabData) {
+            FSERR(Log::k_FLG_UI, "MenuManager", "initialize", ("Failed reading file %s", "mfnt-0.tab"));
+            return false;
+        }
         data = File::loadOriginalFile("mfnt-0.dat", size);
-		if (!data) {
-			FSERR(Log::k_FLG_UI, "MenuManager", "initialize", ("Failed reading file %s", "mfnt-0.dat"));
-			delete[] tabData;
-			return false;
-		}
+        if (!data) {
+            FSERR(Log::k_FLG_UI, "MenuManager", "initialize", ("Failed reading file %s", "mfnt-0.dat"));
+            delete[] tabData;
+            return false;
+        }
 
-		pIntroFontSprites_ = new SpriteManager();
+        pIntroFontSprites_ = new SpriteManager();
         res = pIntroFontSprites_->loadSprites(tabData, tabSize, data, true);
         delete[] tabData;
         delete[] data;
-		if (res) {
-			LOG(Log::k_FLG_GFX, "MenuManager", "initialize", ("%d sprites loaded", tabSize / 6))
-		} else {
-			FSERR(Log::k_FLG_UI, "MenuManager", "initialize", ("Failed loading intro sprites"));
-			return false;
-		}
-	}
-	
-    // Loads fonts
-	LOG(Log::k_FLG_GFX, "MenuManager", "initialize", ("Loading fonts ..."))
-	res = fonts_.loadFonts(&menuSprites_, pIntroFontSprites_);
+        if (res) {
+            LOG(Log::k_FLG_GFX, "MenuManager", "initialize", ("%d sprites loaded", tabSize / 6))
+        } else {
+            FSERR(Log::k_FLG_UI, "MenuManager", "initialize", ("Failed loading intro sprites"));
+            return false;
+        }
+    }
 
-	return res;
+    // Loads fonts
+    LOG(Log::k_FLG_GFX, "MenuManager", "initialize", ("Loading fonts ..."))
+    res = fonts_.loadFonts(&menuSprites_, pIntroFontSprites_);
+
+    return res;
 }
 
 /*!
@@ -150,6 +143,7 @@ void MenuManager::destroy() {
 
     if (background_) {
         delete[] background_;
+        background_ = NULL;
     }
 
     if (language_) {
@@ -157,29 +151,45 @@ void MenuManager::destroy() {
         language_ = NULL;
     }
 
-	if (pIntroFontSprites_) {
-		delete pIntroFontSprites_;
+    if (pIntroFontSprites_) {
+        delete pIntroFontSprites_;
         pIntroFontSprites_ = NULL;
-	}
+    }
+
+    // NOTE: this code was before in destructor, but it should be
+    // here to avoid corruption, that will happen because
+    // agentmanager is destroyed before menumanager and
+    // removeModelListener will fail with critical error,
+    // for unknown reason this happens only in WindowsOS
+    // NOTE: it might be better to create our deallocator
+    // of resource in App class to have correct sequence of destructors
+    if (current_) {
+        if (menus_.find(current_->getId()) == menus_.end())
+            delete current_;
+    }
+
+    for (std::map<int, Menu*>::iterator it = menus_.begin();
+        it != menus_.end(); it++)
+        delete it->second;
 }
 
 void MenuManager::setDefaultPalette() {
-	setPalette("mselect.pal", true);
+    setPalette("mselect.pal", true);
 }
 
 void MenuManager::setPalette(const char *fname, bool sixbit) {
     LOG(Log::k_FLG_GFX, "MenuManager", "setPalette", ("Setting palette : %s", fname))
-	int size;
+    int size;
     uint8 *data = File::loadOriginalFile(fname, size);
 
-	if (data) {
-		if (sixbit)
-			g_System.setPalette6b3(data);
-		else
-			g_System.setPalette8b3(data);
+    if (data) {
+        if (sixbit)
+            g_System.setPalette6b3(data);
+        else
+            g_System.setPalette8b3(data);
 
-		delete[] data;
-	}
+        delete[] data;
+    }
 }
 
 void MenuManager::setLanguage(FS_Lang lang) {
@@ -225,51 +235,51 @@ void MenuManager::getMessage(const std::string & id, std::string & msg) {
 }
 
 Menu * MenuManager::getMenu(int menuId) {
-	// look in the cache
-	if (menus_.find(menuId) != menus_.end()) {
-		return menus_[menuId];
-	}
+    // look in the cache
+    if (menus_.find(menuId) != menus_.end()) {
+        return menus_[menuId];
+    }
 
-	// menu is not in cache so create it
-	// some menus are not saved in cache as they are not accessed many times
-	Menu *pMenu = NULL;
+    // menu is not in cache so create it
+    // some menus are not saved in cache as they are not accessed many times
+    Menu *pMenu = NULL;
 
-	if (menuId == Menu::MENU_MAIN) {
-		pMenu =  new MainMenu(this);
-	} else if (menuId == Menu::MENU_BRIEF) {
-		pMenu =  new BriefMenu(this);
-	} else if (menuId == Menu::MENU_CONF) {
-		pMenu =  new ConfMenu(this);
-	} else if (menuId == Menu::MENU_DEBRIEF) {
-		pMenu =  new DebriefMenu(this);
-	} else if (menuId == Menu::MENU_GAMEPLAY) {
-		pMenu =  new GameplayMenu(this);
-	} else if (menuId == Menu::MENU_LOADING) {
-		pMenu =  new LoadingMenu(this);
-	} else if (menuId == Menu::MENU_LOGOUT) {
-		pMenu =  new LogoutMenu(this);
-	} else if (menuId == Menu::MENU_RESEARCH) {
-		pMenu =  new ResearchMenu(this);
-	} else if (menuId == Menu::MENU_SELECT) {
-		pMenu =  new SelectMenu(this);
-	} else if (menuId == Menu::MENU_LDSAVE) {
-		pMenu =  new LoadSaveMenu(this);
-	} else if (menuId == Menu::MENU_MAP) {
-		pMenu =  new MapMenu(this);
-	} else if (menuId == Menu::MENU_FLI_SUCCESS ||
-		menuId == Menu::MENU_FLI_FAILED || 
-		menuId == Menu::MENU_FLI_TITLE|| 
-		menuId == Menu::MENU_FLI_INTRO) {
-		pMenu =  new FliMenu(this, menuId);
-	} else {
-		FSERR(Log::k_FLG_UI, "MenuManager", "getMenu", ("Cannot open Menu : unknown id"));
-	}
+    if (menuId == Menu::MENU_MAIN) {
+        pMenu =  new MainMenu(this);
+    } else if (menuId == Menu::MENU_BRIEF) {
+        pMenu =  new BriefMenu(this);
+    } else if (menuId == Menu::MENU_CONF) {
+        pMenu =  new ConfMenu(this);
+    } else if (menuId == Menu::MENU_DEBRIEF) {
+        pMenu =  new DebriefMenu(this);
+    } else if (menuId == Menu::MENU_GAMEPLAY) {
+        pMenu =  new GameplayMenu(this);
+    } else if (menuId == Menu::MENU_LOADING) {
+        pMenu =  new LoadingMenu(this);
+    } else if (menuId == Menu::MENU_LOGOUT) {
+        pMenu =  new LogoutMenu(this);
+    } else if (menuId == Menu::MENU_RESEARCH) {
+        pMenu =  new ResearchMenu(this);
+    } else if (menuId == Menu::MENU_SELECT) {
+        pMenu =  new SelectMenu(this);
+    } else if (menuId == Menu::MENU_LDSAVE) {
+        pMenu =  new LoadSaveMenu(this);
+    } else if (menuId == Menu::MENU_MAP) {
+        pMenu =  new MapMenu(this);
+    } else if (menuId == Menu::MENU_FLI_SUCCESS ||
+        menuId == Menu::MENU_FLI_FAILED || 
+        menuId == Menu::MENU_FLI_TITLE|| 
+        menuId == Menu::MENU_FLI_INTRO) {
+        pMenu =  new FliMenu(this, menuId);
+    } else {
+        FSERR(Log::k_FLG_UI, "MenuManager", "getMenu", ("Cannot open Menu : unknown id"));
+    }
 
-	if (pMenu && pMenu->isCachable()) {
-		menus_[menuId] = pMenu;
-	}
+    if (pMenu && pMenu->isCachable()) {
+        menus_[menuId] = pMenu;
+    }
 
-	return pMenu;
+    return pMenu;
 }
 
 /*!
@@ -278,31 +288,31 @@ Menu * MenuManager::getMenu(int menuId) {
  */
 void MenuManager::changeCurrentMenu()
 {
-	// Get the next menu
-	Menu *pMenu = getMenu(nextMenuId_);
-	if (pMenu == NULL) {
-		return;
-	}
+    // Get the next menu
+    Menu *pMenu = getMenu(nextMenuId_);
+    if (pMenu == NULL) {
+        return;
+    }
 
-	if (current_) {
-		// Give the possibility to the old menu
-		// to clean before leaving
+    if (current_) {
+        // Give the possibility to the old menu
+        // to clean before leaving
         leaveMenu(current_);
-		// If menu is not in cache, it means it must be destroyed
-		if (menus_.find(current_->getId()) == menus_.end()) {
-			delete current_;
+        // If menu is not in cache, it means it must be destroyed
+        if (menus_.find(current_->getId()) == menus_.end()) {
+            delete current_;
             current_ = NULL;
-		}
+        }
     }
     current_ = pMenu;
-	nextMenuId_ = -1;
+    nextMenuId_ = -1;
     showMenu(pMenu);
 }
 
 void MenuManager::gotoMenu(int menuId) {
-	nextMenuId_ = menuId;
-	// stop listening for events until window changed
-	drop_events_ = true;
+    nextMenuId_ = menuId;
+    // stop listening for events until window changed
+    drop_events_ = true;
 }
 
 /*!
@@ -338,8 +348,8 @@ void MenuManager::showMenu(Menu *pMenu) {
     int state = g_System.getMousePos(&x, &y);
     pMenu->mouseMotionEvent(x, y, state, KMD_NONE);
 
-	// Adds a dirty rect to force menu rendering
-	addRect(0, 0, g_Screen.gameScreenWidth(), g_Screen.gameScreenHeight());
+    // Adds a dirty rect to force menu rendering
+    addRect(0, 0, g_Screen.gameScreenWidth(), g_Screen.gameScreenHeight());
 
     // reopen the event processing
     drop_events_ = false;
@@ -361,7 +371,7 @@ void MenuManager::leaveMenu(Menu *pMenu) {
         int size;
         data = File::loadOriginalFile(pMenu->getLeaveAnimName(), size);
         fliPlayer.loadFliData(data);
-		g_App.gameSounds().play(snd::MENU_CHANGE);
+        g_App.gameSounds().play(snd::MENU_CHANGE);
         fliPlayer.play();
         delete[] data;
         drop_events_ = false;
@@ -396,40 +406,40 @@ void MenuManager::renderMenu() {
 }
 
 void MenuManager::handleEvents() {
-	FS_Event evt;
-	while(g_System.pumpEvents(&evt)) {
-		switch(evt.type) {
-		case EVT_QUIT:
-			gotoMenu(Menu::MENU_LOGOUT);
-			break;
-		case EVT_MSE_MOTION:
-			if (current_ && !drop_events_)
-				current_->mouseMotionEvent(evt.motion.x, evt.motion.y, evt.motion.state, evt.motion.keyMods);
-			break;
-		case EVT_MSE_DOWN:
+    FS_Event evt;
+    while(g_System.pumpEvents(&evt)) {
+        switch(evt.type) {
+        case EVT_QUIT:
+            gotoMenu(Menu::MENU_LOGOUT);
+            break;
+        case EVT_MSE_MOTION:
+            if (current_ && !drop_events_)
+                current_->mouseMotionEvent(evt.motion.x, evt.motion.y, evt.motion.state, evt.motion.keyMods);
+            break;
+        case EVT_MSE_DOWN:
 #ifdef _DEBUG
-			// Display mouse coordinate
-			if (evt.button.keyMods & KMD_SHIFT) {
-				printf("Mouse is at %d, %d\n", evt.motion.x, evt.motion.y);
-			}
+            // Display mouse coordinate
+            if (evt.button.keyMods & KMD_SHIFT) {
+                printf("Mouse is at %d, %d\n", evt.motion.x, evt.motion.y);
+            }
 #endif
 
-			if (current_ && !drop_events_) {
-				current_->mouseDownEvent(evt.button.x, evt.button.y, evt.button.button, evt.button.keyMods);
-			}
-			break;
-		case EVT_MSE_UP:
-			if (current_ && !drop_events_) {
-				current_->mouseUpEvent(evt.button.x, evt.button.y, evt.button.button, evt.button.keyMods);
-			}
-			break;
-		case EVT_KEY_DOWN:
-			if (current_ && !drop_events_) {
-				current_->keyEvent(evt.key.key, evt.key.keyMods);
-			}
-			break;
+            if (current_ && !drop_events_) {
+                current_->mouseDownEvent(evt.button.x, evt.button.y, evt.button.button, evt.button.keyMods);
+            }
+            break;
+        case EVT_MSE_UP:
+            if (current_ && !drop_events_) {
+                current_->mouseUpEvent(evt.button.x, evt.button.y, evt.button.button, evt.button.keyMods);
+            }
+            break;
+        case EVT_KEY_DOWN:
+            if (current_ && !drop_events_) {
+                current_->keyEvent(evt.key.key, evt.key.keyMods);
+            }
+            break;
         case EVT_NONE:
             break;
-		}
-	}
+        }
+    }
 }

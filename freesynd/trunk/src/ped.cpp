@@ -1430,10 +1430,15 @@ PedInstance::PedInstance(Ped *ped, int m) : ShootableMovableMapObject(m),
 PedInstance::~PedInstance()
 {
     delete ped_;
-    if (target_pos_)
+    ped_ = NULL;
+    if (target_pos_) {
         delete target_pos_;
-    if (reach_pos_)
+        target_pos_ = NULL;
+    }
+    if (reach_pos_) {
         delete reach_pos_;
+        reach_pos_ = NULL;
+    }
 }
 
 void PedInstance::draw(int x, int y) {

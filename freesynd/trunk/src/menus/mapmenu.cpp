@@ -152,6 +152,7 @@ mapblk_data_(NULL), select_tick_count_(0) {
 
 MapMenu::~MapMenu() {
     delete[] mapblk_data_;
+    mapblk_data_ = NULL;
 }
 
 /*!
@@ -182,11 +183,7 @@ void MapMenu::handleBlockSelected() {
     char tmp[100];
 
     // Population
-#ifdef WIN_SECURE
-    sprintf_s(tmp, 100, "%i", blk.population);
-#else
     sprintf(tmp, "%i", blk.population);
-#endif
     getStatic(txtPopId_)->setText(tmp);
 
     // Mission is finished
@@ -216,21 +213,12 @@ void MapMenu::handleBlockSelected() {
 
         // Tax
         int tax = blk.tax + blk.addToTax;
-#ifdef WIN_SECURE
-        sprintf_s(tmp, 100, "%i", g_Session.getTaxRevenue(blk.population, tax));
-#else
         sprintf(tmp, "%i", g_Session.getTaxRevenue(blk.population, tax));
-#endif
         getStatic(txtTaxValueId_)->setText(tmp);
 
         getOption(decrTaxButId_)->setVisible(true);
         getOption(incrTaxButId_)->setVisible(true);
-
-#ifdef WIN_SECURE
-        sprintf_s(tmp, 100, "@   %d%%", tax);
-#else
         sprintf(tmp, "@   %d%%", tax);
-#endif
         getStatic(txtTaxPctId_)->setText(tmp);
 
     } else {
@@ -241,11 +229,7 @@ void MapMenu::handleBlockSelected() {
         // Tax
         if (blk.status == BLK_REBEL) {
             getStatic(txtTaxValueId_)->setText("#MAP_STAT_REBEL");
-#ifdef WIN_SECURE
-            sprintf_s(tmp, 100, "@   %d%%", tax);
-#else
             sprintf(tmp, "@   %d%%", tax);
-#endif
             getStatic(txtTaxPctId_)->setText(tmp);
         } else {
             getStatic(txtTaxValueId_)->setText("#MAP_TAX_UNKWN");
