@@ -531,8 +531,11 @@ protected:
         MapObject::MajorTypeEnum targettype;
         // (objGroupDefMasks)
         uint32 targetsubtype;
-        // index within vector of data
-        uint16 targetindx;
+        union {
+            // index within vector of data
+            uint16 targetindx;
+            uint16 grpid;
+        } indx_grpid;
         // 0 - not defined, 0b - has sub objective, 1b - refers to all objects
         // of subtype, 2b - completed, 3b - failed, 4b - check previous
         // objecives for fail
@@ -555,7 +558,7 @@ protected:
             type = (ObjectiveType)objv_None;
             targettype = (MapObject::MajorTypeEnum)MapObject::mjt_Undefined;
             targetsubtype = 0;
-            targetindx = 0;
+            indx_grpid.targetindx = 0;
             condition = 0;
             subobjindx = 0;
             posxt = 0;

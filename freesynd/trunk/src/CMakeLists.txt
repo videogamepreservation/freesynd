@@ -156,11 +156,13 @@ set(HEADERS
 	utils/utf8/core.h
 	utils/utf8/unchecked.h)
 
-source_group(Sources REGULAR_EXPRESSION .*.cpp)
-source_group(Headers REGULAR_EXPRESSION .*.h)
-source_group(menus REGULAR_EXPRESSION .*menu.cpp FILES widget.cpp)
-source_group(menus REGULAR_EXPRESSION .*menu.h FILES widget.cpp)
-source_group(utils FILES log.cpp log.h)
+#source_group(Sources REGULAR_EXPRESSION .*.cpp)
+#source_group(Headers REGULAR_EXPRESSION .*.h)
+source_group(Menus REGULAR_EXPRESSION menus/*)
+source_group(Utils REGULAR_EXPRESSION utils/*)
+source_group(Core REGULAR_EXPRESSION core/*)
+source_group(Gfx REGULAR_EXPRESSION gfx/*)
+source_group(Sound REGULAR_EXPRESSION sound/*)
 
 add_executable (freesynd ${SOURCES} ${HEADERS})
 

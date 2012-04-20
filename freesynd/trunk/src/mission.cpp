@@ -404,7 +404,7 @@ bool Mission::loadLevel(uint8 * levelData)
                     if ((cindx * 92 + 2) == bindx && pindx[cindx] != 0xFFFF) {
                         objd.type = objv_AquireControl;
                         objd.targettype = MapObject::mjt_Ped;
-                        objd.targetindx = pindx[cindx];
+                        objd.indx_grpid.targetindx = pindx[cindx];
                         objd.msg = g_App.menus().getMessage("GOAL_PERSUADE");
                     } else
                         printf("0x01 incorrect offset");
@@ -418,7 +418,7 @@ bool Mission::loadLevel(uint8 * levelData)
                     if ((cindx * 92 + 2) == bindx && pindx[cindx] != 0xFFFF) {
                         objd.type = objv_DestroyObject;
                         objd.targettype = MapObject::mjt_Ped;
-                        objd.targetindx = pindx[cindx];
+                        objd.indx_grpid.targetindx = pindx[cindx];
                         objd.msg = g_App.menus().getMessage("GOAL_ASSASSINATE");
                     } else
                         printf("0x02 incorrect offset");
@@ -433,7 +433,7 @@ bool Mission::loadLevel(uint8 * levelData)
                         //TODO: multiple commands are required here
                         //objd.type = objv_Protect;
                         objd.targettype = MapObject::mjt_Ped;
-                        objd.targetindx = pindx[cindx];
+                        objd.indx_grpid.targetindx = pindx[cindx];
                         objd.msg = g_App.menus().getMessage("GOAL_PROTECT");
                     } else
                         printf("0x03 incorrect offset");
@@ -448,7 +448,7 @@ bool Mission::loadLevel(uint8 * levelData)
                     if ((cindx * 36) == bindx && windx[cindx] != 0xFFFF) {
                         objd.type = objv_PickUpObject;
                         objd.targettype = MapObject::mjt_Weapon;
-                        objd.targetindx = windx[cindx];
+                        objd.indx_grpid.targetindx = windx[cindx];
                         objd.msg = g_App.menus().getMessage("GOAL_TAKE_WEAPON");
                     } else
                         printf("0x05 incorrect offset");
@@ -460,18 +460,21 @@ bool Mission::loadLevel(uint8 * levelData)
                 objd.type = objv_DestroyObject;
                 objd.targettype = MapObject::mjt_Ped;
                 // maybe also guards should be eliminated?
-                objd.targetsubtype = 4;
+                objd.targetsubtype = PedInstance::og_dmPolice;
+                objd.indx_grpid.targetindx = 4;
                 objd.condition = 2;
-                objd.targetindx = pindx[cindx];
+                objd.indx_grpid.targetindx = pindx[cindx];
                 objd.msg = g_App.menus().getMessage("GOAL_ELIMINATE_POLICE");
                 isset = true;
                 break;
             case 0x0B:
                 objd.type = objv_DestroyObject;
                 objd.targettype = MapObject::mjt_Ped;
-                objd.targetsubtype = 2;
+                // maybe also guards should be eliminated?
+                objd.targetsubtype = PedInstance::og_dmAgent;
                 objd.condition = 2;
-                objd.targetindx = pindx[cindx];
+                objd.indx_grpid.targetindx = pindx[cindx];
+                objd.indx_grpid.targetindx = 2;
                 objd.msg = g_App.menus().getMessage("GOAL_ELIMINATE_AGENTS");
                 isset = true;
                 break;
@@ -482,7 +485,7 @@ bool Mission::loadLevel(uint8 * levelData)
                     if ((cindx * 42) == bindx && vindx[cindx] != 0xFFFF) {
                         objd.type = objv_DestroyObject;
                         objd.targettype = MapObject::mjt_Vehicle;
-                        objd.targetindx = vindx[cindx];
+                        objd.indx_grpid.targetindx = vindx[cindx];
                         objd.msg = g_App.menus().getMessage("GOAL_DESTROY_VEHICLE");
                     } else
                         printf("0x0E incorrect offset");
@@ -495,9 +498,9 @@ bool Mission::loadLevel(uint8 * levelData)
                     bindx -= 0x5C02;
                     cindx = bindx / 42;
                     if ((cindx * 42) == bindx && vindx[cindx] != 0xFFFF) {
-                        objd.type = objv_DestroyObject;
+                        objd.type = objv_AquireControl;
                         objd.targettype = MapObject::mjt_Vehicle;
-                        objd.targetindx = vindx[cindx];
+                        objd.indx_grpid.targetindx = vindx[cindx];
                         objd.msg = g_App.menus().getMessage("GOAL_USE_VEHICLE");
                     } else
                         printf("0x0F incorrect offset");
@@ -833,26 +836,82 @@ void Mission::start()
  * mission status.
  */
 void Mission::checkObjectives() {
-    if (objectives_.size() != 0) {
-        ObjectiveDesc &objd = objectives_[cur_objective_];
-        switch (objd.type) {
+    // TODO: cur_objective_?
+    
+    // checking agents, if all are dead mission failed
+    bool all_dead = true;
+    for (uint32 i = 0; i < 4 && all_dead; i++) {
+        if (peds_[i]->isOurAgent() && peds_[i]->health() > 0) {
+            all_dead = false;
+        }
+    }
+    if (all_dead) {
+        status_ = FAILED;
+        return;
+    }
+
+    bool all_completed = true;
+    bool no_failed = true;
+    for (uint16 o = 0; o < objectives_.size() && no_failed && all_completed; o++)
+    {
+        ObjectiveDesc &obj = objectives_[o];
+        switch (obj.type) {
             case objv_None:
-                status_ = COMPLETED;
+                status_ = FAILED;
                 break;
             case objv_AquireControl:
+                switch (obj.targettype) {
+                    case 1: //ped
+                        if ((obj.condition & 2) == 0) {
+                            if (peds_[obj.indx_grpid.targetindx]->health() <= 0)
+                            {
+                                no_failed = false;
+                                obj.condition |= 8;
+                            } else if (
+                                peds_[obj.indx_grpid.targetindx]->objGroupID()
+                                == 1)
+                            {
+                                if (o == cur_objective_)
+                                    cur_objective_++;
+                                obj.condition |= 4;
+                            } else {
+                                // not dead and not persuaded
+                                all_completed = false;
+                            }
+                        }
+                        break;
+                    default:
+                        break;
+                }
                 break;
             //case objv_Protect:
                 //break;
             case objv_PickUpObject:
                 break;
             case objv_DestroyObject:
-                switch (objd.targettype) {
+                switch (obj.targettype) {
                     case 1: //ped
-                        if ((objd.condition & 2) == 0) {
-                            if (peds_[objd.targetindx]->health() <= 0) {
-                                status_ = COMPLETED;
-                                cur_objective_ ++;
+                        if ((obj.condition & 2) == 0) {
+                            if (peds_[obj.indx_grpid.targetindx]->health() <= 0) {
+                                if (o == cur_objective_)
+                                    cur_objective_++;
+                            } else
+                                all_completed = false;
+                        } else if ((obj.condition & 2) != 0){
+                            all_dead = true;
+                            for (std::vector<PedInstance *>::iterator it_p
+                                = peds_.begin() + 8; all_dead && it_p != peds_.end(); it_p++)
+                            {
+                                if((*it_p)->objGroupDef() == obj.targetsubtype
+                                    && (*it_p)->objGroupID() == obj.indx_grpid.grpid
+                                    && (*it_p)->health() > 0)
+                                {
+                                    all_dead = false;
+                                    all_completed = false;
+                                }
                             }
+                            if (all_dead && o == cur_objective_)
+                                cur_objective_++;
                         }
                         break;
                     default:
@@ -862,6 +921,7 @@ void Mission::checkObjectives() {
             case objv_UseObject:
                 break;
             case objv_ReachLocation:
+                // TODO: check that all alive of objGroupID are near that location
                 break;
             case objv_ExecuteObjective:
                 break;
@@ -869,6 +929,10 @@ void Mission::checkObjectives() {
                 break;
         }
     }
+    if (all_completed)
+        status_ = COMPLETED;
+    else if (!no_failed)
+        status_ = FAILED;
 }
 
 void Mission::end()
