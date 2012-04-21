@@ -205,16 +205,14 @@ void Map::draw(int scrollX, int scrollY, MapHelper * helper)
         + g_Screen.gameScreenHeight() / (TILE_HEIGHT / 3) + max_z_ * 2;
     int swm = sw + chk;
     int sh = screenToTileY(scrollX, scrollY, oy) - 8;
+#if 0
+    // HACK for map dump
+    sh = 0;
+#endif
     int shm = sh + chk;
 
     if (topz == -1)
         topz = max_z_;
-
-#if 0
-    // HACK for map dump
-    sw = 0; swm = max_x_;
-    sh = 0; shm = max_y_;
-#endif
 
 #ifdef EXECUTION_SPEED_TIME
     printf("---------------------------");
