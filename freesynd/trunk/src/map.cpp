@@ -64,7 +64,7 @@ bool Map::loadMap(uint8 * mapData)
             int idx = h * max_x_ + w;
 
             for (int z=0; z < max_z_; z++) {
-                int tileNum = *(mapData + 12 + lookup[idx] + z);
+                uint8 tileNum = *(mapData + 12 + lookup[idx] + z);
                 a_tiles_[idx * max_z_ + z] = tile_manager_->getTile(tileNum);
                 
             }

@@ -61,7 +61,7 @@ int write_png(const char *filename) {
 
     if (!info_ptr) {
         printf("cannot create png info struct\n");
-		fclose(fp);
+        fclose(fp);
         return 1;
     }
 
@@ -201,11 +201,11 @@ int dump_fonts() {
 }
 
 int dump_anims() {
-  int margin = 100;
-  screen_width = margin + 100;
-  screen_height = margin + 100;
-	
-  App *app = new App();
+    int margin = 100;
+    screen_width = margin + 100;
+    screen_height = margin + 100;
+
+    App *app = new App();
     Screen *screen = new Screen(GAME_SCREEN_WIDTH, GAME_SCREEN_HEIGHT);
     GameSpriteManager sprites;
 
@@ -241,10 +241,10 @@ int dump_anims() {
         screen_width = sprites.sprite(s)->width();
         screen_height = sprites.sprite(s)->height();
         if (screen_width != 0 && screen_height != 0) {
-	  char dest[100];
-	  sprintf(dest, "sprites/%i.png", s);
-          write_png(dest);
-	}
+            char dest[100];
+            sprintf(dest, "sprites/%i.png", s);
+            write_png(dest);
+        }
         screen_width = tw;
         screen_height = th;
     }
@@ -253,8 +253,8 @@ int dump_anims() {
         for (int f = 0; ; f++) {
             clear_screen();
             sprites.drawFrame(a, f, margin, margin);
-			char dest[100];
-			sprintf(dest, "anims/%04i%04i.png", a, f);
+            char dest[100];
+            sprintf(dest, "anims/%04i%04i.png", a, f);
             write_png(dest);
 
             if (sprites.lastFrame(a, f))
@@ -267,17 +267,18 @@ int dump_anims() {
 
     delete screen;
     delete app;
-	
-	return 0;
+
+    return 0;
 }
 
 int dump_maps() {
-	screen_width = 8000;
-	screen_height = 4000;
-	App *app = new App();
+    screen_width = 8000;
+    screen_height = 4000;
+    App *app = new App();
     Screen *screen = new Screen(GAME_SCREEN_WIDTH, GAME_SCREEN_HEIGHT);
     DummyHelper helper;
     MapManager maps;
+    maps.initialize();
 
     screen_data = (png_byte **) calloc(1, sizeof(png_byte *) * screen_height);
 
@@ -298,7 +299,7 @@ int dump_maps() {
         palette[i].red = (r << 2) | (r >> 4);
         palette[i].green = (g << 2) | (g >> 4);
         palette[i].blue = (b << 2) | (b >> 4);
-	}
+    }
 
     for (int i = 1; i < 100; i++) {
         char tmp[100];
@@ -317,73 +318,73 @@ int dump_maps() {
         clear_screen();
         printf("drawing map %i\n", i);
         p_map->draw(screen_width / 2, screen_height / 2, &helper);
-	char dest[100];
-	sprintf(dest, "maps/map%i.png", i);
+        char dest[100];
+        sprintf(dest, "maps/map%i.png", i);
         write_png(dest);
     }
 
     delete screen;
     delete app;
-	
-	return 0;
+
+    return 0;
 }
 
 static void usage() {
-	printf("Usage: dump [-m] [-a] [-f] [-b] [-d <data dir>]\n");
-	printf("Options:\n");
-	printf("\t-m\tdump maps\n");
-	printf("\t-a\tdump animations\n");
-	printf("\t-f\tdump fonts\n");
-	printf("\t-b\tdump briefings\n");
-	exit(1);
+    printf("Usage: dump [-m] [-a] [-f] [-b] [-d <data dir>]\n");
+    printf("Options:\n");
+    printf("\t-m\tdump maps\n");
+    printf("\t-a\tdump animations\n");
+    printf("\t-f\tdump fonts\n");
+    printf("\t-b\tdump briefings\n");
+    exit(1);
 }
 
 int main(int argc, char **argv) {
-	const char *dataArg = "./data/";
-	int i;
-	int actions = 0;
+    const char *dataArg = "./data/";
+    int i;
+    int actions = 0;
 
-	for (i = 1; i < argc; i++) {
-		if (!strcmp("-m", argv[i])) {
-			actions++;
-		} else if (!strcmp("-a", argv[i])) {
-			actions++;
-		} else if (!strcmp("-f", argv[i])) {
-			actions++;
-		} else if (!strcmp("-b", argv[i])) {
-			actions++;
-		} else if (!strcmp("-d", argv[i])) {
-			i++;
-			dataArg = argv[i];
-		} else {
-			usage();
-		}
-	}
+    for (i = 1; i < argc; i++) {
+        if (!strcmp("-m", argv[i])) {
+            actions++;
+        } else if (!strcmp("-a", argv[i])) {
+            actions++;
+        } else if (!strcmp("-f", argv[i])) {
+            actions++;
+        } else if (!strcmp("-b", argv[i])) {
+            actions++;
+        } else if (!strcmp("-d", argv[i])) {
+            i++;
+            dataArg = argv[i];
+        } else {
+            usage();
+        }
+    }
 
-	if (!dataArg || !actions) usage();
+    if (!dataArg || !actions) usage();
 
-	std::string dataDir(dataArg);
-	if (dataDir[dataDir.size() - 1] != '\\' && dataDir[dataDir.size() - 1] != '/') {
-		dataDir.push_back('/');
-	}
+    std::string dataDir(dataArg);
+    if (dataDir[dataDir.size() - 1] != '\\' && dataDir[dataDir.size() - 1] != '/') {
+        dataDir.push_back('/');
+    }
 
-	File::setDataPath(dataDir);
-	File::setOurDataPath(dataDir);
+    File::setDataPath(dataDir);
+    File::setOurDataPath(dataDir);
 
-	for (i = 1; i < argc; i++) {
-		if (!strcmp("-m", argv[i])) {
-			dump_maps();
-		} else if (!strcmp("-a", argv[i])) {
-			dump_anims();
-		} else if (!strcmp("-f", argv[i])) {
-			dump_fonts();
-		} else if (!strcmp("-b", argv[i])) {
-			dump_briefings();
-		} else if (!strcmp("-d", argv[i])) {
-		}
-	}
+    for (i = 1; i < argc; i++) {
+        if (!strcmp("-m", argv[i])) {
+            dump_maps();
+        } else if (!strcmp("-a", argv[i])) {
+            dump_anims();
+        } else if (!strcmp("-f", argv[i])) {
+            dump_fonts();
+        } else if (!strcmp("-b", argv[i])) {
+            dump_briefings();
+        } else if (!strcmp("-d", argv[i])) {
+        }
+    }
 
-	return 0;
+    return 0;
 }
 
 App::App() {
