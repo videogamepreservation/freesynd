@@ -856,6 +856,8 @@ void Mission::checkObjectives() {
 
     bool all_completed = true;
     bool no_failed = true;
+    WeaponInstance * wi;
+
     for (uint16 o = 0; o < objectives_.size()
         && no_failed && all_completed; o++)
     {
@@ -897,31 +899,45 @@ void Mission::checkObjectives() {
             //case objv_Protect:
                 //break;
             case objv_PickUpObject:
+                wi = weapons_[obj.indx_grpid.targetindx];
+                if (wi->health() <= 0) {
+                    no_failed = false;
+                } else {
+                    ShootableMapObject *owner = wi->getOwner();
+                    if (owner && owner->majorType() == MapObject::mjt_Ped
+                        && ((PedInstance *)owner)->isOurAgent())
+                    {
+                        if (o == cur_objective_)
+                            cur_objective_++;
+                    } else
+                        all_completed = false;
+                }
                 break;
             case objv_DestroyObject:
                 switch (obj.targettype) {
                     case 1: //ped
                         if ((obj.condition & 2) == 0) {
-                            if (peds_[obj.indx_grpid.targetindx]->health() <= 0) {
+                            if (peds_[obj.indx_grpid.targetindx]->health() <= 0)
+                            {
                                 if (o == cur_objective_)
                                     cur_objective_++;
                             } else
                                 all_completed = false;
                         } else if ((obj.condition & 2) != 0){
-                            all_dead = true;
                             for (std::vector<PedInstance *>::iterator it_p
-                                = peds_.begin() + 8; all_dead
+                                = peds_.begin() + 8; all_completed
                                 && it_p != peds_.end(); it_p++)
                             {
                                 if((*it_p)->objGroupDef() == obj.targetsubtype
+                                    // we can persuade them, will be
+                                    // counted is eliminating for now
                                     && (*it_p)->objGroupID() == obj.indx_grpid.grpid
                                     && (*it_p)->health() > 0)
                                 {
-                                    all_dead = false;
                                     all_completed = false;
                                 }
                             }
-                            if (all_dead && o == cur_objective_) {
+                            if (all_completed && o == cur_objective_) {
                                 cur_objective_++;
                                 obj.condition |= 4;
                             }
@@ -934,7 +950,7 @@ void Mission::checkObjectives() {
             case objv_UseObject:
                 break;
             case objv_ReachLocation:
-                // evacuating
+                // evacuating people
                 for (std::vector<PedInstance *>::iterator it_p
                     = peds_evacuate.begin();
                     it_p != peds_evacuate.end() && all_completed; it_p++)
@@ -949,17 +965,19 @@ void Mission::checkObjectives() {
                 break;
         }
     }
-    if (all_completed)
-        status_ = COMPLETED;
-    else if (!no_failed)
+    if (no_failed) {
+        if (all_completed)
+         status_ = COMPLETED;
+    } else
         status_ = FAILED;
 }
 
 void Mission::end()
 {
     for (unsigned int i = 8; i < peds_.size(); i++) {
-        if (peds_[i]->health() <= 0)
-            switch (peds_[i]->getMainType()) {
+        PedInstance *p = peds_[i];
+        if (p->health() <= 0) {
+            switch (p->getMainType()) {
                 case PedInstance::m_tpAgent:
                     stats_.enemyKilled++;
                     break;
@@ -976,6 +994,15 @@ void Mission::end()
                     stats_.policeKilled++;
                     break;
             }
+        } else if (p->objGroupID() == 1) {
+            if (p->objGroupDef() == PedInstance::og_dmAgent) {
+                // TODO: add these to teamMember list,
+                // what is the maximum list size?
+                // avoid adding too much
+                stats_.agentCaptured++;
+            } else
+                stats_.convinced++;
+        }
     }
 
     for (int i = 0; i < 4; i++)

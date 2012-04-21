@@ -1,7 +1,6 @@
-FreeSynd 0.? : Release Notes
+FreeSynd 0.7 : Release Notes
 ----------------------------
 
-   when vehicle is destroyed, explosion should create damage to all in range
 Description
 -----------
 This is a prelimary release for testing and development purposes.
@@ -25,7 +24,7 @@ Known issues with this release
 ------------------------------
   * Agent AI is not operational.
   * The gameplay minimap is not complete.
-  * PathFinding requires improvement (smooth path)
+  * PathFinding requires improvement (path smoothing)
   * Mission debriefing is not operational
   * No animation for windows
   * Map drawing is buggy

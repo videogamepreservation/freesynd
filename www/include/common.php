@@ -167,7 +167,7 @@ function printRoadMap() {
 		
 		echo "<p><b>" . date("Y-m-d", filemtime('data/roadmap.xml')) . "</b> : " . $xml->status . "</p>\n";
 		
-		echo "<h4>Features:</h4>\n";
+		echo "<h4>Features :</h4>\n";
 		echo " <ul>\n";
 		
 		foreach ($xml->features->feature as $feat) {

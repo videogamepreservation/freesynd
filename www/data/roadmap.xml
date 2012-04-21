@@ -1,18 +1,11 @@
 <?xml version='1.0' standalone='yes'?>
 <roadmap>
 	<date>2011-07-04</date>
-	<status>Date for release of v0.6 is not set.</status>
+	<status>Date for release of v0.7 is not set.</status>
 	<features>
-	  <feature id="3337516" status="D">Standardize text fields in configure and loadsave menus</feature>
-	  <feature id="3336699" status="D">Make save file format portable</feature>
-	  <feature id="3283536" status="D">Manage separate directory for syndicate and freesynd</feature>
-	  <feature id="3202739" status="D">keyboard type management</feature>
-	  <feature id="3473410" status="P">The radar is missing</feature>
-	  <feature id="3473415" status="D">Junction balls are not animated</feature>
-	  <feature id="3461415" status="D">Cycle only through available missions in map menu</feature>
+	  <feature id="3473410" status="I">The radar is missing</feature>
 	</features>
 	<bugs>
-		<bug id="3241136" status="D">freesynd.exe has stopped working</bug>
-		<bug id="3005294 " status="P">Debriefing information is not displayed after ending the mission</bug>
+		<bug id="3005294 " status="I">Debriefing information is not displayed after ending the mission</bug>
 	</bugs>
 </roadmap>
