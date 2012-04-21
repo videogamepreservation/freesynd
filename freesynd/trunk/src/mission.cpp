@@ -510,18 +510,20 @@ bool Mission::loadLevel(uint8 * levelData)
                 break;
             case 0x10:
                 objd.type = objv_ReachLocation;
-                objd.posxt = obj.mapposx[1];
-                objd.posxo = obj.mapposx[0];
-                objd.posyt = obj.mapposy[1];
-                objd.posyo = obj.mapposx[0];
-                objd.poszt = READ_LE_UINT16(obj.mapposz) >> 7;
-                objd.poszo = obj.mapposz[0] & 0x7F;
-                if (objd.poszo != 0)
-                    objd.poszt++;
+                // realworld coordinates, not tile based
+                // tilebased = if offset > 0 then tilez += 1
+                objd.pos_xyz.x = READ_LE_INT16(obj.mapposx);
+                objd.pos_xyz.y = READ_LE_INT16(obj.mapposy);
+                objd.pos_xyz.z = READ_LE_INT16(obj.mapposz);
                 objd.condition = 16;
                 objd.msg = g_App.menus().getMessage("GOAL_EVACUATE");
                 isset = true;
                 break;
+#ifdef _DEBUG
+            default:
+                printf("Unknown objective %X\n", READ_LE_UINT16(obj.type));
+                break;
+#endif
         }
         if (isset) {
             objectives_.push_back(objd);
@@ -836,13 +838,15 @@ void Mission::start()
  * mission status.
  */
 void Mission::checkObjectives() {
-    // TODO: cur_objective_?
     
     // checking agents, if all are dead mission failed
     bool all_dead = true;
+    std::vector <PedInstance *> peds_evacuate;
     for (uint32 i = 0; i < 4 && all_dead; i++) {
-        if (peds_[i]->isOurAgent() && peds_[i]->health() > 0) {
+        PedInstance *p = peds_[i];
+        if (p->isOurAgent() && p->health() > 0) {
             all_dead = false;
+            peds_evacuate.push_back(p);
         }
     }
     if (all_dead) {
@@ -852,9 +856,15 @@ void Mission::checkObjectives() {
 
     bool all_completed = true;
     bool no_failed = true;
-    for (uint16 o = 0; o < objectives_.size() && no_failed && all_completed; o++)
+    for (uint16 o = 0; o < objectives_.size()
+        && no_failed && all_completed; o++)
     {
         ObjectiveDesc &obj = objectives_[o];
+        // some objectives can be completed once,
+        // if failed objective will not be possible to complete
+        if ((obj.condition & 12) != 0)
+            continue;
+
         switch (obj.type) {
             case objv_None:
                 status_ = FAILED;
@@ -863,17 +873,17 @@ void Mission::checkObjectives() {
                 switch (obj.targettype) {
                     case 1: //ped
                         if ((obj.condition & 2) == 0) {
-                            if (peds_[obj.indx_grpid.targetindx]->health() <= 0)
+                            PedInstance *p = peds_[obj.indx_grpid.targetindx];
+                            if (p->health() <= 0)
                             {
                                 no_failed = false;
                                 obj.condition |= 8;
-                            } else if (
-                                peds_[obj.indx_grpid.targetindx]->objGroupID()
+                            } else if (p->objGroupID()
                                 == 1)
                             {
                                 if (o == cur_objective_)
                                     cur_objective_++;
-                                obj.condition |= 4;
+                                peds_evacuate.push_back(p);
                             } else {
                                 // not dead and not persuaded
                                 all_completed = false;
@@ -900,7 +910,8 @@ void Mission::checkObjectives() {
                         } else if ((obj.condition & 2) != 0){
                             all_dead = true;
                             for (std::vector<PedInstance *>::iterator it_p
-                                = peds_.begin() + 8; all_dead && it_p != peds_.end(); it_p++)
+                                = peds_.begin() + 8; all_dead
+                                && it_p != peds_.end(); it_p++)
                             {
                                 if((*it_p)->objGroupDef() == obj.targetsubtype
                                     && (*it_p)->objGroupID() == obj.indx_grpid.grpid
@@ -910,8 +921,10 @@ void Mission::checkObjectives() {
                                     all_completed = false;
                                 }
                             }
-                            if (all_dead && o == cur_objective_)
+                            if (all_dead && o == cur_objective_) {
                                 cur_objective_++;
+                                obj.condition |= 4;
+                            }
                         }
                         break;
                     default:
@@ -921,7 +934,14 @@ void Mission::checkObjectives() {
             case objv_UseObject:
                 break;
             case objv_ReachLocation:
-                // TODO: check that all alive of objGroupID are near that location
+                // evacuating
+                for (std::vector<PedInstance *>::iterator it_p
+                    = peds_evacuate.begin();
+                    it_p != peds_evacuate.end() && all_completed; it_p++)
+                {
+                    if ((*it_p)->distanceToPosXYZ(&obj.pos_xyz) > 512)
+                        all_completed = false;
+                }
                 break;
             case objv_ExecuteObjective:
                 break;

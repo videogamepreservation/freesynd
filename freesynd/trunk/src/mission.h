@@ -542,15 +542,8 @@ protected:
         uint32 condition;
         // indx for sub objective
         uint16 subobjindx;
-        // tile position
-        uint8 posxt;
-        uint8 posyt;
-        uint8 poszt;
-        // offset position
-        uint8 posxo;
-        uint8 posyo;
-        uint8 poszo;
-        // This message should be setup during objective definition
+        toDefineXYZ pos_xyz;
+        // This message should be set during objective definition
         std::string msg;
         uint16 nxtobjindx;
 
@@ -561,12 +554,9 @@ protected:
             indx_grpid.targetindx = 0;
             condition = 0;
             subobjindx = 0;
-            posxt = 0;
-            posyt = 0;
-            poszt = 0;
-            posxo = 0;
-            posyo = 0;
-            poszo = 0;
+            pos_xyz.x = 0;
+            pos_xyz.y = 0;
+            pos_xyz.z = 0;
             msg.clear();
             nxtobjindx = 0;
         }
