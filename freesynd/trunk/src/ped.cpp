@@ -197,8 +197,7 @@ void PedInstance::switchActionStateTo(uint32 as) {
             state_ |= pa_smFiring;
             break;
         case pa_smFollowing:
-            state_ &= (pa_smAll ^(pa_smStanding | pa_smWalking
-                | pa_smFiring | pa_smUsingCar | pa_smInCar));
+            state_ &= (pa_smAll ^ pa_smStanding);
             state_ |= pa_smFollowing;
             break;
         case pa_smPickUp:
@@ -251,6 +250,7 @@ void PedInstance::switchActionStateFrom(uint32 as) {
             break;
         case pa_smFollowing:
             state_ &= pa_smAll ^ pa_smFollowing;
+            state_ |= pa_smStanding;
             break;
         case pa_smPickUp:
         case pa_smPutDown:
@@ -287,7 +287,7 @@ void PedInstance::setActionStateToDrawnAnim(void) {
         setDrawnAnim(PedInstance::ad_NoAnimation);
     } else if ((state_ & pa_smDead) != 0) {
         //setDrawnAnim(PedInstance::ad_DeadAnim);
-    } else if ((state_ & pa_smWalking) != 0) {
+    } else if ((state_ & (pa_smWalking | pa_smFollowing)) != 0) {
         if ((state_ & pa_smFiring) != 0)
             setDrawnAnim(PedInstance::ad_WalkFireAnim);
         else
@@ -590,16 +590,13 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                 if ((aqt.ot_execute & Mission::objv_FollowObject) != 0)
                 {
                     if (aqt.state == 1 || aqt.state == 17) {
-                        int speed_set = 128;
+                        int speed_set = 256;
                         if (aqt.condition == 0) {
-                            bool set_new_dest = true;
                             dist_to_pos_ = aqt.multi_var.dist_var.dist;
                             int dist_is = -1;
                             dist_is = (int)distanceTo(
                                 (MapObject *)aqt.t_smo);
-                            if (dist_is <= dist_to_pos_)
-                                set_new_dest = false;
-                            if (set_new_dest) {
+                            if (dist_is > dist_to_pos_) {
                                 aqt.state |= 2;
                                 setDestinationP(mission,
                                     aqt.t_smo->tileX(), aqt.t_smo->tileY(),
@@ -636,9 +633,8 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                             } else
                                 aqt.state |= 8;
                         }
-                    }
-                    if ((aqt.state & 30) == 2) {
-                        int speed_set = 128;
+                    } else if ((aqt.state & 30) == 2) {
+                        int speed_set = 256;
                         speed_ = speed_set;
                         if (aqt.condition == 0) {
                             updated = movementP(mission, elapsed);
@@ -655,12 +651,16 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                                     || rp.offZ() != aqt.t_smo->offZ())
                                 {
                                     // resetting target position
-                                    dest_path_.clear();
-                                    speed_ = 0;
-                                    aqt.state ^= 2;
+                                    setDestinationP(mission,
+                                        aqt.t_smo->tileX(), aqt.t_smo->tileY(),
+                                        aqt.t_smo->tileZ(), aqt.t_smo->offX(),
+                                        aqt.t_smo->offY(), speed_set);
+                                    if (dest_path_.empty())
+                                        aqt.state |= 8;
                                 }
                             }
                         } else if (aqt.condition == 1) {
+                            // TODO: view range if no weapon?
                             WeaponInstance *wi = selectedWeapon();
                             if (wi) {
                                 updated = movementP(mission, elapsed);
@@ -679,9 +679,12 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                                         || rp.offZ() != aqt.t_smo->offZ())
                                     {
                                         // resetting target position
-                                        dest_path_.clear();
-                                        speed_ = 0;
-                                        aqt.state ^= 2;
+                                        setDestinationP(mission,
+                                            aqt.t_smo->tileX(), aqt.t_smo->tileY(),
+                                            aqt.t_smo->tileZ(), aqt.t_smo->offX(),
+                                            aqt.t_smo->offY(), speed_set);
+                                        if (dest_path_.empty())
+                                            aqt.state |= 8;
                                     }
                                 }
                             } else
@@ -930,6 +933,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                 {
                 }
                 if ((aqt.state & 16) != 0) {
+                    switchActionStateFrom(aqt.as);
                 } else if ((aqt.state & 8) != 0) {
                     if ((aqt.state & 2) != 0)
                         switchActionStateFrom(aqt.as);
@@ -946,7 +950,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                 }
 #ifdef _DEBUG
                 else if ((aqt.state & 1) != 0) {
-                    printf("should not get here");
+                    printf("should not get here, aqt.state = 1\n");
                 }
 #endif
                 if ((aqt.group_desc & PedInstance::gd_mExclusive) != 0
@@ -2004,6 +2008,7 @@ bool PedInstance::movementP(Mission *m, int elapsed)
         int diffx = adx - atx, diffy = ady - aty;
 
         if (abs(diffx) < 16 && abs(diffy) < 16) {
+            // TODO: maybe something better? then using diffx/diffy?
             off_y_ = dest_path_.front().offY();
             off_x_ = dest_path_.front().offX();
             tile_z_ = nxtTileZ;
@@ -2018,18 +2023,6 @@ bool PedInstance::movementP(Mission *m, int elapsed)
 
             int dx = 0, dy = 0;
             double d = sqrt((double)(diffx * diffx + diffy * diffy));
-#ifdef NEW_ANIMATE_HANDLING
-            bool reached_dist = false;
-            if (dist_to_pos_ != 0) {
-                toDefineXYZ xyz;
-                dest_path_.back().convertPosToXYZ(&xyz);
-                double dist_cur = distanceToPosXYZ(&xyz);
-                if (dist_cur > (double)dist_to_pos_) {
-                    d = (double)dist_to_pos_;
-                    reached_dist = true;
-                }
-            }
-#endif
 
             if (abs(diffx) > 0)
                 // dx = diffx * (speed_ * used_time / 1000) / d;
@@ -2070,25 +2063,31 @@ bool PedInstance::movementP(Mission *m, int elapsed)
 #endif
             if(nxtTileX == tile_x_ && nxtTileY == tile_y_)
                 tile_z_ = nxtTileZ;
-#ifdef NEW_ANIMATE_HANDLING
-            if (reached_dist) {
-                dest_path_.clear();
+
+            if(nxtTileX == tile_x_ && nxtTileY == tile_y_
+                && nxtTileZ == tile_z_ 
+                && dest_path_.front().offX() == off_x_
+                && dest_path_.front().offY() == off_y_)
+                dest_path_.pop_front();
+            if (dest_path_.size() == 0)
                 speed_ = 0;
-            } else {
-#endif
-                if(nxtTileX == tile_x_ && nxtTileY == tile_y_
-                    && nxtTileZ == tile_z_ 
-                    && dest_path_.front().offX() == off_x_
-                    && dest_path_.front().offY() == off_y_)
-                    dest_path_.pop_front();
-                if (dest_path_.size() == 0)
-                    speed_ = 0;
-#ifdef NEW_ANIMATE_HANDLING
-            }
-#endif
 
             updated = true;
         }
+
+#ifdef NEW_ANIMATE_HANDLING
+            if ((state_ & pa_smFollowing) != 0) {
+                toDefineXYZ xyz;
+                // TODO: calculate length for dest_path_?
+                // TODO: too big elapsed makes ped move to close to target
+                dest_path_.back().convertPosToXYZ(&xyz);
+                double dist_cur = distanceToPosXYZ(&xyz);
+                if (dist_cur < (double)dist_to_pos_) {
+                    dest_path_.clear();
+                    speed_ = 0;
+                }
+            }
+#endif
         unsigned char twd = m->mtsurfaces_[tile_x_ + tile_y_ * m->mmax_x_
             + tile_z_ * m->mmax_m_xy].twd;
         switch (twd) {
@@ -2141,6 +2140,14 @@ bool PedInstance::handleDamage(ShootableMapObject::DamageInflictType *d) {
         setObjGroupDef((obj_group_def_ & 0xFFFFFF00) |
             (((PedInstance *)d->d_owner)->objGroupDef() & 0xFF));
         setObjGroupID(((PedInstance *)d->d_owner)->objGroupID());
+        dropActQ();
+        assert(d->d_owner != NULL);
+        PedInstance::actionQueueGroupType as;
+        as.group_desc = PedInstance::gd_mExclusive;
+        createActQFollowing(as,
+            d->d_owner, 0, 192);
+        as.main_act = as.actions.size() - 1;
+        setActQInQueue(as);
         setDrawnAnim(PedInstance::ad_PersuadedAnim);
         return true;
     }

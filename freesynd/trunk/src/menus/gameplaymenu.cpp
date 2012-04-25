@@ -605,8 +605,10 @@ void GameplayMenu::handleMouseMotion(int x, int y, int state, const int modKeys)
                 shootable = true;
     }
 
+#if 0
     if (!shootable)
         pointing_at_ped_ = pointing_at_vehicle_ = -1;
+#endif
 
     if (pointing_at_ped_ != -1 || pointing_at_vehicle_ != -1)
         g_System.useTargetCursor();
@@ -692,6 +694,19 @@ bool GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
             for (int i = 0; i < 4; i++) {
                 PedInstance *ped = mission_->ped(i);
                 if (isAgentSelected(i)) {
+#ifdef NEW_ANIMATE_HANDLING
+                    if (pointing_at_ped_ != -1) {
+                        PedInstance::actionQueueGroupType as;
+                        as.group_desc = PedInstance::gd_mExclusive;
+                        ped->createActQFollowing(as,
+                            mission_->ped(pointing_at_ped_), 0, 192);
+                        as.main_act = as.actions.size() - 1;
+                        if (modKeys & KMD_CTRL)
+                            ped->addActQToQueue(as);
+                        else
+                            ped->setActQInQueue(as);
+                    } else
+#endif
                     if (pointing_at_weapon_ != -1) {
 #ifdef NEW_ANIMATE_HANDLING
                         PedInstance::actionQueueGroupType as;
