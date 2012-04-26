@@ -313,6 +313,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
     // TODO: proper handling for exclusive states, switching;
     // animation can be lost because of too big value of elapsed
     // state = 2 will not appear and drawing will not be set (firing)
+    // TODO: animation and state binding, finished animation=state complete.
 
     if (agent_is_ == PedInstance::Agent_Non_Active)
         return true;
@@ -364,7 +365,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                         // check owner
                         // NOTE: don't put weapon to the ground
                         WeaponInstance *wi = aqt.multi_var.enemy_var.weapon.wpn.wi;
-                        if (wi->getWeaponType()
+                        if (wi->getMainType()
                             == Weapon::Persuadatron)
                         {
                             // TODO: proper handling for time, add condition
@@ -1604,18 +1605,37 @@ bool PedInstance::inSightRange(MapObject *t) {
     return d < sight_range_;
 }
 
+void PedInstance::setSelectedWeapon(int n) {
+
+    if (selected_weapon_ != -1) {
+        WeaponInstance *wi = weapons_[selected_weapon_];
+        if (wi->getMainType() == Weapon::EnergyShield)
+            setRcvDamageDef(MapObject::ddmg_Ped);
+        if (wi->getMainType() != Weapon::TimeBomb)
+            wi->deactivate();
+    }
+    selected_weapon_ = n;
+    if (n != -1) {
+        WeaponInstance *wi = weapons_[selected_weapon_];
+        if (wi->getMainType() == Weapon::EnergyShield)
+            setRcvDamageDef(MapObject::ddmg_PedWithEnergyShield);
+        if (wi->getMainType() != Weapon::TimeBomb)
+            wi->activate();
+    }
+}
+
 void PedInstance::selectNextWeapon() {
 
     if (selected_weapon_ != -1) {
         int nextWeapon = -1;
-        Weapon *curSelectedWeapon = (Weapon *)weapon(selected_weapon_);
+        WeaponInstance *curSelectedWeapon = (WeaponInstance *)weapon(selected_weapon_);
 
         if (curSelectedWeapon) {
             for (int i = 0; i < numWeapons(); i++) {
                 WeaponInstance * wi = weapon(i);
                 if (i != selected_weapon_ && wi->ammoRemaining()
-                        && wi->getWeaponType()
-                            == curSelectedWeapon->getWeaponType())
+                        && wi->getMainType()
+                            == curSelectedWeapon->getMainType())
                 {
                     if (nextWeapon == -1)
                         nextWeapon = i;
@@ -1631,18 +1651,13 @@ void PedInstance::selectNextWeapon() {
         if (nextWeapon == -1)
             selectBestWeapon();
         else
-            selected_weapon_ = nextWeapon;
+            setSelectedWeapon(nextWeapon);
     } else
         selectBestWeapon();
-
-    if (selected_weapon_ != -1
-        && weapon(selected_weapon_)->getWeaponType() == Weapon::EnergyShield)
-            setRcvDamageDef(MapObject::ddmg_PedWithEnergyShield);
-    else
-        setRcvDamageDef(MapObject::ddmg_Ped);
 }
 
 void PedInstance::selectBestWeapon() {
+    // TODO: select weapon by type and type of damage + rank
     int bestWeapon = -1;
     int bestWeaponRank = -1;
 
@@ -1654,42 +1669,33 @@ void PedInstance::selectBestWeapon() {
     }
 
     if(bestWeapon != -1) {
-        selected_weapon_ = bestWeapon;
+        setSelectedWeapon(bestWeapon);
     }
 }
 
 void PedInstance::dropWeapon(int n) {
     assert(n >= 0 && n < (int) weapons_.size());
 
-    if (selected_weapon_ == n) {
-        if (weapons_[selected_weapon_]->getWeaponType() == Weapon::EnergyShield)
-            setRcvDamageDef(MapObject::ddmg_PedWithEnergyShield);
-        else
-            setRcvDamageDef(MapObject::ddmg_Ped);
-        selected_weapon_ = -1;
-    }
-
-    WeaponInstance *w = weapons_[n];
-    weapons_.erase(weapons_.begin() + n);
-    if (n < selected_weapon_)
-        selected_weapon_--;
-
+    dropWeapon(weapons_[n]);
+#ifndef NEW_ANIMATE_HANDLING
     putdown_weapon_ = w;
+#endif
 }
 
 void PedInstance::dropWeapon(WeaponInstance *wi) {
+    // TODO: auto selection when dropped weapon is selected?
+    bool upd_selected = selected_weapon_ != -1;
     if (selectedWeapon() == wi) {
-        selected_weapon_ = -1;
-        if (wi->getWeaponType() == Weapon::EnergyShield)
-            setRcvDamageDef(MapObject::ddmg_PedWithEnergyShield);
-        else
-            setRcvDamageDef(MapObject::ddmg_Ped);
+        setSelectedWeapon(-1);
+        upd_selected = false;
     }
-    for (std::vector <WeaponInstance *>::iterator it
-        = weapons_.begin(); it != weapons_.end(); it++)
+    for (int i = 0; i < (int)weapons_.size(); i++)
     {
+        std::vector <WeaponInstance *>::iterator it = weapons_.begin() + i;
         if ((*it) == wi) {
             weapons_.erase(it);
+            if (upd_selected && selected_weapon_ > i)
+                selected_weapon_--;
             break;
         }
     }
@@ -1698,13 +1704,14 @@ void PedInstance::dropWeapon(WeaponInstance *wi) {
     wi->setIsIgnored();
     wi->setPosition(tile_x_, tile_y_, tile_z_, off_x_, off_y_, off_z_);
     wi->setVisZ(vis_z_);
-    wi->activate();
+    if (wi->getMainType() == Weapon::TimeBomb)
+        wi->activate();
 }
 
 void PedInstance::dropAllWeapons() {
 
     setRcvDamageDef(MapObject::ddmg_Ped);
-    selected_weapon_ = -1;
+    setSelectedWeapon(-1);
 
     for (std::vector < WeaponInstance * >::iterator it
         = weapons_.begin(); it != weapons_.end(); it++)
@@ -1716,7 +1723,10 @@ void PedInstance::dropAllWeapons() {
         w->setVisZ(vis_z_);
         w->setOwner(NULL);
         w->setIsIgnored();
-        w->activate();
+        if (w->getMainType() == Weapon::TimeBomb)
+            w->activate();
+        else
+            w->deactivate();
     }
     weapons_.clear();
 }
@@ -2144,10 +2154,13 @@ bool PedInstance::handleDamage(ShootableMapObject::DamageInflictType *d) {
         assert(d->d_owner != NULL);
         PedInstance::actionQueueGroupType as;
         as.group_desc = PedInstance::gd_mExclusive;
+        createActQWait(as, 2000);
+        as.main_act = as.actions.size() - 1;
+        addActQToQueue(as);
         createActQFollowing(as,
             d->d_owner, 0, 192);
         as.main_act = as.actions.size() - 1;
-        setActQInQueue(as);
+        addActQToQueue(as);
         setDrawnAnim(PedInstance::ad_PersuadedAnim);
         return true;
     }
@@ -2175,13 +2188,13 @@ bool PedInstance::handleDamage(ShootableMapObject::DamageInflictType *d) {
                 destroyAllWeapons();
                 break;
             case MapObject::dmg_Burn:
-                // TODO: sometimes we will walk burning
+                // TODO: sometime we will walk burning
                 setDrawnAnim(PedInstance::ad_StandBurnAnim);
                 destroyAllWeapons();
                 setTimeShowAnim(4000);
                 break;
             case MapObject::dmg_Explosion:
-                // TODO: sometimes we will walk burning
+                // TODO: sometime we will walk burning
                 setDrawnAnim(PedInstance::ad_StandBurnAnim);
                 destroyAllWeapons();
                 setTimeShowAnim(4000);
@@ -2194,13 +2207,14 @@ bool PedInstance::handleDamage(ShootableMapObject::DamageInflictType *d) {
             dropAllWeapons();
         is_ignored_ = true;
     } else {
-        // TODO: agent sometimes can survive explosion, they need to walk burning?
+        // TODO: agent sometime can survive explosion, they need to walk burning?
         setDrawnAnim(PedInstance::ad_HitAnim);
     }
     return true;
 }
 
 void PedInstance::destroyAllWeapons() {
+    setSelectedWeapon(-1);
     while (weapons_.size()) {
         WeaponInstance * w = removeWeapon(0);
         w->setMap(-1);
@@ -2208,8 +2222,8 @@ void PedInstance::destroyAllWeapons() {
         w->setVisZ(vis_z_);
         w->setOwner(NULL);
         w->setIsIgnored(true);
+        w->deactivate();
     }
-    selected_weapon_ = -1;
 }
 
 void PedInstance::addEnemyGroupDef(uint32 eg_id, uint32 eg_def) {
@@ -2581,6 +2595,20 @@ void PedInstance::createActQLeaveCar(actionQueueGroupType &as,
     aq.state = 1;
     aq.t_smo = tsmo;
     aq.group_desc = PedInstance::gd_mExclusive;
+    as.actions.push_back(aq);
+}
+
+void PedInstance::createActQWait(actionQueueGroupType &as, int tm_wait)
+{
+    as.state = 1;
+    as.actions.clear();
+    actionQueueType aq;
+    aq.as = PedInstance::pa_smNone;
+    aq.group_desc = PedInstance::gd_mExclusive;
+    aq.state = 1;
+    aq.ot_execute = Mission::objv_Wait;
+    aq.multi_var.time_var.elapsed = 0;
+    aq.multi_var.time_var.time_total = tm_wait;
     as.actions.push_back(aq);
 }
 

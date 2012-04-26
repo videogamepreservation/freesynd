@@ -113,7 +113,7 @@ bool Agent::saveToFile(PortableFile &file) {
     file.write32(nb);
     for (int wIndex = 0; wIndex < numWeapons(); wIndex++) {
         WeaponInstance *pWinst = weapon(wIndex);
-        file.write32(pWinst->getWeaponType());
+        file.write32(pWinst->getMainType());
         file.write32(pWinst->ammoRemaining());
     }
     return true;

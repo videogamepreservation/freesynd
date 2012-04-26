@@ -1031,7 +1031,7 @@ void Mission::end()
                     assert(it != weapons_.end());
                     weapons_.erase(it);
                     // auto-reload for pistol
-                    if (wi->getWeaponType() == Weapon::Pistol)
+                    if (wi->getMainType() == Weapon::Pistol)
                         wi->setAmmoRemaining(wi->ammo());
                     wi->resetWeaponUsedTime();
                     g_Session.teamMember(i)->addWeapon(wi);
@@ -2893,7 +2893,7 @@ WeaponInstance *Mission::createWeaponInstance(uint8 * data)
         wi->setPosition(gamdata->mapposx[1], gamdata->mapposy[1],
                             z, gamdata->mapposx[0],
                             gamdata->mapposy[0], oz);
-        if (wi->getWeaponType() == Weapon::TimeBomb)
+        if (wi->getMainType() == Weapon::TimeBomb)
             wi->setRcvDamageDef(MapObject::ddmg_WeaponBomb);
         return wi;
     }

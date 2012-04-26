@@ -91,8 +91,8 @@ public:
     int rank() { return rank_; }
     int anim() { return anim_; }
     snd::InGameSample getSound() { return sample_; }
-	int getSmallIconId() { return small_icon_; }
-	int getBigIconId() { return big_icon_; }
+    int getSmallIconId() { return small_icon_; }
+    int getBigIconId() { return big_icon_; }
 
     int selector() {
         return small_icon_ == 28 ? 1618 : small_icon_ - 14 + 1602;
@@ -286,7 +286,7 @@ public:
     Weapon::WeaponType getWeaponType() { return pWeaponClass_->getWeaponType(); }
 
     bool operator==(WeaponInstance wi) {
-        return pWeaponClass_->getWeaponType() == wi.getWeaponType();
+        return main_type_ == wi.getMainType();
     }
 
     //! Plays the weapon's sound.
@@ -303,8 +303,6 @@ public:
 
 
     int getShots(int *elapsed = NULL, uint32 make_shots = 0);
-    void getInRangeOne(toDefineXYZ & cp, ShootableMapObject * & target,
-        uint8 mask, bool checkTileOnly = true, int maxr = -1);
     void getInRangeAll(toDefineXYZ & cp, std::vector<ShootableMapObject *> & targets,
         uint8 mask, bool checkTileOnly = true, int maxr = -1);
     bool isReloading();

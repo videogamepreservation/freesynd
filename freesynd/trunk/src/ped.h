@@ -230,14 +230,7 @@ public:
             ? weapons_[selected_weapon_] : 0;
     }
 
-    void setSelectedWeapon(int n) {
-
-        selected_weapon_ = n;
-        if (n != -1 && weapons_[selected_weapon_]->getWeaponType() == Weapon::EnergyShield)
-            setRcvDamageDef(MapObject::ddmg_PedWithEnergyShield);
-        else
-            setRcvDamageDef(MapObject::ddmg_Ped);
-    }
+    void setSelectedWeapon(int n);
 
     void selectNextWeapon();
     void selectBestWeapon();
@@ -685,6 +678,7 @@ public:
         ShootableMapObject *tsmo, uint32 condition);
     void createActQLeaveCar(actionQueueGroupType &as,
         ShootableMapObject *tsmo);
+    void createActQWait(actionQueueGroupType &as, int tm_wait);
     
     void discardActG(uint32 id);
     void discardActG(std::vector <actionQueueGroupType>::iterator it_a);

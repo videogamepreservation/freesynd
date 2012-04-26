@@ -921,48 +921,41 @@ bool GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
     }
 
     // handle weapon selectors
-    if (x < 129) {
-        for (int j = 0; j < 2; j++) {
-            for (int i = 0; i < 4; i++) {
-                if (x >= 32 * i && x < 32 * i + 32
-                        && y >= 2 + 46 + 44 + 10 + 46 + 44 + 15 + j * 32
-                        && y < 2 + 46 + 44 + 10 + 46 + 44 + 15 + j * 32 + 32) {
-                    for (int a = 0; a < 4; a++) {
-                        // TODO: when more then one agent is selecting weapon,
-                        // the chosen ones should be same type and less ammo
-                        // or best in rank
-                        PedInstance *ped = mission_->ped(a);
-                        if (isAgentSelected(a)) {
-                            if (i + j * 4 < ped->numWeapons()) {
-                                if (button == 1) {
-                                    if (ped->selectedWeapon()
-                                            == ped->weapon(i + j * 4))
-                                        ped->setSelectedWeapon(-1);
-                                    else {
-                                        ped->setSelectedWeapon(
-                                                i + j * 4);
-                                    }
-                                } else
+    if (x < 129 && y >= 2 + 46 + 44 + 10 + 46 + 44 + 15
+        && y < 2 + 46 + 44 + 10 + 46 + 44 + 15 + 64)
+    {
+        int w_num = ((y - (2 + 46 + 44 + 10 + 46 + 44 + 15)) / 32) * 4
+            + x / 32;
+        for (int a = 0; a < 4; a++) {
+            // TODO: when more then one agent is selecting weapon,
+            // the chosen ones should be same type and less ammo
+            // or best in rank
+            PedInstance *ped = mission_->ped(a);
+            if (isAgentSelected(a)) {
+                if (w_num < ped->numWeapons()) {
+                    if (button == 1) {
+                        if (ped->selectedWeapon() == ped->weapon(w_num))
+                            ped->setSelectedWeapon(-1);
+                        else
+                            ped->setSelectedWeapon(w_num);
+                    } else
 #ifdef NEW_ANIMATE_HANDLING
-                                {
-                                    PedInstance::actionQueueGroupType as;
-                                    as.main_act = 0;
-                                    as.group_desc = PedInstance::gd_mExclusive;
-                                    ped->createActQPutDown(as,
-                                        ped->weapon(i + j * 4));
-                                    if (modKeys & KMD_CTRL)
-                                        ped->addActQToQueue(as);
-                                    else
-                                        ped->setActQInQueue(as);
-                                }
+                    {
+                        PedInstance::actionQueueGroupType as;
+                        as.main_act = 0;
+                        as.group_desc = PedInstance::gd_mExclusive;
+                        ped->createActQPutDown(as,
+                            ped->weapon(w_num));
+                        if (modKeys & KMD_CTRL)
+                            ped->addActQToQueue(as);
+                        else
+                            ped->setActQInQueue(as);
+                    }
 #else
-                                    ped->dropWeapon(i + j * 4);
+                        ped->dropWeapon(w_num);
 #endif
 
-                                change = true;
-                            }
-                        }
-                    }
+                    change = true;
                 }
             }
         }
@@ -970,9 +963,9 @@ bool GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
 
     if (change)
         //render();
-		needRendering();
+        needRendering();
 
-	return true;
+    return true;
 }
 
 void GameplayMenu::handleMouseUp(int x, int y, int button, const int modKeys) {

@@ -85,38 +85,60 @@ WeaponInstance::WeaponInstance(Weapon * w) : ShootableMapObject(-1)
     owner_ = NULL;
     activated_ = false;
     time_consumed_ = false;
+    health_ = 1;
+    main_type_ = w->getWeaponType();
 }
 
 bool WeaponInstance::animate(int elapsed) {
-    Weapon::WeaponType wt = pWeaponClass_->getWeaponType();
-    if (owner_) {
-        if (wt == Weapon::EnergyShield) {
+
+    if (activated_) {
+        if (main_type_ == Weapon::EnergyShield) {
+            if (ammo_remaining_ == 0)
+                return false;
             int tm_left = elapsed;
-            int ammoused = getShots(&tm_left)
-                * pWeaponClass_->ammoPerShot();
-            if (((PedInstance *)owner_)->selectedWeapon()
-                && ((PedInstance *)owner_)->selectedWeapon() == this)
-            {
-                if (ammoused >= ammo_remaining_) {
-                    ammo_remaining_ = 0;
-                    ((PedInstance *)owner_)->selectNextWeapon();
-                } else
-                    ammo_remaining_ -= ammoused;
-            } else if (ammo_remaining_ != 0
-                && ammo_remaining_ != pWeaponClass_->ammo())
-            {
-                ammo_remaining_ += ammoused;
-                if (ammo_remaining_ > pWeaponClass_->ammo())
-                    ammo_remaining_ = pWeaponClass_->ammo();
-            }
-        } else if (wt == Weapon::MediKit) {
+            int ammoused = getShots(&tm_left) * pWeaponClass_->ammoPerShot();
+            if (ammoused >= ammo_remaining_) {
+                ammo_remaining_ = 0;
+                ((PedInstance *)owner_)->selectNextWeapon();
+            } else
+                ammo_remaining_ -= ammoused;
+            return true;
+        } else if (main_type_ == Weapon::MediKit) {
             if (owner_->health() != owner_->startHealth()) {
                 owner_->setHealth(owner_->startHealth());
                 ammo_remaining_ = 0;
                 ((PedInstance *)owner_)->selectNextWeapon();
                 weapon_used_time_ = 0;
             }
-        } else if (time_consumed_) {
+            return true;
+        } else if (main_type_ == Weapon::TimeBomb) {
+            int tm_left = elapsed;
+            if ((inflictDamage(NULL, NULL, &tm_left)) == 0) {
+                deactivate();
+                map_ = -1;
+                setIsIgnored(true);
+
+                Mission *m = g_Session.getMission();
+                toDefineXYZ cur_pos = {tile_x_ * 256 + off_x_,
+                    tile_y_ * 256 + off_y_, vis_z_ * 128 + off_z_};
+                SFXObject *so = new SFXObject(m->map(),
+                    pWeaponClass_->anims()->hit_anim);
+                so->setPosition(cur_pos.x / 256, cur_pos.y / 256, cur_pos.z / 128,
+                    cur_pos.x % 256, cur_pos.y % 256, cur_pos.z % 128);
+                so->setTileVisZ();
+                m->addSfxObject(so);
+
+                int max_anims = 24 + rand() % 8;
+                rangeDamageAnim(cur_pos, (double)pWeaponClass_->rangeDmg(),
+                    max_anims, pWeaponClass_->anims()->rd_anim);
+                return true;
+            }
+            time_consumed_ = true;
+        } else if (main_type_ == Weapon::Persuadatron) {
+            int tm_left = elapsed;
+            inflictDamage(NULL, NULL, &tm_left);
+        }
+        if (time_consumed_) {
             time_consumed_ = false;
         } else if (weapon_used_time_ != 0 ) {
             weapon_used_time_ += elapsed;
@@ -126,36 +148,27 @@ bool WeaponInstance::animate(int elapsed) {
                 weapon_used_time_ = 0;
             }
         }
-    } else if (activated_) {
-        int tm_left = elapsed;
-        if (activated_ && wt == Weapon::TimeBomb
-            && (inflictDamage(NULL, NULL, &tm_left)) == 0)
-        {
-            deactivate();
-            map_ = -1;
-            setIsIgnored(true);
-
-            Mission *m = g_Session.getMission();
-            toDefineXYZ cur_pos = {tile_x_ * 256 + off_x_,
-                tile_y_ * 256 + off_y_, vis_z_ * 128 + off_z_};
-            SFXObject *so = new SFXObject(m->map(),
-                pWeaponClass_->anims()->hit_anim);
-            so->setPosition(cur_pos.x / 256, cur_pos.y / 256, cur_pos.z / 128,
-                cur_pos.x % 256, cur_pos.y % 256, cur_pos.z % 128);
-            so->setTileVisZ();
-            m->addSfxObject(so);
-
-            int max_anims = 24 + rand() % 8;
-            rangeDamageAnim(cur_pos, (double)pWeaponClass_->rangeDmg(),
-                max_anims, pWeaponClass_->anims()->rd_anim);
-            return true;
-        }
     } else if (weapon_used_time_ != 0 ) {
         weapon_used_time_ += elapsed;
         if (weapon_used_time_ > (pWeaponClass_->timeForShot()
             + pWeaponClass_->timeReload()))
         {
             weapon_used_time_ = 0;
+        }
+    } else {
+        if (main_type_ == Weapon::EnergyShield) {
+            if (ammo_remaining_ != 0
+                && ammo_remaining_ < pWeaponClass_->ammo())
+                return false;
+            int tm_left = elapsed;
+            int ammoused = getShots(&tm_left) * pWeaponClass_->ammoPerShot();
+            if (ammo_remaining_ != 0
+                && ammo_remaining_ != pWeaponClass_->ammo())
+            {
+                ammo_remaining_ += ammoused;
+                if (ammo_remaining_ > pWeaponClass_->ammo())
+                    ammo_remaining_ = pWeaponClass_->ammo();
+            }
         }
     }
 
@@ -650,6 +663,7 @@ uint16 WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
 
     
     if (owner_
+        && pWeaponClass_->dmgType() != MapObject::dmg_Mental
 #ifdef _DEBUG
         && owner_->majorType() == MapObject::mjt_Ped
 #endif
@@ -984,28 +998,6 @@ int WeaponInstance::getShots(int *elapsed, uint32 make_shots) {
     return shots;
 }
 
-void WeaponInstance::getInRangeOne(toDefineXYZ & cp,
-   ShootableMapObject * & target, uint8 mask, bool checkTileOnly, int maxr)
-{
-    bool ownerState, vehicleState, selfState = isIgnored();
-    setIsIgnored(true);
- 
-    if (owner_) {
-        ownerState = owner_->isIgnored();
-        owner_->setIsIgnored(true);
-        vehicleState = ((PedInstance *)owner_)->setVehicleIgnore(true);
-    }
-   
-    getHostileInRange(&cp, target, mask, checkTileOnly, maxr);
-
-    setIsIgnored(selfState);
-    if (owner_) {
-        owner_->setIsIgnored(ownerState);
-        if (vehicleState)
-            ((PedInstance *)owner_)->setVehicleIgnore(false);
-    }
-}
-
 void WeaponInstance::getInRangeAll(toDefineXYZ & cp,
    std::vector<ShootableMapObject *> & targets, uint8 mask,
    bool checkTileOnly, int maxr)
@@ -1030,13 +1022,13 @@ bool WeaponInstance::isReloading() {
 }
 
 void WeaponInstance::activate() {
-    //if (pWeaponClass_->getWeaponType() == Weapon::TimeBomb)
+    //if (main_type_ == Weapon::TimeBomb)
         activated_ = true;
 }
 
 void WeaponInstance::deactivate() {
     activated_ = false;
-    if (pWeaponClass_->getWeaponType() == Weapon::TimeBomb)
+    if (main_type_ == Weapon::TimeBomb)
         weapon_used_time_ = 0;
 }
 
@@ -1155,6 +1147,15 @@ void ShotClass::makeShot(bool rangeChecked, toDefineXYZ &cp, int anim_hit,
 void WeaponInstance::getHostileInRange(toDefineXYZ * cp,
     ShootableMapObject * & target, uint8 mask, bool checkTileOnly, int maxr)
 {
+    bool ownerState, vehicleState, selfState = isIgnored();
+    setIsIgnored(true);
+ 
+    if (owner_) {
+        ownerState = owner_->isIgnored();
+        owner_->setIsIgnored(true);
+        vehicleState = ((PedInstance *)owner_)->setVehicleIgnore(true);
+    }
+
     bool found = false;
     double dist = -1;
     double d = -1;
@@ -1205,11 +1206,27 @@ void WeaponInstance::getHostileInRange(toDefineXYZ * cp,
             }
         }
     }
+
+    setIsIgnored(selfState);
+    if (owner_) {
+        owner_->setIsIgnored(ownerState);
+        if (vehicleState)
+            ((PedInstance *)owner_)->setVehicleIgnore(false);
+    }
 }
 
 void WeaponInstance::getNonFriendInRange(toDefineXYZ * cp,
     ShootableMapObject * & target, bool checkTileOnly, int maxr)
 {
+    bool ownerState, vehicleState, selfState = isIgnored();
+    setIsIgnored(true);
+ 
+    if (owner_) {
+        ownerState = owner_->isIgnored();
+        owner_->setIsIgnored(true);
+        vehicleState = ((PedInstance *)owner_)->setVehicleIgnore(true);
+    }
+
     bool found = false;
     double dist = -1;
     double d = -1;
@@ -1239,6 +1256,13 @@ void WeaponInstance::getNonFriendInRange(toDefineXYZ * cp,
                 found = true;
             }
         }
+    }
+
+    setIsIgnored(selfState);
+    if (owner_) {
+        owner_->setIsIgnored(ownerState);
+        if (vehicleState)
+            ((PedInstance *)owner_)->setVehicleIgnore(false);
     }
 }
 
