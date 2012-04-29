@@ -370,7 +370,7 @@ void GameplayMenu::handleShow() {
 
         char spal[20];
         sprintf(spal,"hpal0%i.dat",g_Session.getSelectedBlock().mis_id % 5 + 1);
-		menu_manager_->setPalette(spal);
+        menu_manager_->setPalette(spal);
         g_Screen.clear(0);
         world_x_ = mission_->startX();
         world_y_ = mission_->startY();
@@ -466,24 +466,24 @@ void GameplayMenu::handleRender(DirtyList &dirtyList)
 #endif
 
 #ifdef TRACK_FPS
-	char tmp[100];
-	static int current_time = 0;
+    char tmp[100];
+    static int current_time = 0;
     static int last_time = 0;
-	static float fps = 0;
-	static int frame = 0;
+    static float fps = 0;
+    static int frame = 0;
 
-	current_time = g_System.getTicks();
+    current_time = g_System.getTicks();
 
-	int elapsed = current_time - last_time;
-	frame++;
+    int elapsed = current_time - last_time;
+    frame++;
 
-	if (elapsed > 1000) {
-		fps = (float) frame / ((float) elapsed / 1000.0f);
-		frame = 0;
-		last_time = current_time;
-	}
-	sprintf(tmp, "FPS : %.2f FRAMES PER SEC", fps);
-	gameFont()->drawText(10, g_Screen.gameScreenHeight() - 15, tmp, 14);
+    if (elapsed > 1000) {
+        fps = (float) frame / ((float) elapsed / 1000.0f);
+        frame = 0;
+        last_time = current_time;
+    }
+    sprintf(tmp, "FPS : %.2f FRAMES PER SEC", fps);
+    gameFont()->drawText(10, g_Screen.gameScreenHeight() - 15, tmp, 14);
 #endif
 }
 
@@ -771,11 +771,11 @@ bool GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
                             if (modKeys & KMD_CTRL) {
                                 ped->inVehicle()->
                                     addDestinationV(stx, sty, 0,
-                                    128, 128, 480);
+                                    128, 128, 1024);
                             } else {
                                 ped->inVehicle()->
                                     setDestinationV(mission_, stx, sty, 0, 
-                                    128, 128, 480);
+                                    128, 128, 1024);
                             }
                         }
                     } else {
@@ -1000,7 +1000,7 @@ bool GameplayMenu::handleUnknownKey(Key key, const int modKeys) {
     }
 
 #ifdef _DEBUG
-	if (isLetterH(key.unicode)) {
+    if (isLetterH(key.unicode)) {
         mission_->setStatus(Mission::COMPLETED);
         return true;
     }
@@ -1013,24 +1013,24 @@ bool GameplayMenu::handleUnknownKey(Key key, const int modKeys) {
 
     // SPACE is pressed when the mission failed or succeeded to return
     // to menu
-	if (key.unicode == K_SPACE) {
+    if (key.unicode == K_SPACE) {
         if (mission_->completed() || mission_->failed()) {
-			// Do not display default leaving animation because 
-			// a success/failed animation will be played
-			leaveAnim_ = "";
+            // Do not display default leaving animation because 
+            // a success/failed animation will be played
+            leaveAnim_ = "";
             if (mission_->completed()) {
                 g_Session.completeSelectedBlock();
                 // Display success animation
-				menu_manager_->gotoMenu(Menu::MENU_FLI_SUCCESS);
+                menu_manager_->gotoMenu(Menu::MENU_FLI_SUCCESS);
             }
             else if (mission_->failed()) {
                 
-				menu_manager_->gotoMenu(Menu::MENU_FLI_FAILED);
+                menu_manager_->gotoMenu(Menu::MENU_FLI_FAILED);
             }
 
             return true;
         }
-	} else if (key.keyFunc == KFC_ESCAPE) {
+    } else if (key.keyFunc == KFC_ESCAPE) {
         // Abort mission
         mission_->setStatus(Mission::ABORTED);
         // Return false so when can still go to parent menu with escape

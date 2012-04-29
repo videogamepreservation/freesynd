@@ -388,7 +388,8 @@ void VehicleInstance::setDestinationV(Mission *m, int x, int y, int z, int ox,
             break;
         }
 
-        std::list < PathNode > neighbours;
+        std::vector <PathNode> neighbours;
+        neighbours.reserve(4);
         uint16 goodDir = tileDir(p.tileX(), p.tileY(), p.tileZ());
 
         if (p.tileX() > 0) {
@@ -417,11 +418,12 @@ void VehicleInstance::setDestinationV(Mission *m, int x, int y, int z, int ox,
                 neighbours.
                     push_back(PathNode(p.tileX(), p.tileY() + 1, p.tileZ()));
 
-        for (std::list < PathNode >::iterator it = neighbours.begin();
-             it != neighbours.end(); it++)
+        for (std::vector <PathNode>::iterator it = neighbours.begin();
+            it != neighbours.end(); it++)
             if (dirWalkable(&p,it->tileX(), it->tileY(), it->tileZ())
                 && open.find(*it) == open.end()
-                && closed.find(*it) == closed.end()) {
+                && closed.find(*it) == closed.end())
+            {
                 parent[*it] = p;
                 open.insert(*it);
             }
@@ -431,7 +433,8 @@ void VehicleInstance::setDestinationV(Mission *m, int x, int y, int z, int ox,
         // Adjusting offsets for correct positioning
         speed_ = new_speed;
         for(std::list < PathNode >::iterator it = dest_path_.begin();
-            it != dest_path_.end(); it++) {
+            it != dest_path_.end(); it++)
+        {
 
             // TODO : requires testing for correct offsets per
             // every direction, because in some part of game
@@ -466,7 +469,6 @@ void VehicleInstance::setDestinationV(Mission *m, int x, int y, int z, int ox,
                     printf("hmm tileDir %X\n", (unsigned int)tileDir(it->tileX(), it->tileY(), it->tileZ()));
                     break;
             }
-
         }
     }
 }
@@ -505,19 +507,20 @@ bool VehicleInstance::movementV(int elapsed)
             setDirection(diffx, diffy, &dir_);
             int dx = 0, dy = 0;
             double d = sqrt((double)(diffx * diffx + diffy * diffy));
+            // object will not move over a distance he can actually move
+            double avail_time_use = (d / (double)speed_) * 1000.0;
+            // correcting time availiable for this distance to time
+            // we can use
+            if (avail_time_use > used_time)
+                avail_time_use = used_time;
 
             if (abs(diffx) > 0)
                 // dx = diffx * (speed_ * used_time / 1000) / d;
-                dx = (int)((diffx * (speed_ * used_time) / d) / 1000);
+                dx = (int)((diffx * (speed_ * avail_time_use) / d) / 1000);
             if (abs(diffy) > 0)
                 // dy = diffy * (speed_ * used_time / 1000) / d;
-                dy = (int)((diffy * (speed_ * used_time) / d) / 1000);
+                dy = (int)((diffy * (speed_ * avail_time_use) / d) / 1000);
 
-            if (abs(dx) > abs(diffx))
-                dx = diffx;
-            if (abs(dy) > abs(diffy))
-                dy = diffy;
-            
             if (dx || dy) {
                 int prv_time = used_time;
                 if (dx) {

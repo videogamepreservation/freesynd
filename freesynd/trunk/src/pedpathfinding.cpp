@@ -22,7 +22,7 @@
 
 #define NEW_ANIMATE_HANDLING
 #include "common.h"
-#include "app.h"
+#include "ped.h"
 #include "pathsurfaces.h"
 
 #if 0

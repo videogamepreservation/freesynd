@@ -26,7 +26,6 @@
 
 #include "common.h"
 #include "app.h"
-#include "pathsurfaces.h"
 #include <math.h>
 
 #define NEW_ANIMATE_HANDLING
@@ -2033,18 +2032,20 @@ bool PedInstance::movementP(Mission *m, int elapsed)
 
             int dx = 0, dy = 0;
             double d = sqrt((double)(diffx * diffx + diffy * diffy));
+            // object will not move over a distance he can actually move
+            double avail_time_use = (d / (double)speed_) * 1000.0;
+            // correcting time availiable for this distance to time
+            // we can use
+            if (avail_time_use > used_time)
+                avail_time_use = used_time;
 
             if (abs(diffx) > 0)
                 // dx = diffx * (speed_ * used_time / 1000) / d;
-                dx = (int)((diffx * (speed_ * used_time) / d) / 1000);
+                dx = (int)((diffx * (speed_ * avail_time_use) / d) / 1000);
             if (abs(diffy) > 0)
                 // dy = diffy * (speed_ * used_time / 1000) / d;
-                dy = (int)((diffy * (speed_ * used_time) / d) / 1000);
+                dy = (int)((diffy * (speed_ * avail_time_use) / d) / 1000);
 
-            if (abs(dx) > abs(diffx))
-                dx = diffx;
-            if (abs(dy) > abs(diffy))
-                dy = diffy;
             if (dx || dy) {
                 int prv_time = used_time;
                 if (dx) {

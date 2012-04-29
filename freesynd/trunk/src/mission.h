@@ -29,7 +29,6 @@
 
 #include "common.h"
 #include "mapobject.h"
-#include "pathsurfaces.h"
 #include "weapon.h"
 #include "map.h"
 
@@ -452,6 +451,7 @@ public:
     // for copy in pathfinding
     floodPointDesc *mdpoints_cp_;
     // initialized in createMinimap, used for in-class calculations
+    // map maximum x,y,z values
     int mmax_x_, mmax_y_, mmax_z_;
     // initialized in setSurfaces, used for in-class calculations
     int mmax_m_all, mmax_m_xy;
