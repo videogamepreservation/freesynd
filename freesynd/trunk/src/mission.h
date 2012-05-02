@@ -463,7 +463,6 @@ public:
 
     MiniMap * getMiniMap() { return p_minimap_; }
 
-    // this type is also used for actions_queue_ for pedinstance
     typedef enum {
         objv_None = 0x0,
         // Setup control over object where possible to lose this control

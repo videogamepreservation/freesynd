@@ -143,6 +143,8 @@ be created at $HOME/.freesynd for your convenience.)
 Run freesynd --help to see usage information.
 
   Here is a description of each of the config file parameters:
+    * test_data: (true/false) If true, the game will look for Original Syndicate
+    Data and test it
     * fullscreen: (true/false) If true, the game will run in fullscreen mode.
     * play_intro: (true/false) If true, the introduction will be played.
     * freesynd_data_dir: Path to the FreeSynd "data" directory. This parameter

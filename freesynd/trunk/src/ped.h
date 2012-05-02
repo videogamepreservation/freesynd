@@ -38,7 +38,6 @@
 #include "weapon.h"
 #include "mission.h"
 
-
 class WeaponInstance;
 class PedInstance;
 class Mission;
@@ -373,7 +372,7 @@ public:
             Mmuu32_t::iterator it = this->find(first);
             bool found = false;
             if (it != this->end()) {
-                if (second == 0)
+                if (second == 0 || it->second == 0)
                     found = true;
                 else {
                     do {
@@ -561,18 +560,56 @@ public:
         uint8 desc;
     } pedWeaponToUse;
 
+    typedef enum {
+        ai_aNone = 0x0,
+        // Setup control over object where possible to lose this control
+        ai_aAquireControl = 0x0001,
+        // Leave control over object where possible to lose this control
+        ai_aLoseControl = 0x0002,
+        // Obtain inventory object
+        ai_aPickUpObject = 0x0008,
+        // Object of defined subtype (of type) should be destroyed
+        // defined by indx
+        ai_aDestroyObject = 0x0010,
+        // Use of object untill condition is met
+        ai_aUseObject = 0x0020,
+        ai_aPutDownObject = 0x0040,
+        // Objects should be at defined location
+        ai_aReachLocation = 0x0080,
+        ai_aFollowObject = 0x0100,
+        // Should wait some time
+        ai_aWait = 0x0200,
+        ai_aAttackLocation = 0x0400,
+        // in range of current weapon or inrange of other friendly units:
+        // will execute ai_aReachLocation
+        ai_aFindEnemy = 0x0800,
+        // in range of current weapon
+        ai_aFindNonFriend = 0x1000,
+        ai_aNonFinishable = 0x80000000,
+    }AiAction;
+
+    typedef enum {
+        gd_mNone = 0,
+        gd_mStandWalk = 0x0001,
+        gd_mFire = 0x0002,
+        gd_mThink = 0x0004,
+        gd_mExclusive = 0x8000,
+        gd_mAll = (gd_mStandWalk | gd_mFire | gd_mThink)
+    } groupDescMasks;
+
     typedef struct {
         // action state (pedActionStateMasks)
         uint32 as;
-        // Mission::ObjectiveType
+        // PedInstance::AiAction
         uint32 ot_execute;
         PathNode t_pn;
-        // objv_FindEnemy sets this value, others use
+        // ai_aFindEnemy sets this value, others use
         ShootableMapObject *t_smo;
         // 0b - not started, 1b - executing, 2b - finished, 3b - failed,
-        // 4b - suspended
+        // 4b - suspended, 5b - waiting for animation to complete,
+        // 6b - not set (empty, should be skipped)
         uint8 state;
-        // same as in actionQueueGroupType
+        // same as in actionQueueGroupType, groupDescMasks
         uint32 group_desc;
         struct {
             struct {
@@ -603,27 +640,19 @@ public:
                 int32 speed;
             } dist_var;
         } multi_var;
-        // for objv_ReachLocation 0 - go to location, 1 - go to direction,
+        // for ai_aReachLocation 0 - go to location, 1 - go to direction,
         // 2 - go to position of object; if dist is set, on reaching
         // this value action complete
-        // for objv_FollowObject 0 - until dist is reached, 1 - in range
+        // for ai_aFollowObject 0 - until dist is reached, 1 - in range
         // of shot view
-        // for objv_AquireControl, for car, 0 - become passenger(or driver),
+        // for ai_aAquireControl, for car, 0 - become passenger(or driver),
         // 1 - become driver only if else failed
-        // for objv_AquireControl, for ped, 0 - controled or not is ok,
+        // for ai_aAquireControl, for ped, 0 - controled or not is ok,
         // 1 - controlled if else failed
-        // for objv_FindEnemy; 0 - scout - will not attack, 1 - search and
+        // for ai_aFindEnemy; 0 - scout - will not attack, 1 - search and
         // destroy
         uint32 condition;
     } actionQueueType;
-
-    typedef enum {
-        gd_mNone = 0,
-        gd_mStandWalk = 1,
-        gd_mFire = 2,
-        gd_mThink = 4,
-        gd_mExclusive = 8
-    } groupDescMasks;
 
     typedef struct {
         std::vector <actionQueueType> actions;
@@ -635,6 +664,7 @@ public:
         // 3b - exclusive, no other action can be executed in parallel with it
         // and all before it should be completed
         // NOTE: a group should not interfere with actions of other group
+        // groupDescMasks
         uint32 group_desc;
         // 0b - not started, 1b - executing, 2b - finished, 3b - failed,
         // 4b - suspended
@@ -679,6 +709,8 @@ public:
     void createActQLeaveCar(actionQueueGroupType &as,
         ShootableMapObject *tsmo);
     void createActQWait(actionQueueGroupType &as, int tm_wait);
+
+    void createActQFindEnemy(actionQueueGroupType &as);
     
     void discardActG(uint32 id);
     void discardActG(std::vector <actionQueueGroupType>::iterator it_a);

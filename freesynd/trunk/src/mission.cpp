@@ -122,7 +122,7 @@ bool Mission::loadLevel(uint8 * levelData)
 #if 0
     // for hacking vehicles data
     char nameSv[256];
-    sprintf(nameSv, "vehicles%02X.hex", map_);
+    sprintf(nameSv, "vehicles%02X.hex", i_map_id_);
     FILE *staticsFv = fopen(nameSv,"wb");
     if (staticsFv) {
         fwrite(level_data_.cars, 1, 42*64, staticsFv);
@@ -153,7 +153,7 @@ bool Mission::loadLevel(uint8 * levelData)
 #if 0
     // for hacking peds data
     char nameSp[256];
-    sprintf(nameSp, "peds%02X.hex", map_);
+    sprintf(nameSp, "peds%02X.hex", i_map_id_);
     FILE *staticsFp = fopen(nameSp,"wb");
     if (staticsFp) {
         fwrite(level_data_.people, 1, 256*92, staticsFp);
@@ -205,7 +205,7 @@ bool Mission::loadLevel(uint8 * levelData)
                 p->addEnemyGroupDef(2);
                 p->addEnemyGroupDef(3);
                 p->setHostileDesc(PedInstance::pd_smArmed);
-                // TODO: sightrange?
+                p->setSightRange(7);
             } else if (i > 7) {
                 unsigned int mt = p->getMainType() << 8;
                 //unsigned int objD = p->descState();
@@ -224,7 +224,7 @@ bool Mission::loadLevel(uint8 * levelData)
                     p->setHostileDesc(PedInstance::pd_smArmed);
                 } else {
                     p->setObjGroupID(5);
-                    p->setObjGroupDef(PedInstance::og_dmNeutral | mt);
+                    p->setObjGroupDef(mt);
                     // civilians and criminals
                 }
                 // TODO: not tile based? realworld including offset calculation?
@@ -233,14 +233,16 @@ bool Mission::loadLevel(uint8 * levelData)
                 p->setMap(-1);
                 p->setHealth(-1);
                 p->setIsIgnored(true);
+                p->setStateMasks(PedInstance::pa_smUnavailable);
+                p->setAgentIs(PedInstance::Agent_Non_Active);
             }
         }
     }
-    
+
 #if 0
     // for hacking map data
     char nameSmap[256];
-    sprintf(nameSmap, "map%02X.hex", map_);
+    sprintf(nameSmap, "map%02X.hex", i_map_id_);
     FILE *staticsFmap = fopen(nameSmap,"wb");
     if (staticsFmap) {
         fwrite(level_data_.map.objs, 1, 32768, staticsFmap);
@@ -292,7 +294,7 @@ bool Mission::loadLevel(uint8 * levelData)
 #if 0
     // for hacking statics data
     char nameSs[256];
-    sprintf(nameSs, "statics%02X.hex", map_);
+    sprintf(nameSs, "statics%02X.hex", i_map_id_);
     FILE *staticsFs = fopen(nameSs,"wb");
     if (staticsFs) {
         fwrite(level_data_.statics, 1, 12000, staticsFs);
@@ -313,7 +315,7 @@ bool Mission::loadLevel(uint8 * levelData)
 #if 0
     // for hacking weapons data
     char nameSw[256];
-    sprintf(nameSw, "weapons%02X.hex", map_);
+    sprintf(nameSw, "weapons%02X.hex", i_map_id_);
     FILE *staticsFw = fopen(nameSw,"wb");
     if (staticsFw) {
         fwrite(level_data_.weapons, 1, 36*512, staticsFw);
@@ -356,7 +358,7 @@ bool Mission::loadLevel(uint8 * levelData)
 #if 0
     // for hacking objectives data
     char nameSo[256];
-    sprintf(nameSo, "obj%02X.hex", map_);
+    sprintf(nameSo, "obj%02X.hex", i_map_id_);
     FILE *staticsFo = fopen(nameSo,"wb");
     if (staticsFo) {
         fwrite(level_data_.objectives, 1, 140, staticsFo);
@@ -536,7 +538,7 @@ bool Mission::loadLevel(uint8 * levelData)
 #if 0
     // for hacking scenarios data
     char nameSss[256];
-    sprintf(nameSss, "scenarios%02X.hex", map_);
+    sprintf(nameSss, "scenarios%02X.hex", i_map_id_);
     FILE *staticsFss = fopen(nameSss,"wb");
     if (staticsFss) {
         fwrite(level_data_.scenarios, 1, 2048 * 8, staticsFss);
@@ -824,11 +826,13 @@ void Mission::start()
                 peds_[i]->setHealth(-1);
                 peds_[i]->setAgentIs(PedInstance::Agent_Non_Active);
                 peds_[i]->setIsIgnored(true);
+                peds_[i]->setStateMasks(PedInstance::pa_smUnavailable);
             }
         } else {
             peds_[i]->setHealth(-1);
             peds_[i]->setAgentIs(PedInstance::Agent_Non_Active);
             peds_[i]->setIsIgnored(true);
+            peds_[i]->setStateMasks(PedInstance::pa_smUnavailable);
         }
     }    
 }
@@ -3182,6 +3186,8 @@ uint8 Mission::inRangeCPos(toDefineXYZ * cp, ShootableMapObject ** t,
             if (t && *t) {
                 if (*t != blockerObj)
                     block_mask |= 6;
+                else
+                    block_mask = 1;
             } else
                 block_mask |= 6;
         }

@@ -571,8 +571,11 @@ uint16 WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
     // drawn, and apply if not
 
     // for weapons that are not using ammo ammo_remaining_ = -1
-    if (ammo_remaining_ == 0)
+    if (ammo_remaining_ == 0) {
+        if (make_shots)
+            *make_shots = 0;
         return 1;
+    }
 
     // NOTE: this block of code defines direction for shooter and damaged person
     // it is placed before shots calculation to set direction for shooter even if not
@@ -1269,7 +1272,7 @@ void WeaponInstance::getNonFriendInRange(toDefineXYZ * cp,
 bool WeaponInstance::handleDamage(ShootableMapObject::DamageInflictType * d)
 {
     if (health_ > 0)
-        printf("hit");
+        printf("weapon hit\n");
     return true;
 }
 

@@ -697,7 +697,7 @@ bool GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
 #ifdef NEW_ANIMATE_HANDLING
                     if (pointing_at_ped_ != -1) {
                         PedInstance::actionQueueGroupType as;
-                        as.group_desc = PedInstance::gd_mExclusive;
+                        as.group_desc = PedInstance::gd_mStandWalk;
                         ped->createActQFollowing(as,
                             mission_->ped(pointing_at_ped_), 0, 192);
                         as.main_act = as.actions.size() - 1;
@@ -710,7 +710,7 @@ bool GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
                     if (pointing_at_weapon_ != -1) {
 #ifdef NEW_ANIMATE_HANDLING
                         PedInstance::actionQueueGroupType as;
-                        as.group_desc = PedInstance::gd_mExclusive;
+                        as.group_desc = PedInstance::gd_mStandWalk;
                         ped->createActQPickUp(as,
                             mission_->weapon(pointing_at_weapon_));
                         as.main_act = as.actions.size() - 1;
@@ -729,7 +729,7 @@ bool GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
                             ped->createActQLeaveCar(as,
                                 mission_->vehicle(pointing_at_vehicle_));
                             as.main_act = as.actions.size() - 1;
-                            as.group_desc = PedInstance::gd_mExclusive;
+                            as.group_desc = PedInstance::gd_mStandWalk;
                             if (modKeys & KMD_CTRL)
                                 ped->addActQToQueue(as);
                             else
@@ -746,7 +746,7 @@ bool GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
                             ped->createActQGetInCar(as,
                                 mission_->vehicle(pointing_at_vehicle_));
                             as.main_act = as.actions.size() - 1;
-                            as.group_desc = PedInstance::gd_mExclusive;
+                            as.group_desc = PedInstance::gd_mStandWalk;
                             if (modKeys & KMD_CTRL)
                                 ped->addActQToQueue(as);
                             else
@@ -803,7 +803,7 @@ bool GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
                         PathNode tpn = PathNode(stx, sty, stz, sox, soy, 0);
                         ped->createActQWalking(as, &tpn, NULL);
                          as.main_act = as.actions.size() - 1;
-                        as.group_desc = PedInstance::gd_mExclusive;
+                        as.group_desc = PedInstance::gd_mStandWalk;
                         if (modKeys & KMD_CTRL)
                             ped->addActQToQueue(as);
                         else
@@ -817,8 +817,6 @@ bool GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
             }
         }
     } else if (button == 3) {
-        // NOTE: this click will not generate firing animation,
-        // no correct state handling for peds
         if (x >= 129) {
             int ox, oy;
             int tx =
@@ -840,7 +838,7 @@ bool GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
                     ) {
                         PedInstance::actionQueueGroupType as;
                         as.main_act = 0;
-                        as.group_desc = PedInstance::gd_mExclusive;
+                        as.group_desc = PedInstance::gd_mFire;
                         if (pa->createActQFiring(as, NULL,
                             mission_->ped(pointing_at_ped_), true))
                         {
@@ -862,7 +860,7 @@ bool GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
                            ) {
                         PedInstance::actionQueueGroupType as;
                         as.main_act = 0;
-                        as.group_desc = PedInstance::gd_mExclusive;
+                        as.group_desc = PedInstance::gd_mFire;
                         if (pa->createActQFiring(as, NULL,
                             mission_->vehicle(pointing_at_vehicle_), true))
                         {
@@ -899,7 +897,7 @@ bool GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
 #endif
                             PedInstance::actionQueueGroupType as;
                             as.main_act = 0;
-                            as.group_desc = PedInstance::gd_mExclusive;
+                            as.group_desc = PedInstance::gd_mFire;
                             if (modKeys & KMD_CTRL) {
                                 if (pa->createActQFiring(as, &pn, NULL, true))
                                     pa->addActQToQueue(as);
