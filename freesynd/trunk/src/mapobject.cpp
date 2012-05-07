@@ -597,7 +597,7 @@ Static *Static::loadInstance(uint8 * data, int m)
                 || gamdata->orientation == 0x7E || gamdata->orientation == 0xFE) {
                 s = new Door(m, baseanim, baseanim + 2, baseanim + 4, baseanim + 6);
                 s->setSubType(0);
-                s->setSizeX(196);
+                s->setSizeX(256);
                 s->setSizeY(1);
                 s->setSizeZ(196);
             } else {
@@ -605,7 +605,7 @@ Static *Static::loadInstance(uint8 * data, int m)
                 s = new Door(m, baseanim, baseanim + 2, baseanim + 4, baseanim + 6);
                 s->setSubType(2);
                 s->setSizeX(1);
-                s->setSizeY(196);
+                s->setSizeY(256);
                 s->setSizeZ(196);
             }
             break;
@@ -614,7 +614,7 @@ Static *Static::loadInstance(uint8 * data, int m)
                 || gamdata->orientation == 0x7E || gamdata->orientation == 0xFE) {
                 s = new Door(m, baseanim, baseanim + 2, baseanim + 4, baseanim + 6);
                 s->setSubType(0);
-                s->setSizeX(196);
+                s->setSizeX(256);
                 s->setSizeY(1);
                 s->setSizeZ(196);
             } else {
@@ -622,7 +622,7 @@ Static *Static::loadInstance(uint8 * data, int m)
                 s = new Door(m, baseanim, baseanim + 2, baseanim + 4, baseanim + 6);
                 s->setSubType(2);
                 s->setSizeX(1);
-                s->setSizeY(196);
+                s->setSizeY(256);
                 s->setSizeZ(196);
             }
             break;
@@ -631,7 +631,7 @@ Static *Static::loadInstance(uint8 * data, int m)
                 || gamdata->orientation == 0x7E || gamdata->orientation == 0xFE) {
                 s = new Door(m, baseanim, baseanim + 2, baseanim + 4, baseanim + 6);
                 s->setSubType(0);
-                s->setSizeX(196);
+                s->setSizeX(256);
                 s->setSizeY(1);
                 s->setSizeZ(196);
             } else {
@@ -639,7 +639,7 @@ Static *Static::loadInstance(uint8 * data, int m)
                 s = new Door(m, baseanim, baseanim + 2, baseanim + 4, baseanim + 6);
                 s->setSubType(2);
                 s->setSizeX(1);
-                s->setSizeY(196);
+                s->setSizeY(256);
                 s->setSizeZ(196);
             }
             s->state_ = sttdoor_Opening;
@@ -649,7 +649,7 @@ Static *Static::loadInstance(uint8 * data, int m)
                 || gamdata->orientation == 0x7E || gamdata->orientation == 0xFE) {
                 s = new Door(m, baseanim, baseanim + 2, baseanim + 4, baseanim + 6);
                 s->setSubType(0);
-                s->setSizeX(196);
+                s->setSizeX(256);
                 s->setSizeY(1);
                 s->setSizeZ(196);
             } else {
@@ -657,7 +657,7 @@ Static *Static::loadInstance(uint8 * data, int m)
                 s = new Door(m, baseanim, baseanim + 2, baseanim + 4, baseanim + 6);
                 s->setSubType(2);
                 s->setSizeX(1);
-                s->setSizeY(196);
+                s->setSizeY(256);
                 s->setSizeZ(196);
             }
             s->state_ = sttdoor_Opening;

@@ -561,16 +561,10 @@ bool ProjectileShot::animate(int elapsed, Mission *m) {
 uint16 WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
     int *elapsed, bool ignoreBlocker, uint32 *make_shots)
 {
-    // TODO: add return value as int for diff fail events to handle correctly,
-    // check tobj completed action,
-    // time remaining, shots done
+    // TODO: check tobj completed action,
     // TODO : IPA+mods influence
 
-    // TODO: to fix animation of firing/correct start better to set it here
-    // for ped, create a function for ped to check whether is shooting animation
-    // drawn, and apply if not
-
-    // for weapons that are not using ammo ammo_remaining_ = -1
+    // for weapons that are not using ammo, ammo_remaining_ = -1
     if (ammo_remaining_ == 0) {
         if (make_shots)
             *make_shots = 0;

@@ -324,7 +324,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
         for (uint32 indx = 0; indx < actions_queue_.size();) {
             std::vector <actionQueueGroupType>::iterator it =
                 actions_queue_.begin() + indx;
-            if ((it->state & 12) != 0) {
+            if ((it->state & 128) == 0 && (it->state & 12) != 0) {
                 actions_queue_.erase(it);
                 continue;
             }
@@ -335,11 +335,13 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
     // NOTE: some actions have remaining time, it is lost for now
     if (actions_queue_.empty()) {
         // TODO: use default_actions_ to fill it up
-         actionQueueGroupType as;
-         createActQFindEnemy(as);
-         as.main_act = 0;
-         as.group_desc = PedInstance::gd_mThink | PedInstance::gd_mFire;
-         actions_queue_.push_back(as);
+        if ((state_ & pa_smDead) == 0) {
+            actionQueueGroupType as;
+            createActQFindEnemy(as);
+            as.main_act = 0;
+            as.group_desc = PedInstance::gd_mThink | PedInstance::gd_mFire;
+            actions_queue_.push_back(as);
+        }
     } else {
         // TODO: xor finished and failed, when all actions will
         // have execution time set?
@@ -347,7 +349,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
         for (std::vector <actionQueueGroupType>::iterator it =
             actions_queue_.begin(); it != actions_queue_.end(); it++)
         {
-            if ((it->state & 76) != 0)
+            if ((it->state & 128) == 0 && (it->state & 76) != 0)
                 continue;
             if ((it->group_desc & groups_processed) != 0)
                 break;
@@ -362,7 +364,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                 if ((acts_g_prcssd & aqt.group_desc) != 0
                     || (acts_g_prcssd & groups_processed) != 0)
                     break;
-                if ((aqt.state & 76) != 0)
+                if ((aqt.state & 128) == 0 && (aqt.state & 76) != 0)
                     continue;
                 if ((aqt.group_desc & PedInstance::gd_mExclusive) != 0
                     && acts_g_prcssd != 0)
@@ -387,7 +389,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                             if (aqt.state == 1)
                                 aqt.state |= 2;
                             int tm_left = elapsed;
-                            if (wi->inflictDamage(aqt.t_smo, NULL, &tm_left))
+                            if (wi->inflictDamage(aqt.t_smo, NULL, &tm_left) == 0)
                                 if (checkFriendIs((PedInstance *)aqt.t_smo))
                                     aqt.state |= 4;
                         } else
@@ -453,11 +455,11 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                 }
                 if ((aqt.ot_execute & PedInstance::ai_aPickUpObject) != 0)
                 {
-                    //TODO: better state checking
-                    if ((state_ & (PedInstance::pa_smInCar
-                        | PedInstance::pa_smUsingCar)) != 0)
-                        aqt.state |= 8;
                     if (aqt.state == 1) {
+                        //TODO: better state checking
+                        if ((state_ & (PedInstance::pa_smInCar
+                            | PedInstance::pa_smUsingCar)) != 0)
+                            aqt.state |= 8;
                         WeaponInstance *wi = (WeaponInstance *)aqt.t_smo;
                         if (wi->hasOwner() || weapons_.size() == 8)
                             aqt.state |= 8;
@@ -467,17 +469,18 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                             wi->setIsIgnored(true);
                             wi->deactivate();
                             weapons_.push_back(wi);
-                            //aqt.state |= 4;
+                            aqt.state |= 4 + 32;
                         }
                     }
                 }
-                if ((aqt.ot_execute & PedInstance::ai_aDestroyObject) != 0)
+                if ((aqt.ot_execute & PedInstance::ai_aDestroyObject) != 0
+                    && (aqt.state & 128) == 0)
                 {
-                    if (aqt.t_smo->health() <= 0)
+                    if (aqt.t_smo->health() <= 0) {
                         // not object did it as such he failed,
                         // but goal reached
                         aqt.state |= 12;
-                    else {
+                    } else {
                         // TODO: make it properly, check selected weapon
                         // if not the one in weapon.desc select it,
                         // check owner
@@ -492,25 +495,25 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                             uint32 make_shots = aqt.multi_var.enemy_var.make_shots;
                             uint32 shots_done = make_shots
                                 - aqt.multi_var.enemy_var.shots_done;
-                            // TODO: set suspended if not able to shoot,
-                            // to prevent animation drawing
-                            wi->inflictDamage(aqt.t_smo, NULL, &tm_left,
+                            uint16 answ = wi->inflictDamage(aqt.t_smo, NULL, &tm_left,
                                 aqt.multi_var.enemy_var.forced_shot, &shots_done);
                             // TODO: handle correctly, use info returned from
                             // inflictDamage, needs use of condition
-                            if (make_shots == 0 && aqt.t_smo->health() <= 0)
-                                aqt.state |= 4;
-                            else if (shots_done != 0) {
-                                if (make_shots == 0 || make_shots
-                                    > shots_done
-                                    + aqt.multi_var.enemy_var.shots_done)
-                                {
-                                    aqt.multi_var.enemy_var.shots_done = shots_done;
-                                    aqt.state |= 2;
-                                } else
+                            if (answ == 0 || answ == 2) {
+                                aqt.state |= 2 + 32;
+                                if (make_shots == 0 && aqt.t_smo->health() <= 0)
                                     aqt.state |= 4;
+                                else if (shots_done != 0) {
+                                    if (make_shots == 0 || make_shots
+                                        > shots_done
+                                        + aqt.multi_var.enemy_var.shots_done)
+                                    {
+                                        aqt.multi_var.enemy_var.shots_done = shots_done;
+                                    } else
+                                        aqt.state |= 4;
+                                }
                             } else
-                                aqt.state |= 2;
+                                aqt.state |= 8;
                         } else
                             aqt.state |= 8;
                     }
@@ -520,17 +523,17 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                 }
                 if ((aqt.ot_execute & PedInstance::ai_aPutDownObject) != 0)
                 {
-                    //TODO: better state checking
-                    if ((state_ & (PedInstance::pa_smInCar
-                        | PedInstance::pa_smUsingCar)) != 0)
-                        aqt.state |= 8;
                     if (aqt.state == 1) {
+                        //TODO: better state checking
+                        if ((state_ & (PedInstance::pa_smInCar
+                            | PedInstance::pa_smUsingCar)) != 0)
+                            aqt.state |= 8;
                         WeaponInstance *wi = (WeaponInstance *)aqt.t_smo;
                         if (wi->getOwner() != this)
                             aqt.state |= 8;
                         else {
                             dropWeapon(wi);
-                            //aqt.state |= 4;
+                            aqt.state |= 4 + 32;
                         }
                     }
                 }
@@ -709,20 +712,8 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                         }
                     }
                 }
-                if ((aqt.ot_execute & PedInstance::ai_aWait) != 0)
-                {
-                    if (aqt.state == 1) {
-                        aqt.multi_var.time_var.elapsed = 0;
-                        aqt.state |= 2;
-                    }
-                    if (aqt.state == 3) {
-                        aqt.multi_var.time_var.elapsed += elapsed;
-                        if (aqt.multi_var.time_var.elapsed
-                            >= aqt.multi_var.time_var.time_total)
-                            aqt.state |= 4;
-                    }
-                }
-                if ((aqt.ot_execute & PedInstance::ai_aAttackLocation) != 0)
+                if ((aqt.ot_execute & PedInstance::ai_aAttackLocation) != 0
+                    && (aqt.state & 128) == 0)
                 {
                     // TODO: additional conditions
                     WeaponInstance *wi = selectedWeapon();
@@ -737,19 +728,22 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                         uint32 make_shots = aqt.multi_var.enemy_var.make_shots;
                         uint32 shots_done = make_shots
                             - aqt.multi_var.enemy_var.shots_done;
-                        wi->inflictDamage(NULL, &aqt.t_pn, &tm_left,
+                        uint16 answ = wi->inflictDamage(NULL, &aqt.t_pn, &tm_left,
                             aqt.multi_var.enemy_var.forced_shot, &shots_done);
-                        if (shots_done != 0) {
-                            if (make_shots == 0 || make_shots
-                                > shots_done
-                                + aqt.multi_var.enemy_var.shots_done)
-                            {
-                                aqt.multi_var.enemy_var.shots_done = shots_done;
-                                aqt.state |= 2;
-                            } else
-                                aqt.state |= 4;
+                        if (answ == 0 || answ == 2) {
+                            aqt.state |= 2 + 32;
+                            if (shots_done != 0) {
+                                if (make_shots == 0 || make_shots
+                                    > shots_done
+                                    + aqt.multi_var.enemy_var.shots_done)
+                                {
+                                    aqt.multi_var.enemy_var.shots_done = shots_done;
+                                } else {
+                                    aqt.state |= 4;
+                                }
+                            }
                         } else
-                            aqt.state |= 2;
+                            aqt.state |= 8;
                     } else
                         aqt.state |= 8;
                 }
@@ -956,10 +950,33 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                         aqt.state |= 4;
                     }
                 }
+                if ((aqt.ot_execute & PedInstance::ai_aWait) != 0)
+                {
+                    // no failed or suspended will have "wait" action
+                    // NOTE: in order to use "wait" as single command
+                    // state should have 4 + 128 already set
+                    if ((aqt.state & 60) == 36) {
+                        if ((aqt.state & 128) != 0) {
+                            aqt.multi_var.time_var.elapsed += elapsed;
+                            if (aqt.multi_var.time_var.elapsed
+                                >= aqt.multi_var.time_var.time_total)
+                            {
+                                aqt.state &= (65535 ^ 160);
+                            }
+                        } else
+                            aqt.state |= 130;
+                    } else
+                        aqt.state &= (65535 ^ 32);
+                }
                 if ((aqt.ot_execute & PedInstance::ai_aNonFinishable) != 0)
                 {
                 }
-                if ((aqt.state & 16) != 0) {
+                if ((aqt.state & 32) != 0) {
+                    if ((aqt.group_desc & PedInstance::gd_mExclusive) != 0)
+                        it->state |= 2;
+                    switchActionStateTo(aqt.as);
+                    acts_g_prcssd |= aqt.group_desc;
+                } else if ((aqt.state & 16) != 0) {
                     switchActionStateFrom(aqt.as);
                 } else if ((aqt.state & 8) != 0) {
                     if ((aqt.state & 2) != 0)
@@ -981,7 +998,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                 }
 #endif
                 if ((aqt.group_desc & PedInstance::gd_mExclusive) != 0
-                    && (aqt.state & 12) == 0)
+                    && ((aqt.state & 12) == 0 || (aqt.state & 128) != 0))
                     break;
                 if (acts_g_prcssd == PedInstance::gd_mAll)
                     break;
@@ -989,7 +1006,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
             it->state = it->actions[it->main_act].state;
 
             if ((it->group_desc & PedInstance::gd_mExclusive) != 0
-                && (it->state & 12) == 0)
+                && ((it->state & 12) == 0 || (it->state & 128) != 0))
                 break;
             groups_processed |= acts_g_prcssd;
 
@@ -1711,7 +1728,7 @@ void PedInstance::dropWeapon(int n) {
 }
 
 void PedInstance::dropWeapon(WeaponInstance *wi) {
-    // TODO: auto selection when dropped weapon is selected?
+    // TODO: auto selection, when dropped weapon is "selected"?
     bool upd_selected = selected_weapon_ != -1;
     if (selectedWeapon() == wi) {
         setSelectedWeapon(-1);
@@ -2003,8 +2020,6 @@ bool PedInstance::movementP(Mission *m, int elapsed)
                 {
                     dest_path_.clear();
                     speed_ = 0;
-                    // TODO: "current action drop" function will be
-                    // better for this purpose
 #ifndef NEW_ANIMATE_HANDLING
                     if (in_vehicle_) {
                         in_vehicle_ = NULL;
@@ -2022,7 +2037,6 @@ bool PedInstance::movementP(Mission *m, int elapsed)
                 {
                     dest_path_.clear();
                     speed_ = 0;
-                    // TODO: same as above
 #ifndef NEW_ANIMATE_HANDLING
                     if (in_vehicle_) {
                         in_vehicle_ = NULL;
@@ -2036,7 +2050,7 @@ bool PedInstance::movementP(Mission *m, int elapsed)
                     hold_on_.wayFree = 0;
             }
         }
-        // TODO: not ignore Z
+        // TODO: not ignore Z, if tile is stairs diffz is wrong
         int adx =
              nxtTileX * 256 + dest_path_.front().offX();
         int ady =
@@ -2047,6 +2061,7 @@ bool PedInstance::movementP(Mission *m, int elapsed)
 
         if (abs(diffx) < 16 && abs(diffy) < 16) {
             // TODO: maybe something better? then using diffx/diffy?
+            // for this check
             off_y_ = dest_path_.front().offY();
             off_x_ = dest_path_.front().offX();
             tile_z_ = nxtTileZ;
@@ -2292,27 +2307,26 @@ bool PedInstance::checkHostileIs(ShootableMapObject *obj,
     unsigned int hostile_desc_alt)
 {
     bool hostile_rsp = false;
+    bool friend_is = false;
     if (obj->majorType() == MapObject::mjt_Vehicle) {
         // TODO: add this check later, create a list of all in vehicle
     } else if (obj->majorType() == MapObject::mjt_Ped) {
         if (checkFriendIs((PedInstance *)obj))
-            hostile_rsp = false;
-        if (!hostile_rsp) {
-            if (((PedInstance *)obj)->emulatedGroupDefsEmpty()) {
-                hostile_rsp =
-                    isInEnemyGroupDef(((PedInstance *)obj)->objGroupID(),
-                    ((PedInstance *)obj)->objGroupDef());
-            } else {
-                hostile_rsp =
-                    ((PedInstance *)obj)->isInEmulatedGroupDef(enemy_group_defs_);
-            }
-            if (!hostile_rsp) {
-                if (hostile_desc_alt == PedInstance::pd_smUndefined)
-                    hostile_desc_alt = hostile_desc_;
-                hostile_rsp =
-                    (((PedInstance *)obj)->descStateMasks()
-                    & hostile_desc_alt) != 0;
-            }
+            friend_is = true;
+        if (((PedInstance *)obj)->emulatedGroupDefsEmpty()) {
+            hostile_rsp =
+                isInEnemyGroupDef(((PedInstance *)obj)->objGroupID(),
+                ((PedInstance *)obj)->objGroupDef());
+        } else {
+            hostile_rsp =
+                ((PedInstance *)obj)->isInEmulatedGroupDef(enemy_group_defs_);
+        }
+        if (!(hostile_rsp || friend_is)) {
+            if (hostile_desc_alt == PedInstance::pd_smUndefined)
+                hostile_desc_alt = hostile_desc_;
+            hostile_rsp =
+                (((PedInstance *)obj)->descStateMasks()
+                & hostile_desc_alt) != 0;
         }
     }
     return hostile_rsp;
@@ -2490,6 +2504,9 @@ bool PedInstance::createActQFiring(actionQueueGroupType &as, PathNode *tpn,
             return false;
     }
     aq.state = 1;
+    aq.ot_execute |= PedInstance::ai_aWait;
+    aq.multi_var.time_var.elapsed = 0;
+    aq.multi_var.time_var.time_total = 250;
     as.actions.push_back(aq);
     return true;
 }
@@ -2655,6 +2672,9 @@ void PedInstance::createActQFindEnemy(actionQueueGroupType &as) {
     aq.group_desc = PedInstance::gd_mFire;
     aq.state = 65;
     aq.ot_execute = PedInstance::ai_aDestroyObject;
+    aq.ot_execute |= PedInstance::ai_aWait;
+    aq.multi_var.time_var.elapsed = 0;
+    aq.multi_var.time_var.time_total = 250;
     aq.multi_var.enemy_var.make_shots = 0;
     aq.multi_var.enemy_var.shots_done = 0;
     aq.multi_var.enemy_var.weapon.desc = 4;

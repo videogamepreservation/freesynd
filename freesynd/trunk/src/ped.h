@@ -606,10 +606,16 @@ public:
         // ai_aFindEnemy sets this value, others use
         ShootableMapObject *t_smo;
         // 0b - not started, 1b - executing, 2b - finished, 3b - failed,
-        // 4b - suspended, 5b - waiting for animation to complete,
-        // 6b - not set (empty, should be skipped)
-        uint8 state;
-        // same as in actionQueueGroupType, groupDescMasks
+        // 4b - suspended, 5b - waiting to complete (ai_aWait),
+        // 6b - not set (empty, should be skipped), 7b - waiting (ai_aWait)
+        uint16 state;
+        // 0 - not set, 0b - stand/walking group(has walking action or
+        // action requires ped to stand), 1b - firing only(no walking action),
+        // (0b+1b) - walking + firing, 2b - decision making(thinking),
+        // 3b - exclusive, no other action can be executed in parallel with it
+        // and all before it should be completed
+        // NOTE: a group should not interfere with actions of other group
+        // groupDescMasks
         uint32 group_desc;
         struct {
             struct {
@@ -656,19 +662,12 @@ public:
 
     typedef struct {
         std::vector <actionQueueType> actions;
-        // index refers action state of which defines state of group
+        // index refers to action, state of which defines state of group
         uint32 main_act;
-        // 0 - not set, 0b - stand/walking group(has walking action or
-        // action requires ped to stand), 1b - firing only(no walking action),
-        // (0b+1b) - walking + firing, 2b - decision making(thinking),
-        // 3b - exclusive, no other action can be executed in parallel with it
-        // and all before it should be completed
-        // NOTE: a group should not interfere with actions of other group
-        // groupDescMasks
+        // same as in actionQueueType, groupDescMasks
         uint32 group_desc;
-        // 0b - not started, 1b - executing, 2b - finished, 3b - failed,
-        // 4b - suspended
-        uint8 state;
+        // same as in actionQueueType.state
+        uint16 state;
         uint32 group_id;
     } actionQueueGroupType;
 
