@@ -28,8 +28,6 @@
 #include "app.h"
 #include <math.h>
 
-#define NEW_ANIMATE_HANDLING
-
 Ped::Ped() {
     memset(stand_anims_, 0, sizeof(stand_anims_));
     memset(walk_anims_, 0, sizeof(walk_anims_));
@@ -307,12 +305,9 @@ void PedInstance::setActionStateToDrawnAnim(void) {
 #endif
 }
 
-#ifdef NEW_ANIMATE_HANDLING
 bool PedInstance::animate(int elapsed, Mission *mission) {
     // TODO: proper handling for exclusive states, switching;
-    // animation can be lost because of too big value of elapsed
-    // state = 2 will not appear and drawing will not be set (firing)
-    // TODO: animation and state binding, finished animation=state complete.
+    // TODO: animation and state binding, finished animation=state complete?
 
     if (agent_is_ == PedInstance::Agent_Non_Active)
         return false;
@@ -581,6 +576,9 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                                     (MapObject *)aqt.t_smo);
                                 if (dist_is <= dist_to_pos_)
                                     set_new_dest = false;
+                            } else {
+                                if (!this->samePosition(aqt.t_smo))
+                                    set_new_dest = true;
                             }
                             if (set_new_dest) {
                                 aqt.state |= 2;
@@ -760,7 +758,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                         // TODO: check for weapons, get the largest shooting
                         // range and put it here
                         int shot_rng = 1;
-                        int view_rng = (sight_range_ << 8);
+                        int view_rng = sight_range_;
                         toDefineXYZ cur_xyz;
                         convertPosToXYZ(&cur_xyz);
                         cur_xyz.z += (size_z_ >> 1);
@@ -912,7 +910,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                     convertPosToXYZ(&cur_xyz);
                     cur_xyz.z += (size_z_ >> 1);
                     int num_peds = mission->numPeds();
-                    int view_rng = (sight_range_ << 8);
+                    int view_rng = sight_range_;
                     for (int i = 0; i < num_peds; i++) {
                         PedInstance *p = mission->ped(i);
                         if ((p->state_ & pa_smCheckExcluded) != 0)
@@ -1026,8 +1024,8 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
         setActionStateToDrawnAnim();
     return updated;
 }
-#endif
-#ifndef NEW_ANIMATE_HANDLING
+
+#if 0
 bool PedInstance::animate(int elapsed, Mission *mission) {
 
     if (agent_is_ == PedInstance::Agent_Non_Active)
@@ -1377,11 +1375,6 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
 }
 #endif
 
-void PedInstance::stopFiring() {
-    if (firing_ != PedInstance::Firing_Not)
-        firing_ = PedInstance::Firing_Stop;
-}
-
 PedInstance *Ped::createInstance(int map) {
     return new PedInstance(this, map);
 }
@@ -1458,17 +1451,14 @@ void PedInstance::showPath(int scrollX, int scrollY) {
 }
 
 PedInstance::PedInstance(Ped *ped, int m) : ShootableMovableMapObject(m),
-    ped_(ped), firing_(PedInstance::Firing_Not),
-    action_grp_id_(1),
+    ped_(ped), action_grp_id_(1),
     desc_state_(PedInstance::pd_smUndefined),
     hostile_desc_(PedInstance::pd_smUndefined),
     obj_group_def_(PedInstance::og_dmUndefined),
     old_obj_group_def_(PedInstance::og_dmUndefined),
     obj_group_id_(0), old_obj_group_id_(0),
-    drawn_anim_(PedInstance::ad_StandAnim), target_(NULL), target_pos_(NULL),
-    reach_obj_(NULL), reach_pos_(NULL), sight_range_(0),
-    is_hostile_(false), reload_count_(0), selected_weapon_(-1),
-    pickup_weapon_(NULL), putdown_weapon_(NULL), in_vehicle_(NULL),
+    drawn_anim_(PedInstance::ad_StandAnim),
+    sight_range_(0), in_vehicle_(NULL),
     agent_is_(PedInstance::Not_Agent)
 {
     hold_on_.wayFree = 0;
@@ -1481,14 +1471,6 @@ PedInstance::~PedInstance()
 {
     delete ped_;
     ped_ = NULL;
-    if (target_pos_) {
-        delete target_pos_;
-        target_pos_ = NULL;
-    }
-    if (reach_pos_) {
-        delete reach_pos_;
-        reach_pos_ = NULL;
-    }
 }
 
 void PedInstance::draw(int x, int y) {
@@ -1503,13 +1485,6 @@ void PedInstance::draw(int x, int y) {
     // ensure on map
     if (x < 129 || y < 0 || map_ == -1)
         return;
-
-#ifndef NEW_ANIMATE_HANDLING
-    if (selectedWeapon() == 0) {
-        firing_ = PedInstance::Firing_Not;
-        target_ = 0;
-    }
-#endif
 
     switch(drawnAnim()){
         case PedInstance::ad_HitAnim:
@@ -1642,12 +1617,8 @@ void PedInstance::drawSelectorAnim(int x, int y) {
 }
 
 bool PedInstance::inSightRange(MapObject *t) {
-    float d =
-        sqrt((float) (t->tileX() - tileX()) * (t->tileX() - tileX()) +
-             (t->tileY() - tileY()) * (t->tileY() - tileY()) +
-             (t->tileZ() - tileZ()) * (t->tileZ() - tileZ()));
 
-    return d < sight_range_;
+    return this->distanceTo(t) < sight_range_;
 }
 
 void PedInstance::setSelectedWeapon(int n) {
@@ -1722,9 +1693,6 @@ void PedInstance::dropWeapon(int n) {
     assert(n >= 0 && n < (int) weapons_.size());
 
     dropWeapon(weapons_[n]);
-#ifndef NEW_ANIMATE_HANDLING
-    putdown_weapon_ = w;
-#endif
 }
 
 void PedInstance::dropWeapon(WeaponInstance *wi) {
@@ -1776,28 +1744,14 @@ void PedInstance::dropAllWeapons() {
     weapons_.clear();
 }
 
-void PedInstance::pickupWeapon(WeaponInstance * w) {
-    assert(w->map() == map());
-
-    if (weapons_.size() >= 8)
-        return;
-
-    pickup_weapon_ = w;
-    frame_ = 0;
-}
-
 bool PedInstance::wePickupWeapon() {
-    return pickup_weapon_ != NULL;
+    return (state_ & pa_smPickUp) != 0;
 }
 
 VehicleInstance *PedInstance::inVehicle()
 {
-#ifdef NEW_ANIMATE_HANDLING
     return (state_ & (PedInstance::pa_smInCar
         | PedInstance::pa_smUsingCar)) != 0 ? in_vehicle_ : NULL;
-#else
-    return map_ == -1 ? in_vehicle_ : NULL;
-#endif
 }
 
 void PedInstance::putInVehicle(VehicleInstance * v) {
@@ -1810,10 +1764,8 @@ void PedInstance::leaveVehicle() {
     map_ = in_vehicle_->map();
     in_vehicle_ = NULL;
     is_ignored_ = false;
-#ifdef NEW_ANIMATE_HANDLING
     switchActionStateFrom(state_ & (PedInstance::pa_smInCar
         | PedInstance::pa_smUsingCar));
-#endif
 }
 
 
@@ -2020,14 +1972,6 @@ bool PedInstance::movementP(Mission *m, int elapsed)
                 {
                     dest_path_.clear();
                     speed_ = 0;
-#ifndef NEW_ANIMATE_HANDLING
-                    if (in_vehicle_) {
-                        in_vehicle_ = NULL;
-                    }
-                    if (pickup_weapon_) {
-                        pickup_weapon_ = NULL;
-                    }
-#endif
                     return updated;
                 } else
                     hold_on_.wayFree = 0;
@@ -2037,14 +1981,6 @@ bool PedInstance::movementP(Mission *m, int elapsed)
                 {
                     dest_path_.clear();
                     speed_ = 0;
-#ifndef NEW_ANIMATE_HANDLING
-                    if (in_vehicle_) {
-                        in_vehicle_ = NULL;
-                    }
-                    if (pickup_weapon_) {
-                        pickup_weapon_ = NULL;
-                    }
-#endif
                     return updated;
                 } else
                     hold_on_.wayFree = 0;
@@ -2130,7 +2066,6 @@ bool PedInstance::movementP(Mission *m, int elapsed)
             updated = true;
         }
 
-#ifdef NEW_ANIMATE_HANDLING
             if ((state_ & pa_smFollowing) != 0) {
                 toDefineXYZ xyz;
                 // TODO: calculate length for dest_path_?
@@ -2142,7 +2077,7 @@ bool PedInstance::movementP(Mission *m, int elapsed)
                     speed_ = 0;
                 }
             }
-#endif
+
         unsigned char twd = m->mtsurfaces_[tile_x_ + tile_y_ * m->mmax_x_
             + tile_z_ * m->mmax_m_xy].twd;
         switch (twd) {
@@ -2184,13 +2119,6 @@ bool PedInstance::handleDamage(ShootableMapObject::DamageInflictType *d) {
     if ((d->dtype & MapObject::dmg_Physical) != 0)
         health_ -= d->dvalue;
     else if (d->dtype == MapObject::dmg_Mental) {
-#ifndef NEW_ANIMATE_HANDLING
-        speed_ = 0;
-        clearDestination();
-        putdown_weapon_ = NULL;
-        pickup_weapon_ = NULL;
-        target_ = NULL;
-#endif
         // TODO: check for required number of persuade points before applying
         setObjGroupDef((obj_group_def_ & 0xFFFFFF00) |
             (((PedInstance *)d->d_owner)->objGroupDef() & 0xFF));
@@ -2214,15 +2142,8 @@ bool PedInstance::handleDamage(ShootableMapObject::DamageInflictType *d) {
     }
     if (health_ <= 0) {
         health_ = -1;
-#ifndef NEW_ANIMATE_HANDLING
-        resetDest_Speed();
-        putdown_weapon_ = NULL;
-        pickup_weapon_ = NULL;
-        target_ = NULL;
-#else
         dropActQ();
         switchActionStateTo(PedInstance::pa_smDead);
-#endif
 
         switch ((unsigned int)d->dtype) {
             case MapObject::dmg_Bullet:
@@ -2356,7 +2277,7 @@ void PedInstance::verifyHostilesFound(Mission *m) {
         if (smo->health() <= 0 || (smo->majorType() == MapObject::mjt_Ped
             && checkFriendIs((PedInstance *)(smo)))
             || (m->inRangeCPos(&cur_xyz, &smo, NULL, false, false,
-            (sight_range_ << 8), &distTo) != 1))
+            sight_range_, &distTo) != 1))
         {
             rm_set.push_back(smo);
         }

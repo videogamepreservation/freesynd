@@ -20,8 +20,8 @@
  *                                                                      *
  ************************************************************************/
 
-#define NEW_ANIMATE_HANDLING
 #include "common.h"
+#include "mission.h"
 #include "ped.h"
 #include "pathsurfaces.h"
 
@@ -79,25 +79,6 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
         printf("Movement from nonwalkable postion\n");
         return;
     }
-
-#ifndef NEW_ANIMATE_HANDLING
-    if (in_vehicle_) {
-        if(in_vehicle_->tileX() != x
-            || in_vehicle_->tileY() != y
-            || in_vehicle_->tileZ() != z
-            || in_vehicle_->offX() != ox
-            || in_vehicle_->offY() != oy)
-        in_vehicle_ = NULL;
-    }
-    if (pickup_weapon_) {
-        if(pickup_weapon_->tileX() != x
-            || pickup_weapon_->tileY() != y
-            || pickup_weapon_->tileZ() != z
-            || pickup_weapon_->offX() != ox
-            || pickup_weapon_->offY() != oy)
-        pickup_weapon_ = 0;
-    }
-#endif
 
     if (tile_x_ == x && tile_y_ == y && tile_z_ == z) {
         dest_path_.push_back(PathNode(x, y, z, ox, oy));

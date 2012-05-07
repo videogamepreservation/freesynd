@@ -121,10 +121,10 @@ public:
     bool samePosition(MapObject * other) {
         return other->tile_x_ == tile_x_
                 && other->tile_y_ == tile_y_
-                && other->tile_z_ == tile_z_
+                && other->vis_z_ == vis_z_
                 && other->off_x_ == off_x_
-                && other->off_y_ == off_y_;
-        // add off_z_ here?
+                && other->off_y_ == off_y_
+                && other->off_z_ == off_z_;
     }
 
     double distanceTo(MapObject *t) {

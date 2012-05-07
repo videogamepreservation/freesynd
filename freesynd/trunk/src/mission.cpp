@@ -205,7 +205,7 @@ bool Mission::loadLevel(uint8 * levelData)
                 p->addEnemyGroupDef(2);
                 p->addEnemyGroupDef(3);
                 p->setHostileDesc(PedInstance::pd_smArmed);
-                p->setSightRange(7);
+                p->setSightRange(7 * 256);
             } else if (i > 7) {
                 unsigned int mt = p->getMainType() << 8;
                 //unsigned int objD = p->descState();
@@ -217,7 +217,6 @@ bool Mission::loadLevel(uint8 * levelData)
                     p->setObjGroupID(3);
                     p->setObjGroupDef(PedInstance::og_dmEnemy);
                     p->addEnemyGroupDef(1);
-                    p->setHostile(true);
                 } else if (mt == PedInstance::og_dmPolice) {
                     p->setObjGroupID(4);
                     p->setObjGroupDef(PedInstance::og_dmPolice);
@@ -227,8 +226,7 @@ bool Mission::loadLevel(uint8 * levelData)
                     p->setObjGroupDef(mt);
                     // civilians and criminals
                 }
-                // TODO: not tile based? realworld including offset calculation?
-                p->setSightRange(7);
+                p->setSightRange(7 * 256);
             } else if (i > 3 && i < 8) {
                 p->setMap(-1);
                 p->setHealth(-1);

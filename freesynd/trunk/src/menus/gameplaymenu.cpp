@@ -33,7 +33,6 @@
 #include "gfx/fliplayer.h"
 #include "utils/file.h"
 
-#define NEW_ANIMATE_HANDLING
 #ifdef _WIN32
 #include <windows.h>
 #endif
@@ -694,7 +693,6 @@ bool GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
             for (int i = 0; i < 4; i++) {
                 PedInstance *ped = mission_->ped(i);
                 if (isAgentSelected(i)) {
-#ifdef NEW_ANIMATE_HANDLING
                     if (pointing_at_ped_ != -1) {
                         PedInstance::actionQueueGroupType as;
                         as.group_desc = PedInstance::gd_mStandWalk;
@@ -706,9 +704,7 @@ bool GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
                         else
                             ped->setActQInQueue(as);
                     } else
-#endif
                     if (pointing_at_weapon_ != -1) {
-#ifdef NEW_ANIMATE_HANDLING
                         PedInstance::actionQueueGroupType as;
                         as.group_desc = PedInstance::gd_mStandWalk;
                         ped->createActQPickUp(as,
@@ -718,13 +714,8 @@ bool GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
                             ped->addActQToQueue(as);
                         else
                             ped->setActQInQueue(as);
-#else
-                        ped->pickupWeapon(
-                                mission_->weapon(pointing_at_weapon_));
-#endif
                     } else if (pointing_at_vehicle_ != -1) {
                         if (ped->inVehicle()) {
-#ifdef NEW_ANIMATE_HANDLING
                             PedInstance::actionQueueGroupType as;
                             ped->createActQLeaveCar(as,
                                 mission_->vehicle(pointing_at_vehicle_));
@@ -734,14 +725,9 @@ bool GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
                                 ped->addActQToQueue(as);
                             else
                                 ped->setActQInQueue(as);
-#else
-                            ped->inVehicle()->removeDriver(ped);
-                            ped->leaveVehicle();
-#endif
                         } else if (mission_->vehicle(pointing_at_vehicle_)->
                                     health() > 0)
                         {
-#ifdef NEW_ANIMATE_HANDLING
                             PedInstance::actionQueueGroupType as;
                             ped->createActQGetInCar(as,
                                 mission_->vehicle(pointing_at_vehicle_));
@@ -751,10 +737,6 @@ bool GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
                                 ped->addActQToQueue(as);
                             else
                                 ped->setActQInQueue(as);
-#else
-                            ped->putInVehicle(mission_->vehicle(
-                                pointing_at_vehicle_));
-#endif
                         }
                     } else if (ped->inVehicle()) {
                         if (ped == ped->inVehicle()->getDriver()) {
@@ -798,7 +780,6 @@ bool GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
                             sox = 63 + 128 * (i % 2);
                             soy = 63 + 128 * (i >> 1);
                         }
-#ifdef NEW_ANIMATE_HANDLING
                         PedInstance::actionQueueGroupType as;
                         PathNode tpn = PathNode(stx, sty, stz, sox, soy, 0);
                         ped->createActQWalking(as, &tpn, NULL);
@@ -808,10 +789,6 @@ bool GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
                             ped->addActQToQueue(as);
                         else
                             ped->setActQInQueue(as);
-#else
-                        mission_->ped(i)->setDestinationP(mission_, stx, sty, stz,
-                                sox, soy, 320);
-#endif
                     }
                 }
             }
@@ -827,15 +804,8 @@ bool GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
                     world_y_ + y, oy);
             for (int i = 0; i < 4; i++) {
                 PedInstance * pa = mission_->ped(i);
-                if (isAgentSelected(i)
-#ifdef NEW_ANIMATE_HANDLING
-#else
-                        && pa->selectedWeapon()
-#endif
-                   ) {
-                    if (pointing_at_ped_ != -1
-#ifdef NEW_ANIMATE_HANDLING
-                    ) {
+                if (isAgentSelected(i)) {
+                    if (pointing_at_ped_ != -1) {
                         PedInstance::actionQueueGroupType as;
                         as.main_act = 0;
                         as.group_desc = PedInstance::gd_mFire;
@@ -847,17 +817,7 @@ bool GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
                             else
                                 pa->setActQInQueue(as);
                         }
-#else
-                        && (pa->selectedWeapon()->inflictDamage(
-                            mission_->ped(pointing_at_ped_), NULL, NULL,
-                            true)) == 0)
-                    {
-                        pa->startFiring();
-                        pa->setTarget(mission_->ped(pointing_at_ped_));
-#endif
-                    } else if (pointing_at_vehicle_ != -1
-#ifdef NEW_ANIMATE_HANDLING
-                           ) {
+                    } else if (pointing_at_vehicle_ != -1) {
                         PedInstance::actionQueueGroupType as;
                         as.main_act = 0;
                         as.group_desc = PedInstance::gd_mFire;
@@ -869,14 +829,6 @@ bool GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
                             else
                                 pa->setActQInQueue(as);
                         }
-#else
-                            && (pa->selectedWeapon()->inflictDamage(
-                            mission_->vehicle(pointing_at_vehicle_), NULL,
-                            NULL, true)) == 0)
-                    {
-                        pa->startFiring();
-                        pa->setTarget(mission_->ped(pointing_at_vehicle_));
-#endif
                     } else {
                         int stx = tx;
                         int sty = ty;
@@ -888,7 +840,6 @@ bool GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
                             sox, soy, oz))
                         {
                             PathNode pn(stx, sty, stz, sox, soy, oz);
-#ifdef NEW_ANIMATE_HANDLING
 #if 0
                             printf("shooting at\n x = %i, y=%i, z=%i\n",
                                    stx, sty, stz);
@@ -905,12 +856,6 @@ bool GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
                                 if (pa->createActQFiring(as, &pn, NULL, true, 1))
                                     pa->setActQInQueue(as);
                             }
-#else
-                            //if (
-                                pa->selectedWeapon()->inflictDamage(NULL, &pn, NULL, true)
-                                //)
-                                ;
-#endif
                         }
                     }
                 }
@@ -936,9 +881,7 @@ bool GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
                             ped->setSelectedWeapon(-1);
                         else
                             ped->setSelectedWeapon(w_num);
-                    } else
-#ifdef NEW_ANIMATE_HANDLING
-                    {
+                    } else {
                         PedInstance::actionQueueGroupType as;
                         as.main_act = 0;
                         as.group_desc = PedInstance::gd_mExclusive;
@@ -949,9 +892,6 @@ bool GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
                         else
                             ped->setActQInQueue(as);
                     }
-#else
-                        ped->dropWeapon(w_num);
-#endif
 
                     change = true;
                 }
@@ -969,13 +909,8 @@ bool GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
 void GameplayMenu::handleMouseUp(int x, int y, int button, const int modKeys) {
     if (button == 3) {
         for (int i = 0; i < 4; i++) {
-            if (isAgentSelected(i)
-#ifdef NEW_ANIMATE_HANDLING
-            ) {
-#else
-                    && mission_->ped(i)->selectedWeapon()) {
-                mission_->ped(i)->stopFiring();
-#endif
+            if (isAgentSelected(i)) {
+                // TODO: button pressed, stop firing, use id to drop
             }
         }
     }

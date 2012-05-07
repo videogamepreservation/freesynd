@@ -28,7 +28,6 @@
 #define PED_H
 
 #include <map>
-#include <list>
 
 #include "common.h"
 #include "mapobject.h"
@@ -36,9 +35,7 @@
 #include "gfx/spritemanager.h"
 #include "weaponholder.h"
 #include "weapon.h"
-#include "mission.h"
 
-class WeaponInstance;
 class PedInstance;
 class Mission;
 class VehicleInstance;
@@ -209,19 +206,7 @@ public:
     bool animate(int elapsed, Mission *mission);
     void drawSelectorAnim(int x, int y);
 
-    ShootableMapObject *target() { return target_; }
-    void setTarget(ShootableMapObject *t, PathNode *pn = NULL) {
-        target_ = t;
-        target_pos_ = pn;
-    }
-
-    void startFiring() { firing_ = PedInstance::Firing_Fire; }
-    void stopFiring();
-
     bool inSightRange(MapObject *t);
-
-    bool isHostile() { return is_hostile_; }
-    void setHostile(bool new_hostile) { is_hostile_ = new_hostile; }
 
     WeaponInstance *selectedWeapon() {
         return selected_weapon_ >= 0
@@ -236,7 +221,6 @@ public:
     void dropWeapon(int n);
     void dropWeapon(WeaponInstance *w);
     void dropAllWeapons();
-    void pickupWeapon(WeaponInstance *w);
     bool wePickupWeapon();
 
     VehicleInstance *inVehicle();
@@ -717,13 +701,6 @@ public:
 protected:
     Ped *ped_;
 
-    enum {
-        Firing_Not,
-        Firing_Fire,
-        Firing_Reload,
-        Firing_Stop
-    } firing_;
-
     std::vector <actionQueueGroupType> actions_queue_;
     std::vector <actionQueueGroupType> default_actions_;
     uint32 action_grp_id_;
@@ -752,18 +729,8 @@ protected:
 
     AnimationDrawn drawn_anim_;
 
-    // target*, if in range movement should stop
-    ShootableMapObject *target_;
-    PathNode *target_pos_;
-    // reach*, wiil only stop when at same or desired distance(undefined for now)
-    ShootableMapObject *reach_obj_;
-    PathNode *reach_pos_;
-
     int sight_range_;
-    bool is_hostile_;
-    int reload_count_;
     int selected_weapon_;
-    WeaponInstance *pickup_weapon_, *putdown_weapon_;
     VehicleInstance *in_vehicle_;
     agentAndNonEnum agent_is_;
     // IPA levels: white bar level,set level,exhaused level and forced level
