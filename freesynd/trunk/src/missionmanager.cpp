@@ -25,9 +25,6 @@
 #include <stdio.h>
 #include <assert.h>
 #include "app.h"
-#include "map.h"
-#include "mission.h"
-#include "missionmanager.h"
 #include "utils/file.h"
 #include "utils/log.h"
 #include "resources.h"

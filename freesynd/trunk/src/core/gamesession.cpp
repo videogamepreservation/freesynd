@@ -24,7 +24,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "gamesession.h"
-#include "map.h"
 #include "mission.h"
 
 // List of logo colours

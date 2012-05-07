@@ -28,9 +28,6 @@
 #include <assert.h>
 
 #include "app.h"
-#include "gfx/screen.h"
-#include "map.h"
-#include "gfx/tilemanager.h"
 #include "utils/log.h"
 
 #if 0

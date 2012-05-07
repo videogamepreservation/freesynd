@@ -30,8 +30,6 @@
 #include <assert.h>
 
 #include "app.h"
-#include "weapon.h"
-#include "ped.h"
 
 #define Z_SHIFT_TO_AIR   8
 

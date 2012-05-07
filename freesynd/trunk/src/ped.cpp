@@ -1458,7 +1458,7 @@ PedInstance::PedInstance(Ped *ped, int m) : ShootableMovableMapObject(m),
     old_obj_group_def_(PedInstance::og_dmUndefined),
     obj_group_id_(0), old_obj_group_id_(0),
     drawn_anim_(PedInstance::ad_StandAnim),
-    sight_range_(0), in_vehicle_(NULL),
+    sight_range_(0), selected_weapon_(-1), in_vehicle_(NULL),
     agent_is_(PedInstance::Not_Agent)
 {
     hold_on_.wayFree = 0;

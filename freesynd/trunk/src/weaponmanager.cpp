@@ -29,7 +29,6 @@
 #include <stdio.h>
 #include <assert.h>
 #include "app.h"
-#include "weaponmanager.h"
 
 WeaponManager::WeaponManager() {
     
