@@ -66,6 +66,8 @@ protected:
         return (selected_agents_ & (1 << agentNo))!=0;
     }
 
+    void stopShootingEvent(void);
+
 protected:
     int tick_count_, last_animate_tick_;
     int last_motion_tick_, last_motion_x_, last_motion_y_;
@@ -85,6 +87,20 @@ protected:
     int mm_tx_, mm_ty_;
     bool completed_;
     bool pressed_btn_select_all_;
+    struct {
+        bool agents_shooting[4];
+        uint32 ids[4];
+        void clear() {
+            agents_shooting[0] = false;
+            agents_shooting[1] = false;
+            agents_shooting[2] = false;
+            agents_shooting[3] = false;
+            ids[0] = 0;
+            ids[1] = 0;
+            ids[2] = 0;
+            ids[3] = 0;
+        }
+    } shooting_events_;
 };
 
 #endif

@@ -374,7 +374,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                         // TODO: make it properly, check selected weapon
                         // if not the one in weapon.desc select it,
                         // check owner
-                        // NOTE: don't put weapon to the ground
+                        // NOTE: don't put weapon on the ground
                         WeaponInstance *wi = aqt.multi_var.enemy_var.weapon.wpn.wi;
                         if (wi->getMainType()
                             == Weapon::Persuadatron)
@@ -499,13 +499,13 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                                 if (make_shots == 0 && aqt.t_smo->health() <= 0)
                                     aqt.state |= 4;
                                 else if (shots_done != 0) {
-                                    if (make_shots == 0 || make_shots
-                                        > shots_done
+                                    aqt.multi_var.enemy_var.shots_done += shots_done;
+                                    if (make_shots != 0 && make_shots
+                                        <= shots_done
                                         + aqt.multi_var.enemy_var.shots_done)
                                     {
-                                        aqt.multi_var.enemy_var.shots_done = shots_done;
-                                    } else
                                         aqt.state |= 4;
+                                    }
                                 }
                             } else
                                 aqt.state |= 8;
@@ -731,12 +731,11 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                         if (answ == 0 || answ == 2) {
                             aqt.state |= 2 + 32;
                             if (shots_done != 0) {
-                                if (make_shots == 0 || make_shots
-                                    > shots_done
+                                aqt.multi_var.enemy_var.shots_done += shots_done;
+                                if (make_shots != 0 && make_shots
+                                    <= shots_done
                                     + aqt.multi_var.enemy_var.shots_done)
                                 {
-                                    aqt.multi_var.enemy_var.shots_done = shots_done;
-                                } else {
                                     aqt.state |= 4;
                                 }
                             }
@@ -2347,7 +2346,7 @@ void PedInstance::createActQHit(actionQueueGroupType &as, PathNode *tpn,
 }
 
 bool PedInstance::createActQFiring(actionQueueGroupType &as, PathNode *tpn,
-    ShootableMapObject *tsmo, bool forced_shot, int make_shots, 
+    ShootableMapObject *tsmo, bool forced_shot, uint32 make_shots, 
     pedWeaponToUse *pw_to_use, int32 value)
 {
     as.state = 1;
@@ -2412,6 +2411,7 @@ bool PedInstance::createActQFiring(actionQueueGroupType &as, PathNode *tpn,
         } else {
             aq.t_pn = *tpn;
             aq.ot_execute = PedInstance::ai_aAttackLocation;
+            aq.t_smo = NULL;
         }
     } else {
         if (tsmo && tsmo->majorType() == MapObject::mjt_Ped) {
@@ -2604,8 +2604,8 @@ void PedInstance::createActQFindEnemy(actionQueueGroupType &as) {
 }
 
 
-void PedInstance::setActQInQueue(actionQueueGroupType &as,
-    bool set_id)
+bool PedInstance::setActQInQueue(actionQueueGroupType &as,
+    uint32 * id)
 {
     // NOTE: if action is invalidated all remaining actions in queue are
     // invalid, they should be removed
@@ -2632,18 +2632,24 @@ void PedInstance::setActQInQueue(actionQueueGroupType &as,
             actions_queue_.erase(it_s, actions_queue_.end());
         setActionStateToDrawnAnim();
     }
-    if (set_id) {
+    if (id != NULL) {
         as.group_id = action_grp_id_++;
+        *id = as.group_id;
+    } else {
+        as.group_id = 0;
     }
     actions_queue_.push_back(as);
+    return true;
 }
 
 bool PedInstance::addActQToQueue(actionQueueGroupType &as,
-    bool set_id)
+    uint32 * id)
 {
-    if (set_id) {
+    if (id != NULL) {
         as.group_id = action_grp_id_++;
-    }
+        *id = as.group_id;
+    } else
+        as.group_id = 0;
     actions_queue_.push_back(as);
     return true;
 }
@@ -2694,3 +2700,68 @@ void PedInstance::dropActQ() {
     }
     actions_queue_.clear();
 }
+
+void PedInstance::setActGFiringShots(uint32 id, uint32 make_shots)
+{
+    for (std::vector <actionQueueGroupType>::iterator it =
+        actions_queue_.begin(); it != actions_queue_.end(); it++)
+    {
+            if (it->group_id == id) {
+                for (std::vector <actionQueueType>::iterator it_a =
+                    it->actions.begin(); it_a != it->actions.end(); it++)
+                {
+                    if ((it_a->ot_execute & (PedInstance::ai_aDestroyObject
+                        | PedInstance::ai_aAttackLocation
+                        | PedInstance::ai_aAquireControl)) != 0)
+                    {
+                        it_a->multi_var.enemy_var.make_shots = make_shots;
+                        break;
+                    }
+                }
+                break;
+            }
+    }
+}
+
+void PedInstance::updtActGFiring(uint32 id, PathNode* tpn,
+    ShootableMapObject* tsmo)
+{
+    for (std::vector <actionQueueGroupType>::iterator it =
+        actions_queue_.begin(); it != actions_queue_.end(); it++)
+    {
+            if (it->group_id == id) {
+                for (std::vector <actionQueueType>::iterator it_a =
+                    it->actions.begin(); it_a != it->actions.end(); it++)
+                {
+                    if ((it_a->ot_execute & (PedInstance::ai_aDestroyObject
+                        | PedInstance::ai_aAttackLocation)) != 0)
+                    {
+                        // TODO : update with when condition will be used
+                        if (tsmo) {
+                            it_a->t_smo = tsmo;
+                            it_a->ot_execute = PedInstance::ai_aDestroyObject;
+                        } else {
+                            it_a->t_pn = *tpn;
+                            it_a->ot_execute = PedInstance::ai_aAttackLocation;
+                            it_a->t_smo = NULL;
+                        }
+                        break;
+                    }
+                    if ((it_a->ot_execute
+                        & (PedInstance::ai_aAquireControl)) != 0)
+                    {
+                        if (tsmo) {
+                            it_a->t_smo = tsmo;
+                        } else {
+                            it_a->t_pn = *tpn;
+                            it_a->t_smo = NULL;
+                        }
+                        break;
+                    }
+                }
+                break;
+            }
+    }
+}
+
+

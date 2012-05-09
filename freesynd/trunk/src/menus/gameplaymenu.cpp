@@ -50,6 +50,7 @@ pointing_at_ped_(-1), pointing_at_vehicle_(-1), pointing_at_weapon_(-1)
 {
     scroll_x_ = 0;
     scroll_y_ = 0;
+    shooting_events_.clear();
 }
 
 /*!
@@ -491,7 +492,7 @@ void GameplayMenu::handleLeave()
     g_App.music().stopPlayback();
 
     g_System.hideCursor();
-	menu_manager_->setDefaultPalette();
+    menu_manager_->setDefaultPalette();
     mission_->end();
     
     tick_count_ = 0;
@@ -510,6 +511,7 @@ void GameplayMenu::handleLeave()
     mission_ = NULL;
     scroll_x_ = 0;
     scroll_y_ = 0;
+    shooting_events_.clear();
 }
 
 void GameplayMenu::handleMouseMotion(int x, int y, int state, const int modKeys)
@@ -794,6 +796,7 @@ bool GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
             }
         }
     } else if (button == 3) {
+        stopShootingEvent();
         if (x >= 129) {
             int ox, oy;
             int tx =
@@ -814,8 +817,10 @@ bool GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
                         {
                             if (modKeys & KMD_CTRL)
                                 pa->addActQToQueue(as);
-                            else
-                                pa->setActQInQueue(as);
+                            else {
+                                shooting_events_.agents_shooting[i] = true;
+                                pa->setActQInQueue(as, &shooting_events_.ids[i]);
+                            }
                         }
                     } else if (pointing_at_vehicle_ != -1) {
                         PedInstance::actionQueueGroupType as;
@@ -826,8 +831,10 @@ bool GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
                         {
                             if (modKeys & KMD_CTRL)
                                 pa->addActQToQueue(as);
-                            else
-                                pa->setActQInQueue(as);
+                            else {
+                                shooting_events_.agents_shooting[i] = true;
+                                pa->setActQInQueue(as, &shooting_events_.ids[i]);
+                            }
                         }
                     } else {
                         int stx = tx;
@@ -853,8 +860,11 @@ bool GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
                                 if (pa->createActQFiring(as, &pn, NULL, true))
                                     pa->addActQToQueue(as);
                             } else {
-                                if (pa->createActQFiring(as, &pn, NULL, true, 1))
-                                    pa->setActQInQueue(as);
+                                if (pa->createActQFiring(as, &pn, NULL, true))
+                                {
+                                    shooting_events_.agents_shooting[i] = true;
+                                    pa->setActQInQueue(as, &shooting_events_.ids[i]);
+                                }
                             }
                         }
                     }
@@ -906,13 +916,20 @@ bool GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
     return true;
 }
 
+void GameplayMenu::stopShootingEvent(void )
+{
+    for (int i = 0; i < 4; i++) {
+        if (shooting_events_.agents_shooting[i]) {
+            shooting_events_.agents_shooting[i] = false;
+            mission_->ped(i)->setActGFiringShots(shooting_events_.ids[i], 1);
+        }
+    }
+}
+
+
 void GameplayMenu::handleMouseUp(int x, int y, int button, const int modKeys) {
     if (button == 3) {
-        for (int i = 0; i < 4; i++) {
-            if (isAgentSelected(i)) {
-                // TODO: button pressed, stop firing, use id to drop
-            }
-        }
+        stopShootingEvent();
     }
 }
 
