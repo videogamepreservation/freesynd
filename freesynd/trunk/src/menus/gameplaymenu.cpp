@@ -617,6 +617,51 @@ void GameplayMenu::handleMouseMotion(int x, int y, int state, const int modKeys)
         g_System.usePickupCursor();
     else
         g_System.usePointerCursor();
+
+    if (x < 129)
+        stopShootingEvent();
+    if (shooting_events_.shooting_) {
+        int ox, oy;
+        int tx =
+            g_App.maps().screenToTileX(mission_->map(), world_x_ + x - 129,
+                world_y_ + y, ox);
+        int ty =
+            g_App.maps().screenToTileY(mission_->map(), world_x_ + x - 129,
+                world_y_ + y, oy);
+        for (int i = 0; i < 4; i++) {
+            if (shooting_events_.agents_shooting[i]) {
+                PedInstance * pa = mission_->ped(i);
+                if (pointing_at_ped_ != -1) {
+                    pa->updtActGFiring(shooting_events_.ids[i], NULL,
+                        mission_->ped(pointing_at_ped_));
+                } else if (pointing_at_vehicle_ != -1) {
+                    pa->updtActGFiring(shooting_events_.ids[i], NULL,
+                        mission_->vehicle(pointing_at_vehicle_));
+                } else {
+                    int stx = tx;
+                    int sty = ty;
+                    int stz = 0;
+                    int sox = ox;
+                    int soy = oy;
+                    int oz = 0;
+                    if (mission_->getShootableTile(stx, sty, stz,
+                        sox, soy, oz))
+                    {
+                        PathNode pn(stx, sty, stz, sox, soy, oz);
+                        pa->updtActGFiring(shooting_events_.ids[i], &pn,
+                           NULL);
+#if 0
+                        printf("shooting at\n x = %i, y=%i, z=%i\n",
+                            stx, sty, stz);
+                        printf("shooting pos\n ox = %i, oy=%i, oz=%i\n",
+                            sox, soy, oz);
+#endif
+                    }
+                }
+            }
+        }
+    }
+
 }
 
 bool GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
@@ -797,7 +842,7 @@ bool GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
         }
     } else if (button == 3) {
         stopShootingEvent();
-        if (x >= 129) {
+        if (x > 128) {
             int ox, oy;
             int tx =
                 g_App.maps().screenToTileX(mission_->map(), world_x_ + x - 129,
@@ -806,8 +851,8 @@ bool GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
                 g_App.maps().screenToTileY(mission_->map(), world_x_ + x - 129,
                     world_y_ + y, oy);
             for (int i = 0; i < 4; i++) {
-                PedInstance * pa = mission_->ped(i);
                 if (isAgentSelected(i)) {
+                    PedInstance * pa = mission_->ped(i);
                     if (pointing_at_ped_ != -1) {
                         PedInstance::actionQueueGroupType as;
                         as.main_act = 0;
@@ -819,6 +864,7 @@ bool GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
                                 pa->addActQToQueue(as);
                             else {
                                 shooting_events_.agents_shooting[i] = true;
+                                shooting_events_.shooting_ = true;
                                 pa->setActQInQueue(as, &shooting_events_.ids[i]);
                             }
                         }
@@ -833,6 +879,7 @@ bool GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
                                 pa->addActQToQueue(as);
                             else {
                                 shooting_events_.agents_shooting[i] = true;
+                                shooting_events_.shooting_ = true;
                                 pa->setActQInQueue(as, &shooting_events_.ids[i]);
                             }
                         }
@@ -863,6 +910,7 @@ bool GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
                                 if (pa->createActQFiring(as, &pn, NULL, true))
                                 {
                                     shooting_events_.agents_shooting[i] = true;
+                                    shooting_events_.shooting_ = true;
                                     pa->setActQInQueue(as, &shooting_events_.ids[i]);
                                 }
                             }
@@ -918,10 +966,13 @@ bool GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
 
 void GameplayMenu::stopShootingEvent(void )
 {
-    for (int i = 0; i < 4; i++) {
-        if (shooting_events_.agents_shooting[i]) {
-            shooting_events_.agents_shooting[i] = false;
-            mission_->ped(i)->setActGFiringShots(shooting_events_.ids[i], 1);
+    if (shooting_events_.shooting_) {
+        shooting_events_.shooting_ = false;
+        for (int i = 0; i < 4; i++) {
+            if (shooting_events_.agents_shooting[i]) {
+                shooting_events_.agents_shooting[i] = false;
+                mission_->ped(i)->discardActG(shooting_events_.ids[i]);
+            }
         }
     }
 }

@@ -495,7 +495,10 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                             // TODO: handle correctly, use info returned from
                             // inflictDamage, needs use of condition
                             if (answ == 0 || answ == 2) {
-                                aqt.state |= 2 + 32;
+                                if ((aqt.ot_execute & PedInstance::ai_aWait) != 0)
+                                    aqt.state |= 2 + 32;
+                                else
+                                    aqt.state |= 2;
                                 if (make_shots == 0 && aqt.t_smo->health() <= 0)
                                     aqt.state |= 4;
                                 else if (shots_done != 0) {
@@ -729,7 +732,10 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                         uint16 answ = wi->inflictDamage(NULL, &aqt.t_pn, &tm_left,
                             aqt.multi_var.enemy_var.forced_shot, &shots_done);
                         if (answ == 0 || answ == 2) {
-                            aqt.state |= 2 + 32;
+                            if ((aqt.ot_execute & PedInstance::ai_aWait) != 0)
+                                aqt.state |= 2 + 32;
+                            else
+                                aqt.state |= 2;
                             if (shots_done != 0) {
                                 aqt.multi_var.enemy_var.shots_done += shots_done;
                                 if (make_shots != 0 && make_shots
@@ -951,7 +957,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                 {
                     // no failed or suspended will have "wait" action
                     // NOTE: in order to use "wait" as single command
-                    // state should have 4 + 128 already set
+                    // state should have 4 + 32 + 128 already set
                     if ((aqt.state & 60) == 36) {
                         if ((aqt.state & 128) != 0) {
                             aqt.multi_var.time_var.elapsed += elapsed;
@@ -2736,13 +2742,15 @@ void PedInstance::updtActGFiring(uint32 id, PathNode* tpn,
                     if ((it_a->ot_execute & (PedInstance::ai_aDestroyObject
                         | PedInstance::ai_aAttackLocation)) != 0)
                     {
+                        it_a->ot_execute &= ~(PedInstance::ai_aDestroyObject
+                            | PedInstance::ai_aAttackLocation);
                         // TODO : update with when condition will be used
                         if (tsmo) {
                             it_a->t_smo = tsmo;
-                            it_a->ot_execute = PedInstance::ai_aDestroyObject;
+                            it_a->ot_execute |= PedInstance::ai_aDestroyObject;
                         } else {
                             it_a->t_pn = *tpn;
-                            it_a->ot_execute = PedInstance::ai_aAttackLocation;
+                            it_a->ot_execute |= PedInstance::ai_aAttackLocation;
                             it_a->t_smo = NULL;
                         }
                         break;

@@ -36,11 +36,11 @@
 class PathNode {
 public:
     PathNode() :
-        tile_x_(0), tile_y_(0), tile_z_(0), off_x_(0), off_y_(0) {}
+        tile_x_(0), tile_y_(0), tile_z_(0), vis_z_(0), off_x_(0), off_y_(0) {}
     PathNode(int tile_x, int tile_y, int tile_z, int off_x = 128,
             int off_y = 128, int off_z = 0) :
-        tile_x_(tile_x), tile_y_(tile_y), tile_z_(tile_z), off_x_(off_x),
-                off_y_(off_y), off_z_(off_z) {}
+        tile_x_(tile_x), tile_y_(tile_y), tile_z_(tile_z), vis_z_(tile_z),
+        off_x_(off_x), off_y_(off_y), off_z_(off_z) {}
 
     int tileX() const { return tile_x_; }
     int tileY() const { return tile_y_; }
@@ -69,6 +69,7 @@ public:
     void setTileX(int x) { tile_x_ = x; }
     void setTileY(int y) { tile_y_ = y; }
     void setTileZ(int z) { tile_z_ = z; }
+    void setVisZ(int z) { vis_z_ = z; }
     void setTileXYZ(int x, int y, int z) {
         tile_x_ = x;
         tile_y_ = y;
@@ -82,7 +83,7 @@ public:
     }
 
 protected:
-    int tile_x_, tile_y_, tile_z_, off_x_, off_y_, off_z_;
+    int tile_x_, tile_y_, tile_z_, vis_z_, off_x_, off_y_, off_z_;
 };
 
 #endif

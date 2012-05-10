@@ -88,9 +88,11 @@ protected:
     bool completed_;
     bool pressed_btn_select_all_;
     struct {
+        bool shooting_;
         bool agents_shooting[4];
         uint32 ids[4];
         void clear() {
+            shooting_ = false;
             agents_shooting[0] = false;
             agents_shooting[1] = false;
             agents_shooting[2] = false;
