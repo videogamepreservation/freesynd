@@ -462,9 +462,23 @@ void SystemSDL::usePointerCursor() {
     cursor_hs_x_ = cursor_hs_y_ = 0;
 }
 
+void SystemSDL::usePointerYellowCursor() {
+    update_cursor_ = true;
+    cursor_rect_.x = 24;
+    cursor_rect_.y = 24;
+    cursor_hs_x_ = cursor_hs_y_ = 0;
+}
+
 void SystemSDL::useTargetCursor() {
     update_cursor_ = true;
     cursor_rect_.x = 48;
+    cursor_rect_.y = 0;
+    cursor_hs_x_ = cursor_hs_y_ = 10;
+}
+
+void SystemSDL::useTargetRedCursor() {
+    update_cursor_ = true;
+    cursor_rect_.x = 72;
     cursor_rect_.y = 0;
     cursor_hs_x_ = cursor_hs_y_ = 10;
 }

@@ -104,7 +104,9 @@ struct System : public Singleton<System> {
      */
     virtual void useMenuCursor() = 0;
     virtual void usePointerCursor() = 0;
+    virtual void usePointerYellowCursor() = 0;
     virtual void useTargetCursor() = 0;
+    virtual void useTargetRedCursor() = 0;
     virtual void usePickupCursor() = 0;
     virtual int getKeyModState() = 0;
 

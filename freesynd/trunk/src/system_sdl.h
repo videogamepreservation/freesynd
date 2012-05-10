@@ -66,7 +66,9 @@ public:
     void showCursor();
     void useMenuCursor();
     void usePointerCursor();
+    void usePointerYellowCursor();
     void useTargetCursor();
+    void useTargetRedCursor();
     void usePickupCursor();
     int getKeyModState() {
         return keyModState_;

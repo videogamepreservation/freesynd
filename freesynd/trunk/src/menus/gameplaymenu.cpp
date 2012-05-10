@@ -494,7 +494,7 @@ void GameplayMenu::handleLeave()
     g_System.hideCursor();
     menu_manager_->setDefaultPalette();
     mission_->end();
-    
+
     tick_count_ = 0;
     last_animate_tick_ = 0;
     last_motion_tick_ = 0;
@@ -586,37 +586,48 @@ void GameplayMenu::handleMouseMotion(int x, int y, int state, const int modKeys)
         }
     }
 
-    // I only want to show the cross-hair cursor if one of your selected agents can shoot
-    // the target.  I know this isn't the same as the original game, but displaying a red
-    // cross-hair is particularly difficult on multiple platforms, so this is a good
-    // compromise.
-    // Updated 2006/11/20, think I'll ignore range - quantumg
-    bool shootable = false;
-
-    if (pointing_at_ped_ != -1) {
+    bool inrange = false;
+    // TODO: use pointers instead of int for peds, vehicles, weapons?
+    if (pointing_at_ped_ != -1)
         for (int i = 0; i < 4; i++)
-            if (isAgentSelected(i)
-                    && mission_->ped(i)->selectedWeapon())
-                shootable = true;
-    }
+            if (isAgentSelected(i)) {
+                WeaponInstance * wi = mission_->ped(i)->selectedWeapon();
+                ShootableMapObject *tsmo = mission_->ped(pointing_at_ped_);
+                if (wi && wi->canShoot() && wi->inRangeNoCP(&tsmo) == 1)
+                {
+                    inrange = true;
+                }
+            }
 
-    if (pointing_at_vehicle_ != -1) {
+    if (pointing_at_vehicle_ != -1)
         for (int i = 0; i < 4; i++)
-            if (isAgentSelected(i))
-                shootable = true;
-    }
+            if (isAgentSelected(i)) {
+                WeaponInstance * wi = mission_->ped(i)->selectedWeapon();
+                ShootableMapObject *tsmo = mission_->vehicle(pointing_at_vehicle_);
+                if (wi && wi->canShoot() && wi->inRangeNoCP(&tsmo)== 1)
+                {
+                    inrange = true;
+                }
+            }
 
 #if 0
     if (!shootable)
         pointing_at_ped_ = pointing_at_vehicle_ = -1;
 #endif
 
-    if (pointing_at_ped_ != -1 || pointing_at_vehicle_ != -1)
-        g_System.useTargetCursor();
-    else if (pointing_at_weapon_ != -1)
+    if (pointing_at_ped_ != -1 || pointing_at_vehicle_ != -1) {
+        if (inrange)
+            g_System.useTargetRedCursor();
+        else
+            g_System.useTargetCursor();
+    } else if (pointing_at_weapon_ != -1)
         g_System.usePickupCursor();
-    else
-        g_System.usePointerCursor();
+    else {
+        if (x > 128)
+            g_System.usePointerCursor();
+        else
+            g_System.usePointerYellowCursor();
+    }
 
     if (x < 129)
         stopShootingEvent();
