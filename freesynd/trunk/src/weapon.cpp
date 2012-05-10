@@ -315,12 +315,7 @@ ProjectileShot::ProjectileShot(toDefineXYZ &cp, Weapon::ShotDesc & sd,
     dist_max_ = range_max;
     dist_passed_ = 0;
     speed_ = shot_speed;
-    // TODO: animation shift by Z and last_anim_dist_
-    if (dmg_range_ == 0) {
-        last_anim_dist_ = 128;
-    } else {
-        last_anim_dist_ = 0;
-    }
+    last_anim_dist_ = 0;
     life_over_ = false;
     double diffx = (double)(sd.tp.x - cur_pos_.x);
     double diffy = (double)(sd.tp.y - cur_pos_.y);
@@ -553,7 +548,9 @@ bool ProjectileShot::animate(int elapsed, Mission *m) {
  * \return mask of different actions done
  * 0b - no ammo (1), 1b - not enough time for single shot (2),
  * 2b - weapon does no damage (4), 3b - weapon's target is wrong (8),
- * 4b - an object blocker (16), 5b - a tile blocking (32), 6b - too far (64)
+ * 4b - an object blocker (16), 5b - a tile blocking (32), 6b - too far (64),
+ * 7b - wrong shooting point, out of game boundaries(128), 8b - wrong shooting
+ * point, solid tile
  * 0 - successful shot
 */
 uint16 WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
@@ -576,19 +573,61 @@ uint16 WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
     int yb = 0;
     int txb = 0;
     int tyb = 0;
-    // TODO: when has owner add per weapon shift of position,
-    // per direction, to "cp" - current position
     toDefineXYZ cp;
     Mission *m = g_Session.getMission();
     if (owner_) {
         xb = owner_->tileX() * 256 + owner_->offX();
         yb = owner_->tileY() * 256 + owner_->offY();
+        if (main_type_ == Weapon::Flamer) {
+            int dir = owner_->getDirection(8);
+            switch (dir) {
+                case 0:
+                    yb += 160;
+                    break;
+                case 1:
+                    xb += 96;
+                    yb += 96;
+                    break;
+                case 2:
+                    xb += 160;
+                    break;
+                case 3:
+                    xb += 96;
+                    yb -= 96;
+                    break;
+                case 4:
+                    yb -= 160;
+                    break;
+                case 5:
+                    xb -= 96;
+                    yb -= 96;
+                    break;
+                case 6:
+                    xb -= 160;
+                    break;
+                case 7:
+                    xb -= 96;
+                    yb += 96;
+                    break;
+            }
+        }
+        if (xb < 0 || (xb > (m->mmax_x_ - 1) * 256))
+            return 128;
+        if (yb < 0 || (yb > (m->mmax_y_ - 1) * 256))
+            return 128;
         cp.x = xb;
         cp.y = yb;
         cp.z = owner_->visZ() * 128 + owner_->offZ()
             + (owner_->sizeZ() >> 1);
         if (cp.z > (m->mmax_z_ - 1) * 128)
             cp.z = (m->mmax_z_ - 1) * 128;
+        int tilez = cp.z / 128;
+        int tileoz = cp.z % 128;
+        if (tileoz != 0)
+            tilez++;
+        if (m->isTileSolid(cp.x / 256, cp.y / 256, tilez, cp.x % 256,
+            cp.y % 256, tileoz))
+            return 256;
         if (tobj || tp) {
             if (tobj) {
                 txb = tobj->tileX() * 256 + tobj->offX();

@@ -338,7 +338,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
             actions_queue_.push_back(as);
         }
     } else {
-        // TODO: xor finished and failed, when all actions will
+        // TODO: xor finished and failed, should all actions will
         // have execution time set?
         uint32 groups_processed = 0;
         for (std::vector <actionQueueGroupType>::iterator it =
@@ -485,7 +485,6 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                         wi = selectedWeapon();
                         if (wi && wi->ammoRemaining() > 0)
                         {
-                            // TODO: more info from weapon
                             int tm_left = elapsed;
                             uint32 make_shots = aqt.multi_var.enemy_var.make_shots;
                             uint32 shots_done = make_shots
@@ -724,7 +723,6 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                         //& Weapon::spe_CanShoot) != 0
                         && wi->ammoRemaining() > 0)
                     {
-                        // TODO: more info from weapon needed
                         int tm_left = elapsed;
                         uint32 make_shots = aqt.multi_var.enemy_var.make_shots;
                         uint32 shots_done = make_shots
@@ -815,9 +813,10 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                                     }
                                 } else if (checkHostileIs(p) ) {
                                     // TODO: hostile_desc_alt to checkHostileIs?
+                                    // IPA lvl inteligence?
                                     double distTo = 0;
                                     if (//inSightRange((MapObject *)(p)) &&
-                                        // TODO: set ignoreblocker based
+                                        // TODO: set ignoreblocker based on AL
                                         mission->inRangeCPos(
                                         &cur_xyz,
                                         (ShootableMapObject **)(&p),

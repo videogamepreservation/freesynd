@@ -176,6 +176,8 @@ public:
     void clrSurfaces();
     bool getWalkable(int &x, int &y, int &z, int &ox, int &oy);
     bool getShootableTile(int &x, int &y, int &z, int &ox, int &oy, int &oz);
+    bool isTileSolid(int x, int y, int z, int ox, int oy, int oz);
+
     void adjXYZ(int &x, int &y, int &z);
 
     void blockerExists(toDefineXYZ * startXYZ, toDefineXYZ * endXYZ,

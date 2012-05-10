@@ -99,7 +99,9 @@ bool Mission::loadLevel(uint8 * levelData)
     copydata(u11, 114058);
 
     i_map_id_ = READ_LE_UINT16(level_data_.mapinfos.map);
+#ifdef _DEBUG
     printf("map to load %X\n", i_map_id_);
+#endif
     min_x_ = READ_LE_UINT16(level_data_.mapinfos.min_x) / 2;
     min_y_ = READ_LE_UINT16(level_data_.mapinfos.min_y) / 2;
     max_x_ = READ_LE_UINT16(level_data_.mapinfos.max_x) / 2;
@@ -3488,4 +3490,36 @@ bool Mission::getShootableTile(int &x, int &y, int &z, int &ox, int &oy,
         assert(bz >= 0);
     }
     return gotit;
+}
+
+bool Mission::isTileSolid(int x, int y, int z, int ox, int oy, int oz) {
+    bool solid = true;
+    uint8 twd = mtsurfaces_[x + y * mmax_x_ + z * mmax_m_xy].twd;
+    switch (twd) {
+        case 0x00:
+        case 0x0C:
+        case 0x10:
+            solid = false;
+            break;
+        case 0x01:
+            if (oz > (127 - (oy >> 1)))
+                solid = false;
+            break;
+        case 0x02:
+            if (oz > (oy >> 1))
+                solid = false;
+            break;
+        case 0x03:
+            if (oz > (ox >> 1))
+                solid = false;
+            break;
+        case 0x04:
+            if (oz > (127 - (ox >> 1)))
+                solid = false;
+            break;
+        default:
+            break;
+    }
+
+    return solid;
 }
