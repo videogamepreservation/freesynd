@@ -2688,12 +2688,14 @@ void PedInstance::discardActG(std::vector <actionQueueGroupType>::iterator it_a)
         for (std::vector <actionQueueType>::iterator it =
             it_a->actions.begin(); it != it_a->actions.end(); it++
         ) {
-            if (((it->state & 14) == 2)) {
+            if ((it->state & 12) == 0 || (it->state & 128) != 0) {
                 it->state |= 8;
+                it->state &= ~128;
                 switchActionStateFrom(it->as);
             }
         }
         it_a->state |= 8;
+        it_a->state &= ~128;
     }
 }
 

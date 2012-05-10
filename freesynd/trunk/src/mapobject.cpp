@@ -298,8 +298,6 @@ bool MapObject::isBlocker(toDefineXYZ * startXYZ, toDefineXYZ * endXYZ,
     if (inc_xyz[1] != 0) {
         d_l = ((double)(range_y_l - startXYZ->y)) / inc_xyz[1];
         d_h = ((double)(range_y_h - startXYZ->y)) / inc_xyz[1];
-    }
-    if (inc_xyz[1] != 0 || inc_xyz[0] != 0) {
         range_g_l = (int)(d_l * inc_xyz[2] + startXYZ->z);
         range_g_h = (int)(d_h * inc_xyz[2] + startXYZ->z);
         if (range_g_h < range_g_l) {
@@ -347,22 +345,6 @@ bool MapObject::isBlocker(toDefineXYZ * startXYZ, toDefineXYZ * endXYZ,
             return false;
         range_x_l = low_num;
         range_x_h = high_num;
-    } else {
-        if (inc_xyz[1] != 0) {
-            range_g_l = (int)(d_l * inc_xyz[0] + startXYZ->x);
-            range_g_h = (int)(d_h * inc_xyz[0] + startXYZ->x);
-            if (range_g_h < range_g_l) {
-                low_num = range_g_h;
-                high_num = range_g_l;
-            } else {
-                low_num = range_g_l;
-                high_num = range_g_h;
-            }
-            if (low_num > range_x_h || high_num < range_x_l)
-                return false;
-            range_x_l = low_num;
-            range_x_h = high_num;
-        }
     }
 
     // restoring coordinates to their respective low/high values
@@ -408,7 +390,7 @@ SFXObject::SFXObject(int m, int type, int t_show) : MapObject(m),
             break;
         case SFXObject::sfxt_FlamerFire:
             anim_ = 383;
-            setFramesPerSec(10);
+            setFramesPerSec(12);
             break;
         case SFXObject::sfxt_Smoke:
             anim_ = 244;
