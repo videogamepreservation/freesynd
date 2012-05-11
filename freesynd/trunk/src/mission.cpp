@@ -2909,13 +2909,14 @@ WeaponInstance *Mission::createWeaponInstance(uint8 * data)
 * This function looks for statics, vehicles, peds
 */
 void Mission::blockerExists(toDefineXYZ * startXYZ, toDefineXYZ * endXYZ,
-                            double dist, MapObject** blockerObj)
+                            double *dist, MapObject** blockerObj)
 {
     // TODO: add check for weapons, when all weapons will be added
+    // TODO: calculating closest blocker first? (start point can be closer though)
     double inc_xyz[3];
-    inc_xyz[0] = (endXYZ->x - startXYZ->x) / dist;
-    inc_xyz[1] = (endXYZ->y - startXYZ->y) / dist;
-    inc_xyz[2] = (endXYZ->z - startXYZ->z) / dist;
+    inc_xyz[0] = (endXYZ->x - startXYZ->x) / (*dist);
+    inc_xyz[1] = (endXYZ->y - startXYZ->y) / (*dist);
+    inc_xyz[2] = (endXYZ->z - startXYZ->z) / (*dist);
     toDefineXYZ copyStartXYZ = *startXYZ;
     toDefineXYZ copyEndXYZ = *endXYZ;
     toDefineXYZ blockStartXYZ;
@@ -2982,6 +2983,7 @@ void Mission::blockerExists(toDefineXYZ * startXYZ, toDefineXYZ * endXYZ,
     if (*blockerObj != NULL) {
         *startXYZ = blockStartXYZ;
         *endXYZ = blockEndXYZ;
+        *dist = closest;
     }
 }
 
@@ -3142,21 +3144,17 @@ uint8 Mission::inRangeCPos(toDefineXYZ * cp, ShootableMapObject ** t,
         targetState = (*t)->isIgnored();
         (*t)->setIsIgnored(true);
     }
-    blockerExists(&startXYZ, &endXYZ, d, &blockerObj);
+    double dist_blocker = d;
+    blockerExists(&startXYZ, &endXYZ, &dist_blocker, &blockerObj);
     if (t && *t)
         (*t)->setIsIgnored(targetState);
 
     if (blockerObj) {
         bool blockerObj_is_closer = false;
         if (block_mask != 1) {
-            int dcx = cx - startXYZ.x;
-            int dcy = cy - startXYZ.y;
-            int dcz = cz - startXYZ.z;
-            int dist_blocker =
-                (dcx * dcx + dcy * dcy + dcz * dcz);
-            dcx = cx - (int)sx;
-            dcy = cy - (int)sy;
-            dcz = cz - (int)sz;
+            int dcx = cx - (int)sx;
+            int dcy = cy - (int)sy;
+            int dcz = cz - (int)sz;
             if (dist_blocker
                     < (dcx * dcx + dcy * dcy + dcz * dcz))
             {

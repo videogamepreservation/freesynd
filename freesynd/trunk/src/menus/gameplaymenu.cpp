@@ -982,7 +982,7 @@ void GameplayMenu::stopShootingEvent(void )
         for (int i = 0; i < 4; i++) {
             if (shooting_events_.agents_shooting[i]) {
                 shooting_events_.agents_shooting[i] = false;
-                mission_->ped(i)->discardActG(shooting_events_.ids[i]);
+                mission_->ped(i)->updtActGFiringShots(shooting_events_.ids[i], 1);
             }
         }
     }

@@ -205,10 +205,11 @@ bool MapObject::isBlocker(toDefineXYZ * startXYZ, toDefineXYZ * endXYZ,
     // Vehicle and other objects with different directions will be handleDamage
     // correctly
 
-    // NOTE: algorithm used, checks whether object is located within range
-    // defined by "start" and "end", then assuming that x coord belongs to
-    // vector calculates y from x range and compares range by y, if it is ok,
-    // calculates z from y range, then if in range by z, recalculates x and y
+    /* NOTE: algorithm, checks whether object is located within range
+     * defined by "start" and "end", then we calculate distances from x, y, z
+     * to their respective startXYZ, choose shortest, then longest between
+     * them and recalculate position of entering of shot and exit point
+     */
 
     // range_x check
     int range_x_h = tile_x_ * 256 + off_x_;
@@ -225,10 +226,6 @@ bool MapObject::isBlocker(toDefineXYZ * startXYZ, toDefineXYZ * endXYZ,
     }
     if (range_x_l > high_num || range_x_h < low_num)
         return false;
-    if (range_x_l < low_num)
-        range_x_l = low_num;
-    if (range_x_h > high_num)
-        range_x_h = high_num;
 
     // range_y check
     int range_y_h = tile_y_ * 256 + off_y_;
@@ -246,10 +243,6 @@ bool MapObject::isBlocker(toDefineXYZ * startXYZ, toDefineXYZ * endXYZ,
     }
     if (range_y_l > high_num || range_y_h < low_num)
         return false;
-    if (range_y_l < low_num)
-        range_y_l = low_num;
-    if (range_y_h > high_num)
-        range_y_h = high_num;
 
     // range_z check
     int range_z_l = vis_z_ * 128 + off_z_;
@@ -266,86 +259,92 @@ bool MapObject::isBlocker(toDefineXYZ * startXYZ, toDefineXYZ * endXYZ,
     }
     if (range_z_l > high_num || range_z_h < low_num)
         return false;
+
+    double d_l[3];
+    double d_h[3];
+    d_l[0] = ((double)(range_x_l - startXYZ->x)) / inc_xyz[0];
+    d_h[0] = ((double)(range_x_h - startXYZ->x)) / inc_xyz[0];
+    d_l[1] = ((double)(range_y_l - startXYZ->y)) / inc_xyz[1];
+    d_h[1] = ((double)(range_y_h - startXYZ->y)) / inc_xyz[1];
+    d_l[2] = ((double)(range_z_l - startXYZ->z)) / inc_xyz[2];
+    d_h[2] = ((double)(range_z_h - startXYZ->z)) / inc_xyz[2];
+
+    // shortest distances to starting point
+    double d_s[3];
+    if (d_l[0] > d_h[0])
+        d_s[0] = d_h[0];
+    else
+        d_s[0] = d_l[0];
+
+    if (d_l[1] > d_h[1])
+        d_s[1] = d_h[1];
+    else
+        d_s[1] = d_l[1];
+
+    if (d_l[2] > d_h[2])
+        d_s[2] = d_h[2];
+    else
+        d_s[2] = d_l[2];
+
+    uint8 indx;
+    // longest distance to start
+    if (d_s[0] > d_s[1]) {
+        if (d_s[0] > d_s[2])
+            indx = 0;
+        else
+            indx = 2;
+    } else if (d_s[1] > d_s[2])
+        indx = 1;
+    else
+        indx = 2;
+
+    double range_g_l = (int)(d_l[indx] * inc_xyz[0] + startXYZ->x);
+    double range_g_h = (int)(d_h[indx] * inc_xyz[0] + startXYZ->x);
+    if (range_g_h < range_g_l) {
+        low_num = range_g_h;
+        high_num = range_g_l;
+    } else {
+        low_num = range_g_l;
+        high_num = range_g_h;
+    }
+    if (low_num > range_x_h || high_num < range_x_l)
+        return false;
+    if (range_x_l < low_num)
+        range_x_l = low_num;
+    if (range_x_h > high_num)
+        range_x_h = high_num;
+
+    range_g_l = (int)(d_l[indx] * inc_xyz[1] + startXYZ->y);
+    range_g_h = (int)(d_h[indx] * inc_xyz[1] + startXYZ->y);
+    if (range_g_h < range_g_l) {
+        low_num = range_g_h;
+        high_num = range_g_l;
+    } else {
+        low_num = range_g_l;
+        high_num = range_g_h;
+    }
+    if (low_num > range_y_h || high_num < range_y_l)
+        return false;
+    if (range_y_l < low_num)
+        range_y_l = low_num;
+    if (range_y_h > high_num)
+        range_y_h = high_num;
+
+    range_g_l = (int)(d_l[indx] * inc_xyz[2] + startXYZ->z);
+    range_g_h = (int)(d_h[indx] * inc_xyz[2] + startXYZ->z);
+    if (range_g_h < range_g_l) {
+        low_num = range_g_h;
+        high_num = range_g_l;
+    } else {
+        low_num = range_g_l;
+        high_num = range_g_h;
+    }
+    if (low_num > range_z_h || high_num < range_z_l)
+        return false;
     if (range_z_l < low_num)
         range_z_l = low_num;
     if (range_z_h > high_num)
         range_z_h = high_num;
-
-    double d_l = 0;
-    double d_h = 0;
-    int range_g_l = 0;
-    int range_g_h = 0;
-    if (inc_xyz[0] != 0) {
-        d_l = ((double)(range_x_l - startXYZ->x)) / inc_xyz[0];
-        d_h = ((double)(range_x_h - startXYZ->x)) / inc_xyz[0];
-        range_g_l = (int)(d_l * inc_xyz[1] + startXYZ->y);
-        range_g_h = (int)(d_h * inc_xyz[1] + startXYZ->y);
-        if (range_g_h < range_g_l) {
-            low_num = range_g_h;
-            high_num = range_g_l;
-        } else {
-            low_num = range_g_l;
-            high_num = range_g_h;
-        }
-        if (low_num > range_y_h || high_num < range_y_l)
-            return false;
-        if (low_num > range_y_l)
-            range_y_l = low_num;
-        if (high_num < range_y_h)
-            range_y_h = high_num;
-    }
-
-    if (inc_xyz[1] != 0) {
-        d_l = ((double)(range_y_l - startXYZ->y)) / inc_xyz[1];
-        d_h = ((double)(range_y_h - startXYZ->y)) / inc_xyz[1];
-        range_g_l = (int)(d_l * inc_xyz[2] + startXYZ->z);
-        range_g_h = (int)(d_h * inc_xyz[2] + startXYZ->z);
-        if (range_g_h < range_g_l) {
-            low_num = range_g_h;
-            high_num = range_g_l;
-        } else {
-            low_num = range_g_l;
-            high_num = range_g_h;
-        }
-        if (low_num > range_z_h || high_num < range_z_l)
-            return false;
-        if (low_num > range_z_l)
-            range_z_l = low_num;
-        if (high_num < range_z_h)
-            range_z_h = high_num;
-    }
-
-    if (inc_xyz[2] != 0) {
-        d_l = ((double)(range_z_l - startXYZ->z)) / inc_xyz[2];
-        d_h = ((double)(range_z_h - startXYZ->z)) / inc_xyz[2];
-        range_g_l = (int)(d_l * inc_xyz[1] + startXYZ->y);
-        range_g_h = (int)(d_h * inc_xyz[1] + startXYZ->y);
-        if (range_g_h < range_g_l) {
-            low_num = range_g_h;
-            high_num = range_g_l;
-        } else {
-            low_num = range_g_l;
-            high_num = range_g_h;
-        }
-        if (low_num > range_y_h || high_num < range_y_l)
-            return false;
-        range_y_l = low_num;
-        range_y_h = high_num;
-
-        range_g_l = (int)(d_l * inc_xyz[0] + startXYZ->x);
-        range_g_h = (int)(d_h * inc_xyz[0] + startXYZ->x);
-        if (range_g_h < range_g_l) {
-            low_num = range_g_h;
-            high_num = range_g_l;
-        } else {
-            low_num = range_g_l;
-            high_num = range_g_h;
-        }
-        if (low_num > range_x_h || high_num < range_x_l)
-            return false;
-        range_x_l = low_num;
-        range_x_h = high_num;
-    }
 
     // restoring coordinates to their respective low/high values
     if (flipped_x) {

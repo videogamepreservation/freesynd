@@ -181,7 +181,7 @@ public:
     void adjXYZ(int &x, int &y, int &z);
 
     void blockerExists(toDefineXYZ * startXYZ, toDefineXYZ * endXYZ,
-        double dist, MapObject** blockerObj);
+        double *dist, MapObject** blockerObj);
     uint8 inRangeCPos(toDefineXYZ * cp, ShootableMapObject ** t,
         PathNode * pn = NULL, bool setBlocker = false,
         bool checkTileOnly = false, double maxr = -1.0, double * distTo = NULL);

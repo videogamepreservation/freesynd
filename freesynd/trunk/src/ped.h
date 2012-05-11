@@ -698,7 +698,7 @@ public:
     void discardActG(uint32 id);
     void discardActG(std::vector <actionQueueGroupType>::iterator it_a);
 
-    void setActGFiringShots(uint32 id, uint32 make_shots);
+    void updtActGFiringShots(uint32 id, uint32 make_shots);
     void updtActGFiring(uint32 id, PathNode *tpn,
         ShootableMapObject *tsmo = NULL);
 

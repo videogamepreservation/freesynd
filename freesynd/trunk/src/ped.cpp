@@ -2432,7 +2432,7 @@ bool PedInstance::createActQFiring(actionQueueGroupType &as, PathNode *tpn,
     aq.state = 1;
     aq.ot_execute |= PedInstance::ai_aWait;
     aq.multi_var.time_var.elapsed = 0;
-    aq.multi_var.time_var.time_total = 250;
+    aq.multi_var.time_var.time_total = 125;
     as.actions.push_back(aq);
     return true;
 }
@@ -2578,7 +2578,7 @@ void PedInstance::createActQWait(actionQueueGroupType &as, int tm_wait)
     actionQueueType aq;
     aq.as = PedInstance::pa_smNone;
     aq.group_desc = PedInstance::gd_mExclusive;
-    aq.state = 1;
+    aq.state = 1 | 4 | 32 | 128;
     aq.ot_execute = PedInstance::ai_aWait;
     aq.multi_var.time_var.elapsed = 0;
     aq.multi_var.time_var.time_total = tm_wait;
@@ -2600,7 +2600,7 @@ void PedInstance::createActQFindEnemy(actionQueueGroupType &as) {
     aq.ot_execute = PedInstance::ai_aDestroyObject;
     aq.ot_execute |= PedInstance::ai_aWait;
     aq.multi_var.time_var.elapsed = 0;
-    aq.multi_var.time_var.time_total = 250;
+    aq.multi_var.time_var.time_total = 125;
     aq.multi_var.enemy_var.make_shots = 0;
     aq.multi_var.enemy_var.shots_done = 0;
     aq.multi_var.enemy_var.weapon.desc = 4;
@@ -2708,7 +2708,7 @@ void PedInstance::dropActQ() {
     actions_queue_.clear();
 }
 
-void PedInstance::setActGFiringShots(uint32 id, uint32 make_shots)
+void PedInstance::updtActGFiringShots(uint32 id, uint32 make_shots)
 {
     for (std::vector <actionQueueGroupType>::iterator it =
         actions_queue_.begin(); it != actions_queue_.end(); it++)

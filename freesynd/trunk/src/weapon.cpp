@@ -655,15 +655,6 @@ uint16 WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
             cp.z = (m->mmax_z_ - 1) * 128;
     }
 
-    uint32 shots = 0;
-    if (make_shots)
-        shots = *make_shots;
-    shots = getShots(elapsed, shots);
-    if (make_shots)
-        *make_shots = shots;
-    if (shots == 0)
-        return 2;
-
     unsigned int shot_prop = pWeaponClass_->shotProperty();
 
     if (pWeaponClass_->dmgType() == MapObject::dmg_None) {
@@ -685,6 +676,8 @@ uint16 WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
         has_blocker = inRange(cp, &smp, &pn);
     if ((has_blocker & 30) != 0) {
         if (!ignoreBlocker) {
+            if (make_shots)
+                *make_shots = 0;
             if ((has_blocker & 6) != 0)
                 has_blocker = 16;
             else if ((has_blocker & 16) != 0)
@@ -694,6 +687,15 @@ uint16 WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
             return has_blocker;
         }
     }
+
+    uint32 shots = 0;
+    if (make_shots)
+        shots = *make_shots;
+    shots = getShots(elapsed, shots);
+    if (make_shots)
+        *make_shots = shots;
+    if (shots == 0)
+        return 2;
 
     
     if (owner_
