@@ -3156,7 +3156,7 @@ uint8 Mission::inRangeCPos(toDefineXYZ * cp, ShootableMapObject ** t,
             int dcy = cy - (int)sy;
             int dcz = cz - (int)sz;
             if (dist_blocker
-                    < (dcx * dcx + dcy * dcy + dcz * dcz))
+                    < sqrt((double)(dcx * dcx + dcy * dcy + dcz * dcz)))
             {
                 blockerObj_is_closer = true;
             }
