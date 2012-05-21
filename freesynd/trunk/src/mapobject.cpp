@@ -298,8 +298,8 @@ bool MapObject::isBlocker(toDefineXYZ * startXYZ, toDefineXYZ * endXYZ,
     else
         indx = 2;
 
-    double range_g_l = (int)(d_l[indx] * inc_xyz[0] + startXYZ->x);
-    double range_g_h = (int)(d_h[indx] * inc_xyz[0] + startXYZ->x);
+    int range_g_l = (int)(d_l[indx] * inc_xyz[0] + startXYZ->x);
+    int range_g_h = (int)(d_h[indx] * inc_xyz[0] + startXYZ->x);
     if (range_g_h < range_g_l) {
         low_num = range_g_h;
         high_num = range_g_l;

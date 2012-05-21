@@ -315,6 +315,11 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
     bool updated = false;
     //Weapon::WeaponAnimIndex weapon_idx =
         //selectedWeapon() ? selectedWeapon()->index() : Weapon::Unarmed_Anim;
+    if (actions_property_ == 1) {
+        dropActQ();
+        actions_property_ = 0;
+    }
+
     if (actions_queue_.size() != 0) {
         for (uint32 indx = 0; indx < actions_queue_.size();) {
             std::vector <actionQueueGroupType>::iterator it =
@@ -342,7 +347,8 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
         // have execution time set?
         uint32 groups_processed = 0;
         for (std::vector <actionQueueGroupType>::iterator it =
-            actions_queue_.begin(); it != actions_queue_.end(); it++)
+            actions_queue_.begin(); it != actions_queue_.end()
+            && actions_property_ == 0; it++)
         {
             if ((it->state & 128) == 0 && (it->state & 76) != 0)
                 continue;
@@ -973,6 +979,8 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                 if ((aqt.ot_execute & PedInstance::ai_aNonFinishable) != 0)
                 {
                 }
+                if (actions_property_ != 0)
+                    break;
                 if ((aqt.state & 32) != 0) {
                     if ((aqt.group_desc & PedInstance::gd_mExclusive) != 0)
                         it->state |= 2;
@@ -1469,6 +1477,7 @@ PedInstance::PedInstance(Ped *ped, int m) : ShootableMovableMapObject(m),
     rcv_damage_def_ = MapObject::ddmg_Ped;
     major_type_ = MapObject::mjt_Ped;
     state_ = PedInstance::pa_smNone;
+    actions_property_ = 0;
 }
 
 PedInstance::~PedInstance()
@@ -2127,6 +2136,8 @@ bool PedInstance::handleDamage(ShootableMapObject::DamageInflictType *d) {
         setObjGroupDef((obj_group_def_ & 0xFFFFFF00) |
             (((PedInstance *)d->d_owner)->objGroupDef() & 0xFF));
         setObjGroupID(((PedInstance *)d->d_owner)->objGroupID());
+        // TODO: inherit enemies
+        enemy_group_defs_.clear();
         dropActQ();
         assert(d->d_owner != NULL);
         PedInstance::actionQueueGroupType as;
@@ -2139,6 +2150,8 @@ bool PedInstance::handleDamage(ShootableMapObject::DamageInflictType *d) {
         as.main_act = as.actions.size() - 1;
         addActQToQueue(as);
         setDrawnAnim(PedInstance::ad_PersuadedAnim);
+        // better to check our known enemies they might be friends now
+        verifyHostilesFound(g_App.getGameSession().getMission());
         return true;
     }
     if (d->ddir != -1) {
@@ -2146,7 +2159,7 @@ bool PedInstance::handleDamage(ShootableMapObject::DamageInflictType *d) {
     }
     if (health_ <= 0) {
         health_ = -1;
-        dropActQ();
+        actions_property_ = 1;
         switchActionStateTo(PedInstance::pa_smDead);
 
         switch ((unsigned int)d->dtype) {
@@ -2627,10 +2640,11 @@ bool PedInstance::setActQInQueue(actionQueueGroupType &as,
             if (discarding) {
                 discardActG(it);
             } else if ((it->group_desc & as.group_desc) != 0
-                && (it->state & 12) == 0) {
+                && (it->state & 12) == 0)
+            {
                 discarding = true;
                 it_s = it;
-                it--;
+                discardActG(it);
             }
         }
         if (it_s != actions_queue_.end())

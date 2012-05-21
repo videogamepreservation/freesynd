@@ -706,6 +706,8 @@ protected:
     Ped *ped_;
 
     std::vector <actionQueueGroupType> actions_queue_;
+    // 0, ok; 1 - all actions should be dropped
+    uint8 actions_property_;
     std::vector <actionQueueGroupType> default_actions_;
     uint32 action_grp_id_;
     // (pedDescStateMasks)
