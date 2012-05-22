@@ -880,6 +880,9 @@ bool Door::animate(int elapsed, Mission *obj)
                         frame_ = 0;
                     }
                     p->hold_on_.wayFree = 1;
+                    p->hold_on_.tilex = x;
+                    p->hold_on_.tiley = y;
+                    p->hold_on_.tilez = z;
                 }
             } while (p);
             *i = 0;
@@ -895,6 +898,9 @@ bool Door::animate(int elapsed, Mission *obj)
                         frame_ = 0;
                     }
                     p->hold_on_.wayFree = 1;
+                    p->hold_on_.tilex = x;
+                    p->hold_on_.tiley = y;
+                    p->hold_on_.tilez = z;
                 }
             } while (p);
             break;
@@ -1028,7 +1034,7 @@ bool LargeDoor::animate(int elapsed, Mission *obj)
             *i = -2;
             mt = MapObject::mjt_Vehicle; si = 0;
             v = (VehicleInstance *)(obj->findAt(x + inc_rel,
-                y + rel_inc,z,&mt,&si,true));
+                y + rel_inc,z, &mt, &si,true));
             if (v) {
                 if (!found) {
                     state_ = Static::sttdoor_Opening;
@@ -1042,7 +1048,7 @@ bool LargeDoor::animate(int elapsed, Mission *obj)
             *i = 2;
             mt = MapObject::mjt_Vehicle; si = 0;
             v = (VehicleInstance *)(obj->findAt(x + inc_rel,
-                y + rel_inc,z,&mt,&si,true));
+                y + rel_inc,z, &mt, &si,true));
             if (v) {
                 if (!found) {
                     state_ = Static::sttdoor_Opening;

@@ -401,7 +401,8 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                         VehicleInstance *v = (VehicleInstance *)aqt.t_smo;
                         if (v->health() > 0 && (state_
                             & (PedInstance::pa_smInCar
-                            | PedInstance::pa_smUsingCar)) == 0)
+                            | PedInstance::pa_smUsingCar)) == 0
+                            && samePosition(v))
                         {
                             if (aqt.condition == 0) {
                                 v->setDriver(this);
@@ -1975,8 +1976,6 @@ bool PedInstance::movementP(Mission *m, int elapsed)
             if (hold_on_.tilex == nxtTileX && hold_on_.tiley == nxtTileY
                 && hold_on_.tilez == nxtTileZ)
                 return updated;
-            else
-                hold_on_.wayFree = 0;
         } else if (hold_on_.wayFree == 2) {
             if (hold_on_.xadj || hold_on_.yadj) {
                 if(abs(hold_on_.tilex - nxtTileX) <= hold_on_.xadj
@@ -1986,8 +1985,7 @@ bool PedInstance::movementP(Mission *m, int elapsed)
                     dest_path_.clear();
                     speed_ = 0;
                     return updated;
-                } else
-                    hold_on_.wayFree = 0;
+                }
             } else {
                 if (hold_on_.tilex == nxtTileX && hold_on_.tiley == nxtTileY
                     && hold_on_.tilez == nxtTileZ)
@@ -1995,8 +1993,7 @@ bool PedInstance::movementP(Mission *m, int elapsed)
                     dest_path_.clear();
                     speed_ = 0;
                     return updated;
-                } else
-                    hold_on_.wayFree = 0;
+                }
             }
         }
         // TODO: not ignore Z, if tile is stairs diffz is wrong
@@ -2415,6 +2412,7 @@ bool PedInstance::createActQFiring(actionQueueGroupType &as, PathNode *tpn,
         return false;
 
     aq.multi_var.enemy_var.value = value;
+    aq.multi_var.enemy_var.forced_shot = forced_shot;
     if (does_phys_dmg) {
         aq.as = PedInstance::pa_smFiring;
         // TODO: use condition to set more information for action execution
@@ -2422,7 +2420,6 @@ bool PedInstance::createActQFiring(actionQueueGroupType &as, PathNode *tpn,
         // until target destroyed, type of damage that will complete action
         aq.multi_var.enemy_var.make_shots = make_shots;
         aq.multi_var.enemy_var.shots_done = 0;
-        aq.multi_var.enemy_var.forced_shot = forced_shot;
         if (tsmo) {
             aq.t_smo = tsmo;
             aq.ot_execute = PedInstance::ai_aDestroyObject;
@@ -2436,7 +2433,6 @@ bool PedInstance::createActQFiring(actionQueueGroupType &as, PathNode *tpn,
             aq.as = PedInstance::pa_smNone;
             aq.multi_var.enemy_var.make_shots = make_shots;
             aq.multi_var.enemy_var.shots_done = 0;
-            aq.multi_var.enemy_var.forced_shot = forced_shot;
             aq.t_smo = tsmo;
             aq.ot_execute = PedInstance::ai_aAquireControl;
         } else
@@ -2618,6 +2614,7 @@ void PedInstance::createActQFindEnemy(actionQueueGroupType &as) {
     aq.multi_var.enemy_var.shots_done = 0;
     aq.multi_var.enemy_var.weapon.desc = 4;
     aq.multi_var.enemy_var.weapon.wpn.dmg_type = MapObject::dmg_Physical;
+    aq.multi_var.enemy_var.forced_shot = false;
     as.actions.push_back(aq);
 }
 
