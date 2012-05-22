@@ -31,6 +31,7 @@
 #include <list>
 #include "path.h"
 #include "pathsurfaces.h"
+#include "map.h"
 
 class MapObject;
 class Mission;
@@ -173,8 +174,13 @@ public:
         int tiley;
         int tilez;
         int xadj;// these create ranges for x
-        int yadj;// and y 
+        int yadj;// and y
+        MapObject * pathBlocker;
     }FreeWay;
+
+    virtual bool isPathBlocker() {
+        return false;
+    }
 
     void setRcvDamageDef(DefDamageType rcvDamageDef) {
         rcv_damage_def_ = rcvDamageDef;
@@ -443,6 +449,7 @@ public:
 
     void draw(int x, int y);
     bool animate(int elapsed, Mission *obj);
+    bool isPathBlocker();
 
 protected:
     int anim_, closing_anim_, open_anim_, opening_anim_;
@@ -458,6 +465,7 @@ public:
 
     void draw(int x, int y);
     bool animate(int elapsed, Mission *obj);
+    bool isPathBlocker();
 
 protected:
     int anim_, closing_anim_, opening_anim_;

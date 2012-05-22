@@ -883,6 +883,7 @@ bool Door::animate(int elapsed, Mission *obj)
                     p->hold_on_.tilex = x;
                     p->hold_on_.tiley = y;
                     p->hold_on_.tilez = z;
+                    p->hold_on_.pathBlocker = this;
                 }
             } while (p);
             *i = 0;
@@ -901,6 +902,7 @@ bool Door::animate(int elapsed, Mission *obj)
                     p->hold_on_.tilex = x;
                     p->hold_on_.tiley = y;
                     p->hold_on_.tilez = z;
+                    p->hold_on_.pathBlocker = this;
                 }
             } while (p);
             break;
@@ -921,6 +923,12 @@ bool Door::animate(int elapsed, Mission *obj)
     }
     return changed;
 }
+
+bool Door::isPathBlocker()
+{
+    return state_ != Static::sttdoor_Open;
+}
+
 
 LargeDoor::LargeDoor(int m, int anim, int closingAnim, int openingAnim):Static(m), anim_(anim),
 closing_anim_(closingAnim), opening_anim_(openingAnim)
@@ -1076,6 +1084,7 @@ bool LargeDoor::animate(int elapsed, Mission *obj)
                             p->hold_on_.yadj = 1;
                         }
                         p->hold_on_.tilez = z;
+                        p->hold_on_.pathBlocker = this;
                     }
                 } while (p);
             }
@@ -1097,6 +1106,7 @@ bool LargeDoor::animate(int elapsed, Mission *obj)
                             p->hold_on_.yadj = 1;
                         }
                         p->hold_on_.tilez = z;
+                        p->hold_on_.pathBlocker = this;
                     }
                 } while (p);
             }
@@ -1118,6 +1128,12 @@ bool LargeDoor::animate(int elapsed, Mission *obj)
     }
     return changed;
 }
+
+bool LargeDoor::isPathBlocker()
+{
+    return state_ != Static::sttdoor_Open;
+}
+
 
 Tree::Tree(int m, int anim, int burningAnim, int damagedAnim):Static(m),
 anim_(anim), burning_anim_(burningAnim), damaged_anim_(damagedAnim)

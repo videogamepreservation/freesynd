@@ -1034,6 +1034,7 @@ void Mission::end()
                         it++;
                     assert(it != weapons_.end());
                     weapons_.erase(it);
+                    wi->deactivate();
                     // auto-reload for pistol
                     if (wi->getMainType() == Weapon::Pistol)
                         wi->setAmmoRemaining(wi->ammo());

@@ -45,6 +45,7 @@ game mission files.
  - mapmenu: player color update - if changed in configmenu; change of owners for
 non-player owned territory, in original territory owners changed it was like
 other syndicates where capturing territories
+ - selectmenu make impossible to start gameplay with all agents non active+dead1
 
  Very low priority stuff, maybe for v0.9:
  - xmidi music data is not dealocated on exit - memory leak

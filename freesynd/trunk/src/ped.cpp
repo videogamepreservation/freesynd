@@ -1972,30 +1972,33 @@ bool PedInstance::movementP(Mission *m, int elapsed)
         int nxtTileX = dest_path_.front().tileX();
         int nxtTileY = dest_path_.front().tileY();
         int nxtTileZ = dest_path_.front().tileZ();
-        if (hold_on_.wayFree == 1) {
-            if (hold_on_.tilex == nxtTileX && hold_on_.tiley == nxtTileY
-                && hold_on_.tilez == nxtTileZ)
-                return updated;
-        } else if (hold_on_.wayFree == 2) {
-            if (hold_on_.xadj || hold_on_.yadj) {
-                if(abs(hold_on_.tilex - nxtTileX) <= hold_on_.xadj
-                    && abs(hold_on_.tiley - nxtTileY) <= hold_on_.yadj
-                    && hold_on_.tilez == nxtTileZ)
-                {
-                    dest_path_.clear();
-                    speed_ = 0;
-                    return updated;
-                }
-            } else {
+        if (hold_on_.wayFree != 0 && hold_on_.pathBlocker->isPathBlocker()) {
+            if (hold_on_.wayFree == 1) {
                 if (hold_on_.tilex == nxtTileX && hold_on_.tiley == nxtTileY
                     && hold_on_.tilez == nxtTileZ)
-                {
-                    dest_path_.clear();
-                    speed_ = 0;
                     return updated;
+            } else if (hold_on_.wayFree == 2) {
+                if (hold_on_.xadj || hold_on_.yadj) {
+                    if(abs(hold_on_.tilex - nxtTileX) <= hold_on_.xadj
+                        && abs(hold_on_.tiley - nxtTileY) <= hold_on_.yadj
+                        && hold_on_.tilez == nxtTileZ)
+                    {
+                        dest_path_.clear();
+                        speed_ = 0;
+                        return updated;
+                    }
+                } else {
+                    if (hold_on_.tilex == nxtTileX && hold_on_.tiley == nxtTileY
+                        && hold_on_.tilez == nxtTileZ)
+                    {
+                        dest_path_.clear();
+                        speed_ = 0;
+                        return updated;
+                    }
                 }
             }
-        }
+        } else
+            hold_on_.wayFree = 0;
         // TODO: not ignore Z, if tile is stairs diffz is wrong
         int adx =
              nxtTileX * 256 + dest_path_.front().offX();
