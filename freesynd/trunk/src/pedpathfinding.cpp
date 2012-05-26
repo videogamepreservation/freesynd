@@ -57,7 +57,7 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
         targetd->dirl, based->dirh, based->dirl);
     printf("ttwd %X \n",m->mtsurfaces_[x + y * m->mmax_x_ 
         + z * m->mmax_m_xy].twd);
-    printf("target pos: x %x; y %x; z %x, ox %i, oy %i\n",
+    printf("target pos: x %i; y %i; z %i, ox %i, oy %i\n",
         x, y, z, ox, oy);
     //printf("tileAt %x\n", g_App.maps().map(map())->tileAt(x,y,z));
     printf("base pos: x %i; y %i; z %i, ox %i, oy %i, oz %i\n",
