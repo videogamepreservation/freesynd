@@ -532,88 +532,87 @@ void GameplayMenu::handleMouseMotion(int x, int y, int state, const int modKeys)
         scroll_y_ = SCROLL_STEP;
     }
 
-    pointing_at_ped_ = -1;
-#ifdef _DEBUG
-    for (int i = 0; mission_ && i < mission_->numPeds(); i++) {
-#else
-    for (int i = 8; mission_ && i < mission_->numPeds(); i++) {
-#endif
-        PedInstance *p = mission_->ped(i);
-        if (p->health() > 0 && p->map() != -1) {
-            int px = p->screenX() - 10;
-            int py = p->screenY() - (1 + p->visZ()) * TILE_HEIGHT/3
-                - (p->offZ() * TILE_HEIGHT/3) / 128;
-
-            if (x - 129 + world_x_ >= px && y + world_y_ >= py &&
-                x - 129 + world_x_ < px + 21 && y + world_y_ < py + 34) {
-                pointing_at_ped_ = i;
-                break;
-            }
-        }
-    }
-
-    pointing_at_vehicle_ = -1;
-
-    for (int i = 0; mission_ && i < mission_->numVehicles(); i++) {
-        VehicleInstance *v = mission_->vehicle(i);
-        if (v->health() > 0) {
-            int px = v->screenX() - 20;
-            int py = v->screenY() - 10 - v->visZ() * TILE_HEIGHT/3;
-
-            if (x - 129 + world_x_ >= px && y + world_y_ >= py &&
-                x - 129 + world_x_ < px + 40 && y + world_y_ < py + 32) {
-                pointing_at_vehicle_ = i;
-                break;
-            }
-        }
-    }
-
-    pointing_at_weapon_ = -1;
-
-    for (int i = 0; mission_ && i < mission_->numWeapons(); i++) {
-        WeaponInstance *w = mission_->weapon(i);
-
-        if (w->map() != -1) {
-            int px = w->screenX() - 10;
-            int py = w->screenY() + 4 - w->visZ() * TILE_HEIGHT/3
-                - (w->offZ() * TILE_HEIGHT/3) / 128;
-
-            if (x - 129 + world_x_ >= px && y + world_y_ >= py &&
-                x - 129 + world_x_ < px + 20 && y + world_y_ < py + 15) {
-                pointing_at_weapon_ = i;
-                break;
-            }
-        }
-    }
-
     bool inrange = false;
-    // TODO: use pointers instead of int for peds, vehicles, weapons?
-    if (pointing_at_ped_ != -1)
-        for (int i = 0; i < 4; i++)
-            if (isAgentSelected(i)) {
-                WeaponInstance * wi = mission_->ped(i)->selectedWeapon();
-                ShootableMapObject *tsmo = mission_->ped(pointing_at_ped_);
-                if (wi && wi->canShoot() && wi->inRangeNoCP(&tsmo) == 1)
-                {
-                    inrange = true;
+    if (x > 128) {
+        pointing_at_ped_ = -1;
+    #ifdef _DEBUG
+        for (int i = 0; mission_ && i < mission_->numPeds(); i++) {
+    #else
+        for (int i = 8; mission_ && i < mission_->numPeds(); i++) {
+    #endif
+            PedInstance *p = mission_->ped(i);
+            if (p->health() > 0 && p->map() != -1) {
+                int px = p->screenX() - 10;
+                int py = p->screenY() - (1 + p->visZ()) * TILE_HEIGHT/3
+                    - (p->offZ() * TILE_HEIGHT/3) / 128;
+
+                if (x - 129 + world_x_ >= px && y + world_y_ >= py &&
+                    x - 129 + world_x_ < px + 21 && y + world_y_ < py + 34) {
+                    pointing_at_ped_ = i;
+                    break;
                 }
             }
+        }
 
-    if (pointing_at_vehicle_ != -1)
-        for (int i = 0; i < 4; i++)
-            if (isAgentSelected(i)) {
-                WeaponInstance * wi = mission_->ped(i)->selectedWeapon();
-                ShootableMapObject *tsmo = mission_->vehicle(pointing_at_vehicle_);
-                if (wi && wi->canShoot() && wi->inRangeNoCP(&tsmo)== 1)
-                {
-                    inrange = true;
+        pointing_at_vehicle_ = -1;
+
+        for (int i = 0; mission_ && i < mission_->numVehicles(); i++) {
+            VehicleInstance *v = mission_->vehicle(i);
+            if (v->health() > 0) {
+                int px = v->screenX() - 20;
+                int py = v->screenY() - 10 - v->visZ() * TILE_HEIGHT/3;
+
+                if (x - 129 + world_x_ >= px && y + world_y_ >= py &&
+                    x - 129 + world_x_ < px + 40 && y + world_y_ < py + 32) {
+                    pointing_at_vehicle_ = i;
+                    break;
                 }
             }
+        }
 
-#if 0
-    if (!shootable)
-        pointing_at_ped_ = pointing_at_vehicle_ = -1;
-#endif
+        pointing_at_weapon_ = -1;
+
+        for (int i = 0; mission_ && i < mission_->numWeapons(); i++) {
+            WeaponInstance *w = mission_->weapon(i);
+
+            if (w->map() != -1) {
+                int px = w->screenX() - 10;
+                int py = w->screenY() + 4 - w->visZ() * TILE_HEIGHT/3
+                    - (w->offZ() * TILE_HEIGHT/3) / 128;
+
+                if (x - 129 + world_x_ >= px && y + world_y_ >= py &&
+                    x - 129 + world_x_ < px + 20 && y + world_y_ < py + 15) {
+                    pointing_at_weapon_ = i;
+                    break;
+                }
+            }
+        }
+
+        // TODO: use pointers instead of int for peds, vehicles, weapons?
+        if (pointing_at_ped_ != -1)
+            for (int i = 0; i < 4; i++)
+                if (isAgentSelected(i)) {
+                    WeaponInstance * wi = mission_->ped(i)->selectedWeapon();
+                    ShootableMapObject *tsmo = mission_->ped(pointing_at_ped_);
+                    if (wi && wi->canShoot() && wi->inRangeNoCP(&tsmo) == 1)
+                    {
+                        inrange = true;
+                    }
+                }
+
+        if (pointing_at_vehicle_ != -1)
+            for (int i = 0; i < 4; i++)
+                if (isAgentSelected(i)) {
+                    WeaponInstance * wi = mission_->ped(i)->selectedWeapon();
+                    ShootableMapObject *tsmo = mission_->vehicle(pointing_at_vehicle_);
+                    if (wi && wi->canShoot() && wi->inRangeNoCP(&tsmo)== 1)
+                    {
+                        inrange = true;
+                    }
+                }
+    } else {
+        pointing_at_ped_ = pointing_at_vehicle_ = pointing_at_weapon_ = -1;
+    }
 
     if (pointing_at_ped_ != -1 || pointing_at_vehicle_ != -1) {
         if (inrange)
@@ -648,6 +647,9 @@ void GameplayMenu::handleMouseMotion(int x, int y, int state, const int modKeys)
                 } else if (pointing_at_vehicle_ != -1) {
                     pa->updtActGFiring(shooting_events_.ids[i], NULL,
                         mission_->vehicle(pointing_at_vehicle_));
+                } else if (pointing_at_weapon_ != -1) {
+                    pa->updtActGFiring(shooting_events_.ids[i], NULL,
+                        mission_->weapon(pointing_at_weapon_));
                 } else {
                     int stx = tx;
                     int sty = ty;
@@ -885,6 +887,21 @@ bool GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
                         as.group_desc = PedInstance::gd_mFire;
                         if (pa->createActQFiring(as, NULL,
                             mission_->vehicle(pointing_at_vehicle_), true))
+                        {
+                            if (modKeys & KMD_CTRL)
+                                pa->addActQToQueue(as);
+                            else {
+                                shooting_events_.agents_shooting[i] = true;
+                                shooting_events_.shooting_ = true;
+                                pa->setActQInQueue(as, &shooting_events_.ids[i]);
+                            }
+                        }
+                    } else if (pointing_at_weapon_ != -1) {
+                        PedInstance::actionQueueGroupType as;
+                        as.main_act = 0;
+                        as.group_desc = PedInstance::gd_mFire;
+                        if (pa->createActQFiring(as, NULL,
+                            mission_->weapon(pointing_at_weapon_), true))
                         {
                             if (modKeys & KMD_CTRL)
                                 pa->addActQToQueue(as);

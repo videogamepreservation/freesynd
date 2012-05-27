@@ -137,6 +137,10 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
     printf("data allocation/setup complete %i.%i\n", SDL_GetTicks()/1000, SDL_GetTicks()%1000);
 #endif
 
+#ifdef FIND_DEFINED_TILE
+    bool assertion_bool = true;
+    int x_check = 48, y_check = 23, z_check = 6;
+#endif
     do {
         unsigned short mindx = bn[blvl].indxs + bn[blvl].n;
         unsigned short nlvl = blvl + 1;
@@ -152,6 +156,11 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                         sadd.coords.x = bref.coords.x;
                         sadd.coords.y = bref.coords.y + 1;
                         sadd.coords.z = bref.coords.z + 1;
+#ifdef FIND_DEFINED_TILE
+                        if (sadd.coords.x == x_check && sadd.coords.y == y_check
+                            && sadd.coords.z == z_check)
+                            assert(assertion_bool);
+#endif
                         sadd.p->lvl = nlvl;
                         sadd.p->t |= m_fdBasePoint;
                         bv.push_back(sadd);
@@ -168,6 +177,11 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                         sadd.coords.x = bref.coords.x + 1;
                         sadd.coords.y = bref.coords.y;
                         sadd.coords.z = bref.coords.z + 1;
+#ifdef FIND_DEFINED_TILE
+                        if (sadd.coords.x == x_check && sadd.coords.y == y_check
+                            && sadd.coords.z == z_check)
+                            assert(assertion_bool);
+#endif
                         sadd.p->lvl = nlvl;
                         sadd.p->t |= m_fdBasePoint;
                         bv.push_back(sadd);
@@ -184,6 +198,11 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                         sadd.coords.x = bref.coords.x;
                         sadd.coords.y = bref.coords.y - 1;
                         sadd.coords.z = bref.coords.z + 1;
+#ifdef FIND_DEFINED_TILE
+                        if (sadd.coords.x == x_check && sadd.coords.y == y_check
+                            && sadd.coords.z == z_check)
+                            assert(assertion_bool);
+#endif
                         sadd.p->lvl = nlvl;
                         sadd.p->t |= m_fdBasePoint;
                         bv.push_back(sadd);
@@ -200,6 +219,11 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                         sadd.coords.x = bref.coords.x - 1;
                         sadd.coords.y = bref.coords.y;
                         sadd.coords.z = bref.coords.z + 1;
+#ifdef FIND_DEFINED_TILE
+                        if (sadd.coords.x == x_check && sadd.coords.y == y_check
+                            && sadd.coords.z == z_check)
+                            assert(assertion_bool);
+#endif
                         sadd.p->lvl = nlvl;
                         sadd.p->t |= m_fdBasePoint;
                         bv.push_back(sadd);
@@ -218,6 +242,11 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                         sadd.coords.x = bref.coords.x;
                         sadd.coords.y = bref.coords.y + 1;
                         sadd.coords.z = bref.coords.z - 1;
+#ifdef FIND_DEFINED_TILE
+                        if (sadd.coords.x == x_check && sadd.coords.y == y_check
+                            && sadd.coords.z == z_check)
+                            assert(assertion_bool);
+#endif
                         sadd.p->lvl = nlvl;
                         sadd.p->t |= m_fdBasePoint;
                         bv.push_back(sadd);
@@ -234,6 +263,11 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                         sadd.coords.x = bref.coords.x + 1;
                         sadd.coords.y = bref.coords.y;
                         sadd.coords.z = bref.coords.z - 1;
+#ifdef FIND_DEFINED_TILE
+                        if (sadd.coords.x == x_check && sadd.coords.y == y_check
+                            && sadd.coords.z == z_check)
+                            assert(assertion_bool);
+#endif
                         sadd.p->lvl = nlvl;
                         sadd.p->t |= m_fdBasePoint;
                         bv.push_back(sadd);
@@ -250,6 +284,11 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                         sadd.coords.x = bref.coords.x;
                         sadd.coords.y = bref.coords.y - 1;
                         sadd.coords.z = bref.coords.z - 1;
+#ifdef FIND_DEFINED_TILE
+                        if (sadd.coords.x == x_check && sadd.coords.y == y_check
+                            && sadd.coords.z == z_check)
+                            assert(assertion_bool);
+#endif
                         sadd.p->lvl = nlvl;
                         sadd.p->t |= m_fdBasePoint;
                         bv.push_back(sadd);
@@ -266,6 +305,11 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                         sadd.coords.x = bref.coords.x - 1;
                         sadd.coords.y = bref.coords.y;
                         sadd.coords.z = bref.coords.z - 1;
+#ifdef FIND_DEFINED_TILE
+                        if (sadd.coords.x == x_check && sadd.coords.y == y_check
+                            && sadd.coords.z == z_check)
+                            assert(assertion_bool);
+#endif
                         sadd.p->lvl = nlvl;
                         sadd.p->t |= m_fdBasePoint;
                         bv.push_back(sadd);
@@ -284,6 +328,11 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                         sadd.coords.x = bref.coords.x;
                         sadd.coords.y = bref.coords.y + 1;
                         sadd.coords.z = bref.coords.z;
+#ifdef FIND_DEFINED_TILE
+                        if (sadd.coords.x == x_check && sadd.coords.y == y_check
+                            && sadd.coords.z == z_check)
+                            assert(assertion_bool);
+#endif
                         sadd.p->lvl = nlvl;
                         sadd.p->t |= m_fdBasePoint;
                         bv.push_back(sadd);
@@ -300,6 +349,11 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                         sadd.coords.x = bref.coords.x + 1;
                         sadd.coords.y = bref.coords.y + 1;
                         sadd.coords.z = bref.coords.z;
+#ifdef FIND_DEFINED_TILE
+                        if (sadd.coords.x == x_check && sadd.coords.y == y_check
+                            && sadd.coords.z == z_check)
+                            assert(assertion_bool);
+#endif
                         sadd.p->lvl = nlvl;
                         sadd.p->t |= m_fdBasePoint;
                         bv.push_back(sadd);
@@ -316,6 +370,11 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                         sadd.coords.x = bref.coords.x + 1;
                         sadd.coords.y = bref.coords.y;
                         sadd.coords.z = bref.coords.z;
+#ifdef FIND_DEFINED_TILE
+                        if (sadd.coords.x == x_check && sadd.coords.y == y_check
+                            && sadd.coords.z == z_check)
+                            assert(assertion_bool);
+#endif
                         sadd.p->lvl = nlvl;
                         sadd.p->t |= m_fdBasePoint;
                         bv.push_back(sadd);
@@ -332,6 +391,11 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                         sadd.coords.x = bref.coords.x + 1;
                         sadd.coords.y = bref.coords.y - 1;
                         sadd.coords.z = bref.coords.z;
+#ifdef FIND_DEFINED_TILE
+                        if (sadd.coords.x == x_check && sadd.coords.y == y_check
+                            && sadd.coords.z == z_check)
+                            assert(assertion_bool);
+#endif
                         sadd.p->lvl = nlvl;
                         sadd.p->t |= m_fdBasePoint;
                         bv.push_back(sadd);
@@ -348,6 +412,11 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                         sadd.coords.x = bref.coords.x;
                         sadd.coords.y = bref.coords.y - 1;
                         sadd.coords.z = bref.coords.z;
+#ifdef FIND_DEFINED_TILE
+                        if (sadd.coords.x == x_check && sadd.coords.y == y_check
+                            && sadd.coords.z == z_check)
+                            assert(assertion_bool);
+#endif
                         sadd.p->lvl = nlvl;
                         sadd.p->t |= m_fdBasePoint;
                         bv.push_back(sadd);
@@ -364,6 +433,11 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                         sadd.coords.x = bref.coords.x - 1;
                         sadd.coords.y = bref.coords.y - 1;
                         sadd.coords.z = bref.coords.z;
+#ifdef FIND_DEFINED_TILE
+                        if (sadd.coords.x == x_check && sadd.coords.y == y_check
+                            && sadd.coords.z == z_check)
+                            assert(assertion_bool);
+#endif
                         sadd.p->lvl = nlvl;
                         sadd.p->t |= m_fdBasePoint;
                         bv.push_back(sadd);
@@ -380,6 +454,11 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                         sadd.coords.x = bref.coords.x - 1;
                         sadd.coords.y = bref.coords.y;
                         sadd.coords.z = bref.coords.z;
+#ifdef FIND_DEFINED_TILE
+                        if (sadd.coords.x == x_check && sadd.coords.y == y_check
+                            && sadd.coords.z == z_check)
+                            assert(assertion_bool);
+#endif
                         sadd.p->lvl = nlvl;
                         sadd.p->t |= m_fdBasePoint;
                         bv.push_back(sadd);
@@ -396,6 +475,11 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                         sadd.coords.x = bref.coords.x - 1;
                         sadd.coords.y = bref.coords.y + 1;
                         sadd.coords.z = bref.coords.z;
+#ifdef FIND_DEFINED_TILE
+                        if (sadd.coords.x == x_check && sadd.coords.y == y_check
+                            && sadd.coords.z == z_check)
+                            assert(assertion_bool);
+#endif
                         sadd.p->lvl = nlvl;
                         sadd.p->t |= m_fdBasePoint;
                         bv.push_back(sadd);
@@ -434,6 +518,11 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                         sadd.coords.x = bref.coords.x;
                         sadd.coords.y = bref.coords.y + 1;
                         sadd.coords.z = bref.coords.z + 1;
+#ifdef FIND_DEFINED_TILE
+                        if (sadd.coords.x == x_check && sadd.coords.y == y_check
+                            && sadd.coords.z == z_check)
+                            assert(assertion_bool);
+#endif
                         sadd.p->lvl = nlvl;
                         sadd.p->t |= m_fdTargetPoint;
                         tv.push_back(sadd);
@@ -450,6 +539,11 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                         sadd.coords.x = bref.coords.x + 1;
                         sadd.coords.y = bref.coords.y;
                         sadd.coords.z = bref.coords.z + 1;
+#ifdef FIND_DEFINED_TILE
+                        if (sadd.coords.x == x_check && sadd.coords.y == y_check
+                            && sadd.coords.z == z_check)
+                            assert(assertion_bool);
+#endif
                         sadd.p->lvl = nlvl;
                         sadd.p->t |= m_fdTargetPoint;
                         tv.push_back(sadd);
@@ -466,6 +560,11 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                         sadd.coords.x = bref.coords.x;
                         sadd.coords.y = bref.coords.y - 1;
                         sadd.coords.z = bref.coords.z + 1;
+#ifdef FIND_DEFINED_TILE
+                        if (sadd.coords.x == x_check && sadd.coords.y == y_check
+                            && sadd.coords.z == z_check)
+                            assert(assertion_bool);
+#endif
                         sadd.p->lvl = nlvl;
                         sadd.p->t |= m_fdTargetPoint;
                         tv.push_back(sadd);
@@ -482,6 +581,11 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                         sadd.coords.x = bref.coords.x - 1;
                         sadd.coords.y = bref.coords.y;
                         sadd.coords.z = bref.coords.z + 1;
+#ifdef FIND_DEFINED_TILE
+                        if (sadd.coords.x == x_check && sadd.coords.y == y_check
+                            && sadd.coords.z == z_check)
+                            assert(assertion_bool);
+#endif
                         sadd.p->lvl = nlvl;
                         sadd.p->t |= m_fdTargetPoint;
                         tv.push_back(sadd);
@@ -500,6 +604,11 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                         sadd.coords.x = bref.coords.x;
                         sadd.coords.y = bref.coords.y + 1;
                         sadd.coords.z = bref.coords.z - 1;
+#ifdef FIND_DEFINED_TILE
+                        if (sadd.coords.x == x_check && sadd.coords.y == y_check
+                            && sadd.coords.z == z_check)
+                            assert(assertion_bool);
+#endif
                         sadd.p->lvl = nlvl;
                         sadd.p->t |= m_fdTargetPoint;
                         tv.push_back(sadd);
@@ -516,6 +625,11 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                         sadd.coords.x = bref.coords.x + 1;
                         sadd.coords.y = bref.coords.y;
                         sadd.coords.z = bref.coords.z - 1;
+#ifdef FIND_DEFINED_TILE
+                        if (sadd.coords.x == x_check && sadd.coords.y == y_check
+                            && sadd.coords.z == z_check)
+                            assert(assertion_bool);
+#endif
                         sadd.p->lvl = nlvl;
                         sadd.p->t |= m_fdTargetPoint;
                         tv.push_back(sadd);
@@ -532,6 +646,11 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                         sadd.coords.x = bref.coords.x;
                         sadd.coords.y = bref.coords.y - 1;
                         sadd.coords.z = bref.coords.z - 1;
+#ifdef FIND_DEFINED_TILE
+                        if (sadd.coords.x == x_check && sadd.coords.y == y_check
+                            && sadd.coords.z == z_check)
+                            assert(assertion_bool);
+#endif
                         sadd.p->lvl = nlvl;
                         sadd.p->t |= m_fdTargetPoint;
                         tv.push_back(sadd);
@@ -548,6 +667,11 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                         sadd.coords.x = bref.coords.x - 1;
                         sadd.coords.y = bref.coords.y;
                         sadd.coords.z = bref.coords.z - 1;
+#ifdef FIND_DEFINED_TILE
+                        if (sadd.coords.x == x_check && sadd.coords.y == y_check
+                            && sadd.coords.z == z_check)
+                            assert(assertion_bool);
+#endif
                         sadd.p->lvl = nlvl;
                         sadd.p->t |= m_fdTargetPoint;
                         tv.push_back(sadd);
@@ -566,6 +690,11 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                         sadd.coords.x = bref.coords.x;
                         sadd.coords.y = bref.coords.y + 1;
                         sadd.coords.z = bref.coords.z;
+#ifdef FIND_DEFINED_TILE
+                        if (sadd.coords.x == x_check && sadd.coords.y == y_check
+                            && sadd.coords.z == z_check)
+                            assert(assertion_bool);
+#endif
                         sadd.p->lvl = nlvl;
                         sadd.p->t |= m_fdTargetPoint;
                         tv.push_back(sadd);
@@ -582,6 +711,11 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                         sadd.coords.x = bref.coords.x + 1;
                         sadd.coords.y = bref.coords.y + 1;
                         sadd.coords.z = bref.coords.z;
+#ifdef FIND_DEFINED_TILE
+                        if (sadd.coords.x == x_check && sadd.coords.y == y_check
+                            && sadd.coords.z == z_check)
+                            assert(assertion_bool);
+#endif
                         sadd.p->lvl = nlvl;
                         sadd.p->t |= m_fdTargetPoint;
                         tv.push_back(sadd);
@@ -598,6 +732,11 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                         sadd.coords.x = bref.coords.x + 1;
                         sadd.coords.y = bref.coords.y;
                         sadd.coords.z = bref.coords.z;
+#ifdef FIND_DEFINED_TILE
+                        if (sadd.coords.x == x_check && sadd.coords.y == y_check
+                            && sadd.coords.z == z_check)
+                            assert(assertion_bool);
+#endif
                         sadd.p->lvl = nlvl;
                         sadd.p->t |= m_fdTargetPoint;
                         tv.push_back(sadd);
@@ -614,6 +753,11 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                         sadd.coords.x = bref.coords.x + 1;
                         sadd.coords.y = bref.coords.y - 1;
                         sadd.coords.z = bref.coords.z;
+#ifdef FIND_DEFINED_TILE
+                        if (sadd.coords.x == x_check && sadd.coords.y == y_check
+                            && sadd.coords.z == z_check)
+                            assert(assertion_bool);
+#endif
                         sadd.p->lvl = nlvl;
                         sadd.p->t |= m_fdTargetPoint;
                         tv.push_back(sadd);
@@ -630,6 +774,11 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                         sadd.coords.x = bref.coords.x;
                         sadd.coords.y = bref.coords.y - 1;
                         sadd.coords.z = bref.coords.z;
+#ifdef FIND_DEFINED_TILE
+                        if (sadd.coords.x == x_check && sadd.coords.y == y_check
+                            && sadd.coords.z == z_check)
+                            assert(assertion_bool);
+#endif
                         sadd.p->lvl = nlvl;
                         sadd.p->t |= m_fdTargetPoint;
                         tv.push_back(sadd);
@@ -646,6 +795,11 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                         sadd.coords.x = bref.coords.x - 1;
                         sadd.coords.y = bref.coords.y - 1;
                         sadd.coords.z = bref.coords.z;
+#ifdef FIND_DEFINED_TILE
+                        if (sadd.coords.x == x_check && sadd.coords.y == y_check
+                            && sadd.coords.z == z_check)
+                            assert(assertion_bool);
+#endif
                         sadd.p->lvl = nlvl;
                         sadd.p->t |= m_fdTargetPoint;
                         tv.push_back(sadd);
@@ -662,6 +816,11 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                         sadd.coords.x = bref.coords.x - 1;
                         sadd.coords.y = bref.coords.y;
                         sadd.coords.z = bref.coords.z;
+#ifdef FIND_DEFINED_TILE
+                        if (sadd.coords.x == x_check && sadd.coords.y == y_check
+                            && sadd.coords.z == z_check)
+                            assert(assertion_bool);
+#endif
                         sadd.p->lvl = nlvl;
                         sadd.p->t |= m_fdTargetPoint;
                         tv.push_back(sadd);
@@ -678,6 +837,11 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                         sadd.coords.x = bref.coords.x - 1;
                         sadd.coords.y = bref.coords.y + 1;
                         sadd.coords.z = bref.coords.z;
+#ifdef FIND_DEFINED_TILE
+                        if (sadd.coords.x == x_check && sadd.coords.y == y_check
+                            && sadd.coords.z == z_check)
+                            assert(assertion_bool);
+#endif
                         sadd.p->lvl = nlvl;
                         sadd.p->t |= m_fdTargetPoint;
                         tv.push_back(sadd);
@@ -1553,6 +1717,10 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
             ct = nt;
         }
         cdestpath.push_back(PathNode(toadd.x, toadd.y, toadd.z));
+        // this assert might save from memory fill up,
+        assert(ctile.x != toadd.x || ctile.y != toadd.y || ctile.z != toadd.z);
+        //if(ctile.x == toadd.x && ctile.y == toadd.y && ctile.z == toadd.z)
+            //ctile = toadd;
         ctile = toadd;
     } while (tnr);
 #ifdef EXECUTION_SPEED_TIME

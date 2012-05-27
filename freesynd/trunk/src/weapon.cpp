@@ -83,8 +83,19 @@ WeaponInstance::WeaponInstance(Weapon * w) : ShootableMapObject(-1)
     owner_ = NULL;
     activated_ = false;
     time_consumed_ = false;
-    health_ = 1;
     main_type_ = w->getWeaponType();
+    if (w->getWeaponType() == Weapon::TimeBomb
+        || w->getWeaponType() == Weapon::Flamer)
+    {
+        size_x_ = 32;
+        size_y_ = 32;
+        size_z_ = 32;
+        setRcvDamageDef(MapObject::ddmg_WeaponBomb);
+        health_ = 1;
+    } else {
+        is_ignored_ = true;
+        health_ = 0;
+    }
 }
 
 bool WeaponInstance::animate(int elapsed) {
@@ -1125,8 +1136,11 @@ void ShotClass::makeShot(bool rangeChecked, toDefineXYZ &cp, int anim_hit,
                 if (anim_obj_hit != SFXObject::sfxt_Unknown) {
                     SFXObject *so = new SFXObject(m->map(),
                         anim_obj_hit);
-                    so->setPosition(smp->tileX(), smp->tileY(), smp->visZ() + 1,
-                        smp->offX(), smp->offY(), smp->offZ());
+                    int z = smp->visZ() * 128 + smp->offZ() + (smp->sizeZ() >> 1);
+                    if (z > (m->mmax_z_ - 1) * 128)
+                        z = (m->mmax_z_ - 1) * 128;
+                    so->setPosition(smp->tileX(), smp->tileY(), z / 128,
+                        smp->offX(), smp->offY(), z % 128);
                     so->setTileVisZ();
                     so->correctZ();
                     m->addSfxObject(so);
@@ -1143,16 +1157,17 @@ void ShotClass::makeShot(bool rangeChecked, toDefineXYZ &cp, int anim_hit,
                 m->addSfxObject(so);
             }
         } else if (has_blocker == 1) {
-            if (smp == NULL && anim_hit != SFXObject::sfxt_Unknown) {
-                SFXObject *so = new SFXObject(m->map(),
-                    anim_hit);
-                so->setPosition(pn.tileX(), pn.tileY(), pn.tileZ(), pn.offX(),
-                    pn.offY(), pn.offZ());
-                so->setTileVisZ();
-                so->correctZ();
-                m->addSfxObject(so);
-            }
-            if (smp) {
+            if (smp == NULL) {
+                if (anim_hit != SFXObject::sfxt_Unknown) {
+                    SFXObject *so = new SFXObject(m->map(),
+                        anim_hit);
+                    so->setPosition(pn.tileX(), pn.tileY(), pn.tileZ(), pn.offX(),
+                        pn.offY(), pn.offZ());
+                    so->setTileVisZ();
+                    so->correctZ();
+                    m->addSfxObject(so);
+                }
+            } else {
                 // TODO: more information needed, handle return value
                 // pass info to shot owner if exist
                 if (smp->handleDamage(&d)) {
@@ -1169,8 +1184,11 @@ void ShotClass::makeShot(bool rangeChecked, toDefineXYZ &cp, int anim_hit,
                 if (anim_obj_hit != SFXObject::sfxt_Unknown) {
                     SFXObject *so = new SFXObject(m->map(),
                         anim_obj_hit);
-                    so->setPosition(pn.tileX(), pn.tileY(), pn.tileZ(),
-                        pn.offX(), pn.offY(), pn.offZ());
+                    int z = smp->visZ() * 128 + smp->offZ() + (smp->sizeZ() >> 1);
+                    if (z > (m->mmax_z_ - 1) * 128)
+                        z = (m->mmax_z_ - 1) * 128;
+                    so->setPosition(smp->tileX(), smp->tileY(), z / 128,
+                        smp->offX(), smp->offY(), z % 128);
                     so->setTileVisZ();
                     so->correctZ();
                     m->addSfxObject(so);
@@ -1304,6 +1322,8 @@ void WeaponInstance::getNonFriendInRange(toDefineXYZ * cp,
 
 bool WeaponInstance::handleDamage(ShootableMapObject::DamageInflictType * d)
 {
+    // TODO: add damage handling for timebomb and flamer,
+    // they will explode when shot
     if (health_ > 0)
         printf("weapon hit\n");
     return true;

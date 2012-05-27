@@ -46,6 +46,8 @@ game mission files.
 non-player owned territory, in original territory owners changed it was like
 other syndicates where capturing territories
  - selectmenu make impossible to start gameplay with all agents non active+dead1
+ - money increase after mission should not include completed mission's income
+for time during this mission was completed
 
  Very low priority stuff, maybe for v0.9:
  - xmidi music data is not dealocated on exit - memory leak

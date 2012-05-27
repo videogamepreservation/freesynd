@@ -28,10 +28,12 @@
 #include "app.h"
 
 MapObject::MapObject(int m):size_x_(1), size_y_(1), size_z_(2),
-map_(m), frame_(0), elapsed_carry_(0),
-frames_per_sec_(8), sub_type_(0), main_type_(0),
-major_type_(MapObject::mjt_Undefined),dir_(0),is_ignored_(false),
-is_frame_drawn_(false)
+    map_(m), frame_(0), elapsed_carry_(0),
+    frames_per_sec_(8), sub_type_(0), main_type_(0),
+    major_type_(MapObject::mjt_Undefined), dir_(0),
+    time_show_anim_(-1), time_showing_anim_(-1),
+    is_ignored_(false), is_frame_drawn_(false),
+    state_(0xFFFFFFFF)
 {
 }
 
@@ -262,12 +264,27 @@ bool MapObject::isBlocker(toDefineXYZ * startXYZ, toDefineXYZ * endXYZ,
 
     double d_l[3];
     double d_h[3];
-    d_l[0] = ((double)(range_x_l - startXYZ->x)) / inc_xyz[0];
-    d_h[0] = ((double)(range_x_h - startXYZ->x)) / inc_xyz[0];
-    d_l[1] = ((double)(range_y_l - startXYZ->y)) / inc_xyz[1];
-    d_h[1] = ((double)(range_y_h - startXYZ->y)) / inc_xyz[1];
-    d_l[2] = ((double)(range_z_l - startXYZ->z)) / inc_xyz[2];
-    d_h[2] = ((double)(range_z_h - startXYZ->z)) / inc_xyz[2];
+    if (inc_xyz[0] != 0) {
+        d_l[0] = ((double)(range_x_l - startXYZ->x)) / inc_xyz[0];
+        d_h[0] = ((double)(range_x_h - startXYZ->x)) / inc_xyz[0];
+    } else {
+        d_l[0] = 0.0;
+        d_h[0] = 0.0;
+    }
+    if (inc_xyz[1] != 0) {
+        d_l[1] = ((double)(range_y_l - startXYZ->y)) / inc_xyz[1];
+        d_h[1] = ((double)(range_y_h - startXYZ->y)) / inc_xyz[1];
+    } else {
+        d_l[1] = 0.0;
+        d_h[1] = 0.0;
+    }
+    if (inc_xyz[0] != 0) {
+        d_l[2] = ((double)(range_z_l - startXYZ->z)) / inc_xyz[2];
+        d_h[2] = ((double)(range_z_h - startXYZ->z)) / inc_xyz[2];
+    } else {
+        d_l[2] = 0.0;
+        d_h[2] = 0.0;
+    }
 
     // shortest distances to starting point
     double d_s[3];
@@ -286,16 +303,27 @@ bool MapObject::isBlocker(toDefineXYZ * startXYZ, toDefineXYZ * endXYZ,
     else
         d_s[2] = d_l[2];
 
-    uint8 indx;
-    // longest distance to start
-    if (d_s[0] > d_s[1]) {
-        if (d_s[0] > d_s[2])
-            indx = 0;
-        else
-            indx = 2;
-    } else if (d_s[1] > d_s[2])
+    // TODO: another look at this function later
+    uint8 indx = 0;
+    // longest non-zero distance to start
+    if (d_s[0] != 0.0) {
+        if (d_s[1] != 0) {
+            if (d_s[0] > d_s[1]) {
+                if (d_s[2] != 0.0 && d_s[0] < d_s[2])
+                    indx = 2;
+            } else {
+                indx = 1;
+                if (d_s[2] != 0.0 && d_s[1] < d_s[2])
+                    indx = 2;
+            }
+        }
+    } else if (d_s[1] != 0) {
         indx = 1;
-    else
+        if (d_s[2] != 0.0) {
+            if (d_s[1] < d_s[2])
+                indx = 2;
+        }
+    } else
         indx = 2;
 
     int range_g_l = (int)(d_l[indx] * inc_xyz[0] + startXYZ->x);

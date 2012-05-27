@@ -1119,13 +1119,17 @@ MapObject * Mission::findAt(int tilex, int tiley, int tilez,
 // Surface walkable
 bool Mission::sWalkable(char thisTile, char upperTile) {
 
-    return (thisTile != upperTile
-        && (((thisTile >= 0x05 && thisTile <= 0x09) ||
-        thisTile == 0x0B || (thisTile >= 0x0D && thisTile <= 0x0F)
-        || (thisTile == 0x11 || thisTile == 0x12))
-            ? (upperTile == 0x00 || upperTile == 0x10) : true))
-        || (thisTile > 0x00 && thisTile < 0x05
-        && (upperTile == 0x00 || upperTile == 0x10));
+    return thisTile != upperTile
+        && (
+            // checking surface
+            (((thisTile >= 0x05 && thisTile <= 0x09) ||
+            thisTile == 0x0B || (thisTile >= 0x0D && thisTile <= 0x0F)
+            || (thisTile == 0x11 || thisTile == 0x12))
+            && (upperTile == 0x00 || upperTile == 0x10))
+            // or checking stairs
+            || ((thisTile > 0x00 && thisTile < 0x05)
+            && (upperTile == 0x00 || upperTile == 0x10))
+        );
 }
 
 bool Mission::isSurface(char thisTile) {
@@ -1196,6 +1200,8 @@ bool Mission::setSurfaces() {
                 x = stodef.x;
                 y = stodef.y;
                 z = stodef.z;
+                //if (x == 48 && y / mmax_x_ == 24 && z / mmax_m_xy == 5)
+                    //x = 48;
                 int xm = x - 1;
                 int ym = y - mmax_x_;
                 int zm = z - mmax_m_xy;
@@ -1230,10 +1236,10 @@ bool Mission::setSurfaces() {
                     case 0x01:
                         cfp->t = m_fdWalkable;
                         if (zm >= 0) {
+                            mdpoints_[x + y + zm].t = m_fdNonWalkable;
                             if (yp < mmax_m_xy) {
                                 nxts = &(mtsurfaces_[x + yp + zm]);
                                 nxtfp = &(mdpoints_[x + yp + zm]);
-                                mdpoints_[x + y + zm].t = m_fdNonWalkable;
                                 this_s = nxts->twd;
                                 upper_s = mtsurfaces_[x + yp + z].twd;
                                 if (isSurface(this_s) || this_s == 0x01) {
@@ -1374,10 +1380,10 @@ bool Mission::setSurfaces() {
                     case 0x02:
                         cfp->t = m_fdWalkable;
                         if (zm >= 0) {
+                            mdpoints_[x + y + zm].t = m_fdNonWalkable;
                             if (ym >= 0) {
                                 nxts = &(mtsurfaces_[x + ym + zm]);
                                 nxtfp = &(mdpoints_[x + ym + zm]);
-                                mdpoints_[x + y + zm].t = m_fdNonWalkable;
                                 this_s = nxts->twd;
                                 upper_s = mtsurfaces_[x + ym + z].twd;
                                 if (isSurface(this_s) || this_s == 0x02) {
@@ -1518,10 +1524,10 @@ bool Mission::setSurfaces() {
                     case 0x03:
                         cfp->t = m_fdWalkable;
                         if (zm >= 0) {
+                            mdpoints_[x + y + zm].t = m_fdNonWalkable;
                             if (xm >= 0) {
                                 nxts = &(mtsurfaces_[xm + y + zm]);
                                 nxtfp = &(mdpoints_[xm + y + zm]);
-                                mdpoints_[x + y + zm].t = m_fdNonWalkable;
                                 this_s = nxts->twd;
                                 upper_s = mtsurfaces_[xm + y + z].twd;
                                 if (isSurface(this_s) || this_s == 0x03) {
@@ -1660,10 +1666,10 @@ bool Mission::setSurfaces() {
                     case 0x04:
                         cfp->t = m_fdWalkable;
                         if (zm >= 0) {
+                            mdpoints_[x + y + zm].t = m_fdNonWalkable;
                             if (xp < mmax_x_) {
                                 nxts = &(mtsurfaces_[xp + y + zm]);
                                 nxtfp = &(mdpoints_[xp + y + zm]);
-                                mdpoints_[x + y + zm].t = m_fdNonWalkable;
                                 this_s = nxts->twd;
                                 upper_s = mtsurfaces_[xp + y + z].twd;
                                 if (isSurface(this_s) || this_s == 0x04) {
@@ -2900,8 +2906,6 @@ WeaponInstance *Mission::createWeaponInstance(uint8 * data)
         wi->setPosition(gamdata->mapposx[1], gamdata->mapposy[1],
                             z, gamdata->mapposx[0],
                             gamdata->mapposy[0], oz);
-        if (wi->getMainType() == Weapon::TimeBomb)
-            wi->setRcvDamageDef(MapObject::ddmg_WeaponBomb);
         return wi;
     }
 
@@ -2914,7 +2918,6 @@ WeaponInstance *Mission::createWeaponInstance(uint8 * data)
 void Mission::blockerExists(toDefineXYZ * startXYZ, toDefineXYZ * endXYZ,
                             double *dist, MapObject** blockerObj)
 {
-    // TODO: add check for weapons, when all weapons will be added
     // TODO: calculating closest blocker first? (start point can be closer though)
     double inc_xyz[3];
     inc_xyz[0] = (endXYZ->x - startXYZ->x) / (*dist);
@@ -2976,6 +2979,25 @@ void Mission::blockerExists(toDefineXYZ * startXYZ, toDefineXYZ * endXYZ,
             if (closest == -1 || dist_blocker < closest) {
                 closest = dist_blocker;
                 *blockerObj = p_blocker;
+                blockStartXYZ = copyStartXYZ;
+                blockEndXYZ = copyEndXYZ;
+            }
+            copyStartXYZ = *startXYZ;
+            copyEndXYZ = *endXYZ;
+        }
+    }
+    for (unsigned int i = 0; i < weapons_.size(); i++) {
+        MapObject * w_blocker = weapons_[i];
+        if (w_blocker->isIgnored())
+            continue;
+        if (w_blocker->isBlocker(&copyStartXYZ, &copyEndXYZ, inc_xyz)) {
+            int cx = startXYZ->x - copyStartXYZ.x;
+            int cy = startXYZ->y - copyStartXYZ.y;
+            int cz = startXYZ->z - copyStartXYZ.z;
+            double dist_blocker = sqrt((double) (cx * cx + cy * cy + cz * cz));
+            if (closest == -1 || dist_blocker < closest) {
+                closest = dist_blocker;
+                *blockerObj = w_blocker;
                 blockStartXYZ = copyStartXYZ;
                 blockEndXYZ = copyEndXYZ;
             }
