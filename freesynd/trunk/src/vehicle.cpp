@@ -148,7 +148,8 @@ bool VehicleInstance::walkable(int x, int y, int z)
 }
 
 uint16 VehicleInstance::tileDir(int x, int y, int z) {
-    uint16 dir = 0;
+    uint16 dir = 0x0;
+    int near_tile;
 
     switch(g_App.maps().map(map())->tileAt(x, y, z)){
         case 80:
@@ -170,15 +171,21 @@ uint16 VehicleInstance::tileDir(int x, int y, int z) {
                 dir |= 0x0FF0;
             if(g_App.maps().map(map())->tileAt(x + 1, y + 1, z) != 118)
                 dir |= 0xFF00;
+            near_tile = g_App.maps().map(map())->tileAt(x + 1, y, z);
+            if (near_tile == 108 || near_tile == 109)
+                dir = (dir & 0x0FFF) | 0x6000;
 
             break;
         case 107:
             dir = (2<<4)|(4<<8)|(6<<12)|(0x000F);
 
             if(g_App.maps().map(map())->tileAt(x - 1, y - 1, z) != 118)
-                dir |= 0xF00F;
-            if(g_App.maps().map(map())->tileAt(x - 1, y + 1, z) != 118)
                 dir |= 0x00FF;
+            if(g_App.maps().map(map())->tileAt(x - 1, y + 1, z) != 118)
+                dir |= 0xF00F;
+            near_tile = g_App.maps().map(map())->tileAt(x - 1, y, z);
+            if (near_tile == 108 || near_tile == 109)
+                dir = (dir & 0xFF0F) | 0x0020;
 
             break;
         case 108:
@@ -188,6 +195,9 @@ uint16 VehicleInstance::tileDir(int x, int y, int z) {
                 dir |= 0xF00F;
             if(g_App.maps().map(map())->tileAt(x - 1, y - 1, z) != 118)
                 dir |= 0xFF00;
+            near_tile = g_App.maps().map(map())->tileAt(x, y - 1, z);
+            if (near_tile == 106 || near_tile == 107)
+                dir = dir & 0xFFF0;
 
             break;
         case 109:
@@ -197,6 +207,9 @@ uint16 VehicleInstance::tileDir(int x, int y, int z) {
                 dir |= 0x00FF;
             if(g_App.maps().map(map())->tileAt(x - 1, y + 1, z) != 118)
                 dir |= 0x0FF0;
+            near_tile = g_App.maps().map(map())->tileAt(x, y + 1, z);
+            if (near_tile == 106 || near_tile == 107)
+                dir = (dir & 0xF0FF) | 0x0400;
 
             break;
         case 110:
@@ -211,6 +224,24 @@ uint16 VehicleInstance::tileDir(int x, int y, int z) {
         case 113:
             dir = (4<<8)|(6<<12)|(0x00FF);
             break;
+        /*case 119:
+            // TODO: Greenland map needs fixing
+            dir = 0xFFFF;
+            near_tile = g_App.maps().map(map())->tileAt(x, y + 1, z);
+            if (near_tile == 107 || near_tile == 225 || near_tile == 226)
+                dir = (dir & 0xF0FF) | 0x0400;
+            near_tile = g_App.maps().map(map())->tileAt(x, y + 1, z);
+            if (near_tile == 106 || near_tile == 225 || near_tile == 226)
+               dir &= 0xFFF0;
+            near_tile = g_App.maps().map(map())->tileAt(x + 1, y, z);
+            if (near_tile == 109 || near_tile == 225 || near_tile == 226)
+                dir = (dir & 0xFF0F) | 0x0020;
+            near_tile = g_App.maps().map(map())->tileAt(x - 1, y, z);
+            if (near_tile == 108 || near_tile == 225 || near_tile == 226)
+                dir = (dir & 0x0FFF) | 0x6000;
+            if (dir ==0xFFFF)
+                dir = 0x0;
+            break;*/
         case 120:
             dir = (0)|(2<<4)|(0xFF00);
             break;
@@ -223,17 +254,55 @@ uint16 VehicleInstance::tileDir(int x, int y, int z) {
         case 123:
             dir = (2<<4)|(4<<8)|(0xF00F);
             break;
-        case 225:
+        case 225:/*
             if(g_App.maps().map(map())->getTileAt(x + 1, y, z)->type() == Tile::kRoadPedCross)
                 dir = (0)|(0xFFF0);
-            if(g_App.maps().map(map())->getTileAt(x - 1, y, z)->type() == Tile::kRoadPedCross)
+            else if(g_App.maps().map(map())->getTileAt(x - 1, y, z)->type() == Tile::kRoadPedCross)
                 dir = (4<<8)|(0xF0FF);
+            else {*/
+                dir = 0xFFFF;
+                near_tile = g_App.maps().map(map())->tileAt(x, y + 1, z);
+                if (/*near_tile == 119 || */near_tile == 106
+                    || near_tile == 107 || near_tile == 80 || near_tile == 225)
+                    dir = (dir & 0xF0FF) | 0x0400;
+                near_tile = g_App.maps().map(map())->tileAt(x, y - 1, z);
+                if (/*near_tile == 119 || */near_tile == 106
+                    || near_tile == 107 || near_tile == 80 || near_tile == 225)
+                    dir &= 0xFFF0;
+                near_tile = g_App.maps().map(map())->tileAt(x + 1, y, z);
+                if (/*near_tile == 119 || */near_tile == 108 || near_tile == 81)
+                    dir = (dir & 0xFF0F) | 0x0020;
+                near_tile = g_App.maps().map(map())->tileAt(x - 1, y, z);
+                if (/*near_tile == 119 || */near_tile == 109 || near_tile == 81)
+                    dir = (dir & 0x0FFF) | 0x6000;
+                if (dir == 0xFFFF)
+                    dir = 0x0;
+            //}
             break;
-        case 226:
+        case 226:/*
             if(g_App.maps().map(map())->getTileAt(x, y - 1, z)->type() == Tile::kRoadPedCross)
                 dir = (2<<4)|(0xFF0F);
-            if(g_App.maps().map(map())->getTileAt(x, y + 1, z)->type() == Tile::kRoadPedCross)
+            else if(g_App.maps().map(map())->getTileAt(x, y + 1, z)->type() == Tile::kRoadPedCross)
                 dir = (6<<12)|(0x0FFF);
+            else {*/
+                dir = 0xFFFF;
+                near_tile = g_App.maps().map(map())->tileAt(x, y + 1, z);
+                if (/*near_tile == 119 || */near_tile == 106 || near_tile == 80)
+                    dir = (dir & 0xF0FF) | 0x0400;
+                near_tile = g_App.maps().map(map())->tileAt(x, y - 1, z);
+                if (/*near_tile == 119 || */near_tile == 107 || near_tile == 80)
+                    dir &= 0xFFF0;
+                near_tile = g_App.maps().map(map())->tileAt(x + 1, y, z);
+                if (/*near_tile == 119 || */near_tile == 108 || near_tile == 109
+                    || near_tile == 81 || near_tile == 226)
+                    dir = (dir & 0xFF0F) | 0x0020;
+                near_tile = g_App.maps().map(map())->tileAt(x - 1, y, z);
+                if (/*near_tile == 119 || */near_tile == 108 || near_tile == 109
+                    || near_tile == 81 || near_tile == 226)
+                    dir = (dir & 0x0FFF) | 0x6000;
+                if (dir == 0xFFFF)
+                    dir = 0;
+            //}
             break;
         default:
             dir = 0xFFFF;
@@ -249,6 +318,8 @@ bool VehicleInstance::dirWalkable(PathNode *p, int x, int y, int z) {
 
     uint16 dirStart = tileDir(p->tileX(),p->tileY(),p->tileZ());
     uint16 dirEnd = tileDir(x,y,z);
+    if (dirStart == 0x0 || dirEnd == 0x0)
+        return false;
     if (dirStart == 0xFFFF || dirEnd == 0xFFFF)
         return true;
 
@@ -467,6 +538,8 @@ void VehicleInstance::setDestinationV(Mission *m, int x, int y, int z, int ox,
     if(!dest_path_.empty()) {
         // Adjusting offsets for correct positioning
         speed_ = new_speed;
+        int curox = off_x_;
+        int curoy = off_y_;
         for(std::list < PathNode >::iterator it = dest_path_.begin();
             it != dest_path_.end(); it++)
         {
@@ -481,28 +554,45 @@ void VehicleInstance::setDestinationV(Mission *m, int x, int y, int z, int ox,
                 case 0xFF20:
                     it->setOffX(200);
                     it->setOffY(32);
+                    curox = 200;
+                    curoy = 32;
                     break;
                 case 0xF4FF:
                     it->setOffX(32);
                     it->setOffY(200);
+                    curox = 32;
+                    curoy = 200;
                     break;
                 case 0xFF2F:
                 case 0xF42F:
                     it->setOffX(32);
                     it->setOffY(32);
+                    curox = 32;
+                    curoy = 32;
                     break;
                 case 0x6FFF:
                 case 0x64FF:
                     it->setOffX(32);
                     it->setOffY(200);
+                    curox = 32;
+                    curoy = 200;
                     break;
                 case 0x6FF0:
                     it->setOffX(200);
                     it->setOffY(200);
+                    curox = 200;
+                    curoy = 200;
                     break;
 #if _DEBUG
                 default:
-                    printf("hmm tileDir %X\n", (unsigned int)tileDir(it->tileX(), it->tileY(), it->tileZ()));
+                    printf("hmm tileDir %X at %i, %i, %i\n",
+                        (unsigned int)tileDir(it->tileX(), it->tileY(),
+                        it->tileZ()), it->tileX(), it->tileY(), it->tileZ());
+                    printf("tileAt %i\n",
+                        (unsigned int)g_App.maps().map(map())->tileAt(
+                        it->tileX(), it->tileY(), it->tileZ()));
+                    it->setOffX(curox);
+                    it->setOffY(curoy);
                     break;
 #endif
             }

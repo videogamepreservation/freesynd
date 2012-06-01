@@ -335,6 +335,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
     // NOTE: some actions have remaining time, it is lost for now
     if (actions_queue_.empty()) {
         // TODO: use default_actions_ to fill it up
+#if 1
         if ((state_ & pa_smDead) == 0) {
             actionQueueGroupType as;
             createActQFindEnemy(as);
@@ -342,6 +343,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
             as.group_desc = PedInstance::gd_mThink | PedInstance::gd_mFire;
             actions_queue_.push_back(as);
         }
+#endif
     } else {
         // TODO: xor finished and failed, should all actions will
         // have execution time set?

@@ -80,14 +80,15 @@ public:
             int w_ammo_per_shot, int w_time_for_shot, int w_time_reload,
             unsigned int w_shot_property, int w_hit_anim, int w_obj_hit_anim,
             int w_rd_anim, int w_trace_anim, int w_range_dmg,
-            double w_shot_angle, double w_shot_accuracy, int w_shot_speed = 0);
+            double w_shot_angle, double w_shot_accuracy, int w_shot_speed = 0,
+            int w_dmg_per_shot = 1);
 
     const char *getName() { return name_.c_str(); }
 
     int cost() { return cost_; }
     int ammo() { return ammo_; }
     int range() { return range_; }
-    int damagePerShot() { return damage_per_shot_; }
+    int damagePerShot() { return dmg_per_shot_; }
     int rank() { return rank_; }
     int anim() { return anim_; }
     snd::InGameSample getSound() { return sample_; }
@@ -206,7 +207,7 @@ public:
 protected:
     std::string name_;
     int small_icon_, big_icon_;
-    int cost_, ammo_cost_, ammo_, range_, damage_per_shot_;
+    int cost_, ammo_cost_, ammo_, range_, dmg_per_shot_;
     int anim_;
     int rank_;  //!> weapon rank
     WeaponType type_;

@@ -40,7 +40,8 @@ Weapon::Weapon(const std::string& w_name, int smallIcon, int bigIcon, int w_cost
     int w_ammo_per_shot, int w_time_for_shot, int w_time_reload,
     unsigned int w_shot_property, int w_hit_anim, int w_obj_hit_anim,
     int w_trace_anim, int w_rd_anim, int w_range_dmg, double w_shot_angle,
-    double w_shot_accuracy, int w_shot_speed) : shot_speed_(w_shot_speed)
+    double w_shot_accuracy, int w_shot_speed,
+    int w_dmg_per_shot) : shot_speed_(w_shot_speed)
 {
     name_ = w_name;
     small_icon_ = smallIcon;
@@ -49,7 +50,7 @@ Weapon::Weapon(const std::string& w_name, int smallIcon, int bigIcon, int w_cost
     ammo_cost_ = w_shot;
     ammo_= w_ammo;
     range_= w_range;
-    damage_per_shot_ = w_shot;
+    dmg_per_shot_ = w_dmg_per_shot;
     anim_ = w_anim;
     rank_ = w_rank;
     idx_ = w_idx;
@@ -761,20 +762,19 @@ uint16 WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
 
     int mask = Weapon::stm_AllObjects;
 
-    int ammoused = 1;
-    if (shot_prop & Weapon::spe_UsesAmmo) {
-        ammoused = shots * pWeaponClass_->ammoPerShot();
-        if (ammoused > ammo_remaining_) {
-            ammoused = ammo_remaining_;
-            ammo_remaining_ = 0;
-        } else
-            ammo_remaining_ -= ammoused;
-    }
-
     bool range_damage = (shot_prop & Weapon::spe_RangeDamageOnReach) != 0;
 
     // every shot is treated separately
     for (uint32 sc = 0; sc < shots; sc++) {
+    int ammoused = 1;
+        if (shot_prop & Weapon::spe_UsesAmmo) {
+            ammoused = shots * pWeaponClass_->ammoPerShot();
+            if (ammoused > ammo_remaining_) {
+                ammoused = ammo_remaining_;
+                ammo_remaining_ = 0;
+            } else
+                ammo_remaining_ -= ammoused;
+        }
         if (shot_prop & Weapon::spe_CreatesProjectile) {
             Weapon::ShotDesc shot_new = base_shot;
             shotTargetRandomizer(&cp, &(shot_new.tp), angle);

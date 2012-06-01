@@ -799,7 +799,8 @@ bool GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
                                 ped->setActQInQueue(as);
                         }
                     } else if (ped->inVehicle()) {
-                        if (ped == ped->inVehicle()->getDriver()) {
+                        if (ped == ped->inVehicle()->getDriver())
+                        {
                             int stx = tx;
                             int sty = ty;
                             //int sox = ox;

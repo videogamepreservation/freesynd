@@ -245,6 +245,10 @@ void Map::draw(int scrollX, int scrollY, MapHelper * helper)
                     && screen_w + TILE_WIDTH * 2 < cmw
                     && coord_h >= scrollY - TILE_HEIGHT * 2
                     && coord_h + TILE_HEIGHT * 2 < cmh) {
+#if 0
+                    if (z != 1)
+                        continue;
+#endif
                     if (z < max_z_) {
                         Tile *p_tile = a_tiles_[(h * max_x_ + w) * max_z_ + z];
                         if (p_tile->id() > 4) {

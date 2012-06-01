@@ -174,9 +174,9 @@ Weapon * WeaponManager::loadWeapon(Weapon::WeaponType wt) {
             pWeapon = new Weapon(g_App.menus().getMessage("WEAPON_MINI_GUN"),
         19, 69, 10000, 500, 2304, 10, 6,
         372, Weapon::Minigun_Anim, snd::MINIGUN, Weapon::Minigun,
-        MapObject::dmg_Bullet, 5, 100, 100, Weapon::wspt_Minigun,
+        MapObject::dmg_Bullet, 5, 100, 75, Weapon::wspt_Minigun,
         SFXObject::sfxt_BulletHit, SFXObject::sfxt_BulletHit,
-        SFXObject::sfxt_Unknown, SFXObject::sfxt_Unknown, 0, 60.0, 0.5);
+        SFXObject::sfxt_Unknown, SFXObject::sfxt_Unknown, 0, 45.0, 0.5, 0, 4);
             break;
         case Weapon::Flamer:
             // NOTE: range changed from 512 to 1152
@@ -193,7 +193,7 @@ Weapon * WeaponManager::loadWeapon(Weapon::WeaponType wt) {
         375, Weapon::LongRange_Anim, snd::LONGRANGE, Weapon::LongRange,
         MapObject::dmg_Bullet, 1, 900, 400, Weapon::wspt_LongRange,
         SFXObject::sfxt_BulletHit, SFXObject::sfxt_BulletHit,
-        SFXObject::sfxt_Unknown, SFXObject::sfxt_Unknown, 0, 1.0, 1.0);
+        SFXObject::sfxt_Unknown, SFXObject::sfxt_Unknown, 0, 1.0, 1.0, 0, 2);
             break;
         case Weapon::EnergyShield:
             pWeapon = new Weapon(g_App.menus().getMessage("WEAPON_ENERGY_SHIELD"),
@@ -208,17 +208,17 @@ Weapon * WeaponManager::loadWeapon(Weapon::WeaponType wt) {
             pWeapon = new Weapon(g_App.menus().getMessage("WEAPON_UZI"),
         18, 68, 750, 50, 1792, 2, 5, 371,
         Weapon::Uzi_Anim, snd::UZI, Weapon::Uzi, MapObject::dmg_Bullet, 1,
-        150, 150, Weapon::wspt_Uzi, SFXObject::sfxt_BulletHit,
+        150, 120, Weapon::wspt_Uzi, SFXObject::sfxt_BulletHit,
         SFXObject::sfxt_BulletHit, SFXObject::sfxt_Unknown,
-        SFXObject::sfxt_Unknown, 0, 20.0, 0.7);
+        SFXObject::sfxt_Unknown, 0, 20.0, 0.7, 0, 2);
             break;
         case Weapon::Laser:
             pWeapon = new Weapon(g_App.menus().getMessage("WEAPON_LASER"),
         20, 70, 35000, 5, 4096, 2000, 7, 373,
         Weapon::Laser_Anim, snd::LASER, Weapon::Laser, MapObject::dmg_Laser,
-        1, 200, 200, Weapon::wspt_Laser, SFXObject::sfxt_Fire_LongSmoke,
+        1, 300, 200, Weapon::wspt_Laser, SFXObject::sfxt_Fire_LongSmoke,
         SFXObject::sfxt_Unknown, SFXObject::sfxt_Unknown,
-        SFXObject::sfxt_Unknown, 512, 5.0, 0.99);
+        SFXObject::sfxt_Unknown, 512, 5.0, 0.99, 0, 32);
             break;
         case Weapon::GaussGun:
             pWeapon = new Weapon(g_App.menus().getMessage("WEAPON_GAUSS_GUN"),
@@ -227,7 +227,7 @@ Weapon * WeaponManager::loadWeapon(Weapon::WeaponType wt) {
         MapObject::dmg_Explosion, 1, 350, 1500, Weapon::wspt_GaussGun,
         SFXObject::sfxt_ExplosionFire,
         SFXObject::sfxt_ExplosionBall, SFXObject::sfxt_Smoke,
-        SFXObject::sfxt_LargeFire, 512, 5.0, 0.99, 4000);
+        SFXObject::sfxt_LargeFire, 512, 5.0, 0.99, 4000, 64);
             break;
         case Weapon::Shotgun:
             pWeapon = new Weapon(g_App.menus().getMessage("WEAPON_SHOTGUN"),
@@ -235,7 +235,7 @@ Weapon * WeaponManager::loadWeapon(Weapon::WeaponType wt) {
         Weapon::Shotgun_Anim, snd::SHOTGUN, Weapon::Shotgun,
         MapObject::dmg_Bullet, 2, 250, 200, Weapon::wspt_Shotgun,
         SFXObject::sfxt_BulletHit, SFXObject::sfxt_BulletHit,
-        SFXObject::sfxt_Unknown, SFXObject::sfxt_Unknown, 0, 60.0, 0.7);
+        SFXObject::sfxt_Unknown, SFXObject::sfxt_Unknown, 0, 60.0, 0.7, 0, 2);
             break;
         case Weapon::MediKit:
             pWeapon = new Weapon(g_App.menus().getMessage("WEAPON_MEDIKIT"),
@@ -268,7 +268,8 @@ Weapon * WeaponManager::loadWeapon(Weapon::WeaponType wt) {
         378, Weapon::Unarmed_Anim, snd::TIMEBOMB, Weapon::TimeBomb,
         MapObject::dmg_Explosion, 1, 15000, 1, Weapon::wspt_TimeBomb,
         SFXObject::sfxt_ExplosionFire, SFXObject::sfxt_ExplosionBall,
-        SFXObject::sfxt_Unknown, SFXObject::sfxt_ExplosionFire, 512, 0.0, 0.0);
+        SFXObject::sfxt_Unknown, SFXObject::sfxt_ExplosionFire, 512, 0.0, 0.0,
+        0, 64);
             break;
         default:
             break;
