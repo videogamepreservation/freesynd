@@ -173,6 +173,9 @@ void MapObject::setDirection(int posx, int posy, int * dir) {
     }
 }
 
+/*!
+ * @returns direction for selected number of surfaces
+ */
 int MapObject::getDirection(int snum) {
     assert(snum > 0);
 

@@ -335,7 +335,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
     // NOTE: some actions have remaining time, it is lost for now
     if (actions_queue_.empty()) {
         // TODO: use default_actions_ to fill it up
-#if 1
+#if 0
         if ((state_ & pa_smDead) == 0) {
             actionQueueGroupType as;
             createActQFindEnemy(as);

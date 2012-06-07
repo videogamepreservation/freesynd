@@ -92,11 +92,9 @@ WeaponInstance::WeaponInstance(Weapon * w) : ShootableMapObject(-1)
         size_y_ = 32;
         size_z_ = 32;
         setRcvDamageDef(MapObject::ddmg_WeaponBomb);
-        health_ = 1;
-    } else {
-        is_ignored_ = true;
-        health_ = 0;
     }
+    health_ = 1;
+    start_health_ = 1;
 }
 
 bool WeaponInstance::animate(int elapsed) {

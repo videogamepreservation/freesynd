@@ -3036,13 +3036,13 @@ uint8 Mission::inRangeCPos(toDefineXYZ * cp, ShootableMapObject ** t,
         tx = (*t)->tileX() * 256 + (*t)->offX();
         ty = (*t)->tileY() * 256 + (*t)->offY();
         tz = (*t)->visZ() * 128 + (*t)->offZ() + ((*t)->sizeZ() >> 1);
-        assert(tz <= (mmax_z_ - 1) * 128);
     } else {
         tx = pn->tileX() * 256 + pn->offX();
         ty = pn->tileY() * 256 + pn->offY();
         tz = pn->tileZ() * 128 + pn->offZ();
-        assert(tz <= (mmax_z_ - 1) * 128);
     }
+    if (tz > (mmax_z_ - 1) * 128)
+        tz = (mmax_z_ - 1) * 128;
 
     double d = 0;
     d = sqrt((double)((tx - cx) * (tx - cx) + (ty - cy) * (ty - cy)

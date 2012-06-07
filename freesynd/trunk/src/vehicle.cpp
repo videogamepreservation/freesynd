@@ -346,7 +346,8 @@ bool VehicleInstance::dirWalkable(PathNode *p, int x, int y, int z) {
 void VehicleInstance::setDestinationV(Mission *m, int x, int y, int z, int ox,
                                        int oy, int new_speed)
 {
-    std::set < PathNode > open, closed;
+    std::map < PathNode, uint16 > open;
+    std::set < PathNode > closed;
     std::map < PathNode, PathNode > parent;
     int basex = tile_x_, basey = tile_y_;
     std::vector < PathNode > path2add;
@@ -447,23 +448,35 @@ void VehicleInstance::setDestinationV(Mission *m, int x, int y, int z, int ox,
     PathNode closest;
     float closest_dist = 100000;
 
-    open.insert(PathNode(basex, basey, tile_z_, off_x_, off_y_));
+    uint16 wrong_dir = (uint16)getDirection(4);
+    if (wrong_dir == 0x0)
+        wrong_dir = 0x0400;
+    else if(wrong_dir == 0x1)
+        wrong_dir = 0x6000;
+    else if(wrong_dir == 0x2)
+        wrong_dir = 0x0;
+    else if(wrong_dir == 0x3)
+        wrong_dir = 0x0020;
+    open.insert(std::pair< PathNode, uint16 >(PathNode(basex, basey, tile_z_, off_x_, off_y_),
+        wrong_dir));
     int watchDog = 1000;
+
     while (!open.empty()) {
         watchDog--;
         float dist = 100000;
         PathNode p;
-        std::set < PathNode >::iterator pit;
-        for (std::set < PathNode >::iterator it = open.begin();
+        std::map < PathNode, uint16 >::iterator pit;
+        for (std::map < PathNode, uint16 >::iterator it = open.begin();
              it != open.end(); it++)
         {
             float d =
-                sqrt((float) (x - it->tileX()) * (x - it->tileX()) +
-                     (y - it->tileY()) * (y - it->tileY()));
+                sqrt((float) (x - it->first.tileX()) * (x - it->first.tileX()) +
+                     (y - it->first.tileY()) * (y - it->first.tileY()));
             if (d < dist) {
                 dist = d;
-                p = *it;
+                p = it->first;
                 pit = it;       // it cannot be const_iterator because of this assign
+                wrong_dir = it->second;
             }
         }
         if (dist < closest_dist) {
@@ -494,43 +507,39 @@ void VehicleInstance::setDestinationV(Mission *m, int x, int y, int z, int ox,
             break;
         }
 
-        std::vector <PathNode> neighbours;
-        neighbours.reserve(4);
+        std::map <PathNode, uint16> neighbours;
         uint16 goodDir = tileDir(p.tileX(), p.tileY(), p.tileZ());
 
-        if (p.tileX() > 0) {
-            if (dirWalkable(&p,p.tileX() - 1, p.tileY(), p.tileZ())
+        if (wrong_dir != 0x6000 && p.tileX() > 0) {
+            if (dirWalkable(&p, p.tileX() - 1, p.tileY(), p.tileZ())
                 && ((goodDir & 0xF000) == 0x6000 || goodDir == 0xFFFF))
-                neighbours.
-                    push_back(PathNode(p.tileX() - 1, p.tileY(), p.tileZ()));
+                neighbours[PathNode(p.tileX() - 1, p.tileY(), p.tileZ())] = 0x0020;
         }
 
-        if (p.tileX() < g_App.maps().map(map())->maxX()) {
-            if (dirWalkable(&p,p.tileX() + 1, p.tileY(), p.tileZ())
+        if (wrong_dir != 0x0020 && p.tileX() < g_App.maps().map(map())->maxX()) {
+            if (dirWalkable(&p, p.tileX() + 1, p.tileY(), p.tileZ())
                 && ((goodDir & 0x00F0) == 0x0020 || goodDir == 0xFFFF))
-                neighbours.
-                    push_back(PathNode(p.tileX() + 1, p.tileY(), p.tileZ()));
+                neighbours[PathNode(p.tileX() + 1, p.tileY(), p.tileZ())] = 0x6000;
         }
 
-        if (p.tileY() > 0)
-            if (dirWalkable(&p,p.tileX(), p.tileY() - 1, p.tileZ())
+        if (wrong_dir != 0x0400 && p.tileY() > 0)
+            if (dirWalkable(&p, p.tileX(), p.tileY() - 1, p.tileZ())
                 && ((goodDir & 0x0F00) == 0x0400 || goodDir == 0xFFFF))
-                neighbours.
-                    push_back(PathNode(p.tileX(), p.tileY() - 1, p.tileZ()));
+                neighbours[PathNode(p.tileX(), p.tileY() - 1, p.tileZ())] = 0x0;
 
-        if (p.tileY() < g_App.maps().map(map())->maxY())
-            if (dirWalkable(&p,p.tileX(), p.tileY() + 1, p.tileZ())
+        if (wrong_dir != 0x0000 && p.tileY() < g_App.maps().map(map())->maxY())
+            if (dirWalkable(&p, p.tileX(), p.tileY() + 1, p.tileZ())
                 && ((goodDir & 0x000F) == 0x0 || goodDir == 0xFFFF))
-                neighbours.
-                    push_back(PathNode(p.tileX(), p.tileY() + 1, p.tileZ()));
+                neighbours[PathNode(p.tileX(), p.tileY() + 1, p.tileZ())] = 0x0400;
 
-        for (std::vector <PathNode>::iterator it = neighbours.begin();
+        for (std::map <PathNode, uint16>::iterator it = neighbours.begin();
             it != neighbours.end(); it++)
-            if (dirWalkable(&p,it->tileX(), it->tileY(), it->tileZ())
-                && open.find(*it) == open.end()
-                && closed.find(*it) == closed.end())
+            if (dirWalkable(&p, it->first.tileX(), it->first.tileY(),
+                it->first.tileZ())
+                && open.find(it->first) == open.end()
+                && closed.find(it->first) == closed.end())
             {
-                parent[*it] = p;
+                parent[it->first] = p;
                 open.insert(*it);
             }
     }
