@@ -497,10 +497,13 @@ public:
         pd_smNoAmmunition = 0x0010,
         // all non-player controllled peds should have this set
         pd_smAutoAction = 0x0020,
+#if 0
         // target can be position or object
         pd_smHasShootTarget = 0x0040,
         // target can be position or object
-        pd_smHasReachTarget = 0x0080
+        pd_smHasReachTarget = 0x0080,
+#endif
+        pd_smAll = 0xFFFF
     } pedDescStateMasks;
 
     typedef enum {
@@ -562,6 +565,8 @@ public:
         ai_aReachLocation = 0x0080,
         ai_aFollowObject = 0x0100,
         // Should wait some time
+        // NOTE: in order to use "wait" as single command
+        // state should have 4 + 32 + 128 already set
         ai_aWait = 0x0200,
         ai_aAttackLocation = 0x0400,
         // in range of current weapon or inrange of other friendly units:
@@ -570,7 +575,7 @@ public:
         // in range of current weapon
         ai_aFindNonFriend = 0x1000,
         ai_aNonFinishable = 0x80000000,
-    }AiAction;
+    } AiAction;
 
     typedef enum {
         gd_mNone = 0,
@@ -711,20 +716,23 @@ protected:
     std::vector <actionQueueGroupType> default_actions_;
     uint32 action_grp_id_;
     // (pedDescStateMasks)
-    unsigned int desc_state_;
+    uint32 desc_state_;
     // this inherits definition from desc_state_
     // ((target checked)desc_state_ & hostile_desc_) != 0 kill him
-    unsigned int hostile_desc_;
+    uint32 hostile_desc_;
     Mmuu32_t enemy_group_defs_;
     // if object is not hostile here, enemy_group_defs_ check
     // is skipped, but not hostiles_found_ or desc_state_
     Mmuu32_t emulated_group_defs_;
+    // not set anywhere but used
     Mmuu32_t friend_group_defs_;
-    //std::set <unsigned int> emulated_failed_groups_;
+    // std::set <unsigned int> emulated_failed_groups_;
     // dicovered hostiles are set here, only within sight range
     Msmod_t hostiles_found_;
-    //unused for now
-    //std::set <ShootableMapObject *> friends_found_;
+    // used by police officers, for now friends forever mode
+    std::set <ShootableMapObject *> friends_found_;
+    // from this list they will move to friends_found_ if in sight
+    std::set <ShootableMapObject *> friends_not_seen_;
     //! defines group obj belongs to (objGroupDefMasks), not unique
     unsigned int obj_group_def_;
     unsigned int old_obj_group_def_;

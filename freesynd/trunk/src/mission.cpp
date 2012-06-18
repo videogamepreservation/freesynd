@@ -3164,19 +3164,12 @@ uint8 Mission::inRangeCPos(toDefineXYZ * cp, ShootableMapObject ** t,
     toDefineXYZ endXYZ = {tx, ty, tz};
     MapObject *blockerObj = NULL;
 
-    bool targetState;
-    if (t && *t) {
-        targetState = (*t)->isIgnored();
-        (*t)->setIsIgnored(true);
-    }
     double dist_blocker = d;
     blockerExists(&startXYZ, &endXYZ, &dist_blocker, &blockerObj);
-    if (t && *t)
-        (*t)->setIsIgnored(targetState);
 
     if (blockerObj) {
         bool blockerObj_is_closer = false;
-        if (block_mask != 1) {
+        if (block_mask != 1 && ((t && *t != blockerObj) || pn)) {
             int dcx = cx - (int)sx;
             int dcy = cy - (int)sy;
             int dcz = cz - (int)sz;

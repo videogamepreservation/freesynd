@@ -66,6 +66,7 @@ screen_(new Screen(GAME_SCREEN_WIDTH, GAME_SCREEN_HEIGHT))
 {
     fullscreen_ = false;
     playIntro_ = true;
+    debug_breakpoint_trigger_ = 0;
 }
 
 App::~App() {
@@ -483,7 +484,7 @@ void App::cheatEquipFancyWeapons() {
         agents_.agent(i)->addWeapon(
             weapons_.getWeapon(Weapon::Laser)->createInstance());
         agents_.agent(i)->addWeapon(
-            weapons_.getWeapon(Weapon::LongRange)->createInstance());
+            weapons_.getWeapon(Weapon::AccessCard)->createInstance());
 #else
         agents_.agent(i)->addWeapon(
                 weapons_.getWeapon(Weapon::Minigun)->createInstance());

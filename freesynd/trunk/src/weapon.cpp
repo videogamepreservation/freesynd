@@ -194,6 +194,7 @@ void WeaponInstance::draw(int x, int y) {
 void ShotClass::shotTargetRandomizer(toDefineXYZ * cp, toDefineXYZ * tp,
     double angle, double dist_new, bool exclude_z)
 {
+    // TODO: review code
     if (angle == 0)
         return;
 

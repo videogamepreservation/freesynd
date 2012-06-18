@@ -20,6 +20,8 @@ that succesfully persuaded; weapon range modifier(?); accuracy modifier/property
  - pathfinding directional will be used for simulation of people walking
 around the city
  - pathfinding directional, vehicles, for peds driving in the city
+ - pathfinding normal, vehicles, now everywhere works(ex. Greenland), needs
+testing( , patch map?)
  - damage inflicted by vehicles/weapons, variate by type of damage and range
  - state of vehicles/people/objects should change correctly due to gameplay:
    switch of state due to damage

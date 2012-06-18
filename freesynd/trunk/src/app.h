@@ -142,6 +142,10 @@ class App : public Singleton < App > {
     bool loadGameFromFile(int fileSlot);
 
     static std::string defaultIniFolder();
+#ifdef _DEBUG
+public:
+    uint8 debug_breakpoint_trigger_;
+#endif
 
 private:
     //! Reads the configuration file
