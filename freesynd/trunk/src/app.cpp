@@ -66,7 +66,9 @@ screen_(new Screen(GAME_SCREEN_WIDTH, GAME_SCREEN_HEIGHT))
 {
     fullscreen_ = false;
     playIntro_ = true;
+#ifdef _DEBUG
     debug_breakpoint_trigger_ = 0;
+#endif
 }
 
 App::~App() {
