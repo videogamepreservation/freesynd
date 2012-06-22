@@ -553,6 +553,8 @@ public:
         ai_aAquireControl = 0x0001,
         // Leave control over object where possible to lose this control
         ai_aLoseControl = 0x0002,
+        // this event should not be used as seperate action only
+        ai_aWaitToStart = 0x0004,
         // Obtain inventory object
         ai_aPickUpObject = 0x0008,
         // Object of defined subtype (of type) should be destroyed
@@ -564,8 +566,8 @@ public:
         // Objects should be at defined location
         ai_aReachLocation = 0x0080,
         ai_aFollowObject = 0x0100,
-        // Should wait some time
-        // NOTE: in order to use "wait" as single command
+        // Should wait some time or works as delay for other action
+        // NOTE: in order to use "wait" as single action
         // state should have 4 + 32 + 128 already set
         ai_aWait = 0x0200,
         ai_aAttackLocation = 0x0400,
@@ -575,6 +577,7 @@ public:
         // in range of current weapon
         ai_aFindNonFriend = 0x1000,
         ai_aNonFinishable = 0x80000000,
+        ai_aAll = 0xFFFFFFFF
     } AiAction;
 
     typedef enum {
@@ -596,7 +599,8 @@ public:
         ShootableMapObject *t_smo;
         // 0b - not started, 1b - executing, 2b - finished, 3b - failed,
         // 4b - suspended, 5b - waiting to complete (ai_aWait),
-        // 6b - not set (empty, should be skipped), 7b - waiting (ai_aWait)
+        // 6b - not set (empty, should be skipped), 7b - waiting (ai_aWait
+        // | ai_aWaitToStart), 8b - waiting to start
         uint16 state;
         // 0 - not set, 0b - stand/walking group(has walking action or
         // action requires ped to stand), 1b - firing only(no walking action),
@@ -623,8 +627,10 @@ public:
             } enemy_var;
             struct {
                 int32 elapsed;
-                // = -1 forever
+                // = -1 forever(ai_aWait)
                 int32 time_total;
+                // = 0 || t > 0 (ai_aWaitToStart)
+                int32 time_before_start;
             } time_var;
             struct {
                 // move into this direction, -1 is unset

@@ -725,6 +725,8 @@ bool GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
                 selectAllAgents();
                 change = true;
             }
+            if (change)
+                g_App.gameSounds().play(snd::SPEECH_SELECTED);
 #if 0
             // TODO: click on minimap requires fixing
             int sy = 46 + 44 + 10 + 46 + 44 + 15 + 2 * 32;
@@ -964,10 +966,13 @@ bool GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
             if (isAgentSelected(a)) {
                 if (w_num < ped->numWeapons()) {
                     if (button == 1) {
-                        if (ped->selectedWeapon() == ped->weapon(w_num))
-                            ped->setSelectedWeapon(-1);
-                        else
-                            ped->setSelectedWeapon(w_num);
+                        if (w_num < ped->numWeapons()) {
+                            if (ped->selectedWeapon() == ped->weapon(w_num))
+                                ped->setSelectedWeapon(-1);
+                            else
+                                ped->setSelectedWeapon(w_num);
+                            g_App.gameSounds().play(snd::SPEECH_SELECTED);
+                        }
                     } else {
                         PedInstance::actionQueueGroupType as;
                         as.main_act = 0;
@@ -1120,6 +1125,16 @@ bool GameplayMenu::handleUnknownKey(Key key, const int modKeys) {
     }
 
 #ifdef _DEBUG
+#if 0
+    static int sound_num = 0;
+    if (key.unicode == 'i') {
+     g_App.gameSounds().play((snd::InGameSample)sound_num);
+     printf("sn %i\n", sound_num);
+     sound_num++;
+     if (sound_num == 33)
+         sound_num = 0;
+    }
+#endif
 #if 0
     if (key == KEY_i)
         mission_->ped(0)->setTileY(mission_->ped(0)->tileY() - 1);

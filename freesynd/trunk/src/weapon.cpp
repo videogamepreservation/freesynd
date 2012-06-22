@@ -717,7 +717,11 @@ uint16 WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
         &&((PedInstance *)owner_)->isOurAgent()) {
         m->incStatisticsShots((int32)shots);
     }
-    this->playSound();
+    // TODO: fix this, remove auto targetting for perseudatron,
+    // use find non friend in ped animate
+    // perseudatron skipping, due to no target
+    if ((shot_prop & Weapon::spe_ShootsWhileNoTarget) == 0)
+        this->playSound();
     // 90% accuracy agent * acurracy weapon
     double accuracy = 0.9 * pWeaponClass_->shotAcurracy();
 
@@ -765,7 +769,7 @@ uint16 WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
 
     // every shot is treated separately
     for (uint32 sc = 0; sc < shots; sc++) {
-    int ammoused = 1;
+        int ammoused = 1;
         if (shot_prop & Weapon::spe_UsesAmmo) {
             ammoused = shots * pWeaponClass_->ammoPerShot();
             if (ammoused > ammo_remaining_) {
@@ -791,6 +795,7 @@ uint16 WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
                     if (smp) {
                         gen_shots.push_back(base_shot);
                         gen_shots.back().smo = smp;
+                        this->playSound();
                     }
                 }
                 if (tobj && tobj->majorType() == MapObject::mjt_Ped) {

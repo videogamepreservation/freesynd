@@ -36,7 +36,7 @@ namespace snd {
      * so don't mess up the order in which they are in.
      */
     enum InGameSample {
-		SHOTGUN = 0,
+        SHOTGUN = 0,
         PISTOL,
         LASER,
         FLAME,
@@ -57,6 +57,7 @@ namespace snd {
         DOOR,
         TIMEBOMB,
         DOOR_2,
+        PUTDOWN_WEAPON,
         MENU_UP,
         MENU_CHANGE,
         FIREWORKS,
@@ -69,6 +70,7 @@ namespace snd {
         EXPLOSION_BIG,
         MENU_AFTER_MISSION,
         UNRECOGNIZED_12,
+        UNRECOGNIZED_13,
         NO_SOUND = -1
     };
 

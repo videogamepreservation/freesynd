@@ -377,6 +377,20 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                 {
                     printf("obj_None");
                 }
+                if ((aqt.ot_execute & PedInstance::ai_aWaitToStart) != 0)
+                {
+                    aqt.state |= 384;
+                    aqt.multi_var.time_var.elapsed += elapsed;
+                    if (aqt.multi_var.time_var.elapsed >=
+                        aqt.multi_var.time_var.time_before_start)
+                    {
+                        aqt.state ^= 384;
+                        aqt.ot_execute ^= PedInstance::ai_aWaitToStart;
+                        elapsed = aqt.multi_var.time_var.elapsed
+                            - aqt.multi_var.time_var.time_before_start;
+                        aqt.multi_var.time_var.elapsed = 0;
+                    }
+                }
                 if ((aqt.ot_execute & PedInstance::ai_aAquireControl) != 0)
                 {
                     if (aqt.t_smo->majorType() == MapObject::mjt_Ped) {
@@ -478,52 +492,69 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                         }
                     }
                 }
-                if ((aqt.ot_execute & PedInstance::ai_aDestroyObject) != 0
-                    && (aqt.state & 128) == 0)
+                if ((aqt.ot_execute & PedInstance::ai_aDestroyObject) != 0)
                 {
-                    if (aqt.t_smo->health() <= 0) {
-                        // not object did it as such he failed,
-                        // but goal reached
-                        aqt.state |= 12;
-                    } else {
-                        // TODO: check friend
-                        // TODO: make it properly, check selected weapon
-                        // if not the one in weapon.desc select it,
-                        // check owner
-                        WeaponInstance *wi = selectedWeapon();
-                        if (!wi)
-                            selectBestWeapon();
-                        wi = selectedWeapon();
-                        if (wi && wi->ammoRemaining() > 0)
-                        {
-                            int tm_left = elapsed;
-                            uint32 make_shots = aqt.multi_var.enemy_var.make_shots;
-                            uint32 shots_done = make_shots
-                                - aqt.multi_var.enemy_var.shots_done;
-                            uint16 answ = wi->inflictDamage(aqt.t_smo, NULL, &tm_left,
-                                aqt.multi_var.enemy_var.forced_shot, &shots_done);
-                            // TODO: handle correctly, use info returned from
-                            // inflictDamage, needs use of condition
-                            if (answ == 0 || answ == 2) {
-                                if ((aqt.ot_execute & PedInstance::ai_aWait) != 0)
-                                    aqt.state |= 2 + 32;
-                                else
-                                    aqt.state |= 2;
-                                if (make_shots == 0 && aqt.t_smo->health() <= 0)
-                                    aqt.state |= 4;
-                                else if (shots_done != 0) {
-                                    aqt.multi_var.enemy_var.shots_done += shots_done;
-                                    if (make_shots != 0 && make_shots
-                                        <= shots_done
-                                        + aqt.multi_var.enemy_var.shots_done)
-                                    {
+                    if ((aqt.state & 128) == 0) {
+                        if (aqt.t_smo->health() <= 0) {
+                            // not object did it as such he failed,
+                            // but goal reached
+                            aqt.state |= 12;
+                        } else {
+                            // TODO: check friend
+                            // TODO: make it properly, check selected weapon
+                            // if not the one in weapon.desc select it,
+                            // check owner
+                            WeaponInstance *wi = selectedWeapon();
+                            if (!wi)
+                                selectBestWeapon();
+                            wi = selectedWeapon();
+                            if (wi && wi->ammoRemaining() > 0)
+                            {
+                                int tm_left = elapsed;
+                                uint32 make_shots = aqt.multi_var.enemy_var.make_shots;
+                                uint32 shots_done = make_shots
+                                    - aqt.multi_var.enemy_var.shots_done;
+                                uint16 answ = wi->inflictDamage(aqt.t_smo, NULL, &tm_left,
+                                    aqt.multi_var.enemy_var.forced_shot, &shots_done);
+                                // TODO: handle correctly, use info returned from
+                                // inflictDamage, needs use of condition
+                                if (answ == 0 || answ == 2) {
+                                    if ((aqt.ot_execute & PedInstance::ai_aWait) != 0)
+                                        aqt.state |= 2 + 32;
+                                    else
+                                        aqt.state |= 2;
+                                    if (make_shots == 0 && aqt.t_smo->health() <= 0)
                                         aqt.state |= 4;
+                                    else if (shots_done != 0) {
+                                        aqt.multi_var.enemy_var.shots_done += shots_done;
+                                        if (make_shots != 0 && make_shots
+                                            <= shots_done
+                                            + aqt.multi_var.enemy_var.shots_done)
+                                        {
+                                            aqt.state |= 4;
+                                        }
                                     }
-                                }
+                                } else
+                                    aqt.state |= 8;
                             } else
                                 aqt.state |= 8;
-                        } else
+                        }
+                    } else if ((aqt.ot_execute & PedInstance::ai_aWaitToStart) != 0)
+                    {
+                        if (aqt.t_smo->majorType() == MapObject::mjt_Ped
+                            && ((obj_group_def_ == og_dmPolice
+                            && checkHostileIs((PedInstance *)aqt.t_smo))
+                            || aqt.t_smo->health() <= 0))
+                        {
+                            aqt.ot_execute &= PedInstance::ai_aAll
+                                ^ (PedInstance::ai_aWaitToStart
+                                | PedInstance::ai_aWait);
+                            aqt.state ^= 384;
+                            // failed target is friendly or dead
                             aqt.state |= 8;
+                            if (obj_group_def_ == og_dmPolice)
+                                setSelectedWeapon(-1);
+                        }
                     }
                 }
                 if ((aqt.ot_execute & PedInstance::ai_aUseObject) != 0)
@@ -925,6 +956,14 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                         aqt_l.t_smo = aqt.t_smo;
                         aqt_l.state ^= 64;
                         it->main_act++;
+                        if (obj_group_def_ == og_dmPolice) {
+                            aqt_l.ot_execute |= PedInstance::ai_aWaitToStart;
+                            aqt_l.multi_var.time_var.time_before_start = 5000;
+                            // showing a gun
+                            selectBestWeapon();
+                            g_App.gameSounds().play(snd::PUTDOWN_WEAPON);
+                            // TODO: create follow if target moves
+                        }
                     }
                 }
                 if ((aqt.ot_execute & PedInstance::ai_aFindNonFriend) != 0)
@@ -976,7 +1015,8 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                         aqt.state |= 4;
                     }
                 }
-                if ((aqt.ot_execute & PedInstance::ai_aWait) != 0)
+                if ((aqt.ot_execute & (PedInstance::ai_aWait
+                    | PedInstance::ai_aWaitToStart)) == PedInstance::ai_aWait)
                 {
                     // no failed or suspended will have "wait" action
                     if ((aqt.state & 60) == 36) {
@@ -997,7 +1037,12 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                 }
                 if (actions_property_ != 0)
                     break;
-                if ((aqt.state & 32) != 0) {
+
+                if ((aqt.state & 256) != 0) {
+                    if ((aqt.group_desc & PedInstance::gd_mExclusive) != 0)
+                        break;
+                    continue;
+                } else if ((aqt.state & 32) != 0) {
                     if ((aqt.group_desc & PedInstance::gd_mExclusive) != 0)
                         it->state |= 2;
                     switchActionStateTo(aqt.as);
@@ -1407,6 +1452,7 @@ void PedInstance::setSelectedWeapon(int n) {
             rmEmulatedGroupDef(4, og_dmPolice);
         desc_state_ &= (pd_smAll ^ (pd_smArmed | pd_smNoAmmunition));
     }
+
     selected_weapon_ = n;
     if (n != -1) {
         WeaponInstance *wi = weapons_[selected_weapon_];
@@ -1422,7 +1468,6 @@ void PedInstance::setSelectedWeapon(int n) {
                 desc_state_ |= pd_smNoAmmunition;
         }
     }
-            
 }
 
 void PedInstance::selectNextWeapon() {

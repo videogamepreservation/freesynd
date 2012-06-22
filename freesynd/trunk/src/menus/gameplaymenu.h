@@ -63,7 +63,7 @@ protected:
     void selectAllAgents(bool invert=false);
 
     bool isAgentSelected(unsigned int agentNo) {
-        return (selected_agents_ & (1 << agentNo))!=0;
+        return (selected_agents_ & (1 << agentNo)) != 0;
     }
 
     void stopShootingEvent(void);

@@ -107,20 +107,21 @@ bool SoundManager::loadSounds(uint8 * tabData, int tabSize,
     }
     
     tabData += tabentry_startoffset_;
-
-    int soundnum = 0;
     uint32 offset = 0;
 
-    for (int i = 0;
-         i < tabSize - (2 * tabentry_offset_); i += tabentry_offset_) {
+    for (int i = 0; i < tabSize - tabentry_offset_;
+        i += tabentry_offset_)
+    {
         uint32 soundsize = READ_LE_UINT32(tabData);
 
         // Samples with size < 144 are bogus
         if (soundsize > 144) {
-            ++soundnum;
             sounds_.push_back(new Sound);
             uint8 *sample = new uint8[soundsize];
             memcpy(sample, soundData, soundsize);
+            // patching wrong sample rate
+            if (i / tabentry_offset_ == 20)
+                sample[0x1e] = 0x9c;
             sounds_.back()->loadSound(sample, soundsize);
             delete []sample;
         }
