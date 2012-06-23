@@ -123,12 +123,12 @@ bool WeaponInstance::animate(int elapsed) {
         } else if (main_type_ == Weapon::TimeBomb) {
             int tm_left = elapsed;
             if (((processed_time_ / 750)
-                < ((processed_time_ += elapsed) / 750))
-                && processed_time_ / 750 != (pWeaponClass_->timeForShot() / 750))
+                < (processed_time_ + elapsed) / 750)
+                && (processed_time_ + elapsed) / 750 != (pWeaponClass_->timeForShot() / 750))
             {
                 g_App.gameSounds().play(snd::TIMEBOMB);
-            } else if(processed_time_ / 750 == (pWeaponClass_->timeForShot() / 750))
-                processed_time_ = 0;
+            }
+            processed_time_ += elapsed;
             if ((inflictDamage(NULL, NULL, &tm_left)) == 0) {
                 deactivate();
                 map_ = -1;
