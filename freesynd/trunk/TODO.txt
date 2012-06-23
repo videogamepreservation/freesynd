@@ -20,14 +20,13 @@ that succesfully persuaded; weapon range modifier(?); accuracy modifier/property
  - pathfinding directional will be used for simulation of people walking
 around the city
  - pathfinding directional, vehicles, for peds driving in the city
- - pathfinding normal, vehicles, now everywhere works(ex. Greenland), needs
-testing( , patch map?)
+ - vehicle pathfinding needs to be tested on all maps and improved
+(Greenland not working)
  - damage inflicted by vehicles/weapons, variate by type of damage and range
  - state of vehicles/people/objects should change correctly due to gameplay:
    switch of state due to damage
    change in behavior due to persuade
-   "access card" make agent become police officer
-   firing should have delay, correct delay per weapon(?)/ipa
+   firing should have delay, correct delay per ipa
    instant damage to objects
  - agent explode with mod chest lvl 2 or 3
  - animation for objects need to be fixed, to correctly represent every stage
@@ -61,3 +60,4 @@ for time during this mission was completed
  - Convert Italian and French translations to accented characters in UTF-8
  - Complete Italian translation
  - Reload button translation for non-English languages
+ - Use game lost menu

@@ -46,20 +46,21 @@ const int Menu::MENU_SELECT = 8;
 const int Menu::MENU_LDSAVE = 9;
 const int Menu::MENU_MAP = 10;
 const int Menu::MENU_FLI_SUCCESS = 11;
-const int Menu::MENU_FLI_FAILED = 12;
+const int Menu::MENU_FLI_FAILED_MISSION = 12;
 const int Menu::MENU_FLI_TITLE = 13;
 const int Menu::MENU_FLI_INTRO = 14;
+const int Menu::MENU_FLI_GAME_LOST = 15;
 
 Menu::Menu(MenuManager * menuManager, int id, int parentId, 
-           const char *showAnim, const char *leaveAnim) :
-	showAnim_(showAnim), leaveAnim_(leaveAnim)
+    const char *showAnim, const char *leaveAnim) :
+    showAnim_(showAnim), leaveAnim_(leaveAnim)
 {
-	id_ = id;
-	parentId_ = parentId;
-	menu_manager_ = menuManager;
+    id_ = id;
+    parentId_ = parentId;
+    menu_manager_ = menuManager;
     focusedWgId_ = -1;
-	pCaptureInput_ = NULL;
-	isCachable_ = true;
+    pCaptureInput_ = NULL;
+    isCachable_ = true;
 }
 
 Menu::~Menu() {
@@ -72,7 +73,7 @@ Menu::~Menu() {
 }
 
 SpriteManager & Menu::menuSprites() {
-	return menu_manager_->menuSprites();
+    return menu_manager_->menuSprites();
 }
 
 /*!
@@ -98,16 +99,16 @@ void Menu::render(DirtyList &dirtyList)
     handleRender(dirtyList);
 
     for (std::list < MenuText >::iterator it = statics_.begin();
-         it != statics_.end(); it++) {
+        it != statics_.end(); it++) {
         MenuText & m = *it;
-		if ( m.isVisible() && dirtyList.intersectsList(m.getX(), m.getY(), m.getWidth(), m.getHeight()) ) {
+        if ( m.isVisible() && dirtyList.intersectsList(m.getX(), m.getY(), m.getWidth(), m.getHeight()) ) {
             m.draw();
         }
     }
 
     for (std::list < ActionWidget * >::iterator it = actions_.begin();
-         it != actions_.end(); it++) {
-			 ActionWidget * a = *it;
+        it != actions_.end(); it++) {
+            ActionWidget * a = *it;
             if ( a->isVisible() && dirtyList.intersectsList(a->getX(), a->getY(), a->getWidth(), a->getHeight())) {
                 a->draw();
             }
@@ -127,11 +128,11 @@ void Menu::leave() {
         focusedWgId_ = -1;
     }
 
-	// Reset capture
-	if (pCaptureInput_ != NULL) {
-		pCaptureInput_->handleCaptureLost();
-		pCaptureInput_ = NULL;
-	}
+    // Reset capture
+    if (pCaptureInput_ != NULL) {
+        pCaptureInput_->handleCaptureLost();
+        pCaptureInput_ = NULL;
+    }
 
     // Give control to menu instance
     handleLeave();
@@ -194,12 +195,12 @@ int Menu::addOption(int x, int y, int width, int height, const char *text, FontM
             int to, bool visible, bool centered, int dark_widget, int light_widget) {
     
     Option *pOption = new Option(this, x, y, width, height, text, getMenuFont(size), to, visible, centered, dark_widget, light_widget);
-	actions_.push_back(pOption);
+    actions_.push_back(pOption);
 
-	if (pOption->getHotKey().keyFunc != KFC_UNKNOWN || pOption->getHotKey().unicode != 0) {
-		// The option already has an acceleration key
-		registerHotKey(pOption->getHotKey().unicode, pOption->getId());
-	}
+    if (pOption->getHotKey().keyFunc != KFC_UNKNOWN || pOption->getHotKey().unicode != 0) {
+        // The option already has an acceleration key
+        registerHotKey(pOption->getHotKey().unicode, pOption->getId());
+    }
 
     return pOption->getId();
 }
@@ -217,17 +218,20 @@ int Menu::addOption(int x, int y, int width, int height, const char *text, FontM
  */
 int Menu::addImageOption(int x, int y, int dark_widget, int light_widget, bool visible) {
 
-	Sprite *spr = menu_manager_->menuSprites().sprite(dark_widget);
-   
+    Sprite *spr = menu_manager_->menuSprites().sprite(dark_widget);
+
     Option *m = new Option(this, x, y, spr->width() * 2, spr->height() * 2, "", 
-		getMenuFont(FontManager::SIZE_1), MENU_NO_MENU, visible, true, dark_widget, light_widget);
+        getMenuFont(FontManager::SIZE_1), MENU_NO_MENU, visible, true, dark_widget, light_widget);
     actions_.push_back(m);
 
     return m->getId();
 }
 
-int Menu::addToggleAction(int x, int y, int width, int height, const char *text, FontManager::EFontSize size, bool selected) {
-    ToggleAction *a = new ToggleAction(this, x, y, width, height, text, getMenuFont(size), selected, &group_);
+int Menu::addToggleAction(int x, int y, int width, int height, const char *text,
+    FontManager::EFontSize size, bool selected)
+{
+    ToggleAction *a = new ToggleAction(this, x, y, width, height, text,
+        getMenuFont(size), selected, &group_);
     group_.addButton(a);
     actions_.push_back(a);
 

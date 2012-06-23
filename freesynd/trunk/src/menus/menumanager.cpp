@@ -267,7 +267,7 @@ Menu * MenuManager::getMenu(int menuId) {
     } else if (menuId == Menu::MENU_MAP) {
         pMenu =  new MapMenu(this);
     } else if (menuId == Menu::MENU_FLI_SUCCESS ||
-        menuId == Menu::MENU_FLI_FAILED || 
+        menuId == Menu::MENU_FLI_FAILED_MISSION || 
         menuId == Menu::MENU_FLI_TITLE|| 
         menuId == Menu::MENU_FLI_INTRO) {
         pMenu =  new FliMenu(this, menuId);

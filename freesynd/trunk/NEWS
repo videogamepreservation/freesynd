@@ -8,13 +8,15 @@ This is a prelimary release for testing and development purposes.
 Changes
 -------
  * Vehicle creates explosion and damages everything nearby
+ * Access card will identify agent as police officer
+ * Added sound effects for gauss, timebomb, mission failed
 
 Fixed Bugs
 ----------
   * 3517737 : Incorrect handling of agent switching, with selected weapon
   * Pathfinding out of memory/segfault error
   * Modifier keys where not passed to the key event
-  * Next and previous button in the briefing where not updated correctly.
+  * Next and previous button in the briefing where not updated correctly
 
 Features added
 ----------

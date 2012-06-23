@@ -341,6 +341,8 @@ protected:
     * if is greater then time_for_shot_ + time_reload_ then full shot is done
     * */
     int weapon_used_time_;
+    // used for timebomb sound effect
+    int processed_time_;
     bool activated_;
     /*! used to avoid double consuming of same elapsed time,
     * if ped shoots, time is consumed and should not be reused by weapon,

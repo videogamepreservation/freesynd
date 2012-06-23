@@ -48,9 +48,7 @@ namespace snd {
         MINIGUN,
         PERSUADE,
         TRACKING_PONG,
-        SPEECH_SELECTED,    // seems a little fast
-                            // BS: yeah, wonder if the sample rate data is
-                            // stored in the "bogus" sounds in the data file?
+        SPEECH_SELECTED,
         GAUSSGUN,
         SPEECH_MISSION_COMPLETED,
         SPEECH_MISSION_FAILED,
@@ -58,19 +56,22 @@ namespace snd {
         TIMEBOMB,
         DOOR_2,
         PUTDOWN_WEAPON,
-        MENU_UP,
+        MENU_UP = 20,
         MENU_CHANGE,
         FIREWORKS,
         SPEECH_NO,
-        UNRECOGNIZED_9,
-        UNRECOGNIZED_10,   // sounds like glass breaking?
+        // mission failed, lamp-monitor impact
+        MONITOR_IMPACT,
+        // mission failed, lamp breaks
+        GLASS_BREAKING_2,
         APPLAUSE,
         APPLAUSE_ZOOM,
         FIREWORKS_APPLAUSE,
         EXPLOSION_BIG,
         MENU_AFTER_MISSION,
-        UNRECOGNIZED_12,
-        UNRECOGNIZED_13,
+        FALLING_COMMAND_SHIP,
+        // mission failed, pressed button on chair
+        PRESS_BUTTON,
         NO_SOUND = -1
     };
 

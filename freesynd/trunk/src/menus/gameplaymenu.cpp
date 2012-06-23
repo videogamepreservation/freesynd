@@ -1060,7 +1060,7 @@ bool GameplayMenu::handleUnknownKey(Key key, const int modKeys) {
             }
             else if (mission_->failed()) {
                 
-                menu_manager_->gotoMenu(Menu::MENU_FLI_FAILED);
+                menu_manager_->gotoMenu(Menu::MENU_FLI_FAILED_MISSION);
             }
 
             return true;
@@ -1126,13 +1126,13 @@ bool GameplayMenu::handleUnknownKey(Key key, const int modKeys) {
 
 #ifdef _DEBUG
 #if 0
-    static int sound_num = 0;
+    static int sound_num = 20;
     if (key.unicode == 'i') {
      g_App.gameSounds().play((snd::InGameSample)sound_num);
      printf("sn %i\n", sound_num);
      sound_num++;
      if (sound_num == 33)
-         sound_num = 0;
+         sound_num = 20;
     }
 #endif
 #if 0

@@ -227,7 +227,7 @@ Weapon * WeaponManager::loadWeapon(Weapon::WeaponType wt) {
         MapObject::dmg_Explosion, 1, 350, 1500, Weapon::wspt_GaussGun,
         SFXObject::sfxt_ExplosionFire,
         SFXObject::sfxt_ExplosionBall, SFXObject::sfxt_Smoke,
-        SFXObject::sfxt_LargeFire, 512, 5.0, 0.99, 4000, 64);
+        SFXObject::sfxt_LargeFire, 512, 5.0, 0.99, 6000, 64);
             break;
         case Weapon::Shotgun:
             pWeapon = new Weapon(g_App.menus().getMessage("WEAPON_SHOTGUN"),
@@ -265,7 +265,7 @@ Weapon * WeaponManager::loadWeapon(Weapon::WeaponType wt) {
         // NOTE: what is real number for "shot"? for now = 7500
             pWeapon = new Weapon(g_App.menus().getMessage("WEAPON_TIME_BOMB"),
         25, 75, 25000, -1, 1000, 7500, -1,
-        378, Weapon::Unarmed_Anim, snd::TIMEBOMB, Weapon::TimeBomb,
+        378, Weapon::Unarmed_Anim, snd::EXPLOSION, Weapon::TimeBomb,
         MapObject::dmg_Explosion, 1, 15000, 1, Weapon::wspt_TimeBomb,
         SFXObject::sfxt_ExplosionFire, SFXObject::sfxt_ExplosionBall,
         SFXObject::sfxt_Unknown, SFXObject::sfxt_ExplosionFire, 512, 0.0, 0.0,

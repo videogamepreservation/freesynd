@@ -44,28 +44,29 @@ class MenuManager;
  */
 class Menu {
 public:
-	static const int MENU_NO_MENU;
-	static const int MENU_MAIN;
-	static const int MENU_BRIEF;
-	static const int MENU_CONF;
-	static const int MENU_DEBRIEF;
-	static const int MENU_GAMEPLAY;
-	static const int MENU_LOADING;
-	static const int MENU_LOGOUT;
-	static const int MENU_RESEARCH;
-	static const int MENU_SELECT;
-	static const int MENU_LDSAVE;
-	static const int MENU_MAP;
-	static const int MENU_FLI_SUCCESS;
-	static const int MENU_FLI_FAILED;
-	static const int MENU_FLI_TITLE;
-	static const int MENU_FLI_INTRO;
+    static const int MENU_NO_MENU;
+    static const int MENU_MAIN;
+    static const int MENU_BRIEF;
+    static const int MENU_CONF;
+    static const int MENU_DEBRIEF;
+    static const int MENU_GAMEPLAY;
+    static const int MENU_LOADING;
+    static const int MENU_LOGOUT;
+    static const int MENU_RESEARCH;
+    static const int MENU_SELECT;
+    static const int MENU_LDSAVE;
+    static const int MENU_MAP;
+    static const int MENU_FLI_SUCCESS;
+    static const int MENU_FLI_FAILED_MISSION;
+    static const int MENU_FLI_TITLE;
+    static const int MENU_FLI_INTRO;
+    static const int MENU_FLI_GAME_LOST;
 
-	/*!
-	 * Menu constructor.
-	 */
+    /*!
+        * Menu constructor.
+        */
     Menu(MenuManager *menuManager, int id, int parentId, 
-		const char *showAnim = "", const char *leaveAnim = "");
+        const char *showAnim = "", const char *leaveAnim = "");
     virtual ~Menu();
 
     int getId() { return id_; }
@@ -78,11 +79,11 @@ public:
     bool hasLeaveAnim() { return leaveAnim_.size() != 0; }
     /*! Returns the leaving animation file name. */
     const char * getLeaveAnimName() { return leaveAnim_.c_str(); }
-	//! Returns true is Menu can be put in cache
-	bool isCachable() { return isCachable_; }
+    //! Returns true is Menu can be put in cache
+    bool isCachable() { return isCachable_; }
 
-	//! Returns the sprites used in menus
-	SpriteManager &menuSprites();
+    //! Returns the sprites used in menus
+    SpriteManager &menuSprites();
     
     //! Creates a new text label and returns its id
     int addStatic(int x, int y, const char *text, FontManager::EFontSize size, bool highlighted);
@@ -91,7 +92,7 @@ public:
     //! Creates a new button and returns its id
     int addOption(int x, int y, int width, int height, const char *text, FontManager::EFontSize size,
             int to = -1, bool visible = true, bool centered = true, int dark_widget = 0, int light_widget = 0);
-	//! Creates a new button that has no text but an image
+    //! Creates a new button that has no text but an image
     int addImageOption(int x, int y, int dark_widget, int light_widget, bool visible = true);
     //! Creates a new toggle button and returns its id
     int addToggleAction(int x, int y, int width, int height, const char *text, FontManager::EFontSize size, bool selected);
@@ -99,32 +100,32 @@ public:
     ListBox * addListBox(int x, int y, int width, int height, bool visible = true);
     //! Creates a specific list box for team selection and returns a pointer on it
     TeamListBox * addTeamListBox(int x, int y, int width, int height, bool visible = true);
-	//! Creates a new textfield widget and returns a pointer on it
-	TextField * addTextField(int x, int y, int width, int height, FontManager::EFontSize size, int maxSize, bool displayEmpty = false, bool visible = false);
+    //! Creates a new textfield widget and returns a pointer on it
+    TextField * addTextField(int x, int y, int width, int height, FontManager::EFontSize size, int maxSize, bool displayEmpty = false, bool visible = false);
 
-	//! Returns the MenuText with given id
+    //! Returns the MenuText with given id
     MenuText * getStatic(int staticId);
-	//! Returns the ActionWidget with the given id
+    //! Returns the ActionWidget with the given id
     ActionWidget * getActionWidget(int buttonId);
-	//! Returns the Option with the given id
+    //! Returns the Option with the given id
     Option * getOption(int buttonId);
-	//! Adds a mapping between a Function Key and an Option
-	void registerHotKey(KeyFunc key, int optId);
-	//! Adds a mapping between a Printable Key and an Option
-	void registerHotKey(uint16 unicode, int optId);
+    //! Adds a mapping between a Function Key and an Option
+    void registerHotKey(KeyFunc key, int optId);
+    //! Adds a mapping between a Printable Key and an Option
+    void registerHotKey(uint16 unicode, int optId);
 
     //! Does common actions before leaving
     void leave();
 
-	//! Callback function : Childs can reimplement
+    //! Callback function : Childs can reimplement
     /*! 
      * Called just after the opening animation is played (if one has
      * been defined) and before the menu is rendered for the first time.
      */
     virtual void handleShow() {}
     
-	//! Main render function
-	void render(DirtyList &dirtyList);
+    //! Main render function
+    void render(DirtyList &dirtyList);
 
     //! Callback function : Childs can reimplement
     /*! 
@@ -142,7 +143,7 @@ public:
     //! Handles mouse button released
     void mouseUpEvent(int x, int y, int button, const int modKeys);
 
-	virtual void handleTick(int elapsed) {}
+    virtual void handleTick(int elapsed) {}
 
     //! Callback function : Childs can reimplement
     /*! 
@@ -155,65 +156,65 @@ public:
 
     void selectToggleAction(int id) { group_.selectButton(id); }
 
-	void captureInputBy(TextField *pTextfield);
+    void captureInputBy(TextField *pTextfield);
 
 protected:
 
-	//! Callback function : Childs can reimplement
+    //! Callback function : Childs can reimplement
     /*! 
-     * Called each time a menu is rendered.
-     */
+        * Called each time a menu is rendered.
+        */
     virtual void handleRender(DirtyList &dirtyList) {}
-	
-	//! Handle mouse down event.
-	/*!
-	 * \return true if the menu has processed the event, and it must not be processed anymore.
-	 */
+
+    //! Handle mouse down event.
+    /*!
+        * \return true if the menu has processed the event, and it must not be processed anymore.
+        */
     virtual bool handleMouseDown(int x, int y, int button, const int modKeys) { return false; }
     virtual void handleMouseUp(int x, int y, int button, const int modKeys) {}
     virtual void handleMouseMotion(int x, int y, int state, const int modKeys) {}
-	virtual bool handleUnknownKey(Key key, const int modKeys) { return false;}
+    virtual bool handleUnknownKey(Key key, const int modKeys) { return false;}
 
     void needRendering();
     void addDirtyRect(int x, int y, int width, int height);
 
-	//! Convenient method to return the menu font with the given size
-	MenuFont * getMenuFont(FontManager::EFontSize size);
-	//! Convenient method to return the game font
-	GameFont *gameFont();
+    //! Convenient method to return the menu font with the given size
+    MenuFont * getMenuFont(FontManager::EFontSize size);
+    //! Convenient method to return the game font
+    GameFont *gameFont();
 
 protected:
-	class HotKey {
-	public:
-		HotKey(KeyFunc code, uint16 unicode, Option *pOpt) {
-			key.keyFunc = code;
-			key.unicode = unicode;
-			pOption = pOpt;
-		}
-		Key key;
-		Option *pOption; 
-	};
+    class HotKey {
+    public:
+        HotKey(KeyFunc code, uint16 unicode, Option *pOpt) {
+            key.keyFunc = code;
+            key.unicode = unicode;
+            pOption = pOpt;
+        }
+        Key key;
+        Option *pOption; 
+    };
 
     MenuManager *menu_manager_;
     /*! A unique id to identify this menu.*/
     int id_;
-	/*! Parent menu when leaving this menu.*/
-	int parentId_;
+    /*! Parent menu when leaving this menu.*/
+    int parentId_;
     std::string showAnim_, leaveAnim_;
     /*! The list of all static widgets (MenuText).*/
     std::list<MenuText> statics_;
     /*! The list of all dynamic widgets (Option).*/
     std::list<ActionWidget *> actions_;
     /*! An association between key and option for hotkeys.*/
-	std::list<HotKey> hotKeys_;
+    std::list<HotKey> hotKeys_;
     /*! A group of mutual exclusive ToggleAction.*/
     Group group_;
     /*! The id of the widget that currently has focus.*/
     int focusedWgId_;
-	/*! The current textfield that holds the cursor and so capture all key events.*/
-	TextField *pCaptureInput_;
-	/*! Tells if the menu is kept in cache even after leaving it or destroy it.*/
-	bool isCachable_;
+    /*! The current textfield that holds the cursor and so capture all key events.*/
+    TextField *pCaptureInput_;
+    /*! Tells if the menu is kept in cache even after leaving it or destroy it.*/
+    bool isCachable_;
 };
 
 #endif
