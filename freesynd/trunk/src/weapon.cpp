@@ -225,7 +225,6 @@ void ShotClass::shotTargetRandomizer(toDefineXYZ * cp, toDefineXYZ * tp,
     if (dist_cur == 0)
         return;
 
-    const double PI = 3.14159265;
     angle /= (180.0 / PI);
     double angx = acos(dtx/dist_cur);
     double angy = acos(dty/dist_cur);

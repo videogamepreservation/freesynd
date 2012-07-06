@@ -23,7 +23,7 @@ information, see comments in the files src/utils/configfile.*
 Freesynd includes UTF8-CPP, a library by Nemanja Trifunovic for handling UTF-8 string.
 It is freely available. See license in the utils/utf8.h and utils/utf8/*.h files.
 
-Class CRC32 from NetworkDLS, see license in utils/ccrc32.h and ccrc32.cpp.
+Class CRC32 from NetworkDLS, see license in utils/ccrc32.h and utils/ccrc32.cpp.
 
 
 What's new in this release?

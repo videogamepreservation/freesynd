@@ -2,7 +2,6 @@
  - MiniMap in game : more detailed map, display peds, guns, radar focus,
     evacuation red circle
  - Mission objectives
- - Play sound in end mission animation
  - Remove debug info displayed in the console
  - Correct identification of object types during mission load, includes
 vehicles, static objects

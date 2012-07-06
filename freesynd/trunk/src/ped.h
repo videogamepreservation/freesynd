@@ -255,9 +255,11 @@ public:
     } lvlNodesDesc;
 
     void setDestinationP(Mission *m, int x, int y, int z,
-        int ox = 128, int oy = 128, int new_speed = 160);
+        int ox = 128, int oy = 128);
 
     bool movementP(Mission *m, int elapsed);
+    int moveToDir(Mission *m, int elapsed, int dir = -1, int dist = -1,
+                  bool bounce = true);
 
     void setAllAdrenaLevels(uint8 amount, uint8 depend, uint8 effect) {
         lvl_percep_amount_ = amount;

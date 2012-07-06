@@ -132,4 +132,6 @@ inline bool bitClear(const uint32 value, int index) {
     return !bitSet(value, index);
 }
 
+const double PI = 3.14159265;
+
 #endif

@@ -513,7 +513,6 @@ bool Mission::loadLevel(uint8 * levelData)
             case 0x10:
                 objd.type = objv_ReachLocation;
                 // realworld coordinates, not tile based
-                // tilebased = if offset > 0 then tilez += 1
                 objd.pos_xyz.x = READ_LE_INT16(obj.mapposx);
                 objd.pos_xyz.y = READ_LE_INT16(obj.mapposy);
                 objd.pos_xyz.z = READ_LE_INT16(obj.mapposz);
@@ -543,6 +542,23 @@ bool Mission::loadLevel(uint8 * levelData)
     if (staticsFss) {
         fwrite(level_data_.scenarios, 1, 2048 * 8, staticsFss);
         fclose(staticsFss);
+    }
+#endif
+#if 0
+    for (unsigned char i = 1; i < 2047; i++) {
+        LEVELDATA_SCENARIOS & scenario = level_data_.scenarios[i];
+        if (scenario.type == 0)
+            break;
+        else {
+            printf("num %i\n", i);
+            printf("next %X\n", READ_LE_INT16(scenario.next));
+            printf("object offset %X\n", READ_LE_INT16(scenario.offset_object));
+            printf("x = %i, y = %i, z = %i\n",
+                   scenario.tilex >> 1,
+                   scenario.tiley >> 1 ,
+                   scenario.tilez >> 1);
+            printf("type = %i\n\n", scenario.type);
+        }
     }
 #endif
 

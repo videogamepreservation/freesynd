@@ -592,18 +592,18 @@ void VehicleInstance::setDestinationV(Mission *m, int x, int y, int z, int ox,
                     curox = 200;
                     curoy = 200;
                     break;
-#if _DEBUG
                 default:
+#if _DEBUG
                     printf("hmm tileDir %X at %i, %i, %i\n",
                         (unsigned int)tileDir(it->tileX(), it->tileY(),
                         it->tileZ()), it->tileX(), it->tileY(), it->tileZ());
                     printf("tileAt %i\n",
                         (unsigned int)g_App.maps().map(map())->tileAt(
                         it->tileX(), it->tileY(), it->tileZ()));
+#endif
                     it->setOffX(curox);
                     it->setOffY(curoy);
                     break;
-#endif
             }
         }
     }

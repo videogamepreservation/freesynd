@@ -129,7 +129,7 @@ void MapObject::setDirection(int dir) {
 void MapObject::setDirection(int posx, int posy, int * dir) {
 
     int direction = -1;
-    double PI = 3.14159265;
+
     if (posx == 0) {
         if (posy < 0) {
             direction = 128;

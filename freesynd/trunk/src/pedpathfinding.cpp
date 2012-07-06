@@ -26,11 +26,12 @@
 #include "pathsurfaces.h"
 
 #if 0
+#include "SDL.h"
 #define EXECUTION_SPEED_TIME
 #endif
 
 void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
-                                     int ox, int oy, int new_speed)
+                                    int ox, int oy)
 {
     // NOTE: this is a "flood" algorithm, it expands until it reaches other's
     // flood point, then it removes unrelated points
@@ -40,7 +41,6 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
 #endif
     m->adjXYZ(x, y, z);
     dest_path_.clear();
-    speed_ = 0;
 
     if (map_ == -1 || health_ <= 0)
         return;
@@ -82,7 +82,6 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
 
     if (tile_x_ == x && tile_y_ == y && tile_z_ == z) {
         dest_path_.push_back(PathNode(x, y, z, ox, oy));
-        speed_ = new_speed;
         return;
     }
 #ifdef EXECUTION_SPEED_TIME
@@ -2186,12 +2185,326 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
 #endif
 #ifdef EXECUTION_SPEED_TIME
     dest_path_.clear();
-#endif
-    if(dest_path_.size() != 0)
-        speed_ = new_speed;
-#ifdef EXECUTION_SPEED_TIME
     printf("+++++++++++++++++++++++++++");
     printf("end time %i.%i\n", SDL_GetTicks()/1000, SDL_GetTicks()%1000);
 #endif
 }
 
+bool PedInstance::movementP(Mission *m, int elapsed)
+{
+    bool updated = false;
+    int used_time = elapsed;
+
+    while (dest_path_.size() && used_time != 0) {
+        int nxtTileX = dest_path_.front().tileX();
+        int nxtTileY = dest_path_.front().tileY();
+        int nxtTileZ = dest_path_.front().tileZ();
+        if (hold_on_.wayFree != 0 && hold_on_.pathBlocker->isPathBlocker()) {
+            if (hold_on_.wayFree == 1) {
+                if (hold_on_.tilex == nxtTileX && hold_on_.tiley == nxtTileY
+                    && hold_on_.tilez == nxtTileZ)
+                    return updated;
+            } else if (hold_on_.wayFree == 2) {
+                if (hold_on_.xadj || hold_on_.yadj) {
+                    if(abs(hold_on_.tilex - nxtTileX) <= hold_on_.xadj
+                        && abs(hold_on_.tiley - nxtTileY) <= hold_on_.yadj
+                        && hold_on_.tilez == nxtTileZ)
+                    {
+                        dest_path_.clear();
+                        speed_ = 0;
+                        return updated;
+                    }
+                } else {
+                    if (hold_on_.tilex == nxtTileX && hold_on_.tiley == nxtTileY
+                        && hold_on_.tilez == nxtTileZ)
+                    {
+                        dest_path_.clear();
+                        speed_ = 0;
+                        return updated;
+                    }
+                }
+            }
+        } else
+            hold_on_.wayFree = 0;
+        // TODO: not ignore Z, if tile is stairs diffz is wrong
+        int adx =
+             nxtTileX * 256 + dest_path_.front().offX();
+        int ady =
+             nxtTileY * 256 + dest_path_.front().offY();
+        int atx = tile_x_ * 256 + off_x_;
+        int aty = tile_y_ * 256 + off_y_;
+        int diffx = adx - atx, diffy = ady - aty;
+
+        if (abs(diffx) < 16 && abs(diffy) < 16) {
+            // TODO: maybe something better? then using diffx/diffy?
+            // for this check
+            off_y_ = dest_path_.front().offY();
+            off_x_ = dest_path_.front().offX();
+            tile_z_ = nxtTileZ;
+            tile_y_ = nxtTileY;
+            tile_x_ = nxtTileX;
+            dest_path_.pop_front();
+            if (dest_path_.empty())
+                speed_ = 0;
+            updated = true;
+        } else {
+            setDirection(diffx, diffy, &dir_);
+
+            int dx = 0, dy = 0;
+            double d = sqrt((double)(diffx * diffx + diffy * diffy));
+            // object will not move over a distance he can actually move
+            double avail_time_use = (d / (double)speed_) * 1000.0;
+            // correcting time availiable for this distance to time
+            // we can use
+            if (avail_time_use > used_time)
+                avail_time_use = used_time;
+
+            if (abs(diffx) > 0)
+                // dx = diffx * (speed_ * used_time / 1000) / d;
+                dx = (int)((diffx * (speed_ * avail_time_use) / d) / 1000);
+            if (abs(diffy) > 0)
+                // dy = diffy * (speed_ * used_time / 1000) / d;
+                dy = (int)((diffy * (speed_ * avail_time_use) / d) / 1000);
+
+            if (dx || dy) {
+                int prv_time = used_time;
+                if (dx) {
+                    used_time -= (int)(((double) dx * 1000.0 * d)
+                        / (double)(diffx * speed_));
+                } else if (dy) {
+                    used_time -= (int)(((double) dy * 1000.0 * d)
+                        / (double)(diffy * speed_));
+                } else
+                    used_time = 0;
+                if (used_time < 0 || prv_time == used_time)
+                    used_time = 0;
+            } else
+                used_time = 0;
+
+            updatePlacement(off_x_ + dx, off_y_ + dy);
+            // TODO : what obstacles? cars? doors are already
+            // setting stop signal, reuse it?
+#if 0
+            if (updatePlacement(off_x_ + dx, off_y_ + dy)) {
+                ;
+            } else {
+                // TODO: avoid obstacles.
+                speed_ = 0;
+            }
+#endif
+            if(nxtTileX == tile_x_ && nxtTileY == tile_y_)
+                tile_z_ = nxtTileZ;
+
+            if(nxtTileX == tile_x_ && nxtTileY == tile_y_
+                && nxtTileZ == tile_z_ 
+                && dest_path_.front().offX() == off_x_
+                && dest_path_.front().offY() == off_y_)
+                dest_path_.pop_front();
+            if (dest_path_.size() == 0)
+                speed_ = 0;
+
+            updated = true;
+        }
+
+            if ((state_ & pa_smFollowing) != 0) {
+                toDefineXYZ xyz;
+                // TODO: calculate length for dest_path_?
+                // TODO: too big elapsed makes ped move to close to target
+                dest_path_.back().convertPosToXYZ(&xyz);
+                double dist_cur = distanceToPosXYZ(&xyz);
+                if (dist_cur < (double)dist_to_pos_) {
+                    dest_path_.clear();
+                    speed_ = 0;
+                }
+            }
+
+        unsigned char twd = m->mtsurfaces_[tile_x_ + tile_y_ * m->mmax_x_
+            + tile_z_ * m->mmax_m_xy].twd;
+        switch (twd) {
+            case 0x01:
+                vis_z_ = tile_z_ - 1;
+                off_z_ = 127 - (off_y_ >> 1);
+                break;
+            case 0x02:
+                vis_z_ = tile_z_ - 1;
+                off_z_ = off_y_ >> 1;
+                break;
+            case 0x03:
+                vis_z_ = tile_z_ - 1;
+                off_z_ = off_x_ >> 1;
+                break;
+            case 0x04:
+                vis_z_ = tile_z_ - 1;
+                off_z_ = 127 - (off_x_ >> 1);
+                break;
+            default:
+                vis_z_ = tile_z_;
+                off_z_ = 0;
+                break;
+        }
+    }
+#ifdef _DEBUG
+    if (dest_path_.empty() && speed_) {
+        printf("Was running at speed %i, destination unknown\n", speed_);
+        speed_ = 0;
+    }
+#endif
+
+    return updated;
+}
+
+int PedInstance::moveToDir(Mission* m, int elapsed, int dir, int dist, bool bounce)
+{/*
+    if (dir == -1) {
+        if (dir_move_ != -1)
+            dir = dir_move_;
+        else
+            dir = dir_;
+    }*/
+    double dist_curr = (elapsed * 512) / 1000.0;
+    if (dist == -1) {
+         if (dist_to_pos_ != 0 && (int)dist_curr > dist_to_pos_)
+             dist_curr = (double) dist_to_pos_;
+    } else if ((int) dist_curr > dist)
+        dist_curr = (double)dist;
+
+    while ((int)dist_curr > 0 && bounce) {
+        double diffx = 0, diffy = 0;
+        if (dir == 0) {
+            diffy = dist_curr;
+        } else if (dir == 64) {
+            diffx = dist_curr;
+        } else if (dir == 128) {
+            diffy = -dist_curr;
+        } else if (dir == 192) {
+            diffx = -dist_curr;
+        } else if (dir < 64) {
+            diffx = sin((dir / 128.0) * PI) * dist_curr;
+            diffy = cos((dir / 128.0) * PI) * dist_curr;
+        } else if (dir < 128) {
+            int dirn = dir % 64;
+            diffy = -sin((dirn / 128.0) * PI) * dist_curr;
+            diffx = cos((dirn / 128.0) * PI) * dist_curr;
+        } else if (dir < 192) {
+            int dirn = dir % 64;
+            diffx = -sin((dirn / 128.0) * PI) * dist_curr;
+            diffy = -cos((dirn / 128.0) * PI) * dist_curr;
+        } else if (dir < 256) {
+            int dirn = dir % 64;
+            diffy = sin((dirn / 128.0) * PI) * dist_curr;
+            diffx = -cos((dirn / 128.0) * PI) * dist_curr;
+        }
+
+        double posx = (double)(tile_x_ * 256 + off_x_);
+        double posy = (double)(tile_y_ * 256 + off_y_);
+        int tilex = tile_x_;
+        int tiley = tile_y_;
+        int tilez = tile_z_;
+        floodPointDesc *fpd = &(m->mdpoints_[tile_x_ + tile_y_ * m->mmax_x_ +
+            tilez * m->mmax_m_xy]);
+        diffx /= dist_curr;
+        diffy /= dist_curr;
+        double dist_passsed = 0;
+        double dist_inc = sqrt(pow(diffx, 2) + pow(diffy, 2));
+        bool need_bounce = false;
+
+        do {
+            double px = posx + diffx;
+            double py = posy + diffy;
+            if (px < 0.0 ||  py < 0.0 || ((int)px / 256) >= m->mmax_x_
+                || ((int)py / 256) >= m->mmax_y_)
+            {
+                need_bounce = true;
+                break;
+            }
+            int tilenx = (int)px / 256;
+            int tileny = (int)py / 256;
+            if (tilex != tilenx || tiley != tileny) {
+                if (tilenx - tilex == 0) {
+                    if (tileny - tiley > 0) {
+                        if ((fpd->dirh & 0x01) == 0x01)
+                            tilez++;
+                        else if ((fpd->dirl & 0x01) == 0x01)
+                            tilez--;
+                        else if ((fpd->dirm & 0x01) != 0x01) {
+                            need_bounce = true;
+                            break;
+                        }
+                    } else {
+                        if ((fpd->dirh & 0x10) == 0x10)
+                            tilez++;
+                        else if ((fpd->dirl & 0x10) == 0x10)
+                            tilez--;
+                        else if ((fpd->dirm & 0x10) != 0x10) {
+                            need_bounce = true;
+                            break;
+                        }
+                    }
+                } else if (tileny - tiley == 0) {
+                    if (tilenx - tilex > 0) {
+                        if ((fpd->dirh & 0x04) == 0x04)
+                            tilez++;
+                        else if ((fpd->dirl & 0x04) == 0x04)
+                            tilez--;
+                        else if ((fpd->dirm & 0x04) != 0x04) {
+                            need_bounce = true;
+                            break;
+                        }
+                    } else {
+                        if ((fpd->dirh & 0x40) == 0x40)
+                            tilez++;
+                        else if ((fpd->dirl & 0x40) == 0x40)
+                            tilez--;
+                        else if ((fpd->dirm & 0x40) != 0x40) {
+                            need_bounce = true;
+                            break;
+                        }
+                    }
+                } else if (tileny - tiley > 0) {
+                    if (tilenx - tilex > 0) {
+                        if ((fpd->dirm & 0x02) != 0x02) {
+                            need_bounce = true;
+                            break;
+                        }
+                    } else {if ((fpd->dirm & 0x80) != 0x80) {
+                            need_bounce = true;
+                            break;
+                        }
+                    }
+                } else {// (tileny - tiley < 0)
+                    if (tilenx - tilex > 0) {
+                        if ((fpd->dirm & 0x08) != 0x08) {
+                            need_bounce = true;
+                            break;
+                        }
+                    } else {if ((fpd->dirm & 0x20) != 0x20) {
+                            need_bounce = true;
+                            break;
+                        }
+                    }
+                }
+            }
+            dist_passsed += dist_inc;
+            posx = px;
+            posy = py;
+            tilex = tilenx;
+            tiley = tileny;
+            fpd = &(m->mdpoints_[tile_x_ + tile_y_ * m->mmax_x_
+                + tilez * m->mmax_m_xy]);
+        } while (dist_passsed < dist_curr);
+        dist_curr -= dist_passsed;
+        if (need_bounce && bounce) {
+            dir = (dir / 64) * 64;
+            int sign = rand() / 1024;
+            if (sign < 512) {
+                dir += 64;
+                dir /= 256;
+            } else {
+                dir -= 64;
+                if (dir < 0)
+                    dir += 256;
+            }
+        }
+    }
+    return dir;
+}

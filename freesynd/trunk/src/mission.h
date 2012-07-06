@@ -249,8 +249,10 @@ public:
         uint8 offset_of_persuader[2];
         uint8 unkn6[2];
         uint8 offset_of_vehicle[2];
-        uint8 offset_scenario_1[2];
-        uint8 offset_scenario_2[2];
+        // currently executed scenario
+        uint8 offset_scenario_curr[2];
+        // starting point for current scenario
+        uint8 offset_scenario_start[2];
         uint8 unkn7[2];
         uint8 offset_of_vehicle_2[2]; // ??
         uint8 goto_mapposx[2];
@@ -382,11 +384,11 @@ public:
         uint8 offset_object[2];
         // tile_x_ = (tilex < < 7) / 256
         // off_x_ = (tilex < < 7) % 256
+        uint8 tilex;
         // tile_y_ = (tiley < < 7) / 256
         // off_y_ = (tiley < < 7) % 256
-        // tile_z_ = tilez
-        uint8 tilex;
         uint8 tiley;
+        // tile_z_ = tilez
         uint8 tilez;
         uint8 type;
     } LEVELDATA_SCENARIOS;         // total: 8 bytes

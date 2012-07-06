@@ -602,10 +602,12 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                                 aqt.state |= 2;
                                 setDestinationP(mission, aqt.t_pn.tileX(),
                                     aqt.t_pn.tileY(), aqt.t_pn.tileZ(),
-                                    aqt.t_pn.offX(), aqt.t_pn.offY(),
-                                    speed_set);
-                                if (dest_path_.empty())
+                                    aqt.t_pn.offX(), aqt.t_pn.offY());
+                                if (dest_path_.empty()) {
                                     aqt.state |= 8;
+                                    speed_ = 0;
+                                } else
+                                    speed_ = speed_set;
                             } else {
                                 aqt.state |= 4;
                             }
@@ -629,9 +631,12 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                                 setDestinationP(mission,
                                     aqt.t_smo->tileX(), aqt.t_smo->tileY(),
                                     aqt.t_smo->tileZ(), aqt.t_smo->offX(),
-                                    aqt.t_smo->offY(), speed_set);
-                                if (dest_path_.empty())
+                                    aqt.t_smo->offY());
+                                if (dest_path_.empty()) {
                                     aqt.state |= 8;
+                                    speed_ = 0;
+                                } else
+                                    speed_ = speed_set;
                             } else
                                 aqt.state |= 4;
                         }
@@ -663,9 +668,12 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                                 setDestinationP(mission,
                                     aqt.t_smo->tileX(), aqt.t_smo->tileY(),
                                     aqt.t_smo->tileZ(), aqt.t_smo->offX(),
-                                    aqt.t_smo->offY(), speed_set);
-                                if (dest_path_.empty())
+                                    aqt.t_smo->offY());
+                                if (dest_path_.empty()) {
                                     aqt.state |= 8;
+                                    speed_ = 0;
+                                } else
+                                    speed_ = speed_set;
                                 if ((aqt.state & 16) != 0)
                                     aqt.state ^= 16;
                             } else
@@ -685,9 +693,12 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                                     setDestinationP(mission,
                                         aqt.t_smo->tileX(), aqt.t_smo->tileY(),
                                         aqt.t_smo->tileZ(), aqt.t_smo->offX(),
-                                        aqt.t_smo->offY(), speed_set);
-                                    if (dest_path_.empty())
+                                        aqt.t_smo->offY());
+                                    if (dest_path_.empty()) {
                                         aqt.state |= 8;
+                                        speed_ = 0;
+                                    } else
+                                        speed_ = speed_set;
                                     if ((aqt.state & 16) != 0)
                                         aqt.state ^= 16;
                                 } else
@@ -716,9 +727,12 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                                     setDestinationP(mission,
                                         aqt.t_smo->tileX(), aqt.t_smo->tileY(),
                                         aqt.t_smo->tileZ(), aqt.t_smo->offX(),
-                                        aqt.t_smo->offY(), speed_set);
-                                    if (dest_path_.empty())
+                                        aqt.t_smo->offY());
+                                    if (dest_path_.empty()) {
                                         aqt.state |= 8;
+                                        speed_ = 0;
+                                    } else
+                                        speed_ = speed_set;
                                 }
                             }
                         } else if (aqt.condition == 1) {
@@ -744,9 +758,12 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                                         setDestinationP(mission,
                                             aqt.t_smo->tileX(), aqt.t_smo->tileY(),
                                             aqt.t_smo->tileZ(), aqt.t_smo->offX(),
-                                            aqt.t_smo->offY(), speed_set);
-                                        if (dest_path_.empty())
+                                            aqt.t_smo->offY());
+                                        if (dest_path_.empty()) {
                                             aqt.state |= 8;
+                                            speed_ = 0;
+                                        } else
+                                            speed_ = speed_set;
                                     }
                                 }
                             } else
@@ -1777,167 +1794,6 @@ bool PedInstance::handleDrawnAnim(int elapsed) {
             break;
     }
     return answer;
-}
-
-bool PedInstance::movementP(Mission *m, int elapsed)
-{
-    bool updated = false;
-    int used_time = elapsed;
-
-    while (dest_path_.size() && used_time != 0) {
-        int nxtTileX = dest_path_.front().tileX();
-        int nxtTileY = dest_path_.front().tileY();
-        int nxtTileZ = dest_path_.front().tileZ();
-        if (hold_on_.wayFree != 0 && hold_on_.pathBlocker->isPathBlocker()) {
-            if (hold_on_.wayFree == 1) {
-                if (hold_on_.tilex == nxtTileX && hold_on_.tiley == nxtTileY
-                    && hold_on_.tilez == nxtTileZ)
-                    return updated;
-            } else if (hold_on_.wayFree == 2) {
-                if (hold_on_.xadj || hold_on_.yadj) {
-                    if(abs(hold_on_.tilex - nxtTileX) <= hold_on_.xadj
-                        && abs(hold_on_.tiley - nxtTileY) <= hold_on_.yadj
-                        && hold_on_.tilez == nxtTileZ)
-                    {
-                        dest_path_.clear();
-                        speed_ = 0;
-                        return updated;
-                    }
-                } else {
-                    if (hold_on_.tilex == nxtTileX && hold_on_.tiley == nxtTileY
-                        && hold_on_.tilez == nxtTileZ)
-                    {
-                        dest_path_.clear();
-                        speed_ = 0;
-                        return updated;
-                    }
-                }
-            }
-        } else
-            hold_on_.wayFree = 0;
-        // TODO: not ignore Z, if tile is stairs diffz is wrong
-        int adx =
-             nxtTileX * 256 + dest_path_.front().offX();
-        int ady =
-             nxtTileY * 256 + dest_path_.front().offY();
-        int atx = tile_x_ * 256 + off_x_;
-        int aty = tile_y_ * 256 + off_y_;
-        int diffx = adx - atx, diffy = ady - aty;
-
-        if (abs(diffx) < 16 && abs(diffy) < 16) {
-            // TODO: maybe something better? then using diffx/diffy?
-            // for this check
-            off_y_ = dest_path_.front().offY();
-            off_x_ = dest_path_.front().offX();
-            tile_z_ = nxtTileZ;
-            tile_y_ = nxtTileY;
-            tile_x_ = nxtTileX;
-            dest_path_.pop_front();
-            if (dest_path_.empty())
-                speed_ = 0;
-            updated = true;
-        } else {
-            setDirection(diffx, diffy, &dir_);
-
-            int dx = 0, dy = 0;
-            double d = sqrt((double)(diffx * diffx + diffy * diffy));
-            // object will not move over a distance he can actually move
-            double avail_time_use = (d / (double)speed_) * 1000.0;
-            // correcting time availiable for this distance to time
-            // we can use
-            if (avail_time_use > used_time)
-                avail_time_use = used_time;
-
-            if (abs(diffx) > 0)
-                // dx = diffx * (speed_ * used_time / 1000) / d;
-                dx = (int)((diffx * (speed_ * avail_time_use) / d) / 1000);
-            if (abs(diffy) > 0)
-                // dy = diffy * (speed_ * used_time / 1000) / d;
-                dy = (int)((diffy * (speed_ * avail_time_use) / d) / 1000);
-
-            if (dx || dy) {
-                int prv_time = used_time;
-                if (dx) {
-                    used_time -= (int)(((double) dx * 1000.0 * d)
-                        / (double)(diffx * speed_));
-                } else if (dy) {
-                    used_time -= (int)(((double) dy * 1000.0 * d)
-                        / (double)(diffy * speed_));
-                } else
-                    used_time = 0;
-                if (used_time < 0 || prv_time == used_time)
-                    used_time = 0;
-            } else
-                used_time = 0;
-
-            updatePlacement(off_x_ + dx, off_y_ + dy);
-            // TODO : what obstacles? cars? doors are already
-            // setting stop signal, reuse it?
-#if 0
-            if (updatePlacement(off_x_ + dx, off_y_ + dy)) {
-                ;
-            } else {
-                // TODO: avoid obstacles.
-                speed_ = 0;
-            }
-#endif
-            if(nxtTileX == tile_x_ && nxtTileY == tile_y_)
-                tile_z_ = nxtTileZ;
-
-            if(nxtTileX == tile_x_ && nxtTileY == tile_y_
-                && nxtTileZ == tile_z_ 
-                && dest_path_.front().offX() == off_x_
-                && dest_path_.front().offY() == off_y_)
-                dest_path_.pop_front();
-            if (dest_path_.size() == 0)
-                speed_ = 0;
-
-            updated = true;
-        }
-
-            if ((state_ & pa_smFollowing) != 0) {
-                toDefineXYZ xyz;
-                // TODO: calculate length for dest_path_?
-                // TODO: too big elapsed makes ped move to close to target
-                dest_path_.back().convertPosToXYZ(&xyz);
-                double dist_cur = distanceToPosXYZ(&xyz);
-                if (dist_cur < (double)dist_to_pos_) {
-                    dest_path_.clear();
-                    speed_ = 0;
-                }
-            }
-
-        unsigned char twd = m->mtsurfaces_[tile_x_ + tile_y_ * m->mmax_x_
-            + tile_z_ * m->mmax_m_xy].twd;
-        switch (twd) {
-            case 0x01:
-                vis_z_ = tile_z_ - 1;
-                off_z_ = 127 - (off_y_ >> 1);
-                break;
-            case 0x02:
-                vis_z_ = tile_z_ - 1;
-                off_z_ = off_y_ >> 1;
-                break;
-            case 0x03:
-                vis_z_ = tile_z_ - 1;
-                off_z_ = off_x_ >> 1;
-                break;
-            case 0x04:
-                vis_z_ = tile_z_ - 1;
-                off_z_ = 127 - (off_x_ >> 1);
-                break;
-            default:
-                vis_z_ = tile_z_;
-                off_z_ = 0;
-                break;
-        }
-    }
-    if (dest_path_.empty() && speed_) {
-        printf("Was running at speed %i, destination unknown\n", speed_);
-        speed_ = 0;
-    }
-
-    return updated;
 }
 
 bool PedInstance::handleDamage(ShootableMapObject::DamageInflictType *d) {
