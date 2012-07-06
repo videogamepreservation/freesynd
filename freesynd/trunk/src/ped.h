@@ -258,7 +258,7 @@ public:
         int ox = 128, int oy = 128);
 
     bool movementP(Mission *m, int elapsed);
-    int moveToDir(Mission *m, int elapsed, int dir = -1, int dist = -1,
+    bool moveToDir(Mission *m, int elapsed, int dir = -1, int dist = -1,
                   bool bounce = true);
 
     void setAllAdrenaLevels(uint8 amount, uint8 depend, uint8 effect) {
@@ -641,6 +641,10 @@ public:
                 int32 dist;
                 // -1 is unset
                 int32 speed;
+                // directional movement only
+                // to decide whether to continue movement by changing
+                // direction or not
+                bool bounce;
             } dist_var;
         } multi_var;
         // for ai_aReachLocation 0 - go to location, 1 - go to direction,

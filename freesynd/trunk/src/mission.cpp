@@ -210,7 +210,6 @@ bool Mission::loadLevel(uint8 * levelData)
                 p->setSightRange(7 * 256);
             } else if (i > 7) {
                 unsigned int mt = p->getMainType() << 8;
-                //unsigned int objD = p->descState();
                 if (mt == PedInstance::og_dmAgent) {
                     p->setObjGroupID(2);
                     p->setObjGroupDef(PedInstance::og_dmAgent);
@@ -229,6 +228,11 @@ bool Mission::loadLevel(uint8 * levelData)
                     // civilians and criminals
                 }
                 p->setSightRange(7 * 256);
+                // TODO: set scenarios
+                LEVELDATA_SCENARIOS sc = level_data_.scenarios[
+                    READ_BE_UINT16(pedref.offset_scenario_curr) / 8];
+                if (sc.tilex != 0 && sc.tiley != 0) {
+                }
             } else if (i > 3 && i < 8) {
                 p->setMap(-1);
                 p->setHealth(-1);
@@ -555,7 +559,7 @@ bool Mission::loadLevel(uint8 * levelData)
             printf("object offset %X\n", READ_LE_INT16(scenario.offset_object));
             printf("x = %i, y = %i, z = %i\n",
                    scenario.tilex >> 1,
-                   scenario.tiley >> 1 ,
+                   scenario.tiley >> 1,
                    scenario.tilez >> 1);
             printf("type = %i\n\n", scenario.type);
         }

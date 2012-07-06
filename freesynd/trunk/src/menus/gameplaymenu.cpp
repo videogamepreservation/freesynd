@@ -846,7 +846,7 @@ bool GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
                         PedInstance::actionQueueGroupType as;
                         PathNode tpn = PathNode(stx, sty, stz, sox, soy, 0);
                         ped->createActQWalking(as, &tpn, NULL);
-                         as.main_act = as.actions.size() - 1;
+                        as.main_act = as.actions.size() - 1;
                         as.group_desc = PedInstance::gd_mStandWalk;
                         if (modKeys & KMD_CTRL)
                             ped->addActQToQueue(as);
@@ -1133,6 +1133,19 @@ bool GameplayMenu::handleUnknownKey(Key key, const int modKeys) {
      sound_num++;
      if (sound_num == 33)
          sound_num = 20;
+    }
+#endif
+#if 1
+    if (key.unicode == 'm') {
+        PedInstance *ped = mission_->ped(0);
+        PedInstance::actionQueueGroupType as;
+        ped->createActQWalking(as, NULL, NULL, 160, 1024);
+        as.main_act = as.actions.size() - 1;
+        as.group_desc = PedInstance::gd_mStandWalk;
+        if (modKeys & KMD_CTRL)
+            ped->addActQToQueue(as);
+        else
+            ped->setActQInQueue(as);
     }
 #endif
 #if 0

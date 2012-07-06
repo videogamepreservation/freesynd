@@ -612,7 +612,11 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                                 aqt.state |= 4;
                             }
                         } else if (aqt.condition == 1) {
-                            // TODO: directional movement
+                            moveToDir(mission, elapsed,
+                                aqt.multi_var.dist_var.dir,
+                                aqt.multi_var.dist_var.dist,
+                                aqt.multi_var.dist_var.bounce);
+                            aqt.state |= 2;
                         } else if (aqt.condition == 2) {
                             bool set_new_dest = true;
                             dist_to_pos_ = aqt.multi_var.dist_var.dist;
@@ -650,7 +654,10 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                             if (speed_ == 0)
                                 aqt.state |= 4;
                         } else if (aqt.condition == 1) {
-                            // TODO: later
+                            moveToDir(mission, elapsed,
+                                aqt.multi_var.dist_var.dir,
+                                aqt.multi_var.dist_var.dist,
+                                aqt.multi_var.dist_var.bounce);
                         }
                     }
                 }
@@ -2026,7 +2033,16 @@ void PedInstance::createActQWalking(actionQueueGroupType &as, PathNode *tpn,
             aq.condition = 2;
         }
     } else {
-        aq.condition = 1;
+        if (tpn) {
+            aq.t_pn = *tpn;
+            aq.condition = 3;
+        } else if (tsmo) {
+            aq.t_smo = tsmo;
+            aq.condition = 4;
+        } else { // directional movement only
+            aq.condition = 1;
+            aq.multi_var.dist_var.bounce = true;
+        }
     }
     as.actions.push_back(aq);
 }

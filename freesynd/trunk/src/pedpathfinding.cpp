@@ -2353,7 +2353,7 @@ bool PedInstance::movementP(Mission *m, int elapsed)
     return updated;
 }
 
-int PedInstance::moveToDir(Mission* m, int elapsed, int dir, int dist, bool bounce)
+bool PedInstance::moveToDir(Mission* m, int elapsed, int dir, int dist, bool bounce)
 {/*
     if (dir == -1) {
         if (dir_move_ != -1)
@@ -2362,13 +2362,17 @@ int PedInstance::moveToDir(Mission* m, int elapsed, int dir, int dist, bool boun
             dir = dir_;
     }*/
     double dist_curr = (elapsed * 512) / 1000.0;
+    /*
     if (dist == -1) {
          if (dist_to_pos_ != 0 && (int)dist_curr > dist_to_pos_)
              dist_curr = (double) dist_to_pos_;
     } else if ((int) dist_curr > dist)
         dist_curr = (double)dist;
+    */
+    bool need_bounce;
 
-    while ((int)dist_curr > 0 && bounce) {
+    while ((int)dist_curr > 0) {
+        need_bounce = false;
         double diffx = 0, diffy = 0;
         if (dir == 0) {
             diffy = dist_curr;
@@ -2397,16 +2401,12 @@ int PedInstance::moveToDir(Mission* m, int elapsed, int dir, int dist, bool boun
 
         double posx = (double)(tile_x_ * 256 + off_x_);
         double posy = (double)(tile_y_ * 256 + off_y_);
-        int tilex = tile_x_;
-        int tiley = tile_y_;
-        int tilez = tile_z_;
         floodPointDesc *fpd = &(m->mdpoints_[tile_x_ + tile_y_ * m->mmax_x_ +
-            tilez * m->mmax_m_xy]);
+            tile_z_ * m->mmax_m_xy]);
         diffx /= dist_curr;
         diffy /= dist_curr;
         double dist_passsed = 0;
         double dist_inc = sqrt(pow(diffx, 2) + pow(diffy, 2));
-        bool need_bounce = false;
 
         do {
             double px = posx + diffx;
@@ -2419,49 +2419,49 @@ int PedInstance::moveToDir(Mission* m, int elapsed, int dir, int dist, bool boun
             }
             int tilenx = (int)px / 256;
             int tileny = (int)py / 256;
-            if (tilex != tilenx || tiley != tileny) {
-                if (tilenx - tilex == 0) {
-                    if (tileny - tiley > 0) {
+            if (tile_x_ != tilenx || tile_y_ != tileny) {
+                if (tilenx - tile_x_ == 0) {
+                    if (tileny - tile_y_ > 0) {
                         if ((fpd->dirh & 0x01) == 0x01)
-                            tilez++;
+                            tile_z_++;
                         else if ((fpd->dirl & 0x01) == 0x01)
-                            tilez--;
+                            tile_z_--;
                         else if ((fpd->dirm & 0x01) != 0x01) {
                             need_bounce = true;
                             break;
                         }
                     } else {
                         if ((fpd->dirh & 0x10) == 0x10)
-                            tilez++;
+                            tile_z_++;
                         else if ((fpd->dirl & 0x10) == 0x10)
-                            tilez--;
+                            tile_z_--;
                         else if ((fpd->dirm & 0x10) != 0x10) {
                             need_bounce = true;
                             break;
                         }
                     }
-                } else if (tileny - tiley == 0) {
-                    if (tilenx - tilex > 0) {
+                } else if (tileny - tile_y_ == 0) {
+                    if (tilenx - tile_x_ > 0) {
                         if ((fpd->dirh & 0x04) == 0x04)
-                            tilez++;
+                            tile_z_++;
                         else if ((fpd->dirl & 0x04) == 0x04)
-                            tilez--;
+                            tile_z_--;
                         else if ((fpd->dirm & 0x04) != 0x04) {
                             need_bounce = true;
                             break;
                         }
                     } else {
                         if ((fpd->dirh & 0x40) == 0x40)
-                            tilez++;
+                            tile_z_++;
                         else if ((fpd->dirl & 0x40) == 0x40)
-                            tilez--;
+                            tile_z_--;
                         else if ((fpd->dirm & 0x40) != 0x40) {
                             need_bounce = true;
                             break;
                         }
                     }
-                } else if (tileny - tiley > 0) {
-                    if (tilenx - tilex > 0) {
+                } else if (tileny - tile_y_ > 0) {
+                    if (tilenx - tile_x_ > 0) {
                         if ((fpd->dirm & 0x02) != 0x02) {
                             need_bounce = true;
                             break;
@@ -2471,8 +2471,8 @@ int PedInstance::moveToDir(Mission* m, int elapsed, int dir, int dist, bool boun
                             break;
                         }
                     }
-                } else {// (tileny - tiley < 0)
-                    if (tilenx - tilex > 0) {
+                } else {// (tileny - tile_y_ < 0)
+                    if (tilenx - tile_x_ > 0) {
                         if ((fpd->dirm & 0x08) != 0x08) {
                             need_bounce = true;
                             break;
@@ -2483,28 +2483,31 @@ int PedInstance::moveToDir(Mission* m, int elapsed, int dir, int dist, bool boun
                         }
                     }
                 }
+                tile_x_ = tilenx;
+                tile_y_ = tileny;
+                fpd = &(m->mdpoints_[tile_x_ + tile_y_ * m->mmax_x_
+                    + tile_z_ * m->mmax_m_xy]);
             }
             dist_passsed += dist_inc;
             posx = px;
             posy = py;
-            tilex = tilenx;
-            tiley = tileny;
-            fpd = &(m->mdpoints_[tile_x_ + tile_y_ * m->mmax_x_
-                + tilez * m->mmax_m_xy]);
+            off_x_ = (int)posx % 256;
+            off_y_ = (int)posy % 256;
         } while (dist_passsed < dist_curr);
         dist_curr -= dist_passsed;
         if (need_bounce && bounce) {
             dir = (dir / 64) * 64;
-            int sign = rand() / 1024;
-            if (sign < 512) {
+            //int sign = rand() % 1024;
+            //if (sign < 512) {
                 dir += 64;
-                dir /= 256;
-            } else {
+                dir %= 256;
+            /*} else {
                 dir -= 64;
                 if (dir < 0)
                     dir += 256;
-            }
+            }*/
         }
     }
-    return dir;
+    setDirection(dir);
+    return need_bounce;
 }
