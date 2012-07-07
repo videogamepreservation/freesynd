@@ -405,6 +405,31 @@ bool MapObject::isBlocker(toDefineXYZ * startXYZ, toDefineXYZ * endXYZ,
     return true;
 }
 
+void MapObject::offzOnStairs(uint8 twd) {
+    switch (twd) {
+        case 0x01:
+            vis_z_ = tile_z_ - 1;
+            off_z_ = 127 - (off_y_ >> 1);
+            break;
+        case 0x02:
+            vis_z_ = tile_z_ - 1;
+            off_z_ = off_y_ >> 1;
+            break;
+        case 0x03:
+            vis_z_ = tile_z_ - 1;
+            off_z_ = off_x_ >> 1;
+            break;
+        case 0x04:
+            vis_z_ = tile_z_ - 1;
+            off_z_ = 127 - (off_x_ >> 1);
+            break;
+        default:
+            vis_z_ = tile_z_;
+            off_z_ = 0;
+            break;
+    }
+}
+
 SFXObject::SFXObject(int m, int type, int t_show) : MapObject(m),
     sfx_life_over_(false), elapsed_left_(0)
 {

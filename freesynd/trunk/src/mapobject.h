@@ -228,6 +228,8 @@ public:
     }
     unsigned int stateMasks() { return state_; }
 
+    void offzOnStairs(uint8 twd);
+
 protected:
     /*! vis_z_ is location used for adjusting object drawing/calculations
      * tile_z_ represents true location for tile

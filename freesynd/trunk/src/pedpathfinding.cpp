@@ -2318,30 +2318,8 @@ bool PedInstance::movementP(Mission *m, int elapsed)
                 }
             }
 
-        unsigned char twd = m->mtsurfaces_[tile_x_ + tile_y_ * m->mmax_x_
-            + tile_z_ * m->mmax_m_xy].twd;
-        switch (twd) {
-            case 0x01:
-                vis_z_ = tile_z_ - 1;
-                off_z_ = 127 - (off_y_ >> 1);
-                break;
-            case 0x02:
-                vis_z_ = tile_z_ - 1;
-                off_z_ = off_y_ >> 1;
-                break;
-            case 0x03:
-                vis_z_ = tile_z_ - 1;
-                off_z_ = off_x_ >> 1;
-                break;
-            case 0x04:
-                vis_z_ = tile_z_ - 1;
-                off_z_ = 127 - (off_x_ >> 1);
-                break;
-            default:
-                vis_z_ = tile_z_;
-                off_z_ = 0;
-                break;
-        }
+        offzOnStairs(m->mtsurfaces_[tile_x_ + tile_y_ * m->mmax_x_
+            + tile_z_ * m->mmax_m_xy].twd);
     }
 #ifdef _DEBUG
     if (dest_path_.empty() && speed_) {
@@ -2369,10 +2347,10 @@ bool PedInstance::moveToDir(Mission* m, int elapsed, int dir, int dist, bool bou
     } else if ((int) dist_curr > dist)
         dist_curr = (double)dist;
     */
-    bool need_bounce;
+    bool bounced = false;
 
     while ((int)dist_curr > 0) {
-        need_bounce = false;
+        bool need_bounce = false;
         double diffx = 0, diffy = 0;
         if (dir == 0) {
             diffy = dist_curr;
@@ -2496,10 +2474,10 @@ bool PedInstance::moveToDir(Mission* m, int elapsed, int dir, int dist, bool bou
         } while (dist_passsed < dist_curr);
         dist_curr -= dist_passsed;
         if (need_bounce && bounce) {
-            dir = (dir / 64) * 64;
+            //dir = (dir / 64) * 64;
             //int sign = rand() % 1024;
             //if (sign < 512) {
-                dir += 64;
+                dir += 16;
                 dir %= 256;
             /*} else {
                 dir -= 64;
@@ -2507,7 +2485,10 @@ bool PedInstance::moveToDir(Mission* m, int elapsed, int dir, int dist, bool bou
                     dir += 256;
             }*/
         }
+        bounced = bounced || need_bounce;
     }
+    offzOnStairs(m->mtsurfaces_[tile_x_ + tile_y_ * m->mmax_x_
+        + tile_z_ * m->mmax_m_xy].twd);
     setDirection(dir);
-    return need_bounce;
+    return bounced;
 }
