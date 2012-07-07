@@ -252,6 +252,7 @@ protected:
     DefDamageType rcv_damage_def_;
     //! objects direction
     int dir_;
+    int dir_last_;
     //! looped animations, time to show them is set here
     int time_show_anim_;
     //! looped animations, playing time

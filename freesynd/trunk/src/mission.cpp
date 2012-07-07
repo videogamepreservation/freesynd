@@ -1305,7 +1305,7 @@ bool Mission::setSurfaces() {
                                 nxtfp = &(mdpoints_[xp + y + zm]);
                                 this_s = nxts->twd;
                                 upper_s = mtsurfaces_[xp + y + z].twd;
-                                upper_s = mtsurfaces_[xp + y + zp].twd;
+                                upper_u = mtsurfaces_[xp + y + zp].twd;
                                 if (isSurface(this_s)) {
                                     if(sWalkable(this_s, upper_s, upper_u)) {
                                         sdirl |= 0x04;
@@ -1562,8 +1562,8 @@ bool Mission::setSurfaces() {
                                 nxts = &(mtsurfaces_[xm + y + zm]);
                                 nxtfp = &(mdpoints_[xm + y + zm]);
                                 this_s = nxts->twd;
-                                upper_s = mtsurfaces_[xp + y + zp].twd;
-                                upper_u = mtsurfaces_[xp + y + zpp].twd;
+                                upper_s = mtsurfaces_[xm + y + z].twd;
+                                upper_u = mtsurfaces_[xm + y + zp].twd;
                                 if (isSurface(this_s) || this_s == 0x03) {
                                     if(sWalkable(this_s, upper_s, upper_u)) {
                                         sdirl |= 0x40;

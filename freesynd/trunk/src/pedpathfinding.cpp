@@ -2348,6 +2348,12 @@ bool PedInstance::moveToDir(Mission* m, int elapsed, int dir, int dist, bool bou
         dist_curr = (double)dist;
     */
     bool bounced = false;
+    uint8 bounce_try = 0;
+    if (dir_last_ != -1 && (dir + 256) > dir_last_) {
+        dir = dir_last_;
+        dir %= 256;
+    } else
+        dir_last_ = -1;
 
     while ((int)dist_curr > 0) {
         bool need_bounce = false;
@@ -2474,16 +2480,39 @@ bool PedInstance::moveToDir(Mission* m, int elapsed, int dir, int dist, bool bou
         } while (dist_passsed < dist_curr);
         dist_curr -= dist_passsed;
         if (need_bounce && bounce) {
-            //dir = (dir / 64) * 64;
-            //int sign = rand() % 1024;
-            //if (sign < 512) {
-                dir += 16;
-                dir %= 256;
-            /*} else {
-                dir -= 64;
-                if (dir < 0)
-                    dir += 256;
-            }*/
+            if (bounce_try) {
+                if (bounce_try == 1)
+                    dir_last_ += 64;
+                if (bounce_try == 2)
+                    dir_last_ -= 64;
+                dir = dir_last_ % 256;
+                bounce_try = 0;
+            } else {
+                if (dir_last_ == -1) {
+                    dir = (dir / 64) * 64;
+                    dir_last_ = dir;
+                }
+                dir_last_ += 64;
+                dir = dir_last_ % 256;
+            }
+        } else if ((int)dist_curr > 0 && dir_last_ > 0) {
+            if (bounce_try == 0) {
+                bounce_try = 1;
+                dir_last_ -= 64;
+            }
+            if (bounce_try == 1) {
+                bounce_try = 2;
+                dir_last_ += 128;
+            }
+            if (bounce_try == 2) {
+                bounce_try = 3;
+                dir_last_ -= 64;
+            }
+            if (bounce_try == 3) {
+                bounce_try = 1;
+                dir_last_ -= 64;
+            }
+            dir = dir_last_ % 256;
         }
         bounced = bounced || need_bounce;
     }

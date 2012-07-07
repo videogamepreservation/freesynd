@@ -246,7 +246,7 @@ void Map::draw(int scrollX, int scrollY, MapHelper * helper)
                     && coord_h >= scrollY - TILE_HEIGHT * 2
                     && coord_h + TILE_HEIGHT * 2 < cmh) {
 #if 0
-                    if (z != 1)
+                    if (z > 2)
                         continue;
 #endif
                     if (z < max_z_) {

@@ -612,6 +612,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                                 aqt.state |= 4;
                             }
                         } else if (aqt.condition == 1) {
+                            dir_last_ = -1;
                             moveToDir(mission, elapsed,
                                 aqt.multi_var.dist_var.dir,
                                 aqt.multi_var.dist_var.dist,
@@ -1308,6 +1309,7 @@ PedInstance::PedInstance(Ped *ped, int m) : ShootableMovableMapObject(m),
     major_type_ = MapObject::mjt_Ped;
     state_ = PedInstance::pa_smNone;
     actions_property_ = 0;
+    dir_last_ = -1;
 }
 
 PedInstance::~PedInstance()
