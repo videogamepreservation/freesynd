@@ -308,28 +308,27 @@ bool App::testOriginalData() {
 }
 
 bool App::loadWalkData() {
-	int size = 0;
+    int size = 0;
     uint8 *data;
 
-	// reads data from file
+    // reads data from file
     data = File::loadOriginalFile("col01.dat", size);
-	if (!data) {
-		return false;
-	}
+    if (!data) {
+        return false;
+    }
 
     memcpy(walkdata_p_, data, 256);
     // little patch to enable full surface description
     // and eliminate unnecessary data
     // 0x10 - non-surface/non-walkable, always above train stop
     // 0x11, 0x12 - train entering surface
-    walkdata_p_[0x02] = 0x00;
     walkdata_p_[0x80] = 0x11;
     walkdata_p_[0x81] = 0x12;
     walkdata_p_[0x8F] = 0x00;
     walkdata_p_[0x93] = 0x00;
     delete[] data;
 
-	return true;
+    return true;
 }
 
 void App::updateIntroFlag() {

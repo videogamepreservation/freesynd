@@ -503,7 +503,7 @@ public:
     }ObjectiveType;
 
 protected:
-    bool sWalkable(char thisTile, char upperTile, char upperUpper);
+    bool sWalkable(char thisTile, char upperTile);
     bool isSurface(char thisTile);
     bool isStairs(char thisTile);
 

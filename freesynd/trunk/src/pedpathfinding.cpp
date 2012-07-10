@@ -2390,7 +2390,7 @@ bool PedInstance::moveToDir(Mission* m, int elapsed, int dir, int dist, bool bou
         diffx /= dist_curr;
         diffy /= dist_curr;
         double dist_passsed = 0;
-        double dist_inc = sqrt(pow(diffx, 2) + pow(diffy, 2));
+        double dist_inc = sqrt(diffx * diffx + diffy * diffy);
 
         do {
             double px = posx + diffx;
@@ -2483,8 +2483,11 @@ bool PedInstance::moveToDir(Mission* m, int elapsed, int dir, int dist, bool bou
             if (bounce_try) {
                 if (bounce_try == 1)
                     dir_last_ += 64;
-                if (bounce_try == 2)
+                if (bounce_try == 2) {
                     dir_last_ -= 64;
+                    if (dir_last_ < 0)
+                        dir_last_ += 256;
+                }
                 dir = dir_last_ % 256;
                 bounce_try = 0;
             } else {
@@ -2495,10 +2498,14 @@ bool PedInstance::moveToDir(Mission* m, int elapsed, int dir, int dist, bool bou
                 dir_last_ += 64;
                 dir = dir_last_ % 256;
             }
-        } else if ((int)dist_curr > 0 && dir_last_ > 0) {
+            setDirection(dir);
+        } else if (dir_last_ != -1) {
+            setDirection(dir);
             if (bounce_try == 0) {
                 bounce_try = 1;
                 dir_last_ -= 64;
+                if (dir_last_ < 0)
+                    dir_last_ += 256;
             }
             if (bounce_try == 1) {
                 bounce_try = 2;
@@ -2507,17 +2514,22 @@ bool PedInstance::moveToDir(Mission* m, int elapsed, int dir, int dist, bool bou
             if (bounce_try == 2) {
                 bounce_try = 3;
                 dir_last_ -= 64;
+                if (dir_last_ < 0)
+                    dir_last_ += 256;
             }
             if (bounce_try == 3) {
                 bounce_try = 1;
                 dir_last_ -= 64;
+                if (dir_last_ < 0)
+                    dir_last_ += 256;
             }
             dir = dir_last_ % 256;
-        }
+        } else
+            setDirection(dir);
         bounced = bounced || need_bounce;
     }
     offzOnStairs(m->mtsurfaces_[tile_x_ + tile_y_ * m->mmax_x_
         + tile_z_ * m->mmax_m_xy].twd);
-    setDirection(dir);
+
     return bounced;
 }
