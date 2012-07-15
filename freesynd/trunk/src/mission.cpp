@@ -229,10 +229,22 @@ bool Mission::loadLevel(uint8 * levelData)
                 }
                 p->setSightRange(7 * 256);
                 // TODO: set scenarios
-                LEVELDATA_SCENARIOS sc = level_data_.scenarios[
-                    READ_LE_UINT16(pedref.offset_scenario_curr) / 8];
-                if (sc.tilex != 0 && sc.tiley != 0) {
-                }
+                uint16 offset_start = READ_LE_UINT16(pedref.offset_scenario_start);
+                uint16 offset_nxt = offset_start;
+                if (offset_start)
+                    p->dropActQ();
+                do {
+                    LEVELDATA_SCENARIOS sc = level_data_.scenarios[offset_nxt / 8];
+                    if (sc.tilex != 0 && sc.tiley != 0) {
+                        PedInstance::actionQueueGroupType as;
+                        PathNode pn(sc.tilex >> 1, sc.tiley >> 1, p->tileZ());
+                        p->createActQWalking(as, &pn, NULL, 160);
+                        as.main_act = as.actions.size() - 1;
+                        as.group_desc = PedInstance::gd_mStandWalk;
+                        p->addActQToQueue(as);
+                    }
+                    offset_nxt = READ_LE_UINT16(sc.next);
+                } while (offset_nxt && offset_nxt != offset_start);
             } else if (i > 3 && i < 8) {
                 p->setMap(-1);
                 p->setHealth(-1);

@@ -148,6 +148,7 @@ PedInstance *PedManager::loadInstance(uint8 * data, int map)
         hp = 2;
     newped->setStartHealth(hp);
 
+    newped->setDirection(gamdata->orientation);
     if (gamdata->state == 0x11) {
         newped->setDrawnAnim(PedInstance::ad_DeadAnim);
         newped->setHealth(-1);
@@ -155,6 +156,13 @@ PedInstance *PedManager::loadInstance(uint8 * data, int map)
     } else {
         newped->setHealth(hp);
         newped->setStateMasks(PedInstance::pa_smStanding);
+        if (gamdata->state == 0x10) {
+            PedInstance::actionQueueGroupType as;
+            newped->createActQWalking(as, NULL, NULL, gamdata->orientation);
+            as.main_act = as.actions.size() - 1;
+            as.group_desc = PedInstance::gd_mStandWalk;
+            newped->addActQToQueue(as);
+        }
     }
     // this is tile based Z we get, realword Z is in gamdata,
     // for correct calculations of viewpoint, target hit etc.
@@ -175,7 +183,6 @@ PedInstance *PedManager::loadInstance(uint8 * data, int map)
     newped->setPosition(gamdata->mapposx[1], gamdata->mapposy[1],
                         z, gamdata->mapposx[0],
                         gamdata->mapposy[0], oz);
-    newped->setDirection(gamdata->orientation);
     newped->setMainType(gamdata->type_ped);
 
     newped->setAllAdrenaLevels(gamdata->adrena_amount,

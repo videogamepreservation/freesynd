@@ -155,6 +155,11 @@ public:
         xyz->z = vis_z_ * 128 + off_z_;
     }
 
+    void convertPosToXY(int *x, int *y) {
+        *x = tile_x_ * 256 + off_x_;
+        *y = tile_y_ * 256 + off_y_;
+    }
+
     virtual bool animate(int elapsed);
 
     void setSubType(int objSubType) { sub_type_ = objSubType; }

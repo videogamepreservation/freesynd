@@ -1137,15 +1137,19 @@ bool GameplayMenu::handleUnknownKey(Key key, const int modKeys) {
 #endif
 #if 1
     if (key.unicode == 'm') {
-        PedInstance *ped = mission_->ped(0);
-        PedInstance::actionQueueGroupType as;
-        ped->createActQWalking(as, NULL, NULL, 160, 1024);
-        as.main_act = as.actions.size() - 1;
-        as.group_desc = PedInstance::gd_mStandWalk;
-        if (modKeys & KMD_CTRL)
-            ped->addActQToQueue(as);
-        else
-            ped->setActQInQueue(as);
+        for (int i = 0; i < 4; i++) {
+            if (isAgentSelected(i)) {
+                PedInstance *ped = mission_->ped(i);
+                PedInstance::actionQueueGroupType as;
+                ped->createActQWalking(as, NULL, NULL, 160, 1024);
+                as.main_act = as.actions.size() - 1;
+                as.group_desc = PedInstance::gd_mStandWalk;
+                if (modKeys & KMD_CTRL)
+                    ped->addActQToQueue(as);
+                else
+                    ped->setActQInQueue(as);
+            }
+        }
     }
 #endif
 #if 0

@@ -55,7 +55,7 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
         targetd->dirm, based->t, based->dirm);
     printf("target dirh %x, dirl %x ; base dirh %x, dirl %x\n", targetd->dirh,
         targetd->dirl, based->dirh, based->dirl);
-    printf("ttwd %X \n",m->mtsurfaces_[x + y * m->mmax_x_ 
+    printf("ttwd %X \n",m->mtsurfaces_[x + y * m->mmax_x_
         + z * m->mmax_m_xy].twd);
     printf("target pos: x %i; y %i; z %i, ox %i, oy %i\n",
         x, y, z, ox, oy);
@@ -64,7 +64,7 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
         tile_x_, tile_y_, tile_z_, off_x_, off_y_, off_z_);
     printf("zmax %x\n", m->mmax_z_);
     if ( (z + 1) < m->mmax_z_) {
-        printf("upper twd %i\n", m->mtsurfaces_[x + y * m->mmax_x_ 
+        printf("upper twd %i\n", m->mtsurfaces_[x + y * m->mmax_x_
         + (z + 1) * m->mmax_m_xy].twd);
     }
 #endif
@@ -2331,22 +2331,27 @@ bool PedInstance::movementP(Mission *m, int elapsed)
     return updated;
 }
 
-bool PedInstance::moveToDir(Mission* m, int elapsed, int dir, int dist, bool bounce)
-{/*
+bool PedInstance::moveToDir(Mission* m, int elapsed, int dir, int t_posx,
+    int t_posy, int dist, bool bounce)
+{
     if (dir == -1) {
-        if (dir_move_ != -1)
+        if (t_posx != -1 && t_posy != -1) {
+            setDirection(t_posx - tile_x_ * 256 - off_x_,
+                t_posy - tile_y_ * 256 - off_y_, &dir);
+            if (dir == -1)
+                return false;
+        } else if (dir_move_ != -1) {
             dir = dir_move_;
-        else
+        } else
             dir = dir_;
-    }*/
-    double dist_curr = (elapsed * 512) / 1000.0;
-    /*
-    if (dist == -1) {
-         if (dist_to_pos_ != 0 && (int)dist_curr > dist_to_pos_)
+    }
+    // TODO: set speed_
+    double dist_curr = (elapsed * 128) / 1000.0;
+    if (dist == 0) {
+         if (dist_to_pos_ > 0 && (int)dist_curr > dist_to_pos_)
              dist_curr = (double) dist_to_pos_;
     } else if ((int) dist_curr > dist)
         dist_curr = (double)dist;
-    */
     bool bounced = false;
     uint8 bounce_try = 0;
     if (dir_last_ != -1 && (dir + 256) > dir_last_) {
@@ -2531,5 +2536,6 @@ bool PedInstance::moveToDir(Mission* m, int elapsed, int dir, int dist, bool bou
     offzOnStairs(m->mtsurfaces_[tile_x_ + tile_y_ * m->mmax_x_
         + tile_z_ * m->mmax_m_xy].twd);
 
+    // TODO: handle bounce answer everywhere
     return bounced;
 }

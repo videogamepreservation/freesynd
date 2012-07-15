@@ -82,6 +82,11 @@ public:
         xyz->z = tile_z_ * 128 + off_z_;
     }
 
+    void convertPosToXY(int *x, int *y) {
+        *x = tile_x_ * 256 + off_x_;
+        *y = tile_y_ * 256 + off_y_;
+    }
+
 protected:
     int tile_x_, tile_y_, tile_z_, vis_z_, off_x_, off_y_, off_z_;
 };

@@ -258,8 +258,8 @@ public:
         int ox = 128, int oy = 128);
 
     bool movementP(Mission *m, int elapsed);
-    bool moveToDir(Mission *m, int elapsed, int dir = -1, int dist = -1,
-                  bool bounce = true);
+    bool moveToDir(Mission *m, int elapsed, int dir = -1, int t_posx = -1,
+        int t_posy = -1, int dist = 0, bool bounce = true);
 
     void setAllAdrenaLevels(uint8 amount, uint8 depend, uint8 effect) {
         lvl_percep_amount_ = amount;
@@ -649,7 +649,9 @@ public:
         } multi_var;
         // for ai_aReachLocation 0 - go to location, 1 - go to direction,
         // 2 - go to position of object; if dist is set, on reaching
-        // this value action complete
+        // this value action complete, 3 - pathnode coords = x, y are used to
+        // calculate direction, 4 - objects coords = x, y to calculate direction
+        // NOTE: coords x,y : tile_x_ * 256 + off_x_, tile_y_ + off_y_
         // for ai_aFollowObject 0 - until dist is reached, 1 - in range
         // of shot view
         // for ai_aAquireControl, for car, 0 - become passenger(or driver),

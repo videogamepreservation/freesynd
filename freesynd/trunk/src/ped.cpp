@@ -613,8 +613,9 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                             }
                         } else if (aqt.condition == 1) {
                             dir_last_ = -1;
+                            // TODO: check already at location
                             moveToDir(mission, elapsed,
-                                aqt.multi_var.dist_var.dir,
+                                aqt.multi_var.dist_var.dir, -1, -1,
                                 aqt.multi_var.dist_var.dist,
                                 aqt.multi_var.dist_var.bounce);
                             aqt.state |= 2;
@@ -644,6 +645,29 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                                     speed_ = speed_set;
                             } else
                                 aqt.state |= 4;
+                        } else if (aqt.condition == 3) {
+                            // TODO: check already at location
+                            dir_last_ = -1;
+                            int pos_x, pos_y;
+                            aqt.t_pn.convertPosToXY(&pos_x, &pos_y);
+                            int diffx = pos_x - tile_x_ * 256 - off_x_;
+                            int diffy = pos_y - tile_y_ * 256 - off_y_;
+                            dist_to_pos_ = (int)sqrt(diffx * diffx + diffy * diffy);
+                            moveToDir(mission, elapsed,
+                                -1, pos_x, pos_y,
+                                aqt.multi_var.dist_var.dist,
+                                aqt.multi_var.dist_var.bounce);
+                            aqt.state |= 2;
+                        } else if (aqt.condition == 4) {
+                            // TODO: check already at location
+                            dir_last_ = -1;
+                            int pos_x, pos_y;
+                            aqt.t_smo->convertPosToXY(&pos_x, &pos_y);
+                            moveToDir(mission, elapsed,
+                                -1, pos_x, pos_y,
+                                aqt.multi_var.dist_var.dist,
+                                aqt.multi_var.dist_var.bounce);
+                            aqt.state |= 2;
                         }
                     }
                     if ((aqt.state & 15) == 3) {
@@ -656,9 +680,42 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                                 aqt.state |= 4;
                         } else if (aqt.condition == 1) {
                             moveToDir(mission, elapsed,
-                                aqt.multi_var.dist_var.dir,
+                                aqt.multi_var.dist_var.dir, -1, -1,
                                 aqt.multi_var.dist_var.dist,
                                 aqt.multi_var.dist_var.bounce);
+                        } else if (aqt.condition == 3) {
+                            dir_last_ = -1;
+                            int pos_x, pos_y;
+                            aqt.t_pn.convertPosToXY(&pos_x, &pos_y);
+                            int diffx = pos_x - tile_x_ * 256 - off_x_;
+                            int diffy = pos_y - tile_y_ * 256 - off_y_;
+                            dist_to_pos_ = (int)sqrt(diffx * diffx + diffy * diffy);
+                            if (dist_to_pos_ > 0) {
+                                moveToDir(mission, elapsed,
+                                    -1, pos_x, pos_y,
+                                    aqt.multi_var.dist_var.dist,
+                                    aqt.multi_var.dist_var.bounce);
+                                if (tile_x_ == aqt.t_pn.tileX()
+                                    && tile_y_ == aqt.t_pn.tileY()
+                                    // TODO: add correct z or ignore it?
+                                    //&& tile_z_ == aqt.t_pn.tileZ()
+                                    && off_x_ == aqt.t_pn.offX()
+                                    && off_y_ == aqt.t_pn.offY())
+                                {
+                                    aqt.state |= 4;
+                                }
+                            } else
+                                aqt.state |= 4;
+                        } else if (aqt.condition == 4) {
+                            dir_last_ = -1;
+                            int pos_x, pos_y;
+                            aqt.t_smo->convertPosToXY(&pos_x, &pos_y);
+                            moveToDir(mission, elapsed,
+                                -1, pos_x, pos_y,
+                                aqt.multi_var.dist_var.dist,
+                                aqt.multi_var.dist_var.bounce);
+                            if (samePosition(aqt.t_smo))
+                                aqt.state |= 4;
                         }
                     }
                 }
@@ -2036,9 +2093,11 @@ void PedInstance::createActQWalking(actionQueueGroupType &as, PathNode *tpn,
         }
     } else {
         if (tpn) {
+            // direction will be calculated from pathnode position
             aq.t_pn = *tpn;
             aq.condition = 3;
         } else if (tsmo) {
+            // direction will be calculated from objects position
             aq.t_smo = tsmo;
             aq.condition = 4;
         } else { // directional movement only
