@@ -2345,7 +2345,8 @@ bool PedInstance::moveToDir(Mission* m, int elapsed, int dir, int t_posx,
         } else
             dir = dir_;
     }
-    // TODO: set speed_
+    // TODO: set speed_ somewhere
+    // double dist_curr = (elapsed * speed_) / 1000.0;
     double dist_curr = (elapsed * 128) / 1000.0;
     if (dist == 0) {
          if (dist_to_pos_ > 0 && (int)dist_curr > dist_to_pos_)
@@ -2364,36 +2365,34 @@ bool PedInstance::moveToDir(Mission* m, int elapsed, int dir, int t_posx,
         bool need_bounce = false;
         double diffx = 0, diffy = 0;
         if (dir == 0) {
-            diffy = dist_curr;
+            diffy = 1.0;
         } else if (dir == 64) {
-            diffx = dist_curr;
+            diffx = 1.0;
         } else if (dir == 128) {
-            diffy = -dist_curr;
+            diffy = -1.0;
         } else if (dir == 192) {
-            diffx = -dist_curr;
+            diffx = -1.0;
         } else if (dir < 64) {
-            diffx = sin((dir / 128.0) * PI) * dist_curr;
-            diffy = cos((dir / 128.0) * PI) * dist_curr;
+            diffx = sin((dir / 128.0) * PI);
+            diffy = cos((dir / 128.0) * PI);
         } else if (dir < 128) {
             int dirn = dir % 64;
-            diffy = -sin((dirn / 128.0) * PI) * dist_curr;
-            diffx = cos((dirn / 128.0) * PI) * dist_curr;
+            diffy = -sin((dirn / 128.0) * PI);
+            diffx = cos((dirn / 128.0) * PI);
         } else if (dir < 192) {
             int dirn = dir % 64;
-            diffx = -sin((dirn / 128.0) * PI) * dist_curr;
-            diffy = -cos((dirn / 128.0) * PI) * dist_curr;
+            diffx = -sin((dirn / 128.0) * PI);
+            diffy = -cos((dirn / 128.0) * PI);
         } else if (dir < 256) {
             int dirn = dir % 64;
-            diffy = sin((dirn / 128.0) * PI) * dist_curr;
-            diffx = -cos((dirn / 128.0) * PI) * dist_curr;
+            diffy = sin((dirn / 128.0) * PI);
+            diffx = -cos((dirn / 128.0) * PI);
         }
 
         double posx = (double)(tile_x_ * 256 + off_x_);
         double posy = (double)(tile_y_ * 256 + off_y_);
         floodPointDesc *fpd = &(m->mdpoints_[tile_x_ + tile_y_ * m->mmax_x_ +
             tile_z_ * m->mmax_m_xy]);
-        diffx /= dist_curr;
-        diffy /= dist_curr;
         double dist_passsed = 0;
         double dist_inc = sqrt(diffx * diffx + diffy * diffy);
 
@@ -2480,8 +2479,13 @@ bool PedInstance::moveToDir(Mission* m, int elapsed, int dir, int t_posx,
             dist_passsed += dist_inc;
             posx = px;
             posy = py;
-            off_x_ = (int)posx % 256;
-            off_y_ = (int)posy % 256;
+            if (dist_curr == 1.0) {
+                off_x_ = ((int)ceil(posx)) % 256;
+                off_y_ = ((int)ceil(posy)) % 256;
+            } else {
+                off_x_ = (int)posx % 256;
+                off_y_ = (int)posy % 256;
+            }
         } while (dist_passsed < dist_curr);
         dist_curr -= dist_passsed;
         if (need_bounce && bounce) {

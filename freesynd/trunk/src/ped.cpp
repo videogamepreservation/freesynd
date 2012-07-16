@@ -710,11 +710,17 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                             dir_last_ = -1;
                             int pos_x, pos_y;
                             aqt.t_smo->convertPosToXY(&pos_x, &pos_y);
-                            moveToDir(mission, elapsed,
-                                -1, pos_x, pos_y,
-                                aqt.multi_var.dist_var.dist,
-                                aqt.multi_var.dist_var.bounce);
-                            if (samePosition(aqt.t_smo))
+                            int diffx = pos_x - tile_x_ * 256 - off_x_;
+                            int diffy = pos_y - tile_y_ * 256 - off_y_;
+                            dist_to_pos_ = (int)sqrt(diffx * diffx + diffy * diffy);
+                            if (dist_to_pos_ > 0) {
+                                moveToDir(mission, elapsed,
+                                    -1, pos_x, pos_y,
+                                    aqt.multi_var.dist_var.dist,
+                                    aqt.multi_var.dist_var.bounce);
+                                if (samePosition(aqt.t_smo))
+                                    aqt.state |= 4;
+                            } else
                                 aqt.state |= 4;
                         }
                     }
