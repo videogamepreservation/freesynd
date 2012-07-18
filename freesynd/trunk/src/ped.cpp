@@ -684,7 +684,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                                 aqt.multi_var.dist_var.dist,
                                 aqt.multi_var.dist_var.bounce);
                         } else if (aqt.condition == 3) {
-                            dir_last_ = -1;
+                            //dir_last_ = -1;
                             int pos_x, pos_y;
                             aqt.t_pn.convertPosToXY(&pos_x, &pos_y);
                             int diffx = pos_x - tile_x_ * 256 - off_x_;

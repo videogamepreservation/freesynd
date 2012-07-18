@@ -2355,6 +2355,8 @@ bool PedInstance::moveToDir(Mission* m, int elapsed, int dir, int t_posx,
         dist_curr = (double)dist;
     bool bounced = false;
     uint8 bounce_try = 0;
+    // TODO: better way for recovering direction, forward 7 tiles check
+    // for current dir?
     if (dir_last_ != -1 && (dir + 256) > dir_last_) {
         dir = dir_last_;
         dir %= 256;
@@ -2473,20 +2475,26 @@ bool PedInstance::moveToDir(Mission* m, int elapsed, int dir, int t_posx,
                 }
                 tile_x_ = tilenx;
                 tile_y_ = tileny;
+                if (dir_last_ != -1) {
+                    dist_passsed += dist_inc;
+                    posx = px;
+                    posy = py;
+                    break;
+                }
                 fpd = &(m->mdpoints_[tile_x_ + tile_y_ * m->mmax_x_
                     + tile_z_ * m->mmax_m_xy]);
             }
             dist_passsed += dist_inc;
             posx = px;
             posy = py;
-            if (dist_curr == 1.0) {
-                off_x_ = ((int)ceil(posx)) % 256;
-                off_y_ = ((int)ceil(posy)) % 256;
-            } else {
-                off_x_ = (int)posx % 256;
-                off_y_ = (int)posy % 256;
-            }
         } while (dist_passsed < dist_curr);
+        if (dist_curr == 1.0) {
+            off_x_ = ((int)ceil(posx)) % 256;
+            off_y_ = ((int)ceil(posy)) % 256;
+        } else {
+            off_x_ = (int)posx % 256;
+            off_y_ = (int)posy % 256;
+        }
         dist_curr -= dist_passsed;
         if (need_bounce && bounce) {
             if (bounce_try) {
