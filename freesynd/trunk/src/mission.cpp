@@ -2649,6 +2649,28 @@ bool Mission::setSurfaces() {
             } while (vtodefine.size());
         }
     }
+
+    for (int z = 0; z < mmax_z_; z++) {
+        int iz = z * mmax_m_xy;
+        for (int y = 0; y < mmax_y_; y++) {
+            int iy = y * mmax_x_;
+            for (int x = 0; x < mmax_x_; x++) {
+                int indx = x + iy + iz;
+                floodPointDesc *cfpp = &(mdpoints_[indx]);
+
+                if ((cfpp->t & m_fdWalkable) == m_fdWalkable) {
+                    cfpp->t &= (0xFF ^ m_fdDefReq);
+                    uint8 twd = mtsurfaces_[indx].twd;
+                    if (!((twd > 0x05 && twd < 0x0A) || twd == 0x0B
+                        || twd == 0x0F))
+                    {
+                        cfpp->t |= m_fdSafeWalk;
+                    }
+                }
+            }
+        }
+    }
+
 #if 0
     unsigned int cw = 0;
     for (int iz = 0; iz < mmax_z_; iz++) {

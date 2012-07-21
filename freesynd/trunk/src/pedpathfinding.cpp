@@ -140,6 +140,7 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
     bool assertion_bool = true;
     int x_check = 48, y_check = 23, z_check = 6;
 #endif
+    // TODO: remove m_fdWalkable checks?
     do {
         unsigned short mindx = bn[blvl].indxs + bn[blvl].n;
         unsigned short nlvl = blvl + 1;
@@ -2410,42 +2411,51 @@ bool PedInstance::moveToDir(Mission* m, int elapsed, int dir, int t_posx,
             int tilenx = (int)px / 256;
             int tileny = (int)py / 256;
             if (tile_x_ != tilenx || tile_y_ != tileny) {
+                int8 dec_z = 0;
                 if (tilenx - tile_x_ == 0) {
                     if (tileny - tile_y_ > 0) {
-                        if ((fpd->dirh & 0x01) == 0x01)
+                        if ((fpd->dirh & 0x01) == 0x01) {
                             tile_z_++;
-                        else if ((fpd->dirl & 0x01) == 0x01)
+                            dec_z = -1;
+                        } else if ((fpd->dirl & 0x01) == 0x01) {
                             tile_z_--;
-                        else if ((fpd->dirm & 0x01) != 0x01) {
+                            dec_z = 1;
+                        } else if ((fpd->dirm & 0x01) != 0x01) {
                             need_bounce = true;
                             break;
                         }
                     } else {
-                        if ((fpd->dirh & 0x10) == 0x10)
+                        if ((fpd->dirh & 0x10) == 0x10) {
                             tile_z_++;
-                        else if ((fpd->dirl & 0x10) == 0x10)
+                            dec_z = -1;
+                        } else if ((fpd->dirl & 0x10) == 0x10) {
                             tile_z_--;
-                        else if ((fpd->dirm & 0x10) != 0x10) {
+                            dec_z = 1;
+                        } else if ((fpd->dirm & 0x10) != 0x10) {
                             need_bounce = true;
                             break;
                         }
                     }
                 } else if (tileny - tile_y_ == 0) {
                     if (tilenx - tile_x_ > 0) {
-                        if ((fpd->dirh & 0x04) == 0x04)
+                        if ((fpd->dirh & 0x04) == 0x04) {
                             tile_z_++;
-                        else if ((fpd->dirl & 0x04) == 0x04)
+                            dec_z = -1;
+                        } else if ((fpd->dirl & 0x04) == 0x04) {
                             tile_z_--;
-                        else if ((fpd->dirm & 0x04) != 0x04) {
+                            dec_z = 1;
+                        } else if ((fpd->dirm & 0x04) != 0x04) {
                             need_bounce = true;
                             break;
                         }
                     } else {
-                        if ((fpd->dirh & 0x40) == 0x40)
+                        if ((fpd->dirh & 0x40) == 0x40) {
                             tile_z_++;
-                        else if ((fpd->dirl & 0x40) == 0x40)
+                            dec_z = -1;
+                        } else if ((fpd->dirl & 0x40) == 0x40) {
                             tile_z_--;
-                        else if ((fpd->dirm & 0x40) != 0x40) {
+                            dec_z = 1;
+                        } else if ((fpd->dirm & 0x40) != 0x40) {
                             need_bounce = true;
                             break;
                         }
@@ -2473,16 +2483,24 @@ bool PedInstance::moveToDir(Mission* m, int elapsed, int dir, int t_posx,
                         }
                     }
                 }
+                fpd = &(m->mdpoints_[tilenx + tileny * m->mmax_x_
+                    + tile_z_ * m->mmax_m_xy]);
+                // TODO: set safewalk need somewhere
+                if ((fpd->t & m_fdSafeWalk) == 0) {
+                    tile_z_ += dec_z;
+                    need_bounce = true;
+                    break;
+                }
                 tile_x_ = tilenx;
                 tile_y_ = tileny;
                 if (dir_last_ != -1) {
                     dist_passsed += dist_inc;
                     posx = px;
                     posy = py;
+                    if (rand() % 256 < 64)
+                        dir_last_ = -1;
                     break;
                 }
-                fpd = &(m->mdpoints_[tile_x_ + tile_y_ * m->mmax_x_
-                    + tile_z_ * m->mmax_m_xy]);
             }
             dist_passsed += dist_inc;
             posx = px;

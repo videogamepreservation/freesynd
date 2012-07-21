@@ -40,7 +40,8 @@
         // 0 - not defined, 0b - base point, 1b - target point,
         // 2b - link (when base point reaches target point or vice versa),
         // 3b - walkable, 4b - constant, 5b - non walkable, 6b - needs to
-        // be defined
+        // be defined, after tiles are defined as walkable this flag will
+        // have meaning of safe walking ground (non-highway, non-railway tiles)
         unsigned char t;
         // dirh(z + 1), dirm(z), dirl(z - 1) - directions
         // 0x01 = (x, y + 1, z); 0x02 = (x + 1, y + 1, z);
@@ -63,6 +64,7 @@
     #define m_fdConstant        16
     #define m_fdNonWalkable     32
     #define m_fdDefReq          64
+    #define m_fdSafeWalk        64
 
 #endif
 

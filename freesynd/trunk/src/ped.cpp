@@ -683,6 +683,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                                 aqt.multi_var.dist_var.dir, -1, -1,
                                 aqt.multi_var.dist_var.dist,
                                 aqt.multi_var.dist_var.bounce);
+                            aqt.multi_var.dist_var.dir = dir_;
                         } else if (aqt.condition == 3) {
                             //dir_last_ = -1;
                             int pos_x, pos_y;
