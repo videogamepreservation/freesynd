@@ -216,8 +216,16 @@ bool BriefMenu::read_next_word(std::string & brief, std::string & line)
     } while ((idx < brief.size()) && (last_char != ' ' && last_char != '\n'));
 
     if (getMenuFont(FontManager::SIZE_2)->textWidth(new_line.c_str(), true) > 470) {
-        // new line is too big so we can add the line as it is
-        return true;
+        // space added to end of word will produce wrong width,
+        // we remove it and check again
+        if (last_char == ' ') {
+            new_line.erase(new_line.size() - 1, 1);
+            if (getMenuFont(FontManager::SIZE_2)->textWidth(new_line.c_str(), true) > 470)
+                // new line is too big so we can add the line as it is
+                return true;
+        } else
+            // new line is too big so we can add the line as it is
+            return true;
     }
 
     // we didn't reached the limit so add the word to the current line
@@ -225,7 +233,7 @@ bool BriefMenu::read_next_word(std::string & brief, std::string & line)
     // remove what has been read from briefing text
     brief.erase(0, idx);
 
-    if (idx == brief.size() || last_char == '\n') {
+    if (brief.size() == 0 || last_char == '\n') {
         // we reach the end of text or a new line so we can add the line
         return true;
     }
@@ -251,10 +259,14 @@ void BriefMenu::update_briefing_text()
         std::string line;
 
         while (brief.size() != 0 && 
-                line_count < (start_line_ + kMaxLinePerPage + 1)) {
+                line_count <= (start_line_ + kMaxLinePerPage)) {
             bool add = read_next_word(brief, line);
 
             if (add) {
+                // first line should not be empty
+                if (line_count % kMaxLinePerPage == 0 && line.size() == 0) {
+                    continue;
+                }
                 if (line_count >= start_line_ && line_count < (start_line_ + kMaxLinePerPage)) {
                     a_page_[line_count - start_line_].assign(line);
                 }
@@ -267,7 +279,7 @@ void BriefMenu::update_briefing_text()
     // Previous button is visible only if not on the first page
     getOption(prevButId_)->setVisible(start_line_ != 0);
     // Next button is visible only if there are line after the lines currently displayed
-    getOption(nextButId_)->setVisible(line_count > (start_line_ + kMaxLinePerPage));
+    getOption(nextButId_)->setVisible(line_count >= (start_line_ + kMaxLinePerPage));
     redrawBriefing();
 }
 

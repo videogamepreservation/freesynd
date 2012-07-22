@@ -82,9 +82,28 @@ bool MissionBriefing::loadBriefing(uint8 * missData, int size) {
             std::size_t idx = tmp.find_first_of('|', start);
             if (std::string::npos != idx) {
                 a_briefing_[i].assign(tmp.substr(start, idx - start));
-                start = idx + 1;
+                // skipping "|\n" pair
+                start = idx + 2;
             } else {
                 a_briefing_[i].assign(tmp.substr(start));
+            }
+            // sometimes text have additional single '\n''s, we will remove them
+            int16 first = -1;
+            size_t sz = a_briefing_[i].size();
+            std::string &str_ref = a_briefing_[i];
+            for (int16 cindx = 0; cindx < (int16)sz; cindx++) {
+                if (str_ref[cindx] == '\n') {
+                    if (first == -1 || (first != -1 && first + 1 != cindx))
+                        first = cindx;
+                    else {
+                        first = -1;
+                    }
+                } else {
+                    if (first != -1 && first + 1 == cindx) {
+                        str_ref[first] = ' ';
+                    }
+                    first = -1;
+                }
             }
         }
     }
