@@ -2722,7 +2722,7 @@ bool Mission::getWalkable(int &x, int &y, int &z, int &ox, int &oy) {
         if (bz >= mmax_z_ || bx >= mmax_x_ || by >= mmax_y_)
             continue;
         cindx = bx + by * mmax_x_ + bz * mmax_m_xy;
-        if (mdpoints_[cindx].t == m_fdWalkable) {
+        if ((mdpoints_[cindx].t & m_fdWalkable) == m_fdWalkable) {
             twd = mtsurfaces_[cindx].twd;
             int dx = 0;
             int dy = 0;
@@ -2737,7 +2737,7 @@ bool Mission::getWalkable(int &x, int &y, int &z, int &ox, int &oy) {
                     } else {
                         if ((bx - 1) >= 0) {
                             cindx = (bx - 1) + by * mmax_x_ + bz * mmax_m_xy;
-                            if (mdpoints_[cindx].t == m_fdWalkable
+                            if ((mdpoints_[cindx].t & m_fdWalkable) == m_fdWalkable
                                 && mtsurfaces_[cindx].twd == 0x01)
                             {
                                 gotit = true;
@@ -2760,7 +2760,7 @@ bool Mission::getWalkable(int &x, int &y, int &z, int &ox, int &oy) {
                             } else {
                                 if ((bx + 1) < mmax_x_) {
                                     cindx = (bx + 1) + by * mmax_x_ + bz * mmax_m_xy;
-                                    if (mdpoints_[cindx].t == m_fdWalkable
+                                    if ((mdpoints_[cindx].t & m_fdWalkable) == m_fdWalkable
                                         && mtsurfaces_[cindx].twd == 0x02)
                                     {
                                         gotit = true;
@@ -2773,7 +2773,7 @@ bool Mission::getWalkable(int &x, int &y, int &z, int &ox, int &oy) {
                         } else {
                             if ((bx - 1) >= 0) {
                                 cindx = (bx - 1) + by * mmax_x_ + bz * mmax_m_xy;
-                                if (mdpoints_[cindx].t == m_fdWalkable
+                                if ((mdpoints_[cindx].t & m_fdWalkable) == m_fdWalkable
                                     && mtsurfaces_[cindx].twd == 0x02)
                                 {
                                     gotit = true;
@@ -2797,7 +2797,7 @@ bool Mission::getWalkable(int &x, int &y, int &z, int &ox, int &oy) {
                             } else {
                                 if ((by + 1) < mmax_y_) {
                                     cindx = bx + (by + 1) * mmax_x_ + bz * mmax_m_xy;
-                                    if (mdpoints_[cindx].t == m_fdWalkable
+                                    if ((mdpoints_[cindx].t & m_fdWalkable) == m_fdWalkable
                                         && mtsurfaces_[cindx].twd == 0x03)
                                     {
                                         gotit = true;
@@ -2810,7 +2810,7 @@ bool Mission::getWalkable(int &x, int &y, int &z, int &ox, int &oy) {
                         } else {
                             if ((by - 1) >= 0) {
                                 cindx = bx + (by - 1) * mmax_x_ + bz * mmax_m_xy;
-                                if (mdpoints_[cindx].t == m_fdWalkable
+                                if ((mdpoints_[cindx].t & m_fdWalkable) == m_fdWalkable
                                     && mtsurfaces_[cindx].twd == 0x03)
                                 {
                                     gotit = true;
@@ -2832,7 +2832,7 @@ bool Mission::getWalkable(int &x, int &y, int &z, int &ox, int &oy) {
                     } else {
                         if ((by - 1) >= 0) {
                             cindx = bx + (by - 1) * mmax_x_ + bz * mmax_m_xy;
-                            if (mdpoints_[cindx].t == m_fdWalkable
+                            if ((mdpoints_[cindx].t & m_fdWalkable) == m_fdWalkable
                                 && mtsurfaces_[cindx].twd == 0x04)
                             {
                                 gotit = true;
@@ -2850,7 +2850,7 @@ bool Mission::getWalkable(int &x, int &y, int &z, int &ox, int &oy) {
         } else {
             if (box < 128 && (bx - 1) >= 0) {
                 cindx = (bx - 1) + by * mmax_x_ + bz * mmax_m_xy;
-                if (mdpoints_[cindx].t == m_fdWalkable) {
+                if ((mdpoints_[cindx].t & m_fdWalkable) == m_fdWalkable) {
                     int dx = 0;
                     int dy = 0;
                     twd = mtsurfaces_[cindx].twd;
@@ -2877,7 +2877,7 @@ bool Mission::getWalkable(int &x, int &y, int &z, int &ox, int &oy) {
             }
             if (!gotit && boy < 128 && (by - 1) >= 0) {
                 cindx = bx + (by - 1) * mmax_x_ + bz * mmax_m_xy;
-                if (mdpoints_[cindx].t == m_fdWalkable) {
+                if ((mdpoints_[cindx].t & m_fdWalkable) == m_fdWalkable) {
                     int dx = 0;
                     int dy = 0;
                     twd = mtsurfaces_[cindx].twd;
@@ -2903,7 +2903,7 @@ bool Mission::getWalkable(int &x, int &y, int &z, int &ox, int &oy) {
                 }
                 if(!gotit && box < 128 && (bx - 1) >= 0) {
                     cindx--;
-                    if (mdpoints_[cindx].t == m_fdWalkable) {
+                    if ((mdpoints_[cindx].t & m_fdWalkable) == m_fdWalkable) {
                         int dx = 0;
                         int dy = 0;
                         twd = mtsurfaces_[cindx].twd;
@@ -3570,30 +3570,28 @@ bool Mission::getShootableTile(int &x, int &y, int &z, int &ox, int &oy,
                 }
                 if(!gotit && box < 128 && (bx - 1) >= 0) {
                     cindx--;
-                    if (mdpoints_[cindx].t == m_fdWalkable) {
-                        int dx2 = 0;
-                        int dy2 = 0;
-                        twd = mtsurfaces_[cindx].twd;
-                        if (twd == 0x01) {
-                            dy2 = ((boy + 256) * 2) / 3;
-                            dx2 = (box + 256) - dy2 / 2;
-                            if (dx2 < 256 && dy2 < 256) {
-                                bx--;
-                                by--;
-                                gotit = true;
-                                box = dx2;
-                                boy = dy2;
-                            }
-                        } else if (twd == 0x04) {
-                            dx2 = ((box + 256) * 2) / 3;
-                            dy2 = (boy + 256) - dx2 / 2;
-                            if (dx2 < 256 && dy2 < 256) {
-                                bx--;
-                                by--;
-                                gotit = true;
-                                box = dx2;
-                                boy = dy2;
-                            }
+                    int dx2 = 0;
+                    int dy2 = 0;
+                    twd = mtsurfaces_[cindx].twd;
+                    if (twd == 0x01) {
+                        dy2 = ((boy + 256) * 2) / 3;
+                        dx2 = (box + 256) - dy2 / 2;
+                        if (dx2 < 256 && dy2 < 256) {
+                            bx--;
+                            by--;
+                            gotit = true;
+                            box = dx2;
+                            boy = dy2;
+                        }
+                    } else if (twd == 0x04) {
+                        dx2 = ((box + 256) * 2) / 3;
+                        dy2 = (boy + 256) - dx2 / 2;
+                        if (dx2 < 256 && dy2 < 256) {
+                            bx--;
+                            by--;
+                            gotit = true;
+                            box = dx2;
+                            boy = dy2;
                         }
                     }
                 }
