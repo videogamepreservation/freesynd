@@ -1244,8 +1244,8 @@ bool Mission::setSurfaces() {
                 x = stodef.x;
                 y = stodef.y;
                 z = stodef.z;
-                //if (x == 48 && y / mmax_x_ == 24 && z / mmax_m_xy == 5)
-                    //x = 48;
+                //if (x == 105 && y / mmax_x_ == 37 && z / mmax_m_xy == 5)
+                    //x = 105;
                 int xm = x - 1;
                 int ym = y - mmax_x_;
                 int zm = z - mmax_m_xy;
@@ -1542,7 +1542,7 @@ bool Mission::setSurfaces() {
 
                         if (xp < mmax_x_) {
                             nxts = &(mtsurfaces_[xp + y + z]);
-                            nxtfp = &(mdpoints_[xp + ym + z]);
+                            nxtfp = &(mdpoints_[xp + y + z]);
                             this_s = nxts->twd;
                             upper_s = mtsurfaces_[xp + y + zp].twd;
                             if (isSurface(this_s) || this_s == 0x02) {
