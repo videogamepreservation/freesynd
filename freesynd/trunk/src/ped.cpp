@@ -425,11 +425,11 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                             if (aqt.condition == 0) {
                                 v->setDriver(this);
                                 if (v->isInsideVehicle(this)) {
-                                    in_vehicle_ = v;
                                     aqt.state |= 4;
-                                    is_ignored_ = true;
-                                    map_ = -1;
-                                    state_ |= pa_smInCar;
+                                    if (v->isDriver(this))
+                                        putInVehicle(v, pa_smUsingCar);
+                                    else
+                                        putInVehicle(v, pa_smInCar);
                                 } else
                                     aqt.state |= 8;
                             } else if (aqt.condition == 1) {
@@ -440,11 +440,8 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                                         aqt.state |= 8;
                                 } else {
                                     v->setDriver(this);
-                                    in_vehicle_ = v;
                                     aqt.state |= 4;
-                                    is_ignored_ = true;
-                                    map_ = -1;
-                                    state_ |= pa_smUsingCar;
+                                    putInVehicle(v, pa_smUsingCar);
                                 }
                             }
                         } else
@@ -1728,9 +1725,13 @@ VehicleInstance *PedInstance::inVehicle()
         | PedInstance::pa_smUsingCar)) != 0 ? in_vehicle_ : NULL;
 }
 
-void PedInstance::putInVehicle(VehicleInstance * v) {
-    assert(map_ != -1);
+void PedInstance::putInVehicle(VehicleInstance * v,
+    pedActionStateMasks add_state)
+{
+    map_ = -1;
     in_vehicle_ = v;
+    is_ignored_ = true;
+    switchActionStateTo((uint32)add_state);
 }
 
 void PedInstance::leaveVehicle() {

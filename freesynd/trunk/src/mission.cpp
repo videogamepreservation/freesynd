@@ -186,20 +186,29 @@ bool Mission::loadLevel(uint8 * levelData)
         if (p) {
             if (pedref.desc == 0x05) {
                 if (driverindx[i] != 0xFFFF) {
-                    p->putInVehicle(vehicles_[driverindx[i]]);
-                    p->setMap(-1);
-                    vehicles_[driverindx[i]]->forceSetDriver(p);
-                    p->setIsIgnored(true);
+                    p->putInVehicle(vehicles_[driverindx[i]],
+                        PedInstance::pa_smUsingCar);
+                    VehicleInstance *v = vehicles_[driverindx[i]];
+                    if (v->hasDriver()) {
+                        PedInstance *curr_driver = v->getDriver();
+                        curr_driver->leaveVehicle();
+                        curr_driver->putInVehicle(v, PedInstance::pa_smInCar);
+                        v->setDriver(p);
+                        v->setDriver(curr_driver);
+                    } else
+                        v->setDriver(p);
                 } else {
                     uint16 vin = READ_LE_UINT16(pedref.offset_of_vehicle);
                     if (vin != 0) {
                         vin = (vin - 0x5C02) / 42; // 42 vehicle data size
                         vin = vindx[vin];
                         if (vin != 0xFFFF) {
-                            p->putInVehicle(vehicles_[vin]);
-                            p->setMap(-1);
-                            vehicles_[vin]->setDriver(p);
-                            p->setIsIgnored(true);
+                            VehicleInstance *v = vehicles_[vin];
+                            v->setDriver(p);
+                            if (v->isDriver(p))
+                                p->putInVehicle(v, PedInstance::pa_smUsingCar);
+                            else
+                                p->putInVehicle(v, PedInstance::pa_smInCar);
                         }
                     }
                 }

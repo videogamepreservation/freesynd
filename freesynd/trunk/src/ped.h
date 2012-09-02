@@ -189,6 +189,29 @@ public:
         m_tpCriminal = 0x10,
     }mainPedType;
 
+    typedef enum {
+        pa_smNone = 0x0,
+        pa_smStanding = 0x0001,
+        pa_smWalking = 0x0002,
+        pa_smHit = 0x0004,
+        pa_smFiring = 0x0008,
+        pa_smFollowing = 0x0010,
+        pa_smPickUp = 0x0020,
+        pa_smPutDown = 0x0040,
+        pa_smBurning = 0x0080,
+        pa_smGetInCar = 0x0100,
+        // only driver can have this set after finished
+        pa_smUsingCar = 0x0200,
+        // passenger only
+        pa_smInCar = 0x0400,
+        pa_smLeaveCar = 0x0800,
+        pa_smDead = 0x1000,
+        // this object should be ignored in all Ai procedures
+        pa_smUnavailable = 0x2000,
+        pa_smCheckExcluded = pa_smDead | pa_smUnavailable,
+        pa_smAll = 0xFFFF
+    } pedActionStateMasks; // MapObject::state_
+
     void draw(int x, int y);
 
     void setFrame(int f) { frame_ = f; }
@@ -225,7 +248,7 @@ public:
 
     VehicleInstance *inVehicle();
 
-    void putInVehicle(VehicleInstance *v);
+    void putInVehicle(VehicleInstance *v, pedActionStateMasks add_state);
     void leaveVehicle();
     bool setVehicleIgnore(bool ignored);
 
@@ -507,29 +530,6 @@ public:
 #endif
         pd_smAll = 0xFFFF
     } pedDescStateMasks;
-
-    typedef enum {
-        pa_smNone = 0x0,
-        pa_smStanding = 0x0001,
-        pa_smWalking = 0x0002,
-        pa_smHit = 0x0004,
-        pa_smFiring = 0x0008,
-        pa_smFollowing = 0x0010,
-        pa_smPickUp = 0x0020,
-        pa_smPutDown = 0x0040,
-        pa_smBurning = 0x0080,
-        pa_smGetInCar = 0x0100,
-        // only driver can have this set after finished
-        pa_smUsingCar = 0x0200,
-        // passenger only
-        pa_smInCar = 0x0400,
-        pa_smLeaveCar = 0x0800,
-        pa_smDead = 0x1000,
-        // this object should be ignored in all Ai procedures
-        pa_smUnavailable = 0x2000,
-        pa_smCheckExcluded = pa_smDead | pa_smUnavailable,
-        pa_smAll = 0xFFFF
-    } pedActionStateMasks; // MapObject::state_
 
     typedef struct {
         union {
