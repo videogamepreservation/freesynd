@@ -2249,7 +2249,7 @@ bool PedInstance::createActQFiring(actionQueueGroupType &as, PathNode *tpn,
         // until target destroyed, type of damage that will complete action
         aq.multi_var.enemy_var.make_shots = make_shots;
         aq.multi_var.enemy_var.shots_done = 0;
-        if (tsmo) {
+        if (tpn) {
             aq.t_pn = *tpn;
             aq.ot_execute = PedInstance::ai_aAttackLocation;
             aq.t_smo = NULL;

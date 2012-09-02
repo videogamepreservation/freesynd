@@ -66,7 +66,7 @@ VehicleInstance *VehicleManager::loadInstance(uint8 * data, int map)
     // and it should be different per vehicle type
     newvehicle->setSizeX(256);
     newvehicle->setSizeY(256);
-    newvehicle->setSizeZ(96);
+    newvehicle->setSizeZ(192);
 
     int oz = gamdata->mapposz[0] & 0x7F;
     newvehicle->setPosition(gamdata->mapposx[1], gamdata->mapposy[1],
