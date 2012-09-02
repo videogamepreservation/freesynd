@@ -22,8 +22,8 @@
  *                                                                      *
  ************************************************************************/
 
-#ifndef MINIMAPRENDERER_H
-#define MINIMAPRENDERER_H
+#ifndef MENUS_MINIMAPRENDERER_H_
+#define MENUS_MINIMAPRENDERER_H_
 
 #include <map>
 
@@ -38,6 +38,9 @@ class MissionBriefing;
  */
 class MinimapRenderer {
 public:
+    /*!
+     * Enumeration for the available zoom levels.
+     */
     enum EZoom {
         ZOOM_X1 = 6,
         ZOOM_X2 = 4,
@@ -56,7 +59,7 @@ public:
     //! Render the minimap
     void render();
 
-    //! Sets all parameters that depend on enhancement level
+    //! Sets all parameters that depend on zooming level
     void zoomOut();
     //! Sets the flag whether to draw enemies on the minimap or not
     void setDrawEnemies(bool draw) { b_draw_enemies_ = draw; }
@@ -69,17 +72,31 @@ public:
     void scrollUp();
     //! Scrolls the minimap to the bottom
     void scrollDown();
-    
+
 protected:
-    /*! X coord in the minimap system.*/
-    int16 minimap_scroll_x_;
-    /*! Y coord in the minimap system.*/
-    int16 minimap_scroll_y_;
+    //! Finds the minimap location
+    void initMinimapLocation();
+    void updateRenderingInfos();
+    //! Checks if minimap is still within the map borders.
+    void checkBorders();
+
+protected:
+    /*! Tile X coord on the map for the top left corner of the minimap.*/
+    uint16 mm_tx_;
+    /*! Tile Y coord on the map for the top left corner of the minimap.*/
+    uint16 mm_ty_;
+    /*!
+     * Total number of tiles displayed in the minimap. 
+     * same for width and height.
+     */
+    uint16 mm_maxtile_;
+    /*! Number of pixel used to draw a map tile.*/
+    uint8 pixpertile_;
     /*! A counter to control the blinking on the minimap.*/
     int minimap_blink_ticks_;
     /*! Helps controling blinking.*/
     int minimap_blink_;
-    /*! The scrolling step : depends on the enhancement level.*/
+    /*! The scrolling step : depends on the zoom level.*/
     uint8 scroll_step_;
     /*! The mission that contains the minimap.*/
     Mission *p_mission_;
@@ -89,4 +106,4 @@ protected:
     bool b_draw_enemies_;
 };
 
-#endif
+#endif  // MENUS_MINIMAPRENDERER_H_
