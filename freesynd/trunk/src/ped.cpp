@@ -194,7 +194,7 @@ void PedInstance::switchActionStateTo(uint32 as) {
             state_ |= pa_smFiring;
             break;
         case pa_smFollowing:
-            state_ &= (pa_smAll ^ pa_smStanding);
+            state_ &= (pa_smAll ^ (pa_smStanding | pa_smWalking));
             state_ |= pa_smFollowing;
             break;
         case pa_smPickUp:
@@ -246,7 +246,7 @@ void PedInstance::switchActionStateFrom(uint32 as) {
             state_ &= pa_smAll ^ pa_smFiring;
             break;
         case pa_smFollowing:
-            state_ &= pa_smAll ^ pa_smFollowing;
+            state_ &= pa_smAll ^ (pa_smFollowing | pa_smWalking);
             state_ |= pa_smStanding;
             break;
         case pa_smPickUp:
@@ -505,6 +505,9 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                             // TODO: make it properly, check selected weapon
                             // if not the one in weapon.desc select it,
                             // check owner
+                            // TODO: if object can't see target and none of
+                            // friendly units can see it  we should fail,
+                            // use check from findenemy?
                             WeaponInstance *wi = selectedWeapon();
                             if (!wi)
                                 selectBestWeapon();
@@ -760,8 +763,14 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                                 // TODO: set checktile check value based
                                 // on mode
                                 if (wi->inRangeNoCP(&aqt.t_smo, NULL,
-                                    false, false) == 1) {
+                                    false, false) == 1)
+                                {
                                     set_new_dest = false;
+                                    // object will turn to target
+                                    int posx, posy;
+                                    aqt.t_smo->convertPosToXY(&posx, &posy);
+                                    setDirection(posx - tile_x_ * 256 - off_x_,
+                                        posy - tile_y_ * 256 - off_y_);
                                 }
                                 if (set_new_dest) {
                                     aqt.state |= 2;
@@ -815,11 +824,16 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                             WeaponInstance *wi = selectedWeapon();
                             if (wi) {
                                 updated = movementP(mission, elapsed);
-                                if (wi->inRangeNoCP(&aqt.t_smo) == 0) {
+                                if (wi->inRangeNoCP(&aqt.t_smo) == 1) {
                                     aqt.state ^= 2;
                                     aqt.state |= 16;
                                     dest_path_.clear();
                                     speed_ = 0;
+                                    // object will turn to target
+                                    int posx, posy;
+                                    aqt.t_smo->convertPosToXY(&posx, &posy);
+                                    setDirection(posx - tile_x_ * 256 - off_x_,
+                                        posy - tile_y_ * 256 - off_y_);
                                 } else {
                                     PathNode &rp = dest_path_.back();
                                     if (rp.tileX() != aqt.t_smo->tileX()
@@ -1044,18 +1058,22 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                         set_nxt_act = true;
                     }
                     if (set_nxt_act) {
-                        actionQueueType & aqt_l = it->actions[indx+1];
-                        aqt_l.t_smo = aqt.t_smo;
+                        actionQueueType & aqt_attack = it->actions[indx+1];
+                        aqt_attack.t_smo = aqt.t_smo;
                         // action is ready removing not ready flag
-                        aqt_l.state ^= 64;
+                        // enabling destroyobject action
+                        aqt_attack.state ^= 64;
                         it->main_act++;
                         if (obj_group_def_ == og_dmPolice) {
-                            aqt_l.ot_execute |= PedInstance::ai_aWaitToStart;
-                            aqt_l.multi_var.time_var.time_before_start = 5000;
+                            aqt_attack.ot_execute |= PedInstance::ai_aWaitToStart;
+                            aqt_attack.multi_var.time_var.time_before_start = 5000;
                             // showing a gun
                             selectBestWeapon();
                             g_App.gameSounds().play(snd::PUTDOWN_WEAPON);
-                            // TODO: create follow if target moves
+                            // enableing following behavior
+                            actionQueueType & aqt_follow = it->actions[indx + 2];
+                            aqt_follow.t_smo = aqt.t_smo;
+                            aqt_follow.state ^= 64;
                         }
                     }
                 }
@@ -1142,6 +1160,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                     acts_g_prcssd |= aqt.group_desc;
                 } else if ((aqt.state & 16) != 0) {
                     switchActionStateFrom(aqt.as);
+                    acts_g_prcssd |= aqt.group_desc;
                 } else if ((aqt.state & 8) != 0) {
                     if ((aqt.state & 2) != 0)
                         switchActionStateFrom(aqt.as);
@@ -1205,7 +1224,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                     as.main_act = 0;
                     as.group_desc = PedInstance::gd_mThink | PedInstance::gd_mFire;
                     as.origin_desc = 2;
-                    actions_queue_.push_back(as);
+                    actions_queue_.insert(actions_queue_.begin(),as);
                 }
             }
         }
@@ -1928,6 +1947,9 @@ bool PedInstance::handleDamage(ShootableMapObject::DamageInflictType *d) {
         as.main_act = as.actions.size() - 1;
         as.origin_desc = 4;
         addActQToQueue(as);
+
+        as.actions.clear();
+
         createActQFollowing(as,
             d->d_owner, 0, 192);
         as.main_act = as.actions.size() - 1;
@@ -2104,7 +2126,6 @@ void PedInstance::verifyHostilesFound(Mission *m) {
 
 void PedInstance::createActQStanding(actionQueueGroupType &as) {
     as.state = 1;
-    as.actions.clear();
     actionQueueType aq;
     aq.ot_execute = PedInstance::ai_aWait;
     aq.as = PedInstance::pa_smStanding;
@@ -2119,7 +2140,6 @@ void PedInstance::createActQWalking(actionQueueGroupType &as, PathNode *tpn,
     ShootableMapObject *tsmo, int32 dir, int32 dist)
 {
     as.state = 1;
-    as.actions.clear();
     actionQueueType aq;
     aq.as = PedInstance::pa_smWalking;
     aq.ot_execute = PedInstance::ai_aReachLocation;
@@ -2156,7 +2176,6 @@ void PedInstance::createActQHit(actionQueueGroupType &as, PathNode *tpn,
     int32 dir)
 {
     as.state = 1;
-    as.actions.clear();
     actionQueueType aq;
     aq.as = PedInstance::pa_smHit;
     aq.ot_execute = PedInstance::ai_aReachLocation;
@@ -2176,7 +2195,6 @@ bool PedInstance::createActQFiring(actionQueueGroupType &as, PathNode *tpn,
     pedWeaponToUse *pw_to_use, int32 value)
 {
     as.state = 1;
-    as.actions.clear();
     actionQueueType aq;
     aq.group_desc = PedInstance::gd_mFire;
     bool can_shoot = false;
@@ -2232,12 +2250,12 @@ bool PedInstance::createActQFiring(actionQueueGroupType &as, PathNode *tpn,
         aq.multi_var.enemy_var.make_shots = make_shots;
         aq.multi_var.enemy_var.shots_done = 0;
         if (tsmo) {
-            aq.t_smo = tsmo;
-            aq.ot_execute = PedInstance::ai_aDestroyObject;
-        } else {
             aq.t_pn = *tpn;
             aq.ot_execute = PedInstance::ai_aAttackLocation;
             aq.t_smo = NULL;
+        } else {
+            aq.t_smo = tsmo;
+            aq.ot_execute = PedInstance::ai_aDestroyObject;
         }
     } else {
         if (tsmo && tsmo->majorType() == MapObject::mjt_Ped) {
@@ -2261,7 +2279,6 @@ void PedInstance::createActQFollowing(actionQueueGroupType &as,
     ShootableMapObject *tsmo, uint32 condition, int32 dist)
 {
     as.state = 1;
-    as.actions.clear();
     actionQueueType aq;
     aq.as = PedInstance::pa_smFollowing;
     aq.ot_execute = PedInstance::ai_aFollowObject;
@@ -2277,7 +2294,6 @@ void PedInstance::createActQPickUp(actionQueueGroupType &as,
     ShootableMapObject *tsmo)
 {
     as.state = 1;
-    as.actions.clear();
     actionQueueType aq;
     aq.as = PedInstance::pa_smWalking;
     aq.ot_execute = PedInstance::ai_aReachLocation;
@@ -2301,7 +2317,6 @@ void PedInstance::createActQPutDown(actionQueueGroupType &as,
     ShootableMapObject *tsmo)
 {
     as.state = 1;
-    as.actions.clear();
     actionQueueType aq;
     aq.as = PedInstance::pa_smPutDown;
     aq.ot_execute = PedInstance::ai_aPutDownObject;
@@ -2316,7 +2331,6 @@ void PedInstance::createActQPutDown(actionQueueGroupType &as,
 
 void PedInstance::createActQBurning(actionQueueGroupType &as) {
     as.state = 1;
-    as.actions.clear();
     actionQueueType aq;
     aq.as = PedInstance::pa_smBurning;
     aq.ot_execute = PedInstance::ai_aReachLocation;
@@ -2348,7 +2362,6 @@ void PedInstance::createActQGetInCar(actionQueueGroupType &as,
     ShootableMapObject *tsmo)
 {
     as.state = 1;
-    as.actions.clear();
     actionQueueType aq;
     aq.as = PedInstance::pa_smWalking;
     aq.ot_execute = PedInstance::ai_aReachLocation;
@@ -2381,7 +2394,6 @@ void PedInstance::createActQLeaveCar(actionQueueGroupType &as,
         ShootableMapObject *tsmo)
 {
     as.state = 1;
-    as.actions.clear();
     actionQueueType aq;
     aq.as = PedInstance::pa_smLeaveCar;
     aq.ot_execute = PedInstance::ai_aLoseControl;
@@ -2394,7 +2406,6 @@ void PedInstance::createActQLeaveCar(actionQueueGroupType &as,
 void PedInstance::createActQWait(actionQueueGroupType &as, int tm_wait)
 {
     as.state = 1;
-    as.actions.clear();
     actionQueueType aq;
     aq.as = PedInstance::pa_smNone;
     aq.group_desc = PedInstance::gd_mExclusive;
@@ -2407,13 +2418,13 @@ void PedInstance::createActQWait(actionQueueGroupType &as, int tm_wait)
 
 void PedInstance::createActQFindEnemy(actionQueueGroupType &as) {
     as.state = 1;
-    as.actions.clear();
     actionQueueType aq;
     aq.as = PedInstance::pa_smNone;
     aq.group_desc = PedInstance::gd_mThink;
     aq.state = 1;
     aq.ot_execute = PedInstance::ai_aFindEnemy;
     as.actions.push_back(aq);
+    // TODO: use createActQFiring(when completed) instead
     aq.as = PedInstance::pa_smFiring;
     aq.group_desc = PedInstance::gd_mFire;
     aq.state = 65;
@@ -2427,6 +2438,8 @@ void PedInstance::createActQFindEnemy(actionQueueGroupType &as) {
     aq.multi_var.enemy_var.weapon.wpn.dmg_type = MapObject::dmg_Physical;
     aq.multi_var.enemy_var.forced_shot = false;
     as.actions.push_back(aq);
+    createActQFollowing(as, NULL, 1);
+    as.actions.back().state |= 64;
 }
 
 

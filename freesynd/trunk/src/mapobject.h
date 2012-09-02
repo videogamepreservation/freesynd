@@ -197,7 +197,7 @@ public:
     void setFrame(int frame) { frame_ = frame;}
 
     void setDirection(int dir);
-    void setDirection(int posx, int posy, int * dir);
+    void setDirection(int posx, int posy, int * dir = NULL);
 
     int getDirection(int snum = 8);
 

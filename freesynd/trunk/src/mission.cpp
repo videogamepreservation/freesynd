@@ -566,7 +566,7 @@ bool Mission::loadLevel(uint8 * levelData)
         fclose(staticsFss);
     }
 #endif
-#if 1
+#if 0
     for (unsigned char i = 1; i < 2047; i++) {
         LEVELDATA_SCENARIOS & scenario = level_data_.scenarios[i];
         if (scenario.type == 0)
