@@ -601,7 +601,7 @@ public:
         ShootableMapObject *t_smo;
         // 0b - not started, 1b - executing, 2b - finished, 3b - failed,
         // 4b - suspended, 5b - waiting to complete (ai_aWait),
-        // 6b - not set (empty, should be skipped), 7b - waiting (ai_aWait
+        // 6b - not ready (empty, should be skipped), 7b - waiting (ai_aWait
         // | ai_aWaitToStart), 8b - waiting to start
         uint16 state;
         // 0 - not set, 0b - stand/walking group(has walking action or
@@ -647,19 +647,20 @@ public:
                 bool bounce;
             } dist_var;
         } multi_var;
-        // for ai_aReachLocation 0 - go to location, 1 - go to direction,
-        // 2 - go to position of object; if dist is set, on reaching
-        // this value action complete, 3 - pathnode coords = x, y are used to
-        // calculate direction, 4 - objects coords = x, y to calculate direction
-        // NOTE: coords x,y : tile_x_ * 256 + off_x_, tile_y_ + off_y_
-        // for ai_aFollowObject 0 - until dist is reached, 1 - in range
-        // of shot view
-        // for ai_aAquireControl, for car, 0 - become passenger(or driver),
-        // 1 - become driver only if else failed
-        // for ai_aAquireControl, for ped, 0 - controled or not is ok,
-        // 1 - controlled if else failed
-        // for ai_aFindEnemy; 0 - scout - will not attack, 1 - search and
-        // destroy
+        /* for ai_aReachLocation 0 - go to location, 1 - go to direction,
+         * 2 - go to position of object; if dist is set, on reaching
+         * this value action complete, 3 - pathnode coords = x, y are used to
+         * calculate direction, 4 - objects coords = x, y to calculate direction
+         * NOTE: coords x,y : tile_x_ * 256 + off_x_, tile_y_ + off_y_
+         * for ai_aFollowObject 0 - until dist is reached, 1 - in range
+         * of shot view
+         * for ai_aAquireControl, for car, 0 - become passenger(or driver),
+         * 1 - become driver only if else failed
+         * for ai_aAquireControl, for ped, 0 - controled or not is ok,
+         * 1 - controlled if else failed
+         * for ai_aFindEnemy; 0 - scout - will not attack, 1 - search and
+         * destroy
+         */
         uint32 condition;
     } actionQueueType;
 
@@ -672,6 +673,11 @@ public:
         // same as in actionQueueType.state
         uint16 state;
         uint32 group_id;
+        /* which process created this action group:
+         * 0 - unknown, 1 - script, 2 - from default_actions_, 3 - other group
+         * created this group, 4 - user input
+         */
+        uint8 origin_desc;
     } actionQueueGroupType;
 
     bool setActQInQueue(actionQueueGroupType &as,

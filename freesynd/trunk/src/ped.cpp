@@ -341,6 +341,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
             createActQFindEnemy(as);
             as.main_act = 0;
             as.group_desc = PedInstance::gd_mThink | PedInstance::gd_mFire;
+            as.origin_desc = 2;
             actions_queue_.push_back(as);
         }
 #endif
@@ -541,10 +542,9 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                         }
                     } else if ((aqt.ot_execute & PedInstance::ai_aWaitToStart) != 0)
                     {
-                        if (aqt.t_smo->majorType() == MapObject::mjt_Ped
-                            && ((obj_group_def_ == og_dmPolice
-                            && checkHostileIs((PedInstance *)aqt.t_smo))
-                            || aqt.t_smo->health() <= 0))
+                        if ((aqt.t_smo->majorType() == MapObject::mjt_Ped
+                            && !checkHostileIs((PedInstance *)aqt.t_smo))
+                            || aqt.t_smo->health() <= 0)
                         {
                             aqt.ot_execute &= PedInstance::ai_aAll
                                 ^ (PedInstance::ai_aWaitToStart
@@ -1046,6 +1046,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                     if (set_nxt_act) {
                         actionQueueType & aqt_l = it->actions[indx+1];
                         aqt_l.t_smo = aqt.t_smo;
+                        // action is ready removing not ready flag
                         aqt_l.state ^= 64;
                         it->main_act++;
                         if (obj_group_def_ == og_dmPolice) {
@@ -1176,6 +1177,37 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
             if (groups_processed == PedInstance::gd_mAll
                 || (groups_processed & PedInstance::gd_mExclusive))
                 break;
+        }
+        if ((groups_processed & PedInstance::gd_mExclusive) == 0)
+        {
+            if ((state_ & pa_smDead) == 0
+                    && (groups_processed & (PedInstance::gd_mThink
+                    | PedInstance::gd_mFire)) == 0)
+            {
+                // checking for action groups availiable in queue
+                // will add from default_actions_ if not availiable
+                uint32 groups_availiable = 0;
+                for (std::vector <actionQueueGroupType>::iterator it =
+                    actions_queue_.begin(); it != actions_queue_.end(); it++)
+                {
+                    if ((it->state & 128) == 0 && (it->state & 76) != 0)
+                        continue;
+
+                    groups_availiable |= it->group_desc;
+                }
+
+                // TODO: use default_actions_
+                if ((groups_availiable & (PedInstance::gd_mThink
+                    | PedInstance::gd_mFire)) == 0)
+                {
+                    actionQueueGroupType as;
+                    createActQFindEnemy(as);
+                    as.main_act = 0;
+                    as.group_desc = PedInstance::gd_mThink | PedInstance::gd_mFire;
+                    as.origin_desc = 2;
+                    actions_queue_.push_back(as);
+                }
+            }
         }
     }
 
@@ -1894,10 +1926,12 @@ bool PedInstance::handleDamage(ShootableMapObject::DamageInflictType *d) {
         as.group_desc = PedInstance::gd_mExclusive;
         createActQWait(as, 2000);
         as.main_act = as.actions.size() - 1;
+        as.origin_desc = 4;
         addActQToQueue(as);
         createActQFollowing(as,
             d->d_owner, 0, 192);
         as.main_act = as.actions.size() - 1;
+        as.group_desc = PedInstance::gd_mStandWalk;
         addActQToQueue(as);
         setDrawnAnim(PedInstance::ad_PersuadedAnim);
         desc_state_ |= pd_smControlled;

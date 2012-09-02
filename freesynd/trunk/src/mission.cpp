@@ -109,9 +109,14 @@ bool Mission::loadLevel(uint8 * levelData)
 
     vehicles_.clear();
 
-    // indexes within vehicle vector
+    // Original objects data is based on offsets, but our objetcs are different
+    // in size and are not in a single memory block, because of this indexes
+    // in our data "arrays" are mirrored for object's position within original
+    // array
+
+    // indexes within vehicle array
     uint16 vindx[64];
-    // indexes within vehicle vector
+    // indexes within peds array
     uint16 pindx[256];
     // contains indexes for driver's vehicle
     uint16 driverindx[256];
@@ -241,6 +246,7 @@ bool Mission::loadLevel(uint8 * levelData)
                         p->createActQWalking(as, &pn, NULL, 160);
                         as.main_act = as.actions.size() - 1;
                         as.group_desc = PedInstance::gd_mStandWalk;
+                        as.origin_desc = 1;
                         p->addActQToQueue(as);
                     }
                     offset_nxt = READ_LE_UINT16(sc.next);
@@ -560,7 +566,7 @@ bool Mission::loadLevel(uint8 * levelData)
         fclose(staticsFss);
     }
 #endif
-#if 0
+#if 1
     for (unsigned char i = 1; i < 2047; i++) {
         LEVELDATA_SCENARIOS & scenario = level_data_.scenarios[i];
         if (scenario.type == 0)

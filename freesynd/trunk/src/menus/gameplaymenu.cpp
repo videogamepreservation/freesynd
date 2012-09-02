@@ -640,6 +640,7 @@ void GameplayMenu::handleMouseMotion(int x, int y, int state, const int modKeys)
                 world_y_ + y, oy);
         for (int i = 0; i < 4; i++) {
             if (shooting_events_.agents_shooting[i]) {
+              // TODO: use objects position instead of pointer
                 PedInstance * pa = mission_->ped(i);
                 if (pointing_at_ped_ != -1) {
                     pa->updtActGFiring(shooting_events_.ids[i], NULL,
@@ -761,6 +762,7 @@ bool GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
                         ped->createActQFollowing(as,
                             mission_->ped(pointing_at_ped_), 0, 192);
                         as.main_act = as.actions.size() - 1;
+                        as.origin_desc = 4;
                         if (modKeys & KMD_CTRL)
                             ped->addActQToQueue(as);
                         else
@@ -771,6 +773,7 @@ bool GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
                         as.group_desc = PedInstance::gd_mStandWalk;
                         ped->createActQPickUp(as,
                             mission_->weapon(pointing_at_weapon_));
+                        as.origin_desc = 4;
                         as.main_act = as.actions.size() - 1;
                         if (modKeys & KMD_CTRL)
                             ped->addActQToQueue(as);
@@ -783,6 +786,7 @@ bool GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
                                 mission_->vehicle(pointing_at_vehicle_));
                             as.main_act = as.actions.size() - 1;
                             as.group_desc = PedInstance::gd_mStandWalk;
+                            as.origin_desc = 4;
                             if (modKeys & KMD_CTRL)
                                 ped->addActQToQueue(as);
                             else
@@ -795,6 +799,7 @@ bool GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
                                 mission_->vehicle(pointing_at_vehicle_));
                             as.main_act = as.actions.size() - 1;
                             as.group_desc = PedInstance::gd_mStandWalk;
+                            as.origin_desc = 4;
                             if (modKeys & KMD_CTRL)
                                 ped->addActQToQueue(as);
                             else
@@ -848,6 +853,7 @@ bool GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
                         ped->createActQWalking(as, &tpn, NULL);
                         as.main_act = as.actions.size() - 1;
                         as.group_desc = PedInstance::gd_mStandWalk;
+                        as.origin_desc = 4;
                         if (modKeys & KMD_CTRL)
                             ped->addActQToQueue(as);
                         else
@@ -868,11 +874,13 @@ bool GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
                     world_y_ + y, oy);
             for (int i = 0; i < 4; i++) {
                 if (isAgentSelected(i)) {
+                  // TODO: use objects position instead of pointer
                     PedInstance * pa = mission_->ped(i);
                     if (pointing_at_ped_ != -1) {
                         PedInstance::actionQueueGroupType as;
                         as.main_act = 0;
                         as.group_desc = PedInstance::gd_mFire;
+                        as.origin_desc = 4;
                         if (pa->createActQFiring(as, NULL,
                             mission_->ped(pointing_at_ped_), true))
                         {
@@ -888,6 +896,7 @@ bool GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
                         PedInstance::actionQueueGroupType as;
                         as.main_act = 0;
                         as.group_desc = PedInstance::gd_mFire;
+                        as.origin_desc = 4;
                         if (pa->createActQFiring(as, NULL,
                             mission_->vehicle(pointing_at_vehicle_), true))
                         {
@@ -903,6 +912,7 @@ bool GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
                         PedInstance::actionQueueGroupType as;
                         as.main_act = 0;
                         as.group_desc = PedInstance::gd_mFire;
+                        as.origin_desc = 4;
                         if (pa->createActQFiring(as, NULL,
                             mission_->weapon(pointing_at_weapon_), true))
                         {
@@ -934,6 +944,7 @@ bool GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
                             PedInstance::actionQueueGroupType as;
                             as.main_act = 0;
                             as.group_desc = PedInstance::gd_mFire;
+                            as.origin_desc = 4;
                             if (modKeys & KMD_CTRL) {
                                 if (pa->createActQFiring(as, &pn, NULL, true))
                                     pa->addActQToQueue(as);
@@ -977,6 +988,7 @@ bool GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
                         PedInstance::actionQueueGroupType as;
                         as.main_act = 0;
                         as.group_desc = PedInstance::gd_mExclusive;
+                        as.origin_desc = 4;
                         ped->createActQPutDown(as,
                             ped->weapon(w_num));
                         if (modKeys & KMD_CTRL)
@@ -1144,6 +1156,7 @@ bool GameplayMenu::handleUnknownKey(Key key, const int modKeys) {
                 ped->createActQWalking(as, NULL, NULL, 160, 1024);
                 as.main_act = as.actions.size() - 1;
                 as.group_desc = PedInstance::gd_mStandWalk;
+                as.origin_desc = 4;
                 if (modKeys & KMD_CTRL)
                     ped->addActQToQueue(as);
                 else

@@ -353,10 +353,11 @@ public:
         uint8 unkn5[4];
         // look peds for more info
         uint8 type; // 0x04
-        // 0x01 persuadertron; 0x02 pistol; 0x03 gauss gun; 0x04 shotgun;
-        // 0x05 uzi; 0x06 minigun; 0x07 laser; 0x08 flamer; 0x09 long range;
-        // 0x0A scanner; 0x0B medikit; 0x0C time bomb; 0x0D access card;
-        // 0x0E invalid; 0x0F invalid; 0x10 invalid; 0x11 energy shield;
+        /* 0x01 persuadertron; 0x02 pistol; 0x03 gauss gun; 0x04 shotgun;
+         * 0x05 uzi; 0x06 minigun; 0x07 laser; 0x08 flamer; 0x09 long range;
+         * 0x0A scanner; 0x0B medikit; 0x0C time bomb; 0x0D access card;
+         * 0x0E invalid; 0x0F invalid; 0x10 invalid; 0x11 energy shield;
+        */
         uint8 sub_type;
         uint8 unkn6[2];
         uint8 offset_next_inventory[2];
@@ -379,7 +380,8 @@ public:
         uint8 offset_owner[2];
     } LEVELDATA_SFX;       // total: 30 bytes
 
-    typedef struct {// was not able to verify correctness
+    typedef struct {
+        // first scenario should be skipped, type 0x00
         uint8 next[2];
         uint8 offset_object[2];
         // tile_x_ = (tilex < < 7) / 256
@@ -388,8 +390,15 @@ public:
         // tile_y_ = (tiley < < 7) / 256
         // off_y_ = (tiley < < 7) % 256
         uint8 tiley;
+        // z is not used for now, as it is "strange"
         // tile_z_ = tilez
         uint8 tilez;
+        /* 0x00 - unset scenario type, is found at start of array and end is
+        * filled with this type;
+        * 0x01 - has location, no object offset; 0x02 - has object offset, no
+        * location; 0x07 - data is not present (end marker?); 0x08 - has
+        * location, no object offset; 0x09 - data is not present (end marker?);
+        */
         uint8 type;
     } LEVELDATA_SCENARIOS;         // total: 8 bytes
 
@@ -409,21 +418,23 @@ public:
     } LEVELDATA_MAPINFOS;        // total: 14 bytes
 
     typedef struct {
-        // only max 5 objectives are non-zero, we will read 6
-        // 0x00 action for non-agent(?) ;0x01 persuade; 0x02 assassinate;
-        // 0x03 protect; 0x05 equipment aquisition; 0x0a combat sweep (police);
-        // 0x0b combat sweep; 0x0e destroy vehicle; 0x0f use vehicle;
-        // 0x10 evacuate
-        // more info in mission.cpp : loadLevel()
+        /* only max 5 objectives are non-zero, we will read 6
+         * 0x00 action for non-agent(?) ;0x01 persuade; 0x02 assassinate;
+         * 0x03 protect; 0x05 equipment aquisition; 0x0a combat sweep (police);
+         * 0x0b combat sweep; 0x0e destroy vehicle; 0x0f use vehicle;
+         * 0x10 evacuate
+         * more info in mission.cpp : loadLevel()
+        */
         uint8 type[2];
         // 'offset + 32774' gives the offset in this file of the first objective
         uint8 offset[2];
         uint8 mapposx[2];
         uint8 mapposy[2];
         uint8 mapposz[2];
-        //If “protect”, the next objective are the goals and their type is zero.
-        //The list finish with zero and the offset of the protected item ?
-        //The status flag is set to 1 if the objective has to be completed
+        /* If "protect", the next objective are the goals and their type is zero.
+         * The list finish with zero and the offset of the protected item ?
+         * The status flag is set to 1 if the objective has to be completed
+        */
         uint8 status;
         uint8 unkn1[3];
     } LEVELDATA_OBJECTIVES;         // total: 14 bytes
