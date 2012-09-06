@@ -2974,7 +2974,7 @@ bool Mission::getWalkable(int &x, int &y, int &z, int &ox, int &oy) {
     unsigned char twd;
     do {
         bz--;
-        // using lowered Z, at  start postion is at top of tile not at bottom
+        // using lowered Z, at start postion is at top of tile not at bottom
         bx = x * 256 + ox + 128 * (bz - 1);
         box = bx % 256;
         bx = bx / 256;
@@ -2983,6 +2983,8 @@ bool Mission::getWalkable(int &x, int &y, int &z, int &ox, int &oy) {
         by = by / 256;
         if (bz >= mmax_z_ || bx >= mmax_x_ || by >= mmax_y_)
             continue;
+        if (bz < 0 || bx < 0 || by < 0)
+            break;
         cindx = bx + by * mmax_x_ + bz * mmax_m_xy;
         if ((mdpoints_[cindx].t & m_fdWalkable) == m_fdWalkable) {
             twd = mtsurfaces_[cindx].twd;
@@ -3607,6 +3609,8 @@ bool Mission::getShootableTile(int &x, int &y, int &z, int &ox, int &oy,
         by = by / 256;
         if (bz >= mmax_z_ || bx >= mmax_x_ || by >= mmax_y_)
             continue;
+        if (bz < 0 || bx < 0 || by < 0)
+            break;
         twd = mtsurfaces_[bx + by * mmax_x_ + bzm * mmax_m_xy].twd;
         int dx = 0;
         int dy = 0;

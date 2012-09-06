@@ -50,7 +50,7 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
     floodPointDesc *based = &(m->mdpoints_[tile_x_
         + tile_y_ * m->mmax_x_ + tile_z_ * m->mmax_m_xy]);
 
-#if 1
+#if 0
     printf("target t %x, dirm %x ; base t %x, dirm %x\n", targetd->t,
         targetd->dirm, based->t, based->dirm);
     printf("target dirh %x, dirl %x ; base dirh %x, dirl %x\n", targetd->dirh,
