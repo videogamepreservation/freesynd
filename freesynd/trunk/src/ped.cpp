@@ -1194,6 +1194,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                 || (groups_processed & PedInstance::gd_mExclusive))
                 break;
         }
+#if 1
         if ((groups_processed & PedInstance::gd_mExclusive) == 0)
         {
             if ((state_ & pa_smDead) == 0
@@ -1225,6 +1226,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                 }
             }
         }
+#endif
     }
 
     if (friends_not_seen_.size() != 0) {
@@ -1687,7 +1689,6 @@ void PedInstance::dropWeapon(WeaponInstance *wi) {
     wi->setMap(map_);
     wi->setIsIgnored();
     wi->setPosition(tile_x_, tile_y_, tile_z_, off_x_, off_y_, off_z_);
-    wi->setVisZ(vis_z_);
     if (wi->getMainType() == Weapon::TimeBomb)
         wi->activate();
 }
@@ -1704,7 +1705,6 @@ void PedInstance::dropAllWeapons() {
         w->setMap(map());
         // TODO: drop weapons not on same place, stairs problem
         w->setPosition(tile_x_, tile_y_, tile_z_, off_x_, off_y_, off_z_);
-        w->setVisZ(vis_z_);
         w->setOwner(NULL);
         w->setIsIgnored();
         if (w->getMainType() == Weapon::TimeBomb)
@@ -2011,7 +2011,6 @@ void PedInstance::destroyAllWeapons() {
         WeaponInstance * w = removeWeapon(0);
         w->setMap(-1);
         w->setPosition(tile_x_, tile_y_, tile_z_, off_x_, off_y_, off_z_);
-        w->setVisZ(vis_z_);
         w->setOwner(NULL);
         w->setIsIgnored(true);
         w->deactivate();

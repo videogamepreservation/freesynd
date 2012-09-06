@@ -136,12 +136,11 @@ bool WeaponInstance::animate(int elapsed) {
 
                 Mission *m = g_Session.getMission();
                 toDefineXYZ cur_pos = {tile_x_ * 256 + off_x_,
-                    tile_y_ * 256 + off_y_, vis_z_ * 128 + off_z_};
+                    tile_y_ * 256 + off_y_, tile_z_ * 128 + off_z_};
                 SFXObject *so = new SFXObject(m->map(),
                     pWeaponClass_->anims()->hit_anim);
                 so->setPosition(cur_pos.x / 256, cur_pos.y / 256, cur_pos.z / 128,
                     cur_pos.x % 256, cur_pos.y % 256, cur_pos.z % 128);
-                so->setTileVisZ();
                 m->addSfxObject(so);
 
                 int max_anims = 24 + rand() % 8;
@@ -480,7 +479,6 @@ bool ProjectileShot::animate(int elapsed, Mission *m) {
                     anims_.trace_anim);
                 so->setPosition(t.x / 256, t.y / 256, t.z / 128, t.x % 256,
                     t.y % 256, t.z % 128 );
-                so->setTileVisZ();
                 m->addSfxObject(so);
             }
         }
@@ -519,7 +517,6 @@ bool ProjectileShot::animate(int elapsed, Mission *m) {
             so->setPosition(cur_pos_.x / 256, cur_pos_.y / 256,
                 cur_pos_.z / 128, cur_pos_.x % 256, cur_pos_.y % 256,
                 cur_pos_.z % 128);
-            so->setTileVisZ();
             m->addSfxObject(so);
 
             toDefineXYZ cp = cur_pos_;
@@ -636,16 +633,12 @@ uint16 WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
             return 128;
         cp.x = xb;
         cp.y = yb;
-        cp.z = owner_->visZ() * 128 + owner_->offZ()
+        cp.z = owner_->tileZ() * 128 + owner_->offZ()
             + (owner_->sizeZ() >> 1);
         if (cp.z > (m->mmax_z_ - 1) * 128)
             cp.z = (m->mmax_z_ - 1) * 128;
-        int tilez = cp.z / 128;
-        int tileoz = cp.z % 128;
-        if (tileoz != 0)
-            tilez++;
-        if (m->isTileSolid(cp.x / 256, cp.y / 256, tilez, cp.x % 256,
-            cp.y % 256, tileoz))
+        if (m->isTileSolid(cp.x / 256, cp.y / 256, cp.z / 128, cp.x % 256,
+            cp.y % 256, cp.z % 128))
             return 256;
         if (tobj || tp) {
             if (tobj) {
@@ -666,10 +659,10 @@ uint16 WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
         cp.x = xb;
         cp.y = yb;
         // NOTE: it is assumed that object has off_z_ = 0, because
-        // if off_z_ != 0 tile_z_ = vis_z_ + Z_SHIFT_TO_AIR, from this assumed that
+        // if off_z_ != 0 tile_z_ = tile_z_ + Z_SHIFT_TO_AIR, from this assumed that
         // tile above is "air", if Z_SHIFT_TO_AIR will not be added, tile will be "solid",
         // trajectory checking will return "failed" response at start
-        cp.z = vis_z_ * 128 + off_z_ + Z_SHIFT_TO_AIR;
+        cp.z = tile_z_ * 128 + off_z_ + Z_SHIFT_TO_AIR;
         if (cp.z > (m->mmax_z_ - 1) * 128)
             cp.z = (m->mmax_z_ - 1) * 128;
     }
@@ -747,7 +740,7 @@ uint16 WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
     if (tobj) {
         base_shot.tp.x = tobj->tileX() * 256 + tobj->offX();
         base_shot.tp.y = tobj->tileY() * 256 + tobj->offY();
-        base_shot.tp.z = tobj->visZ() * 128 + tobj->offZ() + (tobj->sizeZ() >> 1);
+        base_shot.tp.z = tobj->tileZ() * 128 + tobj->offZ() + (tobj->sizeZ() >> 1);
         if (base_shot.tp.z > (m->mmax_z_ - 1) * 128)
             base_shot.tp.z = (m->mmax_z_ - 1) * 128;
         base_shot.tpn.setTileXYZ(tobj->tileX(), tobj->tileY(),
@@ -974,11 +967,11 @@ uint8 WeaponInstance::inRangeNoCP(ShootableMapObject ** t, PathNode * pn,
     if (owner_) {
         cxyz.x = owner_->tileX() * 256 + owner_->offX();
         cxyz.y = owner_->tileY() * 256 + owner_->offY();
-        cxyz.z = owner_->visZ() * 128 + owner_->offZ() + (owner_->sizeZ() >> 1);
+        cxyz.z = owner_->tileZ() * 128 + owner_->offZ() + (owner_->sizeZ() >> 1);
     } else {
         cxyz.x = tile_x_ * 256 + off_x_;
         cxyz.y = tile_y_ * 256 + off_y_;
-        cxyz.z = vis_z_ * 128 + off_z_ + Z_SHIFT_TO_AIR;
+        cxyz.z = tile_z_ * 128 + off_z_ + Z_SHIFT_TO_AIR;
     }
 
     return inRange(cxyz, t, pn, setBlocker, checkTileOnly, maxr);
@@ -1126,7 +1119,6 @@ void ShotClass::makeShot(bool rangeChecked, toDefineXYZ &cp, int anim_hit,
                         anim_hit);
                     so->setPosition(pn.tileX(), pn.tileY(), pn.tileZ(),
                         pn.offX(), pn.offY(), pn.offZ());
-                    so->setTileVisZ();
                     so->correctZ();
                     m->addSfxObject(so);
                 }
@@ -1148,12 +1140,11 @@ void ShotClass::makeShot(bool rangeChecked, toDefineXYZ &cp, int anim_hit,
                 if (anim_obj_hit != SFXObject::sfxt_Unknown) {
                     SFXObject *so = new SFXObject(m->map(),
                         anim_obj_hit);
-                    int z = smp->visZ() * 128 + smp->offZ() + (smp->sizeZ() >> 1);
+                    int z = smp->tileZ() * 128 + smp->offZ() + (smp->sizeZ() >> 1);
                     if (z > (m->mmax_z_ - 1) * 128)
                         z = (m->mmax_z_ - 1) * 128;
                     so->setPosition(smp->tileX(), smp->tileY(), z / 128,
                         smp->offX(), smp->offY(), z % 128);
-                    so->setTileVisZ();
                     so->correctZ();
                     m->addSfxObject(so);
                 }
@@ -1164,7 +1155,6 @@ void ShotClass::makeShot(bool rangeChecked, toDefineXYZ &cp, int anim_hit,
                     anim_hit);
                 so->setPosition(pn.tileX(), pn.tileY(), pn.tileZ(), pn.offX(),
                     pn.offY(), pn.offZ());
-                so->setTileVisZ();
                 so->correctZ();
                 m->addSfxObject(so);
             }
@@ -1175,7 +1165,6 @@ void ShotClass::makeShot(bool rangeChecked, toDefineXYZ &cp, int anim_hit,
                         anim_hit);
                     so->setPosition(pn.tileX(), pn.tileY(), pn.tileZ(), pn.offX(),
                         pn.offY(), pn.offZ());
-                    so->setTileVisZ();
                     so->correctZ();
                     m->addSfxObject(so);
                 }
@@ -1196,12 +1185,11 @@ void ShotClass::makeShot(bool rangeChecked, toDefineXYZ &cp, int anim_hit,
                 if (anim_obj_hit != SFXObject::sfxt_Unknown) {
                     SFXObject *so = new SFXObject(m->map(),
                         anim_obj_hit);
-                    int z = smp->visZ() * 128 + smp->offZ() + (smp->sizeZ() >> 1);
+                    int z = smp->tileZ() * 128 + smp->offZ() + (smp->sizeZ() >> 1);
                     if (z > (m->mmax_z_ - 1) * 128)
                         z = (m->mmax_z_ - 1) * 128;
                     so->setPosition(smp->tileX(), smp->tileY(), z / 128,
                         smp->offX(), smp->offY(), z % 128);
-                    so->setTileVisZ();
                     so->correctZ();
                     m->addSfxObject(so);
                 }
@@ -1364,7 +1352,6 @@ void ShotClass::rangeDamageAnim(toDefineXYZ &cp, double dmg_rng,
                            100 * (rand() % 16));
         so->setPosition(pn.tileX(), pn.tileY(), pn.tileZ(),
                         pn.offX(), pn.offY(), pn.offZ());
-        so->setTileVisZ();
         m->addSfxObject(so);
     }
 }

@@ -37,14 +37,6 @@ MapObject::MapObject(int m):size_x_(1), size_y_(1), size_z_(2),
 {
 }
 
-void MapObject::setTileVisZ(){
-    // from real z, we set tile based
-    vis_z_ = tile_z_;
-    if (off_z_ != 0)
-        tile_z_++;
-    assert(tile_z_ < g_Session.getMission()->mmax_z_);
-}
-
 int MapObject::screenX()
 {
     return g_App.maps().map(map())->tileToScreenX(tile_x_, tile_y_,
@@ -101,7 +93,6 @@ void MapObject::addOffs(int &x, int &y)
     x += ((off_x_ - off_y_) * (TILE_WIDTH / 2)) / 256;
     y += ((off_x_ + off_y_) * (TILE_HEIGHT / 3)) / 256;
     y -= (off_z_ * (TILE_HEIGHT / 3)) / 128;
-    y += (tile_z_ - vis_z_) * TILE_HEIGHT / 3;
 }
 
 bool MapObject::animate(int elapsed)
@@ -250,7 +241,7 @@ bool MapObject::isBlocker(toDefineXYZ * startXYZ, toDefineXYZ * endXYZ,
         return false;
 
     // range_z check
-    int range_z_l = vis_z_ * 128 + off_z_;
+    int range_z_l = tile_z_ * 128 + off_z_;
     int range_z_h = range_z_l + size_z_;
     range_z_h--;
     bool flipped_z = false;
@@ -408,23 +399,18 @@ bool MapObject::isBlocker(toDefineXYZ * startXYZ, toDefineXYZ * endXYZ,
 void MapObject::offzOnStairs(uint8 twd) {
     switch (twd) {
         case 0x01:
-            vis_z_ = tile_z_ - 1;
             off_z_ = 127 - (off_y_ >> 1);
             break;
         case 0x02:
-            vis_z_ = tile_z_ - 1;
             off_z_ = off_y_ >> 1;
             break;
         case 0x03:
-            vis_z_ = tile_z_ - 1;
             off_z_ = off_x_ >> 1;
             break;
         case 0x04:
-            vis_z_ = tile_z_ - 1;
             off_z_ = 127 - (off_x_ >> 1);
             break;
         default:
-            vis_z_ = tile_z_;
             off_z_ = 0;
             break;
     }
@@ -486,7 +472,6 @@ bool SFXObject::animate(int elapsed) {
             if (z > (g_Session.getMission()->mmax_z_ - 1) * 128)
                 z = (g_Session.getMission()->mmax_z_ - 1) * 128;
             tile_z_ = z / 128;
-            vis_z_ = tile_z_;
             off_z_ = z % 128;
         }
         if (frame_ > g_App.gameSprites().lastFrame(anim_)
@@ -505,7 +490,6 @@ void SFXObject::correctZ() {
         if (z > (g_Session.getMission()->mmax_z_ - 1) * 128)
             z = (g_Session.getMission()->mmax_z_ - 1) * 128;
         tile_z_ = z / 128;
-        vis_z_ = tile_z_;
         off_z_ = z % 128;
     }
 }
@@ -839,15 +823,11 @@ Static *Static::loadInstance(uint8 * data, int m)
 
     if (s) {
         int z = READ_LE_UINT16(gamdata->mapposz) >> 7;
-        z--;
         int oz = gamdata->mapposz[0] & 0x7F;
-        s->setVisZ(z);
         // trick to draw
         if (s->getMainType() == Static::smt_Advertisement)
-            z += 2;
+            z += 1;
 
-        if (oz > 0)
-            z++;
         s->setPosition(gamdata->mapposx[1], gamdata->mapposy[1],
                        z, gamdata->mapposx[0],
                        gamdata->mapposy[0], oz);
@@ -1333,43 +1313,40 @@ bool Semaphore::animate(int elapsed, Mission *obj) {
             chng += elapsed_left_bigger_;
             elapsed_left_bigger_ = 0;
         }
-        int z = vis_z_ * 128 + off_z_ - chng;
+        int z = tile_z_ * 128 + off_z_ - chng;
         tile_z_ = z / 128;
         off_z_ = z % 128;
-        setTileVisZ();
+        /*
         if (elapsed_left_bigger_ == 0)
-            vis_z_=vis_z_;
+            return false;
+        */
         return true;
     }
 
     int chng = (elapsed + elapsed_left_smaller_) >> 2;
     elapsed_left_smaller_ = elapsed & 4;
     if (chng) {
-     int oz = off_z_ + chng * up_down_;
-     if (oz > 127) {
-         oz = 127 - (oz & 0x7F);
-         up_down_ -= 2;
-     } else if (oz < 64) {
-         oz = 64 + (64 - oz);
-         up_down_ += 2;
-     }
-     off_z_ = oz;
-     if (oz == 0)
-         vis_z_ = tile_z_ - 1;
-     else
-        setVisZ();
+        int oz = off_z_ + chng * up_down_;
+        if (oz > 127) {
+            oz = 127 - (oz & 0x7F);
+            up_down_ -= 2;
+        } else if (oz < 64) {
+            oz = 64 + (64 - oz);
+            up_down_ += 2;
+        }
+        off_z_ = oz;
     }
 
     chng = (elapsed + elapsed_left_bigger_) >> 6;
     elapsed_left_bigger_ = elapsed & 63;
     if (chng) {
-     // Direction is used as storage for animation change, not my idea
-     dir_ += chng;
-     dir_ &= 0xFF;
-     state_ = dir_ >> 6;
-     state_++;
-     if (state_ > Static::sttsem_Stt3)
-         state_ = Static::sttsem_Stt0;
+        // Direction is used as storage for animation change, not my idea
+        dir_ += chng;
+        dir_ &= 0xFF;
+        state_ = dir_ >> 6;
+        state_++;
+        if (state_ > Static::sttsem_Stt3)
+            state_ = Static::sttsem_Stt0;
     }
 
     return MapObject::animate(elapsed);
@@ -1392,10 +1369,10 @@ bool Semaphore::handleDamage(ShootableMapObject::DamageInflictType *d) {
             indx -= m->mmax_m_xy;
             int twd = m->mtsurfaces_[indx].twd;
             if (twd == 0x0F) {
-                elapsed_left_bigger_ = (vis_z_ - z) * 128 + off_z_;
+                elapsed_left_bigger_ = (tile_z_ - z) * 128 + off_z_;
                 break;
             }
-        };
+        }
         is_ignored_ = true;
     }
     return true;

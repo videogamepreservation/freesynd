@@ -98,7 +98,7 @@ int Map::tileToScreenY(int x, int y, int z, int pX, int pY)
 {
     float fx = x + pX / scaleyPx;
     float fy = y + pY / scaleyPy;
-    return (int) (max_z_ * TILE_HEIGHT / 3 + (fx + fy) * TILE_HEIGHT / 3);
+    return (int) ((max_z_ + 1) * TILE_HEIGHT / 3 + (fx + fy) * TILE_HEIGHT / 3);
 }
 
 int Map::screenToTileX(int x, int y, int &ox)
@@ -269,8 +269,8 @@ void Map::draw(int scrollX, int scrollY, MapHelper * helper)
                             }
                         }
                     }
-                    if (z - 2 >= 0) {
-                        helper->drawAt(w, h, z - 2,
+                    if (z - 1 >= 0) {
+                        helper->drawAt(w, h, z - 1,
                             screen_w - cmx + TILE_WIDTH / 2,
                             coord_h - scrollY + TILE_HEIGHT / 3 * 2,
                             scrollX, scrollY);

@@ -82,20 +82,10 @@ public:
     int tileX() { return tile_x_; }
     int tileY() { return tile_y_; }
     int tileZ() { return tile_z_; }
-    int visZ() { return vis_z_; }
 
     void setTileX(int x) { tile_x_ = x; }
     void setTileY(int y) { tile_y_ = y; }
     void setTileZ(int z) { tile_z_ = z; }
-    void setVisZ() {
-        // from tile based, we set vis_z_
-        vis_z_ = tile_z_;
-        if (off_z_ != 0)
-            vis_z_--;
-        assert(vis_z_ >= 0);
-    }
-    void setTileVisZ();
-    void setVisZ(int z) { vis_z_ = z; }
 
     int offX() { return off_x_; }
     int offY() { return off_y_; }
@@ -122,7 +112,6 @@ public:
     bool samePosition(MapObject * other) {
         return other->tile_x_ == tile_x_
                 && other->tile_y_ == tile_y_
-                && other->vis_z_ == vis_z_
                 && other->off_x_ == off_x_
                 && other->off_y_ == off_y_
                 && other->off_z_ == off_z_;
@@ -131,28 +120,28 @@ public:
     double distanceTo(MapObject *t) {
         int cx = tile_x_ * 256 + off_x_ - (t->tile_x_ * 256 + t->off_x_);
         int cy = tile_y_ * 256 + off_y_ - (t->tile_y_ * 256 + t->off_y_);
-        int cz = vis_z_ * 128 + off_z_ - (t->vis_z_ * 128 + t->off_z_);
+        int cz = tile_z_ * 128 + off_z_ - (t->tile_z_ * 128 + t->off_z_);
         return sqrt((double) (cx * cx + cy * cy + cz * cz));
     }
 
     double distanceToPosXYZ(toDefineXYZ *xyz) {
         int cx = tile_x_ * 256 + off_x_ - (xyz->x);
         int cy = tile_y_ * 256 + off_y_ - (xyz->y);
-        int cz = vis_z_ * 128 + off_z_  - (xyz->z);
+        int cz = tile_z_ * 128 + off_z_  - (xyz->z);
         return sqrt((double) (cx * cx + cy * cy + cz * cz));
     }
 
     double distanceToPosSz(toDefineXYZ *xyz) {
         int cx = tile_x_ * 256 + off_x_ - (xyz->x);
         int cy = tile_y_ * 256 + off_y_ - (xyz->y);
-        int cz = vis_z_ * 128 + off_z_ + (size_z_ >> 1) - (xyz->z);
+        int cz = tile_z_ * 128 + off_z_ + (size_z_ >> 1) - (xyz->z);
         return sqrt((double) (cx * cx + cy * cy + cz * cz));
     }
 
     void convertPosToXYZ(toDefineXYZ *xyz) {
         xyz->x = tile_x_ * 256 + off_x_;
         xyz->y = tile_y_ * 256 + off_y_;
-        xyz->z = vis_z_ * 128 + off_z_;
+        xyz->z = tile_z_ * 128 + off_z_;
     }
 
     void convertPosToXY(int *x, int *y) {
@@ -239,7 +228,7 @@ protected:
     /*! vis_z_ is location used for adjusting object drawing/calculations
      * tile_z_ represents true location for tile
      */
-    int tile_x_, tile_y_, tile_z_, vis_z_, off_x_, off_y_, off_z_;
+    int tile_x_, tile_y_, tile_z_, off_x_, off_y_, off_z_;
     //! these are not true sizes, but halfs of full size by respective coord
     int size_x_, size_y_, size_z_;
     int map_;

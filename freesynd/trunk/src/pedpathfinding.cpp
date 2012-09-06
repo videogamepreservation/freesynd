@@ -50,7 +50,7 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
     floodPointDesc *based = &(m->mdpoints_[tile_x_
         + tile_y_ * m->mmax_x_ + tile_z_ * m->mmax_m_xy]);
 
-#if 0
+#if 1
     printf("target t %x, dirm %x ; base t %x, dirm %x\n", targetd->t,
         targetd->dirm, based->t, based->dirm);
     printf("target dirh %x, dirl %x ; base dirh %x, dirl %x\n", targetd->dirh,
@@ -69,6 +69,7 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
     }
 #endif
 
+    //return;
     if(targetd->t == m_fdNonWalkable || map_ == -1 || health_ <= 0) {
         return;
     }
@@ -1718,6 +1719,8 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
         cdestpath.push_back(PathNode(toadd.x, toadd.y, toadd.z));
         // this assert might save from memory fill up,
         assert(ctile.x != toadd.x || ctile.y != toadd.y || ctile.z != toadd.z);
+        //if(toadd.x == 49 && toadd.y == 86 && toadd.z == 1)
+            //toadd.x = 49;
         //if(ctile.x == toadd.x && ctile.y == toadd.y && ctile.z == toadd.z)
             //ctile = toadd;
         ctile = toadd;
@@ -2484,7 +2487,7 @@ bool PedInstance::moveToDir(Mission* m, int elapsed, int dir, int t_posx,
                 }
                 fpd = &(m->mdpoints_[tilenx + tileny * m->mmax_x_
                     + tile_z_ * m->mmax_m_xy]);
-                // TODO: set safewalk need somewhere
+                // TODO: set safewalk need, somewhere
                 if ((fpd->t & m_fdSafeWalk) == 0) {
                     tile_z_ += dec_z;
                     need_bounce = true;

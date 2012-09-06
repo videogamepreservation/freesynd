@@ -111,7 +111,6 @@ public:
         all_passengers_.erase(all_passengers_.find(vehicleDriver));
         ((MapObject *)vehicleDriver)->setPosition(tile_x_, tile_y_, tile_z_,
             off_x_, off_y_, off_z_);
-        ((MapObject *)vehicleDriver)->setVisZ(tile_z_);
     }
     void forceSetDriver(PedInstance *vehicleDriver) {
         vehicle_driver_ = vehicleDriver;

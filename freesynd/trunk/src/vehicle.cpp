@@ -354,7 +354,8 @@ void VehicleInstance::setDestinationV(Mission *m, int x, int y, int z, int ox,
     path2add.reserve(16);
 
     m->adjXYZ(x, y, z);
-    z = tile_z_;
+    // NOTE: we will be using lower tiles, later will restore Z coord
+    z = tile_z_ - 1;
 
     dest_path_.clear();
     setSpeed(0);
@@ -362,18 +363,18 @@ void VehicleInstance::setDestinationV(Mission *m, int x, int y, int z, int ox,
     if (map_ == -1 || health_ <= 0 || !(walkable(x, y, z)))
         return;
 
-    if (!walkable(tile_x_, tile_y_, tile_z_)) {
+    if (!walkable(tile_x_, tile_y_, z)) {
         int dBest = 100000, dCur;
         std::vector < PathNode > path2wtile;
         path2wtile.reserve(16);
         // we got somewhere we shouldn't, we need to find somewhere that is walkable
-        PathNode pntile(tile_x_ , tile_y_, tile_z_, off_x_, off_y_);
+        PathNode pntile(tile_x_ , tile_y_, z, off_x_, off_y_);
         for (int i = 1; i < 16; i++) {
             if (tile_x_ + i >= m->mmax_x_)
                 break;
             pntile.setTileX(tile_x_ + i);
             path2wtile.push_back(pntile);
-            if (walkable(tile_x_ + i, tile_y_, tile_z_)) {
+            if (walkable(tile_x_ + i, tile_y_, z)) {
                 dCur = i * i;
                 if(dCur < dBest) {
                     dBest = dCur;
@@ -386,13 +387,13 @@ void VehicleInstance::setDestinationV(Mission *m, int x, int y, int z, int ox,
         }
 
         path2wtile.clear();
-        pntile = PathNode(tile_x_ , tile_y_, tile_z_, off_x_, off_y_);
+        pntile = PathNode(tile_x_ , tile_y_, z, off_x_, off_y_);
         for (int i = -1; i > -16; --i) {
             if (tile_x_ + i < 0)
                 break;
             pntile.setTileX(tile_x_ + i);
             path2wtile.push_back(pntile);
-            if (walkable(tile_x_ + i, tile_y_, tile_z_)) {
+            if (walkable(tile_x_ + i, tile_y_, z)) {
                 dCur = i * i;
                 if(dCur < dBest) {
                     dBest = dCur;
@@ -405,13 +406,13 @@ void VehicleInstance::setDestinationV(Mission *m, int x, int y, int z, int ox,
         }
 
         path2wtile.clear();
-        pntile = PathNode(tile_x_ , tile_y_, tile_z_, off_x_, off_y_);
+        pntile = PathNode(tile_x_ , tile_y_, z, off_x_, off_y_);
         for (int i = -1; i > -16; --i) {
             if (tile_y_ + i < 0)
                 break;
             pntile.setTileY(tile_y_ + i);
             path2wtile.push_back(pntile);
-            if (walkable(tile_x_, tile_y_ + i, tile_z_)) {
+            if (walkable(tile_x_, tile_y_ + i, z)) {
                 dCur = i * i;
                 if(dCur < dBest) {
                     dBest = dCur;
@@ -424,13 +425,13 @@ void VehicleInstance::setDestinationV(Mission *m, int x, int y, int z, int ox,
         }
 
         path2wtile.clear();
-        pntile = PathNode(tile_x_ , tile_y_, tile_z_, off_x_, off_y_);
+        pntile = PathNode(tile_x_ , tile_y_, z, off_x_, off_y_);
         for (int i = 1; i < 16; i++) {
             if (tile_y_ + i >= m->mmax_y_)
                 break;
             pntile.setTileY(tile_y_ + i);
             path2wtile.push_back(pntile);
-            if (walkable(tile_x_, tile_y_ + i, tile_z_)) {
+            if (walkable(tile_x_, tile_y_ + i, z)) {
                 dCur = i * i;
                 if(dCur < dBest) {
                     dBest = dCur;
@@ -457,7 +458,7 @@ void VehicleInstance::setDestinationV(Mission *m, int x, int y, int z, int ox,
         wrong_dir = 0x0;
     else if(wrong_dir == 0x3)
         wrong_dir = 0x0020;
-    open.insert(std::pair< PathNode, uint16 >(PathNode(basex, basey, tile_z_, off_x_, off_y_),
+    open.insert(std::pair< PathNode, uint16 >(PathNode(basex, basey, z, off_x_, off_y_),
         wrong_dir));
     int watchDog = 1000;
 
@@ -500,7 +501,7 @@ void VehicleInstance::setDestinationV(Mission *m, int x, int y, int z, int ox,
             while (parent.find(p) != parent.end()) {
                 p = parent[p];
                 if (p.tileX() == tile_x_ && p.tileY() == tile_y_
-                    && p.tileZ() == tile_z_)
+                    && p.tileZ() == z)
                     break;
                 dest_path_.push_front(p);
             }
@@ -607,12 +608,14 @@ void VehicleInstance::setDestinationV(Mission *m, int x, int y, int z, int ox,
                     it->setOffY(curoy);
                     break;
             }
+            it->setTileZ(tile_z_);
         }
     }
     if(path2add.size() != 0 && dest_path_.size() != 0) {
         for (std::vector < PathNode >::reverse_iterator it = path2add.rbegin();
             it != path2add.rend(); it++)
         {
+            it->setTileZ(tile_z_);
             dest_path_.push_front(*it);
         }
     }
@@ -712,7 +715,6 @@ bool VehicleInstance::movementV(int elapsed)
             it != all_passengers_.end(); it++
         ) {
             (*it)->setPosition(tile_x_, tile_y_, tile_z_, off_x_, off_y_, off_z_);
-            (*it)->setVisZ(tile_z_);
         }
     }
 

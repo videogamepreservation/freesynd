@@ -170,16 +170,10 @@ PedInstance *PedManager::loadInstance(uint8 * data, int map)
     // Zr = (Zt * 128) / 256
     int z = READ_LE_UINT16(gamdata->mapposz) >> 7;
     // some peds have z = 0 - map paraguay
-    if (z == 0)
-        z = 1;
-    z--;
     int oz = gamdata->mapposz[0] & 0x7F;
-    newped->setVisZ(z);
     newped->setSizeX(32);
     newped->setSizeY(32);
     newped->setSizeZ(256);
-    if (oz > 0)
-        z++;
     //printf("x %i y %i z %i ox %i oy %i oz %i\n", gamdata->mapposx[1], gamdata->mapposy[1], z, gamdata->mapposx[0], gamdata->mapposy[0], oz);
     newped->setPosition(gamdata->mapposx[1], gamdata->mapposy[1],
                         z, gamdata->mapposx[0],

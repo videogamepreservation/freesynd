@@ -543,12 +543,21 @@ void GameplayMenu::handleMouseMotion(int x, int y, int state, const int modKeys)
             PedInstance *p = mission_->ped(i);
             if (p->health() > 0 && p->map() != -1) {
                 int px = p->screenX() - 10;
-                int py = p->screenY() - (1 + p->visZ()) * TILE_HEIGHT/3
+                int py = p->screenY() - (1 + p->tileZ()) * TILE_HEIGHT/3
                     - (p->offZ() * TILE_HEIGHT/3) / 128;
 
                 if (x - 129 + world_x_ >= px && y + world_y_ >= py &&
                     x - 129 + world_x_ < px + 21 && y + world_y_ < py + 34) {
                     pointing_at_ped_ = i;
+                    for (int indx = 0; indx < 4; indx++)
+                        if (isAgentSelected(indx)) {
+                            WeaponInstance * wi = mission_->ped(indx)->selectedWeapon();
+                            ShootableMapObject *tsmo = mission_->ped(pointing_at_ped_);
+                            if (wi && wi->canShoot() && wi->inRangeNoCP(&tsmo) == 1)
+                            {
+                                inrange = true;
+                            }
+                        }
                     break;
                 }
             }
@@ -560,11 +569,20 @@ void GameplayMenu::handleMouseMotion(int x, int y, int state, const int modKeys)
             VehicleInstance *v = mission_->vehicle(i);
             if (v->health() > 0) {
                 int px = v->screenX() - 20;
-                int py = v->screenY() - 10 - v->visZ() * TILE_HEIGHT/3;
+                int py = v->screenY() - 10 - v->tileZ() * TILE_HEIGHT/3;
 
                 if (x - 129 + world_x_ >= px && y + world_y_ >= py &&
                     x - 129 + world_x_ < px + 40 && y + world_y_ < py + 32) {
                     pointing_at_vehicle_ = i;
+                    for (int indx = 0; indx < 4; indx++)
+                        if (isAgentSelected(indx)) {
+                            WeaponInstance * wi = mission_->ped(indx)->selectedWeapon();
+                            ShootableMapObject *tsmo = mission_->vehicle(pointing_at_vehicle_);
+                            if (wi && wi->canShoot() && wi->inRangeNoCP(&tsmo)== 1)
+                            {
+                                inrange = true;
+                            }
+                        }
                     break;
                 }
             }
@@ -577,7 +595,7 @@ void GameplayMenu::handleMouseMotion(int x, int y, int state, const int modKeys)
 
             if (w->map() != -1) {
                 int px = w->screenX() - 10;
-                int py = w->screenY() + 4 - w->visZ() * TILE_HEIGHT/3
+                int py = w->screenY() + 4 - w->tileZ() * TILE_HEIGHT/3
                     - (w->offZ() * TILE_HEIGHT/3) / 128;
 
                 if (x - 129 + world_x_ >= px && y + world_y_ >= py &&
@@ -589,27 +607,6 @@ void GameplayMenu::handleMouseMotion(int x, int y, int state, const int modKeys)
         }
 
         // TODO: use pointers instead of int for peds, vehicles, weapons?
-        if (pointing_at_ped_ != -1)
-            for (int i = 0; i < 4; i++)
-                if (isAgentSelected(i)) {
-                    WeaponInstance * wi = mission_->ped(i)->selectedWeapon();
-                    ShootableMapObject *tsmo = mission_->ped(pointing_at_ped_);
-                    if (wi && wi->canShoot() && wi->inRangeNoCP(&tsmo) == 1)
-                    {
-                        inrange = true;
-                    }
-                }
-
-        if (pointing_at_vehicle_ != -1)
-            for (int i = 0; i < 4; i++)
-                if (isAgentSelected(i)) {
-                    WeaponInstance * wi = mission_->ped(i)->selectedWeapon();
-                    ShootableMapObject *tsmo = mission_->vehicle(pointing_at_vehicle_);
-                    if (wi && wi->canShoot() && wi->inRangeNoCP(&tsmo)== 1)
-                    {
-                        inrange = true;
-                    }
-                }
     } else {
         pointing_at_ped_ = pointing_at_vehicle_ = pointing_at_weapon_ = -1;
     }
@@ -812,10 +809,10 @@ bool GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
                             int sty = ty;
                             //int sox = ox;
                             //int soy = oy;
-                            stx = tx * 256 + ox + 128 * ped->inVehicle()->tileZ();
+                            stx = tx * 256 + ox + 128 * (ped->inVehicle()->tileZ() - 1);
                             //sox = stx % 256;
                             stx = stx / 256;
-                            sty = ty * 256 + oy + 128 * ped->inVehicle()->tileZ();
+                            sty = ty * 256 + oy + 128 * (ped->inVehicle()->tileZ() - 1);
                             //soy = sty % 256;
                             sty = sty / 256;
                             if (modKeys & KMD_CTRL) {

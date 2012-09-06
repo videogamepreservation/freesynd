@@ -59,8 +59,6 @@ VehicleInstance *VehicleManager::loadInstance(uint8 * data, int map)
         READ_LE_UINT32(gamdata->index_current_anim) - dir);
     VehicleInstance *newvehicle = vehicleanim->createInstance(map);
     int z = READ_LE_UINT16(gamdata->mapposz) >> 7;
-    z--;
-    newvehicle->setVisZ(z);
 
     // TODO: the size should be adjusted on orientation/direction change
     // and it should be different per vehicle type
