@@ -915,7 +915,7 @@ void Mission::checkObjectives() {
     {
         ObjectiveDesc &obj = objectives_[o];
         // some objectives can be completed once,
-        // if failed objective will not be possible to complete
+        // if failed, objective will not be possible to complete
         if ((obj.condition & 12) != 0)
             continue;
 
@@ -982,7 +982,7 @@ void Mission::checkObjectives() {
                             {
                                 if((*it_p)->objGroupDef() == obj.targetsubtype
                                     // we can persuade them, will be
-                                    // counted is eliminating for now
+                                    // counted as eliminating for now
                                     && (*it_p)->objGroupID() == obj.indx_grpid.grpid
                                     && (*it_p)->health() > 0)
                                 {
@@ -2932,20 +2932,6 @@ bool Mission::setSurfaces() {
             } while (vtodefine.size());
         }
     }
-/*
-    for (int z = 0; z < mmax_z_; z++) {
-        int iz = z * mmax_m_xy;
-        for (int y = 0; y < mmax_y_; y++) {
-            int iy = y * mmax_x_;
-            for (int x = 0; x < mmax_x_; x++) {
-                floodPointDesc *cfpp = &(mdpoints_[x + iy + iz]);
-
-                if ((cfpp->t & m_fdWalkable) == m_fdWalkable)
-                    cfpp->t &= (0xFF ^ m_fdDefReq);
-            }
-        }
-    }
-*/
 #if 0
     unsigned int cw = 0;
     for (int iz = 0; iz < mmax_z_; iz++) {
@@ -3046,7 +3032,7 @@ bool Mission::getWalkable(int &x, int &y, int &z, int &ox, int &oy) {
                             }
                         }
                     } else {
-                        // TODO : add check 0x01 tile 0x05s
+                        // TODO : add check 0x01?
                     }
                     break;
                 case 0x03:
@@ -3071,7 +3057,7 @@ bool Mission::getWalkable(int &x, int &y, int &z, int &ox, int &oy) {
                             }
                         }
                     } else {
-                        // TODO : 0x04 0x05s
+                        // TODO : 0x04?
                     }
                     break;
                 case 0x04:
@@ -3097,93 +3083,61 @@ bool Mission::getWalkable(int &x, int &y, int &z, int &ox, int &oy) {
                     break;
                 default:
                     gotit = true;
-                    // TODO: 0x01 0x02 0x03 0x04
+                    // TODO: 0x01 0x02 0x03 0x04?
                 break;
             }
-        } else {/*
-            if (box < 128 && (bx - 1) >= 0) {
-                cindx = (bx - 1) + by * mmax_x_ + bz * mmax_m_xy;
-                if ((mdpoints_[cindx].t & m_fdWalkable) == m_fdWalkable) {
-                    int dx = 0;
-                    int dy = 0;
-                    twd = mtsurfaces_[cindx].twd;
-                    if (twd == 0x01) {
+        } else if (bz - 1 >= 0) {
+            cindx = bx + by * mmax_x_ + (bz - 1) * mmax_m_xy;
+            if ((mdpoints_[cindx].t & m_fdWalkable) == m_fdWalkable) {
+                twd = mtsurfaces_[cindx].twd;
+                int dx = 0;
+                int dy = 0;
+                switch (twd) {
+                    case 0x01:
                         dy = (boy * 2) / 3;
-                        dx = (box + 256) - dy / 2;
-                        if (dx < 256) {
-                            bx--;
-                            gotit = true;
-                            box = dx;
-                            boy = dy;
-                        }
-                    } else if (twd == 0x04) {
-                        dx = ((box + 256) * 2) / 3;
-                        dy = boy - dx / 2;
-                        if (dy >= 0) {
-                            bx--;
-                            gotit = true;
-                            box = dx;
-                            boy = dy;
-                        }
-                    }
-                }
-            }
-            if (!gotit && boy < 128 && (by - 1) >= 0) {
-                cindx = bx + (by - 1) * mmax_x_ + bz * mmax_m_xy;
-                if ((mdpoints_[cindx].t & m_fdWalkable) == m_fdWalkable) {
-                    int dx = 0;
-                    int dy = 0;
-                    twd = mtsurfaces_[cindx].twd;
-                    if (twd == 0x01) {
-                        dy = ((boy + 256) * 2) / 3;
                         dx = box - dy / 2;
                         if (dx >= 0) {
-                            by--;
                             gotit = true;
                             box = dx;
                             boy = dy;
+                            bz--;
                         }
-                    } else if (twd == 0x04) {
+                        break;
+                    case 0x02:
+                        dy = (boy - 128) * 2;
+                        dx = (box + dy / 2) - 128;
+                        if (dy >= 0 && dx >= 0 && dx < 256) {
+                            gotit = true;
+                            box = dx;
+                            boy = dy;
+                            bz--;
+                        }
+                        break;
+                    case 0x03:
+                        dx = (box - 128) * 2;
+                        dy = (boy + dx / 2) - 128;
+                        if (dx >= 0 && dy >= 0 && dy < 256) {
+                            gotit = true;
+                            box = dx;
+                            boy = dy;
+                            bz--;
+                        }
+                        break;
+                    case 0x04:
                         dx = (box * 2) / 3;
-                        dy = (boy + 256) - dx / 2;
-                        if (dy < 256) {
-                            by--;
+                        dy = boy - dx / 2;
+                        if (dy >= 0) {
                             gotit = true;
                             box = dx;
                             boy = dy;
+                            bz--;
                         }
-                    }
+                        break;
+                    default:
+                        break;
                 }
-                if(!gotit && box < 128 && (bx - 1) >= 0) {
-                    cindx--;
-                    if ((mdpoints_[cindx].t & m_fdWalkable) == m_fdWalkable) {
-                        int dx = 0;
-                        int dy = 0;
-                        twd = mtsurfaces_[cindx].twd;
-                        if (twd == 0x01) {
-                            dy = ((boy + 256) * 2) / 3;
-                            dx = (box + 256) - dy / 2;
-                            if (dx < 256 && dy < 256) {
-                                bx--;
-                                by--;
-                                gotit = true;
-                                box = dx;
-                                boy = dy;
-                            }
-                        } else if (twd == 0x04) {
-                            dx = ((box + 256) * 2) / 3;
-                            dy = (boy + 256) - dx / 2;
-                            if (dx < 256 && dy < 256) {
-                                bx--;
-                                by--;
-                                gotit = true;
-                                box = dx;
-                                boy = dy;
-                            }
-                        }
-                    }
-                }
-            }*/
+                
+            }
         }
     } while (bz != 0 && !gotit);
     if (gotit) {

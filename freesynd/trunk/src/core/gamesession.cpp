@@ -378,7 +378,7 @@ int GameSession::updateCountries() {
     int amount = 0;
 
     for (int i=0; i < 50; i++) {
-        // Update country population nulber
+        // Update country population number
         g_Blocks[i].population = getNewPopulation(g_Blocks[i].defPopulation, g_Blocks[i].population);
 
         if (g_Blocks[i].status == BLK_FINISHED) {
