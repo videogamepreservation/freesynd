@@ -196,6 +196,8 @@ public:
         time_showing_anim_ = 0;
     }
     bool leftTimeShowAnim(int t) {
+        if (time_show_anim_ == -1)
+            return true;
         time_showing_anim_ += t;
         return time_show_anim_ > time_showing_anim_;
     }
@@ -247,7 +249,7 @@ protected:
     //! objects direction
     int dir_;
     int dir_last_;
-    //! looped animations, time to show them is set here
+    //! looped animations, time to show them is set here, if = -1 show forever
     int time_show_anim_;
     //! looped animations, playing time
     int time_showing_anim_;
@@ -276,6 +278,12 @@ public:
     void draw(int x, int y);
     bool animate(int elapsed);
     void correctZ();
+    void setDrawAllFrames(bool daf) {
+        if (daf != draw_all_frames_) {
+            draw_all_frames_ = daf;
+            frame_ = 0;
+        }
+    }
 
     typedef enum {
         sfxt_Unknown = 0,
@@ -286,10 +294,17 @@ public:
         sfxt_ExplosionFire = 5,
         sfxt_ExplosionBall = 6,
         sfxt_LargeFire = 7,
+        sfxt_SelArrow = 8,
+        sfxt_AgentFirst = 9,
+        sfxt_AgentSecond = 10,
+        sfxt_AgentThird = 11,
+        sfxt_AgentFourth = 12,
     }SfxTypeEnum;
 protected:
     int anim_;
     bool sfx_life_over_;
+    // to draw all frames or first frame only
+    bool draw_all_frames_;
     int elapsed_left_;
 };
 

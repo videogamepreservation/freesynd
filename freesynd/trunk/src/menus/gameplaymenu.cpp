@@ -285,16 +285,13 @@ void GameplayMenu::handleTick(int elapsed)
     selectable_agents_ = 0;
     for (int i = 0; i < 4; i++) {
         if (mission_->ped(i)) {
-            if(mission_->ped(i)->agentIs() == PedInstance::Agent_Active)
-            {
-                if (mission_->ped(i)->health() > 0) {
-                    selectable_agents_ |= 1 << i;
-                } else {
-                    if ((selected_agents_ & (1 << (i + 4))) != 0 )
-                        selected_agents_ ^= 1 << (i + 4);
-                    if ((selected_agents_ & (1 << i)) != 0 )
-                        selected_agents_ ^= 1 << i;
-                }
+            if (mission_->ped(i)->health() > 0) {
+                selectable_agents_ |= 1 << i;
+            } else {
+                if ((selected_agents_ & (1 << (i + 4))) != 0 )
+                    selected_agents_ ^= 1 << (i + 4);
+                if ((selected_agents_ & (1 << i)) != 0 )
+                    selected_agents_ ^= 1 << i;
             }
         }
     }
@@ -307,6 +304,7 @@ void GameplayMenu::handleTick(int elapsed)
                     break;
             }
     }
+    updtAgentsMarker();
 
     if (change) {
         needRendering();
@@ -396,6 +394,7 @@ void GameplayMenu::handleShow() {
                     break;
             }
 
+        updtAgentsMarker();
         g_System.usePointerCursor();
         g_System.showCursor();
         pressed_btn_select_all_ = false;
@@ -1604,3 +1603,12 @@ void GameplayMenu::selectAllAgents(bool invert) {
         }
     }
 }
+
+void GameplayMenu::updtAgentsMarker()
+{
+    mission_->sfxObjects(4)->setDrawAllFrames(isAgentSelected(0));
+    mission_->sfxObjects(5)->setDrawAllFrames(isAgentSelected(1));
+    mission_->sfxObjects(6)->setDrawAllFrames(isAgentSelected(2));
+    mission_->sfxObjects(7)->setDrawAllFrames(isAgentSelected(3));
+}
+

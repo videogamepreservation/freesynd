@@ -594,6 +594,17 @@ bool Mission::loadLevel(uint8 * levelData)
     }
 #endif
 
+    // adding visual markers(arrow + 1,2,3,4) above our agents
+    // availiable/selected on screen
+    addSfxObject(new SFXObject(-1, SFXObject::sfxt_SelArrow));
+    addSfxObject(new SFXObject(-1, SFXObject::sfxt_SelArrow));
+    addSfxObject(new SFXObject(-1, SFXObject::sfxt_SelArrow));
+    addSfxObject(new SFXObject(-1, SFXObject::sfxt_SelArrow));
+    addSfxObject(new SFXObject(i_map_id_, SFXObject::sfxt_AgentFirst));
+    addSfxObject(new SFXObject(i_map_id_, SFXObject::sfxt_AgentSecond));
+    addSfxObject(new SFXObject(i_map_id_, SFXObject::sfxt_AgentThird));
+    addSfxObject(new SFXObject(i_map_id_, SFXObject::sfxt_AgentFourth));
+
     return true;
 }
 
@@ -694,6 +705,25 @@ void Mission::createFastKeys(int tilex, int tiley, int maxtilex, int maxtiley) {
     fast_statics_cache_.clear();
     fast_sfx_objects_cache_.clear();
 
+    // updating position for visual markers
+    for (unsigned int i = 0; i < 4; i++) {
+        PedInstance *p = peds_[i];
+        if (p->agentIs() == PedInstance::Agent_Active && p->health() > 0) {
+            if (p->tileX() >= tilex && p->tileX() < maxtilex
+                && p->tileY() >= tiley && p->tileY() < maxtiley)
+            {
+                //sfx_objects_[i]->setPosition(p->tileX(), p->tileY(), p->tileZ(),
+                    //p->offX(), p->offY(), p->offZ() + 320);
+                sfx_objects_[i + 4]->setPosition(p->tileX(), p->tileY(),
+                    p->tileZ(), p->offX() - 16, p->offY(), p->offZ() + 256);
+            }
+        } else {
+            //sfx_objects_[i]->setMap(-1);
+            sfx_objects_[i + 4]->setMap(-1);
+        }
+    }
+        
+
     // vehicles
     for (unsigned int i = 0; i < vehicles_.size(); i++) {
         VehicleInstance *v = vehicles_[i];
@@ -734,13 +764,11 @@ void Mission::createFastKeys(int tilex, int tiley, int maxtilex, int maxtiley) {
     // weapons
     for (unsigned int i = 0; i < weapons_.size(); i++) {
         WeaponInstance *w = weapons_[i];
-        if (w->map() != -1) {
-            if (w->tileX() >= tilex && w->tileX() < maxtilex
-                && w->tileY() >= tiley && w->tileY() < maxtiley)
-            {
-                fast_weapon_cache_.insert(fastKey(w));
-                cache_weapons_.push_back(w);
-            }
+        if (w->map() != -1 && w->tileX() >= tilex && w->tileX() < maxtilex
+            && w->tileY() >= tiley && w->tileY() < maxtiley)
+        {
+            fast_weapon_cache_.insert(fastKey(w));
+            cache_weapons_.push_back(w);
         }
     }
 
@@ -758,7 +786,7 @@ void Mission::createFastKeys(int tilex, int tiley, int maxtilex, int maxtiley) {
     // sfx objects
     for (unsigned int i = 0; i < sfx_objects_.size(); i++) {
         SFXObject *so = sfx_objects_[i];
-        if (so->tileX() >= tilex && so->tileX() < maxtilex
+        if (so->map() != -1 && so->tileX() >= tilex && so->tileX() < maxtilex
             && so->tileY() >= tiley && so->tileY() < maxtiley)
         {
             fast_sfx_objects_cache_.insert(fastKey(so));

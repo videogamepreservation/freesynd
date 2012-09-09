@@ -417,7 +417,7 @@ void MapObject::offzOnStairs(uint8 twd) {
 }
 
 SFXObject::SFXObject(int m, int type, int t_show) : MapObject(m),
-    sfx_life_over_(false), elapsed_left_(0)
+    sfx_life_over_(false), draw_all_frames_(true), elapsed_left_(0)
 {
     main_type_ = type;
     setTimeShowAnim(0);
@@ -452,6 +452,31 @@ SFXObject::SFXObject(int m, int type, int t_show) : MapObject(m),
             anim_ = 243;
             setTimeShowAnim(3000 + t_show);
             break;
+        case SFXObject::sfxt_SelArrow:
+            anim_ = 601;
+            time_show_anim_ = -1;
+            setFramesPerSec(6);
+            break;
+        case SFXObject::sfxt_AgentFirst:
+            anim_ = 1951;
+            time_show_anim_ = -1;
+            setFramesPerSec(6);
+            break;
+        case SFXObject::sfxt_AgentSecond:
+            anim_ = 1952;
+            time_show_anim_ = -1;
+            setFramesPerSec(6);
+            break;
+        case SFXObject::sfxt_AgentThird:
+            anim_ = 1953;
+            time_show_anim_ = -1;
+            setFramesPerSec(6);
+            break;
+        case SFXObject::sfxt_AgentFourth:
+            anim_ = 1954;
+            time_show_anim_ = -1;
+            setFramesPerSec(6);
+            break;
     }
 }
 
@@ -463,7 +488,7 @@ void SFXObject::draw(int x, int y) {
 bool SFXObject::animate(int elapsed) {
 
     if (is_frame_drawn_) {
-        bool changed = MapObject::animate(elapsed);
+        bool changed = draw_all_frames_ ? MapObject::animate(elapsed) : false;
         if (main_type_ == SFXObject::sfxt_ExplosionBall) {
             int z = tile_z_ * 128 + off_z_;
             // 250 per sec

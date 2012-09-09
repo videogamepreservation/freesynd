@@ -60,11 +60,13 @@ protected:
     void improveScroll(int &newScrollX, int &newScrollY);
     int selectedAgentsCount();
     void selectAgent(unsigned int agentNo, bool addToGroup);
-    void selectAllAgents(bool invert=false);
+    void selectAllAgents(bool invert = false);
 
     bool isAgentSelected(unsigned int agentNo) {
         return (selected_agents_ & (1 << agentNo)) != 0;
     }
+    //! updates visual markers for our agents
+    void updtAgentsMarker();
 
     void stopShootingEvent(void);
 
