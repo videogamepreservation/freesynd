@@ -46,25 +46,31 @@ Tile::~Tile()
 bool Tile::drawTo(uint8 * screen, int swidth, int sheight, int x, int y,
                   bool clear)
 {
-    if (b_all_alpha_)
-        return false;
+    //if (b_all_alpha_)
+        //return false;
 
     if (clear)
         memset(screen, 255, swidth * sheight);
 
-    for (int j = 0; j < TILE_HEIGHT; j++) {
-        if (y + j < 0)
-            continue;
-        if (y + j >= sheight)
-            break;
-        for (int i = 0; i < TILE_WIDTH; i++) {
-            if (x + i < 0)
-                continue;
-            if (x + i >= swidth)
-                break;
-            uint8 c = a_pixels_[(TILE_HEIGHT - j - 1) * TILE_WIDTH + i];
+    int ilow = x < 0 ? -x : 0;
+    int ihigh = x + TILE_WIDTH >= swidth
+        ? TILE_WIDTH - (x + TILE_WIDTH - swidth) : TILE_WIDTH;
+    int jhigh = y + TILE_HEIGHT >= sheight
+        ? TILE_HEIGHT - (y + TILE_HEIGHT - sheight) : TILE_HEIGHT;
+
+    uint8 *ptr_a_pixels = a_pixels_ + (TILE_HEIGHT - 1) * TILE_WIDTH + ilow;
+    uint8 *ptr_screen = screen + y * swidth + x + ilow;
+    for (int j = y < 0 ? -y : 0; j < jhigh; j++)
+    {
+        uint8 *cp_ptr_a_pixels = ptr_a_pixels;
+        ptr_a_pixels -= TILE_WIDTH;
+        uint8 *cp_ptr_screen = ptr_screen;
+        ptr_screen += swidth;
+        for (int i = ilow; i < ihigh; i++) {
+            uint8 c = *cp_ptr_a_pixels++;
             if (c != 255)
-                screen[(y + j) * swidth + x + i] = c;
+                *cp_ptr_screen = c;
+            cp_ptr_screen++;
         }
     }
 

@@ -63,12 +63,7 @@ inline int ceil8(int v) {
     if (v <= 0)
         return 0;
 
-    int t = 0;
-
-    while (t < v)
-        t += 8;
-
-    return t;
+    return v % 8 ? ((v / 8) + 1) * 8: v;
 }
 
 inline uint16 READ_LE_UINT16(const uint8 *data) {

@@ -60,7 +60,17 @@ void Screen::clear(uint8 color)
     memset(pixels_, color, width_ * height_);
     dirty_ = true;
 }
-
+/*!
+ * Blits data to screen
+ * @param x position by x coord
+ * @param y position by y coord
+ * @param width data's width
+ * @param height data's height
+ * @param pixeldata pointer to data to be blitted
+ * @param flipped draw flipped
+ * @param stride actual data width (Sprite class related)
+ * @sa sprite.h
+ */
 void Screen::blit(int x, int y, int width, int height,
                   const uint8 * pixeldata, bool flipped, int stride)
 {
@@ -78,24 +88,40 @@ void Screen::blit(int x, int y, int width, int height,
         ? y + height : y + height > height_ ? height_ - y : height;
 
     stride = (stride == 0 ? width : stride);
-    int ofs = flipped ? w - 1 : 0;
-    int inc = flipped ? -1 : 1;
+    int ofs = (flipped ? w - 1 : 0) + clipped_x;
+    uint8 *d = pixels_ + clipped_y * width_ + ofs;
 
-    for (int j = 0; j < h; ++j) {
-        uint8 *d = pixels_ + (clipped_y + j) * width_ + clipped_x + ofs;
-        const uint8 *s;
-        if(flipped)
-            s = pixeldata + (sy + j) * stride + sx + (width-w);
-        else
-            s = pixeldata + (sy + j) * stride + sx;
+    if (flipped) {
+        const uint8 *s = pixeldata + sy * stride + sx + (width - w);
+        for (int j = 0; j < h; ++j) {
 
-        for (int i = 0; i < w; ++i) {
-            uint8 c = *s++;
+            const uint8 *cp_s = s;
+            s += stride;
+            uint8 *cp_d = d;
+            d += width_;
+            for (int i = 0; i < w; ++i) {
+                uint8 c = *cp_s++;
 
-            if (c != 255)
-                *d = c;
+                if (c != 255)
+                    *cp_d = c;
+                cp_d--;
+            }
+        }
+    } else {
+        const uint8 *s = pixeldata + sy * stride + sx;
+        for (int j = 0; j < h; ++j) {
 
-            d += inc;
+            const uint8 *cp_s = s;
+            s += stride;
+            uint8 *cp_d = d;
+            d += width_;
+            for (int i = 0; i < w; ++i) {
+                uint8 c = *cp_s++;
+
+                if (c != 255)
+                    *cp_d = c;
+                cp_d++;
+            }
         }
     }
 
@@ -119,24 +145,40 @@ void Screen::blitRect(int x, int y, int width, int height,
         ? y + height : y + height > height_ ? height_ - y : height;
 
     stride = (stride == 0 ? width : stride);
-    int ofs = flipped ? clipped_w - 1 : 0;
-    int inc = flipped ? -1 : 1;
+    int ofs = (flipped ? clipped_w - 1 : 0) + dest_x;
+    uint8 *d = pixels_ + dest_y * width_ + ofs;
 
-    for (int j = 0; j < clipped_h; ++j) {
-        uint8 *d = pixels_ + (dest_y + j) * width_ + dest_x + ofs;
-        const uint8 *s;
-        if(flipped)
-            s = pixeldata + (y + j) * stride + x + (width- clipped_w);
-        else
-            s = pixeldata + (y + j) * stride + x;
+    if (flipped) {
+        const uint8 *s = pixeldata + y * stride + x + (width - clipped_w);
+        for (int j = 0; j < clipped_h; ++j) {
 
-        for (int i = 0; i < clipped_w; ++i) {
-            uint8 c = *s++;
+            const uint8 *cp_s = s;
+            s += stride;
+            uint8 *cp_d = d;
+            d += width_;
+            for (int i = 0; i < clipped_w; ++i) {
+                uint8 c = *cp_s++;
 
-            if (c != 255)
-                *d = c;
+                if (c != 255)
+                    *cp_d = c;
+                cp_d--;
+            }
+        }
+    } else {
+        const uint8 *s = pixeldata + y * stride + x;
+        for (int j = 0; j < clipped_h; ++j) {
 
-            d += inc;
+            const uint8 *cp_s = s;
+            s += stride;
+            uint8 *cp_d = d;
+            d += width_;
+            for (int i = 0; i < clipped_w; ++i) {
+                uint8 c = *cp_s++;
+
+                if (c != 255)
+                    *cp_d = c;
+                cp_d++;
+            }
         }
     }
 
@@ -294,8 +336,16 @@ void Screen::drawRect(int x, int y, int width, int height, uint8 color)
     if (x < 0 || y < 0 || (x + width) > width_
         || (y + height) > height_ || width <= 0 || height <= 0)
         return;
-    for( int i = 0; i != height; i++) {
-        memset(pixels_ + x + width_ * (y + i), color, width);
+    if (width > 32) {
+        for (int i = 0; i != height; i++) {
+            memset(pixels_ + x + width_ * (y + i), color, width);
+        }
+    } else {
+        for (int i = 0; i != height; i++) {
+            uint8 *p_pixels = pixels_ + x + width_ * (y + i);
+            for (int w = 0; w != width; w++)
+                *p_pixels++ = color;
+        }
     }
     dirty_ = true;
 }

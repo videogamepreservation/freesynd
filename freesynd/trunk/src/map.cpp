@@ -213,7 +213,8 @@ void Map::draw(int scrollX, int scrollY, MapHelper * helper)
 
 #ifdef EXECUTION_SPEED_TIME
     printf("---------------------------");
-    printf("start time %i.%i\n", SDL_GetTicks()/1000, SDL_GetTicks()%1000);
+    int measure_ticks = SDL_GetTicks();
+    printf("start time %i.%i\n", measure_ticks/1000, measure_ticks%1000);
 #endif
 
     helper->createFastKeys(sw, sh, swm, shm);
@@ -284,7 +285,9 @@ void Map::draw(int scrollX, int scrollY, MapHelper * helper)
 
 #ifdef EXECUTION_SPEED_TIME
     printf("+++++++++++++++++++++++++++");
-    printf("end time %i.%i\n", SDL_GetTicks()/1000, SDL_GetTicks()%1000);
+    int measure_ticks_end = SDL_GetTicks();
+    printf("end time %i.%i,%i\n", measure_ticks_end/1000, measure_ticks_end%1000,
+        measure_ticks_end - measure_ticks);
 #endif
 
 }

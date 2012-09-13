@@ -37,6 +37,10 @@ class Sprite {
 
     int width_;
     int height_;
+    /*!
+     * sprite width_, but adjusted to be divisible by 8 without remainder
+     * (boundary of 8)
+     */
     int stride_;
     uint8 *sprite_data_;
 
