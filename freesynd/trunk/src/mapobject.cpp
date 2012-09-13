@@ -460,22 +460,22 @@ SFXObject::SFXObject(int m, int type, int t_show) : MapObject(m),
         case SFXObject::sfxt_AgentFirst:
             anim_ = 1951;
             time_show_anim_ = -1;
-            setFramesPerSec(6);
+            setFramesPerSec(4);
             break;
         case SFXObject::sfxt_AgentSecond:
             anim_ = 1952;
             time_show_anim_ = -1;
-            setFramesPerSec(6);
+            setFramesPerSec(4);
             break;
         case SFXObject::sfxt_AgentThird:
             anim_ = 1953;
             time_show_anim_ = -1;
-            setFramesPerSec(6);
+            setFramesPerSec(4);
             break;
         case SFXObject::sfxt_AgentFourth:
             anim_ = 1954;
             time_show_anim_ = -1;
-            setFramesPerSec(6);
+            setFramesPerSec(4);
             break;
     }
 }

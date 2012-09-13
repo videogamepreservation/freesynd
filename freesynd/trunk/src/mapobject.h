@@ -184,6 +184,9 @@ public:
     }
 
     void setFrame(int frame) { frame_ = frame;}
+    void setFrameFromObject(MapObject *m) {
+        frame_ = m->frame_;
+    }
 
     void setDirection(int dir);
     void setDirection(int posx, int posy, int * dir = NULL);

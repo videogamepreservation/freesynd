@@ -1606,9 +1606,34 @@ void GameplayMenu::selectAllAgents(bool invert) {
 
 void GameplayMenu::updtAgentsMarker()
 {
+    // used to correct frame drawn, all frame will be same
+    MapObject *m_correction = NULL;
     mission_->sfxObjects(4)->setDrawAllFrames(isAgentSelected(0));
+    if (isAgentSelected(0))
+        m_correction = mission_->sfxObjects(4);
+
     mission_->sfxObjects(5)->setDrawAllFrames(isAgentSelected(1));
+    if (isAgentSelected(1)) {
+        if (m_correction)
+            mission_->sfxObjects(5)->setFrameFromObject(m_correction);
+        else
+            m_correction = mission_->sfxObjects(5);
+    }
+
     mission_->sfxObjects(6)->setDrawAllFrames(isAgentSelected(2));
+    if (isAgentSelected(2)) {
+        if (m_correction)
+            mission_->sfxObjects(6)->setFrameFromObject(m_correction);
+        else
+            m_correction = mission_->sfxObjects(6);
+    }
+
     mission_->sfxObjects(7)->setDrawAllFrames(isAgentSelected(3));
+    if (isAgentSelected(3)) {
+        if (m_correction)
+            mission_->sfxObjects(7)->setFrameFromObject(m_correction);
+        else
+            m_correction = mission_->sfxObjects(7);
+    }
 }
 
