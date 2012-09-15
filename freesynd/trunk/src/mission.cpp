@@ -222,6 +222,9 @@ bool Mission::loadLevel(uint8 * levelData)
                 p->addEnemyGroupDef(3);
                 p->setHostileDesc(PedInstance::pd_smArmed);
                 p->setSightRange(7 * 256);
+                // not in all missions our agents health is 16, this fixes it
+                p->setHealth(16);
+                p->setStartHealth(16);
             } else if (i > 7) {
                 unsigned int mt = p->getMainType() << 8;
                 if (mt == PedInstance::og_dmAgent) {

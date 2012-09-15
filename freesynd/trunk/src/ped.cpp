@@ -308,13 +308,12 @@ void PedInstance::setActionStateToDrawnAnim(void) {
 bool PedInstance::animate(int elapsed, Mission *mission) {
     // TODO: proper handling for exclusive states, switching;
     // TODO: animation and state binding, finished animation=state complete?
+    // pickup/putdown, firing
 
     if (agent_is_ == PedInstance::Agent_Non_Active)
         return false;
 
     bool updated = false;
-    //Weapon::WeaponAnimIndex weapon_idx =
-        //selectedWeapon() ? selectedWeapon()->index() : Weapon::Unarmed_Anim;
     if (actions_property_ == 1) {
         dropActQ();
         actions_property_ = 0;
@@ -347,7 +346,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
 #endif
     } else {
         friends_not_seen_.clear();
-        // TODO: xor finished and failed, should all actions will
+        // TODO: xor finished and failed, should all actions
         // have execution time set?
         uint32 groups_processed = 0;
         for (std::vector <actionQueueGroupType>::iterator it =
@@ -1445,7 +1444,7 @@ void PedInstance::draw(int x, int y) {
     addOffs(x, y);
 
     // ensure on map
-    if (x < 129 || y < 0 || map_ == -1)
+    if (x < 119 || y < 0 || map_ == -1)
         return;
 
     switch(drawnAnim()){

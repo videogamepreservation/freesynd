@@ -208,7 +208,7 @@ Weapon * WeaponManager::loadWeapon(Weapon::WeaponType wt) {
             pWeapon = new Weapon(g_App.menus().getMessage("WEAPON_UZI"),
         18, 68, 750, 50, 1792, 2, 5, 371,
         Weapon::Uzi_Anim, snd::UZI, Weapon::Uzi, MapObject::dmg_Bullet, 1,
-        150, 120, Weapon::wspt_Uzi, SFXObject::sfxt_BulletHit,
+        150, 100, Weapon::wspt_Uzi, SFXObject::sfxt_BulletHit,
         SFXObject::sfxt_BulletHit, SFXObject::sfxt_Unknown,
         SFXObject::sfxt_Unknown, 0, 20.0, 0.7, 0, 2);
             break;
