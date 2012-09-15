@@ -503,7 +503,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                             // if not the one in weapon.desc select it,
                             // check owner
                             // TODO: if object can't see target and none of
-                            // friendly units can see it  we should fail,
+                            // friendly units can see it we should fail,
                             // use check from findenemy?
                             WeaponInstance *wi = selectedWeapon();
                             if (!wi)
@@ -2425,19 +2425,11 @@ void PedInstance::createActQFindEnemy(actionQueueGroupType &as) {
     aq.ot_execute = PedInstance::ai_aFindEnemy;
     as.actions.push_back(aq);
     // TODO: use createActQFiring(when completed) instead
-    aq.as = PedInstance::pa_smFiring;
-    aq.group_desc = PedInstance::gd_mFire;
-    aq.state = 65;
-    aq.ot_execute = PedInstance::ai_aDestroyObject;
-    aq.ot_execute |= PedInstance::ai_aWait;
-    aq.multi_var.time_var.elapsed = 0;
-    aq.multi_var.time_var.time_total = 125;
-    aq.multi_var.enemy_var.make_shots = 0;
-    aq.multi_var.enemy_var.shots_done = 0;
-    aq.multi_var.enemy_var.weapon.desc = 4;
-    aq.multi_var.enemy_var.weapon.wpn.dmg_type = MapObject::dmg_Physical;
-    aq.multi_var.enemy_var.forced_shot = false;
-    as.actions.push_back(aq);
+    pedWeaponToUse pw_to_use;
+    pw_to_use.desc = 4;
+    pw_to_use.wpn.dmg_type = MapObject::dmg_Physical;
+    createActQFiring(as, NULL, NULL, false, 0, &pw_to_use);
+    as.actions.back().state |= 64;
     createActQFollowing(as, NULL, 1);
     as.actions.back().state |= 64;
 }

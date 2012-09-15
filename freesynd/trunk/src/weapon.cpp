@@ -442,6 +442,8 @@ bool ProjectileShot::animate(int elapsed, Mission *m) {
             draw_impact = true;
             self_remove = true;
         }
+    } else if (block_mask == 32) {
+        self_remove = true;
     } else {
         reached_pos.x = pn.tileX() * 256 + pn.offX();
         reached_pos.y = pn.tileY() * 256 + pn.offY();
@@ -636,7 +638,7 @@ uint16 WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
         cp.z = owner_->tileZ() * 128 + owner_->offZ()
             + (owner_->sizeZ() >> 1);
         if (cp.z > (m->mmax_z_ - 1) * 128)
-            cp.z = (m->mmax_z_ - 1) * 128;
+            return 128;
         if (m->isTileSolid(cp.x / 256, cp.y / 256, cp.z / 128, cp.x % 256,
             cp.y % 256, cp.z % 128))
             return 256;
@@ -686,7 +688,7 @@ uint16 WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
     uint8 has_blocker = 1;
     if (tobj || tp)
         has_blocker = inRange(cp, &smp, &pn);
-    if ((has_blocker & 30) != 0) {
+    if ((has_blocker & 62) != 0) {
         if (!ignoreBlocker) {
             if (make_shots)
                 *make_shots = 0;
@@ -696,7 +698,8 @@ uint16 WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
                 has_blocker = 32;
             else if ((has_blocker & 8) != 0)
                 has_blocker = 64;
-            return has_blocker;
+            // if has_blocker == 32
+            return 64;
         }
     }
 
@@ -1194,7 +1197,8 @@ void ShotClass::makeShot(bool rangeChecked, toDefineXYZ &cp, int anim_hit,
                     m->addSfxObject(so);
                 }
             }
-        }
+        } else if (has_blocker == 32)
+            return;
     }
 }
 
@@ -1347,11 +1351,13 @@ void ShotClass::rangeDamageAnim(toDefineXYZ &cp, double dmg_rng,
         PathNode pn = PathNode(target_pos.x / 256, target_pos.y / 256,
             target_pos.z / 128, target_pos.x % 256,
             target_pos.y % 256, target_pos.z % 128);
-        m->inRangeCPos(&cp, NULL, &pn, true, true, dmg_rng);
-        SFXObject *so = new SFXObject(m->map(), rngdamg_anim,
-                           100 * (rand() % 16));
-        so->setPosition(pn.tileX(), pn.tileY(), pn.tileZ(),
-                        pn.offX(), pn.offY(), pn.offZ());
-        m->addSfxObject(so);
+        uint8 block_mask = m->inRangeCPos(&cp, NULL, &pn, true, true, dmg_rng);
+        if (block_mask != 32) {
+            SFXObject *so = new SFXObject(m->map(), rngdamg_anim,
+                            100 * (rand() % 16));
+            so->setPosition(pn.tileX(), pn.tileY(), pn.tileZ(),
+                            pn.offX(), pn.offY(), pn.offZ());
+            m->addSfxObject(so);
+        }
     }
 }

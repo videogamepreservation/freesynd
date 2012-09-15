@@ -636,17 +636,29 @@ void GameplayMenu::handleMouseMotion(int x, int y, int state, const int modKeys)
                 world_y_ + y, oy);
         for (int i = 0; i < 4; i++) {
             if (shooting_events_.agents_shooting[i]) {
-              // TODO: use objects position instead of pointer
                 PedInstance * pa = mission_->ped(i);
+                PathNode *pn = NULL;
                 if (pointing_at_ped_ != -1) {
-                    pa->updtActGFiring(shooting_events_.ids[i], NULL,
-                        mission_->ped(pointing_at_ped_));
+                    MapObject *m = mission_->ped(pointing_at_ped_);
+                    int tilez = m->tileZ() * 128 + m->offZ() + (m->sizeZ() >> 1);
+                    int offz = tilez % 128;
+                    tilez /= 128;
+                    pn = new PathNode(m->tileX(), m->tileY(), tilez,
+                        m->offX(), m->offY(), offz);
                 } else if (pointing_at_vehicle_ != -1) {
-                    pa->updtActGFiring(shooting_events_.ids[i], NULL,
-                        mission_->vehicle(pointing_at_vehicle_));
+                    MapObject *m = mission_->vehicle(pointing_at_vehicle_);
+                    int tilez = m->tileZ() * 128 + m->offZ() + (m->sizeZ() >> 1);
+                    int offz = tilez % 128;
+                    tilez /= 128;
+                    pn = new PathNode(m->tileX(), m->tileY(), tilez,
+                        m->offX(), m->offY(), offz);
                 } else if (pointing_at_weapon_ != -1) {
-                    pa->updtActGFiring(shooting_events_.ids[i], NULL,
-                        mission_->weapon(pointing_at_weapon_));
+                    MapObject *m = mission_->weapon(pointing_at_weapon_);
+                    int tilez = m->tileZ() * 128 + m->offZ() + (m->sizeZ() >> 1);
+                    int offz = tilez % 128;
+                    tilez /= 128;
+                    pn = new PathNode(m->tileX(), m->tileY(), tilez,
+                        m->offX(), m->offY(), offz);
                 } else {
                     int stx = tx;
                     int sty = ty;
@@ -657,9 +669,7 @@ void GameplayMenu::handleMouseMotion(int x, int y, int state, const int modKeys)
                     if (mission_->getShootableTile(stx, sty, stz,
                         sox, soy, oz))
                     {
-                        PathNode pn(stx, sty, stz, sox, soy, oz);
-                        pa->updtActGFiring(shooting_events_.ids[i], &pn,
-                           NULL);
+                        pn = new PathNode(stx, sty, stz, sox, soy, oz);
 #if 0
                         printf("shooting at\n x = %i, y=%i, z=%i\n",
                             stx, sty, stz);
@@ -667,6 +677,11 @@ void GameplayMenu::handleMouseMotion(int x, int y, int state, const int modKeys)
                             sox, soy, oz);
 #endif
                     }
+                }
+                if (pn) {
+                    pa->updtActGFiring(shooting_events_.ids[i], pn,
+                        NULL);
+                    delete pn;
                 }
             }
         }
@@ -870,56 +885,33 @@ bool GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
                     world_y_ + y, oy);
             for (int i = 0; i < 4; i++) {
                 if (isAgentSelected(i)) {
-                  // TODO: use objects position instead of pointer
                     PedInstance * pa = mission_->ped(i);
+                    PathNode *pn = NULL;
+                    PedInstance::actionQueueGroupType as;
+                    as.main_act = 0;
+                    as.group_desc = PedInstance::gd_mFire;
+                    as.origin_desc = 4;
                     if (pointing_at_ped_ != -1) {
-                        PedInstance::actionQueueGroupType as;
-                        as.main_act = 0;
-                        as.group_desc = PedInstance::gd_mFire;
-                        as.origin_desc = 4;
-                        if (pa->createActQFiring(as, NULL,
-                            mission_->ped(pointing_at_ped_), true))
-                        {
-                            if (modKeys & KMD_CTRL)
-                                pa->addActQToQueue(as);
-                            else {
-                                shooting_events_.agents_shooting[i] = true;
-                                shooting_events_.shooting_ = true;
-                                pa->setActQInQueue(as, &shooting_events_.ids[i]);
-                            }
-                        }
+                        MapObject *m = mission_->ped(pointing_at_ped_);
+                        int tilez = m->tileZ() * 128 + m->offZ() + (m->sizeZ() >> 1);
+                        int offz = tilez % 128;
+                        tilez /= 128;
+                        pn = new PathNode(m->tileX(), m->tileY(), tilez,
+                            m->offX(), m->offY(), offz);
                     } else if (pointing_at_vehicle_ != -1) {
-                        PedInstance::actionQueueGroupType as;
-                        as.main_act = 0;
-                        as.group_desc = PedInstance::gd_mFire;
-                        as.origin_desc = 4;
-                        if (pa->createActQFiring(as, NULL,
-                            mission_->vehicle(pointing_at_vehicle_), true))
-                        {
-                            if (modKeys & KMD_CTRL)
-                                pa->addActQToQueue(as);
-                            else {
-                                shooting_events_.agents_shooting[i] = true;
-                                shooting_events_.shooting_ = true;
-                                pa->setActQInQueue(as, &shooting_events_.ids[i]);
-                            }
-                        }
+                        MapObject *m = mission_->vehicle(pointing_at_vehicle_);
+                        int tilez = m->tileZ() * 128 + m->offZ() + (m->sizeZ() >> 1);
+                        int offz = tilez % 128;
+                        tilez /= 128;
+                        pn = new PathNode(m->tileX(), m->tileY(), tilez,
+                            m->offX(), m->offY(), offz);
                     } else if (pointing_at_weapon_ != -1) {
-                        PedInstance::actionQueueGroupType as;
-                        as.main_act = 0;
-                        as.group_desc = PedInstance::gd_mFire;
-                        as.origin_desc = 4;
-                        if (pa->createActQFiring(as, NULL,
-                            mission_->weapon(pointing_at_weapon_), true))
-                        {
-                            if (modKeys & KMD_CTRL)
-                                pa->addActQToQueue(as);
-                            else {
-                                shooting_events_.agents_shooting[i] = true;
-                                shooting_events_.shooting_ = true;
-                                pa->setActQInQueue(as, &shooting_events_.ids[i]);
-                            }
-                        }
+                        MapObject *m = mission_->weapon(pointing_at_weapon_);
+                        int tilez = m->tileZ() * 128 + m->offZ() + (m->sizeZ() >> 1);
+                        int offz = tilez % 128;
+                        tilez /= 128;
+                        pn = new PathNode(m->tileX(), m->tileY(), tilez,
+                            m->offX(), m->offY(), offz);
                     } else {
                         int stx = tx;
                         int sty = ty;
@@ -930,29 +922,28 @@ bool GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
                         if (mission_->getShootableTile(stx, sty, stz,
                             sox, soy, oz))
                         {
-                            PathNode pn(stx, sty, stz, sox, soy, oz);
+                            pn = new PathNode(stx, sty, stz, sox, soy, oz);
 #if 0
                             printf("shooting at\n x = %i, y=%i, z=%i\n",
                                    stx, sty, stz);
                             printf("shooting pos\n ox = %i, oy=%i, oz=%i\n",
                                    sox, soy, oz);
 #endif
-                            PedInstance::actionQueueGroupType as;
-                            as.main_act = 0;
-                            as.group_desc = PedInstance::gd_mFire;
-                            as.origin_desc = 4;
-                            if (modKeys & KMD_CTRL) {
-                                if (pa->createActQFiring(as, &pn, NULL, true))
-                                    pa->addActQToQueue(as);
-                            } else {
-                                if (pa->createActQFiring(as, &pn, NULL, true))
-                                {
-                                    shooting_events_.agents_shooting[i] = true;
-                                    shooting_events_.shooting_ = true;
-                                    pa->setActQInQueue(as, &shooting_events_.ids[i]);
-                                }
+                        }
+                    }
+                    if (pn) {
+                        if (modKeys & KMD_CTRL) {
+                            if (pa->createActQFiring(as, pn, NULL, true))
+                                pa->addActQToQueue(as);
+                        } else {
+                            if (pa->createActQFiring(as, pn, NULL, true))
+                            {
+                                shooting_events_.agents_shooting[i] = true;
+                                shooting_events_.shooting_ = true;
+                                pa->setActQInQueue(as, &shooting_events_.ids[i]);
                             }
                         }
+                        delete pn;
                     }
                 }
             }

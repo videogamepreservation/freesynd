@@ -3371,7 +3371,7 @@ void Mission::blockerExists(toDefineXYZ * startXYZ, toDefineXYZ * endXYZ,
 * \return mask where bits are:
 * 0b - target in range(1); 1b - blocker is object, "t" is set(2)
 * 2b - blocker object, "pn" is set(4), 3b - reachable point set,
-* 4b - blocker tile, "pn" is set(16)
+* 4b - blocker tile, "pn" is set(16), 5b - out of visible reach(32)
 * NOTE: only if "pn" or "t" are not null, variables are set
 */
 uint8 Mission::inRangeCPos(toDefineXYZ * cp, ShootableMapObject ** t,
@@ -3383,7 +3383,8 @@ uint8 Mission::inRangeCPos(toDefineXYZ * cp, ShootableMapObject ** t,
     int cx = (*cp).x;
     int cy = (*cp).y;
     int cz = (*cp).z;
-    assert(cz <= (mmax_z_ - 1) * 128);
+    if (cz > (mmax_z_ - 1) * 128)
+        return 32;
     int tx = 0;
     int ty = 0;
     int tz = 0;
@@ -3397,7 +3398,7 @@ uint8 Mission::inRangeCPos(toDefineXYZ * cp, ShootableMapObject ** t,
         tz = pn->tileZ() * 128 + pn->offZ();
     }
     if (tz > (mmax_z_ - 1) * 128)
-        tz = (mmax_z_ - 1) * 128;
+        return 32;
 
     double d = 0;
     d = sqrt((double)((tx - cx) * (tx - cx) + (ty - cy) * (ty - cy)
