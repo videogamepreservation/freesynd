@@ -940,11 +940,11 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                         verifyHostilesFound(mission);
 
                     Msmod_t smo_dist;
+                    WeaponInstance *wi = selectedWeapon();
                     if (hostiles_found_.empty()) {
                         // TODO: check for weapons, set the largest shooting
                         // range? not only selected, all?
                         int shot_rng = 0;
-                        WeaponInstance *wi = selectedWeapon();
                         if (wi && wi->doesPhysicalDmg() && wi->canShoot())
                             shot_rng = wi->range();
                         int view_rng = sight_range_;
@@ -980,7 +980,11 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                                             // needs this checking as list might
                                             // become invalidated by other
                                             // peds actions
-                                            if (checkHostileIs(smo)) {
+                                            // TODO : add unavailiable to vehicle
+                                            // use like pa_smCheckExcluded
+                                            if (smo->health() > 0
+                                                && checkHostileIs(smo))
+                                            {
                                                 // TODO: inrange check here might
                                                 // reduce speed, check
                                                 // TODO: reduce inrange calls, later
@@ -1099,11 +1103,12 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                         // enabling destroyobject action
                         aqt_attack.state ^= 64;
                         it->main_act++;
+                        // showing a gun if none selected
+                        if (!wi)
+                            selectBestWeapon();
                         if (obj_group_def_ == og_dmPolice) {
                             aqt_attack.ot_execute |= PedInstance::ai_aWaitToStart;
                             aqt_attack.multi_var.time_var.time_before_start = 5000;
-                            // showing a gun
-                            selectBestWeapon();
                             g_App.gameSounds().play(snd::PUTDOWN_WEAPON);
                             // enableing following behavior
                             actionQueueType & aqt_follow = it->actions[indx + 2];
