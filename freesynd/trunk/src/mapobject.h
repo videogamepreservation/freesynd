@@ -386,6 +386,12 @@ public:
         speed_ = 0;
     }
 
+    //! checks whether final destination is same as pn
+    bool checkFinalDest(PathNode& pn);
+    bool isMoving() { return dest_path_.size() != 0/* && speed_ != 0*/;}
+    //! checks whether current position is same as pn
+    bool checkCurrPos(PathNode &pn);
+
     FreeWay hold_on_;
 
 protected:

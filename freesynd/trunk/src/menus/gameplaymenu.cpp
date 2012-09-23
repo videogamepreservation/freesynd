@@ -829,15 +829,16 @@ bool GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
                             sty = ty * 256 + oy + 128 * (ped->inVehicle()->tileZ() - 1);
                             //soy = sty % 256;
                             sty = sty / 256;
-                            if (modKeys & KMD_CTRL) {
-                                ped->inVehicle()->
-                                    addDestinationV(stx, sty, 0,
-                                    128, 128, 1024);
-                            } else {
-                                ped->inVehicle()->
-                                    setDestinationV(mission_, stx, sty, 0, 
-                                    128, 128, 1024);
-                            }
+                            PedInstance::actionQueueGroupType as;
+                            PathNode tpn = PathNode(stx, sty, 0, 128, 128);
+                            ped->createActQUsingCar(as, &tpn, ped->inVehicle());
+                            as.main_act = as.actions.size() - 1;
+                            as.group_desc = PedInstance::gd_mStandWalk;
+                            as.origin_desc = 4;
+                            if (modKeys & KMD_CTRL)
+                                ped->addActQToQueue(as);
+                            else
+                                ped->setActQInQueue(as);
                         }
                     } else {
                         int stx = tx;

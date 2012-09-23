@@ -298,6 +298,8 @@ void PedInstance::setActionStateToDrawnAnim(void) {
         setDrawnAnim(PedInstance::ad_PickupAnim);
     } else if ((state_ & pa_smPutDown) != 0) {
         setDrawnAnim(PedInstance::ad_PutdownAnim);
+    } else if ((state_ & (pa_smUsingCar | pa_smInCar)) != 0) {
+        setDrawnAnim(PedInstance::ad_StandAnim);
     }
 #ifdef _DEBUG
     if (state_ ==  pa_smNone)
@@ -389,6 +391,56 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                         elapsed = aqt.multi_var.time_var.elapsed
                             - aqt.multi_var.time_var.time_before_start;
                         aqt.multi_var.time_var.elapsed = 0;
+                    }
+                }
+                if ((aqt.ot_execute & PedInstance::ai_aUseObject) != 0)
+                {
+                    if (aqt.t_smo->health() <= 0 
+                        || (state_ & (PedInstance::pa_smInCar
+                        | PedInstance::pa_smUsingCar)) == 0
+                        || !((VehicleInstance *)aqt.t_smo)->isInsideVehicle(this))
+                    {
+                        aqt.state |= 8;
+                    } else {
+                        VehicleInstance *v = (VehicleInstance *)aqt.t_smo;
+                        if (aqt.state == 1) {
+                            if (aqt.condition == 0) {
+                                if (checkCurrPos(aqt.t_pn))
+                                    aqt.state |= 4;
+                                else {
+                                    // TODO: if vehicle has no driver take his position
+                                    if ((state_ & PedInstance::pa_smUsingCar) != 0) {
+                                        v->setDestinationV(mission, aqt.t_pn.tileX(),
+                                            aqt.t_pn.tileY(), aqt.t_pn.tileZ(),
+                                            aqt.t_pn.offX(), aqt.t_pn.offY(), 1024);
+                                        if (v->isMoving())
+                                            aqt.state |= 2;
+                                        else
+                                            aqt.state |= 8;
+                                    } else
+                                        aqt.state |= 2;
+                                }
+                            } else if (aqt.condition == 1) {
+                                if ((state_ & PedInstance::pa_smUsingCar) == 0)
+                                    aqt.state |= 8;
+                                else {
+                                    if (checkCurrPos(aqt.t_pn))
+                                        aqt.state |= 4;
+                                    else {
+                                        v->setDestinationV(mission, aqt.t_pn.tileX(),
+                                            aqt.t_pn.tileY(), aqt.t_pn.tileZ(),
+                                            aqt.t_pn.offX(), aqt.t_pn.offY(), 1024);
+                                        if (v->isMoving())
+                                            aqt.state |= 2;
+                                        else
+                                            aqt.state |= 8;
+                                    }
+                                }
+                            }
+                        } else if (aqt.state == 3) {
+                            if (checkCurrPos(aqt.t_pn))
+                                aqt.state |= 4;
+                        }
                     }
                 }
                 if ((aqt.ot_execute & PedInstance::ai_aAquireControl) != 0)
@@ -556,9 +608,6 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                         }
                     }
                 }
-                if ((aqt.ot_execute & PedInstance::ai_aUseObject) != 0)
-                {
-                }
                 if ((aqt.ot_execute & PedInstance::ai_aPutDownObject) != 0)
                 {
                     if (aqt.state == 1) {
@@ -577,8 +626,6 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                 }
                 if ((aqt.ot_execute & PedInstance::ai_aReachLocation) != 0)
                 {
-                    //TODO: for now we fail while trying to walk
-                    // in car
                     //TODO: better state checking
                     if ((state_ & (PedInstance::pa_smInCar
                         | PedInstance::pa_smUsingCar)) != 0)
@@ -796,12 +843,8 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                                 aqt.state |= 16;
                             } else {
                                 PathNode &rp = dest_path_.back();
-                                if (rp.tileX() != aqt.t_smo->tileX()
-                                    || rp.tileY() != aqt.t_smo->tileY()
-                                    || rp.tileZ() != aqt.t_smo->tileZ()
-                                    || rp.offX() != aqt.t_smo->offX()
-                                    || rp.offY() != aqt.t_smo->offY()
-                                    || rp.offZ() != aqt.t_smo->offZ())
+                                if (!((ShootableMovableMapObject*)aqt.t_smo)
+                                    ->checkCurrPos(rp))
                                 {
                                     // resetting target position
                                     setDestinationP(mission,
@@ -832,12 +875,8 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                                         posy - tile_y_ * 256 - off_y_);
                                 } else {
                                     PathNode &rp = dest_path_.back();
-                                    if (rp.tileX() != aqt.t_smo->tileX()
-                                        || rp.tileY() != aqt.t_smo->tileY()
-                                        || rp.tileZ() != aqt.t_smo->tileZ()
-                                        || rp.offX() != aqt.t_smo->offX()
-                                        || rp.offY() != aqt.t_smo->offY()
-                                        || rp.offZ() != aqt.t_smo->offZ())
+                                    if (!((ShootableMovableMapObject*)aqt.t_smo)
+                                        ->checkCurrPos(rp))
                                     {
                                         // resetting target position
                                         setDestinationP(mission,
@@ -2358,19 +2397,13 @@ void PedInstance::createActQBurning(actionQueueGroupType &as) {
 }
 
 void PedInstance::createActQGetInCar(actionQueueGroupType &as,
-    ShootableMapObject *tsmo)
+    ShootableMapObject *tsmo, int32 dir)
 {
     as.state = 1;
+    createActQWalking(as, NULL, tsmo, dir);
     actionQueueType aq;
-    aq.as = PedInstance::pa_smWalking;
-    aq.ot_execute = PedInstance::ai_aReachLocation;
     aq.state = 1;
     aq.t_smo = tsmo;
-    aq.condition = 2;
-    aq.multi_var.dist_var.dist = 0;
-    aq.multi_var.dist_var.dir = -1;
-    aq.group_desc = PedInstance::gd_mStandWalk;
-    as.actions.push_back(aq);
     // TODO: change this use enum
     aq.condition = 0;
     aq.as = PedInstance::pa_smGetInCar;
@@ -2380,13 +2413,33 @@ void PedInstance::createActQGetInCar(actionQueueGroupType &as,
 }
 
 void PedInstance::createActQUsingCar(actionQueueGroupType &as, PathNode *tpn,
-    ShootableMapObject *tsmo, uint32 condition)
+    ShootableMapObject *tsmo)
 {
+    as.state = 1;
+    actionQueueType aq;
+    aq.state = 1;
+    aq.t_smo = tsmo;
+    aq.t_pn = *tpn;
+    aq.condition = 1;
+    aq.as = PedInstance::pa_smNone;
+    aq.group_desc = PedInstance::gd_mStandWalk;
+    aq.ot_execute = PedInstance::ai_aUseObject;
+    as.actions.push_back(aq);
 }
 
 void PedInstance::createActQInCar(actionQueueGroupType &as, PathNode *tpn,
-    ShootableMapObject *tsmo, uint32 condition)
+    ShootableMapObject *tsmo)
 {
+    as.state = 1;
+    actionQueueType aq;
+    aq.state = 1;
+    aq.t_smo = tsmo;
+    aq.t_pn = *tpn;
+    aq.condition = 0;
+    aq.as = PedInstance::pa_smNone;
+    aq.group_desc = PedInstance::gd_mStandWalk;
+    aq.ot_execute = PedInstance::ai_aUseObject;
+    as.actions.push_back(aq);
 }
 
 void PedInstance::createActQLeaveCar(actionQueueGroupType &as,

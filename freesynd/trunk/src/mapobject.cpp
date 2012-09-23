@@ -561,6 +561,27 @@ bool ShootableMovableMapObject::updatePlacement(int nOffX, int nOffY)
     return changed;
 }
 
+bool ShootableMovableMapObject::checkFinalDest(PathNode &pn) {
+    if (dest_path_.empty())
+        return false;
+    PathNode &target_pn = dest_path_.back();
+    return pn.tileX() == target_pn.tileX()
+        && pn.tileY() == target_pn.tileY()
+        && pn.tileZ() == target_pn.tileZ()
+        && pn.offX() == target_pn.offX()
+        && pn.offY() == target_pn.offY()
+        && pn.offZ() == target_pn.offZ();
+}
+
+bool ShootableMovableMapObject::checkCurrPos(PathNode &pn) {
+    return pn.tileX() == tile_x_
+        && pn.tileY() == tile_y_
+        && pn.tileZ() == tile_z_
+        && pn.offX() == off_x_
+        && pn.offY() == off_y_
+        && pn.offZ() == off_z_;
+}
+
 Static *Static::loadInstance(uint8 * data, int m)
 {
     Mission::LEVELDATA_STATICS * gamdata =
@@ -852,10 +873,22 @@ Static *Static::loadInstance(uint8 * data, int m)
         // trick to draw
         if (s->getMainType() == Static::smt_Advertisement)
             z += 1;
-
-        s->setPosition(gamdata->mapposx[1], gamdata->mapposy[1],
+#if 0
+        if (s->getMainType() == Static::smt_Window) {
+            int x = gamdata->mapposx[1] * 256 + gamdata->mapposx[0] + 128;
+            int y = gamdata->mapposy[1] * 256 + gamdata->mapposy[0] + 128;
+            z++;
+            if (z < 0 || x < 0 || y < 0) {
+                delete s;
+                return NULL;
+            }
+            s->setPosition(x / 256, y / 256, z, x % 256, y % 256, oz);
+        } else
+#endif
+            s->setPosition(gamdata->mapposx[1], gamdata->mapposy[1],
                        z, gamdata->mapposx[0],
                        gamdata->mapposy[0], oz);
+
         //s->setMainType(gamdata->sub_type);
         s->setDirection(gamdata->orientation);
     }
@@ -1032,6 +1065,7 @@ bool LargeDoor::animate(int elapsed, Mission *obj)
     bool found = false;
 
     bool changed = MapObject::animate(elapsed);
+    uint32 cur_state = state_;
     switch(state_) {
         case Static::sttdoor_Open:
             if (sub_type_ == 0) {
@@ -1050,7 +1084,6 @@ bool LargeDoor::animate(int elapsed, Mission *obj)
                 if (!v && state_ == Static::sttdoor_Open && (!found)) {
                     state_ = Static::sttdoor_Closing;
                     is_ignored_ = false;
-                    frame_ = 0;
                 } else if (v){
                     state_ = Static::sttdoor_Open;
                     is_ignored_ = true;
@@ -1066,7 +1099,6 @@ bool LargeDoor::animate(int elapsed, Mission *obj)
                 if (!v && state_ == Static::sttdoor_Open && (!found)) {
                     state_ = Static::sttdoor_Closing;
                     is_ignored_ = false;
-                    frame_ = 0;
                 } else if (v){
                     state_ = Static::sttdoor_Open;
                     is_ignored_ = true;
@@ -1109,7 +1141,6 @@ bool LargeDoor::animate(int elapsed, Mission *obj)
                     state_ = Static::sttdoor_Opening;
                     is_ignored_ = false;
                     found = true;
-                    frame_ = 0;
                 }
                 v->hold_on_.wayFree = 1;
             }
@@ -1123,7 +1154,6 @@ bool LargeDoor::animate(int elapsed, Mission *obj)
                     state_ = Static::sttdoor_Opening;
                     is_ignored_ = false;
                     found = true;
-                    frame_ = 0;
                 }
                 v->hold_on_.wayFree = 1;
             }
@@ -1176,17 +1206,17 @@ bool LargeDoor::animate(int elapsed, Mission *obj)
             if (frame_ >= g_App.gameSprites().lastFrame(closing_anim_)) {
                 state_ = Static::sttdoor_Closed;
                 is_ignored_ = false;
-                frame_ = 0;
             }
             break;
         case Static::sttdoor_Opening:
             if (frame_ >= g_App.gameSprites().lastFrame(opening_anim_)) {
                 state_ = Static::sttdoor_Open;
                 is_ignored_ = true;
-                frame_ = 0;
             }
             break;
     }
+    if (cur_state != state_)
+        frame_ = 0;
     return changed;
 }
 

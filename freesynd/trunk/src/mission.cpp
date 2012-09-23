@@ -252,15 +252,33 @@ bool Mission::loadLevel(uint8 * levelData)
                 if (offset_start)
                     p->dropActQ();
                 do {
+                    // sc.type
+                    // 1, 8 - walking
+                    // 2 - vehicle
+                    // 7, 9 - end marker
                     LEVELDATA_SCENARIOS sc = level_data_.scenarios[offset_nxt / 8];
                     if (sc.tilex != 0 && sc.tiley != 0) {
                         PedInstance::actionQueueGroupType as;
                         PathNode pn(sc.tilex >> 1, sc.tiley >> 1, p->tileZ());
-                        p->createActQWalking(as, &pn, NULL, 160);
+                        p->createActQWalking(as, &pn, NULL, -1);//160);
                         as.main_act = as.actions.size() - 1;
                         as.group_desc = PedInstance::gd_mStandWalk;
                         as.origin_desc = 1;
                         p->addActQToQueue(as);
+                    } if (sc.type == 2) {
+                        uint16 bindx = READ_LE_UINT16(sc.offset_object);
+                        // TODO: test all maps for objects other then vehicle
+                        assert(bindx >= 0x5C02 && bindx < 0x6682);
+                        bindx -= 0x5C02;
+                        bindx /= 42;
+                        if (vindx[bindx] != 0xFFFF) {
+                            PedInstance::actionQueueGroupType as;
+                            p->createActQGetInCar(as, vehicles_[bindx]);
+                            as.main_act = as.actions.size() - 1;
+                            as.group_desc = PedInstance::gd_mStandWalk;
+                            as.origin_desc = 1;
+                            p->addActQToQueue(as);
+                        }
                     }
                     offset_nxt = READ_LE_UINT16(sc.next);
                 } while (offset_nxt && offset_nxt != offset_start);
@@ -586,7 +604,7 @@ bool Mission::loadLevel(uint8 * levelData)
             break;
         else {
             printf("num %i\n", i);
-            printf("next %X\n", READ_LE_INT16(scenario.next));
+            printf("next %i\n", READ_LE_INT16(scenario.next) / 8);
             printf("object offset %X\n", READ_LE_INT16(scenario.offset_object));
             printf("x = %i, y = %i, z = %i\n",
                    scenario.tilex >> 1,

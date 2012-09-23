@@ -660,6 +660,9 @@ public:
          * 1 - controlled if else failed
          * for ai_aFindEnemy; 0 - scout - will not attack, 1 - search and
          * destroy
+         * for ai_aUseObject, 0 - use following vehicle to get to location
+         * (can be passenger); 1 - drive following vehicle to location
+         * (only driver can do this)
          */
         uint32 condition;
     } actionQueueType;
@@ -709,11 +712,11 @@ public:
     void createActQBurning(actionQueueGroupType &as);
 
     void createActQGetInCar(actionQueueGroupType &as,
-        ShootableMapObject *tsmo);
+        ShootableMapObject *tsmo, int32 dir = -1);
     void createActQUsingCar(actionQueueGroupType &as, PathNode *tpn,
-        ShootableMapObject *tsmo, uint32 condition);
+        ShootableMapObject *tsmo);
     void createActQInCar(actionQueueGroupType &as, PathNode *tpn,
-        ShootableMapObject *tsmo, uint32 condition);
+        ShootableMapObject *tsmo);
     void createActQLeaveCar(actionQueueGroupType &as,
         ShootableMapObject *tsmo);
     void createActQWait(actionQueueGroupType &as, int tm_wait);
