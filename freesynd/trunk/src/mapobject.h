@@ -246,7 +246,7 @@ protected:
     //! how often this frame should be drawn per seccond
     int frames_per_sec_;
     int sub_type_, main_type_;
-    //! 0 - not defined, 1 - ped, 2 - weapon, 3 - static, 4 - vehicle
+    //! 0 - not defined, 1 - ped, 2 - weapon, 4 - static, 8 - vehicle
     MajorTypeEnum major_type_;
     DefDamageType rcv_damage_def_;
     //! objects direction

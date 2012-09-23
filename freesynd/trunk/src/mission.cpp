@@ -178,6 +178,8 @@ bool Mission::loadLevel(uint8 * levelData)
     obj_ids[5] = "Civilians";
 #endif
     for (int i = 0; i < 256; i++) {
+        if (i == 130)
+            i = 130;
         LEVELDATA_PEOPLE & pedref = level_data_.people[i];
         if(pedref.type == 0x0 || pedref.desc == 0x0D || pedref.desc == 0x0C)
             continue;
@@ -249,6 +251,7 @@ bool Mission::loadLevel(uint8 * levelData)
                 
                 uint16 offset_start = READ_LE_UINT16(pedref.offset_scenario_start);
                 uint16 offset_nxt = offset_start;
+                VehicleInstance *v = p->inVehicle();
                 if (offset_start)
                     p->dropActQ();
                 do {
@@ -260,7 +263,10 @@ bool Mission::loadLevel(uint8 * levelData)
                     if (sc.tilex != 0 && sc.tiley != 0) {
                         PedInstance::actionQueueGroupType as;
                         PathNode pn(sc.tilex >> 1, sc.tiley >> 1, p->tileZ());
-                        p->createActQWalking(as, &pn, NULL, -1);//160);
+                        if (v)
+                            p->createActQUsingCar(as, &pn, v);
+                        else
+                            p->createActQWalking(as, &pn, NULL, -1);//160);
                         as.main_act = as.actions.size() - 1;
                         as.group_desc = PedInstance::gd_mStandWalk;
                         as.origin_desc = 1;
@@ -273,7 +279,8 @@ bool Mission::loadLevel(uint8 * levelData)
                         bindx /= 42;
                         if (vindx[bindx] != 0xFFFF) {
                             PedInstance::actionQueueGroupType as;
-                            p->createActQGetInCar(as, vehicles_[bindx]);
+                            v = vehicles_[vindx[bindx]];
+                            p->createActQGetInCar(as, v);
                             as.main_act = as.actions.size() - 1;
                             as.group_desc = PedInstance::gd_mStandWalk;
                             as.origin_desc = 1;
