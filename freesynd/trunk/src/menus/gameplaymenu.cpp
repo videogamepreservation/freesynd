@@ -40,13 +40,17 @@
 // The number of pixel of a scroll
 const int SCROLL_STEP = 16;
 
+const int GameplayMenu::kMiniMapScreenX = 0;
+const int GameplayMenu::kMiniMapScreenY = 46 + 44 + 10 + 46 + 44 + 15 + 2 * 32 + 2;
+
 GameplayMenu::GameplayMenu(MenuManager *m) :
 Menu(m, MENU_GAMEPLAY, MENU_DEBRIEF, "", "mscrenup.dat"),
 tick_count_(0), last_animate_tick_(0), last_motion_tick_(0),
 last_motion_x_(320), last_motion_y_(240), mission_hint_ticks_(0), 
 mission_hint_(0), mission_(NULL), world_x_(0),
 world_y_(0), selected_agents_(0),
-pointing_at_ped_(-1), pointing_at_vehicle_(-1), pointing_at_weapon_(-1) 
+pointing_at_ped_(-1), pointing_at_vehicle_(-1), pointing_at_weapon_(-1),
+mm_renderer_()
 {
     scroll_x_ = 0;
     scroll_y_ = 0;
@@ -306,6 +310,8 @@ void GameplayMenu::handleTick(int elapsed)
     }
     updtAgentsMarker();
 
+    updateMinimap();
+
     if (change) {
         needRendering();
         // force pointing_at_ped / vehicle to update
@@ -398,6 +404,10 @@ void GameplayMenu::handleShow() {
         g_System.usePointerCursor();
         g_System.showCursor();
         pressed_btn_select_all_ = false;
+
+        // Reset the minimap
+        mm_renderer_.init(mission_);
+        updateMinimap();
     }
 }
 
@@ -413,7 +423,7 @@ void GameplayMenu::handleRender(DirtyList &dirtyList)
     drawSelectAllButton();
     drawMissionHint(0);
     drawWeaponSelectors();
-    drawMiniMap();
+    mm_renderer_.render(kMiniMapScreenX, kMiniMapScreenY);
 
 #ifdef _DEBUG
     if (g_System.getKeyModState() & KMD_LALT) {
@@ -1489,59 +1499,6 @@ void GameplayMenu::drawWeaponSelectors() {
     }
 }
 
-void GameplayMenu::drawMiniMap() {
-    if (mission_ == 0)
-        return;
-
-    int sy = 46 + 44 + 10 + 46 + 44 + 15 + 2 * 32 + 2;
-
-    int ox, oy;
-    Map *m = g_App.maps().map(mission_->map());
-    int tx = m->screenToTileX(world_x_ + (GAME_SCREEN_WIDTH - 129) / 2,
-            world_y_ + GAME_SCREEN_HEIGHT / 2, ox);
-    int ty = m->screenToTileY(world_x_ + (GAME_SCREEN_WIDTH - 129) / 2,
-            world_y_ + GAME_SCREEN_HEIGHT / 2, oy);
-
-    for (int i = 0; i < 4; i++)
-        if (isAgentSelected(i)) {
-            tx = mission_->ped(i)->tileX();
-            ty = mission_->ped(i)->tileY();
-            ox = mission_->ped(i)->offX();
-            oy = mission_->ped(i)->offY();
-            break;
-        }
-
-    tx -= 8;
-    ty -= 8;
-    mm_tx_ = tx;
-    mm_ty_ = ty;
-    // every 32 of offset = 1 pixel
-    ox = ox / 32;
-    oy = oy / 32;
-
-    uint8 minimap_layer[21*21*8*8];
-    memset(minimap_layer, 0, 21*21*8*8);
-    uint8 minimap_final_layer[128*128];
-
-    for (int j = 0; j < 17; j++) {
-        for (int i = 0; i < 17; i++) {
-            uint8 gcolour = mission_->getMiniMap()->getColourAt(tx + i, ty + j);
-            for (char inc = 0; inc < 8; inc ++) {
-                memset(minimap_layer + (j + 2) * 8 * 8 * 21 + (i + 2) * 8
-                    + inc * 8 * 21, gcolour, 8);
-            }
-        }
-    }
-    //g_Screen.blit(130, 10, 168, 168, minimap_layer);
-    for (int j = 0; j < 128; j++) {
-        memcpy(minimap_final_layer + 128 * j, minimap_layer + (8 * 8 * 21) * 2
-            + (j + oy) * 8 * 21 + (8 * 2) + ox, 128);
-    }
-    g_Screen.blit(0, sy, 128, 128, minimap_final_layer);
-        // TODO: draw icons for units, weapons, etc
-
-}
-
 int GameplayMenu::selectedAgentsCount() {
     int agents = 0;
 
@@ -1629,3 +1586,16 @@ void GameplayMenu::updtAgentsMarker()
     }
 }
 
+/*!
+ * Updates the minimap.
+ */
+void GameplayMenu::updateMinimap() {
+    // Centers the minimap on the first selected agent
+    for (int indx = 0; indx < 4; indx++) {
+        if (isAgentSelected(indx)) {
+            PedInstance *pAgent = mission_->ped(indx);
+            mm_renderer_.centerOn(pAgent->tileX(), pAgent->tileY(), pAgent->offX(), pAgent->offY());
+            break;
+        }
+    }
+}

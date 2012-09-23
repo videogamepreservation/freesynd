@@ -27,6 +27,8 @@
 #ifndef GAMEPLAYMENU_H
 #define GAMEPLAYMENU_H
 
+#include "minimaprenderer.h"
+
 class Mission;
 
 /*!
@@ -53,7 +55,6 @@ protected:
     void drawSelectAllButton();
     void drawMissionHint(int elapsed);
     void drawWeaponSelectors();
-    void drawMiniMap();
     //! Scroll the map vertically or horizontally.
     bool scroll();
     bool isScrollLegal(int newScrollX, int newScrollY);
@@ -69,8 +70,15 @@ protected:
     void updtAgentsMarker();
 
     void stopShootingEvent(void);
+    //! Animate the minimap
+    void updateMinimap();
 
 protected:
+    /*! Origin of the minimap on the screen.*/
+    static const int kMiniMapScreenX;
+    /*! Origin of the minimap on the screen.*/
+    static const int kMiniMapScreenY;
+
     int tick_count_, last_animate_tick_;
     int last_motion_tick_, last_motion_x_, last_motion_y_;
     int mission_hint_ticks_, mission_hint_;
@@ -86,7 +94,8 @@ protected:
     unsigned int selected_agents_;
     unsigned int selectable_agents_;
     int pointing_at_ped_, pointing_at_vehicle_, pointing_at_weapon_;
-    int mm_tx_, mm_ty_;
+    /*! This renderer is in charge of drawing the minimap.*/
+    GamePlayMinimapRenderer mm_renderer_;
     bool completed_;
     bool pressed_btn_select_all_;
     struct {

@@ -307,7 +307,7 @@ void BriefMenu::handleRender(DirtyList &dirtyList) {
     //     pMission->minimap_overlay_,0, false);
 
     // draw minimap
-    mm_renderer_.render();
+    mm_renderer_.render(kMiniMapScreenX, kMiniMapScreenY);
 }
 
 void BriefMenu::handleLeave() {
