@@ -462,7 +462,7 @@ void App::cheatFemaleRecruits() {
     agents_.reset(true);
 
     for (int i = 0; i < 4; i++)
-        session_.setTeamMember(i, agents_.agent(i));
+        session_.squad().setMember(i, agents_.agent(i));
 }
 
 void App::cheatEquipFancyWeapons() {
@@ -579,7 +579,7 @@ bool App::reset() {
     }
 
     for (int i = 0; i < 4; i++)
-        session_.setTeamMember(i, agents_.agent(i));
+        session_.squad().setMember(i, agents_.agent(i));
 
     return true;
 }
@@ -708,7 +708,7 @@ bool App::saveGameToFile(int fileSlot, std::string name) {
 
         // save current squad
         for (int i=0; i<4; i++) {
-            Agent *pAgent = session_.teamMember(i);
+            Agent *pAgent = session_.squad().member(i);
             int id = pAgent ? pAgent->getId() : 0;
             outfile.write32(id);
         }
@@ -783,12 +783,12 @@ bool App::loadGameFromFile(int fileSlot) {
                 for (int iAgnt=0; iAgnt<AgentManager::MAX_AGENT; iAgnt++) {
                     Agent *pAgent = agents_.agent(iAgnt);
                     if (pAgent && pAgent->getId() == id) {
-                        session_.setTeamMember(squadInd, pAgent);
+                        session_.squad().setMember(squadInd, pAgent);
                         break;
                     }
                 }
             } else {
-                session_.setTeamMember(squadInd, NULL);
+                session_.squad().setMember(squadInd, NULL);
             }
         }
 

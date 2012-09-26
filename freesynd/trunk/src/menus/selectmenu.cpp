@@ -109,7 +109,7 @@ void SelectMenu::drawAgentSelector(int x, int y) {
 
 void SelectMenu::drawAgent()
 {
-    Agent *selected = g_Session.teamMember(cur_agent_);
+    Agent *selected = g_Session.squad().member(cur_agent_);
     if (selected == NULL)
         return;
 
@@ -292,7 +292,7 @@ void SelectMenu::drawSelectedWeaponInfos(int x, int y) {
     }
 
 	if (selectedWInstId_ > 0 && g_App.weapons().isAvailable(pSelectedWeap_)) {
-		WeaponInstance *wi = g_Session.teamMember(cur_agent_)->weapon(selectedWInstId_ - 1);
+		WeaponInstance *wi = g_Session.squad().member(cur_agent_)->weapon(selectedWInstId_ - 1);
 		if (wi->needsReloading()) {
 			int rldCost = (pSelectedWeap_->ammo()
 									- wi->ammoRemaining()) * pSelectedWeap_->ammoCost();
@@ -323,15 +323,15 @@ void SelectMenu::handleShow() {
     // Update the time
     updateClock();
 
-    if (g_Session.teamMember(cur_agent_)) {
-        getStatic(txtAgentId_)->setTextFormated("#SELECT_SUBTITLE", g_Session.teamMember(cur_agent_)->getName());
+    if (g_Session.squad().member(cur_agent_)) {
+        getStatic(txtAgentId_)->setTextFormated("#SELECT_SUBTITLE", g_Session.squad().member(cur_agent_)->getName());
     } else {
         getStatic(txtAgentId_)->setText("");
     }
 
     for (int iAgnt=0; iAgnt<AgentManager::MAX_AGENT; iAgnt++) {
         Agent *pAgentFromCryo = g_App.agents().agent(iAgnt);
-        pTeamLBox_->setSquadLine(g_Session.getTeamSlot(pAgentFromCryo), iAgnt);
+        pTeamLBox_->setSquadLine(g_Session.squad().getTeamSlot(pAgentFromCryo), iAgnt);
     }
     showItemList();
 }
@@ -343,10 +343,10 @@ void SelectMenu::handleRender(DirtyList &dirtyList) {
     uint8 data[4], datag[4];
     memset(data, 204, 4);
     memset(datag, 10, 4);
-    Agent *t1 = g_Session.teamMember(0);
-    Agent *t2 = g_Session.teamMember(1);
-    Agent *t3 = g_Session.teamMember(2);
-    Agent *t4 = g_Session.teamMember(3);
+    Agent *t1 = g_Session.squad().member(Squad::kSlot1);
+    Agent *t2 = g_Session.squad().member(Squad::kSlot2);
+    Agent *t3 = g_Session.squad().member(Squad::kSlot3);
+    Agent *t4 = g_Session.squad().member(Squad::kSlot4);
     if (t1) {
         if (t1->isActive()) {
             menuSprites().drawSpriteXYZ(Sprite::MSPR_SELECT_1, 20, 84, 0, false, true);
@@ -444,9 +444,9 @@ void SelectMenu::toggleAgent(int n)
 {
     int nactive = 0;
     for (int i = 0; i < 4; i++)
-        if (g_Session.teamMember(i) && g_Session.teamMember(i)->isActive())
+        if (g_Session.squad().isSlotActive(i))
             nactive++;
-    Agent *a = g_Session.teamMember(n);
+    Agent *a = g_Session.squad().member(n);
     if (a) {
         if (a->isActive() && nactive == 1)
             return;
@@ -465,8 +465,8 @@ bool SelectMenu::handleMouseDown(int x, int y, int button, const int modKeys)
                     if (selectedWInstId_ != 0)
                         updateSelectedWeapon();
                     cur_agent_ = 1;
-                    if (g_Session.teamMember(1)) {
-                        getStatic(txtAgentId_)->setTextFormated("#SELECT_SUBTITLE", g_Session.teamMember(1)->getName());
+                    if (g_Session.squad().member(Squad::kSlot2)) {
+                        getStatic(txtAgentId_)->setTextFormated("#SELECT_SUBTITLE", g_Session.squad().member(Squad::kSlot2)->getName());
                     } else {
                         getStatic(txtAgentId_)->setText("");
                     }
@@ -478,8 +478,8 @@ bool SelectMenu::handleMouseDown(int x, int y, int button, const int modKeys)
                     if (selectedWInstId_ != 0)
                         updateSelectedWeapon();
                     cur_agent_ = 0;
-                    if (g_Session.teamMember(0)) {
-                        getStatic(txtAgentId_)->setTextFormated("#SELECT_SUBTITLE", g_Session.teamMember(0)->getName());
+                    if (g_Session.squad().member(Squad::kSlot1)) {
+                        getStatic(txtAgentId_)->setTextFormated("#SELECT_SUBTITLE", g_Session.squad().member(Squad::kSlot1)->getName());
                     } else {
                         getStatic(txtAgentId_)->setText("");
                     }
@@ -499,8 +499,8 @@ bool SelectMenu::handleMouseDown(int x, int y, int button, const int modKeys)
                     if (selectedWInstId_ != 0)
                         updateSelectedWeapon();
                     cur_agent_ = 3;
-                    if (g_Session.teamMember(3)) {
-                        getStatic(txtAgentId_)->setTextFormated("#SELECT_SUBTITLE", g_Session.teamMember(3)->getName());
+                    if (g_Session.squad().member(Squad::kSlot4)) {
+                        getStatic(txtAgentId_)->setTextFormated("#SELECT_SUBTITLE", g_Session.squad().member(Squad::kSlot4)->getName());
                     } else {
                         getStatic(txtAgentId_)->setText("");
                     }
@@ -512,8 +512,8 @@ bool SelectMenu::handleMouseDown(int x, int y, int button, const int modKeys)
                     if (selectedWInstId_ != 0)
                         updateSelectedWeapon();
                     cur_agent_ = 2;
-                    if (g_Session.teamMember(2)) {
-                        getStatic(txtAgentId_)->setTextFormated("#SELECT_SUBTITLE", g_Session.teamMember(2)->getName());
+                    if (g_Session.squad().member(Squad::kSlot3)) {
+                        getStatic(txtAgentId_)->setTextFormated("#SELECT_SUBTITLE", g_Session.squad().member(Squad::kSlot3)->getName());
                     } else {
                         getStatic(txtAgentId_)->setText("");
                     }
@@ -524,7 +524,7 @@ bool SelectMenu::handleMouseDown(int x, int y, int button, const int modKeys)
     }
 
 	// Checks if the user clicked on item in the current agent inventory
-    Agent *selected = g_Session.teamMember(cur_agent_);
+    Agent *selected = g_Session.squad().member(cur_agent_);
     if (selected) {
         if (x >= 366 && x < 366 + 4 * 32
             && y >= 308 && y < 308 + 2 * 32)
@@ -625,7 +625,7 @@ void SelectMenu::handleAction(const int actionId, void *ctx, const int modKeys)
         int j;
         // check if selected agent is already part of the mission squad
         for (j = 0; j < 4; j++) {
-            if (g_Session.teamMember(j) == pNewAgent) {
+            if (g_Session.squad().member(j) == pNewAgent) {
                 found = true;
                 break;
             }
@@ -633,15 +633,15 @@ void SelectMenu::handleAction(const int actionId, void *ctx, const int modKeys)
 
         // Agent was not part of the squad
         if (!found) {
-            // adds his to the squad
-            g_Session.setTeamMember(cur_agent_, pNewAgent);
+            // adds him to the squad
+            g_Session.squad().setMember(cur_agent_, pNewAgent);
             // Update current agent name
             getStatic(txtAgentId_)->setTextFormated("#SELECT_SUBTITLE", pNewAgent->getName());
             pTeamLBox_->setSquadLine(cur_agent_, pPair->first);
         } else if (j == cur_agent_){
             // else if agent is the currently selected
             // removes him from squad
-            g_Session.setTeamMember(j, NULL);
+            g_Session.squad().setMember(j, NULL);
             getStatic(txtAgentId_)->setTextFormated("");
             pTeamLBox_->setSquadLine(cur_agent_, -1);
         }
@@ -661,7 +661,7 @@ void SelectMenu::handleAction(const int actionId, void *ctx, const int modKeys)
     } else if (actionId == cancelButId_) {
         showItemList();
     } else if (actionId == reloadButId_) {
-        Agent *selected = g_Session.teamMember(cur_agent_);
+        Agent *selected = g_Session.squad().member(cur_agent_);
         WeaponInstance *wi = selected->weapon(selectedWInstId_ - 1);
 		int rldCost = (pSelectedWeap_->ammo()
 						- wi->ammoRemaining()) * pSelectedWeap_->ammoCost();
@@ -677,7 +677,7 @@ void SelectMenu::handleAction(const int actionId, void *ctx, const int modKeys)
         if (pSelectedWeap_) {
             if (sel_all_) {
                 for (int n = 0; n < 4; n++) {
-                    Agent *selected = g_Session.teamMember(n);
+                    Agent *selected = g_Session.squad().member(n);
                     if (selected && selected->numWeapons() < 8
                         && g_Session.getMoney() >= pSelectedWeap_->cost()) {
                         g_Session.setMoney(g_Session.getMoney() - pSelectedWeap_->cost());
@@ -686,7 +686,7 @@ void SelectMenu::handleAction(const int actionId, void *ctx, const int modKeys)
                     }
                 }
             } else {
-                Agent *selected = g_Session.teamMember(cur_agent_);
+                Agent *selected = g_Session.squad().member(cur_agent_);
                 if (selected && selected->numWeapons() < 8
                     && g_Session.getMoney() >= pSelectedWeap_->cost()) {
                     g_Session.setMoney(g_Session.getMoney() - pSelectedWeap_->cost());
@@ -698,7 +698,7 @@ void SelectMenu::handleAction(const int actionId, void *ctx, const int modKeys)
         } else if (pSelectedMod_) {
             if (sel_all_) {
                 for (int n = 0; n < 4; n++) {
-                    Agent *selected = g_Session.teamMember(n);
+                    Agent *selected = g_Session.squad().member(n);
                     if (selected && selected->canHaveMod(pSelectedMod_)
                         && g_Session.getMoney() >= pSelectedMod_->cost()) {
                         selected->addMod(pSelectedMod_);
@@ -707,7 +707,7 @@ void SelectMenu::handleAction(const int actionId, void *ctx, const int modKeys)
                     }
                 }
             } else {
-                Agent *selected = g_Session.teamMember(cur_agent_);
+                Agent *selected = g_Session.squad().member(cur_agent_);
                 if (selected && selected->canHaveMod(pSelectedMod_)
                     && g_Session.getMoney() >= pSelectedMod_->cost()) {
                     selected->addMod(pSelectedMod_);
@@ -720,7 +720,7 @@ void SelectMenu::handleAction(const int actionId, void *ctx, const int modKeys)
     
     } else if (actionId == sellButId_ && selectedWInstId_) {
         addDirtyRect(360, 305, 135, 70);
-        Agent *selected = g_Session.teamMember(cur_agent_);
+        Agent *selected = g_Session.squad().member(cur_agent_);
         WeaponInstance *pWi = selected->removeWeapon(selectedWInstId_ - 1);
         g_Session.setMoney(g_Session.getMoney() + pWi->getWeaponClass()->cost());
 		getStatic(moneyTxtId_)->setTextFormated("%d", g_Session.getMoney());
@@ -732,7 +732,7 @@ void SelectMenu::handleAction(const int actionId, void *ctx, const int modKeys)
 void SelectMenu::updateSelectedWeapon() {
     assert(selectedWInstId_ != 0);
 
-    Agent *selected = g_Session.teamMember(cur_agent_);
+    Agent *selected = g_Session.squad().member(cur_agent_);
     if (selected == NULL) {
         tab_ = TAB_EQUIPS;
         showItemList();

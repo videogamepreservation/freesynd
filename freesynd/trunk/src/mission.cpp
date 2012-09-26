@@ -913,13 +913,13 @@ void Mission::start()
     stats_.nbOfHits = 0;
 
     for (int i = 0; i < 4; i++) {
-        if (g_Session.teamMember(i)) {
-            if(g_Session.teamMember(i)->isActive()){
+        if (g_Session.squad().member(i)) {
+            if(g_Session.squad().member(i)->isActive()){
                 stats_.agents += 1;
-                peds_[i]->setHealth(g_Session.teamMember(i)->health() *
+                peds_[i]->setHealth(g_Session.squad().member(i)->health() *
                                 peds_[i]->health() / 255);
-                while (g_Session.teamMember(i)->numWeapons()) {
-                    WeaponInstance *wi = g_Session.teamMember(i)->removeWeapon(0);
+                while (g_Session.squad().member(i)->numWeapons()) {
+                    WeaponInstance *wi = g_Session.squad().member(i)->removeWeapon(0);
                     weapons_.push_back(wi);
                     peds_[i]->addWeapon(wi);
                     wi->setOwner(peds_[i]);
@@ -1114,13 +1114,13 @@ void Mission::end()
     }
 
     for (int i = 0; i < 4; i++)
-        if (g_Session.teamMember(i) && g_Session.teamMember(i)->isActive()) {
+        if (g_Session.squad().member(i) && g_Session.squad().member(i)->isActive()) {
             if (peds_[i]->health() <= 0) {
                 peds_[i]->destroyAllWeapons();
-                Agent *pAg = g_Session.teamMember(i);
+                Agent *pAg = g_Session.squad().member(i);
                 pAg->removeAllWeapons();
                 pAg->clearSlots();
-                g_Session.setTeamMember(i, NULL);
+                g_Session.squad().setMember(i, NULL);
                 for (int inc = 0;
                     inc < g_App.agents().MAX_AGENT; inc++)
                 {
@@ -1143,7 +1143,7 @@ void Mission::end()
                     if (wi->getMainType() == Weapon::Pistol)
                         wi->setAmmoRemaining(wi->ammo());
                     wi->resetWeaponUsedTime();
-                    g_Session.teamMember(i)->addWeapon(wi);
+                    g_Session.squad().member(i)->addWeapon(wi);
                 }
             }
         }

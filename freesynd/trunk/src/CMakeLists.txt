@@ -10,6 +10,7 @@ set (SOURCES
 	agent.cpp
 	agentmanager.cpp
 	app.cpp
+	core/squad.cpp
 	core/gamesession.cpp
 	core/missionbriefing.cpp
 	core/research.cpp
@@ -106,6 +107,7 @@ set(HEADERS
 	weaponholder.h
 	weaponmanager.h
 	core/gameevent.h
+	core/squad.h
 	core/gamesession.h
 	core/missionbriefing.h
 	core/research.h

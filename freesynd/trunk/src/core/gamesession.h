@@ -28,6 +28,7 @@
 #include <set>
 
 #include "../common.h"
+#include "core/squad.h"
 #include "researchmanager.h"
 #include "utils/portablefile.h"
 
@@ -183,6 +184,10 @@ public:
         return researchMan_;
     }
 
+    Squad &squad() {
+        return squad_;
+    }
+
     //! Sets the representation of the time in the given string
     void getTimeAsStr(char *dest);
 
@@ -214,35 +219,6 @@ public:
      * \param pMission The mission the user will play.
      */
     void setMission(Mission *pMission);
-
-    /*!
-     * Returns an agent of the team.
-     * \param n The agent's index in the team (from 0 to 3)
-     */
-    Agent *teamMember(int n) {
-        assert(n < 4);
-        return teamMembers_[n];
-    }
-
-    /*!
-     * sets an agent in the team at the given index.
-     * \param n The agent's index in the team (from 0 to 3)
-     * \param a The new agent
-     */
-    void setTeamMember(int n, Agent *a) {
-        teamMembers_[n] = a;
-    }
-
-    int getTeamSlot(Agent *pAgent) {
-        if (pAgent) {
-            for (int i=0; i<4; i++) {
-                if (pAgent == teamMembers_[i]) {
-                    return i;
-                }
-            }
-        }
-        return -1;
-    }
 
     //! Update state when finishing a mission
     void completeSelectedBlock();
@@ -312,7 +288,7 @@ private:
     /*!
      * Selected agents for the next mission. Up to 4 agents.
      */
-    Agent *teamMembers_[4];
+    Squad squad_;
     /*! Cheat flag to tell that all missions are playable.*/
     bool enable_all_mis_;
     /*! Cheat flag to enable replay of finished missions. */

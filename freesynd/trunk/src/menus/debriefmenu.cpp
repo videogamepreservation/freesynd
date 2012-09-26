@@ -146,8 +146,8 @@ void DebriefMenu::updateStatsFields(Mission *pMission) {
 void DebriefMenu::checkNewWeaponFound() {
 
     for (int i=0; i<4; i++) {
-        if (g_Session.teamMember(i)) {
-            Agent *pAgent = g_Session.teamMember(i);
+        if (g_Session.squad().member(i)) {
+            Agent *pAgent = g_Session.squad().member(i);
             for (int wi=0; wi < pAgent->numWeapons(); wi++) {
                 Weapon *pWeapon = pAgent->weapon(wi)->getWeaponClass();
 

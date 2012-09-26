@@ -140,9 +140,7 @@ bool GameSession::reset() {
     time_year_ = 85;
     time_elapsed_ = 0;
 
-    for (int i=0; i<4; i++) {
-        teamMembers_[i] = NULL;
-    }
+    squad_.clear();
 
     return researchMan_.reset();
 }
