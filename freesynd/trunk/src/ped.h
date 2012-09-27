@@ -633,6 +633,11 @@ public:
                 int32 time_total;
                 // = 0 || t > 0 (ai_aWaitToStart)
                 int32 time_before_start;
+                // wait event, 0 - time(milliseconds), 1 - uses animations
+                // number to draw(for now 0 or 1)
+                uint8 desc;
+                //uint16 wait_frames_drawn;
+                //uint16 wait_anims_drawn;
             } time_var;
             struct {
                 // move into this direction, -1 is unset
@@ -719,7 +724,8 @@ public:
         ShootableMapObject *tsmo);
     void createActQLeaveCar(actionQueueGroupType &as,
         ShootableMapObject *tsmo);
-    void createActQWait(actionQueueGroupType &as, int tm_wait);
+    void createActQWait(PedInstance::actionQueueGroupType& as, int tm_wait,
+                        uint8 desc = 0);
 
     void createActQFindEnemy(actionQueueGroupType &as);
     

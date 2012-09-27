@@ -309,8 +309,6 @@ void PedInstance::setActionStateToDrawnAnim(void) {
 
 bool PedInstance::animate(int elapsed, Mission *mission) {
     // TODO: proper handling for exclusive states, switching;
-    // TODO: animation and state binding, finished animation=state complete?
-    // pickup/putdown, firing
 
     if (agent_is_ == PedInstance::Agent_Non_Active)
         return false;
@@ -382,15 +380,17 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                 if ((aqt.ot_execute & PedInstance::ai_aWaitToStart) != 0)
                 {
                     aqt.state |= 384;
-                    aqt.multi_var.time_var.elapsed += elapsed;
-                    if (aqt.multi_var.time_var.elapsed >=
-                        aqt.multi_var.time_var.time_before_start)
-                    {
-                        aqt.state ^= 384;
-                        aqt.ot_execute ^= PedInstance::ai_aWaitToStart;
-                        elapsed = aqt.multi_var.time_var.elapsed
-                            - aqt.multi_var.time_var.time_before_start;
-                        aqt.multi_var.time_var.elapsed = 0;
+                    if (aqt.multi_var.time_var.desc == 0) {
+                        aqt.multi_var.time_var.elapsed += elapsed;
+                        if (aqt.multi_var.time_var.elapsed >=
+                            aqt.multi_var.time_var.time_before_start)
+                        {
+                            aqt.state ^= 384;
+                            aqt.ot_execute ^= PedInstance::ai_aWaitToStart;
+                            elapsed = aqt.multi_var.time_var.elapsed
+                                - aqt.multi_var.time_var.time_before_start;
+                            aqt.multi_var.time_var.elapsed = 0;
+                        }
                     }
                 }
                 if ((aqt.ot_execute & PedInstance::ai_aUseObject) != 0)
@@ -537,7 +537,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                             wi->setIsIgnored(true);
                             wi->deactivate();
                             weapons_.push_back(wi);
-                            aqt.state |= 4 + 32;
+                            aqt.state |= 36;
                         }
                     }
                 }
@@ -571,19 +571,20 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                                 // TODO: handle correctly, use info returned from
                                 // inflictDamage, needs use of condition
                                 if (answ == 0 || answ == 2) {
-                                    if ((aqt.ot_execute & PedInstance::ai_aWait) != 0)
-                                        aqt.state |= 2 + 32;
-                                    else
-                                        aqt.state |= 2;
-                                    if (make_shots == 0 && aqt.t_smo->health() <= 0)
-                                        aqt.state |= 4;
-                                    else if (shots_done != 0) {
-                                        aqt.multi_var.enemy_var.shots_done += shots_done;
-                                        if (make_shots != 0 && make_shots
-                                            <= shots_done
-                                            + aqt.multi_var.enemy_var.shots_done)
-                                        {
+                                    aqt.state |= 2;
+                                    if (shots_done != 0) {
+                                        // enabling animation completion
+                                        aqt.state |= 32;
+                                        if (make_shots == 0 && aqt.t_smo->health() <= 0)
                                             aqt.state |= 4;
+                                        else {
+                                            aqt.multi_var.enemy_var.shots_done += shots_done;
+                                            if (make_shots != 0 && make_shots
+                                                <= shots_done
+                                                + aqt.multi_var.enemy_var.shots_done)
+                                            {
+                                                aqt.state |= 4;
+                                            }
                                         }
                                     }
                                 } else
@@ -593,18 +594,20 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                         }
                     } else if ((aqt.ot_execute & PedInstance::ai_aWaitToStart) != 0)
                     {
-                        if ((aqt.t_smo->majorType() == MapObject::mjt_Ped
-                            && !checkHostileIs((PedInstance *)aqt.t_smo))
-                            || aqt.t_smo->health() <= 0)
-                        {
-                            aqt.ot_execute &= PedInstance::ai_aAll
-                                ^ (PedInstance::ai_aWaitToStart
-                                | PedInstance::ai_aWait);
-                            aqt.state ^= 384;
-                            // failed target is friendly or dead
-                            aqt.state |= 8;
-                            if (obj_group_def_ == og_dmPolice)
-                                setSelectedWeapon(-1);
+                        if (aqt.multi_var.time_var.desc == 0) {
+                            if ((aqt.t_smo->majorType() == MapObject::mjt_Ped
+                                && !checkHostileIs((PedInstance *)aqt.t_smo))
+                                || aqt.t_smo->health() <= 0)
+                            {
+                                aqt.ot_execute &= PedInstance::ai_aAll
+                                    ^ (PedInstance::ai_aWaitToStart
+                                    | PedInstance::ai_aWait);
+                                aqt.state ^= 384;
+                                // failed target is friendly or dead
+                                aqt.state |= 8;
+                                if (obj_group_def_ == og_dmPolice)
+                                    setSelectedWeapon(-1);
+                            }
                         }
                     }
                 }
@@ -620,7 +623,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                             aqt.state |= 8;
                         else {
                             dropWeapon(wi);
-                            aqt.state |= 4 + 32;
+                            aqt.state |= 36;
                         }
                     }
                 }
@@ -913,11 +916,10 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                         uint16 answ = wi->inflictDamage(NULL, &aqt.t_pn, &tm_left,
                             aqt.multi_var.enemy_var.forced_shot, &shots_done);
                         if (answ == 0 || answ == 2) {
-                            if ((aqt.ot_execute & PedInstance::ai_aWait) != 0)
-                                aqt.state |= 2 + 32;
-                            else
-                                aqt.state |= 2;
+                            aqt.state |= 2;
                             if (shots_done != 0) {
+                                // enable animation compeletion
+                                aqt.state |= 32;
                                 aqt.multi_var.enemy_var.shots_done += shots_done;
                                 if (make_shots != 0 && make_shots
                                     <= shots_done
@@ -1109,6 +1111,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                         if (obj_group_def_ == og_dmPolice) {
                             aqt_attack.ot_execute |= PedInstance::ai_aWaitToStart;
                             aqt_attack.multi_var.time_var.time_before_start = 5000;
+                            aqt.multi_var.time_var.desc = 0;
                             g_App.gameSounds().play(snd::PUTDOWN_WEAPON);
                             // enableing following behavior
                             actionQueueType & aqt_follow = it->actions[indx + 2];
@@ -1169,19 +1172,44 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                 if ((aqt.ot_execute & (PedInstance::ai_aWait
                     | PedInstance::ai_aWaitToStart)) == PedInstance::ai_aWait)
                 {
-                    // no failed or suspended will have "wait" action
-                    if ((aqt.state & 60) == 36) {
-                        if ((aqt.state & 128) != 0) {
-                            aqt.multi_var.time_var.elapsed += elapsed;
-                            if (aqt.multi_var.time_var.elapsed
-                                >= aqt.multi_var.time_var.time_total)
-                            {
-                                aqt.state &= (65535 ^ 160);
-                            }
+                    if (aqt.multi_var.time_var.desc == 0) {
+                        // no failed or suspended will have "wait" action
+                        if ((aqt.state & 60) == 36) {
+                            if ((aqt.state & 128) != 0) {
+                                aqt.multi_var.time_var.elapsed += elapsed;
+                                if (aqt.multi_var.time_var.elapsed
+                                    >= aqt.multi_var.time_var.time_total)
+                                {
+                                    aqt.state &= (65535 ^ 160);
+                                }
+                            } else
+                                aqt.state |= 130;
                         } else
-                            aqt.state |= 130;
-                    } else
-                        aqt.state &= (65535 ^ 32);
+                            aqt.state &= (65535 ^ 32);
+                    } else if (aqt.multi_var.time_var.desc == 1) {
+                        if ((aqt.state & 32) != 0 && (aqt.state & 12) != 0) {
+                            // firing animation if set, has usable frame_
+                            // to process it we set now "waiting" flag
+                            if (drawn_anim_ == PedInstance::ad_WalkFireAnim
+                                || drawn_anim_ == PedInstance::ad_StandFireAnim)
+                            {
+                                aqt.state |= 128;
+                            }
+                            if ((aqt.state & 128) != 0) {
+                                int frame_bckp = frame_;
+                                int elapsed_carry_bckp = elapsed_carry_;
+                                if (is_frame_drawn_)
+                                    MapObject::animate(elapsed);
+                                // after one time animation drawn this
+                                // action is completed
+                                if (handleDrawnAnim(elapsed))
+                                    aqt.state &= (65535 ^ 160);
+                                frame_ = frame_bckp;
+                                elapsed_carry_ = elapsed_carry_bckp;
+                            } else
+                                aqt.state |= 128;
+                        }
+                    }
                 }
                 if ((aqt.ot_execute & PedInstance::ai_aNonFinishable) != 0)
                 {
@@ -1212,7 +1240,12 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                 } else if ((aqt.state & 2) != 0) {
                     if ((aqt.group_desc & PedInstance::gd_mExclusive) != 0)
                         it->state |= 2;
-                    switchActionStateTo(aqt.as);
+                    if (!((aqt.ot_execute & (PedInstance::ai_aWait
+                        | PedInstance::ai_aWaitToStart)) == PedInstance::ai_aWait
+                        && aqt.multi_var.time_var.desc == 1))
+                    {
+                        switchActionStateTo(aqt.as);
+                    }
                     acts_g_prcssd |= aqt.group_desc;
                 }
 #ifdef _DEBUG
@@ -1290,8 +1323,6 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
     }
     if (is_frame_drawn_) {
         updated = MapObject::animate(elapsed);
-        // TODO: find better way to bind state and animation, then
-        // extending with "wait" (putdown/pickup, others)
     } else
         is_frame_drawn_ = true;
     if (handleDrawnAnim(elapsed))
@@ -2173,6 +2204,7 @@ void PedInstance::createActQStanding(actionQueueGroupType &as) {
     aq.ot_execute = PedInstance::ai_aWait;
     aq.as = PedInstance::pa_smStanding;
     aq.state = 1;
+    aq.multi_var.time_var.desc = 0;
     aq.multi_var.time_var.elapsed = 0;
     aq.multi_var.time_var.time_total = -1;
     aq.group_desc = PedInstance::gd_mStandWalk;
@@ -2312,8 +2344,7 @@ bool PedInstance::createActQFiring(actionQueueGroupType &as, PathNode *tpn,
     }
     aq.state = 1;
     aq.ot_execute |= PedInstance::ai_aWait;
-    aq.multi_var.time_var.elapsed = 0;
-    aq.multi_var.time_var.time_total = 125;
+    aq.multi_var.time_var.desc = 1;
     as.actions.push_back(aq);
     return true;
 }
@@ -2350,8 +2381,7 @@ void PedInstance::createActQPickUp(actionQueueGroupType &as,
     aq.as = PedInstance::pa_smPickUp;
     aq.ot_execute = PedInstance::ai_aPickUpObject;
     aq.ot_execute |= PedInstance::ai_aWait;
-    aq.multi_var.time_var.elapsed = 0;
-    aq.multi_var.time_var.time_total = 500;
+    aq.multi_var.time_var.desc = 1;
     aq.group_desc = PedInstance::gd_mExclusive;
     as.actions.push_back(aq);
 }
@@ -2367,8 +2397,7 @@ void PedInstance::createActQPutDown(actionQueueGroupType &as,
     aq.state = 1;
     aq.t_smo = tsmo;
     aq.ot_execute |= PedInstance::ai_aWait;
-    aq.multi_var.time_var.elapsed = 0;
-    aq.multi_var.time_var.time_total = 500;
+    aq.multi_var.time_var.desc = 1;
     as.actions.push_back(aq);
 }
 
@@ -2460,14 +2489,18 @@ void PedInstance::createActQLeaveCar(actionQueueGroupType &as,
     as.actions.push_back(aq);
 }
 
-void PedInstance::createActQWait(actionQueueGroupType &as, int tm_wait)
+void PedInstance::createActQWait(actionQueueGroupType &as, int tm_wait, uint8 desc)
 {
     as.state = 1;
     actionQueueType aq;
     aq.as = PedInstance::pa_smNone;
     aq.group_desc = PedInstance::gd_mExclusive;
-    aq.state = 1 | 4 | 32 | 128;
+    if (desc == 0)
+        aq.state = 1 | 4 | 32 | 128;
+    else
+        aq.state = 1 | 4 | 32;
     aq.ot_execute = PedInstance::ai_aWait;
+    aq.multi_var.time_var.desc = desc;
     aq.multi_var.time_var.elapsed = 0;
     aq.multi_var.time_var.time_total = tm_wait;
     as.actions.push_back(aq);
