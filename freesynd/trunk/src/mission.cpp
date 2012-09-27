@@ -227,24 +227,29 @@ bool Mission::loadLevel(uint8 * levelData)
                 // not in all missions our agents health is 16, this fixes it
                 p->setHealth(16);
                 p->setStartHealth(16);
+                p->setBaseSpeed(256);
             } else if (i > 7) {
                 unsigned int mt = p->getMainType() << 8;
                 if (mt == PedInstance::og_dmAgent) {
                     p->setObjGroupID(2);
                     p->setObjGroupDef(PedInstance::og_dmAgent);
                     p->addEnemyGroupDef(1);
+                    p->setBaseSpeed(256);
                 } else if (mt == PedInstance::og_dmGuard) {
                     p->setObjGroupID(3);
                     p->setObjGroupDef(PedInstance::og_dmEnemy);
                     p->addEnemyGroupDef(1);
+                    p->setBaseSpeed(256);
                 } else if (mt == PedInstance::og_dmPolice) {
                     p->setObjGroupID(4);
                     p->setObjGroupDef(PedInstance::og_dmPolice);
                     p->setHostileDesc(PedInstance::pd_smArmed);
+                    p->setBaseSpeed(256);
                 } else {
                     p->setObjGroupID(5);
                     p->setObjGroupDef(mt);
                     // civilians and criminals
+                    p->setBaseSpeed(192);
                 }
                 p->setSightRange(7 * 256);
                 // TODO: set scenarios

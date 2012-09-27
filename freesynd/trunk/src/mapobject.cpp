@@ -526,7 +526,7 @@ ShootableMapObject::ShootableMapObject(int m):MapObject(m)
 
 ShootableMovableMapObject::
 ShootableMovableMapObject(int m):ShootableMapObject(m),
-speed_(0), dir_move_(-1), dist_to_pos_(0)
+speed_(0), base_speed_(0), dir_move_(-1), dist_to_pos_(0)
 {
 }
 

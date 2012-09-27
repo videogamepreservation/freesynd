@@ -1354,7 +1354,7 @@ void GameplayMenu::drawMissionHint(int elapsed) {
     {
         for (int i = 0; i < 4; i++) {
             if (isAgentSelected(i)){
-                if (mission_->ped(i)->speed()) {
+                if (mission_->ped(i)->isMoving()) {
                     str = g_App.menus().getMessage("HINT_GOING");
                 } else {
                     str = g_App.menus().getMessage("HINT_OBSERVING");

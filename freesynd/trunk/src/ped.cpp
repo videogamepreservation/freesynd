@@ -634,8 +634,8 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                         | PedInstance::pa_smUsingCar)) != 0)
                         aqt.state |= 8;
                     if (aqt.state == 1) {
-                        //TODO: IPA + mods
-                        int speed_set = 1280;// aqt.multi_var.dist_var.speed
+                        speed_ = aqt.multi_var.dist_var.speed != -1
+                            ? aqt.multi_var.dist_var.speed: speed();
                         if (aqt.condition == 0) {
                             bool set_new_dest = true;
                             dist_to_pos_ = aqt.multi_var.dist_var.dist;
@@ -655,10 +655,10 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                                 if (dest_path_.empty()) {
                                     aqt.state |= 8;
                                     speed_ = 0;
-                                } else
-                                    speed_ = speed_set;
+                                }
                             } else {
                                 aqt.state |= 4;
+                                speed_ = 0;
                             }
                         } else if (aqt.condition == 1) {
                             dir_last_ = -1;
@@ -690,10 +690,11 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                                 if (dest_path_.empty()) {
                                     aqt.state |= 8;
                                     speed_ = 0;
-                                } else
-                                    speed_ = speed_set;
-                            } else
+                                }
+                            } else {
                                 aqt.state |= 4;
+                                speed_ = 0;
+                            }
                         } else if (aqt.condition == 3) {
                             // TODO: check already at location
                             dir_last_ = -1;
@@ -721,9 +722,8 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                         }
                     }
                     if ((aqt.state & 15) == 3) {
-                        //TODO: IPA + mods
-                        int speed_set = 1280;
-                        speed_ = speed_set;
+                        speed_ = aqt.multi_var.dist_var.speed != -1
+                            ? aqt.multi_var.dist_var.speed: speed();
                         if (aqt.condition == 0 || aqt.condition == 2) {
                             updated = movementP(mission, elapsed);
                             if (speed_ == 0)
@@ -755,9 +755,12 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                                     && off_y_ == aqt.t_pn.offY())
                                 {
                                     aqt.state |= 4;
+                                    speed_ = 0;
                                 }
-                            } else
+                            } else {
                                 aqt.state |= 4;
+                                speed_ = 0;
+                            }
                         } else if (aqt.condition == 4) {
                             dir_last_ = -1;
                             int pos_x, pos_y;
@@ -771,17 +774,22 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                                     -1, pos_x, pos_y,
                                     aqt.multi_var.dist_var.dist,
                                     aqt.multi_var.dist_var.bounce);
-                                if (samePosition(aqt.t_smo))
+                                if (samePosition(aqt.t_smo)) {
                                     aqt.state |= 4;
-                            } else
+                                    speed_ = 0;
+                                }
+                            } else {
                                 aqt.state |= 4;
+                                speed_ = 0;
+                            }
                         }
                     }
                 }
                 if ((aqt.ot_execute & PedInstance::ai_aFollowObject) != 0)
                 {
                     if (aqt.state == 1 || aqt.state == 17) {
-                        int speed_set = 256;
+                        speed_ = aqt.multi_var.dist_var.speed != -1
+                            ? aqt.multi_var.dist_var.speed: speed();
                         if (aqt.condition == 0) {
                             dist_to_pos_ = aqt.multi_var.dist_var.dist;
                             int dist_is = -1;
@@ -796,12 +804,13 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                                 if (dest_path_.empty()) {
                                     aqt.state |= 8;
                                     speed_ = 0;
-                                } else
-                                    speed_ = speed_set;
+                                }
                                 if ((aqt.state & 16) != 0)
                                     aqt.state ^= 16;
-                            } else
+                            } else {
                                 aqt.state |= 16;
+                                speed_ = 0;
+                            }
                         } else if (aqt.condition == 1) {
                             WeaponInstance *wi = selectedWeapon();
                             if (wi) {
@@ -827,18 +836,21 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                                     if (dest_path_.empty()) {
                                         aqt.state |= 8;
                                         speed_ = 0;
-                                    } else
-                                        speed_ = speed_set;
+                                    }
                                     if ((aqt.state & 16) != 0)
                                         aqt.state ^= 16;
-                                } else
+                                } else {
                                     aqt.state |= 16;
-                            } else
+                                    speed_ = 0;
+                                }
+                            } else {
                                 aqt.state |= 8;
+                                speed_ = 0;
+                            }
                         }
                     } else if ((aqt.state & 30) == 2) {
-                        int speed_set = 256;
-                        speed_ = speed_set;
+                        speed_ = aqt.multi_var.dist_var.speed != -1
+                            ? aqt.multi_var.dist_var.speed: speed();
                         if (aqt.condition == 0) {
                             updated = movementP(mission, elapsed);
                             if (speed_ == 0) {
@@ -857,8 +869,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                                     if (dest_path_.empty()) {
                                         aqt.state |= 8;
                                         speed_ = 0;
-                                    } else
-                                        speed_ = speed_set;
+                                    }
                                 }
                             }
                         } else if (aqt.condition == 1) {
@@ -889,12 +900,13 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                                         if (dest_path_.empty()) {
                                             aqt.state |= 8;
                                             speed_ = 0;
-                                        } else
-                                            speed_ = speed_set;
+                                        }
                                     }
                                 }
-                            } else
+                            } else {
                                 aqt.state |= 8;
+                                speed_ = 0;
+                            }
                         }
                     }
                 }
@@ -2222,6 +2234,7 @@ void PedInstance::createActQWalking(actionQueueGroupType &as, PathNode *tpn,
     aq.state = 1;
     aq.multi_var.dist_var.dir = dir;
     aq.multi_var.dist_var.dist = dist;
+    aq.multi_var.dist_var.speed = -1;
     if (dir == -1) {
         if (tpn) {
             aq.t_pn = *tpn;
@@ -2256,7 +2269,7 @@ void PedInstance::createActQHit(actionQueueGroupType &as, PathNode *tpn,
     aq.ot_execute = PedInstance::ai_aReachLocation;
     aq.group_desc = PedInstance::gd_mExclusive;
     aq.state = 1;
-    // TODO: set directional movement to
+    // TODO: set directional movement to oposite?
     aq.multi_var.dist_var.dir = dir;
     aq.condition = 1;
     // calculate direction from this point
@@ -2360,6 +2373,7 @@ void PedInstance::createActQFollowing(actionQueueGroupType &as,
     aq.state = 1;
     aq.t_smo = tsmo;
     aq.multi_var.dist_var.dist = dist;
+    aq.multi_var.dist_var.speed = -1;
     aq.condition = condition;
     as.actions.push_back(aq);
 }
@@ -2528,7 +2542,7 @@ void PedInstance::createActQFindEnemy(actionQueueGroupType &as) {
 bool PedInstance::setActQInQueue(actionQueueGroupType &as,
     uint32 * id)
 {
-    // NOTE: if action is invalidated all remaining actions in queue are
+    // NOTE: if action is invalidated - all remaining actions in queue are
     // invalid, they should be removed
     if ((as.group_desc & PedInstance::gd_mExclusive) != 0) {
         dropActQ();
@@ -2688,6 +2702,11 @@ void PedInstance::updtActGFiring(uint32 id, PathNode* tpn,
                 break;
             }
     }
+}
+
+int PedInstance::speed()
+{   //TODO: IPA + mods
+    return base_speed_;
 }
 
 

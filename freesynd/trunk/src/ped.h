@@ -736,6 +736,7 @@ public:
     void updtActGFiring(uint32 id, PathNode *tpn,
         ShootableMapObject *tsmo = NULL);
 
+    int speed();
 protected:
     Ped *ped_;
 

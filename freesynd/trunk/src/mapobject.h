@@ -374,8 +374,11 @@ public:
         speed_ = new_speed;
     }
 
-    int speed() {
+    virtual int speed() {
         return speed_;
+    }
+    void setBaseSpeed(int bs) {
+        base_speed_ = bs;
     }
 
     void clearDestination() {
@@ -388,14 +391,14 @@ public:
 
     //! checks whether final destination is same as pn
     bool checkFinalDest(PathNode& pn);
-    bool isMoving() { return dest_path_.size() != 0/* && speed_ != 0*/;}
+    bool isMoving() { return speed_ != 0 || dest_path_.size() != 0;}
     //! checks whether current position is same as pn
     bool checkCurrPos(PathNode &pn);
 
     FreeWay hold_on_;
 
 protected:
-    int speed_;
+    int speed_, base_speed_;
     int dir_move_;
     //! on reaching this distance object should stop
     int dist_to_pos_;
