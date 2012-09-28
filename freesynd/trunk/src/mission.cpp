@@ -229,27 +229,24 @@ bool Mission::loadLevel(uint8 * levelData)
                 p->setStartHealth(16);
                 p->setBaseSpeed(256);
             } else if (i > 7) {
-                unsigned int mt = p->getMainType() << 8;
+                unsigned int mt = p->getMainType();
+                p->setObjGroupDef(mt);
                 if (mt == PedInstance::og_dmAgent) {
                     p->setObjGroupID(2);
-                    p->setObjGroupDef(PedInstance::og_dmAgent);
                     p->addEnemyGroupDef(1);
                     p->setBaseSpeed(256);
                 } else if (mt == PedInstance::og_dmGuard) {
                     p->setObjGroupID(3);
-                    p->setObjGroupDef(PedInstance::og_dmEnemy);
                     p->addEnemyGroupDef(1);
-                    p->setBaseSpeed(256);
+                    p->setBaseSpeed(192);
                 } else if (mt == PedInstance::og_dmPolice) {
                     p->setObjGroupID(4);
-                    p->setObjGroupDef(PedInstance::og_dmPolice);
                     p->setHostileDesc(PedInstance::pd_smArmed);
-                    p->setBaseSpeed(256);
+                    p->setBaseSpeed(160);
                 } else {
                     p->setObjGroupID(5);
-                    p->setObjGroupDef(mt);
                     // civilians and criminals
-                    p->setBaseSpeed(192);
+                    p->setBaseSpeed(128);
                 }
                 p->setSightRange(7 * 256);
                 // TODO: set scenarios
@@ -259,7 +256,8 @@ bool Mission::loadLevel(uint8 * levelData)
                 VehicleInstance *v = p->inVehicle();
                 if (offset_start)
                     p->dropActQ();
-                do {
+                printf("=====\n");
+                while (offset_nxt) {
                     // sc.type
                     // 1, 8 - walking
                     // 2 - vehicle
@@ -267,11 +265,18 @@ bool Mission::loadLevel(uint8 * levelData)
                     LEVELDATA_SCENARIOS sc = level_data_.scenarios[offset_nxt / 8];
                     if (sc.tilex != 0 && sc.tiley != 0) {
                         PedInstance::actionQueueGroupType as;
-                        PathNode pn(sc.tilex >> 1, sc.tiley >> 1, p->tileZ());
+                        PathNode pn(sc.tilex >> 1, sc.tiley >> 1, sc.tilez,
+                            (sc.tilex & 0x01) << 7, (sc.tiley & 0x01) << 7);
+                        if (sc.type == 0x08) {
+                            p->createActQWait(as, 2000);
+                            // no need for exclusive wait
+                            as.actions.back().group_desc = PedInstance::gd_mStandWalk;
+                        }
                         if (v)
                             p->createActQUsingCar(as, &pn, v);
                         else
-                            p->createActQWalking(as, &pn, NULL, -1);//160);
+                            p->createActQWalking(as, &pn, NULL, p->getDir());
+                            //p->createActQWalking(as, &pn, NULL, -1);
                         as.main_act = as.actions.size() - 1;
                         as.group_desc = PedInstance::gd_mStandWalk;
                         as.origin_desc = 1;
@@ -292,8 +297,11 @@ bool Mission::loadLevel(uint8 * levelData)
                             p->addActQToQueue(as);
                         }
                     }
+                    printf("sc.type = %i, nxt = %i\n", sc.type, offset_nxt / 8);
                     offset_nxt = READ_LE_UINT16(sc.next);
-                } while (offset_nxt && offset_nxt != offset_start);
+                    assert(offset_nxt != offset_start);
+                }
+                printf("+++++\n");
             } else if (i > 3 && i < 8) {
                 p->setMap(-1);
                 p->setHealth(-1);
@@ -609,7 +617,7 @@ bool Mission::loadLevel(uint8 * levelData)
         fclose(staticsFss);
     }
 #endif
-#if 0
+#if 1
     for (unsigned char i = 1; i < 2047; i++) {
         LEVELDATA_SCENARIOS & scenario = level_data_.scenarios[i];
         if (scenario.type == 0)
@@ -621,7 +629,7 @@ bool Mission::loadLevel(uint8 * levelData)
             printf("x = %i, y = %i, z = %i\n",
                    scenario.tilex >> 1,
                    scenario.tiley >> 1,
-                   scenario.tilez >> 1);
+                   scenario.tilez);
             printf("type = %i\n\n", scenario.type);
         }
     }

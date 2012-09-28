@@ -2,7 +2,6 @@
  - MiniMap in game : more detailed map, display peds, guns, radar focus,
     evacuation red circle
  - Mission objectives
- - Remove debug info displayed in the console
  - Correct identification of object types during mission load, includes
 vehicles, static objects
  - Adding properties to:
@@ -48,6 +47,8 @@ other syndicates where capturing territories
  - selectmenu make impossible to start gameplay with all agents non active+dead1
  - money increase after mission should not include completed mission's income
 for time during this mission was completed
+ - gameplaymenu after mission succesful/failed add timed auto switch to
+debriefmenu after 5 sec or so
 
  Very low priority stuff, maybe for v0.9:
  - xmidi music data is not dealocated on exit - memory leak
@@ -60,3 +61,4 @@ for time during this mission was completed
  - Complete Italian translation
  - Reload button translation for non-English languages
  - Use game lost menu
+ - Remove debug info displayed in the console

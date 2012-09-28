@@ -380,7 +380,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                 if ((aqt.ot_execute & PedInstance::ai_aWaitToStart) != 0)
                 {
                     aqt.state |= 384;
-                    if (aqt.multi_var.time_var.desc == 0) {
+                    //if (aqt.multi_var.time_var.desc == 0) {
                         aqt.multi_var.time_var.elapsed += elapsed;
                         if (aqt.multi_var.time_var.elapsed >=
                             aqt.multi_var.time_var.time_before_start)
@@ -391,7 +391,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                                 - aqt.multi_var.time_var.time_before_start;
                             aqt.multi_var.time_var.elapsed = 0;
                         }
-                    }
+                    //}
                 }
                 if ((aqt.ot_execute & PedInstance::ai_aUseObject) != 0)
                 {
@@ -635,7 +635,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                         aqt.state |= 8;
                     if (aqt.state == 1) {
                         speed_ = aqt.multi_var.dist_var.speed != -1
-                            ? aqt.multi_var.dist_var.speed: speed();
+                            ? aqt.multi_var.dist_var.speed: getSpeed();
                         if (aqt.condition == 0) {
                             bool set_new_dest = true;
                             dist_to_pos_ = aqt.multi_var.dist_var.dist;
@@ -723,7 +723,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                     }
                     if ((aqt.state & 15) == 3) {
                         speed_ = aqt.multi_var.dist_var.speed != -1
-                            ? aqt.multi_var.dist_var.speed: speed();
+                            ? aqt.multi_var.dist_var.speed: getSpeed();
                         if (aqt.condition == 0 || aqt.condition == 2) {
                             updated = movementP(mission, elapsed);
                             if (speed_ == 0)
@@ -789,7 +789,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                 {
                     if (aqt.state == 1 || aqt.state == 17) {
                         speed_ = aqt.multi_var.dist_var.speed != -1
-                            ? aqt.multi_var.dist_var.speed: speed();
+                            ? aqt.multi_var.dist_var.speed: getSpeed();
                         if (aqt.condition == 0) {
                             dist_to_pos_ = aqt.multi_var.dist_var.dist;
                             int dist_is = -1;
@@ -850,7 +850,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                         }
                     } else if ((aqt.state & 30) == 2) {
                         speed_ = aqt.multi_var.dist_var.speed != -1
-                            ? aqt.multi_var.dist_var.speed: speed();
+                            ? aqt.multi_var.dist_var.speed: getSpeed();
                         if (aqt.condition == 0) {
                             updated = movementP(mission, elapsed);
                             if (speed_ == 0) {
@@ -2268,8 +2268,9 @@ void PedInstance::createActQHit(actionQueueGroupType &as, PathNode *tpn,
     aq.as = PedInstance::pa_smHit;
     aq.ot_execute = PedInstance::ai_aReachLocation;
     aq.group_desc = PedInstance::gd_mExclusive;
+    aq.multi_var.dist_var.speed = -1;
     aq.state = 1;
-    // TODO: set directional movement to oposite?
+    // TODO: set directional movement to opposite?
     aq.multi_var.dist_var.dir = dir;
     aq.condition = 1;
     // calculate direction from this point
@@ -2382,16 +2383,10 @@ void PedInstance::createActQPickUp(actionQueueGroupType &as,
     ShootableMapObject *tsmo)
 {
     as.state = 1;
+    createActQWalking(as, NULL, tsmo);
     actionQueueType aq;
-    aq.as = PedInstance::pa_smWalking;
-    aq.ot_execute = PedInstance::ai_aReachLocation;
-    aq.group_desc = PedInstance::gd_mStandWalk;
     aq.state = 1;
     aq.t_smo = tsmo;
-    aq.multi_var.dist_var.dir = -1;
-    aq.multi_var.dist_var.dist = 0;
-    aq.condition = 2;
-    as.actions.push_back(aq);
     aq.as = PedInstance::pa_smPickUp;
     aq.ot_execute = PedInstance::ai_aPickUpObject;
     aq.ot_execute |= PedInstance::ai_aWait;
@@ -2422,6 +2417,7 @@ void PedInstance::createActQBurning(actionQueueGroupType &as) {
     aq.ot_execute = PedInstance::ai_aReachLocation;
     aq.multi_var.dist_var.dir = rand() % 256;
     aq.multi_var.dist_var.dist = rand() % 256 + 128;
+    aq.multi_var.dist_var.speed = -1;
     aq.state = 1;
     aq.condition = 1;
     aq.group_desc = PedInstance::gd_mExclusive;
@@ -2704,8 +2700,12 @@ void PedInstance::updtActGFiring(uint32 id, PathNode* tpn,
     }
 }
 
-int PedInstance::speed()
-{   //TODO: IPA + mods
+int PedInstance::getSpeed()
+{
+    //TODO: IPA + mods
+    if (obj_group_def_ == PedInstance::og_dmAgent)
+        return base_speed_ << 2;
+
     return base_speed_;
 }
 

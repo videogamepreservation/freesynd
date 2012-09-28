@@ -495,18 +495,12 @@ public:
 
     typedef enum {
         og_dmUndefined = 0x0,
-        //unused-----
-        og_dmFriend = 0x0001,
-        og_dmEnemy = 0x0002,
-        og_dmNeutral = 0x0004,
-        //unsued-----
-        // mainPedType << 8
-        og_dmPedestrian = 0x0100,
-        og_dmCivilian = 0x0100,
-        og_dmAgent = 0x0200,
-        og_dmPolice = 0x0400,
-        og_dmGuard = 0x0800,
-        og_dmCriminal = 0x1000
+        og_dmPedestrian = 0x01,
+        og_dmCivilian = 0x01,
+        og_dmAgent = 0x02,
+        og_dmPolice = 0x04,
+        og_dmGuard = 0x08,
+        og_dmCriminal = 0x10
     } objGroupDefMasks;
 
     typedef enum {
@@ -736,7 +730,11 @@ public:
     void updtActGFiring(uint32 id, PathNode *tpn,
         ShootableMapObject *tsmo = NULL);
 
-    int speed();
+    /*! 
+     * Movement speed calculated from base speed, mods, weight of inventory,
+     * ipa, etc.
+     */
+    int getSpeed();
 protected:
     Ped *ped_;
 

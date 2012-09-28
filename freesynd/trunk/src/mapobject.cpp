@@ -176,12 +176,10 @@ int MapObject::getDirection(int snum) {
     do {
         int s = direction * sinc;
         if (direction == 0) {
-            if ((256 - sdec) < dir_ || (s + sdec) >= dir_)
+            if ((256 - sdec) <= dir_ || (s + sdec) > dir_)
                 break;
-        } else {
-            if ((s - sdec) < dir_ && (s + sdec) >= dir_)
-                break;
-        }
+        } else if ((s - sdec) <= dir_ && (s + sdec) > dir_)
+            break;
         direction++;
     } while (direction < snum);
     assert(direction < snum);

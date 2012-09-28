@@ -384,17 +384,15 @@ public:
         // first scenario should be skipped, type 0x00
         uint8 next[2];
         uint8 offset_object[2];
-        // tile_x_ = (tilex < < 7) / 256
-        // off_x_ = (tilex < < 7) % 256
+        // tile_x_ = tilex >> 1
+        // off_x_ = (tilex & 0x01) << 7
         uint8 tilex;
-        // tile_y_ = (tiley < < 7) / 256
-        // off_y_ = (tiley < < 7) % 256
+        // tile_y_ = tiley >> 1
+        // off_y_ = (tiley & 0x01) << 7
         uint8 tiley;
-        // z is not used for now, as it is "strange"
         // tile_z_ = tilez
         uint8 tilez;
-        /* 0x00 - unset scenario type, is found at start of array and end is
-        * filled with this type;
+        /* 0x00 - unset scenario type, is found at start of array and end;
         * 0x01 - has location, no object offset; 0x02 - has object offset, no
         * location; 0x07 - data is not present (end marker?); 0x08 - has
         * location, no object offset; 0x09 - data is not present (end marker?);

@@ -191,6 +191,7 @@ public:
     void setDirection(int dir);
     void setDirection(int posx, int posy, int * dir = NULL);
 
+    int getDir() { return dir_;}
     int getDirection(int snum = 8);
 
     void setTimeShowAnim(int t) {
@@ -374,7 +375,7 @@ public:
         speed_ = new_speed;
     }
 
-    virtual int speed() {
+    int speed() {
         return speed_;
     }
     void setBaseSpeed(int bs) {
