@@ -256,7 +256,10 @@ bool Mission::loadLevel(uint8 * levelData)
                 VehicleInstance *v = p->inVehicle();
                 if (offset_start)
                     p->dropActQ();
+#define SHOW_SCENARIOS_DEBUG
+#ifdef SHOW_SCENARIOS_DEBUG
                 printf("=====\n");
+#endif
                 while (offset_nxt) {
                     // sc.type
                     // 1, 8 - walking
@@ -297,11 +300,15 @@ bool Mission::loadLevel(uint8 * levelData)
                             p->addActQToQueue(as);
                         }
                     }
+#ifdef SHOW_SCENARIOS_DEBUG
                     printf("sc.type = %i, nxt = %i\n", sc.type, offset_nxt / 8);
+#endif
                     offset_nxt = READ_LE_UINT16(sc.next);
                     assert(offset_nxt != offset_start);
                 }
+#ifdef SHOW_SCENARIOS_DEBUG
                 printf("+++++\n");
+#endif
             } else if (i > 3 && i < 8) {
                 p->setMap(-1);
                 p->setHealth(-1);
@@ -617,7 +624,7 @@ bool Mission::loadLevel(uint8 * levelData)
         fclose(staticsFss);
     }
 #endif
-#if 1
+#if 0
     for (unsigned char i = 1; i < 2047; i++) {
         LEVELDATA_SCENARIOS & scenario = level_data_.scenarios[i];
         if (scenario.type == 0)
@@ -1290,6 +1297,29 @@ bool Mission::setSurfaces() {
         }
     }
 
+    // to make surfaces where large doors are located walkable
+    for (std::vector<Static *>::iterator it = statics_.begin();
+        it != statics_.end(); it++)
+    {
+        Static *s = *it;
+        if (s->getMainType() == Static::smt_LargeDoor) {
+            int indx = s->tileX() + s->tileY() * mmax_x_
+                + s->tileZ() * mmax_m_xy;
+            mtsurfaces_[indx].twd = 0x00;
+            if (s->getSubType() == 0) {
+                if (indx - 1 >= 0)
+                    mtsurfaces_[indx - 1].twd = 0x00;
+                if (indx + 1 < mmax_m_all)
+                    mtsurfaces_[indx + 1].twd = 0x00;
+            } else if (s->getSubType() == 2) {
+                if (indx - mmax_x_ >= 0)
+                    mtsurfaces_[indx - mmax_x_].twd = 0x00;
+                if (indx + mmax_x_ < mmax_m_all)
+                    mtsurfaces_[indx + mmax_x_].twd = 0x00;
+            }
+        }
+    }
+
     //printf("surface data size %i\n", sizeof(surfaceDesc) * mmax_m_all);
     //printf("flood data size %i\n", sizeof(floodPointDesc) * mmax_m_all);
 
@@ -1335,7 +1365,7 @@ bool Mission::setSurfaces() {
                         continue;
                 } else if (this_s == 0x11 || this_s == 0x12) {
                     int zp_tmp = z + mmax_m_xy;
-                    if (zp_tmp < (mmax_m_xy * mmax_z_)) {
+                    if (zp_tmp < mmax_m_all) {
                         // we are defining tile above current
                         cfp = &(mdpoints_[x + y + zp_tmp]);
                     } else
@@ -1347,7 +1377,7 @@ bool Mission::setSurfaces() {
                 int yp = y + mmax_x_;
                 int zp = z + mmax_m_xy;
                 floodPointDesc *nxtfp;
-                if (zp < (mmax_m_xy * mmax_z_)) {
+                if (zp < mmax_m_all) {
                     upper_s = mtsurfaces_[x + y + zp].twd;
                     if(!sWalkable(this_s, upper_s)) {
                         cfp->t = m_fdNonWalkable;

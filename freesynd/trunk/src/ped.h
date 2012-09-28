@@ -281,7 +281,7 @@ public:
         int ox = 128, int oy = 128);
 
     bool movementP(Mission *m, int elapsed);
-    bool moveToDir(Mission *m, int elapsed, int dir = -1, int t_posx = -1,
+    uint8 moveToDir(Mission *m, int elapsed, int dir = -1, int t_posx = -1,
         int t_posy = -1, int dist = 0, bool bounce = true);
 
     void setAllAdrenaLevels(uint8 amount, uint8 depend, uint8 effect) {
@@ -735,6 +735,7 @@ public:
      * ipa, etc.
      */
     int getSpeed();
+    bool hasAccessCard();
 protected:
     Ped *ped_;
 

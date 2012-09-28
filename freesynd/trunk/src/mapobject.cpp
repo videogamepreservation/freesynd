@@ -1061,6 +1061,11 @@ bool LargeDoor::animate(int elapsed, Mission *obj)
     char inc_rel = 0, rel_inc = 0;
     char *i = 0, *j = 0;
     bool found = false;
+    std::vector<PedInstance *> found_peds;
+    found_peds.reserve(256);
+    std::vector<PedInstance *> found_peds_mid;
+    found_peds_mid.reserve(256);
+    char sign;
 
     bool changed = MapObject::animate(elapsed);
     uint32 cur_state = state_;
@@ -1079,7 +1084,7 @@ bool LargeDoor::animate(int elapsed, Mission *obj)
                 mt = MapObject::mjt_Vehicle; si = 0;
                 v = (VehicleInstance *)(obj->findAt(x + inc_rel,
                     y + rel_inc,z, &mt, &si, true));
-                if (!v && state_ == Static::sttdoor_Open && (!found)) {
+                if (!v && !found) {
                     state_ = Static::sttdoor_Closing;
                     is_ignored_ = false;
                 } else if (v){
@@ -1094,7 +1099,7 @@ bool LargeDoor::animate(int elapsed, Mission *obj)
                 mt = MapObject::mjt_Vehicle; si = 0;
                 v = (VehicleInstance *)(obj->findAt(x + inc_rel,
                     y + rel_inc,z,&mt,&si,true));
-                if (!v && state_ == Static::sttdoor_Open && (!found)) {
+                if (!v && !found) {
                     state_ = Static::sttdoor_Closing;
                     is_ignored_ = false;
                 } else if (v){
@@ -1104,21 +1109,97 @@ bool LargeDoor::animate(int elapsed, Mission *obj)
                     v->hold_on_.wayFree = 0;
                 }
             }
-            for (int a = (y - 1); a <= (y + 1); a++ ) {
-                for (int b = (x - 1); b <= (x + 1); b++) {
-                    mt = MapObject::mjt_Ped; si = 0;
-                    do {
-                        p = (PedInstance *)(obj->findAt(b, a, z,
-                            &mt, &si, true));
-                        if (p) {
-                            p->hold_on_.wayFree = 0;
+            *j = -1;
+            for (*i = -1; *i <= 1; (*i)++ ) {
+                mt = MapObject::mjt_Ped; si = 0;
+                do {
+                    p = (PedInstance *)(obj->findAt(x + rel_inc,
+                        y + inc_rel, z, &mt, &si, true));
+                    if (p) {
+                        found_peds.push_back(p);
+                        if (!found && p->hasAccessCard()) {
+                            state_ = Static::sttdoor_Open;
+                            is_ignored_ = true;
+                            found = true;
                         }
-                    } while (p);
+                    }
+                } while (p);
+            }
+            *j = 1;
+            for (*i = -1; *i <= 1; (*i)++ ) {
+                mt = MapObject::mjt_Ped; si = 0;
+                do {
+                    p = (PedInstance *)(obj->findAt(x + rel_inc,
+                        y + inc_rel, z, &mt, &si, true));
+                    if (p) {
+                        found_peds.push_back(p);
+                        if (!found && p->hasAccessCard()) {
+                            state_ = Static::sttdoor_Open;
+                            is_ignored_ = true;
+                            found = true;
+                        }
+                    }
+                } while (p);
+            }
+            *j = 0;
+            for (*i = -1; *i <= 1; (*i)++ ) {
+                mt = MapObject::mjt_Ped; si = 0;
+                do {
+                    p = (PedInstance *)(obj->findAt(x + rel_inc,
+                        y + inc_rel, z, &mt, &si, true));
+                    if (p) {
+                        found_peds_mid.push_back(p);
+                        if (!found && p->hasAccessCard()) {
+                            state_ = Static::sttdoor_Open;
+                            is_ignored_ = true;
+                            found = true;
+                        }
+                    }
+                } while (p);
+            }
+            if (state_ == Static::sttdoor_Open) {
+                for (std::vector<PedInstance *>::iterator it = found_peds.begin();
+                    it != found_peds.end(); it++ )
+                {
+                    (*it)->hold_on_.wayFree = 0;
+                }
+                for (std::vector<PedInstance *>::iterator it = found_peds_mid.begin();
+                    it != found_peds_mid.end(); it++ )
+                {
+                    (*it)->hold_on_.wayFree = 0;
+                }
+            } else {
+                for (std::vector<PedInstance *>::iterator it = found_peds.begin();
+                    it != found_peds.end(); it++ )
+                {
+                    p = *it;
+                    p->hold_on_.wayFree = 2;
+                    p->hold_on_.tilex = x;
+                    p->hold_on_.tiley = y;
+                    if (sub_type_ == 0) {
+                        p->hold_on_.xadj = 1;
+                        p->hold_on_.yadj = 0;
+                    } else if (sub_type_ == 2) {
+                        p->hold_on_.xadj = 0;
+                        p->hold_on_.yadj = 1;
+                    }
+                    p->hold_on_.tilez = z;
+                    p->hold_on_.pathBlocker = this;
+                }
+                for (std::vector<PedInstance *>::iterator it = found_peds_mid.begin();
+                    it != found_peds_mid.end(); it++ )
+                {
+                    p = *it;
+                    ShootableMapObject::DamageInflictType d;
+                    d.dtype = MapObject::dmg_Hit;
+                    d.d_owner = NULL;
+                    d.dvalue = 1024;
+                    d.ddir = -1;
+                    p->handleDamage(&d);
                 }
             }
             break;
         case Static::sttdoor_Closed:
-            char sign;
             if (sub_type_ == 0) {
                 i = &rel_inc;
                 j = &inc_rel;
@@ -1156,48 +1237,53 @@ bool LargeDoor::animate(int elapsed, Mission *obj)
                 v->hold_on_.wayFree = 1;
             }
             *j = -1;
-            for ( *i = -1; *i <= 1; (*i)++ ) {
+            for (*i = -1; *i <= 1; (*i)++ ) {
                 mt = MapObject::mjt_Ped; si = 0;
                 do {
                     p = (PedInstance *)(obj->findAt(x + rel_inc,
                         y + inc_rel, z, &mt, &si, true));
                     if (p) {
-                        p->hold_on_.wayFree = 2;
-                        p->hold_on_.tilex = x;
-                        p->hold_on_.tiley = y;
-                        if (sub_type_ == 0) {
-                            p->hold_on_.xadj = 1;
-                            p->hold_on_.yadj = 0;
-                        } else if (sub_type_ == 2) {
-                            p->hold_on_.xadj = 0;
-                            p->hold_on_.yadj = 1;
+                        found_peds.push_back(p);
+                        if (!found && p->hasAccessCard()) {
+                            state_ = Static::sttdoor_Opening;
+                            is_ignored_ = false;
+                            found = true;
                         }
-                        p->hold_on_.tilez = z;
-                        p->hold_on_.pathBlocker = this;
                     }
                 } while (p);
             }
             *j = 1;
-            for ( *i = -1; *i <= 1; (*i)++ ) {
+            for (*i = -1; *i <= 1; (*i)++ ) {
                 mt = MapObject::mjt_Ped; si = 0;
                 do {
                     p = (PedInstance *)(obj->findAt(x + rel_inc,
                         y + inc_rel, z, &mt, &si, true));
                     if (p) {
-                        p->hold_on_.wayFree = 2;
-                        p->hold_on_.tilex = x;
-                        p->hold_on_.tiley = y;
-                        if (sub_type_ == 0) {
-                            p->hold_on_.xadj = 1;
-                            p->hold_on_.yadj = 0;
-                        } else if (sub_type_ == 2) {
-                            p->hold_on_.xadj = 0;
-                            p->hold_on_.yadj = 1;
+                        found_peds.push_back(p);
+                        if (!found && p->hasAccessCard()) {
+                            state_ = Static::sttdoor_Opening;
+                            is_ignored_ = false;
+                            found = true;
                         }
-                        p->hold_on_.tilez = z;
-                        p->hold_on_.pathBlocker = this;
                     }
                 } while (p);
+            }
+            for (std::vector<PedInstance *>::iterator it = found_peds.begin();
+                it != found_peds.end(); it++ )
+            {
+                p = *it;
+                p->hold_on_.wayFree = 2;
+                p->hold_on_.tilex = x;
+                p->hold_on_.tiley = y;
+                if (sub_type_ == 0) {
+                    p->hold_on_.xadj = 1;
+                    p->hold_on_.yadj = 0;
+                } else if (sub_type_ == 2) {
+                    p->hold_on_.xadj = 0;
+                    p->hold_on_.yadj = 1;
+                }
+                p->hold_on_.tilez = z;
+                p->hold_on_.pathBlocker = this;
             }
             break;
         case Static::sttdoor_Closing:
@@ -1205,11 +1291,77 @@ bool LargeDoor::animate(int elapsed, Mission *obj)
                 state_ = Static::sttdoor_Closed;
                 is_ignored_ = false;
             }
-            break;
         case Static::sttdoor_Opening:
-            if (frame_ >= g_App.gameSprites().lastFrame(opening_anim_)) {
+            if (state_ == Static::sttdoor_Opening
+                && frame_ >= g_App.gameSprites().lastFrame(opening_anim_))
+            {
                 state_ = Static::sttdoor_Open;
                 is_ignored_ = true;
+            }
+            if (sub_type_ == 0) {
+                i = &rel_inc;
+                j = &inc_rel;
+                sign = 1;
+            } else if (sub_type_ == 2) {
+                i = &inc_rel;
+                j = &rel_inc;
+                sign = -1;
+            }
+            assert(i != 0 && j != 0);
+            *j = -1 * sign;
+            *i = -2;
+            mt = MapObject::mjt_Vehicle; si = 0;
+            v = (VehicleInstance *)(obj->findAt(x + inc_rel,
+                y + rel_inc,z, &mt, &si,true));
+            if (v) {
+                v->hold_on_.wayFree = 1;
+            }
+            *j = 1 * sign;
+            *i = 2;
+            mt = MapObject::mjt_Vehicle; si = 0;
+            v = (VehicleInstance *)(obj->findAt(x + inc_rel,
+                y + rel_inc,z, &mt, &si,true));
+            if (v) {
+                v->hold_on_.wayFree = 1;
+            }
+            *j = -1;
+            for (*i = -1; *i <= 1; (*i)++ ) {
+                mt = MapObject::mjt_Ped; si = 0;
+                do {
+                    p = (PedInstance *)(obj->findAt(x + rel_inc,
+                        y + inc_rel, z, &mt, &si, true));
+                    if (p) {
+                        found_peds.push_back(p);
+                    }
+                } while (p);
+            }
+            *j = 1;
+            for (*i = -1; *i <= 1; (*i)++ ) {
+                mt = MapObject::mjt_Ped; si = 0;
+                do {
+                    p = (PedInstance *)(obj->findAt(x + rel_inc,
+                        y + inc_rel, z, &mt, &si, true));
+                    if (p) {
+                        found_peds.push_back(p);
+                    }
+                } while (p);
+            }
+            for (std::vector<PedInstance *>::iterator it = found_peds.begin();
+                it != found_peds.end(); it++ )
+            {
+                p = *it;
+                p->hold_on_.wayFree = 2;
+                p->hold_on_.tilex = x;
+                p->hold_on_.tiley = y;
+                if (sub_type_ == 0) {
+                    p->hold_on_.xadj = 1;
+                    p->hold_on_.yadj = 0;
+                } else if (sub_type_ == 2) {
+                    p->hold_on_.xadj = 0;
+                    p->hold_on_.yadj = 1;
+                }
+                p->hold_on_.tilez = z;
+                p->hold_on_.pathBlocker = this;
             }
             break;
     }

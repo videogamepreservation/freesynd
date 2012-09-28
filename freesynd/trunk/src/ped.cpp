@@ -1935,13 +1935,18 @@ bool PedInstance::handleDrawnAnim(int elapsed) {
         case PedInstance::ad_HitAnim:
             if (frame_ < ped_->lastHitFrame(getDirection()))
                 answer = false;
+            else if (health() < 0)
+                setDrawnAnim(PedInstance::ad_DieAnim);
             break;
         case PedInstance::ad_DieAnim:
             if (frame_ < ped_->lastDieFrame()) {
                 answer = false;
                 break;
             }
-            setDrawnAnim(PedInstance::ad_DeadAnim);
+            if (agent_is_ == PedInstance::Agent_Active)
+                setDrawnAnim(PedInstance::ad_DeadAgentAnim);
+            else
+                setDrawnAnim(PedInstance::ad_DeadAnim);
             break;
         case PedInstance::ad_DeadAnim:
             break;
@@ -2709,4 +2714,8 @@ int PedInstance::getSpeed()
     return base_speed_;
 }
 
-
+bool PedInstance::hasAccessCard()
+{
+    WeaponInstance * wi = selectedWeapon();
+    return wi && wi->getWeaponType() == Weapon::AccessCard ? true : false;
+}

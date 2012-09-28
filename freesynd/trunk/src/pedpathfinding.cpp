@@ -50,7 +50,7 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
     floodPointDesc *based = &(m->mdpoints_[tile_x_
         + tile_y_ * m->mmax_x_ + tile_z_ * m->mmax_m_xy]);
 
-#if 1
+#if 0
     printf("target t %x, dirm %x ; base t %x, dirm %x\n", targetd->t,
         targetd->dirm, based->t, based->dirm);
     printf("target dirh %x, dirl %x ; base dirh %x, dirl %x\n", targetd->dirh,
@@ -2337,9 +2337,18 @@ bool PedInstance::movementP(Mission *m, int elapsed)
     return updated;
 }
 
-bool PedInstance::moveToDir(Mission* m, int elapsed, int dir, int t_posx,
+// TODO: add responses, possible failure, bounced etc.
+uint8 PedInstance::moveToDir(Mission* m, int elapsed, int dir, int t_posx,
     int t_posy, int dist, bool bounce)
 {
+    floodPointDesc *based = &(m->mdpoints_[tile_x_
+        + tile_y_ * m->mmax_x_ + tile_z_ * m->mmax_m_xy]);
+    if(based->t == m_fdNonWalkable) {
+        printf("==== unwalk pos: x %i; y %i; z %i, ox %i, oy %i, oz %i\n",
+            tile_x_, tile_y_, tile_z_, off_x_, off_y_, off_z_);
+        printf("Movement from nonwalkable postion\n");
+        return false;
+    }
     if (dir == -1) {
         if (t_posx != -1 && t_posy != -1) {
             setDirection(t_posx - tile_x_ * 256 - off_x_,
