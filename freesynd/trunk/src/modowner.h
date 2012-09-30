@@ -71,4 +71,5 @@ public:
 protected:
     Mod *slots_[6];
 };
+
 #endif

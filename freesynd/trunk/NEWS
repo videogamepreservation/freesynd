@@ -7,9 +7,12 @@ This is a prelimary release for testing and development purposes.
 
 Changes
 -------
- * Vehicle creates explosion and damages everything nearby
- * Access card will identify agent as police officer
- * Added sound effects for gauss, timebomb, mission failed
+  * Vehicle creates explosion and damages everything nearby
+  * Added sound effects for gauss, timebomb, mission failed
+  * Police officer will warn armed pedestrian and shoot after 5 sec
+  * Rewritten Z coord setup and use, due to removal of Z lowering in pedmanager
+  * Rewritten PedInstance::animate
+  * Better animation switching for pedestrians
 
 Fixed Bugs
 ----------
@@ -20,6 +23,9 @@ Fixed Bugs
 
 Features added
 ----------
+  * Access card will identify agent as police officer, also opens large doors
+  * Selection markers (1,2,3,4), to identify selected agent
+  * Sound effects added "Selected", "Mission failed", "Police warning"
   * :
 
 Known issues with this release
