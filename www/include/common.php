@@ -51,8 +51,12 @@ function getFileSize($file)
    return round($size, 1) . ' ' . trim(substr(' KMGT', $si, 1)) . 'B';
 }
 
-function getLinkToIssue($id, $label) {
-	return '<a href="http://sourceforge.net/support/tracker.php?aid=' . $id . '">'. $label . '</a>';
+function getLinkToBug($id, $label) {
+	return '<a href="http://sourceforge.net/p/freesynd/bugs/' . $id . '/">'. $label . '</a>';
+}
+
+function getLinkToFeature($id, $label) {
+	return '<a href="http://sourceforge.net/p/freesynd/feature-requests/' . $id . '/">'. $label . '</a>';
 }
 
 function replaceLink($str) {
@@ -130,7 +134,7 @@ function newsItem($title, $content, $submitter, $date, $id)
         . '</b><br />' . htmlentities($date) . "</div>\n\n";
 }
 
-function roadmapItem($id, $content, $status)
+function roadmapItem($id, $content, $status, $isBug)
 {
 	$statusLabel = '';
 	$style = '';
@@ -157,8 +161,11 @@ function roadmapItem($id, $content, $status)
 		$style = ' style = "text-decoration:underline"';
 		break;
   }
-	
-	echo '<li><span' . $style . '>' . getLinkToIssue($id, $id) . '&nbsp;' . $content . '</span>&nbsp;' . $statusLabel . "</li>\n";
+	if ($isBug) {
+		echo '<li><span' . $style . '>' . getLinkToBug($id, $id) . '&nbsp;' . $content . '</span>&nbsp;' . $statusLabel . "</li>\n";
+	} else {
+		echo '<li><span' . $style . '>' . getLinkToFeature($id, $id) . '&nbsp;' . $content . '</span>&nbsp;' . $statusLabel . "</li>\n";
+	}
 }
 
 function printRoadMap() {
@@ -171,7 +178,7 @@ function printRoadMap() {
 		echo " <ul>\n";
 		
 		foreach ($xml->features->feature as $feat) {
-			roadmapItem($feat['id'], $feat, $feat['status']);
+			roadmapItem($feat['id'], $feat, $feat['status'], false);
 		}
 
 		echo " </ul>\n";
@@ -180,7 +187,7 @@ function printRoadMap() {
 		echo " <ul>\n";
 		
 		foreach ($xml->bugs->bug as $bug) {
-			roadmapItem($bug['id'], $bug, $bug['status']);
+			roadmapItem($bug['id'], $bug, $bug['status'], true);
 		}
 
 		echo " </ul>\n";

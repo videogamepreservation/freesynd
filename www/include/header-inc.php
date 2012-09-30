@@ -63,7 +63,7 @@ $title = "News";
     <link rel="stylesheet" href="default.css" title="FreeSynd" media="screen, projection, tv" />
 	
 	<link rel="alternate feed" type="application/rss+xml" title="Freesynd News" href="data/rss-news.xml" />
-	<link rel="alternate feed" type="application/rss+xml" title="Freesynd Recent Activity" href="http://sourceforge.net/export/rss2_keepsake.php?group_id=93282" />
+	<link rel="alternate feed" type="application/rss+xml" title="Freesynd SVN Activity" href="http://sourceforge.net/p/freesynd/code/feed/" />
 
     <script type="text/javascript" src="clock.js"></script>
   </head>
@@ -95,10 +95,9 @@ upgrade to a newer and more standards-compliant browser. Possible
 alternatives are Gecko variants such as
 <a href="http://www.mozilla.org/products/firefox/">Firefox</a>,
 <a href="http://www.mozilla.org/">Mozilla</a>,
-<a href="http://channels.netscape.com/ns/browsers/default.jsp">Netscape</a>,
-<a href="http://mozilla.org/products/camino/">Camino</a>,
+<a href="http://caminobrowser.org/">Camino</a>,
 <a href="http://galeon.sourceforge.net/">Galeon</a> and
-<a href="http://www.kmeleon.org/">K-Meleon</a>; KHTML
+<a href="https://www.google.com/intl/uk/chrome/browser/">Chrome</a>; KHTML
 variants such as <a href="http://www.konqueror.org/">Konqueror</a> and
 <a href="http://www.apple.com/safari/">Safari</a>;
 <a href="http://www.opera.com/">Opera</a>; or even text-mode browsers such as
