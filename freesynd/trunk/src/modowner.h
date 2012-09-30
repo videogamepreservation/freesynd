@@ -5,6 +5,8 @@
  *   Copyright (C) 2005  Stuart Binge  <skbinge@gmail.com>              *
  *   Copyright (C) 2005  Joost Peters  <joostp@users.sourceforge.net>   *
  *   Copyright (C) 2006  Trent Waddington <qg@biodome.org>              *
+ *   Copyright (C) 2006  Tarjei Knapstad <tarjei.knapstad@gmail.com>    *
+ *   Copyright (C) 2011  Bohdan Stelmakh <chamel@users.sourceforge.net> *
  *   Copyright (C) 2011  Joey Parrish  <joey.parrish@gmail.com>         *
  *                                                                      *
  *    This program is free software;  you can redistribute it and / or  *
@@ -22,57 +24,51 @@
  *  The full text of the license is also included in the file COPYING.  *
  *                                                                      *
  ************************************************************************/
-
-#ifndef MODMANAGER_H
-#define MODMANAGER_H
-
-#include <fstream>
-
-#include "common.h"
+#ifndef MODOWNER_H
+#define MODOWNER_H
 #include "mod.h"
-#include "utils/seqmodel.h"
-#include "utils/portablefile.h"
 
-/*!
- * Modifications manager class.
- */
-class ModManager {
+class ModOwner {
 public:
-    //! Constructor
-    ModManager();
-    //! Destructor
-    ~ModManager();
+    ModOwner() {
+        for (int i = 0; i < 6; i++)
+            slots_[i] = NULL;
+    }
+    /*!
+    * Returns true if the agent can be equiped with that mod version.
+    */
+    bool canHaveMod(Mod *pNewMod) {
+        if (pNewMod == NULL) {
+            return false;
+        }
 
-    //! Resources destruction
-    void destroy();
-    //! Reset Data
-    void reset();
-    //! Cheating mode to enable all mods
-    void cheatEnableAllMods();
-    
-    Mod *getMod(Mod::EModType mt, Mod::EModVersion ver);
+        Mod *pMod = slots_[pNewMod->getType()];
+        if (pMod) {
+            // Agent has a mod of the same type
+            // Returns true if equiped version if less than new version
+            return (pMod->getVersion() < pNewMod->getVersion());
+        }
+        
+        // There is no mod of that type so agent can be equiped
+        return true;
+    }
 
-    //! Enable mod of given type and version
-    void enableMod(Mod::EModType mt, Mod::EModVersion ver);
-    //! Returns the list of currently available weapons
-    SequenceModel * getAvalaibleMods() { return &mods_; }
+    void addMod(Mod *pNewMod) {
+        if (pNewMod) {
+            slots_[pNewMod->getType()] = pNewMod;
+        }
+    }
 
-    //! Save instance to file
-    bool saveToFile(PortableFile &file);
-    //! Load instance from file
-    bool loadFromFile(PortableFile &infile, const FormatVersion& v);
-    Mod *getHighestVersion(Mod::EModType mt);
+    Mod *slot(int n) {
+        assert(n < 6);
+        return slots_[n];
+    }
 
+    void clearSlots() {
+        for (int i = 0; i < 6; i++)
+            slots_[i] = NULL;
+    }
 protected:
-    //! Loads the mod from file
-    Mod *loadMod(Mod::EModType mt, Mod::EModVersion ver);
-
-protected:
-    /*! This vector is used to store necessary but unavailable mods until there
-     * are made available.*/
-    std::vector<Mod *> preFetch_;
-    //! The list of currently available mods
-    VectorModel<Mod *> mods_;
+    Mod *slots_[6];
 };
-
 #endif

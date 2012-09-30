@@ -109,7 +109,7 @@ bool Mission::loadLevel(uint8 * levelData)
 
     vehicles_.clear();
 
-    // Original objects data is based on offsets, but our objetcs are different
+    // NOTE: Original objects data is based on offsets, but our objetcs are different
     // in size and are not in a single memory block, because of this indexes
     // in our data "arrays" are mirrored for object's position within original
     // array
@@ -177,6 +177,15 @@ bool Mission::loadLevel(uint8 * levelData)
     obj_ids[4] = "Policemen";
     obj_ids[5] = "Civilians";
 #endif
+    ModOwner mods_enemy;
+    // enemies get top version of mods
+    mods_enemy.addMod(g_App.mods().getHighestVersion(Mod::MOD_LEGS));
+    mods_enemy.addMod(g_App.mods().getHighestVersion(Mod::MOD_ARMS));
+    mods_enemy.addMod(g_App.mods().getHighestVersion(Mod::MOD_CHEST));
+    mods_enemy.addMod(g_App.mods().getHighestVersion(Mod::MOD_HEART));
+    mods_enemy.addMod(g_App.mods().getHighestVersion(Mod::MOD_EYES));
+    mods_enemy.addMod(g_App.mods().getHighestVersion(Mod::MOD_BRAIN));
+    
     for (int i = 0; i < 256; i++) {
         if (i == 130)
             i = 130;
@@ -235,6 +244,7 @@ bool Mission::loadLevel(uint8 * levelData)
                     p->setObjGroupID(2);
                     p->addEnemyGroupDef(1);
                     p->setBaseSpeed(256);
+                    *((ModOwner *)p) = mods_enemy;
                 } else if (mt == PedInstance::og_dmGuard) {
                     p->setObjGroupID(3);
                     p->addEnemyGroupDef(1);
@@ -933,30 +943,33 @@ void Mission::start()
     stats_.nbOfHits = 0;
 
     for (int i = 0; i < 4; i++) {
-        if (g_Session.squad().member(i)) {
-            if(g_Session.squad().member(i)->isActive()){
+        PedInstance *p = peds_[i];
+        Agent *pAg = g_Session.squad().member(i);
+        if (pAg) {
+            if(pAg->isActive()){
                 stats_.agents += 1;
-                peds_[i]->setHealth(g_Session.squad().member(i)->health() *
+                p->setHealth(pAg->health() *
                                 peds_[i]->health() / 255);
-                while (g_Session.squad().member(i)->numWeapons()) {
-                    WeaponInstance *wi = g_Session.squad().member(i)->removeWeapon(0);
+                while (pAg->numWeapons()) {
+                    WeaponInstance *wi = pAg->removeWeapon(0);
                     weapons_.push_back(wi);
-                    peds_[i]->addWeapon(wi);
-                    wi->setOwner(peds_[i]);
+                    p->addWeapon(wi);
+                    wi->setOwner(p);
                     wi->setIsIgnored(true);
                 }
-                peds_[i]->setAgentIs(PedInstance::Agent_Active);
-            }else{
-                peds_[i]->setHealth(-1);
-                peds_[i]->setAgentIs(PedInstance::Agent_Non_Active);
-                peds_[i]->setIsIgnored(true);
-                peds_[i]->setStateMasks(PedInstance::pa_smUnavailable);
+                p->setAgentIs(PedInstance::Agent_Active);
+                *((ModOwner *)pAg) = *((ModOwner *)p);
+            }else {
+                p->setHealth(-1);
+                p->setAgentIs(PedInstance::Agent_Non_Active);
+                p->setIsIgnored(true);
+                p->setStateMasks(PedInstance::pa_smUnavailable);
             }
         } else {
-            peds_[i]->setHealth(-1);
-            peds_[i]->setAgentIs(PedInstance::Agent_Non_Active);
-            peds_[i]->setIsIgnored(true);
-            peds_[i]->setStateMasks(PedInstance::pa_smUnavailable);
+            p->setHealth(-1);
+            p->setAgentIs(PedInstance::Agent_Non_Active);
+            p->setIsIgnored(true);
+            p->setStateMasks(PedInstance::pa_smUnavailable);
         }
     }    
 }
@@ -1100,6 +1113,26 @@ void Mission::checkObjectives() {
         status_ = FAILED;
 }
 
+void Mission::addWeaponsFromPedToAgent(PedInstance* p, Agent* pAg)
+{
+    while (p->numWeapons()) {
+        WeaponInstance *wi = p->removeWeapon(0);
+        std::vector < WeaponInstance * >::iterator it =
+            weapons_.begin();
+        while (it != weapons_.end() && *it != wi)
+            it++;
+        assert(it != weapons_.end());
+        weapons_.erase(it);
+        wi->deactivate();
+        // auto-reload for pistol
+        if (wi->getMainType() == Weapon::Pistol)
+            wi->setAmmoRemaining(wi->ammo());
+        wi->resetWeaponUsedTime();
+        pAg->addWeapon(wi);
+    }
+}
+
+
 void Mission::end()
 {
     for (unsigned int i = 8; i < peds_.size(); i++) {
@@ -1124,49 +1157,38 @@ void Mission::end()
             }
         } else if (p->objGroupID() == 1) {
             if (p->objGroupDef() == PedInstance::og_dmAgent) {
-                // TODO: add these to teamMember list,
-                // what is the maximum list size?
-                // avoid adding too much
                 stats_.agentCaptured++;
+                if (completed()) {
+                    Agent *pAg = g_App.agents().createAgent(false);
+                    if (pAg) {
+                        addWeaponsFromPedToAgent(p, pAg);
+                        *((ModOwner *)pAg) = *((ModOwner *)p);
+                    }
+                }
             } else
                 stats_.convinced++;
         }
     }
 
-    for (int i = 0; i < 4; i++)
-        if (g_Session.squad().member(i) && g_Session.squad().member(i)->isActive()) {
+    for (int i = 0; i < 4; i++) {
+        Agent *pAg = g_Session.squad().member(i);
+        if (pAg && pAg->isActive()) {
             if (peds_[i]->health() <= 0) {
                 peds_[i]->destroyAllWeapons();
-                Agent *pAg = g_Session.squad().member(i);
                 pAg->removeAllWeapons();
                 pAg->clearSlots();
                 g_Session.squad().setMember(i, NULL);
-                for (int inc = 0;
-                    inc < g_App.agents().MAX_AGENT; inc++)
-                {
+                for (int inc = 0; inc < g_App.agents().MAX_AGENT; inc++) {
                     if (g_App.agents().agent(inc) == pAg) {
                         g_App.agents().destroyAgentSlot(inc);
                         break;
                     }
                 }
             } else {
-                while (peds_[i]->numWeapons()) {
-                    WeaponInstance *wi = peds_[i]->removeWeapon(0);
-                    std::vector < WeaponInstance * >::iterator it =
-                        weapons_.begin();
-                    while (it != weapons_.end() && *it != wi)
-                        it++;
-                    assert(it != weapons_.end());
-                    weapons_.erase(it);
-                    wi->deactivate();
-                    // auto-reload for pistol
-                    if (wi->getMainType() == Weapon::Pistol)
-                        wi->setAmmoRemaining(wi->ammo());
-                    wi->resetWeaponUsedTime();
-                    g_Session.squad().member(i)->addWeapon(wi);
-                }
+                addWeaponsFromPedToAgent(peds_[i], pAg);
             }
         }
+    }
 }
 
 void Mission::addWeapon(WeaponInstance * w)

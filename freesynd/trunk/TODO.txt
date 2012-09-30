@@ -42,11 +42,10 @@ game mission files.
  - Create a debian package
  - add sound effects
  - mapmenu: player color update - if changed in configmenu; change of owners for
-non-player owned territory, in original territory owners changed it was like
+non-player owned territory
+ - in original territory owners changed, it was like
 other syndicates where capturing territories
  - selectmenu make impossible to start gameplay with all agents non active+dead1
- - money increase after mission should not include completed mission's income
-for time during this mission was completed
  - gameplaymenu after mission succesful/failed add timed auto switch to
 debriefmenu after 5 sec or so
 

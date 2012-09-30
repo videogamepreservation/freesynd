@@ -93,6 +93,7 @@ set(HEADERS
 	missionmanager.h
 	mod.h
 	modmanager.h
+	modowner.h
 	path.h
 	pathsurfaces.h
 	ped.h

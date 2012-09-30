@@ -31,6 +31,7 @@
 
 #include "common.h"
 #include "mapobject.h"
+#include "modowner.h"
 #include "pathsurfaces.h"
 #include "gfx/spritemanager.h"
 #include "weaponholder.h"
@@ -154,7 +155,9 @@ protected:
 /*!
  * Pedestrian instance class.
  */
-class PedInstance : public ShootableMovableMapObject, public WeaponHolder {
+class PedInstance : public ShootableMovableMapObject, public WeaponHolder,
+    public ModOwner
+{
 public:
     PedInstance(Ped *ped, int m);
     ~PedInstance();

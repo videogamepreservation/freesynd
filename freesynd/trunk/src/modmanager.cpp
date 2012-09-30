@@ -277,3 +277,19 @@ bool ModManager::loadFromFile(PortableFile &infile, const FormatVersion& v) {
     }
     return true;
 }
+
+Mod* ModManager::getHighestVersion(Mod::EModType mt)
+{
+    int highest_ver = -1;
+    Mod *pMod = NULL;
+    for (unsigned i = 0; i != mods_.size(); ++i) {
+        if (mt == mods_.get(i)->getType()
+            && highest_ver < mods_.get(i)->getVersion())
+        {
+            highest_ver = mods_.get(i)->getVersion();
+            pMod = mods_.get(i);
+        }
+    }
+    return pMod;
+}
+

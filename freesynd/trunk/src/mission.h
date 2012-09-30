@@ -38,6 +38,7 @@
 
 class VehicleInstance;
 class PedInstance;
+class Agent;
 
 /*!
  * A structure that holds mission statistics.
@@ -167,6 +168,7 @@ public:
     bool failed() { return status_ == FAILED; }
     //! Returns true if mission status is completed
     bool completed() { return status_ == COMPLETED; }
+    void addWeaponsFromPedToAgent(PedInstance *p, Agent *pAg);
     void end();
 
     void addWeapon(WeaponInstance *w);

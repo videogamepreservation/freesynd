@@ -2024,8 +2024,6 @@ bool PedInstance::handleDamage(ShootableMapObject::DamageInflictType *d) {
         health_ -= d->dvalue;
     else if (d->dtype == MapObject::dmg_Mental) {
         // TODO: check for required number of persuade points before applying
-        setObjGroupDef((obj_group_def_ & 0xFFFFFF00) |
-            (((PedInstance *)d->d_owner)->objGroupDef() & 0xFF));
         setObjGroupID(((PedInstance *)d->d_owner)->objGroupID());
         // TODO: inherit enemies
         enemy_group_defs_.clear();

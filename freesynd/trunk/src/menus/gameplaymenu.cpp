@@ -1064,7 +1064,6 @@ bool GameplayMenu::handleUnknownKey(Key key, const int modKeys) {
             // a success/failed animation will be played
             leaveAnim_ = "";
             if (mission_->completed()) {
-                g_Session.completeSelectedBlock();
                 // Display success animation
                 menu_manager_->gotoMenu(Menu::MENU_FLI_SUCCESS);
             }

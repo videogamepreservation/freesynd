@@ -29,18 +29,18 @@
 
 #include "common.h"
 #include "weaponholder.h"
+#include "modowner.h"
 #include <string>
 #include <vector>
 #include <fstream>
 #include "utils/portablefile.h"
 
-class Mod;
 class WeaponInstance;
 
 /*!
  * Stores information about agent health, weapons inventory and modifications.
  */
-class Agent : public WeaponHolder {
+class Agent : public WeaponHolder, public ModOwner {
 public:
     Agent(const char *agent_name, bool male);
     ~Agent();
@@ -59,20 +59,6 @@ public:
         health_ = n;
     }
 
-    bool canHaveMod(Mod *pNewMod);
-
-    void addMod(Mod *pNewMod);
-
-    Mod *slot(int n) {
-        assert(n < 6);
-        return slots_[n];
-    }
-
-    void clearSlots() {
-        for (int i = 0; i < 6; i++)
-            slots_[i] = NULL;
-    }
-
     void removeAllWeapons();
 
     //! Save instance to file
@@ -89,7 +75,6 @@ protected:
     bool male_;
     bool active_;
     int health_;
-    Mod *slots_[6];
 };
 
 #endif

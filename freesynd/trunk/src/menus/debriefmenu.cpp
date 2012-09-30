@@ -101,6 +101,8 @@ void DebriefMenu::handleShow() {
     g_Session.researchManager().addListener(this);
     int elapsed = pStats->mission_duration;
     g_Session.updateTime(elapsed);
+    if (pMission->completed())
+        g_Session.completeSelectedBlock();
     g_Session.researchManager().removeListener(this);
 
     updateStatsFields(pMission);

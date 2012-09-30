@@ -62,6 +62,7 @@ public:
     bool saveToFile(PortableFile &file);
     //! Load instance from file
     bool loadFromFile(PortableFile &infile, const FormatVersion& v);
+    Agent *createAgent(bool onlyWomen = false);
 
 protected:
     /*!

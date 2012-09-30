@@ -267,3 +267,17 @@ bool AgentManager::loadFromFile(PortableFile &infile, const FormatVersion& v) {
     }
     return true;
 }
+
+Agent* AgentManager::createAgent(bool onlyWomen)
+{
+    for (int i = 0; i < MAX_AGENT; i++) {
+        if (agents_.get(i) == NULL) {
+            Agent * pAgent = new Agent(g_AgentNames[rand() % g_NumAgentNames],
+                onlyWomen ? true : ((rand() % 2) == 0));
+            agents_.setAt(i, pAgent);
+            return pAgent;
+        }
+    }
+    return NULL;
+}
+

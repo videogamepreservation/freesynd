@@ -44,8 +44,6 @@ int Agent::agentCnt = 1;
 Agent::Agent(const char *agent_name, bool male) : name_(agent_name),
 male_(male), active_(true), health_(255) {
     id_ = agentCnt++;
-    for (int i = 0; i < 6; i++)
-        slots_[i] = NULL;
 }
 
 Agent::~Agent() {
@@ -55,31 +53,6 @@ Agent::~Agent() {
 void Agent::removeAllWeapons() {
     while (weapons_.size())
         delete removeWeapon(0);
-}
-
-/*!
- * Returns true if the agent can be equiped with that mod version.
- */
-bool Agent::canHaveMod(Mod *pNewMod) {
-    if (pNewMod == NULL) {
-        return false;
-    }
-
-    Mod *pMod = slots_[pNewMod->getType()];
-    if (pMod) {
-        // Agent has a mod of the same type
-        // Returns true if equiped version if less than new version
-        return (pMod->getVersion() < pNewMod->getVersion());
-    }
-    
-    // There is no mod of that type so agent can be equiped
-    return true;
-}
-
-void Agent::addMod(Mod *pNewMod) {
-    if (pNewMod) {
-        slots_[pNewMod->getType()] = pNewMod;
-    }
 }
 
 bool Agent::saveToFile(PortableFile &file) {
