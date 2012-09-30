@@ -2715,5 +2715,7 @@ int PedInstance::getSpeed()
 bool PedInstance::hasAccessCard()
 {
     WeaponInstance * wi = selectedWeapon();
-    return wi && wi->getWeaponType() == Weapon::AccessCard ? true : false;
+    Mod *pMod = slots_[Mod::MOD_BRAIN];
+    return wi && pMod && wi->getWeaponType() == Weapon::AccessCard
+        && pMod->getVersion() == Mod::MOD_V3 ? true : false;
 }

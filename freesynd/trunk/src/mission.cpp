@@ -958,7 +958,7 @@ void Mission::start()
                     wi->setIsIgnored(true);
                 }
                 p->setAgentIs(PedInstance::Agent_Active);
-                *((ModOwner *)pAg) = *((ModOwner *)p);
+                *((ModOwner *)p) = *((ModOwner *)pAg);
             }else {
                 p->setHealth(-1);
                 p->setAgentIs(PedInstance::Agent_Non_Active);
