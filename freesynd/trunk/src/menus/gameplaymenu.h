@@ -28,6 +28,7 @@
 #define GAMEPLAYMENU_H
 
 #include "minimaprenderer.h"
+#include "squadselection.h"
 
 class Mission;
 
@@ -60,18 +61,23 @@ protected:
     bool isScrollLegal(int newScrollX, int newScrollY);
     void improveScroll(int &newScrollX, int &newScrollY);
     int selectedAgentsCount();
-    void selectAgent(unsigned int agentNo, bool addToGroup);
-    void selectAllAgents(bool invert = false);
+    //! Selects/deselects an agent
+    bool selectAgent(unsigned int agentNo, bool addToGroup);
+    //! Selects/deselects all agents
+    void selectAllAgents();
 
-    bool isAgentSelected(unsigned int agentNo) {
-        return (selected_agents_ & (1 << agentNo)) != 0;
-    }
+    //! Deselect agent if he died
+    void updateSelectionForDeadAgents();
     //! updates visual markers for our agents
     void updtAgentsMarker();
 
     void stopShootingEvent(void);
+    //! Centers the minimap on the selection leader
+    void centerMinimapOnLeader();
     //! Animate the minimap
     void updateMinimap();
+    //! Update the select all button state
+    void updateSelectAll();
 
 protected:
     /*! Origin of the minimap on the screen.*/
@@ -91,8 +97,8 @@ protected:
     int scroll_x_;
     /*! Holds the amount of scroll on the Y axis.*/
     int scroll_y_;
-    unsigned int selected_agents_;
-    unsigned int selectable_agents_;
+    /*! Agent selection manager.*/
+    SquadSelection selection_;
     int pointing_at_ped_, pointing_at_vehicle_, pointing_at_weapon_;
     /*! This renderer is in charge of drawing the minimap.*/
     GamePlayMinimapRenderer mm_renderer_;

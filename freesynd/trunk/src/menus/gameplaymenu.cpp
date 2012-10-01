@@ -48,7 +48,7 @@ Menu(m, MENU_GAMEPLAY, MENU_DEBRIEF, "", "mscrenup.dat"),
 tick_count_(0), last_animate_tick_(0), last_motion_tick_(0),
 last_motion_x_(320), last_motion_y_(240), mission_hint_ticks_(0), 
 mission_hint_(0), mission_(NULL), world_x_(0),
-world_y_(0), selected_agents_(0),
+world_y_(0), selection_(),
 pointing_at_ped_(-1), pointing_at_vehicle_(-1), pointing_at_weapon_(-1),
 mm_renderer_()
 {
@@ -235,6 +235,97 @@ bool GameplayMenu::scroll() {
     return change;
 }
 
+bool GameplayMenu::isScrollLegal(int newScrollX, int newScrollY)
+{
+    int ox, oy;
+    int tx =
+        g_App.maps().screenToTileX(mission_->map(), newScrollX, newScrollY, ox);
+    int ty =
+        g_App.maps().screenToTileY(mission_->map(), newScrollX, newScrollY, oy);
+
+    if (tx < mission_->minX())
+        return false;
+
+    if (ty < mission_->minY())
+        return false;
+
+    if (tx > mission_->maxX())
+        return false;
+
+    if (ty > mission_->maxY())
+        return false;
+
+    return true;
+}
+
+void GameplayMenu::improveScroll(int &newScrollX, int &newScrollY)
+{
+    int ox, oy;
+    int tx =
+        g_App.maps().screenToTileX(mission_->map(), newScrollX, newScrollY, ox);
+    int ty =
+        g_App.maps().screenToTileY(mission_->map(), newScrollX, newScrollY, oy);
+
+    if (tx < mission_->minX())
+        newScrollX++;
+
+    if (ty < mission_->minY())
+        newScrollY++;
+
+    if (tx > mission_->maxX())
+        newScrollX--;
+
+    if (ty > mission_->maxY())
+        newScrollY--;
+}
+
+/*!
+ * Called before the menu is first shown.
+ * Place to do some initialising.
+ */
+void GameplayMenu::handleShow() {
+    mission_ = g_Session.getMission();
+    mission_->start();
+
+    // init menu internal state
+    pressed_btn_select_all_ = false;
+    completed_ = false;
+    world_x_ = mission_->startX();
+    world_y_ = mission_->startY();
+    
+    // set graphic palette
+    char spal[20];
+    sprintf(spal,"hpal0%i.dat",g_Session.getSelectedBlock().mis_id % 5 + 1);
+    menu_manager_->setPalette(spal);
+    g_Screen.clear(0);
+    
+    // place the screen at the good starting position
+    for (int cnt=0; cnt<100; cnt++) {
+        if (isScrollLegal(world_x_, world_y_)) {
+            break;
+        }
+
+        improveScroll(world_x_, world_y_);
+    }
+
+    // init selection to the first selectable agent
+    selection_.setSquad(&(g_Session.squad()));
+    updtAgentsMarker();
+
+    // Reset the minimap
+    mm_renderer_.init(mission_);
+    updateMinimap();
+
+    // Change cursor to game cursor
+    g_System.usePointerCursor();
+    g_System.showCursor();
+
+    // play game track
+    g_App.music().playTrack(msc::TRACK_ASSASSINATE);
+}
+
+int qanim = 200, qframe = 0;
+
 void GameplayMenu::handleTick(int elapsed)
 {
     bool change = false;
@@ -286,29 +377,7 @@ void GameplayMenu::handleTick(int elapsed)
         }
     }
 
-    selectable_agents_ = 0;
-    for (int i = 0; i < 4; i++) {
-        if (mission_->ped(i)) {
-            if (mission_->ped(i)->health() > 0) {
-                selectable_agents_ |= 1 << i;
-            } else {
-                if ((selected_agents_ & (1 << (i + 4))) != 0 )
-                    selected_agents_ ^= 1 << (i + 4);
-                if ((selected_agents_ & (1 << i)) != 0 )
-                    selected_agents_ ^= 1 << i;
-            }
-        }
-    }
-    if (selectable_agents_ == 0)
-        pressed_btn_select_all_ = false;
-    if ((selected_agents_ & 0xFF) == 0) {
-        for (int i = 0; i < 4; i++)
-            if ((selectable_agents_ & (1 << i)) != 0) {
-                    selected_agents_ = 1 << i;
-                    break;
-            }
-    }
-    updtAgentsMarker();
+    updateSelectionForDeadAgents();
 
     updateMinimap();
 
@@ -320,98 +389,6 @@ void GameplayMenu::handleTick(int elapsed)
 
     drawMissionHint(elapsed);
 }
-
-bool GameplayMenu::isScrollLegal(int newScrollX, int newScrollY)
-{
-    int ox, oy;
-    int tx =
-        g_App.maps().screenToTileX(mission_->map(), newScrollX, newScrollY, ox);
-    int ty =
-        g_App.maps().screenToTileY(mission_->map(), newScrollX, newScrollY, oy);
-
-    if (tx < mission_->minX())
-        return false;
-
-    if (ty < mission_->minY())
-        return false;
-
-    if (tx > mission_->maxX())
-        return false;
-
-    if (ty > mission_->maxY())
-        return false;
-
-    return true;
-}
-
-void GameplayMenu::improveScroll(int &newScrollX, int &newScrollY)
-{
-    int ox, oy;
-    int tx =
-        g_App.maps().screenToTileX(mission_->map(), newScrollX, newScrollY, ox);
-    int ty =
-        g_App.maps().screenToTileY(mission_->map(), newScrollX, newScrollY, oy);
-
-    if (tx < mission_->minX())
-        newScrollX++;
-
-    if (ty < mission_->minY())
-        newScrollY++;
-
-    if (tx > mission_->maxX())
-        newScrollX--;
-
-    if (ty > mission_->maxY())
-        newScrollY--;
-}
-
-void GameplayMenu::handleShow() {
-    if (mission_ == NULL) {
-        mission_ = g_Session.getMission();
-        mission_->start();
-        completed_ = false;
-        g_App.music().playTrack(msc::TRACK_ASSASSINATE);
-
-        char spal[20];
-        sprintf(spal,"hpal0%i.dat",g_Session.getSelectedBlock().mis_id % 5 + 1);
-        menu_manager_->setPalette(spal);
-        g_Screen.clear(0);
-        world_x_ = mission_->startX();
-        world_y_ = mission_->startY();
-        int count = 0;
-
-        while (!isScrollLegal(world_x_, world_y_) && count < 100) {
-            improveScroll(world_x_, world_y_);
-            count++;
-        }
-
-        selected_agents_ = 0;
-        selectable_agents_ = 0;
-
-        for (int i = 0; i < 4; i++)
-            if (mission_->ped(i)) {
-                if(mission_->ped(i)->agentIs() == PedInstance::Agent_Active){
-                    selectable_agents_ |= 1 << i;
-                }
-            }
-        for (int i = 0; i < 4; i++)
-            if ((selectable_agents_ & (1 << i)) != 0) {
-                    selected_agents_ = 1 << i;
-                    break;
-            }
-
-        updtAgentsMarker();
-        g_System.usePointerCursor();
-        g_System.showCursor();
-        pressed_btn_select_all_ = false;
-
-        // Reset the minimap
-        mm_renderer_.init(mission_);
-        updateMinimap();
-    }
-}
-
-int qanim = 200, qframe = 0;
 
 void GameplayMenu::handleRender(DirtyList &dirtyList)
 {
@@ -427,16 +404,16 @@ void GameplayMenu::handleRender(DirtyList &dirtyList)
 
 #ifdef _DEBUG
     if (g_System.getKeyModState() & KMD_LALT) {
-        if (isAgentSelected(0))
+        if (selection_.isAgentSelected(0))
             mission_->ped(0)->showPath(world_x_, world_y_);
 
-        if (isAgentSelected(1))
+        if (selection_.isAgentSelected(1))
             mission_->ped(1)->showPath(world_x_, world_y_);
 
-        if (isAgentSelected(2))
+        if (selection_.isAgentSelected(2))
             mission_->ped(2)->showPath(world_x_, world_y_);
 
-        if (isAgentSelected(3))
+        if (selection_.isAgentSelected(3))
             mission_->ped(3)->showPath(world_x_, world_y_);
     }
     // drawing of different sprites
@@ -503,6 +480,7 @@ void GameplayMenu::handleLeave()
     g_System.hideCursor();
     menu_manager_->setDefaultPalette();
     mission_->end();
+    selection_.clear();
 
     tick_count_ = 0;
     last_animate_tick_ = 0;
@@ -513,7 +491,6 @@ void GameplayMenu::handleLeave()
     mission_hint_ = 0;
     world_x_ = 0;
     world_y_ = 0;
-    selected_agents_ = 0;
     pointing_at_ped_ = -1;
     pointing_at_vehicle_ = -1;
     pointing_at_weapon_ = -1;
@@ -559,7 +536,7 @@ void GameplayMenu::handleMouseMotion(int x, int y, int state, const int modKeys)
                     x - 129 + world_x_ < px + 21 && y + world_y_ < py + 34) {
                     pointing_at_ped_ = i;
                     for (int indx = 0; indx < 4; indx++)
-                        if (isAgentSelected(indx)) {
+                        if (selection_.isAgentSelected(indx)) {
                             WeaponInstance * wi = mission_->ped(indx)->selectedWeapon();
                             ShootableMapObject *tsmo = mission_->ped(pointing_at_ped_);
                             if (wi && wi->canShoot() && wi->inRangeNoCP(&tsmo) == 1)
@@ -584,7 +561,7 @@ void GameplayMenu::handleMouseMotion(int x, int y, int state, const int modKeys)
                     x - 129 + world_x_ < px + 40 && y + world_y_ < py + 32) {
                     pointing_at_vehicle_ = i;
                     for (int indx = 0; indx < 4; indx++)
-                        if (isAgentSelected(indx)) {
+                        if (selection_.isAgentSelected(indx)) {
                             WeaponInstance * wi = mission_->ped(indx)->selectedWeapon();
                             ShootableMapObject *tsmo = mission_->vehicle(pointing_at_vehicle_);
                             if (wi && wi->canShoot() && wi->inRangeNoCP(&tsmo)== 1)
@@ -714,41 +691,28 @@ bool GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
         if (x < 128) {
             if (y < 46) {
                 if (x < 64) {
-                    if ((selectable_agents_ & (1 << 0)) != 0) {
-                        selectAgent(0, ctrl);
-                        change = true;
-                    }
+                    change = selectAgent(0, ctrl);
                 } else {
-                    if ((selectable_agents_ & (1 << 1)) != 0) {
-                        selectAgent(1, ctrl);
-                        change = true;
-                    }
+                    change = selectAgent(1, ctrl);
                 }
             }
 
             if (y >= 42 + 48 + 10 && y < 42 + 48 + 10 + 46) {
                 if (x < 64) {
-                    if ((selectable_agents_ & (1 << 2)) != 0) {
-                        selectAgent(2, ctrl);
-                        change = true;
-                    }
+                    change = selectAgent(2, ctrl);
                 } else {
-                    if ((selectable_agents_ & (1 << 3)) != 0) {
-                        selectAgent(3, ctrl);
-                        change = true;
-                    }
+                    change = selectAgent(3, ctrl);
                 }
             }
 
             /* The group-button click (in-between first and second row of
              * agents. A mouse click cycles between current selection and all
-             * agents. If control is pressed, current selection is inverted. */
+             * agents. */
             if (y >= 42 + 48 && y < 42 + 48 + 10) {
                 selectAllAgents();
                 change = true;
             }
-            if (change)
-                g_App.gameSounds().play(snd::SPEECH_SELECTED);
+            
 #if 0
             // TODO: click on minimap requires fixing
             int sy = 46 + 44 + 10 + 46 + 44 + 15 + 2 * 32;
@@ -776,7 +740,7 @@ bool GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
 
             for (int i = 0; i < 4; i++) {
                 PedInstance *ped = mission_->ped(i);
-                if (isAgentSelected(i)) {
+                if (selection_.isAgentSelected(i)) {
                     if (pointing_at_ped_ != -1) {
                         PedInstance::actionQueueGroupType as;
                         as.group_desc = PedInstance::gd_mStandWalk;
@@ -858,7 +822,7 @@ bool GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
                         int soy = oy;
                         if (!(mission_->getWalkable(stx, sty, stz, sox, soy)))
                             continue;
-                        if (selectedAgentsCount() > 1) {
+                        if (selection_.size() > 1) {
                             //TODO: current group position is like
                             // in original this can make non-tile
                             // oriented
@@ -895,7 +859,7 @@ bool GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
                 g_App.maps().screenToTileY(mission_->map(), world_x_ + x - 129,
                     world_y_ + y, oy);
             for (int i = 0; i < 4; i++) {
-                if (isAgentSelected(i)) {
+                if (selection_.isAgentSelected(i)) {
                     PedInstance * pa = mission_->ped(i);
                     PathNode *pn = NULL;
                     PedInstance::actionQueueGroupType as;
@@ -972,7 +936,7 @@ bool GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
             // the chosen ones should be same type and less ammo
             // or best in rank
             PedInstance *ped = mission_->ped(a);
-            if (isAgentSelected(a)) {
+            if (selection_.isAgentSelected(a)) {
                 if (w_num < ped->numWeapons()) {
                     if (button == 1) {
                         if (w_num < ped->numWeapons()) {
@@ -1081,39 +1045,27 @@ bool GameplayMenu::handleUnknownKey(Key key, const int modKeys) {
         return false;
     }
 
-    /* Handle agent selection by numeric keys. Key 0 cycles between current
-     * selection and all 4 agents. Ctrl + 0 inverts selection.
+    /* Handle agent selection by numeric keys. Key 0 cycles between one agent
+     * selection and all 4 agents.
      * Individual keys select the specified agent unless ctrl is pressed -
      * then they add/remove agent from current selection. */
 	if (key.keyVirt == KVT_NUMPAD0) {
         /* This code is exactly the same as for clicking on "group-button"
          * as you can see above. */
-        selectAllAgents(ctrl);
+        selectAllAgents();
         change = true;
     }
     else if (key.keyVirt == KVT_NUMPAD1) {
-        if ((selectable_agents_ & (1 << 0)) != 0) {
-            selectAgent(0, ctrl);
-            change = true;
-        }
+        change = selectAgent(0, ctrl);
     }
     else if (key.keyVirt == KVT_NUMPAD2) {
-        if ((selectable_agents_ & (1 << 1)) != 0) {
-            selectAgent(1, ctrl);
-            change = true;
-        }
+        change = selectAgent(1, ctrl);
     }
     else if (key.keyVirt == KVT_NUMPAD3) {
-        if ((selectable_agents_ & (1 << 2)) != 0) {
-            selectAgent(2, ctrl);
-            change = true;
-        }
+        change = selectAgent(2, ctrl);
     }
     else if (key.keyVirt == KVT_NUMPAD4) {
-        if ((selectable_agents_ & (1 << 3)) != 0) {
-            selectAgent(3, ctrl);
-            change = true;
-        }
+        change = selectAgent(3, ctrl);
 	} else if (key.keyFunc == KFC_LEFT) { // Scroll the map to the left
         scroll_x_ = -SCROLL_STEP;
     } else if (key.keyFunc == KFC_RIGHT) { // Scroll the map to the right
@@ -1147,7 +1099,7 @@ bool GameplayMenu::handleUnknownKey(Key key, const int modKeys) {
 #if 1
     if (key.unicode == 'm') {
         for (int i = 0; i < 4; i++) {
-            if (isAgentSelected(i)) {
+            if (selection_.isAgentSelected(i)) {
                 PedInstance *ped = mission_->ped(i);
                 PedInstance::actionQueueGroupType as;
                 ped->createActQWalking(as, NULL, NULL, 160, 1024);
@@ -1275,16 +1227,16 @@ bool GameplayMenu::handleUnknownKey(Key key, const int modKeys) {
 
 void GameplayMenu::drawAgentSelectors() {
     // 64x46
-    g_App.gameSprites().sprite(isAgentSelected(0) ? 1772 : 1748)->draw(
+    g_App.gameSprites().sprite(selection_.isAgentSelected(0) ? 1772 : 1748)->draw(
             0, 0, 0);
-    g_App.gameSprites().sprite(isAgentSelected(1) ? 1773 : 1749)->draw(
+    g_App.gameSprites().sprite(selection_.isAgentSelected(1) ? 1773 : 1749)->draw(
             64, 0, 0);
 
     // performance meters, select all button
 
-    g_App.gameSprites().sprite(isAgentSelected(2) ? 1774 : 1752)->draw(
+    g_App.gameSprites().sprite(selection_.isAgentSelected(2) ? 1774 : 1752)->draw(
             0, 46 + 44 + 10, 0);
-    g_App.gameSprites().sprite(isAgentSelected(3) ? 1775 : 1753)->draw(
+    g_App.gameSprites().sprite(selection_.isAgentSelected(3) ? 1775 : 1753)->draw(
             64, 46 + 44 + 10, 0);
 
     // draw health bars
@@ -1303,16 +1255,16 @@ void GameplayMenu::drawAgentSelectors() {
 
 void GameplayMenu::drawPerformanceMeters() {
     // 64x46
-    g_App.gameSprites().sprite(isAgentSelected(0) ? 1778 : 1754)->draw(
+    g_App.gameSprites().sprite(selection_.isAgentSelected(0) ? 1778 : 1754)->draw(
             0, 46, 0);
-    g_App.gameSprites().sprite(isAgentSelected(1) ? 1778 : 1755)->draw(
+    g_App.gameSprites().sprite(selection_.isAgentSelected(1) ? 1778 : 1755)->draw(
             64, 46, 0);
 
     // select all button, agent selectors
 
-    g_App.gameSprites().sprite(isAgentSelected(2) ? 1778 : 1754)->draw(
+    g_App.gameSprites().sprite(selection_.isAgentSelected(2) ? 1778 : 1754)->draw(
             0, 46 + 44 + 10 + 46, 0);
-    g_App.gameSprites().sprite(isAgentSelected(3)? 1778 : 1755)->draw(
+    g_App.gameSprites().sprite(selection_.isAgentSelected(3)? 1778 : 1755)->draw(
             64, 46 + 44 + 10 + 46, 0);
 }
 
@@ -1352,7 +1304,7 @@ void GameplayMenu::drawMissionHint(int elapsed) {
         || (mission_hint_ > 60))
     {
         for (int i = 0; i < 4; i++) {
-            if (isAgentSelected(i)){
+            if (selection_.isAgentSelected(i)){
                 if (mission_->ped(i)->isMoving()) {
                     str = g_App.menus().getMessage("HINT_GOING");
                 } else {
@@ -1424,17 +1376,7 @@ void GameplayMenu::drawMissionHint(int elapsed) {
 void GameplayMenu::drawWeaponSelectors() {
     PedInstance *p = NULL;
 
-    if (isAgentSelected(3))
-        p = mission_->ped(3);
-
-    if (isAgentSelected(2))
-        p = mission_->ped(2);
-
-    if (isAgentSelected(1))
-        p = mission_->ped(1);
-
-    if (isAgentSelected(0))
-        p = mission_->ped(0);
+    p = mission_->ped(selection_.getLeaderSlot());
 
     if (p) {
         bool draw_pw = true;
@@ -1498,28 +1440,22 @@ void GameplayMenu::drawWeaponSelectors() {
     }
 }
 
-int GameplayMenu::selectedAgentsCount() {
-    int agents = 0;
-
-    for (int i = 0; i < 4; i++)
-        if (isAgentSelected(i))
-            agents++;
-
-    return agents;
-}
-
 /*!
  * Select the given agent.
  * \param agentNo Agent id
  * \param addToGroup If true, agent is added to the current selection.
  * If not, the selection is emptied and filled with the new agent.
  */
-void GameplayMenu::selectAgent(unsigned int agentNo, bool addToGroup) {
-    if (addToGroup)
-        selected_agents_ ^= 1 << agentNo;
-    else
-        selected_agents_ = 1 << agentNo;
-    pressed_btn_select_all_ = false;
+bool GameplayMenu::selectAgent(unsigned int agentNo, bool addToGroup) {
+    if (selection_.selectAgent(agentNo, addToGroup)) {
+        updateSelectAll();
+        centerMinimapOnLeader();
+        updtAgentsMarker();
+        g_App.gameSounds().play(snd::SPEECH_SELECTED);
+        return true;
+    }
+
+    return false;
 }
 
 /*!
@@ -1527,74 +1463,71 @@ void GameplayMenu::selectAgent(unsigned int agentNo, bool addToGroup) {
  * \param invert If true, selects only the agents that were not already
  * selected.
  */
-void GameplayMenu::selectAllAgents(bool invert) {
-    if (invert) {
-        if ((selectable_agents_ & (1 << 0)) != 0)
-            selected_agents_ ^= 1;
-        if ((selectable_agents_ & (1 << 1)) != 0)
-            selected_agents_ ^= 2;
-        if ((selectable_agents_ & (1 << 2)) != 0)
-            selected_agents_ ^= 4;
-        if ((selectable_agents_ & (1 << 3)) != 0)
-            selected_agents_ ^= 8;
-        pressed_btn_select_all_ = false;
-    } else {
-        if ((selected_agents_ & 0xF0) != 0) {
-            selected_agents_ = selected_agents_ >> 4;
-            pressed_btn_select_all_ = false;
-        } else {
-            if (selectable_agents_ != 0) {
-                selected_agents_ = (selected_agents_ << 4) | selectable_agents_;
-                pressed_btn_select_all_ = true;
-            } else
-                pressed_btn_select_all_ = false;
-        }
+void GameplayMenu::selectAllAgents() {
+    pressed_btn_select_all_ = !pressed_btn_select_all_;
+    selection_.selectAllAgents(pressed_btn_select_all_);
+    g_App.gameSounds().play(snd::SPEECH_SELECTED);
+}
+
+/*!
+ * Make the current leader marker blinks.
+ * All other agents not.
+ */
+void GameplayMenu::updtAgentsMarker()
+{
+    for (size_t i = Squad::kSlot1; i < Squad::kMaxSlot; i++) {
+        // draw animation only for leader
+        mission_->sfxObjects(4 + i)->setDrawAllFrames(selection_.getLeaderSlot() == i);
     }
 }
 
-void GameplayMenu::updtAgentsMarker()
-{
-    // used to correct frame drawn, all frame will be same
-    MapObject *m_correction = NULL;
-    mission_->sfxObjects(4)->setDrawAllFrames(isAgentSelected(0));
-    if (isAgentSelected(0))
-        m_correction = mission_->sfxObjects(4);
-
-    mission_->sfxObjects(5)->setDrawAllFrames(isAgentSelected(1));
-    if (isAgentSelected(1)) {
-        if (m_correction)
-            mission_->sfxObjects(5)->setFrameFromObject(m_correction);
-        else
-            m_correction = mission_->sfxObjects(5);
+/*!
+ * This method checks among the squad to see if an agent died and deselects him.
+ */
+void GameplayMenu::updateSelectionForDeadAgents() {
+    // TODO change the way this detection is made. It's not clean. use events
+    for (size_t i = Squad::kSlot1; i < Squad::kMaxSlot; i++) {
+        if (mission_->ped(i) && mission_->ped(i)->isOurAgent()) {
+            if (g_Session.squad().member(i)->health() > 0 && mission_->ped(i)->health() <= 0) {
+                g_Session.squad().member(i)->setHealth(0);
+                selection_.deselectAgent(i);
+                updtAgentsMarker();
+            }
+        }
     }
+    centerMinimapOnLeader();
+}
 
-    mission_->sfxObjects(6)->setDrawAllFrames(isAgentSelected(2));
-    if (isAgentSelected(2)) {
-        if (m_correction)
-            mission_->sfxObjects(6)->setFrameFromObject(m_correction);
-        else
-            m_correction = mission_->sfxObjects(6);
-    }
-
-    mission_->sfxObjects(7)->setDrawAllFrames(isAgentSelected(3));
-    if (isAgentSelected(3)) {
-        if (m_correction)
-            mission_->sfxObjects(7)->setFrameFromObject(m_correction);
-        else
-            m_correction = mission_->sfxObjects(7);
-    }
+/*!
+ * Updates the minimap.
+ */
+void GameplayMenu::centerMinimapOnLeader() {
+    // Centers the minimap on the selection leader
+    PedInstance *pAgent = mission_->ped(selection_.getLeaderSlot());
+    mm_renderer_.centerOn(pAgent->tileX(), pAgent->tileY(), pAgent->offX(), pAgent->offY());
 }
 
 /*!
  * Updates the minimap.
  */
 void GameplayMenu::updateMinimap() {
-    // Centers the minimap on the first selected agent
+    
+}
+
+/*!
+ * Update the select all button's state
+ */
+void GameplayMenu::updateSelectAll() {
+    int nbAgentAlive = 0;
+    // count the number of remaining agents
     for (int indx = 0; indx < 4; indx++) {
-        if (isAgentSelected(indx)) {
-            PedInstance *pAgent = mission_->ped(indx);
-            mm_renderer_.centerOn(pAgent->tileX(), pAgent->tileY(), pAgent->offX(), pAgent->offY());
-            break;
+        PedInstance *pAgent = mission_->ped(indx);
+        if (pAgent->health() > 0) {
+            nbAgentAlive++;
         }
     }
+
+    // if number of agents alive is the same as number of selected agents
+    // then button is pressed.
+    pressed_btn_select_all_ = (nbAgentAlive == selection_.size());
 }

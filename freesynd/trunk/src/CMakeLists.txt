@@ -44,6 +44,7 @@ set (SOURCES
 	menus/menumanager.cpp
 	menus/researchmenu.cpp
 	menus/selectmenu.cpp
+	menus/squadselection.cpp
 	menus/widget.cpp
 	mission.cpp
 	missionmanager.cpp
@@ -137,6 +138,7 @@ set(HEADERS
 	menus/menumanager.h
 	menus/researchmenu.h
 	menus/selectmenu.h
+	menus/squadselection.h
 	menus/widget.h
 	sound/audio.h
 	sound/music.h
