@@ -50,6 +50,7 @@ Mission::Mission()
     max_y_ = 0;
     cur_objective_ = 0;
     p_minimap_ = NULL;
+    players_group_id_ = 1;
 }
 
 Mission::~Mission()
@@ -171,7 +172,7 @@ bool Mission::loadLevel(uint8 * levelData)
     std::map <uint32, std::string> obj_ids;
     // NOTE: not very useful way of remembering "Who is who"
     obj_ids[0] = "Undefined";
-    obj_ids[1] = "Players Agents or Persuaded";
+    obj_ids[players_group_id_] = "Players Agents or Persuaded";
     obj_ids[2] = "Enemy Agents";
     obj_ids[3] = "Enemy Guards";
     obj_ids[4] = "Policemen";
@@ -227,7 +228,7 @@ bool Mission::loadLevel(uint8 * levelData)
             pindx[i] = peds_.size();
             peds_.push_back(p);
             if (i < 4) {
-                p->setObjGroupID(1);
+                p->setObjGroupID(players_group_id_);
                 p->setObjGroupDef(PedInstance::og_dmAgent);
                 p->addEnemyGroupDef(2);
                 p->addEnemyGroupDef(3);
@@ -266,7 +267,7 @@ bool Mission::loadLevel(uint8 * levelData)
                 VehicleInstance *v = p->inVehicle();
                 if (offset_start)
                     p->dropActQ();
-#define SHOW_SCENARIOS_DEBUG
+//#define SHOW_SCENARIOS_DEBUG
 #ifdef SHOW_SCENARIOS_DEBUG
                 printf("=====\n");
 #endif
@@ -553,7 +554,7 @@ bool Mission::loadLevel(uint8 * levelData)
                 objd.targettype = MapObject::mjt_Ped;
                 // maybe also guards should be eliminated?
                 objd.targetsubtype = PedInstance::og_dmPolice;
-                objd.indx_grpid.targetindx = 4;
+                objd.indx_grpid.grpid = 4;
                 objd.condition = 2;
                 objd.indx_grpid.targetindx = pindx[cindx];
                 objd.msg = g_App.menus().getMessage("GOAL_ELIMINATE_POLICE");
@@ -566,7 +567,7 @@ bool Mission::loadLevel(uint8 * levelData)
                 objd.targetsubtype = PedInstance::og_dmAgent;
                 objd.condition = 2;
                 objd.indx_grpid.targetindx = pindx[cindx];
-                objd.indx_grpid.targetindx = 2;
+                objd.indx_grpid.grpid = 2;
                 objd.msg = g_App.menus().getMessage("GOAL_ELIMINATE_AGENTS");
                 isset = true;
                 break;
@@ -1021,8 +1022,7 @@ void Mission::checkObjectives() {
                             {
                                 no_failed = false;
                                 obj.condition |= 8;
-                            } else if (p->objGroupID()
-                                == 1)
+                            } else if (p->isPersuaded())
                             {
                                 if (o == cur_objective_)
                                     cur_objective_++;
@@ -1064,16 +1064,18 @@ void Mission::checkObjectives() {
                                     cur_objective_++;
                             } else
                                 all_completed = false;
-                        } else if ((obj.condition & 2) != 0){
+                        } else {
+                            //(obj.condition & 2) != 0
                             for (std::vector<PedInstance *>::iterator it_p
                                 = peds_.begin() + 8; all_completed
                                 && it_p != peds_.end(); it_p++)
                             {
-                                if((*it_p)->objGroupDef() == obj.targetsubtype
+                                PedInstance *pPed = *it_p;
+                                if(pPed->objGroupDef() == obj.targetsubtype
                                     // we can persuade them, will be
                                     // counted as eliminating for now
-                                    && (*it_p)->objGroupID() == obj.indx_grpid.grpid
-                                    && (*it_p)->health() > 0)
+                                    && pPed->objGroupID() == obj.indx_grpid.grpid
+                                    && pPed->health() > 0)
                                 {
                                     all_completed = false;
                                 }
@@ -1155,7 +1157,7 @@ void Mission::end()
                     stats_.policeKilled++;
                     break;
             }
-        } else if (p->objGroupID() == 1) {
+        } else if (p->isPersuaded()) {
             if (p->objGroupDef() == PedInstance::og_dmAgent) {
                 stats_.agentCaptured++;
                 if (completed()) {

@@ -739,6 +739,7 @@ public:
      */
     int getSpeed();
     bool hasAccessCard();
+    bool isPersuaded();
 protected:
     Ped *ped_;
 

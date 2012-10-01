@@ -594,7 +594,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                         }
                     } else if ((aqt.ot_execute & PedInstance::ai_aWaitToStart) != 0)
                     {
-                        if (aqt.multi_var.time_var.desc == 0) {
+                        //if (aqt.multi_var.time_var.desc == 0) {
                             if ((aqt.t_smo->majorType() == MapObject::mjt_Ped
                                 && !checkHostileIs((PedInstance *)aqt.t_smo))
                                 || aqt.t_smo->health() <= 0)
@@ -606,10 +606,13 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                                 // failed target is friendly or dead
                                 aqt.state |= 8;
                             }
-                        }
+                        //}
                     }
-                    if ((aqt.state & 8 ) != 0 && obj_group_def_ == og_dmPolice)
-                        setSelectedWeapon(-1);
+                    // TODO: add special action, auto hide weapon,
+                    // when not firing and firing animation is
+                    // not drawn
+                    //if (obj_group_def_ == og_dmPolice)
+                        //setSelectedWeapon(-1);
                 }
                 if ((aqt.ot_execute & PedInstance::ai_aPutDownObject) != 0)
                 {
@@ -1426,6 +1429,16 @@ PedInstance *Ped::createInstance(int map) {
 }
 
 void PedInstance::kill() {
+    health_ = -1;
+    actions_property_ = 1;
+    switchActionStateTo(PedInstance::pa_smDead);
+    if (weapons_.size() != 0)
+        dropAllWeapons();
+    is_ignored_ = true;
+    setDrawnAnim(PedInstance::ad_DieAnim);
+    // TODO:explode agent with chest lvl > 1
+    //Mod *pMod = slots_[Mod::MOD_CHEST];
+    //if (pMod && pMod->getVersion() > Mod::MOD_V1)
 }
 
 bool isOnScreen(int scrollX, int scrollY, int x, int y) {
@@ -1523,6 +1536,10 @@ PedInstance::~PedInstance()
 
 void PedInstance::draw(int x, int y) {
 
+    // ensure on map
+    if (x < 119 || y < 0 || map_ == -1)
+        return;
+
     if (agent_is_ == PedInstance::Agent_Non_Active)
         return;
 
@@ -1530,9 +1547,6 @@ void PedInstance::draw(int x, int y) {
         selectedWeapon() ? selectedWeapon()->index() : Weapon::Unarmed_Anim;
     addOffs(x, y);
 
-    // ensure on map
-    if (x < 119 || y < 0 || map_ == -1)
-        return;
 
     switch(drawnAnim()){
         case PedInstance::ad_HitAnim:
@@ -1545,6 +1559,7 @@ void PedInstance::draw(int x, int y) {
             ped_->drawDeadFrame(x, y, frame_);
             break;
         case PedInstance::ad_DeadAgentAnim:
+            ped_->drawDeadAgentFrame(x, y, frame_);
             break;
         case PedInstance::ad_PickupAnim:
             ped_->drawPickupFrame(x, y, frame_);
@@ -1841,11 +1856,6 @@ bool PedInstance::setVehicleIgnore(bool ignored) {
 }
 
 int PedInstance::map() {
-#ifdef _DEBUG
-    if (map_ == -1) {
-        assert(in_vehicle_);
-    }
-#endif
 
     return map_;
 }
@@ -1943,10 +1953,7 @@ bool PedInstance::handleDrawnAnim(int elapsed) {
                 answer = false;
                 break;
             }
-            if (agent_is_ == PedInstance::Agent_Active)
-                setDrawnAnim(PedInstance::ad_DeadAgentAnim);
-            else
-                setDrawnAnim(PedInstance::ad_DeadAnim);
+            setDrawnAnim(PedInstance::ad_DeadAnim);
             break;
         case PedInstance::ad_DeadAnim:
             break;
@@ -1975,6 +1982,7 @@ bool PedInstance::handleDrawnAnim(int elapsed) {
                 } else {
                     setDrawnAnim(PedInstance::ad_NoAnimation);
                 }
+                map_ = -1;
             } else
                 answer = false;
             break;
@@ -2084,7 +2092,7 @@ bool PedInstance::handleDamage(ShootableMapObject::DamageInflictType *d) {
                 setDrawnAnim(PedInstance::ad_HitAnim);
                 break;
         }
-        if (numWeapons())
+        if (weapons_.size() != 0)
             dropAllWeapons();
         is_ignored_ = true;
     } else {
@@ -2719,3 +2727,11 @@ bool PedInstance::hasAccessCard()
     return wi && pMod && wi->getWeaponType() == Weapon::AccessCard
         && pMod->getVersion() == Mod::MOD_V3 ? true : false;
 }
+
+bool PedInstance::isPersuaded()
+{
+    return (desc_state_ & pd_smControlled) != 0
+        && obj_group_id_ == g_Session.getMission()->playersGroupID();
+}
+
+

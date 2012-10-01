@@ -233,16 +233,19 @@ public:
     void offzOnStairs(uint8 twd);
 
 protected:
-    /*! vis_z_ is location used for adjusting object drawing/calculations
-     * tile_z_ represents true location for tile
+    /*!
+     * Tile based coordinates, tile_x_ and tile_y_ have 256
+     * tile_z_ has 128 base
      */
     int tile_x_, tile_y_, tile_z_, off_x_, off_y_, off_z_;
     //! these are not true sizes, but halfs of full size by respective coord
     int size_x_, size_y_, size_z_;
+    //! if equal -1 object is not on map and should not be drawn
     int map_;
     //! animation frame changing
     int frame_;
-    /*! time left, if frame needs to be drawn every 'n' milliseconds
+    /*!
+     * Time left, if frame needs to be drawn every 'n' milliseconds
      * elapsed time % 'n' = time left
      */
     int elapsed_carry_;

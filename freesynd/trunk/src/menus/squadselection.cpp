@@ -139,6 +139,9 @@ bool SquadSelection::isAgentSelectable(size_t agentNo) {
  * a new leader.
  */
 void SquadSelection::checkLeader(size_t agentNo) {
+    // TODO: why not to check selected and choose leader from them
+    // and only if none selected, choose leader from first possible and
+    // also select him?(chamel)
     if (agentNo == leader_) {
         // The leader has been deselected
         // find another leader among the remaining selection

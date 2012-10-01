@@ -189,6 +189,7 @@ public:
         bool checkTileOnly = false, double maxr = -1.0, double * distTo = NULL);
     void getInRangeAll(toDefineXYZ * cp, std::vector<ShootableMapObject *> & targets,
         uint8 mask, bool checkTileOnly = true, double maxr = -1.0);
+    uint32 playersGroupID() { return players_group_id_;}
 
     typedef struct {
         uint8 unkn10[6];
@@ -605,6 +606,7 @@ protected:
     // walkdata->minimap_colours_ in function createMinimap
     MiniMap *p_minimap_;
     unsigned char minimap_overlay_[128*128];
+    uint32 players_group_id_;
 };
 
 #endif

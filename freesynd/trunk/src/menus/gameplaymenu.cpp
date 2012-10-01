@@ -1486,6 +1486,8 @@ void GameplayMenu::updtAgentsMarker()
  */
 void GameplayMenu::updateSelectionForDeadAgents() {
     // TODO change the way this detection is made. It's not clean. use events
+    // TODO: if selected agent is dead why not selecting next availiable,
+    // when none is selected?(chamel)
     for (size_t i = Squad::kSlot1; i < Squad::kMaxSlot; i++) {
         if (mission_->ped(i) && mission_->ped(i)->isOurAgent()) {
             if (g_Session.squad().member(i)->health() > 0 && mission_->ped(i)->health() <= 0) {
@@ -1518,7 +1520,7 @@ void GameplayMenu::updateMinimap() {
  * Update the select all button's state
  */
 void GameplayMenu::updateSelectAll() {
-    int nbAgentAlive = 0;
+    uint8 nbAgentAlive = 0;
     // count the number of remaining agents
     for (int indx = 0; indx < 4; indx++) {
         PedInstance *pAgent = mission_->ped(indx);
