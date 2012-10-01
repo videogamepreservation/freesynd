@@ -1537,7 +1537,7 @@ PedInstance::~PedInstance()
 void PedInstance::draw(int x, int y) {
 
     // ensure on map
-    if (x < 119 || y < 0 || map_ == -1)
+    if (x < 110 || y < 0 || map_ == -1)
         return;
 
     if (agent_is_ == PedInstance::Agent_Non_Active)

@@ -267,7 +267,7 @@ bool Mission::loadLevel(uint8 * levelData)
                 VehicleInstance *v = p->inVehicle();
                 if (offset_start)
                     p->dropActQ();
-//#define SHOW_SCENARIOS_DEBUG
+#define SHOW_SCENARIOS_DEBUG
 #ifdef SHOW_SCENARIOS_DEBUG
                 printf("=====\n");
 #endif
@@ -635,7 +635,7 @@ bool Mission::loadLevel(uint8 * levelData)
         fclose(staticsFss);
     }
 #endif
-#if 0
+#ifdef SHOW_SCENARIOS_DEBUG
     for (unsigned char i = 1; i < 2047; i++) {
         LEVELDATA_SCENARIOS & scenario = level_data_.scenarios[i];
         if (scenario.type == 0)
@@ -1011,7 +1011,6 @@ void Mission::checkObjectives() {
 
         switch (obj.type) {
             case objv_None:
-                status_ = FAILED;
                 break;
             case objv_AquireControl:
                 switch (obj.targettype) {
@@ -1058,12 +1057,24 @@ void Mission::checkObjectives() {
                 switch (obj.targettype) {
                     case 1: //ped
                         if ((obj.condition & 2) == 0) {
-                            if (peds_[obj.indx_grpid.targetindx]->health() <= 0)
+                            PedInstance *p = peds_[obj.indx_grpid.targetindx];
+                            if (p->health() <= 0)
                             {
                                 if (o == cur_objective_)
                                     cur_objective_++;
-                            } else
-                                all_completed = false;
+                                obj.condition |= 4;
+                            } else {
+                                int x = p->tileX();
+                                int y = p->tileY();
+                                // target might be off visible area (escaped)
+                                if (x < min_x_ || x > max_x_
+                                    || y < min_y_ || y > max_y_)
+                                {
+                                    no_failed = false;
+                                    obj.condition |= 8;
+                                } else
+                                    all_completed = false;
+                            }
                         } else {
                             //(obj.condition & 2) != 0
                             for (std::vector<PedInstance *>::iterator it_p
@@ -1110,7 +1121,7 @@ void Mission::checkObjectives() {
     }
     if (no_failed) {
         if (all_completed)
-         status_ = COMPLETED;
+            status_ = COMPLETED;
     } else
         status_ = FAILED;
 }
