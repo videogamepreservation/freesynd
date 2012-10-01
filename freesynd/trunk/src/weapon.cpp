@@ -732,7 +732,7 @@ uint16 WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
     // angle is used to generate random shot with randomizer
     double angle = pWeaponClass_->shotAngle();
 
-    angle *= (1.0 - accuracy);
+    angle *= accuracy;
 
     Weapon::ShotDesc base_shot;
     base_shot.smo = NULL;

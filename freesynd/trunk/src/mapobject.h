@@ -162,13 +162,15 @@ public:
     int getFramesPerSec() { return frames_per_sec_; }
 
     typedef struct{
-        // 0 - can go to this tile; 1 - wait; 2 - stop
+        // 0 - can go; 1 - wait; 2 - stop
         char wayFree;
         int tilex;
         int tiley;
         int tilez;
-        int xadj;// these create ranges for x
-        int yadj;// and y
+        //! create range by x, should be 0 if not used
+        int xadj;
+        //! create range by y, should be 0 if not used
+        int yadj;
         MapObject * pathBlocker;
     }FreeWay;
 

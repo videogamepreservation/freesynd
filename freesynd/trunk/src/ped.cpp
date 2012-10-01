@@ -605,11 +605,11 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                                 aqt.state ^= 384;
                                 // failed target is friendly or dead
                                 aqt.state |= 8;
-                                if (obj_group_def_ == og_dmPolice)
-                                    setSelectedWeapon(-1);
                             }
                         }
                     }
+                    if ((aqt.state & 8 ) != 0 && obj_group_def_ == og_dmPolice)
+                        setSelectedWeapon(-1);
                 }
                 if ((aqt.ot_execute & PedInstance::ai_aPutDownObject) != 0)
                 {

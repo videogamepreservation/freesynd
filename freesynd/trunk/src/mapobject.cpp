@@ -975,6 +975,8 @@ bool Door::animate(int elapsed, Mission *obj)
                     p->hold_on_.tilex = x;
                     p->hold_on_.tiley = y;
                     p->hold_on_.tilez = z;
+                    p->hold_on_.xadj = 0;
+                    p->hold_on_.yadj = 0;
                     p->hold_on_.pathBlocker = this;
                 }
             } while (p);
@@ -994,6 +996,8 @@ bool Door::animate(int elapsed, Mission *obj)
                     p->hold_on_.tilex = x;
                     p->hold_on_.tiley = y;
                     p->hold_on_.tilez = z;
+                    p->hold_on_.xadj = 0;
+                    p->hold_on_.yadj = 0;
                     p->hold_on_.pathBlocker = this;
                 }
             } while (p);
@@ -1066,6 +1070,7 @@ bool LargeDoor::animate(int elapsed, Mission *obj)
     std::vector<PedInstance *> found_peds_mid;
     found_peds_mid.reserve(256);
     char sign;
+    int set_wayFree = 0;
 
     bool changed = MapObject::animate(elapsed);
     uint32 cur_state = state_;
@@ -1268,11 +1273,12 @@ bool LargeDoor::animate(int elapsed, Mission *obj)
                     }
                 } while (p);
             }
+            set_wayFree = state_ == Static::sttdoor_Opening ? 1 : 2;
             for (std::vector<PedInstance *>::iterator it = found_peds.begin();
                 it != found_peds.end(); it++ )
             {
                 p = *it;
-                p->hold_on_.wayFree = 2;
+                p->hold_on_.wayFree = set_wayFree;
                 p->hold_on_.tilex = x;
                 p->hold_on_.tiley = y;
                 if (sub_type_ == 0) {
@@ -1310,11 +1316,12 @@ bool LargeDoor::animate(int elapsed, Mission *obj)
             assert(i != 0 && j != 0);
             *j = -1 * sign;
             *i = -2;
+            set_wayFree = state_ == Static::sttdoor_Opening ? 1 : 2;
             mt = MapObject::mjt_Vehicle; si = 0;
             v = (VehicleInstance *)(obj->findAt(x + inc_rel,
                 y + rel_inc,z, &mt, &si,true));
             if (v) {
-                v->hold_on_.wayFree = 1;
+                v->hold_on_.wayFree = set_wayFree;
             }
             *j = 1 * sign;
             *i = 2;
@@ -1322,7 +1329,7 @@ bool LargeDoor::animate(int elapsed, Mission *obj)
             v = (VehicleInstance *)(obj->findAt(x + inc_rel,
                 y + rel_inc,z, &mt, &si,true));
             if (v) {
-                v->hold_on_.wayFree = 1;
+                v->hold_on_.wayFree = set_wayFree;
             }
             *j = -1;
             for (*i = -1; *i <= 1; (*i)++ ) {
@@ -1350,7 +1357,7 @@ bool LargeDoor::animate(int elapsed, Mission *obj)
                 it != found_peds.end(); it++ )
             {
                 p = *it;
-                p->hold_on_.wayFree = 2;
+                p->hold_on_.wayFree = set_wayFree;
                 p->hold_on_.tilex = x;
                 p->hold_on_.tiley = y;
                 if (sub_type_ == 0) {
