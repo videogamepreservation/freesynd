@@ -14,9 +14,10 @@ FreeSynd's SourceForge Project Page.
 
 FreeSynd Bugs/Requests Trackers<br />
 <small>
-(<a href="http://sourceforge.net/tracker/?atid=603796&amp;group_id=93282&amp;func=browse">Bugs</a> |
-<a href="http://sourceforge.net/tracker/?atid=603796&amp;group_id=93282&amp;func=browse">Feature Requests</a> |
-<a href="http://sourceforge.net/tracker/?atid=603798&amp;group_id=93282&amp;func=browse">Patches</a>)
+(<a href="http://sourceforge.net/p/freesynd/bugs/">Bugs</a> |
+<a href="http://sourceforge.net/p/freesynd/feature-requests/">Feature Requests</a> |
+<a href="http://sourceforge.net/p/freesynd/support-requests/">Support Requests</a> |
+<a href="http://sourceforge.net/p/freesynd/patches/">Patches</a>)
 </small>
 <br /><br />
 
@@ -43,7 +44,7 @@ SVN commit notifications<br />
 
 RSS Feeds<br />
 <small>
-<a href="http://sourceforge.net/export/rss2_keepsake.php?group_id=93282">SourceForge.net - Recent activity for Freesynd</a><br/>
+<a href="http://sourceforge.net/p/freesynd/code/feed/">SourceForge.net - SVN activity for Freesynd</a><br/>
 <a href="http://freesynd.sourceforge.net/data/rss-news.xml">Freesynd News</a>
 </small>
 <br /><br />

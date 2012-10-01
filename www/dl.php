@@ -3,7 +3,7 @@
 
 <h3>Getting the binaries</h3>
 
-<p>See the releases on <a href="https://sourceforge.net/project/showfiles.php?group_id=93282">sourceforge</a>.</p>
+<p>See the releases on <a href="http://sourceforge.net/projects/freesynd/files/">sourceforge</a>.</p>
 
 <p class="warning">PLEASE NOTE: an ORIGINAL copy of Syndicate (not Plus) is
 required to use FreeSynd,<br /> we do not redistribute the original data files here.</p>
@@ -13,10 +13,9 @@ required to use FreeSynd,<br /> we do not redistribute the original data files h
 <h3>Getting the code</h3>
 
 <p>The FreeSynd SVN repository is hosted by SourceForge. To checkout a module
-from the repository simply type the following commands in your shell (press
-enter if the login command asks for a password):</p>
+from the repository simply type the following commands in your shell:</p>
 
-<pre>svn co https://freesynd.svn.sourceforge.net/svnroot/freesynd freesynd 
+<pre>svn co svn://svn.code.sf.net/p/freesynd/code/ freesynd 
 </pre>
 
 <br />
@@ -33,7 +32,7 @@ scripts	                Tools to help in development
 <br />
 
 <p>Web-based SVN access is also available through SourceForge's <a
-href="http://freesynd.svn.sourceforge.net/viewvc/freesynd/">ViewSVN interface</a>. You might also want to take a look at the <a
+href="http://sourceforge.net/p/freesynd/code/">SVN Web interface</a>. You might also want to take a look at the <a
 href="http://sourceforge.net/projects/freesynd/">project page</a> on
 SourceForge.</p>
 
