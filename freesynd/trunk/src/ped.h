@@ -32,7 +32,6 @@
 #include "common.h"
 #include "mapobject.h"
 #include "modowner.h"
-#include "pathsurfaces.h"
 #include "gfx/spritemanager.h"
 #include "weaponholder.h"
 #include "weapon.h"
@@ -270,15 +269,6 @@ public:
     AnimationDrawn drawnAnim(void);
     void setDrawnAnim(AnimationDrawn drawn_anim);
     bool handleDrawnAnim(int elapsed);
-
-    typedef struct {
-        toDefineXYZ coords;
-        floodPointDesc *p;
-    } toSetDesc;
-    typedef struct {
-        unsigned short indxs;
-        unsigned short n;
-    } lvlNodesDesc;
 
     void setDestinationP(Mission *m, int x, int y, int z,
         int ox = 128, int oy = 128);
@@ -566,8 +556,6 @@ public:
         ai_aReachLocation = 0x0080,
         ai_aFollowObject = 0x0100,
         // Should wait some time or works as delay for other action
-        // NOTE: in order to use "wait" as single action
-        // state should have 4 + 32 + 128 already set
         ai_aWait = 0x0200,
         ai_aAttackLocation = 0x0400,
         // in range of current weapon or inrange of other friendly units:
@@ -575,6 +563,7 @@ public:
         ai_aFindEnemy = 0x0800,
         // in range of current weapon
         ai_aFindNonFriend = 0x1000,
+        ai_aResetActionQueueQueue = 0x2000,
         ai_aNonFinishable = 0x80000000,
         ai_aAll = 0xFFFFFFFF
     } AiAction;
@@ -630,17 +619,17 @@ public:
                 int32 time_total;
                 // = 0 || t > 0 (ai_aWaitToStart)
                 int32 time_before_start;
-                // wait event, 0 - time(milliseconds), 1 - uses animations
-                // number to draw(for now 0 or 1)
+                // wait event, 0 - standalone - time(milliseconds), 1 - waits
+                // till animation finishe, 2 - attached to process time
                 uint8 desc;
-                //uint16 wait_frames_drawn;
-                //uint16 wait_anims_drawn;
             } time_var;
             struct {
                 // move into this direction, -1 is unset
                 int32 dir;
                 // dist to target pos/object
                 int32 dist;
+                // already walked distance
+                int32 dist_walked;
                 // -1 is unset
                 int32 speed;
                 // directional movement only
@@ -725,6 +714,7 @@ public:
                         uint8 desc = 0);
 
     void createActQFindEnemy(actionQueueGroupType &as);
+    void createActQResetActionQueue(actionQueueGroupType &as);
     
     void discardActG(uint32 id);
     void discardActG(std::vector <actionQueueGroupType>::iterator it_a);

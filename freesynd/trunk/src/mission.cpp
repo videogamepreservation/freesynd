@@ -139,7 +139,7 @@ bool Mission::loadLevel(uint8 * levelData)
 
 #endif
 
-    for (int i = 0; i < 64; i++) {
+    for (uint8 i = 0; i < 64; i++) {
         LEVELDATA_CARS & car = level_data_.cars[i];
         // car.sub_type 0x09 - train
         if (car.type == 0x0)
@@ -187,7 +187,7 @@ bool Mission::loadLevel(uint8 * levelData)
     mods_enemy.addMod(g_App.mods().getHighestVersion(Mod::MOD_EYES));
     mods_enemy.addMod(g_App.mods().getHighestVersion(Mod::MOD_BRAIN));
     
-    for (int i = 0; i < 256; i++) {
+    for (uint16 i = 0; i < 256; i++) {
         if (i == 130)
             i = 130;
         LEVELDATA_PEOPLE & pedref = level_data_.people[i];
@@ -271,6 +271,9 @@ bool Mission::loadLevel(uint8 * levelData)
 #ifdef SHOW_SCENARIOS_DEBUG
                 printf("=====\n");
 #endif
+                PedInstance::actionQueueGroupType as;
+                as.group_desc = PedInstance::gd_mStandWalk;
+                as.origin_desc = 1;
                 while (offset_nxt) {
                     // sc.type
                     // 1, 8 - walking
@@ -278,7 +281,6 @@ bool Mission::loadLevel(uint8 * levelData)
                     // 7, 9 - end marker
                     LEVELDATA_SCENARIOS sc = level_data_.scenarios[offset_nxt / 8];
                     if (sc.tilex != 0 && sc.tiley != 0) {
-                        PedInstance::actionQueueGroupType as;
                         PathNode pn(sc.tilex >> 1, sc.tiley >> 1, sc.tilez,
                             (sc.tilex & 0x01) << 7, (sc.tiley & 0x01) << 7);
                         if (sc.type == 0x08) {
@@ -291,25 +293,23 @@ bool Mission::loadLevel(uint8 * levelData)
                         else
                             p->createActQWalking(as, &pn, NULL, p->getDir());
                             //p->createActQWalking(as, &pn, NULL, -1);
-                        as.main_act = as.actions.size() - 1;
-                        as.group_desc = PedInstance::gd_mStandWalk;
-                        as.origin_desc = 1;
-                        p->addActQToQueue(as);
-                    } if (sc.type == 2) {
+                    }
+                    if (sc.type == 2) {
                         uint16 bindx = READ_LE_UINT16(sc.offset_object);
                         // TODO: test all maps for objects other then vehicle
                         assert(bindx >= 0x5C02 && bindx < 0x6682);
                         bindx -= 0x5C02;
                         bindx /= 42;
                         if (vindx[bindx] != 0xFFFF) {
-                            PedInstance::actionQueueGroupType as;
                             v = vehicles_[vindx[bindx]];
                             p->createActQGetInCar(as, v);
-                            as.main_act = as.actions.size() - 1;
-                            as.group_desc = PedInstance::gd_mStandWalk;
-                            as.origin_desc = 1;
-                            p->addActQToQueue(as);
                         }
+                    } else if (sc.type == 9) {
+                        p->createActQResetActionQueue(as);
+                    }
+                    if (as.actions.size() != 0) {
+                        as.main_act = as.actions.size() - 1;
+                        p->addActQToQueue(as);
                     }
 #ifdef SHOW_SCENARIOS_DEBUG
                     printf("sc.type = %i, nxt = %i\n", sc.type, offset_nxt / 8);
@@ -348,8 +348,8 @@ bool Mission::loadLevel(uint8 * levelData)
     // array(container), only using map size we can correctly use our
     // minimap_overlay_; our agent = 1, enemy agent = 2, tile doesn't have
     // ped = 0
-    for(unsigned short i = 0; i < (128*128); i++) {
-        unsigned short pin = READ_LE_UINT16(level_data_.map.objs + i * 2);
+    for (uint32 i = 0; i < (128*128); i++) {
+        uint32 pin = READ_LE_UINT16(level_data_.map.objs + i * 2);
         if (pin >= 0x0002 && pin < 0x5C02) {
             if (pin >= 0x0002 && pin < 0x02e2) {
                 minimap_overlay_[i] = 1;
@@ -394,7 +394,7 @@ bool Mission::loadLevel(uint8 * levelData)
 #endif
 
     statics_.clear();
-    for (unsigned int i = 0; i < 400; i++) {
+    for (uint16 i = 0; i < 400; i++) {
         LEVELDATA_STATICS & sref = level_data_.statics[i];
         if(sref.desc == 0)
             continue;
@@ -414,7 +414,7 @@ bool Mission::loadLevel(uint8 * levelData)
     }
 #endif
     weapons_.clear();
-    for (unsigned int i = 0; i < 512; i++) {
+    for (uint16 i = 0; i < 512; i++) {
         LEVELDATA_WEAPONS & wref = level_data_.weapons[i];
         if(wref.desc == 0)
             continue;
@@ -473,7 +473,7 @@ bool Mission::loadLevel(uint8 * levelData)
     // 0x0e + 2 x 0x01 + 0x0f, because of this careful loading required
     // max 5(6 read) objectives
 
-    for (unsigned char i = 0; i < 6; i++) {
+    for (uint8 i = 0; i < 6; i++) {
         bool isset = false;
         ObjectiveDesc objd;
         objd.clear();
@@ -636,7 +636,7 @@ bool Mission::loadLevel(uint8 * levelData)
     }
 #endif
 #ifdef SHOW_SCENARIOS_DEBUG
-    for (unsigned char i = 1; i < 2047; i++) {
+    for (uint16 i = 1; i < 2047; i++) {
         LEVELDATA_SCENARIOS & scenario = level_data_.scenarios[i];
         if (scenario.type == 0)
             break;

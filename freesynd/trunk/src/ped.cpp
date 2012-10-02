@@ -1126,7 +1126,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                         if (obj_group_def_ == og_dmPolice) {
                             aqt_attack.ot_execute |= PedInstance::ai_aWaitToStart;
                             aqt_attack.multi_var.time_var.time_before_start = 5000;
-                            aqt.multi_var.time_var.desc = 0;
+                            aqt.multi_var.time_var.desc = 1;
                             g_App.gameSounds().play(snd::PUTDOWN_WEAPON);
                             // enableing following behavior
                             actionQueueType & aqt_follow = it->actions[indx + 2];
@@ -1188,17 +1188,15 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                     | PedInstance::ai_aWaitToStart)) == PedInstance::ai_aWait)
                 {
                     if (aqt.multi_var.time_var.desc == 0) {
-                        // no failed or suspended will have "wait" action
-                        if ((aqt.state & 60) == 36) {
-                            if ((aqt.state & 128) != 0) {
-                                aqt.multi_var.time_var.elapsed += elapsed;
-                                if (aqt.multi_var.time_var.elapsed
-                                    >= aqt.multi_var.time_var.time_total)
-                                {
-                                    aqt.state &= (65535 ^ 160);
-                                }
-                            } else
-                                aqt.state |= 130;
+                        if ((aqt.state & 32) != 0) {
+                            aqt.state |= 130;
+                            aqt.multi_var.time_var.elapsed += elapsed;
+                            if (aqt.multi_var.time_var.elapsed
+                                >= aqt.multi_var.time_var.time_total)
+                            {
+                                aqt.state &= (65535 ^ 128);
+                                aqt.state |= 4;
+                            }
                         } else
                             aqt.state &= (65535 ^ 32);
                     } else if (aqt.multi_var.time_var.desc == 1) {
@@ -1224,10 +1222,44 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                             } else
                                 aqt.state |= 128;
                         }
+                    } else if (aqt.multi_var.time_var.desc == 2) {
+                        // no failed or suspended will have "wait" action
+                        if ((aqt.state & 60) == 36) {
+                            if ((aqt.state & 128) != 0) {
+                                aqt.multi_var.time_var.elapsed += elapsed;
+                                if (aqt.multi_var.time_var.elapsed
+                                    >= aqt.multi_var.time_var.time_total)
+                                {
+                                    aqt.state &= (65535 ^ 160);
+                                }
+                            } else
+                                aqt.state |= 130;
+                        } else
+                            aqt.state &= (65535 ^ 32);
                     }
+                }
+                if ((aqt.ot_execute & PedInstance::ai_aResetActionQueueQueue) != 0)
+                {
+                    for (uint32 indx_act = 0, sz = it->actions.size() - 1;
+                         indx_act < sz; indx_act++)
+                    {
+                        actionQueueType &aqt_reset = it->actions[indx_act];
+                        aqt_reset.state &= ((65535 ^ 14));
+                        aqt_reset.multi_var.enemy_var.shots_done = 0;
+                        aqt_reset.multi_var.time_var.elapsed = 0;
+                        aqt_reset.multi_var.dist_var.dist_walked = 0;
+                        if ((aqt_reset.ot_execute & PedInstance::ai_aWait) != 0
+                            && aqt_reset.multi_var.time_var.desc == 1)
+                        {
+                            aqt_reset.state |= 32;
+                        }
+                    }
+                    aqt.state |= 2;
                 }
                 if ((aqt.ot_execute & PedInstance::ai_aNonFinishable) != 0)
                 {
+                    if ((aqt.state & 12) != 0)
+                        aqt.state &= ((65535 ^ 14));
                 }
                 if (actions_property_ != 0)
                     break;
@@ -2447,6 +2479,7 @@ void PedInstance::createActQBurning(actionQueueGroupType &as) {
     aq.ot_execute = PedInstance::ai_aWait;
     aq.multi_var.time_var.elapsed = 0;
     aq.multi_var.time_var.time_total = 1000;
+    aq.multi_var.time_var.desc = 0;
     aq.group_desc = PedInstance::gd_mExclusive;
     as.actions.push_back(aq);
 }
@@ -2516,10 +2549,12 @@ void PedInstance::createActQWait(actionQueueGroupType &as, int tm_wait, uint8 de
     actionQueueType aq;
     aq.as = PedInstance::pa_smNone;
     aq.group_desc = PedInstance::gd_mExclusive;
-    if (desc == 0)
+    if (desc == 2) {
         aq.state = 1 | 4 | 32 | 128;
+    } else if (desc == 1)
+        aq.state = 1 | 4;
     else
-        aq.state = 1 | 4 | 32;
+        aq.state = 1 | 32;
     aq.ot_execute = PedInstance::ai_aWait;
     aq.multi_var.time_var.desc = desc;
     aq.multi_var.time_var.elapsed = 0;
@@ -2543,6 +2578,16 @@ void PedInstance::createActQFindEnemy(actionQueueGroupType &as) {
     as.actions.back().state |= 64;
     createActQFollowing(as, NULL, 1);
     as.actions.back().state |= 64;
+}
+
+void PedInstance::createActQResetActionQueue(actionQueueGroupType &as) {
+    as.state = 1;
+    actionQueueType aq;
+    aq.as = PedInstance::pa_smNone;
+    aq.group_desc = PedInstance::gd_mExclusive;
+    aq.state = 1;
+    aq.ot_execute = PedInstance::ai_aResetActionQueueQueue;
+    as.actions.push_back(aq);
 }
 
 

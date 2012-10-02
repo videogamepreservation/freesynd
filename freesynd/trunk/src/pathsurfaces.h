@@ -56,15 +56,26 @@
         unsigned short lvl;
     }floodPointDesc;
 
-    #define m_fdNotDefined      0
-    #define m_fdBasePoint       1
-    #define m_fdTargetPoint     2
-    #define m_fdLink            4
-    #define m_fdWalkable        8
-    #define m_fdConstant        16
-    #define m_fdNonWalkable     32
-    #define m_fdDefReq          64
-    #define m_fdSafeWalk        64
+    typedef enum {
+        m_fdNotDefined    = 0,
+        m_fdBasePoint     = 1,
+        m_fdTargetPoint   = 2,
+        m_fdLink          = 4,
+        m_fdWalkable      = 8,
+        m_fdConstant      = 16,
+        m_fdNonWalkable   = 32,
+        m_fdDefReq        = 64,
+        m_fdSafeWalk      = 64,
+    } mapFloodDesc;
+
+    typedef struct {
+        toDefineXYZ coords;
+        floodPointDesc *p;
+    } toSetDesc;
+    typedef struct {
+        uint16 indxs;
+        uint16 n;
+    } lvlNodesDesc;
 
 #endif
 
