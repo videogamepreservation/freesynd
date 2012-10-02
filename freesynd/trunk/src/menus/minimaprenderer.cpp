@@ -265,4 +265,7 @@ void GamePlayMinimapRenderer::render(uint16 mm_x, uint16 mm_y) {
     // Draw the minimap on the screen
     g_Screen.blit(mm_x, mm_y, kMiniMapSizePx, kMiniMapSizePx, minimap_final_layer);
     
+    // Draw the minimap cross
+    g_Screen.drawRect(mm_x + 64, mm_y, 1, kMiniMapSizePx, 0);
+    g_Screen.drawRect(mm_x, mm_y + 64, kMiniMapSizePx, 1, 0);
 }
