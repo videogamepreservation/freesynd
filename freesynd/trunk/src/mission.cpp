@@ -980,7 +980,7 @@ void Mission::start()
  * mission status.
  */
 void Mission::checkObjectives() {
-    
+
     // checking agents, if all are dead mission failed
     bool all_dead = true;
     std::vector <PedInstance *> peds_evacuate;
@@ -1067,8 +1067,10 @@ void Mission::checkObjectives() {
                                 int x = p->tileX();
                                 int y = p->tileY();
                                 // target might be off visible area (escaped)
-                                if (x < min_x_ || x > max_x_
-                                    || y < min_y_ || y > max_y_)
+                                if (p->inVehicle() && (x < (min_x_ >> 1)
+                                    || x > max_x_ + ((mmax_x_ - max_x_) >> 1)
+                                    || y < (min_y_ >> 1)
+                                    || y > max_y_ + ((mmax_y_ - max_y_) >> 1)))
                                 {
                                     no_failed = false;
                                     obj.condition |= 8;
@@ -1119,11 +1121,13 @@ void Mission::checkObjectives() {
                 break;
         }
     }
-    if (no_failed) {
-        if (all_completed)
-            status_ = COMPLETED;
-    } else
-        status_ = FAILED;
+    if (status_ == RUNNING) {
+        if (no_failed) {
+            if (all_completed)
+                status_ = COMPLETED;
+        } else
+            status_ = FAILED;
+    }
 }
 
 void Mission::addWeaponsFromPedToAgent(PedInstance* p, Agent* pAg)
