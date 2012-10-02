@@ -451,7 +451,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                         // check owner
                         // NOTE: don't put weapon on the ground
                         WeaponInstance *wi = aqt.multi_var.enemy_var.weapon.wpn.wi;
-                        if (wi->getMainType()
+                        if (wi && wi->getMainType()
                             == Weapon::Persuadatron)
                         {
                             // TODO: proper handling for time, add condition
@@ -717,6 +717,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                             dir_last_ = -1;
                             int pos_x, pos_y;
                             aqt.t_smo->convertPosToXY(&pos_x, &pos_y);
+                            dist_to_pos_ = this->distanceTo(aqt.t_smo);
                             moveToDir(mission, elapsed,
                                 -1, pos_x, pos_y,
                                 aqt.multi_var.dist_var.dist,
@@ -2287,6 +2288,8 @@ void PedInstance::createActQWalking(actionQueueGroupType &as, PathNode *tpn,
             aq.condition = 2;
         }
     } else {
+        // TODO: implement response from directional movement
+        aq.multi_var.dist_var.bounce = true;
         if (tpn) {
             // direction will be calculated from pathnode position
             aq.t_pn = *tpn;

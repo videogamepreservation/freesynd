@@ -2583,8 +2583,13 @@ uint8 PedInstance::moveToDir(Mission* m, int elapsed, int dir, int t_posx,
                     dir_last_ += 256;
             }
             dir = dir_last_ % 256;
-        } else
+        } else {
             setDirection(dir);
+            // TODO: fix this
+            // To avoid looping
+            if (need_bounce)
+                break;
+        }
         bounced = bounced || need_bounce;
     }
     offzOnStairs(m->mtsurfaces_[tile_x_ + tile_y_ * m->mmax_x_

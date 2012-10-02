@@ -116,25 +116,37 @@ void VehicleInstance::draw(int x, int y)
 
 bool VehicleInstance::walkable(int x, int y, int z)
 {
-    Tile *p_this_tile = g_App.maps().map(map())->getTileAt(x, y, z);
+    Map *pMap = g_App.maps().map(map());
+    Tile *p_this_tile = pMap->getTileAt(x, y, z);
     uint8 this_tile_id = p_this_tile->id();
 
     if(this_tile_id == 80) {
-        Tile::EType near_type = g_App.maps().map(map())->getTileAt(x, y - 1, z)->type();
-        if((near_type < Tile::kRoadSideEW || near_type > Tile::kRoadSideNS) && near_type != Tile::kRoadPedCross)
+        Tile::EType near_type = pMap->getTileAt(x, y - 1, z)->type();
+        if((near_type < Tile::kRoadSideEW || near_type > Tile::kRoadSideNS)
+            && near_type != Tile::kRoadPedCross) {
             return false;
-        near_type = g_App.maps().map(map())->getTileAt(x, y + 1, z)->type();
-         if((near_type < Tile::kRoadSideEW || near_type > Tile::kRoadSideNS) && near_type != Tile::kRoadPedCross)
+        }
+        near_type = pMap->getTileAt(x, y + 1, z)->type();
+         if((near_type < Tile::kRoadSideEW || near_type > Tile::kRoadSideNS)
+             && near_type != Tile::kRoadPedCross)
+         {
             return false;
+         }
         return true;
     }
     if(this_tile_id == 81) {
-        Tile::EType near_type = g_App.maps().map(map())->getTileAt(x - 1, y, z)->type();
-         if((near_type < Tile::kRoadSideEW || near_type > Tile::kRoadSideNS) && near_type != Tile::kRoadPedCross)
+        Tile::EType near_type = pMap->getTileAt(x - 1, y, z)->type();
+         if((near_type < Tile::kRoadSideEW || near_type > Tile::kRoadSideNS)
+             && near_type != Tile::kRoadPedCross)
+         {
             return false;
-        near_type = g_App.maps().map(map())->getTileAt(x + 1, y, z)->type();
-         if((near_type < Tile::kRoadSideEW || near_type > Tile::kRoadSideNS) && near_type != Tile::kRoadPedCross)
+         }
+        near_type = pMap->getTileAt(x + 1, y, z)->type();
+         if((near_type < Tile::kRoadSideEW || near_type > Tile::kRoadSideNS)
+             && near_type != Tile::kRoadPedCross)
+         {
             return false;
+         }
         return true;
     }
     if(this_tile_id == 72) {
@@ -150,28 +162,29 @@ bool VehicleInstance::walkable(int x, int y, int z)
 uint16 VehicleInstance::tileDir(int x, int y, int z) {
     uint16 dir = 0x0;
     int near_tile;
+    Map *pMap = g_App.maps().map(map());
 
-    switch(g_App.maps().map(map())->tileAt(x, y, z)){
+    switch(pMap->tileAt(x, y, z)){
         case 80:
             if(g_App.maps().map(map())->tileAt(x + 1, y, z) == 80)
                 dir = (0)|(0xFFF0);
-            if(g_App.maps().map(map())->tileAt(x - 1, y, z) == 80)
+            if(pMap->tileAt(x - 1, y, z) == 80)
                 dir = (4<<8)|(0xF0FF);
             break;
         case 81:
-            if(g_App.maps().map(map())->tileAt(x, y - 1, z) == 81)
+            if(pMap->tileAt(x, y - 1, z) == 81)
                 dir = (2<<4)|(0xFF0F);
-            if(g_App.maps().map(map())->tileAt(x, y + 1, z) == 81)
+            if(pMap->tileAt(x, y + 1, z) == 81)
                 dir = (6<<12)|(0x0FFF);
             break;
         case 106:
             dir = (0)|(2<<4)|(6<<12)|(0x0F00);
 
-            if(g_App.maps().map(map())->tileAt(x + 1, y - 1, z) != 118)
+            if(pMap->tileAt(x + 1, y - 1, z) != 118)
                 dir |= 0x0FF0;
-            if(g_App.maps().map(map())->tileAt(x + 1, y + 1, z) != 118)
+            if(pMap->tileAt(x + 1, y + 1, z) != 118)
                 dir |= 0xFF00;
-            near_tile = g_App.maps().map(map())->tileAt(x + 1, y, z);
+            near_tile = pMap->tileAt(x + 1, y, z);
             if (near_tile == 108 || near_tile == 109)
                 dir = (dir & 0x0FFF) | 0x6000;
 
@@ -179,11 +192,11 @@ uint16 VehicleInstance::tileDir(int x, int y, int z) {
         case 107:
             dir = (2<<4)|(4<<8)|(6<<12)|(0x000F);
 
-            if(g_App.maps().map(map())->tileAt(x - 1, y - 1, z) != 118)
+            if(pMap->tileAt(x - 1, y - 1, z) != 118)
                 dir |= 0x00FF;
-            if(g_App.maps().map(map())->tileAt(x - 1, y + 1, z) != 118)
+            if(pMap->tileAt(x - 1, y + 1, z) != 118)
                 dir |= 0xF00F;
-            near_tile = g_App.maps().map(map())->tileAt(x - 1, y, z);
+            near_tile = pMap->tileAt(x - 1, y, z);
             if (near_tile == 108 || near_tile == 109)
                 dir = (dir & 0xFF0F) | 0x0020;
 
@@ -191,11 +204,11 @@ uint16 VehicleInstance::tileDir(int x, int y, int z) {
         case 108:
             dir = (0)|(2<<4)|(4<<8)|(0xF000);
 
-            if(g_App.maps().map(map())->tileAt(x + 1, y - 1, z) != 118)
+            if(pMap->tileAt(x + 1, y - 1, z) != 118)
                 dir |= 0xF00F;
-            if(g_App.maps().map(map())->tileAt(x - 1, y - 1, z) != 118)
+            if(pMap->tileAt(x - 1, y - 1, z) != 118)
                 dir |= 0xFF00;
-            near_tile = g_App.maps().map(map())->tileAt(x, y - 1, z);
+            near_tile = pMap->tileAt(x, y - 1, z);
             if (near_tile == 106 || near_tile == 107)
                 dir = dir & 0xFFF0;
 
@@ -203,11 +216,11 @@ uint16 VehicleInstance::tileDir(int x, int y, int z) {
         case 109:
             dir = (0)|(4<<8)|(6<<12)|(0x00F0);
 
-            if(g_App.maps().map(map())->tileAt(x + 1, y + 1, z) != 118)
+            if(pMap->tileAt(x + 1, y + 1, z) != 118)
                 dir |= 0x00FF;
-            if(g_App.maps().map(map())->tileAt(x - 1, y + 1, z) != 118)
+            if(pMap->tileAt(x - 1, y + 1, z) != 118)
                 dir |= 0x0FF0;
-            near_tile = g_App.maps().map(map())->tileAt(x, y + 1, z);
+            near_tile = pMap->tileAt(x, y + 1, z);
             if (near_tile == 106 || near_tile == 107)
                 dir = (dir & 0xF0FF) | 0x0400;
 
@@ -227,16 +240,16 @@ uint16 VehicleInstance::tileDir(int x, int y, int z) {
         /*case 119:
             // TODO: Greenland map needs fixing
             dir = 0xFFFF;
-            near_tile = g_App.maps().map(map())->tileAt(x, y + 1, z);
+            near_tile = pMap->tileAt(x, y + 1, z);
             if (near_tile == 107 || near_tile == 225 || near_tile == 226)
                 dir = (dir & 0xF0FF) | 0x0400;
-            near_tile = g_App.maps().map(map())->tileAt(x, y + 1, z);
+            near_tile = pMap->tileAt(x, y + 1, z);
             if (near_tile == 106 || near_tile == 225 || near_tile == 226)
                dir &= 0xFFF0;
-            near_tile = g_App.maps().map(map())->tileAt(x + 1, y, z);
+            near_tile = pMap->tileAt(x + 1, y, z);
             if (near_tile == 109 || near_tile == 225 || near_tile == 226)
                 dir = (dir & 0xFF0F) | 0x0020;
-            near_tile = g_App.maps().map(map())->tileAt(x - 1, y, z);
+            near_tile = pMap->tileAt(x - 1, y, z);
             if (near_tile == 108 || near_tile == 225 || near_tile == 226)
                 dir = (dir & 0x0FFF) | 0x6000;
             if (dir ==0xFFFF)
@@ -261,18 +274,18 @@ uint16 VehicleInstance::tileDir(int x, int y, int z) {
                 dir = (4<<8)|(0xF0FF);
             else {*/
                 dir = 0xFFFF;
-                near_tile = g_App.maps().map(map())->tileAt(x, y + 1, z);
+                near_tile = pMap->tileAt(x, y + 1, z);
                 if (/*near_tile == 119 || */near_tile == 106
                     || near_tile == 107 || near_tile == 80 || near_tile == 225)
                     dir = (dir & 0xF0FF) | 0x0400;
-                near_tile = g_App.maps().map(map())->tileAt(x, y - 1, z);
+                near_tile = pMap->tileAt(x, y - 1, z);
                 if (/*near_tile == 119 || */near_tile == 106
                     || near_tile == 107 || near_tile == 80 || near_tile == 225)
                     dir &= 0xFFF0;
-                near_tile = g_App.maps().map(map())->tileAt(x + 1, y, z);
+                near_tile = pMap->tileAt(x + 1, y, z);
                 if (/*near_tile == 119 || */near_tile == 108 || near_tile == 81)
                     dir = (dir & 0xFF0F) | 0x0020;
-                near_tile = g_App.maps().map(map())->tileAt(x - 1, y, z);
+                near_tile = pMap->tileAt(x - 1, y, z);
                 if (/*near_tile == 119 || */near_tile == 109 || near_tile == 81)
                     dir = (dir & 0x0FFF) | 0x6000;
                 if (dir == 0xFFFF)
@@ -286,17 +299,17 @@ uint16 VehicleInstance::tileDir(int x, int y, int z) {
                 dir = (6<<12)|(0x0FFF);
             else {*/
                 dir = 0xFFFF;
-                near_tile = g_App.maps().map(map())->tileAt(x, y + 1, z);
+                near_tile = pMap->tileAt(x, y + 1, z);
                 if (/*near_tile == 119 || */near_tile == 106 || near_tile == 80)
                     dir = (dir & 0xF0FF) | 0x0400;
-                near_tile = g_App.maps().map(map())->tileAt(x, y - 1, z);
+                near_tile = pMap->tileAt(x, y - 1, z);
                 if (/*near_tile == 119 || */near_tile == 107 || near_tile == 80)
                     dir &= 0xFFF0;
-                near_tile = g_App.maps().map(map())->tileAt(x + 1, y, z);
+                near_tile = pMap->tileAt(x + 1, y, z);
                 if (/*near_tile == 119 || */near_tile == 108 || near_tile == 109
                     || near_tile == 81 || near_tile == 226)
                     dir = (dir & 0xFF0F) | 0x0020;
-                near_tile = g_App.maps().map(map())->tileAt(x - 1, y, z);
+                near_tile = pMap->tileAt(x - 1, y, z);
                 if (/*near_tile == 119 || */near_tile == 108 || near_tile == 109
                     || near_tile == 81 || near_tile == 226)
                     dir = (dir & 0x0FFF) | 0x6000;
@@ -360,8 +373,17 @@ void VehicleInstance::setDestinationV(Mission *m, int x, int y, int z, int ox,
     dest_path_.clear();
     setSpeed(0);
 
-    if (map_ == -1 || health_ <= 0 || !(walkable(x, y, z)))
+    if (map_ == -1 || health_ <= 0 || !(walkable(x, y, z))) {
+#if _DEBUG
+        if (!(map_ == -1 || health_ <= 0)) {
+            printf("non-walking tile is target to drive\n");
+            printf("tileAt %i\n",
+                (unsigned int)g_App.maps().map(map())->tileAt(x, y, z));
+            printf("tile x = %i, y = %i, z = %i\n", x, y, z);
+        }
+#endif
         return;
+    }
 
     if (!walkable(tile_x_, tile_y_, z)) {
         int dBest = 100000, dCur;
@@ -553,12 +575,8 @@ void VehicleInstance::setDestinationV(Mission *m, int x, int y, int z, int ox,
         for(std::list < PathNode >::iterator it = dest_path_.begin();
             it != dest_path_.end(); it++)
         {
-
-            // TODO : requires testing for correct offsets per
-            // every direction, because in some part of game
-            // vehicle position on start of game can create incorrect
-            // visual representation
-            // maybe offsets depend on type or tileZ?
+            // TODO : adjust offsets respecting direction relative to
+            // close next tiles
             switch(tileDir(it->tileX(), it->tileY(), it->tileZ())) {
                 case 0xFFF0:
                 case 0xFF20:
@@ -761,7 +779,7 @@ bool VehicleInstance::handleDamage(ShootableMapObject::DamageInflictType *d) {
         for (std::vector<ShootableMapObject *>::iterator it = all_targets.begin();
             it != all_targets.end(); it++
         ) {
-        // TODO: set directiom?
+        // TODO: set direction?
             (*it)->handleDamage(&dit);
         }
         rangeDamageAnim(xyz, 512, 16, SFXObject::sfxt_ExplosionFire);

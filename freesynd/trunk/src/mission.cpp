@@ -265,6 +265,9 @@ bool Mission::loadLevel(uint8 * levelData)
                 uint16 offset_start = READ_LE_UINT16(pedref.offset_scenario_start);
                 uint16 offset_nxt = offset_start;
                 VehicleInstance *v = p->inVehicle();
+                bool not_in_vehicle = true;
+                if (v)
+                    not_in_vehicle = false;
                 if (offset_start)
                     p->dropActQ();
 #define SHOW_SCENARIOS_DEBUG
@@ -278,8 +281,15 @@ bool Mission::loadLevel(uint8 * levelData)
                     // sc.type
                     // 1, 8 - walking
                     // 2 - vehicle
-                    // 7, 9 - end marker
+                    // 7, 9(repeat) - end marker
+                    // 10(loop?)?5(has offset <?ped?>)?
                     LEVELDATA_SCENARIOS sc = level_data_.scenarios[offset_nxt / 8];
+#ifdef SHOW_SCENARIOS_DEBUG
+                    printf("sc.type = %i, nxt = %i\n", sc.type, offset_nxt / 8);
+#endif
+                    offset_nxt = READ_LE_UINT16(sc.next);
+                    assert(offset_nxt != offset_start);
+
                     if (sc.tilex != 0 && sc.tiley != 0) {
                         PathNode pn(sc.tilex >> 1, sc.tiley >> 1, sc.tilez,
                             (sc.tilex & 0x01) << 7, (sc.tiley & 0x01) << 7);
@@ -293,29 +303,35 @@ bool Mission::loadLevel(uint8 * levelData)
                         else
                             p->createActQWalking(as, &pn, NULL, p->getDir());
                             //p->createActQWalking(as, &pn, NULL, -1);
-                    }
-                    if (sc.type == 2) {
-                        uint16 bindx = READ_LE_UINT16(sc.offset_object);
-                        // TODO: test all maps for objects other then vehicle
-                        assert(bindx >= 0x5C02 && bindx < 0x6682);
-                        bindx -= 0x5C02;
-                        bindx /= 42;
-                        if (vindx[bindx] != 0xFFFF) {
-                            v = vehicles_[vindx[bindx]];
-                            p->createActQGetInCar(as, v);
+                        if (!not_in_vehicle && offset_nxt == 0)
+                            p->createActQResetActionQueue(as);
+                    } else if (sc.type == 2) {
+                        if (not_in_vehicle) {
+                            uint16 bindx = READ_LE_UINT16(sc.offset_object);
+                            // TODO: test all maps for objects other then vehicle
+                            assert(bindx >= 0x5C02 && bindx < 0x6682);
+                            bindx -= 0x5C02;
+                            bindx /= 42;
+                            if (vindx[bindx] != 0xFFFF) {
+                                v = vehicles_[vindx[bindx]];
+                                p->createActQGetInCar(as, v);
+                            }
+                        } else {
+                            PathNode pn(v->tileX(), v->tileY(), v->tileZ(),
+                                v->offX(), v->offY());
+                            p->createActQUsingCar(as, &pn, v);
                         }
                     } else if (sc.type == 9) {
                         p->createActQResetActionQueue(as);
+                    } else if (sc.type == 10) {
+                        p->createActQWait(as, 5000);
+                        if (offset_nxt == 0)
+                            p->createActQResetActionQueue(as);
                     }
-                    if (as.actions.size() != 0) {
-                        as.main_act = as.actions.size() - 1;
-                        p->addActQToQueue(as);
-                    }
-#ifdef SHOW_SCENARIOS_DEBUG
-                    printf("sc.type = %i, nxt = %i\n", sc.type, offset_nxt / 8);
-#endif
-                    offset_nxt = READ_LE_UINT16(sc.next);
-                    assert(offset_nxt != offset_start);
+                }
+                if (as.actions.size() != 0) {
+                    as.main_act = as.actions.size() - 1;
+                    p->addActQToQueue(as);
                 }
 #ifdef SHOW_SCENARIOS_DEBUG
                 printf("+++++\n");

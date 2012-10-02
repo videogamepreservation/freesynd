@@ -509,12 +509,6 @@ public:
         pd_smNoAmmunition = 0x0010,
         // all non-player controllled peds should have this set
         pd_smAutoAction = 0x0020,
-#if 0
-        // target can be position or object
-        pd_smHasShootTarget = 0x0040,
-        // target can be position or object
-        pd_smHasReachTarget = 0x0080,
-#endif
         pd_smAll = 0xFFFF
     } pedDescStateMasks;
 
@@ -595,8 +589,8 @@ public:
         // (0b+1b) - walking + firing, 2b - decision making(thinking),
         // 3b - exclusive, no other action can be executed in parallel with it
         // and all before it should be completed
-        // NOTE: a group should not interfere with actions of other group
-        // groupDescMasks
+        // NOTE: group with same type as previous cannot be executed until
+        // previous is completed or failed
         uint32 group_desc;
         struct {
             struct {
@@ -642,7 +636,7 @@ public:
          * 2 - go to position of object; if dist is set, on reaching
          * this value action complete, 3 - pathnode coords = x, y are used to
          * calculate direction, 4 - objects coords = x, y to calculate direction
-         * NOTE: coords x,y : tile_x_ * 256 + off_x_, tile_y_ + off_y_
+         * NOTE: coords x,y : tile_x_ * 256 + off_x_, tile_y_ * 256 + off_y_
          * for ai_aFollowObject 0 - until dist is reached, 1 - in range
          * of shot view
          * for ai_aAquireControl, for car, 0 - become passenger(or driver),
