@@ -400,6 +400,8 @@ public:
     bool isMoving() { return speed_ != 0 || dest_path_.size() != 0;}
     //! checks whether current position is same as pn
     bool checkCurrPos(PathNode &pn);
+    //! checks whether current position is same as pn, tile only
+    bool checkCurrPosTileOnly(PathNode &pn);
 
     FreeWay hold_on_;
 

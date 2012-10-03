@@ -405,7 +405,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                         VehicleInstance *v = (VehicleInstance *)aqt.t_smo;
                         if (aqt.state == 1) {
                             if (aqt.condition == 0) {
-                                if (checkCurrPos(aqt.t_pn))
+                                if (checkCurrPosTileOnly(aqt.t_pn))
                                     aqt.state |= 4;
                                 else {
                                     // TODO: if vehicle has no driver take his position
@@ -413,9 +413,11 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                                         v->setDestinationV(mission, aqt.t_pn.tileX(),
                                             aqt.t_pn.tileY(), aqt.t_pn.tileZ(),
                                             aqt.t_pn.offX(), aqt.t_pn.offY(), 1024);
-                                        if (v->isMoving())
+                                        if (v->isMoving()) {
                                             aqt.state |= 2;
-                                        else
+                                            // TODO: create way to properly set offsets
+                                            // in t_pn, without this checkCurrPos fails
+                                        } else
                                             aqt.state |= 8;
                                     } else
                                         aqt.state |= 2;
@@ -424,21 +426,23 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                                 if ((state_ & PedInstance::pa_smUsingCar) == 0)
                                     aqt.state |= 8;
                                 else {
-                                    if (checkCurrPos(aqt.t_pn))
+                                    if (checkCurrPosTileOnly(aqt.t_pn))
                                         aqt.state |= 4;
                                     else {
                                         v->setDestinationV(mission, aqt.t_pn.tileX(),
                                             aqt.t_pn.tileY(), aqt.t_pn.tileZ(),
                                             aqt.t_pn.offX(), aqt.t_pn.offY(), 1024);
-                                        if (v->isMoving())
+                                        if (v->isMoving()) {
                                             aqt.state |= 2;
-                                        else
+                                            // TODO: create way to properly set offsets
+                                            // in t_pn, without this checkCurrPos fails
+                                        } else
                                             aqt.state |= 8;
                                     }
                                 }
                             }
                         } else if (aqt.state == 3) {
-                            if (checkCurrPos(aqt.t_pn))
+                            if (checkCurrPosTileOnly(aqt.t_pn))
                                 aqt.state |= 4;
                         }
                     }

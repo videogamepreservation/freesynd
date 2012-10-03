@@ -201,6 +201,7 @@ bool Mission::loadLevel(uint8 * levelData)
                     p->putInVehicle(vehicles_[driverindx[i]],
                         PedInstance::pa_smUsingCar);
                     VehicleInstance *v = vehicles_[driverindx[i]];
+                    assert(v);
                     if (v->hasDriver()) {
                         PedInstance *curr_driver = v->getDriver();
                         curr_driver->leaveVehicle();
@@ -270,7 +271,7 @@ bool Mission::loadLevel(uint8 * levelData)
                     not_in_vehicle = false;
                 if (offset_start)
                     p->dropActQ();
-#define SHOW_SCENARIOS_DEBUG
+//#define SHOW_SCENARIOS_DEBUG
 #ifdef SHOW_SCENARIOS_DEBUG
                 printf("=====\n");
 #endif

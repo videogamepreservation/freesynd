@@ -38,7 +38,7 @@ public:
     VehicleManager();
     ~VehicleManager();
 
-    void setVehicle(Vehicle *vehicleanim, unsigned short baseAnim);
+    void setVehicleBaseAnim(Vehicle *vehicleanim, unsigned short baseAnim);
 
     int numVehicles() { return vehicles_.size(); }
 

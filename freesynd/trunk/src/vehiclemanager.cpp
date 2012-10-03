@@ -40,7 +40,7 @@ VehicleManager::~VehicleManager()
         */
 }
 
-void VehicleManager::setVehicle(Vehicle *vehicleanim, unsigned short baseAnim)
+void VehicleManager::setVehicleBaseAnim(Vehicle *vehicleanim, unsigned short baseAnim)
 {
     vehicleanim->setAnims(baseAnim);
     vehicleanim->setAnimsBurning(baseAnim + 8);
@@ -55,8 +55,12 @@ VehicleInstance *VehicleManager::loadInstance(uint8 * data, int map)
     int dir = gamdata->orientation >> 5;
 
     Vehicle *vehicleanim = new Vehicle();
-    setVehicle(vehicleanim,
+    setVehicleBaseAnim(vehicleanim,
         READ_LE_UINT32(gamdata->index_current_anim) - dir);
+    switch (gamdata->sub_type) {
+        case 00:
+            printf("vehicle");
+    }
     VehicleInstance *newvehicle = vehicleanim->createInstance(map);
     int z = READ_LE_UINT16(gamdata->mapposz) >> 7;
 

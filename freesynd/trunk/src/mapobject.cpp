@@ -580,6 +580,12 @@ bool ShootableMovableMapObject::checkCurrPos(PathNode &pn) {
         && pn.offZ() == off_z_;
 }
 
+bool ShootableMovableMapObject::checkCurrPosTileOnly(PathNode &pn) {
+    return pn.tileX() == tile_x_
+        && pn.tileY() == tile_y_
+        && pn.tileZ() == tile_z_;
+}
+
 Static *Static::loadInstance(uint8 * data, int m)
 {
     Mission::LEVELDATA_STATICS * gamdata =
@@ -1227,6 +1233,7 @@ bool LargeDoor::animate(int elapsed, Mission *obj)
                     found = true;
                 }
                 v->hold_on_.wayFree = 1;
+                v->hold_on_.pathBlocker = this;
             }
             *j = 1 * sign;
             *i = 2;
@@ -1240,6 +1247,7 @@ bool LargeDoor::animate(int elapsed, Mission *obj)
                     found = true;
                 }
                 v->hold_on_.wayFree = 1;
+                v->hold_on_.pathBlocker = this;
             }
             *j = -1;
             for (*i = -1; *i <= 1; (*i)++ ) {
@@ -1321,7 +1329,8 @@ bool LargeDoor::animate(int elapsed, Mission *obj)
             v = (VehicleInstance *)(obj->findAt(x + inc_rel,
                 y + rel_inc,z, &mt, &si,true));
             if (v) {
-                v->hold_on_.wayFree = set_wayFree;
+                v->hold_on_.wayFree = 1;
+                v->hold_on_.pathBlocker = this;
             }
             *j = 1 * sign;
             *i = 2;
@@ -1329,7 +1338,8 @@ bool LargeDoor::animate(int elapsed, Mission *obj)
             v = (VehicleInstance *)(obj->findAt(x + inc_rel,
                 y + rel_inc,z, &mt, &si,true));
             if (v) {
-                v->hold_on_.wayFree = set_wayFree;
+                v->hold_on_.wayFree = 1;
+                v->hold_on_.pathBlocker = this;
             }
             *j = -1;
             for (*i = -1; *i <= 1; (*i)++ ) {
@@ -1483,6 +1493,7 @@ anim_(anim), burning_anim_(burningAnim), damaged_anim_(damagedAnim)
 {
     rcv_damage_def_ = MapObject::ddmg_StaticGeneral;
     major_type_ = MapObject::mjt_Static;
+    main_type_ = -1;
 }
 
 void EtcObj::draw(int x, int y)

@@ -374,6 +374,7 @@ void VehicleInstance::setDestinationV(Mission *m, int x, int y, int z, int ox,
     setSpeed(0);
 
     if (map_ == -1 || health_ <= 0 || !(walkable(x, y, z))) {
+#if 0
 #if _DEBUG
         if (!(map_ == -1 || health_ <= 0)) {
             printf("non-walking tile is target to drive\n");
@@ -381,6 +382,7 @@ void VehicleInstance::setDestinationV(Mission *m, int x, int y, int z, int ox,
                 (unsigned int)g_App.maps().map(map())->tileAt(x, y, z));
             printf("tile x = %i, y = %i, z = %i\n", x, y, z);
         }
+#endif
 #endif
         return;
     }
@@ -722,7 +724,7 @@ bool VehicleInstance::movementV(int elapsed)
             updated = true;
         }
     }
-    
+
     if (dest_path_.empty() && speed_) {
         printf("Destination Unknown, full speed driving = %i ... doing full stop\n",
                speed_);

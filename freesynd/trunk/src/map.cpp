@@ -259,6 +259,7 @@ void Map::draw(int scrollX, int scrollY, MapHelper * helper)
                             if (coord_h - scrollY < 0)
                                 dy = -(coord_h - scrollY);
                             if (dx < TILE_WIDTH && dy < TILE_HEIGHT) {
+                                // TODO: we double draw!!
                                 p_tile->drawTo(buf, TILE_WIDTH,
                                                      TILE_HEIGHT, 0, 0, true);
                                 g_Screen.blit(screen_w - cmx +
