@@ -109,8 +109,7 @@ public:
     void drawMap(int scrollx, int scrolly);
 
     //--- MapHelper stuff
-    virtual void drawAt(int tilex, int tiley, int tilez, int x, int y,
-            int scrollX, int scrollY);
+    virtual void drawAt(int tilex, int tiley, int tilez, int x, int y);
     virtual void createFastKeys(int tilex, int tiley,
         int maxtilex, int maxtiley);
     //---

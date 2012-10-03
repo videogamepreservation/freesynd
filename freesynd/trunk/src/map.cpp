@@ -30,7 +30,7 @@
 #include "app.h"
 #include "utils/log.h"
 
-#if 1
+#if 0
 #define EXECUTION_SPEED_TIME
 #endif
 
@@ -194,8 +194,6 @@ void Map::draw(int scrollX, int scrollY, MapHelper * helper)
     if (scrollY + g_Screen.gameScreenHeight() >= map_height_)
         scrollY = map_height_ - g_Screen.gameScreenHeight();
 
-    //uint8 buf[TILE_WIDTH * TILE_HEIGHT];
-
     int ox, oy;
     int sw = screenToTileX(scrollX, scrollY, ox);
     int chk = g_Screen.gameScreenWidth() / (TILE_WIDTH / 2) + 2
@@ -260,31 +258,18 @@ void Map::draw(int scrollX, int scrollY, MapHelper * helper)
                             if (coord_h - scrollY < 0)
                                 dy = -(coord_h - scrollY);
                             if (dx < TILE_WIDTH && dy < TILE_HEIGHT) {
-#if 1
                                 p_tile->drawTo((uint8*)g_Screen.pixels(),
                                     g_Screen.gameScreenWidth(),
                                     g_Screen.gameScreenHeight(),
                                     screen_w - cmx,
                                     coord_h - scrollY, false);
-#else
-                                // TODO: we double draw!!
-                                p_tile->drawTo(buf, TILE_WIDTH,
-                                                TILE_HEIGHT, 0, 0, true);
-                                g_Screen.blit(screen_w - cmx,
-                                              coord_h - scrollY,
-                                              TILE_WIDTH,
-                                              TILE_HEIGHT,
-                                              buf,
-                                              false);
-#endif
                             }
                         }
                     }
                     if (z - 1 >= 0) {
                         helper->drawAt(w, h, z - 1,
                             screen_w - cmx + TILE_WIDTH / 2,
-                            coord_h - scrollY + TILE_HEIGHT / 3 * 2,
-                            scrollX, scrollY);
+                            coord_h - scrollY + TILE_HEIGHT / 3 * 2);
                     }
                 }
                 h--;

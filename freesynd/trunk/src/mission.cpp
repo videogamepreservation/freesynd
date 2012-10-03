@@ -876,8 +876,7 @@ void Mission::drawMap(int scrollx, int scrolly)
     p_map_->draw(scrollx, scrolly, this);
 }
 
-void Mission::drawAt(int tilex, int tiley, int tilez, int x, int y,
-                     int scrollX, int scrollY)
+void Mission::drawAt(int tilex, int tiley, int tilez, int x, int y)
 {
     int key = fastKey(tilex, tiley, tilez);
 
