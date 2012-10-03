@@ -30,7 +30,7 @@
 #include "app.h"
 #include "utils/log.h"
 
-#if 0
+#if 1
 #define EXECUTION_SPEED_TIME
 #endif
 
@@ -194,7 +194,7 @@ void Map::draw(int scrollX, int scrollY, MapHelper * helper)
     if (scrollY + g_Screen.gameScreenHeight() >= map_height_)
         scrollY = map_height_ - g_Screen.gameScreenHeight();
 
-    uint8 buf[TILE_WIDTH * TILE_HEIGHT];
+    //uint8 buf[TILE_WIDTH * TILE_HEIGHT];
 
     int ox, oy;
     int sw = screenToTileX(scrollX, scrollY, ox);
@@ -240,12 +240,13 @@ void Map::draw(int scrollX, int scrollY, MapHelper * helper)
                     continue;
                 }
                 int screen_w = (max_x_ + (w - h)) * (TILE_WIDTH / 2);
-                int screen_h = (max_z_ + w + h) * (TILE_HEIGHT / 3);
-                int coord_h = screen_h - (z - 1) * (TILE_HEIGHT / 3);
+                //int screen_h = (max_z_ + w + h) * (TILE_HEIGHT / 3);
+                int coord_h = ((max_z_ + w + h) - (z - 1)) * (TILE_HEIGHT / 3);
                 if (screen_w >= scrollX - TILE_WIDTH * 2
                     && screen_w + TILE_WIDTH * 2 < cmw
                     && coord_h >= scrollY - TILE_HEIGHT * 2
-                    && coord_h + TILE_HEIGHT * 2 < cmh) {
+                    && coord_h + TILE_HEIGHT * 2 < cmh)
+                {
 #if 0
                     if (z > 2)
                         continue;
@@ -253,21 +254,29 @@ void Map::draw(int scrollX, int scrollY, MapHelper * helper)
                     if (z < max_z_) {
                         Tile *p_tile = a_tiles_[(h * max_x_ + w) * max_z_ + z];
                         if (p_tile->id() > 4) {
-                        int dx = 0, dy = 0;
+                            int dx = 0, dy = 0;
                             if (screen_w - scrollX < 0)
                                 dx = -(screen_w - scrollX);
                             if (coord_h - scrollY < 0)
                                 dy = -(coord_h - scrollY);
                             if (dx < TILE_WIDTH && dy < TILE_HEIGHT) {
+#if 1
+                                p_tile->drawTo((uint8*)g_Screen.pixels(),
+                                    g_Screen.gameScreenWidth(),
+                                    g_Screen.gameScreenHeight(),
+                                    screen_w - cmx,
+                                    coord_h - scrollY, false);
+#else
                                 // TODO: we double draw!!
                                 p_tile->drawTo(buf, TILE_WIDTH,
-                                                     TILE_HEIGHT, 0, 0, true);
-                                g_Screen.blit(screen_w - cmx +
-                                              dx, coord_h - scrollY + dy,
-                                              TILE_WIDTH - dx,
-                                              TILE_HEIGHT - dy,
-                                              buf + dx + dy * TILE_WIDTH,
-                                              false, TILE_WIDTH);
+                                                TILE_HEIGHT, 0, 0, true);
+                                g_Screen.blit(screen_w - cmx,
+                                              coord_h - scrollY,
+                                              TILE_WIDTH,
+                                              TILE_HEIGHT,
+                                              buf,
+                                              false);
+#endif
                             }
                         }
                     }

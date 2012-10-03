@@ -142,7 +142,7 @@ PedInstance *PedManager::loadInstance(uint8 * data, int map)
     int hp = READ_LE_INT16(gamdata->health);
 
     Ped *pedanim = new Ped();
-    setPed(pedanim, READ_LE_UINT32(gamdata->index_base_anim));
+    setPed(pedanim, READ_LE_UINT16(gamdata->index_base_anim));
     PedInstance *newped = pedanim->createInstance(map);
     if (hp <= 0)
         hp = 2;

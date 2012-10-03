@@ -49,34 +49,80 @@ void VehicleManager::setVehicleBaseAnim(Vehicle *vehicleanim, unsigned short bas
 
 VehicleInstance *VehicleManager::loadInstance(uint8 * data, int map)
 {
+    // TODO: check all maps
+    // TODO: train, join somehow
     Mission::LEVELDATA_CARS * gamdata = (Mission::LEVELDATA_CARS *) data;
 
     int hp = READ_LE_INT16(gamdata->health);
     int dir = gamdata->orientation >> 5;
 
     Vehicle *vehicleanim = new Vehicle();
-    setVehicleBaseAnim(vehicleanim,
-        READ_LE_UINT32(gamdata->index_current_anim) - dir);
+    int cur_anim = READ_LE_UINT16(gamdata->index_current_anim) - dir;
+    setVehicleBaseAnim(vehicleanim, cur_anim);
+    VehicleInstance *vehivle_new = vehicleanim->createInstance(map);
+    vehivle_new->setHealth(hp);
+    vehivle_new->setStartHealth(hp);
+    vehivle_new->setMainType(gamdata->sub_type);
     switch (gamdata->sub_type) {
-        case 00:
-            printf("vehicle");
+        case 0x01:
+            // large armored
+            break;
+        case 0x04:
+            // large armored damaged
+            // it is actually base animation and they have 8 directions
+            setVehicleBaseAnim(vehicleanim, cur_anim - 12 + (dir >> 1));
+            vehivle_new->setStartHealth(0);
+            vehivle_new->setHealth(-1);
+            vehivle_new->setIsIgnored(true);
+            vehicleanim->setVehicleAnim(Vehicle::BurntAnim);
+            break;
+        case 0x05:
+            // train head
+        case 0x09:
+            // train body
+            break;
+        case 0x0D:
+            // grey vehicle
+            break;
+        case 0x11:
+            // firefighters vehicle
+            break;
+        case 0x1C:
+            // small armored vehicle
+            break;
+        case 0x24:
+            // police vehicle
+            break;
+        case 0x28:
+            // medical vehicle
+            break;
+#if _DEBUG
+        default:
+            printf("uknown vehicle type %02X , %02X, %X\n", gamdata->sub_type,
+                gamdata->orientation,
+                READ_LE_UINT16(gamdata->index_current_frame));
+            printf("x = %i, xoff = %i, ", gamdata->mapposx[1],
+                gamdata->mapposx[0]);
+            printf("y = %i, yoff = %i, ", gamdata->mapposy[1],
+                gamdata->mapposy[0]);
+            printf("z = %i, zoff = %i\n", gamdata->mapposz[1],
+                gamdata->mapposz[0]);
+            break;
+#endif
     }
-    VehicleInstance *newvehicle = vehicleanim->createInstance(map);
     int z = READ_LE_UINT16(gamdata->mapposz) >> 7;
 
     // TODO: the size should be adjusted on orientation/direction change
     // and it should be different per vehicle type
-    newvehicle->setSizeX(256);
-    newvehicle->setSizeY(256);
-    newvehicle->setSizeZ(192);
+    vehivle_new->setSizeX(256);
+    vehivle_new->setSizeY(256);
+    vehivle_new->setSizeZ(192);
 
     int oz = gamdata->mapposz[0] & 0x7F;
-    newvehicle->setPosition(gamdata->mapposx[1], gamdata->mapposy[1],
+    vehivle_new->setPosition(gamdata->mapposx[1], gamdata->mapposy[1],
                             z, gamdata->mapposx[0],
                             gamdata->mapposy[0], oz);
-    newvehicle->setHealth(hp);
-    newvehicle->setStartHealth(hp);
-    newvehicle->setDirection(gamdata->orientation);
+    vehivle_new->setDirection(gamdata->orientation);
 
-    return newvehicle;
+    return vehivle_new;
 }

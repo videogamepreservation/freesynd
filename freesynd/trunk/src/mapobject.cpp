@@ -856,19 +856,19 @@ Static *Static::loadInstance(uint8 * data, int m)
                 s->setSizeZ(192);
             }
             break;
-            /*
+#if _DEBUG
         default:
-            printf("uknown type %02X , %02X, %X\n", gamdata->sub_type,
-                gamdata->orientation,
+            printf("uknown static object type %02X , %02X, %X\n",
+                gamdata->sub_type, gamdata->orientation,
                 READ_LE_UINT16(gamdata->index_current_frame));
-            printf("x is %i, xoff is %i ==", gamdata->mapposx[1],
+            printf("x = %i, xoff = %i, ", gamdata->mapposx[1],
                 gamdata->mapposx[0]);
-            printf("y is %i, yoff is %i ==", gamdata->mapposy[1],
+            printf("y = %i, yoff = %i, ", gamdata->mapposy[1],
                 gamdata->mapposy[0]);
-            printf("z is %i, zoff is %i\n", gamdata->mapposz[1],
+            printf("z = %i, zoff = %i\n", gamdata->mapposz[1],
                 gamdata->mapposz[0]);
             break;
-            */
+#endif
     }
 
     if (s) {
