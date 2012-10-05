@@ -74,7 +74,7 @@ public:
     void patchMap(int x, int y, int z, uint8 tileNum);
 
 protected:
-    /*!  Every map has a unique which is used to identify the 
+    /*!  Every map has a unique ID which is used to identify the 
     name of the file containing map data.*/
     uint16 i_id_;
     int max_x_, max_y_, max_z_;

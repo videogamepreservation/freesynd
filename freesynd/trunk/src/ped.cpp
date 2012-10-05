@@ -1788,7 +1788,7 @@ void PedInstance::selectBestWeapon() {
     int bestWeapon = -1;
     int bestWeaponRank = -1;
 
-    for (int i = numWeapons() - 1; i >=0; i--) {
+    for (int i = numWeapons() - 1; i >= 0; i--) {
         if (weapon(i)->ammoRemaining() && weapon(i)->rank() > bestWeaponRank) {
             bestWeapon = i;
             bestWeaponRank = weapon(i)->rank();
@@ -1807,7 +1807,6 @@ void PedInstance::dropWeapon(int n) {
 }
 
 void PedInstance::dropWeapon(WeaponInstance *wi) {
-    // TODO: auto selection, when dropped weapon is "selected"?
     bool upd_selected = selected_weapon_ != -1;
     if (selectedWeapon() == wi) {
         setSelectedWeapon(-1);
@@ -2733,7 +2732,8 @@ void PedInstance::updtActGFiring(uint32 id, PathNode* tpn,
                     if ((it_a->ot_execute & (PedInstance::ai_aDestroyObject
                         | PedInstance::ai_aAttackLocation)) != 0)
                     {
-                        it_a->ot_execute &= ~(PedInstance::ai_aDestroyObject
+                        it_a->ot_execute &= PedInstance::ai_aAll
+                            ^ (PedInstance::ai_aDestroyObject
                             | PedInstance::ai_aAttackLocation);
                         // TODO : update with when condition will be used
                         if (tsmo) {

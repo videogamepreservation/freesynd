@@ -104,7 +104,6 @@ void GameSpriteManager::load()
     int tabSize, size;
     uint8 *tabData, *data;
 #if 1
-    // using http://rtfm.insomnia.org/~qg/syndicate.zip
     tabData = File::loadOriginalFile("hspr-0.tab", tabSize);
     data = File::loadOriginalFile("hspr-0.dat", size);
     printf("Loaded %d sprites from hspr-0.dat\n", tabSize / 6);
