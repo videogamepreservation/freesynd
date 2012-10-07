@@ -68,7 +68,7 @@ bool Map::loadMap(uint8 * mapData)
         }
     delete[] lookup;
 
-    map_width_ = (max_x_ * max_y_) * (TILE_WIDTH / 2);
+    map_width_ = (max_x_ + max_y_) * (TILE_WIDTH / 2);
     map_height_ = (max_x_ + max_y_ + max_z_) * TILE_HEIGHT / 3;
 
     return true;
