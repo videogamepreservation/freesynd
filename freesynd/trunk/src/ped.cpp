@@ -822,7 +822,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                             WeaponInstance *wi = selectedWeapon();
                             if (wi) {
                                 bool set_new_dest = true;
-                                // TODO: set checktile check value based
+                                // TODO: set checktile value, based
                                 // on mode
                                 if (wi->inRangeNoCP(&aqt.t_smo, NULL,
                                     false, false) == 1)
@@ -2068,8 +2068,7 @@ bool PedInstance::handleDamage(ShootableMapObject::DamageInflictType *d) {
     else if (d->dtype == MapObject::dmg_Mental) {
         // TODO: check for required number of persuade points before applying
         setObjGroupID(((PedInstance *)d->d_owner)->objGroupID());
-        // TODO: inherit enemies
-        enemy_group_defs_.clear();
+        ((PedInstance *)d->d_owner)->cpyEnemyDefs(enemy_group_defs_);
         dropActQ();
         assert(d->d_owner != NULL);
 

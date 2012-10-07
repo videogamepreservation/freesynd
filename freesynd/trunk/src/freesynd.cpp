@@ -206,25 +206,25 @@ int main(int argc, char *argv[]) {
     Log::initialize(Log::k_FLG_ALL, "game.log");
 #endif
 
-	if (iniPath.size() == 0) {
-		iniPath.assign(App::defaultIniFolder());
-		iniPath.append("/freesynd.ini");
+    if (iniPath.size() == 0) {
+        iniPath.assign(App::defaultIniFolder());
+        iniPath.append("/freesynd.ini");
 #ifdef _WIN32
-		if (_access(iniPath.c_str(), 0) != 0)
+        if (_access(iniPath.c_str(), 0) != 0)
 #else
-		struct stat st;
-		if (stat(iniPath.c_str(), &st))
+        struct stat st;
+        if (stat(iniPath.c_str(), &st))
 #endif
-		{
-			FILE *f = fopen(iniPath.c_str(), "w");
-			if (!f) {
-				FSERR(Log::k_FLG_IO, "Freesynd", "main", ("Cannot create default ini file at %s", iniPath.c_str()))
-				return -1;
-			}
-			fwrite(embedded_default_ini_data, 1, embedded_default_ini_size, f);
-			fclose(f);
-		}
-	}
+        {
+            FILE *f = fopen(iniPath.c_str(), "w");
+            if (!f) {
+                FSERR(Log::k_FLG_IO, "Freesynd", "main", ("Cannot create default ini file at %s", iniPath.c_str()))
+                return -1;
+            }
+            fwrite(embedded_default_ini_data, 1, embedded_default_ini_size, f);
+            fclose(f);
+        }
+    }
 
     LOG(Log::k_FLG_INFO, "Main", "main", ("Initializing application..."))
     std::auto_ptr<App> app(new App(disable_sound));

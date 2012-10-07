@@ -354,7 +354,6 @@ void PedInstance::createActQFindEnemy(actionQueueGroupType &as) {
     aq.state = 1;
     aq.ot_execute = PedInstance::ai_aFindEnemy;
     as.actions.push_back(aq);
-    // TODO: use createActQFiring(when completed) instead
     pedWeaponToUse pw_to_use;
     pw_to_use.desc = 4;
     pw_to_use.wpn.dmg_type = MapObject::dmg_Physical;

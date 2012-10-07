@@ -373,30 +373,30 @@ bool App::initialize(const std::string& iniPath) {
         return false;
     }
 
-	LOG(Log::k_FLG_INFO, "App", "initialize", ("initializing menus..."))
-	if (!menus_.initialize(playIntro_)) {
-		return false;
-	}
-
-	if (!loadWalkData()) {
-		return false;
-	}
-
-	LOG(Log::k_FLG_INFO, "App", "initialize", ("loading game sprites..."))
-	if (!gameSprites().loaded())
-		gameSprites().load();
-
-    LOG(Log::k_FLG_INFO, "App", "initialize", ("loading game tileset..."))
-	if (!maps().initialize()) {
-		return false;
+    LOG(Log::k_FLG_INFO, "App", "initialize", ("initializing menus..."))
+    if (!menus_.initialize(playIntro_)) {
+        return false;
     }
 
-	if (playIntro_) {
-		LOG(Log::k_FLG_INFO, "App", "initialize", ("Loading intro sounds..."))
-		if (!intro_sounds_.loadSounds(SoundManager::SAMPLES_INTRO)) {
-			return false;
-		}
-	}
+    if (!loadWalkData()) {
+        return false;
+    }
+
+    LOG(Log::k_FLG_INFO, "App", "initialize", ("loading game sprites..."))
+    if (!gameSprites().loaded())
+        gameSprites().load();
+
+    LOG(Log::k_FLG_INFO, "App", "initialize", ("loading game tileset..."))
+    if (!maps().initialize()) {
+        return false;
+    }
+
+    if (playIntro_) {
+        LOG(Log::k_FLG_INFO, "App", "initialize", ("Loading intro sounds..."))
+        if (!intro_sounds_.loadSounds(SoundManager::SAMPLES_INTRO)) {
+            return false;
+        }
+    }
 
     LOG(Log::k_FLG_INFO, "App", "initialize", ("Loading game sounds..."))
     if (!game_sounds_.loadSounds(SoundManager::SAMPLES_GAME)) {
@@ -627,14 +627,14 @@ void App::run(int start_mission) {
 #endif
 
     if (start_mission == -1) {
-		if (playIntro_) {
-			menus_.gotoMenu(Menu::MENU_FLI_INTRO);
-			// Update intro flag so intro won't be played next time
-			updateIntroFlag();
-		} else {
-			// play title before going to main menu
-			menus_.gotoMenu(Menu::MENU_FLI_TITLE);
-		}
+        if (playIntro_) {
+            menus_.gotoMenu(Menu::MENU_FLI_INTRO);
+            // Update intro flag so intro won't be played next time
+            updateIntroFlag();
+        } else {
+            // play title before going to main menu
+            menus_.gotoMenu(Menu::MENU_FLI_TITLE);
+        }
     }
     else {
         // Debug scenario : start directly with the brief menu
@@ -644,16 +644,16 @@ void App::run(int start_mission) {
         for (int i = 0; i < 50; i++) {
             if (session_.getBlock(i).mis_id == start_mission) {
                 session_.setSelectedBlockId(i);
-				break;
+                break;
             }
         }
         // Then we go to the brief menu
-		menus_.gotoMenu(Menu::MENU_BRIEF);
+        menus_.gotoMenu(Menu::MENU_BRIEF);
     }
 
     int lasttick = SDL_GetTicks();
     while (running_) {
-		menus_.handleEvents();
+        menus_.handleEvents();
         int curtick = SDL_GetTicks();
         int diff_ticks = curtick - lasttick;
         if (diff_ticks < 30) {

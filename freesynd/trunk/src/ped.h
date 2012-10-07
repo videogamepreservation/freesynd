@@ -724,6 +724,8 @@ public:
     int getSpeed();
     bool hasAccessCard();
     bool isPersuaded();
+
+    void cpyEnemyDefs(Mmuu32_t &eg_defs) { eg_defs = enemy_group_defs_; }
 protected:
     Ped *ped_;
 

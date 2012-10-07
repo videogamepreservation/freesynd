@@ -3378,6 +3378,7 @@ WeaponInstance *Mission::createWeaponInstance(uint8 * data)
             wType = Weapon::EnergyShield;
             break;
         default:
+            wType = Weapon::Unknown;
             break;
     }
 
@@ -3393,8 +3394,8 @@ WeaponInstance *Mission::createWeaponInstance(uint8 * data)
     return NULL;
 }
 
-/*
-* This function looks for statics, vehicles, peds
+/*!
+* This function looks for blockers - statics, vehicles, peds, weapons
 */
 void Mission::blockerExists(toDefineXYZ * startXYZ, toDefineXYZ * endXYZ,
                             double *dist, MapObject** blockerObj)

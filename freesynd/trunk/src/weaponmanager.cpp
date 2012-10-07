@@ -31,20 +31,7 @@
 #include "app.h"
 
 WeaponManager::WeaponManager() {
-    all_game_weapons_.push_back(loadWeapon(Weapon::Persuadatron));
-    all_game_weapons_.push_back(loadWeapon(Weapon::Pistol));
-    all_game_weapons_.push_back(loadWeapon(Weapon::Shotgun));
-    all_game_weapons_.push_back(loadWeapon(Weapon::Uzi));
-    all_game_weapons_.push_back(loadWeapon(Weapon::Scanner));
-    all_game_weapons_.push_back(loadWeapon(Weapon::MediKit));
-    all_game_weapons_.push_back(loadWeapon(Weapon::Minigun));
-    all_game_weapons_.push_back(loadWeapon(Weapon::Flamer));
-    all_game_weapons_.push_back(loadWeapon(Weapon::LongRange));
-    all_game_weapons_.push_back(loadWeapon(Weapon::EnergyShield));
-    all_game_weapons_.push_back(loadWeapon(Weapon::Laser));
-    all_game_weapons_.push_back(loadWeapon(Weapon::GaussGun));
-    all_game_weapons_.push_back(loadWeapon(Weapon::AccessCard));
-    all_game_weapons_.push_back(loadWeapon(Weapon::TimeBomb));
+    all_game_weapons_.reserve(18);
 }
 
 void WeaponManager::destroy() {
@@ -66,11 +53,22 @@ WeaponManager::~WeaponManager() {
 void WeaponManager::reset() {
     destroy();
 
-    for (std::vector<Weapon *>::iterator it = all_game_weapons_.begin();
-        it != all_game_weapons_.end();it++)
-    {
-        (*it)->resetSubmittedToSearch();
-    }
+    all_game_weapons_.clear();
+    all_game_weapons_.push_back(loadWeapon(Weapon::Persuadatron));
+    all_game_weapons_.push_back(loadWeapon(Weapon::Pistol));
+    all_game_weapons_.push_back(loadWeapon(Weapon::Shotgun));
+    all_game_weapons_.push_back(loadWeapon(Weapon::Uzi));
+    all_game_weapons_.push_back(loadWeapon(Weapon::Scanner));
+    all_game_weapons_.push_back(loadWeapon(Weapon::MediKit));
+    all_game_weapons_.push_back(loadWeapon(Weapon::Minigun));
+    all_game_weapons_.push_back(loadWeapon(Weapon::Flamer));
+    all_game_weapons_.push_back(loadWeapon(Weapon::LongRange));
+    all_game_weapons_.push_back(loadWeapon(Weapon::EnergyShield));
+    all_game_weapons_.push_back(loadWeapon(Weapon::Laser));
+    all_game_weapons_.push_back(loadWeapon(Weapon::GaussGun));
+    all_game_weapons_.push_back(loadWeapon(Weapon::AccessCard));
+    all_game_weapons_.push_back(loadWeapon(Weapon::TimeBomb));
+
     // Enables default weapons
     enableWeapon(Weapon::Persuadatron);
     enableWeapon(Weapon::Pistol);
@@ -298,7 +296,7 @@ Weapon * WeaponManager::loadWeapon(Weapon::WeaponType wt) {
             break;
 #if _DEBUG
         default:
-            printf("unknown weapon loaded, NULL passed");
+            printf("unknown weapon loaded(%i), NULL passed", wt);
             break;
 #endif
     }
@@ -320,7 +318,7 @@ bool WeaponManager::saveToFile(PortableFile &file) {
 bool WeaponManager::loadFromFile(PortableFile &infile, const FormatVersion& v) {
     int nbWeap = infile.read32();
 
-    for (int i=0;i<nbWeap; i++) {
+    for (int i = 0; i < nbWeap; i++) {
         int type = infile.read32();
         Weapon::WeaponType wt = Weapon::Unknown;
         switch (type) {
