@@ -51,6 +51,7 @@ set (SOURCES
 	mod.cpp
 	modmanager.cpp
 	ped.cpp
+	pedactions.cpp
 	pedmanager.cpp
 	pedpathfinding.cpp
 	sound/audio.cpp
