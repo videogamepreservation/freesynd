@@ -2337,28 +2337,39 @@ bool PedInstance::createActQFiring(actionQueueGroupType &as, PathNode *tpn,
     aq.group_desc = PedInstance::gd_mFire;
     bool can_shoot = false;
     bool does_phys_dmg = false;
+    Weapon *pWeapon = NULL;
     if (pw_to_use) {
         switch (pw_to_use->desc) {
-            // indx used
             // TODO: use it later, convert indx to weapon pointer
             case 1:
+                // indx used
                 break;
-            // pointer
             case 2:
+                // pointer
                 can_shoot = pw_to_use->wpn.wi->canShoot();
                 does_phys_dmg = pw_to_use->wpn.wi->doesPhysicalDmg();
                 break;
-            // weapon type
-            // TODO: create a way for checking can_shoot and does_phys_dmg
             case 3:
+                // weapon type
+                pWeapon = g_App.weapons().getWeapon(pw_to_use->wpn.wpn_type);
+                can_shoot = pWeapon->canShoot();
+                does_phys_dmg = pWeapon->doesPhysicalDmg();
                 break;
-            // strict damage type
             case 4:
-            // non-strict damage type
+                // strict damage type
+                if(!g_App.weapons().checkDmgTypeCanShootStrict(
+                    pw_to_use->wpn.dmg_type, can_shoot)) {
+                    return false;
+                }
+                does_phys_dmg = (pw_to_use->wpn.dmg_type
+                    & MapObject::dmg_Physical) != 0;
+                break;
             case 5:
-                // TODO: check inventory for shootable weapons? or check in
-                // action queue processing? for availiable, search the ground?
-                can_shoot = true;
+                // non-strict damage type
+                if(!g_App.weapons().checkDmgTypeCanShootStrict(
+                    pw_to_use->wpn.dmg_type, can_shoot)) {
+                    return false;
+                }
                 does_phys_dmg = (pw_to_use->wpn.dmg_type
                     & MapObject::dmg_Physical) != 0;
                 break;

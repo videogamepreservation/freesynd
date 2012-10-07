@@ -31,31 +31,46 @@
 #include "app.h"
 
 WeaponManager::WeaponManager() {
-    
+    all_game_weapons_.push_back(loadWeapon(Weapon::Persuadatron));
+    all_game_weapons_.push_back(loadWeapon(Weapon::Pistol));
+    all_game_weapons_.push_back(loadWeapon(Weapon::Shotgun));
+    all_game_weapons_.push_back(loadWeapon(Weapon::Uzi));
+    all_game_weapons_.push_back(loadWeapon(Weapon::Scanner));
+    all_game_weapons_.push_back(loadWeapon(Weapon::MediKit));
+    all_game_weapons_.push_back(loadWeapon(Weapon::Minigun));
+    all_game_weapons_.push_back(loadWeapon(Weapon::Flamer));
+    all_game_weapons_.push_back(loadWeapon(Weapon::LongRange));
+    all_game_weapons_.push_back(loadWeapon(Weapon::EnergyShield));
+    all_game_weapons_.push_back(loadWeapon(Weapon::Laser));
+    all_game_weapons_.push_back(loadWeapon(Weapon::GaussGun));
+    all_game_weapons_.push_back(loadWeapon(Weapon::AccessCard));
+    all_game_weapons_.push_back(loadWeapon(Weapon::TimeBomb));
 }
 
 void WeaponManager::destroy() {
-    // Delete all weapons from the cache
-    for (unsigned int i = 0; i != preFetch_.size(); ++i) {
-       delete preFetch_[i];
-    }
-
-    // Then delete all available weapons
-    for (unsigned i = 0; i != availableWeapons_.size(); ++i) {
-        delete availableWeapons_.get(i);
-    }
-
     preFetch_.clear();
     availableWeapons_.clear();
 }
 
 WeaponManager::~WeaponManager() {
     destroy();
+    for (std::vector<Weapon *>::iterator it = all_game_weapons_.begin();
+        it != all_game_weapons_.end();it++)
+    {
+        delete (*it);
+    }
+    all_game_weapons_.clear();
+        
 }
 
 void WeaponManager::reset() {
     destroy();
 
+    for (std::vector<Weapon *>::iterator it = all_game_weapons_.begin();
+        it != all_game_weapons_.end();it++)
+    {
+        (*it)->resetSubmittedToSearch();
+    }
     // Enables default weapons
     enableWeapon(Weapon::Persuadatron);
     enableWeapon(Weapon::Pistol);
@@ -126,7 +141,17 @@ Weapon * WeaponManager::getWeapon(Weapon::WeaponType wt) {
     }
 
     // Weapon was not found so loads it
-    Weapon *pWeapon = loadWeapon(wt);
+    Weapon *pWeapon = NULL;
+    
+    for (std::vector<Weapon *>::iterator it = all_game_weapons_.begin();
+        it != all_game_weapons_.end();it++)
+    {
+        if ((*it)->getWeaponType() == wt) {
+            pWeapon = *it;
+            break;
+        }
+    }
+    assert(pWeapon);
     // Stores it in cache
     preFetch_.push_back(pWeapon);
     
@@ -271,8 +296,11 @@ Weapon * WeaponManager::loadWeapon(Weapon::WeaponType wt) {
         SFXObject::sfxt_Unknown, SFXObject::sfxt_ExplosionFire, 512, 0.0, 0.0,
         0, 64);
             break;
+#if _DEBUG
         default:
+            printf("unknown weapon loaded, NULL passed");
             break;
+#endif
     }
 
     return pWeapon;
@@ -347,3 +375,41 @@ bool WeaponManager::loadFromFile(PortableFile &infile, const FormatVersion& v) {
 
     return true;
 }
+
+bool WeaponManager::checkDmgTypeCanShootStrict(MapObject::DamageType dmg, bool &can_shoot)
+{
+    bool found = false;
+    can_shoot = false;
+
+    for (std::vector<Weapon *>::iterator it = all_game_weapons_.begin();
+        it != all_game_weapons_.end();it++)
+    {
+        if ((*it)->dmgType() == dmg) {
+            found = true;
+            if (((*it)->shotProperty() & Weapon::spe_CanShoot) != 0)
+                can_shoot = true;
+        }
+    }
+
+    return found;
+}
+
+bool WeaponManager::checkDmgTypeCanShootNonStrict(MapObject::DamageType dmg, bool &can_shoot)
+{
+    bool found = false;
+    can_shoot = false;
+
+    for (std::vector<Weapon *>::iterator it = all_game_weapons_.begin();
+        it != all_game_weapons_.end();it++)
+    {
+        if (((*it)->dmgType() & dmg) != 0) {
+            found = true;
+            if ((*it)->canShoot())
+                can_shoot = true;
+        }
+    }
+
+    return found;
+
+}
+

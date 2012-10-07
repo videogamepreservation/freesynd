@@ -524,7 +524,7 @@ public:
             MapObject::DamageType dmg_type;
         } wpn;
         // union description
-        // 0 - not used, 1 - indx, 2 - pointer, 3 - weapon type,
+        // 0 - not set, 1 - indx, 2 - pointer, 3 - weapon type,
         // 4 - damage type strict (type == dmg_type),
         // 5 - damage type non-strict (type & dmg_type != 0)
         uint8 desc;

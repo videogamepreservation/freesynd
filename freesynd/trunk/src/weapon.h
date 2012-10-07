@@ -111,6 +111,19 @@ public:
 
     bool wasSubmittedToSearch() { return submittedToSearch_; }
     void submitToSearch() { submittedToSearch_ = true; }
+    void resetSubmittedToSearch() { submittedToSearch_ = false; }
+
+    bool canShoot() {
+        return (shot_property_ & Weapon::spe_CanShoot) != 0;
+    }
+
+    bool doesMentalDmg() {
+        return (dmg_type_ & MapObject::dmg_Mental) != 0;
+    }
+
+    bool doesPhysicalDmg() {
+        return (dmg_type_ & MapObject::dmg_Physical) != 0;
+    }
 
     typedef enum {
         spe_None = 0x0,
@@ -169,7 +182,7 @@ public:
         wspt_AccessCard = (spe_Owner | spe_ChangeAttribute),
         wspt_EnergyShield =
             (spe_Owner | spe_ChangeAttribute | spe_UsesAmmo),
-    }WeaponShotPropertyType;
+    } WeaponShotPropertyType;
 
     typedef enum {
         stm_AllObjects = MapObject::mjt_Ped | MapObject::mjt_Vehicle
@@ -195,6 +208,7 @@ public:
         int rd_anim;
     }ad_HitAnims;
 
+    // (WeaponShotPropertyType)
     unsigned int shotProperty() { return shot_property_; }
 
     ad_HitAnims * anims() { return &anims_; }
@@ -318,15 +332,15 @@ public:
     bool handleDamage(ShootableMapObject::DamageInflictType * d);
 
     bool canShoot() {
-        return (pWeaponClass_->shotProperty() & Weapon::spe_CanShoot) != 0;
+        return pWeaponClass_->canShoot();
     }
 
     bool doesMentalDmg() {
-        return pWeaponClass_->dmgType() == MapObject::dmg_Mental;
+        return pWeaponClass_->doesMentalDmg();
     }
 
     bool doesPhysicalDmg() {
-        return (pWeaponClass_->dmgType() & MapObject::dmg_Physical) != 0;
+        return pWeaponClass_->doesPhysicalDmg();
     }
 
     bool needsReloading() {

@@ -65,12 +65,19 @@ public:
     //! Load instance from file
     bool loadFromFile(PortableFile &infile, const FormatVersion& v);
 
+    //! checks existing weapons that can do such damage and sets whether they can shoot
+    //! strict check
+    bool checkDmgTypeCanShootStrict(MapObject::DamageType dmg, bool &can_shoot);
+    //! checks existing weapons that can do such damage and sets whether they can shoot
+    //! non strict check
+    bool checkDmgTypeCanShootNonStrict(MapObject::DamageType dmg, bool &can_shoot);
 protected:
     //! Loads the weapon from file
     Weapon *loadWeapon(Weapon::WeaponType wt);
 
 protected:
-    /*! This vector is used to store necessary but unavailable weapons until there
+    std::vector<Weapon *> all_game_weapons_;
+    /*! This vector is used to store necessary but unavailable weapons until they
      * are made available.*/
     std::vector<Weapon *> preFetch_;
     /*! This is the list of all weapons available to the user.*/
