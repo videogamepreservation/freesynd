@@ -133,7 +133,7 @@ bool PedInstance::createActQFiring(actionQueueGroupType &as, PathNode *tpn,
                 break;
             case 5:
                 // non-strict damage type
-                if(!g_App.weapons().checkDmgTypeCanShootStrict(
+                if(!g_App.weapons().checkDmgTypeCanShootNonStrict(
                     pw_to_use->wpn.dmg_type, can_shoot)) {
                     return false;
                 }
@@ -355,10 +355,10 @@ void PedInstance::createActQFindEnemy(actionQueueGroupType &as) {
     aq.ot_execute = PedInstance::ai_aFindEnemy;
     as.actions.push_back(aq);
     pedWeaponToUse pw_to_use;
-    pw_to_use.desc = 4;
+    pw_to_use.desc = 5;
     pw_to_use.wpn.dmg_type = MapObject::dmg_Physical;
-    createActQFiring(as, NULL, NULL, false, 0, &pw_to_use);
-    as.actions.back().state |= 64;
+    if (createActQFiring(as, NULL, NULL, false, 0, &pw_to_use))
+        as.actions.back().state |= 64;
     createActQFollowing(as, NULL, 1);
     as.actions.back().state |= 64;
 }

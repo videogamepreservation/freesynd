@@ -331,7 +331,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
     }
 
     // NOTE: some actions have remaining time, it is lost for now
-    if (actions_queue_.empty()) {
+    if (actions_queue_.empty() || 1) {
         // TODO: use default_actions_ to fill it up
 #if 1
         if ((state_ & pa_smDead) == 0) {
@@ -343,7 +343,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
             actions_queue_.push_back(as);
         }
 #endif
-    } else {
+    //} else {
         friends_not_seen_.clear();
         // TODO: xor finished and failed, should all actions
         // have execution time set?
@@ -407,7 +407,12 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                                 if (checkCurrPosTileOnly(aqt.t_pn))
                                     aqt.state |= 4;
                                 else {
-                                    // TODO: if vehicle has no driver take his position
+                                    if (v->getDriver() == NULL) {
+                                        v->forceSetDriver(this);
+                                        if (v->isDriver(this))
+                                            state_ = (state_ ^ PedInstance::pa_smInCar)
+                                                | PedInstance::pa_smUsingCar;
+                                    }
                                     if ((state_ & PedInstance::pa_smUsingCar) != 0) {
                                         v->setDestinationV(mission, aqt.t_pn.tileX(),
                                             aqt.t_pn.tileY(), aqt.t_pn.tileZ(),
@@ -455,16 +460,17 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                         // NOTE: don't put weapon on the ground
                         WeaponInstance *wi = aqt.multi_var.enemy_var.weapon.wpn.wi;
                         if (wi && wi->getMainType()
-                            == Weapon::Persuadatron)
+                            == Weapon::Persuadatron && aqt.t_smo->health() > 0)
                         {
-                            // TODO: proper handling for time, add condition
-                            // of failure to inflict damage
-                            if (aqt.state == 1)
-                                aqt.state |= 2;
                             int tm_left = elapsed;
-                            if (wi->inflictDamage(aqt.t_smo, NULL, &tm_left) == 0)
+                            uint16 answ = wi->inflictDamage(aqt.t_smo, NULL, &tm_left);
+                            if (answ == 0) {
                                 if (checkFriendIs((PedInstance *)aqt.t_smo))
                                     aqt.state |= 4;
+                            } else if (answ == 2) {
+                                aqt.state |= 2;
+                            } else
+                                aqt.state |= 8;
                         } else
                             aqt.state |= 8;
                     } else if (aqt.t_smo->majorType()
@@ -515,10 +521,8 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                             VehicleInstance *v = (VehicleInstance *)aqt.t_smo;
                             if (v->isInsideVehicle(this)) {
                                 v->removeDriver(this);
-                                map_ = v->map();
-                                is_ignored_ = false;
-                                in_vehicle_ = NULL;
                                 aqt.state |= 4;
+                                leaveVehicle();
                             } else
                                 aqt.state |= 8;
                         }
@@ -957,7 +961,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                     bool selfState = is_ignored_;
                     is_ignored_ = true;
                     // TODO: check inside of vehicles too, is_ignored_?
-                    if (!hostiles_found_.empty())
+                    if (hostiles_found_.size() != 0)
                         verifyHostilesFound(mission);
 
                     Msmod_t smo_dist;
@@ -983,8 +987,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                             int num_peds = mission->numPeds();
                             for (int i = 0; i < num_peds; i++) {
                                 PedInstance *p = mission->ped(i);
-                                if ((p->state_ &
-                                    pa_smCheckExcluded) != 0
+                                if (p->isExcluded()
                                     || hostiles_found_.find(p)
                                     != hostiles_found_.end()
                                     || smo_dist.find(p)
@@ -1001,14 +1004,18 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                                             // needs this checking as list might
                                             // become invalidated by other
                                             // peds actions
-                                            // TODO : add unavailiable to vehicle
-                                            // use like pa_smCheckExcluded
-                                            if (smo->health() > 0
+                                            /*bool excluded;
+                                            if (smo->majorType() == MapObject::mjt_Ped)
+                                                excluded = ((PedInstance *)smo)->isExcluded();
+                                            else
+                                                excluded = smo->isExcluded();*/
+                                            if ((!smo->isExcluded())
                                                 && checkHostileIs(smo))
                                             {
                                                 // TODO: inrange check here might
                                                 // reduce speed, check
                                                 // TODO: reduce inrange calls, later
+                                                // TODO: set ignoreblocker based on Ai
                                                 if (//inSightRange((MapObject *)(smo))
                                                     //&&
                                                     mission->inRangeCPos(
@@ -1037,13 +1044,11 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                                     // IPA lvl inteligence?
                                     double distTo = 0;
                                     if (//inSightRange((MapObject *)(p)) &&
-                                        // TODO: set ignoreblocker based on AL
-                                        mission->inRangeCPos(
-                                        &cur_xyz,
+                                        // TODO: set ignoreblocker based on Ai
+                                        mission->inRangeCPos(&cur_xyz,
                                         (ShootableMapObject **)(&p),
                                         NULL, false, false,
-                                        view_rng, &distTo)
-                                        == 1)
+                                        view_rng, &distTo) == 1)
                                     {
                                         hostiles_found_.insert(
                                             Pairsmod_t(
@@ -1065,18 +1070,36 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                                     double distTo = 0;
                                     if (//inSightRange((MapObject *)(p))
                                         //&&
-                                        mission->inRangeCPos(
-                                        &cur_xyz,
+                                    // TODO: set ignoreblocker based on Ai
+                                        mission->inRangeCPos(&cur_xyz,
                                         (ShootableMapObject **)(&p),
                                         NULL, false, false,
-                                        view_rng, &distTo)
-                                        == 1)
+                                        view_rng, &distTo) == 1)
                                     {
                                         hostiles_found_.insert(
                                             Pairsmod_t(
                                             (ShootableMapObject *)p,
                                             distTo));
                                     }
+                                }
+                            }
+                        }
+                        int num_vehicles = mission->numVehicles();
+                        for (int i = 0; i < num_vehicles; i++) {
+                            VehicleInstance *v = mission->vehicle(i);
+                            // NOTE: we can call checkHostilesInside directly,
+                            // but just to use checkHostileIs we ignore it
+                            if ((!v->isExcluded()) && checkHostileIs(v)) {
+                                double distTo = 0;
+                                // TODO: set ignoreblocker based on Ai
+                                if (mission->inRangeCPos(&cur_xyz,
+                                    (ShootableMapObject **)(&v), NULL, false,
+                                    false, view_rng, &distTo) == 1)
+                                {
+                                    hostiles_found_.insert(
+                                        Pairsmod_t(
+                                        (ShootableMapObject *)v,
+                                        distTo));
                                 }
                             }
                         }
@@ -1225,7 +1248,8 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                                 elapsed_carry_ = elapsed_carry_bckp;
                             } else
                                 aqt.state |= 128;
-                        }
+                        } else if ((aqt.state & 2) == 0)
+                            aqt.state &= (65535 ^ 32);
                     } else if (aqt.multi_var.time_var.desc == 2) {
                         // no failed or suspended will have "wait" action
                         if ((aqt.state & 60) == 36) {
@@ -2185,8 +2209,9 @@ bool PedInstance::checkHostileIs(ShootableMapObject *obj,
 {
     bool hostile_rsp = false;
     bool friend_is = false;
+
     if (obj->majorType() == MapObject::mjt_Vehicle) {
-        // TODO: add this check later, create a list of all in vehicle
+        ((VehicleInstance *)obj)->checkHostilesInside(this, hostile_desc_alt);
     } else if (obj->majorType() == MapObject::mjt_Ped) {
         if (checkFriendIs((PedInstance *)obj))
             friend_is = true;
@@ -2205,6 +2230,7 @@ bool PedInstance::checkHostileIs(ShootableMapObject *obj,
                 & hostile_desc_alt) != 0;
         }
     }
+
     return hostile_rsp;
 }
 

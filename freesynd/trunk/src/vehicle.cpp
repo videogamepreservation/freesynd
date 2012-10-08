@@ -790,3 +790,28 @@ bool VehicleInstance::handleDamage(ShootableMapObject::DamageInflictType *d) {
     }
     return true;
 }
+
+void VehicleInstance::removeDriver(PedInstance* vehicleDriver) {
+    if (vehicle_driver_ == vehicleDriver) {
+        vehicle_driver_ = NULL;
+        clearDestination();
+        setSpeed(0);
+    }
+    all_passengers_.erase(all_passengers_.find(vehicleDriver));
+    ((MapObject *)vehicleDriver)->setPosition(tile_x_, tile_y_, tile_z_,
+        off_x_, off_y_, off_z_);
+}
+
+bool VehicleInstance::checkHostilesInside(PedInstance* p,
+                                          unsigned int hostile_desc_alt)
+{
+    for (std::set<PedInstance *>::iterator it = all_passengers_.begin();
+        it != all_passengers_.end(); it++)
+    {
+        if (p->checkHostileIs((ShootableMapObject *)(*it), hostile_desc_alt))
+            return false;
+    }
+    return false;
+}
+
+

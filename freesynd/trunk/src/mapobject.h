@@ -363,6 +363,7 @@ public:
         health_ -= d->dvalue;
         return true;
     }
+    virtual bool isExcluded() { return health_ <= 0;}
 
   protected:
     int health_, start_health_;

@@ -726,6 +726,7 @@ public:
     bool isPersuaded();
 
     void cpyEnemyDefs(Mmuu32_t &eg_defs) { eg_defs = enemy_group_defs_; }
+    bool isExcluded() { return (state_ & pa_smCheckExcluded) != 0;}
 protected:
     Ped *ped_;
 
