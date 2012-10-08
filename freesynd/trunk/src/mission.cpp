@@ -507,6 +507,21 @@ bool Mission::loadLevel(uint8 * levelData)
 
         switch (READ_LE_UINT16(obj.type)) {
             case 0x00:
+                objd.pos_xyz.x = READ_LE_INT16(obj.mapposx);
+                if (objd.pos_xyz.x != 0) {
+                    objd.pos_xyz.y = READ_LE_INT16(obj.mapposy);
+                    objd.pos_xyz.z = READ_LE_INT16(obj.mapposz);
+                    objd.type = objv_ReachLocation;
+                    objd.msg = "";
+                    objd.condition = 32;
+                    assert(objectives_.size() != 0);
+                    ObjectiveDesc &ref_obj = objectives_.back();
+                    ref_obj.condition |= 1;
+                    ref_obj.subobjindx = objectives_.size();
+                    objd.indx_grpid.targetindx = ref_obj.indx_grpid.targetindx;
+                    objd.targettype = ref_obj.targettype;
+                    isset = true;
+                }
                 break;
             case 0x01:
                 if (bindx > 0 && bindx < 0x5C02) {
@@ -540,8 +555,7 @@ bool Mission::loadLevel(uint8 * levelData)
                 if (bindx > 0 && bindx < 0x5C02) {
                     cindx = (bindx - 2) / 92;
                     if ((cindx * 92 + 2) == bindx && pindx[cindx] != 0xFFFF) {
-                        //TODO: multiple commands are required here
-                        //objd.type = objv_Protect;
+                        objd.type = objv_Protect;
                         objd.targettype = MapObject::mjt_Ped;
                         objd.indx_grpid.targetindx = pindx[cindx];
                         objd.msg = g_App.menus().getMessage("GOAL_PROTECT");
@@ -569,7 +583,6 @@ bool Mission::loadLevel(uint8 * levelData)
             case 0x0A:
                 objd.type = objv_DestroyObject;
                 objd.targettype = MapObject::mjt_Ped;
-                // maybe also guards should be eliminated?
                 objd.targetsubtype = PedInstance::og_dmPolice;
                 objd.indx_grpid.grpid = 4;
                 objd.condition = 2;
@@ -580,7 +593,6 @@ bool Mission::loadLevel(uint8 * levelData)
             case 0x0B:
                 objd.type = objv_DestroyObject;
                 objd.targettype = MapObject::mjt_Ped;
-                // maybe also guards should be eliminated?
                 objd.targetsubtype = PedInstance::og_dmAgent;
                 objd.condition = 2;
                 objd.indx_grpid.targetindx = pindx[cindx];
@@ -1015,6 +1027,8 @@ void Mission::checkObjectives() {
     bool all_completed = true;
     bool no_failed = true;
     WeaponInstance * wi;
+    PedInstance *p;
+    VehicleInstance *v;
 
     for (uint16 o = 0; o < objectives_.size()
         && no_failed && all_completed; o++)
@@ -1030,30 +1044,42 @@ void Mission::checkObjectives() {
                 break;
             case objv_AquireControl:
                 switch (obj.targettype) {
-                    case 1: //ped
-                        if ((obj.condition & 2) == 0) {
-                            PedInstance *p = peds_[obj.indx_grpid.targetindx];
-                            if (p->health() <= 0)
-                            {
-                                no_failed = false;
-                                obj.condition |= 8;
-                            } else if (p->isPersuaded())
-                            {
-                                if (o == cur_objective_)
-                                    cur_objective_++;
-                                peds_evacuate.push_back(p);
-                            } else {
-                                // not dead and not persuaded
-                                all_completed = false;
-                            }
+                    case MapObject::mjt_Ped: //ped
+                        p = peds_[obj.indx_grpid.targetindx];
+                        if (p->health() <= 0)
+                        {
+                            no_failed = false;
+                            obj.condition |= 8;
+                        } else if (p->isPersuaded())
+                        {
+                            if (o == cur_objective_)
+                                cur_objective_++;
+                            peds_evacuate.push_back(p);
+                        } else {
+                            // not dead and not persuaded
+                            all_completed = false;
                         }
+                        break;
+                    case MapObject::mjt_Vehicle: //vehicle
+                        v = vehicles_[obj.indx_grpid.targetindx];
+                        if (v->health() <= 0) {
+                            no_failed = false;
+                            obj.condition |= 8;
+                            break;
+                        }
+                        p = v->getDriver();
+                        if (p && p->isOurAgent())
+                            obj.condition |= 4;
                         break;
                     default:
                         break;
                 }
                 break;
-            //case objv_Protect:
-                //break;
+            case objv_Protect:
+                p = peds_[obj.indx_grpid.targetindx];
+                if (p->health() <= 0)
+                    obj.condition |= 8;
+                break;
             case objv_PickUpObject:
                 wi = weapons_[obj.indx_grpid.targetindx];
                 if (wi->health() <= 0) {
@@ -1071,9 +1097,9 @@ void Mission::checkObjectives() {
                 break;
             case objv_DestroyObject:
                 switch (obj.targettype) {
-                    case 1: //ped
+                    case MapObject::mjt_Ped: //ped
                         if ((obj.condition & 2) == 0) {
-                            PedInstance *p = peds_[obj.indx_grpid.targetindx];
+                            p = peds_[obj.indx_grpid.targetindx];
                             if (p->health() <= 0)
                             {
                                 if (o == cur_objective_)
@@ -1115,6 +1141,11 @@ void Mission::checkObjectives() {
                             }
                         }
                         break;
+                    case MapObject::mjt_Vehicle:
+                        v = vehicles_[obj.indx_grpid.targetindx];
+                        if (v->health() <= 0)
+                            obj.condition |= 4;
+                        break;
                     default:
                         break;
                 }
@@ -1122,6 +1153,14 @@ void Mission::checkObjectives() {
             case objv_UseObject:
                 break;
             case objv_ReachLocation:
+                if (obj.condition == 32) {
+                    if (cur_objective_ == o)
+                        cur_objective_++;
+                    p = peds_[obj.indx_grpid.targetindx];
+                    if (p->distanceToPosXYZ(&obj.pos_xyz) > 256)
+                        all_completed = false;
+                    break;
+                }
                 // evacuating people
                 for (std::vector<PedInstance *>::iterator it_p
                     = peds_evacuate.begin();
@@ -1130,8 +1169,6 @@ void Mission::checkObjectives() {
                     if ((*it_p)->distanceToPosXYZ(&obj.pos_xyz) > 512)
                         all_completed = false;
                 }
-                break;
-            case objv_ExecuteObjective:
                 break;
             default:
                 break;
@@ -3505,6 +3542,7 @@ uint8 Mission::inRangeCPos(toDefineXYZ * cp, ShootableMapObject ** t,
     PathNode * pn, bool setBlocker, bool checkTileOnly, double maxr,
     double * distTo)
 {
+    // TODO: some objects mid point is higher then map z
     assert(maxr >= 0);
 
     int cx = (*cp).x;

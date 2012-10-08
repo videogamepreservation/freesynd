@@ -498,19 +498,7 @@ public:
         // Should wait some time
         objv_Wait = 0x0200,
         objv_AttackLocation = 0x0400,
-        // in range of current weapon or inrange of other friendly units:
-        // will execute objv_ReachLocation
-        objv_FindEnemy = 0x0800,
-        // in range of current weapon
-        objv_FindNonFriend = 0x1000,
-        // Objective(action) for defined object(s), has sub-objective
-        // NOTE: this can be used to set objective(s) for single ped or group
-        objv_ExecuteObjective = 0x2000,
-        objv_ExecuteObjectiveEnd = 0x4000,
-        objv_NonFinishable = 0x8000,
-        // Protect object at all cost, command(s) after this should have
-        // objv_ExecuteObjectiveEnd
-        // objv_Protect = objv_FollowObject | objv_ExecuteObjective,
+        objv_Protect = 0x8000,
     }ObjectiveType;
 
 protected:
@@ -541,8 +529,8 @@ protected:
     typedef struct {
         // type of objective
         ObjectiveType type;
-        // 0 - not defined, 1 - ped, 2 - weapon, 3 - static, 4 - vehicle
-        MapObject::MajorTypeEnum targettype;
+        // MapObject::MajorTypeEnum
+        uint8 targettype;
         // (objGroupDefMasks)
         uint32 targetsubtype;
         union {
@@ -552,7 +540,7 @@ protected:
         } indx_grpid;
         // 0 - not defined, 0b - has sub objective, 1b - refers to all objects
         // of subtype, 2b - completed, 3b - failed, 4b - check previous
-        // objecives for fail
+        // objectives for fail, 5b - is subobjective
         uint32 condition;
         // indx for sub objective
         uint16 subobjindx;
