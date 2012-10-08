@@ -140,7 +140,7 @@ void SelectMenu::drawAgent()
     }
     if (selected->slot(Mod::MOD_ARMS)) {
         arms = selected->slot(Mod::MOD_ARMS)->icon(selected->isMale());
-       getMenuFont(FontManager::SIZE_1)->drawText(366, 226,
+        getMenuFont(FontManager::SIZE_1)->drawText(366, 226,
             selected->slot(Mod::MOD_ARMS)->getName(),
             false);
     }
@@ -219,7 +219,7 @@ void SelectMenu::drawAgent()
         {
             WeaponInstance *wi = selected->weapon(j * 4 + i);
             Weapon *pW = wi->getWeaponClass();
-			menuSprites().drawSpriteXYZ(pW->getSmallIconId(),
+            menuSprites().drawSpriteXYZ(pW->getSmallIconId(),
                 366 + i * 32, 308 + j * 32, 0, false, true);
             uint8 data[3] = {204, 204, 204};
             if (pW->ammo() != -1) {
@@ -266,41 +266,53 @@ void SelectMenu::updateClock() {
 }
 
 void SelectMenu::drawSelectedWeaponInfos(int x, int y) {
-	char tmp[100];
-	
+    char tmp[100];
+
+    const int shifted_x = x + 52;
     getMenuFont(FontManager::SIZE_1)->drawText(x, y, pSelectedWeap_->getName(), true);
-	sprintf(tmp, "COST   :%d", pSelectedWeap_->cost());
-    getMenuFont(FontManager::SIZE_1)->drawText(x, y + 12, tmp, true);
-    y += 24;
+    y += 12;
+    sprintf(tmp, ":%d", pSelectedWeap_->cost());
+    getMenuFont(FontManager::SIZE_1)->drawText(x, y,
+        g_App.menus().getMessage("SELECT_WPN_COST").c_str(), true);
+    getMenuFont(FontManager::SIZE_1)->drawText(shifted_x, y, tmp, true);
+    y += 12;
 
     if (pSelectedWeap_->ammo() >= 0) {
-		sprintf(tmp, "AMMO   :%d", pSelectedWeap_->ammo());
-        getMenuFont(FontManager::SIZE_1)->drawText(x, y, tmp, true);
+        sprintf(tmp, ":%d", pSelectedWeap_->ammo());
+        getMenuFont(FontManager::SIZE_1)->drawText(x, y,
+            g_App.menus().getMessage("SELECT_WPN_AMMO").c_str(), true);
+        getMenuFont(FontManager::SIZE_1)->drawText(shifted_x, y, tmp, true);
         y += 12;
     }
 
     if (pSelectedWeap_->range() >= 0) {
-		sprintf(tmp, "RANGE  :%d", pSelectedWeap_->range());
-        getMenuFont(FontManager::SIZE_1)->drawText(x, y, tmp, true);
+        sprintf(tmp, ":%d", pSelectedWeap_->range());
+        getMenuFont(FontManager::SIZE_1)->drawText(x, y,
+            g_App.menus().getMessage("SELECT_WPN_RANGE").c_str(), true);
+        getMenuFont(FontManager::SIZE_1)->drawText(shifted_x, y, tmp, true);
         y += 12;
     }
 
-    if (pSelectedWeap_->damagePerShot() >= 0 && pSelectedWeap_->ammo() >= 0) {
-		sprintf(tmp, "SHOT   :%d", pSelectedWeap_->damagePerShot());
-        getMenuFont(FontManager::SIZE_1)->drawText(x, y, tmp, true);
+    if (pSelectedWeap_->ammoCost() >= 0 && pSelectedWeap_->ammo() >= 0) {
+        sprintf(tmp, ":%d", pSelectedWeap_->ammoCost());
+        getMenuFont(FontManager::SIZE_1)->drawText(x, y,
+            g_App.menus().getMessage("SELECT_WPN_SHOT").c_str(), true);
+        getMenuFont(FontManager::SIZE_1)->drawText(shifted_x, y, tmp, true);
         y += 12;
     }
 
-	if (selectedWInstId_ > 0 && g_App.weapons().isAvailable(pSelectedWeap_)) {
-		WeaponInstance *wi = g_Session.squad().member(cur_agent_)->weapon(selectedWInstId_ - 1);
-		if (wi->needsReloading()) {
-			int rldCost = (pSelectedWeap_->ammo()
-									- wi->ammoRemaining()) * pSelectedWeap_->ammoCost();
+    if (selectedWInstId_ > 0 && g_App.weapons().isAvailable(pSelectedWeap_)) {
+        WeaponInstance *wi = g_Session.squad().member(cur_agent_)->weapon(selectedWInstId_ - 1);
+        if (wi->needsReloading()) {
+            int rldCost = (pSelectedWeap_->ammo()
+                                    - wi->ammoRemaining()) * pSelectedWeap_->ammoCost();
 
-			sprintf(tmp, "RELOAD :%d", rldCost);
-			getMenuFont(FontManager::SIZE_1)->drawText(x, y, tmp, true);
-			y += 12;
-		}
+            sprintf(tmp, ":%d", rldCost);
+            getMenuFont(FontManager::SIZE_1)->drawText(x, y,
+                g_App.menus().getMessage("SELECT_WPN_RELOAD").c_str(), true);
+            getMenuFont(FontManager::SIZE_1)->drawText(shifted_x, y, tmp, true);
+            y += 12;
+        }
     }
 }
 
@@ -663,14 +675,14 @@ void SelectMenu::handleAction(const int actionId, void *ctx, const int modKeys)
     } else if (actionId == reloadButId_) {
         Agent *selected = g_Session.squad().member(cur_agent_);
         WeaponInstance *wi = selected->weapon(selectedWInstId_ - 1);
-		int rldCost = (pSelectedWeap_->ammo()
-						- wi->ammoRemaining()) * pSelectedWeap_->ammoCost();
+        int rldCost = (pSelectedWeap_->ammo()
+                        - wi->ammoRemaining()) * pSelectedWeap_->ammoCost();
 
         if (g_Session.getMoney() >= rldCost) {
             g_Session.setMoney(g_Session.getMoney() - rldCost);
             wi->setAmmoRemaining(pSelectedWeap_->ammo());
             getOption(reloadButId_)->setVisible(false);
-			getStatic(moneyTxtId_)->setTextFormated("%d", g_Session.getMoney());
+            getStatic(moneyTxtId_)->setTextFormated("%d", g_Session.getMoney());
         }
     } else if (actionId == purchaseButId_) {
         // Buying weapon
@@ -682,7 +694,7 @@ void SelectMenu::handleAction(const int actionId, void *ctx, const int modKeys)
                         && g_Session.getMoney() >= pSelectedWeap_->cost()) {
                         g_Session.setMoney(g_Session.getMoney() - pSelectedWeap_->cost());
                         selected->addWeapon(pSelectedWeap_->createInstance());
-						getStatic(moneyTxtId_)->setTextFormated("%d", g_Session.getMoney());
+                        getStatic(moneyTxtId_)->setTextFormated("%d", g_Session.getMoney());
                     }
                 }
             } else {
@@ -691,7 +703,7 @@ void SelectMenu::handleAction(const int actionId, void *ctx, const int modKeys)
                     && g_Session.getMoney() >= pSelectedWeap_->cost()) {
                     g_Session.setMoney(g_Session.getMoney() - pSelectedWeap_->cost());
                     selected->addWeapon(pSelectedWeap_->createInstance());
-					getStatic(moneyTxtId_)->setTextFormated("%d", g_Session.getMoney());
+                    getStatic(moneyTxtId_)->setTextFormated("%d", g_Session.getMoney());
                 }
             }
             needRendering();
@@ -703,7 +715,7 @@ void SelectMenu::handleAction(const int actionId, void *ctx, const int modKeys)
                         && g_Session.getMoney() >= pSelectedMod_->cost()) {
                         selected->addMod(pSelectedMod_);
                         g_Session.setMoney(g_Session.getMoney() - pSelectedMod_->cost());
-						getStatic(moneyTxtId_)->setTextFormated("%d", g_Session.getMoney());
+                        getStatic(moneyTxtId_)->setTextFormated("%d", g_Session.getMoney());
                     }
                 }
             } else {
@@ -712,7 +724,7 @@ void SelectMenu::handleAction(const int actionId, void *ctx, const int modKeys)
                     && g_Session.getMoney() >= pSelectedMod_->cost()) {
                     selected->addMod(pSelectedMod_);
                     g_Session.setMoney(g_Session.getMoney() - pSelectedMod_->cost());
-					getStatic(moneyTxtId_)->setTextFormated("%d", g_Session.getMoney());
+                    getStatic(moneyTxtId_)->setTextFormated("%d", g_Session.getMoney());
                 }
             }
             showItemList();
@@ -723,7 +735,7 @@ void SelectMenu::handleAction(const int actionId, void *ctx, const int modKeys)
         Agent *selected = g_Session.squad().member(cur_agent_);
         WeaponInstance *pWi = selected->removeWeapon(selectedWInstId_ - 1);
         g_Session.setMoney(g_Session.getMoney() + pWi->getWeaponClass()->cost());
-		getStatic(moneyTxtId_)->setTextFormated("%d", g_Session.getMoney());
+        getStatic(moneyTxtId_)->setTextFormated("%d", g_Session.getMoney());
         delete pWi;
         showItemList();
     }

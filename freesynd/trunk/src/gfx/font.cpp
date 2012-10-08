@@ -165,7 +165,7 @@ Sprite *Font::getSprite(unsigned char dos_char) {
     if (range_.in_range(dos_char) == false) {
         // use '?' as default character.
         if (range_.in_range('?') == true) {
-			return sprites_->sprite('?' + offset_);
+            return sprites_->sprite('?' + offset_);
         } else {
             // NULL causes the missing glyph to be skipped.
             // no space will be consumed on-screen.
@@ -215,7 +215,7 @@ void Font::drawText(int x, int y, const char *text, bool dos, bool x2) {
 
             s->draw(x, y + y_offset, 0, false, x2);
             
-			x += s->width() * sc - sc;
+            x += s->width() * sc - sc;
         }
     }
 }
@@ -258,7 +258,7 @@ Sprite *MenuFont::getSprite(unsigned char dos_char, bool highlighted) {
     if (range_.in_range(dos_char) == false) {
         // use '?' as default character.
         if (range_.in_range('?') == true) {
-			return sprites_->sprite('?' + (highlighted ? lightOffset_ : offset_));
+            return sprites_->sprite('?' + (highlighted ? lightOffset_ : offset_));
         } else {
             // NULL causes the missing glyph to be skipped.
             // no space will be consumed on-screen.
@@ -270,9 +270,9 @@ Sprite *MenuFont::getSprite(unsigned char dos_char, bool highlighted) {
 
 void MenuFont::setSpriteManager(SpriteManager *sprites, int darkOffset, int lightOffset, char base,
             const std::string& valid_chars) {
-	sprites_ = sprites;
+    sprites_ = sprites;
     offset_ = darkOffset - base;
-	lightOffset_ = lightOffset - base;
+    lightOffset_ = lightOffset - base;
     range_ = FontRange(valid_chars);
 }
 
@@ -301,14 +301,14 @@ void MenuFont::drawText(int x, int y, bool dos, const char *text, bool highlight
             if (cc == ':')
                 y_offset = sc;
             else if (cc == '.' || cc == ',' || cc == '-' || cc == '_')
-				y_offset = pDef->height() *sc - getSprite(cc, false)->height() * sc;
-			else if (cc == '/') {
-				y_offset = (pDef->height() *sc)/2 - (getSprite('/', false)->height() * sc) / 2;
-			}
+                y_offset = pDef->height() *sc - getSprite(cc, false)->height() * sc;
+            else if (cc == '/') {
+                y_offset = (pDef->height() *sc)/2 - (getSprite('/', false)->height() * sc) / 2;
+            }
 
             s->draw(x, y + y_offset, 0, false, x2);
             
-			x += s->width() * sc - sc;
+            x += s->width() * sc - sc;
         }
     }
 }
@@ -323,48 +323,48 @@ GameFont::GameFont() :Font() {}
  * \param toColor The color used to draw the text.
  */
 void GameFont::drawText(int x, int y, const char *text, uint8 toColor) {
-	int sc = 1;
+    int sc = 1;
     int ox = x;
-	uint8 fromColor = 252;
+    uint8 fromColor = 252;
     const unsigned char *c = (const unsigned char *)text;
-	Sprite *pDef = getSprite('A');
+    Sprite *pDef = getSprite('A');
     for (unsigned char cc = decode(c, false); cc; cc = decode(c, false)) {
         if (cc == 0xff) {
             // invalid utf8 code, skip it.
             continue;
         }
         if (cc == ' ') {
-			// If char is a space, only move the drawing origin to the left
+            // If char is a space, only move the drawing origin to the left
             x += pDef->width() * sc - sc;
             continue;
         }
         if (cc == '\n') {
-			// If char is a space, only move the drawing origin to the next line
+            // If char is a space, only move the drawing origin to the next line
             x = ox;
             y += textHeight() - sc;
             continue;
         }
-		// get the sprite for the caracter
+        // get the sprite for the caracter
         Sprite *s = getSprite(cc);
         if (s) {
             int y_offset = 0;
-			// Add some offset correct for special caracters as ':' '.' ',' '-'
+            // Add some offset correct for special caracters as ':' '.' ',' '-'
             if (cc == ':')
                 y_offset = sc;
             else if (cc == '.' || cc == ',' || cc == '-')
                 y_offset = pDef->height() *sc - getSprite(cc)->height() * sc;
-			else if (cc == '/') {
-				y_offset = (pDef->height() *sc)/2 - (getSprite('/')->height() * sc) / 2;
-			}
+            else if (cc == '/') {
+                y_offset = (pDef->height() *sc)/2 - (getSprite('/')->height() * sc) / 2;
+            }
 
             uint8 *data = new uint8[s->width() * s->height()];
             s->data(data);
 
-			// Change original color to the specified color
+            // Change original color to the specified color
             for (int i = 0; i < s->width() * s->height(); i++)
                 data[i] = (data[i] == fromColor ? toColor : 255);
 
-			// draw modified sprite
+            // draw modified sprite
             g_Screen.blit(x, y + y_offset, s->width(), s->height(), data);
 
             delete[] data;
