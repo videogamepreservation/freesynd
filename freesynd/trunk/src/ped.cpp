@@ -331,7 +331,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
     }
 
     // NOTE: some actions have remaining time, it is lost for now
-    if (actions_queue_.empty() || 1) {
+    if (actions_queue_.empty()) {
         // TODO: use default_actions_ to fill it up
 #if 1
         if ((state_ & pa_smDead) == 0) {
@@ -343,7 +343,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
             actions_queue_.push_back(as);
         }
 #endif
-    //} else {
+    } else {
         friends_not_seen_.clear();
         // TODO: xor finished and failed, should all actions
         // have execution time set?
@@ -2211,7 +2211,8 @@ bool PedInstance::checkHostileIs(ShootableMapObject *obj,
     bool friend_is = false;
 
     if (obj->majorType() == MapObject::mjt_Vehicle) {
-        ((VehicleInstance *)obj)->checkHostilesInside(this, hostile_desc_alt);
+        hostile_rsp = ((VehicleInstance *)obj)->checkHostilesInside(
+            this, hostile_desc_alt);
     } else if (obj->majorType() == MapObject::mjt_Ped) {
         if (checkFriendIs((PedInstance *)obj))
             friend_is = true;

@@ -809,7 +809,7 @@ bool VehicleInstance::checkHostilesInside(PedInstance* p,
         it != all_passengers_.end(); it++)
     {
         if (p->checkHostileIs((ShootableMapObject *)(*it), hostile_desc_alt))
-            return false;
+            return true;
     }
     return false;
 }
