@@ -25,16 +25,23 @@
 #include "gfx/screen.h"
 #include "app.h"
 
-MinimapRenderer::MinimapRenderer() {
+const int MinimapRenderer::kMiniMapSizePx = 128;
+
+void MinimapRenderer::setZoom(EZoom zoom) {
+    zoom_ = zoom;
+    pixpertile_ = 10 - zoom_;
+}
+
+BriefMinimapRenderer::BriefMinimapRenderer() {
     scroll_step_ = 0;
 }
 
 /*!
  * Init the renderer with a new mission, zoom level and draw_enemies params.
  */
-void MinimapRenderer::init(Mission *pMission, EZoom zoom, bool draw_enemies) {
+void BriefMinimapRenderer::init(Mission *pMission, EZoom zoom, bool draw_enemies) {
     p_mission_ = pMission;
-    zoom_ = zoom;
+    setZoom(zoom);
     b_draw_enemies_ = draw_enemies;
     minimap_blink_ticks_ = 0;
     minimap_blink_ = 0;
@@ -49,7 +56,7 @@ void MinimapRenderer::init(Mission *pMission, EZoom zoom, bool draw_enemies) {
 /*!
  * Centers the minimap on the starting position of agents
  */
-void MinimapRenderer::initMinimapLocation() {
+void BriefMinimapRenderer::initMinimapLocation() {
     bool found = false;
     int maxx = p_mission_->mmax_x_;
     int maxy = p_mission_->mmax_y_;
@@ -77,7 +84,7 @@ void MinimapRenderer::initMinimapLocation() {
  * Checking borders for correctness
  * we assume that maps are always bigger than minimap.
  */
-void MinimapRenderer::checkBorders() {
+void BriefMinimapRenderer::checkBorders() {
     int maxx = p_mission_->mmax_x_;
     int maxy = p_mission_->mmax_y_;
 
@@ -99,22 +106,21 @@ void MinimapRenderer::checkBorders() {
     assert((mm_ty_ + mm_maxtile_) <= maxy);
 }
 
-void MinimapRenderer::updateRenderingInfos() {
-    pixpertile_ = 10 - zoom_;
+void BriefMinimapRenderer::updateRenderingInfos() {
     scroll_step_ = 30 / pixpertile_;
     mm_maxtile_ = 120 / pixpertile_;
 }
 
-void MinimapRenderer::zoomOut() {
+void BriefMinimapRenderer::zoomOut() {
     switch (zoom_) {
     case ZOOM_X2:
-        zoom_ = ZOOM_X1;
+        setZoom(ZOOM_X1);
         break;
     case ZOOM_X3:
-        zoom_ = ZOOM_X2;
+        setZoom(ZOOM_X2);
         break;
     case ZOOM_X4:
-        zoom_ = ZOOM_X3;
+        setZoom(ZOOM_X3);
         break;
     default:
         break;
@@ -125,7 +131,7 @@ void MinimapRenderer::zoomOut() {
     checkBorders();
 }
 
-bool MinimapRenderer::handleTick(int elapsed) {
+bool BriefMinimapRenderer::handleTick(int elapsed) {
     minimap_blink_ticks_ += elapsed;
 
     if (minimap_blink_ticks_ > 500) {
@@ -137,25 +143,25 @@ bool MinimapRenderer::handleTick(int elapsed) {
     return false;
 }
 
-void MinimapRenderer::scrollRight() {
+void BriefMinimapRenderer::scrollRight() {
     mm_tx_ += scroll_step_;
     if ((mm_tx_ + mm_maxtile_) >= p_mission_->mmax_x_)
         mm_tx_ = p_mission_->mmax_x_ - mm_maxtile_;
 }
 
-void MinimapRenderer::scrollLeft() {
+void BriefMinimapRenderer::scrollLeft() {
     mm_tx_ -= scroll_step_;
     if (mm_tx_ < 0)
         mm_tx_ = 0;
 }
 
-void MinimapRenderer::scrollUp() {
+void BriefMinimapRenderer::scrollUp() {
     mm_ty_ -= scroll_step_;
     if (mm_ty_ < 0)
         mm_ty_ = 0;
 }
 
-void MinimapRenderer::scrollDown() {
+void BriefMinimapRenderer::scrollDown() {
     mm_ty_ += scroll_step_;
     if ((mm_ty_ + mm_maxtile_) >= p_mission_->mmax_y_) {
         mm_ty_ = p_mission_->mmax_y_ - mm_maxtile_;
@@ -167,7 +173,7 @@ void MinimapRenderer::scrollDown() {
  * \param mm_x X coord in absolute pixels.
  * \param mm_y Y coord in absolute pixels.
  */
-void MinimapRenderer::render(uint16 mm_x, uint16 mm_y) {
+void BriefMinimapRenderer::render(uint16 mm_x, uint16 mm_y) {
     for (uint16 tx = mm_tx_; tx < (mm_tx_ + mm_maxtile_); tx++) {
         uint16 xc = mm_x + (tx - mm_tx_) * pixpertile_;
         for (uint16 ty = mm_ty_; ty < (mm_ty_ + mm_maxtile_); ty++) {
@@ -191,10 +197,6 @@ void MinimapRenderer::render(uint16 mm_x, uint16 mm_y) {
     }
 }
 
-const int GamePlayMinimapRenderer::kMiniMapSizePx = 128;
-const int GamePlayMinimapRenderer::kPixelPerTile = 8;
-
-
 /*!
  * Default constructor.
  */
@@ -208,6 +210,7 @@ GamePlayMinimapRenderer::GamePlayMinimapRenderer() {
  */
 void GamePlayMinimapRenderer::init(Mission *pMission) {
     p_mission_ = pMission;
+    setZoom(ZOOM_X3);
     mm_tx_ = 0;
     mm_ty_ = 0;
     offset_x_ = 0;
@@ -223,11 +226,11 @@ void GamePlayMinimapRenderer::init(Mission *pMission) {
  * \param offY The offset of the agent on the tile.
  */
 void GamePlayMinimapRenderer::centerOn(uint16 tileX, uint16 tileY, int offX, int offY) {
-    mm_tx_ = tileX >= 8 ? tileX - 8 : tileX;
-    mm_ty_ = tileY >= 8 ? tileY - 8 : tileY;
-    // every 32 of offset = 1 pixel
-    offset_x_ = offX / 32;
-    offset_y_ = offY / 32;
+    mm_tx_ = (tileX < 8) ? 0 : tileX - 8;
+    mm_ty_ = (tileY < 8) ? 0 : tileY - 8;
+
+    offset_x_ = (tileX == p_mission_->get_map()->maxX() -1) ? 0 : offX / 32;
+    offset_y_ = (tileY == p_mission_->get_map()->maxY() -1) ? 0 : offY / 32;
 }
 
 /*!
@@ -248,9 +251,9 @@ void GamePlayMinimapRenderer::render(uint16 mm_x, uint16 mm_y) {
     for (int j = 0; j < 17; j++) {
         for (int i = 0; i < 17; i++) {
             uint8 gcolour = p_mission_->getMiniMap()->getColourAt(mm_tx_ + i, mm_ty_ + j);
-            for (char inc = 0; inc < kPixelPerTile; inc ++) {
+            for (char inc = 0; inc < pixpertile_; inc ++) {
                 memset(minimap_layer + (j + 2) * 8 * 8 * 21 + (i + 2) * 8
-                    + inc * 8 * 21, gcolour, kPixelPerTile);
+                    + inc * 8 * 21, gcolour, pixpertile_);
             }
         }
     }

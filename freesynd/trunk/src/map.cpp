@@ -47,9 +47,13 @@ Map::~Map()
 
 bool Map::loadMap(uint8 * mapData)
 {
+    LOG(Log::k_FLG_GFX, "Map", "loadMap", ("Loading Map %d.", i_id_));
     max_x_ = READ_LE_UINT32(mapData + 0);
     max_y_ = READ_LE_UINT32(mapData + 4);
     max_z_ = READ_LE_UINT32(mapData + 8);
+
+    LOG(Log::k_FLG_GFX, "Map", "loadMap", 
+        ("Map size in tiles: max_x = %d, max_y = %d, max_z = %d.", max_x_, max_y_, max_z_));
 
     uint32 *lookup = new uint32[max_x_ * max_y_];
     a_tiles_ = new Tile*[max_x_ * max_y_ * max_z_];
@@ -70,6 +74,10 @@ bool Map::loadMap(uint8 * mapData)
 
     map_width_ = (max_x_ + max_y_) * (TILE_WIDTH / 2);
     map_height_ = (max_x_ + max_y_ + max_z_) * TILE_HEIGHT / 3;
+    LOG(Log::k_FLG_GFX, "Map", "loadMap", 
+        ("Map size in pixels: width = %d, height = %d.", map_width_, map_height_));
+
+    LOG(Log::k_FLG_GFX, "Map", "loadMap", ("Loading finished"));
 
     return true;
 }
@@ -99,6 +107,52 @@ int Map::tileToScreenY(int x, int y, int z, int pX, int pY)
     float fx = x + pX / scaleyPx;
     float fy = y + pY / scaleyPy;
     return (int) ((max_z_ + 1) * TILE_HEIGHT / 3 + (fx + fy) * TILE_HEIGHT / 3);
+}
+
+MapScreenPoint Map::tileToScreenPoint(int x, int y, int z, int pX, int pY)
+{
+    float fx = x + pX / scalexPx;
+    float fy = y + pY / scalexPy;
+
+    MapScreenPoint msp;
+    msp.x = (int) ((max_x_ * TILE_WIDTH / 2) + (fx - fy) * TILE_WIDTH / 2
+                  + TILE_WIDTH / 2);
+
+    msp.y = (int) ((max_z_ + 1) * TILE_HEIGHT / 3 + (fx + fy) * TILE_HEIGHT / 3);
+
+    return msp;
+}
+
+/*!
+ * Returns the tile position corresponding to the screen position.
+ * Usually after the user clicked on the map, this method is used
+ * to find what tile has been clicked.
+ * \param x The x position on the screen (in pixel).
+ * \param y The y position on the screen (in pixel).
+ */
+MapTilePoint Map::screenToTilePoint(int x, int y)
+{
+    MapTilePoint mtp;
+
+    x -= (max_x_ + 1) * (TILE_WIDTH / 2);
+    // x now equals fx * TILE_WIDTH / 2 - fy * TILE_WIDTH / 2
+    // which equals TILE_WIDTH/2 * (fx - fy)
+    y -= (max_z_ + 1) * (TILE_HEIGHT / 3);
+    // y now equals (fx + fy) * TILE_HEIGHT / 3
+    float dx = (float) x / (TILE_WIDTH / 2);
+    float dy = (float) y / (TILE_HEIGHT / 3);
+
+    // dx equals fx - fy
+    // dy equals fx + fy
+    float f_tx = (dx + dy) / 2;
+    mtp.tx = (int) f_tx;
+    mtp.ox = (int) ((f_tx - mtp.tx) * 256.0f);
+
+    float f_ty = (dy - dx) / 2;
+    mtp.ty = (int) f_ty;
+    mtp.oy = (int) ((f_ty - mtp.ty) * 256.0f);
+
+    return mtp;
 }
 
 int Map::screenToTileX(int x, int y, int &ox)

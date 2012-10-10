@@ -1486,18 +1486,32 @@ void GameplayMenu::updtAgentsMarker()
  */
 void GameplayMenu::updateSelectionForDeadAgents() {
     // TODO change the way this detection is made. It's not clean. use events
-    // TODO: if selected agent is dead why not selecting next availiable,
-    // when none is selected?(chamel)
+    bool b_agentDied = false;
     for (size_t i = Squad::kSlot1; i < Squad::kMaxSlot; i++) {
         if (mission_->ped(i) && mission_->ped(i)->isOurAgent()) {
             if (g_Session.squad().member(i)->health() > 0 && mission_->ped(i)->health() <= 0) {
                 g_Session.squad().member(i)->setHealth(0);
                 selection_.deselectAgent(i);
-                updtAgentsMarker();
+                b_agentDied = true;
             }
         }
     }
-    centerMinimapOnLeader();
+    // At least one agent died
+    if (b_agentDied) {
+        // if selection is empty after agent's death
+        // selects the first selectable agent
+        if (selection_.size() == 0) {
+            for (size_t i = Squad::kSlot1; i < Squad::kMaxSlot; i++) {
+                if (selection_.selectAgent(i, false)) {
+                    // Agent has been selected -> quit
+                    break;
+                }
+            }
+        }
+
+        // anyway updates markers
+        updtAgentsMarker();
+    }
 }
 
 /*!
@@ -1505,15 +1519,17 @@ void GameplayMenu::updateSelectionForDeadAgents() {
  */
 void GameplayMenu::centerMinimapOnLeader() {
     // Centers the minimap on the selection leader
-    PedInstance *pAgent = mission_->ped(selection_.getLeaderSlot());
-    mm_renderer_.centerOn(pAgent->tileX(), pAgent->tileY(), pAgent->offX(), pAgent->offY());
+    if (selection_.size() > 0) {
+        PedInstance *pAgent = mission_->ped(selection_.getLeaderSlot());
+        mm_renderer_.centerOn(pAgent->tileX(), pAgent->tileY(), pAgent->offX(), pAgent->offY());
+    }
 }
 
 /*!
  * Updates the minimap.
  */
 void GameplayMenu::updateMinimap() {
-    
+    centerMinimapOnLeader();
 }
 
 /*!

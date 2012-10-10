@@ -99,7 +99,7 @@ protected:
     /*! Briefing informations on current mission.*/
 	MissionBriefing *p_briefing_;
     /*! Class that draws the minimap.*/
-    MinimapRenderer mm_renderer_;
+    BriefMinimapRenderer mm_renderer_;
 };
 
 #endif

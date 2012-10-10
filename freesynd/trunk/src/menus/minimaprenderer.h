@@ -48,8 +48,36 @@ public:
         ZOOM_X4 = 0
     };
 
+    //! update the class with elapsed time
+    bool handleTick(int elapsed) { return false; }
+
+    //! Render the minimap at the given point
+    void render(uint16 mm_x, uint16 mm_y) {}
+protected:
+    void setZoom(EZoom zoom);
+protected:
+    /*! The size in pixel of the minimap. Minimap is a square.*/
+    static const int kMiniMapSizePx;
+
+    /*! Number of pixel used to draw a map tile.*/
+    uint8 pixpertile_;
+    /*! Current zoom level.*/
+    EZoom zoom_;
+    /*! Tile X coord on the map for the top left corner of the minimap.*/
+    uint16 mm_tx_;
+    /*! Tile Y coord on the map for the top left corner of the minimap.*/
+    uint16 mm_ty_;
+};
+
+/*!
+ * Renderer for minimap.
+ * This class is used to display a minimap in the briefing menu.
+ */
+class BriefMinimapRenderer : public MinimapRenderer {
+public:
+
     //! Class Constructor.
-    MinimapRenderer();
+    BriefMinimapRenderer();
     //! Reset the class with a new mission
     void init(Mission *pMission, EZoom zoom, bool drawEnemies);
 
@@ -81,17 +109,11 @@ protected:
     void checkBorders();
 
 protected:
-    /*! Tile X coord on the map for the top left corner of the minimap.*/
-    uint16 mm_tx_;
-    /*! Tile Y coord on the map for the top left corner of the minimap.*/
-    uint16 mm_ty_;
     /*!
      * Total number of tiles displayed in the minimap. 
      * same for width and height.
      */
     uint16 mm_maxtile_;
-    /*! Number of pixel used to draw a map tile.*/
-    uint8 pixpertile_;
     /*! A counter to control the blinking on the minimap.*/
     int minimap_blink_ticks_;
     /*! Helps controling blinking.*/
@@ -100,8 +122,6 @@ protected:
     uint8 scroll_step_;
     /*! The mission that contains the minimap.*/
     Mission *p_mission_;
-    /*! Current zoom level.*/
-    EZoom zoom_;
     /*! IF true, enemies are drawn on the minimap.*/
     bool b_draw_enemies_;
 };
@@ -111,7 +131,7 @@ protected:
  * Renderer for minimap.
  * This class is used to display a minimap in the gameplay menu.
  */
-class GamePlayMinimapRenderer {
+class GamePlayMinimapRenderer : public MinimapRenderer {
 public:
     //! Constructor for the class
     GamePlayMinimapRenderer();
@@ -126,17 +146,9 @@ public:
     void render(uint16 mm_x, uint16 mm_y);
 
 private:
-    /*! The size in pixel of the minimap. Minimap is a square.*/
-    static const int kMiniMapSizePx;
-    /*! The number of pixel on the minimap for a map tile.*/
-    static const int kPixelPerTile;
-
     /*! The mission that contains the minimap.*/
     Mission *p_mission_;
-    /*! Tile X coord on the map for the top left corner of the minimap.*/
-    uint16 mm_tx_;
-    /*! Tile Y coord on the map for the top left corner of the minimap.*/
-    uint16 mm_ty_;
+
     /*! Offset for the tile.*/
     int offset_x_;
     /*! Offset for the tile.*/

@@ -226,7 +226,7 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    LOG(Log::k_FLG_INFO, "Main", "main", ("Initializing application..."))
+    LOG(Log::k_FLG_INFO, "Main", "main", ("----- Initializing application..."))
     std::auto_ptr<App> app(new App(disable_sound));
 
     if (app->initialize(iniPath)) {
@@ -242,14 +242,15 @@ int main(int argc, char *argv[]) {
             }
         }
 
-        LOG(Log::k_FLG_INFO, "Main", "main", ("Initializing application completed"))
-
+        LOG(Log::k_FLG_INFO, "Main", "main", ("----- Initializing application completed"))
+        LOG(Log::k_FLG_INFO, "Main", "main", ("----- Starting game loop"))
         app->run(start_mission);
     } else {
-        LOG(Log::k_FLG_INFO, "Main", "main", ("Initializing application failed"))
+        LOG(Log::k_FLG_INFO, "Main", "main", ("----- Initializing application failed"))
     }
 
     // Destroy application
+    LOG(Log::k_FLG_INFO, "Main", "main", ("----- End of game loop. Destroy application"))
     app->destroy();
 
 #ifdef _DEBUG

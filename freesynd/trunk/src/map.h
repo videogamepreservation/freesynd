@@ -44,6 +44,34 @@ public:
 };
 
 /*!
+ * This a convenient structure to store a position
+ * in map tile coordinates.
+ */
+struct MapTilePoint {
+    /*! The tile's X coord.*/
+    int tx;
+    /*! The tile's Y coord.*/
+    int ty;
+    /*! The tile's Z coord.*/
+    int tz;
+    /*! X Offset inside the tile. (varies between 0 and 256)*/
+    int ox;
+    /*! Y Offset inside the tile. (varies between 0 and 256)*/
+    int oy;
+};
+
+/*!
+ * This a convenient structure to store a position
+ * in screen coordinates (in pixels).
+ */
+struct MapScreenPoint {
+    /*! the X coord on the screen.*/
+    int x;
+    /*! the Y coord on the screen.*/
+    int y;
+};
+
+/*!
  * Map class.
  */
 class Map {
@@ -63,6 +91,10 @@ public:
     int tileToScreenY(int x, int y, int z, int pX, int pY);
     int screenToTileX(int x, int y, int &ox);
     int screenToTileY(int x, int y, int &oy);
+    //! Converts a Map tile position to a screen position
+    MapScreenPoint tileToScreenPoint(int x, int y, int z, int pX, int pY);
+    //! Converts a screen position in pixel into a Map tile position
+    MapTilePoint screenToTilePoint(int x, int y);
 
     int maxX() { return max_x_; }
     int maxY() { return max_y_; }

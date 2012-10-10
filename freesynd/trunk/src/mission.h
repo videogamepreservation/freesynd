@@ -91,6 +91,7 @@ public:
 
     int map() { return i_map_id_; }
     void set_map(Map *p_map) { p_map_ = p_map; }
+    Map * get_map() {return p_map_; }
 
     int mapWidth();
     int mapHeight();
