@@ -30,9 +30,10 @@ const int MinimapRenderer::kMiniMapSizePx = 128;
 void MinimapRenderer::setZoom(EZoom zoom) {
     zoom_ = zoom;
     pixpertile_ = 10 - zoom_;
+    updateRenderingInfos();
 }
 
-BriefMinimapRenderer::BriefMinimapRenderer() {
+BriefMinimapRenderer::BriefMinimapRenderer() : mm_timer(500) {
     scroll_step_ = 0;
 }
 
@@ -43,10 +44,8 @@ void BriefMinimapRenderer::init(Mission *pMission, EZoom zoom, bool draw_enemies
     p_mission_ = pMission;
     setZoom(zoom);
     b_draw_enemies_ = draw_enemies;
-    minimap_blink_ticks_ = 0;
+    mm_timer.reset();
     minimap_blink_ = 0;
-
-    updateRenderingInfos();
 
     // Initialize minimap origin by looking for the position
     // of the first found agent on the map
@@ -74,36 +73,27 @@ void BriefMinimapRenderer::initMinimapLocation() {
     }
 
     uint16 halftiles = mm_maxtile_ / 2;
-    mm_tx_ = mm_tx_ - halftiles + 1;
-    mm_ty_ = mm_ty_ - halftiles + 1;
+    mm_tx_ = (mm_tx_ < halftiles) ? 0 : (mm_tx_ - halftiles + 1);
+    mm_ty_ = (mm_ty_ < halftiles) ? 0 : (mm_ty_ - halftiles + 1);
 
-    checkBorders();
+    clipMinimapToRightAndDown();
 }
 
 /*!
- * Checking borders for correctness
- * we assume that maps are always bigger than minimap.
+ *
  */
-void BriefMinimapRenderer::checkBorders() {
-    int maxx = p_mission_->mmax_x_;
-    int maxy = p_mission_->mmax_y_;
-
-    if (mm_tx_ < 0) {
-        mm_tx_ = 0;
-    } else if ((mm_tx_ + mm_maxtile_) >= maxx) {
-        mm_tx_ = maxx - mm_maxtile_;
+void BriefMinimapRenderer::clipMinimapToRightAndDown() {
+    if ((mm_tx_ + mm_maxtile_) >= p_mission_->mmax_x_) {
+        // We assume that map size in tiles (p_mission_->mmax_x_)
+        // is bigger than the minimap size (mm_maxtile_)
+        mm_tx_ = p_mission_->mmax_x_ - mm_maxtile_;
     }
 
-    if (mm_ty_ < 0) {
-        mm_ty_ = 0;
-    } else if ((mm_ty_ + mm_maxtile_) >= maxy) {
-        mm_tx_ = maxy - mm_maxtile_;
+    if ((mm_ty_ + mm_maxtile_) >= p_mission_->mmax_y_) {
+        // We assume that map size in tiles (p_mission_->mmax_y_)
+        // is bigger than the minimap size (mm_maxtile_)
+        mm_ty_ = p_mission_->mmax_y_ - mm_maxtile_;
     }
-
-    assert(mm_tx_ >= 0);
-    assert(mm_ty_ >= 0);
-    assert((mm_tx_ + mm_maxtile_) <= maxx);
-    assert((mm_ty_ + mm_maxtile_) <= maxy);
 }
 
 void BriefMinimapRenderer::updateRenderingInfos() {
@@ -126,16 +116,14 @@ void BriefMinimapRenderer::zoomOut() {
         break;
     }
 
-    // update scrolling data
-    updateRenderingInfos();
-    checkBorders();
+    // check if map should be aligned with right and bottom border
+    // as when zooming out only displays more tiles but does not
+    // move the minimap origin
+    clipMinimapToRightAndDown();
 }
 
 bool BriefMinimapRenderer::handleTick(int elapsed) {
-    minimap_blink_ticks_ += elapsed;
-
-    if (minimap_blink_ticks_ > 500) {
-        minimap_blink_ticks_ = 0;
+    if (mm_timer.update(elapsed)) {
         minimap_blink_ ^= 1;
         return true;
     }
@@ -143,29 +131,51 @@ bool BriefMinimapRenderer::handleTick(int elapsed) {
     return false;
 }
 
+/*!
+ * Scrolls right using current scroll step. If scroll is too far,
+ * clips scrolling to the map's right border.
+ */
 void BriefMinimapRenderer::scrollRight() {
     mm_tx_ += scroll_step_;
-    if ((mm_tx_ + mm_maxtile_) >= p_mission_->mmax_x_)
-        mm_tx_ = p_mission_->mmax_x_ - mm_maxtile_;
+    clipMinimapToRightAndDown();
 }
 
+/*!
+ * Scrolls left using current scroll step. If scroll is too far,
+ * clips scrolling to the map's left border.
+ */
 void BriefMinimapRenderer::scrollLeft() {
-    mm_tx_ -= scroll_step_;
-    if (mm_tx_ < 0)
+    // if scroll_step is bigger than mm_tx_
+    // then mm_tx_ -= scroll_step_ would be negative
+    // but mm_tx_ is usigned so it would be an error
+    if (mm_tx_ < scroll_step_) {
         mm_tx_ = 0;
+    } else {
+        // we know that mm_tx_ >= scroll_step_
+        mm_tx_ -= scroll_step_;
+    }
 }
 
+/*!
+ * Scrolls up using current scroll step. If scroll is too far,
+ * clips scrolling to the map's top border.
+ */
 void BriefMinimapRenderer::scrollUp() {
-    mm_ty_ -= scroll_step_;
-    if (mm_ty_ < 0)
+    if (mm_ty_ < scroll_step_) {
         mm_ty_ = 0;
+    } else {
+        // we know that mm_ty_ >= scroll_step_
+        mm_ty_ -= scroll_step_;
+    }
 }
 
+/*!
+ * Scrolls down using current scroll step. If scroll is too far,
+ * clips scrolling to the map's bottom border.
+ */
 void BriefMinimapRenderer::scrollDown() {
     mm_ty_ += scroll_step_;
-    if ((mm_ty_ + mm_maxtile_) >= p_mission_->mmax_y_) {
-        mm_ty_ = p_mission_->mmax_y_ - mm_maxtile_;
-    }
+    clipMinimapToRightAndDown();
 }
 
 /*!
@@ -217,6 +227,10 @@ void GamePlayMinimapRenderer::init(Mission *pMission) {
     offset_y_ = 0;
 }
 
+void GamePlayMinimapRenderer::updateRenderingInfos() {
+    mm_maxtile_ = 128 / pixpertile_ + 1;
+}
+
 /*!
  * Centers the minimap on the given tile. Usually, the minimap is centered
  * on the selected agent.
@@ -226,9 +240,11 @@ void GamePlayMinimapRenderer::init(Mission *pMission) {
  * \param offY The offset of the agent on the tile.
  */
 void GamePlayMinimapRenderer::centerOn(uint16 tileX, uint16 tileY, int offX, int offY) {
-    mm_tx_ = (tileX < 8) ? 0 : tileX - 8;
-    mm_ty_ = (tileY < 8) ? 0 : tileY - 8;
+    uint16 halfSize = mm_maxtile_ / 2;
+    mm_tx_ = (tileX < halfSize) ? 0 : tileX - halfSize;
+    mm_ty_ = (tileY < halfSize) ? 0 : tileY - halfSize;
 
+    // TODO : offset ratio depends on zoom level
     offset_x_ = (tileX == p_mission_->get_map()->maxX() -1) ? 0 : offX / 32;
     offset_y_ = (tileY == p_mission_->get_map()->maxY() -1) ? 0 : offY / 32;
 }
@@ -239,21 +255,22 @@ void GamePlayMinimapRenderer::centerOn(uint16 tileX, uint16 tileY, int offX, int
  * \param mm_y Y coord in absolute pixels.
  */
 void GamePlayMinimapRenderer::render(uint16 mm_x, uint16 mm_y) {
-    // A temporary buffer composed of 21*21 tiles of 8*8 pixels
-    uint8 minimap_layer[21*21*8*8];
-    // The final minimap that will be displayed : the minimap is 16*16 tiles
+    // A temporary buffer composed of 17*17 tiles of 8*8 pixels
+    // 17*17*8*8 > 33*33*4*4
+    uint8 minimap_layer[17*17*8*8];
+    // The final minimap that will be displayed : the minimap is 128*128 pixels
     uint8 minimap_final_layer[kMiniMapSizePx*kMiniMapSizePx];
 
-    // The temporary buffer is 21*21 but we draw only 17*17 tiles starting
-    // at tile (2, 2). So it leaves 2 rows and columns around the 17*17 square
-    // 21 = 2 + 17 + 2
-    memset(minimap_layer, 0, 21*21*8*8);
-    for (int j = 0; j < 17; j++) {
-        for (int i = 0; i < 17; i++) {
+    // The temporary buffer is 17*17 because when we'll draw the final minimap,
+    // the offset will c
+    memset(minimap_layer, 0, 17*17*8*8);
+    for (int j = 0; j < mm_maxtile_; j++) {
+        for (int i = 0; i < mm_maxtile_; i++) {
             uint8 gcolour = p_mission_->getMiniMap()->getColourAt(mm_tx_ + i, mm_ty_ + j);
             for (char inc = 0; inc < pixpertile_; inc ++) {
-                memset(minimap_layer + (j + 2) * 8 * 8 * 21 + (i + 2) * 8
-                    + inc * 8 * 21, gcolour, pixpertile_);
+                memset(minimap_layer + j * pixpertile_ * pixpertile_ * mm_maxtile_ + 
+                    i * pixpertile_ + inc * pixpertile_ * mm_maxtile_,
+                    gcolour, pixpertile_);
             }
         }
     }
@@ -261,14 +278,15 @@ void GamePlayMinimapRenderer::render(uint16 mm_x, uint16 mm_y) {
     // Copy the temp buffer in the final minimap using the tile offset so the minimap movement
     // is smoother
     for (int j = 0; j < kMiniMapSizePx; j++) {
-        memcpy(minimap_final_layer + (kMiniMapSizePx * j), minimap_layer + (8 * 8 * 21) * 2
-            + (j + offset_y_) * 8 * 21 + (8 * 2) + offset_x_, kMiniMapSizePx);
+        memcpy(minimap_final_layer + (kMiniMapSizePx * j), minimap_layer +
+            (j + offset_y_) * pixpertile_ * mm_maxtile_ + offset_x_, kMiniMapSizePx);
     }
 
     // Draw the minimap on the screen
     g_Screen.blit(mm_x, mm_y, kMiniMapSizePx, kMiniMapSizePx, minimap_final_layer);
     
     // Draw the minimap cross
+    // TODO cross is not fix. it is centered on the leader.
     g_Screen.drawRect(mm_x + 64, mm_y, 1, kMiniMapSizePx, 0);
     g_Screen.drawRect(mm_x, mm_y + 64, kMiniMapSizePx, 1, 0);
 }

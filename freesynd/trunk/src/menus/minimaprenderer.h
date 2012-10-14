@@ -2,9 +2,7 @@
  *                                                                      *
  *  FreeSynd - a remake of the classic Bullfrog game "Syndicate".       *
  *                                                                      *
- *   Copyright (C) 2005  Stuart Binge  <skbinge@gmail.com>              *
- *   Copyright (C) 2005  Joost Peters  <joostp@users.sourceforge.net>   *
- *   Copyright (C) 2006  Trent Waddington <qg@biodome.org>              *
+ *   Copyright (C) 2012  Benoit Blancard <benblan@users.sourceforge.net>*
  *                                                                      *
  *    This program is free software;  you can redistribute it and / or  *
  *  modify it  under the  terms of the  GNU General  Public License as  *
@@ -28,18 +26,25 @@
 #include <map>
 
 #include "common.h"
+#include "utils/timer.h"
 
 class Mission;
 class MissionBriefing;
 
 /*!
- * Renderer for minimap.
- * This class is used to display a minimap in the briefing menu.
+ * Base class Renderer for minimap.
+ * A minimap renderer can display a minimap at a given position on the screen.
+ * The minimap is rendered with a resolution that depends on the zoom level.
+ * The resolution is the number of pixel used to render one tile.
+ * The renderer also stores the coords for the top left corner of the minimap
+ * in the map coordinates. Moving the minimap depends on the subclass.
  */
 class MinimapRenderer {
 public:
     /*!
      * Enumeration for the available zoom levels.
+     * The higher is the zoom, the more pixels is used to
+     * render a tile.
      */
     enum EZoom {
         ZOOM_X1 = 6,
@@ -55,6 +60,8 @@ public:
     void render(uint16 mm_x, uint16 mm_y) {}
 protected:
     void setZoom(EZoom zoom);
+     //! called when zoom changes
+    virtual void updateRenderingInfos() = 0;
 protected:
     /*! The size in pixel of the minimap. Minimap is a square.*/
     static const int kMiniMapSizePx;
@@ -105,19 +112,19 @@ protected:
     //! Finds the minimap location
     void initMinimapLocation();
     void updateRenderingInfos();
-    //! Checks if minimap is still within the map borders.
-    void checkBorders();
+    //! If minimap is too far right or down, align with right or down border
+    void clipMinimapToRightAndDown();
 
 protected:
+    /*! A timer to control the blinking on the minimap.*/
+    fs_utils::Timer mm_timer;
+    /*! Helps controling blinking.*/
+    int minimap_blink_;
     /*!
      * Total number of tiles displayed in the minimap. 
      * same for width and height.
      */
     uint16 mm_maxtile_;
-    /*! A counter to control the blinking on the minimap.*/
-    int minimap_blink_ticks_;
-    /*! Helps controling blinking.*/
-    int minimap_blink_;
     /*! The scrolling step : depends on the zoom level.*/
     uint8 scroll_step_;
     /*! The mission that contains the minimap.*/
@@ -144,11 +151,17 @@ public:
 
     //! Render the minimap
     void render(uint16 mm_x, uint16 mm_y);
-
+protected:
+    //! called when zoom changes
+    void updateRenderingInfos();
 private:
     /*! The mission that contains the minimap.*/
     Mission *p_mission_;
-
+    /*!
+     * Total number of tiles displayed in the minimap. 
+     * same for width and height.
+     */
+    uint16 mm_maxtile_;
     /*! Offset for the tile.*/
     int offset_x_;
     /*! Offset for the tile.*/

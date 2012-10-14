@@ -157,6 +157,7 @@ set(HEADERS
 	utils/portablefile.h
 	utils/seqmodel.h
 	utils/singleton.h
+	utils/timer.h
 	utils/utf8.h
 	utils/utf8/checked.h
 	utils/utf8/core.h
