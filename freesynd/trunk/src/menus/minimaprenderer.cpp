@@ -217,10 +217,11 @@ GamePlayMinimapRenderer::GamePlayMinimapRenderer() {
 /*!
  * Sets a new mission for rendering the minimap.
  * \param pMission A mission.
+ * \param b_scannerEnabled True if scanner is enabled -> changes zoom level.
  */
-void GamePlayMinimapRenderer::init(Mission *pMission) {
+void GamePlayMinimapRenderer::init(Mission *pMission, bool b_scannerEnabled) {
     p_mission_ = pMission;
-    setZoom(ZOOM_X3);
+    setScannerEnabled(b_scannerEnabled);
     mm_tx_ = 0;
     mm_ty_ = 0;
     offset_x_ = 0;
@@ -232,8 +233,17 @@ void GamePlayMinimapRenderer::updateRenderingInfos() {
 }
 
 /*!
+ * Setting the scanner on or off will play on the zooming level.
+ * \param b_enabled True will set a zoom of X1, else X3.
+ */
+void GamePlayMinimapRenderer::setScannerEnabled(bool b_enabled) {
+    setZoom(b_enabled ? ZOOM_X1 : ZOOM_X3);
+}
+
+/*!
  * Centers the minimap on the given tile. Usually, the minimap is centered
- * on the selected agent.
+ * on the selected agent. If the agent is too close from the border, the minimap
+ * does not move anymore.
  * \param tileX The X coord of the tile.
  * \param tileX The Y coord of the tile.
  * \param offX The offset of the agent on the tile.
@@ -241,12 +251,30 @@ void GamePlayMinimapRenderer::updateRenderingInfos() {
  */
 void GamePlayMinimapRenderer::centerOn(uint16 tileX, uint16 tileY, int offX, int offY) {
     uint16 halfSize = mm_maxtile_ / 2;
-    mm_tx_ = (tileX < halfSize) ? 0 : tileX - halfSize;
-    mm_ty_ = (tileY < halfSize) ? 0 : tileY - halfSize;
 
-    // TODO : offset ratio depends on zoom level
-    offset_x_ = (tileX == p_mission_->get_map()->maxX() -1) ? 0 : offX / 32;
-    offset_y_ = (tileY == p_mission_->get_map()->maxY() -1) ? 0 : offY / 32;
+    if (tileX < halfSize) {
+        // we're too close of the top border -> stop moving along X axis
+        mm_tx_ = 0;
+        offset_x_ = 0;
+    } else if ((tileX + halfSize) >= p_mission_->mmax_x_) {
+        // we're too close of the bottom border -> stop moving along X axis
+        mm_tx_ = p_mission_->mmax_x_ - mm_maxtile_;
+        offset_x_ = 0;
+    } else {
+        mm_tx_ = tileX - halfSize;
+        offset_x_ = offX / (256 / pixpertile_);
+    }
+
+    if (tileY < halfSize) {
+        mm_ty_ = 0;
+        offset_y_ = 0;
+    } else if ((tileY + halfSize) >= p_mission_->mmax_y_) {
+        mm_ty_ = p_mission_->mmax_y_ - mm_maxtile_;
+        offset_y_ = 0;
+    } else {
+        mm_ty_ = tileY - halfSize;
+        offset_y_ = offY / (256 / pixpertile_);
+    }
 }
 
 /*!

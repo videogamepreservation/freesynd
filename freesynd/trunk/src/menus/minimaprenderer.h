@@ -144,10 +144,13 @@ public:
     GamePlayMinimapRenderer();
 
     //! Reset the class with a new mission
-    void init(Mission *pMission);
+    void init(Mission *pMission, bool b_scannerEnabled);
 
     //! Sets the minimap center on the given tile
     void centerOn(uint16 tileX, uint16 tileY, int offX, int offY);
+
+    //! Tells whether scanner is on or off.
+    void setScannerEnabled(bool b_enabled);
 
     //! Render the minimap
     void render(uint16 mm_x, uint16 mm_y);

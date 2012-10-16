@@ -79,6 +79,9 @@ protected:
     //! Update the select all button state
     void updateSelectAll();
 
+    //! Returns true if at least one agent has a scanner
+    bool hasScanner();
+
 protected:
     /*! Origin of the minimap on the screen.*/
     static const int kMiniMapScreenX;

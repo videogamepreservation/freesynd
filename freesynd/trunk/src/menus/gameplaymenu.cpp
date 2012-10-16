@@ -313,7 +313,7 @@ void GameplayMenu::handleShow() {
     updtAgentsMarker();
 
     // Reset the minimap
-    mm_renderer_.init(mission_);
+    mm_renderer_.init(mission_, hasScanner());
     updateMinimap();
 
     // Change cursor to game cursor
@@ -1548,4 +1548,23 @@ void GameplayMenu::updateSelectAll() {
     // if number of agents alive is the same as number of selected agents
     // then button is pressed.
     pressed_btn_select_all_ = (nbAgentAlive == selection_.size());
+}
+
+/*! 
+ * Returns true if one living agent has a scanner.
+ */
+bool GameplayMenu::hasScanner() {
+    for (int indx = 0; indx < 4; indx++) {
+        PedInstance *pAgent = mission_->ped(indx);
+        if (pAgent->health() > 0) {
+            for (int windx=0; windx<pAgent->numWeapons(); windx++) {
+                if (pAgent->weapon(windx)->getWeaponType() == Weapon::Scanner) {
+                    return true;
+                }
+            }
+        }
+    }
+
+    // No agent has a scanner
+    return false;
 }
