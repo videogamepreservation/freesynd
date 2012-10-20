@@ -21,7 +21,8 @@
  ************************************************************************/
 
 #include "menus/squadselection.h"
-#include "agent.h"
+#include "agentmanager.h"
+#include "ped.h"
 
 /*!
  * Default constructor.
@@ -41,7 +42,7 @@ void SquadSelection::setSquad(Squad *pSquad) {
     clear();
     pSquad_ = pSquad;
 
-    for (size_t i = Squad::kSlot1; i < Squad::kMaxSlot; i++) {
+    for (size_t i = AgentManager::kSlot1; i < AgentManager::kMaxSlot; i++) {
         // try to select agent. if true means agent has been selected
         if (selectAgent(i, false)) {
             break;
@@ -63,7 +64,7 @@ void SquadSelection::clear() {
 size_t SquadSelection::size() {
     int agents = 0;
 
-    for (size_t i = Squad::kSlot1; i < Squad::kMaxSlot; i++) {
+    for (size_t i = AgentManager::kSlot1; i < AgentManager::kMaxSlot; i++) {
         if (isAgentSelected(i)) {
             agents++;
         }
@@ -115,7 +116,7 @@ void SquadSelection::deselectAgent(size_t agentNo) {
 void SquadSelection::selectAllAgents(bool b_selectAll) {
     if (b_selectAll) {
         // Select all agents
-        for (size_t i = Squad::kSlot1; i < Squad::kMaxSlot; i++) {
+        for (size_t i = AgentManager::kSlot1; i < AgentManager::kMaxSlot; i++) {
             if (isAgentSelectable(i)) {
                 selected_agents_ |= (1 << i);
             }
@@ -130,8 +131,8 @@ void SquadSelection::selectAllAgents(bool b_selectAll) {
  * Returns true if agent is active and alive.
  */
 bool SquadSelection::isAgentSelectable(size_t agentNo) {
-    return pSquad_->isSlotActive(agentNo) &&
-            pSquad_->member(agentNo)->health() > 0;
+    PedInstance *pPed = pSquad_->member(agentNo);
+    return  pPed && pPed->health() > 0;
 }
 
 /*!
@@ -145,7 +146,7 @@ void SquadSelection::checkLeader(size_t agentNo) {
     if (agentNo == leader_) {
         // The leader has been deselected
         // find another leader among the remaining selection
-        for (size_t i = Squad::kSlot1; i < Squad::kMaxSlot; i++) {
+        for (size_t i = AgentManager::kSlot1; i < AgentManager::kMaxSlot; i++) {
             if (isAgentSelectable(i) && leader_ != i) {
                 leader_ = i;
                 break;

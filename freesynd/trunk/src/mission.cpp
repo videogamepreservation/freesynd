@@ -51,6 +51,7 @@ Mission::Mission()
     cur_objective_ = 0;
     p_minimap_ = NULL;
     players_group_id_ = 1;
+    p_squad_ = new Squad();
 }
 
 Mission::~Mission()
@@ -71,6 +72,10 @@ Mission::~Mission()
 
     if (p_minimap_) {
         delete p_minimap_;
+    }
+
+    if (p_squad_) {
+        delete p_squad_;
     }
 }
 
@@ -970,30 +975,27 @@ void Mission::start()
     stats_.convinced = 0;
     stats_.nbOfShots = 0;
     stats_.nbOfHits = 0;
+    // Clear squad
+    p_squad_->clear();
 
     for (int i = 0; i < 4; i++) {
         PedInstance *p = peds_[i];
-        Agent *pAg = g_Session.squad().member(i);
-        if (pAg) {
-            if(pAg->isActive()){
-                stats_.agents += 1;
-                p->setHealth(pAg->health() *
-                                peds_[i]->health() / 255);
-                while (pAg->numWeapons()) {
-                    WeaponInstance *wi = pAg->removeWeapon(0);
-                    weapons_.push_back(wi);
-                    p->addWeapon(wi);
-                    wi->setOwner(p);
-                    wi->setIsIgnored(true);
-                }
-                p->setAgentIs(PedInstance::Agent_Active);
-                *((ModOwner *)p) = *((ModOwner *)pAg);
-            }else {
-                p->setHealth(-1);
-                p->setAgentIs(PedInstance::Agent_Non_Active);
-                p->setIsIgnored(true);
-                p->setStateMasks(PedInstance::pa_smUnavailable);
+        Agent *pAg = g_Session.agents().squadMember(i);
+        if (pAg && pAg->isActive()) {
+            stats_.agents += 1;
+            p->setHealth(pAg->health() *
+                            peds_[i]->health() / 255);
+            while (pAg->numWeapons()) {
+                WeaponInstance *wi = pAg->removeWeapon(0);
+                weapons_.push_back(wi);
+                p->addWeapon(wi);
+                wi->setOwner(p);
+                wi->setIsIgnored(true);
             }
+            p->setAgentIs(PedInstance::Agent_Active);
+            *((ModOwner *)p) = *((ModOwner *)pAg);
+            // adds the agent to the mission squad
+            p_squad_->setMember(i, p);
         } else {
             p->setHealth(-1);
             p->setAgentIs(PedInstance::Agent_Non_Active);
@@ -1229,7 +1231,7 @@ void Mission::end()
             if (p->objGroupDef() == PedInstance::og_dmAgent) {
                 stats_.agentCaptured++;
                 if (completed()) {
-                    Agent *pAg = g_App.agents().createAgent(false);
+                    Agent *pAg = g_Session.agents().createAgent(false);
                     if (pAg) {
                         addWeaponsFromPedToAgent(p, pAg);
                         *((ModOwner *)pAg) = *((ModOwner *)p);
@@ -1240,25 +1242,24 @@ void Mission::end()
         }
     }
 
-    for (int i = 0; i < 4; i++) {
-        Agent *pAg = g_Session.squad().member(i);
-        if (pAg && pAg->isActive()) {
-            if (peds_[i]->health() <= 0) {
-                peds_[i]->destroyAllWeapons();
-                pAg->removeAllWeapons();
-                pAg->clearSlots();
-                g_Session.squad().setMember(i, NULL);
-                for (int inc = 0; inc < g_App.agents().MAX_AGENT; inc++) {
-                    if (g_App.agents().agent(inc) == pAg) {
-                        g_App.agents().destroyAgentSlot(inc);
-                        break;
-                    }
-                }
+    // synch ped agents with agent from cryo chamber
+    for (size_t i = AgentManager::kSlot1; i < AgentManager::kMaxSlot; i++) {
+        PedInstance *p_pedAgent = p_squad_->member(i);
+        if (p_pedAgent) {
+            Agent *pAg = g_Session.agents().squadMember(i);
+            if (p_pedAgent->health() <= 0) {
+                // an agent died -> remove him from cryo
+                p_pedAgent->destroyAllWeapons();
+                g_Session.agents().destroyAgentSlot(i);
             } else {
-                addWeaponsFromPedToAgent(peds_[i], pAg);
+                // synch only weapons
+                addWeaponsFromPedToAgent(p_pedAgent, pAg);
             }
         }
     }
+
+    // reset squad
+    p_squad_->clear();
 }
 
 void Mission::addWeapon(WeaponInstance * w)

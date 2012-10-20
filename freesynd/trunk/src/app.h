@@ -40,7 +40,6 @@
 #include "mapmanager.h"
 #include "mission.h"
 #include "missionmanager.h"
-#include "agentmanager.h"
 #include "weaponmanager.h"
 #include "modmanager.h"
 #include "vehiclemanager.h"
@@ -96,10 +95,6 @@ class App : public Singleton < App > {
 
     VehicleManager &vehicles() {
         return vehicles_;
-    }
-
-    AgentManager &agents() {
-        return agents_;
     }
 
     PedManager &peds() {
@@ -190,7 +185,6 @@ private:
     GameSpriteManager game_sprites_;
     MenuManager menus_;
     MissionManager missions_;
-    AgentManager agents_;
     WeaponManager weapons_;
     ModManager mods_;
     MapManager maps_;

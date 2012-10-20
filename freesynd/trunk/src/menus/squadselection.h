@@ -33,8 +33,99 @@
  */
 class SquadSelection {
  public:
+     /*!
+      * An iterator to iterate over the selected agents.
+      */
+     class Iterator {
+         public:
+            Iterator(size_t idx, SquadSelection *pSel) : idx_(idx), pSel_(pSel) {}
+            ~Iterator() {}
+
+            // The assignment and relational operators are straightforward
+            Iterator& operator=(const Iterator& other)
+            {
+                 idx_ = other.idx_;
+                 return(*this);
+            }
+
+            bool operator==(const Iterator& other)
+            {
+                return(idx_ == other.idx_);
+            }
+
+            bool operator!=(const Iterator& other)
+            {
+                return(idx_ != other.idx_);
+            }
+
+            /*!
+             *
+             */
+            Iterator& operator++()
+            {
+                while (idx_ < 4)
+                {
+                    idx_ += 1;
+                    if (idx_ < 4 && pSel_->isAgentSelected(idx_)) {
+                        break;
+                    }
+                }
+                return(*this);
+            }
+
+            /*!
+             *
+             */
+            Iterator& operator++(int)
+            {
+                ++(*this);
+                return(*this);
+            }
+
+            // Return a reference to the value in the node.  I do this instead
+          // of returning by value so a caller can update the value in the
+          // node directly.
+          PedInstance * operator*()
+          {
+              return (pSel_->pSquad_->member(idx_));
+          }
+
+          // Return the address of the value referred to.
+          PedInstance * operator->()
+          {
+              //PedInstance * pPed = *(*this); // dereference *this to get the value
+              //return (&pPed); // Return the address of the referent
+              return pSel_->pSquad_->member(idx_);
+          }
+
+         private:
+             size_t idx_;
+             SquadSelection *pSel_;
+     };
+
     //! Default constructor
     SquadSelection();
+
+    /*!
+     * Returns the first element of the selection.
+     */
+    Iterator begin() {
+
+        for (size_t idx=0; idx < 4; idx++)
+        {
+            if (isAgentSelected(idx)) {
+                return Iterator(idx, this);
+            }
+        }
+        return end();
+    }
+
+    /*!
+     * Returns the end of selection.
+     */
+    Iterator end() {
+       return(Iterator(4, NULL));
+    }
 
     /*!
      * Returns true if an agent is selected.

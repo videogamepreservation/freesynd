@@ -25,7 +25,7 @@
 
 #include "common.h"
 
-class Agent;
+class PedInstance;
 
 /*!
  * A squad is a team of 1 to 4 agents that perform the mission.
@@ -40,41 +40,16 @@ public:
 
     //! Empties the squad
     void clear();
-    //! Returns true if the slot holds an agent and if he's active
-    bool isSlotActive(size_t slotId);
-    /*!
-     * Sets an agent in the squad at the given index.
-     * \param n The agent's index in the team (from 0 to 3)
-     * \param a The new agent
-     */
-    void setMember(size_t slotId, Agent *pAgent) { 
-        assert(slotId < kMaxSlot);
-        a_members_[slotId] = pAgent;
-    };
+    //! Sets an agent in the squad at the given index.
+    void setMember(size_t slotId, PedInstance *pPedAgent) ;
     //! Returns the agent on the given slot
-    Agent * member(size_t slotId) {
-        assert(slotId < kMaxSlot);
-        return a_members_[slotId];
-    }
-    //! Return the slot that holds the given agent or -1 if ni agent is found
-    int getTeamSlot(Agent *pAgent);
+    PedInstance * member(size_t slotId);
 
-public:
-    /*! Total number of slots.*/
-    static const size_t kMaxSlot;
-    /*! Id of slot 1.*/
-    static const size_t kSlot1;
-    /*! Id of slot 2.*/
-    static const size_t kSlot2;
-    /*! Id of slot 3.*/
-    static const size_t kSlot3;
-    /*! Id of slot 4.*/
-    static const size_t kSlot4;
 private:
     /*!
      * Selected agents for the next mission. Up to 4 agents.
      */
-    Agent *a_members_[4];
+    PedInstance *a_members_[4];
 };
 
 #endif  // CORE_SQUAD_H_

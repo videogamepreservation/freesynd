@@ -140,7 +140,8 @@ bool GameSession::reset() {
     time_year_ = 85;
     time_elapsed_ = 0;
 
-    squad_.clear();
+    // TODO add reading cheatcode for onlywomen parameter
+    agents_.reset();
 
     return researchMan_.reset();
 }

@@ -27,14 +27,15 @@
 #ifndef MISSION_H
 #define MISSION_H
 
+#include <string>
+#include <vector>
+#include <set>
+
 #include "common.h"
 #include "mapobject.h"
 #include "weapon.h"
 #include "map.h"
-
-#include <string>
-#include <vector>
-#include <set>
+#include "core/squad.h"
 
 class VehicleInstance;
 class PedInstance;
@@ -478,6 +479,10 @@ public:
     }
 
     MiniMap * getMiniMap() { return p_minimap_; }
+    /*!
+     * Returns the current squad.
+     */
+    Squad * getSquad() { return p_squad_; }
 
     typedef enum {
         objv_None = 0x0,
@@ -595,6 +600,10 @@ protected:
     MiniMap *p_minimap_;
     unsigned char minimap_overlay_[128*128];
     uint32 players_group_id_;
+    /*!
+     * The squad selected for the mission. It contains only active agents.
+     */
+    Squad *p_squad_;
 };
 
 #endif

@@ -28,8 +28,8 @@
 #include <set>
 
 #include "../common.h"
-#include "core/squad.h"
-#include "researchmanager.h"
+#include "agentmanager.h"
+#include "core/researchmanager.h"
 #include "utils/portablefile.h"
 
 enum Status_Pop {
@@ -184,8 +184,8 @@ public:
         return researchMan_;
     }
 
-    Squad &squad() {
-        return squad_;
+    AgentManager &agents() {
+        return agents_;
     }
 
     //! Sets the representation of the time in the given string
@@ -285,16 +285,16 @@ private:
      * Currently played mission.
      */
     Mission *mission_;
-    /*!
-     * Selected agents for the next mission. Up to 4 agents.
-     */
-    Squad squad_;
     /*! Cheat flag to tell that all missions are playable.*/
     bool enable_all_mis_;
     /*! Cheat flag to enable replay of finished missions. */
     bool replay_mission_;
     /*! Manager for researches. */
     ResearchManager researchMan_;
+    /*!
+     * Manager of agent.
+     */
+    AgentManager agents_;
 };
 
 #endif //CORE_GAME_SESSION_H

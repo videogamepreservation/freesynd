@@ -104,6 +104,11 @@ const char * const g_AgentNames[] = {
 const int g_NumAgentNames = (sizeof(g_AgentNames) / sizeof(char *)) - 1; // minus one accounts for the NULL at the end of the names list
 
 int const AgentManager::MAX_AGENT = 18;
+const size_t AgentManager::kMaxSlot = 4;
+const size_t AgentManager::kSlot1 = 0;
+const size_t AgentManager::kSlot2 = 1;
+const size_t AgentManager::kSlot3 = 2;
+const size_t AgentManager::kSlot4 = 3;
 
 AgentManager::AgentManager() {
     nextName_ = 0;
@@ -119,6 +124,7 @@ AgentManager::~AgentManager() {
     }
 
     agents_.clear();
+    clearSquad();
 }
 
 void AgentManager::loadAgents() {
@@ -127,6 +133,8 @@ void AgentManager::loadAgents() {
 
 void AgentManager::reset(bool onlyWomen) {
     nextName_ = 0;
+    // First delete existing agents
+    clearSquad();
     for (int i = 0; i < MAX_AGENT; i++) {
         if (agents_.get(i)) {
             delete agents_.get(i);
@@ -134,18 +142,32 @@ void AgentManager::reset(bool onlyWomen) {
         }
     }
 
+    // Then recreate the first 8 available agents
     for (int i = 0; i < 8; i++) {
         Agent * pAgent = new Agent(g_AgentNames[nextName_], onlyWomen ? true : ((i % 2) == 0));
         pAgent->addWeapon(g_App.weapons().getWeapon(Weapon::Pistol)->createInstance());
         
         agents_.setAt(i, pAgent);
+        // Adds the first 4 agents to the squad
+        if (i < 4) {
+            setSquadMember(i, pAgent);
+        }
         nextName_++;
     }
 }
 
-void AgentManager::destroyAgentSlot(int n) {
-    delete agents_.get(n);
-    agents_.setAt(n, NULL);
+void AgentManager::destroyAgentSlot(size_t squadSlot) {
+    Agent *p_agent = squadMember(squadSlot);
+    p_agent->removeAllWeapons();
+    p_agent->clearSlots();
+    setSquadMember(squadSlot, NULL);
+    for (int inc = 0; inc < AgentManager::MAX_AGENT; inc++) {
+        if (agent(inc) == p_agent) {
+            delete agents_.get(inc);
+            agents_.setAt(squadSlot, NULL);
+            return;
+        }
+    }
 }
 
 bool AgentManager::saveToFile(PortableFile &file) {
@@ -157,6 +179,13 @@ bool AgentManager::saveToFile(PortableFile &file) {
         if (pAgent) {
             pAgent->saveToFile(file);
         }
+    }
+
+    // save current squad
+    for (size_t i=0; i<kMaxSlot; i++) {
+        Agent *pAgent = squadMember(i);
+        int id = pAgent ? pAgent->getId() : 0;
+        file.write32(id);
     }
     return true;
 }
@@ -265,6 +294,22 @@ bool AgentManager::loadFromFile(PortableFile &infile, const FormatVersion& v) {
             destroyAgentSlot(i);
         }
     }
+
+    // Read squad
+    for (size_t squadInd=0; squadInd<kMaxSlot; squadInd++) {
+        int id = infile.read32();
+        if (id != 0) {
+            for (int iAgnt=0; iAgnt<MAX_AGENT; iAgnt++) {
+                Agent *pAgent = agent(iAgnt);
+                if (pAgent && pAgent->getId() == id) {
+                    setSquadMember(squadInd, pAgent);
+                    break;
+                }
+            }
+        } else {
+            setSquadMember(squadInd, NULL);
+        }
+    }
     return true;
 }
 
@@ -281,3 +326,26 @@ Agent* AgentManager::createAgent(bool onlyWomen)
     return NULL;
 }
 
+void AgentManager::clearSquad() {
+    for (size_t s=0; s<kMaxSlot; s++) {
+        a_squad_[s] = NULL;
+    }
+}
+    
+//! Returns true if the slot holds an agent and if he's active
+bool AgentManager::isSquadSlotActive(size_t slotId) {
+    assert(slotId < kMaxSlot);
+    return a_squad_[slotId] && a_squad_[slotId]->isActive();
+}
+
+//! Return the slot that holds the given agent or -1 if ni agent is found
+int AgentManager::getSquadSlotForAgent(Agent *pAgent) {
+    if (pAgent) {
+        for (size_t i=0; i<kMaxSlot; i++) {
+            if (pAgent == a_squad_[i]) {
+                return i;
+            }
+        }
+    }
+    return -1;
+}

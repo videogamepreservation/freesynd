@@ -309,7 +309,7 @@ void GameplayMenu::handleShow() {
     }
 
     // init selection to the first selectable agent
-    selection_.setSquad(&(g_Session.squad()));
+    selection_.setSquad(mission_->getSquad());
     updtAgentsMarker();
 
     // Reset the minimap
@@ -404,18 +404,12 @@ void GameplayMenu::handleRender(DirtyList &dirtyList)
 
 #ifdef _DEBUG
     if (g_System.getKeyModState() & KMD_LALT) {
-        if (selection_.isAgentSelected(0))
-            mission_->ped(0)->showPath(world_x_, world_y_);
-
-        if (selection_.isAgentSelected(1))
-            mission_->ped(1)->showPath(world_x_, world_y_);
-
-        if (selection_.isAgentSelected(2))
-            mission_->ped(2)->showPath(world_x_, world_y_);
-
-        if (selection_.isAgentSelected(3))
-            mission_->ped(3)->showPath(world_x_, world_y_);
+        for (SquadSelection::Iterator it = selection_.begin();
+            it != selection_.end(); ++it) {
+            (*it)->showPath(world_x_, world_y_);
+        }
     }
+    
     // drawing of different sprites
 //    g_App.gameSprites().sprite(9 * 40 + 1)->draw(0, 0, 0, false, true);
 #if 0
@@ -1475,7 +1469,7 @@ void GameplayMenu::selectAllAgents() {
  */
 void GameplayMenu::updtAgentsMarker()
 {
-    for (size_t i = Squad::kSlot1; i < Squad::kMaxSlot; i++) {
+    for (size_t i = AgentManager::kSlot1; i < AgentManager::kMaxSlot; i++) {
         // draw animation only for leader
         mission_->sfxObjects(4 + i)->setDrawAllFrames(selection_.getLeaderSlot() == i);
     }
@@ -1487,10 +1481,11 @@ void GameplayMenu::updtAgentsMarker()
 void GameplayMenu::updateSelectionForDeadAgents() {
     // TODO change the way this detection is made. It's not clean. use events
     bool b_agentDied = false;
-    for (size_t i = Squad::kSlot1; i < Squad::kMaxSlot; i++) {
+    for (size_t i = AgentManager::kSlot1; i < AgentManager::kMaxSlot; i++) {
         if (mission_->ped(i) && mission_->ped(i)->isOurAgent()) {
-            if (g_Session.squad().member(i)->health() > 0 && mission_->ped(i)->health() <= 0) {
-                g_Session.squad().member(i)->setHealth(0);
+            if (g_Session.agents().squadMember(i)->health() > 0 && mission_->ped(i)->health() <= 0) {
+                // TODO change this
+                //g_Session.agents().squadMember(i)->setHealth(0);
                 selection_.deselectAgent(i);
                 b_agentDied = true;
             }
@@ -1501,7 +1496,7 @@ void GameplayMenu::updateSelectionForDeadAgents() {
         // if selection is empty after agent's death
         // selects the first selectable agent
         if (selection_.size() == 0) {
-            for (size_t i = Squad::kSlot1; i < Squad::kMaxSlot; i++) {
+            for (size_t i = AgentManager::kSlot1; i < AgentManager::kMaxSlot; i++) {
                 if (selection_.selectAgent(i, false)) {
                     // Agent has been selected -> quit
                     break;

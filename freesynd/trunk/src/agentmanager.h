@@ -37,19 +37,33 @@ extern const int g_NumAgentNames;
 /*!
  * Agent Manager class.
  *
- * Provides methods for managing player's agents.
+ * Provides methods for managing player's agents and squad.
+ * The Squad is the team of agent selected for a mission. It holds up to 4 agents.
+ * An agent can be selected for a squad but not active : in this case, he will not
+ * participate 
  */
 class AgentManager {
 public:
     /*! Max number of agents in cryo chamber.*/
     static const int MAX_AGENT;
+    /*! Total number of slots on a squad.*/
+    static const size_t kMaxSlot;
+    /*! Id of slot 1.*/
+    static const size_t kSlot1;
+    /*! Id of slot 2.*/
+    static const size_t kSlot2;
+    /*! Id of slot 3.*/
+    static const size_t kSlot3;
+    /*! Id of slot 4.*/
+    static const size_t kSlot4;
 
     AgentManager();
     ~AgentManager();
 
     void loadAgents();
     void reset(bool onlyWomen = false);
-    void destroyAgentSlot(int n);
+    //! Destroy an agent from squad and cryo chamber
+    void destroyAgentSlot(size_t squadSlot);
 
     Agent *agent(int n) {
         assert(n < MAX_AGENT);
@@ -57,6 +71,31 @@ public:
     }
 
     SequenceModel * getAgents() { return &agents_; }
+
+    //! Empties the squad
+    void clearSquad();
+
+    //! Returns true if the squad slot holds an agent and if he's active
+    bool isSquadSlotActive(size_t slotId);
+
+    /*!
+     * Sets an agent in the squad at the given index.
+     * \param n The agent's index in the team (from 0 to 3)
+     * \param a The new agent
+     */
+    void setSquadMember(size_t slotId, Agent *pAgent) { 
+        assert(slotId < kMaxSlot);
+        a_squad_[slotId] = pAgent;
+    };
+
+    //! Returns the agent on the given squad slot
+    Agent * squadMember(size_t slotId) {
+        assert(slotId < kMaxSlot);
+        return a_squad_[slotId];
+    }
+
+    //! Return the slot that holds the given agent or -1 if ni agent is found
+    int getSquadSlotForAgent(Agent *pAgent);
 
     //! Save instance to file
     bool saveToFile(PortableFile &file);
@@ -69,6 +108,10 @@ protected:
      * All available agents.
      */
     VectorModel<Agent *> agents_;
+    /*!
+     * Selected agents for the next mission. Up to 4 agents.
+     */
+    Agent *a_squad_[4];
     int nextName_;
 };
 

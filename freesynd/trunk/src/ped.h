@@ -28,6 +28,7 @@
 #define PED_H
 
 #include <map>
+#include <set>
 
 #include "common.h"
 #include "mapobject.h"

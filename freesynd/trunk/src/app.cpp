@@ -407,7 +407,7 @@ bool App::initialize(const std::string& iniPath) {
     music_.loadMusic();
 
     LOG(Log::k_FLG_INFO, "App", "initialize", ("Loading game data..."))
-    agents_.loadAgents();
+    session_.agents().loadAgents();
     return reset();
 }
 
@@ -425,7 +425,7 @@ void App::cheatWeaponsAndMods() {
 
 void App::cheatEquipAllMods() {
     for (int agent = 0; agent < AgentManager::MAX_AGENT; agent++) {
-        Agent *pAgent = agents_.agent(agent);
+        Agent *pAgent = session_.agents().agent(agent);
         if (pAgent) {
             pAgent->clearSlots();
 
@@ -459,49 +459,49 @@ void App::cheatAccelerateTime() {
 }
 
 void App::cheatFemaleRecruits() {
-    agents_.reset(true);
+    session_.agents().reset(true);
 
     for (int i = 0; i < 4; i++)
-        session_.squad().setMember(i, agents_.agent(i));
+        session_.agents().setSquadMember(i, session_.agents().agent(i));
 }
 
 void App::cheatEquipFancyWeapons() {
     for (int i = 0; i < AgentManager::MAX_AGENT; i++) {
-        if (agents_.agent(i)) {
-        agents_.agent(i)->removeAllWeapons();
+        if (session_.agents().agent(i)) {
+        session_.agents().agent(i)->removeAllWeapons();
 #ifdef _DEBUG
-        agents_.agent(i)->addWeapon(
+        session_.agents().agent(i)->addWeapon(
             weapons_.getWeapon(Weapon::Minigun)->createInstance());
-        agents_.agent(i)->addWeapon(
+        session_.agents().agent(i)->addWeapon(
             weapons_.getWeapon(Weapon::TimeBomb)->createInstance());
-        agents_.agent(i)->addWeapon(
+        session_.agents().agent(i)->addWeapon(
             weapons_.getWeapon(Weapon::GaussGun)->createInstance());
-        agents_.agent(i)->addWeapon(
+        session_.agents().agent(i)->addWeapon(
             weapons_.getWeapon(Weapon::Flamer)->createInstance());
-        agents_.agent(i)->addWeapon(
+        session_.agents().agent(i)->addWeapon(
             weapons_.getWeapon(Weapon::Uzi)->createInstance());
-        agents_.agent(i)->addWeapon(
+        session_.agents().agent(i)->addWeapon(
             weapons_.getWeapon(Weapon::Persuadatron)->createInstance());
-        agents_.agent(i)->addWeapon(
+        session_.agents().agent(i)->addWeapon(
             weapons_.getWeapon(Weapon::Laser)->createInstance());
-        agents_.agent(i)->addWeapon(
+        session_.agents().agent(i)->addWeapon(
             weapons_.getWeapon(Weapon::AccessCard)->createInstance());
 #else
-        agents_.agent(i)->addWeapon(
+        session_.agents().agent(i)->addWeapon(
                 weapons_.getWeapon(Weapon::Minigun)->createInstance());
-        agents_.agent(i)->addWeapon(
+        session_.agents().agent(i)->addWeapon(
                 weapons_.getWeapon(Weapon::Minigun)->createInstance());
-        agents_.agent(i)->addWeapon(
+        session_.agents().agent(i)->addWeapon(
                 weapons_.getWeapon(Weapon::Persuadatron)->createInstance());
-        agents_.agent(i)->addWeapon(
+        session_.agents().agent(i)->addWeapon(
                 weapons_.getWeapon(Weapon::TimeBomb)->createInstance());
-        agents_.agent(i)->addWeapon(
+        session_.agents().agent(i)->addWeapon(
                 weapons_.getWeapon(Weapon::EnergyShield)->createInstance());
-        agents_.agent(i)->addWeapon(
+        session_.agents().agent(i)->addWeapon(
                 weapons_.getWeapon(Weapon::EnergyShield)->createInstance());
-        agents_.agent(i)->addWeapon(
+        session_.agents().agent(i)->addWeapon(
                 weapons_.getWeapon(Weapon::Laser)->createInstance());
-        agents_.agent(i)->addWeapon(
+        session_.agents().agent(i)->addWeapon(
                 weapons_.getWeapon(Weapon::Laser)->createInstance());
 #endif
         }
@@ -570,16 +570,10 @@ bool App::reset() {
     weapons_.reset();
     mods_.reset();
 
-    // Reset default agents
-    agents_.reset();
-
     // Reset user session
     if (!session_.reset()) {
         return false;
     }
-
-    for (int i = 0; i < 4; i++)
-        session_.squad().setMember(i, agents_.agent(i));
 
     return true;
 }
@@ -704,16 +698,11 @@ bool App::saveGameToFile(int fileSlot, std::string name) {
         mods_.saveToFile(outfile);
 
         // Agents
-        agents_.saveToFile(outfile);
-
-        // save current squad
-        for (int i=0; i<4; i++) {
-            Agent *pAgent = session_.squad().member(i);
-            int id = pAgent ? pAgent->getId() : 0;
-            outfile.write32(id);
-        }
+        // TODO move in sesion saveToFile
+        session_.agents().saveToFile(outfile);
 
         // save researches
+        // TODO move in sesion saveToFile
         session_.researchManager().saveToFile(outfile);
 
         return true;
@@ -774,23 +763,7 @@ bool App::loadGameFromFile(int fileSlot) {
         mods_.loadFromFile(infile, v);
 
         // Agents
-        agents_.loadFromFile(infile, v);
-
-        // Read squad
-        for (int squadInd=0; squadInd<4; squadInd++) {
-            int id = infile.read32();
-            if (id != 0) {
-                for (int iAgnt=0; iAgnt<AgentManager::MAX_AGENT; iAgnt++) {
-                    Agent *pAgent = agents_.agent(iAgnt);
-                    if (pAgent && pAgent->getId() == id) {
-                        session_.squad().setMember(squadInd, pAgent);
-                        break;
-                    }
-                }
-            } else {
-                session_.squad().setMember(squadInd, NULL);
-            }
-        }
+        session_.agents().loadFromFile(infile, v);
 
         // Research
         session_.researchManager().loadFromFile(infile, v);
