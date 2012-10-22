@@ -44,7 +44,8 @@ public:
     void setMember(size_t slotId, PedInstance *pPedAgent) ;
     //! Returns the agent on the given slot
     PedInstance * member(size_t slotId);
-
+    //! Returns true if at least one agent has a scanner
+    bool hasScanner();
 private:
     /*!
      * Selected agents for the next mission. Up to 4 agents.

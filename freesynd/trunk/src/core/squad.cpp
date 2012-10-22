@@ -22,6 +22,7 @@
 
 #include "core/squad.h"
 #include "agentmanager.h"
+#include "ped.h"
 
 
 //! Default constructor
@@ -49,4 +50,23 @@ void Squad::setMember(size_t slotId, PedInstance *pPedAgent) {
 PedInstance * Squad::member(size_t slotId) {
     assert(slotId < AgentManager::kMaxSlot);
     return a_members_[slotId];
+}
+
+/*! 
+ * Returns true if one living agent has a scanner.
+ */
+bool Squad::hasScanner() {
+    for (size_t indx = AgentManager::kSlot1; indx < AgentManager::kMaxSlot; indx++) {
+        PedInstance *pAgent = a_members_[indx];
+        if (pAgent->health() > 0) {
+            for (int windx=0; windx<pAgent->numWeapons(); windx++) {
+                if (pAgent->weapon(windx)->getWeaponType() == Weapon::Scanner) {
+                    return true;
+                }
+            }
+        }
+    }
+
+    // No agent has a scanner
+    return false;
 }

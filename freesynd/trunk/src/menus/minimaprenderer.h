@@ -157,6 +157,24 @@ public:
 protected:
     //! called when zoom changes
     void updateRenderingInfos();
+    //! Draw all visible cars
+    void drawCars(uint8 * a_minimap);
+    /*!
+     * Returns X coord of the given tile relatively
+     * to the top letf corner of the minimap in pixel.
+     */
+    int mapToMiniMapX(int tileX, int offX)
+    {
+    	return ((tileX - mm_tx_) * pixpertile_) + (offX / (256 / pixpertile_));
+    }
+    /*!
+     * Returns Y coord of the given tile relatively
+     * to the top letf corner of the minimap in pixel.
+     */
+    int mapToMiniMapY(int tileY, int offY)
+    {
+    	return ((tileY - mm_ty_) * pixpertile_) + (offY / (256 / pixpertile_));
+    }
 private:
     /*! The mission that contains the minimap.*/
     Mission *p_mission_;
@@ -169,6 +187,10 @@ private:
     int offset_x_;
     /*! Offset for the tile.*/
     int offset_y_;
+    /*! Coords in pixels of the cross.*/
+    int cross_x_;
+    /*! Coords in pixels of the cross.*/
+    int cross_y_;
 };
 
 #endif  // MENUS_MINIMAPRENDERER_H_

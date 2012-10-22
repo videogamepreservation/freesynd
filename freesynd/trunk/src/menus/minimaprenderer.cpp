@@ -226,6 +226,8 @@ void GamePlayMinimapRenderer::init(Mission *pMission, bool b_scannerEnabled) {
     mm_ty_ = 0;
     offset_x_ = 0;
     offset_y_ = 0;
+    cross_x_ = 64;
+    cross_y_ = 64;
 }
 
 void GamePlayMinimapRenderer::updateRenderingInfos() {
@@ -256,24 +258,30 @@ void GamePlayMinimapRenderer::centerOn(uint16 tileX, uint16 tileY, int offX, int
         // we're too close of the top border -> stop moving along X axis
         mm_tx_ = 0;
         offset_x_ = 0;
+        cross_x_ = mapToMiniMapX(tileX, offX);
     } else if ((tileX + halfSize) >= p_mission_->mmax_x_) {
         // we're too close of the bottom border -> stop moving along X axis
         mm_tx_ = p_mission_->mmax_x_ - mm_maxtile_;
         offset_x_ = 0;
+        cross_x_ = mapToMiniMapX(tileX, offX);
     } else {
         mm_tx_ = tileX - halfSize;
         offset_x_ = offX / (256 / pixpertile_);
+        cross_x_ = 64;
     }
 
     if (tileY < halfSize) {
         mm_ty_ = 0;
         offset_y_ = 0;
+        cross_y_ = mapToMiniMapY(tileY, offY);
     } else if ((tileY + halfSize) >= p_mission_->mmax_y_) {
         mm_ty_ = p_mission_->mmax_y_ - mm_maxtile_;
         offset_y_ = 0;
+        cross_y_ = mapToMiniMapY(tileY, offY);
     } else {
         mm_ty_ = tileY - halfSize;
         offset_y_ = offY / (256 / pixpertile_);
+        cross_y_ = 64;
     }
 }
 
@@ -303,6 +311,9 @@ void GamePlayMinimapRenderer::render(uint16 mm_x, uint16 mm_y) {
         }
     }
     
+    // draw all visible elements on the minimap
+    drawCars(minimap_layer);
+
     // Copy the temp buffer in the final minimap using the tile offset so the minimap movement
     // is smoother
     for (int j = 0; j < kMiniMapSizePx; j++) {
@@ -314,7 +325,37 @@ void GamePlayMinimapRenderer::render(uint16 mm_x, uint16 mm_y) {
     g_Screen.blit(mm_x, mm_y, kMiniMapSizePx, kMiniMapSizePx, minimap_final_layer);
     
     // Draw the minimap cross
-    // TODO cross is not fix. it is centered on the leader.
-    g_Screen.drawRect(mm_x + 64, mm_y, 1, kMiniMapSizePx, 0);
-    g_Screen.drawRect(mm_x, mm_y + 64, kMiniMapSizePx, 1, 0);
+    g_Screen.drawRect(mm_x + cross_x_, mm_y, 1, kMiniMapSizePx, 0);
+    g_Screen.drawRect(mm_x, mm_y + cross_y_, kMiniMapSizePx, 1, 0);
 }
+
+void GamePlayMinimapRenderer::drawCars(uint8 *minimap_layer) {
+    for (int i = 0; i < p_mission_->numVehicles(); i++) {
+        VehicleInstance *p_vehicle = p_mission_->vehicle(i);
+        int tx = p_vehicle->tileX();
+		int ty = p_vehicle->tileY();
+
+        if (tx >= mm_tx_ && 
+            tx < (mm_tx_ + mm_maxtile_) &&
+            ty >= mm_ty_ && 
+            ty < (mm_ty_ + mm_maxtile_)) {
+            // vehicle is on minimap and is not driven by one of our agent.
+            // if a car is driven by our agent we only draw the yellow
+            // circle for the driver
+            PedInstance *p_ped = p_vehicle->getDriver();
+            if (p_ped == NULL || !p_ped->isOurAgent()) {
+                int vehicle_size = (zoom_ == ZOOM_X1) ? 2 : 4;
+                // hope that a car will never be at (0, 0)
+                int px = mapToMiniMapX(tx, p_vehicle->offX()) - vehicle_size / 2;
+                int py = mapToMiniMapY(ty, p_vehicle->offY()) - vehicle_size / 2;
+
+                
+                for (char inc = 0; inc < vehicle_size; inc ++) {
+                    memset(minimap_layer + (py + inc) * pixpertile_ * mm_maxtile_ + px,
+                        250, vehicle_size);
+                }
+            }
+        }
+    }
+}
+

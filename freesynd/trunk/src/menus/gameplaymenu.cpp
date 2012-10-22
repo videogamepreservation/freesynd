@@ -313,7 +313,7 @@ void GameplayMenu::handleShow() {
     updtAgentsMarker();
 
     // Reset the minimap
-    mm_renderer_.init(mission_, hasScanner());
+    mm_renderer_.init(mission_, mission_->getSquad()->hasScanner());
     updateMinimap();
 
     // Change cursor to game cursor
@@ -529,15 +529,15 @@ void GameplayMenu::handleMouseMotion(int x, int y, int state, const int modKeys)
                 if (x - 129 + world_x_ >= px && y + world_y_ >= py &&
                     x - 129 + world_x_ < px + 21 && y + world_y_ < py + 34) {
                     pointing_at_ped_ = i;
-                    for (int indx = 0; indx < 4; indx++)
-                        if (selection_.isAgentSelected(indx)) {
-                            WeaponInstance * wi = mission_->ped(indx)->selectedWeapon();
-                            ShootableMapObject *tsmo = mission_->ped(pointing_at_ped_);
-                            if (wi && wi->canShoot() && wi->inRangeNoCP(&tsmo) == 1)
-                            {
-                                inrange = true;
-                            }
+                    for (SquadSelection::Iterator it = selection_.begin();
+                            it != selection_.end(); ++it) {
+                        WeaponInstance * wi = (*it)->selectedWeapon();
+                        ShootableMapObject *tsmo = mission_->ped(pointing_at_ped_);
+                        if (wi && wi->canShoot() && wi->inRangeNoCP(&tsmo) == 1)
+                        {
+                            inrange = true;
                         }
+                    }
                     break;
                 }
             }
@@ -554,15 +554,15 @@ void GameplayMenu::handleMouseMotion(int x, int y, int state, const int modKeys)
                 if (x - 129 + world_x_ >= px && y + world_y_ >= py &&
                     x - 129 + world_x_ < px + 40 && y + world_y_ < py + 32) {
                     pointing_at_vehicle_ = i;
-                    for (int indx = 0; indx < 4; indx++)
-                        if (selection_.isAgentSelected(indx)) {
-                            WeaponInstance * wi = mission_->ped(indx)->selectedWeapon();
-                            ShootableMapObject *tsmo = mission_->vehicle(pointing_at_vehicle_);
-                            if (wi && wi->canShoot() && wi->inRangeNoCP(&tsmo)== 1)
-                            {
-                                inrange = true;
-                            }
+                    for (SquadSelection::Iterator it = selection_.begin();
+                            it != selection_.end(); ++it) {
+                        WeaponInstance * wi = (*it)->selectedWeapon();
+                        ShootableMapObject *tsmo = mission_->vehicle(pointing_at_vehicle_);
+                        if (wi && wi->canShoot() && wi->inRangeNoCP(&tsmo)== 1)
+                        {
+                            inrange = true;
                         }
+                    }
                     break;
                 }
             }
@@ -839,8 +839,8 @@ bool GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
                         else
                             ped->setActQInQueue(as);
                     }
-                }
-            }
+                } // end of if selected
+            } // end of for
         }
     } else if (button == 3) {
         stopShootingEvent();
@@ -925,38 +925,37 @@ bool GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
     {
         int w_num = ((y - (2 + 46 + 44 + 10 + 46 + 44 + 15)) / 32) * 4
             + x / 32;
-        for (int a = 0; a < 4; a++) {
+        for (SquadSelection::Iterator it = selection_.begin();
+                            it != selection_.end(); ++it) {
             // TODO: when more then one agent is selecting weapon,
             // the chosen ones should be same type and less ammo
             // or best in rank
-            PedInstance *ped = mission_->ped(a);
-            if (selection_.isAgentSelected(a)) {
-                if (w_num < ped->numWeapons()) {
-                    if (button == 1) {
-                        if (w_num < ped->numWeapons()) {
-                            if (ped->selectedWeapon() == ped->weapon(w_num))
-                                ped->setSelectedWeapon(-1);
-                            else
-                                ped->setSelectedWeapon(w_num);
-                            g_App.gameSounds().play(snd::SPEECH_SELECTED);
-                        }
-                    } else {
-                        PedInstance::actionQueueGroupType as;
-                        as.main_act = 0;
-                        as.group_desc = PedInstance::gd_mExclusive;
-                        as.origin_desc = 4;
-                        ped->createActQPutDown(as,
-                            ped->weapon(w_num));
-                        if (modKeys & KMD_CTRL)
-                            ped->addActQToQueue(as);
+            PedInstance *ped = *it;
+            if (w_num < ped->numWeapons()) {
+                if (button == 1) {
+                    if (w_num < ped->numWeapons()) {
+                        if (ped->selectedWeapon() == ped->weapon(w_num))
+                            ped->setSelectedWeapon(-1);
                         else
-                            ped->setActQInQueue(as);
+                            ped->setSelectedWeapon(w_num);
+                        g_App.gameSounds().play(snd::SPEECH_SELECTED);
                     }
-
-                    change = true;
+                } else {
+                    PedInstance::actionQueueGroupType as;
+                    as.main_act = 0;
+                    as.group_desc = PedInstance::gd_mExclusive;
+                    as.origin_desc = 4;
+                    ped->createActQPutDown(as,
+                        ped->weapon(w_num));
+                    if (modKeys & KMD_CTRL)
+                        ped->addActQToQueue(as);
+                    else
+                        ped->setActQInQueue(as);
                 }
+
+                change = true;
             }
-        }
+        } // end for
     }
 
     if (change)
@@ -1092,19 +1091,18 @@ bool GameplayMenu::handleUnknownKey(Key key, const int modKeys) {
 #endif
 #if 1
     if (key.unicode == 'm') {
-        for (int i = 0; i < 4; i++) {
-            if (selection_.isAgentSelected(i)) {
-                PedInstance *ped = mission_->ped(i);
-                PedInstance::actionQueueGroupType as;
-                ped->createActQWalking(as, NULL, NULL, 160, 1024);
-                as.main_act = as.actions.size() - 1;
-                as.group_desc = PedInstance::gd_mStandWalk;
-                as.origin_desc = 4;
-                if (modKeys & KMD_CTRL)
-                    ped->addActQToQueue(as);
-                else
-                    ped->setActQInQueue(as);
-            }
+        for (SquadSelection::Iterator it = selection_.begin();
+                            it != selection_.end(); ++it) {
+            PedInstance *ped = *it;
+            PedInstance::actionQueueGroupType as;
+            ped->createActQWalking(as, NULL, NULL, 160, 1024);
+            as.main_act = as.actions.size() - 1;
+            as.group_desc = PedInstance::gd_mStandWalk;
+            as.origin_desc = 4;
+            if (modKeys & KMD_CTRL)
+                ped->addActQToQueue(as);
+            else
+                ped->setActQInQueue(as);
         }
     }
 #endif
@@ -1297,19 +1295,18 @@ void GameplayMenu::drawMissionHint(int elapsed) {
     if ((mission_hint_ > 20 && mission_hint_ < 41)
         || (mission_hint_ > 60))
     {
-        for (int i = 0; i < 4; i++) {
-            if (selection_.isAgentSelected(i)){
-                if (mission_->ped(i)->isMoving()) {
-                    str = g_App.menus().getMessage("HINT_GOING");
-                } else {
-                    str = g_App.menus().getMessage("HINT_OBSERVING");
-                }
-                if (mission_->ped(i)->wePickupWeapon()) {
-                    str = g_App.menus().getMessage("HINT_PICKUP_WEAPON");
-                }
-                if (mission_->ped(i)->drawnAnim() == PedInstance::ad_HitAnim) {
-                    str = g_App.menus().getMessage("HINT_HIT_BY_BULLET");
-                }
+        for (SquadSelection::Iterator it = selection_.begin();
+                            it != selection_.end(); ++it) {
+            if ((*it)->isMoving()) {
+                str = g_App.menus().getMessage("HINT_GOING");
+            } else {
+                str = g_App.menus().getMessage("HINT_OBSERVING");
+            }
+            if ((*it)->wePickupWeapon()) {
+                str = g_App.menus().getMessage("HINT_PICKUP_WEAPON");
+            }
+            if ((*it)->drawnAnim() == PedInstance::ad_HitAnim) {
+                str = g_App.menus().getMessage("HINT_HIT_BY_BULLET");
             }
         }
         txtColor = 14;
@@ -1543,23 +1540,4 @@ void GameplayMenu::updateSelectAll() {
     // if number of agents alive is the same as number of selected agents
     // then button is pressed.
     pressed_btn_select_all_ = (nbAgentAlive == selection_.size());
-}
-
-/*! 
- * Returns true if one living agent has a scanner.
- */
-bool GameplayMenu::hasScanner() {
-    for (int indx = 0; indx < 4; indx++) {
-        PedInstance *pAgent = mission_->ped(indx);
-        if (pAgent->health() > 0) {
-            for (int windx=0; windx<pAgent->numWeapons(); windx++) {
-                if (pAgent->weapon(windx)->getWeaponType() == Weapon::Scanner) {
-                    return true;
-                }
-            }
-        }
-    }
-
-    // No agent has a scanner
-    return false;
 }
