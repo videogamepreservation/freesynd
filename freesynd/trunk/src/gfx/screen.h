@@ -48,7 +48,8 @@ public:
     void scale2x(int x, int y, int width, int height, const uint8 *pixeldata,
             int stride = 0, bool transp = true);
 
-    void vertLine(int x, int y, int length, uint8 color);
+    void drawVLine(int x, int y, int length, uint8 color);
+    void drawHLine(int x, int y, int length, uint8 color);
 
     int numLogos();
     void drawLogo(int x, int y, int logo, int colour, bool mini = false);

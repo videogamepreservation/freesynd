@@ -175,6 +175,7 @@ protected:
     {
     	return ((tileY - mm_ty_) * pixpertile_) + (offY / (256 / pixpertile_));
     }
+    static const uint32 minimap_buffer_width_ = 19*8;
 private:
     /*! The mission that contains the minimap.*/
     Mission *p_mission_;

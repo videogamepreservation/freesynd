@@ -291,21 +291,21 @@ void GamePlayMinimapRenderer::centerOn(uint16 tileX, uint16 tileY, int offX, int
  * \param mm_y Y coord in absolute pixels.
  */
 void GamePlayMinimapRenderer::render(uint16 mm_x, uint16 mm_y) {
-    // A temporary buffer composed of 17*17 tiles of 8*8 pixels
-    // 17*17*8*8 > 33*33*4*4
-    uint8 minimap_layer[17*17*8*8];
+    // A temporary buffer composed of 18*18 tiles of 8*8 pixels
+    // 19*19*8*8 > 33*33*4*4
+    uint8 minimap_buffer[19*19*8*8];
     // The final minimap that will be displayed : the minimap is 128*128 pixels
     uint8 minimap_final_layer[kMiniMapSizePx*kMiniMapSizePx];
 
-    // The temporary buffer is 17*17 because when we'll draw the final minimap,
+    // The temporary buffer is 19*19 because when we'll draw the final minimap,
     // the offset will c
-    memset(minimap_layer, 0, 17*17*8*8);
+    uint8 *minimap_layer = minimap_buffer + (minimap_buffer_width_ * 8 + 8);
     for (int j = 0; j < mm_maxtile_; j++) {
         for (int i = 0; i < mm_maxtile_; i++) {
             uint8 gcolour = p_mission_->getMiniMap()->getColourAt(mm_tx_ + i, mm_ty_ + j);
             for (char inc = 0; inc < pixpertile_; inc ++) {
-                memset(minimap_layer + j * pixpertile_ * pixpertile_ * mm_maxtile_ + 
-                    i * pixpertile_ + inc * pixpertile_ * mm_maxtile_,
+                memset(minimap_layer + j * pixpertile_ * minimap_buffer_width_ + 
+                    i * pixpertile_ + inc * minimap_buffer_width_,
                     gcolour, pixpertile_);
             }
         }
@@ -318,22 +318,22 @@ void GamePlayMinimapRenderer::render(uint16 mm_x, uint16 mm_y) {
     // is smoother
     for (int j = 0; j < kMiniMapSizePx; j++) {
         memcpy(minimap_final_layer + (kMiniMapSizePx * j), minimap_layer +
-            (j + offset_y_) * pixpertile_ * mm_maxtile_ + offset_x_, kMiniMapSizePx);
+            (j + offset_y_) * minimap_buffer_width_ + offset_x_, kMiniMapSizePx);
     }
 
     // Draw the minimap on the screen
     g_Screen.blit(mm_x, mm_y, kMiniMapSizePx, kMiniMapSizePx, minimap_final_layer);
     
     // Draw the minimap cross
-    g_Screen.drawRect(mm_x + cross_x_, mm_y, 1, kMiniMapSizePx, 0);
-    g_Screen.drawRect(mm_x, mm_y + cross_y_, kMiniMapSizePx, 1, 0);
+    g_Screen.drawVLine(mm_x + cross_x_, mm_y, kMiniMapSizePx, 0);
+    g_Screen.drawHLine(mm_x, mm_y + cross_y_, kMiniMapSizePx, 0);
 }
 
 void GamePlayMinimapRenderer::drawCars(uint8 *minimap_layer) {
     for (int i = 0; i < p_mission_->numVehicles(); i++) {
         VehicleInstance *p_vehicle = p_mission_->vehicle(i);
         int tx = p_vehicle->tileX();
-		int ty = p_vehicle->tileY();
+        int ty = p_vehicle->tileY();
 
         if (tx >= mm_tx_ && 
             tx < (mm_tx_ + mm_maxtile_) &&
@@ -345,14 +345,12 @@ void GamePlayMinimapRenderer::drawCars(uint8 *minimap_layer) {
             PedInstance *p_ped = p_vehicle->getDriver();
             if (p_ped == NULL || !p_ped->isOurAgent()) {
                 int vehicle_size = (zoom_ == ZOOM_X1) ? 2 : 4;
-                // hope that a car will never be at (0, 0)
                 int px = mapToMiniMapX(tx, p_vehicle->offX()) - vehicle_size / 2;
                 int py = mapToMiniMapY(ty, p_vehicle->offY()) - vehicle_size / 2;
 
-                
                 for (char inc = 0; inc < vehicle_size; inc ++) {
-                    memset(minimap_layer + (py + inc) * pixpertile_ * mm_maxtile_ + px,
-                        250, vehicle_size);
+                    memset(minimap_layer + (py + inc) * minimap_buffer_width_ + px,
+                        12, vehicle_size);
                 }
             }
         }

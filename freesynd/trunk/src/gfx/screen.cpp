@@ -209,18 +209,48 @@ void Screen::scale2x(int x, int y, int width, int height,
     dirty_ = true;
 }
 
-void Screen::vertLine(int x, int y, int length, uint8 color)
+void Screen::drawVLine(int x, int y, int length, uint8 color)
 {
     if (x < 0 || x >= width_ || y + length < 0 || y >= height_)
         return;
 
     length = y + length >= height_ ? height_ - y : length;
+    if (y < 0) {
+        length += y;
+        y = 0;
+    }
+    if (length < 1)
+        return;
 
     uint8 *pixel = pixels_ + y * width_ + x;
-    while (--length) {
+    while (length--) {
         *pixel = color;
         pixel += width_;
     }
+
+    dirty_ = true;
+}
+
+void Screen::drawHLine(int x, int y, int length, uint8 color)
+{
+    if ((x + length) < 0 || x >= width_ || y < 0 || y >= height_)
+        return;
+
+    length = x + length >= width_ ? width_ - x : length;
+    if (x < 0) {
+        length += x;
+        x = 0;
+    }
+    if (length < 1)
+        return;
+
+    uint8 *pixel_ptr = pixels_ + y * width_ + x;
+    if (length < 32) {
+        while (length--) {
+            *(pixel_ptr++) = color;
+        }
+    } else
+        memset(pixel_ptr, color, length);
 
     dirty_ = true;
 }
@@ -336,12 +366,14 @@ void Screen::drawRect(int x, int y, int width, int height, uint8 color)
     if (x < 0 || y < 0 || (x + width) > width_
         || (y + height) > height_ || width <= 0 || height <= 0)
         return;
+    // NOTE: we don't handle properly clipping by (x,y), do we need it?
+
     if (width > 32) {
-        for (int i = 0; i != height; i++) {
+        for (int i = 0; i < height; i++) {
             memset(pixels_ + x + width_ * (y + i), color, width);
         }
     } else {
-        for (int i = 0; i != height; i++) {
+        for (int i = 0; i < height; i++) {
             uint8 *p_pixels = pixels_ + x + width_ * (y + i);
             for (int w = 0; w != width; w++)
                 *p_pixels++ = color;
