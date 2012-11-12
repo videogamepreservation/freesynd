@@ -325,8 +325,8 @@ void GamePlayMinimapRenderer::render(uint16 mm_x, uint16 mm_y) {
     }
 
     // Draw the minimap cross
-    drawFillRect(minimap_layer, cross_x_, 0, 1, (mm_maxtile_+1) * 8, fs_cmn::kColorBlack);
-    drawFillRect(minimap_layer, 0, cross_y_, (mm_maxtile_+1) * 8, 1, fs_cmn::kColorBlack);
+    drawFillRect(minimap_layer, cross_x_, 0, 1, (mm_maxtile_ + 1) * pixpertile_, fs_cmn::kColorBlack);
+    drawFillRect(minimap_layer, 0, cross_y_, (mm_maxtile_ + 1) * pixpertile_, 1, fs_cmn::kColorBlack);
     
     // draw all visible elements on the minimap
     drawPedestrians(minimap_layer);
