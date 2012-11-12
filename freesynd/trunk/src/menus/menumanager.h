@@ -99,6 +99,8 @@ public:
 
 	//! Sets the default palette
 	void setDefaultPalette();
+    //! Sets the palette for the given mission id
+    void setPaletteForMission(int i_id);
 	void setPalette(const char *fname, bool sixbit = true);
 
     //! Displays the current menu

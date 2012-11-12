@@ -294,9 +294,7 @@ void GameplayMenu::handleShow() {
     world_y_ = mission_->startY();
     
     // set graphic palette
-    char spal[20];
-    sprintf(spal,"hpal0%i.dat",g_Session.getSelectedBlock().mis_id % 5 + 1);
-    menu_manager_->setPalette(spal);
+    menu_manager_->setPaletteForMission(g_Session.getSelectedBlock().mis_id);
     g_Screen.clear(0);
     
     // place the screen at the good starting position
@@ -314,7 +312,7 @@ void GameplayMenu::handleShow() {
 
     // Reset the minimap
     mm_renderer_.init(mission_, mission_->getSquad()->hasScanner());
-    updateMinimap();
+    centerMinimapOnLeader();
 
     // Change cursor to game cursor
     g_System.usePointerCursor();
@@ -379,7 +377,7 @@ void GameplayMenu::handleTick(int elapsed)
 
     updateSelectionForDeadAgents();
 
-    updateMinimap();
+    updateMinimap(elapsed);
 
     if (change) {
         needRendering();
@@ -1520,8 +1518,9 @@ void GameplayMenu::centerMinimapOnLeader() {
 /*!
  * Updates the minimap.
  */
-void GameplayMenu::updateMinimap() {
+void GameplayMenu::updateMinimap(int elapsed) {
     centerMinimapOnLeader();
+    mm_renderer_.handleTick(elapsed);
 }
 
 /*!

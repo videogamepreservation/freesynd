@@ -75,7 +75,7 @@ protected:
     //! Centers the minimap on the selection leader
     void centerMinimapOnLeader();
     //! Animate the minimap
-    void updateMinimap();
+    void updateMinimap(int elapsed);
     //! Update the select all button state
     void updateSelectAll();
 

@@ -27,7 +27,12 @@
 namespace fs_utils {
 
 /*!
- * A timer is used to .
+ * A simple timer implementation. Create the timer with
+ * max time and call update in each frame animation with the
+ * elapsed time since the last call.
+ * When the maximum is reached, update() returns true otherwise
+ * it returns false.
+ * Call reset to set the timer to zero.
  */
 class Timer {
  public:
@@ -62,6 +67,43 @@ class Timer {
  private:
     uint32 i_counter_;
     uint32 i_max_;
+};
+
+/*!
+ * A convenient timer to store a boolean value.
+ * Each time the timer reaches the max, the value is set to the opposite.
+ * Call state() to get the current state.
+ */
+class BoolTimer : public Timer {
+ public:
+     /*!
+      * Contructor to set the max time.
+      * \param i_max Maximum value of the counter
+      * \param b_state The initial state.
+      */
+     BoolTimer(uint32 i_max, bool b_state) : Timer(i_max) {
+         b_state_ = b_state;
+     }
+
+     //! Return the current state
+     bool state() { return b_state_; }
+
+     /*!
+      * Adds time to time and returns true if max is reached.
+      * If max is reached, counter is reset and state value is set
+      * to the opposite.
+      * \return True if timer has reached max.
+      */
+     bool update(uint32 elapsed) {
+         bool res = Timer::update(elapsed);
+         if (res) {
+             b_state_ = !b_state_;
+         }
+         return res;
+     }
+
+ private:
+    bool b_state_;
 };
 };
 

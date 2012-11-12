@@ -210,7 +210,8 @@ void BriefMinimapRenderer::render(uint16 mm_x, uint16 mm_y) {
 /*!
  * Default constructor.
  */
-GamePlayMinimapRenderer::GamePlayMinimapRenderer() {
+GamePlayMinimapRenderer::GamePlayMinimapRenderer() : 
+    mm_timer_weap(300, false), mm_timer_ped(260, false) {
     p_mission_ = NULL;
 }
 
@@ -228,9 +229,11 @@ void GamePlayMinimapRenderer::init(Mission *pMission, bool b_scannerEnabled) {
     offset_y_ = 0;
     cross_x_ = 64;
     cross_y_ = 64;
+    mm_timer_weap.reset();
 }
 
 void GamePlayMinimapRenderer::updateRenderingInfos() {
+    // mm_maxtile_ can be 17 or 33
     mm_maxtile_ = 128 / pixpertile_ + 1;
 }
 
@@ -258,31 +261,38 @@ void GamePlayMinimapRenderer::centerOn(uint16 tileX, uint16 tileY, int offX, int
         // we're too close of the top border -> stop moving along X axis
         mm_tx_ = 0;
         offset_x_ = 0;
-        cross_x_ = mapToMiniMapX(tileX, offX);
     } else if ((tileX + halfSize) >= p_mission_->mmax_x_) {
         // we're too close of the bottom border -> stop moving along X axis
         mm_tx_ = p_mission_->mmax_x_ - mm_maxtile_;
         offset_x_ = 0;
-        cross_x_ = mapToMiniMapX(tileX, offX);
     } else {
         mm_tx_ = tileX - halfSize;
         offset_x_ = offX / (256 / pixpertile_);
-        cross_x_ = 64;
     }
 
     if (tileY < halfSize) {
         mm_ty_ = 0;
         offset_y_ = 0;
-        cross_y_ = mapToMiniMapY(tileY, offY);
     } else if ((tileY + halfSize) >= p_mission_->mmax_y_) {
         mm_ty_ = p_mission_->mmax_y_ - mm_maxtile_;
         offset_y_ = 0;
-        cross_y_ = mapToMiniMapY(tileY, offY);
     } else {
         mm_ty_ = tileY - halfSize;
         offset_y_ = offY / (256 / pixpertile_);
-        cross_y_ = 64;
     }
+
+    // get the cross coordinate
+    // 
+    // TODO : see if we can remove + 1
+    cross_x_ = mapToMiniMapX(tileX + 1, offX);
+    cross_y_ = mapToMiniMapY(tileY + 1, offY);
+}
+
+bool GamePlayMinimapRenderer::handleTick(int elapsed) {
+    mm_timer_ped.update(elapsed);
+    mm_timer_weap.update(elapsed);
+
+    return true;
 }
 
 /*!
@@ -291,69 +301,222 @@ void GamePlayMinimapRenderer::centerOn(uint16 tileX, uint16 tileY, int offX, int
  * \param mm_y Y coord in absolute pixels.
  */
 void GamePlayMinimapRenderer::render(uint16 mm_x, uint16 mm_y) {
-    // A temporary buffer composed of 18*18 tiles of 8*8 pixels
-    // 19*19*8*8 > 33*33*4*4
-    uint8 minimap_buffer[19*19*8*8];
+    // A temporary buffer composed of mm_maxtile + 1 columns and rows.
+    // we use a slightly larger rendering buffer not to have
+    // to check borders. At the end we only display  the mm_maxtile x mm_maxtile tiles.
+    // On top of this we use one size for both resolutions as 18*18*8*8 > 34*34*4*4
+    uint8 minimap_layer[18*18*8*8];
+    uint8 mm_layer_size = mm_maxtile_ + 1;
     // The final minimap that will be displayed : the minimap is 128*128 pixels
     uint8 minimap_final_layer[kMiniMapSizePx*kMiniMapSizePx];
 
-    // The temporary buffer is 19*19 because when we'll draw the final minimap,
-    // the offset will c
-    uint8 *minimap_layer = minimap_buffer + (minimap_buffer_width_ * 8 + 8);
+    // In this loop, we fill the buffer with floor colour. the first row and column
+    // is not filled
+    memset(minimap_layer, 0, 18*18*8*8);
     for (int j = 0; j < mm_maxtile_; j++) {
         for (int i = 0; i < mm_maxtile_; i++) {
             uint8 gcolour = p_mission_->getMiniMap()->getColourAt(mm_tx_ + i, mm_ty_ + j);
             for (char inc = 0; inc < pixpertile_; inc ++) {
-                memset(minimap_layer + j * pixpertile_ * minimap_buffer_width_ + 
-                    i * pixpertile_ + inc * minimap_buffer_width_,
+                memset(minimap_layer + (j + 1) * pixpertile_ * pixpertile_ * mm_layer_size + 
+                    (i + 1) * pixpertile_ + inc * pixpertile_ * mm_layer_size,
                     gcolour, pixpertile_);
             }
         }
     }
+
+    // Draw the minimap cross
+    drawFillRect(minimap_layer, cross_x_, 0, 1, (mm_maxtile_+1) * 8, fs_cmn::kColorBlack);
+    drawFillRect(minimap_layer, 0, cross_y_, (mm_maxtile_+1) * 8, 1, fs_cmn::kColorBlack);
     
     // draw all visible elements on the minimap
+    drawPedestrians(minimap_layer);
+    drawWeapons(minimap_layer);
     drawCars(minimap_layer);
+    
 
     // Copy the temp buffer in the final minimap using the tile offset so the minimap movement
     // is smoother
     for (int j = 0; j < kMiniMapSizePx; j++) {
-        memcpy(minimap_final_layer + (kMiniMapSizePx * j), minimap_layer +
-            (j + offset_y_) * minimap_buffer_width_ + offset_x_, kMiniMapSizePx);
+        memcpy(minimap_final_layer + (kMiniMapSizePx * j), 
+            minimap_layer + (pixpertile_ * pixpertile_ * mm_layer_size) +
+            (j + offset_y_) * pixpertile_ * mm_layer_size + pixpertile_ + offset_x_, kMiniMapSizePx);
     }
 
     // Draw the minimap on the screen
     g_Screen.blit(mm_x, mm_y, kMiniMapSizePx, kMiniMapSizePx, minimap_final_layer);
-    
-    // Draw the minimap cross
-    g_Screen.drawVLine(mm_x + cross_x_, mm_y, kMiniMapSizePx, 0);
-    g_Screen.drawHLine(mm_x, mm_y + cross_y_, kMiniMapSizePx, 0);
 }
 
-void GamePlayMinimapRenderer::drawCars(uint8 *minimap_layer) {
+void GamePlayMinimapRenderer::drawCars(uint8 *a_minimap) {
     for (int i = 0; i < p_mission_->numVehicles(); i++) {
         VehicleInstance *p_vehicle = p_mission_->vehicle(i);
         int tx = p_vehicle->tileX();
         int ty = p_vehicle->tileY();
 
-        if (tx >= mm_tx_ && 
-            tx < (mm_tx_ + mm_maxtile_) &&
-            ty >= mm_ty_ && 
-            ty < (mm_ty_ + mm_maxtile_)) {
+        if (isVisible(tx, ty)) {
             // vehicle is on minimap and is not driven by one of our agent.
             // if a car is driven by our agent we only draw the yellow
             // circle for the driver
             PedInstance *p_ped = p_vehicle->getDriver();
             if (p_ped == NULL || !p_ped->isOurAgent()) {
-                int vehicle_size = (zoom_ == ZOOM_X1) ? 2 : 4;
-                int px = mapToMiniMapX(tx, p_vehicle->offX()) - vehicle_size / 2;
-                int py = mapToMiniMapY(ty, p_vehicle->offY()) - vehicle_size / 2;
+                size_t vehicle_size = (zoom_ == ZOOM_X1) ? 2 : 4;
+                int px = mapToMiniMapX(tx + 1, p_vehicle->offX()) - vehicle_size / 2;
+                int py = mapToMiniMapY(ty + 1, p_vehicle->offY()) - vehicle_size / 2;
 
-                for (char inc = 0; inc < vehicle_size; inc ++) {
-                    memset(minimap_layer + (py + inc) * minimap_buffer_width_ + px,
-                        12, vehicle_size);
+                drawFillRect(a_minimap, px, py, vehicle_size, vehicle_size, fs_cmn::kColorWhite);
+            } else {
+                int px = mapToMiniMapX(tx + 1, p_vehicle->offX());
+                int py = mapToMiniMapY(ty + 1, p_vehicle->offY());
+                uint8 borderColor = (mm_timer_ped.state()) ? fs_cmn::kColorBlack : fs_cmn::kColorLightGreen;
+                drawPedCircle(a_minimap, px, py, fs_cmn::kColorYellow, borderColor);
+            }
+        }
+    }
+}
+
+void GamePlayMinimapRenderer::drawWeapons(uint8 * a_minimap) {
+    const size_t weapon_size = 2;
+    for (int i = 0; i < p_mission_->numWeapons(); i++)
+	{
+		WeaponInstance *p = p_mission_->weapon(i);
+		int tx = p->tileX();
+		int ty = p->tileY();
+		int ox = p->offX();
+		int oy = p->offY();
+
+        // we draw weapons that have no owner ie that are on the ground
+		if (!p->hasOwner() && isVisible(tx, ty)) {
+            if (mm_timer_weap.state()) {
+				int px = mapToMiniMapX(tx + 1, ox) - 1;
+                int py = mapToMiniMapY(ty + 1, oy) - 1;
+
+                drawFillRect(a_minimap, px, py, weapon_size, weapon_size, fs_cmn::kColorLightGrey);
+            }
+        }
+	}
+}
+
+void GamePlayMinimapRenderer::drawPedestrians(uint8 * a_minimap) {
+    for (int i = 0; i < p_mission_->numPeds(); i++)
+	{
+		PedInstance *p_ped = p_mission_->ped(i);
+		int tx = p_ped->tileX();
+		int ty = p_ped->tileY();
+		int ox = p_ped->offX();
+		int oy = p_ped->offY();
+
+		if (p_ped->health() > 0 && isVisible(tx, ty))
+		{
+            int px = mapToMiniMapX(tx + 1, ox);
+            int py = mapToMiniMapY(ty + 1, oy);
+			if (p_ped->isPersuaded())
+			{
+				// col_Yellow circle with a black or lightgreen border (blinking)
+                uint8 borderColor = (mm_timer_ped.state()) ? fs_cmn::kColorLightGreen : fs_cmn::kColorBlack;
+                drawPedCircle(a_minimap, px, py, fs_cmn::kColorYellow, borderColor);
+			} else {
+                switch (p_ped->getMainType())
+				{
+				case PedInstance::m_tpPedestrian:
+				case PedInstance::m_tpCriminal:
+                    {
+					    // white rect 2x2 (opaque and transparent blinking)
+                        size_t ped_width = 2;
+                        size_t ped_height = 2;
+                        if (mm_timer_ped.state()) {
+					        px -= 1;
+                            py -= 1;
+                            
+                            // draw the square
+                            drawFillRect(a_minimap, px, py, ped_width, ped_height, fs_cmn::kColorWhite);
+                        }
+					break;
+                    }
+                case PedInstance::m_tpAgent:
+                {
+                    if (p_ped->inVehicle() == NULL)
+                    {
+                        if (p_ped->isOurAgent())
+                        {
+                            // col_Yellow circle with a black or lightgreen border (blinking)
+                            uint8 borderColor = (mm_timer_ped.state()) ? fs_cmn::kColorBlack : fs_cmn::kColorLightGreen;
+                            drawPedCircle(a_minimap, px, py, fs_cmn::kColorYellow, borderColor);
+                        } else {
+                            // col_LightRed circle with a black or dark red border (blinking)
+                            uint8 borderColor = (mm_timer_ped.state()) ? fs_cmn::kColorBlack : fs_cmn::kColorDarkRed;
+                            drawPedCircle(a_minimap, px, py, fs_cmn::kColorLightRed, borderColor);
+                        }
+                    }
+                }
+                break;
+				case PedInstance::m_tpPolice:
+                    {
+					// blue circle with a black or col_BlueGrey (blinking)
+                    uint8 borderColor = (mm_timer_ped.state()) ? fs_cmn::kColorBlack : fs_cmn::kColorBlueGrey;
+                    drawPedCircle(a_minimap, px, py, fs_cmn::kColorBlue, borderColor);
+                    }
+					break;
+				case PedInstance::m_tpGuard:
+                    {
+					// col_LightGrey circle with a black or white border (blinking) 
+                    uint8 borderColor = (mm_timer_ped.state()) ? fs_cmn::kColorWhite : fs_cmn::kColorBlack;
+                    drawPedCircle(a_minimap, px, py, fs_cmn::kColorLightGrey, borderColor);
+                    }
+					break;
                 }
             }
         }
     }
 }
 
+/*!
+ * This array is used as a mask to draw circle for peds.
+ * Values of the mask are :
+ * - 0 : use the color of the buffer
+ * - 1 : use border color if buffer color is not the fillColor
+ * - 2 : use the fillColor
+ */
+uint8 g_ped_circle_mask_[] = {
+    0,  0,  1,  1,  1,  0,  0,
+    0,  1,  2,  2,  2,  1,  0,
+    1,  2,  2,  2,  2,  2,  1,
+    1,  2,  2,  2,  2,  2,  1,
+    1,  2,  2,  2,  2,  2,  1,
+    0,  1,  2,  2,  2,  1,  0,
+    0,  0,  1,  1,  1,  0,  0
+};
+
+/*!
+    * Draw a circle with the given colors for fill and border. This is used to represent agents, police and guards.
+    * \param a_buffer destination buffer
+    * \param mm_x X coord in the destination buffer
+    * \param mm_y Y coord in the destination buffer
+    * \param fillColor the color to fill the rect
+    * \param borderColor the color to draw the circle border
+    */
+void GamePlayMinimapRenderer::drawPedCircle(uint8 * a_buffer, int mm_x, int mm_y, uint8 fillColor, uint8 borderColor) {
+    // Size of the mask : it's a square of 4x4 pixels.
+    const uint8 kCircleMaskSize = 7;
+    // centers the circle on the ped position and add pixels to skip the first row and column
+    mm_x -= 3;
+    mm_y -= 3;
+    
+    for (uint8 j = 0; j < kCircleMaskSize; j++) {
+        for (uint8 i = 0; i < kCircleMaskSize; i++) {
+            // get the color at the current point
+            int i_index = (mm_y + j) * pixpertile_ * (mm_maxtile_ + 1) + mm_x + i;
+            uint8 bufferColor = a_buffer[i_index];
+            switch(g_ped_circle_mask_[j*kCircleMaskSize + i]) {
+            case 2:
+                a_buffer[i_index] = fillColor;
+                break;
+            case 1:
+                if (bufferColor != fillColor) {
+                    a_buffer[i_index] = borderColor;
+                }
+                break;
+            default:
+                break;
+            }
+        }
+    }
+}

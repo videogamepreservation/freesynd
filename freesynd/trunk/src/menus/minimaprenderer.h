@@ -40,7 +40,7 @@ class MissionBriefing;
  * in the map coordinates. Moving the minimap depends on the subclass.
  */
 class MinimapRenderer {
-public:
+ public:
     /*!
      * Enumeration for the available zoom levels.
      * The higher is the zoom, the more pixels is used to
@@ -53,16 +53,18 @@ public:
         ZOOM_X4 = 0
     };
 
+    virtual ~MinimapRenderer() {}
+
     //! update the class with elapsed time
     bool handleTick(int elapsed) { return false; }
 
     //! Render the minimap at the given point
     void render(uint16 mm_x, uint16 mm_y) {}
-protected:
+ protected:
     void setZoom(EZoom zoom);
      //! called when zoom changes
     virtual void updateRenderingInfos() = 0;
-protected:
+ protected:
     /*! The size in pixel of the minimap. Minimap is a square.*/
     static const int kMiniMapSizePx;
 
@@ -81,7 +83,7 @@ protected:
  * This class is used to display a minimap in the briefing menu.
  */
 class BriefMinimapRenderer : public MinimapRenderer {
-public:
+ public:
 
     //! Class Constructor.
     BriefMinimapRenderer();
@@ -108,14 +110,14 @@ public:
     //! Scrolls the minimap to the bottom
     void scrollDown();
 
-protected:
+ protected:
     //! Finds the minimap location
     void initMinimapLocation();
     void updateRenderingInfos();
     //! If minimap is too far right or down, align with right or down border
     void clipMinimapToRightAndDown();
 
-protected:
+ protected:
     /*! A timer to control the blinking on the minimap.*/
     fs_utils::Timer mm_timer;
     /*! Helps controling blinking.*/
@@ -139,7 +141,7 @@ protected:
  * This class is used to display a minimap in the gameplay menu.
  */
 class GamePlayMinimapRenderer : public MinimapRenderer {
-public:
+ public:
     //! Constructor for the class
     GamePlayMinimapRenderer();
 
@@ -152,31 +154,69 @@ public:
     //! Tells whether scanner is on or off.
     void setScannerEnabled(bool b_enabled);
 
+    //! update the class with elapsed time
+    bool handleTick(int elapsed);
+
     //! Render the minimap
     void render(uint16 mm_x, uint16 mm_y);
-protected:
+ protected:
     //! called when zoom changes
     void updateRenderingInfos();
     //! Draw all visible cars
     void drawCars(uint8 * a_minimap);
+    //! Draw all visible dropped weapons
+    void drawWeapons(uint8 * a_minimap);
+    //! Draw visible peds
+    void drawPedestrians(uint8 * a_minimap);
+    /*! 
+     * Returns true if coords is visible on the map
+     * \param tx tile coord in world coord.
+     * \param ty tile coord in world coord.
+     */
+    bool isVisible(int tx, int ty) {
+        return (tx >= mm_tx_ &&
+            tx < (mm_tx_ + mm_maxtile_) &&
+            ty >= mm_ty_ &&
+            ty < (mm_ty_ + mm_maxtile_));
+    }
     /*!
      * Returns X coord of the given tile relatively
      * to the top letf corner of the minimap in pixel.
      */
-    int mapToMiniMapX(int tileX, int offX)
-    {
-    	return ((tileX - mm_tx_) * pixpertile_) + (offX / (256 / pixpertile_));
+    int mapToMiniMapX(int tileX, int offX) {
+        return ((tileX - mm_tx_) * pixpertile_) + (offX / (256 / pixpertile_));
     }
+
     /*!
      * Returns Y coord of the given tile relatively
      * to the top letf corner of the minimap in pixel.
      */
-    int mapToMiniMapY(int tileY, int offY)
-    {
-    	return ((tileY - mm_ty_) * pixpertile_) + (offY / (256 / pixpertile_));
+    int mapToMiniMapY(int tileY, int offY) {
+        return ((tileY - mm_ty_) * pixpertile_) + (offY / (256 / pixpertile_));
     }
-    static const uint32 minimap_buffer_width_ = 19*8;
-private:
+
+    /*!
+     * Draw a rect to the given buffer with the given size and color.
+     * \param a_buffer destination buffer
+     * \param mm_x X coord in the destination buffer
+     * \param mm_y Y coord in the destination buffer
+     * \param width width of the rect to draw
+     * \param height height of the rect to draw
+     * \param color the color to fill the rect
+     */
+    void drawFillRect(uint8 * a_buffer, int mm_x, int mm_y, size_t width,
+                        size_t height, uint8 color) {
+        for (size_t inc = 0; inc < height; inc ++) {
+            memset(a_buffer +
+                (mm_y + inc) * pixpertile_ * (mm_maxtile_ + 1) + mm_x,
+                color, width);
+        }
+    }
+
+    //! Draw a circle to represent agents, police and guards.
+    void drawPedCircle(uint8 * a_buffer, int mm_x, int mm_y, uint8 fillColor,
+                            uint8 borderColor);
+ private:
     /*! The mission that contains the minimap.*/
     Mission *p_mission_;
     /*!
@@ -192,6 +232,10 @@ private:
     int cross_x_;
     /*! Coords in pixels of the cross.*/
     int cross_y_;
+    /*! A timer to control the blinking of weapons.*/
+    fs_utils::BoolTimer mm_timer_weap;
+    /*! A timer to control the blinking of pedestrians.*/
+    fs_utils::BoolTimer mm_timer_ped;
 };
 
 #endif  // MENUS_MINIMAPRENDERER_H_

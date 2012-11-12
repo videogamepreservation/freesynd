@@ -177,6 +177,13 @@ void MenuManager::setDefaultPalette() {
     setPalette("mselect.pal", true);
 }
 
+void MenuManager::setPaletteForMission(int i_id) {
+    // I'm not sure of the way we get the palette
+    char spal[20];
+    sprintf(spal,"hpal0%i.dat",g_Session.getSelectedBlock().mis_id % 5 + 1);
+    setPalette(spal);
+}
+
 void MenuManager::setPalette(const char *fname, bool sixbit) {
     LOG(Log::k_FLG_GFX, "MenuManager", "setPalette", ("Setting palette : %s", fname))
     int size;

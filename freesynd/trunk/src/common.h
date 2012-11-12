@@ -129,4 +129,27 @@ inline bool bitClear(const uint32 value, int index) {
 
 const double PI = 3.14159265;
 
+namespace fs_cmn {
+
+    // Those values are the index of the color in the current pallette.
+    /*! Color constant : Black */
+    static const uint8 kColorBlack = 0;
+    /*! Color constant : Light Green */
+    static const uint8 kColorLightGreen = 3;
+    /*! Color constant : Light grey */
+    static const uint8 kColorLightGrey = 4;
+    /*! Color constant : Dark Red */
+    static const uint8 kColorDarkRed = 6;
+    /*! Color constant : Blue Grey */
+    static const uint8 kColorBlueGrey = 7;
+    /*! Color constant : Yellow */
+    static const uint8 kColorYellow = 11;
+    /*! Color constant : White */
+    static const uint8 kColorWhite = 12;
+    /*! Color constant : Light Red */
+    static const uint8 kColorLightRed = 14;
+    /*! Color constant : Blue */
+    static const uint8 kColorBlue = 15;
+};
+
 #endif
