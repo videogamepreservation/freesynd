@@ -26,6 +26,7 @@
 #include <map>
 
 #include "common.h"
+#include "map.h"
 #include "utils/timer.h"
 
 class Mission;
@@ -59,7 +60,7 @@ class MinimapRenderer {
     bool handleTick(int elapsed) { return false; }
 
     //! Render the minimap at the given point
-    void render(uint16 mm_x, uint16 mm_y) {}
+    void render(uint16 screen_x, uint16 screen_y) {}
  protected:
     void setZoom(EZoom zoom);
      //! called when zoom changes
@@ -73,9 +74,9 @@ class MinimapRenderer {
     /*! Current zoom level.*/
     EZoom zoom_;
     /*! Tile X coord on the map for the top left corner of the minimap.*/
-    uint16 mm_tx_;
+    uint16 world_tx_;
     /*! Tile Y coord on the map for the top left corner of the minimap.*/
-    uint16 mm_ty_;
+    uint16 world_ty_;
 };
 
 /*!
@@ -94,7 +95,7 @@ class BriefMinimapRenderer : public MinimapRenderer {
     bool handleTick(int elapsed);
 
     //! Render the minimap at the given point
-    void render(uint16 mm_x, uint16 mm_y);
+    void render(uint16 screen_x, uint16 screen_y);
 
     //! Sets all parameters that depend on zooming level
     void zoomOut();
@@ -158,7 +159,10 @@ class GamePlayMinimapRenderer : public MinimapRenderer {
     bool handleTick(int elapsed);
 
     //! Render the minimap
-    void render(uint16 mm_x, uint16 mm_y);
+    void render(uint16 screen_x, uint16 screen_y);
+
+    //! Returns the map coordinates of the point on the minimap.
+    MapTilePoint minimapToMapPoint(int mm_x, int mm_y);
  protected:
     //! called when zoom changes
     void updateRenderingInfos();
@@ -174,17 +178,17 @@ class GamePlayMinimapRenderer : public MinimapRenderer {
      * \param ty tile coord in world coord.
      */
     bool isVisible(int tx, int ty) {
-        return (tx >= mm_tx_ &&
-            tx < (mm_tx_ + mm_maxtile_) &&
-            ty >= mm_ty_ &&
-            ty < (mm_ty_ + mm_maxtile_));
+        return (tx >= world_tx_ &&
+            tx < (world_tx_ + mm_maxtile_) &&
+            ty >= world_ty_ &&
+            ty < (world_ty_ + mm_maxtile_));
     }
     /*!
      * Returns X coord of the given tile relatively
      * to the top letf corner of the minimap in pixel.
      */
     int mapToMiniMapX(int tileX, int offX) {
-        return ((tileX - mm_tx_) * pixpertile_) + (offX / (256 / pixpertile_));
+        return ((tileX - world_tx_) * pixpertile_) + (offX / (256 / pixpertile_));
     }
 
     /*!
@@ -192,7 +196,7 @@ class GamePlayMinimapRenderer : public MinimapRenderer {
      * to the top letf corner of the minimap in pixel.
      */
     int mapToMiniMapY(int tileY, int offY) {
-        return ((tileY - mm_ty_) * pixpertile_) + (offY / (256 / pixpertile_));
+        return ((tileY - world_ty_) * pixpertile_) + (offY / (256 / pixpertile_));
     }
 
     /*!

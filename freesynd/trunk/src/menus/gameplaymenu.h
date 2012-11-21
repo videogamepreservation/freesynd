@@ -50,6 +50,12 @@ protected:
 	void handleMouseMotion(int x, int y, int state, const int modKeys);
     bool handleMouseDown(int x, int y, int button, const int modKeys);
     void handleMouseUp(int x, int y, int button, const int modKeys);
+    //! Handles the user's click on weapon selector
+    void handleClickOnWeaponSelector(int x, int y, int button, const int modKeys);
+    //! Handles the user's click on the map
+    void handleClickOnMap(int x, int y, int button, const int modKeys);
+    //! Handles the user's click on the minimap
+    void handleClickOnMinimap(int x, int y);
 
     void drawAgentSelectors();
     void drawPerformanceMeters();
@@ -62,7 +68,7 @@ protected:
     void improveScroll(int &newScrollX, int &newScrollY);
     int selectedAgentsCount();
     //! Selects/deselects an agent
-    bool selectAgent(unsigned int agentNo, bool addToGroup);
+    void selectAgent(size_t agentNo, bool addToGroup);
     //! Selects/deselects all agents
     void selectAllAgents();
 
@@ -71,6 +77,7 @@ protected:
     //! updates visual markers for our agents
     void updtAgentsMarker();
 
+    bool setDestinationPoint(const MapTilePoint &mapPt, bool isForGroup, bool addDestPt, size_t agentNo, PedInstance *p_ped);
     void stopShootingEvent(void);
     //! Centers the minimap on the selection leader
     void centerMinimapOnLeader();

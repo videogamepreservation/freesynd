@@ -58,6 +58,22 @@ struct MapTilePoint {
     int ox;
     /*! Y Offset inside the tile. (varies between 0 and 256)*/
     int oy;
+
+    MapTilePoint() {
+        tx = 0;
+        ty = 0;
+        tz = 0;
+        ox = 0;
+        oy = 0;
+    }
+
+    MapTilePoint(const MapTilePoint &mtp) {
+        tx = mtp.tx;
+        ty = mtp.ty;
+        tz = mtp.tz;
+        ox = mtp.ox;
+        oy = mtp.oy;
+    }
 };
 
 /*!

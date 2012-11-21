@@ -23,7 +23,8 @@
 #include "menus/minimaprenderer.h"
 #include "mission.h"
 #include "gfx/screen.h"
-#include "app.h"
+#include "vehicle.h"
+#include "ped.h"
 
 const int MinimapRenderer::kMiniMapSizePx = 128;
 
@@ -65,16 +66,16 @@ void BriefMinimapRenderer::initMinimapLocation() {
             if (p_mission_->getMinimapOverlay(x, y) == 1) {
                 // We found a tile with an agent on it
                 // stop searching and memorize position
-                mm_tx_ = x;
-                mm_ty_ = y;
+                world_tx_ = x;
+                world_ty_ = y;
                 found = true;
             }
         }
     }
 
     uint16 halftiles = mm_maxtile_ / 2;
-    mm_tx_ = (mm_tx_ < halftiles) ? 0 : (mm_tx_ - halftiles + 1);
-    mm_ty_ = (mm_ty_ < halftiles) ? 0 : (mm_ty_ - halftiles + 1);
+    world_tx_ = (world_tx_ < halftiles) ? 0 : (world_tx_ - halftiles + 1);
+    world_ty_ = (world_ty_ < halftiles) ? 0 : (world_ty_ - halftiles + 1);
 
     clipMinimapToRightAndDown();
 }
@@ -83,16 +84,16 @@ void BriefMinimapRenderer::initMinimapLocation() {
  *
  */
 void BriefMinimapRenderer::clipMinimapToRightAndDown() {
-    if ((mm_tx_ + mm_maxtile_) >= p_mission_->mmax_x_) {
+    if ((world_tx_ + mm_maxtile_) >= p_mission_->mmax_x_) {
         // We assume that map size in tiles (p_mission_->mmax_x_)
         // is bigger than the minimap size (mm_maxtile_)
-        mm_tx_ = p_mission_->mmax_x_ - mm_maxtile_;
+        world_tx_ = p_mission_->mmax_x_ - mm_maxtile_;
     }
 
-    if ((mm_ty_ + mm_maxtile_) >= p_mission_->mmax_y_) {
+    if ((world_ty_ + mm_maxtile_) >= p_mission_->mmax_y_) {
         // We assume that map size in tiles (p_mission_->mmax_y_)
         // is bigger than the minimap size (mm_maxtile_)
-        mm_ty_ = p_mission_->mmax_y_ - mm_maxtile_;
+        world_ty_ = p_mission_->mmax_y_ - mm_maxtile_;
     }
 }
 
@@ -136,7 +137,7 @@ bool BriefMinimapRenderer::handleTick(int elapsed) {
  * clips scrolling to the map's right border.
  */
 void BriefMinimapRenderer::scrollRight() {
-    mm_tx_ += scroll_step_;
+    world_tx_ += scroll_step_;
     clipMinimapToRightAndDown();
 }
 
@@ -145,14 +146,14 @@ void BriefMinimapRenderer::scrollRight() {
  * clips scrolling to the map's left border.
  */
 void BriefMinimapRenderer::scrollLeft() {
-    // if scroll_step is bigger than mm_tx_
-    // then mm_tx_ -= scroll_step_ would be negative
-    // but mm_tx_ is usigned so it would be an error
-    if (mm_tx_ < scroll_step_) {
-        mm_tx_ = 0;
+    // if scroll_step is bigger than world_tx_
+    // then world_tx_ -= scroll_step_ would be negative
+    // but world_tx_ is usigned so it would be an error
+    if (world_tx_ < scroll_step_) {
+        world_tx_ = 0;
     } else {
-        // we know that mm_tx_ >= scroll_step_
-        mm_tx_ -= scroll_step_;
+        // we know that world_tx_ >= scroll_step_
+        world_tx_ -= scroll_step_;
     }
 }
 
@@ -161,11 +162,11 @@ void BriefMinimapRenderer::scrollLeft() {
  * clips scrolling to the map's top border.
  */
 void BriefMinimapRenderer::scrollUp() {
-    if (mm_ty_ < scroll_step_) {
-        mm_ty_ = 0;
+    if (world_ty_ < scroll_step_) {
+        world_ty_ = 0;
     } else {
-        // we know that mm_ty_ >= scroll_step_
-        mm_ty_ -= scroll_step_;
+        // we know that world_ty_ >= scroll_step_
+        world_ty_ -= scroll_step_;
     }
 }
 
@@ -174,19 +175,19 @@ void BriefMinimapRenderer::scrollUp() {
  * clips scrolling to the map's bottom border.
  */
 void BriefMinimapRenderer::scrollDown() {
-    mm_ty_ += scroll_step_;
+    world_ty_ += scroll_step_;
     clipMinimapToRightAndDown();
 }
 
 /*!
  * Renders the minimap at the given position on the screen.
- * \param mm_x X coord in absolute pixels.
- * \param mm_y Y coord in absolute pixels.
+ * \param screen_x X coord in absolute pixels.
+ * \param screen_y Y coord in absolute pixels.
  */
-void BriefMinimapRenderer::render(uint16 mm_x, uint16 mm_y) {
-    for (uint16 tx = mm_tx_; tx < (mm_tx_ + mm_maxtile_); tx++) {
-        uint16 xc = mm_x + (tx - mm_tx_) * pixpertile_;
-        for (uint16 ty = mm_ty_; ty < (mm_ty_ + mm_maxtile_); ty++) {
+void BriefMinimapRenderer::render(uint16 screen_x, uint16 screen_y) {
+    for (uint16 tx = world_tx_; tx < (world_tx_ + mm_maxtile_); tx++) {
+        uint16 xc = screen_x + (tx - world_tx_) * pixpertile_;
+        for (uint16 ty = world_ty_; ty < (world_ty_ + mm_maxtile_); ty++) {
             unsigned char c = p_mission_->getMinimapOverlay(tx, ty);
             switch (c) {
                 case 0:
@@ -201,7 +202,7 @@ void BriefMinimapRenderer::render(uint16 mm_x, uint16 mm_y) {
                     else
                         c = p_mission_->getMiniMap()->getColourAt(tx, ty);
             }
-            g_Screen.drawRect(xc, mm_y + (ty - mm_ty_) * pixpertile_, pixpertile_,
+            g_Screen.drawRect(xc, screen_y + (ty - world_ty_) * pixpertile_, pixpertile_,
                 pixpertile_, c);
         }
     }
@@ -223,8 +224,8 @@ GamePlayMinimapRenderer::GamePlayMinimapRenderer() :
 void GamePlayMinimapRenderer::init(Mission *pMission, bool b_scannerEnabled) {
     p_mission_ = pMission;
     setScannerEnabled(b_scannerEnabled);
-    mm_tx_ = 0;
-    mm_ty_ = 0;
+    world_tx_ = 0;
+    world_ty_ = 0;
     offset_x_ = 0;
     offset_y_ = 0;
     cross_x_ = 64;
@@ -259,25 +260,25 @@ void GamePlayMinimapRenderer::centerOn(uint16 tileX, uint16 tileY, int offX, int
 
     if (tileX < halfSize) {
         // we're too close of the top border -> stop moving along X axis
-        mm_tx_ = 0;
+        world_tx_ = 0;
         offset_x_ = 0;
     } else if ((tileX + halfSize) >= p_mission_->mmax_x_) {
         // we're too close of the bottom border -> stop moving along X axis
-        mm_tx_ = p_mission_->mmax_x_ - mm_maxtile_;
+        world_tx_ = p_mission_->mmax_x_ - mm_maxtile_;
         offset_x_ = 0;
     } else {
-        mm_tx_ = tileX - halfSize;
+        world_tx_ = tileX - halfSize;
         offset_x_ = offX / (256 / pixpertile_);
     }
 
     if (tileY < halfSize) {
-        mm_ty_ = 0;
+        world_ty_ = 0;
         offset_y_ = 0;
     } else if ((tileY + halfSize) >= p_mission_->mmax_y_) {
-        mm_ty_ = p_mission_->mmax_y_ - mm_maxtile_;
+        world_ty_ = p_mission_->mmax_y_ - mm_maxtile_;
         offset_y_ = 0;
     } else {
-        mm_ty_ = tileY - halfSize;
+        world_ty_ = tileY - halfSize;
         offset_y_ = offY / (256 / pixpertile_);
     }
 
@@ -296,11 +297,32 @@ bool GamePlayMinimapRenderer::handleTick(int elapsed) {
 }
 
 /*!
- * Renders the minimap at the given position on the screen.
- * \param mm_x X coord in absolute pixels.
- * \param mm_y Y coord in absolute pixels.
+ * \param mm_x coord on the minimap in pixels
+ * \param mm_y coord on the minimap in pixels
  */
-void GamePlayMinimapRenderer::render(uint16 mm_x, uint16 mm_y) {
+MapTilePoint GamePlayMinimapRenderer::minimapToMapPoint(int mm_x, int mm_y) {
+    MapTilePoint pt;
+    // I'm not sure this code is correct
+    int tx = (mm_x + offset_x_) / pixpertile_;
+    int ty = (mm_y + offset_y_) / pixpertile_;
+    int ox = (mm_x + offset_x_) % pixpertile_;
+    int oy = (mm_y + offset_y_) % pixpertile_;
+
+    pt.tx = tx + world_tx_;
+    pt.ty = ty + world_ty_;
+    pt.tz = 0;
+    pt.ox = ox * (256 / pixpertile_);
+    pt.oy = oy * (256 / pixpertile_);
+
+    return pt;
+}
+
+/*!
+ * Renders the minimap at the given position on the screen.
+ * \param screen_x X coord in absolute pixels.
+ * \param screen_y Y coord in absolute pixels.
+ */
+void GamePlayMinimapRenderer::render(uint16 screen_x, uint16 screen_y) {
     // A temporary buffer composed of mm_maxtile + 1 columns and rows.
     // we use a slightly larger rendering buffer not to have
     // to check borders. At the end we only display  the mm_maxtile x mm_maxtile tiles.
@@ -315,7 +337,7 @@ void GamePlayMinimapRenderer::render(uint16 mm_x, uint16 mm_y) {
     memset(minimap_layer, 0, 18*18*8*8);
     for (int j = 0; j < mm_maxtile_; j++) {
         for (int i = 0; i < mm_maxtile_; i++) {
-            uint8 gcolour = p_mission_->getMiniMap()->getColourAt(mm_tx_ + i, mm_ty_ + j);
+            uint8 gcolour = p_mission_->getMiniMap()->getColourAt(world_tx_ + i, world_ty_ + j);
             for (char inc = 0; inc < pixpertile_; inc ++) {
                 memset(minimap_layer + (j + 1) * pixpertile_ * pixpertile_ * mm_layer_size + 
                     (i + 1) * pixpertile_ + inc * pixpertile_ * mm_layer_size,
@@ -343,7 +365,7 @@ void GamePlayMinimapRenderer::render(uint16 mm_x, uint16 mm_y) {
     }
 
     // Draw the minimap on the screen
-    g_Screen.blit(mm_x, mm_y, kMiniMapSizePx, kMiniMapSizePx, minimap_final_layer);
+    g_Screen.blit(screen_x, screen_y, kMiniMapSizePx, kMiniMapSizePx, minimap_final_layer);
 }
 
 void GamePlayMinimapRenderer::drawCars(uint8 *a_minimap) {

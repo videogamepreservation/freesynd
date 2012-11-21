@@ -670,295 +670,296 @@ void GameplayMenu::handleMouseMotion(int x, int y, int state, const int modKeys)
 
 bool GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
 {
-    bool change = false; /* Indicator whether we need menu redraw */
-    bool ctrl = false;  // Is control button pressed
-    if (modKeys & KMD_CTRL) {
-        ctrl = true;
+    if (button == 3) {
+        stopShootingEvent();
     }
+
+    if (x < 129) {
+        bool ctrl = false;  // Is control button pressed
+        if (modKeys & KMD_CTRL) {
+            ctrl = true;
+        }
+        // Handle agent selection. Click on an agent changes selection
+        // to it. If control key is pressed, add or removes agent from
+        // current selection.
+        if (y < 46) {
+            if (x < 64) {
+                selectAgent(0, ctrl);
+            } else {
+                selectAgent(1, ctrl);
+            }
+        }
+
+        else if (y >= 42 + 48 + 10 && y < 42 + 48 + 10 + 46) {
+            if (x < 64) {
+                selectAgent(2, ctrl);
+            } else {
+                selectAgent(3, ctrl);
+            }
+        } else if (y >= 42 + 48 && y < 42 + 48 + 10) {
+            // User clicked on the select all button
+            selectAllAgents();
+        }
+        else if (y >= 2 + 46 + 44 + 10 + 46 + 44 + 15
+                 && y < 2 + 46 + 44 + 10 + 46 + 44 + 15 + 64)
+        {
+            // user clicked on the weapon selector
+            handleClickOnWeaponSelector(x, y, button, modKeys);
+        } else if ( y > kMiniMapScreenY && button == 1) {
+            handleClickOnMinimap(x, y);
+        }
+    } else {
+        // User clicked on the map
+        handleClickOnMap(x, y, button, modKeys);
+    }
+
+    return true;
+}
+
+/*!
+ * The user has clicked on the weapon selector.
+ * \param x Mouse X coord
+ * \param y Mouse Y coord
+ * \param button Mouse button that was clicked
+ * \param modKeys System keys states
+ */
+void GameplayMenu::handleClickOnWeaponSelector(int x, int y, int button, const int modKeys) {
+    int w_num = ((y - (2 + 46 + 44 + 10 + 46 + 44 + 15)) / 32) * 4
+            + x / 32;
+    for (SquadSelection::Iterator it = selection_.begin();
+                        it != selection_.end(); ++it) {
+        // TODO: when more then one agent is selecting weapon,
+        // the chosen ones should be same type and less ammo
+        // or best in rank
+        PedInstance *ped = *it;
+        if (w_num < ped->numWeapons()) {
+            if (button == 1) {
+                if (w_num < ped->numWeapons()) {
+                    if (ped->selectedWeapon() == ped->weapon(w_num))
+                        ped->setSelectedWeapon(-1);
+                    else
+                        ped->setSelectedWeapon(w_num);
+                    g_App.gameSounds().play(snd::SPEECH_SELECTED);
+                }
+            } else {
+                PedInstance::actionQueueGroupType as;
+                as.main_act = 0;
+                as.group_desc = PedInstance::gd_mExclusive;
+                as.origin_desc = 4;
+                ped->createActQPutDown(as,
+                    ped->weapon(w_num));
+                if (modKeys & KMD_CTRL)
+                    ped->addActQToQueue(as);
+                else
+                    ped->setActQInQueue(as);
+            }
+        }
+    } // end for
+    // redraw weapon selector
+    addDirtyRect(0, 207, 128, 64);
+}
+
+void GameplayMenu::handleClickOnMap(int x, int y, int button, const int modKeys) {
+    MapTilePoint mapPt = mission_->get_map()->screenToTilePoint(world_x_ + x - 129,
+                    world_y_ + y);
 
     if (button == 1) {
-      /* Handle agent selection. Click on an agent changes selection
-       * to it. If control key is pressed, add or removes agent from
-       * current selection. */
-        if (x < 128) {
-            if (y < 46) {
-                if (x < 64) {
-                    change = selectAgent(0, ctrl);
-                } else {
-                    change = selectAgent(1, ctrl);
-                }
-            }
-
-            if (y >= 42 + 48 + 10 && y < 42 + 48 + 10 + 46) {
-                if (x < 64) {
-                    change = selectAgent(2, ctrl);
-                } else {
-                    change = selectAgent(3, ctrl);
-                }
-            }
-
-            /* The group-button click (in-between first and second row of
-             * agents. A mouse click cycles between current selection and all
-             * agents. */
-            if (y >= 42 + 48 && y < 42 + 48 + 10) {
-                selectAllAgents();
-                change = true;
-            }
-            
-#if 0
-            // TODO: click on minimap requires fixing
-            int sy = 46 + 44 + 10 + 46 + 44 + 15 + 2 * 32;
-
-            if (y > sy) {
-                for (int j = 0; j < 16; j++)
-                    for (int i = 0; i < 16; i++)
-                        if (x > i * 8 && x < i * 8 + 8 && y > j * 8 + sy
-                                && y < j * 8 + sy + 8) {
-                            int t =
-                                g_App.maps().map(mission_->map())->
-                                tileAt(mm_tx_ + i, mm_ty_ + j, 1);
-                            printf("%i\n", t);
-                        }
-            }
-#endif
-        } else {
-            int ox, oy;
-            int tx =
-                g_App.maps().screenToTileX(mission_->map(), world_x_ + x - 129,
-                        world_y_ + y, ox);
-            int ty =
-                g_App.maps().screenToTileY(mission_->map(), world_x_ + x - 129,
-                        world_y_ + y, oy);
-
-            for (int i = 0; i < 4; i++) {
-                PedInstance *ped = mission_->ped(i);
-                if (selection_.isAgentSelected(i)) {
-                    if (pointing_at_ped_ != -1) {
-                        PedInstance::actionQueueGroupType as;
-                        as.group_desc = PedInstance::gd_mStandWalk;
-                        ped->createActQFollowing(as,
-                            mission_->ped(pointing_at_ped_), 0, 192);
-                        as.main_act = as.actions.size() - 1;
-                        as.origin_desc = 4;
-                        if (modKeys & KMD_CTRL)
-                            ped->addActQToQueue(as);
-                        else
-                            ped->setActQInQueue(as);
-                    } else
-                    if (pointing_at_weapon_ != -1) {
-                        PedInstance::actionQueueGroupType as;
-                        as.group_desc = PedInstance::gd_mStandWalk;
-                        ped->createActQPickUp(as,
-                            mission_->weapon(pointing_at_weapon_));
-                        as.origin_desc = 4;
-                        as.main_act = as.actions.size() - 1;
-                        if (modKeys & KMD_CTRL)
-                            ped->addActQToQueue(as);
-                        else
-                            ped->setActQInQueue(as);
-                    } else if (pointing_at_vehicle_ != -1) {
-                        if (ped->inVehicle()) {
-                            PedInstance::actionQueueGroupType as;
-                            ped->createActQLeaveCar(as,
-                                mission_->vehicle(pointing_at_vehicle_));
-                            as.main_act = as.actions.size() - 1;
-                            as.group_desc = PedInstance::gd_mStandWalk;
-                            as.origin_desc = 4;
-                            if (modKeys & KMD_CTRL)
-                                ped->addActQToQueue(as);
-                            else
-                                ped->setActQInQueue(as);
-                        } else if (mission_->vehicle(pointing_at_vehicle_)->
-                                    health() > 0)
-                        {
-                            PedInstance::actionQueueGroupType as;
-                            ped->createActQGetInCar(as,
-                                mission_->vehicle(pointing_at_vehicle_));
-                            as.main_act = as.actions.size() - 1;
-                            as.group_desc = PedInstance::gd_mStandWalk;
-                            as.origin_desc = 4;
-                            if (modKeys & KMD_CTRL)
-                                ped->addActQToQueue(as);
-                            else
-                                ped->setActQInQueue(as);
-                        }
-                    } else if (ped->inVehicle()) {
-                        if (ped == ped->inVehicle()->getDriver())
-                        {
-                            int stx = tx;
-                            int sty = ty;
-                            //int sox = ox;
-                            //int soy = oy;
-                            stx = tx * 256 + ox + 128 * (ped->inVehicle()->tileZ() - 1);
-                            //sox = stx % 256;
-                            stx = stx / 256;
-                            sty = ty * 256 + oy + 128 * (ped->inVehicle()->tileZ() - 1);
-                            //soy = sty % 256;
-                            sty = sty / 256;
-                            PedInstance::actionQueueGroupType as;
-                            PathNode tpn = PathNode(stx, sty, 0, 128, 128);
-                            ped->createActQUsingCar(as, &tpn, ped->inVehicle());
-                            as.main_act = as.actions.size() - 1;
-                            as.group_desc = PedInstance::gd_mStandWalk;
-                            as.origin_desc = 4;
-                            if (modKeys & KMD_CTRL)
-                                ped->addActQToQueue(as);
-                            else
-                                ped->setActQInQueue(as);
-                        }
-                    } else {
-                        int stx = tx;
-                        int sty = ty;
-                        int stz = 0;
-                        int sox = ox;
-                        int soy = oy;
-                        if (!(mission_->getWalkable(stx, sty, stz, sox, soy)))
-                            continue;
-                        if (selection_.size() > 1) {
-                            //TODO: current group position is like
-                            // in original this can make non-tile
-                            // oriented
-                            //int sox = (i % 2) * (i - 2) * 16;
-                            //int soy = ((i + 1) % 2) * (i - 1) * 8;
-
-                            //this should be romoved if non-tile
-                            //position needed
-                            sox = 63 + 128 * (i % 2);
-                            soy = 63 + 128 * (i >> 1);
-                        }
-                        PedInstance::actionQueueGroupType as;
-                        PathNode tpn = PathNode(stx, sty, stz, sox, soy, 0);
-                        ped->createActQWalking(as, &tpn, NULL);
-                        as.main_act = as.actions.size() - 1;
-                        as.group_desc = PedInstance::gd_mStandWalk;
-                        as.origin_desc = 4;
-                        if (modKeys & KMD_CTRL)
-                            ped->addActQToQueue(as);
-                        else
-                            ped->setActQInQueue(as);
-                    }
-                } // end of if selected
-            } // end of for
-        }
-    } else if (button == 3) {
-        stopShootingEvent();
-        if (x > 128) {
-            int ox, oy;
-            int tx =
-                g_App.maps().screenToTileX(mission_->map(), world_x_ + x - 129,
-                    world_y_ + y, ox);
-            int ty =
-                g_App.maps().screenToTileY(mission_->map(), world_x_ + x - 129,
-                    world_y_ + y, oy);
-            for (int i = 0; i < 4; i++) {
-                if (selection_.isAgentSelected(i)) {
-                    PedInstance * pa = mission_->ped(i);
-                    PathNode *pn = NULL;
+        for (int i = 0; i < 4; i++) {
+            PedInstance *ped = mission_->ped(i);
+            if (selection_.isAgentSelected(i)) {
+                if (pointing_at_ped_ != -1) {
                     PedInstance::actionQueueGroupType as;
-                    as.main_act = 0;
-                    as.group_desc = PedInstance::gd_mFire;
+                    as.group_desc = PedInstance::gd_mStandWalk;
+                    ped->createActQFollowing(as,
+                        mission_->ped(pointing_at_ped_), 0, 192);
+                    as.main_act = as.actions.size() - 1;
                     as.origin_desc = 4;
-                    if (pointing_at_ped_ != -1) {
-                        MapObject *m = mission_->ped(pointing_at_ped_);
-                        int tilez = m->tileZ() * 128 + m->offZ() + (m->sizeZ() >> 1);
-                        int offz = tilez % 128;
-                        tilez /= 128;
-                        pn = new PathNode(m->tileX(), m->tileY(), tilez,
-                            m->offX(), m->offY(), offz);
-                    } else if (pointing_at_vehicle_ != -1) {
-                        MapObject *m = mission_->vehicle(pointing_at_vehicle_);
-                        int tilez = m->tileZ() * 128 + m->offZ() + (m->sizeZ() >> 1);
-                        int offz = tilez % 128;
-                        tilez /= 128;
-                        pn = new PathNode(m->tileX(), m->tileY(), tilez,
-                            m->offX(), m->offY(), offz);
-                    } else if (pointing_at_weapon_ != -1) {
-                        MapObject *m = mission_->weapon(pointing_at_weapon_);
-                        int tilez = m->tileZ() * 128 + m->offZ() + (m->sizeZ() >> 1);
-                        int offz = tilez % 128;
-                        tilez /= 128;
-                        pn = new PathNode(m->tileX(), m->tileY(), tilez,
-                            m->offX(), m->offY(), offz);
-                    } else {
-                        int stx = tx;
-                        int sty = ty;
-                        int stz = 0;
-                        int sox = ox;
-                        int soy = oy;
-                        int oz = 0;
-                        if (mission_->getShootableTile(stx, sty, stz,
-                            sox, soy, oz))
-                        {
-                            pn = new PathNode(stx, sty, stz, sox, soy, oz);
-#if 0
-                            printf("shooting at\n x = %i, y=%i, z=%i\n",
-                                   stx, sty, stz);
-                            printf("shooting pos\n ox = %i, oy=%i, oz=%i\n",
-                                   sox, soy, oz);
-#endif
-                        }
-                    }
-                    if (pn) {
-                        if (modKeys & KMD_CTRL) {
-                            if (pa->createActQFiring(as, pn, NULL, true))
-                                pa->addActQToQueue(as);
-                        } else {
-                            if (pa->createActQFiring(as, pn, NULL, true))
-                            {
-                                shooting_events_.agents_shooting[i] = true;
-                                shooting_events_.shooting_ = true;
-                                pa->setActQInQueue(as, &shooting_events_.ids[i]);
-                            }
-                        }
-                        delete pn;
-                    }
-                }
-            }
-        }
-    }
-
-    // handle weapon selectors
-    if (x < 129 && y >= 2 + 46 + 44 + 10 + 46 + 44 + 15
-        && y < 2 + 46 + 44 + 10 + 46 + 44 + 15 + 64)
-    {
-        int w_num = ((y - (2 + 46 + 44 + 10 + 46 + 44 + 15)) / 32) * 4
-            + x / 32;
-        for (SquadSelection::Iterator it = selection_.begin();
-                            it != selection_.end(); ++it) {
-            // TODO: when more then one agent is selecting weapon,
-            // the chosen ones should be same type and less ammo
-            // or best in rank
-            PedInstance *ped = *it;
-            if (w_num < ped->numWeapons()) {
-                if (button == 1) {
-                    if (w_num < ped->numWeapons()) {
-                        if (ped->selectedWeapon() == ped->weapon(w_num))
-                            ped->setSelectedWeapon(-1);
-                        else
-                            ped->setSelectedWeapon(w_num);
-                        g_App.gameSounds().play(snd::SPEECH_SELECTED);
-                    }
-                } else {
-                    PedInstance::actionQueueGroupType as;
-                    as.main_act = 0;
-                    as.group_desc = PedInstance::gd_mExclusive;
-                    as.origin_desc = 4;
-                    ped->createActQPutDown(as,
-                        ped->weapon(w_num));
                     if (modKeys & KMD_CTRL)
                         ped->addActQToQueue(as);
                     else
                         ped->setActQInQueue(as);
+                } else
+                if (pointing_at_weapon_ != -1) {
+                    PedInstance::actionQueueGroupType as;
+                    as.group_desc = PedInstance::gd_mStandWalk;
+                    ped->createActQPickUp(as,
+                        mission_->weapon(pointing_at_weapon_));
+                    as.origin_desc = 4;
+                    as.main_act = as.actions.size() - 1;
+                    if (modKeys & KMD_CTRL)
+                        ped->addActQToQueue(as);
+                    else
+                        ped->setActQInQueue(as);
+                } else if (pointing_at_vehicle_ != -1) {
+                    if (ped->inVehicle()) {
+                        PedInstance::actionQueueGroupType as;
+                        ped->createActQLeaveCar(as,
+                            mission_->vehicle(pointing_at_vehicle_));
+                        as.main_act = as.actions.size() - 1;
+                        as.group_desc = PedInstance::gd_mStandWalk;
+                        as.origin_desc = 4;
+                        if (modKeys & KMD_CTRL)
+                            ped->addActQToQueue(as);
+                        else
+                            ped->setActQInQueue(as);
+                    } else if (mission_->vehicle(pointing_at_vehicle_)->
+                                health() > 0)
+                    {
+                        PedInstance::actionQueueGroupType as;
+                        ped->createActQGetInCar(as,
+                            mission_->vehicle(pointing_at_vehicle_));
+                        as.main_act = as.actions.size() - 1;
+                        as.group_desc = PedInstance::gd_mStandWalk;
+                        as.origin_desc = 4;
+                        if (modKeys & KMD_CTRL)
+                            ped->addActQToQueue(as);
+                        else
+                            ped->setActQInQueue(as);
+                    }
+                } else if (ped->inVehicle()) {
+                    if (ped == ped->inVehicle()->getDriver())
+                    {
+                        int stx = mapPt.tx;
+                        int sty = mapPt.ty;
+                        //int sox = ox;
+                        //int soy = oy;
+                        stx = mapPt.tx * 256 + mapPt.ox + 128 * (ped->inVehicle()->tileZ() - 1);
+                        //sox = stx % 256;
+                        stx = stx / 256;
+                        sty = mapPt.ty * 256 + mapPt.oy + 128 * (ped->inVehicle()->tileZ() - 1);
+                        //soy = sty % 256;
+                        sty = sty / 256;
+                        PedInstance::actionQueueGroupType as;
+                        PathNode tpn = PathNode(stx, sty, 0, 128, 128);
+                        ped->createActQUsingCar(as, &tpn, ped->inVehicle());
+                        as.main_act = as.actions.size() - 1;
+                        as.group_desc = PedInstance::gd_mStandWalk;
+                        as.origin_desc = 4;
+                        if (modKeys & KMD_CTRL)
+                            ped->addActQToQueue(as);
+                        else
+                            ped->setActQInQueue(as);
+                    }
+                } else {
+                    bool isForGroup = selection_.size() > 1;
+                    bool addDestPt = (modKeys & KMD_CTRL) == KMD_CTRL;
+                    if (!setDestinationPoint(mapPt, isForGroup, addDestPt, i, ped)) {
+                        // could not set destination point -> we can stop
+                        break;
+                    }
                 }
-
-                change = true;
+            } // end of if selected
+        } // end of for
+    } else if (button == 3) {
+        for (int i = 0; i < 4; i++) {
+            if (selection_.isAgentSelected(i)) {
+                PedInstance * pa = mission_->ped(i);
+                PathNode *pn = NULL;
+                PedInstance::actionQueueGroupType as;
+                as.main_act = 0;
+                as.group_desc = PedInstance::gd_mFire;
+                as.origin_desc = 4;
+                if (pointing_at_ped_ != -1) {
+                    MapObject *m = mission_->ped(pointing_at_ped_);
+                    int tilez = m->tileZ() * 128 + m->offZ() + (m->sizeZ() >> 1);
+                    int offz = tilez % 128;
+                    tilez /= 128;
+                    pn = new PathNode(m->tileX(), m->tileY(), tilez,
+                        m->offX(), m->offY(), offz);
+                } else if (pointing_at_vehicle_ != -1) {
+                    MapObject *m = mission_->vehicle(pointing_at_vehicle_);
+                    int tilez = m->tileZ() * 128 + m->offZ() + (m->sizeZ() >> 1);
+                    int offz = tilez % 128;
+                    tilez /= 128;
+                    pn = new PathNode(m->tileX(), m->tileY(), tilez,
+                        m->offX(), m->offY(), offz);
+                } else if (pointing_at_weapon_ != -1) {
+                    MapObject *m = mission_->weapon(pointing_at_weapon_);
+                    int tilez = m->tileZ() * 128 + m->offZ() + (m->sizeZ() >> 1);
+                    int offz = tilez % 128;
+                    tilez /= 128;
+                    pn = new PathNode(m->tileX(), m->tileY(), tilez,
+                        m->offX(), m->offY(), offz);
+                } else {
+                    int stx = mapPt.tx;
+                    int sty = mapPt.ty;
+                    int stz = 0;
+                    int sox = mapPt.ox;
+                    int soy = mapPt.oy;
+                    int oz = 0;
+                    if (mission_->getShootableTile(stx, sty, stz,
+                        sox, soy, oz))
+                    {
+                        pn = new PathNode(stx, sty, stz, sox, soy, oz);
+#if 0
+                        printf("shooting at\n x = %i, y=%i, z=%i\n",
+                                stx, sty, stz);
+                        printf("shooting pos\n ox = %i, oy=%i, oz=%i\n",
+                                sox, soy, oz);
+#endif
+                    }
+                }
+                if (pn) {
+                    if (modKeys & KMD_CTRL) {
+                        if (pa->createActQFiring(as, pn, NULL, true))
+                            pa->addActQToQueue(as);
+                    } else {
+                        if (pa->createActQFiring(as, pn, NULL, true))
+                        {
+                            shooting_events_.agents_shooting[i] = true;
+                            shooting_events_.shooting_ = true;
+                            pa->setActQInQueue(as, &shooting_events_.ids[i]);
+                        }
+                    }
+                    delete pn;
+                }
             }
-        } // end for
+        }
+    }
+}
+
+void GameplayMenu::handleClickOnMinimap(int x, int y) {
+    MapTilePoint pt = mm_renderer_.minimapToMapPoint(x - kMiniMapScreenX, y - kMiniMapScreenY);
+    for (size_t i = 0; i < 4; i++) {
+        if (selection_.isAgentSelected(i)) {
+            PedInstance *ped = mission_->ped(i);
+            bool isForGroup = selection_.size() > 1;
+            if (!setDestinationPoint(pt, isForGroup, false, i, ped)){
+                break;
+            }
+        }
+    }
+}
+
+bool GameplayMenu::setDestinationPoint(const MapTilePoint &mapPt, bool isForGroup, bool addDestPt, size_t agentNo, PedInstance *p_ped) {
+    
+    MapTilePoint tmpPt(mapPt);
+
+    if (!(mission_->getWalkable(tmpPt)))
+        return false;
+    if (isForGroup) {
+        //TODO: current group position is like
+        // in original this can make non-tile
+        // oriented
+        //int sox = (i % 2) * (i - 2) * 16;
+        //int soy = ((i + 1) % 2) * (i - 1) * 8;
+
+        //this should be romoved if non-tile
+        //position needed
+        tmpPt.ox = 63 + 128 * (agentNo % 2);
+        tmpPt.oy = 63 + 128 * (agentNo >> 1);
     }
 
-    if (change)
-        //render();
-        needRendering();
+    PedInstance::actionQueueGroupType as;
+    PathNode tpn = PathNode(tmpPt.tx, tmpPt.ty, tmpPt.tz, tmpPt.ox, tmpPt.oy, 0);
+    p_ped->createActQWalking(as, &tpn, NULL);
+    as.main_act = as.actions.size() - 1;
+    as.group_desc = PedInstance::gd_mStandWalk;
+    as.origin_desc = 4;
+    if (addDestPt)
+        p_ped->addActQToQueue(as);
+    else
+        p_ped->setActQInQueue(as);
 
     return true;
 }
@@ -1044,19 +1045,18 @@ bool GameplayMenu::handleUnknownKey(Key key, const int modKeys) {
         /* This code is exactly the same as for clicking on "group-button"
          * as you can see above. */
         selectAllAgents();
-        change = true;
     }
     else if (key.keyVirt == KVT_NUMPAD1) {
-        change = selectAgent(0, ctrl);
+        selectAgent(0, ctrl);
     }
     else if (key.keyVirt == KVT_NUMPAD2) {
-        change = selectAgent(1, ctrl);
+        selectAgent(1, ctrl);
     }
     else if (key.keyVirt == KVT_NUMPAD3) {
-        change = selectAgent(2, ctrl);
+        selectAgent(2, ctrl);
     }
     else if (key.keyVirt == KVT_NUMPAD4) {
-        change = selectAgent(3, ctrl);
+        selectAgent(3, ctrl);
 	} else if (key.keyFunc == KFC_LEFT) { // Scroll the map to the left
         scroll_x_ = -SCROLL_STEP;
     } else if (key.keyFunc == KFC_RIGHT) { // Scroll the map to the right
@@ -1435,16 +1435,30 @@ void GameplayMenu::drawWeaponSelectors() {
  * \param addToGroup If true, agent is added to the current selection.
  * If not, the selection is emptied and filled with the new agent.
  */
-bool GameplayMenu::selectAgent(unsigned int agentNo, bool addToGroup) {
+void GameplayMenu::selectAgent(size_t agentNo, bool addToGroup) {
     if (selection_.selectAgent(agentNo, addToGroup)) {
         updateSelectAll();
         centerMinimapOnLeader();
         updtAgentsMarker();
         g_App.gameSounds().play(snd::SPEECH_SELECTED);
-        return true;
+        
+        // redraw agent selectors
+        addDirtyRect(((agentNo % 2) == 0 ? 0 : 65), (agentNo > 1 ? 90 : 0) , 64, 46);
+        /*switch (agentNo) {
+        case 1:
+            addDirtyRect(0, 0, 64, 46);
+            break;
+        case 2:
+            addDirtyRect(65, 0, 64, 46);
+            break;
+        case 3:
+            addDirtyRect(0, 100, 64, 46);
+            break;
+        case 4:
+            addDirtyRect(65, 100, 64, 46);
+            break;
+        }*/
     }
-
-    return false;
 }
 
 /*!
@@ -1456,6 +1470,8 @@ void GameplayMenu::selectAllAgents() {
     pressed_btn_select_all_ = !pressed_btn_select_all_;
     selection_.selectAllAgents(pressed_btn_select_all_);
     g_App.gameSounds().play(snd::SPEECH_SELECTED);
+    // redraw all agent selectors
+    addDirtyRect(0, 0, 128, 180);
 }
 
 /*!

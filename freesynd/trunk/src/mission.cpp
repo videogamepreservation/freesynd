@@ -3158,7 +3158,12 @@ void Mission::clrSurfaces() {
     }
 }
 
-bool Mission::getWalkable(int &x, int &y, int &z, int &ox, int &oy) {
+/*!
+ * 
+ * \param mtp
+ * \return 
+ */
+bool Mission::getWalkable(MapTilePoint &mtp) {
     bool gotit = false;
     int bx, by, box, boy;
     int bz = mmax_z_;
@@ -3167,10 +3172,10 @@ bool Mission::getWalkable(int &x, int &y, int &z, int &ox, int &oy) {
     do {
         bz--;
         // using lowered Z, at start postion is at top of tile not at bottom
-        bx = x * 256 + ox + 128 * (bz - 1);
+        bx = mtp.tx * 256 + mtp.ox + 128 * (bz - 1);
         box = bx % 256;
         bx = bx / 256;
-        by = y * 256 + oy + 128 * (bz - 1);
+        by = mtp.ty * 256 + mtp.oy + 128 * (bz - 1);
         boy = by % 256;
         by = by / 256;
         if (bz >= mmax_z_ || bx >= mmax_x_ || by >= mmax_y_)
@@ -3335,11 +3340,11 @@ bool Mission::getWalkable(int &x, int &y, int &z, int &ox, int &oy) {
         }
     } while (bz != 0 && !gotit);
     if (gotit) {
-        x = bx;
-        y = by;
-        z = bz;
-        ox = box;
-        oy = boy;
+        mtp.tx = bx;
+        mtp.ty = by;
+        mtp.tz = bz;
+        mtp.ox = box;
+        mtp.oy = boy;
     }
     return gotit;
 }

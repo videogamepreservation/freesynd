@@ -177,7 +177,7 @@ public:
         MapObject::MajorTypeEnum *majorT, int *searchIndex, bool only);
     bool setSurfaces();
     void clrSurfaces();
-    bool getWalkable(int &x, int &y, int &z, int &ox, int &oy);
+    bool getWalkable(MapTilePoint &mtp);
     bool getShootableTile(int &x, int &y, int &z, int &ox, int &oy, int &oz);
     bool isTileSolid(int x, int y, int z, int ox, int oy, int oz);
 
