@@ -555,8 +555,10 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                             // not object did it as such he failed,
                             // but goal reached
                             aqt.state |= 12;
-                        } else {
-                            // TODO: check friend
+                        } else if (aqt.t_smo->majorType() == MapObject::mjt_Ped
+                            ? aqt.multi_var.enemy_var.forced_shot
+                            || !checkFriendIs((PedInstance *)aqt.t_smo) : true)
+                        {
                             // TODO: make it properly, check selected weapon
                             // if not the one in weapon.desc select it,
                             // check owner
@@ -598,7 +600,8 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                                     aqt.state |= 8;
                             } else
                                 aqt.state |= 8;
-                        }
+                        } else
+                            aqt.state |= 8;
                     } else if ((aqt.ot_execute & PedInstance::ai_aWaitToStart) != 0)
                     {
                         //if (aqt.multi_var.time_var.desc == 0) {
@@ -1150,12 +1153,15 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                         // showing a gun if none selected
                         if (!wi)
                             selectBestWeapon();
-                        if (obj_group_def_ == og_dmPolice) {
+                        if (obj_group_def_ == og_dmPolice
+                            // only non controlled will follow and wait
+                            && (desc_state_ & pd_smControlled) == 0)
+                        {
                             aqt_attack.ot_execute |= PedInstance::ai_aWaitToStart;
                             aqt_attack.multi_var.time_var.time_before_start = 5000;
                             aqt.multi_var.time_var.desc = 1;
                             g_App.gameSounds().play(snd::PUTDOWN_WEAPON);
-                            // enableing following behavior
+                            // enabling following behavior
                             actionQueueType & aqt_follow = it->actions[indx + 2];
                             aqt_follow.t_smo = aqt.t_smo;
                             aqt_follow.state ^= 64;
@@ -2106,8 +2112,7 @@ bool PedInstance::handleDamage(ShootableMapObject::DamageInflictType *d) {
 
         as.actions.clear();
 
-        createActQFollowing(as,
-            d->d_owner, 0, 192);
+        createActQFollowing(as, d->d_owner, 0, 192);
         as.main_act = as.actions.size() - 1;
         as.group_desc = PedInstance::gd_mStandWalk;
         addActQToQueue(as);
@@ -2115,6 +2120,7 @@ bool PedInstance::handleDamage(ShootableMapObject::DamageInflictType *d) {
         desc_state_ |= pd_smControlled;
         friends_found_.clear();
         hostiles_found_.clear();
+        hostile_desc_ = ((PedInstance *)d->d_owner)->hostileDesc();
         // TODO: set default_actions_ to owners
         return true;
     }
