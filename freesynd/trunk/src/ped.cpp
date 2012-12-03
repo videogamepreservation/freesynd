@@ -1753,6 +1753,7 @@ bool PedInstance::inSightRange(MapObject *t) {
 void PedInstance::setSelectedWeapon(int n) {
 
     if (selected_weapon_ != -1) {
+        assert((size_t)selected_weapon_ < weapons_.size());
         WeaponInstance *wi = weapons_[selected_weapon_];
         if (wi->getMainType() == Weapon::EnergyShield)
             setRcvDamageDef(MapObject::ddmg_Ped);
@@ -1765,6 +1766,7 @@ void PedInstance::setSelectedWeapon(int n) {
 
     selected_weapon_ = n;
     if (n != -1) {
+        assert((size_t)selected_weapon_ < weapons_.size());
         WeaponInstance *wi = weapons_[selected_weapon_];
         if (wi->getMainType() == Weapon::EnergyShield)
             setRcvDamageDef(MapObject::ddmg_PedWithEnergyShield);
@@ -2005,6 +2007,14 @@ bool PedInstance::handleDrawnAnim(int elapsed) {
         selectedWeapon() ? selectedWeapon()->index() : Weapon::Unarmed_Anim;
 
     PedInstance::AnimationDrawn curanim = drawnAnim();
+    // TODO: resolve switch selected weapon and current drawing
+    // NOTE: quick fix. to remove
+    if (weapon_idx == Weapon::Unarmed_Anim
+        && (curanim == PedInstance::ad_StandFireAnim
+        || curanim == PedInstance::ad_WalkFireAnim))
+    {
+        return true;
+    }
     bool answer = true;
     switch (curanim) {
         case PedInstance::ad_HitAnim:

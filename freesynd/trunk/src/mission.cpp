@@ -1437,8 +1437,8 @@ bool Mission::setSurfaces() {
                 x = stodef.x;
                 y = stodef.y;
                 z = stodef.z;
-                //if (x == 49 && y / mmax_x_ == 86 && z / mmax_m_xy == 1)
-                    //x = 49;
+                //if (x == 50 && y / mmax_x_ == 27 && z / mmax_m_xy == 2)
+                    //x = 50;
                 uint8 this_s = mtsurfaces_[x + y + z].twd;
                 uint8 upper_s = 0;
                 floodPointDesc *cfp = &(mdpoints_[x + y + z]);

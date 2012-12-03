@@ -68,9 +68,9 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
     printf("base pos: x %i; y %i; z %i, ox %i, oy %i, oz %i\n",
         tile_x_, tile_y_, tile_z_, off_x_, off_y_, off_z_);
     printf("zmax %x\n", m->mmax_z_);
-    if ((z + 1) < m->mmax_z_) {
-        printf("upper twd %i\n", m->mtsurfaces_[x + y * m->mmax_x_
-            + (z + 1) * m->mmax_m_xy].twd);
+    if ((z - 1)>= 0) {
+        printf("lower twd %i\n", m->mtsurfaces_[x + y * m->mmax_x_
+            + (z - 1) * m->mmax_m_xy].twd);
     }
 #endif
 #endif

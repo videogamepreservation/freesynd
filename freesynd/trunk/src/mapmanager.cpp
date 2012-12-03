@@ -75,6 +75,13 @@ Map * MapManager::loadMap(int mapNum)
         maps_[mapNum]->patchMap(61, 67, 1, 0x27);
         maps_[mapNum]->patchMap(62, 67, 1, 0x27);
     }
+    // patch for "INDONESIA" map
+    // TODO: find better way to block access for our agents
+    if (mapNum == 0x5B) {
+        maps_[mapNum]->patchMap(49, 27, 2, 0);
+        maps_[mapNum]->patchMap(49, 28, 2, 0);
+        maps_[mapNum]->patchMap(49, 29, 2, 0);
+    }
 
     delete[] mapData;
 
