@@ -1764,29 +1764,7 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                 } else {
                     switch (twd) {
                         case 0x01:
-                            if (zf == 1) {
-                                if (xf == 0) {
-                                    dest_path_.push_back(*it);
-                                    break;
-                                }
-                                if (xf == 1) {
-                                    prvpn.setOffXY(0,255);
-                                    dest_path_.push_back(prvpn);
-                                    it->setOffXY(255,255);
-                                    dest_path_.push_back(*it);
-                                    modified = true;
-                                    break;
-                                }
-                                if (xf == -1) {
-                                    prvpn.setOffXY(255,255);
-                                    dest_path_.push_back(prvpn);
-                                    it->setOffXY(0,255);
-                                    dest_path_.push_back(*it);
-                                    modified = true;
-                                    break;
-                                }
-                            }
-                            if (zf == 0) {
+                            if (zf == -1) {
                                 if (xf == 0) {
                                     dest_path_.push_back(*it);
                                     break;
@@ -1808,33 +1786,33 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                                     break;
                                 }
                             }
-                            if (zf == -1)
+                            if (zf == 0) {
+                                if (xf == 0) {
+                                    dest_path_.push_back(*it);
+                                    break;
+                                }
+                                if (xf == 1) {
+                                    prvpn.setOffXY(0,255);
+                                    dest_path_.push_back(prvpn);
+                                    it->setOffXY(255,255);
+                                    dest_path_.push_back(*it);
+                                    modified = true;
+                                    break;
+                                }
+                                if (xf == -1) {
+                                    prvpn.setOffXY(255,255);
+                                    dest_path_.push_back(prvpn);
+                                    it->setOffXY(0,255);
+                                    dest_path_.push_back(*it);
+                                    modified = true;
+                                    break;
+                                }
+                            }
+                            if (zf == 1)
                                 dest_path_.push_back(*it);
                             break;
                         case 0x02:
-                            if (zf == 1) {
-                                if (xf == 0) {
-                                    dest_path_.push_back(*it);
-                                    break;
-                                }
-                                if (xf == 1) {
-                                    prvpn.setOffXY(0,0);
-                                    dest_path_.push_back(prvpn);
-                                    it->setOffXY(255,0);
-                                    dest_path_.push_back(*it);
-                                    modified = true;
-                                    break;
-                                }
-                                if (xf == -1) {
-                                    prvpn.setOffXY(255,0);
-                                    dest_path_.push_back(prvpn);
-                                    it->setOffXY(0,0);
-                                    dest_path_.push_back(*it);
-                                    modified = true;
-                                    break;
-                                }
-                            }
-                            if (zf == 0) {
+                            if (zf == -1) {
                                 if (xf == 0) {
                                     dest_path_.push_back(*it);
                                     break;
@@ -1856,11 +1834,33 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                                     break;
                                 }
                             }
-                            if (zf == -1)
+                            if (zf == 0) {
+                                if (xf == 0) {
+                                    dest_path_.push_back(*it);
+                                    break;
+                                }
+                                if (xf == 1) {
+                                    prvpn.setOffXY(0,0);
+                                    dest_path_.push_back(prvpn);
+                                    it->setOffXY(255,0);
+                                    dest_path_.push_back(*it);
+                                    modified = true;
+                                    break;
+                                }
+                                if (xf == -1) {
+                                    prvpn.setOffXY(255,0);
+                                    dest_path_.push_back(prvpn);
+                                    it->setOffXY(0,0);
+                                    dest_path_.push_back(*it);
+                                    modified = true;
+                                    break;
+                                }
+                            }
+                            if (zf == 1)
                                 dest_path_.push_back(*it);
                             break;
                         case 0x03:
-                            if (zf == 1) {
+                            if (zf == -1) {
                                 if (yf == 0) {
                                     dest_path_.push_back(*it);
                                     break;
@@ -1868,13 +1868,13 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                                 if (yf == 1) {
                                     prvpn.setOffXY(0,0);
                                     dest_path_.push_back(prvpn);
-                                    it->setOffXY(0,255);
+                                    it->setOffXY(255,0);
                                     dest_path_.push_back(*it);
                                     modified = true;
                                     break;
                                 }
                                 if (yf == -1) {
-                                    prvpn.setOffXY(0,255);
+                                    prvpn.setOffXY(255,0);
                                     dest_path_.push_back(prvpn);
                                     it->setOffXY(0,0);
                                     dest_path_.push_back(*it);
@@ -1888,7 +1888,7 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                                     break;
                                 }
                                 if (yf == 1) {
-                                    prvpn.setOffXY(255,0);
+                                    prvpn.setOffXY(0,255);
                                     dest_path_.push_back(prvpn);
                                     it->setOffXY(255,255);
                                     dest_path_.push_back(*it);
@@ -1898,39 +1898,17 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                                 if (yf == -1) {
                                     prvpn.setOffXY(255,255);
                                     dest_path_.push_back(prvpn);
-                                    it->setOffXY(255,0);
+                                    it->setOffXY(0,255);
                                     dest_path_.push_back(*it);
                                     modified = true;
                                     break;
                                 }
                             }
-                            if (zf == -1)
+                            if (zf == 1)
                                 dest_path_.push_back(*it);
                             break;
                         case 0x04:
-                            if (zf == 1) {
-                                if (yf == 0) {
-                                    dest_path_.push_back(*it);
-                                    break;
-                                }
-                                if (yf == 1) {
-                                    prvpn.setOffXY(255,0);
-                                    dest_path_.push_back(prvpn);
-                                    it->setOffXY(255,255);
-                                    dest_path_.push_back(*it);
-                                    modified = true;
-                                    break;
-                                }
-                                if (yf == -1) {
-                                    prvpn.setOffXY(255,255);
-                                    dest_path_.push_back(prvpn);
-                                    it->setOffXY(255,0);
-                                    dest_path_.push_back(*it);
-                                    modified = true;
-                                    break;
-                                }
-                            }
-                            if (zf == 0) {
+                            if (zf == -1) {
                                 if (yf == 0) {
                                     dest_path_.push_back(*it);
                                     break;
@@ -1952,7 +1930,29 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                                     break;
                                 }
                             }
-                            if (zf == -1)
+                            if (zf == 0) {
+                                if (yf == 0) {
+                                    dest_path_.push_back(*it);
+                                    break;
+                                }
+                                if (yf == 1) {
+                                    prvpn.setOffXY(255,0);
+                                    dest_path_.push_back(prvpn);
+                                    it->setOffXY(255,255);
+                                    dest_path_.push_back(*it);
+                                    modified = true;
+                                    break;
+                                }
+                                if (yf == -1) {
+                                    prvpn.setOffXY(255,255);
+                                    dest_path_.push_back(prvpn);
+                                    it->setOffXY(255,0);
+                                    dest_path_.push_back(*it);
+                                    modified = true;
+                                    break;
+                                }
+                            }
+                            if (zf == 1)
                                 dest_path_.push_back(*it);
                             break;
                     }
@@ -1967,28 +1967,6 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                                     break;
                                 }
                                 if (xf == -1) {
-                                    prvpn.setOffXY(255,255);
-                                    dest_path_.push_back(prvpn);
-                                    it->setOffXY(0,255);
-                                    dest_path_.push_back(*it);
-                                    modified = true;
-                                    break;
-                                }
-                                if (xf == 1) {
-                                    prvpn.setOffXY(0,255);
-                                    dest_path_.push_back(prvpn);
-                                    it->setOffXY(255,255);
-                                    dest_path_.push_back(*it);
-                                    modified = true;
-                                    break;
-                                }
-                            }
-                            if (zf == 0) {
-                                if (xf == 0) {
-                                    dest_path_.push_back(*it);
-                                    break;
-                                }
-                                if (xf == -1) {
                                     prvpn.setOffXY(255,0);
                                     dest_path_.push_back(prvpn);
                                     it->setOffXY(0,0);
@@ -2000,6 +1978,28 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                                     prvpn.setOffXY(0,0);
                                     dest_path_.push_back(prvpn);
                                     it->setOffXY(255,0);
+                                    dest_path_.push_back(*it);
+                                    modified = true;
+                                    break;
+                                }
+                            }
+                            if (zf == 0) {
+                                if (xf == 0) {
+                                    dest_path_.push_back(*it);
+                                    break;
+                                }
+                                if (xf == -1) {
+                                    prvpn.setOffXY(255,255);
+                                    dest_path_.push_back(prvpn);
+                                    it->setOffXY(0,255);
+                                    dest_path_.push_back(*it);
+                                    modified = true;
+                                    break;
+                                }
+                                if (xf == 1) {
+                                    prvpn.setOffXY(0,255);
+                                    dest_path_.push_back(prvpn);
+                                    it->setOffXY(255,255);
                                     dest_path_.push_back(*it);
                                     modified = true;
                                     break;
@@ -2015,17 +2015,17 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                                     break;
                                 }
                                 if (xf == -1) {
-                                    prvpn.setOffXY(255,0);
+                                    prvpn.setOffXY(255,255);
                                     dest_path_.push_back(prvpn);
-                                    it->setOffXY(0,0);
+                                    it->setOffXY(0,255);
                                     dest_path_.push_back(*it);
                                     modified = true;
                                     break;
                                 }
                                 if (xf == 1) {
-                                    prvpn.setOffXY(0,0);
+                                    prvpn.setOffXY(255,255);
                                     dest_path_.push_back(prvpn);
-                                    it->setOffXY(255,0);
+                                    it->setOffXY(0,255);
                                     dest_path_.push_back(*it);
                                     modified = true;
                                     break;
@@ -2037,17 +2037,17 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                                     break;
                                 }
                                 if (xf == -1) {
-                                    prvpn.setOffXY(255,255);
+                                    prvpn.setOffXY(255,0);
                                     dest_path_.push_back(prvpn);
-                                    it->setOffXY(0,255);
+                                    it->setOffXY(0,0);
                                     dest_path_.push_back(*it);
                                     modified = true;
                                     break;
                                 }
                                 if (xf == 1) {
-                                    prvpn.setOffXY(0,255);
+                                    prvpn.setOffXY(0,0);
                                     dest_path_.push_back(prvpn);
-                                    it->setOffXY(255,255);
+                                    it->setOffXY(255,0);
                                     dest_path_.push_back(*it);
                                     modified = true;
                                     break;
@@ -2073,7 +2073,7 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                                 if (yf == 1) {
                                     prvpn.setOffXY(0,0);
                                     dest_path_.push_back(prvpn);
-                                    it->setOffXY(0,255);
+                                    it->setOffXY(255,0);
                                     dest_path_.push_back(*it);
                                     modified = true;
                                     break;
@@ -2087,13 +2087,13 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                                 if (yf == -1) {
                                     prvpn.setOffXY(255,255);
                                     dest_path_.push_back(prvpn);
-                                    it->setOffXY(255,0);
+                                    it->setOffXY(0,255);
                                     dest_path_.push_back(*it);
                                     modified = true;
                                     break;
                                 }
                                 if (yf == 1) {
-                                    prvpn.setOffXY(255,0);
+                                    prvpn.setOffXY(0,255);
                                     dest_path_.push_back(prvpn);
                                     it->setOffXY(255,255);
                                     dest_path_.push_back(*it);
@@ -2111,28 +2111,6 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                                     break;
                                 }
                                 if (yf == -1) {
-                                    prvpn.setOffXY(255,255);
-                                    dest_path_.push_back(prvpn);
-                                    it->setOffXY(255,0);
-                                    dest_path_.push_back(*it);
-                                    modified = true;
-                                    break;
-                                }
-                                if (yf == 1) {
-                                    prvpn.setOffXY(255,0);
-                                    dest_path_.push_back(prvpn);
-                                    it->setOffXY(255,255);
-                                    dest_path_.push_back(*it);
-                                    modified = true;
-                                    break;
-                                }
-                            }
-                            if (zf == 0) {
-                                if (yf == 0) {
-                                    dest_path_.push_back(*it);
-                                    break;
-                                }
-                                if (yf == -1) {
                                     prvpn.setOffXY(0,255);
                                     dest_path_.push_back(prvpn);
                                     it->setOffXY(0,0);
@@ -2144,6 +2122,28 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                                     prvpn.setOffXY(0,0);
                                     dest_path_.push_back(prvpn);
                                     it->setOffXY(0,255);
+                                    dest_path_.push_back(*it);
+                                    modified = true;
+                                    break;
+                                }
+                            }
+                            if (zf == 0) {
+                                if (yf == 0) {
+                                    dest_path_.push_back(*it);
+                                    break;
+                                }
+                                if (yf == -1) {
+                                    prvpn.setOffXY(255,255);
+                                    dest_path_.push_back(prvpn);
+                                    it->setOffXY(255,0);
+                                    dest_path_.push_back(*it);
+                                    modified = true;
+                                    break;
+                                }
+                                if (yf == 1) {
+                                    prvpn.setOffXY(255,0);
+                                    dest_path_.push_back(prvpn);
+                                    it->setOffXY(255,255);
                                     dest_path_.push_back(*it);
                                     modified = true;
                                     break;

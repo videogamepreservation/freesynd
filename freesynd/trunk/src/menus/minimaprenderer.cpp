@@ -327,14 +327,20 @@ void GamePlayMinimapRenderer::render(uint16 screen_x, uint16 screen_y) {
     // we use a slightly larger rendering buffer not to have
     // to check borders. At the end we only display  the mm_maxtile x mm_maxtile tiles.
     // On top of this we use one size for both resolutions as 18*18*8*8 > 34*34*4*4
-    uint8 minimap_layer[18*18*8*8];
+
+    // NOTE: additional data is added to avoid stack corruption (18 * 8) * 4
+    uint8 minimap_layer[18*18*8*8 + (18 * 8) * 4];
+    // because of reading data from buffer in peds draw, to avoid
+    // conditional on uninitialized value
+    memset(minimap_layer, 0, 18*18*8*8 + (18 * 8) * 4);
+
     uint8 mm_layer_size = mm_maxtile_ + 1;
     // The final minimap that will be displayed : the minimap is 128*128 pixels
     uint8 minimap_final_layer[kMiniMapSizePx*kMiniMapSizePx];
 
     // In this loop, we fill the buffer with floor colour. the first row and column
     // is not filled
-    memset(minimap_layer, 0, 18*18*8*8);
+
     for (int j = 0; j < mm_maxtile_; j++) {
         for (int i = 0; i < mm_maxtile_; i++) {
             uint8 gcolour = p_mission_->getMiniMap()->getColourAt(world_tx_ + i, world_ty_ + j);
@@ -398,92 +404,97 @@ void GamePlayMinimapRenderer::drawCars(uint8 *a_minimap) {
 void GamePlayMinimapRenderer::drawWeapons(uint8 * a_minimap) {
     const size_t weapon_size = 2;
     for (int i = 0; i < p_mission_->numWeapons(); i++)
-	{
-		WeaponInstance *p = p_mission_->weapon(i);
-		int tx = p->tileX();
-		int ty = p->tileY();
-		int ox = p->offX();
-		int oy = p->offY();
-
+    {
+        WeaponInstance * w = p_mission_->weapon(i);
         // we draw weapons that have no owner ie that are on the ground
-		if (!p->hasOwner() && isVisible(tx, ty)) {
+        // and are not destroyed
+        if (w->map() == -1)
+            continue;
+
+        int tx = w->tileX();
+        int ty = w->tileY();
+        int ox = w->offX();
+        int oy = w->offY();
+
+        if (isVisible(tx, ty)) {
             if (mm_timer_weap.state()) {
-				int px = mapToMiniMapX(tx + 1, ox) - 1;
+                int px = mapToMiniMapX(tx + 1, ox) - 1;
                 int py = mapToMiniMapY(ty + 1, oy) - 1;
 
                 drawFillRect(a_minimap, px, py, weapon_size, weapon_size, fs_cmn::kColorLightGrey);
             }
         }
-	}
+    }
 }
 
 void GamePlayMinimapRenderer::drawPedestrians(uint8 * a_minimap) {
     for (int i = 0; i < p_mission_->numPeds(); i++)
-	{
-		PedInstance *p_ped = p_mission_->ped(i);
-		int tx = p_ped->tileX();
-		int ty = p_ped->tileY();
-		int ox = p_ped->offX();
-		int oy = p_ped->offY();
+    {
+        PedInstance *p_ped = p_mission_->ped(i);
+        // we are not showing dead or peds inside vehicle
+        if (p_ped->health() <= 0 || p_ped->inVehicle())
+            continue;
 
-		if (p_ped->health() > 0 && isVisible(tx, ty))
-		{
+        int tx = p_ped->tileX();
+        int ty = p_ped->tileY();
+        int ox = p_ped->offX();
+        int oy = p_ped->offY();
+
+        if (isVisible(tx, ty))
+        {
             int px = mapToMiniMapX(tx + 1, ox);
             int py = mapToMiniMapY(ty + 1, oy);
-			if (p_ped->isPersuaded())
-			{
-				// col_Yellow circle with a black or lightgreen border (blinking)
+            if (p_ped->isPersuaded())
+            {
+                // col_Yellow circle with a black or lightgreen border (blinking)
                 uint8 borderColor = (mm_timer_ped.state()) ? fs_cmn::kColorLightGreen : fs_cmn::kColorBlack;
                 drawPedCircle(a_minimap, px, py, fs_cmn::kColorYellow, borderColor);
-			} else {
+            } else {
                 switch (p_ped->getMainType())
-				{
-				case PedInstance::m_tpPedestrian:
-				case PedInstance::m_tpCriminal:
+                {
+                case PedInstance::m_tpPedestrian:
+                case PedInstance::m_tpCriminal:
                     {
-					    // white rect 2x2 (opaque and transparent blinking)
+                        // white rect 2x2 (opaque and transparent blinking)
                         size_t ped_width = 2;
                         size_t ped_height = 2;
                         if (mm_timer_ped.state()) {
-					        px -= 1;
+                            px -= 1;
                             py -= 1;
                             
                             // draw the square
                             drawFillRect(a_minimap, px, py, ped_width, ped_height, fs_cmn::kColorWhite);
                         }
-					break;
+                    break;
                     }
                 case PedInstance::m_tpAgent:
                 {
-                    if (p_ped->inVehicle() == NULL)
+                    if (p_ped->isOurAgent())
                     {
-                        if (p_ped->isOurAgent())
-                        {
-                            // col_Yellow circle with a black or lightgreen border (blinking)
-                            uint8 borderColor = (mm_timer_ped.state()) ? fs_cmn::kColorBlack : fs_cmn::kColorLightGreen;
-                            drawPedCircle(a_minimap, px, py, fs_cmn::kColorYellow, borderColor);
-                        } else {
-                            // col_LightRed circle with a black or dark red border (blinking)
-                            uint8 borderColor = (mm_timer_ped.state()) ? fs_cmn::kColorBlack : fs_cmn::kColorDarkRed;
-                            drawPedCircle(a_minimap, px, py, fs_cmn::kColorLightRed, borderColor);
-                        }
+                        // col_Yellow circle with a black or lightgreen border (blinking)
+                        uint8 borderColor = (mm_timer_ped.state()) ? fs_cmn::kColorBlack : fs_cmn::kColorLightGreen;
+                        drawPedCircle(a_minimap, px, py, fs_cmn::kColorYellow, borderColor);
+                    } else {
+                        // col_LightRed circle with a black or dark red border (blinking)
+                        uint8 borderColor = (mm_timer_ped.state()) ? fs_cmn::kColorBlack : fs_cmn::kColorDarkRed;
+                        drawPedCircle(a_minimap, px, py, fs_cmn::kColorLightRed, borderColor);
                     }
                 }
                 break;
-				case PedInstance::m_tpPolice:
+                case PedInstance::m_tpPolice:
                     {
-					// blue circle with a black or col_BlueGrey (blinking)
+                    // blue circle with a black or col_BlueGrey (blinking)
                     uint8 borderColor = (mm_timer_ped.state()) ? fs_cmn::kColorBlack : fs_cmn::kColorBlueGrey;
                     drawPedCircle(a_minimap, px, py, fs_cmn::kColorBlue, borderColor);
                     }
-					break;
-				case PedInstance::m_tpGuard:
+                    break;
+                case PedInstance::m_tpGuard:
                     {
-					// col_LightGrey circle with a black or white border (blinking) 
+                    // col_LightGrey circle with a black or white border (blinking) 
                     uint8 borderColor = (mm_timer_ped.state()) ? fs_cmn::kColorWhite : fs_cmn::kColorBlack;
                     drawPedCircle(a_minimap, px, py, fs_cmn::kColorLightGrey, borderColor);
                     }
-					break;
+                    break;
                 }
             }
         }
