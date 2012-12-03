@@ -56,21 +56,29 @@ bool Map::loadMap(uint8 * mapData)
         ("Map size in tiles: max_x = %d, max_y = %d, max_z = %d.", max_x_, max_y_, max_z_));
 
     uint32 *lookup = new uint32[max_x_ * max_y_];
-    a_tiles_ = new Tile*[max_x_ * max_y_ * max_z_];
+    // NOTE : increased map height by 1 to enable range check on higher tiles
+    a_tiles_ = new Tile*[max_x_ * max_y_ * (max_z_ + 1)];
     
     for (int i = 0; i < max_x_ * max_y_; i++)
         lookup[i] = READ_LE_UINT32(mapData + 12 + i * 4);
-    for (int h = 0; h < max_y_; h++)
+    for (int h = 0, z_real = max_z_ + 1; h < max_y_; h++)
         for (int w = 0; w < max_x_; w++) {
             int idx = h * max_x_ + w;
 
-            for (int z=0; z < max_z_; z++) {
+            for (int z = 0; z < max_z_; z++) {
                 uint8 tileNum = *(mapData + 12 + lookup[idx] + z);
-                a_tiles_[idx * max_z_ + z] = tile_manager_->getTile(tileNum);
+                a_tiles_[idx * z_real + z] = tile_manager_->getTile(tileNum);
                 
             }
         }
     delete[] lookup;
+
+    max_z_++;
+    for (int h = 0, z = max_z_ - 1; h < max_y_; h++) {
+        for (int w = 0; w < max_x_; w++) {
+            a_tiles_[(h * max_x_ + w) * max_z_ + z] = tile_manager_->getTile(0);
+        }
+    }
 
     map_width_ = (max_x_ + max_y_) * (TILE_WIDTH / 2);
     map_height_ = (max_x_ + max_y_ + max_z_) * TILE_HEIGHT / 3;

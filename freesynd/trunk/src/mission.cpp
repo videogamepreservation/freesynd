@@ -1421,8 +1421,11 @@ bool Mission::setSurfaces() {
         int x = p->tileX();
         int y = p->tileY();
         int z = p->tileZ();
-        if (z >= mmax_z_ || z < 0 || p->health() <= 0)
+        if (z >= mmax_z_ || z < 0 || p->health() <= 0) {
+            // TODO : check on all maps those peds correct position
+            p->setTileZ(mmax_z_ - 1);
             continue;
+        }
         if (mdpoints_[x + y * mmax_x_ + z * mmax_m_xy].t == m_fdNotDefined) {
             toDefineXYZ stodef;
             std::vector<toDefineXYZ> vtodefine;
