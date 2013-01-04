@@ -12,3 +12,5 @@ Contributors
 * Tomas Jakobsson - good advices
 * Mark(mentor66) - patch for reload button
 * Michael Schubeck - patch for minimap
+* Ryan Cocks - IPA initial implementaion + converted indexes to pointers in
+gameplaymenu

@@ -43,13 +43,139 @@ const int SCROLL_STEP = 16;
 const int GameplayMenu::kMiniMapScreenX = 0;
 const int GameplayMenu::kMiniMapScreenY = 46 + 44 + 10 + 46 + 44 + 15 + 2 * 32 + 2;
 
+// TODO: move this class to separated file? or to header?
+// it should not be here definetly
+class IPAGui
+{
+    static const int ipa_full_width = 56;
+    static const int bar_height = 10;
+    static const int bar_left_13 = 4;
+    static const int bar_left_24 = 68;
+    static const int bar_top_12  = 48;
+    static const int bar_top_34  = 148;
+    static const int ipa_y_offset = 14;
+    
+public:
+    static int getTop(int agent, IPAStim::IPAType type)
+    {
+        int top;
+        if(agent > 1)
+            top = bar_top_34;
+        else
+            top = bar_top_12;
+        
+        switch (type) {
+            case IPAStim::Adrenaline:
+                break;
+            case IPAStim::Perception:
+                top += ipa_y_offset;
+                break;
+            case IPAStim::Intelligence:
+                top += 2 * ipa_y_offset;
+                break;
+            default:
+                assert(false);
+        }
+        return top;
+    }
+    
+    static int getLeft(int agent)
+    {
+        if(agent % 2 == 1)
+            return bar_left_24;
+        else
+            return bar_left_13;
+    }
+    
+    static int full_width()
+    {
+        return ipa_full_width;
+    }
+    
+    static int height()
+    {
+        return bar_height;
+    }
+    
+    static int colour(IPAStim::IPAType type)
+    {
+        switch (type)
+        {
+            case IPAStim::Adrenaline:
+                return fs_cmn::kColorLightRed;
+            case IPAStim::Perception:
+                return fs_cmn::kColorBlue;
+            case IPAStim::Intelligence:
+                // TODO: this color needs to be defined
+                return 13;
+            default:
+                assert(false);
+        }
+    }
+
+    static int dim_colour(IPAStim::IPAType type)
+    {
+        switch (type)
+        {
+            case IPAStim::Adrenaline:
+                return fs_cmn::kColorDarkRed;
+            case IPAStim::Perception:
+                return fs_cmn::kColorBlueGrey;
+            case IPAStim::Intelligence:
+                // TODO: this color needs to be defined
+                return 5;
+            default:
+                assert(false);
+        }
+    }
+    
+    struct IPATuple
+    {
+        IPATuple(int agent, IPAStim::IPAType type, int percentage)
+        : type_(type), agent_(agent), percentage_(percentage)
+        { }
+        
+        IPAStim::IPAType type_;
+        int agent_, percentage_;
+    };
+    
+    static struct IPATuple * scanCoordsForIPA(int x, int y)
+    {
+        IPAStim::IPAType type;
+        for(int a = 0; a < 4; a++)
+        {
+            if(x >= getLeft(a) && x <= getLeft(a) + ipa_full_width)
+            {
+                type = IPAStim::Adrenaline;
+                if( y>= getTop(a, type) && y <= getTop(a, type) + bar_height)
+                    return new IPATuple(a, type, get_percentage(a, x));
+                type = IPAStim::Perception;
+                if( y>= getTop(a, type) && y <= getTop(a, type) + bar_height)
+                    return new IPATuple(a, type, get_percentage(a, x));
+                type = IPAStim::Intelligence;
+                if( y>= getTop(a, type) && y <= getTop(a, type) + bar_height)
+                    return new IPATuple(a, type, get_percentage(a, x));
+            }
+        }
+        return NULL;
+    }
+    
+    static int get_percentage(int agent, int x)
+    {
+        int left = getLeft(agent);
+        int offset = x - left;
+        return (int)(((float)offset / (float)full_width()) * 100.0);
+    }
+};
+
+
 GameplayMenu::GameplayMenu(MenuManager *m) :
 Menu(m, MENU_GAMEPLAY, MENU_DEBRIEF, "", "mscrenup.dat"),
 tick_count_(0), last_animate_tick_(0), last_motion_tick_(0),
 last_motion_x_(320), last_motion_y_(240), mission_hint_ticks_(0), 
 mission_hint_(0), mission_(NULL), world_x_(0),
 world_y_(0), selection_(),
-pointing_at_ped_(-1), pointing_at_vehicle_(-1), pointing_at_weapon_(-1),
+target_(NULL),
 mm_renderer_()
 {
     scroll_x_ = 0;
@@ -379,9 +505,11 @@ void GameplayMenu::handleTick(int elapsed)
 
     updateMinimap(elapsed);
 
+    updateIPALevelMeters(elapsed);
+
     if (change) {
         needRendering();
-        // force pointing_at_ped / vehicle to update
+        // force target to update
         handleMouseMotion(last_motion_x_, last_motion_y_, 0, KMD_NONE);
     }
 
@@ -483,9 +611,7 @@ void GameplayMenu::handleLeave()
     mission_hint_ = 0;
     world_x_ = 0;
     world_y_ = 0;
-    pointing_at_ped_ = -1;
-    pointing_at_vehicle_ = -1;
-    pointing_at_weapon_ = -1;
+    target_ = NULL;
     mission_ = NULL;
     scroll_x_ = 0;
     scroll_y_ = 0;
@@ -511,27 +637,28 @@ void GameplayMenu::handleMouseMotion(int x, int y, int state, const int modKeys)
     }
 
     bool inrange = false;
+    target_ = NULL;
+
     if (x > 128) {
-        pointing_at_ped_ = -1;
-    #ifdef _DEBUG
+#ifdef _DEBUG
         for (int i = 0; mission_ && i < mission_->numPeds(); i++) {
-    #else
+#else
         for (int i = 8; mission_ && i < mission_->numPeds(); i++) {
-    #endif
+#endif
             PedInstance *p = mission_->ped(i);
             if (p->health() > 0 && p->map() != -1) {
                 int px = p->screenX() - 10;
                 int py = p->screenY() - (1 + p->tileZ()) * TILE_HEIGHT/3
-                    - (p->offZ() * TILE_HEIGHT/3) / 128;
+                - (p->offZ() * TILE_HEIGHT/3) / 128;
 
                 if (x - 129 + world_x_ >= px && y + world_y_ >= py &&
                     x - 129 + world_x_ < px + 21 && y + world_y_ < py + 34) {
-                    pointing_at_ped_ = i;
                     for (SquadSelection::Iterator it = selection_.begin();
-                            it != selection_.end(); ++it) {
+                         it != selection_.end(); ++it) {
                         WeaponInstance * wi = (*it)->selectedWeapon();
-                        ShootableMapObject *tsmo = mission_->ped(pointing_at_ped_);
-                        if (wi && wi->canShoot() && wi->inRangeNoCP(&tsmo) == 1)
+                        target_ = mission_->ped(i);
+                        if (wi && wi->canShoot()
+                            && wi->inRangeNoCP(&target_) == 1)
                         {
                             inrange = true;
                         }
@@ -540,8 +667,6 @@ void GameplayMenu::handleMouseMotion(int x, int y, int state, const int modKeys)
                 }
             }
         }
-
-        pointing_at_vehicle_ = -1;
 
         for (int i = 0; mission_ && i < mission_->numVehicles(); i++) {
             VehicleInstance *v = mission_->vehicle(i);
@@ -551,12 +676,12 @@ void GameplayMenu::handleMouseMotion(int x, int y, int state, const int modKeys)
 
                 if (x - 129 + world_x_ >= px && y + world_y_ >= py &&
                     x - 129 + world_x_ < px + 40 && y + world_y_ < py + 32) {
-                    pointing_at_vehicle_ = i;
                     for (SquadSelection::Iterator it = selection_.begin();
-                            it != selection_.end(); ++it) {
+                         it != selection_.end(); ++it) {
                         WeaponInstance * wi = (*it)->selectedWeapon();
-                        ShootableMapObject *tsmo = mission_->vehicle(pointing_at_vehicle_);
-                        if (wi && wi->canShoot() && wi->inRangeNoCP(&tsmo)== 1)
+                        target_ = mission_->vehicle(i);
+                        if (wi && wi->canShoot()
+                            && wi->inRangeNoCP(&target_)== 1)
                         {
                             inrange = true;
                         }
@@ -566,37 +691,34 @@ void GameplayMenu::handleMouseMotion(int x, int y, int state, const int modKeys)
             }
         }
 
-        pointing_at_weapon_ = -1;
-
         for (int i = 0; mission_ && i < mission_->numWeapons(); i++) {
             WeaponInstance *w = mission_->weapon(i);
 
             if (w->map() != -1) {
                 int px = w->screenX() - 10;
                 int py = w->screenY() + 4 - w->tileZ() * TILE_HEIGHT/3
-                    - (w->offZ() * TILE_HEIGHT/3) / 128;
+                - (w->offZ() * TILE_HEIGHT/3) / 128;
 
                 if (x - 129 + world_x_ >= px && y + world_y_ >= py &&
                     x - 129 + world_x_ < px + 20 && y + world_y_ < py + 15) {
-                    pointing_at_weapon_ = i;
+                    target_ = mission_->weapon(i);
                     break;
                 }
             }
         }
-
-        // TODO: use pointers instead of int for peds, vehicles, weapons?
-    } else {
-        pointing_at_ped_ = pointing_at_vehicle_ = pointing_at_weapon_ = -1;
     }
 
-    if (pointing_at_ped_ != -1 || pointing_at_vehicle_ != -1) {
-        if (inrange)
-            g_System.useTargetRedCursor();
-        else
-            g_System.useTargetCursor();
-    } else if (pointing_at_weapon_ != -1)
-        g_System.usePickupCursor();
-    else {
+    if (target_) {
+        if (target_->useTargetCursor() ) {
+            if (inrange)
+                g_System.useTargetRedCursor();
+            else
+                g_System.useTargetCursor();
+            // There shoudl really be an "isCollectable()" in the class hierarchy
+            // instead of this dynamic_cast
+        } else if (target_->majorType() == MapObject::mjt_Weapon)
+            g_System.usePickupCursor();
+    } else {
         if (x > 128)
             g_System.usePointerCursor();
         else
@@ -617,27 +739,12 @@ void GameplayMenu::handleMouseMotion(int x, int y, int state, const int modKeys)
             if (shooting_events_.agents_shooting[i]) {
                 PedInstance * pa = mission_->ped(i);
                 PathNode *pn = NULL;
-                if (pointing_at_ped_ != -1) {
-                    MapObject *m = mission_->ped(pointing_at_ped_);
-                    int tilez = m->tileZ() * 128 + m->offZ() + (m->sizeZ() >> 1);
+                if (target_) {
+                    int tilez = target_->tileZ() * 128 + target_->offZ() + (target_->sizeZ() >> 1);
                     int offz = tilez % 128;
                     tilez /= 128;
-                    pn = new PathNode(m->tileX(), m->tileY(), tilez,
-                        m->offX(), m->offY(), offz);
-                } else if (pointing_at_vehicle_ != -1) {
-                    MapObject *m = mission_->vehicle(pointing_at_vehicle_);
-                    int tilez = m->tileZ() * 128 + m->offZ() + (m->sizeZ() >> 1);
-                    int offz = tilez % 128;
-                    tilez /= 128;
-                    pn = new PathNode(m->tileX(), m->tileY(), tilez,
-                        m->offX(), m->offY(), offz);
-                } else if (pointing_at_weapon_ != -1) {
-                    MapObject *m = mission_->weapon(pointing_at_weapon_);
-                    int tilez = m->tileZ() * 128 + m->offZ() + (m->sizeZ() >> 1);
-                    int offz = tilez % 128;
-                    tilez /= 128;
-                    pn = new PathNode(m->tileX(), m->tileY(), tilez,
-                        m->offX(), m->offY(), offz);
+                    pn = new PathNode(target_->tileX(), target_->tileY(), tilez,
+                        target_->offX(), target_->offY(), offz);
                 } else {
                     int stx = tx;
                     int sty = ty;
@@ -700,6 +807,12 @@ bool GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
             // User clicked on the select all button
             selectAllAgents();
         }
+        else if (struct IPAGui::IPATuple *tuple = IPAGui::scanCoordsForIPA(x,y))
+        {
+            handleClickOnIPA(tuple->agent_, tuple->type_, tuple->percentage_,
+                button, modKeys);
+            delete(tuple);
+        }
         else if (y >= 2 + 46 + 44 + 10 + 46 + 44 + 15
                  && y < 2 + 46 + 44 + 10 + 46 + 44 + 15 + 64)
         {
@@ -759,6 +872,32 @@ void GameplayMenu::handleClickOnWeaponSelector(int x, int y, int button, const i
     addDirtyRect(0, 207, 128, 64);
 }
 
+void GameplayMenu::handleClickOnIPA(int agent, IPAStim::IPAType type,
+    int percentage, int button, const int modKeys)
+{
+    PedInstance *ped = mission_->ped(agent);
+    switch(type)
+    {
+        case IPAStim::Adrenaline:
+            ped->adrenaline_->setAmount(percentage);
+            break;
+        case IPAStim::Perception:
+            ped->perception_->setAmount(percentage);
+            break;
+        case IPAStim::Intelligence:
+            ped->intelligence_->setAmount(percentage);
+            break;
+    }
+}
+
+void GameplayMenu::updateIPALevelMeters(int elapsed)
+{
+    for (int agent = 0; agent < 4; agent++) {
+        PedInstance *ped = mission_->ped(agent);
+        ped->updtIPATime(elapsed);
+    }
+}
+
 void GameplayMenu::handleClickOnMap(int x, int y, int button, const int modKeys) {
     MapTilePoint mapPt = mission_->get_map()->screenToTilePoint(world_x_ + x - 129,
                     world_y_ + y);
@@ -767,54 +906,36 @@ void GameplayMenu::handleClickOnMap(int x, int y, int button, const int modKeys)
         for (int i = 0; i < 4; i++) {
             PedInstance *ped = mission_->ped(i);
             if (selection_.isAgentSelected(i)) {
-                if (pointing_at_ped_ != -1) {
-                    PedInstance::actionQueueGroupType as;
-                    as.group_desc = PedInstance::gd_mStandWalk;
-                    ped->createActQFollowing(as,
-                        mission_->ped(pointing_at_ped_), 0, 192);
-                    as.main_act = as.actions.size() - 1;
-                    as.origin_desc = 4;
-                    if (modKeys & KMD_CTRL)
-                        ped->addActQToQueue(as);
-                    else
-                        ped->setActQInQueue(as);
-                } else
-                if (pointing_at_weapon_ != -1) {
-                    PedInstance::actionQueueGroupType as;
-                    as.group_desc = PedInstance::gd_mStandWalk;
-                    ped->createActQPickUp(as,
-                        mission_->weapon(pointing_at_weapon_));
-                    as.origin_desc = 4;
-                    as.main_act = as.actions.size() - 1;
-                    if (modKeys & KMD_CTRL)
-                        ped->addActQToQueue(as);
-                    else
-                        ped->setActQInQueue(as);
-                } else if (pointing_at_vehicle_ != -1) {
-                    if (ped->inVehicle()) {
-                        PedInstance::actionQueueGroupType as;
-                        ped->createActQLeaveCar(as,
-                            mission_->vehicle(pointing_at_vehicle_));
-                        as.main_act = as.actions.size() - 1;
-                        as.group_desc = PedInstance::gd_mStandWalk;
-                        as.origin_desc = 4;
-                        if (modKeys & KMD_CTRL)
-                            ped->addActQToQueue(as);
-                        else
-                            ped->setActQInQueue(as);
-                    } else if (mission_->vehicle(pointing_at_vehicle_)->
-                                health() > 0)
-                    {
-                        PedInstance::actionQueueGroupType as;
-                        ped->createActQGetInCar(as,
-                            mission_->vehicle(pointing_at_vehicle_));
-                        as.main_act = as.actions.size() - 1;
-                        as.group_desc = PedInstance::gd_mStandWalk;
-                        as.origin_desc = 4;
-                        if (modKeys & KMD_CTRL)
-                            ped->addActQToQueue(as);
-                        else
-                            ped->setActQInQueue(as);
+                PedInstance::actionQueueGroupType as;
+                bool action = false;
+                // Note: using dynamic_cast indicates we have an issue with
+                // our class hierarchy
+                if (target_) {
+                    switch (target_->majorType()) {
+                        case MapObject::mjt_Ped:
+                            // TODO : Should we also follow a vehicle if it is
+                            // being driven / has a driver?
+                            ped->createActQFollowing(as, target_, 0, 192);
+                            action = true;
+                            break;
+                         case MapObject::mjt_Weapon:
+                            ped->createActQPickUp(as, target_);
+                            action = true;
+                            break;
+                         case MapObject::mjt_Vehicle:
+                            // TODO: Shouldn't this check if the vehicle is the
+                            // one we're in?
+                            if (ped->inVehicle()) {
+                                ped->createActQLeaveCar(as, target_);
+                                action = true;
+                            } else if (target_->health() > 0)
+                            {
+                                ped->createActQGetInCar(as, target_);
+                                action = true;
+                            }
+                            break;
+                         default:
+                             break;
                     }
                 } else if (ped->inVehicle()) {
                     if (ped == ped->inVehicle()->getDriver())
@@ -829,17 +950,21 @@ void GameplayMenu::handleClickOnMap(int x, int y, int button, const int modKeys)
                         sty = mapPt.ty * 256 + mapPt.oy + 128 * (ped->inVehicle()->tileZ() - 1);
                         //soy = sty % 256;
                         sty = sty / 256;
-                        PedInstance::actionQueueGroupType as;
                         PathNode tpn = PathNode(stx, sty, 0, 128, 128);
                         ped->createActQUsingCar(as, &tpn, ped->inVehicle());
-                        as.main_act = as.actions.size() - 1;
-                        as.group_desc = PedInstance::gd_mStandWalk;
-                        as.origin_desc = 4;
-                        if (modKeys & KMD_CTRL)
-                            ped->addActQToQueue(as);
-                        else
-                            ped->setActQInQueue(as);
+                        action = true;
                     }
+                }
+                
+                if(action)
+                {
+                    as.main_act = as.actions.size() - 1;
+                    as.group_desc = PedInstance::gd_mStandWalk;
+                    as.origin_desc = 4;
+                    if (modKeys & KMD_CTRL)
+                        ped->addActQToQueue(as);
+                    else
+                        ped->setActQInQueue(as);
                 } else {
                     bool isForGroup = selection_.size() > 1;
                     bool addDestPt = (modKeys & KMD_CTRL) == KMD_CTRL;
@@ -850,8 +975,8 @@ void GameplayMenu::handleClickOnMap(int x, int y, int button, const int modKeys)
                 }
             } // end of if selected
         } // end of for
-    } else if (button == 3) {
-        for (int i = 0; i < 4; i++) {
+        } else if (button == 3) {
+            for (int i = 0; i < 4; i++) {
             if (selection_.isAgentSelected(i)) {
                 PedInstance * pa = mission_->ped(i);
                 PathNode *pn = NULL;
@@ -859,27 +984,12 @@ void GameplayMenu::handleClickOnMap(int x, int y, int button, const int modKeys)
                 as.main_act = 0;
                 as.group_desc = PedInstance::gd_mFire;
                 as.origin_desc = 4;
-                if (pointing_at_ped_ != -1) {
-                    MapObject *m = mission_->ped(pointing_at_ped_);
-                    int tilez = m->tileZ() * 128 + m->offZ() + (m->sizeZ() >> 1);
+                if (target_) {
+                    int tilez = target_->tileZ() * 128 + target_->offZ() + (target_->sizeZ() >> 1);
                     int offz = tilez % 128;
                     tilez /= 128;
-                    pn = new PathNode(m->tileX(), m->tileY(), tilez,
-                        m->offX(), m->offY(), offz);
-                } else if (pointing_at_vehicle_ != -1) {
-                    MapObject *m = mission_->vehicle(pointing_at_vehicle_);
-                    int tilez = m->tileZ() * 128 + m->offZ() + (m->sizeZ() >> 1);
-                    int offz = tilez % 128;
-                    tilez /= 128;
-                    pn = new PathNode(m->tileX(), m->tileY(), tilez,
-                        m->offX(), m->offY(), offz);
-                } else if (pointing_at_weapon_ != -1) {
-                    MapObject *m = mission_->weapon(pointing_at_weapon_);
-                    int tilez = m->tileZ() * 128 + m->offZ() + (m->sizeZ() >> 1);
-                    int offz = tilez % 128;
-                    tilez /= 128;
-                    pn = new PathNode(m->tileX(), m->tileY(), tilez,
-                        m->offX(), m->offY(), offz);
+                    pn = new PathNode(target_->tileX(), target_->tileY(), tilez,
+                        target_->offX(), target_->offY(), offz);
                 } else {
                     int stx = mapPt.tx;
                     int sty = mapPt.ty;
@@ -1243,6 +1353,41 @@ void GameplayMenu::drawAgentSelectors() {
     mission_->ped(3)->drawSelectorAnim(96,138);
 }
 
+void GameplayMenu::drawIPABar(int agent, IPAStim *stim)
+{
+    // Convert those percentages to pixels
+    int amount_x = (float)IPAGui::full_width() * ((float)stim->getAmount()/100.0);
+    int effect_x = (float)IPAGui::full_width() * ((float)stim->getEffect()/100.0);
+    int dependency_x = (float)IPAGui::full_width() * ((float)stim->getDependency()/100.0);
+
+    IPAStim::IPAType type = stim->getType();
+    
+    // Draw a bar between the current level and the dependency marker
+    // x needs to be leftmost...
+    int left, width;
+    boxify(left, width, amount_x, dependency_x);
+    if(width > 0) {
+        g_Screen.drawRect(IPAGui::getLeft(agent) + left,
+                          IPAGui::getTop(agent, type),
+                          width, IPAGui::height(), IPAGui::colour(type));
+    }
+    
+    // NB: this bar stops rendering when it's neck-a-neck with 'amount'
+    if(amount_x != effect_x)
+    {
+        boxify(left, width, effect_x, dependency_x);
+        if(width > 0) {
+            g_Screen.drawRect(IPAGui::getLeft(agent) + left,
+                              IPAGui::getTop(agent, type),
+                              width, IPAGui::height(), IPAGui::dim_colour(type));
+        }
+    }
+    
+    // Draw a vertical white line to mark the dependency level
+    g_Screen.drawVLine(IPAGui::getLeft(agent) + dependency_x,
+                      IPAGui::getTop(agent, type), IPAGui::height(), 12);
+}
+
 void GameplayMenu::drawPerformanceMeters() {
     // 64x46
     g_App.gameSprites().sprite(selection_.isAgentSelected(0) ? 1778 : 1754)->draw(
@@ -1256,6 +1401,13 @@ void GameplayMenu::drawPerformanceMeters() {
             0, 46 + 44 + 10 + 46, 0);
     g_App.gameSprites().sprite(selection_.isAgentSelected(3)? 1778 : 1755)->draw(
             64, 46 + 44 + 10 + 46, 0);
+
+    // draw IPA
+    for (int agent = 0; agent < 4; agent++) {
+        drawIPABar(agent, mission_->ped(agent)->adrenaline_);
+        drawIPABar(agent, mission_->ped(agent)->perception_);
+        drawIPABar(agent, mission_->ped(agent)->intelligence_);
+    }
 }
 
 void GameplayMenu::drawSelectAllButton() {
@@ -1283,8 +1435,8 @@ void GameplayMenu::drawMissionHint(int elapsed) {
     mission_hint_ += inc;
 
     bool inversed = false;
-    bool text_pw = (pointing_at_weapon_ != -1
-        && mission_->weapon(pointing_at_weapon_)->map() != -1);
+    bool text_pw = (target_ && target_->majorType() == MapObject::mjt_Weapon
+        && target_->map() != -1);
 
     std::string str;
 
@@ -1351,7 +1503,7 @@ void GameplayMenu::drawMissionHint(int elapsed) {
             g_Screen.drawRect(0, 46 + 44 + 10 + 46 + 44, 128, 12, 11);
         } else {
             if (text_pw) {
-                str = mission_->weapon(pointing_at_weapon_)->name();
+                str = ((WeaponInstance *)target_)->name();
                 txtColor = inversed ? 14 : 11;
             }
         }
@@ -1359,7 +1511,7 @@ void GameplayMenu::drawMissionHint(int elapsed) {
 
     int width = gameFont()->textWidth(str.c_str(), false, false);
     int x = 64 - width / 2;
-	gameFont()->drawText(x, 46 + 44 + 10 + 46 + 44 + 2 - 1, str.c_str(), txtColor);
+    gameFont()->drawText(x, 46 + 44 + 10 + 46 + 44 + 2 - 1, str.c_str(), txtColor);
 }
 
 void GameplayMenu::drawWeaponSelectors() {
@@ -1387,13 +1539,13 @@ void GameplayMenu::drawWeaponSelectors() {
                     s = wi->getWeaponClass()->selector();
                     if (p->selectedWeapon() && p->selectedWeapon() == wi)
                         s += 40;
-                } else {
-                    if (draw_pw && pointing_at_weapon_ != -1
+                } else if (draw_pw) {
+                    if (target_ && target_->majorType() == MapObject::mjt_Weapon
                         && (mission_hint_ % 20) < 10
-                        && mission_->weapon(pointing_at_weapon_)->map() != -1)
+                        && target_->map() != -1)
                     {
+                        wi = (WeaponInstance *)target_;
                         draw_pw = false;
-                        wi = mission_->weapon(pointing_at_weapon_);
                         s = wi->getWeaponClass()->selector() + 40;
                     }
                 }

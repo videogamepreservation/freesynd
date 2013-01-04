@@ -36,6 +36,7 @@
 #include "gfx/spritemanager.h"
 #include "weaponholder.h"
 #include "weapon.h"
+#include "ipastim.h"
 
 class PedInstance;
 class Mission;
@@ -279,21 +280,20 @@ public:
         int t_posy = -1, int dist = 0, bool bounce = true);
 
     void setAllAdrenaLevels(uint8 amount, uint8 depend, uint8 effect) {
-        lvl_percep_amount_ = amount;
-        lvl_percep_dependency_ = depend;
-        lvl_percep_effect_ = effect;
+        adrenaline_->setLevels256(amount, depend, effect);
     }
 
     void setAllInteliLevels(uint8 amount, uint8 depend, uint8 effect) {
-        lvl_percep_amount_ = amount;
-        lvl_percep_dependency_ = depend;
-        lvl_percep_effect_ = effect;
+        intelligence_->setLevels256(amount, depend, effect);
     }
 
     void setAllPercepLevels(uint8 amount, uint8 depend, uint8 effect) {
-        lvl_percep_amount_ = amount;
-        lvl_percep_dependency_ = depend;
-        lvl_percep_effect_ = effect;
+        perception_->setLevels256(amount, depend, effect);
+    }
+    void updtIPATime(int elapsed) {
+        adrenaline_->processTicks(elapsed);
+        perception_->processTicks(elapsed);
+        intelligence_->processTicks(elapsed);
     }
 
     bool handleDamage(ShootableMapObject::DamageInflictType *d);
@@ -728,6 +728,11 @@ public:
 
     void cpyEnemyDefs(Mmuu32_t &eg_defs) { eg_defs = enemy_group_defs_; }
     bool isExcluded() { return (state_ & pa_smCheckExcluded) != 0;}
+    
+    IPAStim *adrenaline_;
+    IPAStim *perception_;
+    IPAStim *intelligence_;
+    
 protected:
     Ped *ped_;
 
@@ -768,22 +773,6 @@ protected:
     int selected_weapon_;
     VehicleInstance *in_vehicle_;
     agentAndNonEnum agent_is_;
-    // IPA levels: white bar level,set level,exhaused level and forced level
-    //uint8 lvl_adrena_reserve_;
-    uint8 lvl_adrena_amount_;
-    uint8 lvl_adrena_dependency_;
-    uint8 lvl_adrena_effect_;
-
-    //uint8 lvl_inteli_reserve_;
-    uint8 lvl_inteli_amount_;
-    uint8 lvl_inteli_dependency_;
-    uint8 lvl_inteli_effect_;
-
-    //uint8 lvl_percep_reserve_;
-    uint8 lvl_percep_amount_;
-    uint8 lvl_percep_dependency_;
-    uint8 lvl_percep_effect_;
-
     bool walkable(int x, int y, int z);
 };
 

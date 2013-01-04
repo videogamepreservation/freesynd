@@ -6,6 +6,7 @@
  *   Copyright (C) 2005  Joost Peters  <joostp@users.sourceforge.net>   *
  *   Copyright (C) 2006  Trent Waddington <qg@biodome.org>              *
  *   Copyright (C) 2011  Joey Parrish  <joey.parrish@gmail.com>         *
+ *   Copyright (C) 2012  Ryan Cocks <ryan@ryancocks.net>                *
  *                                                                      *
  *    This program is free software;  you can redistribute it and / or  *
  *  modify it  under the  terms of the  GNU General  Public License as  *
@@ -151,5 +152,11 @@ namespace fs_cmn {
     /*! Color constant : Blue */
     static const uint8 kColorBlue = 15;
 };
+
+inline void boxify(int &left, int &width, int x1, int x2)
+{
+    width = x1 < x2 ? x2 - x1 : x1 - x2;
+    left = (x1 < x2) ? x1 : x2;
+}
 
 #endif

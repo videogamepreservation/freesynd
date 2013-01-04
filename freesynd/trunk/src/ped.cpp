@@ -1592,6 +1592,10 @@ PedInstance::PedInstance(Ped *ped, int m) : ShootableMovableMapObject(m),
     state_ = PedInstance::pa_smNone;
     actions_property_ = 0;
     dir_last_ = -1;
+    
+    adrenaline_  = new IPAStim(IPAStim::Adrenaline);
+    perception_  = new IPAStim(IPAStim::Perception);
+    intelligence_ = new IPAStim(IPAStim::Intelligence);
 }
 
 PedInstance::~PedInstance()
@@ -2300,9 +2304,17 @@ void PedInstance::verifyHostilesFound(Mission *m) {
 
 int PedInstance::getSpeed()
 {
-    //TODO: IPA + mods
+    //TODO: mods
     if (obj_group_def_ == PedInstance::og_dmAgent)
-        return base_speed_ << 2;
+    {
+#ifdef _DEBUG
+        return ((int)((float)base_speed_ * adrenaline_->getMultiplier())) << 2;
+#else
+        // See the comments in the IPAStim class for details on the multiplier
+        // algorithm for adrenaline
+        return (int)((float)base_speed_ * adrenaline_->getMultiplier());
+#endif
+    }
 
     return base_speed_;
 }

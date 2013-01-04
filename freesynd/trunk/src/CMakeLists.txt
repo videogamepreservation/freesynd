@@ -17,6 +17,7 @@ set (SOURCES
 	core/researchmanager.cpp
 	default_ini.h
 	freesynd.cpp
+  ipastim.cpp
 	gfx/dirtylist.cpp
 	gfx/fliplayer.cpp
 	gfx/font.cpp
@@ -87,6 +88,7 @@ set(HEADERS
 	common.h
 	config.h
 	cp437.h
+  ipastim.h
 	keys.h
 	map.h
 	mapmanager.h

@@ -31,6 +31,7 @@
 #include "squadselection.h"
 
 class Mission;
+class IPAStim;
 
 /*!
  * Gameplay Menu class.
@@ -47,11 +48,14 @@ public:
 protected:
     bool handleUnknownKey(Key key, const int modKeys);
 
-	void handleMouseMotion(int x, int y, int state, const int modKeys);
+    void handleMouseMotion(int x, int y, int state, const int modKeys);
     bool handleMouseDown(int x, int y, int button, const int modKeys);
     void handleMouseUp(int x, int y, int button, const int modKeys);
     //! Handles the user's click on weapon selector
     void handleClickOnWeaponSelector(int x, int y, int button, const int modKeys);
+    //! Update the target value for adrenaline etc for an agent
+    void handleClickOnIPA(int agent, IPAStim::IPAType type, int percentage,
+        int button, const int modKeys);
     //! Handles the user's click on the map
     void handleClickOnMap(int x, int y, int button, const int modKeys);
     //! Handles the user's click on the minimap
@@ -85,6 +89,11 @@ protected:
     void updateMinimap(int elapsed);
     //! Update the select all button state
     void updateSelectAll();
+    // helper to render the IPA bars. Draws all the elements
+    // for one bar
+    void drawIPABar(int agent,  IPAStim *stim);
+    // process ticks
+    void updateIPALevelMeters(int elapsed);
 
 protected:
     /*! Origin of the minimap on the screen.*/
@@ -106,7 +115,8 @@ protected:
     int scroll_y_;
     /*! Agent selection manager.*/
     SquadSelection selection_;
-    int pointing_at_ped_, pointing_at_vehicle_, pointing_at_weapon_;
+    /*! Object mouse cursor is above*/ 
+    ShootableMapObject *target_;
     /*! This renderer is in charge of drawing the minimap.*/
     GamePlayMinimapRenderer mm_renderer_;
     bool completed_;
