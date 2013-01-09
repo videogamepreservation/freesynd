@@ -460,7 +460,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                         // NOTE: don't put weapon on the ground
                         WeaponInstance *wi = aqt.multi_var.enemy_var.weapon.wpn.wi;
                         if (wi && wi->getMainType()
-                            == Weapon::Persuadatron && aqt.t_smo->health() > 0)
+                            == Weapon::Persuadatron && aqt.t_smo->health())
                         {
                             int tm_left = elapsed;
                             uint16 answ = wi->inflictDamage(aqt.t_smo, NULL, &tm_left);
@@ -477,7 +477,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                                 == MapObject::mjt_Vehicle)
                     {
                         VehicleInstance *v = (VehicleInstance *)aqt.t_smo;
-                        if (v->health() > 0 && (state_
+                        if (v->health() && (state_
                             & (PedInstance::pa_smInCar
                             | PedInstance::pa_smUsingCar)) == 0
                             && samePosition(v))
@@ -1429,7 +1429,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
             // for the moment, assume peds can only be hostile towards the agents
             for (int i = 0; i < 4; i++) {
                 PedInstance * pinst = mission->ped(i);
-                if (pinst->health() > 0
+                if (pinst->health()
                     && selectedWeapon()->inRangeNoCP(
                         (ShootableMapObject **)(&pinst)) == 1) {
                     if (pinst->inVehicle())
@@ -1444,7 +1444,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
             if (target_ == NULL){
                 for (int i = 0; i < 4; i++) {
                     PedInstance * pinst = mission->ped(i);
-                    if (pinst->health() > 0 && inSightRange(pinst)) {
+                    if (pinst->health() && inSightRange(pinst)) {
                         if (dest_path_.size() == 0)
                             setDestinationP(mission, pinst->tileX(),
                                 pinst->tileY(), pinst->tileZ());

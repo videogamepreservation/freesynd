@@ -54,8 +54,8 @@ public:
     MenuManager();
     ~MenuManager();
 
-	bool initialize(bool loadIntroFont);
-    
+    bool initialize(bool loadIntroFont);
+
     //! Destroy all menus and resources
     void destroy();
 
@@ -63,29 +63,29 @@ public:
     std::string getMessage(const std::string & id);
     void getMessage(const std::string & id, std::string & msg);
 
-	//! Return the menu sprites manager
-	SpriteManager &menuSprites() {
+    //! Return the menu sprites manager
+    SpriteManager &menuSprites() {
         return menuSprites_;
     }
 
-	FontManager &fonts() {
+    FontManager &fonts() {
         return fonts_;
     }
 
-	/*! Reads events from the event queue and dispatches them.*/
-	void handleEvents();
+    /*! Reads events from the event queue and dispatches them.*/
+    void handleEvents();
 
     void handleTick(int elapsed) {
         if (current_)
             current_->handleTick(elapsed);
 
-		if (nextMenuId_ != -1) {
-			changeCurrentMenu();
-		}
+        if (nextMenuId_ != -1) {
+            changeCurrentMenu();
+        }
     }
 
-	// Change the menu
-	void gotoMenu(int menuId);
+    // Change the menu
+    void gotoMenu(int menuId);
 
     //! Take a snapshot of the screen.
     void saveBackground();
@@ -97,11 +97,11 @@ public:
         dirtyList_.addRect(x, y, width, height);
     }
 
-	//! Sets the default palette
-	void setDefaultPalette();
+    //! Sets the default palette
+    void setDefaultPalette();
     //! Sets the palette for the given mission id
     void setPaletteForMission(int i_id);
-	void setPalette(const char *fname, bool sixbit = true);
+    void setPalette(const char *fname, bool sixbit = true);
 
     //! Displays the current menu
     void renderMenu();
@@ -112,13 +112,13 @@ public:
     FS_Lang currLanguage(void) {return curr_language_; }
 
 protected:
-	//! Returns a menu with the given id
-	Menu * getMenu(int menuId);
+    //! Returns a menu with the given id
+    Menu * getMenu(int menuId);
     //! Shows the menu opening animation
     void showMenu(Menu *pMenu);
     //! Shows the menu closing animation
     void leaveMenu(Menu *pMenu);
-	//! Switch from menu and plays the transition animation.
+    //! Switch from menu and plays the transition animation.
     void changeCurrentMenu();
 
 protected:
@@ -126,8 +126,8 @@ protected:
     std::map<int, Menu *> menus_;
     /** The current menu being displayed.*/
     Menu *current_;
-	/** The id of the next menu. -1 by default.*/
-	int nextMenuId_;
+    /** The id of the next menu. -1 by default.*/
+    int nextMenuId_;
     /** This flag prevents the input events from being processed.*/
     bool drop_events_;
     /** This array stores a copy of the back buffer to reset the screen.*/
@@ -140,12 +140,12 @@ protected:
     ConfigFile  *language_;
     FS_Lang curr_language_;
 
-	/*! Sprite manager for menu sprites.*/
-	SpriteManager menuSprites_;
-	/*! Sprite manager for intro font. */
-	SpriteManager *pIntroFontSprites_;
-	/*! Font manager.*/
-	FontManager fonts_;
+    /*! Sprite manager for menu sprites.*/
+    SpriteManager menuSprites_;
+    /*! Sprite manager for intro font. */
+    SpriteManager *pIntroFontSprites_;
+    /*! Font manager.*/
+    FontManager fonts_;
 };
 
 #endif

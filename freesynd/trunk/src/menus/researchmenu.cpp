@@ -72,9 +72,9 @@ ResearchMenu::ResearchMenu(MenuManager * m):Menu(m, MENU_RESEARCH, MENU_SELECT, 
     fundMaxTxtId_ = addStatic(20, 143, "", FontManager::SIZE_1, true);    // Search maximum
 
     incrFundId_ = addOption(16, 210, 129, 25,  "#RES_INC_FUND_BUT", FontManager::SIZE_2, MENU_NO_MENU, false);
-	registerHotKey(K_PLUS, incrFundId_);
+    registerHotKey(K_PLUS, incrFundId_);
     decrFundId_ = addOption(16, 260, 129, 25,  "#RES_DEC_FUND_BUT", FontManager::SIZE_2, MENU_NO_MENU, false);
-	registerHotKey(K_MINUS, decrFundId_);
+    registerHotKey(K_MINUS, decrFundId_);
     fundCurrLblId_ = addStatic(16, 242, 129, "", FontManager::SIZE_2, true);    // Current Funding label
     searchTitleLblId_ = addStatic(158, 86, "", FontManager::SIZE_2, true);    // Current search title
 
@@ -191,27 +191,27 @@ void ResearchMenu::showResGraph(Research *pRes) {
 }
 
 void ResearchMenu::drawSelectedWeaponInfos(int x, int y) {
-	char tmp[100];
-	
+    char tmp[100];
+
     getMenuFont(FontManager::SIZE_1)->drawText(x, y, pSelectedWeapon_->getName(), false);
-	sprintf(tmp, "COST   :%d", pSelectedWeapon_->cost());
+    sprintf(tmp, "COST   :%d", pSelectedWeapon_->cost());
     getMenuFont(FontManager::SIZE_1)->drawText(x, y + 12, tmp, false);
     y += 24;
 
     if (pSelectedWeapon_->ammo() >= 0) {
-		sprintf(tmp, "AMMO   :%d", pSelectedWeapon_->ammo());
+        sprintf(tmp, "AMMO   :%d", pSelectedWeapon_->ammo());
         getMenuFont(FontManager::SIZE_1)->drawText(x, y, tmp, false);
         y += 12;
     }
 
     if (pSelectedWeapon_->range() >= 0) {
-		sprintf(tmp, "RANGE  :%d", pSelectedWeapon_->range());
+        sprintf(tmp, "RANGE  :%d", pSelectedWeapon_->range());
         getMenuFont(FontManager::SIZE_1)->drawText(x, y, tmp, false);
         y += 12;
     }
 
     if (pSelectedWeapon_->damagePerShot() >= 0 && pSelectedWeapon_->ammo() >= 0) {
-		sprintf(tmp, "SHOT   :%d", pSelectedWeapon_->damagePerShot());
+        sprintf(tmp, "SHOT   :%d", pSelectedWeapon_->damagePerShot());
         getMenuFont(FontManager::SIZE_1)->drawText(x, y, tmp, false);
         y += 12;
     }
@@ -219,11 +219,11 @@ void ResearchMenu::drawSelectedWeaponInfos(int x, int y) {
 
 void ResearchMenu::drawSelectedModInfos(int x, int y)
 {
-	getMenuFont(FontManager::SIZE_1)->drawText(x, y, pSelectedMod_->getName(), false);
+    getMenuFont(FontManager::SIZE_1)->drawText(x, y, pSelectedMod_->getName(), false);
     char tmp[100];
-	sprintf(tmp, "COST   :%d", pSelectedMod_->cost());
+    sprintf(tmp, "COST   :%d", pSelectedMod_->cost());
     getMenuFont(FontManager::SIZE_1)->drawText(504, y + 14, tmp, false);
-	getMenuFont(FontManager::SIZE_1)->drawText(504, y + 28, pSelectedMod_->desc(), false);
+    getMenuFont(FontManager::SIZE_1)->drawText(504, y + 28, pSelectedMod_->desc(), false);
 }
 
 void ResearchMenu::handleTick(int elapsed)
@@ -273,7 +273,7 @@ void ResearchMenu::handleRender(DirtyList &dirtyList)
         memset(ldata, 16, sizeof(ldata));
         g_Screen.scale2x(502, 318, sizeof(ldata), 1, ldata);
 
-		menuSprites().drawSpriteXYZ(pSelectedWeapon_->getBigIconId(), 502, 108, 0, false, true);
+        menuSprites().drawSpriteXYZ(pSelectedWeapon_->getBigIconId(), 502, 108, 0, false, true);
         drawSelectedWeaponInfos(504, 196);
     }
 
@@ -325,17 +325,10 @@ void ResearchMenu::handleRender(DirtyList &dirtyList)
 void ResearchMenu::handleLeave() {
     g_System.hideCursor();
     // reset window presentation
+    pResForGraph_ = NULL;
     showFieldList();
     showDetailsList();
-    getStatic(fundCurrLblId_)->setVisible(false);
     getStatic(searchTitleLblId_)->setText("");
-
-    getOption(incrFundId_)->setVisible(false);
-    getOption(decrFundId_)->setVisible(false);
-    getStatic(fundCurrLblId_)->setVisible(false);
-
-    pSelectedRes_ = NULL;
-    pResForGraph_ = NULL;
 }
 
 void ResearchMenu::handleAction(const int actionId, void *ctx, const int modKeys)

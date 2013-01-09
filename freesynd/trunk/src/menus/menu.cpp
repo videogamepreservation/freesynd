@@ -328,11 +328,11 @@ Option * Menu::getOption(int optionId) {
  * \param optId The option id
  */
 void  Menu::registerHotKey(KeyFunc code, int optId) {
-	Option *pOption = getOption(optId);
-	if (pOption) {
-		HotKey hc(code, 0, pOption);
-		hotKeys_.push_back(hc);
-	}
+    Option *pOption = getOption(optId);
+    if (pOption) {
+        HotKey hc(code, 0, pOption);
+        hotKeys_.push_back(hc);
+    }
 }
 
 /*!
@@ -342,23 +342,23 @@ void  Menu::registerHotKey(KeyFunc code, int optId) {
  * \param optId The option id
  */
 void  Menu::registerHotKey(uint16 unicode, int optId) {
-	Option *pOption = getOption(optId);
-	if (pOption) {
-		HotKey hc(KFC_UNKNOWN, unicode, pOption);
-		hotKeys_.push_back(hc);
-	}
+    Option *pOption = getOption(optId);
+    if (pOption) {
+        HotKey hc(KFC_UNKNOWN, unicode, pOption);
+        hotKeys_.push_back(hc);
+    }
 }
 
 void Menu::captureInputBy(TextField *pTextfield) {
-	if (pTextfield != pCaptureInput_ && pCaptureInput_ != NULL) {
-		pCaptureInput_->handleCaptureLost();
-	}
+    if (pTextfield != pCaptureInput_ && pCaptureInput_ != NULL) {
+        pCaptureInput_->handleCaptureLost();
+    }
 
-	pCaptureInput_ = pTextfield;
+    pCaptureInput_ = pTextfield;
 
-	if (pCaptureInput_ != NULL) {
-		pCaptureInput_->handleCaptureGained();
-	}
+    if (pCaptureInput_ != NULL) {
+        pCaptureInput_->handleCaptureGained();
+    }
 }
 
 /*!
@@ -368,39 +368,39 @@ void Menu::captureInputBy(TextField *pTextfield) {
  */
 void Menu::keyEvent(Key key, const int modKeys)
 {
-	// first pass the event to the textfield that has the cursor
-	if (pCaptureInput_ != NULL) {
-		if (pCaptureInput_->handleKey(key, modKeys)) {
-			return;
-		}
-	}
-
-	// Then look for a mapped key to execute an action
-	for (std::list < HotKey >::iterator it = hotKeys_.begin();
-         it != hotKeys_.end(); it++) {
-			 uint16 c = key.unicode;
-			 // Hotkey can only be character from 'A' to 'Z'
-			 if (c >= 'a' && c <= 'z') {
-				 // so uppercase it
-				 c -= 32;
-			 }
-			 if ((*it).key.keyFunc == key.keyFunc && (*it).key.unicode == c) {
-				Option *opt = (*it).pOption;
-				if (opt->isVisible() && opt->isenabled()) {
-					opt->executeAction(modKeys);
-				}
-				return;
-			}
+    // first pass the event to the textfield that has the cursor
+    if (pCaptureInput_ != NULL) {
+        if (pCaptureInput_->handleKey(key, modKeys)) {
+            return;
+        }
     }
 
-	// Finally pass the event to the menu instance
+    // Then look for a mapped key to execute an action
+    for (std::list < HotKey >::iterator it = hotKeys_.begin();
+            it != hotKeys_.end(); it++) {
+                uint16 c = key.unicode;
+                // Hotkey can only be character from 'A' to 'Z'
+                if (c >= 'a' && c <= 'z') {
+                    // so uppercase it
+                    c -= 32;
+                }
+                if ((*it).key.keyFunc == key.keyFunc && (*it).key.unicode == c) {
+                Option *opt = (*it).pOption;
+                if (opt->isVisible() && opt->isWidgetEnabled()) {
+                    opt->executeAction(modKeys);
+                }
+                return;
+            }
+    }
+
+    // Finally pass the event to the menu instance
     if (!handleUnknownKey(key, modKeys)) {
-		// Menu has not consummed key event :
-		// Pressing Escape changes the current menu to its parent(like a back)
-		if (key.keyFunc == KFC_ESCAPE) {
-			menu_manager_->gotoMenu(parentId_);
-			return;
-		}
+        // Menu has not consummed key event :
+        // Pressing Escape changes the current menu to its parent(like a back)
+        if (key.keyFunc == KFC_ESCAPE) {
+            menu_manager_->gotoMenu(parentId_);
+            return;
+        }
     }
 }
 
@@ -430,7 +430,7 @@ void Menu::mouseMotionEvent(int x, int y, int state, const int modKeys)
          it != actions_.end(); it++) {
         ActionWidget *m = *it;
 
-		if (!m->isVisible() || !m->isenabled()) {
+		if (!m->isVisible() || !m->isWidgetEnabled()) {
             // action is not visible or not enabled so it doesn't count
             continue;
         }
@@ -471,7 +471,7 @@ void Menu::mouseDownEvent(int x, int y, int button, const int modKeys)
          it != actions_.end(); it++) {
         ActionWidget *m = *it;
 
-        if (!m->isVisible() || !m->isenabled()) {
+        if (!m->isVisible() || !m->isWidgetEnabled()) {
             // Widget is not visible or enabled so it doesn't count
             continue;
         }

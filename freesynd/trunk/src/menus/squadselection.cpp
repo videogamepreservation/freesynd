@@ -132,7 +132,7 @@ void SquadSelection::selectAllAgents(bool b_selectAll) {
  */
 bool SquadSelection::isAgentSelectable(size_t agentNo) {
     PedInstance *pPed = pSquad_->member(agentNo);
-    return  pPed && pPed->health() > 0;
+    return  pPed && pPed->health();
 }
 
 /*!

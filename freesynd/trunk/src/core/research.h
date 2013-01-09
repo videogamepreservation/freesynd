@@ -38,7 +38,7 @@ class Research {
 public:
 
     enum EResType {
-        EQUIPS,
+        EQUIPS = 0,
         MODS
     };
 

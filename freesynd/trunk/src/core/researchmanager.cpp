@@ -246,6 +246,10 @@ void ResearchManager::complete(Research *pResearch) {
         // There's no more research for this category
         removeSearch(pResearch);
     }
+
+    // TODO: seems like it is possible to have a crash here due to removeSearch
+    // replication needed and fixing, if crash is possible
+
     // alerts of change
     fireGameEvent(pResearch);
 

@@ -21,19 +21,22 @@ void Widget::setLocation(int x, int y) {
 
 void Widget::setVisible(bool visible) {
     if (visible != visible_) {
-        redraw();
+        // forcing widget update, if it becomes invisible widget erased,
+        // if becomes visible widget is drawn
+        g_App.menus().addRect(x_, y_, width_, height_);
         visible_ = visible;
     }
 }
 
 MenuText::MenuText(int x, int y, const char *text, MenuFont *pFont, 
                    bool highlighted, bool visible): 
-            Widget(x, y, 0, 0, visible) {
-		highlighted_ = highlighted;
+            Widget(x, y, 0, 0, visible)
+{
+        highlighted_ = highlighted;
         centered_ = false;
         anchorX_ = x;
         anchorY_ = y;
-		pFont_ = pFont;
+        pFont_ = pFont;
         // Height is fixed by font size
         height_ = pFont->textHeight();
 
@@ -42,18 +45,19 @@ MenuText::MenuText(int x, int y, const char *text, MenuFont *pFont,
 
 MenuText::MenuText(int x, int y, int width, const char *text, MenuFont *pFont, 
                    bool highlighted, bool visible, bool centered): 
-            Widget(x, y, width, 0, visible) {
+            Widget(x, y, width, 0, visible)
+{
         
-		highlighted_ = highlighted;
-        centered_ = centered;
-        anchorX_ = x;
-        anchorY_ = y;
-		pFont_ = pFont;
-        // Height is fixed by font size
-        height_ = pFont->textHeight();
+    highlighted_ = highlighted;
+    centered_ = centered;
+    anchorX_ = x;
+    anchorY_ = y;
+    pFont_ = pFont;
+    // Height is fixed by font size
+    height_ = pFont->textHeight();
 
-        updateText(text);
-    }
+    updateText(text);
+}
 
 void MenuText::updateText(const char *text) {
     std::string lbl(text);
@@ -146,59 +150,61 @@ bool ActionWidget::isMouseOver(int x, int y) {
             y < y_ + height_);
 }
 
-void ActionWidget::setenabled(bool enabled) {
-	if (enabled != enabled_) {
-		enabled_ = enabled;
-		redraw();
-	}
+void ActionWidget::setWidgetEnabled(bool enabled) {
+    if (enabled != enabled_) {
+        enabled_ = enabled;
+        redraw();
+    }
 }
 
-Option::Option(Menu *peer, int x, int y, int width, int height, const char *text, MenuFont *pFont,
-            int to, bool visible, bool centered, int darkWidgetId, int lightWidgetId) 
-            : ActionWidget(peer, x, y, width, height, visible), text_(x, y, width - 4, text, pFont, false, true, centered) {
+Option::Option(Menu *peer, int x, int y, int width, int height, const char *text,
+    MenuFont *pFont, int to, bool visible, bool centered, int darkWidgetId,
+    int lightWidgetId) : ActionWidget(peer, x, y, width, height, visible),
+    text_(x, y, width - 4, text, pFont, false, true, centered)
+{
         to_ = to;
         darkWidget_ = NULL;
         lightWidget_ = NULL;
-		hotKey_.keyFunc = KFC_UNKNOWN;
-		hotKey_.unicode = 0;
+        hotKey_.keyFunc = KFC_UNKNOWN;
+        hotKey_.unicode = 0;
 
-		// If button label contains a '&' caracter, then the next
-		// caracter is the acceleration key for that button
-		// only 'a-zA-Z' characters are available
-		char src[100];
-		size_t size = text_.getText().size();
+        // If button label contains a '&' caracter, then the next
+        // caracter is the acceleration key for that button
+        // only 'a-zA-Z' characters are available
+        char src[100];
+        size_t size = text_.getText().size();
 
-		memset(src, 0, 100);
-		memcpy(src, text_.getText().c_str(), size);
-		size_t nbCdpt = utf8::distance(src, src + size);
+        memset(src, 0, 100);
+        memcpy(src, text_.getText().c_str(), size);
+        size_t nbCdpt = utf8::distance(src, src + size);
 
-		char tmp[100];
-		char *itSrc = src;
-		char *itDst = tmp;
-		memset(tmp, 0, 100);
+        char tmp[100];
+        char *itSrc = src;
+        char *itDst = tmp;
+        memset(tmp, 0, 100);
 
-		size_t i = 0;
-		bool foundAmp = false;
-		while (i<nbCdpt) {
-			i++;
-			int cp = utf8::next(itSrc, src + size);
-			if (cp == '&') {
-				if (!foundAmp) {
-					// found '&' : skip it
-					foundAmp = true;
-					continue;
-				}
-			} else if (foundAmp && hotKey_.unicode == 0) {
-				if (cp >= 'A' && cp <= 'z') {
-					hotKey_.unicode = cp;
-				}
-			}
-			// copy char
-			itDst = utf8::append(cp, itDst);
-		}
-		text_.setText(tmp);
-			
-		//////////////////////////
+        size_t i = 0;
+        bool foundAmp = false;
+        while (i<nbCdpt) {
+            i++;
+            int cp = utf8::next(itSrc, src + size);
+            if (cp == '&') {
+                if (!foundAmp) {
+                    // found '&' : skip it
+                    foundAmp = true;
+                    continue;
+                }
+            } else if (foundAmp && hotKey_.unicode == 0) {
+                if (cp >= 'A' && cp <= 'z') {
+                    hotKey_.unicode = cp;
+                }
+            }
+            // copy char
+            itDst = utf8::append(cp, itDst);
+        }
+        text_.setText(tmp);
+
+        //////////////////////////
 
 
 
@@ -486,11 +492,11 @@ TextField::TextField(Menu *peer, int x, int y, int width, int height, MenuFont *
     // Position the button text in the middle of height
     // add 1 pixel to height to compensate lost of division
     text_.setLocation(text_.getX(), y_ + (height_ / 2) - (text_.getHeight() / 2) + 1);
-	isDisplayEmpty_ = displayEmpty;
-	caretPosition_ = 0;
-	yCaret_ = text_.getY() + text_.getFont()->textHeight(true);
-	isInEdition_ = false;
-	maxSize_ = maxSize;
+    isDisplayEmpty_ = displayEmpty;
+    caretPosition_ = 0;
+    yCaret_ = text_.getY() + text_.getFont()->textHeight(true);
+    isInEdition_ = false;
+    maxSize_ = maxSize;
 }
 
 TextField::~TextField() {
@@ -502,64 +508,64 @@ TextField::~TextField() {
  * already drawn on the background image.
  */
 void TextField::draw() {
-	if (!isInEdition_ && isDisplayEmpty_ && text_.getText().size() == 0) {
-		text_.getFont()->drawText(getX(), text_.getY(), emptyLbl_.c_str(), false);
+    if (!isInEdition_ && isDisplayEmpty_ && text_.getText().size() == 0) {
+        text_.getFont()->drawText(getX(), text_.getY(), emptyLbl_.c_str(), false);
     } else {
         text_.draw();
-		if (isInEdition_) {
-			drawCaret();
-		}
+        if (isInEdition_) {
+            drawCaret();
+        }
     }
 }
 
 void TextField::handleCaptureGained() {
-	isInEdition_ = true;
-	// by default set the caret at the end of the text
-	char src[100];
-	size_t size = text_.getText().size();
-	memset(src, 0, 100);
-	memcpy(src, text_.getText().c_str(), size);
-	caretPosition_ = utf8::distance(src, src + size);
+    isInEdition_ = true;
+    // by default set the caret at the end of the text
+    char src[100];
+    size_t size = text_.getText().size();
+    memset(src, 0, 100);
+    memcpy(src, text_.getText().c_str(), size);
+    caretPosition_ = utf8::distance(src, src + size);
 
-	setHighlighted(true);
-	redraw();
+    setHighlighted(true);
+    redraw();
 }
 
 void TextField::handleCaptureLost() {
-	isInEdition_ = false;
-	caretPosition_ = 0;
-	setHighlighted(false);
-	redraw();
+    isInEdition_ = false;
+    caretPosition_ = 0;
+    setHighlighted(false);
+    redraw();
 }
 
 /*!
  * Erase one character before caret.
  */
 void TextField::handleBackSpace() {
-	// Erase character only if caret is not on the first character
+    // Erase character only if caret is not on the first character
     if (caretPosition_ > 0) {
-		char src[100];
-		size_t size = text_.getText().size();
-		memset(src, 0, 100);
-		memcpy(src, text_.getText().c_str(), size);
+        char src[100];
+        size_t size = text_.getText().size();
+        memset(src, 0, 100);
+        memcpy(src, text_.getText().c_str(), size);
 
-		char tmp[100];
-		char *itSrc = src;
-		char *itDst = tmp;
-		memset(tmp, 0, 100);
+        char tmp[100];
+        char *itSrc = src;
+        char *itDst = tmp;
+        memset(tmp, 0, 100);
 
-		size_t nbCdpt = utf8::distance(src, src + size);
+        size_t nbCdpt = utf8::distance(src, src + size);
 
-		size_t i = 0;
-		while (i<nbCdpt) {
-			int cp = utf8::next(itSrc, src + size);
-			if (i != caretPosition_ - 1) {
-				itDst = utf8::append(cp, itDst);
-			}
-			i++;
-		}
-			
-		setText(tmp);
+        size_t i = 0;
+        while (i<nbCdpt) {
+            int cp = utf8::next(itSrc, src + size);
+            if (i != caretPosition_ - 1) {
+                itDst = utf8::append(cp, itDst);
+            }
+            i++;
+        }
+            
+        setText(tmp);
         caretPosition_--;
     }
 }
@@ -568,92 +574,92 @@ void TextField::handleBackSpace() {
  * Erase one character after caret.
  */
 void TextField::handleDelete() {
-	char src[100];
-	size_t size = text_.getText().size();
+    char src[100];
+    size_t size = text_.getText().size();
 
-	memset(src, 0, 100);
-	memcpy(src, text_.getText().c_str(), size);
-	size_t nbCdpt = utf8::distance(src, src + size);
+    memset(src, 0, 100);
+    memcpy(src, text_.getText().c_str(), size);
+    size_t nbCdpt = utf8::distance(src, src + size);
 
-	// Erase one character only if caret is not at the end
+    // Erase one character only if caret is not at the end
     if (caretPosition_ < nbCdpt) {
-		char tmp[100];
-		char *itSrc = src;
-		char *itDst = tmp;
-		memset(tmp, 0, 100);
+        char tmp[100];
+        char *itSrc = src;
+        char *itDst = tmp;
+        memset(tmp, 0, 100);
 
-		size_t i = 0;
-		while (i<nbCdpt) {
-			int cp = utf8::next(itSrc, src + size);
-			if (i != caretPosition_) {
-				itDst = utf8::append(cp, itDst);
-			}
-			i++;
-		}
-			
-		setText(tmp);
+        size_t i = 0;
+        while (i<nbCdpt) {
+            int cp = utf8::next(itSrc, src + size);
+            if (i != caretPosition_) {
+                itDst = utf8::append(cp, itDst);
+            }
+            i++;
+        }
+            
+        setText(tmp);
     }
 }
 
 // Insert new character at caret position
 void TextField::handleCharacter(Key key) {
-	// Key can be displayed -> insert it at the caret position
-	char src[100];
-	size_t size = text_.getText().size();
-	memset(src, 0, 100);
-	memcpy(src, text_.getText().c_str(), size);
-	char *itSrc = src;
-	size_t nbCdpt = utf8::distance(src, src + size);
+    // Key can be displayed -> insert it at the caret position
+    char src[100];
+    size_t size = text_.getText().size();
+    memset(src, 0, 100);
+    memcpy(src, text_.getText().c_str(), size);
+    char *itSrc = src;
+    size_t nbCdpt = utf8::distance(src, src + size);
     if (nbCdpt < maxSize_) {
-		char tmp[100];
-		char *itDst = tmp;
-		memset(tmp, 0, 100);
+        char tmp[100];
+        char *itDst = tmp;
+        memset(tmp, 0, 100);
 
-		size_t i = 0;
-		while(i<caretPosition_) {
-			int cp = utf8::next(itSrc, src + size);
-			itDst = utf8::append(cp, itDst);
-			i++;
-		}
-		// Add the new key
-		if (key.unicode >= 0x0061 && key.unicode <= 0x007A) {
-			// If the key is a letter between 'a' and 'z'
-			// => capitalize it because MenuFont only displays capital letters
-			itDst = utf8::append(key.unicode - 32, itDst);
-		} else {
-			itDst = utf8::append(key.unicode, itDst);
-		}
-			
-		while(i<nbCdpt) {
-			int cp = utf8::next(itSrc, src + size);
-			itDst = utf8::append(cp, itDst);
-			i++;
-		}
-		setText(tmp);
+        size_t i = 0;
+        while(i<caretPosition_) {
+            int cp = utf8::next(itSrc, src + size);
+            itDst = utf8::append(cp, itDst);
+            i++;
+        }
+        // Add the new key
+        if (key.unicode >= 0x0061 && key.unicode <= 0x007A) {
+            // If the key is a letter between 'a' and 'z'
+            // => capitalize it because MenuFont only displays capital letters
+            itDst = utf8::append(key.unicode - 32, itDst);
+        } else {
+            itDst = utf8::append(key.unicode, itDst);
+        }
+            
+        while(i<nbCdpt) {
+            int cp = utf8::next(itSrc, src + size);
+            itDst = utf8::append(cp, itDst);
+            i++;
+        }
+        setText(tmp);
 
         caretPosition_++;
     }
 }
 
 bool TextField::handleKey(Key key, const int modKeys) {
-	bool needRedraw = false;
-	if (key.keyFunc == KFC_LEFT) {
-		// Move caret to the left until start of the text
+    bool needRedraw = false;
+    if (key.keyFunc == KFC_LEFT) {
+        // Move caret to the left until start of the text
         if (caretPosition_ > 0) {
             caretPosition_--;
-			needRedraw = true;
+            needRedraw = true;
         }
     } else if (key.keyFunc == KFC_RIGHT) {
-		char src[100];
-		size_t size = text_.getText().size();
+        char src[100];
+        size_t size = text_.getText().size();
 
-		memset(src, 0, 100);
-		memcpy(src, text_.getText().c_str(), size);
-		size_t dist = utf8::distance(src, src + size);
-		// Move caret to the right until the end of the text
-		if (caretPosition_ < dist) {
+        memset(src, 0, 100);
+        memcpy(src, text_.getText().c_str(), size);
+        size_t dist = utf8::distance(src, src + size);
+        // Move caret to the right until the end of the text
+        if (caretPosition_ < dist) {
             caretPosition_++;
-			needRedraw = true;
+            needRedraw = true;
         }
     } else if (key.keyFunc == KFC_BACKSPACE) {
         handleBackSpace();
@@ -661,37 +667,38 @@ bool TextField::handleKey(Key key, const int modKeys) {
         handleDelete();
     } else if (key.keyFunc == KFC_HOME) {
         caretPosition_ = 0;
-		needRedraw = true;
+        needRedraw = true;
     } else if (key.keyFunc == KFC_END) {
         char src[100];
-		size_t size = text_.getText().size();
+        size_t size = text_.getText().size();
 
-		memset(src, 0, 100);
-		memcpy(src, text_.getText().c_str(), size);
-		caretPosition_ = utf8::distance(src, src + size);
-		needRedraw = true;
-	} else if (text_.getFont()->isPrintable(key.unicode)) {
-		handleCharacter(key);
+        memset(src, 0, 100);
+        memcpy(src, text_.getText().c_str(), size);
+        caretPosition_ = utf8::distance(src, src + size);
+        needRedraw = true;
+    } else if (text_.getFont()->isPrintable(key.unicode)) {
+        handleCharacter(key);
     } else {
         return false;
     }
 
-	if (needRedraw) redraw();
-	return true;
+    if (needRedraw)
+        redraw();
+    return true;
 }
 
 void TextField::handleMouseDown(int x, int y, int button, const int modKeys) {
-	peer_->captureInputBy(this);
+    peer_->captureInputBy(this);
 
-	char src[100];
-	size_t sizeByte = text_.getText().size();
+    char src[100];
+    size_t sizeByte = text_.getText().size();
 
-	memset(src, 0, 100);
-	memcpy(src, text_.getText().c_str(), sizeByte);
-	size_t nbCdpt = utf8::distance(src, src + sizeByte);
+    memset(src, 0, 100);
+    memcpy(src, text_.getText().c_str(), sizeByte);
+    size_t nbCdpt = utf8::distance(src, src + sizeByte);
 
-	// Size in pixel of the text
-	int sizePxl = text_.getFont()->textWidth(src, false);
+    // Size in pixel of the text
+    int sizePxl = text_.getFont()->textWidth(src, false);
 
     // computes caret position
     if (x > sizePxl + getX()) {
@@ -699,64 +706,64 @@ void TextField::handleMouseDown(int x, int y, int button, const int modKeys) {
         caretPosition_ = nbCdpt;
     } else {
         // Clicked in the text so computes what exact letter
-		char tmp[100];
-		char *itSrc = src;
-		char *itDst = tmp;
-		memset(tmp, 0, 100);
+        char tmp[100];
+        char *itSrc = src;
+        char *itDst = tmp;
+        memset(tmp, 0, 100);
 
-		size_t i = 0;
-		while (i<nbCdpt) {
-			int cp = utf8::next(itSrc, src + sizeByte);
-			itDst = utf8::append(cp, itDst);
+        size_t i = 0;
+        while (i<nbCdpt) {
+            int cp = utf8::next(itSrc, src + sizeByte);
+            itDst = utf8::append(cp, itDst);
 
-			if (x < getX() + text_.getFont()->textWidth(tmp, false)) {
+            if (x < getX() + text_.getFont()->textWidth(tmp, false)) {
                 caretPosition_ = i;
                 break;
             }
-			i++;
-		}
+            i++;
+        }
     }
 
-	redraw();
+    redraw();
 }
 
 void TextField::setText(const char* text) {
-	text_.setText(text);
-	redraw();
+    text_.setText(text);
+    redraw();
 }
 
 void TextField::drawCaret() {
-		char src[100];
-		size_t size = text_.getText().size();
-		memset(src, 0, 100);
-		memcpy(src, text_.getText().c_str(), size);
+    char src[100];
+    size_t size = text_.getText().size();
+    memset(src, 0, 100);
+    memcpy(src, text_.getText().c_str(), size);
 
-		char tmp[100];
-		char *itSrc = src;
-		char *itDst = tmp;
-		memset(tmp, 0, 100);
+    char tmp[100];
+    char *itSrc = src;
+    char *itDst = tmp;
+    memset(tmp, 0, 100);
 
-		size_t nbCdpt = utf8::distance(src, src + size);
+    size_t nbCdpt = utf8::distance(src, src + size);
 
-		size_t i = 0;
-		while (i<caretPosition_) {
-			int cp = utf8::next(itSrc, src + size);
-			itDst = utf8::append(cp, itDst);
-			i++;
-		}
+    size_t i = 0;
+    while (i<caretPosition_) {
+        int cp = utf8::next(itSrc, src + size);
+        itDst = utf8::append(cp, itDst);
+        i++;
+    }
 
-		int x = getX() + text_.getFont()->textWidth(tmp, false) + 1;
+    int x = getX() + text_.getFont()->textWidth(tmp, false) + 1;
 
-		// width of caret is the same of the letter above
-		int length = 10;
-		if (caretPosition_ < nbCdpt) {
-			memset(tmp, 0, 100);
-			itDst = tmp;
-			int cp = utf8::next(itSrc, src + size);
-			itDst = utf8::append(cp, itDst);
-            length = text_.getFont()->textWidth(tmp, false);
-        }
+    // width of caret is the same of the letter above
+    int length = 10;
+    if (caretPosition_ < nbCdpt) {
+        memset(tmp, 0, 100);
+        itDst = tmp;
+        int cp = utf8::next(itSrc, src + size);
+        itDst = utf8::append(cp, itDst);
+        length = text_.getFont()->textWidth(tmp, false);
+    }
 
-		// Draw caret
-        g_Screen.drawRect(x, yCaret_, length, 2, 252);
+    // Draw caret
+    g_Screen.drawRect(x, yCaret_, length, 2, 252);
 }

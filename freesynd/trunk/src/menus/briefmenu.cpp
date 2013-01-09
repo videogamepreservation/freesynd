@@ -153,20 +153,20 @@ void BriefMenu::handleShow() {
     if (g_Session.getSelectedBlock().infoLevel < p_briefing_->nb_infos()) {
         getStatic(txtInfoId_)->setTextFormated("%d",
             p_briefing_->infoCost(g_Session.getSelectedBlock().infoLevel));
-        getOption(infosButId_)->setenabled(true);
+        getOption(infosButId_)->setWidgetEnabled(true);
     } else {
         getStatic(txtInfoId_)->setText("");
-        getOption(infosButId_)->setenabled(false);
+        getOption(infosButId_)->setWidgetEnabled(false);
     }
 
     // Initialize the enhancements label with current cost
     if (enh_lvl < p_briefing_->nb_enhts()) {
         getStatic(txtEnhId_)->setTextFormated("%d",
             p_briefing_->enhanceCost(enh_lvl));
-        getOption(enhButId_)->setenabled(true);
+        getOption(enhButId_)->setWidgetEnabled(true);
     } else {
         getStatic(txtEnhId_)->setText("");
-        getOption(enhButId_)->setenabled(false);
+        getOption(enhButId_)->setWidgetEnabled(false);
     }
 
     g_System.showCursor();
@@ -328,7 +328,7 @@ void BriefMenu::handleAction(const int actionId, void *ctx, const int modKeys) {
                 getStatic(txtInfoId_)->setTextFormated("%d",
                     p_briefing_->infoCost(g_Session.getSelectedBlock().infoLevel));
             } else {
-                getOption(infosButId_)->setenabled(false);
+                getOption(infosButId_)->setWidgetEnabled(false);
                 getStatic(txtInfoId_)->setText("");
             }
             update_briefing_text();
@@ -345,7 +345,7 @@ void BriefMenu::handleAction(const int actionId, void *ctx, const int modKeys) {
             mm_renderer_.zoomOut();
             if (g_Session.getSelectedBlock().enhanceLevel == p_briefing_->nb_enhts()) {
                 mm_renderer_.setDrawEnemies(true);
-                getOption(enhButId_)->setenabled(false);
+                getOption(enhButId_)->setWidgetEnabled(false);
             }
             redrawMiniMap();
             

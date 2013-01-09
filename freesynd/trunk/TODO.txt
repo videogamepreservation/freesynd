@@ -1,6 +1,5 @@
  - Complete mission tree
- - MiniMap in game : more detailed map, display peds, guns, radar focus,
-    evacuation red circle
+ - MiniMap in game : more detailed map, display radar focus, evacuation red circle
  - Mission objectives
  - Correct identification of object types during mission load, includes
 vehicles, static objects
@@ -43,8 +42,8 @@ game mission files.
  - add sound effects
  - mapmenu: player color update - if changed in configmenu; change of owners for
 non-player owned territory
- - in original territory owners changed, it was like
-other syndicates where capturing territories
+ - in original territory owners changed, it was like other syndicates where
+ capturing territories
  - selectmenu make impossible to start gameplay with all agents non active+dead1
  - gameplaymenu after mission succesful/failed add timed auto switch to
 debriefmenu after 5 sec or so
@@ -61,3 +60,4 @@ debriefmenu after 5 sec or so
  - Reload button translation for non-English languages
  - Use game lost menu
  - Remove debug info displayed in the console
+ -  add functions isAlive isDead for all objects with health

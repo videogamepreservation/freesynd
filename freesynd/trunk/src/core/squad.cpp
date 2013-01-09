@@ -58,7 +58,7 @@ PedInstance * Squad::member(size_t slotId) {
 bool Squad::hasScanner() {
     for (size_t indx = AgentManager::kSlot1; indx < AgentManager::kMaxSlot; indx++) {
         PedInstance *pAgent = a_members_[indx];
-        if (pAgent && pAgent->health() > 0) {
+        if (pAgent && pAgent->health()) {
             for (int windx=0; windx<pAgent->numWeapons(); windx++) {
                 if (pAgent->weapon(windx)->getWeaponType() == Weapon::Scanner) {
                     return true;

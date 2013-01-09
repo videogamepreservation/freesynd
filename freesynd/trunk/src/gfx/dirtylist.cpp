@@ -143,15 +143,15 @@ void DirtyList::flush() {
 
 bool DirtyList::intersectsList(int x, int y, int width, int height)
 {
-	if (pHead_) {
+    if (pHead_) {
         Link * l = pHead_;
         while (l) {
-			if ( !((x > l->element.x + l->element.width) || 
-					(x + width < l->element.x) ||
-					(y > l->element.y + l->element.height) ||
-					(y + height < l->element.y)) ) {
-				return true;
-			}
+            if ( !((x > l->element.x + l->element.width) || 
+                    (x + width < l->element.x) ||
+                    (y > l->element.y + l->element.height) ||
+                    (y + height < l->element.y)) ) {
+                return true;
+            }
 
 
             l = l->pNext;

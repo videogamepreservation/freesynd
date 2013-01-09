@@ -232,8 +232,8 @@ void ConfMenu::showMainPanel() {
 
 	getOption(okButId_)->setVisible(false);
 	getOption(cancelButId_)->setVisible(false);
-	getOption(acceptButId_)->setenabled(true);
-	getOption(menuButId_)->setenabled(true);
+	getOption(acceptButId_)->setWidgetEnabled(true);
+	getOption(menuButId_)->setWidgetEnabled(true);
 
 	if (currPanel_ == PNL_LOGO) {
 		getOption(leftColButId_)->setVisible(false);
@@ -262,8 +262,8 @@ void ConfMenu::hideMainPanel() {
 	getOption(userNameButId_)->setVisible(false);
 	getOption(compNameButId_)->setVisible(false);
 
-	getOption(acceptButId_)->setenabled(false);
-	getOption(menuButId_)->setenabled(false);
+	getOption(acceptButId_)->setWidgetEnabled(false);
+	getOption(menuButId_)->setWidgetEnabled(false);
 
 	redrawPanel();
 }

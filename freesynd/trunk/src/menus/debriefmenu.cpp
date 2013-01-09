@@ -6,6 +6,7 @@
  *   Copyright (C) 2005  Joost Peters  <joostp@users.sourceforge.net>   *
  *   Copyright (C) 2006  Trent Waddington <qg@biodome.org>              *
  *   Copyright (C) 2010  Benoit Blancard <benblan@users.sourceforge.net>*
+ *   Copyright (C) 2012  Roland Haeder <quixy@users.sourceforge.net>   *
  *                                                                      *
  *    This program is free software;  you can redistribute it and / or  *
  *  modify it  under the  terms of the  GNU General  Public License as  *
@@ -187,10 +188,23 @@ void DebriefMenu::handleLeave() {
 
 void DebriefMenu::handleGameEvent(GameEvent evt) {
     if (evt.type_ == GameEvent::GE_SEARCH) {
-        // A research has ended
+        // A research has ended, so check which type
         Research *pRes = static_cast<Research *> (evt.pCtxt_);
-        Weapon *pWeap = g_App.weapons().getWeapon(pRes->getSearchWeapon());
+         // Is it equipment or mods research?
+         if (pRes->getType() == Research::EQUIPS) {
+             // Get researched weapon type
+             Weapon::WeaponType wt= pRes->getSearchWeapon();
+             assert(wt);
 
-        getStatic(txtSearchId_)->setTextFormated("#DEBRIEF_SEARCH", pWeap->getName());
+             // Get weapon
+             Weapon *pWeap = g_App.weapons().getWeapon(wt);
+             assert(pWeap);
+
+             // Draw name of it
+             getStatic(txtSearchId_)->setTextFormated("#DEBRIEF_SEARCH", pWeap->getName());
+         } else {
+             // Must be mods research so draw it
+             getStatic(txtSearchId_)->setTextFormated("#DEBRIEF_SEARCH", pRes->getName().c_str());
+         }
     }
 }

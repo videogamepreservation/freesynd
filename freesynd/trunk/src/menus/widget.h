@@ -187,9 +187,9 @@ public:
 			enabled_ = isEnabled;
     }
 
-	void setenabled(bool enabled);
+	void setWidgetEnabled(bool enabled);
 
-	bool isenabled() { return enabled_; }
+	bool isWidgetEnabled() { return enabled_; }
 
     //! Tells whether the pointer is over the widget or not
     bool isMouseOver(int x, int y);

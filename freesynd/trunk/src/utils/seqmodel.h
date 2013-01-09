@@ -130,7 +130,7 @@ public:
      */
     void remove(unsigned int index) {
         unsigned int i=0;
-		typename std::vector < T >::iterator it;
+        typename std::vector < T >::iterator it;
         for (it = elements_.begin();
          it != elements_.end(); it++, i++) {
              if (i == index) {
