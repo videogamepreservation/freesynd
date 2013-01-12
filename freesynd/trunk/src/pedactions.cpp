@@ -58,8 +58,9 @@ void PedInstance::createActQWalking(actionQueueGroupType &as, PathNode *tpn,
             aq.condition = 2;
         }
     } else {
+        aq.multi_var.dist_var.dir_move.clear();
         // TODO: implement response from directional movement
-        aq.multi_var.dist_var.bounce = true;
+        aq.multi_var.dist_var.dir_move.bounce = true;
         if (tpn) {
             // direction will be calculated from pathnode position
             aq.t_pn = *tpn;
@@ -70,7 +71,7 @@ void PedInstance::createActQWalking(actionQueueGroupType &as, PathNode *tpn,
             aq.condition = 4;
         } else { // directional movement only
             aq.condition = 1;
-            aq.multi_var.dist_var.bounce = true;
+            aq.multi_var.dist_var.dir_move.bounce = true;
         }
     }
     as.actions.push_back(aq);

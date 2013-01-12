@@ -477,7 +477,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                                 == MapObject::mjt_Vehicle)
                     {
                         VehicleInstance *v = (VehicleInstance *)aqt.t_smo;
-                        if (v->health() && (state_
+                        if (v->health() > 0 && (state_
                             & (PedInstance::pa_smInCar
                             | PedInstance::pa_smUsingCar)) == 0
                             && samePosition(v))
@@ -674,12 +674,11 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                                 speed_ = 0;
                             }
                         } else if (aqt.condition == 1) {
-                            dir_last_ = -1;
                             // TODO: check already at location
                             moveToDir(mission, elapsed,
+                                aqt.multi_var.dist_var.dir_move,
                                 aqt.multi_var.dist_var.dir, -1, -1,
-                                aqt.multi_var.dist_var.dist,
-                                aqt.multi_var.dist_var.bounce);
+                                aqt.multi_var.dist_var.dist);
                             aqt.state |= 2;
                         } else if (aqt.condition == 2) {
                             bool set_new_dest = true;
@@ -710,7 +709,6 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                             }
                         } else if (aqt.condition == 3) {
                             // TODO: check already at location
-                            dir_last_ = -1;
                             int pos_x, pos_y;
                             aqt.t_pn.convertPosToXY(&pos_x, &pos_y);
                             int diffx = pos_x - tile_x_ * 256 - off_x_;
@@ -718,20 +716,19 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                             dist_to_pos_ = (int)sqrt((double)
                                 (diffx * diffx + diffy * diffy));
                             moveToDir(mission, elapsed,
+                                aqt.multi_var.dist_var.dir_move,
                                 -1, pos_x, pos_y,
-                                aqt.multi_var.dist_var.dist,
-                                aqt.multi_var.dist_var.bounce);
+                                aqt.multi_var.dist_var.dist);
                             aqt.state |= 2;
                         } else if (aqt.condition == 4) {
                             // TODO: check already at location
-                            dir_last_ = -1;
                             int pos_x, pos_y;
                             aqt.t_smo->convertPosToXY(&pos_x, &pos_y);
                             dist_to_pos_ = this->distanceTo(aqt.t_smo);
                             moveToDir(mission, elapsed,
+                                aqt.multi_var.dist_var.dir_move,
                                 -1, pos_x, pos_y,
-                                aqt.multi_var.dist_var.dist,
-                                aqt.multi_var.dist_var.bounce);
+                                aqt.multi_var.dist_var.dist);
                             aqt.state |= 2;
                         }
                     }
@@ -744,9 +741,9 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                                 aqt.state |= 4;
                         } else if (aqt.condition == 1) {
                             moveToDir(mission, elapsed,
+                                aqt.multi_var.dist_var.dir_move,
                                 aqt.multi_var.dist_var.dir, -1, -1,
-                                aqt.multi_var.dist_var.dist,
-                                aqt.multi_var.dist_var.bounce);
+                                aqt.multi_var.dist_var.dist);
                             aqt.multi_var.dist_var.dir = dir_;
                         } else if (aqt.condition == 3) {
                             //dir_last_ = -1;
@@ -758,9 +755,9 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                                 (diffx * diffx + diffy * diffy));
                             if (dist_to_pos_ > 0) {
                                 moveToDir(mission, elapsed,
+                                    aqt.multi_var.dist_var.dir_move,
                                     -1, pos_x, pos_y,
-                                    aqt.multi_var.dist_var.dist,
-                                    aqt.multi_var.dist_var.bounce);
+                                    aqt.multi_var.dist_var.dist);
                                 if (tile_x_ == aqt.t_pn.tileX()
                                     && tile_y_ == aqt.t_pn.tileY()
                                     // TODO: add correct z or ignore it?
@@ -776,7 +773,6 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                                 speed_ = 0;
                             }
                         } else if (aqt.condition == 4) {
-                            dir_last_ = -1;
                             int pos_x, pos_y;
                             aqt.t_smo->convertPosToXY(&pos_x, &pos_y);
                             int diffx = pos_x - tile_x_ * 256 - off_x_;
@@ -785,9 +781,9 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                                 (diffx * diffx + diffy * diffy));
                             if (dist_to_pos_ > 0) {
                                 moveToDir(mission, elapsed,
+                                    aqt.multi_var.dist_var.dir_move,
                                     -1, pos_x, pos_y,
-                                    aqt.multi_var.dist_var.dist,
-                                    aqt.multi_var.dist_var.bounce);
+                                    aqt.multi_var.dist_var.dist);
                                 if (samePosition(aqt.t_smo)) {
                                     aqt.state |= 4;
                                     speed_ = 0;
@@ -1591,7 +1587,6 @@ PedInstance::PedInstance(Ped *ped, int m) : ShootableMovableMapObject(m),
     major_type_ = MapObject::mjt_Ped;
     state_ = PedInstance::pa_smNone;
     actions_property_ = 0;
-    dir_last_ = -1;
     
     adrenaline_  = new IPAStim(IPAStim::Adrenaline);
     perception_  = new IPAStim(IPAStim::Perception);

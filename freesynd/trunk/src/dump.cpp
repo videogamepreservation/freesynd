@@ -1,7 +1,6 @@
 #include "gfx/screen.h"
 #include "gfx/spritemanager.h"
 #include "mapmanager.h"
-#include "mission.h"
 #include "utils/file.h"
 #include <png.h>
 #include <stdlib.h>
@@ -23,8 +22,7 @@ public:
 class DummyHelper : public MapHelper {
 public:
     virtual ~DummyHelper() {}
-    virtual void drawAt(int tilex, int tiley, int tilez, int x, int y,
-            int scrollX, int scrollY) {}
+    virtual void drawAt(int tilex, int tiley, int tilez, int x, int y) {}
     virtual void createFastKeys(int tilex, int tiley,
         int maxtilex, int maxtiley) {}
 };

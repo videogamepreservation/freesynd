@@ -276,8 +276,27 @@ public:
         int ox = 128, int oy = 128);
 
     bool movementP(Mission *m, int elapsed);
-    uint8 moveToDir(Mission *m, int elapsed, int dir = -1, int t_posx = -1,
-        int t_posy = -1, int dist = 0, bool bounce = true);
+
+    typedef struct {
+        int32 dir_last;
+        int32 tm_last_chng;
+        int32 dir_modifier;
+        int32 modifier_value;
+        // directional movement only
+        // to decide whether to continue movement by changing
+        // direction or not
+        bool bounce;
+        void clear() {
+            dir_last = -1;
+            tm_last_chng = 0;
+            dir_modifier = 0;
+            modifier_value = 0;
+            bounce = false;
+        }
+    } dirMoveType;
+
+    uint8 moveToDir(Mission *m, int elapsed, dirMoveType &dir_move,
+        int dir = -1, int t_posx = -1, int t_posy = -1, int dist = 0);
 
     void setAllAdrenaLevels(uint8 amount, uint8 depend, uint8 effect) {
         adrenaline_->setLevels256(amount, depend, effect);
@@ -615,7 +634,7 @@ public:
                 // = 0 || t > 0 (ai_aWaitToStart)
                 int32 time_before_start;
                 // wait event, 0 - standalone - time(milliseconds), 1 - waits
-                // till animation finishe, 2 - attached to process time
+                // till animation finished, 2 - attached to process time
                 uint8 desc;
             } time_var;
             struct {
@@ -627,10 +646,7 @@ public:
                 int32 dist_walked;
                 // -1 is unset
                 int32 speed;
-                // directional movement only
-                // to decide whether to continue movement by changing
-                // direction or not
-                bool bounce;
+                dirMoveType dir_move;
             } dist_var;
         } multi_var;
         /* for ai_aReachLocation 0 - go to location, 1 - go to direction,

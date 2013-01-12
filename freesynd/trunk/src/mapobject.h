@@ -259,7 +259,6 @@ protected:
     DefDamageType rcv_damage_def_;
     //! objects direction
     int dir_;
-    int dir_last_;
     //! looped animations, time to show them is set here, if = -1 show forever
     int time_show_anim_;
     //! looped animations, playing time
@@ -413,7 +412,6 @@ public:
 
 protected:
     int speed_, base_speed_;
-    int dir_move_;
     //! on reaching this distance object should stop
     int dist_to_pos_;
     std::list<PathNode> dest_path_;

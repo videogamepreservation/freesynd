@@ -1758,6 +1758,7 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
             char xf = prvpn.tileX() - it->tileX();
             char yf = prvpn.tileY() - it->tileY();
             char zf = prvpn.tileZ() - it->tileZ();
+            // TODO: check offsets
             if (twd > 0x0 && twd < 0x05) {
                 if (twdn > 0x0 && twdn < 0x05) {
                     dest_path_.push_back(*it);
@@ -2344,8 +2345,8 @@ bool PedInstance::movementP(Mission *m, int elapsed)
 }
 
 // TODO: add responses, possible failure, bounced etc.
-uint8 PedInstance::moveToDir(Mission* m, int elapsed, int dir, int t_posx,
-    int t_posy, int dist, bool bounce)
+uint8 PedInstance::moveToDir(Mission* m, int elapsed, dirMoveType &dir_move,
+    int dir, int t_posx, int t_posy, int dist)
 {
     floodPointDesc *based = &(m->mdpoints_[tile_x_
         + tile_y_ * m->mmax_x_ + tile_z_ * m->mmax_m_xy]);
@@ -2359,7 +2360,7 @@ uint8 PedInstance::moveToDir(Mission* m, int elapsed, int dir, int t_posx,
     // TODO: set safewalk need, somewhere
     bool check_safe_walk = true;
 
-    // TODO: better to find safewalk tile and use normal pathfinding
+    // TODO: find safewalk tile and use normal pathfinding
     // to get there
     if ((based->t & m_fdSafeWalk) == 0)
         check_safe_walk = false;
@@ -2369,8 +2370,6 @@ uint8 PedInstance::moveToDir(Mission* m, int elapsed, int dir, int t_posx,
                 t_posy - tile_y_ * 256 - off_y_, &dir);
             if (dir == -1)
                 return false;
-        } else if (dir_move_ != -1) {
-            dir = dir_move_;
         } else
             dir = dir_;
     }
@@ -2384,11 +2383,13 @@ uint8 PedInstance::moveToDir(Mission* m, int elapsed, int dir, int t_posx,
     uint8 bounce_try = 0;
     // TODO: better way for recovering direction, forward 7 tiles check
     // for current dir?
-    if (dir_last_ != -1 && (dir + 256) > dir_last_) {
-        dir = dir_last_;
-        dir %= 256;
-    } else
-        dir_last_ = -1;
+    if (dir_move.dir_last != -1) {
+        if ((dir + 256) > dir_move.dir_last) {
+            dir = dir_move.dir_last;
+            dir %= 256;
+        } else
+            dir_move.dir_last = -1;
+    }
 
     while ((int)dist_curr > 0) {
         bool need_bounce = false;
@@ -2522,12 +2523,12 @@ uint8 PedInstance::moveToDir(Mission* m, int elapsed, int dir, int t_posx,
                 }
                 tile_x_ = tilenx;
                 tile_y_ = tileny;
-                if (dir_last_ != -1) {
+                if (dir_move.dir_last != -1) {
                     dist_passsed += dist_inc;
                     posx = px;
                     posy = py;
                     if (rand() % 256 < 64)
-                        dir_last_ = -1;
+                        dir_move.dir_last = -1;
                     break;
                 }
             }
@@ -2544,51 +2545,51 @@ uint8 PedInstance::moveToDir(Mission* m, int elapsed, int dir, int t_posx,
         else
             off_y_ = ((int)floor(posy)) % 256;
         dist_curr -= dist_passsed;
-        if (need_bounce && bounce) {
+        if (need_bounce && dir_move.bounce) {
             if (bounce_try) {
                 if (bounce_try == 1)
-                    dir_last_ += 64;
+                    dir_move.dir_last += 64;
                 if (bounce_try == 2) {
-                    dir_last_ -= 64;
-                    if (dir_last_ < 0)
-                        dir_last_ += 256;
+                    dir_move.dir_last -= 64;
+                    if (dir_move.dir_last < 0)
+                        dir_move.dir_last += 256;
                 }
-                dir = dir_last_ % 256;
+                dir = dir_move.dir_last % 256;
                 bounce_try = 0;
             } else {
-                if (dir_last_ == -1) {
+                if (dir_move.dir_last == -1) {
                     dir = (dir / 64) * 64;
-                    dir_last_ = dir;
+                    dir_move.dir_last = dir;
                 }
-                dir_last_ += 64;
-                dir = dir_last_ % 256;
+                dir_move.dir_last += 64;
+                dir = dir_move.dir_last % 256;
             }
             setDirection(dir);
-        } else if (dir_last_ != -1) {
+        } else if (dir_move.dir_last != -1) {
             setDirection(dir);
             if (bounce_try == 0) {
                 bounce_try = 1;
-                dir_last_ -= 64;
-                if (dir_last_ < 0)
-                    dir_last_ += 256;
+                dir_move.dir_last -= 64;
+                if (dir_move.dir_last < 0)
+                    dir_move.dir_last += 256;
             }
             if (bounce_try == 1) {
                 bounce_try = 2;
-                dir_last_ += 128;
+                dir_move.dir_last += 128;
             }
             if (bounce_try == 2) {
                 bounce_try = 3;
-                dir_last_ -= 64;
-                if (dir_last_ < 0)
-                    dir_last_ += 256;
+                dir_move.dir_last -= 64;
+                if (dir_move.dir_last < 0)
+                    dir_move.dir_last += 256;
             }
             if (bounce_try == 3) {
                 bounce_try = 1;
-                dir_last_ -= 64;
-                if (dir_last_ < 0)
-                    dir_last_ += 256;
+                dir_move.dir_last -= 64;
+                if (dir_move.dir_last < 0)
+                    dir_move.dir_last += 256;
             }
-            dir = dir_last_ % 256;
+            dir = dir_move.dir_last % 256;
         } else {
             setDirection(dir);
             // TODO: fix this

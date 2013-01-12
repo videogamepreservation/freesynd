@@ -801,7 +801,7 @@ void Mission::createFastKeys(int tilex, int tiley, int maxtilex, int maxtiley) {
     // updating position for visual markers
     for (unsigned int i = 0; i < 4; i++) {
         PedInstance *p = peds_[i];
-        if (p->agentIs() == PedInstance::Agent_Active && p->health()) {
+        if (p->agentIs() == PedInstance::Agent_Active && p->health() > 0) {
             if (p->tileX() >= tilex && p->tileX() < maxtilex
                 && p->tileY() >= tiley && p->tileY() < maxtiley)
             {
@@ -1016,7 +1016,7 @@ void Mission::checkObjectives() {
     std::vector <PedInstance *> peds_evacuate;
     for (uint32 i = 0; i < 4 && all_dead; i++) {
         PedInstance *p = peds_[i];
-        if (p->isOurAgent() && p->health()) {
+        if (p->isOurAgent() && p->health() > 0) {
             all_dead = false;
             peds_evacuate.push_back(p);
         }
@@ -1132,7 +1132,7 @@ void Mission::checkObjectives() {
                                     // we can persuade them, will be
                                     // counted as eliminating for now
                                     && pPed->objGroupID() == obj.indx_grpid.grpid
-                                    && pPed->health())
+                                    && pPed->health() > 0)
                                 {
                                     all_completed = false;
                                 }
@@ -3162,9 +3162,10 @@ void Mission::clrSurfaces() {
 }
 
 /*!
- * 
+ * Uses isometric coordinates transformation to find walkable tile,
+ * starting from top.
  * \param mtp
- * \return 
+ * \return True if walkable tile found
  */
 bool Mission::getWalkable(MapTilePoint &mtp) {
     bool gotit = false;
