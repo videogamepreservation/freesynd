@@ -94,7 +94,7 @@ class Agent;
  * A holder for player data.
  * This class stores all user data.
  */
-class GameSession {
+class GameSession : public Singleton<GameSession> {
 public:
     /*! Number of millisecond for an hour in the game.*/
     static const int HOUR_DELAY;
@@ -296,5 +296,7 @@ private:
      */
     AgentManager agents_;
 };
+
+#define g_Session   GameSession::singleton()
 
 #endif //CORE_GAME_SESSION_H

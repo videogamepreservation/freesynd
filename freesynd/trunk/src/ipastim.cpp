@@ -70,14 +70,14 @@ float IPAStim::getMultiplier() const
         // If you fiddle with this equation beware of
         // values for effective which are close to 0
         float mult = part_of_four(magnitude);
-        assert(mult >= 1 and mult <= 4);
+        assert(mult >= 1 && mult <= 4);
         //printf("%s boost: m:%d->%fx\n", getName(), magnitude_, mult);
         return mult;
     } else {
         // < 0
         // range: 0.25 up towards 1
         float mult = 1.0/part_of_four(magnitude);
-        assert(mult >= 0.25 and mult <= 1.0);
+        assert(mult >= 0.25 && mult <= 1.0);
         //printf("%s reduce: m:%d->%fx\n", getName(), magnitude_, mult);
         return mult;
     }

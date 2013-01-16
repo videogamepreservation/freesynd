@@ -65,10 +65,6 @@ class App : public Singleton < App > {
 
     void setCheatCode(const char *name);
 
-    GameSession &getGameSession() {
-        return session_;
-    }
-
     GameSpriteManager &gameSprites() {
         return game_sprites_;
     }
@@ -156,7 +152,7 @@ private:
     void updateIntroFlag();
 
     void cheatFunds() {
-        session_.setMoney(100000000);
+        g_Session.setMoney(100000000);
     }
 
     void cheatRepeatOrCompleteMission();
@@ -170,13 +166,13 @@ private:
     void cheatEquipFancyWeapons();
 
 private:
-    GameSession session_;
-
     bool running_;
     /*! True means the game will run in fullscreen. */
     bool fullscreen_;
     /*! True means the intro will be played.*/
     bool playIntro_;
+    /*! A structure to hold player informations.*/
+    std::auto_ptr<GameSession> session_;
     std::auto_ptr<Screen> screen_;
     std::auto_ptr<System> system_;
 
@@ -196,7 +192,5 @@ private:
 };
 
 #define g_App   App::singleton()
-
-#define g_Session   App::singleton().getGameSession()
 
 #endif

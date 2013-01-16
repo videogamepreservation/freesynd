@@ -163,7 +163,31 @@ class GamePlayMinimapRenderer : public MinimapRenderer {
 
     //! Returns the map coordinates of the point on the minimap.
     MapTilePoint minimapToMapPoint(int mm_x, int mm_y);
+
+    //! Defines a source on the minimap for the signal
+    void setTargetSignalSource(MapTilePoint &mtp) {
+        setSignalSource(mtp);
+        signalType_ = TARGET;
+    }
+    //! Defines the evacuation point on the minimap
+    void setEvacuationSignalSource(MapTilePoint &mtp) {
+        setSignalSource(mtp);
+        signalType_ = EVACUATION;
+    }
+    //! Changes the signal source position on the map
+    void updateSignalSourcePosition(MapTilePoint &mtp);
+    //! clear any signal source on map
+    void clearSignalSource();
  protected:
+
+    /*!
+     * This enumaration lists the type of signal on the minimap.
+     */
+    enum ESignalType {
+        NONE,
+        TARGET,
+        EVACUATION
+    };
     //! called when zoom changes
     void updateRenderingInfos();
     //! Draw all visible cars
@@ -199,6 +223,9 @@ class GamePlayMinimapRenderer : public MinimapRenderer {
         return ((tileY - world_ty_) * pixpertile_) + (offY / (256 / pixpertile_));
     }
 
+    //! common method for defining a signal source
+    void setSignalSource(MapTilePoint &mtp);
+
     /*!
      * Draw a rect to the given buffer with the given size and color.
      * \param a_buffer destination buffer
@@ -220,6 +247,17 @@ class GamePlayMinimapRenderer : public MinimapRenderer {
     //! Draw a circle to represent agents, police and guards.
     void drawPedCircle(uint8 * a_buffer, int mm_x, int mm_y, uint8 fillColor,
                             uint8 borderColor);
+    //! Draw a circle on the minimap for the signal
+    void drawSignalCircle(uint8 * a_buffer, int signal_px, int signal_py, uint8 radius, uint8 color);
+    //! Draw a pixel on the minimap
+    void drawPixel (uint8 * a_buffer, int signal_px, int signal_py, int x, int y, uint8 color) {
+        x = signal_px + x;
+        y = signal_py - y;
+        if (x > 0 && x < (mm_maxtile_ * pixpertile_) && y > 0 && y < (mm_maxtile_ * pixpertile_)) {
+            int i_index = y * pixpertile_ * (mm_maxtile_ + 1) + x;
+            a_buffer[i_index] = color;
+        }
+    }
  private:
     /*! The mission that contains the minimap.*/
     Mission *p_mission_;
@@ -236,10 +274,22 @@ class GamePlayMinimapRenderer : public MinimapRenderer {
     int cross_x_;
     /*! Coords in pixels of the cross.*/
     int cross_y_;
+    /*! Coords on the world map of the signal source.*/
+    MapTilePoint signalSource_;
+    /*! Coords on the world map of the signal source next position.*/
+    MapTilePoint nextSignalSource_;
+    /*! Type of emitted signal. If NONE, no signal is emitted.*/
+    ESignalType signalType_;
+    /*! Radius for the signal circle.*/
+    uint8 i_signalRadius_;
+    /*! Current signal color.*/
+    uint8 i_signalColor_;
     /*! A timer to control the blinking of weapons.*/
     fs_utils::BoolTimer mm_timer_weap;
     /*! A timer to control the blinking of pedestrians.*/
     fs_utils::BoolTimer mm_timer_ped;
+    /*! Timer for the signal.*/
+    fs_utils::Timer mm_timer_signal;
 };
 
 #endif  // MENUS_MINIMAPRENDERER_H_

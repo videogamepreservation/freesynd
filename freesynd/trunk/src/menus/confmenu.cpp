@@ -136,10 +136,10 @@ void ConfMenu::handleRender(DirtyList &dirtyList) {
 void ConfMenu::handleShow() {
 	menu_manager_->saveBackground();
 
-	toAcceptLogo_ = g_App.getGameSession().getLogo();
+	toAcceptLogo_ = g_Session.getLogo();
 
 	for (unsigned int i = 0; i < sizeof(g_Colours) / sizeof(int); i++) {
-        if (g_Colours[i] == g_App.getGameSession().getLogoColour())
+        if (g_Colours[i] == g_Session.getLogoColour())
             toAcceptColourId_ = i;
     }
 

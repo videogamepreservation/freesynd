@@ -55,8 +55,8 @@
 #include "utils/configfile.h"
 #include "utils/portablefile.h"
 
-App::App(bool disable_sound): running_(true),
-screen_(new Screen(GAME_SCREEN_WIDTH, GAME_SCREEN_HEIGHT))
+App::App(bool disable_sound):
+screen_(new Screen(GAME_SCREEN_WIDTH, GAME_SCREEN_HEIGHT)), session_(new GameSession())
 #ifdef SYSTEM_SDL
     , system_(new SystemSDL())
 #else
@@ -66,6 +66,7 @@ screen_(new Screen(GAME_SCREEN_WIDTH, GAME_SCREEN_HEIGHT))
 {
     fullscreen_ = false;
     playIntro_ = true;
+    running_ = true;
 #ifdef _DEBUG
     debug_breakpoint_trigger_ = 0;
 #endif
@@ -407,7 +408,7 @@ bool App::initialize(const std::string& iniPath) {
     music_.loadMusic();
 
     LOG(Log::k_FLG_INFO, "App", "initialize", ("Loading game data..."))
-    session_.agents().loadAgents();
+    g_Session.agents().loadAgents();
     return reset();
 }
 
@@ -415,7 +416,7 @@ bool App::initialize(const std::string& iniPath) {
  * Activate cheat mode in which all completed missions can be replayed.
  */
 void App::cheatRepeatOrCompleteMission() {
-    session_.cheatReplayMission();
+    g_Session.cheatReplayMission();
 }
 
 void App::cheatWeaponsAndMods() {
@@ -425,7 +426,7 @@ void App::cheatWeaponsAndMods() {
 
 void App::cheatEquipAllMods() {
     for (int agent = 0; agent < AgentManager::MAX_AGENT; agent++) {
-        Agent *pAgent = session_.agents().agent(agent);
+        Agent *pAgent = g_Session.agents().agent(agent);
         if (pAgent) {
             pAgent->clearSlots();
 
@@ -443,7 +444,7 @@ void App::cheatEquipAllMods() {
  * Activate cheat mode in which all missions are playable.
  */
 void App::cheatAnyMission() {
-    session_.cheatEnableAllMission();
+    g_Session.cheatEnableAllMission();
 }
 
 void App::cheatResurrectAgents() {
@@ -459,49 +460,49 @@ void App::cheatAccelerateTime() {
 }
 
 void App::cheatFemaleRecruits() {
-    session_.agents().reset(true);
+    g_Session.agents().reset(true);
 
     for (int i = 0; i < 4; i++)
-        session_.agents().setSquadMember(i, session_.agents().agent(i));
+        g_Session.agents().setSquadMember(i, g_Session.agents().agent(i));
 }
 
 void App::cheatEquipFancyWeapons() {
     for (int i = 0; i < AgentManager::MAX_AGENT; i++) {
-        if (session_.agents().agent(i)) {
-        session_.agents().agent(i)->removeAllWeapons();
+        if (g_Session.agents().agent(i)) {
+        g_Session.agents().agent(i)->removeAllWeapons();
 #ifdef _DEBUG
-        session_.agents().agent(i)->addWeapon(
+        g_Session.agents().agent(i)->addWeapon(
             weapons_.getWeapon(Weapon::Minigun)->createInstance());
-        session_.agents().agent(i)->addWeapon(
+        g_Session.agents().agent(i)->addWeapon(
             weapons_.getWeapon(Weapon::TimeBomb)->createInstance());
-        session_.agents().agent(i)->addWeapon(
+        g_Session.agents().agent(i)->addWeapon(
             weapons_.getWeapon(Weapon::GaussGun)->createInstance());
-        session_.agents().agent(i)->addWeapon(
+        g_Session.agents().agent(i)->addWeapon(
             weapons_.getWeapon(Weapon::Flamer)->createInstance());
-        session_.agents().agent(i)->addWeapon(
+        g_Session.agents().agent(i)->addWeapon(
             weapons_.getWeapon(Weapon::Uzi)->createInstance());
-        session_.agents().agent(i)->addWeapon(
+        g_Session.agents().agent(i)->addWeapon(
             weapons_.getWeapon(Weapon::Persuadatron)->createInstance());
-        session_.agents().agent(i)->addWeapon(
+        g_Session.agents().agent(i)->addWeapon(
             weapons_.getWeapon(Weapon::Laser)->createInstance());
-        session_.agents().agent(i)->addWeapon(
+        g_Session.agents().agent(i)->addWeapon(
             weapons_.getWeapon(Weapon::AccessCard)->createInstance());
 #else
-        session_.agents().agent(i)->addWeapon(
+        g_Session.agents().agent(i)->addWeapon(
                 weapons_.getWeapon(Weapon::Minigun)->createInstance());
-        session_.agents().agent(i)->addWeapon(
+        g_Session.agents().agent(i)->addWeapon(
                 weapons_.getWeapon(Weapon::Minigun)->createInstance());
-        session_.agents().agent(i)->addWeapon(
+        g_Session.agents().agent(i)->addWeapon(
                 weapons_.getWeapon(Weapon::Persuadatron)->createInstance());
-        session_.agents().agent(i)->addWeapon(
+        g_Session.agents().agent(i)->addWeapon(
                 weapons_.getWeapon(Weapon::TimeBomb)->createInstance());
-        session_.agents().agent(i)->addWeapon(
+        g_Session.agents().agent(i)->addWeapon(
                 weapons_.getWeapon(Weapon::EnergyShield)->createInstance());
-        session_.agents().agent(i)->addWeapon(
+        g_Session.agents().agent(i)->addWeapon(
                 weapons_.getWeapon(Weapon::EnergyShield)->createInstance());
-        session_.agents().agent(i)->addWeapon(
+        g_Session.agents().agent(i)->addWeapon(
                 weapons_.getWeapon(Weapon::Laser)->createInstance());
-        session_.agents().agent(i)->addWeapon(
+        g_Session.agents().agent(i)->addWeapon(
                 weapons_.getWeapon(Weapon::Laser)->createInstance());
 #endif
         }
@@ -571,7 +572,7 @@ bool App::reset() {
     mods_.reset();
 
     // Reset user session
-    if (!session_.reset()) {
+    if (!g_Session.reset()) {
         return false;
     }
 
@@ -636,8 +637,8 @@ void App::run(int start_mission) {
         // First, we find the block associated with the given
         // mission number
         for (int i = 0; i < 50; i++) {
-            if (session_.getBlock(i).mis_id == start_mission) {
-                session_.setSelectedBlockId(i);
+            if (g_Session.getBlock(i).mis_id == start_mission) {
+                g_Session.setSelectedBlockId(i);
                 break;
             }
         }
@@ -689,7 +690,7 @@ bool App::saveGameToFile(int fileSlot, std::string name) {
         outfile.write_string(name, 31);
         
         // Session
-        session_.saveToFile(outfile);
+        g_Session.saveToFile(outfile);
 
         // Weapons
         weapons_.saveToFile(outfile);
@@ -699,11 +700,11 @@ bool App::saveGameToFile(int fileSlot, std::string name) {
 
         // Agents
         // TODO move in sesion saveToFile
-        session_.agents().saveToFile(outfile);
+        g_Session.agents().saveToFile(outfile);
 
         // save researches
         // TODO move in sesion saveToFile
-        session_.researchManager().saveToFile(outfile);
+        g_Session.researchManager().saveToFile(outfile);
 
         return true;
     }
@@ -754,7 +755,7 @@ bool App::loadGameFromFile(int fileSlot) {
         // v1.1: 31 characters.
         slotName = infile.read_string((v == 0x0100) ? 25 : 31, true);
 
-        session_.loadFromFile(infile, v);
+        g_Session.loadFromFile(infile, v);
 
         // Weapons
         weapons_.loadFromFile(infile, v);
@@ -763,10 +764,10 @@ bool App::loadGameFromFile(int fileSlot) {
         mods_.loadFromFile(infile, v);
 
         // Agents
-        session_.agents().loadFromFile(infile, v);
+        g_Session.agents().loadFromFile(infile, v);
 
         // Research
-        session_.researchManager().loadFromFile(infile, v);
+        g_Session.researchManager().loadFromFile(infile, v);
 
         return true;
     }

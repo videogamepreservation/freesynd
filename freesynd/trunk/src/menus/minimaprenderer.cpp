@@ -212,8 +212,10 @@ void BriefMinimapRenderer::render(uint16 screen_x, uint16 screen_y) {
  * Default constructor.
  */
 GamePlayMinimapRenderer::GamePlayMinimapRenderer() : 
-    mm_timer_weap(300, false), mm_timer_ped(260, false) {
+    mm_timer_weap(300, false), mm_timer_ped(260, false),
+    mm_timer_signal(500) {
     p_mission_ = NULL;
+    clearSignalSource();
 }
 
 /*!
@@ -231,6 +233,8 @@ void GamePlayMinimapRenderer::init(Mission *pMission, bool b_scannerEnabled) {
     cross_x_ = 64;
     cross_y_ = 64;
     mm_timer_weap.reset();
+    mm_timer_signal.reset();
+    clearSignalSource();
 }
 
 void GamePlayMinimapRenderer::updateRenderingInfos() {
@@ -289,9 +293,48 @@ void GamePlayMinimapRenderer::centerOn(uint16 tileX, uint16 tileY, int offX, int
     cross_y_ = mapToMiniMapY(tileY + 1, offY);
 }
 
+
+void GamePlayMinimapRenderer::setSignalSource(MapTilePoint &mtp) {
+    updateSignalSourcePosition(mtp);
+    signalSource_ = mtp;
+    i_signalRadius_ = 0;
+    i_signalColor_ = fs_cmn::kColorWhite;
+}
+
+void GamePlayMinimapRenderer::updateSignalSourcePosition(MapTilePoint &mtp) {
+    nextSignalSource_ = mtp;
+}
+
+//! clear any signal source on map
+void GamePlayMinimapRenderer::clearSignalSource() {
+    signalType_ = NONE;
+    i_signalRadius_ = 0;
+}
+
 bool GamePlayMinimapRenderer::handleTick(int elapsed) {
     mm_timer_ped.update(elapsed);
     mm_timer_weap.update(elapsed);
+
+    if (signalType_ != NONE && mm_timer_signal.update(elapsed)) {
+        i_signalRadius_ += 2;
+        int signal_px = mapToMiniMapX(signalSource_.tx + 1, signalSource_.ox);
+        int signal_py = mapToMiniMapY(signalSource_.ty + 1, signalSource_.oy);
+
+        int signalRadius2 = i_signalRadius_ * i_signalRadius_;
+        // Distance to the top right corner
+        int dist1 = (128 - signal_px )* (128 - signal_px ) + (signal_py )* (signal_py );
+        // Distance to the top left corner
+        int dist2 = (signal_px )* (signal_px ) + (signal_py )* (signal_py );
+        // Distance to the bottom left corner
+        int dist3 = (signal_px )* (signal_px ) + (128 - signal_py )* (128 - signal_py );
+        // Distance to the bottom left corner
+        int dist4 = (128 - signal_px )* (128 - signal_px ) + (128 - signal_py )* (128 - signal_py );
+        // All four corners of the minimap must be inside the circle to stop growing
+        if (signalRadius2 > dist1 && signalRadius2 > dist2 && signalRadius2 > dist3) {
+            i_signalRadius_ = 0;
+            signalSource_ = nextSignalSource_;
+        }
+    }
 
     return true;
 }
@@ -360,7 +403,12 @@ void GamePlayMinimapRenderer::render(uint16 screen_x, uint16 screen_y) {
     drawPedestrians(minimap_layer);
     drawWeapons(minimap_layer);
     drawCars(minimap_layer);
-    
+
+    if (signalType_ != NONE) {
+        int signal_px = mapToMiniMapX(signalSource_.tx + 1, signalSource_.ox);
+        int signal_py = mapToMiniMapY(signalSource_.ty + 1, signalSource_.oy);
+        drawSignalCircle(minimap_layer, signal_px, signal_py, i_signalRadius_, i_signalColor_);
+    }
 
     // Copy the temp buffer in the final minimap using the tile offset so the minimap movement
     // is smoother
@@ -553,3 +601,72 @@ void GamePlayMinimapRenderer::drawPedCircle(uint8 * a_buffer, int mm_x, int mm_y
         }
     }
 }
+
+/*void GamePlayMinimapRenderer::drawCircle(int x0, int y0, int radius, uint8 color)
+{
+	if (radius<0 || x0+radius < 0 || x0-radius>=width() || y0+radius<0 || y0-radius>=height()) return;
+	if (!radius) { drawPoint(x0,y0,color); return; }
+	drawPoint(x0-radius,y0,color);
+	drawPoint(x0+radius,y0,color);
+	drawPoint(x0,y0-radius,color);
+	drawPoint(x0,y0+radius,color);
+	if (radius==1) return;
+	for (int f = 1-radius, ddFx = 0, ddFy = -(radius<<1), x = 0, y = radius; x<y; ) {
+		if (f>=0) { f+=(ddFy+=2); --y; }
+		++x; ++(f+=(ddFx+=2));
+		if (x!=y+1) {
+			const int x1 = x0-y, x2 = x0+y, y1 = y0-x, y2 = y0+x, x3 = x0-x, x4 = x0+x, y3 = y0-y, y4 = y0+y;
+			drawPoint(x1,y1,color);
+			drawPoint(x1,y2,color);
+			drawPoint(x2,y1,color);
+			drawPoint(x2,y2,color);
+			if (x!=y)
+			{
+				drawPoint(x3,y3,color);
+				drawPoint(x4,y4,color);
+				drawPoint(x4,y3,color);
+				drawPoint(x3,y4,color);
+			}
+		}
+	}
+}*/
+
+void GamePlayMinimapRenderer::drawSignalCircle(uint8 * a_buffer, int signal_px, int signal_py, uint8 radius, uint8 color)
+{
+    int x, y;
+    int l;
+    int r2, y2;
+    int y2_new;
+    int ty;
+
+    // cos pi/4 = 185363 / 2^18 (approx)
+    l = (radius * 185363) >> 18;
+
+    // At x=0, y=radius
+    y = radius;
+
+    r2 = y2 = y * y;
+    ty = (2 * y) - 1;
+    y2_new = r2 + 3;
+
+    for (x = 0; x <= l; x++) {
+        y2_new -= (2 * x) - 3;
+
+        if ((y2 - y2_new) >= ty) {
+            y2 -= ty;
+            y -= 1;
+            ty -= 2;
+        }
+
+        drawPixel (a_buffer, signal_px, signal_py, x, y, color);
+        drawPixel (a_buffer, signal_px, signal_py, x, -y, color);
+        drawPixel (a_buffer, signal_px, signal_py, -x, y, color);
+        drawPixel (a_buffer, signal_px, signal_py, -x, -y, color);
+
+        drawPixel (a_buffer, signal_px, signal_py, y, x, color);
+        drawPixel (a_buffer, signal_px, signal_py, y, -x, color);
+        drawPixel (a_buffer, signal_px, signal_py, -y, x, color);
+        drawPixel (a_buffer, signal_px, signal_py, -y, -x, color);
+    }
+}
+
