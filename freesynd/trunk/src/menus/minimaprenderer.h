@@ -258,7 +258,21 @@ class GamePlayMinimapRenderer : public MinimapRenderer {
             a_buffer[i_index] = color;
         }
     }
+
+    /*!
+     * Return true if the evacuation circle is completly on the minimap.
+     */
+    bool isEvacuationCircleOnMinimap(int signal_px, int signal_py) {
+        int maxPx = mm_maxtile_ * pixpertile_;
+        return (signal_px + kEvacuationRadius < maxPx &&
+                signal_px - kEvacuationRadius > 0 &&
+                signal_py + kEvacuationRadius < maxPx &&
+                signal_py - kEvacuationRadius > 0);
+    }
  private:
+     /*! Radius of the red evacuation circle.*/
+    static const int kEvacuationRadius;
+
     /*! The mission that contains the minimap.*/
     Mission *p_mission_;
     /*!

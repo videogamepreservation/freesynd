@@ -20,6 +20,7 @@
  *                                                                      *
  ************************************************************************/
 
+#include "app.h"
 #include "menus/minimaprenderer.h"
 #include "mission.h"
 #include "gfx/screen.h"
@@ -27,6 +28,7 @@
 #include "ped.h"
 
 const int MinimapRenderer::kMiniMapSizePx = 128;
+const int GamePlayMinimapRenderer::kEvacuationRadius = 15;
 
 void MinimapRenderer::setZoom(EZoom zoom) {
     zoom_ = zoom;
@@ -213,7 +215,7 @@ void BriefMinimapRenderer::render(uint16 screen_x, uint16 screen_y) {
  */
 GamePlayMinimapRenderer::GamePlayMinimapRenderer() : 
     mm_timer_weap(300, false), mm_timer_ped(260, false),
-    mm_timer_signal(500) {
+    mm_timer_signal(450) {
     p_mission_ = NULL;
     clearSignalSource();
 }
@@ -293,12 +295,24 @@ void GamePlayMinimapRenderer::centerOn(uint16 tileX, uint16 tileY, int offX, int
     cross_y_ = mapToMiniMapY(tileY + 1, offY);
 }
 
-
+/*!
+ * Defines a signal position on the map.
+ */
 void GamePlayMinimapRenderer::setSignalSource(MapTilePoint &mtp) {
     updateSignalSourcePosition(mtp);
     signalSource_ = mtp;
-    i_signalRadius_ = 0;
-    i_signalColor_ = fs_cmn::kColorWhite;
+
+    int signal_px = mapToMiniMapX(signalSource_.tx + 1, signalSource_.ox);
+    int signal_py = mapToMiniMapY(signalSource_.ty + 1, signalSource_.oy);
+    if (signalType_ == EVACUATION && isEvacuationCircleOnMinimap(signal_px, signal_py)) {
+        // If we're defining an evacuation point and it's already visible
+        // then the circle is red
+        i_signalColor_ = fs_cmn::kColorDarkRed;
+        i_signalRadius_ = kEvacuationRadius;
+    } else {
+        i_signalRadius_ = 0;
+        i_signalColor_ = fs_cmn::kColorWhite;
+    }
 }
 
 void GamePlayMinimapRenderer::updateSignalSourcePosition(MapTilePoint &mtp) {
@@ -316,23 +330,34 @@ bool GamePlayMinimapRenderer::handleTick(int elapsed) {
     mm_timer_weap.update(elapsed);
 
     if (signalType_ != NONE && mm_timer_signal.update(elapsed)) {
-        i_signalRadius_ += 2;
+        i_signalRadius_ += 4;
         int signal_px = mapToMiniMapX(signalSource_.tx + 1, signalSource_.ox);
         int signal_py = mapToMiniMapY(signalSource_.ty + 1, signalSource_.oy);
 
-        int signalRadius2 = i_signalRadius_ * i_signalRadius_;
-        // Distance to the top right corner
-        int dist1 = (128 - signal_px )* (128 - signal_px ) + (signal_py )* (signal_py );
-        // Distance to the top left corner
-        int dist2 = (signal_px )* (signal_px ) + (signal_py )* (signal_py );
-        // Distance to the bottom left corner
-        int dist3 = (signal_px )* (signal_px ) + (128 - signal_py )* (128 - signal_py );
-        // Distance to the bottom left corner
-        int dist4 = (128 - signal_px )* (128 - signal_px ) + (128 - signal_py )* (128 - signal_py );
-        // All four corners of the minimap must be inside the circle to stop growing
-        if (signalRadius2 > dist1 && signalRadius2 > dist2 && signalRadius2 > dist3) {
-            i_signalRadius_ = 0;
-            signalSource_ = nextSignalSource_;
+        if (signalType_ == EVACUATION && isEvacuationCircleOnMinimap(signal_px, signal_py)) {
+            i_signalColor_ = fs_cmn::kColorDarkRed;
+            i_signalRadius_ = kEvacuationRadius;
+        } else {
+            int maxPx = mm_maxtile_ * pixpertile_;
+            int signalRadius2 = i_signalRadius_ * i_signalRadius_;
+            // Distance to the top right corner
+            int dist1 = (maxPx - signal_px )* (maxPx - signal_px ) + (signal_py )* (signal_py );
+            // Distance to the top left corner
+            int dist2 = (signal_px )* (signal_px ) + (signal_py )* (signal_py );
+            // Distance to the bottom left corner
+            int dist3 = (signal_px )* (signal_px ) + (maxPx - signal_py )* (maxPx - signal_py );
+            // Distance to the bottom left corner
+            int dist4 = (maxPx - signal_px )* (maxPx - signal_px ) + (maxPx - signal_py )* (maxPx - signal_py );
+            // All four corners of the minimap must be inside the circle to stop growing
+            if (signalRadius2 > dist1 && signalRadius2 > dist2 && 
+                signalRadius2 > dist3 && signalRadius2 > dist4) {
+                i_signalRadius_ = 0;
+                signalSource_ = nextSignalSource_;
+                // TODO : uncomment when assassinate.ogg doesn't have the pong sound in it
+                //g_App.gameSounds().play(snd::TRACKING_PONG);
+            }
+            // reset color to white in case the red circle was displayed
+            i_signalColor_ = fs_cmn::kColorWhite;
         }
     }
 
