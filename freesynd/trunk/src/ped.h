@@ -696,7 +696,8 @@ public:
 
     void createActQStanding(actionQueueGroupType &as);
     void createActQWalking(actionQueueGroupType &as, PathNode *tpn,
-        ShootableMapObject *tsmo, int32 dir = -1, int32 dist = 0);
+        ShootableMapObject *tsmo, int32 dir = -1, int32 dist = 0,
+        bool bounce = true);
     void createActQHit(actionQueueGroupType &as, PathNode *tpn,
         int32 dir = -1);
     bool createActQFiring(actionQueueGroupType &as, PathNode *tpn,

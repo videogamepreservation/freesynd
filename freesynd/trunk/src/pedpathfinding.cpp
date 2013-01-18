@@ -2381,6 +2381,7 @@ uint8 PedInstance::moveToDir(Mission* m, int elapsed, dirMoveType &dir_move,
         dist_curr = (double)dist;
     bool bounced = false;
     uint8 bounce_try = 0;
+    bool should_bounce = dir_move.bounce;
     // TODO: better way for recovering direction, forward 7 tiles check
     // for current dir?
     if (dir_move.dir_last != -1) {
@@ -2527,8 +2528,10 @@ uint8 PedInstance::moveToDir(Mission* m, int elapsed, dirMoveType &dir_move,
                     dist_passsed += dist_inc;
                     posx = px;
                     posy = py;
-                    if (rand() % 256 < 64)
+                    if (rand() % 256 < 64) {
                         dir_move.dir_last = -1;
+                        bounce_try = 0;
+                    }
                     break;
                 }
             }
@@ -2545,7 +2548,7 @@ uint8 PedInstance::moveToDir(Mission* m, int elapsed, dirMoveType &dir_move,
         else
             off_y_ = ((int)floor(posy)) % 256;
         dist_curr -= dist_passsed;
-        if (need_bounce && dir_move.bounce) {
+        if (need_bounce && should_bounce) {
             if (bounce_try) {
                 if (bounce_try == 1)
                     dir_move.dir_last += 64;

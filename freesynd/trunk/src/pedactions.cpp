@@ -38,7 +38,7 @@ void PedInstance::createActQStanding(actionQueueGroupType &as) {
 }
 
 void PedInstance::createActQWalking(actionQueueGroupType &as, PathNode *tpn,
-    ShootableMapObject *tsmo, int32 dir, int32 dist)
+    ShootableMapObject *tsmo, int32 dir, int32 dist, bool bounce)
 {
     as.state = 1;
     actionQueueType aq;
@@ -60,7 +60,7 @@ void PedInstance::createActQWalking(actionQueueGroupType &as, PathNode *tpn,
     } else {
         aq.multi_var.dist_var.dir_move.clear();
         // TODO: implement response from directional movement
-        aq.multi_var.dist_var.dir_move.bounce = true;
+        aq.multi_var.dist_var.dir_move.bounce = bounce;
         if (tpn) {
             // direction will be calculated from pathnode position
             aq.t_pn = *tpn;
@@ -71,7 +71,7 @@ void PedInstance::createActQWalking(actionQueueGroupType &as, PathNode *tpn,
             aq.condition = 4;
         } else { // directional movement only
             aq.condition = 1;
-            aq.multi_var.dist_var.dir_move.bounce = true;
+            aq.multi_var.dist_var.dir_move.bounce = bounce;
         }
     }
     as.actions.push_back(aq);

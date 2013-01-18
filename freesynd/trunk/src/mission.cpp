@@ -283,6 +283,7 @@ bool Mission::loadLevel(uint8 * levelData)
                 PedInstance::actionQueueGroupType as;
                 as.group_desc = PedInstance::gd_mStandWalk;
                 as.origin_desc = 1;
+                // TODO : kenya map timeout scenario somewhere
                 while (offset_nxt) {
                     // sc.type
                     // 1, 8 - walking
@@ -307,7 +308,7 @@ bool Mission::loadLevel(uint8 * levelData)
                         if (v)
                             p->createActQUsingCar(as, &pn, v);
                         else
-                            p->createActQWalking(as, &pn, NULL, p->getDir());
+                            p->createActQWalking(as, &pn, NULL, p->getDir(), 0, false);
                             //p->createActQWalking(as, &pn, NULL, -1);
                         if (!not_in_vehicle && offset_nxt == 0)
                             p->createActQResetActionQueue(as);
@@ -1081,6 +1082,7 @@ void Mission::checkObjectives() {
                 p = peds_[obj.indx_grpid.targetindx];
                 if (p->health() <= 0)
                     obj.condition |= 8;
+                all_completed = false;
                 break;
             case objv_PickUpObject:
                 wi = weapons_[obj.indx_grpid.targetindx];
