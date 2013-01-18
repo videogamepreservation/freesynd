@@ -460,7 +460,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                         // NOTE: don't put weapon on the ground
                         WeaponInstance *wi = aqt.multi_var.enemy_var.weapon.wpn.wi;
                         if (wi && wi->getMainType()
-                            == Weapon::Persuadatron && aqt.t_smo->health())
+                            == Weapon::Persuadatron && aqt.t_smo->health() > 0)
                         {
                             int tm_left = elapsed;
                             uint16 answ = wi->inflictDamage(aqt.t_smo, NULL, &tm_left);

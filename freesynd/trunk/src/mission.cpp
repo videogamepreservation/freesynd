@@ -308,7 +308,7 @@ bool Mission::loadLevel(uint8 * levelData)
                         if (v)
                             p->createActQUsingCar(as, &pn, v);
                         else
-                            p->createActQWalking(as, &pn, NULL, p->getDir(), 0, false);
+                            p->createActQWalking(as, &pn, NULL, p->getDir(), 0, true);
                             //p->createActQWalking(as, &pn, NULL, -1);
                         if (!not_in_vehicle && offset_nxt == 0)
                             p->createActQResetActionQueue(as);
