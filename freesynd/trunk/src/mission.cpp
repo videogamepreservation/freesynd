@@ -702,14 +702,21 @@ bool Mission::loadLevel(uint8 * levelData)
     return true;
 }
 
-bool Mission::loadMap()
-{
-    p_map_ = g_App.maps().loadMap(i_map_id_);
-    if (p_map_ != NULL) {
-        createMinimap();
-        return true;
+/*!
+ * Sets the given map for the mission.
+ * Creates a minimap from it.
+ * \param p_map The map to set.
+ */
+void Mission::set_map(Map *p_map) {
+    if (p_map) {
+        p_map_ = p_map;
+        p_map_->mapDimensions(&mmax_x_, &mmax_y_, &mmax_z_);
+
+        if (p_minimap_) {
+            delete p_minimap_;
+        }
+        p_minimap_ = new MiniMap(p_map_);
     }
-    return false;
 }
 
 int Mission::mapWidth()
@@ -3366,15 +3373,6 @@ void Mission::adjXYZ(int &x, int &y, int &z) {
         x = mmax_x_ - 1;
     if (y >= mmax_y_)
         y = mmax_y_ - 1;
-}
-
-void Mission::createMinimap() {
-    p_map_->mapDimensions(&mmax_x_, &mmax_y_, &mmax_z_);
-
-    if (p_minimap_) {
-        delete p_minimap_;
-    }
-    p_minimap_ = new MiniMap(p_map_);
 }
 
 WeaponInstance *Mission::createWeaponInstance(uint8 * data)

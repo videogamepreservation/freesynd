@@ -88,10 +88,22 @@ public:
     virtual ~Mission();
 
     bool loadLevel(uint8 *levelData);
-    bool loadMap();
 
+    /*!
+     * Sets the given map for the mission.
+     * If p_map is not null, creates a minimap from it.
+     * \param p_map The map to set.
+     */
+    void set_map(Map *p_map);
+
+    /*!
+     * Returns the map id used for the mission.
+     */
     int map() { return i_map_id_; }
-    void set_map(Map *p_map) { p_map_ = p_map; }
+    uint16 mapId() { return i_map_id_; }
+    /*!
+     * Returns the map used for the mission.
+     */
     Map * get_map() {return p_map_; }
 
     int mapWidth();
@@ -467,7 +479,7 @@ public:
     floodPointDesc *mdpoints_;
     // for copy in pathfinding
     floodPointDesc *mdpoints_cp_;
-    // initialized in createMinimap, used for in-class calculations
+    // initialized in set_map, used for in-class calculations
     // map maximum x,y,z values
     int mmax_x_, mmax_y_, mmax_z_;
     // initialized in setSurfaces, used for in-class calculations
@@ -513,8 +525,6 @@ protected:
     bool isStairs(char thisTile);
 
     WeaponInstance *createWeaponInstance(uint8 *data);
-
-    void createMinimap();
 
 protected:
     LEVELDATA level_data_;

@@ -42,9 +42,6 @@ public:
     Mission *loadMission(int n);
     //! Loads briefing for the given mission id
 	MissionBriefing *loadBriefing(int n);
-
-protected:
-     std::map<int, Mission *> missions_;
 };
 
 #endif

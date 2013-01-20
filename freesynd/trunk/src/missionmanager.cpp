@@ -75,9 +75,14 @@ MissionBriefing *MissionManager::loadBriefing(int n) {
 	return p_mb;
 }
 
+/*!
+ * Loads a mission.
+ * \param n Mission id.
+ * \return NULL if Mission could not be loaded.
+ */
 Mission *MissionManager::loadMission(int n)
 {
-    LOG(Log::k_FLG_IO, "MissionManager", "loadMission()", ("loading mission %i\n", n));
+    LOG(Log::k_FLG_IO, "MissionManager", "loadMission()", ("loading mission %i", n));
 
     char tmp[100];
     int size;
@@ -97,8 +102,12 @@ Mission *MissionManager::loadMission(int n)
     }
     delete[] data;
 
-    m->loadMap();
+    Map *p_map = g_App.maps().loadMap(m->mapId());
+    if (p_map == NULL) {
+        delete m;
+        return NULL;
+    }
+    m->set_map(p_map);
 
-    missions_[n] = m;
     return m;
 }

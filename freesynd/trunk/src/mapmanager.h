@@ -41,17 +41,10 @@ public:
 
     //! Initialize the manager
     bool initialize();
-    Map * loadMap(int mapNum);
-    bool drawMap(int mapNum, int scrollx, int scrolly, MapHelper *helper);
+    //! Load the map with the given id
+    Map * loadMap(uint16 i_mapNum);
+    //! Look in the cache for the map with the given id
     Map *map(int mapNum);
-    int mapWidth(int mapNum);
-    int mapHeight(int mapNum);
-    int tileToScreenX(int mapNum, int x, int y, int z, int pX, int pY);
-    int tileToScreenY(int mapNum, int x, int y, int z, int pX, int pY);
-    int screenToTileX(int mapNum, int x, int y, int &ox);
-    int screenToTileY(int mapNum, int x, int y, int &oy);
-    int maxZAt(int mapNum, int x, int y);
-    bool mapDimensions(int mapNum, int *x, int *y, int *z);
 
 protected:
     std::map<int, Map *> maps_;

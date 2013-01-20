@@ -26,6 +26,7 @@
 #include <assert.h>
 #include "mapmanager.h"
 #include "utils/file.h"
+#include "utils/log.h"
 
 MapManager::MapManager()
 {
@@ -46,159 +47,80 @@ bool MapManager::initialize()
     return tileManager_.loadTiles();
 }
 
-Map * MapManager::loadMap(int mapNum)
+/*!
+ * Loads the given map.
+ * First look in the map cache if the map already exists.
+ * If the map exists, returns it. Otherwise, creates a new one.
+ * \param i_mapNum The map id.
+ * \return NULL if map could not be loaded
+ */
+Map * MapManager::loadMap(uint16 i_mapNum)
 {
-    if (maps_.find(mapNum) != maps_.end())
-        return maps_[mapNum];
     char tmp[100];
-    sprintf(tmp, "map%02d.dat", mapNum);
     int size;
-    uint8 *mapData = File::loadOriginalFile(tmp, size);
 
-    maps_[mapNum] = new Map(&tileManager_, mapNum);
-    maps_[mapNum]->loadMap(mapData);
+    LOG(Log::k_FLG_IO, "MapManager", "loadMap()", ("loading map %i", i_mapNum));
+    // First look in cache
+    if (maps_.find(i_mapNum) != maps_.end()) {
+        return maps_[i_mapNum];
+    }
+    
+    // Not found so construct new one
+    LOG(Log::k_FLG_IO, "MapManager", "loadMap()", ("Load new map"));
+    sprintf(tmp, "map%02d.dat", i_mapNum);
+    uint8 *mapData = File::loadOriginalFile(tmp, size);
+    if (mapData == NULL) {
+        return NULL;
+    }
+
+    maps_[i_mapNum] = new Map(&tileManager_, i_mapNum);
+    maps_[i_mapNum]->loadMap(mapData);
     // patch for "YUKON" map
-    if (mapNum == 0x27) {
-        maps_[mapNum]->patchMap(60, 63, 1, 0x27);
-        maps_[mapNum]->patchMap(61, 63, 1, 0x27);
-        maps_[mapNum]->patchMap(62, 63, 1, 0x27);
-        maps_[mapNum]->patchMap(60, 64, 1, 0x27);
-        maps_[mapNum]->patchMap(61, 64, 1, 0x27);
-        maps_[mapNum]->patchMap(62, 64, 1, 0x27);
-        maps_[mapNum]->patchMap(60, 65, 1, 0x27);
-        maps_[mapNum]->patchMap(61, 65, 1, 0x27);
-        maps_[mapNum]->patchMap(62, 65, 1, 0x27);
-        maps_[mapNum]->patchMap(60, 66, 1, 0x27);
-        maps_[mapNum]->patchMap(61, 66, 1, 0x27);
-        maps_[mapNum]->patchMap(62, 66, 1, 0x27);
-        maps_[mapNum]->patchMap(60, 67, 1, 0x27);
-        maps_[mapNum]->patchMap(61, 67, 1, 0x27);
-        maps_[mapNum]->patchMap(62, 67, 1, 0x27);
+    if (i_mapNum == 0x27) {
+        maps_[i_mapNum]->patchMap(60, 63, 1, 0x27);
+        maps_[i_mapNum]->patchMap(61, 63, 1, 0x27);
+        maps_[i_mapNum]->patchMap(62, 63, 1, 0x27);
+        maps_[i_mapNum]->patchMap(60, 64, 1, 0x27);
+        maps_[i_mapNum]->patchMap(61, 64, 1, 0x27);
+        maps_[i_mapNum]->patchMap(62, 64, 1, 0x27);
+        maps_[i_mapNum]->patchMap(60, 65, 1, 0x27);
+        maps_[i_mapNum]->patchMap(61, 65, 1, 0x27);
+        maps_[i_mapNum]->patchMap(62, 65, 1, 0x27);
+        maps_[i_mapNum]->patchMap(60, 66, 1, 0x27);
+        maps_[i_mapNum]->patchMap(61, 66, 1, 0x27);
+        maps_[i_mapNum]->patchMap(62, 66, 1, 0x27);
+        maps_[i_mapNum]->patchMap(60, 67, 1, 0x27);
+        maps_[i_mapNum]->patchMap(61, 67, 1, 0x27);
+        maps_[i_mapNum]->patchMap(62, 67, 1, 0x27);
     }
     // patch for "INDONESIA" map
     // TODO: find better way to block access for our agents
-    if (mapNum == 0x5B) {
-        maps_[mapNum]->patchMap(49, 27, 2, 0);
-        maps_[mapNum]->patchMap(49, 28, 2, 0);
-        maps_[mapNum]->patchMap(49, 29, 2, 0);
+    if (i_mapNum == 0x5B) {
+        maps_[i_mapNum]->patchMap(49, 27, 2, 0);
+        maps_[i_mapNum]->patchMap(49, 28, 2, 0);
+        maps_[i_mapNum]->patchMap(49, 29, 2, 0);
     }
 
     delete[] mapData;
 
-    return maps_[mapNum];
+    return maps_[i_mapNum];
 }
 
-bool MapManager::drawMap(int mapNum, int scrollx, int scrolly,
-                         MapHelper * helper)
-{
-
-    //make sure the map is loaded
-    if (maps_.find(mapNum) == maps_.end()) {
-        printf("MapManager::drawMap: map %d not loaded!\n", mapNum);
-        return false;
-    }
-
-    maps_[mapNum]->draw(scrollx, scrolly, helper);
-
-    return true;
-}
-
-Map *MapManager::map(int mapNum)
+/*!
+ * Returns the map if found in cache.
+ * The map must have been loaded first.
+ * \param i_mapNum Map id.
+ * \return NULL if map is not found
+ */
+Map *MapManager::map(int i_mapNum)
 {
     //make sure the map is loaded
-    if (maps_.find(mapNum) == maps_.end()) {
-        printf("MapManager::map: map %d not loaded!\n", mapNum);
-        return false;
+    if (maps_.find(i_mapNum) == maps_.end()) {
+        LOG(Log::k_FLG_IO, "MapManager", "map", ("map %d not in cache", i_mapNum));
+        return NULL;
     }
 
-    return maps_[mapNum];
+    return maps_[i_mapNum];
 }
 
-int MapManager::mapWidth(int mapNum)
-{
-    //make sure the map is loaded
-    if (maps_.find(mapNum) == maps_.end()) {
-        printf("MapManager::mapWidth: map %d not loaded!\n", mapNum);
-        return false;
-    }
 
-    return maps_[mapNum]->width();
-}
-
-int MapManager::mapHeight(int mapNum)
-{
-    //make sure the map is loaded
-    if (maps_.find(mapNum) == maps_.end()) {
-        printf("MapManager::mapHeight: map %d not loaded!\n", mapNum);
-        return false;
-    }
-
-    return maps_[mapNum]->height();
-}
-
-int MapManager::tileToScreenX(int mapNum, int x, int y, int z, int pX,
-                              int pY)
-{
-    //make sure the map is loaded
-    if (maps_.find(mapNum) == maps_.end()) {
-        printf("MapManager::tileToScreenX: map %d not loaded!\n", mapNum);
-        return 0;
-    }
-
-    return maps_[mapNum]->tileToScreenX(x, y, z, pX, pY);
-}
-
-int MapManager::tileToScreenY(int mapNum, int x, int y, int z, int pX,
-                              int pY)
-{
-    //make sure the map is loaded
-    if (maps_.find(mapNum) == maps_.end()) {
-        printf("MapManager::tileToScreenY: map %d not loaded!\n", mapNum);
-        return 0;
-    }
-
-    return maps_[mapNum]->tileToScreenY(x, y, z, pX, pY);
-}
-
-int MapManager::screenToTileX(int mapNum, int x, int y, int &ox)
-{
-    //make sure the map is loaded
-    if (maps_.find(mapNum) == maps_.end()) {
-        printf("MapManager::screenToTileX: map %d not loaded!\n", mapNum);
-        return 0;
-    }
-
-    return maps_[mapNum]->screenToTileX(x, y, ox);
-}
-
-int MapManager::screenToTileY(int mapNum, int x, int y, int &oy)
-{
-    //make sure the map is loaded
-    if (maps_.find(mapNum) == maps_.end()) {
-        printf("MapManager::screenToTileY: map %d not loaded!\n", mapNum);
-        return 0;
-    }
-
-    return maps_[mapNum]->screenToTileY(x, y, oy);
-}
-
-int MapManager::maxZAt(int mapNum, int x, int y)
-{
-    return maps_[mapNum]->maxZAt(x, y);
-}
-
-bool MapManager::mapDimensions(int mapNum, int *x, int *y, int *z)
-{
-    //make sure the map is loaded
-    if (maps_.find(mapNum) == maps_.end()) {
-        printf("MapManager::mapDimensions: map %d not loaded!\n", mapNum);
-        return false;
-    }
-
-    Map * m = maps_[mapNum];
-    *x = m->maxX();
-    *y = m->maxY();
-    *z = m->maxZ();
-
-    return true;
-}

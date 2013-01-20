@@ -198,9 +198,9 @@ bool GameplayMenu::scroll() {
         int newWorldX = world_x_ + scroll_x_;
 
         int tx =
-            g_App.maps().screenToTileX(mission_->map(), newWorldX, world_y_, ox);
+            mission_->get_map()->screenToTileX(newWorldX, world_y_, ox);
         int ty =
-            g_App.maps().screenToTileY(mission_->map(), newWorldX, world_y_, oy);
+            mission_->get_map()->screenToTileY(newWorldX, world_y_, oy);
 
         // Scroll to the right
         if (scroll_x_ > 0) {
@@ -209,8 +209,8 @@ bool GameplayMenu::scroll() {
                 // so we scroll down until the far right corner
                 int newWorldY = world_y_ + SCROLL_STEP;
                 newWorldX += SCROLL_STEP;
-                tx = g_App.maps().screenToTileX(mission_->map(), newWorldX, newWorldY, ox);
-                ty = g_App.maps().screenToTileY(mission_->map(), newWorldX, newWorldY, oy);
+                tx = mission_->get_map()->screenToTileX(newWorldX, newWorldY, ox);
+                ty = mission_->get_map()->screenToTileY(newWorldX, newWorldY, oy);
 
                 if (ty < mission_->minY() || tx > mission_->maxX()) {
                     // We hit the corner so don't scroll
@@ -225,8 +225,8 @@ bool GameplayMenu::scroll() {
                 // so we scroll up until the far right corner
                 int newWorldY = world_y_ - SCROLL_STEP;
                 newWorldX += SCROLL_STEP;
-                tx = g_App.maps().screenToTileX(mission_->map(), newWorldX, newWorldY, ox);
-                ty = g_App.maps().screenToTileY(mission_->map(), newWorldX, newWorldY, oy);
+                tx = mission_->get_map()->screenToTileX(newWorldX, newWorldY, ox);
+                ty = mission_->get_map()->screenToTileY(newWorldX, newWorldY, oy);
 
                 if (ty < mission_->minY() || tx > mission_->maxX()) {
                     return false;
@@ -247,8 +247,8 @@ bool GameplayMenu::scroll() {
                 // so we scroll down until the far left corner
                 int newWorldY = world_y_ + SCROLL_STEP;
                 newWorldX -= SCROLL_STEP;
-                tx = g_App.maps().screenToTileX(mission_->map(), newWorldX, newWorldY, ox);
-                ty = g_App.maps().screenToTileY(mission_->map(), newWorldX, newWorldY, oy);
+                tx = mission_->get_map()->screenToTileX(newWorldX, newWorldY, ox);
+                ty = mission_->get_map()->screenToTileY(newWorldX, newWorldY, oy);
 
                 if (tx < mission_->minX() || ty > mission_->maxY()) {
                     return false;
@@ -262,8 +262,8 @@ bool GameplayMenu::scroll() {
                 // so we scroll up until the far left corner
                 int newWorldY = world_y_ - SCROLL_STEP;
                 newWorldX -= SCROLL_STEP;
-                tx = g_App.maps().screenToTileX(mission_->map(), newWorldX, newWorldY, ox);
-                ty = g_App.maps().screenToTileY(mission_->map(), newWorldX, newWorldY, oy);
+                tx = mission_->get_map()->screenToTileX(newWorldX, newWorldY, ox);
+                ty = mission_->get_map()->screenToTileY(newWorldX, newWorldY, oy);
 
                 if (tx < mission_->minX() || ty > mission_->maxY()) {
                     return false;
@@ -283,9 +283,9 @@ bool GameplayMenu::scroll() {
         int newWorldY = world_y_ + scroll_y_;
 
         int tx =
-            g_App.maps().screenToTileX(mission_->map(), world_x_, newWorldY, ox);
+            mission_->get_map()->screenToTileX(world_x_, newWorldY, ox);
         int ty =
-            g_App.maps().screenToTileY(mission_->map(), world_x_, newWorldY, oy);
+            mission_->get_map()->screenToTileY(world_x_, newWorldY, oy);
 
         // Scroll down
         if (scroll_y_ > 0) {
@@ -293,8 +293,8 @@ bool GameplayMenu::scroll() {
                 // we hit the lower right border of the map
                 // so we scroll down until the lower corner
                 int newWorldX = world_x_ - 2*SCROLL_STEP;
-                tx = g_App.maps().screenToTileX(mission_->map(), newWorldX, newWorldY, ox);
-                ty = g_App.maps().screenToTileY(mission_->map(), newWorldX, newWorldY, oy);
+                tx = mission_->get_map()->screenToTileX(newWorldX, newWorldY, ox);
+                ty = mission_->get_map()->screenToTileY(newWorldX, newWorldY, oy);
 
                 if (ty > mission_->maxY() || tx > mission_->maxX()) {
                     return false;
@@ -307,8 +307,8 @@ bool GameplayMenu::scroll() {
                 // we hit the lower left border of the map
                 // so we scroll down until the lower corner
                 int newWorldX = world_x_ + 2*SCROLL_STEP;
-                tx = g_App.maps().screenToTileX(mission_->map(), newWorldX, newWorldY, ox);
-                ty = g_App.maps().screenToTileY(mission_->map(), newWorldX, newWorldY, oy);
+                tx = mission_->get_map()->screenToTileX(newWorldX, newWorldY, ox);
+                ty = mission_->get_map()->screenToTileY(newWorldX, newWorldY, oy);
 
                 if (ty > mission_->maxY() || tx > mission_->maxX()) {
                     return false;
@@ -327,8 +327,8 @@ bool GameplayMenu::scroll() {
                 // we hit the upper right border of the map
                 // so we scroll up until the upper corner
                 int newWorldX = world_x_ + 2*SCROLL_STEP;
-                tx = g_App.maps().screenToTileX(mission_->map(), newWorldX, newWorldY, ox);
-                ty = g_App.maps().screenToTileY(mission_->map(), newWorldX, newWorldY, oy);
+                tx = mission_->get_map()->screenToTileX(newWorldX, newWorldY, ox);
+                ty = mission_->get_map()->screenToTileY(newWorldX, newWorldY, oy);
 
                 if (ty < mission_->minY() || tx < mission_->minX()) {
                     return false;
@@ -341,8 +341,8 @@ bool GameplayMenu::scroll() {
                 // we hit the upper left border of the map
                 // so we scroll up until the upper corner
                 int newWorldX = world_x_ - 2*SCROLL_STEP;
-                tx = g_App.maps().screenToTileX(mission_->map(), newWorldX, newWorldY, ox);
-                ty = g_App.maps().screenToTileY(mission_->map(), newWorldX, newWorldY, oy);
+                tx = mission_->get_map()->screenToTileX(newWorldX, newWorldY, ox);
+                ty = mission_->get_map()->screenToTileY(newWorldX, newWorldY, oy);
 
                 if (ty < mission_->minY() || tx < mission_->minX()) {
                     return false;
@@ -365,9 +365,9 @@ bool GameplayMenu::isScrollLegal(int newScrollX, int newScrollY)
 {
     int ox, oy;
     int tx =
-        g_App.maps().screenToTileX(mission_->map(), newScrollX, newScrollY, ox);
+        mission_->get_map()->screenToTileX(newScrollX, newScrollY, ox);
     int ty =
-        g_App.maps().screenToTileY(mission_->map(), newScrollX, newScrollY, oy);
+        mission_->get_map()->screenToTileY(newScrollX, newScrollY, oy);
 
     if (tx < mission_->minX())
         return false;
@@ -388,9 +388,9 @@ void GameplayMenu::improveScroll(int &newScrollX, int &newScrollY)
 {
     int ox, oy;
     int tx =
-        g_App.maps().screenToTileX(mission_->map(), newScrollX, newScrollY, ox);
+        mission_->get_map()->screenToTileX(newScrollX, newScrollY, ox);
     int ty =
-        g_App.maps().screenToTileY(mission_->map(), newScrollX, newScrollY, oy);
+        mission_->get_map()->screenToTileY(newScrollX, newScrollY, oy);
 
     if (tx < mission_->minX())
         newScrollX++;
@@ -730,10 +730,10 @@ void GameplayMenu::handleMouseMotion(int x, int y, int state, const int modKeys)
     if (shooting_events_.shooting_) {
         int ox, oy;
         int tx =
-            g_App.maps().screenToTileX(mission_->map(), world_x_ + x - 129,
+            mission_->get_map()->screenToTileX(world_x_ + x - 129,
                 world_y_ + y, ox);
         int ty =
-            g_App.maps().screenToTileY(mission_->map(), world_x_ + x - 129,
+            mission_->get_map()->screenToTileY(world_x_ + x - 129,
                 world_y_ + y, oy);
         for (int i = 0; i < 4; i++) {
             if (shooting_events_.agents_shooting[i]) {
