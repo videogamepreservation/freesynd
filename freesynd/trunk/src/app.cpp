@@ -56,7 +56,7 @@
 #include "utils/portablefile.h"
 
 App::App(bool disable_sound):
-screen_(new Screen(GAME_SCREEN_WIDTH, GAME_SCREEN_HEIGHT)), session_(new GameSession())
+session_(new GameSession()), screen_(new Screen(GAME_SCREEN_WIDTH, GAME_SCREEN_HEIGHT))
 #ifdef SYSTEM_SDL
     , system_(new SystemSDL())
 #else
