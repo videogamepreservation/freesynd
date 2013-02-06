@@ -2372,7 +2372,8 @@ uint8 PedInstance::moveToDir(Mission* m, int elapsed, dirMoveType &dir_move,
             if (dir == -1)
                 return false;
             move_to_pos = true;
-            dir_move.dir_orig = dir;
+            if (dir_move.dir_modifier == 0)
+                dir_move.dir_orig = dir;
         } else {
             dir = dir_;
             dir_move.dir_orig = dir;
@@ -2530,7 +2531,15 @@ uint8 PedInstance::moveToDir(Mission* m, int elapsed, dirMoveType &dir_move,
                     dist_passsed += dist_inc;
                     posx = px;
                     posy = py;
-                    if (rand() % 256 < 64 || move_to_pos) {
+                    if (move_to_pos) {/*
+                        dir_move.dir_modifier--;
+                        dir = (256 + dir_move.modifier_value * dir_move.dir_modifier
+                            + (((dir_move.dir_orig & 0x00E0) + 32) & 0x00C0)) & 0x00C0;
+                        dir_move.dir_last = dir;*/
+                        dir_move.dir_last = -1;
+                        dir_move.dir_modifier = 0;
+                        dir = dir_move.dir_orig;
+                    } else if (rand() % 256 < 64) {
                         dir_move.dir_last = -1;
                         dir_move.dir_modifier = 0;
                     }
@@ -2553,68 +2562,71 @@ uint8 PedInstance::moveToDir(Mission* m, int elapsed, dirMoveType &dir_move,
         if (need_bounce && should_bounce) {
             if (move_to_pos) {
                 if (dir_move.dir_modifier == 0) {
-                    if (dir_move.dir_orig % 64 < 32)
-                        dir_move.modifier_value = -64;
-                    else
+                    if (dir_move.dir_orig % 64 < 32) {
                         dir_move.modifier_value = 64;
-                    dir_move.dir_modifier = -1;
-                    dir = (256 + dir_move.modifier_value
-                        + (dir_move.dir_orig & 0x00C0)) & 0x00C0;
-                    dir_move.dir_last = dir;
-                } else if (dir_move.dir_modifier == -1) {
+                    } else {
+                        //dir_move.modifier_value = -64;
+                    }
+                    dir_move.modifier_value *= dir_move.modifier_inversion;
                     dir_move.dir_modifier = 1;
-                    dir = (256 - dir_move.modifier_value
-                        + (dir_move.dir_orig & 0x00C0)) & 0x00C0;
+                    dir = ((dir_move.dir_orig & 0x00E0)) & 0x00C0;
                     dir_move.dir_last = dir;
                 } else if (dir_move.dir_modifier == 1) {
+                    dir = (256 + dir_move.modifier_value
+                        + (((dir_move.dir_orig & 0x00E0)) & 0x00C0)) & 0x00C0;
+                    dir_move.dir_modifier = 2;
+                    dir_move.dir_last = dir;
+                } else if (dir_move.dir_modifier == 2) {
+                    dir = (256 + dir_move.modifier_value
+                        + (((dir_move.dir_orig & 0x00E0)) & 0x00C0)) & 0x00C0;
+                    dir_move.dir_modifier = 3;
+                    dir_move.dir_last = dir;
+                } else if (dir_move.dir_modifier == 3) {
+                    dir = (512 + dir_move.modifier_value
+                        + (((dir_move.dir_orig & 0x00E0)) & 0x00C0)) & 0x00C0;
+                    dir_move.dir_modifier = 4;
+                    dir_move.dir_last = dir;
+                } else {
                     dir_move.dir_modifier = 0;
                     dir_move.dir_last = -1;
+                    dir_move.modifier_inversion *= -1;
                     break;
                 }
             } else if (dir_move.dir_modifier) {
-                if (dir_move.dir_modifier == 1)
+                if (dir_move.dir_modifier == 2)
                     dir_move.dir_last += 64;
-                if (dir_move.dir_modifier == 2) {
-                    dir_move.dir_last -= 64;
-                    if (dir_move.dir_last < 0)
-                        dir_move.dir_last += 256;
+                if (dir_move.dir_modifier == 3) {
+                    dir_move.dir_last += (256 - 64);
                 }
-                dir = dir_move.dir_last % 256;
-                dir_move.dir_modifier = 0;
+                dir_move.dir_last %= 256;
+                dir = dir_move.dir_last;
+                dir_move.dir_modifier--;
             } else {
-                if (dir_move.dir_last == -1) {
-                    dir = (dir / 64) * 64;
-                    dir_move.dir_last = dir;
-                }
-                dir_move.dir_last += 64;
-                dir = dir_move.dir_last % 256;
+                dir_move.dir_last = (dir_move.dir_last + 64) % 256;
+                dir = dir_move.dir_last;
+                dir_move.dir_modifier = 1;
             }
             setDirection(dir);
         } else if (!move_to_pos && dir_move.dir_modifier != 0) {
             setDirection(dir);
-            if (dir_move.dir_modifier == 0) {
-                dir_move.dir_modifier = 1;
-                dir_move.dir_last -= 64;
-                if (dir_move.dir_last < 0)
-                    dir_move.dir_last += 256;
-            }
             if (dir_move.dir_modifier == 1) {
-                dir_move.dir_modifier = 2;
-                dir_move.dir_last += 128;
+                dir_move.dir_modifier++;
+                dir_move.dir_last += (256 - 64);
             }
             if (dir_move.dir_modifier == 2) {
-                dir_move.dir_modifier = 3;
-                dir_move.dir_last -= 64;
-                if (dir_move.dir_last < 0)
-                    dir_move.dir_last += 256;
+                dir_move.dir_modifier++;
+                dir_move.dir_last += 128;
             }
             if (dir_move.dir_modifier == 3) {
-                dir_move.dir_modifier = 1;
-                dir_move.dir_last -= 64;
-                if (dir_move.dir_last < 0)
-                    dir_move.dir_last += 256;
+                dir_move.dir_modifier++;
+                dir_move.dir_last += (256 - 64);
             }
-            dir = dir_move.dir_last % 256;
+            if (dir_move.dir_modifier == 3) {
+                dir_move.dir_modifier = 0;
+                dir_move.dir_last += (256 - 64);
+            }
+            dir_move.dir_last %= 256;
+            dir = dir_move.dir_last;
         } else {
             setDirection(dir);
             // TODO: fix this

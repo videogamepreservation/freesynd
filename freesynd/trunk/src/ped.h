@@ -281,9 +281,9 @@ public:
         int32 dir_orig;
         int32 dir_last;
         int32 tm_last_chng;
-        //! -1,0,1, for target position : -1 - closest to dir, 1 - farther to dir
         int32 dir_modifier;
         int32 modifier_value;
+        int32 modifier_inversion;
         // directional movement only
         // to decide whether to continue movement by changing
         // direction or not
@@ -293,6 +293,7 @@ public:
             tm_last_chng = 0;
             dir_modifier = 0;
             modifier_value = 0;
+            modifier_inversion = 1;
             bounce = false;
         }
     } dirMoveType;
