@@ -26,8 +26,15 @@
 class GameEvent {
 public:
     enum EEventType {
+        kNone,
         GE_AGENT,
-        GE_SEARCH
+        GE_SEARCH,
+        /*! Sent when evacuation order arrives.*/
+        kObjEvacuate,
+        /*! Sent when an objective with a MapObject target arrives.*/
+        kObjTargetSet,
+        /*! Sent when an objective with a MapObject target is finished.*/
+        kObjTargetCleared
     };
 
     EEventType type_;

@@ -141,7 +141,7 @@ class BriefMinimapRenderer : public MinimapRenderer {
  * Renderer for minimap.
  * This class is used to display a minimap in the gameplay menu.
  */
-class GamePlayMinimapRenderer : public MinimapRenderer {
+class GamePlayMinimapRenderer : public MinimapRenderer, GameEventListener {
  public:
     //! Constructor for the class
     GamePlayMinimapRenderer();
@@ -164,29 +164,20 @@ class GamePlayMinimapRenderer : public MinimapRenderer {
     //! Returns the map coordinates of the point on the minimap.
     MapTilePoint minimapToMapPoint(int mm_x, int mm_y);
 
-    //! Defines a source on the minimap for the signal
-    void setTargetSignalSource(MapTilePoint &mtp) {
-        setSignalSource(mtp);
-        signalType_ = TARGET;
-    }
-    //! Defines the evacuation point on the minimap
-    void setEvacuationSignalSource(MapTilePoint &mtp) {
-        setSignalSource(mtp);
-        signalType_ = EVACUATION;
-    }
-    //! Changes the signal source position on the map
-    void updateSignalSourcePosition(MapTilePoint &mtp);
-    //! clear any signal source on map
-    void clearSignalSource();
+    //! Handles game events
+    void handleGameEvent(GameEvent evt);
  protected:
 
     /*!
-     * This enumaration lists the type of signal on the minimap.
+     * This enumeration lists the type of signal on the minimap.
      */
     enum ESignalType {
-        NONE,
-        TARGET,
-        EVACUATION
+        //! No signal is emitted
+        kNone,
+        //! A signal for a target is emitted
+        kTarget,
+        //! A signal for an evacuation is emitted
+        kEvacuation
     };
     //! called when zoom changes
     void updateRenderingInfos();
@@ -222,9 +213,6 @@ class GamePlayMinimapRenderer : public MinimapRenderer {
     int mapToMiniMapY(int tileY, int offY) {
         return ((tileY - world_ty_) * pixpertile_) + (offY / (256 / pixpertile_));
     }
-
-    //! common method for defining a signal source
-    void setSignalSource(MapTilePoint &mtp);
 
     /*!
      * Draw a rect to the given buffer with the given size and color.
@@ -269,12 +257,19 @@ class GamePlayMinimapRenderer : public MinimapRenderer {
                 signal_py + kEvacuationRadius < maxPx &&
                 signal_py - kEvacuationRadius > 0);
     }
+
+    //! Clear all signals on map
+    void handleClearSignal();
+    void handleTargetSet();
+    void handleEvacuationSet();
  private:
      /*! Radius of the red evacuation circle.*/
     static const int kEvacuationRadius;
 
     /*! The mission that contains the minimap.*/
     Mission *p_mission_;
+    /*! The minimap to display.*/
+    MiniMap *p_minimap_;
     /*!
      * Total number of tiles displayed in the minimap. 
      * same for width and height.
@@ -290,8 +285,6 @@ class GamePlayMinimapRenderer : public MinimapRenderer {
     int cross_y_;
     /*! Coords on the world map of the signal source.*/
     MapTilePoint signalSource_;
-    /*! Coords on the world map of the signal source next position.*/
-    MapTilePoint nextSignalSource_;
     /*! Type of emitted signal. If NONE, no signal is emitted.*/
     ESignalType signalType_;
     /*! Radius for the signal circle.*/

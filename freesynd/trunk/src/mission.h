@@ -36,6 +36,7 @@
 #include "weapon.h"
 #include "map.h"
 #include "core/squad.h"
+#include "model/objectivedesc.h"
 
 class VehicleInstance;
 class PedInstance;
@@ -496,28 +497,10 @@ public:
      */
     Squad * getSquad() { return p_squad_; }
 
-    typedef enum {
-        objv_None = 0x0,
-        // Setup control over object where possible to lose this control
-        objv_AquireControl = 0x0001,
-        // Leave control over object where possible to lose this control
-        objv_LoseControl = 0x0002,
-        // Obtain inventory object
-        objv_PickUpObject = 0x0008,
-        // Object of defined subtype (of type) should be destroyed
-        // defined by indx
-        objv_DestroyObject = 0x0010,
-        // Use of object untill condition is met
-        objv_UseObject = 0x0020,
-        objv_PutDownObject = 0x0040,
-        // Objects should be at defined location
-        objv_ReachLocation = 0x0080,
-        objv_FollowObject = 0x0100,
-        // Should wait some time
-        objv_Wait = 0x0200,
-        objv_AttackLocation = 0x0400,
-        objv_Protect = 0x8000,
-    }ObjectiveType;
+    //! Adds a listener for mission events
+    void addListener(GameEventListener *pListener);
+    //! Removes a listener
+    void removeListener(GameEventListener *pListener);
 
 protected:
     bool sWalkable(char thisTile, char upperTile);
@@ -526,6 +509,8 @@ protected:
 
     WeaponInstance *createWeaponInstance(uint8 *data);
 
+    //! Sends an event to all listeners
+    void fireGameEvent(GameEvent &evt);
 protected:
     LEVELDATA level_data_;
 
@@ -541,44 +526,6 @@ protected:
     std::vector<WeaponInstance *> cache_weapons_;
     std::vector<Static *> cache_statics_;
     std::vector<SFXObject *> cache_sfx_objects_;
-
-    typedef struct {
-        // type of objective
-        ObjectiveType type;
-        // MapObject::MajorTypeEnum
-        uint8 targettype;
-        // (objGroupDefMasks)
-        uint32 targetsubtype;
-        union {
-            // index within vector of data
-            uint16 targetindx;
-            uint16 grpid;
-        } indx_grpid;
-        // 0 - not defined, 0b - has sub objective, 1b - refers to all objects
-        // of subtype, 2b - completed, 3b - failed, 4b - check previous
-        // objectives for fail, 5b - is subobjective
-        uint32 condition;
-        // indx for sub objective
-        uint16 subobjindx;
-        toDefineXYZ pos_xyz;
-        // This message should be set during objective definition
-        std::string msg;
-        uint16 nxtobjindx;
-
-        void clear() {
-            type = (ObjectiveType)objv_None;
-            targettype = (MapObject::MajorTypeEnum)MapObject::mjt_Undefined;
-            targetsubtype = 0;
-            indx_grpid.targetindx = 0;
-            condition = 0;
-            subobjindx = 0;
-            pos_xyz.x = 0;
-            pos_xyz.y = 0;
-            pos_xyz.z = 0;
-            msg.clear();
-            nxtobjindx = 0;
-        }
-    }ObjectiveDesc;
 
     std::vector <ObjectiveDesc> objectives_;
     std::vector <ObjectiveDesc> sub_objectives_;
@@ -614,6 +561,8 @@ protected:
      * The squad selected for the mission. It contains only active agents.
      */
     Squad *p_squad_;
+    /*! List of listeners for missions events.*/
+    std::list<GameEventListener *> listeners_;
 };
 
 #endif

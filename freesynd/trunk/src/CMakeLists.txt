@@ -126,6 +126,7 @@ set(HEADERS
 	gfx/spritemanager.h
 	gfx/tile.h
 	gfx/tilemanager.h
+	model/objectivedesc.h
 	menus/minimaprenderer.h
 	menus/briefmenu.h
 	menus/confmenu.h
@@ -172,6 +173,7 @@ source_group(Utils REGULAR_EXPRESSION utils/*)
 source_group(Core REGULAR_EXPRESSION core/*)
 source_group(Gfx REGULAR_EXPRESSION gfx/*)
 source_group(Sound REGULAR_EXPRESSION sound/*)
+source_group(Model REGULAR_EXPRESSION model/*)
 
 add_executable (freesynd ${SOURCES} ${HEADERS})
 

@@ -401,3 +401,16 @@ uint8 MiniMap::getColourAt(int x, int y) {
         return a_minimap_[x + y * mmax_x_];
     return 0;
 }
+
+//! Defines a source on the minimap for the signal
+void MiniMap::setTarget(MapTilePoint &mtp) {
+    target_ = mtp;
+}
+//! Clear the target source
+void MiniMap::clearTarget() {
+    // TODO when target is a map objet set to null
+}
+//! Defines the evacuation point on the minimap
+void MiniMap::setEvacuationPoint(MapTilePoint &mtp) {
+    evacPt_ = mtp;
+}

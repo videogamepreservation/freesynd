@@ -70,7 +70,6 @@ protected:
     bool scroll();
     bool isScrollLegal(int newScrollX, int newScrollY);
     void improveScroll(int &newScrollX, int &newScrollY);
-    int selectedAgentsCount();
     //! Selects/deselects an agent
     void selectAgent(size_t agentNo, bool addToGroup);
     //! Selects/deselects all agents

@@ -140,6 +140,15 @@ public:
     ~MiniMap();
 
     uint8 getColourAt(int x, int y);
+    //! Return the target position
+    MapTilePoint targetPosition() { return target_; }
+
+    //! Defines a source on the minimap for the signal
+    void setTarget(MapTilePoint &mtp);
+    //! Clear the target source
+    void clearTarget();
+    //! Defines the evacuation point on the minimap
+    void setEvacuationPoint(MapTilePoint &mtp);
 
 private:
     /* An array with the same size of the real map but containing
@@ -149,6 +158,10 @@ private:
     int mmax_x_;
     /* Height of the minimap (same as the map).*/
     int mmax_y_;
+    /*! Coords on the world map of the signal source.*/
+    MapTilePoint target_;
+    /*! Coords on the world map of the signal source.*/
+    MapTilePoint evacPt_;
 };
 
 #endif

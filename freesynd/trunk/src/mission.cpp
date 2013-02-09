@@ -77,6 +77,8 @@ Mission::~Mission()
     if (p_squad_) {
         delete p_squad_;
     }
+
+    listeners_.clear();
 }
 
 #define copydata(x, y) memcpy(&level_data_.x, levelData + y, sizeof(level_data_.x))
@@ -1049,6 +1051,12 @@ void Mission::checkObjectives() {
         if ((obj.condition & 12) != 0)
             continue;
 
+        if (o == cur_objective_ && obj.status == kNotStarted) {
+            // An objective has just started, warn all listeners
+            GameEvent evt = obj.start();
+            fireGameEvent(evt);
+        }
+
         switch (obj.type) {
             case objv_None:
                 break;
@@ -1108,11 +1116,12 @@ void Mission::checkObjectives() {
                 break;
             case objv_DestroyObject:
                 switch (obj.targettype) {
-                    case MapObject::mjt_Ped: //ped
+                    case MapObject::mjt_Ped: // Kill ped
                         if ((obj.condition & 2) == 0) {
                             p = peds_[obj.indx_grpid.targetindx];
                             if (p->health() <= 0)
                             {
+                                // target is already dead
                                 if (o == cur_objective_)
                                     cur_objective_++;
                                 obj.condition |= 4;
@@ -1152,7 +1161,7 @@ void Mission::checkObjectives() {
                             }
                         }
                         break;
-                    case MapObject::mjt_Vehicle:
+                    case MapObject::mjt_Vehicle: // Destroy vehicle
                         v = vehicles_[obj.indx_grpid.targetindx];
                         if (v->health() <= 0)
                             obj.condition |= 4;
@@ -1191,6 +1200,41 @@ void Mission::checkObjectives() {
                 status_ = COMPLETED;
         } else
             status_ = FAILED;
+    }
+}
+
+/*! 
+ * Adds a listener to the list of listeners of mission events.
+ * \param pListener The listener
+ */
+void Mission::addListener(GameEventListener *pListener) {
+    if (pListener) {
+        listeners_.push_back(pListener);
+    }
+}
+
+/*! 
+ * Removes the listener from the list of listeners of mission events.
+ * \param pListener The listener
+ */
+void Mission::removeListener(GameEventListener *pListener) {
+    for (std::list < GameEventListener * >::iterator it = listeners_.begin();
+         it != listeners_.end(); it++) {
+             if (pListener == *it) {
+                 listeners_.erase(it);
+                 return;
+             }
+    }
+}
+
+/*! 
+ * Sends the event to all listeners of mission events.
+ * \param evt The event to send
+ */
+void Mission::fireGameEvent(GameEvent &evt) {
+    for (std::list < GameEventListener * >::iterator it = listeners_.begin();
+                        it != listeners_.end(); it++) {
+        (*it)->handleGameEvent(evt);
     }
 }
 
