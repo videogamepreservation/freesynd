@@ -2531,14 +2531,20 @@ uint8 PedInstance::moveToDir(Mission* m, int elapsed, dirMoveType &dir_move,
                     dist_passsed += dist_inc;
                     posx = px;
                     posy = py;
-                    if (move_to_pos) {/*
-                        dir_move.dir_modifier--;
-                        dir = (256 + dir_move.modifier_value * dir_move.dir_modifier
-                            + (((dir_move.dir_orig & 0x00E0) + 32) & 0x00C0)) & 0x00C0;
-                        dir_move.dir_last = dir;*/
-                        dir_move.dir_last = -1;
-                        dir_move.dir_modifier = 0;
-                        dir = dir_move.dir_orig;
+                    if (move_to_pos) {
+                        if (dir_move.dir_modifier == 1) {
+                            dir_move.dir_modifier = 0;
+                            dir_move.dir_last = -1;
+                            dir = dir_move.dir_orig;
+                        } else {
+                            dir_move.dir_modifier -= 2;
+                            // & 0x00C0 = ((% 256) / 64) * 64
+                            dir = (256 + dir_move.dir_closest
+                                + dir_move.modifier_value
+                                * dir_move.dir_modifier) & 0x00C0;
+                            dir_move.dir_last = dir;
+                            dir_move.dir_modifier++;
+                        }
                     } else if (rand() % 256 < 64) {
                         dir_move.dir_last = -1;
                         dir_move.dir_modifier = 0;
@@ -2562,33 +2568,30 @@ uint8 PedInstance::moveToDir(Mission* m, int elapsed, dirMoveType &dir_move,
         if (need_bounce && should_bounce) {
             if (move_to_pos) {
                 if (dir_move.dir_modifier == 0) {
-                    if (dir_move.dir_orig % 64 < 32) {
-                        dir_move.modifier_value = 64;
-                    } else {
-                        //dir_move.modifier_value = -64;
-                    }
+                    dir_move.modifier_value = 64;
+                    dir_move.modifier_inversion = getClosestDirs(dir_move.dir_orig,
+                        dir_move.dir_closest, dir_move.dir_closer);
                     dir_move.modifier_value *= dir_move.modifier_inversion;
                     dir_move.dir_modifier = 1;
-                    dir = ((dir_move.dir_orig & 0x00E0)) & 0x00C0;
-                    dir_move.dir_last = dir;
+                    dir = dir_move.dir_closest;
+                    dir_move.dir_last = dir_move.dir_closest;
                 } else if (dir_move.dir_modifier == 1) {
-                    dir = (256 + dir_move.modifier_value
-                        + (((dir_move.dir_orig & 0x00E0)) & 0x00C0)) & 0x00C0;
                     dir_move.dir_modifier = 2;
+                    // & 0x00C0 = ((% 256) / 64) * 64
+                    dir = (256 + dir_move.dir_closest + dir_move.modifier_value) & 0x00C0;
                     dir_move.dir_last = dir;
                 } else if (dir_move.dir_modifier == 2) {
-                    dir = (256 + dir_move.modifier_value
-                        + (((dir_move.dir_orig & 0x00E0)) & 0x00C0)) & 0x00C0;
+                    dir = (256 + dir_move.dir_closest + dir_move.modifier_value * 2) & 0x00C0;
+                    dir_move.dir_last = dir;
                     dir_move.dir_modifier = 3;
-                    dir_move.dir_last = dir;
                 } else if (dir_move.dir_modifier == 3) {
-                    dir = (512 + dir_move.modifier_value
-                        + (((dir_move.dir_orig & 0x00E0)) & 0x00C0)) & 0x00C0;
-                    dir_move.dir_modifier = 4;
+                    dir = (256 + dir_move.dir_closest + dir_move.modifier_value * 3) & 0x00C0;
                     dir_move.dir_last = dir;
+                    dir_move.dir_modifier = 4;
                 } else {
                     dir_move.dir_modifier = 0;
                     dir_move.dir_last = -1;
+                    dir = dir_move.dir_orig;
                     dir_move.modifier_inversion *= -1;
                     break;
                 }
@@ -2625,7 +2628,8 @@ uint8 PedInstance::moveToDir(Mission* m, int elapsed, dirMoveType &dir_move,
                 dir_move.dir_modifier = 0;
                 dir_move.dir_last += (256 - 64);
             }
-            dir_move.dir_last %= 256;
+            // &0x00FF = % 256
+            dir_move.dir_last &= 0x00FF;
             dir = dir_move.dir_last;
         } else {
             setDirection(dir);
@@ -2641,4 +2645,25 @@ uint8 PedInstance::moveToDir(Mission* m, int elapsed, dirMoveType &dir_move,
 
     // TODO: handle bounce answer everywhere
     return bounced;
+}
+
+int PedInstance::getClosestDirs(int dir, int& closest, int& closer) {
+    // & 0x003F = % 64
+    int mod = dir & 0x003F;
+    if (mod == 0) {
+        // & 0x00C0 = ((% 256) / 64) * 64
+        closest = (dir + 64) & 0x00C0;
+        closer = (256 + dir - 64) & 0x00C0;
+        return 1;
+    } else {
+        if (mod < 32) {
+            closest = dir & 0x00C0;
+            closer = (dir + 64) & 0x00C0;
+            return -1;
+        } else {
+            closest = (dir + 64) & 0x00C0;
+            closer = dir & 0x00C0;
+        }
+    }
+    return 1;
 }

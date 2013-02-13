@@ -1095,8 +1095,10 @@ void Mission::checkObjectives() {
                 break;
             case objv_Protect:
                 p = peds_[obj.indx_grpid.targetindx];
-                if (p->health() <= 0)
+                if (p->health() <= 0) {
                     obj.condition |= 8;
+                    no_failed = false;
+                }
                 all_completed = false;
                 break;
             case objv_PickUpObject:

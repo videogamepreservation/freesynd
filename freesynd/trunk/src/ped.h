@@ -280,7 +280,8 @@ public:
     typedef struct {
         int32 dir_orig;
         int32 dir_last;
-        int32 tm_last_chng;
+        int32 dir_closest;
+        int32 dir_closer;
         int32 dir_modifier;
         int32 modifier_value;
         int32 modifier_inversion;
@@ -290,7 +291,6 @@ public:
         bool bounce;
         void clear() {
             dir_last = -1;
-            tm_last_chng = 0;
             dir_modifier = 0;
             modifier_value = 0;
             modifier_inversion = 1;
@@ -793,7 +793,10 @@ protected:
     int selected_weapon_;
     VehicleInstance *in_vehicle_;
     agentAndNonEnum agent_is_;
-    bool walkable(int x, int y, int z);
+    bool walkable(int x, int y, int z) { return true; };
+
+private:
+    int getClosestDirs(int dir, int& closest, int& closer);
 };
 
 #endif

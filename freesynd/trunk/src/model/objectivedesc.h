@@ -74,6 +74,7 @@ enum EObjectiveStatus {
  */
 class ObjectiveDesc {
 public:
+    virtual ~ObjectiveDesc() {};
     //! type of objective
     ObjectiveType type;
     // MapObject::MajorTypeEnum

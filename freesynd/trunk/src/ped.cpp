@@ -1923,10 +1923,6 @@ int PedInstance::map() {
     return map_;
 }
 
-bool PedInstance::walkable(int x, int y, int z) {
-    return true;
-}
-
 PedInstance::AnimationDrawn PedInstance::drawnAnim(void) {
     return drawn_anim_;
 }
