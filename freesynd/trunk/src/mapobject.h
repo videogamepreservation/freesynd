@@ -31,9 +31,7 @@
 #include <list>
 #include "path.h"
 #include "pathsurfaces.h"
-#include "map.h"
 
-class MapObject;
 class Mission;
 
 /*!

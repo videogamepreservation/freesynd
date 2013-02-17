@@ -36,11 +36,12 @@
 #include "weapon.h"
 #include "map.h"
 #include "core/squad.h"
-#include "model/objectivedesc.h"
+#include "core/gameevent.h"
 
 class VehicleInstance;
 class PedInstance;
 class Agent;
+class ObjectiveDesc;
 
 /*!
  * A structure that holds mission statistics.
@@ -501,6 +502,7 @@ public:
     void addListener(GameEventListener *pListener);
     //! Removes a listener
     void removeListener(GameEventListener *pListener);
+    void removeListeners();
 
 protected:
     bool sWalkable(char thisTile, char upperTile);
@@ -508,7 +510,10 @@ protected:
     bool isStairs(char thisTile);
 
     WeaponInstance *createWeaponInstance(uint8 *data);
-
+    //! starts a objective
+    void startObjective(ObjectiveDesc *pObj);
+    //! Ends an objective (completed or failed)
+    void endObjective(int objectiveId, bool succeeded, ObjectiveDesc *pObj);
     //! Sends an event to all listeners
     void fireGameEvent(GameEvent &evt);
 protected:
@@ -527,8 +532,8 @@ protected:
     std::vector<Static *> cache_statics_;
     std::vector<SFXObject *> cache_sfx_objects_;
 
-    std::vector <ObjectiveDesc> objectives_;
-    std::vector <ObjectiveDesc> sub_objectives_;
+    std::vector <ObjectiveDesc *> objectives_;
+    //std::vector <ObjectiveDesc> sub_objectives_;
     uint16 cur_objective_;
     /*!
      * Mission status. 

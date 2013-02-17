@@ -215,7 +215,7 @@ void BriefMinimapRenderer::render(uint16 screen_x, uint16 screen_y) {
  */
 GamePlayMinimapRenderer::GamePlayMinimapRenderer() : 
     mm_timer_weap(300, false), mm_timer_ped(260, false),
-    mm_timer_signal(450) {
+    mm_timer_signal(400) {
     p_mission_ = NULL;
     handleClearSignal();
 }
@@ -238,6 +238,7 @@ void GamePlayMinimapRenderer::init(Mission *pMission, bool b_scannerEnabled) {
     mm_timer_weap.reset();
     mm_timer_signal.reset();
     handleClearSignal();
+    p_mission_->addListener(this);
 }
 
 void GamePlayMinimapRenderer::updateRenderingInfos() {
@@ -301,13 +302,12 @@ void GamePlayMinimapRenderer::centerOn(uint16 tileX, uint16 tileY, int offX, int
  * The catched events are for detecting signals setup.
  */
 void GamePlayMinimapRenderer::handleGameEvent(GameEvent evt) {
-    printf("Minimap renderer reception d'un event\n");
     switch (evt.type_) {
     case GameEvent::kObjEvacuate:
         handleEvacuationSet();
         break;
     case GameEvent::kObjTargetSet:
-        handleEvacuationSet();
+        handleTargetSet();
         break;
     case GameEvent::kObjTargetCleared:
         handleClearSignal();
@@ -320,7 +320,7 @@ void GamePlayMinimapRenderer::handleGameEvent(GameEvent evt) {
 
 void GamePlayMinimapRenderer::handleEvacuationSet() {
     handleClearSignal();
-    signalSource_ = p_minimap_->targetPosition();    
+    signalSource_ = p_minimap_->evacuationPoint();    
     signalType_ = kEvacuation;
 
     // Check if the evacuation point is already visible
@@ -354,7 +354,7 @@ bool GamePlayMinimapRenderer::handleTick(int elapsed) {
 
     if (signalType_ != kNone &&mm_timer_signal.update(elapsed)) {
         // Time hit max -> update radar circle size
-        i_signalRadius_ += 4;
+        i_signalRadius_ += 8;
         int signal_px = mapToMiniMapX(signalSource_.tx + 1, signalSource_.ox);
         int signal_py = mapToMiniMapY(signalSource_.ty + 1, signalSource_.oy);
 

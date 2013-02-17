@@ -27,8 +27,11 @@
 #include <string.h>
 #include <assert.h>
 
-#include "app.h"
+#include "map.h"
+#include "mapobject.h"
 #include "utils/log.h"
+#include "gfx/tilemanager.h"
+#include "gfx/screen.h"
 
 #if 0
 #define EXECUTION_SPEED_TIME
@@ -403,14 +406,28 @@ uint8 MiniMap::getColourAt(int x, int y) {
 }
 
 //! Defines a source on the minimap for the signal
-void MiniMap::setTarget(MapTilePoint &mtp) {
-    target_ = mtp;
+void MiniMap::setTarget(MapObject *pTarget) {
+    p_target_ = pTarget;
 }
 //! Clear the target source
 void MiniMap::clearTarget() {
-    // TODO when target is a map objet set to null
+    p_target_ = NULL;
 }
 //! Defines the evacuation point on the minimap
 void MiniMap::setEvacuationPoint(MapTilePoint &mtp) {
     evacPt_ = mtp;
+}
+
+//! Return the target position
+MapTilePoint MiniMap::targetPosition() {
+    MapTilePoint mtp;
+    if (p_target_) {
+        // TODO MapObject should already have a MapTilePoint
+        mtp.tx = p_target_->tileX();
+        mtp.ty = p_target_->tileY();
+        mtp.tz = p_target_->tileZ();
+        mtp.ox = p_target_->offX();
+        mtp.oy = p_target_->offY();
+    }
+    return mtp; 
 }

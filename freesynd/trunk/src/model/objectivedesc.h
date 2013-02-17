@@ -108,8 +108,8 @@ public:
     std::string msg;
     uint16 nxtobjindx;
 
-    void clear() {
-        type = (ObjectiveType)objv_None;
+    ObjectiveDesc(ObjectiveType aType) {
+        type = aType;
         targettype = (MapObject::MajorTypeEnum)MapObject::mjt_Undefined;
         targetsubtype = 0;
         indx_grpid.targetindx = 0;
@@ -119,8 +119,14 @@ public:
         pos_xyz.x = 0;
         pos_xyz.y = 0;
         pos_xyz.z = 0;
-        msg.clear();
         nxtobjindx = 0;
+    }
+
+    /*!
+     * Return true if objective is cleared (succeeded or failed)
+     */
+    bool isTerminated() {
+        return ((condition & 12) != 0) || status == kCompleted || status == kFailed;
     }
 
     /*!
@@ -137,10 +143,58 @@ public:
         handleStart(evt);
         return evt;
     }
-protected:
-    virtual void handleStart(GameEvent &evt) {
-        // TODO do something
+
+    /*!
+     * This method ends an objective with a 'failed' or 'succeeded' status.
+     * Returns an event that should be send to all listeners interested by
+     * it.
+     * The returned event depends on the type of objective.
+     */
+    GameEvent end(bool succeeded) {
+        status = succeeded ? kCompleted : kFailed;
+        GameEvent evt;
+        evt.type_ = GameEvent::kNone;
+        evt.pCtxt_ = NULL;
+        handleEnd(evt);
+        return evt;
     }
+protected:
+    virtual void handleStart(GameEvent &evt) {}
+
+    virtual void handleEnd(GameEvent &evt) {}
+};
+
+/*!
+ * A TargetObjective defines an objective with a MapObject as target.
+ */
+class TargetObjective : public ObjectiveDesc {
+public:
+    TargetObjective(ObjectiveType aType, MapObject * pMapObject) : ObjectiveDesc(aType) {
+        p_target_ = pMapObject;
+    }
+
+    MapObject * target() { return p_target_; }
+protected:
+    void handleStart(GameEvent &evt) {
+        evt.type_ = GameEvent::kObjTargetSet;
+        evt.pCtxt_ = p_target_;
+    }
+
+    void handleEnd(GameEvent &evt) {
+        evt.type_ = GameEvent::kObjTargetCleared;
+        evt.pCtxt_ = p_target_;
+    }
+
+protected:
+    MapObject *p_target_;
+};
+
+/*!
+ * A LocationObjective defines an objective with a Location as target.
+ */
+class LocationObjective : public ObjectiveDesc {
+public:
+    LocationObjective(ObjectiveType aType) : ObjectiveDesc(aType) {}
 };
 
 #endif // MODEL_OBJECTIVEDESC_H

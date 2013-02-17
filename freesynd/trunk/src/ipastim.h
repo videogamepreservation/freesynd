@@ -98,7 +98,7 @@ private:
     // i.e. instead of 0 to 4
     float part_of_four(int percentage) const
     {
-        return (3 * ((float)percentage)/100.0) + 1;
+        return (3.0f * ((float)percentage)/100.0f) + 1.0f;
     }
     
     enum IPADir {
