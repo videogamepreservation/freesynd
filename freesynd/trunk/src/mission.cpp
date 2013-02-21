@@ -507,7 +507,7 @@ bool Mission::loadLevel(uint8 * levelData)
     // max 5(6 read) objectives
     
     for (uint8 i = 0; i < 6; i++) {
-        bool isset = false;
+        //bool isset = false;
         ObjectiveDesc *objd = NULL;
         //objd.clear();
         LEVELDATA_OBJECTIVES & obj = level_data_.objectives[i];
@@ -538,7 +538,7 @@ bool Mission::loadLevel(uint8 * levelData)
                     pLastObj->subobjindx = objectives_.size();
                     objd->indx_grpid.targetindx = pLastObj->indx_grpid.targetindx;
                     objd->targettype = pLastObj->targettype;
-                    isset = true;
+                    //isset = true;
                 }
             }
                 break;
@@ -554,7 +554,7 @@ bool Mission::loadLevel(uint8 * levelData)
                         printf("0x01 incorrect offset");
                 } else
                     printf("0x01 type not matched");
-                isset = true;
+                //isset = true;
                 break;
             case 0x02:
                 if (bindx > 0 && bindx < 0x5C02) {
@@ -568,7 +568,7 @@ bool Mission::loadLevel(uint8 * levelData)
                         printf("0x02 incorrect offset");
                 } else
                     printf("0x02 type not matched");
-                isset = true;
+                //isset = true;
                 break;
             case 0x03:
                 if (bindx > 0 && bindx < 0x5C02) {
@@ -582,7 +582,7 @@ bool Mission::loadLevel(uint8 * levelData)
                         printf("0x03 incorrect offset");
                 } else
                     printf("0x03 type not matched");
-                isset = true;
+                //isset = true;
                 break;
             case 0x05:
                 if (bindx >= 0x9562 && bindx < 0xDD62) {
@@ -597,7 +597,7 @@ bool Mission::loadLevel(uint8 * levelData)
                         printf("0x05 incorrect offset");
                 } else
                     printf("0x05 type not matched %X", bindx);
-                isset = true;
+                //isset = true;
                 break;
             case 0x0A:
                 objd = new ObjectiveDesc(objv_DestroyObject);
@@ -607,7 +607,7 @@ bool Mission::loadLevel(uint8 * levelData)
                 objd->condition = 2;
                 objd->indx_grpid.targetindx = pindx[cindx];
                 objd->msg = g_App.menus().getMessage("GOAL_ELIMINATE_POLICE");
-                isset = true;
+                //isset = true;
                 break;
             case 0x0B:
                 objd = new ObjectiveDesc(objv_DestroyObject);
@@ -617,7 +617,7 @@ bool Mission::loadLevel(uint8 * levelData)
                 objd->indx_grpid.targetindx = pindx[cindx];
                 objd->indx_grpid.grpid = 2;
                 objd->msg = g_App.menus().getMessage("GOAL_ELIMINATE_AGENTS");
-                isset = true;
+                //isset = true;
                 break;
             case 0x0E:
                 if (bindx >= 0x5C02 && bindx < 0x6682) {
@@ -632,7 +632,7 @@ bool Mission::loadLevel(uint8 * levelData)
                         printf("0x0E incorrect offset");
                 } else
                     printf("0x0E type not matched");;
-                isset = true;
+                //isset = true;
                 break;
             case 0x0F:
                 if (bindx >= 0x5C02 && bindx < 0x6682) {
@@ -647,7 +647,7 @@ bool Mission::loadLevel(uint8 * levelData)
                         printf("0x0F incorrect offset");
                 } else
                     printf("0x0F type not matched");
-                isset = true;
+                //isset = true;
                 break;
             case 0x10:
                 objd = new ObjectiveDesc(objv_ReachLocation);
@@ -657,7 +657,7 @@ bool Mission::loadLevel(uint8 * levelData)
                 objd->pos_xyz.z = READ_LE_INT16(obj.mapposz);
                 objd->condition = 16;
                 objd->msg = g_App.menus().getMessage("GOAL_EVACUATE");
-                isset = true;
+                //isset = true;
                 break;
 #ifdef _DEBUG
             default:

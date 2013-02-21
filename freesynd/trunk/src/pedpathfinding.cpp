@@ -2532,18 +2532,16 @@ uint8 PedInstance::moveToDir(Mission* m, int elapsed, dirMoveType &dir_move,
                     posx = px;
                     posy = py;
                     if (move_to_pos) {
-                        if (dir_move.dir_modifier == 1) {
+                        dir_move.on_new_tile = true;
+                        if (dir_move.dir_modifier < 3) {
                             dir_move.dir_modifier = 0;
                             dir_move.dir_last = -1;
                             dir = dir_move.dir_orig;
                         } else {
                             dir_move.dir_modifier -= 2;
                             // & 0x00C0 = ((% 256) / 64) * 64
-                            dir = (256 + dir_move.dir_closest
-                                + dir_move.modifier_value
-                                * dir_move.dir_modifier) & 0x00C0;
+                            dir = (256 + dir - dir_move.modifier_value) & 0x00C0;
                             dir_move.dir_last = dir;
-                            dir_move.dir_modifier++;
                         }
                     } else if (rand() % 256 < 64) {
                         dir_move.dir_last = -1;
@@ -2569,30 +2567,53 @@ uint8 PedInstance::moveToDir(Mission* m, int elapsed, dirMoveType &dir_move,
             if (move_to_pos) {
                 if (dir_move.dir_modifier == 0) {
                     dir_move.modifier_value = 64;
-                    dir_move.modifier_inversion = getClosestDirs(dir_move.dir_orig,
-                        dir_move.dir_closest, dir_move.dir_closer);
-                    dir_move.modifier_value *= dir_move.modifier_inversion;
+                    dir_move.modifier_value *= getClosestDirs(dir_move.dir_orig,
+                        dir_move.dir_closest, dir_move.dir_closer);;
                     dir_move.dir_modifier = 1;
                     dir = dir_move.dir_closest;
                     dir_move.dir_last = dir_move.dir_closest;
+                    dir_move.on_new_tile = false;
                 } else if (dir_move.dir_modifier == 1) {
-                    dir_move.dir_modifier = 2;
-                    // & 0x00C0 = ((% 256) / 64) * 64
-                    dir = (256 + dir_move.dir_closest + dir_move.modifier_value) & 0x00C0;
+                    if (dir_move.on_new_tile) {
+                        // TODO: +2?
+                        dir_move.dir_modifier = 3;
+                        // & 0x00C0 = ((% 256) / 64) * 64
+                        dir = (256 + dir_move.dir_closest + dir_move.modifier_value) & 0x00C0;
+                    } else {
+                        dir_move.modifier_value *= -1;
+                        dir_move.dir_modifier = 4;
+                        dir = dir_move.dir_closer;
+                        dir_move.dir_last = dir_move.dir_closer;
+                    }
                     dir_move.dir_last = dir;
-                } else if (dir_move.dir_modifier == 2) {
+                } else if (dir_move.dir_modifier == 3) {
                     dir = (256 + dir_move.dir_closest + dir_move.modifier_value * 2) & 0x00C0;
                     dir_move.dir_last = dir;
-                    dir_move.dir_modifier = 3;
-                } else if (dir_move.dir_modifier == 3) {
+                    dir_move.dir_modifier = 5;
+                } else if (dir_move.dir_modifier == 5) {
                     dir = (256 + dir_move.dir_closest + dir_move.modifier_value * 3) & 0x00C0;
                     dir_move.dir_last = dir;
+                    dir_move.dir_modifier = 7;
+                } else if (dir_move.dir_modifier == 2) {
+                    dir = dir_move.dir_closer;
+                    dir_move.dir_last = dir_move.dir_closer;
                     dir_move.dir_modifier = 4;
+                } else if (dir_move.dir_modifier == 4) {
+                    dir = (256 + dir_move.dir_closer + dir_move.modifier_value) & 0x00C0;
+                    dir_move.dir_last = dir;
+                    dir_move.dir_modifier = 6;
+                } else if (dir_move.dir_modifier == 6) {
+                    dir = (256 + dir_move.dir_closer + dir_move.modifier_value * 2) & 0x00C0;
+                    dir_move.dir_last = dir;
+                    dir_move.dir_modifier = 8;
+                } else if (dir_move.dir_modifier == 8) {
+                    dir = (256 + dir_move.dir_closer + dir_move.modifier_value * 3) & 0x00C0;
+                    dir_move.dir_last = dir;
+                    dir_move.dir_modifier = 10;
                 } else {
                     dir_move.dir_modifier = 0;
                     dir_move.dir_last = -1;
                     dir = dir_move.dir_orig;
-                    dir_move.modifier_inversion *= -1;
                     break;
                 }
             } else if (dir_move.dir_modifier) {

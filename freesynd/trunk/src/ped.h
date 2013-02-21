@@ -284,17 +284,18 @@ public:
         int32 dir_closer;
         int32 dir_modifier;
         int32 modifier_value;
-        int32 modifier_inversion;
         // directional movement only
         // to decide whether to continue movement by changing
         // direction or not
         bool bounce;
+        // when closest is used and first movement is successful
+        bool on_new_tile;
         void clear() {
             dir_last = -1;
             dir_modifier = 0;
             modifier_value = 0;
-            modifier_inversion = 1;
             bounce = false;
+            on_new_tile = false;
         }
     } dirMoveType;
 
