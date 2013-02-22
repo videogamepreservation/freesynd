@@ -203,8 +203,8 @@ bool Mission::loadLevel(uint8 * levelData)
     mods_enemy.addMod(g_App.mods().getHighestVersion(Mod::MOD_BRAIN));
     
     for (uint16 i = 0; i < 256; i++) {
-        if (i == 130)
-            i = 130;
+        if (i == 40)
+            i = 40;
         LEVELDATA_PEOPLE & pedref = level_data_.people[i];
         if(pedref.type == 0x0 || pedref.desc == 0x0D || pedref.desc == 0x0C)
             continue;
@@ -300,6 +300,7 @@ bool Mission::loadLevel(uint8 * levelData)
                     // 2 - vehicle
                     // 7, 9(repeat) - end marker
                     // 10(loop?)?5(has offset <?ped?>)?
+                    // 11 - protected target reached destination(kenya)
                     LEVELDATA_SCENARIOS sc = level_data_.scenarios[offset_nxt / 8];
 #ifdef SHOW_SCENARIOS_DEBUG
                     printf("sc.type = %i, nxt = %i\n", sc.type, offset_nxt / 8);

@@ -2518,6 +2518,7 @@ uint8 PedInstance::moveToDir(Mission* m, int elapsed, dirMoveType &dir_move,
                         }
                     }
                 }
+                floodPointDesc *fpd_prv = fpd;
                 fpd = &(m->mdpoints_[tilenx + tileny * m->mmax_x_
                     + tile_z_ * m->mmax_m_xy]);
                 if (check_safe_walk && (fpd->t & m_fdSafeWalk) == 0) {
@@ -2533,15 +2534,22 @@ uint8 PedInstance::moveToDir(Mission* m, int elapsed, dirMoveType &dir_move,
                     posy = py;
                     if (move_to_pos) {
                         dir_move.on_new_tile = true;
-                        if (dir_move.dir_modifier < 3) {
-                            dir_move.dir_modifier = 0;
-                            dir_move.dir_last = -1;
-                            dir = dir_move.dir_orig;
-                        } else {
-                            dir_move.dir_modifier -= 2;
-                            // & 0x00C0 = ((% 256) / 64) * 64
-                            dir = (256 + dir - dir_move.modifier_value) & 0x00C0;
-                            dir_move.dir_last = dir;
+                        // avoiding direction recovery where tile is same as
+                        // the one that forced us to bounce
+                        if (fpd_prv->dirh != fpd->dirh
+                            || fpd_prv->dirm != fpd->dirm
+                            || fpd_prv->dirl != fpd->dirl)
+                        {
+                            if (dir_move.dir_modifier < 3) {
+                                dir_move.dir_modifier = 0;
+                                dir_move.dir_last = -1;
+                                dir = dir_move.dir_orig;
+                            } else {
+                                dir_move.dir_modifier -= 2;
+                                // & 0x00C0 = ((% 256) / 64) * 64
+                                dir = (256 + dir - dir_move.modifier_value) & 0x00C0;
+                                dir_move.dir_last = dir;
+                            }
                         }
                     } else if (rand() % 256 < 64) {
                         dir_move.dir_last = -1;
@@ -2578,7 +2586,8 @@ uint8 PedInstance::moveToDir(Mission* m, int elapsed, dirMoveType &dir_move,
                         // TODO: +2?
                         dir_move.dir_modifier = 3;
                         // & 0x00C0 = ((% 256) / 64) * 64
-                        dir = (256 + dir_move.dir_closest + dir_move.modifier_value) & 0x00C0;
+                        dir = (256 + dir_move.dir_closest
+                            + dir_move.modifier_value) & 0x00C0;
                     } else {
                         dir_move.modifier_value *= -1;
                         dir_move.dir_modifier = 4;
@@ -2587,11 +2596,13 @@ uint8 PedInstance::moveToDir(Mission* m, int elapsed, dirMoveType &dir_move,
                     }
                     dir_move.dir_last = dir;
                 } else if (dir_move.dir_modifier == 3) {
-                    dir = (256 + dir_move.dir_closest + dir_move.modifier_value * 2) & 0x00C0;
+                    dir = (256 + dir_move.dir_closest
+                        + dir_move.modifier_value * 2) & 0x00C0;
                     dir_move.dir_last = dir;
                     dir_move.dir_modifier = 5;
                 } else if (dir_move.dir_modifier == 5) {
-                    dir = (256 + dir_move.dir_closest + dir_move.modifier_value * 3) & 0x00C0;
+                    dir = (256 + dir_move.dir_closest
+                        + dir_move.modifier_value * 3) & 0x00C0;
                     dir_move.dir_last = dir;
                     dir_move.dir_modifier = 7;
                 } else if (dir_move.dir_modifier == 2) {
@@ -2599,15 +2610,18 @@ uint8 PedInstance::moveToDir(Mission* m, int elapsed, dirMoveType &dir_move,
                     dir_move.dir_last = dir_move.dir_closer;
                     dir_move.dir_modifier = 4;
                 } else if (dir_move.dir_modifier == 4) {
-                    dir = (256 + dir_move.dir_closer + dir_move.modifier_value) & 0x00C0;
+                    dir = (256 + dir_move.dir_closer
+                        + dir_move.modifier_value) & 0x00C0;
                     dir_move.dir_last = dir;
                     dir_move.dir_modifier = 6;
                 } else if (dir_move.dir_modifier == 6) {
-                    dir = (256 + dir_move.dir_closer + dir_move.modifier_value * 2) & 0x00C0;
+                    dir = (256 + dir_move.dir_closer
+                        + dir_move.modifier_value * 2) & 0x00C0;
                     dir_move.dir_last = dir;
                     dir_move.dir_modifier = 8;
                 } else if (dir_move.dir_modifier == 8) {
-                    dir = (256 + dir_move.dir_closer + dir_move.modifier_value * 3) & 0x00C0;
+                    dir = (256 + dir_move.dir_closer
+                        + dir_move.modifier_value * 3) & 0x00C0;
                     dir_move.dir_last = dir;
                     dir_move.dir_modifier = 10;
                 } else {
@@ -2622,11 +2636,11 @@ uint8 PedInstance::moveToDir(Mission* m, int elapsed, dirMoveType &dir_move,
                 if (dir_move.dir_modifier == 3) {
                     dir_move.dir_last += (256 - 64);
                 }
-                dir_move.dir_last %= 256;
+                dir_move.dir_last &= 0x00FF;
                 dir = dir_move.dir_last;
                 dir_move.dir_modifier--;
             } else {
-                dir_move.dir_last = (dir_move.dir_last + 64) % 256;
+                dir_move.dir_last = (dir_move.dir_last + 64) & 0x00FF;
                 dir = dir_move.dir_last;
                 dir_move.dir_modifier = 1;
             }
