@@ -710,6 +710,14 @@ void GameplayMenu::handleMouseMotion(int x, int y, int state, const int modKeys)
     }
 
     if (target_) {
+#if 0
+#ifdef _DEBUG
+        if (modKeys & KMD_ALT) {
+            printf("target id  : %i == majorType : %i\n",
+                target_->getDebugID(), target_->majorType());
+        }
+#endif
+#endif
         if (target_->useTargetCursor() ) {
             if (inrange)
                 g_System.useTargetRedCursor();
@@ -968,7 +976,7 @@ void GameplayMenu::handleClickOnMap(int x, int y, int button, const int modKeys)
                         ped->setActQInQueue(as);
                 } else {
                     bool isForGroup = selection_.size() > 1;
-                    bool addDestPt = (modKeys & KMD_CTRL) == KMD_CTRL;
+                    bool addDestPt = (modKeys & KMD_CTRL) != 0;
                     if (!setDestinationPoint(mapPt, isForGroup, addDestPt, i, ped)) {
                         // could not set destination point -> we can stop
                         break;

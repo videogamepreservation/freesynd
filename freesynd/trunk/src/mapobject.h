@@ -231,6 +231,10 @@ public:
     unsigned int stateMasks() { return state_; }
 
     void offzOnStairs(uint8 twd);
+#ifdef _DEBUG
+    void setDebugID(uint32 id) { debug_id_ = id; }
+    uint32 getDebugID() { return debug_id_; }
+#endif
 
 protected:
     /*!
@@ -271,6 +275,10 @@ protected:
     uint32 state_;
 
     void addOffs(int &x, int &y);
+#ifdef _DEBUG
+private:
+    uint32 debug_id_;
+#endif
 };
 
 /*!

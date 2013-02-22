@@ -203,14 +203,17 @@ bool Mission::loadLevel(uint8 * levelData)
     mods_enemy.addMod(g_App.mods().getHighestVersion(Mod::MOD_BRAIN));
     
     for (uint16 i = 0; i < 256; i++) {
-        if (i == 40)
-            i = 40;
+        //if (i == 40)
+            //i = 40;
         LEVELDATA_PEOPLE & pedref = level_data_.people[i];
         if(pedref.type == 0x0 || pedref.desc == 0x0D || pedref.desc == 0x0C)
             continue;
         PedInstance *p =
             g_App.peds().loadInstance((uint8 *) & pedref, i_map_id_);
         if (p) {
+#ifdef _DEBUG
+            p->setDebugID(i);
+#endif
             if (pedref.desc == 0x05) {
                 if (driverindx[i] != 0xFFFF) {
                     p->putInVehicle(vehicles_[driverindx[i]],
