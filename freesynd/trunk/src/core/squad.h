@@ -46,6 +46,8 @@ public:
     PedInstance * member(size_t slotId);
     //! Returns true if at least one agent has a scanner
     bool hasScanner();
+    //! Returns true if at least one agent is alive
+    bool isAllDead();
 private:
     /*!
      * Selected agents for the next mission. Up to 4 agents.

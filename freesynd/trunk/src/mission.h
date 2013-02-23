@@ -510,10 +510,8 @@ protected:
     bool isStairs(char thisTile);
 
     WeaponInstance *createWeaponInstance(uint8 *data);
-    //! starts a objective
-    void startObjective(ObjectiveDesc *pObj);
-    //! Ends an objective (completed or failed)
-    void endObjective(int objectiveId, bool succeeded, ObjectiveDesc *pObj);
+    //! If the current objective has generated an event -> dispatch it
+    void handleObjectiveEvent(GameEvent & evt, ObjectiveDesc *pObj);
     //! Sends an event to all listeners
     void fireGameEvent(GameEvent &evt);
 protected:

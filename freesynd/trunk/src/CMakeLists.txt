@@ -10,6 +10,7 @@ set (SOURCES
 	agent.cpp
 	agentmanager.cpp
 	app.cpp
+	model/objectivedesc.cpp
 	core/squad.cpp
 	core/gamesession.cpp
 	core/missionbriefing.cpp

@@ -34,7 +34,9 @@ public:
         /*! Sent when an objective with a MapObject target arrives.*/
         kObjTargetSet,
         /*! Sent when an objective with a MapObject target is finished.*/
-        kObjTargetCleared
+        kObjTargetCleared,
+        /*! Send when all the objectives of a mission are completed.*/
+        kObjSucceed
     };
 
     EEventType type_;

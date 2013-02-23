@@ -70,3 +70,19 @@ bool Squad::hasScanner() {
     // No agent has a scanner
     return false;
 }
+
+/*!
+ * Check if all agents are dead.
+ * \return true if at least one agent is alive.
+ */
+bool Squad::isAllDead() {
+    for (size_t indx = AgentManager::kSlot1; indx < AgentManager::kMaxSlot; indx++) {
+        PedInstance *pAgent = a_members_[indx];
+        if (pAgent && pAgent->health() > 0) {
+            return false;
+        }
+    }
+
+    // No agent is alive
+    return true;
+}
