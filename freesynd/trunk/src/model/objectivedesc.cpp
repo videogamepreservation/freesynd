@@ -105,14 +105,14 @@ ObjEliminate::ObjEliminate(PedInstance::objGroupDefMasks subtype) :
         ObjectiveDesc() {
     if (subtype == PedInstance::og_dmAgent) {
         msg = g_App.menus().getMessage("GOAL_ELIMINATE_AGENTS");
-        targetsubtype = subtype;
+        groupDefMask_ = subtype;
         indx_grpid.grpid = 2;
     } else if (subtype == PedInstance::og_dmPolice) {
         msg = g_App.menus().getMessage("GOAL_ELIMINATE_POLICE");
-        targetsubtype = subtype;
+        groupDefMask_ = subtype;
         indx_grpid.grpid = 4;
     } else {
-        targetsubtype = PedInstance::og_dmUndefined;
+        groupDefMask_ = PedInstance::og_dmUndefined;
         indx_grpid.grpid = 0;
     }
 }
@@ -126,7 +126,7 @@ void ObjEliminate::selfEvaluate(GameEvent &evt, Mission *pMission) {
     for (int i=0; i<pMission->numPeds(); i++) {
         PedInstance *pPed = pMission->ped(i);
 
-        if(pPed->objGroupDef() == targetsubtype
+        if(pPed->objGroupDef() == groupDefMask_
             // we can persuade them, will be
             // counted as eliminating for now
             && pPed->objGroupID() == indx_grpid.grpid
@@ -173,7 +173,7 @@ void ObjEvacuate::selfEvaluate(GameEvent &evt, Mission *pMission) {
 
     for (size_t indx = AgentManager::kSlot1; indx < AgentManager::kMaxSlot; indx++) {
         PedInstance *pAgent = pMission->getSquad()->member(indx);
-        if (pAgent) {
+        if (pAgent && pAgent->health() > 0) {
             if (pAgent->distanceToPosXYZ(&pos_xyz) > 512) {
                 // one of the peds is not yet in the evacuation perimeter
                 return;

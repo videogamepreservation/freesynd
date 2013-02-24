@@ -215,7 +215,7 @@ void BriefMinimapRenderer::render(uint16 screen_x, uint16 screen_y) {
  */
 GamePlayMinimapRenderer::GamePlayMinimapRenderer() : 
     mm_timer_weap(300, false), mm_timer_ped(260, false),
-    mm_timer_signal(400) {
+    mm_timer_signal(250) {
     p_mission_ = NULL;
     handleClearSignal();
 }
@@ -320,13 +320,14 @@ void GamePlayMinimapRenderer::handleGameEvent(GameEvent evt) {
 
 void GamePlayMinimapRenderer::handleEvacuationSet() {
     handleClearSignal();
-    signalSource_ = p_minimap_->evacuationPoint();    
+    p_minimap_->evacuationPoint(signalSourceXYZ_);
+   
     signalType_ = kEvacuation;
 
     // Check if the evacuation point is already visible
     // in this case, we draw the circle in red
-    int signal_px = mapToMiniMapX(signalSource_.tx + 1, signalSource_.ox);
-    int signal_py = mapToMiniMapY(signalSource_.ty + 1, signalSource_.oy);
+    int signal_px = signalXYZToMiniMapX();
+    int signal_py = signalXYZToMiniMapY();
     if (isEvacuationCircleOnMinimap(signal_px, signal_py)) {
         i_signalColor_ = fs_cmn::kColorDarkRed;
         i_signalRadius_ = kEvacuationRadius;
@@ -337,6 +338,9 @@ void GamePlayMinimapRenderer::handleClearSignal() {
     i_signalRadius_ = 0;
     i_signalColor_ = fs_cmn::kColorWhite;
     signalType_ = kNone;
+    signalSourceXYZ_.x = 0;
+    signalSourceXYZ_.y = 0;
+    signalSourceXYZ_.z = 0;
 }
 
 /*!
@@ -344,7 +348,8 @@ void GamePlayMinimapRenderer::handleClearSignal() {
  */
 void GamePlayMinimapRenderer::handleTargetSet() {
     handleClearSignal();
-    signalSource_ = p_minimap_->targetPosition();
+    // get the target current position
+    p_minimap_->target()->convertPosToXYZ(&signalSourceXYZ_);
     signalType_ = kTarget;
 }
 
@@ -354,9 +359,9 @@ bool GamePlayMinimapRenderer::handleTick(int elapsed) {
 
     if (signalType_ != kNone &&mm_timer_signal.update(elapsed)) {
         // Time hit max -> update radar circle size
-        i_signalRadius_ += 8;
-        int signal_px = mapToMiniMapX(signalSource_.tx + 1, signalSource_.ox);
-        int signal_py = mapToMiniMapY(signalSource_.ty + 1, signalSource_.oy);
+        i_signalRadius_ += 16;
+        int signal_px = signalXYZToMiniMapX();
+        int signal_py = signalXYZToMiniMapY();
 
         if (signalType_ == kEvacuation && isEvacuationCircleOnMinimap(signal_px, signal_py)) {
             // the evacuation circle is completely on the map, so it's a red circle with fixed size
@@ -379,7 +384,7 @@ bool GamePlayMinimapRenderer::handleTick(int elapsed) {
                 i_signalRadius_ = 0;
                 // Update signal position in case of a moving target
                 if (signalType_ == kTarget) {
-                    signalSource_ = p_minimap_->targetPosition();
+                    p_minimap_->target()->convertPosToXYZ(&signalSourceXYZ_);
                 }
                 // TODO : uncomment when assassinate.ogg doesn't have the pong sound in it
                 //g_App.gameSounds().play(snd::TRACKING_PONG);
@@ -458,8 +463,8 @@ void GamePlayMinimapRenderer::render(uint16 screen_x, uint16 screen_y) {
     drawCars(minimap_layer);
 
     if (signalType_ != kNone) {
-        int signal_px = mapToMiniMapX(signalSource_.tx + 1, signalSource_.ox);
-        int signal_py = mapToMiniMapY(signalSource_.ty + 1, signalSource_.oy);
+        int signal_px = signalXYZToMiniMapX();
+        int signal_py = signalXYZToMiniMapY();
         drawSignalCircle(minimap_layer, signal_px, signal_py, i_signalRadius_, i_signalColor_);
     }
 
@@ -684,7 +689,7 @@ void GamePlayMinimapRenderer::drawPedCircle(uint8 * a_buffer, int mm_x, int mm_y
 	}
 }*/
 
-void GamePlayMinimapRenderer::drawSignalCircle(uint8 * a_buffer, int signal_px, int signal_py, uint8 radius, uint8 color)
+void GamePlayMinimapRenderer::drawSignalCircle(uint8 * a_buffer, int signal_px, int signal_py, uint16 radius, uint8 color)
 {
     int x, y;
     int l;

@@ -1015,6 +1015,10 @@ void Mission::start()
     }    
 }
 
+/*! 
+ * Checks if objectives are completed or failed and updates
+ * mission status.
+ */
 void Mission::checkObjectives() {
     // checking agents, if all are dead -> mission failed
     if (p_squad_->isAllDead()) {
@@ -1054,71 +1058,14 @@ void Mission::checkObjectives() {
     }
 }
 
-/*! 
- * Checks if objectives are completed or failed and updates
- * mission status.
- */
+
 /*void Mission::checkObjectives() {
-
-    // checking agents, if all are dead mission failed
-    bool all_dead = true;
-    std::vector <PedInstance *> peds_evacuate;
-    for (uint32 i = 0; i < 4 && all_dead; i++) {
-        PedInstance *p = peds_[i];
-        if (p->isOurAgent() && p->health() > 0) {
-            all_dead = false;
-            peds_evacuate.push_back(p);
-        }
-    }
-    if (all_dead) {
-        status_ = FAILED;
-        return;
-    }
-
-    bool all_completed = true;
-    bool no_failed = true;
-    WeaponInstance * wi;
-    PedInstance *p;
-    VehicleInstance *v;
-
-    for (uint16 o = 0; o < objectives_.size()
-        && no_failed && all_completed; o++)
-    {
-        ObjectiveDesc * pObj = objectives_[o];
-        // some objectives can be completed once,
-        // if failed, objective will not be possible to complete
-        if (pObj->isTerminated())
-            continue;
-
-        if (o == cur_objective_ && pObj->status == kNotStarted) {
-            startObjective(pObj);
-        }
 
         switch (pObj->type) {
             case objv_None:
                 break;
-            case objv_Evacuate:
-                {
-                GameEvent evt = pObj->evaluate(this);
-                if (evt.type_ != GameEvent::kNone) {
-                    handleObjectiveEvent(o, evt, pObj);
-                } else {
-                    all_completed = false;
-                }
-                }
-                break;
             case objv_AquireControl:
                 switch (pObj->targettype) {
-                    case MapObject::mjt_Ped: //ped
-                        {
-                            GameEvent evt = pObj->evaluate(this);
-                            if (evt.type_ != GameEvent::kNone) {
-                                handleObjectiveEvent(o, evt, pObj);
-                            } else {
-                                all_completed = false;
-                            }
-                        }
-                        break;
                     case MapObject::mjt_Vehicle: //vehicle
                         v = vehicles_[pObj->indx_grpid.targetindx];
                         if (v->health() <= 0) {
@@ -1142,106 +1089,12 @@ void Mission::checkObjectives() {
                 }
                 all_completed = false;
                 break;
-            case objv_PickUpObject:
-                wi = weapons_[pObj->indx_grpid.targetindx];
-                if (wi->health() <= 0) {
-                    no_failed = false;
-                } else {
-                    ShootableMapObject *owner = wi->getOwner();
-                    if (owner && owner->majorType() == MapObject::mjt_Ped
-                        && ((PedInstance *)owner)->isOurAgent())
-                    {
-                        if (o == cur_objective_)
-                            cur_objective_++;
-                    } else
-                        all_completed = false;
-                }
-                break;
-            case objv_DestroyObject:
-                switch (pObj->targettype) {
-                    case MapObject::mjt_Ped: // Kill ped
-                        if ((pObj->condition & 2) == 0) {
-                            TargetObjective *pTargetObj = static_cast<TargetObjective *> (pObj);
-                            p = static_cast<PedInstance *>(pTargetObj->target());
-                            if (p->health() <= 0)
-                            {
-                                // Target is dead -> objective is completed
-                                endObjective(o, true, pObj);
-                            } else {
-                                int x = p->tileX();
-                                int y = p->tileY();
-                                // target might be off visible area (escaped) -> failed
-                                if (p->inVehicle() && (x < (min_x_ >> 1)
-                                    || x > max_x_ + ((mmax_x_ - max_x_) >> 1)
-                                    || y < (min_y_ >> 1)
-                                    || y > max_y_ + ((mmax_y_ - max_y_) >> 1)))
-                                {
-                                    no_failed = false;
-                                    endObjective(o, false, pObj);
-                                } else
-                                    all_completed = false;
-                            }
-                        } else {
-                            //(obj.condition & 2) != 0
-                            for (std::vector<PedInstance *>::iterator it_p
-                                = peds_.begin() + 8; all_completed
-                                && it_p != peds_.end(); it_p++)
-                            {
-                                PedInstance *pPed = *it_p;
-                                if(pPed->objGroupDef() == pObj->targetsubtype
-                                    // we can persuade them, will be
-                                    // counted as eliminating for now
-                                    && pPed->objGroupID() == pObj->indx_grpid.grpid
-                                    && pPed->health() > 0)
-                                {
-                                    all_completed = false;
-                                }
-                            }
-                            if (all_completed && o == cur_objective_) {
-                                cur_objective_++;
-                                pObj->condition |= 4;
-                            }
-                        }
-                        break;
-                    case MapObject::mjt_Vehicle: // Destroy vehicle
-                        v = vehicles_[pObj->indx_grpid.targetindx];
-                        if (v->health() <= 0)
-                            pObj->condition |= 4;
-                        break;
-                    default:
-                        break;
-                }
-                break;
             case objv_UseObject:
                 break;
-            case objv_ReachLocation:
-                if (pObj->condition == 32) {
-                    if (cur_objective_ == o)
-                        cur_objective_++;
-                    p = peds_[pObj->indx_grpid.targetindx];
-                    if (p->distanceToPosXYZ(&pObj->pos_xyz) > 256)
-                        all_completed = false;
-                    break;
-                }
-                // evacuating people
-                for (std::vector<PedInstance *>::iterator it_p
-                    = peds_evacuate.begin();
-                    it_p != peds_evacuate.end() && all_completed; it_p++)
-                {
-                    if ((*it_p)->distanceToPosXYZ(&pObj->pos_xyz) > 512)
-                        all_completed = false;
-                }
-                break;
+
             default:
                 break;
         }
-    }
-    if (status_ == RUNNING) {
-        if (no_failed) {
-            if (all_completed)
-                status_ = COMPLETED;
-        } else
-            status_ = FAILED;
     }
 }*/
 
@@ -1254,7 +1107,10 @@ void Mission::handleObjectiveEvent(GameEvent & evt, ObjectiveDesc *pObj) {
         }
         break;
     case GameEvent::kObjEvacuate:
-        // TODO get the evacuation point
+        {
+        ObjEvacuate * pObjEvac = static_cast<ObjEvacuate *>(pObj);
+        p_minimap_->setEvacuationPoint(pObjEvac->posXYZ());
+        }
         break;
     case GameEvent::kObjTargetCleared:
         p_minimap_->clearTarget();

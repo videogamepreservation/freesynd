@@ -26,12 +26,12 @@
 #define MAP_H
 
 #include "common.h"
+#include "mapobject.h"
 
 #define NUM_MAPS               59
 
 class Tile;
 class TileManager;
-class MapObject;
 
 /*!
  * Map helper class.
@@ -151,9 +151,9 @@ public:
     //! Clear the target source
     void clearTarget();
     //! Defines the evacuation point on the minimap
-    void setEvacuationPoint(MapTilePoint &mtp);
+    void setEvacuationPoint(const toDefineXYZ &evacPt);
     //! Return the evacuation position
-    const MapTilePoint evacuationPoint() { return evacPt_; }
+    void evacuationPoint(toDefineXYZ &evacPt);
 
 private:
     /* An array with the same size of the real map but containing
@@ -166,7 +166,7 @@ private:
     /*! Current target emitting a signal.*/
     MapObject *p_target_;
     /*! Coords on the world map of the signal source.*/
-    MapTilePoint evacPt_;
+    toDefineXYZ evacPt_;
 };
 
 #endif

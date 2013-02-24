@@ -26,12 +26,11 @@ Features added
   * Access card will identify agent as police officer, also opens large doors
   * Selection markers (1,2,3,4), to identify selected agent
   * Sound effects added "Selected", "Mission failed", "Police warning"
-  * :
+  * Gameplay minimap fully implemented
 
 Known issues with this release
 ------------------------------
   * Agent AI is not operational.
-  * The gameplay minimap is not complete.
   * PathFinding requires improvement (path smoothing)
   * Mission debriefing is not operational
   * No animation for windows

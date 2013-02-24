@@ -31,35 +31,6 @@
 #include "core/gameevent.h"
 
 /*!
- * Defines all objectives possible types.
- */
-enum ObjectiveType {
-    objv_None = 0x0,
-    //! Setup control over object where possible to lose this control
-    objv_AquireControl = 0x0001,
-    //! Leave control over object where possible to lose this control
-    objv_LoseControl = 0x0002,
-    //! Obtain inventory object
-    objv_PickUpObject = 0x0008,
-    /*!
-     * Object of defined subtype (of type) should be destroyed
-     * defined by indx
-     */
-    objv_DestroyObject = 0x0010,
-    //! Use of object untill condition is met
-    objv_UseObject = 0x0020,
-    objv_PutDownObject = 0x0040,
-    //! Objects should be at defined location
-    objv_ReachLocation = 0x0080,
-    objv_FollowObject = 0x0100,
-    //! Should wait some time
-    objv_Wait = 0x0200,
-    objv_AttackLocation = 0x0400,
-    objv_Protect = 0x8000,
-    objv_Evacuate = 0x9000
-};
-
-/*!
  * Defines all possible status for the current objective.
  */
 enum EObjectiveStatus {
@@ -81,21 +52,14 @@ class Mission;
 class ObjectiveDesc {
 public:
     ObjectiveDesc() {
-        targettype = (MapObject::MajorTypeEnum)MapObject::mjt_Undefined;
-        targetsubtype = 0;
         indx_grpid.targetindx = 0;
         status = kNotStarted;
-        condition = 0;
         subobjindx = 0;
         nxtobjindx = 0;
     }
 
     virtual ~ObjectiveDesc() {};
-
-    // MapObject::MajorTypeEnum
-    uint8 targettype;
-    // (objGroupDefMasks)
-    uint32 targetsubtype;
+    
     union {
         // index within vector of data
         uint16 targetindx;
@@ -104,18 +68,7 @@ public:
 
     /*! Status of the objective.*/
     EObjectiveStatus status;
-    /*!
-     * Status of the objective.
-     * Possible values :
-     * - 00 : not defined
-     * - 0b : has sub objective
-     * - 1b : refers to all objects of subtype
-     * - 2b : completed
-     * - 3b : failed
-     * - 4b : check previous objectives for fail
-     * - 5b - is subobjective
-     */
-    uint32 condition;
+
     // indx for sub objective
     uint16 subobjindx;
     
@@ -127,7 +80,7 @@ public:
      * Return true if objective is cleared (succeeded or failed)
      */
     bool isTerminated() {
-        return ((condition & 12) != 0) || status == kCompleted || status == kFailed;
+        return status == kCompleted || status == kFailed;
     }
 
     /*!
@@ -200,6 +153,10 @@ public:
 
 protected:
     void selfEvaluate(GameEvent &evt, Mission *pMission);
+
+protected:
+    /*! The group to eliminate.*/
+    uint32 groupDefMask_;
 };
 
 /*!

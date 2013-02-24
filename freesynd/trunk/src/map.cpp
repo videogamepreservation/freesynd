@@ -29,7 +29,6 @@
 #include <assert.h>
 
 #include "map.h"
-#include "mapobject.h"
 #include "utils/log.h"
 #include "gfx/tilemanager.h"
 #include "gfx/screen.h"
@@ -415,8 +414,17 @@ void MiniMap::clearTarget() {
     p_target_ = NULL;
 }
 //! Defines the evacuation point on the minimap
-void MiniMap::setEvacuationPoint(MapTilePoint &mtp) {
-    evacPt_ = mtp;
+void MiniMap::setEvacuationPoint(const toDefineXYZ &evacPt) {
+    evacPt_.x = evacPt.x;
+    evacPt_.y = evacPt.y;
+    evacPt_.z = evacPt.z;
+}
+
+//! Return the evacuation position
+void MiniMap::evacuationPoint(toDefineXYZ &evacPt) {
+    evacPt.x = evacPt_.x;
+    evacPt.y = evacPt_.y;
+    evacPt.z = evacPt_.z;
 }
 
 //! Return the target position

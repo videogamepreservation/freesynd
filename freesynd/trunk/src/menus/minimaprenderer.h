@@ -215,6 +215,22 @@ class GamePlayMinimapRenderer : public MinimapRenderer, GameEventListener {
     }
 
     /*!
+     * Returns X coord of the current real world coordinate of the signal relatively
+     * to the top letf corner of the minimap in pixel.
+     */
+    int signalXYZToMiniMapX() {
+        return signalSourceXYZ_.x * pixpertile_ / 256 - world_tx_ * pixpertile_ + pixpertile_;
+    }
+
+    /*!
+     * Returns Y coord of the current real world coordinate of the signal relatively
+     * to the top letf corner of the minimap in pixel.
+     */
+    int signalXYZToMiniMapY() {
+        return signalSourceXYZ_.y * pixpertile_ / 256 - world_ty_ * pixpertile_ + pixpertile_;
+    }
+
+    /*!
      * Draw a rect to the given buffer with the given size and color.
      * \param a_buffer destination buffer
      * \param mm_x X coord in the destination buffer
@@ -236,7 +252,7 @@ class GamePlayMinimapRenderer : public MinimapRenderer, GameEventListener {
     void drawPedCircle(uint8 * a_buffer, int mm_x, int mm_y, uint8 fillColor,
                             uint8 borderColor);
     //! Draw a circle on the minimap for the signal
-    void drawSignalCircle(uint8 * a_buffer, int signal_px, int signal_py, uint8 radius, uint8 color);
+    void drawSignalCircle(uint8 * a_buffer, int signal_px, int signal_py, uint16 radius, uint8 color);
     //! Draw a pixel on the minimap
     void drawPixel (uint8 * a_buffer, int signal_px, int signal_py, int x, int y, uint8 color) {
         x = signal_px + x;
@@ -284,11 +300,12 @@ class GamePlayMinimapRenderer : public MinimapRenderer, GameEventListener {
     /*! Coords in pixels of the cross.*/
     int cross_y_;
     /*! Coords on the world map of the signal source.*/
-    MapTilePoint signalSource_;
+    //MapTilePoint signalSource_;
+    toDefineXYZ signalSourceXYZ_;
     /*! Type of emitted signal. If NONE, no signal is emitted.*/
     ESignalType signalType_;
     /*! Radius for the signal circle.*/
-    uint8 i_signalRadius_;
+    uint16 i_signalRadius_;
     /*! Current signal color.*/
     uint8 i_signalColor_;
     /*! A timer to control the blinking of weapons.*/
