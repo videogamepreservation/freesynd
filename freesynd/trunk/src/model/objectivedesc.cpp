@@ -123,7 +123,7 @@ ObjEliminate::ObjEliminate(PedInstance::objGroupDefMasks subtype) :
  * \param pMission
  */
 void ObjEliminate::selfEvaluate(GameEvent &evt, Mission *pMission) {
-    for (int i=0; i<pMission->numPeds(); i++) {
+    for (int i = 8; i< pMission->numPeds(); i++) {
         PedInstance *pPed = pMission->ped(i);
 
         if(pPed->objGroupDef() == groupDefMask_
@@ -132,9 +132,10 @@ void ObjEliminate::selfEvaluate(GameEvent &evt, Mission *pMission) {
             && pPed->objGroupID() == indx_grpid.grpid
             && pPed->health() > 0)
         {
-            break;
+            return;
         }
     }
+    status = kCompleted;
 }
 
 ObjEvacuate::ObjEvacuate(int x, int y, int z, std::vector <PedInstance *> &lstOfPeds) : 
