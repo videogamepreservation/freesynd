@@ -395,6 +395,17 @@ void MenuManager::saveBackground() {
 }
 
 /*!
+ * Blit a portion of the background to the current screen.
+ * \param x Origin of the blit rect. 
+ * \param y Origin of the blit rect.
+ * \param width Width of the blit rect.
+ * \param height Height of the blit rect.
+ */
+void MenuManager::blitFromBackground(int x, int y, int width, int height) {
+    g_Screen.blitRect(x, y, width, height, background_, false, g_Screen.gameScreenWidth());
+}
+
+/*!
  * Renders the current menu if there is one 
  * and if it needs to be refreshed.
  */

@@ -89,7 +89,8 @@ public:
 
     //! Take a snapshot of the screen.
     void saveBackground();
-
+    //! Blit a portion of the background to the current screen
+    void blitFromBackground(int x, int y, int width, int height);
     /*! 
      * Adds a new dirty rectangle
      */

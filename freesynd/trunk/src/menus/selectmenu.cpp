@@ -193,24 +193,12 @@ void SelectMenu::drawAgent()
         menuSprites().drawSpriteXYZ(brain, brainx, 114, 0, false, true);
     }
     // restore lines over agent
-/*    g_Screen.blit(254, 124, 30, 2,
-                  background_ + 256 + 124 * GAME_SCREEN_WIDTH, false,
-                  GAME_SCREEN_WIDTH);
-    g_Screen.blit(264, 132, 30, 2,
-                  background_ + 266 + 132 * GAME_SCREEN_WIDTH, false,
-                  GAME_SCREEN_WIDTH);
-    g_Screen.blit(266, 174, 36, 2,
-                  background_ + 268 + 174 * GAME_SCREEN_WIDTH, false,
-                  GAME_SCREEN_WIDTH);
-    g_Screen.blit(252, 210, 56, 2,
-                  background_ + 254 + 210 * GAME_SCREEN_WIDTH, false,
-                  GAME_SCREEN_WIDTH);
-    g_Screen.blit(302, 232, 10, 2,
-                  background_ + 304 + 232 * GAME_SCREEN_WIDTH, false,
-                  GAME_SCREEN_WIDTH);
-    g_Screen.blit(264, 256, 30, 2,
-                  background_ + 266 + 256 * GAME_SCREEN_WIDTH, false,
-                  GAME_SCREEN_WIDTH);*/
+    menu_manager_->blitFromBackground(254, 124, 30, 2);
+    menu_manager_->blitFromBackground(264, 132, 30, 2);
+    menu_manager_->blitFromBackground(266, 174, 36, 2);
+    menu_manager_->blitFromBackground(252, 210, 56, 2);
+    menu_manager_->blitFromBackground(302, 232, 10, 2);
+    menu_manager_->blitFromBackground(264, 256, 30, 2);
 
     // write inventory
     for (int j = 0; j < 2; j++)

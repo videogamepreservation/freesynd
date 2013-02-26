@@ -1,5 +1,7 @@
- - Complete mission tree
- - Mission objectives
+Gameplay:
+---------
+ - Complete mission tree : finishing a mission gives access to other missions
+ - Mission objectives : implements all possible objectives
  - Correct identification of object types during mission load, includes
 vehicles, static objects
  - Adding properties to:
@@ -12,6 +14,11 @@ recieved modifier, if we don't want to recalculate all the time; persuade power
 points; persuade points needed to persuade - this value will be added to agent
 that succesfully persuaded; weapon range modifier(?); accuracy modifier/property(?);
  - static objects: damage recieve value; destructable or not
+ - in original territory owners changed, it was like other syndicates where
+ capturing territories
+ 
+ A.I:
+----
  - A.L. - this one is complex
  - pathfinding directional will be used for simulation of people walking
 around the city
@@ -25,6 +32,9 @@ around the city
    firing should have delay, correct delay per ipa
    instant damage to objects
  - agent explode with mod chest lvl 2 or 3
+ 
+IHM:
+----
  - animation for objects need to be fixed, to correctly represent every stage
 of event/state:
    windows break when shot
@@ -33,21 +43,26 @@ of event/state:
  - map drawing still buggy
  - set weapons for enemy agents, because in gamedata weapons are not the same as
 in original gameplay or are not present at all
+ - add sound effects
+ - mapmenu: player color update - if changed in configmenu; change of owners for
+non-player owned territory
+ - gameplaymenu after mission succesful/failed add timed auto switch to
+debriefmenu after 5 sec or so
+ - selectmenu make impossible to start gameplay with all agents non active+dead1
+
+New features:
+-------------
  - write mission editor, create new mission files using editor, based on original
 game mission files.
  - map editor
  - Implement dragging in SelectMenu to pass a weapon from an agent to another.
+
+Packaging:
+----------
  - Create a debian package
- - add sound effects
- - mapmenu: player color update - if changed in configmenu; change of owners for
-non-player owned territory
- - in original territory owners changed, it was like other syndicates where
- capturing territories
- - selectmenu make impossible to start gameplay with all agents non active+dead1
- - gameplaymenu after mission succesful/failed add timed auto switch to
-debriefmenu after 5 sec or so
 
  Very low priority stuff, maybe for v0.9:
+ ----------------------------------------
  - xmidi music data is not dealocated on exit - memory leak
  - "no_sound"/"no_music" option for config file
  - Add mission failure music
