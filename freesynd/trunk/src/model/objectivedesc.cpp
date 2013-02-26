@@ -52,6 +52,24 @@ void ObjAssassinate::selfEvaluate(GameEvent &evt, Mission *pMission) {
     }
 }
 
+ObjProtect::ObjProtect(MapObject * pMapObject) : TargetObjective(pMapObject) {
+    msg = g_App.menus().getMessage("GOAL_PROTECT");
+}
+
+/*!
+ * Evaluate the objective.
+ * \param evt
+ * \param pMission
+ */
+void ObjProtect::selfEvaluate(GameEvent &evt, Mission *pMission) {
+    PedInstance *p = static_cast<PedInstance *>(p_target_);
+    if (p->health() <= 0) {
+        // Target is dead -> objective is failed
+        endObjective(evt, false);
+    }
+    // TODO : detect that ped is safe
+}
+
 /*!
  * Constructeur.
  * \param
@@ -69,6 +87,33 @@ void ObjDestroyVehicle::selfEvaluate(GameEvent &evt, Mission *pMission) {
     VehicleInstance *pVehicle = static_cast<VehicleInstance *>(p_target_);
 
     if (pVehicle->health() <= 0) {
+        endObjective(evt, true);
+    }
+}
+
+/*!
+ * Constructor.
+ * \param
+ */
+ObjUseVehicle::ObjUseVehicle(MapObject * pVehicle) : TargetObjective(pVehicle) {
+    msg = g_App.menus().getMessage("GOAL_USE_VEHICLE");
+}
+
+/*!
+ * Evaluate the objective.
+ * \param evt
+ * \param pMission
+ */
+void ObjUseVehicle::selfEvaluate(GameEvent &evt, Mission *pMission) {
+    VehicleInstance *pVehicle = static_cast<VehicleInstance *>(p_target_);
+
+    if (pVehicle->health() <= 0) {
+        endObjective(evt, false);
+        return;
+    }
+    
+    PedInstance *p = pVehicle->getDriver();
+    if (p && p->isOurAgent()) {
         endObjective(evt, true);
     }
 }

@@ -217,11 +217,33 @@ protected:
 };
 
 /*!
+ * A ObjProtect defines an objective where player must prevent a Ped from being killed.
+ */
+class ObjProtect : public TargetObjective {
+public:
+    ObjProtect(MapObject * pMapObject);
+
+protected:
+    void selfEvaluate(GameEvent &evt, Mission *pMission);
+};
+
+/*!
  * This objective is for destroying a vehicle.
  */
 class ObjDestroyVehicle : public TargetObjective {
 public:
     ObjDestroyVehicle(MapObject * pVehicle);
+
+protected:
+    void selfEvaluate(GameEvent &evt, Mission *pMission);
+};
+
+/*!
+ * This objective is for taking control of a vehicle.
+ */
+class ObjUseVehicle : public TargetObjective {
+public:
+    ObjUseVehicle(MapObject * pVehicle);
 
 protected:
     void selfEvaluate(GameEvent &evt, Mission *pMission);

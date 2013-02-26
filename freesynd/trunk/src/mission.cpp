@@ -573,18 +573,14 @@ bool Mission::loadLevel(uint8 * levelData)
                     printf("0x02 type not matched");
                 break;
             case 0x03:
-/*                if (bindx > 0 && bindx < 0x5C02) {
+                if (bindx > 0 && bindx < 0x5C02) {
                     cindx = (bindx - 2) / 92;
                     if ((cindx * 92 + 2) == bindx && pindx[cindx] != 0xFFFF) {
-                        objd = new ObjectiveDesc(objv_Protect);
-                        objd->targettype = MapObject::mjt_Ped;
-                        objd->indx_grpid.targetindx = pindx[cindx];
-                        objd->msg = g_App.menus().getMessage("GOAL_PROTECT");
+                        objd = new ObjProtect(peds_[pindx[cindx]]);
                     } else
                         printf("0x03 incorrect offset");
                 } else
                     printf("0x03 type not matched");
-                isset = true;*/
                 break;
             case 0x05:
                 if (bindx >= 0x9562 && bindx < 0xDD62) {
@@ -617,19 +613,16 @@ bool Mission::loadLevel(uint8 * levelData)
 
                 break;
             case 0x0F:
-/*                if (bindx >= 0x5C02 && bindx < 0x6682) {
+                if (bindx >= 0x5C02 && bindx < 0x6682) {
                     bindx -= 0x5C02;
                     cindx = bindx / 42;
                     if ((cindx * 42) == bindx && vindx[cindx] != 0xFFFF) {
-                        objd = new ObjectiveDesc(objv_AquireControl);
-                        objd->targettype = MapObject::mjt_Vehicle;
-                        objd->indx_grpid.targetindx = vindx[cindx];
-                        objd->msg = g_App.menus().getMessage("GOAL_USE_VEHICLE");
+                        objd = new ObjUseVehicle(vehicles_[vindx[cindx]]);
+                        // TODO Do we have to add the vehicle to the list of object to evacuate?
                     } else
                         printf("0x0F incorrect offset");
                 } else
                     printf("0x0F type not matched");
-                isset = true;*/
                 break;
             case 0x10:
                 // realworld coordinates, not tile based
@@ -1057,46 +1050,6 @@ void Mission::checkObjectives() {
         }
     }
 }
-
-
-/*void Mission::checkObjectives() {
-
-        switch (pObj->type) {
-            case objv_None:
-                break;
-            case objv_AquireControl:
-                switch (pObj->targettype) {
-                    case MapObject::mjt_Vehicle: //vehicle
-                        v = vehicles_[pObj->indx_grpid.targetindx];
-                        if (v->health() <= 0) {
-                            no_failed = false;
-                            pObj->condition |= 8;
-                            break;
-                        }
-                        p = v->getDriver();
-                        if (p && p->isOurAgent())
-                            pObj->condition |= 4;
-                        break;
-                    default:
-                        break;
-                }
-                break;
-            case objv_Protect:
-                p = peds_[pObj->indx_grpid.targetindx];
-                if (p->health() <= 0) {
-                    pObj->condition |= 8;
-                    no_failed = false;
-                }
-                all_completed = false;
-                break;
-            case objv_UseObject:
-                break;
-
-            default:
-                break;
-        }
-    }
-}*/
 
 void Mission::handleObjectiveEvent(GameEvent & evt, ObjectiveDesc *pObj) {
     switch(evt.type_) {
