@@ -192,6 +192,7 @@ public:
     bool setSurfaces();
     void clrSurfaces();
     bool getWalkable(MapTilePoint &mtp);
+    bool getWalkableClosestByZ(MapTilePoint &mtp);
     bool getShootableTile(int &x, int &y, int &z, int &ox, int &oy, int &oz);
     bool isTileSolid(int x, int y, int z, int ox, int oy, int oz);
 

@@ -3291,6 +3291,38 @@ bool Mission::getWalkable(MapTilePoint &mtp) {
     return gotit;
 }
 
+bool Mission::getWalkableClosestByZ(MapTilePoint &mtp) {
+    // NOTE: using z from mtp as start to find closest z
+    int inc_z = mtp.tz;
+    int dec_z = mtp.tz;
+    bool found = false;
+
+    do {
+        if (inc_z < mmax_z_) {
+            if ((mdpoints_[mtp.tx + mtp.ty * mmax_x_
+                + inc_z * mmax_m_xy].t & m_fdWalkable) == m_fdWalkable)
+            {
+                mtp.tz = inc_z;
+                found = true;
+                break;
+            }
+            inc_z++;
+        }
+        if (dec_z >= 0) {
+            if ((mdpoints_[mtp.tx + mtp.ty * mmax_x_
+                + dec_z * mmax_m_xy].t & m_fdWalkable) == m_fdWalkable)
+            {
+                mtp.tz = dec_z;
+                found = true;
+                break;
+            }
+            dec_z--;
+        }
+    } while (inc_z < mmax_z_ || dec_z >= 0);
+
+    return found;
+}
+
 void Mission::adjXYZ(int &x, int &y, int &z) {
     if (x < 0)
         x = 0;

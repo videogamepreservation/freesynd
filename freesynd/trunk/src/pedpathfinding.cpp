@@ -2388,8 +2388,6 @@ uint8 PedInstance::moveToDir(Mission* m, int elapsed, dirMoveType &dir_move,
     bool bounced = false;
     bool should_bounce = dir_move.bounce;
 
-    // TODO: better way for recovering direction, forward 7 tiles check
-    // for current dir?
     if (dir_move.dir_modifier != 0) {
         dir = dir_move.dir_last;
     }
@@ -2551,9 +2549,14 @@ uint8 PedInstance::moveToDir(Mission* m, int elapsed, dirMoveType &dir_move,
                                 dir_move.dir_last = dir;
                             }
                         }
-                    } else if (rand() % 256 < 64) {
-                        dir_move.dir_last = -1;
-                        dir_move.dir_modifier = 0;
+                    } else {
+                        int rand_inc = rand();
+                        if ((rand_inc & 0x00FF) < 32) {
+                            dir_move.dir_last = -1;
+                            dir_move.dir_modifier = 0;
+                            // & 0x003F = % 64, & 0x00FF = % 256
+                            dir = (256 + dir + (rand_inc & 0x003F) - 32) & 0x00FF;
+                        }
                     }
                     break;
                 }
@@ -2563,13 +2566,14 @@ uint8 PedInstance::moveToDir(Mission* m, int elapsed, dirMoveType &dir_move,
             posy = py;
         } while (dist_passsed < dist_curr);
         if (diffx >= 0)
-            off_x_ = ((int)ceil(posx)) % 256;
+            // & 0x00FF = % 256
+            off_x_ = ((int)ceil(posx)) & 0x00FF;
         else
-            off_x_ = ((int)floor(posx)) % 256;
+            off_x_ = ((int)floor(posx)) & 0x00FF;
         if (diffy >= 0)
-            off_y_ = ((int)ceil(posy)) % 256;
+            off_y_ = ((int)ceil(posy)) & 0x00FF;
         else
-            off_y_ = ((int)floor(posy)) % 256;
+            off_y_ = ((int)floor(posy)) & 0x00FF;
         dist_curr -= dist_passsed;
         if (need_bounce && should_bounce) {
             if (move_to_pos) {
@@ -2583,11 +2587,10 @@ uint8 PedInstance::moveToDir(Mission* m, int elapsed, dirMoveType &dir_move,
                     dir_move.on_new_tile = false;
                 } else if (dir_move.dir_modifier == 1) {
                     if (dir_move.on_new_tile) {
-                        // TODO: +2?
-                        dir_move.dir_modifier = 3;
+                        dir_move.dir_modifier += 2;
                         // & 0x00C0 = ((% 256) / 64) * 64
-                        dir = (256 + dir_move.dir_closest
-                            + dir_move.modifier_value) & 0x00C0;
+                        // dir based on closest
+                        dir = (256 + dir + dir_move.modifier_value) & 0x00C0;
                     } else {
                         dir_move.modifier_value *= -1;
                         dir_move.dir_modifier = 4;
@@ -2595,35 +2598,34 @@ uint8 PedInstance::moveToDir(Mission* m, int elapsed, dirMoveType &dir_move,
                         dir_move.dir_last = dir_move.dir_closer;
                     }
                     dir_move.dir_last = dir;
+
+                // dir based on closest
                 } else if (dir_move.dir_modifier == 3) {
-                    dir = (256 + dir_move.dir_closest
-                        + dir_move.modifier_value * 2) & 0x00C0;
+                    dir = (256 + dir + dir_move.modifier_value) & 0x00C0;
                     dir_move.dir_last = dir;
-                    dir_move.dir_modifier = 5;
+                    dir_move.dir_modifier += 2;
                 } else if (dir_move.dir_modifier == 5) {
-                    dir = (256 + dir_move.dir_closest
-                        + dir_move.modifier_value * 3) & 0x00C0;
+                    dir = (256 + dir + dir_move.modifier_value) & 0x00C0;
                     dir_move.dir_last = dir;
-                    dir_move.dir_modifier = 7;
+                    dir_move.dir_modifier += 2;
+
+                // dir based on closer
                 } else if (dir_move.dir_modifier == 2) {
                     dir = dir_move.dir_closer;
                     dir_move.dir_last = dir_move.dir_closer;
-                    dir_move.dir_modifier = 4;
+                    dir_move.dir_modifier += 2;
                 } else if (dir_move.dir_modifier == 4) {
-                    dir = (256 + dir_move.dir_closer
-                        + dir_move.modifier_value) & 0x00C0;
+                    dir = (256 + dir + dir_move.modifier_value) & 0x00C0;
                     dir_move.dir_last = dir;
-                    dir_move.dir_modifier = 6;
+                    dir_move.dir_modifier += 2;
                 } else if (dir_move.dir_modifier == 6) {
-                    dir = (256 + dir_move.dir_closer
-                        + dir_move.modifier_value * 2) & 0x00C0;
+                    dir = (256 + dir + dir_move.modifier_value) & 0x00C0;
                     dir_move.dir_last = dir;
-                    dir_move.dir_modifier = 8;
+                    dir_move.dir_modifier += 2;
                 } else if (dir_move.dir_modifier == 8) {
-                    dir = (256 + dir_move.dir_closer
-                        + dir_move.modifier_value * 3) & 0x00C0;
+                    dir = (256 + dir + dir_move.modifier_value) & 0x00C0;
                     dir_move.dir_last = dir;
-                    dir_move.dir_modifier = 10;
+                    dir_move.dir_modifier += 2;
                 } else {
                     dir_move.dir_modifier = 0;
                     dir_move.dir_last = -1;
@@ -2668,8 +2670,7 @@ uint8 PedInstance::moveToDir(Mission* m, int elapsed, dirMoveType &dir_move,
             dir = dir_move.dir_last;
         } else {
             setDirection(dir);
-            // TODO: fix this
-            // To avoid looping
+            // TODO: movement should announce failure
             if (need_bounce)
                 break;
         }

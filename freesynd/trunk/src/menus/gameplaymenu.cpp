@@ -424,7 +424,7 @@ void GameplayMenu::handleShow() {
     g_Screen.clear(0);
     
     // place the screen at the good starting position
-    for (int cnt=0; cnt<100; cnt++) {
+    for (int cnt = 0; cnt < 100; cnt++) {
         if (isScrollLegal(world_x_, world_y_)) {
             break;
         }
@@ -723,8 +723,6 @@ void GameplayMenu::handleMouseMotion(int x, int y, int state, const int modKeys)
                 g_System.useTargetRedCursor();
             else
                 g_System.useTargetCursor();
-            // There shoudl really be an "isCollectable()" in the class hierarchy
-            // instead of this dynamic_cast
         } else if (target_->majorType() == MapObject::mjt_Weapon)
             g_System.usePickupCursor();
     } else {
@@ -917,8 +915,6 @@ void GameplayMenu::handleClickOnMap(int x, int y, int button, const int modKeys)
             if (selection_.isAgentSelected(i)) {
                 PedInstance::actionQueueGroupType as;
                 bool action = false;
-                // Note: using dynamic_cast indicates we have an issue with
-                // our class hierarchy
                 if (target_) {
                     switch (target_->majorType()) {
                         case MapObject::mjt_Ped:
@@ -977,6 +973,8 @@ void GameplayMenu::handleClickOnMap(int x, int y, int button, const int modKeys)
                 } else {
                     bool isForGroup = selection_.size() > 1;
                     bool addDestPt = (modKeys & KMD_CTRL) != 0;
+                    if (!mission_->getWalkable(mapPt))
+                        break;
                     if (!setDestinationPoint(mapPt, isForGroup, addDestPt, i, ped)) {
                         // could not set destination point -> we can stop
                         break;
@@ -1043,7 +1041,10 @@ void GameplayMenu::handleClickOnMinimap(int x, int y) {
         if (selection_.isAgentSelected(i)) {
             PedInstance *ped = mission_->ped(i);
             bool isForGroup = selection_.size() > 1;
-            if (!setDestinationPoint(pt, isForGroup, false, i, ped)){
+            pt.tz = ped->tileZ();
+            if (!mission_->getWalkableClosestByZ(pt))
+                break;
+            if (!setDestinationPoint(pt, isForGroup, false, i, ped)) {
                 break;
             }
         }
@@ -1054,8 +1055,6 @@ bool GameplayMenu::setDestinationPoint(const MapTilePoint &mapPt, bool isForGrou
     
     MapTilePoint tmpPt(mapPt);
 
-    if (!(mission_->getWalkable(tmpPt)))
-        return false;
     if (isForGroup) {
         //TODO: current group position is like
         // in original this can make non-tile
