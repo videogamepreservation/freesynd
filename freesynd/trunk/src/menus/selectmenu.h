@@ -46,6 +46,7 @@ public:
 
 protected:
 	bool handleMouseDown(int x, int y, int button, const int modKeys);
+    void handleClickOnAgentSelector(const size_t agent_no, int button);
 
     void updateClock();
     //! Draws a focus around the selected agent picture
@@ -54,7 +55,11 @@ protected:
 	void drawSelectedWeaponInfos(int x, int y);
 	void drawSelectedModInfos(int x, int y);
 
+    //! Utility method to force redraw of agent selectors
+    void dirtyAgentSelector() { addDirtyRect(16, 80, 130, 155); }
+
     void toggleAgent(int n);
+    void updateAcceptEnabled();
 
     void showModWeaponPanel();
     void showItemList();
@@ -101,6 +106,8 @@ protected:
     int purchaseButId_;
     /*! Id of the sell button.*/
     int sellButId_;
+    /*! Id of the accept button.*/
+    int acceptButId_;
     /*! The team list box.*/
     TeamListBox *pTeamLBox_;
     /*! The weapons list.*/

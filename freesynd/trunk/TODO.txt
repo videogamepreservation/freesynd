@@ -48,7 +48,6 @@ in original gameplay or are not present at all
 non-player owned territory
  - gameplaymenu after mission succesful/failed add timed auto switch to
 debriefmenu after 5 sec or so
- - selectmenu make impossible to start gameplay with all agents non active+dead1
 
 New features:
 -------------

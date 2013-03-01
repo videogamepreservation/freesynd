@@ -107,7 +107,7 @@ typedef struct Key {
 
 // A list of macros to ease unicode comparisons (case insensitive)
 #define isLetterA(codePoint) codePoint == 0x0061 || codePoint == 0x0041
-#define isLetterD(codePoint) codePoint == 0x0064 || codePoint == 0x0044
+#define isLetterD(codePoint) codePoint == 0x0064 || codePoint == 0x0044 || codePoint == 0x0004
 #define isLetterG(codePoint) codePoint == 0x0067 || codePoint == 0x0047
 #define isLetterH(codePoint) codePoint == 0x0068 || codePoint == 0x0048
 #define isLetterQ(codePoint) codePoint == 0x0071 || codePoint == 0x0051

@@ -48,7 +48,7 @@ cur_agent_(0), tick_count_(0), rnd_(0), sel_all_(false)
     teamButId_ = addToggleAction(16, 262, 129, 25, "#SELECT_TEAM_BUT", FontManager::SIZE_2, false);
     modsButId_ = addToggleAction(16, 290, 129, 25, "#MENU_MODS_BUT", FontManager::SIZE_2, false);
     equipButId_ = addToggleAction(16, 318, 129, 25, "#MENU_EQUIP_BUT", FontManager::SIZE_2, true);
-	addOption(16, 346, 129, 25, "#MENU_ACC_BUT", FontManager::SIZE_2, MENU_LOADING);
+    acceptButId_ = addOption(16, 346, 129, 25, "#MENU_ACC_BUT", FontManager::SIZE_2, MENU_LOADING);
     addOption(500, 347,  128, 25, "#MENU_MAIN_BUT", FontManager::SIZE_2, MENU_MAIN);
 
     // Team list
@@ -334,6 +334,8 @@ void SelectMenu::handleShow() {
         pTeamLBox_->setSquadLine(g_Session.agents().getSquadSlotForAgent(pAgentFromCryo), iAgnt);
     }
     showItemList();
+
+    updateAcceptEnabled();
 }
 
 void SelectMenu::handleRender(DirtyList &dirtyList) {
@@ -440,18 +442,40 @@ void SelectMenu::handleLeave() {
     sel_all_ = false;
 }
 
+/*!
+ * Invert the active/inactive status of an agent in the squad.
+ * Cannot inactivate an agent if he's the last active agent.
+ */
 void SelectMenu::toggleAgent(int n)
 {
     int nactive = 0;
-    for (int i = 0; i < 4; i++)
+    // count the number of active agents
+    for (size_t i = 0; i < AgentManager::kMaxSlot; i++)
         if (g_Session.agents().isSquadSlotActive(i))
             nactive++;
     Agent *a = g_Session.agents().squadMember(n);
     if (a) {
+        // prevent from inactiving the last active agent
         if (a->isActive() && nactive == 1)
             return;
         a->setActive(!a->isActive());
+        dirtyAgentSelector();
     }
+}
+
+/*!
+ * Update the accept button : enable if there is one agent active.
+ */
+void SelectMenu::updateAcceptEnabled() {
+    // Player cannot start mission if no agent has been activated
+    bool found = false;
+    for (size_t i=0; i<AgentManager::kMaxSlot; i++) {
+        if (g_Session.agents().isSquadSlotActive(i)) {
+            found = true;
+            break;
+        }
+    }
+    getOption(acceptButId_)->setWidgetEnabled(found);
 }
 
 bool SelectMenu::handleMouseDown(int x, int y, int button, const int modKeys)
@@ -459,33 +483,10 @@ bool SelectMenu::handleMouseDown(int x, int y, int button, const int modKeys)
     if (x >= 20 && x <= 140) {
         if (y >= 84 && y <= 150) {
             if (x >= 82) {
-                if (button == 3)
-                    toggleAgent(1);
-                else if (cur_agent_ != 1) {
-                    if (selectedWInstId_ != 0)
-                        updateSelectedWeapon();
-                    cur_agent_ = 1;
-                    if (g_Session.agents().squadMember(AgentManager::kSlot2)) {
-                        getStatic(txtAgentId_)->setTextFormated("#SELECT_SUBTITLE", g_Session.agents().squadMember(AgentManager::kSlot2)->getName());
-                    } else {
-                        getStatic(txtAgentId_)->setText("");
-                    }
-                }
+                handleClickOnAgentSelector(AgentManager::kSlot2, button);
             } else {
-                if (button == 3)
-                    toggleAgent(0);
-                else if (cur_agent_ != 0) {
-                    if (selectedWInstId_ != 0)
-                        updateSelectedWeapon();
-                    cur_agent_ = 0;
-                    if (g_Session.agents().squadMember(AgentManager::kSlot1)) {
-                        getStatic(txtAgentId_)->setTextFormated("#SELECT_SUBTITLE", g_Session.agents().squadMember(AgentManager::kSlot1)->getName());
-                    } else {
-                        getStatic(txtAgentId_)->setText("");
-                    }
-                }
+                handleClickOnAgentSelector(AgentManager::kSlot1, button);
             }
-            needRendering();
         }
         if (y > 150 && y < 162) {
             sel_all_ = !sel_all_;
@@ -493,33 +494,10 @@ bool SelectMenu::handleMouseDown(int x, int y, int button, const int modKeys)
         }
         if (y >= 162 && y <= 228) {
             if (x >= 82) {
-                if (button == 3)
-                    toggleAgent(3);
-                else if (cur_agent_ != 3) {
-                    if (selectedWInstId_ != 0)
-                        updateSelectedWeapon();
-                    cur_agent_ = 3;
-                    if (g_Session.agents().squadMember(AgentManager::kSlot4)) {
-                        getStatic(txtAgentId_)->setTextFormated("#SELECT_SUBTITLE", g_Session.agents().squadMember(AgentManager::kSlot4)->getName());
-                    } else {
-                        getStatic(txtAgentId_)->setText("");
-                    }
-                }
+                handleClickOnAgentSelector(AgentManager::kSlot4, button);
             } else {
-                if (button == 3)
-                    toggleAgent(2);
-                else if (cur_agent_ != 2) {
-                    if (selectedWInstId_ != 0)
-                        updateSelectedWeapon();
-                    cur_agent_ = 2;
-                    if (g_Session.agents().squadMember(AgentManager::kSlot3)) {
-                        getStatic(txtAgentId_)->setTextFormated("#SELECT_SUBTITLE", g_Session.agents().squadMember(AgentManager::kSlot3)->getName());
-                    } else {
-                        getStatic(txtAgentId_)->setText("");
-                    }
-                }
+                handleClickOnAgentSelector(AgentManager::kSlot3, button);
             }
-            needRendering();
         }
     }
 
@@ -564,6 +542,25 @@ bool SelectMenu::handleMouseDown(int x, int y, int button, const int modKeys)
     }
 
 	return false;
+}
+
+/**
+ * Handles when the player clicks on a agent selector.
+ */
+void SelectMenu::handleClickOnAgentSelector(const size_t agent_no, int button) {
+    if (button == 3) {
+        toggleAgent(agent_no);
+    } else if (cur_agent_ != agent_no) {
+        if (selectedWInstId_ != 0)
+            updateSelectedWeapon();
+        cur_agent_ = agent_no;
+        if (g_Session.agents().squadMember(agent_no)) {
+            getStatic(txtAgentId_)->setTextFormated("#SELECT_SUBTITLE", g_Session.agents().squadMember(agent_no)->getName());
+        } else {
+            getStatic(txtAgentId_)->setText("");
+        }
+        needRendering();
+    }
 }
 
 /*!
@@ -622,9 +619,8 @@ void SelectMenu::handleAction(const int actionId, void *ctx, const int modKeys)
         Agent *pNewAgent = static_cast<Agent *> (pPair->second);
         
         bool found = false;
-        int j;
         // check if selected agent is already part of the mission squad
-        for (j = 0; j < 4; j++) {
+        for (size_t j = 0; j < AgentManager::kMaxSlot; j++) {
             if (g_Session.agents().squadMember(j) == pNewAgent) {
                 found = true;
                 break;
@@ -638,17 +634,13 @@ void SelectMenu::handleAction(const int actionId, void *ctx, const int modKeys)
             // Update current agent name
             getStatic(txtAgentId_)->setTextFormated("#SELECT_SUBTITLE", pNewAgent->getName());
             pTeamLBox_->setSquadLine(cur_agent_, pPair->first);
-        } else if (j == cur_agent_){
-            // else if agent is the currently selected
-            // removes him from squad
-            g_Session.agents().setSquadMember(j, NULL);
-            getStatic(txtAgentId_)->setTextFormated("");
-            pTeamLBox_->setSquadLine(cur_agent_, -1);
+            updateAcceptEnabled();
+
+            // redraw agent display
+            addDirtyRect(158, 110, 340, 260);
+            // redraw agent buttons
+            dirtyAgentSelector();
         }
-        // redraw agent display
-        addDirtyRect(158, 110, 340, 260);
-        // redraw agent buttons
-        addDirtyRect(16, 80, 130, 155);
         
     } else if (actionId == pModsLBox_->getId()) {
         std::pair<int, void *> * pPair = static_cast<std::pair<int, void *> *> (ctx);
