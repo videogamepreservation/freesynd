@@ -45,15 +45,15 @@ public:
     void handleAction(const int actionId, void *ctx, const int modKeys);
 
 protected:
-	bool handleMouseDown(int x, int y, int button, const int modKeys);
-    void handleClickOnAgentSelector(const size_t agent_no, int button);
+    bool handleMouseDown(int x, int y, int button, const int modKeys);
+    void handleClickOnAgentSelector(const int agent_no, int button);
 
     void updateClock();
     //! Draws a focus around the selected agent picture
     void drawAgentSelector(int x, int y);
     void drawAgent();
-	void drawSelectedWeaponInfos(int x, int y);
-	void drawSelectedModInfos(int x, int y);
+    void drawSelectedWeaponInfos(int x, int y);
+    void drawSelectedModInfos(int x, int y);
 
     //! Utility method to force redraw of agent selectors
     void dirtyAgentSelector() { addDirtyRect(16, 80, 130, 155); }
@@ -73,7 +73,7 @@ protected:
     };
 
     ETab tab_;
-	/*! Id of the currently selected agent.*/
+    /*! Id of the currently selected agent.*/
     int cur_agent_;
     /*! Counter to update the rnd_ field.*/
     int tick_count_;
@@ -90,7 +90,7 @@ protected:
     int txtAgentId_;
     /*! Id of the text widget for time.*/
     int txtTimeId_;
-	/*! Id of the text field displaying current amount of money.*/
+    /*! Id of the text field displaying current amount of money.*/
     int moneyTxtId_;
     /*! Id of the team toogle button.*/
     int teamButId_;

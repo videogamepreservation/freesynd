@@ -294,11 +294,11 @@ Weapon * WeaponManager::loadWeapon(Weapon::WeaponType wt) {
         SFXObject::sfxt_Unknown, SFXObject::sfxt_ExplosionFire, 512, 0.0, 0.0,
         0, 64);
             break;
-#if _DEBUG
         default:
+#if _DEBUG
             printf("unknown weapon loaded(%i), NULL passed", wt);
-            break;
 #endif
+            break;
     }
 
     return pWeapon;

@@ -111,6 +111,7 @@ public:
             default:
                 assert(false);
         }
+        return -1;
     }
 
     static int dim_colour(IPAStim::IPAType type)
@@ -127,6 +128,7 @@ public:
             default:
                 assert(false);
         }
+        return -1;
     }
     
     struct IPATuple

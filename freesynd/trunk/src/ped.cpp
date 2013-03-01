@@ -1594,6 +1594,13 @@ PedInstance::~PedInstance()
 {
     delete ped_;
     ped_ = NULL;
+    
+    delete adrenaline_;
+    adrenaline_ = NULL;
+    delete perception_;
+    perception_ = NULL;
+    delete intelligence_;
+    intelligence_ = NULL;
 }
 
 void PedInstance::draw(int x, int y) {

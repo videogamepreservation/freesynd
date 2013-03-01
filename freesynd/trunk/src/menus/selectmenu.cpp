@@ -547,7 +547,7 @@ bool SelectMenu::handleMouseDown(int x, int y, int button, const int modKeys)
 /**
  * Handles when the player clicks on a agent selector.
  */
-void SelectMenu::handleClickOnAgentSelector(const size_t agent_no, int button) {
+void SelectMenu::handleClickOnAgentSelector(const int agent_no, int button) {
     if (button == 3) {
         toggleAgent(agent_no);
     } else if (cur_agent_ != agent_no) {
@@ -555,7 +555,8 @@ void SelectMenu::handleClickOnAgentSelector(const size_t agent_no, int button) {
             updateSelectedWeapon();
         cur_agent_ = agent_no;
         if (g_Session.agents().squadMember(agent_no)) {
-            getStatic(txtAgentId_)->setTextFormated("#SELECT_SUBTITLE", g_Session.agents().squadMember(agent_no)->getName());
+            getStatic(txtAgentId_)->setTextFormated("#SELECT_SUBTITLE",
+                g_Session.agents().squadMember(agent_no)->getName());
         } else {
             getStatic(txtAgentId_)->setText("");
         }

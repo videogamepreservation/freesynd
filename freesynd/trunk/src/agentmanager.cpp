@@ -164,7 +164,7 @@ void AgentManager::destroyAgentSlot(size_t squadSlot) {
     for (int inc = 0; inc < AgentManager::MAX_AGENT; inc++) {
         if (agent(inc) == p_agent) {
             delete agents_.get(inc);
-            agents_.setAt(squadSlot, NULL);
+            agents_.setAt(inc, NULL);
             return;
         }
     }
