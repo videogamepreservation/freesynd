@@ -1,4 +1,4 @@
-FreeSynd 0.7 : Release Notes
+FreeSynd 0.7.1 : Release Notes
 ----------------------------
 
 Description
@@ -7,38 +7,41 @@ This is a prelimary release for testing and development purposes.
 
 Changes
 -------
-  * Vehicle creates explosion and damages everything nearby
-  * Added sound effects for gauss, timebomb, mission failed
-  * Police officer will warn armed pedestrian and shoot after 5 sec
-  * Rewritten Z coord setup and use, due to removal of Z lowering in pedmanager
-  * Rewritten PedInstance::animate
-  * Better animation switching for pedestrians
 
 Fixed Bugs
 ----------
-  * 3517737 : Incorrect handling of agent switching, with selected weapon
-  * Pathfinding out of memory/segfault error
-  * Modifier keys where not passed to the key event
-  * Next and previous button in the briefing where not updated correctly
 
 Features added
 ----------
-  * Access card will identify agent as police officer, also opens large doors
-  * Selection markers (1,2,3,4), to identify selected agent
-  * Sound effects added "Selected", "Mission failed", "Police warning"
-  * Gameplay minimap fully implemented
 
 Known issues with this release
 ------------------------------
   * Agent AI is not operational.
   * PathFinding requires improvement (path smoothing)
-  * Mission debriefing is not operational
   * No animation for windows
   * Map drawing is buggy
   * Not all weapons correctly function.
 
 History
 -------
+
+ v0.7
+ ----
+  * Vehicle creates explosion and damages everything nearby
+  * Added sound effects for gauss, timebomb, mission failed
+  * Police officer will warn armed pedestrian and shoot after 5 sec
+  * Rewritten Z coord setup and use, due to removal of Z lowering in pedmanager
+  * Rewritten PedInstance::animate
+  * Better animation switching for pedestrians
+  * 3517737 : Incorrect handling of agent switching, with selected weapon
+  * Pathfinding out of memory/segfault error
+  * Modifier keys where not passed to the key event
+  * Next and previous button in the briefing where not updated correctly
+  * Access card will identify agent as police officer, also opens large doors
+  * Selection markers (1,2,3,4), to identify selected agent
+  * Sound effects added "Selected", "Mission failed", "Police warning"
+  * Gameplay minimap fully implemented
+
  v0.6
  ----
   * CMake is used instead of autotools, used to generate Makefile for Unix's
