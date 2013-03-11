@@ -51,7 +51,7 @@ VehicleInstance *VehicleManager::loadInstance(uint8 * data, int map)
 {
     // TODO: check all maps
     // TODO: train, join somehow
-    Mission::LEVELDATA_CARS * gamdata = (Mission::LEVELDATA_CARS *) data;
+    LevelData::Cars * gamdata = (LevelData::Cars *) data;
 
     int hp = READ_LE_INT16(gamdata->health);
     int dir = gamdata->orientation >> 5;

@@ -588,8 +588,8 @@ bool ShootableMovableMapObject::checkCurrPosTileOnly(PathNode &pn) {
 
 Static *Static::loadInstance(uint8 * data, int m)
 {
-    Mission::LEVELDATA_STATICS * gamdata =
-        (Mission::LEVELDATA_STATICS *) data;
+    LevelData::Statics * gamdata =
+        (LevelData::Statics *) data;
     Static *s = NULL;
 
     // TODO: find where object current state is,

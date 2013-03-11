@@ -27,6 +27,7 @@
 #ifndef GAMEPLAYMENU_H
 #define GAMEPLAYMENU_H
 
+#include "agentselectorrenderer.h"
 #include "minimaprenderer.h"
 #include "squadselection.h"
 
@@ -54,8 +55,7 @@ protected:
     //! Handles the user's click on weapon selector
     void handleClickOnWeaponSelector(int x, int y, int button, const int modKeys);
     //! Update the target value for adrenaline etc for an agent
-    void handleClickOnIPA(int agent, IPAStim::IPAType type, int percentage,
-        int button, const int modKeys);
+    void handleClickOnIPA(AgentSelectorRenderer::IPAMouseEvent *tuple, int button, const int modKeys);
     //! Handles the user's click on the map
     void handleClickOnMap(int x, int y, int button, const int modKeys);
     //! Handles the user's click on the minimap
@@ -88,9 +88,6 @@ protected:
     void updateMinimap(int elapsed);
     //! Update the select all button state
     void updateSelectAll();
-    // helper to render the IPA bars. Draws all the elements
-    // for one bar
-    void drawIPABar(int agent,  IPAStim *stim);
     // process ticks
     void updateIPALevelMeters(int elapsed);
 
@@ -118,6 +115,8 @@ protected:
     ShootableMapObject *target_;
     /*! This renderer is in charge of drawing the minimap.*/
     GamePlayMinimapRenderer mm_renderer_;
+    /*! This renderer is in charge of drawing the IPA meters.*/
+    AgentSelectorRenderer agt_sel_renderer_;
     bool completed_;
     bool pressed_btn_select_all_;
     struct {

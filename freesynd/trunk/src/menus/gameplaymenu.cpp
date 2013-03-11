@@ -43,134 +43,6 @@ const int SCROLL_STEP = 16;
 const int GameplayMenu::kMiniMapScreenX = 0;
 const int GameplayMenu::kMiniMapScreenY = 46 + 44 + 10 + 46 + 44 + 15 + 2 * 32 + 2;
 
-// TODO: move this class to separated file? or to header?
-// it should not be here definetly
-class IPAGui
-{
-    static const int ipa_full_width = 56;
-    static const int bar_height = 10;
-    static const int bar_left_13 = 4;
-    static const int bar_left_24 = 68;
-    static const int bar_top_12  = 48;
-    static const int bar_top_34  = 148;
-    static const int ipa_y_offset = 14;
-    
-public:
-    static int getTop(int agent, IPAStim::IPAType type)
-    {
-        int top;
-        if(agent > 1)
-            top = bar_top_34;
-        else
-            top = bar_top_12;
-        
-        switch (type) {
-            case IPAStim::Adrenaline:
-                break;
-            case IPAStim::Perception:
-                top += ipa_y_offset;
-                break;
-            case IPAStim::Intelligence:
-                top += 2 * ipa_y_offset;
-                break;
-            default:
-                assert(false);
-        }
-        return top;
-    }
-    
-    static int getLeft(int agent)
-    {
-        if(agent % 2 == 1)
-            return bar_left_24;
-        else
-            return bar_left_13;
-    }
-    
-    static int full_width()
-    {
-        return ipa_full_width;
-    }
-    
-    static int height()
-    {
-        return bar_height;
-    }
-    
-    static int colour(IPAStim::IPAType type)
-    {
-        switch (type)
-        {
-            case IPAStim::Adrenaline:
-                return fs_cmn::kColorLightRed;
-            case IPAStim::Perception:
-                return fs_cmn::kColorBlue;
-            case IPAStim::Intelligence:
-                // TODO: this color needs to be defined
-                return 13;
-            default:
-                assert(false);
-        }
-        return -1;
-    }
-
-    static int dim_colour(IPAStim::IPAType type)
-    {
-        switch (type)
-        {
-            case IPAStim::Adrenaline:
-                return fs_cmn::kColorDarkRed;
-            case IPAStim::Perception:
-                return fs_cmn::kColorBlueGrey;
-            case IPAStim::Intelligence:
-                // TODO: this color needs to be defined
-                return 5;
-            default:
-                assert(false);
-        }
-        return -1;
-    }
-    
-    struct IPATuple
-    {
-        IPATuple(int agent, IPAStim::IPAType type, int percentage)
-        : type_(type), agent_(agent), percentage_(percentage)
-        { }
-        
-        IPAStim::IPAType type_;
-        int agent_, percentage_;
-    };
-    
-    static struct IPATuple * scanCoordsForIPA(int x, int y)
-    {
-        IPAStim::IPAType type;
-        for(int a = 0; a < 4; a++)
-        {
-            if(x >= getLeft(a) && x <= getLeft(a) + ipa_full_width)
-            {
-                type = IPAStim::Adrenaline;
-                if( y>= getTop(a, type) && y <= getTop(a, type) + bar_height)
-                    return new IPATuple(a, type, get_percentage(a, x));
-                type = IPAStim::Perception;
-                if( y>= getTop(a, type) && y <= getTop(a, type) + bar_height)
-                    return new IPATuple(a, type, get_percentage(a, x));
-                type = IPAStim::Intelligence;
-                if( y>= getTop(a, type) && y <= getTop(a, type) + bar_height)
-                    return new IPATuple(a, type, get_percentage(a, x));
-            }
-        }
-        return NULL;
-    }
-    
-    static int get_percentage(int agent, int x)
-    {
-        int left = getLeft(agent);
-        int offset = x - left;
-        return (int)(((float)offset / (float)full_width()) * 100.0);
-    }
-};
-
-
 GameplayMenu::GameplayMenu(MenuManager *m) :
 Menu(m, MENU_GAMEPLAY, MENU_DEBRIEF, "", "mscrenup.dat"),
 tick_count_(0), last_animate_tick_(0), last_motion_tick_(0),
@@ -816,10 +688,9 @@ bool GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
             // User clicked on the select all button
             selectAllAgents();
         }
-        else if (struct IPAGui::IPATuple *tuple = IPAGui::scanCoordsForIPA(x,y))
+        else if (AgentSelectorRenderer::IPAMouseEvent *tuple = agt_sel_renderer_.scanCoordsForIPA(x,y))
         {
-            handleClickOnIPA(tuple->agent_, tuple->type_, tuple->percentage_,
-                button, modKeys);
+            handleClickOnIPA(tuple, button, modKeys);
             delete(tuple);
         }
         else if (y >= 2 + 46 + 44 + 10 + 46 + 44 + 15
@@ -881,20 +752,19 @@ void GameplayMenu::handleClickOnWeaponSelector(int x, int y, int button, const i
     addDirtyRect(0, 207, 128, 64);
 }
 
-void GameplayMenu::handleClickOnIPA(int agent, IPAStim::IPAType type,
-    int percentage, int button, const int modKeys)
+void GameplayMenu::handleClickOnIPA(AgentSelectorRenderer::IPAMouseEvent *tuple, int button, const int modKeys)
 {
-    PedInstance *ped = mission_->ped(agent);
-    switch(type)
+    PedInstance *ped = mission_->ped(tuple->agent);
+    switch(tuple->type)
     {
         case IPAStim::Adrenaline:
-            ped->adrenaline_->setAmount(percentage);
+            ped->adrenaline_->setAmount(tuple->percentage);
             break;
         case IPAStim::Perception:
-            ped->perception_->setAmount(percentage);
+            ped->perception_->setAmount(tuple->percentage);
             break;
         case IPAStim::Intelligence:
-            ped->intelligence_->setAmount(percentage);
+            ped->intelligence_->setAmount(tuple->percentage);
             break;
     }
 }
@@ -1370,41 +1240,6 @@ void GameplayMenu::drawAgentSelectors() {
     mission_->ped(3)->drawSelectorAnim(96,138);
 }
 
-void GameplayMenu::drawIPABar(int agent, IPAStim *stim)
-{
-    // Convert those percentages to pixels
-    int amount_x = (float)IPAGui::full_width() * ((float)stim->getAmount()/100.0);
-    int effect_x = (float)IPAGui::full_width() * ((float)stim->getEffect()/100.0);
-    int dependency_x = (float)IPAGui::full_width() * ((float)stim->getDependency()/100.0);
-
-    IPAStim::IPAType type = stim->getType();
-    
-    // Draw a bar between the current level and the dependency marker
-    // x needs to be leftmost...
-    int left, width;
-    boxify(left, width, amount_x, dependency_x);
-    if(width > 0) {
-        g_Screen.drawRect(IPAGui::getLeft(agent) + left,
-                          IPAGui::getTop(agent, type),
-                          width, IPAGui::height(), IPAGui::colour(type));
-    }
-    
-    // NB: this bar stops rendering when it's neck-a-neck with 'amount'
-    if(amount_x != effect_x)
-    {
-        boxify(left, width, effect_x, dependency_x);
-        if(width > 0) {
-            g_Screen.drawRect(IPAGui::getLeft(agent) + left,
-                              IPAGui::getTop(agent, type),
-                              width, IPAGui::height(), IPAGui::dim_colour(type));
-        }
-    }
-    
-    // Draw a vertical white line to mark the dependency level
-    g_Screen.drawVLine(IPAGui::getLeft(agent) + dependency_x,
-                      IPAGui::getTop(agent, type), IPAGui::height(), 12);
-}
-
 void GameplayMenu::drawPerformanceMeters() {
     // 64x46
     g_App.gameSprites().sprite(selection_.isAgentSelected(0) ? 1778 : 1754)->draw(
@@ -1421,9 +1256,9 @@ void GameplayMenu::drawPerformanceMeters() {
 
     // draw IPA
     for (int agent = 0; agent < 4; agent++) {
-        drawIPABar(agent, mission_->ped(agent)->adrenaline_);
-        drawIPABar(agent, mission_->ped(agent)->perception_);
-        drawIPABar(agent, mission_->ped(agent)->intelligence_);
+        agt_sel_renderer_.drawIPABar(agent, mission_->ped(agent)->adrenaline_);
+        agt_sel_renderer_.drawIPABar(agent, mission_->ped(agent)->perception_);
+        agt_sel_renderer_.drawIPABar(agent, mission_->ped(agent)->intelligence_);
     }
 }
 

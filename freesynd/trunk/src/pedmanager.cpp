@@ -136,8 +136,8 @@ void PedManager::setPed(Ped *pedanim, unsigned short baseAnim)
 
 PedInstance *PedManager::loadInstance(uint8 * data, int map)
 {
-    Mission::LEVELDATA_PEOPLE * gamdata =
-        (Mission::LEVELDATA_PEOPLE *) data;
+    LevelData::People * gamdata =
+        (LevelData::People *) data;
 
     int hp = READ_LE_INT16(gamdata->health);
 

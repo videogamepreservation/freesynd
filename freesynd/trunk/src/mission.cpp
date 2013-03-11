@@ -152,7 +152,7 @@ bool Mission::loadLevel(uint8 * levelData)
 #endif
 
     for (uint8 i = 0; i < 64; i++) {
-        LEVELDATA_CARS & car = level_data_.cars[i];
+        LevelData::Cars & car = level_data_.cars[i];
         // car.sub_type 0x09 - train
         if (car.type == 0x0)
             continue;
@@ -202,7 +202,7 @@ bool Mission::loadLevel(uint8 * levelData)
     for (uint16 i = 0; i < 256; i++) {
         //if (i == 40)
             //i = 40;
-        LEVELDATA_PEOPLE & pedref = level_data_.people[i];
+        LevelData::People & pedref = level_data_.people[i];
         if(pedref.type == 0x0 || pedref.desc == 0x0D || pedref.desc == 0x0C)
             continue;
         PedInstance *p =
@@ -301,7 +301,7 @@ bool Mission::loadLevel(uint8 * levelData)
                     // 7, 9(repeat) - end marker
                     // 10(loop?)?5(has offset <?ped?>)?
                     // 11 - protected target reached destination(kenya)
-                    LEVELDATA_SCENARIOS sc = level_data_.scenarios[offset_nxt / 8];
+                    LevelData::Scenarios sc = level_data_.scenarios[offset_nxt / 8];
 #ifdef SHOW_SCENARIOS_DEBUG
                     printf("sc.type = %i, nxt = %i\n", sc.type, offset_nxt / 8);
 #endif
@@ -396,7 +396,7 @@ bool Mission::loadLevel(uint8 * levelData)
             }
         } else if (pin >= 0x9562 && pin < 0xDD62) {
             pin = (pin - 0x9562) / 36; // 36 = weapon data size
-            LEVELDATA_WEAPONS & wref = level_data_.weapons[pin];
+            LevelData::Weapons & wref = level_data_.weapons[pin];
             if (wref.desc == 0x05) {
                 pin = READ_LE_UINT16(wref.offset_owner);
                 if (pin != 0) {
@@ -429,7 +429,7 @@ bool Mission::loadLevel(uint8 * levelData)
 
     statics_.clear();
     for (uint16 i = 0; i < 400; i++) {
-        LEVELDATA_STATICS & sref = level_data_.statics[i];
+        LevelData::Statics & sref = level_data_.statics[i];
         if(sref.desc == 0)
             continue;
         Static *s = Static::loadInstance((uint8 *) & sref, i_map_id_);
@@ -449,7 +449,7 @@ bool Mission::loadLevel(uint8 * levelData)
 #endif
     weapons_.clear();
     for (uint16 i = 0; i < 512; i++) {
-        LEVELDATA_WEAPONS & wref = level_data_.weapons[i];
+        LevelData::Weapons & wref = level_data_.weapons[i];
         if(wref.desc == 0)
             continue;
         WeaponInstance *w = createWeaponInstance((uint8 *) & wref);
@@ -511,7 +511,7 @@ bool Mission::loadLevel(uint8 * levelData)
         //bool isset = false;
         ObjectiveDesc *objd = NULL;
 
-        LEVELDATA_OBJECTIVES & obj = level_data_.objectives[i];
+        LevelData::Objectives & obj = level_data_.objectives[i];
         unsigned int bindx = READ_LE_UINT16(obj.offset), cindx = 0;
         // TODO: checking is implemented for correct offset, because
         // in game data objective description is not correctly defined
@@ -3338,8 +3338,8 @@ void Mission::adjXYZ(int &x, int &y, int &z) {
 
 WeaponInstance *Mission::createWeaponInstance(uint8 * data)
 {
-    Mission::LEVELDATA_WEAPONS * gamdata =
-        (Mission::LEVELDATA_WEAPONS *) data;
+    LevelData::Weapons * gamdata =
+        (LevelData::Weapons *) data;
     Weapon::WeaponType wType = Weapon::Unknown;
 
     switch (gamdata->sub_type) {

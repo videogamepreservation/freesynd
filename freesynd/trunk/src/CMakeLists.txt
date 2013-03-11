@@ -31,6 +31,7 @@ set (SOURCES
 	map.cpp
 	mapobject.cpp
 	mapmanager.cpp
+	menus/agentselectorrenderer.cpp
 	menus/minimaprenderer.cpp
 	menus/briefmenu.cpp
 	menus/confmenu.cpp
@@ -128,6 +129,8 @@ set(HEADERS
 	gfx/tile.h
 	gfx/tilemanager.h
 	model/objectivedesc.h
+	model/leveldata.h
+	menus/agentselectorrenderer.h
 	menus/minimaprenderer.h
 	menus/briefmenu.h
 	menus/confmenu.h
