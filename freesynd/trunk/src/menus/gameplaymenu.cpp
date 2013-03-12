@@ -395,8 +395,7 @@ void GameplayMenu::handleRender(DirtyList &dirtyList)
     g_Screen.clear(0);
     mission_->drawMap(world_x_, world_y_);
     g_Screen.drawRect(0,0, 129, GAME_SCREEN_HEIGHT);
-    drawAgentSelectors();
-    drawPerformanceMeters();
+    agt_sel_renderer_.render(selection_, mission_->getSquad());
     drawSelectAllButton();
     drawMissionHint(0);
     drawWeaponSelectors();
@@ -667,31 +666,24 @@ bool GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
         if (modKeys & KMD_CTRL) {
             ctrl = true;
         }
-        // Handle agent selection. Click on an agent changes selection
-        // to it. If control key is pressed, add or removes agent from
-        // current selection.
-        if (y < 46) {
-            if (x < 64) {
-                selectAgent(0, ctrl);
-            } else {
-                selectAgent(1, ctrl);
-            }
-        }
 
-        else if (y >= 42 + 48 + 10 && y < 42 + 48 + 10 + 46) {
-            if (x < 64) {
-                selectAgent(2, ctrl);
-            } else {
-                selectAgent(3, ctrl);
+        // First check if player has clicked on agent selectors
+        SelectorEvent selEvt;
+        if (agt_sel_renderer_.hasClickedOnAgentSelector(x, y, selEvt)) {
+            switch (selEvt.eventType) {
+            case SelectorEvent::kSelectAgent:
+                // Handle agent selection. Click on an agent changes selection
+                // to it. If control key is pressed, add or removes agent from
+                // current selection.
+                selectAgent(selEvt.agentSlot, ctrl);
+                break;
+            case SelectorEvent::kSelectIpa:
+                handleClickOnIPA(selEvt, button, modKeys);
+                break;
             }
         } else if (y >= 42 + 48 && y < 42 + 48 + 10) {
             // User clicked on the select all button
             selectAllAgents();
-        }
-        else if (AgentSelectorRenderer::IPAMouseEvent *tuple = agt_sel_renderer_.scanCoordsForIPA(x,y))
-        {
-            handleClickOnIPA(tuple, button, modKeys);
-            delete(tuple);
         }
         else if (y >= 2 + 46 + 44 + 10 + 46 + 44 + 15
                  && y < 2 + 46 + 44 + 10 + 46 + 44 + 15 + 64)
@@ -752,19 +744,19 @@ void GameplayMenu::handleClickOnWeaponSelector(int x, int y, int button, const i
     addDirtyRect(0, 207, 128, 64);
 }
 
-void GameplayMenu::handleClickOnIPA(AgentSelectorRenderer::IPAMouseEvent *tuple, int button, const int modKeys)
+void GameplayMenu::handleClickOnIPA(const SelectorEvent & evt, int button, const int modKeys)
 {
-    PedInstance *ped = mission_->ped(tuple->agent);
-    switch(tuple->type)
+    PedInstance *ped = mission_->ped(evt.agentSlot);
+    switch(evt.IpaType)
     {
         case IPAStim::Adrenaline:
-            ped->adrenaline_->setAmount(tuple->percentage);
+            ped->adrenaline_->setAmount(evt.percentage);
             break;
         case IPAStim::Perception:
-            ped->perception_->setAmount(tuple->percentage);
+            ped->perception_->setAmount(evt.percentage);
             break;
         case IPAStim::Intelligence:
-            ped->intelligence_->setAmount(tuple->percentage);
+            ped->intelligence_->setAmount(evt.percentage);
             break;
     }
 }
@@ -1212,55 +1204,6 @@ bool GameplayMenu::handleUnknownKey(Key key, const int modKeys) {
     return consumed;
 }
 
-void GameplayMenu::drawAgentSelectors() {
-    // 64x46
-    g_App.gameSprites().sprite(selection_.isAgentSelected(0) ? 1772 : 1748)->draw(
-            0, 0, 0);
-    g_App.gameSprites().sprite(selection_.isAgentSelected(1) ? 1773 : 1749)->draw(
-            64, 0, 0);
-
-    // performance meters, select all button
-
-    g_App.gameSprites().sprite(selection_.isAgentSelected(2) ? 1774 : 1752)->draw(
-            0, 46 + 44 + 10, 0);
-    g_App.gameSprites().sprite(selection_.isAgentSelected(3) ? 1775 : 1753)->draw(
-            64, 46 + 44 + 10, 0);
-
-    // draw health bars
-    for (int a = 0; a < 4; a++) {
-        int ydiff = 36 * mission_->ped(a)->health() / mission_->ped(a)->startHealth();
-        g_Screen.drawRect(((a % 2) == 1 ? 64 : 0) + 51,
-            (a > 1 ? 46 + 44 + 10 : 0) + 6 + 36 - ydiff, 7, ydiff, 12);
-    }
-
-    //draw animation within selectors
-    mission_->ped(0)->drawSelectorAnim(32,38);
-    mission_->ped(1)->drawSelectorAnim(96,38);
-    mission_->ped(2)->drawSelectorAnim(32,138);
-    mission_->ped(3)->drawSelectorAnim(96,138);
-}
-
-void GameplayMenu::drawPerformanceMeters() {
-    // 64x46
-    g_App.gameSprites().sprite(selection_.isAgentSelected(0) ? 1778 : 1754)->draw(
-            0, 46, 0);
-    g_App.gameSprites().sprite(selection_.isAgentSelected(1) ? 1778 : 1755)->draw(
-            64, 46, 0);
-
-    // select all button, agent selectors
-
-    g_App.gameSprites().sprite(selection_.isAgentSelected(2) ? 1778 : 1754)->draw(
-            0, 46 + 44 + 10 + 46, 0);
-    g_App.gameSprites().sprite(selection_.isAgentSelected(3)? 1778 : 1755)->draw(
-            64, 46 + 44 + 10 + 46, 0);
-
-    // draw IPA
-    for (int agent = 0; agent < 4; agent++) {
-        agt_sel_renderer_.drawIPABar(agent, mission_->ped(agent)->adrenaline_);
-        agt_sel_renderer_.drawIPABar(agent, mission_->ped(agent)->perception_);
-        agt_sel_renderer_.drawIPABar(agent, mission_->ped(agent)->intelligence_);
-    }
-}
 
 void GameplayMenu::drawSelectAllButton() {
     // 64x10

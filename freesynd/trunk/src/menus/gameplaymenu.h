@@ -40,7 +40,7 @@ class IPAStim;
 class GameplayMenu : public Menu {
 public:
     GameplayMenu(MenuManager *m);
-
+    //! Update the menu state
     void handleTick(int elapsed);
     void handleShow();
     void handleRender(DirtyList &dirtyList);
@@ -54,15 +54,13 @@ protected:
     void handleMouseUp(int x, int y, int button, const int modKeys);
     //! Handles the user's click on weapon selector
     void handleClickOnWeaponSelector(int x, int y, int button, const int modKeys);
-    //! Update the target value for adrenaline etc for an agent
-    void handleClickOnIPA(AgentSelectorRenderer::IPAMouseEvent *tuple, int button, const int modKeys);
+    //! Handles the user's click on a IPA selector
+    void handleClickOnIPA(const SelectorEvent & evt, int button, const int modKeys);
     //! Handles the user's click on the map
     void handleClickOnMap(int x, int y, int button, const int modKeys);
     //! Handles the user's click on the minimap
     void handleClickOnMinimap(int x, int y);
 
-    void drawAgentSelectors();
-    void drawPerformanceMeters();
     void drawSelectAllButton();
     void drawMissionHint(int elapsed);
     void drawWeaponSelectors();
@@ -88,7 +86,7 @@ protected:
     void updateMinimap(int elapsed);
     //! Update the select all button state
     void updateSelectAll();
-    // process ticks
+    //! Update the target value for adrenaline etc for an agent
     void updateIPALevelMeters(int elapsed);
 
 protected:

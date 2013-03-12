@@ -24,42 +24,44 @@
 #define MENUS_AGENTSELECTORRENDERER_H_
 
 #include "ipastim.h"
+#include "menus/squadselection.h"
 
+/*!
+ * The SelectorEvent class is the event that is used
+ * to tell where the player has clicked on the control panel.
+ */
+class SelectorEvent {
+public:
+    /*!
+     * This enumeration lists the different types of event.
+     */
+    enum EType {
+        kNone,
+        kSelectAgent,
+        kSelectIpa
+    };
 
+    /*! The type of the event.*/
+    EType eventType;
+    /*! What agent was clicked.*/
+    size_t agentSlot;
+    /*! The type of IPA selected for eventType = kSelectIpa.*/
+    IPAStim::IPAType IpaType;
+    /*! for eventType = kSelectIpa.*/
+    int percentage;
+};
+
+/*!
+ * This renderer manages the drawing of agent selector on the control panel
+ * in the gameplay menu.
+ */
 class AgentSelectorRenderer
 {
 public:
-    /*!
-     * This structure holds informations on where the player
-     * clicked when he clicked on the IPA meters.
-     */
-    struct IPAMouseEvent
-    {
-        IPAMouseEvent(int a, IPAStim::IPAType aType, int aPercentage) {
-            agent = a;
-            type = aType;
-            percentage = aPercentage;
-        }
-
-        /*! The type of IPA selected.*/
-        IPAStim::IPAType type;
-        /*! What agent was clicked.*/
-        int agent;
-        /*!*/
-        int percentage;
-    };
-
-    /*!
-     * Return an event to describe the IPA the player has clicked.
-     * \return NULL if the player didn't click on a IPA meter.
-     */
-    IPAMouseEvent * scanCoordsForIPA(int x, int y);
-
-    /*!
-     * helper to render the IPA bars. Draws all the elements
-     * for one bar
-     */
-    void drawIPABar(int agent, IPAStim *stim);
+    //! Check if player has clicked on a agent selector
+    bool hasClickedOnAgentSelector(int x, int y, SelectorEvent & evt);
+    //! Renders the agent's selectors
+    void render(SquadSelection & selection, Squad * pSquad);
 
 private:
     static const int kIpaBarWidth;
@@ -69,6 +71,15 @@ private:
     static const int kIpaBarTop12;
     static const int kIpaBarTop34;
     static const int kIpaYOffset;
+
+    /*!
+     * Checks if the player has clicked on an IPA bar for an agent.
+     * \return NULL if the player didn't click on a IPA meter.
+     */
+    void scanCoordsForIPA(int x, int y, SelectorEvent & evt);
+
+    //! Draws all the elements for one bar
+    void drawIPABar(int agent, IPAStim *stim);
 
     /*!
      * Returns the Y coord of the top left corner of the IPA bar for a given agent slot and IPA Type.
@@ -154,6 +165,8 @@ private:
         int offset = x - left;
         return (int)(((float)offset / (float) kIpaBarWidth) * 100.0);
     }
+
+    void drawSelectorForAgent(size_t agentSlot, PedInstance *pAgent, bool isSelected);
 };
 
 #endif  // MENUS_AGENTSELECTORRENDERER_H_

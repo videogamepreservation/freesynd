@@ -22,6 +22,7 @@
 
 #include "menus/agentselectorrenderer.h"
 #include "gfx/screen.h"
+#include "app.h"
 
 const int AgentSelectorRenderer::kIpaBarWidth = 56;
 const int AgentSelectorRenderer::kIpaBarHeight = 10;
@@ -31,40 +32,64 @@ const int AgentSelectorRenderer::kIpaBarTop12  = 48;
 const int AgentSelectorRenderer::kIpaBarTop34  = 148;
 const int AgentSelectorRenderer::kIpaYOffset = 14;
 
-AgentSelectorRenderer::IPAMouseEvent * AgentSelectorRenderer::scanCoordsForIPA(int x, int y)
+/*!
+ *
+ */
+bool AgentSelectorRenderer::hasClickedOnAgentSelector(int x, int y, SelectorEvent & evt) {
+    evt.eventType = SelectorEvent::kNone;
+    if (y < 46) {
+        evt.eventType = SelectorEvent::kSelectAgent;
+        if (x < 64) {
+            evt.agentSlot = 0;
+        } else {
+            evt.agentSlot = 1;
+        }
+    }
+
+    else if (y >= 42 + 48 + 10 && y < 42 + 48 + 10 + 46) {
+        evt.eventType = SelectorEvent::kSelectAgent;
+        if (x < 64) {
+            evt.agentSlot = 2;
+        } else {
+            evt.agentSlot = 3;
+        }
+    }
+    else
+    {
+        scanCoordsForIPA(x,y, evt);
+    }
+
+    return evt.eventType != SelectorEvent::kNone;
+}
+
+void AgentSelectorRenderer::scanCoordsForIPA(int x, int y, SelectorEvent & evt)
 {
-    IPAStim::IPAType type;
+    IPAStim::IPAType types[] = {IPAStim::Adrenaline, IPAStim::Perception, IPAStim::Intelligence};
+    // For each agent
     for(size_t a = 0; a < 4; a++)
     {
         int barLeft = getIpaBarLeftForAgent(a);
         if(x >= barLeft && x <= barLeft + kIpaBarWidth)
         {
-            // try for Adrenaline bar
-            type = IPAStim::Adrenaline;
-            int barTop = getIpaBarTop(a, type);
-            if( y>= barTop && y <= barTop + kIpaBarHeight)
-                return new IPAMouseEvent(a, type, get_percentage(a, x));
-
-            // try for Perception bar
-            type = IPAStim::Perception;
-            barTop = getIpaBarTop(a, type);
-            if( y>= barTop && y <= barTop + kIpaBarHeight)
-                return new IPAMouseEvent(a, type, get_percentage(a, x));
-
-            // try for Intelligence bar
-            type = IPAStim::Intelligence;
-            barTop = getIpaBarTop(a, type);
-            if( y>= barTop && y <= barTop + kIpaBarHeight)
-                return new IPAMouseEvent(a, type, get_percentage(a, x));
+            // For each type of IPA
+            for (int i=0; i<3; i++) {
+                int barTop = getIpaBarTop(a, types[i]);
+                if( y>= barTop && y <= barTop + kIpaBarHeight) {
+                    evt.eventType = SelectorEvent::kSelectIpa;
+                    evt.agentSlot = a;
+                    evt.IpaType = types[i];
+                    evt.percentage = get_percentage(a, x);
+                    return;
+                }
+            }
         }
     }
-
-    // No IPA bar was clicked
-    return NULL;
 }
 
-// helper to render the IPA bars. Draws all the elements
-    // for one bar
+/*!
+ * Draws all the elements
+ * for one bar
+ */
 void AgentSelectorRenderer::drawIPABar(int agent, IPAStim *stim)
 {
     // Convert those percentages to pixels
@@ -98,4 +123,48 @@ void AgentSelectorRenderer::drawIPABar(int agent, IPAStim *stim)
     // Draw a vertical white line to mark the dependency level
     g_Screen.drawVLine(getIpaBarLeftForAgent(agent) + dependency_x,
                       getIpaBarTop(agent, type), kIpaBarHeight, 12);
+}
+
+/*!
+ * Draw the complete selector for an agent.
+ * \param agentSlot
+ * \param pAgent
+ * \param isSelected
+ */
+void AgentSelectorRenderer::drawSelectorForAgent(size_t agentSlot, PedInstance *pAgent, bool isSelected) {
+    int topX = ((agentSlot % 2) == 1 ? 64 : 0);
+    int topY = (agentSlot > 1 ? 46 + 44 + 10 : 0);
+    int spriteSelected = 1772 + agentSlot;
+    int springUnselected = 1748 + (agentSlot > 1 ? agentSlot + 2 : agentSlot);
+
+    // Draw the background of selector
+    g_App.gameSprites().sprite(isSelected ? spriteSelected : springUnselected)->draw(
+            topX, topY, 0);
+    g_App.gameSprites().sprite(isSelected ? 1778 : 1754)->draw(
+            topX, topY + 46, 0);
+
+    if (pAgent) {
+        // draw health bar
+        int ydiff = 36 * pAgent->health() / pAgent->startHealth();
+        g_Screen.drawRect(topX + 51,
+            topY + 6 + 36 - ydiff, 7, ydiff, 12);
+
+        //draw animation within selectors
+        pAgent->drawSelectorAnim(topX + 32, topY + 38);
+
+        // draw IPA
+        drawIPABar(agentSlot, pAgent->adrenaline_);
+        drawIPABar(agentSlot, pAgent->perception_);
+        drawIPABar(agentSlot, pAgent->intelligence_);
+    }
+}
+
+/*!
+ * Draw all elements for the agent selectors.
+ */
+void AgentSelectorRenderer::render(SquadSelection & selection, Squad * pSquad) {
+    for (size_t a = 0; a < 4; a++) {
+        PedInstance * pAgent = pSquad->member(a);
+        drawSelectorForAgent(a, pAgent, selection.isAgentSelected(a));
+    }
 }
