@@ -63,7 +63,7 @@ const FrameEvent intro[] = {
     { 892, msc::NO_TRACK, snd::NO_SOUND,    0x0, NULL },
     { 904, msc::NO_TRACK, snd::NO_SOUND,    0x0, "INTRO_18" },
     { 960, msc::NO_TRACK, snd::NO_SOUND,    0x0, NULL },
-    {-1, msc::NO_TRACK, snd::NO_SOUND, 0x0, NULL }
+    {(uint16)-1, msc::NO_TRACK, snd::NO_SOUND, 0x0, NULL }
 };
 
 const FrameEvent mission_win[] = {
@@ -71,7 +71,7 @@ const FrameEvent mission_win[] = {
     { 1, msc::NO_TRACK, snd::APPLAUSE_ZOOM,         0x0, NULL },
     { 10, msc::NO_TRACK, snd::FIREWORKS,            0x1, NULL },
     { 30, msc::NO_TRACK, snd::FIREWORKS_APPLAUSE,   0x1, NULL },
-    {-1, msc::NO_TRACK, snd::NO_SOUND,              0x0, NULL }
+    {(uint16)-1, msc::NO_TRACK, snd::NO_SOUND,              0x0, NULL }
 };
 
 const FrameEvent mission_failed[] = {
@@ -81,23 +81,23 @@ const FrameEvent mission_failed[] = {
     { 80, msc::NO_TRACK, snd::SPEECH_NO, 0x0, NULL },
     { 108, msc::NO_TRACK, snd::MONITOR_IMPACT, 0x0, NULL },
     { 118, msc::NO_TRACK, snd::GLASS_BREAKING_2, 0x0, NULL },
-    {-1, msc::NO_TRACK, snd::NO_SOUND, 0x0, NULL }
+    {(uint16)-1, msc::NO_TRACK, snd::NO_SOUND, 0x0, NULL }
 };
 
 const FrameEvent game_lost[] = {
     { 1, msc::NO_TRACK, snd::NO_SOUND, 0x0, NULL },
     { 2, msc::NO_TRACK, snd::FALLING_COMMAND_SHIP, 0x0, NULL },
     { 34, msc::NO_TRACK, snd::EXPLOSION_BIG, 0x0, NULL },
-    {-1, msc::NO_TRACK, snd::NO_SOUND, 0x0, NULL }
+    {(uint16)-1, msc::NO_TRACK, snd::NO_SOUND, 0x0, NULL }
 };
 
 const FrameEvent menu_up[] = {
     { 1, msc::NO_TRACK, snd::MENU_UP,   0x1, NULL },
-    {-1, msc::NO_TRACK, snd::NO_SOUND,  0x0, NULL }
+    {(uint16)-1, msc::NO_TRACK, snd::NO_SOUND,  0x0, NULL }
 };
 
 const FrameEvent no_event[] = {
-    {-1, msc::NO_TRACK, snd::NO_SOUND, 0x0, NULL }
+    {(uint16)-1, msc::NO_TRACK, snd::NO_SOUND, 0x0, NULL }
 };
 
 FliMenu::FliMenu(MenuManager *m, int menuId) : Menu(m, menuId, Menu::MENU_MAIN), fliPlayer_()

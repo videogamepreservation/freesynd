@@ -582,6 +582,7 @@ public:
         // in range of current weapon
         ai_aFindNonFriend = 0x1000,
         ai_aResetActionQueueQueue = 0x2000,
+        ai_aDeselectCurWeapon = 0x4000,
         ai_aNonFinishable = 0x80000000,
         ai_aAll = 0xFFFFFFFF
     } AiAction;
@@ -603,10 +604,10 @@ public:
         PathNode t_pn;
         // ai_aFindEnemy sets this value, others use
         ShootableMapObject *t_smo;
-        // 0b - not started, 1b - executing, 2b - finished, 3b - failed,
-        // 4b - suspended, 5b - waiting to complete (ai_aWait),
-        // 6b - not ready (empty, should be skipped), 7b - waiting (ai_aWait
-        // | ai_aWaitToStart), 8b - waiting to start
+        // 0b(1) - not started, 1b(2) - executing, 2b(4) - finished, 3b(8) - failed,
+        // 4b(16) - suspended, 5b(32) - waiting to complete (ai_aWait),
+        // 6b(64) - not ready (empty, should be skipped), 7b(128) - waiting (ai_aWait
+        // | ai_aWaitToStart), 8b(256) - waiting to start
         uint16 state;
         // 0 - not set, 0b - stand/walking group(has walking action or
         // action requires ped to stand), 1b - firing only(no walking action),
@@ -731,6 +732,7 @@ public:
 
     void createActQFindEnemy(actionQueueGroupType &as);
     void createActQResetActionQueue(actionQueueGroupType &as);
+    void createActQDeselectCurWeapon(actionQueueGroupType &as);
     
     void discardActG(uint32 id);
     void discardActG(std::vector <actionQueueGroupType>::iterator it_a);

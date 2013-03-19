@@ -96,12 +96,10 @@ int Ped::lastDieFrame() {
 }
 
 void Ped::drawDeadFrame(int x, int y, int frame) {
-    // TODO: findout whether frame really changes?
     g_App.gameSprites().drawFrame(dead_anim_, frame, x, y);
 }
 
 void Ped::drawDeadAgentFrame(int x, int y, int frame) {
-    // TODO: findout whether frame really changes?
     g_App.gameSprites().drawFrame(dead_agent_anim_, frame, x, y);
 }
 
@@ -159,7 +157,6 @@ void Ped::drawSmokeBurnFrame(int x, int y, int frame) {
 }
 
 void Ped::drawDeadBurnFrame(int x, int y, int frame) {
-    // TODO: findout whether frame really changes?
     g_App.gameSprites().drawFrame(dead_burn_anim_, frame, x, y);
 }
 
@@ -363,49 +360,49 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
             uint32 acts_g_prcssd = 0;
             for (uint32 indx = 0; indx < it->actions.size(); indx++)
             {
-                actionQueueType & aqt = it->actions[indx];
-                if ((acts_g_prcssd & aqt.group_desc) != 0
+                std::vector <actionQueueType>::iterator aqt = it->actions.begin() + indx;
+                if ((acts_g_prcssd & aqt->group_desc) != 0
                     || (acts_g_prcssd & groups_processed) != 0)
                     break;
-                if ((aqt.state & 128) == 0 && (aqt.state & 76) != 0)
+                if ((aqt->state & 128) == 0 && (aqt->state & 76) != 0)
                     continue;
-                if ((aqt.group_desc & PedInstance::gd_mExclusive) != 0
+                if ((aqt->group_desc & PedInstance::gd_mExclusive) != 0
                     && acts_g_prcssd != 0)
                     break;
-                if ((aqt.ot_execute & PedInstance::ai_aNone) != 0)
+                if ((aqt->ot_execute & PedInstance::ai_aNone) != 0)
                 {
                     printf("obj_None");
                 }
-                if ((aqt.ot_execute & PedInstance::ai_aWaitToStart) != 0)
+                if ((aqt->ot_execute & PedInstance::ai_aWaitToStart) != 0)
                 {
-                    aqt.state |= 384;
-                    //if (aqt.multi_var.time_var.desc == 0) {
-                        aqt.multi_var.time_var.elapsed += elapsed;
-                        if (aqt.multi_var.time_var.elapsed >=
-                            aqt.multi_var.time_var.time_before_start)
+                    aqt->state |= 384;
+                    //if (aqt->multi_var.time_var.desc == 0) {
+                        aqt->multi_var.time_var.elapsed += elapsed;
+                        if (aqt->multi_var.time_var.elapsed >=
+                            aqt->multi_var.time_var.time_before_start)
                         {
-                            aqt.state ^= 384;
-                            aqt.ot_execute ^= PedInstance::ai_aWaitToStart;
-                            elapsed = aqt.multi_var.time_var.elapsed
-                                - aqt.multi_var.time_var.time_before_start;
-                            aqt.multi_var.time_var.elapsed = 0;
+                            aqt->state ^= 384;
+                            aqt->ot_execute ^= PedInstance::ai_aWaitToStart;
+                            elapsed = aqt->multi_var.time_var.elapsed
+                                - aqt->multi_var.time_var.time_before_start;
+                            aqt->multi_var.time_var.elapsed = 0;
                         }
                     //}
                 }
-                if ((aqt.ot_execute & PedInstance::ai_aUseObject) != 0)
+                if ((aqt->ot_execute & PedInstance::ai_aUseObject) != 0)
                 {
-                    if (aqt.t_smo->health() <= 0 
+                    if (aqt->t_smo->health() <= 0 
                         || (state_ & (PedInstance::pa_smInCar
                         | PedInstance::pa_smUsingCar)) == 0
-                        || !((VehicleInstance *)aqt.t_smo)->isInsideVehicle(this))
+                        || !((VehicleInstance *)aqt->t_smo)->isInsideVehicle(this))
                     {
-                        aqt.state |= 8;
+                        aqt->state |= 8;
                     } else {
-                        VehicleInstance *v = (VehicleInstance *)aqt.t_smo;
-                        if (aqt.state == 1) {
-                            if (aqt.condition == 0) {
-                                if (checkCurrPosTileOnly(aqt.t_pn))
-                                    aqt.state |= 4;
+                        VehicleInstance *v = (VehicleInstance *)aqt->t_smo;
+                        if (aqt->state == 1) {
+                            if (aqt->condition == 0) {
+                                if (checkCurrPosTileOnly(aqt->t_pn))
+                                    aqt->state |= 4;
                                 else {
                                     if (v->getDriver() == NULL) {
                                         v->forceSetDriver(this);
@@ -414,150 +411,151 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                                                 | PedInstance::pa_smUsingCar;
                                     }
                                     if ((state_ & PedInstance::pa_smUsingCar) != 0) {
-                                        v->setDestinationV(mission, aqt.t_pn.tileX(),
-                                            aqt.t_pn.tileY(), aqt.t_pn.tileZ(),
-                                            aqt.t_pn.offX(), aqt.t_pn.offY(), 1024);
+                                        v->setDestinationV(mission, aqt->t_pn.tileX(),
+                                            aqt->t_pn.tileY(), aqt->t_pn.tileZ(),
+                                            aqt->t_pn.offX(), aqt->t_pn.offY(), 1024);
                                         if (v->isMoving()) {
-                                            aqt.state |= 2;
+                                            aqt->state |= 2;
                                             // TODO: create way to properly set offsets
                                             // in t_pn, without this checkCurrPos fails
                                         } else
-                                            aqt.state |= 8;
+                                            aqt->state |= 8;
                                     } else
-                                        aqt.state |= 2;
+                                        aqt->state |= 2;
                                 }
-                            } else if (aqt.condition == 1) {
+                            } else if (aqt->condition == 1) {
                                 if ((state_ & PedInstance::pa_smUsingCar) == 0)
-                                    aqt.state |= 8;
+                                    aqt->state |= 8;
                                 else {
-                                    if (checkCurrPosTileOnly(aqt.t_pn))
-                                        aqt.state |= 4;
+                                    if (checkCurrPosTileOnly(aqt->t_pn))
+                                        aqt->state |= 4;
                                     else {
-                                        v->setDestinationV(mission, aqt.t_pn.tileX(),
-                                            aqt.t_pn.tileY(), aqt.t_pn.tileZ(),
-                                            aqt.t_pn.offX(), aqt.t_pn.offY(), 1024);
+                                        v->setDestinationV(mission, aqt->t_pn.tileX(),
+                                            aqt->t_pn.tileY(), aqt->t_pn.tileZ(),
+                                            aqt->t_pn.offX(), aqt->t_pn.offY(), 1024);
                                         if (v->isMoving()) {
-                                            aqt.state |= 2;
+                                            aqt->state |= 2;
                                             // TODO: create way to properly set offsets
                                             // in t_pn, without this checkCurrPos fails
                                         } else
-                                            aqt.state |= 8;
+                                            aqt->state |= 8;
                                     }
                                 }
                             }
-                        } else if (aqt.state == 3) {
-                            if (checkCurrPosTileOnly(aqt.t_pn))
-                                aqt.state |= 4;
+                        } else if (aqt->state == 3) {
+                            if (checkCurrPosTileOnly(aqt->t_pn))
+                                aqt->state |= 4;
                         }
                     }
                 }
-                if ((aqt.ot_execute & PedInstance::ai_aAquireControl) != 0)
+                if ((aqt->ot_execute & PedInstance::ai_aAquireControl) != 0)
                 {
-                    if (aqt.t_smo->majorType() == MapObject::mjt_Ped) {
+                    if (aqt->t_smo->majorType() == MapObject::mjt_Ped) {
                         // TODO: make it properly, check selected weapon
                         // if not the one in weapon.desc select it,
                         // check owner
                         // NOTE: don't put weapon on the ground
-                        WeaponInstance *wi = aqt.multi_var.enemy_var.weapon.wpn.wi;
+                        WeaponInstance *wi = aqt->multi_var.enemy_var.weapon.wpn.wi;
                         if (wi && wi->getMainType()
-                            == Weapon::Persuadatron && aqt.t_smo->health() > 0)
+                            == Weapon::Persuadatron && aqt->t_smo->health() > 0)
                         {
                             int tm_left = elapsed;
-                            uint16 answ = wi->inflictDamage(aqt.t_smo, NULL, &tm_left);
+                            uint16 answ = wi->inflictDamage(aqt->t_smo, NULL, &tm_left);
                             if (answ == 0) {
-                                if (checkFriendIs((PedInstance *)aqt.t_smo))
-                                    aqt.state |= 4;
+                                if (checkFriendIs((PedInstance *)aqt->t_smo))
+                                    aqt->state |= 4;
                             } else if (answ == 2) {
-                                aqt.state |= 2;
+                                aqt->state |= 2;
                             } else
-                                aqt.state |= 8;
+                                aqt->state |= 8;
                         } else
-                            aqt.state |= 8;
-                    } else if (aqt.t_smo->majorType()
+                            aqt->state |= 8;
+                    } else if (aqt->t_smo->majorType()
                                 == MapObject::mjt_Vehicle)
                     {
-                        VehicleInstance *v = (VehicleInstance *)aqt.t_smo;
+                        VehicleInstance *v = (VehicleInstance *)aqt->t_smo;
                         if (v->health() > 0 && (state_
                             & (PedInstance::pa_smInCar
                             | PedInstance::pa_smUsingCar)) == 0
                             && samePosition(v))
                         {
-                            if (aqt.condition == 0) {
+                            if (aqt->condition == 0) {
                                 v->setDriver(this);
                                 if (v->isInsideVehicle(this)) {
-                                    aqt.state |= 4;
+                                    aqt->state |= 4;
                                     if (v->isDriver(this))
                                         putInVehicle(v, pa_smUsingCar);
                                     else
                                         putInVehicle(v, pa_smInCar);
                                 } else
-                                    aqt.state |= 8;
-                            } else if (aqt.condition == 1) {
+                                    aqt->state |= 8;
+                            } else if (aqt->condition == 1) {
                                 if (v->hasDriver()) {
                                     if (v->isDriver(this))
-                                        aqt.state |= 4;
+                                        aqt->state |= 4;
                                     else
-                                        aqt.state |= 8;
+                                        aqt->state |= 8;
                                 } else {
                                     v->setDriver(this);
-                                    aqt.state |= 4;
+                                    aqt->state |= 4;
                                     putInVehicle(v, pa_smUsingCar);
                                 }
                             }
                         } else
-                            aqt.state |= 8;
+                            aqt->state |= 8;
                     } else
                         // type cannot be aquired
-                        aqt.state |= 8;
+                        aqt->state |= 8;
                 }
-                if ((aqt.ot_execute & PedInstance::ai_aLoseControl) != 0)
+                if ((aqt->ot_execute & PedInstance::ai_aLoseControl) != 0)
                 {
-                    if (aqt.state == 1) {
-                        if (aqt.t_smo->majorType() == MapObject::mjt_Ped) {
+                    if (aqt->state == 1) {
+                        if (aqt->t_smo->majorType() == MapObject::mjt_Ped) {
                             // TODO: but not now
-                        } else if (aqt.t_smo->majorType()
+                        } else if (aqt->t_smo->majorType()
                                    == MapObject::mjt_Vehicle)
                         {
-                            VehicleInstance *v = (VehicleInstance *)aqt.t_smo;
+                            VehicleInstance *v = (VehicleInstance *)aqt->t_smo;
                             if (v->isInsideVehicle(this)) {
                                 v->removeDriver(this);
-                                aqt.state |= 4;
+                                aqt->state |= 4;
                                 leaveVehicle();
                             } else
-                                aqt.state |= 8;
+                                aqt->state |= 8;
                         }
                     }
                 }
-                if ((aqt.ot_execute & PedInstance::ai_aPickUpObject) != 0)
+                if ((aqt->ot_execute & PedInstance::ai_aPickUpObject) != 0)
                 {
-                    if (aqt.state == 1) {
+                    if (aqt->state == 1) {
                         //TODO: better state checking
                         if ((state_ & (PedInstance::pa_smInCar
-                            | PedInstance::pa_smUsingCar)) != 0)
-                            aqt.state |= 8;
-                        WeaponInstance *wi = (WeaponInstance *)aqt.t_smo;
+                            | PedInstance::pa_smUsingCar
+                            | PedInstance::pa_smHit)) != 0)
+                            aqt->state |= 8;
+                        WeaponInstance *wi = (WeaponInstance *)aqt->t_smo;
                         if (wi->hasOwner() || weapons_.size() == 8)
-                            aqt.state |= 8;
+                            aqt->state |= 8;
                         else {
                             wi->setOwner(this);
                             wi->setMap(-1);
                             wi->setIsIgnored(true);
                             wi->deactivate();
                             weapons_.push_back(wi);
-                            aqt.state |= 36;
+                            aqt->state |= 36;
                         }
                     }
                 }
-                if ((aqt.ot_execute & PedInstance::ai_aDestroyObject) != 0)
+                if ((aqt->ot_execute & PedInstance::ai_aDestroyObject) != 0)
                 {
-                    if ((aqt.state & 128) == 0) {
-                        if (aqt.t_smo->health() <= 0) {
+                    if ((aqt->state & 128) == 0) {
+                        if (aqt->t_smo->health() <= 0) {
                             // not object did it as such he failed,
                             // but goal reached
-                            aqt.state |= 12;
-                        } else if (aqt.t_smo->majorType() == MapObject::mjt_Ped
-                            ? aqt.multi_var.enemy_var.forced_shot
-                            || !checkFriendIs((PedInstance *)aqt.t_smo) : true)
+                            aqt->state |= 12;
+                        } else if (aqt->t_smo->majorType() == MapObject::mjt_Ped
+                            ? aqt->multi_var.enemy_var.forced_shot
+                            || !checkFriendIs((PedInstance *)aqt->t_smo) : true)
                         {
                             // TODO: make it properly, check selected weapon
                             // if not the one in weapon.desc select it,
@@ -572,356 +570,359 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                             if (wi && wi->ammoRemaining() > 0)
                             {
                                 int tm_left = elapsed;
-                                uint32 make_shots = aqt.multi_var.enemy_var.make_shots;
+                                uint32 make_shots = aqt->multi_var.enemy_var.make_shots;
                                 uint32 shots_done = make_shots
-                                    - aqt.multi_var.enemy_var.shots_done;
-                                uint16 answ = wi->inflictDamage(aqt.t_smo, NULL, &tm_left,
-                                    aqt.multi_var.enemy_var.forced_shot, &shots_done);
+                                    - aqt->multi_var.enemy_var.shots_done;
+                                uint16 answ = wi->inflictDamage(aqt->t_smo, NULL, &tm_left,
+                                    aqt->multi_var.enemy_var.forced_shot, &shots_done);
                                 // TODO: handle correctly, use info returned from
                                 // inflictDamage, needs use of condition
                                 if (answ == 0 || answ == 2) {
-                                    aqt.state |= 2;
+                                    aqt->state |= 2;
                                     if (shots_done != 0) {
                                         // enabling animation completion
-                                        aqt.state |= 32;
-                                        if (make_shots == 0 && aqt.t_smo->health() <= 0)
-                                            aqt.state |= 4;
+                                        aqt->state |= 32;
+                                        if (make_shots == 0 && aqt->t_smo->health() <= 0)
+                                            aqt->state |= 4;
                                         else {
-                                            aqt.multi_var.enemy_var.shots_done += shots_done;
+                                            aqt->multi_var.enemy_var.shots_done += shots_done;
                                             if (make_shots != 0 && make_shots
                                                 <= shots_done
-                                                + aqt.multi_var.enemy_var.shots_done)
+                                                + aqt->multi_var.enemy_var.shots_done)
                                             {
-                                                aqt.state |= 4;
+                                                aqt->state |= 4;
                                             }
                                         }
                                     }
                                 } else
-                                    aqt.state |= 8;
+                                    aqt->state |= 8;
                             } else
-                                aqt.state |= 8;
+                                aqt->state |= 8;
                         } else
-                            aqt.state |= 8;
-                    } else if ((aqt.ot_execute & PedInstance::ai_aWaitToStart) != 0)
+                            aqt->state |= 8;
+                    } else if ((aqt->ot_execute & PedInstance::ai_aWaitToStart) != 0)
                     {
-                        //if (aqt.multi_var.time_var.desc == 0) {
-                            if ((aqt.t_smo->majorType() == MapObject::mjt_Ped
-                                && !checkHostileIs((PedInstance *)aqt.t_smo))
-                                || aqt.t_smo->health() <= 0)
+                        //if (aqt->multi_var.time_var.desc == 0) {
+                            if ((aqt->t_smo->majorType() == MapObject::mjt_Ped
+                                && !checkHostileIs((PedInstance *)aqt->t_smo))
+                                || aqt->t_smo->health() <= 0)
                             {
-                                aqt.ot_execute &= PedInstance::ai_aAll
+                                aqt->ot_execute &= PedInstance::ai_aAll
                                     ^ (PedInstance::ai_aWaitToStart
                                     | PedInstance::ai_aWait);
-                                aqt.state ^= 384;
+                                aqt->state ^= 384;
                                 // failed target is friendly or dead
-                                aqt.state |= 8;
+                                aqt->state |= 8;
                             }
                         //}
                     }
-                    // TODO: add special action, auto hide weapon,
-                    // when not firing and firing animation is
-                    // not drawn
-                    //if (obj_group_def_ == og_dmPolice)
-                        //setSelectedWeapon(-1);
+
+                    // hiding weapon for police officers for completed/failed state
+                    if ((aqt->state & 12) != 0 && obj_group_def_ == og_dmPolice) {
+                        createActQDeselectCurWeapon(*it);
+                        it->main_act = it->actions.size() - 1;
+                        aqt = it->actions.begin() + indx;
+                    }
                 }
-                if ((aqt.ot_execute & PedInstance::ai_aPutDownObject) != 0)
+                if ((aqt->ot_execute & PedInstance::ai_aPutDownObject) != 0)
                 {
-                    if (aqt.state == 1) {
+                    if (aqt->state == 1) {
                         //TODO: better state checking
                         if ((state_ & (PedInstance::pa_smInCar
-                            | PedInstance::pa_smUsingCar)) != 0)
-                            aqt.state |= 8;
-                        WeaponInstance *wi = (WeaponInstance *)aqt.t_smo;
+                            | PedInstance::pa_smUsingCar
+                            | PedInstance::pa_smHit)) != 0)
+                            aqt->state |= 8;
+                        WeaponInstance *wi = (WeaponInstance *)aqt->t_smo;
                         if (wi->getOwner() != this)
-                            aqt.state |= 8;
+                            aqt->state |= 8;
                         else {
                             dropWeapon(wi);
-                            aqt.state |= 36;
+                            aqt->state |= 36;
                         }
                     }
                 }
-                if ((aqt.ot_execute & PedInstance::ai_aReachLocation) != 0)
+                if ((aqt->ot_execute & PedInstance::ai_aReachLocation) != 0)
                 {
                     //TODO: better state checking
                     if ((state_ & (PedInstance::pa_smInCar
                         | PedInstance::pa_smUsingCar)) != 0)
-                        aqt.state |= 8;
-                    if (aqt.state == 1) {
-                        speed_ = aqt.multi_var.dist_var.speed != -1
-                            ? aqt.multi_var.dist_var.speed: getSpeed();
-                        if (aqt.condition == 0) {
+                        aqt->state |= 8;
+                    if (aqt->state == 1) {
+                        speed_ = aqt->multi_var.dist_var.speed != -1
+                            ? aqt->multi_var.dist_var.speed: getSpeed();
+                        if (aqt->condition == 0) {
                             bool set_new_dest = true;
-                            dist_to_pos_ = aqt.multi_var.dist_var.dist;
+                            dist_to_pos_ = aqt->multi_var.dist_var.dist;
                             if (dist_to_pos_ != 0) {
                                 toDefineXYZ xyz;
                                 int dist_is = -1;
-                                aqt.t_pn.convertPosToXYZ(&xyz);
+                                aqt->t_pn.convertPosToXYZ(&xyz);
                                 dist_is = (int)distanceToPosXYZ(&xyz);
                                 if (dist_is <= dist_to_pos_)
                                     set_new_dest = false;
                             }
                             if (set_new_dest) {
-                                aqt.state |= 2;
-                                setDestinationP(mission, aqt.t_pn.tileX(),
-                                    aqt.t_pn.tileY(), aqt.t_pn.tileZ(),
-                                    aqt.t_pn.offX(), aqt.t_pn.offY());
+                                aqt->state |= 2;
+                                setDestinationP(mission, aqt->t_pn.tileX(),
+                                    aqt->t_pn.tileY(), aqt->t_pn.tileZ(),
+                                    aqt->t_pn.offX(), aqt->t_pn.offY());
                                 if (dest_path_.empty()) {
-                                    aqt.state |= 8;
+                                    aqt->state |= 8;
                                     speed_ = 0;
                                 }
                             } else {
-                                aqt.state |= 4;
+                                aqt->state |= 4;
                                 speed_ = 0;
                             }
-                        } else if (aqt.condition == 1) {
+                        } else if (aqt->condition == 1) {
                             // TODO: check already at location
                             moveToDir(mission, elapsed,
-                                aqt.multi_var.dist_var.dir_move,
-                                aqt.multi_var.dist_var.dir, -1, -1,
-                                aqt.multi_var.dist_var.dist);
-                            aqt.state |= 2;
-                        } else if (aqt.condition == 2) {
+                                aqt->multi_var.dist_var.dir_move,
+                                aqt->multi_var.dist_var.dir, -1, -1,
+                                aqt->multi_var.dist_var.dist);
+                            aqt->state |= 2;
+                        } else if (aqt->condition == 2) {
                             bool set_new_dest = true;
-                            dist_to_pos_ = aqt.multi_var.dist_var.dist;
+                            dist_to_pos_ = aqt->multi_var.dist_var.dist;
                             if (dist_to_pos_ != 0) {
                                 int dist_is = -1;
                                 dist_is = (int)distanceTo(
-                                    (MapObject *)aqt.t_smo);
+                                    (MapObject *)aqt->t_smo);
                                 if (dist_is <= dist_to_pos_)
                                     set_new_dest = false;
                             } else {
-                                if (!this->samePosition(aqt.t_smo))
+                                if (!this->samePosition(aqt->t_smo))
                                     set_new_dest = true;
                             }
                             if (set_new_dest) {
-                                aqt.state |= 2;
+                                aqt->state |= 2;
                                 setDestinationP(mission,
-                                    aqt.t_smo->tileX(), aqt.t_smo->tileY(),
-                                    aqt.t_smo->tileZ(), aqt.t_smo->offX(),
-                                    aqt.t_smo->offY());
+                                    aqt->t_smo->tileX(), aqt->t_smo->tileY(),
+                                    aqt->t_smo->tileZ(), aqt->t_smo->offX(),
+                                    aqt->t_smo->offY());
                                 if (dest_path_.empty()) {
-                                    aqt.state |= 8;
+                                    aqt->state |= 8;
                                     speed_ = 0;
                                 }
                             } else {
-                                aqt.state |= 4;
+                                aqt->state |= 4;
                                 speed_ = 0;
                             }
-                        } else if (aqt.condition == 3) {
+                        } else if (aqt->condition == 3) {
                             // TODO: check already at location
                             int pos_x, pos_y;
-                            aqt.t_pn.convertPosToXY(&pos_x, &pos_y);
+                            aqt->t_pn.convertPosToXY(&pos_x, &pos_y);
                             int diffx = pos_x - tile_x_ * 256 - off_x_;
                             int diffy = pos_y - tile_y_ * 256 - off_y_;
                             dist_to_pos_ = (int)sqrt((double)
                                 (diffx * diffx + diffy * diffy));
                             moveToDir(mission, elapsed,
-                                aqt.multi_var.dist_var.dir_move,
+                                aqt->multi_var.dist_var.dir_move,
                                 -1, pos_x, pos_y,
-                                aqt.multi_var.dist_var.dist);
-                            aqt.state |= 2;
-                        } else if (aqt.condition == 4) {
+                                aqt->multi_var.dist_var.dist);
+                            aqt->state |= 2;
+                        } else if (aqt->condition == 4) {
                             // TODO: check already at location
                             int pos_x, pos_y;
-                            aqt.t_smo->convertPosToXY(&pos_x, &pos_y);
-                            dist_to_pos_ = this->distanceTo(aqt.t_smo);
+                            aqt->t_smo->convertPosToXY(&pos_x, &pos_y);
+                            dist_to_pos_ = this->distanceTo(aqt->t_smo);
                             moveToDir(mission, elapsed,
-                                aqt.multi_var.dist_var.dir_move,
+                                aqt->multi_var.dist_var.dir_move,
                                 -1, pos_x, pos_y,
-                                aqt.multi_var.dist_var.dist);
-                            aqt.state |= 2;
+                                aqt->multi_var.dist_var.dist);
+                            aqt->state |= 2;
                         }
                     }
-                    if ((aqt.state & 15) == 3) {
-                        speed_ = aqt.multi_var.dist_var.speed != -1
-                            ? aqt.multi_var.dist_var.speed: getSpeed();
-                        if (aqt.condition == 0 || aqt.condition == 2) {
+                    if ((aqt->state & 15) == 3) {
+                        speed_ = aqt->multi_var.dist_var.speed != -1
+                            ? aqt->multi_var.dist_var.speed: getSpeed();
+                        if (aqt->condition == 0 || aqt->condition == 2) {
                             updated = movementP(mission, elapsed);
                             if (speed_ == 0)
-                                aqt.state |= 4;
-                        } else if (aqt.condition == 1) {
+                                aqt->state |= 4;
+                        } else if (aqt->condition == 1) {
                             moveToDir(mission, elapsed,
-                                aqt.multi_var.dist_var.dir_move,
-                                aqt.multi_var.dist_var.dir, -1, -1,
-                                aqt.multi_var.dist_var.dist);
-                            aqt.multi_var.dist_var.dir = dir_;
-                        } else if (aqt.condition == 3) {
+                                aqt->multi_var.dist_var.dir_move,
+                                aqt->multi_var.dist_var.dir, -1, -1,
+                                aqt->multi_var.dist_var.dist);
+                            aqt->multi_var.dist_var.dir = dir_;
+                        } else if (aqt->condition == 3) {
                             //dir_last_ = -1;
                             int pos_x, pos_y;
-                            aqt.t_pn.convertPosToXY(&pos_x, &pos_y);
+                            aqt->t_pn.convertPosToXY(&pos_x, &pos_y);
                             int diffx = pos_x - tile_x_ * 256 - off_x_;
                             int diffy = pos_y - tile_y_ * 256 - off_y_;
                             dist_to_pos_ = (int)sqrt((double)
                                 (diffx * diffx + diffy * diffy));
                             if (dist_to_pos_ > 0) {
                                 moveToDir(mission, elapsed,
-                                    aqt.multi_var.dist_var.dir_move,
+                                    aqt->multi_var.dist_var.dir_move,
                                     -1, pos_x, pos_y,
-                                    aqt.multi_var.dist_var.dist);
-                                if (tile_x_ == aqt.t_pn.tileX()
-                                    && tile_y_ == aqt.t_pn.tileY()
+                                    aqt->multi_var.dist_var.dist);
+                                if (tile_x_ == aqt->t_pn.tileX()
+                                    && tile_y_ == aqt->t_pn.tileY()
                                     // TODO: add correct z or ignore it?
-                                    //&& tile_z_ == aqt.t_pn.tileZ()
-                                    && off_x_ == aqt.t_pn.offX()
-                                    && off_y_ == aqt.t_pn.offY())
+                                    //&& tile_z_ == aqt->t_pn.tileZ()
+                                    && off_x_ == aqt->t_pn.offX()
+                                    && off_y_ == aqt->t_pn.offY())
                                 {
-                                    aqt.state |= 4;
+                                    aqt->state |= 4;
                                     speed_ = 0;
                                 }
                             } else {
-                                aqt.state |= 4;
+                                aqt->state |= 4;
                                 speed_ = 0;
                             }
-                        } else if (aqt.condition == 4) {
+                        } else if (aqt->condition == 4) {
                             int pos_x, pos_y;
-                            aqt.t_smo->convertPosToXY(&pos_x, &pos_y);
+                            aqt->t_smo->convertPosToXY(&pos_x, &pos_y);
                             int diffx = pos_x - tile_x_ * 256 - off_x_;
                             int diffy = pos_y - tile_y_ * 256 - off_y_;
                             dist_to_pos_ = (int)sqrt((double)
                                 (diffx * diffx + diffy * diffy));
                             if (dist_to_pos_ > 0) {
                                 moveToDir(mission, elapsed,
-                                    aqt.multi_var.dist_var.dir_move,
+                                    aqt->multi_var.dist_var.dir_move,
                                     -1, pos_x, pos_y,
-                                    aqt.multi_var.dist_var.dist);
-                                if (samePosition(aqt.t_smo)) {
-                                    aqt.state |= 4;
+                                    aqt->multi_var.dist_var.dist);
+                                if (samePosition(aqt->t_smo)) {
+                                    aqt->state |= 4;
                                     speed_ = 0;
                                 }
                             } else {
-                                aqt.state |= 4;
+                                aqt->state |= 4;
                                 speed_ = 0;
                             }
                         }
                     }
                 }
-                if ((aqt.ot_execute & PedInstance::ai_aFollowObject) != 0)
+                if ((aqt->ot_execute & PedInstance::ai_aFollowObject) != 0)
                 {
-                    if (aqt.state == 1 || aqt.state == 17) {
-                        speed_ = aqt.multi_var.dist_var.speed != -1
-                            ? aqt.multi_var.dist_var.speed: getSpeed();
-                        if (aqt.condition == 0) {
-                            dist_to_pos_ = aqt.multi_var.dist_var.dist;
+                    if (aqt->state == 1 || aqt->state == 17) {
+                        speed_ = aqt->multi_var.dist_var.speed != -1
+                            ? aqt->multi_var.dist_var.speed: getSpeed();
+                        if (aqt->condition == 0) {
+                            dist_to_pos_ = aqt->multi_var.dist_var.dist;
                             int dist_is = -1;
                             dist_is = (int)distanceTo(
-                                (MapObject *)aqt.t_smo);
+                                (MapObject *)aqt->t_smo);
                             if (dist_is > dist_to_pos_) {
-                                aqt.state |= 2;
+                                aqt->state |= 2;
                                 setDestinationP(mission,
-                                    aqt.t_smo->tileX(), aqt.t_smo->tileY(),
-                                    aqt.t_smo->tileZ(), aqt.t_smo->offX(),
-                                    aqt.t_smo->offY());
+                                    aqt->t_smo->tileX(), aqt->t_smo->tileY(),
+                                    aqt->t_smo->tileZ(), aqt->t_smo->offX(),
+                                    aqt->t_smo->offY());
                                 if (dest_path_.empty()) {
-                                    aqt.state |= 8;
+                                    aqt->state |= 8;
                                     speed_ = 0;
                                 }
-                                if ((aqt.state & 16) != 0)
-                                    aqt.state ^= 16;
+                                if ((aqt->state & 16) != 0)
+                                    aqt->state ^= 16;
                             } else {
-                                aqt.state |= 16;
+                                aqt->state |= 16;
                                 speed_ = 0;
                             }
-                        } else if (aqt.condition == 1) {
+                        } else if (aqt->condition == 1) {
                             WeaponInstance *wi = selectedWeapon();
                             if (wi) {
                                 bool set_new_dest = true;
                                 // TODO: set checktile value, based
                                 // on mode
-                                if (wi->inRangeNoCP(&aqt.t_smo, NULL,
+                                if (wi->inRangeNoCP(&aqt->t_smo, NULL,
                                     false, false) == 1)
                                 {
                                     set_new_dest = false;
                                     // object will turn to target
                                     int posx, posy;
-                                    aqt.t_smo->convertPosToXY(&posx, &posy);
+                                    aqt->t_smo->convertPosToXY(&posx, &posy);
                                     setDirection(posx - tile_x_ * 256 - off_x_,
                                         posy - tile_y_ * 256 - off_y_);
                                 }
                                 if (set_new_dest) {
-                                    aqt.state |= 2;
+                                    aqt->state |= 2;
                                     setDestinationP(mission,
-                                        aqt.t_smo->tileX(), aqt.t_smo->tileY(),
-                                        aqt.t_smo->tileZ(), aqt.t_smo->offX(),
-                                        aqt.t_smo->offY());
+                                        aqt->t_smo->tileX(), aqt->t_smo->tileY(),
+                                        aqt->t_smo->tileZ(), aqt->t_smo->offX(),
+                                        aqt->t_smo->offY());
                                     if (dest_path_.empty()) {
-                                        aqt.state |= 8;
+                                        aqt->state |= 8;
                                         speed_ = 0;
                                     }
-                                    if ((aqt.state & 16) != 0)
-                                        aqt.state ^= 16;
+                                    if ((aqt->state & 16) != 0)
+                                        aqt->state ^= 16;
                                 } else {
-                                    aqt.state |= 16;
+                                    aqt->state |= 16;
                                     speed_ = 0;
                                 }
                             } else {
-                                aqt.state |= 8;
+                                aqt->state |= 8;
                                 speed_ = 0;
                             }
                         }
-                    } else if ((aqt.state & 30) == 2) {
-                        speed_ = aqt.multi_var.dist_var.speed != -1
-                            ? aqt.multi_var.dist_var.speed: getSpeed();
-                        if (aqt.condition == 0) {
+                    } else if ((aqt->state & 30) == 2) {
+                        speed_ = aqt->multi_var.dist_var.speed != -1
+                            ? aqt->multi_var.dist_var.speed: getSpeed();
+                        if (aqt->condition == 0) {
                             updated = movementP(mission, elapsed);
                             if (speed_ == 0) {
-                                aqt.state ^= 2;
-                                aqt.state |= 16;
+                                aqt->state ^= 2;
+                                aqt->state |= 16;
                             } else {
                                 PathNode &rp = dest_path_.back();
-                                if (!((ShootableMovableMapObject*)aqt.t_smo)
+                                if (!((ShootableMovableMapObject*)aqt->t_smo)
                                     ->checkCurrPos(rp))
                                 {
                                     // resetting target position
                                     setDestinationP(mission,
-                                        aqt.t_smo->tileX(), aqt.t_smo->tileY(),
-                                        aqt.t_smo->tileZ(), aqt.t_smo->offX(),
-                                        aqt.t_smo->offY());
+                                        aqt->t_smo->tileX(), aqt->t_smo->tileY(),
+                                        aqt->t_smo->tileZ(), aqt->t_smo->offX(),
+                                        aqt->t_smo->offY());
                                     if (dest_path_.empty()) {
-                                        aqt.state |= 8;
+                                        aqt->state |= 8;
                                         speed_ = 0;
                                     }
                                 }
                             }
-                        } else if (aqt.condition == 1) {
+                        } else if (aqt->condition == 1) {
                             // TODO: view range if no weapon?
                             WeaponInstance *wi = selectedWeapon();
                             if (wi) {
                                 updated = movementP(mission, elapsed);
-                                if (wi->inRangeNoCP(&aqt.t_smo) == 1) {
-                                    aqt.state ^= 2;
-                                    aqt.state |= 16;
+                                if (wi->inRangeNoCP(&aqt->t_smo) == 1) {
+                                    aqt->state ^= 2;
+                                    aqt->state |= 16;
                                     dest_path_.clear();
                                     speed_ = 0;
                                     // object will turn to target
                                     int posx, posy;
-                                    aqt.t_smo->convertPosToXY(&posx, &posy);
+                                    aqt->t_smo->convertPosToXY(&posx, &posy);
                                     setDirection(posx - tile_x_ * 256 - off_x_,
                                         posy - tile_y_ * 256 - off_y_);
                                 } else {
                                     PathNode &rp = dest_path_.back();
-                                    if (!((ShootableMovableMapObject*)aqt.t_smo)
+                                    if (!((ShootableMovableMapObject*)aqt->t_smo)
                                         ->checkCurrPos(rp))
                                     {
                                         // resetting target position
                                         setDestinationP(mission,
-                                            aqt.t_smo->tileX(), aqt.t_smo->tileY(),
-                                            aqt.t_smo->tileZ(), aqt.t_smo->offX(),
-                                            aqt.t_smo->offY());
+                                            aqt->t_smo->tileX(), aqt->t_smo->tileY(),
+                                            aqt->t_smo->tileZ(), aqt->t_smo->offX(),
+                                            aqt->t_smo->offY());
                                         if (dest_path_.empty()) {
-                                            aqt.state |= 8;
+                                            aqt->state |= 8;
                                             speed_ = 0;
                                         }
                                     }
                                 }
                             } else {
-                                aqt.state |= 8;
+                                aqt->state |= 8;
                                 speed_ = 0;
                             }
                         }
                     }
                 }
-                if ((aqt.ot_execute & PedInstance::ai_aAttackLocation) != 0
-                    && (aqt.state & 128) == 0)
+                if ((aqt->ot_execute & PedInstance::ai_aAttackLocation) != 0
+                    && (aqt->state & 128) == 0)
                 {
                     // TODO: additional conditions
                     WeaponInstance *wi = selectedWeapon();
@@ -932,30 +933,30 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                         && wi->ammoRemaining() > 0)
                     {
                         int tm_left = elapsed;
-                        uint32 make_shots = aqt.multi_var.enemy_var.make_shots;
+                        uint32 make_shots = aqt->multi_var.enemy_var.make_shots;
                         uint32 shots_done = make_shots
-                            - aqt.multi_var.enemy_var.shots_done;
-                        uint16 answ = wi->inflictDamage(NULL, &aqt.t_pn, &tm_left,
-                            aqt.multi_var.enemy_var.forced_shot, &shots_done);
+                            - aqt->multi_var.enemy_var.shots_done;
+                        uint16 answ = wi->inflictDamage(NULL, &aqt->t_pn, &tm_left,
+                            aqt->multi_var.enemy_var.forced_shot, &shots_done);
                         if (answ == 0 || answ == 2) {
-                            aqt.state |= 2;
+                            aqt->state |= 2;
                             if (shots_done != 0) {
                                 // enable animation compeletion
-                                aqt.state |= 32;
-                                aqt.multi_var.enemy_var.shots_done += shots_done;
+                                aqt->state |= 32;
+                                aqt->multi_var.enemy_var.shots_done += shots_done;
                                 if (make_shots != 0 && make_shots
                                     <= shots_done
-                                    + aqt.multi_var.enemy_var.shots_done)
+                                    + aqt->multi_var.enemy_var.shots_done)
                                 {
-                                    aqt.state |= 4;
+                                    aqt->state |= 4;
                                 }
                             }
                         } else
-                            aqt.state |= 8;
+                            aqt->state |= 8;
                     } else
-                        aqt.state |= 8;
+                        aqt->state |= 8;
                 }
-                if ((aqt.ot_execute & PedInstance::ai_aFindEnemy) != 0)
+                if ((aqt->ot_execute & PedInstance::ai_aFindEnemy) != 0)
                 {
                     bool selfState = is_ignored_;
                     is_ignored_ = true;
@@ -1110,7 +1111,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                     bool set_nxt_act = false;
                     if (hostiles_found_.empty()) {
                         if (smo_dist.empty())
-                            aqt.state |= 8;
+                            aqt->state |= 8;
                         else {
                             Msmod_t::iterator it_msmod = smo_dist.begin();
                             Pairsmod_t closest = *it_msmod;
@@ -1121,8 +1122,8 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                                 }
                                 it_msmod++;
                             }
-                            aqt.t_smo = closest.first;
-                            aqt.state |= 4;
+                            aqt->t_smo = closest.first;
+                            aqt->state |= 4;
                             set_nxt_act = true;
                         }
                     } else {
@@ -1135,14 +1136,14 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                             }
                             it_msmod++;
                         }
-                        aqt.t_smo = closest.first;
-                        aqt.state |= 4;
+                        aqt->t_smo = closest.first;
+                        aqt->state |= 4;
                         set_nxt_act = true;
                     }
                     if (set_nxt_act) {
-                        actionQueueType & aqt_attack = it->actions[indx+1];
-                        aqt_attack.t_smo = aqt.t_smo;
-                        // action is ready removing not ready flag
+                        actionQueueType & aqt_attack = it->actions[indx + 1];
+                        aqt_attack.t_smo = aqt->t_smo;
+                        // action is ready, removing not ready flag
                         // enabling destroyobject action
                         aqt_attack.state ^= 64;
                         it->main_act++;
@@ -1155,16 +1156,16 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                         {
                             aqt_attack.ot_execute |= PedInstance::ai_aWaitToStart;
                             aqt_attack.multi_var.time_var.time_before_start = 5000;
-                            aqt.multi_var.time_var.desc = 1;
+                            aqt->multi_var.time_var.desc = 1;
                             g_App.gameSounds().play(snd::PUTDOWN_WEAPON);
                             // enabling following behavior
                             actionQueueType & aqt_follow = it->actions[indx + 2];
-                            aqt_follow.t_smo = aqt.t_smo;
+                            aqt_follow.t_smo = aqt->t_smo;
                             aqt_follow.state ^= 64;
                         }
                     }
                 }
-                if ((aqt.ot_execute & PedInstance::ai_aFindNonFriend) != 0)
+                if ((aqt->ot_execute & PedInstance::ai_aFindNonFriend) != 0)
                 {
                     bool selfState = is_ignored_;
                     // TODO : check inside of vehicles, is_ignored_?
@@ -1198,7 +1199,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                     }
                     is_ignored_ = selfState;
                     if (nf_dist.empty())
-                        aqt.state |= 8;
+                        aqt->state |= 8;
                     else {
                         Msmod_t::iterator it_msmod = nf_dist.begin();
                         Pairsmod_t closest = *it_msmod;
@@ -1209,35 +1210,35 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                             }
                             it_msmod++;
                         }
-                        aqt.t_smo = closest.first;
-                        aqt.state |= 4;
+                        aqt->t_smo = closest.first;
+                        aqt->state |= 4;
                     }
                 }
-                if ((aqt.ot_execute & (PedInstance::ai_aWait
+                if ((aqt->ot_execute & (PedInstance::ai_aWait
                     | PedInstance::ai_aWaitToStart)) == PedInstance::ai_aWait)
                 {
-                    if (aqt.multi_var.time_var.desc == 0) {
-                        if ((aqt.state & 32) != 0) {
-                            aqt.state |= 130;
-                            aqt.multi_var.time_var.elapsed += elapsed;
-                            if (aqt.multi_var.time_var.elapsed
-                                >= aqt.multi_var.time_var.time_total)
+                    if (aqt->multi_var.time_var.desc == 0) {
+                        if ((aqt->state & 32) != 0) {
+                            aqt->state |= 130;
+                            aqt->multi_var.time_var.elapsed += elapsed;
+                            if (aqt->multi_var.time_var.elapsed
+                                >= aqt->multi_var.time_var.time_total)
                             {
-                                aqt.state &= (65535 ^ 128);
-                                aqt.state |= 4;
+                                aqt->state &= (65535 ^ 128);
+                                aqt->state |= 4;
                             }
                         } else
-                            aqt.state &= (65535 ^ 32);
-                    } else if (aqt.multi_var.time_var.desc == 1) {
-                        if ((aqt.state & 32) != 0 && (aqt.state & 12) != 0) {
+                            aqt->state &= (65535 ^ 32);
+                    } else if (aqt->multi_var.time_var.desc == 1) {
+                        if ((aqt->state & 32) != 0 && (aqt->state & 12) != 0) {
                             // firing animation if set, has usable frame_
                             // to process it we set now "waiting" flag
                             if (drawn_anim_ == PedInstance::ad_WalkFireAnim
                                 || drawn_anim_ == PedInstance::ad_StandFireAnim)
                             {
-                                aqt.state |= 128;
+                                aqt->state |= 128;
                             }
-                            if ((aqt.state & 128) != 0) {
+                            if ((aqt->state & 128) != 0) {
                                 int frame_bckp = frame_;
                                 int elapsed_carry_bckp = elapsed_carry_;
                                 if (is_frame_drawn_)
@@ -1245,30 +1246,30 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                                 // after one time animation drawn this
                                 // action is completed
                                 if (handleDrawnAnim(elapsed))
-                                    aqt.state &= (65535 ^ 160);
+                                    aqt->state &= (65535 ^ 160);
                                 frame_ = frame_bckp;
                                 elapsed_carry_ = elapsed_carry_bckp;
                             } else
-                                aqt.state |= 128;
-                        } else if ((aqt.state & 2) == 0)
-                            aqt.state &= (65535 ^ 32);
-                    } else if (aqt.multi_var.time_var.desc == 2) {
+                                aqt->state |= 128;
+                        } else if ((aqt->state & 2) == 0)
+                            aqt->state &= (65535 ^ 32);
+                    } else if (aqt->multi_var.time_var.desc == 2) {
                         // no failed or suspended will have "wait" action
-                        if ((aqt.state & 60) == 36) {
-                            if ((aqt.state & 128) != 0) {
-                                aqt.multi_var.time_var.elapsed += elapsed;
-                                if (aqt.multi_var.time_var.elapsed
-                                    >= aqt.multi_var.time_var.time_total)
+                        if ((aqt->state & 60) == 36) {
+                            if ((aqt->state & 128) != 0) {
+                                aqt->multi_var.time_var.elapsed += elapsed;
+                                if (aqt->multi_var.time_var.elapsed
+                                    >= aqt->multi_var.time_var.time_total)
                                 {
-                                    aqt.state &= (65535 ^ 160);
+                                    aqt->state &= (65535 ^ 160);
                                 }
                             } else
-                                aqt.state |= 130;
+                                aqt->state |= 130;
                         } else
-                            aqt.state &= (65535 ^ 32);
+                            aqt->state &= (65535 ^ 32);
                     }
                 }
-                if ((aqt.ot_execute & PedInstance::ai_aResetActionQueueQueue) != 0)
+                if ((aqt->ot_execute & PedInstance::ai_aResetActionQueueQueue) != 0)
                 {
                     for (uint32 indx_act = 0, sz = it->actions.size() - 1;
                          indx_act < sz; indx_act++)
@@ -1284,54 +1285,59 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                             aqt_reset.state |= 32;
                         }
                     }
-                    aqt.state |= 2;
+                    aqt->state |= 2;
                 }
-                if ((aqt.ot_execute & PedInstance::ai_aNonFinishable) != 0)
+                if ((aqt->ot_execute & PedInstance::ai_aDeselectCurWeapon) != 0)
                 {
-                    if ((aqt.state & 12) != 0)
-                        aqt.state &= ((65535 ^ 14));
+                    setSelectedWeapon(-1);
+                    aqt->state |= 4;
+                }
+                if ((aqt->ot_execute & PedInstance::ai_aNonFinishable) != 0)
+                {
+                    if ((aqt->state & 12) != 0)
+                        aqt->state &= ((65535 ^ 14));
                 }
                 if (actions_property_ != 0)
                     break;
 
-                if ((aqt.state & 256) != 0) {
-                    if ((aqt.group_desc & PedInstance::gd_mExclusive) != 0)
+                if ((aqt->state & 256) != 0) {
+                    if ((aqt->group_desc & PedInstance::gd_mExclusive) != 0)
                         break;
                     continue;
-                } else if ((aqt.state & 32) != 0) {
-                    if ((aqt.group_desc & PedInstance::gd_mExclusive) != 0)
+                } else if ((aqt->state & 32) != 0) {
+                    if ((aqt->group_desc & PedInstance::gd_mExclusive) != 0)
                         it->state |= 2;
-                    switchActionStateTo(aqt.as);
-                    acts_g_prcssd |= aqt.group_desc;
-                } else if ((aqt.state & 16) != 0) {
-                    switchActionStateFrom(aqt.as);
-                    acts_g_prcssd |= aqt.group_desc;
-                } else if ((aqt.state & 8) != 0) {
-                    if ((aqt.state & 2) != 0)
-                        switchActionStateFrom(aqt.as);
-                    if ((aqt.group_desc & PedInstance::gd_mExclusive) != 0)
+                    switchActionStateTo(aqt->as);
+                    acts_g_prcssd |= aqt->group_desc;
+                } else if ((aqt->state & 16) != 0) {
+                    switchActionStateFrom(aqt->as);
+                    acts_g_prcssd |= aqt->group_desc;
+                } else if ((aqt->state & 8) != 0) {
+                    if ((aqt->state & 2) != 0)
+                        switchActionStateFrom(aqt->as);
+                    if ((aqt->group_desc & PedInstance::gd_mExclusive) != 0)
                         it->state |= 8;
-                } else if ((aqt.state & 4) != 0) {
-                    switchActionStateFrom(aqt.as);
-                    acts_g_prcssd |= aqt.group_desc;
-                } else if ((aqt.state & 2) != 0) {
-                    if ((aqt.group_desc & PedInstance::gd_mExclusive) != 0)
+                } else if ((aqt->state & 4) != 0) {
+                    switchActionStateFrom(aqt->as);
+                    acts_g_prcssd |= aqt->group_desc;
+                } else if ((aqt->state & 2) != 0) {
+                    if ((aqt->group_desc & PedInstance::gd_mExclusive) != 0)
                         it->state |= 2;
-                    if (!((aqt.ot_execute & (PedInstance::ai_aWait
+                    if (!((aqt->ot_execute & (PedInstance::ai_aWait
                         | PedInstance::ai_aWaitToStart)) == PedInstance::ai_aWait
-                        && aqt.multi_var.time_var.desc == 1))
+                        && aqt->multi_var.time_var.desc == 1))
                     {
-                        switchActionStateTo(aqt.as);
+                        switchActionStateTo(aqt->as);
                     }
-                    acts_g_prcssd |= aqt.group_desc;
+                    acts_g_prcssd |= aqt->group_desc;
                 }
 #ifdef _DEBUG
-                else if ((aqt.state & 1) != 0) {
-                    printf("should not get here, aqt.state = 1\n");
+                else if ((aqt->state & 1) != 0) {
+                    printf("should not get here, aqt->state = 1\n");
                 }
 #endif
-                if ((aqt.group_desc & PedInstance::gd_mExclusive) != 0
-                    && ((aqt.state & 12) == 0 || (aqt.state & 128) != 0))
+                if ((aqt->group_desc & PedInstance::gd_mExclusive) != 0
+                    && ((aqt->state & 12) == 0 || (aqt->state & 128) != 0))
                     break;
                 if (acts_g_prcssd == PedInstance::gd_mAll)
                     break;

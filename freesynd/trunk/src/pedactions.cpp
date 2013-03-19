@@ -374,6 +374,16 @@ void PedInstance::createActQResetActionQueue(actionQueueGroupType &as) {
     as.actions.push_back(aq);
 }
 
+void PedInstance::createActQDeselectCurWeapon(actionQueueGroupType &as) {
+    as.state = 1;
+    actionQueueType aq;
+    aq.as = PedInstance::pa_smNone;
+    aq.group_desc = PedInstance::gd_mFire;
+    aq.state = 1;
+    aq.ot_execute = PedInstance::ai_aDeselectCurWeapon;
+    as.actions.push_back(aq);
+}
+
 
 bool PedInstance::setActQInQueue(actionQueueGroupType &as,
     uint32 * id)
