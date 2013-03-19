@@ -340,8 +340,8 @@ namespace internal
             ((it != end) && (internal::mask8(*it))   == bom[2])
            );
     }
-\t
-\t//Deprecated in release 2.3 
+    
+    //Deprecated in release 2.3 
     template <typename octet_iterator>
     inline bool is_bom (octet_iterator it)
     {

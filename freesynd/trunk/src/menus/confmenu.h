@@ -36,81 +36,81 @@ public:
     ~ConfMenu();
 
     virtual void handleRender(DirtyList &dirtyList);
-\tvoid handleShow();
+    void handleShow();
     void handleLeave();
 
     void handleAction(const int actionId, void *ctx, const int modKeys);
 
 protected:
 
-\tbool handleUnknownKey(Key key, const int modKeys);
+    bool handleUnknownKey(Key key, const int modKeys);
 
-\tvoid createPanels();
-\tvoid showLogoPanel();
-\tvoid showUserNamePanel();
-\tvoid showCompanyNamePanel();
-\tvoid showMainPanel();
-\tvoid hideMainPanel();
+    void createPanels();
+    void showLogoPanel();
+    void showUserNamePanel();
+    void showCompanyNamePanel();
+    void showMainPanel();
+    void hideMainPanel();
 
-\tvoid redrawLogo() { addDirtyRect(28, 22, 150, 110); }
-\tvoid redrawPanel() { addDirtyRect(278, 20, 340 , 135); }
+    void redrawLogo() { addDirtyRect(28, 22, 150, 110); }
+    void redrawPanel() { addDirtyRect(278, 20, 340 , 135); }
 
 protected:
-\t/*! 
-\t * This enum identifies the panel which is currently displayed.
-\t */
-\tenum EPanel {
+    /*! 
+     * This enum identifies the panel which is currently displayed.
+     */
+    enum EPanel {
         PNL_MAIN = 0,
         PNL_LOGO = 1,
         PNL_USRNM = 2,
-\t\tPNL_CMPNM = 3
+        PNL_CMPNM = 3
     };
 
-\t/*! This array holds the values for drawing a frame
-\t *  around the ok and cancel button in the sub panels. */
-\tuint8 butFrameData_[68 * 13];
-\t/*! This array holds the values for drawing a frame
-\t *  around the textfield in the user and company name panels. */
-\tuint8 tfFrameData_[136 * 13];
+    /*! This array holds the values for drawing a frame
+     *  around the ok and cancel button in the sub panels. */
+    uint8 butFrameData_[68 * 13];
+    /*! This array holds the values for drawing a frame
+     *  around the textfield in the user and company name panels. */
+    uint8 tfFrameData_[136 * 13];
 
-\t/*! keep track of the current panel.*/
-\tEPanel currPanel_;
-\t/*! Button to open the change logo panel.*/
-\tint logoButId_;
-\t/*! Button to open the change company name panel.*/
-\tint compNameButId_;
-\t/*! Button to open the change user name panel.*/
-\tint userNameButId_;
-\t/*! Button in the main window to accept change.*/
-\tint acceptButId_;
-\t/*! Button in the main window to cancel change.*/
-\tint menuButId_;
-\tint panelMsgId_;
+    /*! keep track of the current panel.*/
+    EPanel currPanel_;
+    /*! Button to open the change logo panel.*/
+    int logoButId_;
+    /*! Button to open the change company name panel.*/
+    int compNameButId_;
+    /*! Button to open the change user name panel.*/
+    int userNameButId_;
+    /*! Button in the main window to accept change.*/
+    int acceptButId_;
+    /*! Button in the main window to cancel change.*/
+    int menuButId_;
+    int panelMsgId_;
 
-\t// Logo Panel
-\tint leftColButId_;
-\tint rightColButId_;
-\tint leftLogoButId_;
-\tint rightLogoButId_;
-\tint logoStaticId_;
-\tint colStaticId_;
+    // Logo Panel
+    int leftColButId_;
+    int rightColButId_;
+    int leftLogoButId_;
+    int rightLogoButId_;
+    int logoStaticId_;
+    int colStaticId_;
 
-\t// Change names panel
-\tTextField *pUserNameTF_;
-\tTextField *pCompNameTF_;
+    // Change names panel
+    TextField *pUserNameTF_;
+    TextField *pCompNameTF_;
 
-\t// Common buttons
-\tint okButId_;
-\tint cancelButId_;
+    // Common buttons
+    int okButId_;
+    int cancelButId_;
 
-\t/*! Id of the menu text that stores the username that will be accepted.*/
-\tint toAcceptUsrNameTxtId_;
-\t/*! Id of the menu text that stores the company name that will be accepted.*/
-\tint toAcceptCmpNameTxtId_;
-\tint toAcceptLogo_;
-\tint toAcceptColourId_;
-\tint tempLogo_;
-\tint tempColourId_;
+    /*! Id of the menu text that stores the username that will be accepted.*/
+    int toAcceptUsrNameTxtId_;
+    /*! Id of the menu text that stores the company name that will be accepted.*/
+    int toAcceptCmpNameTxtId_;
+    int toAcceptLogo_;
+    int toAcceptColourId_;
+    int tempLogo_;
+    int tempColourId_;
 };
 
 #endif

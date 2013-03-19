@@ -248,7 +248,7 @@ int Menu::addToggleAction(int x, int y, int width, int height, const char *text,
  * \return A pointer on the widget.
  */
 ListBox * Menu::addListBox(int x, int y, int width, int height, bool visible) {
-\tListBox *pBox = new ListBox(this, x, y, width, height, getMenuFont(FontManager::SIZE_1), visible);
+    ListBox *pBox = new ListBox(this, x, y, width, height, getMenuFont(FontManager::SIZE_1), visible);
     actions_.push_back(pBox);
 
     return pBox;
@@ -271,10 +271,10 @@ TeamListBox * Menu::addTeamListBox(int x, int y, int width, int height, bool vis
 }
 
 TextField * Menu::addTextField(int x, int y, int width, int height, FontManager::EFontSize size, int maxSize, bool displayEmpty, bool visible) {
-\tTextField *pTextField = new TextField(this, x, y, width, height, getMenuFont(size), maxSize, displayEmpty, visible);
-\tactions_.push_back(pTextField);
+    TextField *pTextField = new TextField(this, x, y, width, height, getMenuFont(size), maxSize, displayEmpty, visible);
+    actions_.push_back(pTextField);
 
-\treturn pTextField;
+    return pTextField;
 }
 
 /*!
@@ -430,7 +430,7 @@ void Menu::mouseMotionEvent(int x, int y, int state, const int modKeys)
          it != actions_.end(); it++) {
         ActionWidget *m = *it;
 
-\t\tif (!m->isVisible() || !m->isWidgetEnabled()) {
+        if (!m->isVisible() || !m->isWidgetEnabled()) {
             // action is not visible or not enabled so it doesn't count
             continue;
         }
@@ -460,13 +460,13 @@ void Menu::mouseMotionEvent(int x, int y, int state, const int modKeys)
  */
 void Menu::mouseDownEvent(int x, int y, int button, const int modKeys)
 {
-\t// First pass the event to the menu
-\tif (handleMouseDown(x, y, button, modKeys)) {
-\t\t// Menu has processed the event, so don't pass it to widget
-\t\treturn;
-\t}
+    // First pass the event to the menu
+    if (handleMouseDown(x, y, button, modKeys)) {
+        // Menu has processed the event, so don't pass it to widget
+        return;
+    }
 
-\t// The event was not processed by the menu, so give a chance to a widget
+    // The event was not processed by the menu, so give a chance to a widget
     for (std::list < ActionWidget * >::iterator it = actions_.begin();
          it != actions_.end(); it++) {
         ActionWidget *m = *it;
@@ -496,9 +496,9 @@ void Menu::mouseUpEvent(int x, int y, int button, const int modKeys)
 }
 
 MenuFont * Menu::getMenuFont(FontManager::EFontSize size) { 
-\treturn menu_manager_->fonts().getMenuFont(size); 
+    return menu_manager_->fonts().getMenuFont(size); 
 }
 
 GameFont *Menu::gameFont() {
-\treturn menu_manager_->fonts().gameFont();
+    return menu_manager_->fonts().gameFont();
 }

@@ -234,8 +234,8 @@ bool GameSpriteManager::drawFrame(int animNum, int frameNum, int x, int y)
     assert(animNum < (int) index_.size());
 
     GameSpriteFrame *f = &frames_[index_[animNum]];
-\tif (f == NULL)
-\t\treturn false;
+    if (f == NULL)
+        return false;
 
     while (frameNum) {
         f = &frames_[f->next_frame_];

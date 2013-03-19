@@ -126,7 +126,7 @@ bool GameSession::reset() {
         do {
             int index = rand() % (sizeof(g_Colours) / sizeof(int));
             g_Blocks[i].colour = g_Colours[index];
-\t\t} while (g_Blocks[i].colour == getLogoColour());
+        } while (g_Blocks[i].colour == getLogoColour());
 
         // Reset briefing information
         g_Blocks[i].infoLevel = 0;

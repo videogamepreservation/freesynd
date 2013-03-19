@@ -34,7 +34,7 @@ enum KeyFunc {
     KFC_UNKNOWN = 0,
     KFC_ESCAPE = 1,
     KFC_BACKSPACE = 2,
-\tKFC_RETURN = 4,
+    KFC_RETURN = 4,
 
     // Arrows + Home/End pad
     KFC_UP = 11,
@@ -82,27 +82,27 @@ const int KMD_ALT = KMD_LALT | KMD_RALT;
  * Virtual key represents the physical key on a keyboard.
  */
 enum KeyVirtual {
-\tKVT_UNKNOWN = 0,
-\tKVT_NUMPAD0 = 1,
-\tKVT_NUMPAD1 = 2,
-\tKVT_NUMPAD2 = 3,
-\tKVT_NUMPAD3 = 4,
-\tKVT_NUMPAD4 = 5,
-\tKVT_NUMPAD5 = 6,
-\tKVT_NUMPAD6 = 7,
-\tKVT_NUMPAD7 = 8,
-\tKVT_NUMPAD8 = 9,
-\tKVT_NUMPAD9 = 10
-\t
+    KVT_UNKNOWN = 0,
+    KVT_NUMPAD0 = 1,
+    KVT_NUMPAD1 = 2,
+    KVT_NUMPAD2 = 3,
+    KVT_NUMPAD3 = 4,
+    KVT_NUMPAD4 = 5,
+    KVT_NUMPAD5 = 6,
+    KVT_NUMPAD6 = 7,
+    KVT_NUMPAD7 = 8,
+    KVT_NUMPAD8 = 9,
+    KVT_NUMPAD9 = 10
+    
 };
 
 /*! 
  * All available key codes.
  */
 typedef struct Key {
-\tKeyFunc keyFunc;
-\tKeyVirtual keyVirt;\t\t/**< Virtual key : KVT_UNKNOWN if not set. */
-\tuint16 unicode;\t\t\t/**< Unicode for printable characters. */
+    KeyFunc keyFunc;
+    KeyVirtual keyVirt;        /**< Virtual key : KVT_UNKNOWN if not set. */
+    uint16 unicode;            /**< Unicode for printable characters. */
 } Key;
 
 // A list of macros to ease unicode comparisons (case insensitive)
@@ -112,19 +112,19 @@ typedef struct Key {
 #define isLetterH(codePoint) codePoint == 0x0068 || codePoint == 0x0048
 #define isLetterQ(codePoint) codePoint == 0x0071 || codePoint == 0x0051
 
-#define K_PLUS\t0x002B
-#define K_MINUS\t0x002D
-#define K_SPACE\t0x0020
+#define K_PLUS    0x002B
+#define K_MINUS    0x002D
+#define K_SPACE    0x0020
 
-#define K_DGT_0\t0x0030
-#define K_DGT_1\t0x0031
-#define K_DGT_2\t0x0032
-#define K_DGT_3\t0x0033
-#define K_DGT_4\t0x0034
-#define K_DGT_5\t0x0035
-#define K_DGT_6\t0x0036
-#define K_DGT_7\t0x0037
-#define K_DGT_8\t0x0038
-#define K_DGT_9\t0x0039
+#define K_DGT_0    0x0030
+#define K_DGT_1    0x0031
+#define K_DGT_2    0x0032
+#define K_DGT_3    0x0033
+#define K_DGT_4    0x0034
+#define K_DGT_5    0x0035
+#define K_DGT_6    0x0036
+#define K_DGT_7    0x0037
+#define K_DGT_8    0x0038
+#define K_DGT_9    0x0039
 
 #endif

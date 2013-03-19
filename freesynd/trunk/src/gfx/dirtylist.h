@@ -44,16 +44,16 @@ public:
 
     void flush();
 
-\t//! Returns true if the given rect intersects with any dirty rect in the list
-\tbool intersectsList(int x, int y, int width, int height);
+    //! Returns true if the given rect intersects with any dirty rect in the list
+    bool intersectsList(int x, int y, int width, int height);
 
 private:
     struct Link
-\t{
-\t\tLink *pPrev;
-\t\tLink *pNext;
-\t\tDirtyRect element;
-\t};
+    {
+        Link *pPrev;
+        Link *pNext;
+        DirtyRect element;
+    };
 
     Link * createLink(int x, int y, int width, int height);
 

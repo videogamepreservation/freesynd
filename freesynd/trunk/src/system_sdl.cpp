@@ -87,7 +87,7 @@ bool SystemSDL::initialize(bool fullscreen) {
 
     // Keyboard init
     SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY, SDL_DEFAULT_REPEAT_INTERVAL);
-\tSDL_EnableUNICODE(1);
+    SDL_EnableUNICODE(1);
 
     // Audio initialisation
     if (!Audio::init()) {
@@ -174,18 +174,18 @@ void SystemSDL::updateScreen() {
  * \returns If key code is not a function key, returns KEY_UNKNOWN.
  */
 void SystemSDL::checkKeyCodes(SDL_keysym keysym, Key &key) {
-\tkey.keyFunc = KFC_UNKNOWN;
-\tkey.keyVirt = KVT_UNKNOWN;
+    key.keyFunc = KFC_UNKNOWN;
+    key.keyVirt = KVT_UNKNOWN;
     switch(keysym.sym) {
         case SDLK_ESCAPE: key.keyFunc = KFC_ESCAPE; break;
         case SDLK_BACKSPACE: key.keyFunc = KFC_BACKSPACE; break;
-\t\tcase SDLK_RETURN: key.keyFunc = KFC_RETURN; break;
+        case SDLK_RETURN: key.keyFunc = KFC_RETURN; break;
         case SDLK_DELETE: key.keyFunc = KFC_DELETE; break;
         case SDLK_UP:
         case SDLK_DOWN:
         case SDLK_RIGHT:
         case SDLK_LEFT:
-\t\tcase SDLK_INSERT:
+        case SDLK_INSERT:
         case SDLK_HOME:
         case SDLK_END:
         case SDLK_PAGEUP:
@@ -206,9 +206,9 @@ void SystemSDL::checkKeyCodes(SDL_keysym keysym, Key &key) {
         case SDLK_F12:
             key.keyFunc = static_cast < KeyFunc > (KFC_F1 + (keysym.sym - SDLK_F1));
             break;
-\t\tcase SDLK_0:case SDLK_1:case SDLK_2:case SDLK_3:case SDLK_4:
-\t\tcase SDLK_5:case SDLK_6:case SDLK_7:case SDLK_8:case SDLK_9:
-\t\t\tkey.keyVirt = static_cast < KeyVirtual > (KVT_NUMPAD0 + (keysym.sym - SDLK_0));
+        case SDLK_0:case SDLK_1:case SDLK_2:case SDLK_3:case SDLK_4:
+        case SDLK_5:case SDLK_6:case SDLK_7:case SDLK_8:case SDLK_9:
+            key.keyVirt = static_cast < KeyVirtual > (KVT_NUMPAD0 + (keysym.sym - SDLK_0));
             break;
         default:
             // unused key
@@ -226,16 +226,16 @@ void SystemSDL::checkKeyCodes(SDL_keysym keysym, Key &key) {
  * if multiple modifier keys are pressed at the same time (ie Ctrl/Shift)
  */
 bool SystemSDL::pumpEvents(FS_Event *pEvtOut) {
-\tSDL_Event evtIn;
+    SDL_Event evtIn;
 
-\tpEvtOut->type = EVT_NONE;
+    pEvtOut->type = EVT_NONE;
 
     if (SDL_PollEvent(&evtIn)) {
         switch (evtIn.type) {
-\t\tcase SDL_QUIT:
-\t\t\tpEvtOut->quit.type = EVT_QUIT;
-\t\t\tbreak;
-\t\tcase SDL_KEYDOWN:
+        case SDL_QUIT:
+            pEvtOut->quit.type = EVT_QUIT;
+            break;
+        case SDL_KEYDOWN:
             {
             // Check if key pressed is a modifier
             switch(evtIn.key.keysym.sym) {
@@ -258,31 +258,31 @@ bool SystemSDL::pumpEvents(FS_Event *pEvtOut) {
                     keyModState_ = keyModState_ | KMD_LALT; 
                     break;
                 default:
-\t\t\t\t\t// We pass the event only if it's not a allowed modifier key
-\t\t\t\t\t// Plus, the application receives event only when key is pressed
-\t\t\t\t\t// not released.
-\t\t\t\t\tpEvtOut->type = EVT_KEY_DOWN;
-\t\t\t\t\tKey key;
-\t\t\t\t\tkey.unicode = 0;
-\t\t\t\t\tcheckKeyCodes(evtIn.key.keysym, key);
-\t\t\t\t\tif (key.keyFunc == KFC_UNKNOWN) {
-\t\t\t\t\t\tkey.unicode = evtIn.key.keysym.unicode;
+                    // We pass the event only if it's not a allowed modifier key
+                    // Plus, the application receives event only when key is pressed
+                    // not released.
+                    pEvtOut->type = EVT_KEY_DOWN;
+                    Key key;
+                    key.unicode = 0;
+                    checkKeyCodes(evtIn.key.keysym, key);
+                    if (key.keyFunc == KFC_UNKNOWN) {
+                        key.unicode = evtIn.key.keysym.unicode;
 #if _DEBUG
-\t\t\t\t\t\tprintf( "Scancode: 0x%02X", evtIn.key.keysym.scancode );
-\t\t\t\t\t\tprintf( ", Name: %s", SDL_GetKeyName( evtIn.key.keysym.sym ) );
-\t\t\t\t\t\tprintf(", Unicode: " );
-\t\t\t\t\t\tif( evtIn.key.keysym.unicode < 0x80 && evtIn.key.keysym.unicode > 0 ){
-\t\t\t\t\t\t\tprintf( "%c (0x%04X)\n", (char)evtIn.key.keysym.unicode,
-\t\t\t\t\t\t\t\t\tevtIn.key.keysym.unicode );
-\t\t\t\t\t\t} else{
-\t\t\t\t\t\t\tprintf( "? (0x%04X)\n", evtIn.key.keysym.unicode );
-\t\t\t\t\t\t}
+                        printf( "Scancode: 0x%02X", evtIn.key.keysym.scancode );
+                        printf( ", Name: %s", SDL_GetKeyName( evtIn.key.keysym.sym ) );
+                        printf(", Unicode: " );
+                        if( evtIn.key.keysym.unicode < 0x80 && evtIn.key.keysym.unicode > 0 ){
+                            printf( "%c (0x%04X)\n", (char)evtIn.key.keysym.unicode,
+                                    evtIn.key.keysym.unicode );
+                        } else{
+                            printf( "? (0x%04X)\n", evtIn.key.keysym.unicode );
+                        }
 #endif
-\t\t\t\t\t}
-\t\t\t\t\tpEvtOut->key.key = key;
+                    }
+                    pEvtOut->key.key = key;
                     pEvtOut->key.keyMods = keyModState_;
                     break;
-\t\t\t\t} // end switch
+                } // end switch
             } // end case SDL_KEYDOWN
             break;
         case SDL_KEYUP:
@@ -311,34 +311,34 @@ bool SystemSDL::pumpEvents(FS_Event *pEvtOut) {
             }
             }
             break;
-\t\tcase SDL_MOUSEBUTTONUP:
-\t\t\tpEvtOut->button.type = EVT_MSE_UP;
-\t\t\tpEvtOut->button.x = evtIn.button.x;
+        case SDL_MOUSEBUTTONUP:
+            pEvtOut->button.type = EVT_MSE_UP;
+            pEvtOut->button.x = evtIn.button.x;
             pEvtOut->button.y = cursor_y_ = evtIn.button.y;
-\t\t\tpEvtOut->button.button = evtIn.button.button;
-\t\t\tpEvtOut->button.keyMods = keyModState_;
+            pEvtOut->button.button = evtIn.button.button;
+            pEvtOut->button.keyMods = keyModState_;
             break;
         case SDL_MOUSEBUTTONDOWN:
             pEvtOut->button.type = EVT_MSE_DOWN;
-\t\t\tpEvtOut->button.x = evtIn.button.x;
+            pEvtOut->button.x = evtIn.button.x;
             pEvtOut->button.y = cursor_y_ = evtIn.button.y;
-\t\t\tpEvtOut->button.button = evtIn.button.button;
-\t\t\tpEvtOut->button.keyMods = keyModState_;
+            pEvtOut->button.button = evtIn.button.button;
+            pEvtOut->button.keyMods = keyModState_;
             break;
-\t\tcase SDL_MOUSEMOTION:
-\t\t\tupdate_cursor_ = true;
-\t\t\tpEvtOut->motion.type = EVT_MSE_MOTION;
-\t\t\tpEvtOut->motion.x = cursor_x_ = evtIn.motion.x;
+        case SDL_MOUSEMOTION:
+            update_cursor_ = true;
+            pEvtOut->motion.type = EVT_MSE_MOTION;
+            pEvtOut->motion.x = cursor_x_ = evtIn.motion.x;
             pEvtOut->motion.y = cursor_y_ = evtIn.motion.y;
-\t\t\tpEvtOut->motion.state = evtIn.motion.state;
-\t\t\tpEvtOut->motion.keyMods = keyModState_;
+            pEvtOut->motion.state = evtIn.motion.state;
+            pEvtOut->motion.keyMods = keyModState_;
             break;
         default:
             break;
         }
-\t}
+    }
 
-\treturn pEvtOut->type != EVT_NONE;
+    return pEvtOut->type != EVT_NONE;
 }
 
 void SystemSDL::delay(int msec) {
@@ -346,7 +346,7 @@ void SystemSDL::delay(int msec) {
 }
 
 int SystemSDL::getTicks() {
-\treturn SDL_GetTicks();
+    return SDL_GetTicks();
 }
 
 bool like(int a, int b) {

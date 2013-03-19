@@ -41,7 +41,7 @@ public:
     MissionManager();
     Mission *loadMission(int n);
     //! Loads briefing for the given mission id
-\tMissionBriefing *loadBriefing(int n);
+    MissionBriefing *loadBriefing(int n);
 };
 
 #endif

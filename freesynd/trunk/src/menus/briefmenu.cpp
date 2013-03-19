@@ -129,8 +129,8 @@ void BriefMenu::handleShow() {
     assert(pMission != NULL);
     g_Session.setMission(pMission);
 
-\t// Loads mission briefing
-\tp_briefing_ = g_App.missions().loadBriefing(cur_miss);
+    // Loads mission briefing
+    p_briefing_ = g_App.missions().loadBriefing(cur_miss);
     assert(p_briefing_ != NULL);
 
     start_line_ = 0;

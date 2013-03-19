@@ -48,41 +48,41 @@ public:
     FontManager();
     ~FontManager();
 
-\t//! Creates all fonts
-\tbool loadFonts(SpriteManager *pMenuSprites, SpriteManager *pIntroFontSprites_);
+    //! Creates all fonts
+    bool loadFonts(SpriteManager *pMenuSprites, SpriteManager *pIntroFontSprites_);
 
-\t/*! 
-\t * Returns the font used in menus.
-\t * \param size Size of the font
-\t */
-\tMenuFont * getMenuFont(FontManager::EFontSize size) { return menuFonts_[size]; }
+    /*! 
+     * Returns the font used in menus.
+     * \param size Size of the font
+     */
+    MenuFont * getMenuFont(FontManager::EFontSize size) { return menuFonts_[size]; }
 
-\t/*!
-\t * Returns the font used in the gameplay menu.
-\t */
-\tGameFont *gameFont() {
+    /*!
+     * Returns the font used in the gameplay menu.
+     */
+    GameFont *gameFont() {
         return pGameFont_;
     }
 
-\t/*!
-\t * Returns the font used in the intro animation.
-\t */
-\tFont * introFont() {
+    /*!
+     * Returns the font used in the intro animation.
+     */
+    Font * introFont() {
         return pIntroFont_;
     }
 
 protected:
-\t//! Create a menu font for the given size
-\tMenuFont * createMenuFontForSize(SpriteManager *sprites, EFontSize size, int darkOffset, int lightOffset,
+    //! Create a menu font for the given size
+    MenuFont * createMenuFontForSize(SpriteManager *sprites, EFontSize size, int darkOffset, int lightOffset,
             char base, const std::string& valid_chars);
 
 protected:
-\t/*!
-\t * Menu fonts have different sizes.
-\t */
+    /*!
+     * Menu fonts have different sizes.
+     */
     MenuFont * menuFonts_[4];
-\tGameFont *pGameFont_;
-\tFont *pIntroFont_;
+    GameFont *pGameFont_;
+    Font *pIntroFont_;
 };
 
 #endif

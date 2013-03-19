@@ -63,8 +63,8 @@ public:
     int textWidth(const char *text, bool dos, bool x2 = true);
     int textHeight(bool x2 = true);
 
-\t// returns true if given code point is printable with the font
-\tbool isPrintable(uint16 unicode);
+    // returns true if given code point is printable with the font
+    bool isPrintable(uint16 unicode);
 
 protected:
     static unsigned char decode(const unsigned char * &c, bool dos);
@@ -82,25 +82,25 @@ protected:
  */
 class MenuFont : public Font {
 public:
-\tMenuFont();
+    MenuFont();
 
-\tvoid setSpriteManager(SpriteManager *sprites, int darkOffset, int lightOffset, char base,
+    void setSpriteManager(SpriteManager *sprites, int darkOffset, int lightOffset, char base,
             const std::string& valid_chars);
 
-\t//! draws a UTF-8 text at the given position
-\tvoid drawText(int x, int y, const char *text, bool lighted, bool x2 = true) {
-\t\tdrawText(x, y, false, text, lighted, x2);
-\t};
-\t//! draws a Cp437 text at the given position
-\tvoid drawTextCp437(int x, int y, const char *text, bool lighted, bool x2 = true) {
-\t\tdrawText(x, y, true, text, lighted, x2);
-\t};
+    //! draws a UTF-8 text at the given position
+    void drawText(int x, int y, const char *text, bool lighted, bool x2 = true) {
+        drawText(x, y, false, text, lighted, x2);
+    };
+    //! draws a Cp437 text at the given position
+    void drawTextCp437(int x, int y, const char *text, bool lighted, bool x2 = true) {
+        drawText(x, y, true, text, lighted, x2);
+    };
 
 protected:
-\t//! returns the sprite which can be highlighted or not
-\tvirtual Sprite *getSprite(unsigned char dos_char, bool highlighted);
-\t//! draws a text at the given position
-\tvoid drawText(int x, int y, bool dos, const char *text, bool lighted, bool x2 = true);
+    //! returns the sprite which can be highlighted or not
+    virtual Sprite *getSprite(unsigned char dos_char, bool highlighted);
+    //! draws a text at the given position
+    void drawText(int x, int y, bool dos, const char *text, bool lighted, bool x2 = true);
 
 protected:
     int lightOffset_;
@@ -114,10 +114,10 @@ protected:
  */
 class GameFont : public Font {
 public:
-\tGameFont();
+    GameFont();
 
-\t//! draw a UTF-8 text at the given position with the given color
-\tvoid drawText(int x, int y, const char *text, uint8 toColor);
+    //! draw a UTF-8 text at the given position with the given color
+    void drawText(int x, int y, const char *text, uint8 toColor);
 };
 
 class HChar {

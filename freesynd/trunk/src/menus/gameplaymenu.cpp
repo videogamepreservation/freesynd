@@ -1023,7 +1023,7 @@ bool GameplayMenu::handleUnknownKey(Key key, const int modKeys) {
      * selection and all 4 agents.
      * Individual keys select the specified agent unless ctrl is pressed -
      * then they add/remove agent from current selection. */
-\tif (key.keyVirt == KVT_NUMPAD0) {
+    if (key.keyVirt == KVT_NUMPAD0) {
         /* This code is exactly the same as for clicking on "group-button"
          * as you can see above. */
         selectAllAgents();
@@ -1039,7 +1039,7 @@ bool GameplayMenu::handleUnknownKey(Key key, const int modKeys) {
     }
     else if (key.keyVirt == KVT_NUMPAD4) {
         selectAgent(3, ctrl);
-\t} else if (key.keyFunc == KFC_LEFT) { // Scroll the map to the left
+    } else if (key.keyFunc == KFC_LEFT) { // Scroll the map to the left
         scroll_x_ = -SCROLL_STEP;
     } else if (key.keyFunc == KFC_RIGHT) { // Scroll the map to the right
         scroll_x_ = SCROLL_STEP;

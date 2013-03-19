@@ -29,31 +29,31 @@
 #include "sound/music.h"
 
 struct FrameEvent {
-\t/*! frame Id.*/
-\tuint16 frame;
-\t/*! start music.*/
-\tmsc::MusicTrack\tmusic;
-\t/*! Game sound to play.*/
-\tsnd::InGameSample\tsound;
-\tuint8\tsndChan;
-\t/*! Operation on subtitle.*/
-\tconst char* subtitle;
+    /*! frame Id.*/
+    uint16 frame;
+    /*! start music.*/
+    msc::MusicTrack    music;
+    /*! Game sound to play.*/
+    snd::InGameSample    sound;
+    uint8    sndChan;
+    /*! Operation on subtitle.*/
+    const char* subtitle;
 };
 
 /*!
  * A description of the fli animation to be played.
  */
 struct FliDesc {
-\t/*! Name of the file containing the animation.*/
-\tstd::string name;
-\t/*! Speed of animation : delay between 2 frames.*/
-\tuint8 frameDelay;
-\t/*! True means user has to press key or mouse to go to 
-\t * next animation or next menu after the end of animation.*/
-\tbool waitKeyPressed;
-\t/*! True means animation can be skipped by pressing key or mouse.*/
-\tbool skipable;
-\tconst FrameEvent *evtList;
+    /*! Name of the file containing the animation.*/
+    std::string name;
+    /*! Speed of animation : delay between 2 frames.*/
+    uint8 frameDelay;
+    /*! True means user has to press key or mouse to go to 
+     * next animation or next menu after the end of animation.*/
+    bool waitKeyPressed;
+    /*! True means animation can be skipped by pressing key or mouse.*/
+    bool skipable;
+    const FrameEvent *evtList;
 };
 
 /*!
@@ -70,34 +70,34 @@ public:
     void handleLeave();
     
 protected:
-\tvoid handleRender(DirtyList &dirtyList);
+    void handleRender(DirtyList &dirtyList);
 
-\tbool handleMouseDown(int x, int y, int button, const int modKeys);
+    bool handleMouseDown(int x, int y, int button, const int modKeys);
 
-\tbool handleUnknownKey(Key key, const int modKeys);
+    bool handleUnknownKey(Key key, const int modKeys);
 
-\tbool loadNextFli();
+    bool loadNextFli();
 
-\tvoid addFliDesc(const char *anim, uint8 frameDelay, bool waitKey, bool skipable, const FrameEvent *events);
+    void addFliDesc(const char *anim, uint8 frameDelay, bool waitKey, bool skipable, const FrameEvent *events);
 
 protected:
-\t/*! The Fli player.*/
-\tFliPlayer fliPlayer_;
-\t/*! The list of animation to play.*/
-\tstd::vector<FliDesc> fliList_;
-\t/*! Index of the next animation to play.*/
-\tsize_t fliIndex_;
-\tuint16 frameIndex_;
-\t/*! Timer to control animation speed.*/
-\tint frameDelay_;
-\t/*! Content of current animation.*/
-\tuint8 *pData_;
-\t/*! A flag telling if an animation is being played.*/
-\tbool playingFli_;
-\t/*! Id of the menu to go after all animations have been played.*/
-\tint nextMenu_;
-\t/*! Content of a subtitle to draw during animation. Used in intro.*/
-\tstd::string currSubTitle_;
+    /*! The Fli player.*/
+    FliPlayer fliPlayer_;
+    /*! The list of animation to play.*/
+    std::vector<FliDesc> fliList_;
+    /*! Index of the next animation to play.*/
+    size_t fliIndex_;
+    uint16 frameIndex_;
+    /*! Timer to control animation speed.*/
+    int frameDelay_;
+    /*! Content of current animation.*/
+    uint8 *pData_;
+    /*! A flag telling if an animation is being played.*/
+    bool playingFli_;
+    /*! Id of the menu to go after all animations have been played.*/
+    int nextMenu_;
+    /*! Content of a subtitle to draw during animation. Used in intro.*/
+    std::string currSubTitle_;
 };
 
 #endif

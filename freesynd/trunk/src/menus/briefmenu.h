@@ -60,7 +60,7 @@ protected:
     void redrawMiniMap();
     void redrawBriefing();
 
-\tbool handleMouseDown(int x, int y, int button, const int modKeys);
+    bool handleMouseDown(int x, int y, int button, const int modKeys);
     //! Return the zoom level from the enhancement level
     MinimapRenderer::EZoom toZoomLevel(uint8 enh_lvl);
 
@@ -97,7 +97,7 @@ protected:
     /*! Id of the scroll previous button.*/
     int prevButId_;
     /*! Briefing informations on current mission.*/
-\tMissionBriefing *p_briefing_;
+    MissionBriefing *p_briefing_;
     /*! Class that draws the minimap.*/
     BriefMinimapRenderer mm_renderer_;
 };

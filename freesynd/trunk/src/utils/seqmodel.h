@@ -33,7 +33,7 @@
  */
 class ModelListener {
 public:
-\tvirtual ~ModelListener() {}
+    virtual ~ModelListener() {}
     /*!
      * Called by the model to alert on the changes.
      */
@@ -112,7 +112,7 @@ public:
      */
     void insertAt(unsigned int index, T item) {
         unsigned int i=0;
-\t\ttypename std::vector < T >::iterator it;
+        typename std::vector < T >::iterator it;
         for (it = elements_.begin();
          it != elements_.end(); it++, i++) {
              if (i == index) {
@@ -155,7 +155,7 @@ public:
      */
     int getLineForElement(void *pElement) {
         int i=0;
-\t\ttypename std::vector < T >::iterator it;
+        typename std::vector < T >::iterator it;
         for (it = elements_.begin();
          it != elements_.end(); it++, i++) {
              if (pElement == *it) {
@@ -189,7 +189,7 @@ public:
      * Calls T::getName() to obtain the string.
      */
     void getLabels(std::list<std::string> &labels) {
-\t\ttypename std::vector < T >::iterator it;
+        typename std::vector < T >::iterator it;
         for (it = elements_.begin();
          it != elements_.end(); it++) {
              if (*it) {

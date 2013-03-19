@@ -3,54 +3,54 @@
 
 int main(int argc, char **argv)
 {
-\tchar *input, *name, *output;
-\tFILE *inf, *outf;
-\tsize_t total;
+    char *input, *name, *output;
+    FILE *inf, *outf;
+    size_t total;
 
-\tif (argc != 4) {
-\t\tfprintf(stderr, "Usage: embed <input> <name> <output>\n");
-\t\treturn 1;
-\t}
+    if (argc != 4) {
+        fprintf(stderr, "Usage: embed <input> <name> <output>\n");
+        return 1;
+    }
 
-\tinput = argv[1];
-\tname = argv[2];
-\toutput = argv[3];
+    input = argv[1];
+    name = argv[2];
+    output = argv[3];
 
-\tinf = fopen(input, "rb");
-\tif (!inf) {
-\t\tfprintf(stderr, "Unable to open `%s' for input.\n", input);
-\t\treturn 1;
-\t}
+    inf = fopen(input, "rb");
+    if (!inf) {
+        fprintf(stderr, "Unable to open `%s' for input.\n", input);
+        return 1;
+    }
 
-\toutf = fopen(output, "wb");
-\tif (!outf) {
-\t\tfprintf(stderr, "Unable to open `%s' for output.\n", output);
-\t\treturn 1;
-\t}
+    outf = fopen(output, "wb");
+    if (!outf) {
+        fprintf(stderr, "Unable to open `%s' for output.\n", output);
+        return 1;
+    }
 
-\tfprintf(outf, "#pragma once\n");
-\tfprintf(outf, "const unsigned char %s_data[] = {\n", name);
+    fprintf(outf, "#pragma once\n");
+    fprintf(outf, "const unsigned char %s_data[] = {\n", name);
 
-\ttotal = 0;
-\twhile (!feof(inf)) {
-\t\tunsigned char buf[16];
-\t\tsize_t n = fread(buf, 1, 16, inf);
-\t\tif (n > 0) {
-\t\t\tsize_t i;
-\t\t\tfor (i = 0; i < n; i++) {
-\t\t\t\tfprintf(outf, "0x%02x, ", buf[i]);
-\t\t\t}
-\t\t\ttotal += n;
-\t\t\tfprintf(outf, "\n");
-\t\t}
-\t}
+    total = 0;
+    while (!feof(inf)) {
+        unsigned char buf[16];
+        size_t n = fread(buf, 1, 16, inf);
+        if (n > 0) {
+            size_t i;
+            for (i = 0; i < n; i++) {
+                fprintf(outf, "0x%02x, ", buf[i]);
+            }
+            total += n;
+            fprintf(outf, "\n");
+        }
+    }
 
-\tfprintf(outf, "};\n");
-\tfprintf(outf, "const int %s_size = %d;\n", name, (int)total);
+    fprintf(outf, "};\n");
+    fprintf(outf, "const int %s_size = %d;\n", name, (int)total);
 
-\tfclose(inf);
-\tfclose(outf);
+    fclose(inf);
+    fclose(outf);
 
-\treturn 0;
+    return 0;
 }
 

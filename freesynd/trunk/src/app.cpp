@@ -122,44 +122,44 @@ static bool getResourcePath(string& resourcePath) {
 
 #ifdef _WIN32
 static string exeFolder() {
-\tchar buf[1024];
-\tGetModuleFileName(NULL, buf, 1024);
-\tstring tmp(buf);
-\tsize_t pos = tmp.find_last_of('\\');
-\tif (pos != std::string::npos) tmp.erase(pos + 1);
-\telse tmp = ".";
-\treturn tmp;
+    char buf[1024];
+    GetModuleFileName(NULL, buf, 1024);
+    string tmp(buf);
+    size_t pos = tmp.find_last_of('\\');
+    if (pos != std::string::npos) tmp.erase(pos + 1);
+    else tmp = ".";
+    return tmp;
 }
 #endif
 
 string App::defaultIniFolder()
 {
-\tstring folder;
+    string folder;
 #ifdef _WIN32
-\t// Under windows config file is in the same directory as freesynd.exe
-\tfolder.assign(exeFolder());
-\t// Since we're defaulting to the exe's folder, no need to try to create a directory.
+    // Under windows config file is in the same directory as freesynd.exe
+    folder.assign(exeFolder());
+    // Since we're defaulting to the exe's folder, no need to try to create a directory.
 #elif defined(__APPLE__)
-\t// Make a symlink for convenience for *nix people who own Macs.
-\tfolder.assign(getenv("HOME"));
-\tfolder.append("/.freesynd");
-\tsymlink("Library/Application Support/FreeSynd", folder.c_str());
-\t// On OS X, applications tend to store config files in this sort of path.
-\tfolder.assign(getenv("HOME"));
-\tfolder.append("/Library/Application Support/FreeSynd");
-\tmkdir(folder.c_str(), 0755);
+    // Make a symlink for convenience for *nix people who own Macs.
+    folder.assign(getenv("HOME"));
+    folder.append("/.freesynd");
+    symlink("Library/Application Support/FreeSynd", folder.c_str());
+    // On OS X, applications tend to store config files in this sort of path.
+    folder.assign(getenv("HOME"));
+    folder.append("/Library/Application Support/FreeSynd");
+    mkdir(folder.c_str(), 0755);
 #else
-\t// Under unix it's in the user home directory
-\tfolder.assign(getenv("HOME"));
-\tfolder.append("/.freesynd");
-\tmkdir(folder.c_str(), 0755);
+    // Under unix it's in the user home directory
+    folder.assign(getenv("HOME"));
+    folder.append("/.freesynd");
+    mkdir(folder.c_str(), 0755);
 #endif
-\t// note that we don't care if the mkdir() calls above succeed or not.
-\t// if they fail because they already exist, then it's no problem.
-\t// if they fail for any other reason, then we won't be able to open
-\t// or create freesynd.ini, and we'll surely detect that below.
+    // note that we don't care if the mkdir() calls above succeed or not.
+    // if they fail because they already exist, then it's no problem.
+    // if they fail for any other reason, then we won't be able to open
+    // or create freesynd.ini, and we'll surely detect that below.
 
-\treturn folder;
+    return folder;
 }
 
 bool App::readConfiguration() {

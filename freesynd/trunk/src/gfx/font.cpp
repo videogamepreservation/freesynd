@@ -186,7 +186,7 @@ void Font::setSpriteManager(SpriteManager *sprites, int offset, char base, const
 }
 
 void Font::drawText(int x, int y, const char *text, bool dos, bool x2) {
-\tint sc = x2 ? 2 : 1;
+    int sc = x2 ? 2 : 1;
     int ox = x;
     const unsigned char *c = (const unsigned char *)text;
     for (unsigned char cc = decode(c, dos); cc; cc = decode(c, dos)) {
@@ -248,7 +248,7 @@ int Font::textHeight(bool x2) {
 
 // returns true if given code point is printable with the font
 bool Font::isPrintable(uint16 unicode) {
-\treturn unicode != 0;
+    return unicode != 0;
 }
 
 MenuFont::MenuFont() : Font() {
@@ -277,10 +277,10 @@ void MenuFont::setSpriteManager(SpriteManager *sprites, int darkOffset, int ligh
 }
 
 void MenuFont::drawText(int x, int y, bool dos, const char *text, bool highlighted, bool x2) {
-\tint sc = x2 ? 2 : 1;
+    int sc = x2 ? 2 : 1;
     int ox = x;
     const unsigned char *c = (const unsigned char *)text;
-\tSprite *pDef = getSprite('A', false);
+    Sprite *pDef = getSprite('A', false);
     for (unsigned char cc = decode(c, dos); cc; cc = decode(c, dos)) {
         if (cc == 0xff) {
             // invalid utf8 code, skip it.

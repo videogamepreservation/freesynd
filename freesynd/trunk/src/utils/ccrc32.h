@@ -14,22 +14,22 @@
 
 class CCRC32{
 
-\tpublic:
-\t\tCCRC32(void);
-\t\t~CCRC32(void);
+    public:
+        CCRC32(void);
+        ~CCRC32(void);
 
-\t\tvoid Initialize(void);
+        void Initialize(void);
 
-\t\tbool FileCRC(const char *sFileName, unsigned int *ulOutCRC, size_t ulBufferSize);
+        bool FileCRC(const char *sFileName, unsigned int *ulOutCRC, size_t ulBufferSize);
 
-\t\tunsigned int FullCRC(const unsigned char *sData, size_t ulDataLength);
-\t\tvoid FullCRC(const unsigned char *sData, size_t ulLength, unsigned int *ulOutCRC);
+        unsigned int FullCRC(const unsigned char *sData, size_t ulDataLength);
+        void FullCRC(const unsigned char *sData, size_t ulLength, unsigned int *ulOutCRC);
 
-\t\tvoid PartialCRC(unsigned int *ulCRC, const unsigned char *sData, size_t ulDataLength);
+        void PartialCRC(unsigned int *ulCRC, const unsigned char *sData, size_t ulDataLength);
 
-\tprivate:
-\t\tunsigned int Reflect(unsigned int ulReflect, const char cChar);
-\t\tunsigned int ulTable[256]; // CRC lookup table array.
+    private:
+        unsigned int Reflect(unsigned int ulReflect, const char cChar);
+        unsigned int ulTable[256]; // CRC lookup table array.
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
