@@ -770,12 +770,13 @@ void GameplayMenu::updateIPALevelMeters(int elapsed)
 }
 
 void GameplayMenu::handleClickOnMap(int x, int y, int button, const int modKeys) {
-    MapTilePoint mapPt = mission_->get_map()->screenToTilePoint(world_x_ + x - 129,
+    MapTilePoint mapPt_base = mission_->get_map()->screenToTilePoint(world_x_ + x - 129,
                     world_y_ + y);
 
     if (button == 1) {
         for (int i = 0; i < 4; i++) {
             PedInstance *ped = mission_->ped(i);
+            MapTilePoint mapPt(mapPt_base);
             if (selection_.isAgentSelected(i)) {
                 PedInstance::actionQueueGroupType as;
                 bool action = false;
@@ -846,8 +847,9 @@ void GameplayMenu::handleClickOnMap(int x, int y, int button, const int modKeys)
                 }
             } // end of if selected
         } // end of for
-        } else if (button == 3) {
-            for (int i = 0; i < 4; i++) {
+    } else if (button == 3) {
+        for (int i = 0; i < 4; i++) {
+            MapTilePoint mapPt(mapPt_base);
             if (selection_.isAgentSelected(i)) {
                 PedInstance * pa = mission_->ped(i);
                 PathNode *pn = NULL;
@@ -900,8 +902,9 @@ void GameplayMenu::handleClickOnMap(int x, int y, int button, const int modKeys)
 }
 
 void GameplayMenu::handleClickOnMinimap(int x, int y) {
-    MapTilePoint pt = mm_renderer_.minimapToMapPoint(x - kMiniMapScreenX, y - kMiniMapScreenY);
+    MapTilePoint pt_base = mm_renderer_.minimapToMapPoint(x - kMiniMapScreenX, y - kMiniMapScreenY);
     for (size_t i = 0; i < 4; i++) {
+        MapTilePoint pt(pt_base);
         if (selection_.isAgentSelected(i)) {
             PedInstance *ped = mission_->ped(i);
             bool isForGroup = selection_.size() > 1;
