@@ -45,7 +45,7 @@ public:
 
 class GameEventListener {
 public:
-	virtual ~GameEventListener() {}
+\tvirtual ~GameEventListener() {}
     virtual void handleGameEvent(GameEvent evt) = 0;
 };
 

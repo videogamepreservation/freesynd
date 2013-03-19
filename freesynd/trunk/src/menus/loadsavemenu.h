@@ -38,7 +38,7 @@ public:
 
     void handleAction(const int actionId, void *ctx, const int modKeys);
 
-	bool handleMouseDown(int x, int y, int button, const int modKeys);
+\tbool handleMouseDown(int x, int y, int button, const int modKeys);
 
 protected:
     static const int X_ORIGIN;
@@ -51,8 +51,8 @@ protected:
     int saveButId_;
     /*! The id of the line currently being edited. -1 if no line selected.*/
     short editNameId_;
-	/*! There are 10 text fields in the menu to enter file names.*/
-	TextField *pTextFields_[10];
+\t/*! There are 10 text fields in the menu to enter file names.*/
+\tTextField *pTextFields_[10];
 };
 
 #endif

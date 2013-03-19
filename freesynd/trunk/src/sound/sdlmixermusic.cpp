@@ -137,12 +137,12 @@ bool SdlMixerMusic::loadMusic(uint8 * musicData, int size)
  */
 bool SdlMixerMusic::loadMusicFile(const char *fname)
 {
-	Mix_Music *newmusic = Mix_LoadMUS(File::dataFullPath(fname).c_str());
+\tMix_Music *newmusic = Mix_LoadMUS(File::dataFullPath(fname).c_str());
 
-	if (!newmusic) {
+\tif (!newmusic) {
         Audio::error("SdlMixerMusic", "loadMusicFile", "Failed loading music from file");
         return false;
-	}
+\t}
     if (music_data_)
         Mix_FreeMusic(music_data_);
 

@@ -40,7 +40,7 @@ MissionManager::MissionManager()
  * \return NULL if mission could not be loaded
  */
 MissionBriefing *MissionManager::loadBriefing(int n) {
-	char tmp[100];
+\tchar tmp[100];
     // Briefing file depends on the current language
     switch(g_App.menus().currLanguage()) {
         case MenuManager::ENGLISH:
@@ -63,7 +63,7 @@ MissionBriefing *MissionManager::loadBriefing(int n) {
     }
 
     // Create Briefing
-	MissionBriefing *p_mb = new MissionBriefing();
+\tMissionBriefing *p_mb = new MissionBriefing();
     // Loads briefing text
     if (!p_mb->loadBriefing(data, size)) {
         delete[] data;
@@ -72,7 +72,7 @@ MissionBriefing *MissionManager::loadBriefing(int n) {
     }
     delete[] data;
 
-	return p_mb;
+\treturn p_mb;
 }
 
 /*!

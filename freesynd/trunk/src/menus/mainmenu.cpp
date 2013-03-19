@@ -31,19 +31,19 @@
 MainMenu::MainMenu(MenuManager * m):Menu(m, MENU_MAIN, MENU_MAIN, "moption.dat",
      "moptout.dat")
 {
-	isCachable_ = false;
+\tisCachable_ = false;
     addStatic(0, 40, g_Screen.gameScreenWidth(), "#MAIN_TITLE", FontManager::SIZE_4, false);
 
     int id = addOption(201, 130, 300, 25, "#MAIN_CONF", FontManager::SIZE_3, MENU_CONF, true, false);
-	registerHotKey(KFC_F1, id);
+\tregisterHotKey(KFC_F1, id);
     id = addOption(201, 164, 300, 25, "#MAIN_BEGIN", FontManager::SIZE_3, MENU_MAP, true, false);
-	registerHotKey(KFC_F2, id);
+\tregisterHotKey(KFC_F2, id);
     id = addOption(201, 198, 300, 25, "#MAIN_LOAD_SAVE", FontManager::SIZE_3, MENU_LDSAVE, true, false);
-	registerHotKey(KFC_F3, id);
-	resetButId_ = addOption(201, 232, 300, 25, "#MAIN_RESET", FontManager::SIZE_3, MENU_MAIN, true, false);
-	registerHotKey(KFC_F4, resetButId_);
+\tregisterHotKey(KFC_F3, id);
+\tresetButId_ = addOption(201, 232, 300, 25, "#MAIN_RESET", FontManager::SIZE_3, MENU_MAIN, true, false);
+\tregisterHotKey(KFC_F4, resetButId_);
     quitButId_ = addOption(201, 266, 300, 25, "#MAIN_QUIT", FontManager::SIZE_3, MENU_NO_MENU, true, false);
-	registerHotKey(KFC_F5, quitButId_);
+\tregisterHotKey(KFC_F5, quitButId_);
 }
 
 void MainMenu::handleShow()
@@ -63,5 +63,5 @@ void MainMenu::handleAction(const int actionId, void *ctx, const int modKeys)
     if (actionId == resetButId_)
         g_App.reset();
     if (actionId == quitButId_)
-		menu_manager_->gotoMenu(Menu::MENU_LOGOUT);
+\t\tmenu_manager_->gotoMenu(Menu::MENU_LOGOUT);
 }

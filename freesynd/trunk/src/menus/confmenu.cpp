@@ -40,15 +40,15 @@ int g_Colours[MAX_COLOUR] = { 6, 7, 14, 3, 11, 12, 13, 15 };
 
 ConfMenu::ConfMenu(MenuManager *m) :
 Menu(m, MENU_CONF, MENU_MAIN, "mconfup.dat", "mconfout.dat") {
-	isCachable_ = false;
-	toAcceptLogo_ = 0;
-	toAcceptColourId_ = 0;
-	tempLogo_ = 0;
-	tempColourId_ = 0;
+\tisCachable_ = false;
+\ttoAcceptLogo_ = 0;
+\ttoAcceptColourId_ = 0;
+\ttempLogo_ = 0;
+\ttempColourId_ = 0;
     
-	panelMsgId_ = addStatic(280, 32, 330, "#CONF_MAIN_MSG", FontManager::SIZE_2, true);
+\tpanelMsgId_ = addStatic(280, 32, 330, "#CONF_MAIN_MSG", FontManager::SIZE_2, true);
     
-	logoButId_ = addOption(325, 65, 240, 20, "#CONF_COL_LOGO_BUT", FontManager::SIZE_2, MENU_NO_MENU, true, false, Sprite::MSPR_BULLET_D, Sprite::MSPR_BULLET_L);
+\tlogoButId_ = addOption(325, 65, 240, 20, "#CONF_COL_LOGO_BUT", FontManager::SIZE_2, MENU_NO_MENU, true, false, Sprite::MSPR_BULLET_D, Sprite::MSPR_BULLET_L);
     compNameButId_ = addOption(325, 90, 240, 20, "#CONF_COM_NAME_BUT", FontManager::SIZE_2, MENU_NO_MENU, true, false, Sprite::MSPR_BULLET_D, Sprite::MSPR_BULLET_L);
     userNameButId_ = addOption(325, 115, 240, 20, "#CONF_YOUR_NAME_BUT", FontManager::SIZE_2, MENU_NO_MENU, true, false, Sprite::MSPR_BULLET_D, Sprite::MSPR_BULLET_L);
     // Accept button
@@ -56,18 +56,18 @@ Menu(m, MENU_CONF, MENU_MAIN, "mconfup.dat", "mconfout.dat") {
     // Main menu button
     menuButId_ = addOption(500, 347,  128, 25, "#MENU_MAIN_BUT", FontManager::SIZE_2, MENU_MAIN);
 
-	createPanels();
+\tcreatePanels();
 
-	// Sub panel Ok and Cancel buttons
+\t// Sub panel Ok and Cancel buttons
     okButId_ = addOption(291, 122, 125, 23, "#CONF_OK_BUT", FontManager::SIZE_2, MENU_NO_MENU, false);
     cancelButId_ = addOption(476, 122, 123, 23, "#MENU_CANCEL_BUT", FontManager::SIZE_2, MENU_NO_MENU, false);
 
-	toAcceptCmpNameTxtId_ = addStatic(32, 93, "", FontManager::SIZE_1, false);
-	toAcceptUsrNameTxtId_ = addStatic(32, 115, "", FontManager::SIZE_1, false);
+\ttoAcceptCmpNameTxtId_ = addStatic(32, 93, "", FontManager::SIZE_1, false);
+\ttoAcceptUsrNameTxtId_ = addStatic(32, 115, "", FontManager::SIZE_1, false);
 
-	currPanel_ = PNL_MAIN;
+\tcurrPanel_ = PNL_MAIN;
 
-	// Initialize data for the buttons frame
+\t// Initialize data for the buttons frame
     memset(butFrameData_, 255, 68 * 13);
     for (int i = 4; i < 66; i++) {
         butFrameData_[i + 0 * 68] = 16;
@@ -79,8 +79,8 @@ Menu(m, MENU_CONF, MENU_MAIN, "mconfup.dat", "mconfout.dat") {
         butFrameData_[66 + j * 68] = 16;
     }
 
-	// Initialize data for the text field frame
-	memset(tfFrameData_, 255, 136 * 13);
+\t// Initialize data for the text field frame
+\tmemset(tfFrameData_, 255, 136 * 13);
 
     for (int i = 4; i < 134; i++) {
         tfFrameData_[i + 0 * 136] = 16;
@@ -97,221 +97,221 @@ ConfMenu::~ConfMenu() {
 }
 
 void ConfMenu::createPanels() {
-	// Color picker
-	colStaticId_ = addStatic(475, 60, "#CONF_COL_TITLE", FontManager::SIZE_2, true);
-	getStatic(colStaticId_)->setVisible(false);
-	leftColButId_ = addImageOption(405, 58, Sprite::MSPR_LEFT_ARROW_D, Sprite::MSPR_LEFT_ARROW_L, false);
+\t// Color picker
+\tcolStaticId_ = addStatic(475, 60, "#CONF_COL_TITLE", FontManager::SIZE_2, true);
+\tgetStatic(colStaticId_)->setVisible(false);
+\tleftColButId_ = addImageOption(405, 58, Sprite::MSPR_LEFT_ARROW_D, Sprite::MSPR_LEFT_ARROW_L, false);
     rightColButId_ = addImageOption(435, 58, Sprite::MSPR_RIGHT_ARROW_D, Sprite::MSPR_RIGHT_ARROW_L, false);
 
-	// Logo picker
+\t// Logo picker
     leftLogoButId_ = addImageOption(405, 94, Sprite::MSPR_LEFT_ARROW_D, Sprite::MSPR_LEFT_ARROW_L, false);
     rightLogoButId_ = addImageOption(435, 94, Sprite::MSPR_RIGHT_ARROW_D, Sprite::MSPR_RIGHT_ARROW_L, false);
     logoStaticId_ = addStatic(475, 96, "#CONF_LOGO_TITLE", FontManager::SIZE_2, true);
-	getStatic(logoStaticId_)->setVisible(false);
+\tgetStatic(logoStaticId_)->setVisible(false);
 
-	// Change names textfields
-	pUserNameTF_ = addTextField(312, 79, 255, 21, FontManager::SIZE_2, NAME_MAX_SIZE);
-	pCompNameTF_ = addTextField(312, 79, 255, 21, FontManager::SIZE_2, NAME_MAX_SIZE);
+\t// Change names textfields
+\tpUserNameTF_ = addTextField(312, 79, 255, 21, FontManager::SIZE_2, NAME_MAX_SIZE);
+\tpCompNameTF_ = addTextField(312, 79, 255, 21, FontManager::SIZE_2, NAME_MAX_SIZE);
 }
 
 void ConfMenu::handleRender(DirtyList &dirtyList) {
-	// Draw the current logo
+\t// Draw the current logo
     g_Screen.drawLogo(28, 22, toAcceptLogo_, g_Colours[toAcceptColourId_]);
 
-	if (currPanel_ == PNL_LOGO) {
-		// Draw the selected logo
-		g_Screen.drawLogo(336, 55, tempLogo_, g_Colours[tempColourId_]);
-	} else if (currPanel_ == PNL_CMPNM || currPanel_ == PNL_USRNM) {
-		// draw a frame around the textfield
+\tif (currPanel_ == PNL_LOGO) {
+\t\t// Draw the selected logo
+\t\tg_Screen.drawLogo(336, 55, tempLogo_, g_Colours[tempColourId_]);
+\t} else if (currPanel_ == PNL_CMPNM || currPanel_ == PNL_USRNM) {
+\t\t// draw a frame around the textfield
         g_Screen.scale2x(300, 77, 136, 13, tfFrameData_);
-	}
+\t}
 
-	if (currPanel_ != PNL_MAIN) {
-		// draw frame around ok and cancel buttons
+\tif (currPanel_ != PNL_MAIN) {
+\t\t// draw frame around ok and cancel buttons
         g_Screen.scale2x(283, 122, 68, 13, butFrameData_);
         g_Screen.scale2x(468, 122, 68, 13, butFrameData_);
-	}
+\t}
 }
 
 void ConfMenu::handleShow() {
-	menu_manager_->saveBackground();
+\tmenu_manager_->saveBackground();
 
-	toAcceptLogo_ = g_Session.getLogo();
+\ttoAcceptLogo_ = g_Session.getLogo();
 
-	for (unsigned int i = 0; i < sizeof(g_Colours) / sizeof(int); i++) {
+\tfor (unsigned int i = 0; i < sizeof(g_Colours) / sizeof(int); i++) {
         if (g_Colours[i] == g_Session.getLogoColour())
             toAcceptColourId_ = i;
     }
 
-	getStatic(toAcceptUsrNameTxtId_)->setText(g_Session.getUserName());
-	getStatic(toAcceptCmpNameTxtId_)->setText(g_Session.getCompanyName());
+\tgetStatic(toAcceptUsrNameTxtId_)->setText(g_Session.getUserName());
+\tgetStatic(toAcceptCmpNameTxtId_)->setText(g_Session.getCompanyName());
 
-	g_System.showCursor();
+\tg_System.showCursor();
 }
 
 void ConfMenu::handleLeave() {
-	showMainPanel();
+\tshowMainPanel();
 
     g_System.hideCursor();
 }
 
 void ConfMenu::handleAction(const int actionId, void *ctx, const int modKeys) {
-	if (actionId == logoButId_) {
-		showLogoPanel();
-	} else if (actionId == userNameButId_) {
-		showUserNamePanel();
-	} else if (actionId == compNameButId_) {
-		showCompanyNamePanel();
-	} else if (actionId == leftColButId_) {
-		tempColourId_--;
-		if (tempColourId_ < 0) {
-			tempColourId_ = MAX_COLOUR - 1;
-		}
-		redrawPanel();
-	} else if (actionId == rightColButId_) {
-		tempColourId_ = (tempColourId_ + 1) % MAX_COLOUR;
-		redrawPanel();
-	} else if (actionId == leftLogoButId_) {
-		tempLogo_--;
-		if (tempLogo_ < 0 ) {
-			tempLogo_ = g_Screen.numLogos() - 1;
-		}
-		redrawPanel();
-	} else if (actionId == rightLogoButId_) {
-		tempLogo_ = (tempLogo_ + 1) % g_Screen.numLogos();
-		redrawPanel();
-	} else if (actionId == okButId_) {
-		if (currPanel_ == PNL_LOGO) {
-			toAcceptColourId_ = tempColourId_;
-			toAcceptLogo_ = tempLogo_;
-		} else if (currPanel_ == PNL_USRNM) {
-			getStatic(toAcceptUsrNameTxtId_)->setText(pUserNameTF_->getText().c_str());
-		} else {
-			getStatic(toAcceptCmpNameTxtId_)->setText(pCompNameTF_->getText().c_str());
-		}
-		redrawLogo();
-		showMainPanel();
-	} else if (actionId == cancelButId_) {
-		showMainPanel();
-	} else if (actionId == acceptButId_) {
-		g_Session.setCompanyName(getStatic(toAcceptCmpNameTxtId_)->getText().c_str());
-		g_Session.setUserName(getStatic(toAcceptUsrNameTxtId_)->getText().c_str());
-		g_Session.setLogo(toAcceptLogo_);
-		g_Session.setLogoColour(g_Colours[toAcceptColourId_]);
-	}
+\tif (actionId == logoButId_) {
+\t\tshowLogoPanel();
+\t} else if (actionId == userNameButId_) {
+\t\tshowUserNamePanel();
+\t} else if (actionId == compNameButId_) {
+\t\tshowCompanyNamePanel();
+\t} else if (actionId == leftColButId_) {
+\t\ttempColourId_--;
+\t\tif (tempColourId_ < 0) {
+\t\t\ttempColourId_ = MAX_COLOUR - 1;
+\t\t}
+\t\tredrawPanel();
+\t} else if (actionId == rightColButId_) {
+\t\ttempColourId_ = (tempColourId_ + 1) % MAX_COLOUR;
+\t\tredrawPanel();
+\t} else if (actionId == leftLogoButId_) {
+\t\ttempLogo_--;
+\t\tif (tempLogo_ < 0 ) {
+\t\t\ttempLogo_ = g_Screen.numLogos() - 1;
+\t\t}
+\t\tredrawPanel();
+\t} else if (actionId == rightLogoButId_) {
+\t\ttempLogo_ = (tempLogo_ + 1) % g_Screen.numLogos();
+\t\tredrawPanel();
+\t} else if (actionId == okButId_) {
+\t\tif (currPanel_ == PNL_LOGO) {
+\t\t\ttoAcceptColourId_ = tempColourId_;
+\t\t\ttoAcceptLogo_ = tempLogo_;
+\t\t} else if (currPanel_ == PNL_USRNM) {
+\t\t\tgetStatic(toAcceptUsrNameTxtId_)->setText(pUserNameTF_->getText().c_str());
+\t\t} else {
+\t\t\tgetStatic(toAcceptCmpNameTxtId_)->setText(pCompNameTF_->getText().c_str());
+\t\t}
+\t\tredrawLogo();
+\t\tshowMainPanel();
+\t} else if (actionId == cancelButId_) {
+\t\tshowMainPanel();
+\t} else if (actionId == acceptButId_) {
+\t\tg_Session.setCompanyName(getStatic(toAcceptCmpNameTxtId_)->getText().c_str());
+\t\tg_Session.setUserName(getStatic(toAcceptUsrNameTxtId_)->getText().c_str());
+\t\tg_Session.setLogo(toAcceptLogo_);
+\t\tg_Session.setLogoColour(g_Colours[toAcceptColourId_]);
+\t}
 }
 
 bool ConfMenu::handleUnknownKey(Key key, const int modKeys) {
-	if (currPanel_ != PNL_MAIN) {
-		if (key.keyFunc == KFC_ESCAPE) {
-			showMainPanel();
-			return true;
-		} else if (key.keyFunc == KFC_RETURN) {
-			if (currPanel_ == PNL_LOGO) {
-				toAcceptColourId_ = tempColourId_;
-				toAcceptLogo_ = tempLogo_;
-			} else if (currPanel_ == PNL_USRNM) {
-				getStatic(toAcceptUsrNameTxtId_)->setText(pUserNameTF_->getText().c_str());
-			} else {
-				getStatic(toAcceptCmpNameTxtId_)->setText(pCompNameTF_->getText().c_str());
-			}
-			redrawLogo();
-			showMainPanel();
-			return true;
-		}
-	}
+\tif (currPanel_ != PNL_MAIN) {
+\t\tif (key.keyFunc == KFC_ESCAPE) {
+\t\t\tshowMainPanel();
+\t\t\treturn true;
+\t\t} else if (key.keyFunc == KFC_RETURN) {
+\t\t\tif (currPanel_ == PNL_LOGO) {
+\t\t\t\ttoAcceptColourId_ = tempColourId_;
+\t\t\t\ttoAcceptLogo_ = tempLogo_;
+\t\t\t} else if (currPanel_ == PNL_USRNM) {
+\t\t\t\tgetStatic(toAcceptUsrNameTxtId_)->setText(pUserNameTF_->getText().c_str());
+\t\t\t} else {
+\t\t\t\tgetStatic(toAcceptCmpNameTxtId_)->setText(pCompNameTF_->getText().c_str());
+\t\t\t}
+\t\t\tredrawLogo();
+\t\t\tshowMainPanel();
+\t\t\treturn true;
+\t\t}
+\t}
 
-	return false;
+\treturn false;
 }
 
 void ConfMenu::showMainPanel() {
-	getOption(logoButId_)->setVisible(true);
-	getOption(userNameButId_)->setVisible(true);
-	getOption(compNameButId_)->setVisible(true);
-	getStatic(panelMsgId_)->setText("#CONF_MAIN_MSG");
+\tgetOption(logoButId_)->setVisible(true);
+\tgetOption(userNameButId_)->setVisible(true);
+\tgetOption(compNameButId_)->setVisible(true);
+\tgetStatic(panelMsgId_)->setText("#CONF_MAIN_MSG");
 
-	getOption(okButId_)->setVisible(false);
-	getOption(cancelButId_)->setVisible(false);
-	getOption(acceptButId_)->setWidgetEnabled(true);
-	getOption(menuButId_)->setWidgetEnabled(true);
+\tgetOption(okButId_)->setVisible(false);
+\tgetOption(cancelButId_)->setVisible(false);
+\tgetOption(acceptButId_)->setWidgetEnabled(true);
+\tgetOption(menuButId_)->setWidgetEnabled(true);
 
-	if (currPanel_ == PNL_LOGO) {
-		getOption(leftColButId_)->setVisible(false);
-		getOption(rightColButId_)->setVisible(false);
-		getOption(leftLogoButId_)->setVisible(false);
-		getOption(rightLogoButId_)->setVisible(false);
+\tif (currPanel_ == PNL_LOGO) {
+\t\tgetOption(leftColButId_)->setVisible(false);
+\t\tgetOption(rightColButId_)->setVisible(false);
+\t\tgetOption(leftLogoButId_)->setVisible(false);
+\t\tgetOption(rightLogoButId_)->setVisible(false);
 
-		getStatic(colStaticId_)->setVisible(false);
-		getStatic(logoStaticId_)->setVisible(false);
-	} else if (currPanel_ == PNL_USRNM) {
-		pUserNameTF_->setVisible(false);
-		pUserNameTF_->setText("");
-		captureInputBy(NULL);
-	} else if (currPanel_ == PNL_CMPNM) {
-		pCompNameTF_->setVisible(false);
-		pCompNameTF_->setText("");
-		captureInputBy(NULL);
-	}
+\t\tgetStatic(colStaticId_)->setVisible(false);
+\t\tgetStatic(logoStaticId_)->setVisible(false);
+\t} else if (currPanel_ == PNL_USRNM) {
+\t\tpUserNameTF_->setVisible(false);
+\t\tpUserNameTF_->setText("");
+\t\tcaptureInputBy(NULL);
+\t} else if (currPanel_ == PNL_CMPNM) {
+\t\tpCompNameTF_->setVisible(false);
+\t\tpCompNameTF_->setText("");
+\t\tcaptureInputBy(NULL);
+\t}
 
-	redrawPanel();
-	currPanel_ = PNL_MAIN;
+\tredrawPanel();
+\tcurrPanel_ = PNL_MAIN;
 }
 
 void ConfMenu::hideMainPanel() {
-	getOption(logoButId_)->setVisible(false);
-	getOption(userNameButId_)->setVisible(false);
-	getOption(compNameButId_)->setVisible(false);
+\tgetOption(logoButId_)->setVisible(false);
+\tgetOption(userNameButId_)->setVisible(false);
+\tgetOption(compNameButId_)->setVisible(false);
 
-	getOption(acceptButId_)->setWidgetEnabled(false);
-	getOption(menuButId_)->setWidgetEnabled(false);
+\tgetOption(acceptButId_)->setWidgetEnabled(false);
+\tgetOption(menuButId_)->setWidgetEnabled(false);
 
-	redrawPanel();
+\tredrawPanel();
 }
 
 void ConfMenu::showLogoPanel() {
-	currPanel_ = PNL_LOGO;
-	getStatic(panelMsgId_)->setText("#CONF_COL_LOGO_MSG");
-	getOption(leftColButId_)->setVisible(true);
-	getOption(rightColButId_)->setVisible(true);
-	getOption(leftLogoButId_)->setVisible(true);
-	getOption(rightLogoButId_)->setVisible(true);
+\tcurrPanel_ = PNL_LOGO;
+\tgetStatic(panelMsgId_)->setText("#CONF_COL_LOGO_MSG");
+\tgetOption(leftColButId_)->setVisible(true);
+\tgetOption(rightColButId_)->setVisible(true);
+\tgetOption(leftLogoButId_)->setVisible(true);
+\tgetOption(rightLogoButId_)->setVisible(true);
 
-	getOption(okButId_)->setVisible(true);
-	getOption(cancelButId_)->setVisible(true);
+\tgetOption(okButId_)->setVisible(true);
+\tgetOption(cancelButId_)->setVisible(true);
 
-	getStatic(colStaticId_)->setVisible(true);
-	getStatic(logoStaticId_)->setVisible(true);
+\tgetStatic(colStaticId_)->setVisible(true);
+\tgetStatic(logoStaticId_)->setVisible(true);
 
-	tempColourId_ = toAcceptColourId_;
-	tempLogo_ = toAcceptLogo_;
+\ttempColourId_ = toAcceptColourId_;
+\ttempLogo_ = toAcceptLogo_;
 
-	hideMainPanel();
+\thideMainPanel();
 }
 
 void ConfMenu::showUserNamePanel() {
-	currPanel_ = PNL_USRNM;
-	getStatic(panelMsgId_)->setText("#CONF_YOUR_NAME_MSG");
+\tcurrPanel_ = PNL_USRNM;
+\tgetStatic(panelMsgId_)->setText("#CONF_YOUR_NAME_MSG");
 
-	pUserNameTF_->setText(getStatic(toAcceptUsrNameTxtId_)->getText().c_str());
-	pUserNameTF_->setVisible(true);
-	captureInputBy(pUserNameTF_);
+\tpUserNameTF_->setText(getStatic(toAcceptUsrNameTxtId_)->getText().c_str());
+\tpUserNameTF_->setVisible(true);
+\tcaptureInputBy(pUserNameTF_);
 
-	getOption(okButId_)->setVisible(true);
-	getOption(cancelButId_)->setVisible(true);
+\tgetOption(okButId_)->setVisible(true);
+\tgetOption(cancelButId_)->setVisible(true);
 
-	hideMainPanel();
+\thideMainPanel();
 }
 
 void ConfMenu::showCompanyNamePanel() {
-	currPanel_ = PNL_CMPNM;
-	getStatic(panelMsgId_)->setText("#CONF_COM_NAME_MSG");
+\tcurrPanel_ = PNL_CMPNM;
+\tgetStatic(panelMsgId_)->setText("#CONF_COM_NAME_MSG");
 
-	pCompNameTF_->setText(getStatic(toAcceptCmpNameTxtId_)->getText().c_str());
-	pCompNameTF_->setVisible(true);
-	captureInputBy(pCompNameTF_);
+\tpCompNameTF_->setText(getStatic(toAcceptCmpNameTxtId_)->getText().c_str());
+\tpCompNameTF_->setVisible(true);
+\tcaptureInputBy(pCompNameTF_);
 
-	getOption(okButId_)->setVisible(true);
-	getOption(cancelButId_)->setVisible(true);
+\tgetOption(okButId_)->setVisible(true);
+\tgetOption(cancelButId_)->setVisible(true);
 
-	hideMainPanel();
+\thideMainPanel();
 }

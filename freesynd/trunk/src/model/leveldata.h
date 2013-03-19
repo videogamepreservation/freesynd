@@ -328,7 +328,7 @@ namespace LevelData {
     /*!
      * This is the main structure.
      */
-    struct LevelData {
+    struct LevelDataAll {
         /*      0 */ Unkn01 u01;
         /*      6 */ Map map;
         /*  32774 0x0*/ uint8 offset_ref[2];

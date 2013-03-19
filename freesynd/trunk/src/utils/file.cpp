@@ -224,10 +224,10 @@ void File::getGameSavedNames(std::vector<std::string> &files) {
     WIN32_FIND_DATA File;
     HANDLE hSearch;
 
-	sa.nLength = sizeof(sa);
-	sa.lpSecurityDescriptor = NULL;
-	sa.bInheritHandle = TRUE;
-	
+\tsa.nLength = sizeof(sa);
+\tsa.lpSecurityDescriptor = NULL;
+\tsa.bInheritHandle = TRUE;
+\t
     if (CreateDirectory(savePath.c_str(), &sa) == ERROR_PATH_NOT_FOUND) {
         FSERR(Log::k_FLG_IO, "File", "getGameSavedNames", ("Cannot create save directory in %s", homePath_.c_str()))
         return;
@@ -241,21 +241,21 @@ void File::getGameSavedNames(std::vector<std::string> &files) {
         } while (FindNextFile(hSearch, &File));
     }
 #else
-	DIR * rep = opendir(savePath.c_str());
-	struct dirent * ent;
+\tDIR * rep = opendir(savePath.c_str());
+\tstruct dirent * ent;
 
-	if (rep == NULL) {
-		if (mkdir(savePath.c_str(), 0777) == -1) {  // Create the directory
-        	FSERR(Log::k_FLG_IO, "File", "getGameSavedNames", ("Cannot create save directory in %s", homePath_.c_str()))
-        	return;
-     	}
-		rep = opendir(savePath.c_str());
-	}
+\tif (rep == NULL) {
+\t\tif (mkdir(savePath.c_str(), 0777) == -1) {  // Create the directory
+        \tFSERR(Log::k_FLG_IO, "File", "getGameSavedNames", ("Cannot create save directory in %s", homePath_.c_str()))
+        \treturn;
+     \t}
+\t\trep = opendir(savePath.c_str());
+\t}
 
-	while ((ent = readdir(rep)) != NULL) {
-		processSaveFile(ent->d_name, files);
-	}
+\twhile ((ent = readdir(rep)) != NULL) {
+\t\tprocessSaveFile(ent->d_name, files);
+\t}
 
-	closedir(rep);
+\tclosedir(rep);
 #endif
 }

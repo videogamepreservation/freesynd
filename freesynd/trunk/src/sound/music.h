@@ -31,14 +31,14 @@
 #include "common.h"
 
 namespace msc {
-	enum MusicTrack {
+\tenum MusicTrack {
         TRACK_INTRO,
         TRACK_ASSASSINATE,
         TRACK_DANGER,
         TRACK_GAME_COMPLETED,
         TRACK_MISSION_FAILED,
         TRACK_MISSION_COMPLETED,
-		NO_TRACK = -1
+\t\tNO_TRACK = -1
     };
 };
 

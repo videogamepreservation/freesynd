@@ -34,33 +34,33 @@
 
 struct IFFchunk
 {
-	bool isType(const char szId[4]) const {
-		return memcmp(id, szId, 4) == 0;
-	}
+\tbool isType(const char szId[4]) const {
+\t\treturn memcmp(id, szId, 4) == 0;
+\t}
 
-	// getActualSize takes IFF rounding rules into account,
-	// keeping stream sizes 2-byte aligned
-	uint32 getActualSize() const {
-		return size + (size&1);
-	}
+\t// getActualSize takes IFF rounding rules into account,
+\t// keeping stream sizes 2-byte aligned
+\tuint32 getActualSize() const {
+\t\treturn size + (size&1);
+\t}
 
-	char   id[4];
-	uint32 size;
+\tchar   id[4];
+\tuint32 size;
 };
 
 
 static uint32 get_IFF_uint32(const unsigned char* stream)
 {
-	return (stream[0] << 24) |
-	       (stream[1] << 16) |
-	       (stream[2] <<  8) |
-	       (stream[3]);
+\treturn (stream[0] << 24) |
+\t       (stream[1] << 16) |
+\t       (stream[2] <<  8) |
+\t       (stream[3]);
 }
 
 static void getIFFchunkHeader(IFFchunk& chunk, const unsigned char* stream)
 {
-	memcpy(&chunk.id, stream, 4);
-	chunk.size = get_IFF_uint32(stream + 4);
+\tmemcpy(&chunk.id, stream, 4);
+\tchunk.size = get_IFF_uint32(stream + 4);
 }
 
 
@@ -70,12 +70,12 @@ std::vector<XMidi::Midi> XMidi::convertXMidi(uint8* buf, int size)
     XMidiFile* xmi = loadXMidi(buf, size);
     if (xmi)
     {
-	midi.resize(xmi->tracks);
-	for(unsigned int i = 0; i < xmi->tracks; ++i)
-	{
-	    midi[i].size_ = retrieveMidi(xmi, i, &(midi[i].data_));
-	}
-	delete xmi;
+\tmidi.resize(xmi->tracks);
+\tfor(unsigned int i = 0; i < xmi->tracks; ++i)
+\t{
+\t    midi[i].size_ = retrieveMidi(xmi, i, &(midi[i].data_));
+\t}
+\tdelete xmi;
     }
     return midi;
 }
@@ -86,8 +86,8 @@ XMidi::XMidiFile* XMidi::loadXMidi(uint8* buf, int size)
 
     if (!readFile (xmidi, buf, size))
     {
-	delete xmidi;
-	xmidi = NULL;
+\tdelete xmidi;
+\txmidi = NULL;
     }
     return xmidi;
 }
@@ -96,22 +96,22 @@ int XMidi::retrieveMidi(const XMidiFile *xmidi, uint32 track, uint8 **buffer)
 {
     if (!xmidi->events)
     {
-	fprintf (stderr, "No midi data in loaded\n");
-	return 0;
+\tfprintf (stderr, "No midi data in loaded\n");
+\treturn 0;
     }
 
     if (track >= xmidi->tracks)
     {
-	fprintf (stderr, "Can't retrieve MIDI data, track out of range\n");
-	return 0;
+\tfprintf (stderr, "Can't retrieve MIDI data, track out of range\n");
+\treturn 0;
     }
 
     int len = 14 + convertListToMTrk (NULL, xmidi->events[track]);
 
     if (len == 14)
     {
-	len = 0;
-	return 0;
+\tlen = 0;
+\treturn 0;
     }
 
     uint8* buf = new unsigned char[len];
@@ -119,8 +119,8 @@ int XMidi::retrieveMidi(const XMidiFile *xmidi, uint32 track, uint8 **buffer)
 
     if (!buf)
     {
-	fprintf (stderr, "Unable to allocate output buffer\n");
-	return 0;
+\tfprintf (stderr, "Unable to allocate output buffer\n");
+\treturn 0;
     }
 
     buf[0] = 'M';
@@ -164,32 +164,32 @@ XMidi::midi_event* XMidi::allocateEvent(int time)
 /* Sets current to the new event and updates list */
 void XMidi::createNewEvent (XMidiFile *xmidi, int time)
 {
-	if (!xmidi->list)
-	{
-		xmidi->list = xmidi->current = allocateEvent(time);
-		return;
-	}
+\tif (!xmidi->list)
+\t{
+\t\txmidi->list = xmidi->current = allocateEvent(time);
+\t\treturn;
+\t}
 
-	if (xmidi->current->time > time)
-		xmidi->current = xmidi->list;
+\tif (xmidi->current->time > time)
+\t\txmidi->current = xmidi->list;
 
-	while (xmidi->current->next)
-	{
-		if (xmidi->current->next->time > time)
-		{
-			midi_event *event = allocateEvent(time);
-			
-			event->next = xmidi->current->next;
-			xmidi->current->next = event;
-			xmidi->current = event;
-			return;
-		}
-		
-		xmidi->current = xmidi->current->next;
-	}
+\twhile (xmidi->current->next)
+\t{
+\t\tif (xmidi->current->next->time > time)
+\t\t{
+\t\t\tmidi_event *event = allocateEvent(time);
+\t\t\t
+\t\t\tevent->next = xmidi->current->next;
+\t\t\txmidi->current->next = event;
+\t\t\txmidi->current = event;
+\t\t\treturn;
+\t\t}
+\t\t
+\t\txmidi->current = xmidi->current->next;
+\t}
 
-	xmidi->current->next = allocateEvent(time);
-	xmidi->current = xmidi->current->next;
+\txmidi->current->next = allocateEvent(time);
+\txmidi->current = xmidi->current->next;
 }
 
 
@@ -201,22 +201,22 @@ void XMidi::createNewEvent (XMidiFile *xmidi, int time)
 //
 int XMidi::getVLQ (const unsigned char *stream, uint32 *quant)
 {
-	int i;
-	*quant = 0;
+\tint i;
+\t*quant = 0;
 
-	for (i = 0; i < 4; i++)
-	{
-		*quant <<= 7;
-		*quant |= stream[i] & 0x7F;
+\tfor (i = 0; i < 4; i++)
+\t{
+\t\t*quant <<= 7;
+\t\t*quant |= stream[i] & 0x7F;
 
-		if (!(stream[i] & 0x80))
-		{
-			i++;
-			break;
-		}
-	}
+\t\tif (!(stream[i] & 0x80))
+\t\t{
+\t\t\ti++;
+\t\t\tbreak;
+\t\t}
+\t}
 
-	return i;
+\treturn i;
 }
 
 //
@@ -226,13 +226,13 @@ int XMidi::getVLQ (const unsigned char *stream, uint32 *quant)
 //
 int XMidi::getVLQ2 (const unsigned char *stream, uint32 *quant)
 {
-	int i;
-	*quant = 0;
+\tint i;
+\t*quant = 0;
 
-	for (i = 0; i < 4 && !(stream[i] & 0x80); i++)
-		*quant += stream[i];
+\tfor (i = 0; i < 4 && !(stream[i] & 0x80); i++)
+\t\t*quant += stream[i];
 
-	return i;
+\treturn i;
 }
 
 //
@@ -242,26 +242,26 @@ int XMidi::getVLQ2 (const unsigned char *stream, uint32 *quant)
 //
 int XMidi::putVLQ(unsigned char *stream, uint32 value)
 {
-	int buffer;
-	int i = 1;
-	buffer = value & 0x7F;
-	while (value >>= 7)
-	{
-		buffer <<= 8;
-		buffer |= ((value & 0x7F) | 0x80);
-		i++;
-	}
-	if (!stream) return i;
-	while (1)
-	{
-		*stream++ = (buffer & 0xFF);
-		if (buffer & 0x80)
-			buffer >>= 8;
-		else
-			break;
-	}
-	
-	return i;
+\tint buffer;
+\tint i = 1;
+\tbuffer = value & 0x7F;
+\twhile (value >>= 7)
+\t{
+\t\tbuffer <<= 8;
+\t\tbuffer |= ((value & 0x7F) | 0x80);
+\t\ti++;
+\t}
+\tif (!stream) return i;
+\twhile (1)
+\t{
+\t\t*stream++ = (buffer & 0xFF);
+\t\tif (buffer & 0x80)
+\t\t\tbuffer >>= 8;
+\t\telse
+\t\t\tbreak;
+\t}
+\t
+\treturn i;
 }
 
 /*
@@ -276,61 +276,61 @@ int XMidi::putVLQ(unsigned char *stream, uint32 value)
 
 int XMidi::convertEvent (XMidiFile *xmidi, const int time, const unsigned char status, const unsigned char *stream, const int size)
 {
-	int i;
-	uint32 delta = 0;
-	midi_event *prev;
+\tint i;
+\tuint32 delta = 0;
+\tmidi_event *prev;
 
-	createNewEvent (xmidi, time);
-	xmidi->current->status = status;
-	xmidi->current->data[0] = stream[0];
+\tcreateNewEvent (xmidi, time);
+\txmidi->current->status = status;
+\txmidi->current->data[0] = stream[0];
 
-	if (size == 1) return 1;
+\tif (size == 1) return 1;
 
-	xmidi->current->data[1] = stream[1];
+\txmidi->current->data[1] = stream[1];
 
-	if (size == 2) return 2;
+\tif (size == 2) return 2;
 
-	/* Save old */
-	prev = xmidi->current;
+\t/* Save old */
+\tprev = xmidi->current;
 
-	i = getVLQ (stream+2, &delta);
+\ti = getVLQ (stream+2, &delta);
 
-	createNewEvent (xmidi, time+delta*3);
+\tcreateNewEvent (xmidi, time+delta*3);
 
-	xmidi->current->status = status;
-	xmidi->current->data[0] = stream[0];
-	xmidi->current->data[1] = 0;
-	
-	/* Change the xmidi->current to the prev */
-	xmidi->current = prev;
+\txmidi->current->status = status;
+\txmidi->current->data[0] = stream[0];
+\txmidi->current->data[1] = 0;
+\t
+\t/* Change the xmidi->current to the prev */
+\txmidi->current = prev;
 
-	return i + 2;
+\treturn i + 2;
 }
 
 /* Simple routine to convert system messages */
 int XMidi::convertSystemMessage (XMidiFile *xmidi, const int time, const unsigned char *stream)
 {
-	int i=1;
+\tint i=1;
 
-	createNewEvent (xmidi, time);
-	xmidi->current->status = stream[0];
+\tcreateNewEvent (xmidi, time);
+\txmidi->current->status = stream[0];
 
-	/* Handling of Meta events */
-	if (stream[0] == EV_META)
-	{
-		xmidi->current->data[0] = stream[1];
-		i++;
-	}
+\t/* Handling of Meta events */
+\tif (stream[0] == EV_META)
+\t{
+\t\txmidi->current->data[0] = stream[1];
+\t\ti++;
+\t}
 
-	i += getVLQ (stream+i, &xmidi->current->len);
+\ti += getVLQ (stream+i, &xmidi->current->len);
 
-	if (!xmidi->current->len) return i;
+\tif (!xmidi->current->len) return i;
 
-	xmidi->current->stream = new unsigned char[xmidi->current->len];
+\txmidi->current->stream = new unsigned char[xmidi->current->len];
 
-	memcpy (xmidi->current->stream, stream+i, xmidi->current->len);
+\tmemcpy (xmidi->current->stream, stream+i, xmidi->current->len);
 
-	return i+xmidi->current->len;
+\treturn i+xmidi->current->len;
 }
 
 /*
@@ -339,102 +339,102 @@ int XMidi::convertSystemMessage (XMidiFile *xmidi, const int time, const unsigne
 */
 int XMidi::readEventList (XMidiFile *xmidi, const unsigned char *stream)
 {
-	int	time = 0;
-	uint32 delta;
-	int	end = 0;
-	int	tempo = 500000;
-	int	tempo_set = 0;
+\tint\ttime = 0;
+\tuint32 delta;
+\tint\tend = 0;
+\tint\ttempo = 500000;
+\tint\ttempo_set = 0;
 
-	int i = 0;
+\tint i = 0;
 
-	for (i = 0; !end; )
-	{
-		switch (stream[i] >> 4)
-		{
-			/* Note Off */
-			case EV_NOTE_OFF >> 4:
-			fprintf (stderr, "ERROR: Note off not valid in XMidiFile\n");
-			return 0;
+\tfor (i = 0; !end; )
+\t{
+\t\tswitch (stream[i] >> 4)
+\t\t{
+\t\t\t/* Note Off */
+\t\t\tcase EV_NOTE_OFF >> 4:
+\t\t\tfprintf (stderr, "ERROR: Note off not valid in XMidiFile\n");
+\t\t\treturn 0;
 
-			/* Note On */
-			case EV_NOTE_ON >> 4:
-			i+= 1+convertEvent (xmidi, time, stream[i], stream+i+1, 3);
-			break;
+\t\t\t/* Note On */
+\t\t\tcase EV_NOTE_ON >> 4:
+\t\t\ti+= 1+convertEvent (xmidi, time, stream[i], stream+i+1, 3);
+\t\t\tbreak;
 
-			/* 2 byte data */
-			/* Aftertouch, Controller and Pitch Wheel */
-			case EV_POLY_PRESS >> 4:
-			case EV_CONTROL >> 4:
-			case EV_PITCH >> 4:
-			i+= 1+convertEvent (xmidi, time, stream[i], stream+i+1, 2);
-			break;
+\t\t\t/* 2 byte data */
+\t\t\t/* Aftertouch, Controller and Pitch Wheel */
+\t\t\tcase EV_POLY_PRESS >> 4:
+\t\t\tcase EV_CONTROL >> 4:
+\t\t\tcase EV_PITCH >> 4:
+\t\t\ti+= 1+convertEvent (xmidi, time, stream[i], stream+i+1, 2);
+\t\t\tbreak;
 
-			/* 1 byte data */
-			/* Program Change and Channel Pressure */
-			case EV_PROGRAM >> 4:
-			case EV_CHAN_PRESS >> 4:
-			i+= 1+convertEvent (xmidi, time, stream[i], stream+i+1, 1);
-			break;
+\t\t\t/* 1 byte data */
+\t\t\t/* Program Change and Channel Pressure */
+\t\t\tcase EV_PROGRAM >> 4:
+\t\t\tcase EV_CHAN_PRESS >> 4:
+\t\t\ti+= 1+convertEvent (xmidi, time, stream[i], stream+i+1, 1);
+\t\t\tbreak;
 
-			/* SysEx */
-			case EV_SYSEX >> 4:
-			if (stream[i] == EV_META)
-			{
-				const MetaEvent evt = static_cast<MetaEvent>(stream[i+1]);
-				switch (evt)
-				{
-					case META_OUTPUT_CABLE:
-					break;
-					case META_TRACK_END: /* End Of Track */
-					end = 1;
-					break;
-					case META_SET_TEMPO:
-					if (!tempo_set) /* Tempo. Need it for PPQN */
-					{
-						tempo = stream[i+5];
-						tempo |= stream[i+4] << 8;
-						tempo |= stream[i+3] << 16;
-						tempo_set = 1;
-					}
-					break;
-					case META_TIME_SIG:
-					{
-						//int num = stream[i+2];        // numerator of the time signature
-						//int denom = 1 << stream[i+2]; // denominator of the time signature
-						//int qnotes = 4 * num / denom; // number of quarter notes per beat
-					}
-					break;
-					case META_KEYSIG:
-					{
-						// value=# of sharps/flats, major/minor
-					}
-					break;
-					default:
-					// log "unknown meta event"?
-					break;
-				}
-			}
-			else
-			{
-				// log "unknown sysex event"?
-			}
+\t\t\t/* SysEx */
+\t\t\tcase EV_SYSEX >> 4:
+\t\t\tif (stream[i] == EV_META)
+\t\t\t{
+\t\t\t\tconst MetaEvent evt = static_cast<MetaEvent>(stream[i+1]);
+\t\t\t\tswitch (evt)
+\t\t\t\t{
+\t\t\t\t\tcase META_OUTPUT_CABLE:
+\t\t\t\t\tbreak;
+\t\t\t\t\tcase META_TRACK_END: /* End Of Track */
+\t\t\t\t\tend = 1;
+\t\t\t\t\tbreak;
+\t\t\t\t\tcase META_SET_TEMPO:
+\t\t\t\t\tif (!tempo_set) /* Tempo. Need it for PPQN */
+\t\t\t\t\t{
+\t\t\t\t\t\ttempo = stream[i+5];
+\t\t\t\t\t\ttempo |= stream[i+4] << 8;
+\t\t\t\t\t\ttempo |= stream[i+3] << 16;
+\t\t\t\t\t\ttempo_set = 1;
+\t\t\t\t\t}
+\t\t\t\t\tbreak;
+\t\t\t\t\tcase META_TIME_SIG:
+\t\t\t\t\t{
+\t\t\t\t\t\t//int num = stream[i+2];        // numerator of the time signature
+\t\t\t\t\t\t//int denom = 1 << stream[i+2]; // denominator of the time signature
+\t\t\t\t\t\t//int qnotes = 4 * num / denom; // number of quarter notes per beat
+\t\t\t\t\t}
+\t\t\t\t\tbreak;
+\t\t\t\t\tcase META_KEYSIG:
+\t\t\t\t\t{
+\t\t\t\t\t\t// value=# of sharps/flats, major/minor
+\t\t\t\t\t}
+\t\t\t\t\tbreak;
+\t\t\t\t\tdefault:
+\t\t\t\t\t// log "unknown meta event"?
+\t\t\t\t\tbreak;
+\t\t\t\t}
+\t\t\t}
+\t\t\telse
+\t\t\t{
+\t\t\t\t// log "unknown sysex event"?
+\t\t\t}
 
-			i+= convertSystemMessage (xmidi, time, stream+i);
-			break;
+\t\t\ti+= convertSystemMessage (xmidi, time, stream+i);
+\t\t\tbreak;
 
-			/* Delta T, also known as interval count */
-			default:
-			{
-			const int size = getVLQ2 (stream+i, &delta);
-			i+= size;
-			delta *= 3;
-			time += delta;
-			}
-			break;
-		}
-	}
+\t\t\t/* Delta T, also known as interval count */
+\t\t\tdefault:
+\t\t\t{
+\t\t\tconst int size = getVLQ2 (stream+i, &delta);
+\t\t\ti+= size;
+\t\t\tdelta *= 3;
+\t\t\ttime += delta;
+\t\t\t}
+\t\t\tbreak;
+\t\t}
+\t}
 
-	return (tempo*9)/25000;
+\treturn (tempo*9)/25000;
 }
 
 //
@@ -449,8 +449,8 @@ int XMidi::extractEvents(XMidiFile *xmidi, const unsigned char *stream, const ui
     signed short ppqn = readEventList (xmidi, stream);
     if (!ppqn)
     {
-	fprintf (stderr, "Unable to convert data\n");
-	return 0;
+\tfprintf (stderr, "Unable to convert data\n");
+\treturn 0;
     }
 
     xmidi->timing[xmidi->curr_track] = ppqn;
@@ -478,24 +478,24 @@ int XMidi::readFile (XMidiFile *xmidi, const unsigned char *stream, const uint32
     xmidi->tracks = 1; // default to 1 track, in case there is no XDIR chunk
 
     do {
-	bool result;
-	getIFFchunkHeader(chunk, stream);
-	stream += 8;
-	read_so_far += 8;
+\tbool result;
+\tgetIFFchunkHeader(chunk, stream);
+\tstream += 8;
+\tread_so_far += 8;
 
-	if (chunk.isType("FORM")) {
-	    result = handleChunkFORM(xmidi, stream, chunk.size);
-	} else
-	if (chunk.isType("CAT ")) {
-	    result = handleChunkCAT(xmidi, stream, chunk.size);
-	} else {
-	    return 0; // We don't know how to handle this
-	}
-	if (!result) {
-	    return 0; // something failed
-	}
-	stream      += chunk.getActualSize();
-	read_so_far += chunk.getActualSize();
+\tif (chunk.isType("FORM")) {
+\t    result = handleChunkFORM(xmidi, stream, chunk.size);
+\t} else
+\tif (chunk.isType("CAT ")) {
+\t    result = handleChunkCAT(xmidi, stream, chunk.size);
+\t} else {
+\t    return 0; // We don't know how to handle this
+\t}
+\tif (!result) {
+\t    return 0; // something failed
+\t}
+\tstream      += chunk.getActualSize();
+\tread_so_far += chunk.getActualSize();
     } while (read_so_far < streamsize);
 
     return 1; // done
@@ -508,121 +508,121 @@ int XMidi::readFile (XMidiFile *xmidi, const unsigned char *stream, const uint32
 */
 uint32 XMidi::convertListToMTrk (unsigned char *buf, const midi_event *mlist)
 {
-	int time = 0;
-	uint32	delta = 0;
-	unsigned char	last_status = 0;
-	uint32 	i = 8;
-	uint32 	j;
-	int i_start;
+\tint time = 0;
+\tuint32\tdelta = 0;
+\tunsigned char\tlast_status = 0;
+\tuint32 \ti = 8;
+\tuint32 \tj;
+\tint i_start;
 
-	/* This is set true to make the song end when an XMidiFile break is hit. */
-	int	sshock_break = 0;
+\t/* This is set true to make the song end when an XMidiFile break is hit. */
+\tint\tsshock_break = 0;
 
-	if (buf)
-	{
-		buf[0] = 'M';
-		buf[1] = 'T';
-		buf[2] = 'r';
-		buf[3] = 'k';
-	}
+\tif (buf)
+\t{
+\t\tbuf[0] = 'M';
+\t\tbuf[1] = 'T';
+\t\tbuf[2] = 'r';
+\t\tbuf[3] = 'k';
+\t}
 
-	for (const midi_event* event = mlist; event; event=event->next)
-	{
-		i_start = i;
+\tfor (const midi_event* event = mlist; event; event=event->next)
+\t{
+\t\ti_start = i;
 
-		/* If sshock_break is set, the delta is only 0 */
-		delta = sshock_break?0:event->time - time;
-		time = event->time;
+\t\t/* If sshock_break is set, the delta is only 0 */
+\t\tdelta = sshock_break?0:event->time - time;
+\t\ttime = event->time;
 
-		if (buf) i += putVLQ (buf+i, delta);
-		else i += putVLQ (NULL, delta);
+\t\tif (buf) i += putVLQ (buf+i, delta);
+\t\telse i += putVLQ (NULL, delta);
 
-		if ((event->status != last_status) || (event->status >= EV_SYSEX))
-		{
-			if (buf) buf[i] = event->status;
-			i++;
-		}
+\t\tif ((event->status != last_status) || (event->status >= EV_SYSEX))
+\t\t{
+\t\t\tif (buf) buf[i] = event->status;
+\t\t\ti++;
+\t\t}
 
-		last_status = event->status;
+\t\tlast_status = event->status;
 
-		switch (event->status >> 4)
-		{
-			/* 2 bytes data */
-			/* Note off, Note on, Aftertouch and Pitch Wheel */
-			case EV_NOTE_OFF >> 4: // invalid in XMID
-			case EV_NOTE_ON >> 4:
-			case EV_POLY_PRESS >> 4:
-			case EV_PITCH >> 4:
-			if (buf)
-			{
-				buf[i] = event->data[0];
-				buf[i+1] = event->data[1];
-			}
-			i += 2;
-			break;
+\t\tswitch (event->status >> 4)
+\t\t{
+\t\t\t/* 2 bytes data */
+\t\t\t/* Note off, Note on, Aftertouch and Pitch Wheel */
+\t\t\tcase EV_NOTE_OFF >> 4: // invalid in XMID
+\t\t\tcase EV_NOTE_ON >> 4:
+\t\t\tcase EV_POLY_PRESS >> 4:
+\t\t\tcase EV_PITCH >> 4:
+\t\t\tif (buf)
+\t\t\t{
+\t\t\t\tbuf[i] = event->data[0];
+\t\t\t\tbuf[i+1] = event->data[1];
+\t\t\t}
+\t\t\ti += 2;
+\t\t\tbreak;
 
-			/* Controller, we need to catch XMIXI Breaks */
-			case EV_CONTROL >> 4:
-			if (buf)
-			{
-				buf[i] = event->data[0];
-				buf[i+1] = event->data[1];
-			}
-			/* XMidiFile Break */
-			if (event->data[0] == XMIDI_CONTROLLER_NEXT_BREAK) sshock_break = 1;
-			i += 2;
-			break;
+\t\t\t/* Controller, we need to catch XMIXI Breaks */
+\t\t\tcase EV_CONTROL >> 4:
+\t\t\tif (buf)
+\t\t\t{
+\t\t\t\tbuf[i] = event->data[0];
+\t\t\t\tbuf[i+1] = event->data[1];
+\t\t\t}
+\t\t\t/* XMidiFile Break */
+\t\t\tif (event->data[0] == XMIDI_CONTROLLER_NEXT_BREAK) sshock_break = 1;
+\t\t\ti += 2;
+\t\t\tbreak;
 
-			/* 1 bytes data */
-			/* Program Change and Channel Pressure */
-			case EV_PROGRAM >> 4:
-			case EV_CHAN_PRESS >> 4:
-			if (buf) buf[i] = event->data[0];
-			i++;
-			break;
-			
+\t\t\t/* 1 bytes data */
+\t\t\t/* Program Change and Channel Pressure */
+\t\t\tcase EV_PROGRAM >> 4:
+\t\t\tcase EV_CHAN_PRESS >> 4:
+\t\t\tif (buf) buf[i] = event->data[0];
+\t\t\ti++;
+\t\t\tbreak;
+\t\t\t
 
-			/* Variable length */
-			/* SysEx */
-			case EV_SYSEX >> 4:
-			if (event->status == EV_META)
-			{
-				if (buf) buf[i] = event->data[0];
-				i++;
-			}
-	
-			if (buf) i += putVLQ (buf+i, event->len);
-			else i += putVLQ (NULL, event->len);
-			
-			if (event->len)
-			{
-				for (j = 0; j < event->len; j++)
-				{
-					if (buf) buf[i] = event->stream[j]; 
-					i++;
-				}
-			}
+\t\t\t/* Variable length */
+\t\t\t/* SysEx */
+\t\t\tcase EV_SYSEX >> 4:
+\t\t\tif (event->status == EV_META)
+\t\t\t{
+\t\t\t\tif (buf) buf[i] = event->data[0];
+\t\t\t\ti++;
+\t\t\t}
+\t
+\t\t\tif (buf) i += putVLQ (buf+i, event->len);
+\t\t\telse i += putVLQ (NULL, event->len);
+\t\t\t
+\t\t\tif (event->len)
+\t\t\t{
+\t\t\t\tfor (j = 0; j < event->len; j++)
+\t\t\t\t{
+\t\t\t\t\tif (buf) buf[i] = event->stream[j]; 
+\t\t\t\t\ti++;
+\t\t\t\t}
+\t\t\t}
 
-			break;
-			
+\t\t\tbreak;
+\t\t\t
 
-			/* Never occur */
-			default:
-			fprintf (stdout, "Not supposed to see this\n");
-			break;
-		}
-	}
+\t\t\t/* Never occur */
+\t\t\tdefault:
+\t\t\tfprintf (stdout, "Not supposed to see this\n");
+\t\t\tbreak;
+\t\t}
+\t}
 
-	if (buf)
-	{
-		uint32	size = i -8;
-		buf[4] = (unsigned char) ((size >> 24) & 0xFF);
-		buf[5] = (unsigned char) ((size >> 16) & 0xFF);
-		buf[6] = (unsigned char) ((size >> 8) & 0xFF);
-		buf[7] = (unsigned char) (size & 0xFF);
-	}
+\tif (buf)
+\t{
+\t\tuint32\tsize = i -8;
+\t\tbuf[4] = (unsigned char) ((size >> 24) & 0xFF);
+\t\tbuf[5] = (unsigned char) ((size >> 16) & 0xFF);
+\t\tbuf[6] = (unsigned char) ((size >> 8) & 0xFF);
+\t\tbuf[7] = (unsigned char) (size & 0xFF);
+\t}
 
-	return i;
+\treturn i;
 }
 
 bool XMidi::handleChunkFORM(XMidiFile* xmidi, const unsigned char* stream, uint32 chunksize)
@@ -632,11 +632,11 @@ bool XMidi::handleChunkFORM(XMidiFile* xmidi, const unsigned char* stream, uint3
     stream += 4;
 
     if (!memcmp(formType, "XDIR", 4)) {
-	return handleChunkXDIR(xmidi, stream, chunksize - 4);
+\treturn handleChunkXDIR(xmidi, stream, chunksize - 4);
     }
 
     if (!memcmp(formType, "XMID", 4)) {
-	return handleChunkXMID(xmidi, stream, chunksize - 4);
+\treturn handleChunkXMID(xmidi, stream, chunksize - 4);
     }
 
     return false; // We don't know how to handle this
@@ -649,32 +649,32 @@ bool XMidi::handleChunkCAT(XMidiFile* xmidi, const unsigned char* stream, uint32
     uint32 read_so_far = 0;
 
     do {
-	getIFFchunkHeader(chunk, stream);
-	// do NOT increment stream by sizeof(chunk) here, as
-	// e.g. XMID isn't really a chunk but only a data identifier
-	// with no trailing size designator.
-	stream += 4;
-	read_so_far += 4;
+\tgetIFFchunkHeader(chunk, stream);
+\t// do NOT increment stream by sizeof(chunk) here, as
+\t// e.g. XMID isn't really a chunk but only a data identifier
+\t// with no trailing size designator.
+\tstream += 4;
+\tread_so_far += 4;
 
-	bool result;
+\tbool result;
 
-	if (chunk.isType("FORM")) {
-	    stream += 4;      // adjust for "real" IFF chunk header size
-	    read_so_far += 4; // ditto
-	    result = handleChunkFORM(xmidi, stream, chunk.size);
-	} else
-	if (chunk.isType("XMID")) {
-	    const uint32 xmid_data_len = chunksize - read_so_far;
-	    result = handleChunkXMID(xmidi, stream, xmid_data_len);
-	    chunk.size = xmid_data_len; // "fake" it, for calculation below
-	} else {
-	    return false; // We don't know how to handle this
-	}
-	if (!result) {
-	    return false; // something failed
-	}
-	stream      += chunk.getActualSize();
-	read_so_far += chunk.getActualSize();
+\tif (chunk.isType("FORM")) {
+\t    stream += 4;      // adjust for "real" IFF chunk header size
+\t    read_so_far += 4; // ditto
+\t    result = handleChunkFORM(xmidi, stream, chunk.size);
+\t} else
+\tif (chunk.isType("XMID")) {
+\t    const uint32 xmid_data_len = chunksize - read_so_far;
+\t    result = handleChunkXMID(xmidi, stream, xmid_data_len);
+\t    chunk.size = xmid_data_len; // "fake" it, for calculation below
+\t} else {
+\t    return false; // We don't know how to handle this
+\t}
+\tif (!result) {
+\t    return false; // something failed
+\t}
+\tstream      += chunk.getActualSize();
+\tread_so_far += chunk.getActualSize();
     } while (read_so_far < chunksize);
 
     return true;
@@ -683,7 +683,7 @@ bool XMidi::handleChunkCAT(XMidiFile* xmidi, const unsigned char* stream, uint32
 bool XMidi::handleChunkXDIR(XMidiFile* xmidi, const unsigned char* stream, uint32 chunksize)
 {
     if (chunksize != 10 /* "INFO" + 32-bit_size + UWORD */) {
-	return false;
+\treturn false;
     }
 
     IFFchunk chunk;
@@ -692,11 +692,11 @@ bool XMidi::handleChunkXDIR(XMidiFile* xmidi, const unsigned char* stream, uint3
     stream += 8;
 
     if (!chunk.isType("INFO")) {
-	return false; // bugger
+\treturn false; // bugger
     }
 
     if (chunk.size != 2) {
-	return false; // malformed chunk
+\treturn false; // malformed chunk
     }
     // # of tracks (implies # of FORMs) is an IFF abomination, as
     // it's a little-endian 16-bit value.
@@ -717,28 +717,28 @@ bool XMidi::handleChunkXMID(XMidiFile* xmidi, const unsigned char* stream, uint3
     uint32 read_so_far = 0;
 
     do {
-	bool result;
+\tbool result;
 
-	getIFFchunkHeader(chunk, stream);
-	stream += 8;
-	read_so_far += 8;
+\tgetIFFchunkHeader(chunk, stream);
+\tstream += 8;
+\tread_so_far += 8;
 
-	if (chunk.isType("FORM")) {
-	    result = handleChunkFORM(xmidi, stream, chunk.size);
-	} else
-	    if (chunk.isType("TIMB")) {
-		result = handleChunkTIMB(xmidi, stream, chunk.size);
-	    } else
-		if (chunk.isType("EVNT")) {
-		    result = handleChunkEVNT(xmidi, stream, chunk.size);
-		} else {
-		    return false; // We don't know how to handle this
-		}
-		if (!result) {
-		    return 0; // something failed
-		}
-		stream      += chunk.getActualSize();;
-		read_so_far += chunk.getActualSize();
+\tif (chunk.isType("FORM")) {
+\t    result = handleChunkFORM(xmidi, stream, chunk.size);
+\t} else
+\t    if (chunk.isType("TIMB")) {
+\t\tresult = handleChunkTIMB(xmidi, stream, chunk.size);
+\t    } else
+\t\tif (chunk.isType("EVNT")) {
+\t\t    result = handleChunkEVNT(xmidi, stream, chunk.size);
+\t\t} else {
+\t\t    return false; // We don't know how to handle this
+\t\t}
+\t\tif (!result) {
+\t\t    return 0; // something failed
+\t\t}
+\t\tstream      += chunk.getActualSize();;
+\t\tread_so_far += chunk.getActualSize();
     } while (read_so_far < chunksize);
 
     return true;
@@ -761,8 +761,8 @@ bool XMidi::handleChunkTIMB(XMidiFile* xmidi, const unsigned char* stream, uint3
 
     // sanity check
     if ((uint32)timbre_count * 2 + 2 != chunksize) {
-	// sanity failure. Log "TIMBre chunk insanity"?
-	return false;
+\t// sanity failure. Log "TIMBre chunk insanity"?
+\treturn false;
     }
 
     typedef XMidiFile::TIMB_ timb_t;
@@ -802,8 +802,8 @@ bool XMidi::handleChunkEVNT(XMidiFile* xmidi, const unsigned char* stream, uint3
 
     if (count != 1)
     {
-	fprintf (stderr, "Error: unable to extract track from XMidiFile.\n");
-	return false;
+\tfprintf (stderr, "Error: unable to extract track from XMidiFile.\n");
+\treturn false;
     }
 
     return true;
@@ -826,12 +826,12 @@ XMidi::XMidiFile::~XMidiFile()
 {
     if (events)
     {
-		for (int i=0; i < tracks; i++)
-		{
-			deleteEventList (events[i]);
-			delete[] timbres[i];
-		}
-		delete[] events;
+\t\tfor (int i=0; i < tracks; i++)
+\t\t{
+\t\t\tdeleteEventList (events[i]);
+\t\t\tdelete[] timbres[i];
+\t\t}
+\t\tdelete[] events;
     }
     delete[] timing;
     delete[] timbres;
@@ -841,7 +841,7 @@ XMidi::XMidiFile::~XMidiFile()
 void XMidi::XMidiFile::allocData()
 {
     if (events) {
-	return;
+\treturn;
     }
 
     events = new midi_event*[tracks];
@@ -851,10 +851,10 @@ void XMidi::XMidiFile::allocData()
 
     for (int track = 0; track < tracks; ++track)
     {
-	timing[track] = 0;
-	events[track] = NULL;
-	timbres[track] = 0;
-	timbre_sizes[track] = 0;
+\ttiming[track] = 0;
+\tevents[track] = NULL;
+\ttimbres[track] = 0;
+\ttimbre_sizes[track] = 0;
     }
 }
 
@@ -865,9 +865,9 @@ void XMidi::XMidiFile::deleteEventList (midi_event *mlist)
 
     while ((event = next))
     {
-	next = event->next;
-	delete [] event->stream;
-	delete event;
+\tnext = event->next;
+\tdelete [] event->stream;
+\tdelete event;
     }
 }
 

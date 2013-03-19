@@ -148,8 +148,8 @@ public:
     void setHighlighted(bool highlighted);
     bool isHighlighted() { return highlighted_; }
 
-	/*! Returns the font size. */
-	MenuFont * getFont() { return pFont_; }
+\t/*! Returns the font size. */
+\tMenuFont * getFont() { return pFont_; }
 
 protected:
     /*!
@@ -184,12 +184,12 @@ public:
     ActionWidget(Menu *peer, int x, int y, int width, int height, bool visible, bool isEnabled = true) 
         : Widget(x, y, width, height, visible) {
             peer_ = peer;
-			enabled_ = isEnabled;
+\t\t\tenabled_ = isEnabled;
     }
 
-	void setWidgetEnabled(bool enabled);
+\tvoid setWidgetEnabled(bool enabled);
 
-	bool isWidgetEnabled() { return enabled_; }
+\tbool isWidgetEnabled() { return enabled_; }
 
     //! Tells whether the pointer is over the widget or not
     bool isMouseOver(int x, int y);
@@ -206,7 +206,7 @@ public:
 
 protected:
     Menu *peer_;
-	bool enabled_;
+\tbool enabled_;
 };
 
 //! A button widget.
@@ -224,7 +224,7 @@ public:
 
     ~Option();
 
-	Key getHotKey() { return hotKey_; }
+\tKey getHotKey() { return hotKey_; }
 
     //! Draw the widget on screen
     void draw();
@@ -240,7 +240,7 @@ public:
 protected:
 
     MenuText text_;
-	/*! The id of the next menu.*/
+\t/*! The id of the next menu.*/
     int to_;
     /*! 
      * The widget to display when button is dark.
@@ -252,10 +252,10 @@ protected:
      * When id is zero, there is no widget.
      */
     Sprite *lightWidget_;
-	/*!
-	 * This button can have an acceleration key.
-	 */
-	Key hotKey_;
+\t/*!
+\t * This button can have an acceleration key.
+\t */
+\tKey hotKey_;
 };
 
 class ToggleAction;
@@ -340,7 +340,7 @@ protected:
     SequenceModel *pModel_;
     /*! The line that the mouse is on. -1 if no line is hovered.*/
     int focusedLine_;
-	/*! Font used to draw the text. */
+\t/*! Font used to draw the text. */
     MenuFont *pFont_;
 };
 
@@ -388,7 +388,7 @@ protected:
  */
 class TextField : public ActionWidget {
 public:
-	static void setEmptyLabel(std::string str) { emptyLbl_ = str; }
+\tstatic void setEmptyLabel(std::string str) { emptyLbl_ = str; }
 
     //! Constructs a new textfield.
     TextField(Menu *peer, int x, int y, int width, int height, MenuFont *pFont,
@@ -396,10 +396,10 @@ public:
 
     ~TextField();
 
-	void setText(const char* text);
-	std::string getText() { return text_.getText(); }
+\tvoid setText(const char* text);
+\tstd::string getText() { return text_.getText(); }
 
-	void setHighlighted(bool highlighted) { text_.setHighlighted(highlighted); }
+\tvoid setHighlighted(bool highlighted) { text_.setHighlighted(highlighted); }
     bool isHighlighted() { return text_.isHighlighted(); }
 
     //! Draw the widget on screen
@@ -407,37 +407,37 @@ public:
 
     void handleMouseDown(int x, int y, int button, const int modKeys);
 
-	void handleCaptureGained();
-	void handleCaptureLost();
+\tvoid handleCaptureGained();
+\tvoid handleCaptureLost();
 
-	bool handleKey(Key key, const int modKeys);
-
-protected:
-	void drawCaret();
-
-	// Removes one character backward
-	void handleBackSpace();
-	// Removes one character forward
-	void handleDelete();
-	// Insert new character at caret position
-	void handleCharacter(Key key);
+\tbool handleKey(Key key, const int modKeys);
 
 protected:
-	/*! Label for empty lines.*/
+\tvoid drawCaret();
+
+\t// Removes one character backward
+\tvoid handleBackSpace();
+\t// Removes one character forward
+\tvoid handleDelete();
+\t// Insert new character at caret position
+\tvoid handleCharacter(Key key);
+
+protected:
+\t/*! Label for empty lines.*/
     static std::string emptyLbl_;
 
-	/*! This holds the text value.*/
+\t/*! This holds the text value.*/
     MenuText text_;
-	/*! Displays or not a default string if textfield is empty.*/
-	bool isDisplayEmpty_;
-	/*! Position of caret in the name.*/
+\t/*! Displays or not a default string if textfield is empty.*/
+\tbool isDisplayEmpty_;
+\t/*! Position of caret in the name.*/
     size_t caretPosition_;
-	/*! Vertical position of the caret.*/
-	int yCaret_;
-	/*! Tells whether the field is being edited.*/
-	bool isInEdition_;
-	/*! Maximum size of the text.*/
-	size_t maxSize_;
+\t/*! Vertical position of the caret.*/
+\tint yCaret_;
+\t/*! Tells whether the field is being edited.*/
+\tbool isInEdition_;
+\t/*! Maximum size of the text.*/
+\tsize_t maxSize_;
 };
 
 #endif // WIDGET_H

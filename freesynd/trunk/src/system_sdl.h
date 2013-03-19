@@ -50,10 +50,10 @@ public:
     bool initialize(bool fullscreen);
 
     void updateScreen();
-	//! Pumps an event from the event queue
-	bool pumpEvents(FS_Event *pEvtOut);
+\t//! Pumps an event from the event queue
+\tbool pumpEvents(FS_Event *pEvtOut);
     void delay(int msec);
-	int getTicks();
+\tint getTicks();
 
     void setPalette6b3(const uint8 *pal, int cols = 256);
     void setPalette8b3(const uint8 *pal, int cols = 256);

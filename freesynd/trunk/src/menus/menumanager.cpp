@@ -48,8 +48,8 @@
 
 
 MenuManager::MenuManager(): 
-	dirtyList_(g_Screen.gameScreenWidth(), g_Screen.gameScreenHeight()),
-	menuSprites_(), fonts_()
+\tdirtyList_(g_Screen.gameScreenWidth(), g_Screen.gameScreenHeight()),
+\tmenuSprites_(), fonts_()
 {
     drop_events_ = false;
     background_ = new uint8[g_Screen.gameScreenWidth() * g_Screen.gameScreenHeight()];
@@ -58,9 +58,9 @@ MenuManager::MenuManager():
     language_ = NULL;
     
     current_ = NULL;
-	nextMenuId_ = -1;
+\tnextMenuId_ = -1;
 
-	pIntroFontSprites_ = NULL;
+\tpIntroFontSprites_ = NULL;
 }
 
 MenuManager::~MenuManager()

@@ -3,54 +3,54 @@
 
 int main(int argc, char **argv)
 {
-	char *input, *name, *output;
-	FILE *inf, *outf;
-	size_t total;
+\tchar *input, *name, *output;
+\tFILE *inf, *outf;
+\tsize_t total;
 
-	if (argc != 4) {
-		fprintf(stderr, "Usage: embed <input> <name> <output>\n");
-		return 1;
-	}
+\tif (argc != 4) {
+\t\tfprintf(stderr, "Usage: embed <input> <name> <output>\n");
+\t\treturn 1;
+\t}
 
-	input = argv[1];
-	name = argv[2];
-	output = argv[3];
+\tinput = argv[1];
+\tname = argv[2];
+\toutput = argv[3];
 
-	inf = fopen(input, "rb");
-	if (!inf) {
-		fprintf(stderr, "Unable to open `%s' for input.\n", input);
-		return 1;
-	}
+\tinf = fopen(input, "rb");
+\tif (!inf) {
+\t\tfprintf(stderr, "Unable to open `%s' for input.\n", input);
+\t\treturn 1;
+\t}
 
-	outf = fopen(output, "wb");
-	if (!outf) {
-		fprintf(stderr, "Unable to open `%s' for output.\n", output);
-		return 1;
-	}
+\toutf = fopen(output, "wb");
+\tif (!outf) {
+\t\tfprintf(stderr, "Unable to open `%s' for output.\n", output);
+\t\treturn 1;
+\t}
 
-	fprintf(outf, "#pragma once\n");
-	fprintf(outf, "const unsigned char %s_data[] = {\n", name);
+\tfprintf(outf, "#pragma once\n");
+\tfprintf(outf, "const unsigned char %s_data[] = {\n", name);
 
-	total = 0;
-	while (!feof(inf)) {
-		unsigned char buf[16];
-		size_t n = fread(buf, 1, 16, inf);
-		if (n > 0) {
-			size_t i;
-			for (i = 0; i < n; i++) {
-				fprintf(outf, "0x%02x, ", buf[i]);
-			}
-			total += n;
-			fprintf(outf, "\n");
-		}
-	}
+\ttotal = 0;
+\twhile (!feof(inf)) {
+\t\tunsigned char buf[16];
+\t\tsize_t n = fread(buf, 1, 16, inf);
+\t\tif (n > 0) {
+\t\t\tsize_t i;
+\t\t\tfor (i = 0; i < n; i++) {
+\t\t\t\tfprintf(outf, "0x%02x, ", buf[i]);
+\t\t\t}
+\t\t\ttotal += n;
+\t\t\tfprintf(outf, "\n");
+\t\t}
+\t}
 
-	fprintf(outf, "};\n");
-	fprintf(outf, "const int %s_size = %d;\n", name, (int)total);
+\tfprintf(outf, "};\n");
+\tfprintf(outf, "const int %s_size = %d;\n", name, (int)total);
 
-	fclose(inf);
-	fclose(outf);
+\tfclose(inf);
+\tfclose(outf);
 
-	return 0;
+\treturn 0;
 }
 

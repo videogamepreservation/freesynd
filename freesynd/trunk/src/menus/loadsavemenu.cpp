@@ -37,7 +37,7 @@ const size_t LoadSaveMenu::NAME_MAX_SIZE = 31;
 LoadSaveMenu::LoadSaveMenu(MenuManager * m):Menu(m, MENU_LDSAVE, MENU_MAIN, "mlosa.dat",
      "mlosaout.dat")
 {
-	isCachable_ = false;
+\tisCachable_ = false;
     // Title
     addStatic(0, 40, g_Screen.gameScreenWidth(), "#LS_TITLE", FontManager::SIZE_4, false);
 
@@ -48,14 +48,14 @@ LoadSaveMenu::LoadSaveMenu(MenuManager * m):Menu(m, MENU_LDSAVE, MENU_MAIN, "mlo
     // Main menu button
     addOption(501, 346, 126, 25, "#MENU_MAIN_BUT", FontManager::SIZE_2, MENU_MAIN);
 
-	std::string label;
+\tstd::string label;
     g_App.menus().getMessage("MENU_LB_EMPTY", label);
-	TextField::setEmptyLabel(label);
+\tTextField::setEmptyLabel(label);
     
-	int y = Y_ORIGIN;
+\tint y = Y_ORIGIN;
     for (int i=0; i<10; i++) {
-		pTextFields_[i] = addTextField(X_ORIGIN, y, 370, 22, FontManager::SIZE_2, NAME_MAX_SIZE, true, true);
-		y += 24;
+\t\tpTextFields_[i] = addTextField(X_ORIGIN, y, 370, 22, FontManager::SIZE_2, NAME_MAX_SIZE, true, true);
+\t\ty += 24;
     }
 
     // by default no line is edited
@@ -66,13 +66,13 @@ void LoadSaveMenu::handleShow()
 {
     // List of savefile names.
     std::vector<std::string> files;
-	for (int i=0; i<10; i++) {
+\tfor (int i=0; i<10; i++) {
         files.push_back("");
     }
     File::getGameSavedNames(files);
 
-	for (int i=0; i<10; i++) {
-		pTextFields_[i]->setText(files[i].c_str());
+\tfor (int i=0; i<10; i++) {
+\t\tpTextFields_[i]->setText(files[i].c_str());
     }
 
     menu_manager_->saveBackground();
@@ -81,9 +81,9 @@ void LoadSaveMenu::handleShow()
 
 void LoadSaveMenu::handleLeave() {
     g_System.hideCursor();
-	if (editNameId_ != -1) {
-		pTextFields_[editNameId_]->setHighlighted(false);
-	}
+\tif (editNameId_ != -1) {
+\t\tpTextFields_[editNameId_]->setHighlighted(false);
+\t}
     editNameId_ = -1;
 }
 
@@ -92,7 +92,7 @@ void LoadSaveMenu::handleAction(const int actionId, void *ctx, const int modKeys
         if (editNameId_ != -1) {
             if (g_App.loadGameFromFile(editNameId_)) {
                 editNameId_ = -1;
-				menu_manager_->gotoMenu(Menu::MENU_MAIN);
+\t\t\t\tmenu_manager_->gotoMenu(Menu::MENU_MAIN);
             }
         }
     } else if (actionId == saveButId_) {
@@ -106,12 +106,12 @@ void LoadSaveMenu::handleAction(const int actionId, void *ctx, const int modKeys
 }
 
 bool LoadSaveMenu::handleMouseDown(int x, int y, int button, const int modKeys) {
-	for (int i=0; i<10; i++) {
-		if (pTextFields_[i]->isMouseOver(x, y)) {
-			editNameId_ = i;
-			break;
-		}
-	}
+\tfor (int i=0; i<10; i++) {
+\t\tif (pTextFields_[i]->isMouseOver(x, y)) {
+\t\t\teditNameId_ = i;
+\t\t\tbreak;
+\t\t}
+\t}
 
-	return false;
+\treturn false;
 }

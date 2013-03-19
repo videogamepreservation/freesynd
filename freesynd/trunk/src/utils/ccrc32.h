@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//  Copyright © NetworkDLS 2002, All rights reserved
+//  Copyright ï¿½ NetworkDLS 2002, All rights reserved
 //
 // THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF 
 // ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO 
@@ -14,22 +14,22 @@
 
 class CCRC32{
 
-	public:
-		CCRC32(void);
-		~CCRC32(void);
+\tpublic:
+\t\tCCRC32(void);
+\t\t~CCRC32(void);
 
-		void Initialize(void);
+\t\tvoid Initialize(void);
 
-		bool FileCRC(const char *sFileName, unsigned int *ulOutCRC, size_t ulBufferSize);
+\t\tbool FileCRC(const char *sFileName, unsigned int *ulOutCRC, size_t ulBufferSize);
 
-		unsigned int FullCRC(const unsigned char *sData, size_t ulDataLength);
-		void FullCRC(const unsigned char *sData, size_t ulLength, unsigned int *ulOutCRC);
+\t\tunsigned int FullCRC(const unsigned char *sData, size_t ulDataLength);
+\t\tvoid FullCRC(const unsigned char *sData, size_t ulLength, unsigned int *ulOutCRC);
 
-		void PartialCRC(unsigned int *ulCRC, const unsigned char *sData, size_t ulDataLength);
+\t\tvoid PartialCRC(unsigned int *ulCRC, const unsigned char *sData, size_t ulDataLength);
 
-	private:
-		unsigned int Reflect(unsigned int ulReflect, const char cChar);
-		unsigned int ulTable[256]; // CRC lookup table array.
+\tprivate:
+\t\tunsigned int Reflect(unsigned int ulReflect, const char cChar);
+\t\tunsigned int ulTable[256]; // CRC lookup table array.
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

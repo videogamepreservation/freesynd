@@ -45,9 +45,9 @@ public:
     void handleAction(const int actionId, void *ctx, const int modKeys);
 
 protected:
-	void handleRender(DirtyList &dirtyList);
+\tvoid handleRender(DirtyList &dirtyList);
     bool handleUnknownKey(Key key, const int modKeys);
-	bool handleMouseDown(int x, int y, int button, const int modKeys);
+\tbool handleMouseDown(int x, int y, int button, const int modKeys);
     //! Utility method to draw the mission selector
     void drawSelector();
     //! Utility method to update mission informations
@@ -87,7 +87,7 @@ protected:
     /*! Id of the decrement tax percentage button.*/
     int decrTaxButId_;
 
-	/*! Id of the briefing button.*/
+\t/*! Id of the briefing button.*/
     int briefButId_;
 };
 

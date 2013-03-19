@@ -42,7 +42,7 @@ cur_agent_(0), tick_count_(0), rnd_(0), sel_all_(false)
     pSelectedMod_ = NULL;
     addStatic(85, 35, 545, "#SELECT_TITLE", FontManager::SIZE_4, false);
     txtTimeId_ = addStatic(500, 9, "", FontManager::SIZE_2, true);       // Time
-	moneyTxtId_ = addStatic(500, 87, 128, "0", FontManager::SIZE_2, true);     // Money
+\tmoneyTxtId_ = addStatic(500, 87, 128, "0", FontManager::SIZE_2, true);     // Money
 
     addOption(16, 234, 129, 25, "#SELECT_RES_BUT", FontManager::SIZE_2, MENU_RESEARCH);
     teamButId_ = addToggleAction(16, 262, 129, 25, "#SELECT_TEAM_BUT", FontManager::SIZE_2, false);
@@ -249,7 +249,7 @@ void SelectMenu::updateClock() {
     g_Session.getTimeAsStr(tmp);
     getStatic(txtTimeId_)->setText(tmp);
 
-	// update money
+\t// update money
     getStatic(moneyTxtId_)->setTextFormated("%d", g_Session.getMoney());
 }
 
@@ -306,11 +306,11 @@ void SelectMenu::drawSelectedWeaponInfos(int x, int y) {
 
 void SelectMenu::drawSelectedModInfos(int x, int y)
 {
-	getMenuFont(FontManager::SIZE_1)->drawText(x, y, pSelectedMod_->getName(), true);
+\tgetMenuFont(FontManager::SIZE_1)->drawText(x, y, pSelectedMod_->getName(), true);
     char tmp[100];
-	sprintf(tmp, "COST   :%d", pSelectedMod_->cost());
+\tsprintf(tmp, "COST   :%d", pSelectedMod_->cost());
     getMenuFont(FontManager::SIZE_1)->drawText(504, y + 14, tmp, true);
-	getMenuFont(FontManager::SIZE_1)->drawText(504, y + 28, pSelectedMod_->desc(), true);
+\tgetMenuFont(FontManager::SIZE_1)->drawText(504, y + 28, pSelectedMod_->desc(), true);
 }
 
 void SelectMenu::handleShow() {
@@ -418,7 +418,7 @@ void SelectMenu::handleRender(DirtyList &dirtyList) {
         g_Screen.scale2x(502, 292, sizeof(ldata), 1, ldata);
         g_Screen.scale2x(502, 318, sizeof(ldata), 1, ldata);
         
-		menuSprites().drawSpriteXYZ(pSelectedWeap_->getBigIconId(), 502, 106, 0, false, true);
+\t\tmenuSprites().drawSpriteXYZ(pSelectedWeap_->getBigIconId(), 502, 106, 0, false, true);
         drawSelectedWeaponInfos(504, 194);
     
     } else if (pSelectedMod_) {
@@ -501,7 +501,7 @@ bool SelectMenu::handleMouseDown(int x, int y, int button, const int modKeys)
         }
     }
 
-	// Checks if the user clicked on item in the current agent inventory
+\t// Checks if the user clicked on item in the current agent inventory
     Agent *selected = g_Session.agents().squadMember(cur_agent_);
     if (selected) {
         if (x >= 366 && x < 366 + 4 * 32
@@ -541,7 +541,7 @@ bool SelectMenu::handleMouseDown(int x, int y, int button, const int modKeys)
         }
     }
 
-	return false;
+\treturn false;
 }
 
 /**
@@ -569,8 +569,8 @@ void SelectMenu::handleClickOnAgentSelector(const int agent_no, int button) {
  * that appear on the detail panel.
  */
 void SelectMenu::showModWeaponPanel() {
-	getOption(purchaseButId_)->setVisible(true);
-	getOption(cancelButId_)->setVisible(true);
+\tgetOption(purchaseButId_)->setVisible(true);
+\tgetOption(cancelButId_)->setVisible(true);
     if (tab_ == TAB_MODS) {
         pModsLBox_->setVisible(false);
     } else {

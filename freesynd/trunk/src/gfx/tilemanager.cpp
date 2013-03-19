@@ -188,11 +188,11 @@ bool TileManager::loadTiles()
     int size;
     uint8 *type_data;
 
-	// first reads types
+\t// first reads types
     type_data = File::loadOriginalFile(TILE_TYPES, size);
-	if (!type_data) {
-		return false;
-	}
+\tif (!type_data) {
+\t\treturn false;
+\t}
 
     // then reads tiles
     uint8 *tileData = File::loadOriginalFile(TILE_SET, size);

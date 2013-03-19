@@ -83,7 +83,7 @@ DebriefMenu::DebriefMenu(MenuManager *m) : Menu(m, MENU_DEBRIEF, MENU_MAIN, "mde
     y += 14;
     txtNewWeap2Id_ = addStatic(left_x, y, "", FontManager::SIZE_2, true);
 
-	addOption(16, 346, 129, 25, "#MENU_ACC_BUT", FontManager::SIZE_2, MENU_MAP);
+\taddOption(16, 346, 129, 25, "#MENU_ACC_BUT", FontManager::SIZE_2, MENU_MAP);
     addOption(500, 347,  128, 25, "#MENU_MAIN_BUT", FontManager::SIZE_2, MENU_MAIN);
 }
 

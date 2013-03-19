@@ -328,7 +328,7 @@ ListBox::ListBox(Menu *peer, int x, int y, int width, int height, MenuFont *pFon
         ActionWidget(peer, x, y, width, height, visible) {
     focusedLine_ = -1;
     pModel_ = NULL;
-	pFont_ = pFont;
+\tpFont_ = pFont;
 }
 
 ListBox::~ListBox() {

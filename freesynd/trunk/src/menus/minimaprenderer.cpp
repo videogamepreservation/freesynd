@@ -662,31 +662,31 @@ void GamePlayMinimapRenderer::drawPedCircle(uint8 * a_buffer, int mm_x, int mm_y
 
 /*void GamePlayMinimapRenderer::drawCircle(int x0, int y0, int radius, uint8 color)
 {
-	if (radius<0 || x0+radius < 0 || x0-radius>=width() || y0+radius<0 || y0-radius>=height()) return;
-	if (!radius) { drawPoint(x0,y0,color); return; }
-	drawPoint(x0-radius,y0,color);
-	drawPoint(x0+radius,y0,color);
-	drawPoint(x0,y0-radius,color);
-	drawPoint(x0,y0+radius,color);
-	if (radius==1) return;
-	for (int f = 1-radius, ddFx = 0, ddFy = -(radius<<1), x = 0, y = radius; x<y; ) {
-		if (f>=0) { f+=(ddFy+=2); --y; }
-		++x; ++(f+=(ddFx+=2));
-		if (x!=y+1) {
-			const int x1 = x0-y, x2 = x0+y, y1 = y0-x, y2 = y0+x, x3 = x0-x, x4 = x0+x, y3 = y0-y, y4 = y0+y;
-			drawPoint(x1,y1,color);
-			drawPoint(x1,y2,color);
-			drawPoint(x2,y1,color);
-			drawPoint(x2,y2,color);
-			if (x!=y)
-			{
-				drawPoint(x3,y3,color);
-				drawPoint(x4,y4,color);
-				drawPoint(x4,y3,color);
-				drawPoint(x3,y4,color);
-			}
-		}
-	}
+\tif (radius<0 || x0+radius < 0 || x0-radius>=width() || y0+radius<0 || y0-radius>=height()) return;
+\tif (!radius) { drawPoint(x0,y0,color); return; }
+\tdrawPoint(x0-radius,y0,color);
+\tdrawPoint(x0+radius,y0,color);
+\tdrawPoint(x0,y0-radius,color);
+\tdrawPoint(x0,y0+radius,color);
+\tif (radius==1) return;
+\tfor (int f = 1-radius, ddFx = 0, ddFy = -(radius<<1), x = 0, y = radius; x<y; ) {
+\t\tif (f>=0) { f+=(ddFy+=2); --y; }
+\t\t++x; ++(f+=(ddFx+=2));
+\t\tif (x!=y+1) {
+\t\t\tconst int x1 = x0-y, x2 = x0+y, y1 = y0-x, y2 = y0+x, x3 = x0-x, x4 = x0+x, y3 = y0-y, y4 = y0+y;
+\t\t\tdrawPoint(x1,y1,color);
+\t\t\tdrawPoint(x1,y2,color);
+\t\t\tdrawPoint(x2,y1,color);
+\t\t\tdrawPoint(x2,y2,color);
+\t\t\tif (x!=y)
+\t\t\t{
+\t\t\t\tdrawPoint(x3,y3,color);
+\t\t\t\tdrawPoint(x4,y4,color);
+\t\t\t\tdrawPoint(x4,y3,color);
+\t\t\t\tdrawPoint(x3,y4,color);
+\t\t\t}
+\t\t}
+\t}
 }*/
 
 void GamePlayMinimapRenderer::drawSignalCircle(uint8 * a_buffer, int signal_px, int signal_py, uint16 radius, uint8 color)

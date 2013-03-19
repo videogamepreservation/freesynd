@@ -26,13 +26,13 @@
 /* Portions of CPS.h */
 typedef struct CPSProcessSerNum
 {
-	UInt32		lo;
-	UInt32		hi;
+\tUInt32\t\tlo;
+\tUInt32\t\thi;
 } CPSProcessSerNum;
 
-extern OSErr	CPSGetCurrentProcess( CPSProcessSerNum *psn);
-extern OSErr 	CPSEnableForegroundOperation( CPSProcessSerNum *psn, UInt32 _arg2, UInt32 _arg3, UInt32 _arg4, UInt32 _arg5);
-extern OSErr	CPSSetFrontProcess( CPSProcessSerNum *psn);
+extern OSErr\tCPSGetCurrentProcess( CPSProcessSerNum *psn);
+extern OSErr \tCPSEnableForegroundOperation( CPSProcessSerNum *psn, UInt32 _arg2, UInt32 _arg3, UInt32 _arg4, UInt32 _arg5);
+extern OSErr\tCPSSetFrontProcess( CPSProcessSerNum *psn);
 
 static int    gArgc;
 static char  **gArgv;
@@ -144,8 +144,8 @@ static void setupWindowMenu(void)
 /* Replacement for NSApplicationMain */
 static void CustomApplicationMain (int argc, char **argv)
 {
-    NSAutoreleasePool	*pool = [[NSAutoreleasePool alloc] init];
-    SDLMain				*sdlMain;
+    NSAutoreleasePool\t*pool = [[NSAutoreleasePool alloc] init];
+    SDLMain\t\t\t\t*sdlMain;
 
     /* Ensure the application object is initialised */
     [NSApplication sharedApplication];

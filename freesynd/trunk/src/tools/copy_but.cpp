@@ -14,65 +14,65 @@
 
 int traverse(const char *src, const char *dst, const char *but_not)
 {
-	DIR *d = opendir(src);
-	if (!d) {
-		fprintf(stderr, "Unable to open source directory `%s'.\n", src);
-		return 1;
-	}
+\tDIR *d = opendir(src);
+\tif (!d) {
+\t\tfprintf(stderr, "Unable to open source directory `%s'.\n", src);
+\t\treturn 1;
+\t}
 
-	int ret = 0;
-	struct dirent *ent;
-	for (ent = readdir(d); ent; ent = readdir(d)) {
-		if (!strcmp(ent->d_name, ".") || !strcmp(ent->d_name, "..") || !strcmp(ent->d_name, but_not)) {
-			continue;
-		}
+\tint ret = 0;
+\tstruct dirent *ent;
+\tfor (ent = readdir(d); ent; ent = readdir(d)) {
+\t\tif (!strcmp(ent->d_name, ".") || !strcmp(ent->d_name, "..") || !strcmp(ent->d_name, but_not)) {
+\t\t\tcontinue;
+\t\t}
 
-		std::string path(src);
-		path.push_back('/');
-		path.append(ent->d_name);
+\t\tstd::string path(src);
+\t\tpath.push_back('/');
+\t\tpath.append(ent->d_name);
 
-		struct stat st;
-		if (stat(path.c_str(), &st)) {
-			fprintf(stderr, "Unable to stat `%s`.\n", path.c_str());
-			ret = 1;
-			continue;
-		}
+\t\tstruct stat st;
+\t\tif (stat(path.c_str(), &st)) {
+\t\t\tfprintf(stderr, "Unable to stat `%s`.\n", path.c_str());
+\t\t\tret = 1;
+\t\t\tcontinue;
+\t\t}
 
-		std::string dstpath(dst);
-		dstpath.push_back('/');
-		dstpath.append(ent->d_name);
+\t\tstd::string dstpath(dst);
+\t\tdstpath.push_back('/');
+\t\tdstpath.append(ent->d_name);
 
-		if (S_ISDIR(st.st_mode)) {
-			mkdir(dstpath.c_str(), 0755);
-			ret |= traverse(path.c_str(), dstpath.c_str(), but_not);
-		} else {
-			std::ifstream inf(path.c_str(), std::ios_base::in|std::ios_base::binary);
-			std::ofstream outf(dstpath.c_str(), std::ios_base::out|std::ios_base::binary);
-			while (inf.good()) {
-				char buf[8192];
-				size_t n = inf.readsome(buf, 8192);
-				if (n > 0) outf.write(buf, n);
-				if (n == 0) break;
-			}
-		}
-	}
+\t\tif (S_ISDIR(st.st_mode)) {
+\t\t\tmkdir(dstpath.c_str(), 0755);
+\t\t\tret |= traverse(path.c_str(), dstpath.c_str(), but_not);
+\t\t} else {
+\t\t\tstd::ifstream inf(path.c_str(), std::ios_base::in|std::ios_base::binary);
+\t\t\tstd::ofstream outf(dstpath.c_str(), std::ios_base::out|std::ios_base::binary);
+\t\t\twhile (inf.good()) {
+\t\t\t\tchar buf[8192];
+\t\t\t\tsize_t n = inf.readsome(buf, 8192);
+\t\t\t\tif (n > 0) outf.write(buf, n);
+\t\t\t\tif (n == 0) break;
+\t\t\t}
+\t\t}
+\t}
 
-	return ret;
+\treturn ret;
 }
 
 int main(int argc, char **argv)
 {
-	if (argc != 4) {
-		fprintf(stderr, "Usage: copy_but <source> <destination> <but>\n");
-		return 1;
-	}
+\tif (argc != 4) {
+\t\tfprintf(stderr, "Usage: copy_but <source> <destination> <but>\n");
+\t\treturn 1;
+\t}
 
-	char *src = argv[1];
-	char *dst = argv[2];
-	char *but_not = argv[3];
+\tchar *src = argv[1];
+\tchar *dst = argv[2];
+\tchar *but_not = argv[3];
 
-	mkdir(dst, 0755);
+\tmkdir(dst, 0755);
 
-	return traverse(src, dst, but_not);
+\treturn traverse(src, dst, but_not);
 }
 

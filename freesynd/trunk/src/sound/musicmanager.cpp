@@ -60,7 +60,7 @@ void MusicManager::loadMusic()
 
 #if USE_INTRO_OGG
     tracks_.push_back(new Music);
-	tracks_.back()->loadMusicFile("music/intro.ogg");
+\ttracks_.back()->loadMusicFile("music/intro.ogg");
 #else
     data = File::loadOriginalFile("INTRO.XMI", size);
     tracks = xmidi.convertXMidi(data, size);
@@ -74,18 +74,18 @@ void MusicManager::loadMusic()
     data = File::loadOriginalFile("SYNGAME.XMI", size);
     tracks = xmidi.convertXMidi(data, size);
     for (unsigned int i = 0; i < tracks.size(); ++i) {
-		if (i == 0) {
+\t\tif (i == 0) {
 #if USE_ASSASSINATE_OGG
-			tracks_.push_back(new Music);
-			tracks_.back()->loadMusicFile("music/assassinate.ogg");
+\t\t\ttracks_.push_back(new Music);
+\t\t\ttracks_.back()->loadMusicFile("music/assassinate.ogg");
 #else
-			tracks_.push_back(new Music);
-			tracks_.back()->loadMusic(tracks[i].data_, tracks[i].size_);
+\t\t\ttracks_.push_back(new Music);
+\t\t\ttracks_.back()->loadMusic(tracks[i].data_, tracks[i].size_);
 #endif
-		} else {
-			tracks_.push_back(new Music);
-			tracks_.back()->loadMusic(tracks[i].data_, tracks[i].size_);
-		}
+\t\t} else {
+\t\t\ttracks_.push_back(new Music);
+\t\t\ttracks_.back()->loadMusic(tracks[i].data_, tracks[i].size_);
+\t\t}
     }
     delete[] data;
 }

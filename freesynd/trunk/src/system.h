@@ -32,47 +32,47 @@
 class Sprite;
 
 enum FS_EventType {
-	EVT_NONE = 0,		// No event in the queue
-	EVT_QUIT = 1,		// Quit event
-	EVT_MSE_MOTION = 2,	// Mouse motion
-	EVT_MSE_UP = 3,
-	EVT_MSE_DOWN = 4,
-	EVT_KEY_DOWN = 5
+\tEVT_NONE = 0,\t\t// No event in the queue
+\tEVT_QUIT = 1,\t\t// Quit event
+\tEVT_MSE_MOTION = 2,\t// Mouse motion
+\tEVT_MSE_UP = 3,
+\tEVT_MSE_DOWN = 4,
+\tEVT_KEY_DOWN = 5
 };
 
 /** The "quit requested" event */
 struct FS_QuitEvent {
-	FS_EventType type;
+\tFS_EventType type;
 };
 
 struct FS_MouseMotionEvent {
-	FS_EventType type;	/**< SDL_MOUSEMOTION */
-	uint8 state;	/**< The current button state */
-	uint16 x, y;	/**< The X/Y coordinates of the mouse */
-	int keyMods;
+\tFS_EventType type;\t/**< SDL_MOUSEMOTION */
+\tuint8 state;\t/**< The current button state */
+\tuint16 x, y;\t/**< The X/Y coordinates of the mouse */
+\tint keyMods;
 };
 
 struct FS_MouseButtonEvent {
-	FS_EventType type;	/**< SDL_MOUSEMOTION */
-	uint8 button;	/**< The current button state */
-	uint16 x, y;	/**< The X/Y coordinates of the mouse */
-	int keyMods;
+\tFS_EventType type;\t/**< SDL_MOUSEMOTION */
+\tuint8 button;\t/**< The current button state */
+\tuint16 x, y;\t/**< The X/Y coordinates of the mouse */
+\tint keyMods;
 };
 
 struct FS_KeyEvent {
-	FS_EventType type;	/**< EVT_KEY_DOWN */
-	Key key;
-	int keyMods;
+\tFS_EventType type;\t/**< EVT_KEY_DOWN */
+\tKey key;
+\tint keyMods;
 };
 
 /** General event structure */
 union FS_Event {
-	FS_EventType type;
-	
-	FS_QuitEvent quit;
-	FS_MouseMotionEvent motion;
-	FS_MouseButtonEvent button;
-	FS_KeyEvent key;
+\tFS_EventType type;
+\t
+\tFS_QuitEvent quit;
+\tFS_MouseMotionEvent motion;
+\tFS_MouseButtonEvent button;
+\tFS_KeyEvent key;
 };
 
 /*! 
@@ -82,10 +82,10 @@ struct System : public Singleton<System> {
     virtual ~System() {}
     virtual bool initialize(bool fullscreen) = 0;
     virtual void updateScreen() = 0;
-	//! Pumps an event from the event queue
-	virtual bool pumpEvents(FS_Event *pEvtOut) = 0;
+\t//! Pumps an event from the event queue
+\tvirtual bool pumpEvents(FS_Event *pEvtOut) = 0;
     virtual void delay(int msec) = 0;
-	virtual int getTicks() = 0;
+\tvirtual int getTicks() = 0;
 
     virtual void setPalette6b3(const uint8 *pal, int cols = 256) = 0;
     virtual void setPalette8b3(const uint8 *pal, int cols = 256) = 0;

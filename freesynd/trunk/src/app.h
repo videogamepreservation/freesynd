@@ -145,8 +145,8 @@ private:
     //! Tests Syndicate original data for existence and correctness
     bool testOriginalData();
 
-	//! Loads walk data
-	bool loadWalkData();
+\t//! Loads walk data
+\tbool loadWalkData();
 
     //! Sets the intro flag to false in the config file
     void updateIntroFlag();

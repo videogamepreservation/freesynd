@@ -60,7 +60,7 @@ public:
     FliPlayer() : fli_data_(0), offscreen_(0) {}
     virtual ~FliPlayer();
 
-	//! Play an entire animation without interruption
+\t//! Play an entire animation without interruption
     bool play(bool intro = false, Font *pIntroFont = NULL);
     void loadFliData(uint8 *buf);
     bool decodeFrame();

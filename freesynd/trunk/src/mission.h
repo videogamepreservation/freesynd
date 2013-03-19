@@ -248,7 +248,7 @@ protected:
     //! Sends an event to all listeners
     void fireGameEvent(GameEvent &evt);
 protected:
-    LevelData::LevelData level_data_;
+    LevelData::LevelDataAll level_data_;
 
     // eventually all this level data will be replaced by objects like this:
     std::vector<VehicleInstance *> vehicles_;

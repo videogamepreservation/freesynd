@@ -37,16 +37,16 @@ SoundManager::SoundManager(bool disabled):tabentry_startoffset_(58), tabentry_of
 
 SoundManager::~SoundManager()
 {
-	for(std::vector< Sound * >::iterator it = sounds_.begin(); it != sounds_.end(); ++it)
-	{
-		delete *it;
-	}
+\tfor(std::vector< Sound * >::iterator it = sounds_.begin(); it != sounds_.end(); ++it)
+\t{
+\t\tdelete *it;
+\t}
 }
 
 Sound *SoundManager::sound(snd::InGameSample sample)
 {
     if (sample == snd::NO_SOUND)
-		return NULL;
+\t\treturn NULL;
     return sounds_.at(sample);
 }
 
@@ -147,7 +147,7 @@ void SoundManager::play(snd::InGameSample sample, int channel, int loops) {
 
     if (pSound) {
         // Sound is played on first available channel (value -1)
-		pSound->play(loops, -1);
+\t\tpSound->play(loops, -1);
     }
 }
 
