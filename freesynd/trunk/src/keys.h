@@ -111,6 +111,7 @@ typedef struct Key {
 #define isLetterG(codePoint) codePoint == 0x0067 || codePoint == 0x0047
 #define isLetterH(codePoint) codePoint == 0x0068 || codePoint == 0x0048
 #define isLetterQ(codePoint) codePoint == 0x0071 || codePoint == 0x0051
+#define isLetterP(codePoint) codePoint == 0x0070 || codePoint == 0x0050
 
 #define K_PLUS    0x002B
 #define K_MINUS    0x002D

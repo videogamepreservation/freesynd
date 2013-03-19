@@ -50,7 +50,7 @@ last_motion_x_(320), last_motion_y_(240), mission_hint_ticks_(0),
 mission_hint_(0), mission_(NULL), world_x_(0),
 world_y_(0), selection_(),
 target_(NULL),
-mm_renderer_()
+mm_renderer_(), paused_(false)
 {
     scroll_x_ = 0;
     scroll_y_ = 0;
@@ -326,6 +326,8 @@ int qanim = 200, qframe = 0;
 
 void GameplayMenu::handleTick(int elapsed)
 {
+    if (paused_)
+        return;
     bool change = false;
     tick_count_ += elapsed;
 
@@ -464,6 +466,7 @@ void GameplayMenu::handleRender(DirtyList &dirtyList)
     sprintf(tmp, "FPS : %.2f FRAMES PER SEC", fps);
     gameFont()->drawText(10, g_Screen.gameScreenHeight() - 15, tmp, 14);
 #endif
+    // TODO: draw paused text
 }
 
 void GameplayMenu::handleLeave()
@@ -826,8 +829,7 @@ void GameplayMenu::handleClickOnMap(int x, int y, int button, const int modKeys)
                     }
                 }
                 
-                if(action)
-                {
+                if (action) {
                     as.main_act = as.actions.size() - 1;
                     as.group_desc = PedInstance::gd_mStandWalk;
                     as.origin_desc = 4;
@@ -842,46 +844,48 @@ void GameplayMenu::handleClickOnMap(int x, int y, int button, const int modKeys)
                         break;
                     if (!setDestinationPoint(mapPt, isForGroup, addDestPt, i, ped)) {
                         // could not set destination point -> we can stop
+                        // TODO: if one agent can't move there all should stop?
                         break;
                     }
                 }
             } // end of if selected
         } // end of for
     } else if (button == 3) {
+        // TODO: use directly mapPt_base?
+        MapTilePoint mapPt(mapPt_base);
+        PathNode *pn = NULL;
+        if (target_) {
+            int tilez = target_->tileZ() * 128 + target_->offZ() + (target_->sizeZ() >> 1);
+            int offz = tilez % 128;
+            tilez /= 128;
+            pn = new PathNode(target_->tileX(), target_->tileY(), tilez,
+                target_->offX(), target_->offY(), offz);
+        } else {
+            int stx = mapPt.tx;
+            int sty = mapPt.ty;
+            int stz = 0;
+            int sox = mapPt.ox;
+            int soy = mapPt.oy;
+            int oz = 0;
+            if (mission_->getShootableTile(stx, sty, stz,
+                sox, soy, oz))
+            {
+                pn = new PathNode(stx, sty, stz, sox, soy, oz);
+#if 0
+                printf("shooting at\n x = %i, y=%i, z=%i\n",
+                        stx, sty, stz);
+                printf("shooting pos\n ox = %i, oy=%i, oz=%i\n",
+                        sox, soy, oz);
+#endif
+            }
+        }
         for (int i = 0; i < 4; i++) {
-            MapTilePoint mapPt(mapPt_base);
             if (selection_.isAgentSelected(i)) {
                 PedInstance * pa = mission_->ped(i);
-                PathNode *pn = NULL;
                 PedInstance::actionQueueGroupType as;
                 as.main_act = 0;
                 as.group_desc = PedInstance::gd_mFire;
                 as.origin_desc = 4;
-                if (target_) {
-                    int tilez = target_->tileZ() * 128 + target_->offZ() + (target_->sizeZ() >> 1);
-                    int offz = tilez % 128;
-                    tilez /= 128;
-                    pn = new PathNode(target_->tileX(), target_->tileY(), tilez,
-                        target_->offX(), target_->offY(), offz);
-                } else {
-                    int stx = mapPt.tx;
-                    int sty = mapPt.ty;
-                    int stz = 0;
-                    int sox = mapPt.ox;
-                    int soy = mapPt.oy;
-                    int oz = 0;
-                    if (mission_->getShootableTile(stx, sty, stz,
-                        sox, soy, oz))
-                    {
-                        pn = new PathNode(stx, sty, stz, sox, soy, oz);
-#if 0
-                        printf("shooting at\n x = %i, y=%i, z=%i\n",
-                                stx, sty, stz);
-                        printf("shooting pos\n ox = %i, oy=%i, oz=%i\n",
-                                sox, soy, oz);
-#endif
-                    }
-                }
                 if (pn) {
                     if (modKeys & KMD_CTRL) {
                         if (pa->createActQFiring(as, pn, NULL, true))
@@ -894,10 +898,11 @@ void GameplayMenu::handleClickOnMap(int x, int y, int button, const int modKeys)
                             pa->setActQInQueue(as, &shooting_events_.ids[i]);
                         }
                     }
-                    delete pn;
                 }
             }
         }
+        if (pn)
+            delete pn;
     }
 }
 
@@ -1068,6 +1073,14 @@ bool GameplayMenu::handleUnknownKey(Key key, const int modKeys) {
         consumed = false;
     }
 
+    // Pause/unpause game
+    if (isLetterP(key.unicode)) {
+        // TODO: xor?
+        if (paused_)
+            paused_ = false;
+        else
+            paused_ = true;
+    }
 #ifdef _DEBUG
 #if 0
     static int sound_num = 20;
