@@ -81,7 +81,7 @@ public:
             unsigned int w_shot_property, int w_hit_anim, int w_obj_hit_anim,
             int w_rd_anim, int w_trace_anim, int w_range_dmg,
             double w_shot_angle, double w_shot_accuracy, int w_shot_speed = 0,
-            int w_dmg_per_shot = 1);
+            int w_dmg_per_shot = 1, int w_shots_per_ammo = 1);
 
     const char *getName() { return name_.c_str(); }
 
@@ -161,7 +161,7 @@ public:
         wspt_Shotgun =
             (spe_PointToManyPoints | spe_TargetReachInstant | spe_UsesAmmo
             | spe_CanShoot),
-        wspt_Uzi = (spe_PointToManyPoints | spe_TargetReachInstant
+        wspt_Uzi = (spe_PointToPoint | spe_TargetReachInstant
             | spe_UsesAmmo | spe_CanShoot),
         wspt_Minigun =
             (spe_PointToManyPoints | spe_TargetReachInstant | spe_UsesAmmo
@@ -217,6 +217,7 @@ public:
     double shotAcurracy() { return shot_accuracy_; }
     int ammoCost() { return ammo_cost_; }
     int shotSpeed() { return shot_speed_; }
+    int shotsPerAmmo() { return shots_per_ammo_; }
 
 protected:
     std::string name_;
@@ -235,6 +236,7 @@ protected:
     int time_reload_;
     /*! True when weapon was found and submit to search manager.*/
     bool submittedToSearch_;
+    //WeaponShotPropertyType
     uint32 shot_property_;
     ad_HitAnims anims_;
     int range_dmg_;
@@ -244,6 +246,8 @@ protected:
     double shot_accuracy_;
     //! only projectiles have this set (gauss, flamer)
     int shot_speed_;
+    //! shotgun only for now
+    int shots_per_ammo_;
 };
 
 class ShotClass {

@@ -199,7 +199,7 @@ Weapon * WeaponManager::loadWeapon(Weapon::WeaponType wt) {
         372, Weapon::Minigun_Anim, snd::MINIGUN, Weapon::Minigun,
         MapObject::dmg_Bullet, 5, 100, 75, Weapon::wspt_Minigun,
         SFXObject::sfxt_BulletHit, SFXObject::sfxt_BulletHit,
-        SFXObject::sfxt_Unknown, SFXObject::sfxt_Unknown, 0, 45.0, 0.5, 0, 4);
+        SFXObject::sfxt_Unknown, SFXObject::sfxt_Unknown, 0, 45.0, 0.5, 0, 2);
             break;
         case Weapon::Flamer:
             // NOTE: range changed from 512 to 1152
@@ -208,7 +208,7 @@ Weapon * WeaponManager::loadWeapon(Weapon::WeaponType wt) {
         Weapon::Flamer_Anim, snd::FLAME, Weapon::Flamer, MapObject::dmg_Burn,
         10, 70, 50, Weapon::wspt_Flamer, SFXObject::sfxt_FlamerFire,
         SFXObject::sfxt_FlamerFire, SFXObject::sfxt_FlamerFire,
-        SFXObject::sfxt_Unknown, 0, 2.0, 0.9, 2200);
+        SFXObject::sfxt_Unknown, 0, 2.0, 0.9, 2200, 8);
             break;
         case Weapon::LongRange:
             pWeapon = new Weapon(g_App.menus().getMessage("WEAPON_LONG_RANGE"),
@@ -258,7 +258,8 @@ Weapon * WeaponManager::loadWeapon(Weapon::WeaponType wt) {
         Weapon::Shotgun_Anim, snd::SHOTGUN, Weapon::Shotgun,
         MapObject::dmg_Bullet, 2, 250, 200, Weapon::wspt_Shotgun,
         SFXObject::sfxt_BulletHit, SFXObject::sfxt_BulletHit,
-        SFXObject::sfxt_Unknown, SFXObject::sfxt_Unknown, 0, 60.0, 0.7, 0, 2);
+        SFXObject::sfxt_Unknown, SFXObject::sfxt_Unknown, 0, 60.0, 0.7,
+        0, 2, 8);
             break;
         case Weapon::MediKit:
             pWeapon = new Weapon(g_App.menus().getMessage("WEAPON_MEDIKIT"),
