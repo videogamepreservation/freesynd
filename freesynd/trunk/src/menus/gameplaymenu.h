@@ -133,7 +133,6 @@ protected:
             ids[3] = 0;
         }
     } shooting_events_;
-    bool paused_;
 };
 
 #endif

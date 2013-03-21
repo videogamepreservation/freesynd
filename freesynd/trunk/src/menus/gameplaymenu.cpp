@@ -50,7 +50,7 @@ last_motion_x_(320), last_motion_y_(240), mission_hint_ticks_(0),
 mission_hint_(0), mission_(NULL), world_x_(0),
 world_y_(0), selection_(),
 target_(NULL),
-mm_renderer_(), paused_(false)
+mm_renderer_()
 {
     scroll_x_ = 0;
     scroll_y_ = 0;
@@ -466,7 +466,6 @@ void GameplayMenu::handleRender(DirtyList &dirtyList)
     sprintf(tmp, "FPS : %.2f FRAMES PER SEC", fps);
     gameFont()->drawText(10, g_Screen.gameScreenHeight() - 15, tmp, 14);
 #endif
-    // TODO: draw paused text
 }
 
 void GameplayMenu::handleLeave()
@@ -493,6 +492,7 @@ void GameplayMenu::handleLeave()
     scroll_x_ = 0;
     scroll_y_ = 0;
     shooting_events_.clear();
+    paused_ = false;
 }
 
 void GameplayMenu::handleMouseMotion(int x, int y, int state, const int modKeys)
@@ -660,6 +660,8 @@ void GameplayMenu::handleMouseMotion(int x, int y, int state, const int modKeys)
 
 bool GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
 {
+    if (paused_)
+        return true;
     if (button == 3) {
         stopShootingEvent();
     }
@@ -969,6 +971,9 @@ void GameplayMenu::stopShootingEvent(void )
 
 
 void GameplayMenu::handleMouseUp(int x, int y, int button, const int modKeys) {
+    // TODO: all mouse continued actions should stop, when paused
+    //if (paused_)
+        //return;
     if (button == 3) {
         stopShootingEvent();
     }
@@ -984,6 +989,30 @@ bool GameplayMenu::handleUnknownKey(Key key, const int modKeys) {
         // Mission must not be null
         return false;
     }
+
+    // Pause/unpause game
+    if (isLetterP(key.unicode)) {
+        if (paused_) {
+            paused_ = false;
+        } else {
+            paused_ = true;
+            // TODO: translate all paused texts
+            std::string str_paused = g_App.menus().getMessage("GAME_PAUSED");
+            MenuFont *font_used = getMenuFont(FontManager::SIZE_1);
+            int txt_width = font_used->textWidth(str_paused.c_str(), false);
+            int txt_posx = g_Screen.gameScreenWidth() / 2 - txt_width / 2;
+            int txt_height = font_used->textHeight(false);
+            int txt_posy = g_Screen.gameScreenHeight() / 2 - txt_height / 2;
+            
+            g_Screen.drawRect(txt_posx - 10, txt_posy - 5,
+                txt_width + 20, txt_height + 10);
+            gameFont()->drawText(txt_posx, txt_posy, str_paused.c_str(), 9);
+        }
+        return true;
+    }
+
+    if (paused_)
+        return true;
 
     bool ctrl = false;
     if (modKeys & KMD_CTRL) {
@@ -1073,14 +1102,6 @@ bool GameplayMenu::handleUnknownKey(Key key, const int modKeys) {
         consumed = false;
     }
 
-    // Pause/unpause game
-    if (isLetterP(key.unicode)) {
-        // TODO: xor?
-        if (paused_)
-            paused_ = false;
-        else
-            paused_ = true;
-    }
 #ifdef _DEBUG
 #if 0
     static int sound_num = 20;
@@ -1399,6 +1420,7 @@ void GameplayMenu::drawWeaponSelectors() {
  * If not, the selection is emptied and filled with the new agent.
  */
 void GameplayMenu::selectAgent(size_t agentNo, bool addToGroup) {
+    // TODO: when agent deselected and he was shooting, he should stop
     if (selection_.selectAgent(agentNo, addToGroup)) {
         updateSelectAll();
         centerMinimapOnLeader();

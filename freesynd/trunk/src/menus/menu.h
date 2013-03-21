@@ -157,6 +157,7 @@ public:
     void selectToggleAction(int id) { group_.selectButton(id); }
 
     void captureInputBy(TextField *pTextfield);
+    bool isPaused() { return paused_; }
 
 protected:
 
@@ -215,6 +216,8 @@ protected:
     TextField *pCaptureInput_;
     /*! Tells if the menu is kept in cache even after leaving it or destroy it.*/
     bool isCachable_;
+    /*! Used only in gameplay menu, pauses game*/
+    bool paused_;
 };
 
 #endif

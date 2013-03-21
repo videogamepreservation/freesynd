@@ -61,6 +61,7 @@ Menu::Menu(MenuManager * menuManager, int id, int parentId,
     focusedWgId_ = -1;
     pCaptureInput_ = NULL;
     isCachable_ = true;
+    paused_ = false;
 }
 
 Menu::~Menu() {
@@ -375,22 +376,24 @@ void Menu::keyEvent(Key key, const int modKeys)
         }
     }
 
-    // Then look for a mapped key to execute an action
-    for (std::list < HotKey >::iterator it = hotKeys_.begin();
-            it != hotKeys_.end(); it++) {
-                uint16 c = key.unicode;
-                // Hotkey can only be character from 'A' to 'Z'
-                if (c >= 'a' && c <= 'z') {
-                    // so uppercase it
-                    c -= 32;
+    if (!paused_) {
+        // Then look for a mapped key to execute an action
+        for (std::list < HotKey >::iterator it = hotKeys_.begin();
+                it != hotKeys_.end(); it++) {
+                    uint16 c = key.unicode;
+                    // Hotkey can only be character from 'A' to 'Z'
+                    if (c >= 'a' && c <= 'z') {
+                        // so uppercase it
+                        c -= 32;
+                    }
+                    if ((*it).key.keyFunc == key.keyFunc && (*it).key.unicode == c) {
+                    Option *opt = (*it).pOption;
+                    if (opt->isVisible() && opt->isWidgetEnabled()) {
+                        opt->executeAction(modKeys);
+                    }
+                    return;
                 }
-                if ((*it).key.keyFunc == key.keyFunc && (*it).key.unicode == c) {
-                Option *opt = (*it).pOption;
-                if (opt->isVisible() && opt->isWidgetEnabled()) {
-                    opt->executeAction(modKeys);
-                }
-                return;
-            }
+        }
     }
 
     // Finally pass the event to the menu instance
