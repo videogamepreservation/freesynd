@@ -1497,16 +1497,20 @@ PedInstance *Ped::createInstance(int map) {
 }
 
 void PedInstance::kill() {
-    health_ = -1;
-    actions_property_ = 1;
-    switchActionStateTo(PedInstance::pa_smDead);
-    if (weapons_.size() != 0)
-        dropAllWeapons();
-    is_ignored_ = true;
-    setDrawnAnim(PedInstance::ad_DieAnim);
-    // TODO:explode agent with chest lvl > 1
-    //Mod *pMod = slots_[Mod::MOD_CHEST];
-    //if (pMod && pMod->getVersion() > Mod::MOD_V1)
+    if (health_ > 0) {
+        health_ = -1;
+        actions_property_ = 1;
+        switchActionStateTo(PedInstance::pa_smDead);
+        if (weapons_.size() != 0)
+            dropAllWeapons();
+        is_ignored_ = true;
+        setDrawnAnim(PedInstance::ad_DieAnim);
+        Mod *pMod = slots_[Mod::MOD_CHEST];
+        if (pMod && pMod->getVersion() > Mod::MOD_V1) {
+            ShotClass explosion;
+            explosion.createExplosion(this, 512.0);
+        }
+    }
 }
 
 bool isOnScreen(int scrollX, int scrollY, int x, int y) {

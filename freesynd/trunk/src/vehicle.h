@@ -75,7 +75,7 @@ protected:
 /*!
  * Vehicle instance class.
  */
-class VehicleInstance : public ShootableMovableMapObject, private ShotClass
+class VehicleInstance : public ShootableMovableMapObject
 {
 public:
     VehicleInstance(Vehicle *vehicle, int m);

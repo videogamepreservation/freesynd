@@ -1088,12 +1088,11 @@ bool GameplayMenu::handleUnknownKey(Key key, const int modKeys) {
         g_App.music().toggleMusic();
     } else if (key.keyFunc == KFC_F2) { // Sound Control
         g_App.gameSounds().toggleSound();
-    } else if (isLetterD(key.unicode)) { // all agents are killed with 'd'
-        // TODO : only selected agents should explodes
+    } else if (isLetterD(key.unicode)) { // selected agents are killed with 'd'
         if (ctrl) {
             for (int i = 0; i < 4; i++) {
                 PedInstance *pAgent = mission_->getSquad()->member(i);
-                if (pAgent) {
+                if (pAgent && selection_.isAgentSelected(i)) {
                     pAgent->kill();
                 }
             }

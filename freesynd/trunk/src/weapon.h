@@ -265,6 +265,7 @@ public:
         double dist_new = -1, bool exclude_z = false);
     void rangeDamageAnim(toDefineXYZ &cp, double dmg_rng,
         int rngdamg_anim);
+    void createExplosion(ShootableMapObject *tobj, double dmg_rng, int dmg_value = 16);
 
 protected:
     void makeShot(bool rangeChecked, toDefineXYZ &cp, int anim_hit,

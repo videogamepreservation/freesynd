@@ -137,13 +137,13 @@ bool WeaponInstance::animate(int elapsed) {
                 setIsIgnored(true);
 
                 Mission *m = g_Session.getMission();
-                toDefineXYZ cur_pos = {tile_x_ * 256 + off_x_,
-                    tile_y_ * 256 + off_y_, tile_z_ * 128 + off_z_};
                 SFXObject *so = new SFXObject(m->map(),
                     pWeaponClass_->anims()->hit_anim);
-                so->setPosition(cur_pos.x / 256, cur_pos.y / 256, cur_pos.z / 128,
-                    cur_pos.x % 256, cur_pos.y % 256, cur_pos.z % 128);
+                so->setPosition(tile_x_, tile_y_, tile_z_,
+                    off_x_, off_y_, off_z_);
                 m->addSfxObject(so);
+                toDefineXYZ cur_pos = {tile_x_ * 256 + off_x_,
+                    tile_y_ * 256 + off_y_, tile_z_ * 128 + off_z_};
 
                 rangeDamageAnim(cur_pos, (double)pWeaponClass_->rangeDmg(),
                     pWeaponClass_->anims()->rd_anim);
@@ -457,6 +457,7 @@ bool ProjectileShot::animate(int elapsed, Mission *m) {
     }
     // TODO : set this somewhere?
     // gauss
+    // distance between 2 animations
     double anim_d = 64;
     if (dmg_range_ == 0)
         //flamer
@@ -517,7 +518,7 @@ bool ProjectileShot::animate(int elapsed, Mission *m) {
             makeShot(true, base_pos_, anims_.hit_anim, all_shots,
                 anims_.obj_hit_anim);
         } else {
-            // NOTE: if projectile hits water, should hit and flames be drawn?
+            // TODO: if projectile hits water, should hit and flames be drawn?
             SFXObject *so = new SFXObject(m->map(),
                 anims_.hit_anim);
             so->setPosition(cur_pos_.x / 256, cur_pos_.y / 256,
@@ -1308,13 +1309,38 @@ void WeaponInstance::getNonFriendInRange(toDefineXYZ * cp,
 
 bool WeaponInstance::handleDamage(ShootableMapObject::DamageInflictType * d)
 {
-    // TODO: add damage handling for timebomb and flamer,
-    // they will explode when shot
-    if (health_ > 0)
-        printf("weapon hit\n");
+    if (health_ > 0) {
+        if (main_type_ == Weapon::TimeBomb) {
+            int tm = pWeaponClass_->timeForShot();
+            if ((inflictDamage(NULL, NULL, &tm)) == 0) {
+                deactivate();
+                map_ = -1;
+                setIsIgnored(true);
+                health_ = -1;
+
+                Mission *m = g_Session.getMission();
+                SFXObject *so = new SFXObject(m->map(),
+                    pWeaponClass_->anims()->hit_anim);
+                so->setPosition(tile_x_, tile_y_, tile_z_,
+                    off_x_, off_y_, off_z_);
+                m->addSfxObject(so);
+                toDefineXYZ cur_pos = {tile_x_ * 256 + off_x_,
+                    tile_y_ * 256 + off_y_, tile_z_ * 128 + off_z_};
+
+                rangeDamageAnim(cur_pos, (double)pWeaponClass_->rangeDmg(),
+                    pWeaponClass_->anims()->rd_anim);
+                return true;
+            }
+        }
+    }
     return true;
 }
 
+/*! Draws animation of impact/explosion
+ * @param cp current position (center)
+ * @param dmg_rng effective range for drawing
+ * @param rngdamg_anim animation to be used for drawing
+ */
 void ShotClass::rangeDamageAnim(toDefineXYZ &cp, double dmg_rng,
     int rngdamg_anim)
 {
@@ -1326,7 +1352,8 @@ void ShotClass::rangeDamageAnim(toDefineXYZ &cp, double dmg_rng,
     // TODO: exclude flames on water, put these flames to the ground,
     // don't draw in air(, stairs problem?)
     double angle_inc = PI;
-    for (uint8 i = 0; i < 4; i++) {
+    const uint8 waves = (int)dmg_rng / 144 + 1;
+    for (uint8 i = 0; i < waves; i++) {
         double base_angle = 0.0;
         if (rand() % 100 > 74)
             base_angle += angle_inc;
@@ -1349,4 +1376,34 @@ void ShotClass::rangeDamageAnim(toDefineXYZ &cp, double dmg_rng,
         }
         angle_inc /= 2.0;
     }
+}
+
+void ShotClass::createExplosion(ShootableMapObject* tobj, double dmg_rng,
+    int dmg_value)
+{
+    Mission *m = g_Session.getMission();
+    std::vector<ShootableMapObject *> all_targets;
+    ShootableMapObject::DamageInflictType dit;
+    dit.d_owner = tobj;
+    dit.dvalue = dmg_value;
+    dit.dtype = MapObject::dmg_Explosion;
+    dit.ddir = -1;
+    toDefineXYZ xyz;
+    tobj->convertPosToXYZ(&xyz);
+    xyz.z += 8;
+    m->getInRangeAll(&xyz, all_targets, Weapon::stm_AllObjects,
+        true, dmg_rng);
+    for (std::vector<ShootableMapObject *>::iterator it = all_targets.begin();
+        it != all_targets.end(); it++)
+    {
+        // TODO: set direction?
+        ShootableMapObject *smo = *it;
+        smo->handleDamage(&dit);
+        SFXObject *so = new SFXObject(m->map(), SFXObject::sfxt_ExplosionBall);
+        so->setPosition(smo->tileX(), smo->tileY(), smo->tileZ(), smo->offX(),
+            smo->offY(), smo->offZ());
+        so->correctZ();
+        m->addSfxObject(so);
+    }
+    rangeDamageAnim(xyz, dmg_rng, SFXObject::sfxt_ExplosionFire);
 }

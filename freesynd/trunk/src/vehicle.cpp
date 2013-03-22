@@ -743,11 +743,12 @@ bool VehicleInstance::movementV(int elapsed)
 
 
 bool VehicleInstance::handleDamage(ShootableMapObject::DamageInflictType *d) {
-    if (health_ < 0 || d->dtype == MapObject::dmg_Mental)
+    if (health_ <= 0 || d->dtype == MapObject::dmg_Mental)
         return false;
     health_ -= d->dvalue;
     if (health_ <= 0) {
         speed_ = 0;
+        health_ = -1;
         is_ignored_ = true;
         clearDestination();
         switch ((unsigned int)d->dtype) {
@@ -766,25 +767,8 @@ bool VehicleInstance::handleDamage(ShootableMapObject::DamageInflictType *d) {
             p->leaveVehicle();
             removeDriver(p);
         }
-        Mission *m = g_Session.getMission();
-        std::vector<ShootableMapObject *> all_targets;
-        DamageInflictType dit;
-        dit.d_owner = this;
-        dit.dvalue = 16;
-        dit.dtype = MapObject::dmg_Explosion;
-        dit.ddir = -1;
-        toDefineXYZ xyz;
-        this->convertPosToXYZ(&xyz);
-        xyz.z += 8;
-        m->getInRangeAll(&xyz, all_targets, Weapon::stm_AllObjects,
-            true, 512.0);
-        for (std::vector<ShootableMapObject *>::iterator it = all_targets.begin();
-            it != all_targets.end(); it++
-        ) {
-        // TODO: set direction?
-            (*it)->handleDamage(&dit);
-        }
-        rangeDamageAnim(xyz, 512, SFXObject::sfxt_ExplosionFire);
+        ShotClass explosion;
+        explosion.createExplosion(this, 512.0);
     } else {// NOTE: maybe reduce speed on hit?
         // TODO: let passengers know that vehicle is attacked
     }
