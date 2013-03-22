@@ -1509,6 +1509,8 @@ void PedInstance::kill() {
         if (pMod && pMod->getVersion() > Mod::MOD_V1) {
             ShotClass explosion;
             explosion.createExplosion(this, 512.0);
+            setDrawnAnim(PedInstance::ad_StandBurnAnim);
+            setTimeShowAnim(4000);
         }
     }
 }
