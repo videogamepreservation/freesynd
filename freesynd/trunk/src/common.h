@@ -128,7 +128,7 @@ inline bool bitClear(const uint32 value, int index) {
     return !bitSet(value, index);
 }
 
-const double PI = 3.14159265;
+const double PI = 3.141592653589793;
 
 namespace fs_cmn {
 

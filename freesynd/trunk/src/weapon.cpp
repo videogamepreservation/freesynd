@@ -145,9 +145,8 @@ bool WeaponInstance::animate(int elapsed) {
                     cur_pos.x % 256, cur_pos.y % 256, cur_pos.z % 128);
                 m->addSfxObject(so);
 
-                int max_anims = 24 + rand() % 8;
                 rangeDamageAnim(cur_pos, (double)pWeaponClass_->rangeDmg(),
-                    max_anims, pWeaponClass_->anims()->rd_anim);
+                    pWeaponClass_->anims()->rd_anim);
                 return true;
             }
             time_consumed_ = true;
@@ -217,12 +216,12 @@ void ShotClass::shotTargetRandomizer(toDefineXYZ * cp, toDefineXYZ * tp,
     double dtx = (double)(tx - cx);
     double dty = (double)(ty - cy);
     double dtz = (double)(tz - cz);
-    double dist_cur = 0;
-    if (dist_new != -1)
+    double dist_cur = 0.0;
+    if (dist_new != -1.0)
         dist_cur = dist_new;
     else
         dist_cur = sqrt(dtx * dtx + dty * dty + dtz * dtz);
-    if (dist_cur == 0)
+    if (dist_cur == 0.0)
         return;
 
     angle /= (180.0 / PI);
@@ -254,7 +253,7 @@ void ShotClass::shotTargetRandomizer(toDefineXYZ * cp, toDefineXYZ * tp,
     int gtz = cz + (int)(cos(angz) * dist_cur);
 
     if (gtx < 0) {
-        if (cos(angx) == 0) {
+        if (cos(angx) == 0.0) {
             gtx = 0;
         } else {
             dist_cur -= fabs((double)gtx / cos(angx));
@@ -264,7 +263,7 @@ void ShotClass::shotTargetRandomizer(toDefineXYZ * cp, toDefineXYZ * tp,
         }
     }
     if (gty < 0) {
-        if (cos(angy) == 0) {
+        if (cos(angy) == 0.0) {
             gty = 0;
         } else {
             dist_cur -= fabs((double)gty / cos(angy));
@@ -274,7 +273,7 @@ void ShotClass::shotTargetRandomizer(toDefineXYZ * cp, toDefineXYZ * tp,
         }
     }
     if (gtz < 0) {
-        if (cos(angz) == 0) {
+        if (cos(angz) == 0.0) {
             gtz = 0;
         } else {
             dist_cur -= fabs((double)gtz / cos(angz));
@@ -288,7 +287,7 @@ void ShotClass::shotTargetRandomizer(toDefineXYZ * cp, toDefineXYZ * tp,
     int max_y = (g_Session.getMission()->mmax_y_ - 1) * 256;
     int max_z = (g_Session.getMission()->mmax_z_ - 1) * 128;
     if (gtx > max_x) {
-        if (cos(angx) == 0) {
+        if (cos(angx) == 0.0) {
             gtx = max_x;
         } else {
             dist_cur -= fabs((double)(gtx - max_x) / cos(angx));
@@ -298,7 +297,7 @@ void ShotClass::shotTargetRandomizer(toDefineXYZ * cp, toDefineXYZ * tp,
         }
     }
     if (gty > max_y) {
-        if (cos(angy) == 0) {
+        if (cos(angy) == 0.0) {
             gty = max_y;
         } else {
             dist_cur -= fabs((double)(gty - max_y) / cos(angy));
@@ -308,7 +307,7 @@ void ShotClass::shotTargetRandomizer(toDefineXYZ * cp, toDefineXYZ * tp,
         }
     }
     if (gtz > max_z) {
-        if (cos(angx) == 0) {
+        if (cos(angx) == 0.0) {
             gtz = max_z;
         } else {
             dist_cur -= fabs((double)(gtz - max_z) / cos(angz));
@@ -556,9 +555,7 @@ bool ProjectileShot::animate(int elapsed, Mission *m) {
             }
             makeShot(true, cp, anims_.hit_anim, all_shots,
                 anims_.obj_hit_anim);
-            int max_flames = 24 + rand() % 8;
-            rangeDamageAnim(cur_pos_, (double)dmg_range_, max_flames,
-                anims_.rd_anim);
+            rangeDamageAnim(cur_pos_, (double)dmg_range_, anims_.rd_anim);
             g_App.gameSounds().play(snd::EXPLOSION);
         }
     }
@@ -1319,30 +1316,37 @@ bool WeaponInstance::handleDamage(ShootableMapObject::DamageInflictType * d)
 }
 
 void ShotClass::rangeDamageAnim(toDefineXYZ &cp, double dmg_rng,
-    int max_anims, int rngdamg_anim)
+    int rngdamg_anim)
 {
     Mission *m = g_Session.getMission();
-    toDefineXYZ base_pos_ = cp;
-    cp.z += 16;
+    toDefineXYZ base_pos = cp;
+    cp.z += Z_SHIFT_TO_AIR;
     if (cp.z > (m->mmax_z_ - 1) * 128)
         cp.z = (m->mmax_z_ - 1) * 128;
     // TODO: exclude flames on water, put these flames to the ground,
     // don't draw in air(, stairs problem?)
-    dmg_rng *= 1.1;
-    for (char i = 0; i < max_anims; i++) {
-        // TODO: bad randoming for animations, something better needed
-        toDefineXYZ target_pos = base_pos_;
-        shotTargetRandomizer(&cp, &target_pos, 120.0, dmg_rng, true);
-        PathNode pn = PathNode(target_pos.x / 256, target_pos.y / 256,
-            target_pos.z / 128, target_pos.x % 256,
-            target_pos.y % 256, target_pos.z % 128);
-        uint8 block_mask = m->inRangeCPos(&cp, NULL, &pn, true, true, dmg_rng);
-        if (block_mask != 32) {
-            SFXObject *so = new SFXObject(m->map(), rngdamg_anim,
-                            100 * (rand() % 16));
-            so->setPosition(pn.tileX(), pn.tileY(), pn.tileZ(),
-                            pn.offX(), pn.offY(), pn.offZ());
-            m->addSfxObject(so);
+    double angle_inc = PI;
+    for (uint8 i = 0; i < 4; i++) {
+        double base_angle = 0.0;
+        if (rand() % 100 > 74)
+            base_angle += angle_inc;
+        for (int j = 0; j < (4 << i); j++) {
+            double x = (double)(144 * i) * cos(base_angle);
+            double y = (double)(144 * i) * sin(base_angle);
+            base_angle += angle_inc;
+            PathNode pn = PathNode((base_pos.x + (int)x) / 256,
+                (base_pos.y + (int)y) / 256,
+                base_pos.z / 128, (base_pos.x + (int)x) % 256,
+                (base_pos.y + (int)y) % 256, base_pos.z % 128);
+            uint8 block_mask = m->inRangeCPos(&cp, NULL, &pn, true, true, dmg_rng);
+            if (block_mask != 32) {
+                SFXObject *so = new SFXObject(m->map(), rngdamg_anim,
+                                100 * (rand() % 16));
+                so->setPosition(pn.tileX(), pn.tileY(), pn.tileZ(),
+                                pn.offX(), pn.offY(), pn.offZ());
+                m->addSfxObject(so);
+            }
         }
+        angle_inc /= 2.0;
     }
 }

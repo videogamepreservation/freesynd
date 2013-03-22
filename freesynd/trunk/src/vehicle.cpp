@@ -784,7 +784,7 @@ bool VehicleInstance::handleDamage(ShootableMapObject::DamageInflictType *d) {
         // TODO: set direction?
             (*it)->handleDamage(&dit);
         }
-        rangeDamageAnim(xyz, 512, 16, SFXObject::sfxt_ExplosionFire);
+        rangeDamageAnim(xyz, 512, SFXObject::sfxt_ExplosionFire);
     } else {// NOTE: maybe reduce speed on hit?
         // TODO: let passengers know that vehicle is attacked
     }

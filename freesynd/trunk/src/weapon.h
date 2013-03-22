@@ -252,11 +252,10 @@ protected:
 
 class ShotClass {
 public:
-    ShotClass(ShootableMapObject *tobj = NULL) : owner_(NULL), last_owner_(NULL),
+    ShotClass(ShootableMapObject *tobj = NULL) : owner_(NULL),
         target_object_(tobj){};
     ~ShotClass(){};
     void setOwner(ShootableMapObject *owner) {
-        last_owner_ = owner_;
         owner_ = owner;
     }
     ShootableMapObject *getOwner() { return owner_; }
@@ -265,7 +264,7 @@ public:
     void shotTargetRandomizer(toDefineXYZ * cp, toDefineXYZ * tp, double angle,
         double dist_new = -1, bool exclude_z = false);
     void rangeDamageAnim(toDefineXYZ &cp, double dmg_rng,
-        int max_anims, int rngdamg_anim);
+        int rngdamg_anim);
 
 protected:
     void makeShot(bool rangeChecked, toDefineXYZ &cp, int anim_hit,
@@ -273,7 +272,6 @@ protected:
         WeaponInstance *w = NULL);
 protected:
     ShootableMapObject *owner_;
-    ShootableMapObject *last_owner_;
     ShootableMapObject *target_object_;
 };
 

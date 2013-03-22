@@ -499,7 +499,9 @@ bool SFXObject::animate(int elapsed) {
         }
         if (frame_ > g_App.gameSprites().lastFrame(anim_)
             && !leftTimeShowAnim(elapsed))
+        {
             sfx_life_over_ = true;
+        }
         return changed;
     }
     is_frame_drawn_ = true;
