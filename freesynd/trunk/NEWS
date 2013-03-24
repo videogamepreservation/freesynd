@@ -7,12 +7,17 @@ This is a prelimary release for testing and development purposes.
 
 Changes
 -------
+  * Code refactoring
+  * All tabs coverted to spaces
+  * Better animation for impact or detonating explosions
 
 Fixed Bugs
 ----------
+  * Clicking on map/minimap
 
 Features added
 ----------
+  * Agent with chest mod ver > 1 will explode when killed (Ctrl + D)
 
 Known issues with this release
 ------------------------------
