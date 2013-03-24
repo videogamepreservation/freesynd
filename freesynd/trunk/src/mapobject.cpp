@@ -1444,6 +1444,7 @@ bool Tree::handleDamage(ShootableMapObject::DamageInflictType *d) {
         state_ = Static::stttree_Burning;
         setTimeShowAnim(10000);
         is_ignored_ = true;
+        health_ = 0;
     }
     return true;
 }
@@ -1599,6 +1600,7 @@ bool Semaphore::handleDamage(ShootableMapObject::DamageInflictType *d) {
             }
         }
         is_ignored_ = true;
+        health_ = 0;
     }
     return true;
 }

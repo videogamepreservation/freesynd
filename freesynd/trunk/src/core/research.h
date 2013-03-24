@@ -39,7 +39,7 @@ public:
 
     enum EResType {
         EQUIPS = 0,
-        MODS
+        MODS = 1
     };
 
     enum EResStatus {

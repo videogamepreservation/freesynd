@@ -135,6 +135,7 @@ bool WeaponInstance::animate(int elapsed) {
                 deactivate();
                 map_ = -1;
                 setIsIgnored(true);
+                health_ = 0;
 
                 Mission *m = g_Session.getMission();
                 SFXObject *so = new SFXObject(m->map(),
@@ -1316,7 +1317,7 @@ bool WeaponInstance::handleDamage(ShootableMapObject::DamageInflictType * d)
                 deactivate();
                 map_ = -1;
                 setIsIgnored(true);
-                health_ = -1;
+                health_ = 0;
 
                 Mission *m = g_Session.getMission();
                 SFXObject *so = new SFXObject(m->map(),

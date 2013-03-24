@@ -2259,7 +2259,7 @@ bool PedInstance::handleDamage(ShootableMapObject::DamageInflictType *d) {
         dir_ = (d->ddir + 128) % 256;
     }
     if (health_ <= 0) {
-        health_ = -1;
+        health_ = 0;
         actions_property_ = 1;
         switchActionStateTo(PedInstance::pa_smDead);
 

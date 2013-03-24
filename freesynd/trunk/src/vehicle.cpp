@@ -748,7 +748,7 @@ bool VehicleInstance::handleDamage(ShootableMapObject::DamageInflictType *d) {
     health_ -= d->dvalue;
     if (health_ <= 0) {
         speed_ = 0;
-        health_ = -1;
+        health_ = 0;
         is_ignored_ = true;
         clearDestination();
         switch ((unsigned int)d->dtype) {

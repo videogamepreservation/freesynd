@@ -53,7 +53,7 @@ public:
         dmg_Physical = (dmg_Bullet | dmg_Laser | dmg_Burn | dmg_Explosion | dmg_Hit),
         dmg_Mental = 32,
         dmg_Heal = 64,
-        dmg_All = 127,
+        dmg_All = 127
     } DamageType;
 
     typedef enum {
@@ -64,7 +64,7 @@ public:
         ddmg_StaticTree = dmg_Laser | dmg_Burn | dmg_Explosion,
         ddmg_StaticWindow = dmg_Bullet | dmg_Explosion,
         ddmg_StaticGeneral = dmg_Laser | dmg_Explosion,
-        ddmg_WeaponBomb = dmg_Bullet | dmg_Laser | dmg_Explosion,
+        ddmg_WeaponBomb = dmg_Bullet | dmg_Laser | dmg_Explosion
     } DefDamageType;
 
     void setPosition(int tile_x, int tile_y, int tile_z, int off_x = 0,
@@ -219,7 +219,7 @@ public:
         mjt_Ped = 1,
         mjt_Weapon = 2,
         mjt_Static = 4,
-        mjt_Vehicle = 8,
+        mjt_Vehicle = 8
     } MajorTypeEnum;
 
     MajorTypeEnum majorType() { return major_type_; }
@@ -314,7 +314,7 @@ public:
         sfxt_AgentFirst = 9,
         sfxt_AgentSecond = 10,
         sfxt_AgentThird = 11,
-        sfxt_AgentFourth = 12,
+        sfxt_AgentFourth = 12
     }SfxTypeEnum;
 protected:
     int anim_;
@@ -334,6 +334,8 @@ public:
 
     int health() { return health_; }
 
+    // NOTE: objects that are not used or have negative health from start
+    // shoud have -1; objects destroyed during gameplay 0
     void setHealth(int n) {
         if (n > 255)
             n = 255;
@@ -368,6 +370,7 @@ public:
             || (d->dtype & rcv_damage_def_) == 0)
             return false;
         health_ -= d->dvalue;
+        health_ = 0;
         return true;
     }
     virtual bool isExcluded() { return health_ <= 0; }
