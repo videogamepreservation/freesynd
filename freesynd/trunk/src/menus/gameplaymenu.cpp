@@ -523,7 +523,7 @@ void GameplayMenu::handleMouseMotion(int x, int y, int state, const int modKeys)
         for (int i = 8; mission_ && i < mission_->numPeds(); i++) {
 #endif
             PedInstance *p = mission_->ped(i);
-            if (p->health() > 0 && p->map() != -1) {
+            if (p->isAlive() && p->map() != -1) {
                 int px = p->screenX() - 10;
                 int py = p->screenY() - (1 + p->tileZ()) * TILE_HEIGHT/3
                 - (p->offZ() * TILE_HEIGHT/3) / 128;
@@ -547,7 +547,7 @@ void GameplayMenu::handleMouseMotion(int x, int y, int state, const int modKeys)
 
         for (int i = 0; mission_ && i < mission_->numVehicles(); i++) {
             VehicleInstance *v = mission_->vehicle(i);
-            if (v->health() > 0) {
+            if (v->isAlive()) {
                 int px = v->screenX() - 20;
                 int py = v->screenY() - 10 - v->tileZ() * TILE_HEIGHT/3;
 
@@ -685,6 +685,8 @@ bool GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
             case SelectorEvent::kSelectIpa:
                 handleClickOnIPA(selEvt, button, modKeys);
                 break;
+            case SelectorEvent::kNone:
+                break;
             }
         } else if (y >= 42 + 48 && y < 42 + 48 + 10) {
             // User clicked on the select all button
@@ -718,7 +720,7 @@ void GameplayMenu::handleClickOnWeaponSelector(int x, int y, int button, const i
             + x / 32;
     bool weapon_is_selected = false;
     PedInstance *pLeader = mission_->ped(selection_.getLeaderSlot());
-    if (pLeader->health() > 0) {
+    if (pLeader->isAlive()) {
         if (w_num < pLeader->numWeapons()) {
             if (button == 1) {
                 WeaponInstance *wi = pLeader->weapon(w_num);
@@ -819,7 +821,7 @@ void GameplayMenu::handleClickOnMap(int x, int y, int button, const int modKeys)
                             if (ped->inVehicle() == target_) {
                                 ped->createActQLeaveCar(as, target_);
                                 action = true;
-                            } else if (target_->health() > 0)
+                            } else if (target_->isAlive())
                             {
                                 ped->createActQGetInCar(as, target_);
                                 action = true;
@@ -1494,7 +1496,7 @@ void GameplayMenu::updateSelectionForDeadAgents() {
     bool b_agentDied = false;
     for (size_t i = AgentManager::kSlot1; i < AgentManager::kMaxSlot; i++) {
         if (mission_->ped(i) && mission_->ped(i)->isOurAgent()) {
-            if (g_Session.agents().squadMember(i)->health() > 0 && mission_->ped(i)->health() <= 0) {
+            if (g_Session.agents().squadMember(i)->isAlive() && mission_->ped(i)->health() <= 0) {
                 // TODO change this
                 //g_Session.agents().squadMember(i)->setHealth(0);
                 selection_.deselectAgent(i);
@@ -1547,7 +1549,7 @@ void GameplayMenu::updateSelectAll() {
     // count the number of remaining agents
     for (int indx = 0; indx < 4; indx++) {
         PedInstance *pAgent = mission_->ped(indx);
-        if (pAgent->health() > 0) {
+        if (pAgent->isAlive()) {
             nbAgentAlive++;
         }
     }

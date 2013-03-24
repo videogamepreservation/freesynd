@@ -392,7 +392,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                 }
                 if ((aqt->ot_execute & PedInstance::ai_aUseObject) != 0)
                 {
-                    if (aqt->t_smo->health() <= 0 
+                    if (aqt->t_smo->isDead()
                         || (state_ & (PedInstance::pa_smInCar
                         | PedInstance::pa_smUsingCar)) == 0
                         || !((VehicleInstance *)aqt->t_smo)->isInsideVehicle(this))
@@ -451,7 +451,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                 }
                 if ((aqt->ot_execute & PedInstance::ai_aAquireControl) != 0)
                 {
-                    if (aqt->t_smo->health() > 0) {
+                    if (aqt->t_smo->isAlive()) {
                         if (aqt->t_smo->majorType() == MapObject::mjt_Ped) {
                             if (selectRequiredWeapon(&aqt->multi_var.enemy_var.pw_to_use))
                             {
@@ -471,7 +471,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                                     == MapObject::mjt_Vehicle)
                         {
                             VehicleInstance *v = (VehicleInstance *)aqt->t_smo;
-                            if (v->health() > 0 && (state_
+                            if (v->isAlive() && (state_
                                 & (PedInstance::pa_smInCar
                                 | PedInstance::pa_smUsingCar)) == 0
                                 && samePosition(v))
@@ -548,7 +548,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                 if ((aqt->ot_execute & PedInstance::ai_aDestroyObject) != 0)
                 {
                     if ((aqt->state & 128) == 0) {
-                        if (aqt->t_smo->health() <= 0) {
+                        if (aqt->t_smo->isDead()) {
                             // not object did it as such he failed,
                             // but goal reached
                             // TODO: projectile shot?
@@ -577,7 +577,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                                     if (shots_done != 0) {
                                         // enabling animation completion
                                         aqt->state |= 32;
-                                        if (make_shots == 0 && aqt->t_smo->health() <= 0)
+                                        if (make_shots == 0 && aqt->t_smo->isDead())
                                             aqt->state |= 4;
                                         else {
                                             aqt->multi_var.enemy_var.shots_done += shots_done;
@@ -607,7 +607,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                         //if (aqt->multi_var.time_var.desc == 0) {
                             if ((aqt->t_smo->majorType() == MapObject::mjt_Ped
                                 && !checkHostileIs((PedInstance *)aqt->t_smo))
-                                || aqt->t_smo->health() <= 0)
+                                || aqt->t_smo->isDead())
                             {
                                 aqt->ot_execute &= PedInstance::ai_aAll
                                     ^ (PedInstance::ai_aWaitToStart
@@ -2405,7 +2405,7 @@ void PedInstance::verifyHostilesFound(Mission *m) {
     {
         ShootableMapObject *smo = it->first;
         double distTo = 0;
-        if (smo->health() <= 0 || (smo->majorType() == MapObject::mjt_Ped
+        if (smo->isDead() || (smo->majorType() == MapObject::mjt_Ped
             && checkFriendIs((PedInstance *)(smo)))
             || (m->inRangeCPos(&cur_xyz, &smo, NULL, false, false,
             check_rng, &distTo) != 1))

@@ -338,8 +338,8 @@ public:
         if (n > 255)
             n = 255;
 
-        if (n < 0)
-            n = 0;
+        if (n < -1)
+            n = -1;
 
         health_ = n;
     }
@@ -350,8 +350,8 @@ public:
         if (n > 255)
             n = 255;
 
-        if (n < 0)
-            n = 0;
+        if (n < -1)
+            n = -1;
 
         start_health_ = n;
     }
@@ -371,6 +371,8 @@ public:
         return true;
     }
     virtual bool isExcluded() { return health_ <= 0; }
+    bool isAlive() { return health_ <= 0; }
+    bool isDead() { return health_ > 0; }
 
   protected:
     int health_, start_health_;

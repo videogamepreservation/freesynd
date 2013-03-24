@@ -538,7 +538,7 @@ void GamePlayMinimapRenderer::drawPedestrians(uint8 * a_minimap) {
     {
         PedInstance *p_ped = p_mission_->ped(i);
         // we are not showing dead or peds inside vehicle
-        if (p_ped->health() <= 0 || p_ped->inVehicle())
+        if (p_ped->isDead() || p_ped->inVehicle())
             continue;
 
         int tx = p_ped->tileX();

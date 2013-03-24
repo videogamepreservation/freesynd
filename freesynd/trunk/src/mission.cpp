@@ -802,7 +802,7 @@ void Mission::createFastKeys(int tilex, int tiley, int maxtilex, int maxtiley) {
     // updating position for visual markers
     for (unsigned int i = 0; i < 4; i++) {
         PedInstance *p = peds_[i];
-        if (p->agentIs() == PedInstance::Agent_Active && p->health() > 0) {
+        if (p->agentIs() == PedInstance::Agent_Active && p->isAlive()) {
             if (p->tileX() >= tilex && p->tileX() < maxtilex
                 && p->tileY() >= tiley && p->tileY() < maxtiley)
             {
@@ -1147,7 +1147,7 @@ void Mission::end()
     LOG(Log::k_FLG_GAME, "Mission", "end()", ("End mission"));
     for (unsigned int i = 8; i < peds_.size(); i++) {
         PedInstance *p = peds_[i];
-        if (p->health() <= 0) {
+        if (p->isDead()) {
             switch (p->getMainType()) {
                 case PedInstance::m_tpAgent:
                     stats_.enemyKilled++;
@@ -1185,7 +1185,7 @@ void Mission::end()
         PedInstance *p_pedAgent = p_squad_->member(i);
         if (p_pedAgent) {
             Agent *pAg = g_Session.agents().squadMember(i);
-            if (p_pedAgent->health() <= 0) {
+            if (p_pedAgent->isDead()) {
                 // an agent died -> remove him from cryo
                 p_pedAgent->destroyAllWeapons();
                 g_Session.agents().destroyAgentSlot(i);
@@ -1359,7 +1359,7 @@ bool Mission::setSurfaces() {
         int x = p->tileX();
         int y = p->tileY();
         int z = p->tileZ();
-        if (z >= mmax_z_ || z < 0 || p->health() <= 0) {
+        if (z >= mmax_z_ || z < 0 || p->isDead()) {
             // TODO : check on all maps those peds correct position
             p->setTileZ(mmax_z_ - 1);
             continue;

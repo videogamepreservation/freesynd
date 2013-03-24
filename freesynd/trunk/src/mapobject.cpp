@@ -949,7 +949,7 @@ bool Door::animate(int elapsed, Mission *obj)
                         state_ = Static::sttdoor_Closing;
                         is_ignored_ = false;
                         frame_ = 0;
-                    } else if (p && p->health() > 0){
+                    } else if (p && p->isAlive()){
                         state_ = Static::sttdoor_Open;
                         is_ignored_ = true;
                         found = true;
@@ -972,7 +972,7 @@ bool Door::animate(int elapsed, Mission *obj)
             do {
                 p = (PedInstance *)(obj->findAt(x + inc_rel,
                     y + rel_inc, z, &mt, &si, true));
-                if (p && p->health() > 0) {
+                if (p && p->isAlive()) {
                     if (!found) {
                         state_ = Static::sttdoor_Opening;
                         is_ignored_ = false;
@@ -993,7 +993,7 @@ bool Door::animate(int elapsed, Mission *obj)
             do {
                 p = (PedInstance *)(obj->findAt(x + inc_rel,
                     y + rel_inc, z, &mt, &si, true));
-                if (p && p->health() > 0) {
+                if (p && p->isAlive()) {
                     if (!found) {
                         state_ = Static::sttdoor_Opening;
                         is_ignored_ = false;

@@ -13,7 +13,7 @@ ObjPersuade::ObjPersuade(MapObject * pMapObject) : TargetObjective(pMapObject) {
  */
 void ObjPersuade::selfEvaluate(GameEvent &evt, Mission *pMission) {
     PedInstance *p = static_cast<PedInstance *>(p_target_);
-    if (p->health() <= 0)
+    if (p->isDead())
     {
         // Target is dead -> mission is failed
         endObjective(evt, false);
@@ -34,7 +34,7 @@ ObjAssassinate::ObjAssassinate(MapObject * pMapObject) : TargetObjective(pMapObj
  */
 void ObjAssassinate::selfEvaluate(GameEvent &evt, Mission *pMission) {
     PedInstance *p = static_cast<PedInstance *>(p_target_);
-    if (p->health() <= 0)
+    if (p->isDead())
     {
         // Target is dead -> objective is completed
         endObjective(evt, true);
@@ -63,7 +63,7 @@ ObjProtect::ObjProtect(MapObject * pMapObject) : TargetObjective(pMapObject) {
  */
 void ObjProtect::selfEvaluate(GameEvent &evt, Mission *pMission) {
     PedInstance *p = static_cast<PedInstance *>(p_target_);
-    if (p->health() <= 0) {
+    if (p->isDead()) {
         // Target is dead -> objective is failed
         endObjective(evt, false);
     }
@@ -86,7 +86,7 @@ ObjDestroyVehicle::ObjDestroyVehicle(MapObject * pVehicle) : TargetObjective(pVe
 void ObjDestroyVehicle::selfEvaluate(GameEvent &evt, Mission *pMission) {
     VehicleInstance *pVehicle = static_cast<VehicleInstance *>(p_target_);
 
-    if (pVehicle->health() <= 0) {
+    if (pVehicle->isDead()) {
         endObjective(evt, true);
     }
 }
@@ -107,7 +107,7 @@ ObjUseVehicle::ObjUseVehicle(MapObject * pVehicle) : TargetObjective(pVehicle) {
 void ObjUseVehicle::selfEvaluate(GameEvent &evt, Mission *pMission) {
     VehicleInstance *pVehicle = static_cast<VehicleInstance *>(p_target_);
 
-    if (pVehicle->health() <= 0) {
+    if (pVehicle->isDead()) {
         endObjective(evt, false);
         return;
     }
@@ -134,7 +134,7 @@ ObjTakeWeapon::ObjTakeWeapon(MapObject * pWeapon) : TargetObjective(pWeapon) {
 void ObjTakeWeapon::selfEvaluate(GameEvent &evt, Mission *pMission) {
     WeaponInstance *pWeapon = static_cast<WeaponInstance *>(p_target_);
 
-    if (pWeapon->health() <= 0) {
+    if (pWeapon->isDead()) {
         endObjective(evt, false);
     } else {
         ShootableMapObject *owner = pWeapon->getOwner();
@@ -175,7 +175,7 @@ void ObjEliminate::selfEvaluate(GameEvent &evt, Mission *pMission) {
             // we can persuade them, will be
             // counted as eliminating for now
             && pPed->objGroupID() == indx_grpid.grpid
-            && pPed->health() > 0)
+            && pPed->isAlive())
         {
             return;
         }
@@ -219,7 +219,7 @@ void ObjEvacuate::selfEvaluate(GameEvent &evt, Mission *pMission) {
 
     for (size_t indx = AgentManager::kSlot1; indx < AgentManager::kMaxSlot; indx++) {
         PedInstance *pAgent = pMission->getSquad()->member(indx);
-        if (pAgent && pAgent->health() > 0) {
+        if (pAgent && pAgent->isAlive()) {
             if (pAgent->distanceToPosXYZ(&pos_xyz) > 512) {
                 // one of the peds is not yet in the evacuation perimeter
                 return;

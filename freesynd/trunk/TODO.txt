@@ -71,5 +71,4 @@ Packaging:
  - Reload button translation for non-English languages
  - Use game lost menu
  - Remove debug info displayed in the console
- -  add functions isAlive isDead for all objects with health
  - deselect "select all" button when all agents are dead
