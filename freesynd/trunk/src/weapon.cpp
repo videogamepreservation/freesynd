@@ -672,7 +672,7 @@ uint16 WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
             cp.z = (m->mmax_z_ - 1) * 128;
     }
 
-    unsigned int shot_prop = pWeaponClass_->shotProperty();
+    unsigned int shot_prop = shotProperty();
 
     if (pWeaponClass_->dmgType() == MapObject::dmg_None) {
         return 4;
@@ -993,7 +993,7 @@ int WeaponInstance::getShots(int *elapsed, uint32 make_shots) {
     elapsed_l = 0;
 
     uint32 shots_can_do = 0xFFFFFFFF;
-    if (pWeaponClass_->shotProperty() & Weapon::spe_UsesAmmo) {
+    if (shotProperty() & Weapon::spe_UsesAmmo) {
         shots_can_do = ammo_remaining_ / pWeaponClass_->ammoPerShot();
         if (ammo_remaining_ % pWeaponClass_->ammoPerShot())
             shots_can_do++;

@@ -86,7 +86,7 @@ public:
     void setSquadMember(size_t slotId, Agent *pAgent) { 
         assert(slotId < kMaxSlot);
         a_squad_[slotId] = pAgent;
-    };
+    }
 
     //! Returns the agent on the given squad slot
     Agent * squadMember(size_t slotId) {

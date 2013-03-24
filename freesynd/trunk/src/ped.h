@@ -182,7 +182,7 @@ public:
         ad_DieBurnAnim,
         ad_SmokeBurnAnim,
         ad_DeadBurnAnim,
-        ad_PersuadedAnim,
+        ad_PersuadedAnim
     }AnimationDrawn;
 
     typedef enum {
@@ -190,7 +190,7 @@ public:
         m_tpAgent = 0x02,
         m_tpPolice = 0x04,
         m_tpGuard = 0x08,
-        m_tpCriminal = 0x10,
+        m_tpCriminal = 0x10
     }mainPedType;
 
     typedef enum {
@@ -547,12 +547,16 @@ public:
             // use weapon that inflicts this type of damage
             MapObject::DamageType dmg_type;
         } wpn;
-        // union description
+        // union descriptor
         // 0 - not set, 1 - indx, 2 - pointer, 3 - weapon type,
         // 4 - damage type strict (type == dmg_type),
         // 5 - damage type non-strict (type & dmg_type != 0)
+        // NOTE: indx should be used only when loading game script;
+        // 4,5 - when that can shoot only
         uint8 desc;
+        bool use_ranks;
     } pedWeaponToUse;
+    bool selectRequiredWeapon(pedWeaponToUse *pw_to_use = NULL);
 
     typedef enum {
         ai_aNone = 0x0,
@@ -627,7 +631,7 @@ public:
                 uint32 make_shots;
                 uint32 shots_done;
                 bool forced_shot;
-                pedWeaponToUse weapon;
+                pedWeaponToUse pw_to_use;
                 // upon reaching this value action is complete;
                 // health dropped to this value( or persuade resistance points?)
                 int32 value;
@@ -730,7 +734,7 @@ public:
     void createActQWait(PedInstance::actionQueueGroupType& as, int tm_wait,
                         uint8 desc = 0);
 
-    void createActQFindEnemy(actionQueueGroupType &as);
+    bool createActQFindEnemy(actionQueueGroupType &as);
     void createActQResetActionQueue(actionQueueGroupType &as);
     void createActQDeselectCurWeapon(actionQueueGroupType &as);
     

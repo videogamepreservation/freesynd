@@ -108,9 +108,11 @@ bool PedInstance::createActQFiring(actionQueueGroupType &as, PathNode *tpn,
     Weapon *pWeapon = NULL;
     if (pw_to_use) {
         switch (pw_to_use->desc) {
-            // TODO: use it later, convert indx to weapon pointer
             case 1:
-                // indx used
+                pw_to_use->wpn.wi = weapon(pw_to_use->wpn.indx);
+                can_shoot = pw_to_use->wpn.wi->canShoot();
+                does_phys_dmg = pw_to_use->wpn.wi->doesPhysicalDmg();
+                pw_to_use->desc = 2;
                 break;
             case 2:
                 // pointer
@@ -142,14 +144,28 @@ bool PedInstance::createActQFiring(actionQueueGroupType &as, PathNode *tpn,
                     & MapObject::dmg_Physical) != 0;
                 break;
         }
-        aq.multi_var.enemy_var.weapon = *pw_to_use;
+        aq.multi_var.enemy_var.pw_to_use = *pw_to_use;
     } else {
         WeaponInstance *wi = selectedWeapon();
         if (wi) {
             can_shoot = wi->canShoot();
             does_phys_dmg = wi->doesPhysicalDmg();
-            aq.multi_var.enemy_var.weapon.desc = 2;
-            aq.multi_var.enemy_var.weapon.wpn.wi = wi;
+            Mod *pMod = slots_[Mod::MOD_BRAIN];
+            if (pMod) {
+                if (pMod->getVersion() == Mod::MOD_V3) {
+                    aq.multi_var.enemy_var.pw_to_use.desc = 5;
+                    aq.multi_var.enemy_var.pw_to_use.wpn.dmg_type = wi->dmgType();
+                } else if (pMod->getVersion() == Mod::MOD_V2) {
+                    aq.multi_var.enemy_var.pw_to_use.desc = 4;
+                    aq.multi_var.enemy_var.pw_to_use.wpn.dmg_type = wi->dmgType();
+                } else {
+                    aq.multi_var.enemy_var.pw_to_use.desc = 3;
+                    aq.multi_var.enemy_var.pw_to_use.wpn.wpn_type = wi->getWeaponType();
+                }
+            } else {
+                aq.multi_var.enemy_var.pw_to_use.desc = 2;
+                aq.multi_var.enemy_var.pw_to_use.wpn.wi = wi;
+            }
         } else
             return false;
     }
@@ -157,6 +173,7 @@ bool PedInstance::createActQFiring(actionQueueGroupType &as, PathNode *tpn,
     if (!can_shoot)
         return false;
 
+    aq.multi_var.enemy_var.pw_to_use.use_ranks = slots_[Mod::MOD_BRAIN] ? true: false;
     aq.multi_var.enemy_var.value = value;
     aq.multi_var.enemy_var.forced_shot = forced_shot;
     if (does_phys_dmg) {
@@ -347,7 +364,7 @@ void PedInstance::createActQWait(actionQueueGroupType &as, int tm_wait, uint8 de
     as.actions.push_back(aq);
 }
 
-void PedInstance::createActQFindEnemy(actionQueueGroupType &as) {
+bool PedInstance::createActQFindEnemy(actionQueueGroupType &as) {
     as.state = 1;
     actionQueueType aq;
     aq.as = PedInstance::pa_smNone;
@@ -356,12 +373,43 @@ void PedInstance::createActQFindEnemy(actionQueueGroupType &as) {
     aq.ot_execute = PedInstance::ai_aFindEnemy;
     as.actions.push_back(aq);
     pedWeaponToUse pw_to_use;
-    pw_to_use.desc = 5;
-    pw_to_use.wpn.dmg_type = MapObject::dmg_Physical;
+    Mod *pMod = slots_[Mod::MOD_BRAIN];
+    if (getMainType() == PedInstance::m_tpAgent) {
+        aq.multi_var.enemy_var.pw_to_use.use_ranks = pMod || (!isOurAgent())
+            ? true: false;
+        WeaponInstance *wi = selectedWeapon();
+        if (wi && wi->canShoot()) {
+            if (pMod) {
+                if (pMod->getVersion() == Mod::MOD_V3) {
+                    pw_to_use.desc = 5;
+                    pw_to_use.wpn.dmg_type = wi->dmgType();
+                } else if (pMod->getVersion() == Mod::MOD_V2) {
+                    pw_to_use.desc = 4;
+                    pw_to_use.wpn.dmg_type = wi->dmgType();
+                } else {
+                    // Mod::MOD_V1
+                    pw_to_use.desc = 3;
+                    pw_to_use.wpn.wpn_type = wi->getWeaponType();
+                }
+            } else {
+                pw_to_use.desc = 2;
+                pw_to_use.wpn.wi = wi;
+            }
+        } else {
+            pw_to_use.desc = 5;
+            pw_to_use.wpn.dmg_type = MapObject::dmg_Physical;
+        }
+    } else {
+        pw_to_use.desc = 5;
+        pw_to_use.wpn.dmg_type = MapObject::dmg_Physical;
+    }
     if (createActQFiring(as, NULL, NULL, false, 0, &pw_to_use))
         as.actions.back().state |= 64;
+    else
+        return false;
     createActQFollowing(as, NULL, 1);
     as.actions.back().state |= 64;
+    return true;
 }
 
 void PedInstance::createActQResetActionQueue(actionQueueGroupType &as) {

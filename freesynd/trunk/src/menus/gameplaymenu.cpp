@@ -798,9 +798,7 @@ void GameplayMenu::handleClickOnMap(int x, int y, int button, const int modKeys)
                             action = true;
                             break;
                          case MapObject::mjt_Vehicle:
-                            // TODO: Shouldn't this check if the vehicle is the
-                            // one we're in?
-                            if (ped->inVehicle()) {
+                            if (ped->inVehicle() == target_) {
                                 ped->createActQLeaveCar(as, target_);
                                 action = true;
                             } else if (target_->health() > 0)
@@ -846,7 +844,7 @@ void GameplayMenu::handleClickOnMap(int x, int y, int button, const int modKeys)
                         break;
                     if (!setDestinationPoint(mapPt, isForGroup, addDestPt, i, ped)) {
                         // could not set destination point -> we can stop
-                        // TODO: if one agent can't move there all should stop?
+                        // TODO: if one agent can't move there, all should stop?
                         break;
                     }
                 }

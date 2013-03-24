@@ -57,7 +57,7 @@ public:
         TimeBomb = 11,
         AccessCard = 12,
         EnergyShield = 13,
-        Persuadatron = 14,
+        Persuadatron = 14
     } WeaponType;
 
     typedef enum {
@@ -70,7 +70,7 @@ public:
         Uzi_Anim,
         Laser_Anim,
         Gauss_Anim,
-        Shotgun_Anim,
+        Shotgun_Anim
     } WeaponAnimIndex;
 
     Weapon(const std::string& w_name, int smallIcon, int bigIcon, int w_cost,
@@ -146,7 +146,7 @@ public:
         spe_SelfDestruction = 0x0200,
         spe_TargetPedOnly = 0x0400,
         spe_CanShoot = 0x0800
-    }ShotPropertyEnum;
+    } ShotPropertyEnum;
 
     typedef enum {
         wspt_None = spe_None,
@@ -186,8 +186,8 @@ public:
 
     typedef enum {
         stm_AllObjects = MapObject::mjt_Ped | MapObject::mjt_Vehicle
-        | MapObject::mjt_Static | MapObject::mjt_Weapon,
-    }SearchTargetMask;
+        | MapObject::mjt_Static | MapObject::mjt_Weapon
+    } SearchTargetMask;
 
     typedef struct {
         PathNode tpn;
@@ -253,8 +253,8 @@ protected:
 class ShotClass {
 public:
     ShotClass(ShootableMapObject *tobj = NULL) : owner_(NULL),
-        target_object_(tobj){};
-    ~ShotClass(){};
+        target_object_(tobj){}
+    ~ShotClass(){}
     void setOwner(ShootableMapObject *owner) {
         owner_ = owner;
     }
@@ -297,7 +297,7 @@ public:
     int range() { return pWeaponClass_->range(); }
     int ammo() { return pWeaponClass_->ammo(); }
     int rank() { return pWeaponClass_->rank(); }
-    unsigned int shotProperty() { return pWeaponClass_->shotProperty(); }
+    uint32 shotProperty() { return pWeaponClass_->shotProperty(); }
     const char * name() { return pWeaponClass_->getName(); }
 
     Weapon::WeaponAnimIndex index() { return pWeaponClass_->index(); }
@@ -348,6 +348,20 @@ public:
 
     bool needsReloading() {
         return pWeaponClass_->ammo() > ammo_remaining_;
+    }
+
+    bool usesAmmo() {
+        return shotProperty() & Weapon::spe_UsesAmmo;
+    }
+
+    bool doesDmgStrict(uint32 dmg_type) {
+        return pWeaponClass_->dmgType() == dmg_type;
+    }
+    bool doesDmgNonStrict(uint32 dmg_type) {
+        return pWeaponClass_->dmgType() & dmg_type;
+    }
+    MapObject::DamageType dmgType() {
+        return pWeaponClass_->dmgType();
     }
 
 protected:

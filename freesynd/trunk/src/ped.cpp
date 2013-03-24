@@ -333,11 +333,12 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
 #if 1
         if ((state_ & pa_smDead) == 0) {
             actionQueueGroupType as;
-            createActQFindEnemy(as);
-            as.main_act = 0;
-            as.group_desc = PedInstance::gd_mThink | PedInstance::gd_mFire;
-            as.origin_desc = 2;
-            actions_queue_.push_back(as);
+            if (createActQFindEnemy(as)) {
+                as.main_act = 0;
+                as.group_desc = PedInstance::gd_mThink | PedInstance::gd_mFire;
+                as.origin_desc = 2;
+                actions_queue_.push_back(as);
+            }
         }
 #endif
     } else {
@@ -450,61 +451,59 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                 }
                 if ((aqt->ot_execute & PedInstance::ai_aAquireControl) != 0)
                 {
-                    if (aqt->t_smo->majorType() == MapObject::mjt_Ped) {
-                        // TODO: make it properly, check selected weapon
-                        // if not the one in weapon.desc select it,
-                        // check owner
-                        // NOTE: don't put weapon on the ground
-                        WeaponInstance *wi = aqt->multi_var.enemy_var.weapon.wpn.wi;
-                        if (wi && wi->getMainType()
-                            == Weapon::Persuadatron && aqt->t_smo->health() > 0)
+                    if (aqt->t_smo->health() > 0) {
+                        if (aqt->t_smo->majorType() == MapObject::mjt_Ped) {
+                            if (selectRequiredWeapon(&aqt->multi_var.enemy_var.pw_to_use))
+                            {
+                                WeaponInstance *wi = selectedWeapon();
+                                int tm_left = elapsed;
+                                uint16 answ = wi->inflictDamage(aqt->t_smo, NULL, &tm_left);
+                                if (answ == 0) {
+                                    if (checkFriendIs((PedInstance *)aqt->t_smo))
+                                        aqt->state |= 4;
+                                } else if (answ == 2) {
+                                    aqt->state |= 2;
+                                } else
+                                    aqt->state |= 8;
+                            } else
+                                aqt->state |= 8;
+                        } else if (aqt->t_smo->majorType()
+                                    == MapObject::mjt_Vehicle)
                         {
-                            int tm_left = elapsed;
-                            uint16 answ = wi->inflictDamage(aqt->t_smo, NULL, &tm_left);
-                            if (answ == 0) {
-                                if (checkFriendIs((PedInstance *)aqt->t_smo))
-                                    aqt->state |= 4;
-                            } else if (answ == 2) {
-                                aqt->state |= 2;
+                            VehicleInstance *v = (VehicleInstance *)aqt->t_smo;
+                            if (v->health() > 0 && (state_
+                                & (PedInstance::pa_smInCar
+                                | PedInstance::pa_smUsingCar)) == 0
+                                && samePosition(v))
+                            {
+                                if (aqt->condition == 0) {
+                                    v->setDriver(this);
+                                    if (v->isInsideVehicle(this)) {
+                                        aqt->state |= 4;
+                                        if (v->isDriver(this))
+                                            putInVehicle(v, pa_smUsingCar);
+                                        else
+                                            putInVehicle(v, pa_smInCar);
+                                    } else
+                                        aqt->state |= 8;
+                                } else if (aqt->condition == 1) {
+                                    if (v->hasDriver()) {
+                                        if (v->isDriver(this))
+                                            aqt->state |= 4;
+                                        else
+                                            aqt->state |= 8;
+                                    } else {
+                                        v->setDriver(this);
+                                        aqt->state |= 4;
+                                        putInVehicle(v, pa_smUsingCar);
+                                    }
+                                }
                             } else
                                 aqt->state |= 8;
                         } else
-                            aqt->state |= 8;
-                    } else if (aqt->t_smo->majorType()
-                                == MapObject::mjt_Vehicle)
-                    {
-                        VehicleInstance *v = (VehicleInstance *)aqt->t_smo;
-                        if (v->health() > 0 && (state_
-                            & (PedInstance::pa_smInCar
-                            | PedInstance::pa_smUsingCar)) == 0
-                            && samePosition(v))
-                        {
-                            if (aqt->condition == 0) {
-                                v->setDriver(this);
-                                if (v->isInsideVehicle(this)) {
-                                    aqt->state |= 4;
-                                    if (v->isDriver(this))
-                                        putInVehicle(v, pa_smUsingCar);
-                                    else
-                                        putInVehicle(v, pa_smInCar);
-                                } else
-                                    aqt->state |= 8;
-                            } else if (aqt->condition == 1) {
-                                if (v->hasDriver()) {
-                                    if (v->isDriver(this))
-                                        aqt->state |= 4;
-                                    else
-                                        aqt->state |= 8;
-                                } else {
-                                    v->setDriver(this);
-                                    aqt->state |= 4;
-                                    putInVehicle(v, pa_smUsingCar);
-                                }
-                            }
-                        } else
+                            // type cannot be aquired
                             aqt->state |= 8;
                     } else
-                        // type cannot be aquired
                         aqt->state |= 8;
                 }
                 if ((aqt->ot_execute & PedInstance::ai_aLoseControl) != 0)
@@ -552,21 +551,17 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                         if (aqt->t_smo->health() <= 0) {
                             // not object did it as such he failed,
                             // but goal reached
+                            // TODO: projectile shot?
                             aqt->state |= 12;
-                        } else if (aqt->t_smo->majorType() == MapObject::mjt_Ped
+                        } else if ((aqt->t_smo->majorType() == MapObject::mjt_Ped
                             ? aqt->multi_var.enemy_var.forced_shot
                             || !checkFriendIs((PedInstance *)aqt->t_smo) : true)
+                            && selectRequiredWeapon(&aqt->multi_var.enemy_var.pw_to_use))
                         {
-                            // TODO: make it properly, check selected weapon
-                            // if not the one in weapon.desc select it,
-                            // check owner
                             // TODO: if object can't see target and none of
                             // friendly units can see it we should fail,
                             // use check from findenemy?
                             WeaponInstance *wi = selectedWeapon();
-                            if (!wi)
-                                selectBestWeapon();
-                            wi = selectedWeapon();
                             if (wi && wi->ammoRemaining() > 0)
                             {
                                 int tm_left = elapsed;
@@ -593,6 +588,13 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                                                 aqt->state |= 4;
                                             }
                                         }
+                                    }
+                                    wi = selectedWeapon();
+                                    if (wi && wi->ammoRemaining() == 0) {
+                                        // hiding weapon without ammo
+                                        createActQDeselectCurWeapon(*it);
+                                        it->main_act = it->actions.size() - 1;
+                                        aqt = it->actions.begin() + indx;
                                     }
                                 } else
                                     aqt->state |= 8;
@@ -925,13 +927,9 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                     && (aqt->state & 128) == 0)
                 {
                     // TODO: additional conditions
-                    WeaponInstance *wi = selectedWeapon();
-                    if (!wi)
-                        selectBestWeapon();
-                    if (wi //&& (wi->shotProperty()
-                        //& Weapon::spe_CanShoot) != 0
-                        && wi->ammoRemaining() > 0)
+                    if (selectRequiredWeapon(&aqt->multi_var.enemy_var.pw_to_use))
                     {
+                        WeaponInstance *wi = selectedWeapon();
                         int tm_left = elapsed;
                         uint32 make_shots = aqt->multi_var.enemy_var.make_shots;
                         uint32 shots_done = make_shots
@@ -1147,13 +1145,12 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                         // enabling destroyobject action
                         aqt_attack.state ^= 64;
                         it->main_act++;
-                        // showing a gun if none selected
-                        if (!wi)
-                            selectBestWeapon();
                         if (obj_group_def_ == og_dmPolice
                             // only non controlled will follow and wait
                             && (desc_state_ & pd_smControlled) == 0)
                         {
+                            // forcing showing a gun
+                            selectRequiredWeapon();
                             aqt_attack.ot_execute |= PedInstance::ai_aWaitToStart;
                             aqt_attack.multi_var.time_var.time_before_start = 5000;
                             aqt->multi_var.time_var.desc = 1;
@@ -1377,11 +1374,12 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                     | PedInstance::gd_mFire)) == 0)
                 {
                     actionQueueGroupType as;
-                    createActQFindEnemy(as);
-                    as.main_act = 0;
-                    as.group_desc = PedInstance::gd_mThink | PedInstance::gd_mFire;
-                    as.origin_desc = 2;
-                    actions_queue_.insert(actions_queue_.begin(),as);
+                    if (createActQFindEnemy(as)) {
+                        as.main_act = 0;
+                        as.group_desc = PedInstance::gd_mThink | PedInstance::gd_mFire;
+                        as.origin_desc = 2;
+                        actions_queue_.insert(actions_queue_.begin(),as);
+                    }
                 }
             }
         }
@@ -1795,6 +1793,118 @@ void PedInstance::setSelectedWeapon(int n) {
                 desc_state_ |= pd_smNoAmmunition;
         }
     }
+}
+
+bool PedInstance::selectRequiredWeapon(pedWeaponToUse *pw_to_use) {
+    WeaponInstance *wi = selectedWeapon();
+    // pair <rank, indx>
+    std::vector < std::pair<int, int> > found_weapons;
+    uint8 sz;
+    bool alloced_pwtu = false;
+
+    if (!pw_to_use) {
+        pw_to_use = new pedWeaponToUse;
+        alloced_pwtu = true;
+        pw_to_use->desc = 5;
+        pw_to_use->wpn.dmg_type = MapObject::dmg_Physical;
+    }
+    bool found = false;
+    switch (pw_to_use->desc) {
+        case 2:
+            if (pw_to_use->wpn.wi == wi) {
+                found = true;
+            } else {
+                for (uint8 i = 0; i < numWeapons(); i++) {
+                    if (weapon(i) == wi) {
+                        setSelectedWeapon(i);
+                        found = true;
+                        break;
+                    }
+                }
+            }
+            break;
+        case 3:
+            sz = numWeapons();
+            for (uint8 i = 0; i < sz; i++) {
+                WeaponInstance *pWI = weapon(i);
+                if (pWI->getWeaponType() == pw_to_use->wpn.wpn_type)
+                {
+                    if (pWI->usesAmmo()) {
+                        if (pWI->ammoRemaining()) {
+                            found = true;
+                            setSelectedWeapon(i);
+                            break;
+                        }
+                    } else {
+                        found = true;
+                        setSelectedWeapon(i);
+                        break;
+                    }
+                }
+            }
+            break;
+        case 4:
+            sz = numWeapons();
+            for (uint8 i = 0; i < sz; i++) {
+                WeaponInstance *pWI = weapon(i);
+                if (pWI->canShoot()
+                    && pWI->doesDmgStrict(pw_to_use->wpn.dmg_type))
+                {
+                    if (pWI->usesAmmo()) {
+                        if (pWI->ammoRemaining()) {
+                            found = true;
+                            found_weapons.push_back(std::make_pair(pWI->rank(),
+                                i));
+                        }
+                    } else {
+                        found = true;
+                        found_weapons.push_back(std::make_pair(pWI->rank(),
+                            i));
+                    }
+                }
+            }
+            break;
+        case 5:
+            sz = numWeapons();
+            for (uint8 i = 0; i < sz; i++) {
+                WeaponInstance *pWI = weapon(i);
+                if (pWI->canShoot()
+                    && pWI->doesDmgNonStrict(pw_to_use->wpn.dmg_type))
+                {
+                    if (pWI->usesAmmo()) {
+                        if (pWI->ammoRemaining()) {
+                            found = true;
+                            found_weapons.push_back(std::make_pair(pWI->rank(),
+                                i));
+                        }
+                    } else {
+                        found = true;
+                        found_weapons.push_back(std::make_pair(pWI->rank(),
+                            i));
+                    }
+                }
+            }
+            break;
+    }
+
+    if (found_weapons.size()) {
+        int best_rank = -1;
+        int indx = -1;
+        if (pw_to_use->use_ranks) {
+            sz = found_weapons.size();
+            for (uint8 i = 0; i < sz; i++) {
+                if (best_rank < found_weapons[i].first) {
+                    best_rank = found_weapons[i].first;
+                    indx = found_weapons[i].second;
+                }
+            }
+            setSelectedWeapon(indx);
+        } else
+            setSelectedWeapon(found_weapons[0].second);
+    }
+    if (alloced_pwtu)
+        delete pw_to_use;
+    return found;
 }
 
 void PedInstance::selectNextWeapon() {
