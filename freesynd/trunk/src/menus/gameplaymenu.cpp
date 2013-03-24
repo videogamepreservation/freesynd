@@ -1496,7 +1496,7 @@ void GameplayMenu::updateSelectionForDeadAgents() {
     bool b_agentDied = false;
     for (size_t i = AgentManager::kSlot1; i < AgentManager::kMaxSlot; i++) {
         if (mission_->ped(i) && mission_->ped(i)->isOurAgent()) {
-            if (g_Session.agents().squadMember(i)->isAlive() && mission_->ped(i)->health() <= 0) {
+            if (g_Session.agents().squadMember(i)->isAlive() && mission_->ped(i)->isDead()) {
                 // TODO change this
                 //g_Session.agents().squadMember(i)->setHealth(0);
                 selection_.deselectAgent(i);
