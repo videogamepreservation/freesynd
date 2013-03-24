@@ -716,36 +716,54 @@ bool GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
 void GameplayMenu::handleClickOnWeaponSelector(int x, int y, int button, const int modKeys) {
     int w_num = ((y - (2 + 46 + 44 + 10 + 46 + 44 + 15)) / 32) * 4
             + x / 32;
-    for (SquadSelection::Iterator it = selection_.begin();
-                        it != selection_.end(); ++it) {
-        // TODO: when more then one agent is selecting weapon,
-        // the chosen ones should be same type and less ammo
-        // or best in rank
-        PedInstance *ped = *it;
-        if (w_num < ped->numWeapons()) {
+    bool weapon_is_selected = false;
+    PedInstance *pLeader = mission_->ped(selection_.getLeaderSlot());
+    if (pLeader->health() > 0) {
+        if (w_num < pLeader->numWeapons()) {
             if (button == 1) {
-                if (w_num < ped->numWeapons()) {
-                    if (ped->selectedWeapon() == ped->weapon(w_num))
-                        ped->setSelectedWeapon(-1);
-                    else
-                        ped->setSelectedWeapon(w_num);
-                    g_App.gameSounds().play(snd::SPEECH_SELECTED);
+                WeaponInstance *wi = pLeader->weapon(w_num);
+                bool deselect_curr = false;
+                if (pLeader->selectedWeapon() == wi) {
+                    deselect_curr = true;
                 }
+                for (SquadSelection::Iterator it = selection_.begin();
+                     it != selection_.end(); ++it) {
+                    PedInstance *ped = *it;
+                    if (deselect_curr)
+                        ped->setSelectedWeapon(-1);
+                    else {
+                        if (pLeader == ped) {
+                            pLeader->setSelectedWeapon(w_num);
+                        } else {
+                            WeaponInstance *pWI = ped->selectedWeapon();
+                            if ((pWI && pWI->getWeaponType() != wi->getWeaponType())
+                                 || !pWI)
+                            {
+                                PedInstance::pedWeaponToUse pw_to_use;
+                                pw_to_use.desc = 3;
+                                pw_to_use.wpn.wpn_type = wi->getWeaponType();
+                                ped->selectRequiredWeapon(&pw_to_use);
+                            }
+                        }
+                    }
+                    weapon_is_selected = true;
+                } // end for
             } else {
                 PedInstance::actionQueueGroupType as;
                 as.main_act = 0;
                 as.group_desc = PedInstance::gd_mExclusive;
                 as.origin_desc = 4;
-                ped->createActQPutDown(as,
-                    ped->weapon(w_num));
+                pLeader->createActQPutDown(as, pLeader->weapon(w_num));
                 if (modKeys & KMD_CTRL)
-                    ped->addActQToQueue(as);
+                    pLeader->addActQToQueue(as);
                 else
-                    ped->setActQInQueue(as);
+                    pLeader->setActQInQueue(as);
             }
         }
-    } // end for
+    }
     // redraw weapon selector
+    if (weapon_is_selected)
+        g_App.gameSounds().play(snd::SPEECH_SELECTED);
     addDirtyRect(0, 207, 128, 64);
 }
 
