@@ -371,8 +371,8 @@ public:
         return true;
     }
     virtual bool isExcluded() { return health_ <= 0; }
-    bool isAlive() { return health_ <= 0; }
-    bool isDead() { return health_ > 0; }
+    bool isAlive() { return health_ > 0; }
+    bool isDead() { return health_ <= 0; }
 
   protected:
     int health_, start_health_;

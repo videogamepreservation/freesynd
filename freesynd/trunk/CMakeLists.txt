@@ -18,7 +18,12 @@ if (WIN32 AND MSVC)
 	set (CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} /LTCG")
 else ()
 	# Set extra warnings.
-	set (EXTRA_C_FLAGS "-Wall -Wshadow -Wimplicit -Wno-multichar")
+    if (APPLE)
+        set (EXTRA_C_FLAGS "-Wall -Wshadow -Wimplicit -Wno-multichar")
+    endif ()
+    if (NOT APPLE)
+        set (EXTRA_C_FLAGS "-Wall -Wshadow -Wno-multichar")
+    endif ()
 	set (EXTRA_CXX_FLAGS "${EXTRA_C_FLAGS} -Wreorder -Wnon-virtual-dtor")
 	# Set debug flag.
 	set (CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -D_DEBUG")
