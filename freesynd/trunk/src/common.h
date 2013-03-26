@@ -139,6 +139,8 @@ namespace fs_cmn {
     static const uint8 kColorLightGreen = 3;
     /*! Color constant : Light grey */
     static const uint8 kColorLightGrey = 4;
+    /*! Color constant : Dark Brown */
+    static const uint8 kColorDarkBrown = 5;
     /*! Color constant : Dark Red */
     static const uint8 kColorDarkRed = 6;
     /*! Color constant : Blue Grey */
@@ -147,6 +149,8 @@ namespace fs_cmn {
     static const uint8 kColorYellow = 11;
     /*! Color constant : White */
     static const uint8 kColorWhite = 12;
+    /*! Color constant : Light Brown */
+    static const uint8 kColorLightBrown = 13;
     /*! Color constant : Light Red */
     static const uint8 kColorLightRed = 14;
     /*! Color constant : Blue */

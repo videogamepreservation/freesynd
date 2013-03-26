@@ -289,7 +289,6 @@ void GameplayMenu::handleShow() {
 
     // init menu internal state
     pressed_btn_select_all_ = false;
-    completed_ = false;
     world_x_ = mission_->startX();
     world_y_ = mission_->startY();
     
@@ -331,11 +330,13 @@ void GameplayMenu::handleTick(int elapsed)
     bool change = false;
     tick_count_ += elapsed;
 
-    // Update stats
-    mission_->getStatistics()->mission_duration += elapsed;
+    if (!mission_->completed() && !mission_->failed()) {
+        // Update stats
+        mission_->getStatistics()->mission_duration += elapsed;
 
-    // Checks mission objectives
-    mission_->checkObjectives();
+        // Checks mission objectives
+        mission_->checkObjectives();
+    }
 
     // Scroll the map
     if (scroll_x_ != 0 || scroll_y_ != 0) {
@@ -1039,12 +1040,12 @@ bool GameplayMenu::handleUnknownKey(Key key, const int modKeys) {
 
 #ifdef _DEBUG
     if (isLetterH(key.unicode)) {
-        mission_->setStatus(Mission::COMPLETED);
+        mission_->endWithStatus(Mission::COMPLETED);
         return true;
     }
 
     if (isLetterG(key.unicode)) {
-        mission_->setStatus(Mission::FAILED);
+        mission_->endWithStatus(Mission::FAILED);
         return true;
     }
 #endif
@@ -1069,7 +1070,7 @@ bool GameplayMenu::handleUnknownKey(Key key, const int modKeys) {
         }
     } else if (key.keyFunc == KFC_ESCAPE) {
         // Abort mission
-        mission_->setStatus(Mission::ABORTED);
+        mission_->endWithStatus(Mission::ABORTED);
         // Return false so when can still go to parent menu with escape
         return false;
     }
@@ -1322,21 +1323,11 @@ void GameplayMenu::drawMissionHint(int elapsed) {
         if (mission_) {
             mission_->objectiveMsg(str);
             if (mission_->failed()) {
-                if (!completed_) {
-                    completed_ = true;
-                    g_App.gameSounds().play(snd::SPEECH_MISSION_FAILED);
-                }
-
                 str = g_App.menus().getMessage("HINT_MISSION_FAILED");
                 text_pw = false;
             }
 
             if (mission_->completed()) {
-                if (!completed_) {
-                    completed_ = true;
-                    g_App.gameSounds().play(snd::SPEECH_MISSION_COMPLETED);
-                }
-
                 str = g_App.menus().getMessage("HINT_MISSION_COMPLETE");
                 text_pw = false;
             }

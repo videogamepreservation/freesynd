@@ -174,12 +174,12 @@ public:
     void incStatisticsHits(int hits) { stats_.nbOfHits += hits; }
 
     void start();
-    //! Forces mission status
-    void setStatus(Status status) { status_ = status; }
     //! Returns mission status
     Status getStatus() { return status_; }
     //! Check if objectives are completed or failed
     void checkObjectives();
+    //! Ends mission with the given status
+    void endWithStatus(Status status);
     //! Returns true if mission status is failed
     bool failed() { return status_ == FAILED; }
     //! Returns true if mission status is completed

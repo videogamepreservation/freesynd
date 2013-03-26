@@ -1015,7 +1015,7 @@ void Mission::start()
 void Mission::checkObjectives() {
     // checking agents, if all are dead -> mission failed
     if (p_squad_->isAllDead()) {
-        status_ = FAILED;
+        endWithStatus(FAILED);
         return;
     }
 
@@ -1042,7 +1042,7 @@ void Mission::checkObjectives() {
 
         if (pObj->isTerminated()) {
             if (pObj->status == kFailed) {
-                status_ = FAILED;
+                endWithStatus(FAILED);
             } else {
                 // Objective is completed -> go to next one
                 cur_objective_++;
@@ -1070,12 +1070,32 @@ void Mission::handleObjectiveEvent(GameEvent & evt, ObjectiveDesc *pObj) {
         break;
     case GameEvent::kObjSucceed:
         // Special event to know a mission is completed
-        status_ = COMPLETED;
+        endWithStatus(COMPLETED);
         break;
     default:
         break;
     }
     fireGameEvent(evt);
+}
+
+/*!
+ * Ends the mission with the given status.
+ * \param status The ending status
+ */
+void Mission::endWithStatus(Status status) {
+    switch (status) {
+    case COMPLETED:
+        status_ = COMPLETED;
+        g_App.gameSounds().play(snd::SPEECH_MISSION_COMPLETED);
+        break;
+    case FAILED:
+        status_ = FAILED;
+        g_App.gameSounds().play(snd::SPEECH_MISSION_FAILED);
+        break;
+    case ABORTED:
+        status_ = ABORTED;
+        break;
+    }
 }
 
 /*! 

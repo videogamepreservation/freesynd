@@ -130,8 +130,7 @@ private:
             case IPAStim::Perception:
                 return fs_cmn::kColorBlue;
             case IPAStim::Intelligence:
-                // TODO: this color needs to be defined
-                return 13;
+                return fs_cmn::kColorLightBrown;
             default:
                 assert(false);
         }
@@ -147,8 +146,7 @@ private:
             case IPAStim::Perception:
                 return fs_cmn::kColorBlueGrey;
             case IPAStim::Intelligence:
-                // TODO: this color needs to be defined
-                return 5;
+                return fs_cmn::kColorDarkBrown;
             default:
                 assert(false);
         }

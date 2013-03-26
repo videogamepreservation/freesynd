@@ -115,7 +115,6 @@ protected:
     GamePlayMinimapRenderer mm_renderer_;
     /*! This renderer is in charge of drawing the IPA meters.*/
     AgentSelectorRenderer agt_sel_renderer_;
-    bool completed_;
     bool pressed_btn_select_all_;
     struct {
         bool shooting_;
