@@ -172,7 +172,11 @@ void Research::improve(Weapon *pWeapon) {
 
         ProgressPoint lastPt = progressList_.back();
         ProgressPoint newPt;
-        newPt.coeffId = lastPt.coeffId;
+        // NOTE: in updateProgression if coeffInd_ == lastPt.coeffId
+        // this point will be substituted by new point with
+        // different percent and hours value,
+        // to avoid this we set it to -1
+        newPt.coeffId = -1;
         newPt.hours = lastPt.hours;
         // Adds a bonus to research
         newPt.percentage = lastPt.percentage + 25.0f;
