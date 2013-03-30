@@ -244,7 +244,6 @@ public:
     void setSelectedWeapon(int n);
 
     void selectNextWeapon();
-    void selectBestWeapon();
     void dropWeapon(int n);
     void dropWeapon(WeaponInstance *w);
     void dropAllWeapons();

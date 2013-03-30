@@ -1799,13 +1799,12 @@ bool PedInstance::selectRequiredWeapon(pedWeaponToUse *pw_to_use) {
     // pair <rank, indx>
     std::vector < std::pair<int, int> > found_weapons;
     uint8 sz;
-    bool alloced_pwtu = false;
+    pedWeaponToUse local_pw_to_use;
 
     if (!pw_to_use) {
-        pw_to_use = new pedWeaponToUse;
-        alloced_pwtu = true;
-        pw_to_use->desc = 5;
-        pw_to_use->wpn.dmg_type = MapObject::dmg_Physical;
+        pw_to_use = &local_pw_to_use;
+        local_pw_to_use.desc = 5;
+        local_pw_to_use.wpn.dmg_type = MapObject::dmg_Physical;
     }
     bool found = false;
     switch (pw_to_use->desc) {
@@ -1901,58 +1900,40 @@ bool PedInstance::selectRequiredWeapon(pedWeaponToUse *pw_to_use) {
         } else
             setSelectedWeapon(found_weapons[0].second);
     }
-    if (alloced_pwtu)
-        delete pw_to_use;
     return found;
 }
 
 void PedInstance::selectNextWeapon() {
-
     if (selected_weapon_ != -1) {
         int nextWeapon = -1;
-        WeaponInstance *curSelectedWeapon = (WeaponInstance *)weapon(selected_weapon_);
+        WeaponInstance *cur_sel_weapon = (WeaponInstance *)weapon(selected_weapon_);
 
-        if (curSelectedWeapon) {
+        if (cur_sel_weapon) {
             for (int i = 0; i < numWeapons(); i++) {
                 WeaponInstance * wi = weapon(i);
                 if (i != selected_weapon_ && wi->ammoRemaining()
-                        && wi->getMainType()
-                            == curSelectedWeapon->getMainType())
+                        && wi->getMainType() == cur_sel_weapon->getMainType())
                 {
                     if (nextWeapon == -1)
                         nextWeapon = i;
                     else {
                         if (wi->ammoRemaining()
                             < weapon(nextWeapon)->ammoRemaining())
+                        {
                             nextWeapon = i;
+                        }
                     }
                 }
             }
         }
 
+        setSelectedWeapon(-1);
         if (nextWeapon == -1)
-            selectBestWeapon();
+            selectRequiredWeapon();
         else
             setSelectedWeapon(nextWeapon);
     } else
-        selectBestWeapon();
-}
-
-void PedInstance::selectBestWeapon() {
-    // TODO: select weapon by type and type of damage + rank
-    int bestWeapon = -1;
-    int bestWeaponRank = -1;
-
-    for (int i = numWeapons() - 1; i >= 0; i--) {
-        if (weapon(i)->ammoRemaining() && weapon(i)->rank() > bestWeaponRank) {
-            bestWeapon = i;
-            bestWeaponRank = weapon(i)->rank();
-        }
-    }
-
-    if(bestWeapon != -1) {
-        setSelectedWeapon(bestWeapon);
-    }
+        selectRequiredWeapon();
 }
 
 void PedInstance::dropWeapon(int n) {
