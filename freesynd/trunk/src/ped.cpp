@@ -1001,21 +1001,12 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                                             // needs this checking as list might
                                             // become invalidated by other
                                             // peds actions
-                                            /*bool excluded;
-                                            if (smo->majorType() == MapObject::mjt_Ped)
-                                                excluded = ((PedInstance *)smo)->isExcluded();
-                                            else
-                                                excluded = smo->isExcluded();*/
                                             if ((!smo->isExcluded())
                                                 && checkHostileIs(smo))
                                             {
-                                                // TODO: inrange check here might
-                                                // reduce speed, check
                                                 // TODO: reduce inrange calls, later
                                                 // TODO: set ignoreblocker based on Ai
-                                                if (//inSightRange((MapObject *)(smo))
-                                                    //&&
-                                                    mission->inRangeCPos(
+                                                if (mission->inRangeCPos(
                                                     &cur_xyz,
                                                     &smo, NULL, false, false,
                                                     view_rng, &distTo)
@@ -1040,9 +1031,8 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                                     // TODO: hostile_desc_alt to checkHostileIs?
                                     // IPA lvl inteligence?
                                     double distTo = 0;
-                                    if (//inSightRange((MapObject *)(p)) &&
-                                        // TODO: set ignoreblocker based on Ai
-                                        mission->inRangeCPos(&cur_xyz,
+                                    // TODO: set ignoreblocker based on Ai
+                                    if (mission->inRangeCPos(&cur_xyz,
                                         (ShootableMapObject **)(&p),
                                         NULL, false, false,
                                         view_rng, &distTo) == 1)
@@ -1065,10 +1055,8 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                                 if (checkHostileIs(p) ) {
                                     // TODO: hostile_desc_alt to checkHostileIs?
                                     double distTo = 0;
-                                    if (//inSightRange((MapObject *)(p))
-                                        //&&
                                     // TODO: set ignoreblocker based on Ai
-                                        mission->inRangeCPos(&cur_xyz,
+                                    if (mission->inRangeCPos(&cur_xyz,
                                         (ShootableMapObject **)(&p),
                                         NULL, false, false,
                                         view_rng, &distTo) == 1)
@@ -1179,14 +1167,9 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                             continue;
                         if (!checkFriendIs(p) ) {
                             double distTo = 0;
-                            if (//inSightRange((MapObject *)(p))
-                                //&&
-                                mission->inRangeCPos(
-                                &cur_xyz,
-                                (ShootableMapObject **)(&p),
-                                NULL, false, false,
-                                view_rng, &distTo)
-                                == 1)
+                            if (mission->inRangeCPos(&cur_xyz,
+                                (ShootableMapObject **)(&p), NULL, false, false,
+                                view_rng, &distTo) == 1)
                             {
                                 nf_dist.insert(Pairsmod_t(
                                     (ShootableMapObject *)p, distTo));
@@ -1201,9 +1184,8 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                         Pairsmod_t closest = *it_msmod;
                         it_msmod++;
                         while (it_msmod != nf_dist.end()) {
-                            if (it_msmod->second < closest.second) {
+                            if (it_msmod->second < closest.second)
                                 closest = *it_msmod;
-                            }
                             it_msmod++;
                         }
                         aqt->t_smo = closest.first;
@@ -1970,14 +1952,19 @@ void PedInstance::dropAllWeapons() {
 
     setRcvDamageDef(MapObject::ddmg_Ped);
     setSelectedWeapon(-1);
+    Mission *m = g_Session.getMission();
+    uint8 twd = m->mtsurfaces_[tile_x_ + m->mmax_x_ * tile_y_
+        + m->mmax_m_xy * tile_z_].twd;
 
     for (std::vector < WeaponInstance * >::iterator it
         = weapons_.begin(); it != weapons_.end(); it++)
     {
         WeaponInstance *w = *it;
         w->setMap(map());
-        // TODO: drop weapons not on same place, stairs problem
-        w->setPosition(tile_x_, tile_y_, tile_z_, off_x_, off_y_, off_z_);
+        int ox = rand() % 256;
+        int oy = rand() % 256;
+        w->setPosition(tile_x_, tile_y_, tile_z_, ox, oy);
+        w->offzOnStairs(twd);
         w->setOwner(NULL);
         w->setIsIgnored();
         if (w->getMainType() == Weapon::TimeBomb)
@@ -2109,7 +2096,7 @@ bool PedInstance::handleDrawnAnim(int elapsed) {
 
     PedInstance::AnimationDrawn curanim = drawnAnim();
     // TODO: resolve switch selected weapon and current drawing
-    // NOTE: quick fix. to remove
+    // FIXME: quick fix. to remove
     if (weapon_idx == Weapon::Unarmed_Anim
         && (curanim == PedInstance::ad_StandFireAnim
         || curanim == PedInstance::ad_WalkFireAnim))
@@ -2208,6 +2195,7 @@ bool PedInstance::handleDamage(ShootableMapObject::DamageInflictType *d) {
         health_ -= d->dvalue;
     else if (d->dtype == MapObject::dmg_Mental) {
         // TODO: check for required number of persuade points before applying
+        // they should be influenced by mod brain
         setObjGroupID(((PedInstance *)d->d_owner)->objGroupID());
         ((PedInstance *)d->d_owner)->cpyEnemyDefs(enemy_group_defs_);
         dropActQ();
@@ -2235,9 +2223,10 @@ bool PedInstance::handleDamage(ShootableMapObject::DamageInflictType *d) {
         // TODO: set default_actions_ to owners
         return true;
     }
-    if (d->ddir != -1) {
+
+    if (d->ddir != -1)
         dir_ = (d->ddir + 128) % 256;
-    }
+
     if (health_ <= 0) {
         health_ = 0;
         actions_property_ = 1;
@@ -2360,11 +2349,12 @@ bool PedInstance::checkFriendIs(PedInstance *p) {
     if (p->isInEmulatedGroupDef(obj_group_id_, obj_group_def_)) {
         if (obj_group_def_ == og_dmPolice
             && (desc_state_ & pd_smControlled) == 0)
+        {
             friends_not_seen_.insert(p);
+        }
         return true;
     }
-    if (friend_group_defs_.find(p->objGroupDef()) !=
-        friend_group_defs_.end())
+    if (friend_group_defs_.find(p->objGroupDef()) != friend_group_defs_.end())
         return true;
     return (p->objGroupID() == obj_group_id_);
 }

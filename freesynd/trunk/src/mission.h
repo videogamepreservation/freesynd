@@ -209,6 +209,7 @@ public:
     uint32 playersGroupID() { return players_group_id_;}
 
     // map-tile surfaces
+    // x + y * mmax_x_ + z * mmax_m_xy
     surfaceDesc *mtsurfaces_;
     // map-directions points
     floodPointDesc *mdpoints_;

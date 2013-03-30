@@ -114,9 +114,10 @@ void MapObject::setDirection(int dir) {
     dir_ = dir;
 }
 
-// posx = targetx - objx
-// posy = targety - objy
-// if dir == NULL, object callers dir_ will be set
+/* NOTE posx = targetx - objx
+ * posy = targety - objy
+ * if dir == NULL, object callers dir_ will be set
+ */
 void MapObject::setDirection(int posx, int posy, int * dir) {
 
     int direction = -1;

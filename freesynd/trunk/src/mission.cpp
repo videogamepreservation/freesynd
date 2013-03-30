@@ -3780,6 +3780,7 @@ void Mission::getInRangeAll(toDefineXYZ * cp,
 bool Mission::getShootableTile(int &x, int &y, int &z, int &ox, int &oy,
     int &oz)
 {
+    // TODO: review later
     bool gotit = false;
     int bx, by, box, boy;
     int bz = mmax_z_;
