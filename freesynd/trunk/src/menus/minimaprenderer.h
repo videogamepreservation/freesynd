@@ -256,7 +256,7 @@ class GamePlayMinimapRenderer : public MinimapRenderer, GameEventListener {
     //! Draw a pixel on the minimap
     void drawPixel (uint8 * a_buffer, int signal_px, int signal_py, int x, int y, uint8 color) {
         x = signal_px + x;
-        y = signal_py - y;
+        y = signal_py + y;
         int mm_maxtile_plus = (mm_maxtile_ + 1);
         if (x > 0 && x < (mm_maxtile_plus * pixpertile_) && y > 0 && y < (mm_maxtile_plus * pixpertile_)) {
             int i_index = y * pixpertile_ * mm_maxtile_plus + x;
