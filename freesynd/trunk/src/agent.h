@@ -51,8 +51,8 @@ public:
     bool isActive() { return active_; }
     void setActive(bool a) { active_ = a; }
     int health() { return health_; }
-    bool isAlive() { return health_ <= 0; }
-    bool isDead() { return health_ > 0; }
+    bool isAlive() { return health_ > 0; }
+    bool isDead() { return health_ <= 0; }
 
     void setHealth(int n) {
         if (n > 255)

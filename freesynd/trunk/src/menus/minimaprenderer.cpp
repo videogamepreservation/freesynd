@@ -662,7 +662,8 @@ void GamePlayMinimapRenderer::drawPedCircle(uint8 * a_buffer, int mm_x, int mm_y
 #if 0
 // NOTE: this function is derived from http://cimg.sourceforge.net/
 // and is under http://www.cecill.info/licences/Licence_CeCILL_V2-en.txt
-// license
+// or http://www.cecill.info/licences/Licence_CeCILL-C_V1-en.txt
+// licenses
 void GamePlayMinimapRenderer::drawSignalCircle(uint8 * a_buffer, int signal_px,
     int signal_py, uint16 radius, uint8 color)
 {
