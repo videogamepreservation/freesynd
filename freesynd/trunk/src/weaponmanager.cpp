@@ -256,10 +256,10 @@ Weapon * WeaponManager::loadWeapon(Weapon::WeaponType wt) {
             pWeapon = new Weapon(g_App.menus().getMessage("WEAPON_SHOTGUN"),
         17, 67, 250, 12, 1024, 2, 2, 370,
         Weapon::Shotgun_Anim, snd::SHOTGUN, Weapon::Shotgun,
-        MapObject::dmg_Bullet, 2, 250, 200, Weapon::wspt_Shotgun,
+        MapObject::dmg_Bullet, 1, 250, 200, Weapon::wspt_Shotgun,
         SFXObject::sfxt_BulletHit, SFXObject::sfxt_BulletHit,
         SFXObject::sfxt_Unknown, SFXObject::sfxt_Unknown, 0, 60.0, 0.7,
-        0, 1, 8);
+        0, 2, 6);
             break;
         case Weapon::MediKit:
             pWeapon = new Weapon(g_App.menus().getMessage("WEAPON_MEDIKIT"),
