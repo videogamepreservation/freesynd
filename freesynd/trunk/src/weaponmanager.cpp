@@ -191,7 +191,7 @@ Weapon * WeaponManager::loadWeapon(Weapon::WeaponType wt) {
         Weapon::Pistol_Anim, snd::PISTOL, Weapon::Pistol,
         MapObject::dmg_Bullet, 1, 200, 600, Weapon::wspt_Pistol,
         SFXObject::sfxt_BulletHit, SFXObject::sfxt_BulletHit,
-        SFXObject::sfxt_Unknown, SFXObject::sfxt_Unknown, 0, 5.0, 0.9);
+        SFXObject::sfxt_Unknown, SFXObject::sfxt_Unknown, 0, 5.0, 0.9, 0, 2);
             break;
         case Weapon::Minigun:
             pWeapon = new Weapon(g_App.menus().getMessage("WEAPON_MINI_GUN"),
@@ -259,7 +259,7 @@ Weapon * WeaponManager::loadWeapon(Weapon::WeaponType wt) {
         MapObject::dmg_Bullet, 2, 250, 200, Weapon::wspt_Shotgun,
         SFXObject::sfxt_BulletHit, SFXObject::sfxt_BulletHit,
         SFXObject::sfxt_Unknown, SFXObject::sfxt_Unknown, 0, 60.0, 0.7,
-        0, 2, 8);
+        0, 1, 8);
             break;
         case Weapon::MediKit:
             pWeapon = new Weapon(g_App.menus().getMessage("WEAPON_MEDIKIT"),

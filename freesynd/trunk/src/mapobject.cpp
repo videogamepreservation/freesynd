@@ -598,9 +598,6 @@ Static *Static::loadInstance(uint8 * data, int m)
     // some windows are broken/open etc
     // Also verify whether object description is correct
     // subtype for doors, use instead orientation?
-    // objects have not real position, trick for drawing?
-    // correction required because isblocker will not work
-    // (windows)
     uint16 curanim = READ_LE_UINT16(gamdata->index_current_anim);
     uint16 baseanim = READ_LE_UINT16(gamdata->index_base_anim);
     uint16 curframe = READ_LE_UINT16(gamdata->index_current_frame);
@@ -745,14 +742,14 @@ Static *Static::loadInstance(uint8 * data, int m)
             s = new WindowObj(m, curanim - 2, curanim, curanim + 2, curanim + 4);
             if (gamdata->orientation == 0x00 || gamdata->orientation == 0x80) {
                 s->setSubType(0);
-                s->setSizeX(48);
-                s->setSizeY(1);
-                s->setSizeZ(48);
+                s->setSizeX(96);
+                s->setSizeY(4);
+                s->setSizeZ(96);
             } else {
                 s->setSubType(2);
-                s->setSizeX(1);
-                s->setSizeY(48);
-                s->setSizeZ(48);
+                s->setSizeX(4);
+                s->setSizeY(96);
+                s->setSizeZ(96);
             }
             s->setHealth(1);
             s->setStartHealth(1);
@@ -763,14 +760,14 @@ Static *Static::loadInstance(uint8 * data, int m)
             s = new WindowObj(m, curanim, curanim + 2, curanim + 4, curanim + 6);
             if (gamdata->orientation == 0x00 || gamdata->orientation == 0x80) {
                 s->setSubType(0);
-                s->setSizeX(48);
-                s->setSizeY(1);
-                s->setSizeZ(48);
+                s->setSizeX(96);
+                s->setSizeY(4);
+                s->setSizeZ(96);
             } else {
                 s->setSubType(2);
-                s->setSizeX(1);
-                s->setSizeY(48);
-                s->setSizeZ(48);
+                s->setSizeX(4);
+                s->setSizeY(96);
+                s->setSizeZ(96);
             }
             s->setHealth(1);
             s->setStartHealth(1);
