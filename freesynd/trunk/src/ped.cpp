@@ -958,7 +958,6 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                 {
                     bool selfState = is_ignored_;
                     is_ignored_ = true;
-                    // TODO: check inside of vehicles too, is_ignored_?
                     if (hostiles_found_.size() != 0)
                         verifyHostilesFound(mission);
 
@@ -2407,6 +2406,8 @@ void PedInstance::verifyHostilesFound(Mission *m) {
         double distTo = 0;
         if (smo->isDead() || (smo->majorType() == MapObject::mjt_Ped
             && checkFriendIs((PedInstance *)(smo)))
+            || (smo->majorType() == MapObject::mjt_Vehicle
+            && ((VehicleInstance *)smo)->checkHostilesInside(this, hostile_desc_))
             || (m->inRangeCPos(&cur_xyz, &smo, NULL, false, false,
             check_rng, &distTo) != 1))
         {
