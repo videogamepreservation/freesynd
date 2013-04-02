@@ -982,6 +982,13 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                 {
                     bool selfState = is_ignored_;
                     is_ignored_ = true;
+                    bool vehicleState;
+                    if ((state_ & (PedInstance::pa_smInCar
+                        | PedInstance::pa_smUsingCar)) != 0)
+                    {
+                        vehicleState = in_vehicle_->isIgnored();
+                        in_vehicle_->setIsIgnored(true);
+                    }
                     if (hostiles_found_.size() != 0)
                         verifyHostilesFound(mission);
 
@@ -1075,7 +1082,9 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                                 if ((p->state_ & pa_smCheckExcluded) != 0
                                     || hostiles_found_.find(p)
                                     != hostiles_found_.end())
+                                {
                                     continue;
+                                }
                                 if (checkHostileIs(p) ) {
                                     // TODO: hostile_desc_alt to checkHostileIs?
                                     double distTo = 0;
@@ -1096,24 +1105,28 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                         int num_vehicles = mission->numVehicles();
                         for (int i = 0; i < num_vehicles; i++) {
                             VehicleInstance *v = mission->vehicle(i);
-                            // NOTE: we can call checkHostilesInside directly,
-                            // but just to use checkHostileIs we ignore it
-                            if ((!v->isExcluded()) && checkHostileIs(v)) {
+                            if ((!v->isExcluded()) && v->checkHostilesInside(this, 0))
+                            {
                                 double distTo = 0;
                                 // TODO: set ignoreblocker based on Ai
                                 if (mission->inRangeCPos(&cur_xyz,
                                     (ShootableMapObject **)(&v), NULL, false,
                                     false, view_rng, &distTo) == 1)
                                 {
-                                    hostiles_found_.insert(
-                                        Pairsmod_t(
-                                        (ShootableMapObject *)v,
-                                        distTo));
+                                    hostiles_found_.insert(Pairsmod_t(
+                                        (ShootableMapObject *)v, distTo));
                                 }
                             }
                         }
                     }
+
                     is_ignored_ = selfState;
+                    if (((state_ & (PedInstance::pa_smInCar
+                        | PedInstance::pa_smUsingCar)) != 0))
+                    {
+                        in_vehicle_->setIsIgnored(vehicleState);
+                    }
+
                     // NOTE: possible check for most dangerous weapon
                     // or object, if is one of objectives to destroy, for
                     // now only distance check

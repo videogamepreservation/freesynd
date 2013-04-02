@@ -20,7 +20,7 @@ that succesfully persuaded; weapon range modifier(?); accuracy modifier/property
  A.I:
 ----
  - A.L. - this one is complex
- - pathfinding directional, improvements needed as it is nit working as in original
+ - pathfinding directional, improvements needed as it is not working as in original
  - pathfinding directional, vehicles, for peds driving in the city
  - vehicle pathfinding needs to be tested on all maps and improved
 (Greenland not working)
@@ -44,8 +44,6 @@ in original gameplay or are not present at all
  - add sound effects
  - mapmenu: player color update - if changed in configmenu; change of owners for
 non-player owned territory
- - gameplaymenu after mission succesful/failed add timed auto switch to
-debriefmenu after 5 sec or so
 
 New features:
 -------------
