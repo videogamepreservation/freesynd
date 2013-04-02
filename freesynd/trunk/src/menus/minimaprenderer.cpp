@@ -709,6 +709,7 @@ void GamePlayMinimapRenderer::drawSignalCircle(uint8 * a_buffer, int signal_px, 
 
     // cos pi/4 = 185363 / 2^18 (approx)
     l = (radius * 185363) >> 18;
+    l++;
 
     // At x=0, y=radius
     y = radius;
