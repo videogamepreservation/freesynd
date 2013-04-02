@@ -432,6 +432,19 @@ void PedInstance::createActQDeselectCurWeapon(actionQueueGroupType &as) {
     as.actions.push_back(aq);
 }
 
+void PedInstance::createActQTrigger(actionQueueGroupType &as, PathNode *tpn,
+    int32 range)
+{
+    as.state = 1;
+    actionQueueType aq;
+    aq.as = PedInstance::pa_smNone;
+    aq.group_desc = PedInstance::gd_mExclusive;
+    aq.state = 1;
+    aq.ot_execute = PedInstance::ai_aTrigger;
+    aq.t_pn = *tpn;
+    aq.multi_var.dist_var.dist = range;
+    as.actions.push_back(aq);
+}
 
 bool PedInstance::setActQInQueue(actionQueueGroupType &as,
     uint32 * id)
@@ -596,5 +609,23 @@ void PedInstance::updtActGFiring(uint32 id, PathNode* tpn,
                 }
                 break;
             }
+    }
+}
+
+bool PedInstance::checkActGCompleted(uint32 desc) {
+    for (std::vector <actionQueueGroupType>::iterator it =
+        actions_queue_.begin(); it != actions_queue_.end(); it++)
+    {
+        if ((it->origin_desc) == desc && (it->state & 4) != 0)
+            return true;
+    }
+    return false;
+}
+
+void PedInstance::pauseAllInActG(actionQueueGroupType &as, uint32 start_pos) {
+    for (std::vector <actionQueueType>::iterator it =
+        as.actions.begin() + start_pos; it != as.actions.end(); it++)
+    {
+        it->state |= 64;
     }
 }

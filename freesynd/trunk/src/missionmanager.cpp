@@ -95,6 +95,48 @@ Mission *MissionManager::loadMission(int n)
 
     Mission *m = new Mission();
 
+    // Kenya map, adding additional walking points to scenarios
+#if 1
+    if (n == 40) {
+        uint8 *scen_start = data + 97128 + 8 * 86;
+        // coord offsets changing for next point
+        scen_start[4] = ((scen_start[4] & 0xFE) | 1);
+        scen_start[5] = (scen_start[5] & 0xFE);
+
+        scen_start = data + 97128 + 8 * 87;
+        WRITE_LE_UINT16(scen_start, 90 * 8);
+        scen_start = data + 97128 + 8 * 90;
+        WRITE_LE_UINT16(scen_start, 91 *8);
+        scen_start += 4;
+        // coords x = 72,ox = 128, y = 32, oy = 128, z = 2
+        scen_start[0] = (72 << 1) | 1;
+        scen_start[1] = (32 << 1) | 1;
+        scen_start[3] = 2;
+        // type 1 = reach location
+        scen_start[4] = 1;
+
+        scen_start += 4;
+        WRITE_LE_UINT16(scen_start, 92 *8);
+        scen_start += 4;
+        // coords x = 61,ox = 0, y = 32, oy = 0, z = 2
+        scen_start[0] = (62 << 1) | 1;
+        scen_start[1] = (57 << 1) | 1;
+        scen_start[3] = 2;
+        // type 1 = reach location
+        scen_start[4] = 1;
+
+        scen_start += 4;
+        WRITE_LE_UINT16(scen_start, 88 *8);
+        scen_start += 4;
+        // coords x = 42,ox = 0, y = 59, oy = 0, z = 2
+        scen_start[0] = (42 << 1) | 1;
+        scen_start[1] = (59 << 1);
+        scen_start[3] = 2;
+        // type 1 = reach location
+        scen_start[4] = 1;
+    }
+#endif
+
     if (!m->loadLevel(data)) {
         delete[] data;
         delete m;

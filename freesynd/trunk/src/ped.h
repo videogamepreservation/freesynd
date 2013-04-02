@@ -586,6 +586,7 @@ public:
         ai_aFindNonFriend = 0x1000,
         ai_aResetActionQueueQueue = 0x2000,
         ai_aDeselectCurWeapon = 0x4000,
+        ai_aTrigger = 0x8000,
         ai_aNonFinishable = 0x80000000,
         ai_aAll = 0xFFFFFFFF
     } AiAction;
@@ -730,12 +731,13 @@ public:
         ShootableMapObject *tsmo);
     void createActQLeaveCar(actionQueueGroupType &as,
         ShootableMapObject *tsmo);
-    void createActQWait(PedInstance::actionQueueGroupType& as, int tm_wait,
+    void createActQWait(actionQueueGroupType& as, int tm_wait,
                         uint8 desc = 0);
 
     bool createActQFindEnemy(actionQueueGroupType &as);
     void createActQResetActionQueue(actionQueueGroupType &as);
     void createActQDeselectCurWeapon(actionQueueGroupType &as);
+    void createActQTrigger(actionQueueGroupType &as, PathNode *tpn, int32 range);
     
     void discardActG(uint32 id);
     void discardActG(std::vector <actionQueueGroupType>::iterator it_a);
@@ -743,6 +745,8 @@ public:
     void updtActGFiringShots(uint32 id, uint32 make_shots);
     void updtActGFiring(uint32 id, PathNode *tpn,
         ShootableMapObject *tsmo = NULL);
+    bool checkActGCompleted(uint32 desc);
+    void pauseAllInActG(actionQueueGroupType &as, uint32 start_pos = 1);
 
     /*! 
      * Movement speed calculated from base speed, mods, weight of inventory,

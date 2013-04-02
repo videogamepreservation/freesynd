@@ -319,7 +319,10 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
         for (uint32 indx = 0; indx < actions_queue_.size();) {
             std::vector <actionQueueGroupType>::iterator it =
                 actions_queue_.begin() + indx;
-            if ((it->state & 128) == 0 && (it->state & 12) != 0) {
+            if ((it->state & 128) == 0 && (it->state & 12) != 0
+                // do not remove scripted actions
+                && (it->origin_desc != 1))
+            {
                 actions_queue_.erase(it);
                 continue;
             }
@@ -334,6 +337,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
         if ((state_ & pa_smDead) == 0) {
             actionQueueGroupType as;
             if (createActQFindEnemy(as)) {
+                as.group_id = 0;
                 as.main_act = 0;
                 as.group_desc = PedInstance::gd_mThink | PedInstance::gd_mFire;
                 as.origin_desc = 2;
@@ -373,6 +377,26 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                 if ((aqt->ot_execute & PedInstance::ai_aNone) != 0)
                 {
                     printf("obj_None");
+                }
+                if ((aqt->ot_execute & PedInstance::ai_aTrigger) != 0)
+                {
+                    toDefineXYZ xyz;
+                    aqt->t_pn.convertPosToXYZ(&xyz);
+                    aqt->state |= 2;
+                    for (uint8 i = 0; i < 4; i++) {
+                        if((int32)(mission->ped(i)->distanceToPosXYZ(&xyz))
+                           < aqt->multi_var.dist_var.dist)
+                        {
+                            for (std::vector <actionQueueType>::iterator it_a
+                                 = aqt + 1; it_a != it->actions.end(); it_a++)
+                            {
+                                it_a->state ^= 64;
+                            }
+                            aqt->state |= 4;
+                            it->main_act = it->actions.size() - 1;
+                            break;
+                        }
+                    }
                 }
                 if ((aqt->ot_execute & PedInstance::ai_aWaitToStart) != 0)
                 {
@@ -1253,6 +1277,8 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                          indx_act < sz; indx_act++)
                     {
                         actionQueueType &aqt_reset = it->actions[indx_act];
+                        if ((aqt_reset.ot_execute & PedInstance::ai_aTrigger) != 0)
+                            continue;
                         aqt_reset.state &= ((65535 ^ 14));
                         aqt_reset.multi_var.enemy_var.shots_done = 0;
                         aqt_reset.multi_var.time_var.elapsed = 0;
@@ -1356,10 +1382,11 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                 {
                     actionQueueGroupType as;
                     if (createActQFindEnemy(as)) {
+                        as.group_id = 0;
                         as.main_act = 0;
                         as.group_desc = PedInstance::gd_mThink | PedInstance::gd_mFire;
                         as.origin_desc = 2;
-                        actions_queue_.insert(actions_queue_.begin(),as);
+                        actions_queue_.insert(actions_queue_.begin(), as);
                     }
                 }
             }
@@ -2203,6 +2230,7 @@ bool PedInstance::handleDamage(ShootableMapObject::DamageInflictType *d) {
 
         // adding following behavior for persuaded
         PedInstance::actionQueueGroupType as;
+        as.group_id = 0;
         as.group_desc = PedInstance::gd_mExclusive;
         createActQWait(as, 2000);
         as.main_act = as.actions.size() - 1;

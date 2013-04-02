@@ -66,8 +66,10 @@ void ObjProtect::selfEvaluate(GameEvent &evt, Mission *pMission) {
     if (p->isDead()) {
         // Target is dead -> objective is failed
         endObjective(evt, false);
+    } else {
+        if(p->checkActGCompleted(1))
+            endObjective(evt, true);
     }
-    // TODO : detect that ped is safe
 }
 
 /*!

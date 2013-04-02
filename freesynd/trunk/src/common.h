@@ -99,6 +99,11 @@ inline int32 READ_BE_INT32(const uint8 *data) {
     return (data[0] << 24) | (data[1] << 16) | (data[2] << 8) | data[3];
 }
 
+inline void WRITE_LE_UINT16(uint8 *data, uint16 num) {
+    data[0] = (uint8)(num & 0xFF);
+    data[1] = (uint8)(num >> 8);
+}
+
 inline uint32 mirror(uint32 value, int count) {
     uint32 top = 1 << (count - 1), bottom = 1;
 

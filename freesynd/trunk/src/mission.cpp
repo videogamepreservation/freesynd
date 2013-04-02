@@ -294,10 +294,12 @@ bool Mission::loadLevel(uint8 * levelData)
                 as.group_desc = PedInstance::gd_mStandWalk;
                 as.origin_desc = 1;
                 // TODO : kenya map timeout scenario somewhere
+                int32 has_trigger = -1;
                 while (offset_nxt) {
                     // sc.type
-                    // 1, 8 - walking
+                    // 1, 8(triggers on our agents) - walking
                     // 2 - vehicle
+                    // 5, 6 ? (kenya)
                     // 7, 9(repeat) - end marker
                     // 10(loop?)?5(has offset <?ped?>)?
                     // 11 - protected target reached destination(kenya)
@@ -312,15 +314,17 @@ bool Mission::loadLevel(uint8 * levelData)
                         PathNode pn(sc.tilex >> 1, sc.tiley >> 1, sc.tilez,
                             (sc.tilex & 0x01) << 7, (sc.tiley & 0x01) << 7);
                         if (sc.type == 0x08) {
-                            p->createActQWait(as, 2000);
                             // no need for exclusive wait
+                            p->createActQTrigger(as, &pn, 6 * 256);
+                            has_trigger = as.actions.size();
+                            p->createActQWait(as, 3000);
                             as.actions.back().group_desc = PedInstance::gd_mStandWalk;
                         }
                         if (v)
                             p->createActQUsingCar(as, &pn, v);
                         else
                             p->createActQWalking(as, &pn, NULL, p->getDir(), 0, true);
-                            //p->createActQWalking(as, &pn, NULL, -1);
+                        //p->createActQWalking(as, &pn, NULL, -1);
                         if (!not_in_vehicle && offset_nxt == 0)
                             p->createActQResetActionQueue(as);
                     } else if (sc.type == 2) {
@@ -348,7 +352,11 @@ bool Mission::loadLevel(uint8 * levelData)
                     }
                 }
                 if (as.actions.size() != 0) {
-                    as.main_act = as.actions.size() - 1;
+                    if (has_trigger != -1) {
+                        p->pauseAllInActG(as, (uint32)has_trigger);
+                        as.main_act = (uint32)has_trigger - 1;
+                    } else
+                        as.main_act = as.actions.size() - 1;
                     p->addActQToQueue(as);
                 }
 #ifdef SHOW_SCENARIOS_DEBUG
@@ -665,7 +673,7 @@ bool Mission::loadLevel(uint8 * levelData)
 #endif
 #ifdef SHOW_SCENARIOS_DEBUG
     for (uint16 i = 1; i < 2047; i++) {
-        LEVELDATA_SCENARIOS & scenario = level_data_.scenarios[i];
+        LevelData::Scenarios & scenario = level_data_.scenarios[i];
         if (scenario.type == 0)
             break;
         else {

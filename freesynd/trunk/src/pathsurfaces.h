@@ -37,6 +37,7 @@
     }toDefineXYZ;
 
     typedef struct {
+        // mapFloodDesc
         // 0 - not defined, 0b - base point, 1b - target point,
         // 2b - link (when base point reaches target point or vice versa),
         // 3b - walkable, 4b - constant, 5b - non walkable, 6b - needs to
