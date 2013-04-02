@@ -659,7 +659,7 @@ void GamePlayMinimapRenderer::drawPedCircle(uint8 * a_buffer, int mm_x, int mm_y
         }
     }
 }
-#if 0
+
 // NOTE: this function is derived from http://cimg.sourceforge.net/
 // and is under http://www.cecill.info/licences/Licence_CeCILL_V2-en.txt
 // or http://www.cecill.info/licences/Licence_CeCILL-C_V1-en.txt
@@ -669,14 +669,15 @@ void GamePlayMinimapRenderer::drawSignalCircle(uint8 * a_buffer, int signal_px,
 {
     if (!radius)
     {
-       drawPixel(a_buffer, signal_px, signal_py, 0, 0,color);
+       drawPixel(a_buffer, signal_px, signal_py, color);
         return;
     }
-    drawPixel(a_buffer, signal_px-radius,signal_py, 0, 0,color);
-    drawPixel(a_buffer, signal_px+radius,signal_py, 0, 0,color);
-    drawPixel(a_buffer, signal_px,signal_py-radius, 0, 0,color);
-    drawPixel(a_buffer, signal_px,signal_py+radius, 0, 0,color);
-    if (radius==1) return;
+    drawPixel(a_buffer, signal_px-radius,signal_py, color);
+    drawPixel(a_buffer, signal_px+radius,signal_py, color);
+    drawPixel(a_buffer, signal_px,signal_py-radius, color);
+    drawPixel(a_buffer, signal_px,signal_py+radius, color);
+    if (radius==1)
+        return;
     for (int f = 1-radius, ddFx = 0, ddFy = -(radius<<1), x = 0, y = radius; x<y; ) {
         if (f>=0) { f+=(ddFy+=2); --y; }
         ++x; ++(f+=(ddFx+=2));
@@ -684,58 +685,18 @@ void GamePlayMinimapRenderer::drawSignalCircle(uint8 * a_buffer, int signal_px,
             const int x1 = signal_px-y, x2 = signal_px+y, y1 = signal_py-x,
                 y2 = signal_py+x, x3 = signal_px-x, x4 = signal_px+x,
                 y3 = signal_py-y, y4 = signal_py+y;
-            drawPixel(a_buffer, x1,y1, 0, 0,color);
-            drawPixel(a_buffer, x1,y2, 0, 0,color);
-            drawPixel(a_buffer, x2,y1, 0, 0,color);
-            drawPixel(a_buffer, x2,y2, 0, 0,color);
+            drawPixel(a_buffer, x1,y1, color);
+            drawPixel(a_buffer, x1,y2, color);
+            drawPixel(a_buffer, x2,y1, color);
+            drawPixel(a_buffer, x2,y2, color);
             if (x!=y)
             {
-                drawPixel(a_buffer, x3,y3, 0, 0,color);
-                drawPixel(a_buffer, x4,y4, 0, 0,color);
-                drawPixel(a_buffer, x4,y3, 0, 0,color);
-                drawPixel(a_buffer, x3,y4, 0, 0,color);
+                drawPixel(a_buffer, x3,y3, color);
+                drawPixel(a_buffer, x4,y4, color);
+                drawPixel(a_buffer, x4,y3, color);
+                drawPixel(a_buffer, x3,y4, color);
             }
         }
     }
 }
-#else
-void GamePlayMinimapRenderer::drawSignalCircle(uint8 * a_buffer, int signal_px, int signal_py, uint16 radius, uint8 color)
-{
-    int x, y;
-    int l;
-    int r2, y2;
-    int y2_new;
-    int ty;
 
-    // cos pi/4 = 185363 / 2^18 (approx)
-    l = (radius * 185363) >> 18;
-    l++;
-
-    // At x=0, y=radius
-    y = radius;
-
-    r2 = y2 = y * y;
-    ty = (2 * y) - 1;
-    y2_new = r2 + 3;
-
-    for (x = 0; x <= l; x++) {
-        y2_new -= (2 * x) - 3;
-
-        if ((y2 - y2_new) >= ty) {
-            y2 -= ty;
-            y -= 1;
-            ty -= 2;
-        }
-
-        drawPixel (a_buffer, signal_px, signal_py, x, y, color);
-        drawPixel (a_buffer, signal_px, signal_py, x, -y, color);
-        drawPixel (a_buffer, signal_px, signal_py, -x, y, color);
-        drawPixel (a_buffer, signal_px, signal_py, -x, -y, color);
-
-        drawPixel (a_buffer, signal_px, signal_py, y, x, color);
-        drawPixel (a_buffer, signal_px, signal_py, y, -x, color);
-        drawPixel (a_buffer, signal_px, signal_py, -y, x, color);
-        drawPixel (a_buffer, signal_px, signal_py, -y, -x, color);
-    }
-}
-#endif
