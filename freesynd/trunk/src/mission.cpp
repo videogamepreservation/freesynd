@@ -732,10 +732,8 @@ int Mission::mapHeight()
 
 int Mission::startX()
 {
-    int x =
-        p_map_->tileToScreenX(peds_[0]->tileX(),
-        peds_[0]->tileY(), mmax_z_ - 1, 0,
-                                   0);
+    int x = p_map_->tileToScreenX(peds_[0]->tileX(),
+        peds_[0]->tileY(), mmax_z_ + 1, 0, 0);
     x -= (GAME_SCREEN_WIDTH - 129) / 2;
     if (x < 0)
         x = 0;
@@ -744,10 +742,8 @@ int Mission::startX()
 
 int Mission::startY()
 {
-    int y =
-        p_map_->tileToScreenY(peds_[0]->tileX(),
-                                   peds_[0]->tileY(), mmax_z_ - 1, 0,
-                                   0);
+    int y = p_map_->tileToScreenY(peds_[0]->tileX(),
+        peds_[0]->tileY(), mmax_z_ + 1, 0, 0);
     y -= GAME_SCREEN_HEIGHT / 2;
     if (y < 0)
         y = 0;

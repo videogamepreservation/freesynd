@@ -131,12 +131,14 @@ bool WeaponInstance::animate(int elapsed) {
                 g_App.gameSounds().play(snd::TIMEBOMB);
             }
             processed_time_ += elapsed;
-            if ((inflictDamage(NULL, NULL, &tm_left)) == 0) {
-                deactivate();
+            if (processed_time_ >= pWeaponClass_->timeForShot()) {
+                // setting these values here to avoid recursion
                 map_ = -1;
                 setIsIgnored(true);
                 health_ = 0;
-
+            }
+            if ((inflictDamage(NULL, NULL, &tm_left)) == 0) {
+                deactivate();
                 Mission *m = g_Session.getMission();
                 SFXObject *so = new SFXObject(m->map(),
                     pWeaponClass_->anims()->hit_anim);
@@ -589,8 +591,8 @@ uint16 WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
     }
 
     // NOTE: this block of code defines direction for shooter and damaged person
-    // it is placed before shots calculation to set direction for shooter even if not
-    // enough time is for shot
+    // it is placed before shots calculation to set direction for shooter even
+    // if there is not enough time for shot
     int xb = 0;
     int yb = 0;
     int txb = 0;
@@ -645,7 +647,9 @@ uint16 WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
             return 128;
         if (m->isTileSolid(cp.x / 256, cp.y / 256, cp.z / 128, cp.x % 256,
             cp.y % 256, cp.z % 128))
+        {
             return 256;
+        }
         if (tobj || tp) {
             if (tobj) {
                 txb = tobj->tileX() * 256 + tobj->offX();
@@ -1312,12 +1316,12 @@ bool WeaponInstance::handleDamage(ShootableMapObject::DamageInflictType * d)
 {
     if (health_ > 0) {
         if (main_type_ == Weapon::TimeBomb) {
+            deactivate();
+            map_ = -1;
+            setIsIgnored(true);
+            health_ = 0;
             int tm = pWeaponClass_->timeForShot();
             if ((inflictDamage(NULL, NULL, &tm)) == 0) {
-                deactivate();
-                map_ = -1;
-                setIsIgnored(true);
-                health_ = 0;
 
                 Mission *m = g_Session.getMission();
                 SFXObject *so = new SFXObject(m->map(),

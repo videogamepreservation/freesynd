@@ -66,7 +66,6 @@ protected:
     void drawWeaponSelectors();
     //! Scroll the map vertically or horizontally.
     bool scroll();
-    bool isScrollLegal(int newScrollX, int newScrollY);
     void improveScroll(int &newScrollX, int &newScrollY);
     //! Selects/deselects an agent
     void selectAgent(size_t agentNo, bool addToGroup);

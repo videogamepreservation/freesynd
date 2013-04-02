@@ -235,29 +235,6 @@ bool GameplayMenu::scroll() {
     return change;
 }
 
-bool GameplayMenu::isScrollLegal(int newScrollX, int newScrollY)
-{
-    int ox, oy;
-    int tx =
-        mission_->get_map()->screenToTileX(newScrollX, newScrollY, ox);
-    int ty =
-        mission_->get_map()->screenToTileY(newScrollX, newScrollY, oy);
-
-    if (tx < mission_->minX())
-        return false;
-
-    if (ty < mission_->minY())
-        return false;
-
-    if (tx > mission_->maxX())
-        return false;
-
-    if (ty > mission_->maxY())
-        return false;
-
-    return true;
-}
-
 void GameplayMenu::improveScroll(int &newScrollX, int &newScrollY)
 {
     int ox, oy;
@@ -267,16 +244,22 @@ void GameplayMenu::improveScroll(int &newScrollX, int &newScrollY)
         mission_->get_map()->screenToTileY(newScrollX, newScrollY, oy);
 
     if (tx < mission_->minX())
-        newScrollX++;
+        tx = mission_->minX();
 
     if (ty < mission_->minY())
-        newScrollY++;
+        ty = mission_->minY();
 
     if (tx > mission_->maxX())
-        newScrollX--;
+        tx = mission_->maxX();
 
     if (ty > mission_->maxY())
-        newScrollY--;
+        ty = mission_->maxY();
+
+    // recalculating new screen coords
+    newScrollX = mission_->get_map()->tileToScreenX(tx, ty,
+        mission_->mmax_z_ + 1, 0, 0);
+    newScrollY = mission_->get_map()->tileToScreenY(tx, ty,
+        mission_->mmax_z_ + 1, 0, 0);
 }
 
 /*!
@@ -297,13 +280,7 @@ void GameplayMenu::handleShow() {
     g_Screen.clear(0);
     
     // place the screen at the good starting position
-    for (int cnt = 0; cnt < 100; cnt++) {
-        if (isScrollLegal(world_x_, world_y_)) {
-            break;
-        }
-
-        improveScroll(world_x_, world_y_);
-    }
+    improveScroll(world_x_, world_y_);
 
     // init selection to the first selectable agent
     selection_.setSquad(mission_->getSquad());
@@ -1460,11 +1437,15 @@ void GameplayMenu::selectAgent(size_t agentNo, bool addToGroup) {
  * selected.
  */
 void GameplayMenu::selectAllAgents() {
+    bool prv_state = pressed_btn_select_all_;
     pressed_btn_select_all_ = !pressed_btn_select_all_;
     selection_.selectAllAgents(pressed_btn_select_all_);
-    g_App.gameSounds().play(snd::SPEECH_SELECTED);
-    // redraw all agent selectors
-    addDirtyRect(0, 0, 128, 180);
+    updateSelectAll();
+    if (pressed_btn_select_all_ != prv_state) {
+        g_App.gameSounds().play(snd::SPEECH_SELECTED);
+        // redraw all agent selectors
+        addDirtyRect(0, 0, 128, 180);
+    }
 }
 
 /*!
@@ -1489,7 +1470,7 @@ void GameplayMenu::updateSelectionForDeadAgents() {
         if (mission_->ped(i) && mission_->ped(i)->isOurAgent()) {
             if (g_Session.agents().squadMember(i)->isAlive() && mission_->ped(i)->isDead()) {
                 // TODO change this
-                //g_Session.agents().squadMember(i)->setHealth(0);
+                g_Session.agents().squadMember(i)->setHealth(0);
                 selection_.deselectAgent(i);
                 b_agentDied = true;
             }
@@ -1510,6 +1491,7 @@ void GameplayMenu::updateSelectionForDeadAgents() {
 
         // anyway updates markers
         updtAgentsMarker();
+        updateSelectAll();
     }
 }
 
@@ -1547,5 +1529,6 @@ void GameplayMenu::updateSelectAll() {
 
     // if number of agents alive is the same as number of selected agents
     // then button is pressed.
-    pressed_btn_select_all_ = (nbAgentAlive == selection_.size());
+    pressed_btn_select_all_ = ((nbAgentAlive == selection_.size()
+        && nbAgentAlive != 0) || nbAgentAlive == 1);
 }
