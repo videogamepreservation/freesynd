@@ -4012,23 +4012,27 @@ bool Mission::getShootableTile(int &x, int &y, int &z, int &ox, int &oy,
                 bz--;
                 break;
             default:
-                // recalculating point of collision
-                if (box > 192 || boy > 192) {
-                    if (box >= boy)
-                        oz = (256 - box) << 1;
-                    else if (boy > box)
-                        oz = (256 - boy) << 1;
-                } else
-                    oz = 128;
+                twd = mtsurfaces_[bx + by * mmax_x_ + bz * mmax_m_xy].twd;
+                if (!(twd == 0x00 || twd == 0x0C || twd == 0x10)) {
+                    // recalculating point of collision
+                    if (box > 192 || boy > 192) {
+                        if (box >= boy)
+                            oz = (256 - box) << 1;
+                        else if (boy > box)
+                            oz = (256 - boy) << 1;
+                    } else
+                        oz = 128;
 
-                bx = x * 256 + ox + 128 * (bz - 1) + oz;
-                box = bx % 256;
-                bx = bx / 256;
-                by = y * 256 + oy + 128 * (bz - 1) + oz;
-                boy = by % 256;
-                by = by / 256;
-                bz += oz / 128;
-                oz %= 128;
+                    bx = x * 256 + ox + 128 * (bz - 1) + oz;
+                    box = bx % 256;
+                    bx = bx / 256;
+                    by = y * 256 + oy + 128 * (bz - 1) + oz;
+                    boy = by % 256;
+                    by = by / 256;
+                    bz += oz / 128;
+                    oz %= 128;
+                } else
+                    oz = 0;
         }
         x = bx;
         y = by;
