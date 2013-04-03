@@ -199,7 +199,8 @@ Weapon * WeaponManager::loadWeapon(Weapon::WeaponType wt) {
         372, Weapon::Minigun_Anim, snd::MINIGUN, Weapon::Minigun,
         MapObject::dmg_Bullet, 5, 100, 75, Weapon::wspt_Minigun,
         SFXObject::sfxt_BulletHit, SFXObject::sfxt_BulletHit,
-        SFXObject::sfxt_Unknown, SFXObject::sfxt_Unknown, 0, 45.0, 0.5, 0, 2);
+        SFXObject::sfxt_Unknown, SFXObject::sfxt_Unknown, 0, 45.0, 0.5, 0, 2,
+        1, 25);
             break;
         case Weapon::Flamer:
             // NOTE: range changed from 512 to 1152
@@ -208,7 +209,7 @@ Weapon * WeaponManager::loadWeapon(Weapon::WeaponType wt) {
         Weapon::Flamer_Anim, snd::FLAME, Weapon::Flamer, MapObject::dmg_Burn,
         10, 70, 50, Weapon::wspt_Flamer, SFXObject::sfxt_FlamerFire,
         SFXObject::sfxt_FlamerFire, SFXObject::sfxt_FlamerFire,
-        SFXObject::sfxt_Unknown, 0, 2.0, 0.9, 2200, 8);
+        SFXObject::sfxt_Unknown, 0, 2.0, 0.9, 2200, 8, 1, 15);
             break;
         case Weapon::LongRange:
             pWeapon = new Weapon(g_App.menus().getMessage("WEAPON_LONG_RANGE"),
@@ -216,7 +217,7 @@ Weapon * WeaponManager::loadWeapon(Weapon::WeaponType wt) {
         375, Weapon::LongRange_Anim, snd::LONGRANGE, Weapon::LongRange,
         MapObject::dmg_Bullet, 1, 900, 400, Weapon::wspt_LongRange,
         SFXObject::sfxt_BulletHit, SFXObject::sfxt_BulletHit,
-        SFXObject::sfxt_Unknown, SFXObject::sfxt_Unknown, 0, 1.0, 1.0, 0, 2);
+        SFXObject::sfxt_Unknown, SFXObject::sfxt_Unknown, 0, 1.0, 1.0, 0, 2, 1, 5);
             break;
         case Weapon::EnergyShield:
             pWeapon = new Weapon(g_App.menus().getMessage("WEAPON_ENERGY_SHIELD"),
@@ -225,7 +226,7 @@ Weapon * WeaponManager::loadWeapon(Weapon::WeaponType wt) {
         Weapon::EnergyShield, MapObject::dmg_None, 1, 75, 50,
         Weapon::wspt_EnergyShield, SFXObject::sfxt_Unknown,
         SFXObject::sfxt_Unknown, SFXObject::sfxt_Unknown,
-        SFXObject::sfxt_Unknown, 0, 0.0, 0.0);
+        SFXObject::sfxt_Unknown, 0, 0.0, 0.0, 0, 0, 1, 8);
             break;
         case Weapon::Uzi:
             pWeapon = new Weapon(g_App.menus().getMessage("WEAPON_UZI"),
@@ -233,7 +234,7 @@ Weapon * WeaponManager::loadWeapon(Weapon::WeaponType wt) {
         Weapon::Uzi_Anim, snd::UZI, Weapon::Uzi, MapObject::dmg_Bullet, 1,
         150, 100, Weapon::wspt_Uzi, SFXObject::sfxt_BulletHit,
         SFXObject::sfxt_BulletHit, SFXObject::sfxt_Unknown,
-        SFXObject::sfxt_Unknown, 0, 20.0, 0.7, 0, 2);
+        SFXObject::sfxt_Unknown, 0, 20.0, 0.7, 0, 2, 1, 5);
             break;
         case Weapon::Laser:
             pWeapon = new Weapon(g_App.menus().getMessage("WEAPON_LASER"),
@@ -241,7 +242,7 @@ Weapon * WeaponManager::loadWeapon(Weapon::WeaponType wt) {
         Weapon::Laser_Anim, snd::LASER, Weapon::Laser, MapObject::dmg_Laser,
         1, 300, 200, Weapon::wspt_Laser, SFXObject::sfxt_Fire_LongSmoke,
         SFXObject::sfxt_Unknown, SFXObject::sfxt_Unknown,
-        SFXObject::sfxt_Unknown, 512, 5.0, 0.99, 0, 32);
+        SFXObject::sfxt_Unknown, 512, 5.0, 0.99, 0, 32, 1, 10);
             break;
         case Weapon::GaussGun:
             pWeapon = new Weapon(g_App.menus().getMessage("WEAPON_GAUSS_GUN"),
@@ -250,7 +251,7 @@ Weapon * WeaponManager::loadWeapon(Weapon::WeaponType wt) {
         MapObject::dmg_Explosion, 1, 350, 1500, Weapon::wspt_GaussGun,
         SFXObject::sfxt_ExplosionFire,
         SFXObject::sfxt_ExplosionBall, SFXObject::sfxt_Smoke,
-        SFXObject::sfxt_LargeFire, 512, 5.0, 0.99, 6000, 64);
+        SFXObject::sfxt_LargeFire, 512, 5.0, 0.99, 6000, 64, 10);
             break;
         case Weapon::Shotgun:
             pWeapon = new Weapon(g_App.menus().getMessage("WEAPON_SHOTGUN"),
@@ -259,7 +260,7 @@ Weapon * WeaponManager::loadWeapon(Weapon::WeaponType wt) {
         MapObject::dmg_Bullet, 1, 250, 200, Weapon::wspt_Shotgun,
         SFXObject::sfxt_BulletHit, SFXObject::sfxt_BulletHit,
         SFXObject::sfxt_Unknown, SFXObject::sfxt_Unknown, 0, 60.0, 0.7,
-        0, 2, 6);
+        0, 2, 6, 7);
             break;
         case Weapon::MediKit:
             pWeapon = new Weapon(g_App.menus().getMessage("WEAPON_MEDIKIT"),
@@ -293,7 +294,7 @@ Weapon * WeaponManager::loadWeapon(Weapon::WeaponType wt) {
         MapObject::dmg_Explosion, 1, 15000, 1, Weapon::wspt_TimeBomb,
         SFXObject::sfxt_ExplosionFire, SFXObject::sfxt_ExplosionBall,
         SFXObject::sfxt_Unknown, SFXObject::sfxt_ExplosionFire, 512, 0.0, 0.0,
-        0, 64);
+        0, 64, 1, 5);
             break;
         default:
 #if _DEBUG

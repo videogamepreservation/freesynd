@@ -41,7 +41,7 @@ Weapon::Weapon(const std::string& w_name, int smallIcon, int bigIcon, int w_cost
     unsigned int w_shot_property, int w_hit_anim, int w_obj_hit_anim,
     int w_trace_anim, int w_rd_anim, int w_range_dmg, double w_shot_angle,
     double w_shot_accuracy, int w_shot_speed,
-    int w_dmg_per_shot, int w_shots_per_ammo)
+    int w_dmg_per_shot, int w_shots_per_ammo, int w_weight)
 {
     name_ = w_name;
     small_icon_ = smallIcon;
@@ -71,6 +71,7 @@ Weapon::Weapon(const std::string& w_name, int smallIcon, int bigIcon, int w_cost
     shot_accuracy_ = w_shot_accuracy;
     shot_speed_ = w_shot_speed;
     shots_per_ammo_ = w_shots_per_ammo;
+    weight_ = w_weight;
 }
 
 WeaponInstance *Weapon::createInstance() {

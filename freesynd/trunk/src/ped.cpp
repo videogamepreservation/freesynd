@@ -2437,15 +2437,37 @@ void PedInstance::verifyHostilesFound(Mission *m) {
 int PedInstance::getSpeed()
 {
     //TODO: mods
+    int speed_new = base_speed_;
+
+    int weight_max = 0;
+    Mod *pMod = slots_[Mod::MOD_LEGS];
+    if (pMod) {
+        weight_max += 5 << (pMod->getVersion() + 1);
+        speed_new *= (pMod->getVersion() + 2);
+    } else
+        weight_max = 5;
+    pMod = slots_[Mod::MOD_ARMS];
+    if (pMod)
+        weight_max += 5 << (pMod->getVersion() + 1);
+    else
+        weight_max += 5;
+
+    int weight_inv = 0;
+    for (uint8 i = 0; i < weapons_.size(); ++i)
+        weight_inv += weapons_[i]->getWeight();
+
+    if (weight_inv > weight_max) {
+        if ((weight_inv / weight_max) > 1)
+            speed_new = 0;
+        else
+            speed_new /= 2;
+    }
+
     if (obj_group_def_ == PedInstance::og_dmAgent)
     {
-#ifdef _DEBUG
-        return ((int)((float)base_speed_ * adrenaline_->getMultiplier())) << 2;
-#else
         // See the comments in the IPAStim class for details on the multiplier
         // algorithm for adrenaline
-        return (int)((float)base_speed_ * adrenaline_->getMultiplier());
-#endif
+        return (int)((float)speed_new * adrenaline_->getMultiplier());
     }
 
     return base_speed_;

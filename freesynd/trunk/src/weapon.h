@@ -81,7 +81,8 @@ public:
             unsigned int w_shot_property, int w_hit_anim, int w_obj_hit_anim,
             int w_rd_anim, int w_trace_anim, int w_range_dmg,
             double w_shot_angle, double w_shot_accuracy, int w_shot_speed = 0,
-            int w_dmg_per_shot = 1, int w_shots_per_ammo = 1);
+            int w_dmg_per_shot = 1, int w_shots_per_ammo = 1,
+            int w_weight = 1);
 
     const char *getName() { return name_.c_str(); }
 
@@ -91,6 +92,7 @@ public:
     int damagePerShot() { return dmg_per_shot_; }
     int rank() { return rank_; }
     int anim() { return anim_; }
+    int weight() {return weight_; }
     snd::InGameSample getSound() { return sample_; }
     int getSmallIconId() { return small_icon_; }
     int getBigIconId() { return big_icon_; }
@@ -248,6 +250,7 @@ protected:
     int shot_speed_;
     //! shotgun only for now
     int shots_per_ammo_;
+    int weight_;
 };
 
 class ShotClass {
@@ -363,6 +366,7 @@ public:
     MapObject::DamageType dmgType() {
         return pWeaponClass_->dmgType();
     }
+    int getWeight() { return pWeaponClass_->weight(); }
 
 protected:
     Weapon *pWeaponClass_;

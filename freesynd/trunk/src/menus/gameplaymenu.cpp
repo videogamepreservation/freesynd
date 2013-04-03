@@ -1032,7 +1032,7 @@ bool GameplayMenu::handleUnknownKey(Key key, const int modKeys) {
             
             g_Screen.drawRect(txt_posx - 10, txt_posy - 5,
                 txt_width + 20, txt_height + 10);
-            gameFont()->drawText(txt_posx, txt_posy, str_paused.c_str(), 9);
+            gameFont()->drawText(txt_posx, txt_posy, str_paused.c_str(), 11);
         }
         return true;
     }
