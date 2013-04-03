@@ -792,17 +792,18 @@ Static *Static::loadInstance(uint8 * data, int m)
             s->setStartHealth(1);
             break;
         case 0x19:
-            // trash bin / mail box
+            // trash bin
             s = new EtcObj(m, curanim, curanim, curanim);
             s->setSizeX(64);
             s->setSizeY(64);
             s->setSizeZ(96);
             break;
         case 0x1A:
-            // advertisement on wall
+            // mail box
             s = new EtcObj(m, curanim, curanim, curanim);
-            s->setMainType(smt_Advertisement);
-            s->setIsIgnored(true);
+            s->setSizeX(64);
+            s->setSizeY(64);
+            s->setSizeZ(96);
             break;
         case 0x1C:
             // ???? what is this?
@@ -877,23 +878,15 @@ Static *Static::loadInstance(uint8 * data, int m)
         // trick to draw
         if (s->getMainType() == Static::smt_Advertisement)
             z += 1;
-#if 0
-        if (s->getMainType() == Static::smt_Window) {
-            int x = gamdata->mapposx[1] * 256 + gamdata->mapposx[0] + 128;
-            int y = gamdata->mapposy[1] * 256 + gamdata->mapposy[0] + 128;
-            z++;
-            if (z < 0 || x < 0 || y < 0) {
-                delete s;
-                return NULL;
-            }
-            s->setPosition(x / 256, y / 256, z, x % 256, y % 256, oz);
-        } else
-#endif
-            s->setPosition(gamdata->mapposx[1], gamdata->mapposy[1],
-                       z, gamdata->mapposx[0],
-                       gamdata->mapposy[0], oz);
+
+        s->setPosition(gamdata->mapposx[1], gamdata->mapposy[1],
+            z, gamdata->mapposx[0], gamdata->mapposy[0], oz);
 
         //s->setMainType(gamdata->sub_type);
+#if 0
+        if (s->tileX() == 66 && s->tileY() == 49)
+            oz = 2;
+#endif
         s->setDirection(gamdata->orientation);
     }
 
