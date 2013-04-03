@@ -425,7 +425,6 @@ bool ProjectileShot::animate(int elapsed, Mission *m) {
         do_recalc = true;
     }
     if (do_recalc) {
-        do_recalc = false;
         if (inc_z_ != 0) {
             cur_dist_ = (double)(reached_pos.z - base_pos_.z) / inc_z_;
             reached_pos.x = base_pos_.x + (int)(inc_x_ * cur_dist_);

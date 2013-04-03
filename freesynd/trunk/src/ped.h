@@ -353,7 +353,7 @@ public:
                 // removing all of this id
                 Mmuu32_t::iterator its = it;
                 do {
-                    it++;
+                    ++it;
                 } while (it->first == first && it != this->end());
                 this->erase(its, it);
             } else {
@@ -362,7 +362,7 @@ public:
                         this->erase(it);
                         break;
                     }
-                    it++;
+                    ++it;
                 } while (it->first == first && it != this->end());
             }
         }
@@ -385,7 +385,7 @@ public:
                             found = true;
                             break;
                         }
-                        it++;
+                        ++it;
                     } while (it != this->end());
                     if (!found)
                         this->insert(std::pair<uint32, uint32>(first, second));
@@ -405,7 +405,7 @@ public:
                             found = true;
                             break;
                         }
-                        it++;
+                        ++it;
                     } while (it != this->end() && it->first == first);
                 }
             }
@@ -448,7 +448,7 @@ public:
                         mm.equal_range(first_value);
                     found = false;
                     for (Mmuu32_t::iterator it = rng.first;
-                        it != rng.second; it++)
+                        it != rng.second; ++it)
                     {
                         if (it->second == second_value) {
                             found = true;

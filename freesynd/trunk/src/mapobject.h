@@ -413,7 +413,7 @@ public:
 
     //! checks whether final destination is same as pn
     bool checkFinalDest(PathNode& pn);
-    bool isMoving() { return speed_ != 0 || dest_path_.size() != 0;}
+    bool isMoving() { return speed_ != 0 || !dest_path_.empty();}
     //! checks whether current position is same as pn
     bool checkCurrPos(PathNode &pn);
     //! checks whether current position is same as pn, tile only

@@ -631,7 +631,7 @@ void VehicleInstance::setDestinationV(Mission *m, int x, int y, int z, int ox,
             it->setTileZ(tile_z_);
         }
     }
-    if(path2add.size() != 0 && dest_path_.size() != 0) {
+    if((!path2add.empty()) && (!dest_path_.empty())) {
         for (std::vector < PathNode >::reverse_iterator it = path2add.rbegin();
             it != path2add.rend(); it++)
         {
@@ -646,7 +646,7 @@ bool VehicleInstance::movementV(int elapsed)
     bool updated = false;
     int used_time = elapsed;
 
-    while (dest_path_.size() && used_time != 0) {
+    while ((!dest_path_.empty()) && used_time != 0) {
         if (hold_on_.wayFree == 1) {
             return updated;
         } else if (hold_on_.wayFree == 2){
@@ -730,7 +730,7 @@ bool VehicleInstance::movementV(int elapsed)
                speed_);
         speed_ = 0;
     }
-    if (all_passengers_.size() != 0) {
+    if (!all_passengers_.empty()) {
         for (std::set<PedInstance *>::iterator it = all_passengers_.begin();
             it != all_passengers_.end(); it++
         ) {

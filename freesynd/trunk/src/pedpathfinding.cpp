@@ -154,7 +154,7 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
         unsigned short mindx = bn[blvl].indxs + bn[blvl].n;
         unsigned short nlvl = blvl + 1;
         unsigned int cindx = 0;
-        for (unsigned short i = bn[blvl].indxs; i < mindx; i++) {
+        for (unsigned short i = bn[blvl].indxs; i < mindx; ++i) {
             toSetDesc bref = bv[i];
             cindx = bref.coords.x + bref.coords.y * m->mmax_x_
                 + bref.coords.z * m->mmax_m_xy;
@@ -506,7 +506,7 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
         if (ladd.n > 0) {
             nodeset = true;
             bn.push_back(ladd);
-            blvl++;
+            ++blvl;
         } else {
             nodeset = false;
             break;
@@ -516,7 +516,7 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
         mindx = tn[tlvl].indxs + tn[tlvl].n;
         nlvl = tlvl + 1;
-        for (unsigned short i = tn[tlvl].indxs; i < mindx; i++) {
+        for (unsigned short i = tn[tlvl].indxs; i < mindx; ++i) {
             toSetDesc bref = tv[i];
             cindx = bref.coords.x + bref.coords.y * m->mmax_x_
                 + bref.coords.z * m->mmax_m_xy;
@@ -868,7 +868,7 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
         if (ladd.n > 0) {
             nodeset = true;
             tn.push_back(ladd);
-            tlvl++;
+            ++tlvl;
         } else {
             nodeset = false;
             break;
@@ -891,25 +891,25 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
         if (lt == m_fdBasePoint) {
             unsigned short n = bn[blvl].n;
             std::vector <toSetDesc>::iterator it = bv.begin() + bn[blvl].indxs;
-            for (unsigned short i = 0; i < n; i++) {
+            for (unsigned short i = 0; i < n; ++i) {
                 it->p->t ^= m_fdBasePoint;
                 it->p->lvl = 0;
                 //bv.erase(it);
-                it++;
+                ++it;
             }
             //bn.pop_back();
-            blvl--;
+            --blvl;
         } else {
             unsigned short n = tn[tlvl].n;
             std::vector <toSetDesc>::iterator it = tv.begin() + tn[tlvl].indxs;
-            for (unsigned short i = 0; i < n; i++) {
+            for (unsigned short i = 0; i < n; ++i) {
                 it->p->t ^= m_fdTargetPoint;
                 it->p->lvl = 0;
                 //tv.erase(it);
-                it++;
+                ++it;
             }
             //tn.pop_back();
-            tlvl--;
+            --tlvl;
         }
     }
 
@@ -918,14 +918,14 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
         unsigned short n = bn[blvl].n;
         unsigned short nr = 0;
         std::vector <toSetDesc>::iterator it = bv.begin() + bn[blvl].indxs;
-        for (unsigned short i = 0; i < n; i++) {
+        for (unsigned short i = 0; i < n; ++i) {
             if ((it->p->t & m_fdLink) == 0) {
                 it->p->t ^= m_fdBasePoint;
                 it->p->lvl = 0;
                 //bv.erase(it);
-                nr++;
+                ++nr;
             }
-            it++;
+            ++it;
         }
         bn[blvl].n -= nr;
     }
@@ -934,14 +934,14 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
         unsigned short n = tn[tlvl].n;
         unsigned short nr = 0;
         std::vector <toSetDesc>::iterator it = tv.begin() + tn[tlvl].indxs;
-        for (unsigned short i = 0; i < n; i++) {
+        for (unsigned short i = 0; i < n; ++i) {
             if ((it->p->t & m_fdLink) == 0) {
                 it->p->t ^= m_fdTargetPoint;
                 it->p->lvl = 0;
                 //tv.erase(it);
-                nr++;
+                ++nr;
             }
-            it++;
+            ++it;
         }
         tn[tlvl].n -= nr;
     }
@@ -952,9 +952,9 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
 
     // tiles that have no childs are removed
     if (blvl > 1) {
-        blvl--;
+        --blvl;
         unsigned short indx = bn[blvl].indxs + bn[blvl].n;
-        indx--;
+        --indx;
         do {
             toSetDesc &bref = bv[indx];
             uint16 lvl_child = (bref.p->lvl + 1);
@@ -1082,13 +1082,13 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                 bref.p->lvl = 0;
                 //bv.erase(it);
             }
-            indx--;
+            --indx;
         } while(indx != 0);
     }
     if (tlvl > 1) {
-        tlvl--;
+        --tlvl;
         unsigned short indx = tn[tlvl].indxs + tn[tlvl].n;
-        indx--;
+        --indx;
         do {
             toSetDesc &bref = tv[indx];
             uint16 lvl_child = (bref.p->lvl + 1);
@@ -1216,7 +1216,7 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
                 bref.p->lvl = 0;
                 //tv.erase(it);
             }
-            indx--;
+            --indx;
         } while(indx != 0);
     }
     //printf("bv %i, tv %i\n", bv.size(), tv.size());
@@ -1739,14 +1739,14 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
 #endif
 
     // stairs to surface, surface to stairs correction
-    if (cdestpath.size() != 0) {
+    if (!cdestpath.empty()) {
         PathNode prvpn = PathNode(tile_x_, tile_y_, tile_z_, off_x_, off_y_);
         // TODO: use these to smoother path. later
         //std::vector<PathNode> vsingleway;
         //unsigned char mdir = 0xFF;
         //unsigned char hl = 0xFF;
         for (std::vector <PathNode>::iterator it = cdestpath.begin();
-            it != cdestpath.end(); it++) {
+            it != cdestpath.end(); ++it) {
             std::vector <PathNode>::iterator fit = it + 1;
             bool modified = false;
             unsigned char twd = m->mtsurfaces_[prvpn.tileX()
@@ -2192,7 +2192,7 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
 
 #if 0
     for (std::list <PathNode>::iterator it = dest_path_.begin();
-        it != dest_path_.end(); it++) {
+        it != dest_path_.end(); ++it) {
         printf("x %i, y %i, z %i\n", it->tileX(),it->tileY(),it->tileZ());
     }
 #endif
@@ -2208,7 +2208,7 @@ bool PedInstance::movementP(Mission *m, int elapsed)
     bool updated = false;
     int used_time = elapsed;
 
-    while (dest_path_.size() && used_time != 0) {
+    while ((!dest_path_.empty()) && used_time != 0) {
         int nxtTileX = dest_path_.front().tileX();
         int nxtTileY = dest_path_.front().tileY();
         int nxtTileZ = dest_path_.front().tileZ();
@@ -2447,7 +2447,7 @@ uint8 PedInstance::moveToDir(Mission* m, int elapsed, dirMoveType &dir_move,
                 if (tilenx - tile_x_ == 0) {
                     if (tileny - tile_y_ > 0) {
                         if ((fpd->dirh & 0x01) == 0x01) {
-                            tile_z_++;
+                            ++tile_z_;
                             dec_z = -1;
                         } else if ((fpd->dirl & 0x01) == 0x01) {
                             tile_z_--;
@@ -2458,10 +2458,10 @@ uint8 PedInstance::moveToDir(Mission* m, int elapsed, dirMoveType &dir_move,
                         }
                     } else {
                         if ((fpd->dirh & 0x10) == 0x10) {
-                            tile_z_++;
+                            ++tile_z_;
                             dec_z = -1;
                         } else if ((fpd->dirl & 0x10) == 0x10) {
-                            tile_z_--;
+                            --tile_z_;
                             dec_z = 1;
                         } else if ((fpd->dirm & 0x10) != 0x10) {
                             need_bounce = true;
@@ -2471,10 +2471,10 @@ uint8 PedInstance::moveToDir(Mission* m, int elapsed, dirMoveType &dir_move,
                 } else if (tileny - tile_y_ == 0) {
                     if (tilenx - tile_x_ > 0) {
                         if ((fpd->dirh & 0x04) == 0x04) {
-                            tile_z_++;
+                            ++tile_z_;
                             dec_z = -1;
                         } else if ((fpd->dirl & 0x04) == 0x04) {
-                            tile_z_--;
+                            --tile_z_;
                             dec_z = 1;
                         } else if ((fpd->dirm & 0x04) != 0x04) {
                             need_bounce = true;
@@ -2482,10 +2482,10 @@ uint8 PedInstance::moveToDir(Mission* m, int elapsed, dirMoveType &dir_move,
                         }
                     } else {
                         if ((fpd->dirh & 0x40) == 0x40) {
-                            tile_z_++;
+                            ++tile_z_;
                             dec_z = -1;
                         } else if ((fpd->dirl & 0x40) == 0x40) {
-                            tile_z_--;
+                            --tile_z_;
                             dec_z = 1;
                         } else if ((fpd->dirm & 0x40) != 0x40) {
                             need_bounce = true;
@@ -2640,7 +2640,7 @@ uint8 PedInstance::moveToDir(Mission* m, int elapsed, dirMoveType &dir_move,
                 }
                 dir_move.dir_last &= 0x00FF;
                 dir = dir_move.dir_last;
-                dir_move.dir_modifier--;
+                --dir_move.dir_modifier;
             } else {
                 dir_move.dir_last = (dir_move.dir_last + 64) & 0x00FF;
                 dir = dir_move.dir_last;
@@ -2650,15 +2650,15 @@ uint8 PedInstance::moveToDir(Mission* m, int elapsed, dirMoveType &dir_move,
         } else if (!move_to_pos && dir_move.dir_modifier != 0) {
             setDirection(dir);
             if (dir_move.dir_modifier == 1) {
-                dir_move.dir_modifier++;
+                ++dir_move.dir_modifier;
                 dir_move.dir_last += (256 - 64);
             }
             if (dir_move.dir_modifier == 2) {
-                dir_move.dir_modifier++;
+                ++dir_move.dir_modifier;
                 dir_move.dir_last += 128;
             }
             if (dir_move.dir_modifier == 3) {
-                dir_move.dir_modifier++;
+                ++dir_move.dir_modifier;
                 dir_move.dir_last += (256 - 64);
             }
             if (dir_move.dir_modifier == 3) {

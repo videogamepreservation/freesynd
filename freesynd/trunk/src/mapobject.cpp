@@ -152,8 +152,8 @@ void MapObject::setDirection(int posx, int posy, int * dir) {
             * atan((double)posy / (double)posx)) / PI + 64.0);
     } else { // posx > 0 && posy > 0
         int swapx = posx;
-        posy = posx;
-        posx = swapx;
+        posx = posy;
+        posy = swapx;
         direction = (int)((128.0
             * atan((double)posy / (double)posx)) / PI);
     }
@@ -1170,18 +1170,18 @@ bool LargeDoor::animate(int elapsed, Mission *obj)
             }
             if (state_ == Static::sttdoor_Open) {
                 for (std::vector<PedInstance *>::iterator it = found_peds.begin();
-                    it != found_peds.end(); it++ )
+                    it != found_peds.end(); ++it )
                 {
                     (*it)->hold_on_.wayFree = 0;
                 }
                 for (std::vector<PedInstance *>::iterator it = found_peds_mid.begin();
-                    it != found_peds_mid.end(); it++ )
+                    it != found_peds_mid.end(); ++it )
                 {
                     (*it)->hold_on_.wayFree = 0;
                 }
             } else {
                 for (std::vector<PedInstance *>::iterator it = found_peds.begin();
-                    it != found_peds.end(); it++ )
+                    it != found_peds.end(); ++it )
                 {
                     p = *it;
                     p->hold_on_.wayFree = 2;
@@ -1198,7 +1198,7 @@ bool LargeDoor::animate(int elapsed, Mission *obj)
                     p->hold_on_.pathBlocker = this;
                 }
                 for (std::vector<PedInstance *>::iterator it = found_peds_mid.begin();
-                    it != found_peds_mid.end(); it++ )
+                    it != found_peds_mid.end(); ++it )
                 {
                     p = *it;
                     ShootableMapObject::DamageInflictType d;
@@ -1283,7 +1283,7 @@ bool LargeDoor::animate(int elapsed, Mission *obj)
             }
             set_wayFree = state_ == Static::sttdoor_Opening ? 1 : 2;
             for (std::vector<PedInstance *>::iterator it = found_peds.begin();
-                it != found_peds.end(); it++ )
+                it != found_peds.end(); ++it )
             {
                 p = *it;
                 p->hold_on_.wayFree = set_wayFree;
@@ -1364,7 +1364,7 @@ bool LargeDoor::animate(int elapsed, Mission *obj)
                 } while (p);
             }
             for (std::vector<PedInstance *>::iterator it = found_peds.begin();
-                it != found_peds.end(); it++ )
+                it != found_peds.end(); ++it )
             {
                 p = *it;
                 p->hold_on_.wayFree = set_wayFree;

@@ -36,7 +36,7 @@
 class PathNode {
 public:
     PathNode() :
-        tile_x_(0), tile_y_(0), tile_z_(0), off_x_(0), off_y_(0) {}
+        tile_x_(0), tile_y_(0), tile_z_(0), off_x_(0), off_y_(0), off_z_(0) {}
     PathNode(int tile_x, int tile_y, int tile_z, int off_x = 128,
             int off_y = 128, int off_z = 0) :
         tile_x_(tile_x), tile_y_(tile_y), tile_z_(tile_z),

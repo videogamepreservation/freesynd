@@ -315,8 +315,8 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
         actions_property_ = 0;
     }
 
-    if (actions_queue_.size() != 0) {
-        for (uint32 indx = 0; indx < actions_queue_.size();) {
+    if (!actions_queue_.empty()) {
+        for (uint32 indx = 0; indx < actions_queue_.size(); ++indx) {
             std::vector <actionQueueGroupType>::iterator it =
                 actions_queue_.begin() + indx;
             if ((it->state & 128) == 0 && (it->state & 12) != 0
@@ -326,7 +326,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                 actions_queue_.erase(it);
                 continue;
             }
-            indx++;
+            ;
         }
     }
 
@@ -989,7 +989,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                         vehicleState = in_vehicle_->isIgnored();
                         in_vehicle_->setIsIgnored(true);
                     }
-                    if (hostiles_found_.size() != 0)
+                    if (!hostiles_found_.empty())
                         verifyHostilesFound(mission);
 
                     Msmod_t smo_dist;
@@ -1407,7 +1407,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
 #endif
     }
 
-    if (friends_not_seen_.size() != 0) {
+    if (!friends_not_seen_.empty()) {
         toDefineXYZ cur_xyz;
         convertPosToXYZ(&cur_xyz);
         cur_xyz.z += (size_z_ >> 1);
@@ -1520,7 +1520,7 @@ void PedInstance::kill() {
         health_ = -1;
         actions_property_ = 1;
         switchActionStateTo(PedInstance::pa_smDead);
-        if (weapons_.size() != 0)
+        if (!weapons_.empty())
             dropAllWeapons();
         is_ignored_ = true;
         setDrawnAnim(PedInstance::ad_DieAnim);
@@ -1907,7 +1907,7 @@ bool PedInstance::selectRequiredWeapon(pedWeaponToUse *pw_to_use) {
             break;
     }
 
-    if (found_weapons.size()) {
+    if (!found_weapons.empty()) {
         int best_rank = -1;
         int indx = -1;
         if (pw_to_use->use_ranks) {
@@ -2297,7 +2297,7 @@ bool PedInstance::handleDamage(ShootableMapObject::DamageInflictType *d) {
                 setDrawnAnim(PedInstance::ad_HitAnim);
                 break;
         }
-        if (weapons_.size() != 0)
+        if (!weapons_.empty())
             dropAllWeapons();
         is_ignored_ = true;
     } else {
@@ -2309,7 +2309,7 @@ bool PedInstance::handleDamage(ShootableMapObject::DamageInflictType *d) {
 
 void PedInstance::destroyAllWeapons() {
     setSelectedWeapon(-1);
-    while (weapons_.size()) {
+    while (!weapons_.empty()) {
         WeaponInstance * w = removeWeapon(0);
         w->setMap(-1);
         w->setPosition(tile_x_, tile_y_, tile_z_, off_x_, off_y_, off_z_);
