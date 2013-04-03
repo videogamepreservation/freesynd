@@ -162,9 +162,13 @@ bool Mission::loadLevel(uint8 * levelData)
             vindx[i] = vehicles_.size();
             vehicles_.push_back(v);
             if (car.offset_of_driver != 0 && ((car.offset_of_driver - 2) / 92 + 2) * 92
-                == car.offset_of_driver) {
+                == car.offset_of_driver)
+            {
                 driverindx[(car.offset_of_driver - 2) / 92] = vindx[i];
             }
+#ifdef _DEBUG
+            v->setDebugID(i);
+#endif
         }
     }
 
@@ -441,8 +445,12 @@ bool Mission::loadLevel(uint8 * levelData)
         if(sref.desc == 0)
             continue;
         Static *s = Static::loadInstance((uint8 *) & sref, i_map_id_);
-        if (s)
+        if (s) {
             statics_.push_back(s);
+#ifdef _DEBUG
+            s->setDebugID(i);
+#endif
+        }
     }
 
 #if 0
@@ -462,6 +470,9 @@ bool Mission::loadLevel(uint8 * levelData)
             continue;
         WeaponInstance *w = createWeaponInstance((uint8 *) & wref);
         if (w) {
+#ifdef _DEBUG
+            w->setDebugID(i);
+#endif
             if (wref.desc == 0x05) {
                 uint16 offset_owner = READ_LE_UINT16(wref.offset_owner);
                 if (offset_owner != 0) {

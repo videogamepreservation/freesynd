@@ -1802,6 +1802,8 @@ void PedInstance::setSelectedWeapon(int n) {
     if (n != -1) {
         assert((size_t)selected_weapon_ < weapons_.size());
         WeaponInstance *wi = weapons_[selected_weapon_];
+        if (wi->usesAmmo() && wi->ammoRemaining() == 0)
+            return;
         if (wi->getMainType() == Weapon::EnergyShield)
             setRcvDamageDef(MapObject::ddmg_PedWithEnergyShield);
         if (wi->getMainType() != Weapon::TimeBomb)

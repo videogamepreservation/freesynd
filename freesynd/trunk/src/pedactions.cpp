@@ -378,8 +378,14 @@ bool PedInstance::createActQFindEnemy(actionQueueGroupType &as) {
         aq.multi_var.enemy_var.pw_to_use.use_ranks = pMod || (!isOurAgent())
             ? true: false;
         WeaponInstance *wi = selectedWeapon();
+        if (wi && wi->usesAmmo() && wi->ammoRemaining() == 0) {
+            wi = NULL;
+            setSelectedWeapon(-1);
+        }
         if (wi && wi->canShoot()) {
             if (pMod) {
+                // This overrides selected weapon
+                // might be confusing for player
                 if (pMod->getVersion() == Mod::MOD_V3) {
                     pw_to_use.desc = 5;
                     pw_to_use.wpn.dmg_type = wi->dmgType();

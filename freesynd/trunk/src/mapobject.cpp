@@ -35,6 +35,9 @@ MapObject::MapObject(int m):size_x_(1), size_y_(1), size_z_(2),
     is_ignored_(false), is_frame_drawn_(false),
     state_(0xFFFFFFFF)
 {
+#ifdef _DEBUG
+    debug_id_ = 0xFFFFFFFF;
+#endif
 }
 
 int MapObject::screenX()

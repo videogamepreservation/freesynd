@@ -504,14 +504,16 @@ void GameplayMenu::handleMouseMotion(int x, int y, int state, const int modKeys)
             if (p->isAlive() && p->map() != -1) {
                 int px = p->screenX() - 10;
                 int py = p->screenY() - (1 + p->tileZ()) * TILE_HEIGHT/3
-                - (p->offZ() * TILE_HEIGHT/3) / 128;
+                    - (p->offZ() * TILE_HEIGHT/3) / 128;
 
                 if (x - 129 + world_x_ >= px && y + world_y_ >= py &&
-                    x - 129 + world_x_ < px + 21 && y + world_y_ < py + 34) {
+                    x - 129 + world_x_ < px + 21 && y + world_y_ < py + 34)
+                {
                     for (SquadSelection::Iterator it = selection_.begin();
-                         it != selection_.end(); ++it) {
+                         it != selection_.end(); ++it)
+                    {
                         WeaponInstance * wi = (*it)->selectedWeapon();
-                        target_ = mission_->ped(i);
+                        target_ = p;
                         if (wi && wi->canShoot()
                             && wi->inRangeNoCP(&target_) == 1)
                         {
@@ -530,11 +532,13 @@ void GameplayMenu::handleMouseMotion(int x, int y, int state, const int modKeys)
                 int py = v->screenY() - 10 - v->tileZ() * TILE_HEIGHT/3;
 
                 if (x - 129 + world_x_ >= px && y + world_y_ >= py &&
-                    x - 129 + world_x_ < px + 40 && y + world_y_ < py + 32) {
+                    x - 129 + world_x_ < px + 40 && y + world_y_ < py + 32)
+                {
                     for (SquadSelection::Iterator it = selection_.begin();
-                         it != selection_.end(); ++it) {
+                         it != selection_.end(); ++it)
+                    {
                         WeaponInstance * wi = (*it)->selectedWeapon();
-                        target_ = mission_->vehicle(i);
+                        target_ = v;
                         if (wi && wi->canShoot()
                             && wi->inRangeNoCP(&target_)== 1)
                         {
@@ -552,15 +556,36 @@ void GameplayMenu::handleMouseMotion(int x, int y, int state, const int modKeys)
             if (w->map() != -1) {
                 int px = w->screenX() - 10;
                 int py = w->screenY() + 4 - w->tileZ() * TILE_HEIGHT/3
-                - (w->offZ() * TILE_HEIGHT/3) / 128;
+                    - (w->offZ() * TILE_HEIGHT/3) / 128;
 
                 if (x - 129 + world_x_ >= px && y + world_y_ >= py &&
-                    x - 129 + world_x_ < px + 20 && y + world_y_ < py + 15) {
-                    target_ = mission_->weapon(i);
+                    x - 129 + world_x_ < px + 20 && y + world_y_ < py + 15)
+                {
+                    target_ = w;
                     break;
                 }
             }
         }
+#if 0
+#ifdef _DEBUG
+        for (int i = 0; mission_ && i < mission_->numStatics(); i++) {
+            Static *s = mission_->statics(i);
+
+            if (s->map() != -1) {
+                int px = s->screenX() - 10;
+                int py = s->screenY() + 4 - s->tileZ() * TILE_HEIGHT/3
+                    - (s->offZ() * TILE_HEIGHT/3) / 128;
+
+                if (x - 129 + world_x_ >= px && y + world_y_ >= py &&
+                    x - 129 + world_x_ < px + 20 && y + world_y_ < py + 15)
+                {
+                    target_ = s;
+                    break;
+                }
+            }
+        }
+#endif
+#endif
     }
 
     if (target_) {
@@ -601,7 +626,8 @@ void GameplayMenu::handleMouseMotion(int x, int y, int state, const int modKeys)
                 PedInstance * pa = mission_->ped(i);
                 PathNode *pn = NULL;
                 if (target_) {
-                    int tilez = target_->tileZ() * 128 + target_->offZ() + (target_->sizeZ() >> 1);
+                    int tilez = target_->tileZ() * 128 + target_->offZ()
+                        + (target_->sizeZ() >> 1);
                     int offz = tilez % 128;
                     tilez /= 128;
                     pn = new PathNode(target_->tileX(), target_->tileY(), tilez,
@@ -693,7 +719,9 @@ bool GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
  * \param button Mouse button that was clicked
  * \param modKeys System keys states
  */
-void GameplayMenu::handleClickOnWeaponSelector(int x, int y, int button, const int modKeys) {
+void GameplayMenu::handleClickOnWeaponSelector(int x, int y, int button,
+    const int modKeys)
+{
     int w_num = ((y - (2 + 46 + 44 + 10 + 46 + 44 + 15)) / 32) * 4
             + x / 32;
     bool weapon_is_selected = false;
@@ -703,11 +731,13 @@ void GameplayMenu::handleClickOnWeaponSelector(int x, int y, int button, const i
             if (button == 1) {
                 WeaponInstance *wi = pLeader->weapon(w_num);
                 bool deselect_curr = false;
-                if (pLeader->selectedWeapon() == wi) {
+
+                if (pLeader->selectedWeapon() == wi)
                     deselect_curr = true;
-                }
+
                 for (SquadSelection::Iterator it = selection_.begin();
-                     it != selection_.end(); ++it) {
+                     it != selection_.end(); ++it)
+                {
                     PedInstance *ped = *it;
                     if (deselect_curr)
                         ped->setSelectedWeapon(-1);
@@ -1413,21 +1443,7 @@ void GameplayMenu::selectAgent(size_t agentNo, bool addToGroup) {
         g_App.gameSounds().play(snd::SPEECH_SELECTED);
         
         // redraw agent selectors
-        addDirtyRect(((agentNo % 2) == 0 ? 0 : 65), (agentNo > 1 ? 90 : 0) , 64, 46);
-        /*switch (agentNo) {
-        case 1:
-            addDirtyRect(0, 0, 64, 46);
-            break;
-        case 2:
-            addDirtyRect(65, 0, 64, 46);
-            break;
-        case 3:
-            addDirtyRect(0, 100, 64, 46);
-            break;
-        case 4:
-            addDirtyRect(65, 100, 64, 46);
-            break;
-        }*/
+        addDirtyRect((agentNo % 2) * 65, (agentNo / 2) * 90 , 64, 46);
     }
 }
 

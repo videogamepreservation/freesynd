@@ -441,6 +441,9 @@ public:
     virtual ~Static() {}
 
     virtual bool animate(int elapsed, Mission *obj) { return MapObject::animate(elapsed); }
+#ifdef _DEBUG
+    bool useTargetCursor() { return true; }
+#endif
     typedef enum {
         sttdoor_Closed = 0,
         sttdoor_Closing,
