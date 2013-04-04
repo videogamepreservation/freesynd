@@ -1,5 +1,14 @@
 <?xml version='1.0' standalone='yes'?>
 <news>>
+	<item title="Icon is WANTED." date="2013-04-04" author="Bohdan Stelmakh"
+	rssDesc="Freesynd lacks icon, we need someone to create it." id="11">
+	Usually projects have icon from the very beginning, but not Freesynd and we are
+	STILL WITHOUT one. If anyone is capable of creating this masterpiece - please do and
+	send us. Some info for creator : it should have green color, be "dark" and
+	"cyberpunk in heart", SVG format, license (CC BY-SA 3.0) will be prefered.
+	This [[https://sourceforge.net/p/freesynd/feature-requests/31/ ticket]] should be used
+	for sending and evaluating icons.
+	</item>
 	<item title="Release 0.7" date="2013-03-02" author="Bohdan Stelmakh"
 	rssDesc="The development version 0.7 of Freesynd is available for download." id="10">
 	We have finally managed to release new version of Freesynd, it's 0.7.
