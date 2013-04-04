@@ -67,10 +67,10 @@ public:
 
     //! checks existing weapons that can do such damage and sets whether they can shoot
     //! strict check
-    bool checkDmgTypeCanShootStrict(MapObject::DamageType dmg, bool &can_shoot);
+    bool checkDmgTypeCanShootStrict(uint32 dmg, bool &can_shoot);
     //! checks existing weapons that can do such damage and sets whether they can shoot
     //! non strict check
-    bool checkDmgTypeCanShootNonStrict(MapObject::DamageType dmg, bool &can_shoot);
+    bool checkDmgTypeCanShootNonStrict(uint32 dmg, bool &can_shoot);
 protected:
     //! Loads the weapon from file
     Weapon *loadWeapon(Weapon::WeaponType wt);

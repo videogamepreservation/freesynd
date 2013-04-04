@@ -376,7 +376,7 @@ bool WeaponManager::loadFromFile(PortableFile &infile, const FormatVersion& v) {
     return true;
 }
 
-bool WeaponManager::checkDmgTypeCanShootStrict(MapObject::DamageType dmg, bool &can_shoot)
+bool WeaponManager::checkDmgTypeCanShootStrict(uint32 dmg, bool &can_shoot)
 {
     bool found = false;
     can_shoot = false;
@@ -394,7 +394,7 @@ bool WeaponManager::checkDmgTypeCanShootStrict(MapObject::DamageType dmg, bool &
     return found;
 }
 
-bool WeaponManager::checkDmgTypeCanShootNonStrict(MapObject::DamageType dmg, bool &can_shoot)
+bool WeaponManager::checkDmgTypeCanShootNonStrict(uint32 dmg, bool &can_shoot)
 {
     bool found = false;
     can_shoot = false;

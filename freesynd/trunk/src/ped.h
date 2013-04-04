@@ -544,7 +544,8 @@ public:
             // use only this type of weapon
             Weapon::WeaponType wpn_type;
             // use weapon that inflicts this type of damage
-            MapObject::DamageType dmg_type;
+            // MapObject::DamageType
+            uint32 dmg_type;
         } wpn;
         // union descriptor
         // 0 - not set, 1 - indx, 2 - pointer, 3 - weapon type,
