@@ -798,7 +798,8 @@ void GameplayMenu::updateIPALevelMeters(int elapsed)
 {
     for (int agent = 0; agent < 4; agent++) {
         PedInstance *ped = mission_->ped(agent);
-        ped->updtIPATime(elapsed);
+        if (ped->isAlive())
+            ped->updtIPATime(elapsed);
     }
 }
 

@@ -131,9 +131,13 @@ void AgentSelectorRenderer::drawIPABar(int agent, IPAStim *stim)
  * \param pAgent
  * \param isSelected
  */
-void AgentSelectorRenderer::drawSelectorForAgent(size_t agentSlot, PedInstance *pAgent, bool isSelected) {
-    int topX = ((agentSlot % 2) == 1 ? 64 : 0);
-    int topY = (agentSlot > 1 ? 46 + 44 + 10 : 0);
+void AgentSelectorRenderer::drawSelectorForAgent(size_t agentSlot,
+    PedInstance *pAgent, bool isSelected)
+{
+    // parity check
+    int topX = (agentSlot & 0x01) * 64;
+    // 2,3 should be drawn at (46 + 44 + 10)
+    int topY = (agentSlot >> 1) * (46 + 44 + 10);
     int spriteSelected = 1772 + agentSlot;
     int springUnselected = 1748 + (agentSlot > 1 ? agentSlot + 2 : agentSlot);
 
@@ -152,10 +156,12 @@ void AgentSelectorRenderer::drawSelectorForAgent(size_t agentSlot, PedInstance *
         //draw animation within selectors
         pAgent->drawSelectorAnim(topX + 32, topY + 38);
 
-        // draw IPA
-        drawIPABar(agentSlot, pAgent->adrenaline_);
-        drawIPABar(agentSlot, pAgent->perception_);
-        drawIPABar(agentSlot, pAgent->intelligence_);
+        // draw IPA, for alive only agents
+        if (pAgent->isAlive()) {
+            drawIPABar(agentSlot, pAgent->adrenaline_);
+            drawIPABar(agentSlot, pAgent->perception_);
+            drawIPABar(agentSlot, pAgent->intelligence_);
+        }
     }
 }
 
