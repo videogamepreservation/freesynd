@@ -167,6 +167,26 @@ bool WeaponManager::isAvailable(Weapon *pWeapon) {
     return false;
 }
 
+Weapon * WeaponManager::getAvailable(Weapon::WeaponType wpn) {
+    // search in available weapons
+    for (unsigned i = 0; i != availableWeapons_.size(); ++i) {
+        if (wpn == availableWeapons_.get(i)->getWeaponType())
+            return availableWeapons_.get(i);
+    }
+
+    // No weapon of that type has been found
+    return NULL;
+}
+
+void WeaponManager::getAvailable(uint32 dmg_type, std::vector <Weapon *> &wpns)
+{
+    // search in available weapons
+    for (unsigned i = 0; i != availableWeapons_.size(); ++i) {
+        if ((availableWeapons_.get(i)->dmgType() & dmg_type) != 0)
+            wpns.push_back(availableWeapons_.get(i));
+    }
+}
+
 Weapon * WeaponManager::loadWeapon(Weapon::WeaponType wt) {
     /* NOTE: small icon 27 exists and looks like an N with an arrow above it.
        the corresponding large icon is actually the "all" button on the

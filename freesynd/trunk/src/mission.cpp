@@ -478,7 +478,9 @@ bool Mission::loadLevel(uint8 * levelData)
                 if (offset_owner != 0) {
                     offset_owner = (offset_owner - 2) / 92; // 92 = ped data size
                     if (offset_owner > 7 && pindx[offset_owner] != 0xFFFF) {
-                        // TODO: correct weapons for enemy agents
+                        // TODO: still there is a problem of weapons setup
+                        // some police officers can have more then 1 weapon
+                        // others none (pacific Rim)
                         peds_[pindx[offset_owner]]->addWeapon(w);
                         w->setOwner(peds_[pindx[offset_owner]]);
                         w->setIsIgnored(true);
@@ -996,7 +998,7 @@ void Mission::start()
     p_squad_->clear();
     cur_objective_ = 0;
 
-    for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < 4; ++i) {
         PedInstance *p = peds_[i];
         Agent *pAg = g_Session.agents().squadMember(i);
         if (pAg && pAg->isActive()) {
@@ -1020,7 +1022,53 @@ void Mission::start()
             p->setIsIgnored(true);
             p->setStateMasks(PedInstance::pa_smUnavailable);
         }
-    }    
+    }
+
+    // creating a list of available weapons
+    // TODO: consider weight of weapons when adding?
+    std::vector <Weapon *> wpns;
+    g_App.weapons().getAvailable(MapObject::dmg_Bullet, wpns);
+    int indx_best = -1;
+    int indx_second = -1;
+    for (int i = 0, sz = wpns.size(), rank_best = -1, rank_second = -1;
+        i < sz; ++i)
+    {
+        if (wpns[i]->rank() > rank_best) {
+            rank_second = rank_best;
+            indx_second = indx_best;
+            rank_best = wpns[i]->rank();
+            indx_best = i;
+        } else if (wpns[i]->rank() > rank_second) {
+            rank_second = wpns[i]->rank();
+            indx_second = i;
+        }
+    }
+    Weapon *bomb = g_App.weapons().getAvailable(Weapon::TimeBomb);
+
+    // TODO: check whether enemy agents weapons are equal to best two
+    // if not set them
+    for (uint16 i = 8, sz = peds_.size(); i < sz; ++i) {
+        PedInstance *p = peds_[i];
+        if (p->objGroupDef() == PedInstance::og_dmAgent &&
+            p->numWeapons() == 0)
+        {
+            int index_give = indx_best;
+            if (indx_second != -1 && (rand() & 0xFF) > 200)
+                index_give = indx_second;
+            WeaponInstance *wi = wpns[index_give]->createInstance();
+            p->addWeapon(wi);
+            wi->setOwner(p);
+            wi->setIsIgnored(true);
+            weapons_.push_back(wi);
+            if (bomb) {
+                WeaponInstance *w_bomb = bomb->createInstance();
+                p->addWeapon(w_bomb);
+                w_bomb->setOwner(p);
+                w_bomb->setIsIgnored(true);
+                weapons_.push_back(w_bomb);
+            }
+        }
+    }
 }
 
 /*! 

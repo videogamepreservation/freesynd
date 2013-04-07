@@ -60,6 +60,11 @@ public:
     //! Returns true is the given weapon is available for agents
     bool isAvailable(Weapon *pWeapon);
 
+    //! Returns pointer if required weapon type is availiable
+    Weapon * getAvailable(Weapon::WeaponType wpn);
+    //! Creates a list of available weapons of required damage
+    void getAvailable(uint32 dmg_type, std::vector <Weapon *> &wpns);
+
     //! Save instance to file
     bool saveToFile(PortableFile &file);
     //! Load instance from file
