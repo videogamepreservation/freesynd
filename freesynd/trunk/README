@@ -73,6 +73,8 @@ Commands
  * Ctrl + 0           : Inverts the selection.
  * Ctrl + Left Click  : Sets a waypoint for the selected agents.
  * Left,Right,Up,Down : Scrolls the map.
+ * P   : Pauses Game
+ * Ctrl + D           : Autodestruction of selected agent(s)
  
  - Debug Mode :
 

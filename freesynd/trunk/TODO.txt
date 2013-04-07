@@ -20,7 +20,6 @@ that succesfully persuaded; weapon range modifier(?); accuracy modifier/property
  A.I:
 ----
  - A.L. - this one is complex
- - pathfinding directional, improvements needed as it is not working as in original
  - pathfinding directional, vehicles, for peds driving in the city
  - vehicle pathfinding needs to be tested on all maps and improved
 (Greenland not working)
@@ -39,8 +38,6 @@ of event/state:
    different objects burn
  - object positioning during drawing
  - map drawing still buggy
- - set weapons for enemy agents, because in gamedata weapons are not the same as
-in original gameplay or are not present at all
  - add sound effects
  - mapmenu: player color update - if changed in configmenu; change of owners for
 non-player owned territory
@@ -65,8 +62,7 @@ Packaging:
 (Ö and Ü in certain sizes)
  - Work on hyphenation rules in the text reflow code
  - Convert Italian and French translations to accented characters in UTF-8
- - Complete Italian translation
+ - Check all translations for correctness
  - Reload button translation for non-English languages
  - Use game lost menu
  - Remove debug info displayed in the console
- - deselect "select all" button when all agents are dead

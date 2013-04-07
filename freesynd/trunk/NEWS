@@ -14,16 +14,19 @@ Changes
 Fixed Bugs
 ----------
   * Clicking on map/minimap
+  * Enemy agents on some maps were without weapons
+  * Circle in minimap is more precise and is fully drawn
 
 Features added
 ----------
   * Agent with chest mod ver > 1 will explode when killed (Ctrl + D)
+  * Time bomb can be detonated by shot
 
 Known issues with this release
 ------------------------------
-  * Agent AI is not operational.
+  * Agent AI is partially operational.
   * PathFinding requires improvement (path smoothing)
-  * No animation for windows
+  * No animation for animated windows
   * Map drawing is buggy
   * Not all weapons correctly function.
 
