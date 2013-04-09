@@ -1,6 +1,6 @@
 cmake_minimum_required (VERSION 2.6)
 project (FreeSynd)
-set (FREESYND_VERSION "0.7.1")
+set (FREESYND_VERSION "0.7.5")
 
 if (WIN32 AND MSVC)
 	# Search the bundled libs directory when using MSVC.

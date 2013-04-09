@@ -1,5 +1,11 @@
 <?xml version='1.0' standalone='yes'?>
 <news>>
+	<item title="Release 0.7.1" date="2013-04-09" author="Bohdan Stelmakh"
+	rssDesc="The development version 0.7.1 of Freesynd is available for download." id="12">
+	Small improvements were done in this release, we hope you will enjoy it.
+	Get it from [[http://sourceforge.net/projects/freesynd/files/freesynd/freesynd-0.7.1/ sourceforge]].
+	We are STILL WITHOUT icon, read news "Icon is WANTED." for more info.
+	</item>
 	<item title="Icon is WANTED." date="2013-04-04" author="Bohdan Stelmakh"
 	rssDesc="Freesynd lacks icon, we need someone to create it." id="11">
 	Usually projects have icon from the very beginning, but not Freesynd and we are

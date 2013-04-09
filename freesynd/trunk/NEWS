@@ -1,4 +1,4 @@
-FreeSynd 0.7.1 : Release Notes
+FreeSynd 0.7.5 : Release Notes
 ----------------------------
 
 Description
@@ -7,20 +7,15 @@ This is a prelimary release for testing and development purposes.
 
 Changes
 -------
-  * Code refactoring
-  * All tabs coverted to spaces
-  * Better animation for impact or detonating explosions
+  *
 
 Fixed Bugs
 ----------
-  * Clicking on map/minimap
-  * Enemy agents on some maps were without weapons
-  * Circle in minimap is more precise and is fully drawn
+  *
 
 Features added
 ----------
-  * Agent with chest mod ver > 1 will explode when killed (Ctrl + D)
-  * Time bomb can be detonated by shot
+  *
 
 Known issues with this release
 ------------------------------
@@ -32,6 +27,17 @@ Known issues with this release
 
 History
 -------
+
+ v0.7.1
+ ----
+  * Code refactoring
+  * All tabs coverted to spaces
+  * Better animation for impact or detonating explosions
+  * Clicking on map/minimap
+  * Enemy agents on some maps were without weapons
+  * Circle in minimap is more precise and is fully drawn
+  * Agent with chest mod ver > 1 will explode when killed (Ctrl + D)
+  * Time bomb can be detonated by shot
 
  v0.7
  ----
