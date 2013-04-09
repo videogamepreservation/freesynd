@@ -2150,7 +2150,7 @@ bool PedInstance::handleDrawnAnim(int elapsed) {
         case PedInstance::ad_HitAnim:
             if (frame_ < ped_->lastHitFrame(getDirection()))
                 answer = false;
-            else if (health() < 0)
+            else if (health_ <= 0)
                 setDrawnAnim(PedInstance::ad_DieAnim);
             break;
         case PedInstance::ad_DieAnim:

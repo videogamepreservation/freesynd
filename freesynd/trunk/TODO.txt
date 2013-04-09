@@ -34,7 +34,6 @@ IHM:
 ----
  - animation for objects need to be fixed, to correctly represent every stage
 of event/state:
-   windows break when shot
    different objects burn
  - object positioning during drawing
  - map drawing still buggy
