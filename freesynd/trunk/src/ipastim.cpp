@@ -34,7 +34,7 @@ const char * IPAStim::IPANames[3] = {
 #endif
 
 IPAStim::IPAStim(IPAType ipa_type, int amount, int dependency)
-:ipa_type_(ipa_type), effect_(50), effect_timer_(1000), dependency_timer_(5000)
+:ipa_type_(ipa_type), effect_(50), effect_timer_(1000), dependency_timer_(4500)
 {
     assert(ipa_type_ <= 3);
     setLevels(amount, dependency);
@@ -56,28 +56,28 @@ float IPAStim::getMultiplier() const
     // the same speed as a civilian.
     
     // This function has been implemented to assume that FULL adrenaline
-    // would give a 4x increase in speed and the worst case would leave
-    // you walking at a quarter speed. With neutral adrenaline it has no
+    // would give a 2x increase in speed and the worst case would leave
+    // you walking at a half speed. With neutral adrenaline it has no
     // effect and therefore returns 1.
     
-    // Thus, the algortithm used here goes from 0.25 to 1 for 'negative'
-    // adrenaline and 1 to 4 on the positive side.
+    // Thus, the algortithm used here goes from 0.5 to 1 for 'negative'
+    // adrenaline and 1 to 2 on the positive side.
     int magnitude = getMagnitude();
     
     if(direction() == IPA_boost) {
-        // return value is 1 to 4 for values
+        // return value is 1 to 2 for values
         // of 'magnitude' from 0 to 100
         // If you fiddle with this equation beware of
         // values for effective which are close to 0
-        float mult = part_of_four(magnitude);
-        assert(mult >= 1 && mult <= 4);
+        float mult = part_of_two(magnitude);
+        assert(mult >= 1 && mult <= 2);
         //printf("%s boost: m:%d->%fx\n", getName(), magnitude_, mult);
         return mult;
     } else {
         // < 0
-        // range: 0.25 up towards 1
-        float mult = 1.0/part_of_four(magnitude);
-        assert(mult >= 0.25 && mult <= 1.0);
+        // range: 0.5 up towards 1
+        float mult = 1.0/part_of_two(magnitude);
+        assert(mult >= 0.5 && mult <= 1.0);
         //printf("%s reduce: m:%d->%fx\n", getName(), magnitude_, mult);
         return mult;
     }
@@ -133,13 +133,19 @@ void IPAStim::processTicks(int elapsed)
     // The dependency indicator always creaps towards amount
     if(dependency_timer_.update(elapsed))
     {
-        if(dependency_ > amount_)
-        {
+        if (dependency_ > amount_) {
             dependency_--;
-        }
-        else if(dependency_ < amount_)
-        {
+        } else if (dependency_ < amount_) {
             dependency_++;
+        } else {
+            // equal
+            if (amount_ < 50) {
+                ++amount_;
+                ++dependency_;
+            } else if (amount_ > 50) {
+                --amount_;
+                --dependency_;
+            }
         }
         assert(dependency_ >=0 && dependency_ <= 100);
 

@@ -48,7 +48,7 @@ public:
     }
 #endif
     
-    // Return value varies from 0.25 to 4 and returns 1
+    // Return value varies from 0.5 to 2 and returns 1
     // for 'neutral' adrenaline.
     float getMultiplier() const;
     
@@ -94,11 +94,11 @@ private:
     // moving towards the dependency line.
     int effect_;
     
-    // Given a percentage returns that % of 1 to 4
-    // i.e. instead of 0 to 4
-    float part_of_four(int percentage) const
+    // Given a percentage returns that % of 1 to 2
+    // i.e. instead of 0 to 2
+    float part_of_two(int percentage) const
     {
-        return (3.0f * ((float)percentage)/100.0f) + 1.0f;
+        return (((float)percentage)/100.0f) + 1.0f;
     }
     
     enum IPADir {
@@ -113,7 +113,7 @@ private:
     // A one second timer, IPA's seem to adjust themselves
     // about once a second
     fs_utils::Timer effect_timer_; // every second
-    fs_utils::Timer dependency_timer_; // once every 5 seconds
+    fs_utils::Timer dependency_timer_; // once every 4.5 seconds
 };
 
 #endif

@@ -2436,14 +2436,14 @@ void PedInstance::verifyHostilesFound(Mission *m) {
 
 int PedInstance::getSpeed()
 {
-    //TODO: mods
     int speed_new = base_speed_;
 
     int weight_max = 0;
     Mod *pMod = slots_[Mod::MOD_LEGS];
     if (pMod) {
         weight_max += 5 << (pMod->getVersion() + 1);
-        speed_new *= (pMod->getVersion() + 2);
+        speed_new *= (pMod->getVersion() + 5);
+        speed_new >>= 2;
     } else
         weight_max = 5;
     pMod = slots_[Mod::MOD_ARMS];
@@ -2470,7 +2470,7 @@ int PedInstance::getSpeed()
         return (int)((float)speed_new * adrenaline_->getMultiplier());
     }
 
-    return base_speed_;
+    return speed_new;
 }
 
 bool PedInstance::hasAccessCard()
