@@ -24,6 +24,7 @@ int main(int argc, char **argv)
 
     outf = fopen(output, "wb");
     if (!outf) {
+        fclose(inf);
         fprintf(stderr, "Unable to open `%s' for output.\n", output);
         return 1;
     }

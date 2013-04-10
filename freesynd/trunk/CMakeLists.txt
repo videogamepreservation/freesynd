@@ -59,7 +59,11 @@ if (NOT PNG_FOUND)
 	message (FATAL_ERROR "Unable to locate PNG")
 endif ()
 
-if (NOT CMAKE_BUILD_TYPE OR CMAKE_BUILD_TYPE STREQUAL "debug")
+if (NOT CMAKE_BUILD_TYPE)
+    set (CMAKE_BUILD_TYPE "debug")
+endif ()
+
+if (CMAKE_BUILD_TYPE STREQUAL "debug" OR CMAKE_BUILD_TYPE STREQUAL "Debug")
 	set (BUILD_DEV_TOOLS TRUE)
 else ()
 	set (BUILD_DEV_TOOLS FALSE)

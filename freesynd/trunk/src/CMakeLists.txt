@@ -77,7 +77,7 @@ set (SOURCES
 	weaponmanager.cpp
 )
 
-if (APPLE AND ${SDL_INCLUDE_DIR} MATCHES ".framework")
+if (APPLE AND "${SDL_INCLUDE_DIR}" MATCHES ".framework")
 	# When using the official SDL 1.2 framework for Mac,
 	# you must link in an implementation of SDLmain.
 	set (SOURCES ${SOURCES} SDLMain.m)
