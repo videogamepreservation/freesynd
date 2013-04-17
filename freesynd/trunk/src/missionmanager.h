@@ -42,6 +42,10 @@ public:
     Mission *loadMission(int n);
     //! Loads briefing for the given mission id
     MissionBriefing *loadBriefing(int n);
+
+private:
+    //! When loading missions, possibly adds some info to the data
+    void hackMissions(int n, uint8 *data);
 };
 
 #endif

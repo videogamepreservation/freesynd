@@ -90,7 +90,7 @@ public:
     Mission();
     virtual ~Mission();
 
-    bool loadLevel(uint8 *levelData);
+    bool loadLevel(LevelData::LevelDataAll &level_data);
 
     /*!
      * Sets the given map for the mission.
@@ -249,8 +249,7 @@ protected:
     //! Sends an event to all listeners
     void fireGameEvent(GameEvent &evt);
 protected:
-    LevelData::LevelDataAll level_data_;
-
+    
     // eventually all this level data will be replaced by objects like this:
     std::vector<VehicleInstance *> vehicles_;
     std::vector<PedInstance *> peds_;

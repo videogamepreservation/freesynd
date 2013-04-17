@@ -38,7 +38,6 @@
 Mission::Mission()
 {
     status_ = RUNNING;
-    memset(&level_data_, 0, sizeof(level_data_));
     memset(minimap_overlay_, 0, 128*128);
     
     mtsurfaces_ = NULL;
@@ -85,8 +84,9 @@ Mission::~Mission()
     listeners_.clear();
 }
 
-#define copydata(x, y) memcpy(&level_data_.x, levelData + y, sizeof(level_data_.x))
-
+/*!
+ * Sets the given message with the current objective label.
+ */
 void Mission::objectiveMsg(std::string& msg) {
     if (cur_objective_ < objectives_.size()) {
         msg = objectives_[cur_objective_]->msg;
@@ -95,30 +95,16 @@ void Mission::objectiveMsg(std::string& msg) {
     }
 }
 
-bool Mission::loadLevel(uint8 * levelData)
+bool Mission::loadLevel(LevelData::LevelDataAll &level_data)
 {
-    copydata(u01, 0);
-    copydata(map, 6);
-    copydata(offset_ref, 32774);
-    copydata(people, 32776);
-    copydata(cars, 56328);
-    copydata(statics, 59016);
-    copydata(weapons, 71016);
-    copydata(sfx, 89448);
-    copydata(scenarios, 97128);
-    copydata(u09, 113512);
-    copydata(mapinfos, 113960);
-    copydata(objectives, 113974);
-    copydata(u11, 114058);
-
-    i_map_id_ = READ_LE_UINT16(level_data_.mapinfos.map);
+    i_map_id_ = READ_LE_UINT16(level_data.mapinfos.map);
 #ifdef _DEBUG
     printf("map to load %X\n", i_map_id_);
 #endif
-    min_x_ = READ_LE_UINT16(level_data_.mapinfos.min_x) / 2;
-    min_y_ = READ_LE_UINT16(level_data_.mapinfos.min_y) / 2;
-    max_x_ = READ_LE_UINT16(level_data_.mapinfos.max_x) / 2;
-    max_y_ = READ_LE_UINT16(level_data_.mapinfos.max_y) / 2;
+    min_x_ = READ_LE_UINT16(level_data.mapinfos.min_x) / 2;
+    min_y_ = READ_LE_UINT16(level_data.mapinfos.min_y) / 2;
+    max_x_ = READ_LE_UINT16(level_data.mapinfos.max_x) / 2;
+    max_y_ = READ_LE_UINT16(level_data.mapinfos.max_y) / 2;
 
     vehicles_.clear();
 
@@ -145,14 +131,14 @@ bool Mission::loadLevel(uint8 * levelData)
     sprintf(nameSv, "vehicles%02X.hex", i_map_id_);
     FILE *staticsFv = fopen(nameSv,"wb");
     if (staticsFv) {
-        fwrite(level_data_.cars, 1, 42*64, staticsFv);
+        fwrite(level_data.cars, 1, 42*64, staticsFv);
         fclose(staticsFv);
     }
 
 #endif
 
     for (uint8 i = 0; i < 64; i++) {
-        LevelData::Cars & car = level_data_.cars[i];
+        LevelData::Cars & car = level_data.cars[i];
         // car.sub_type 0x09 - train
         if (car.type == 0x0)
             continue;
@@ -180,7 +166,7 @@ bool Mission::loadLevel(uint8 * levelData)
     sprintf(nameSp, "peds%02X.hex", i_map_id_);
     FILE *staticsFp = fopen(nameSp,"wb");
     if (staticsFp) {
-        fwrite(level_data_.people, 1, 256*92, staticsFp);
+        fwrite(level_data.people, 1, 256*92, staticsFp);
         fclose(staticsFp);
     }
 #endif
@@ -206,7 +192,7 @@ bool Mission::loadLevel(uint8 * levelData)
     for (uint16 i = 0; i < 256; i++) {
         //if (i == 40)
             //i = 40;
-        LevelData::People & pedref = level_data_.people[i];
+        LevelData::People & pedref = level_data.people[i];
         if(pedref.type == 0x0 || pedref.desc == 0x0D || pedref.desc == 0x0C)
             continue;
         PedInstance *p =
@@ -307,7 +293,7 @@ bool Mission::loadLevel(uint8 * levelData)
                     // 7, 9(repeat) - end marker
                     // 10(loop?)?5(has offset <?ped?>)?
                     // 11 - protected target reached destination(kenya)
-                    LevelData::Scenarios sc = level_data_.scenarios[offset_nxt / 8];
+                    LevelData::Scenarios sc = level_data.scenarios[offset_nxt / 8];
 #ifdef SHOW_SCENARIOS_DEBUG
                     printf("sc.type = %i, nxt = %i\n", sc.type, offset_nxt / 8);
 #endif
@@ -382,7 +368,7 @@ bool Mission::loadLevel(uint8 * levelData)
     sprintf(nameSmap, "map%02X.hex", i_map_id_);
     FILE *staticsFmap = fopen(nameSmap,"wb");
     if (staticsFmap) {
-        fwrite(level_data_.map.objs, 1, 32768, staticsFmap);
+        fwrite(level_data.map.objs, 1, 32768, staticsFmap);
         fclose(staticsFmap);
     }
 
@@ -395,7 +381,7 @@ bool Mission::loadLevel(uint8 * levelData)
     // minimap_overlay_; our agent = 1, enemy agent = 2, tile doesn't have
     // ped = 0
     for (uint32 i = 0; i < (128*128); i++) {
-        uint32 pin = READ_LE_UINT16(level_data_.map.objs + i * 2);
+        uint32 pin = READ_LE_UINT16(level_data.map.objs + i * 2);
         if (pin >= 0x0002 && pin < 0x5C02) {
             if (pin >= 0x0002 && pin < 0x02e2) {
                 minimap_overlay_[i] = 1;
@@ -408,7 +394,7 @@ bool Mission::loadLevel(uint8 * levelData)
             }
         } else if (pin >= 0x9562 && pin < 0xDD62) {
             pin = (pin - 0x9562) / 36; // 36 = weapon data size
-            LevelData::Weapons & wref = level_data_.weapons[pin];
+            LevelData::Weapons & wref = level_data.weapons[pin];
             if (wref.desc == 0x05) {
                 pin = READ_LE_UINT16(wref.offset_owner);
                 if (pin != 0) {
@@ -434,14 +420,14 @@ bool Mission::loadLevel(uint8 * levelData)
     sprintf(nameSs, "statics%02X.hex", i_map_id_);
     FILE *staticsFs = fopen(nameSs,"wb");
     if (staticsFs) {
-        fwrite(level_data_.statics, 1, 12000, staticsFs);
+        fwrite(level_data.statics, 1, 12000, staticsFs);
         fclose(staticsFs);
     }
 #endif
 
     statics_.clear();
     for (uint16 i = 0; i < 400; i++) {
-        LevelData::Statics & sref = level_data_.statics[i];
+        LevelData::Statics & sref = level_data.statics[i];
         if(sref.desc == 0)
             continue;
         Static *s = Static::loadInstance((uint8 *) & sref, i_map_id_);
@@ -459,13 +445,13 @@ bool Mission::loadLevel(uint8 * levelData)
     sprintf(nameSw, "weapons%02X.hex", i_map_id_);
     FILE *staticsFw = fopen(nameSw,"wb");
     if (staticsFw) {
-        fwrite(level_data_.weapons, 1, 36*512, staticsFw);
+        fwrite(level_data.weapons, 1, 36*512, staticsFw);
         fclose(staticsFw);
     }
 #endif
     weapons_.clear();
     for (uint16 i = 0; i < 512; i++) {
-        LevelData::Weapons & wref = level_data_.weapons[i];
+        LevelData::Weapons & wref = level_data.weapons[i];
         if(wref.desc == 0)
             continue;
         WeaponInstance *w = createWeaponInstance((uint8 *) & wref);
@@ -507,7 +493,7 @@ bool Mission::loadLevel(uint8 * levelData)
     sprintf(nameSo, "obj%02X.hex", i_map_id_);
     FILE *staticsFo = fopen(nameSo,"wb");
     if (staticsFo) {
-        fwrite(level_data_.objectives, 1, 140, staticsFo);
+        fwrite(level_data.objectives, 1, 140, staticsFo);
         fclose(staticsFo);
     }
 #endif
@@ -532,7 +518,7 @@ bool Mission::loadLevel(uint8 * levelData)
         //bool isset = false;
         ObjectiveDesc *objd = NULL;
 
-        LevelData::Objectives & obj = level_data_.objectives[i];
+        LevelData::Objectives & obj = level_data.objectives[i];
         unsigned int bindx = READ_LE_UINT16(obj.offset), cindx = 0;
         // TODO: checking is implemented for correct offset, because
         // in game data objective description is not correctly defined
@@ -680,13 +666,13 @@ bool Mission::loadLevel(uint8 * levelData)
     sprintf(nameSss, "scenarios%02X.hex", i_map_id_);
     FILE *staticsFss = fopen(nameSss,"wb");
     if (staticsFss) {
-        fwrite(level_data_.scenarios, 1, 2048 * 8, staticsFss);
+        fwrite(level_data.scenarios, 1, 2048 * 8, staticsFss);
         fclose(staticsFss);
     }
 #endif
 #ifdef SHOW_SCENARIOS_DEBUG
     for (uint16 i = 1; i < 2047; i++) {
-        LevelData::Scenarios & scenario = level_data_.scenarios[i];
+        LevelData::Scenarios & scenario = level_data.scenarios[i];
         if (scenario.type == 0)
             break;
         else {

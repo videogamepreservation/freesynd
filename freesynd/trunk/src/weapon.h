@@ -354,14 +354,14 @@ public:
     }
 
     bool usesAmmo() {
-        return shotProperty() & Weapon::spe_UsesAmmo;
+        return (shotProperty() & Weapon::spe_UsesAmmo) != 0;
     }
 
     bool doesDmgStrict(uint32 dmg_type) {
         return pWeaponClass_->dmgType() == dmg_type;
     }
     bool doesDmgNonStrict(uint32 dmg_type) {
-        return pWeaponClass_->dmgType() & dmg_type;
+        return (pWeaponClass_->dmgType() & dmg_type) != 0;
     }
     MapObject::DamageType dmgType() {
         return pWeaponClass_->dmgType();

@@ -75,6 +75,8 @@ MissionBriefing *MissionManager::loadBriefing(int n) {
     return p_mb;
 }
 
+#define copydata(x, y) memcpy(&level_data.x, data + y, sizeof(level_data.x))
+
 /*!
  * Loads a mission.
  * \param n Mission id.
@@ -93,10 +95,50 @@ Mission *MissionManager::loadMission(int n)
         return NULL;
     }
 
-    Mission *m = new Mission();
-
-    // Kenya map, adding additional walking points to scenarios
 #if 1
+    hackMissions(n, data);
+#endif
+
+    // Initialize LevelData structure from data read in file
+    LevelData::LevelDataAll level_data;
+    memset(&level_data, 0, sizeof(level_data));
+    copydata(u01, 0);
+    copydata(map, 6);
+    copydata(offset_ref, 32774);
+    copydata(people, 32776);
+    copydata(cars, 56328);
+    copydata(statics, 59016);
+    copydata(weapons, 71016);
+    copydata(sfx, 89448);
+    copydata(scenarios, 97128);
+    copydata(u09, 113512);
+    copydata(mapinfos, 113960);
+    copydata(objectives, 113974);
+    copydata(u11, 114058);
+
+    Mission *m = new Mission();
+    if (!m->loadLevel(level_data)) {
+        delete[] data;
+        delete m;
+        return NULL;
+    }
+    delete[] data;
+
+    Map *p_map = g_App.maps().loadMap(m->mapId());
+    if (p_map == NULL) {
+        delete m;
+        return NULL;
+    }
+    m->set_map(p_map);
+
+    return m;
+}
+
+/*!
+ *
+ */
+void MissionManager::hackMissions(int n, uint8 *data) {
+    // Kenya map, adding additional walking points to scenarios
     if (n == 40) {
         uint8 *scen_start = data + 97128 + 8 * 86;
         // coord offsets changing for next point
@@ -135,21 +177,4 @@ Mission *MissionManager::loadMission(int n)
         // type 1 = reach location
         scen_start[4] = 1;
     }
-#endif
-
-    if (!m->loadLevel(data)) {
-        delete[] data;
-        delete m;
-        return NULL;
-    }
-    delete[] data;
-
-    Map *p_map = g_App.maps().loadMap(m->mapId());
-    if (p_map == NULL) {
-        delete m;
-        return NULL;
-    }
-    m->set_map(p_map);
-
-    return m;
 }
