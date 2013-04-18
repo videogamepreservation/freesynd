@@ -276,26 +276,29 @@ bool Mission::loadLevel(LevelData::LevelDataAll &level_data)
                     not_in_vehicle = false;
                 if (offset_start)
                     p->dropActQ();
-//#define SHOW_SCENARIOS_DEBUG
+#define SHOW_SCENARIOS_DEBUG
 #ifdef SHOW_SCENARIOS_DEBUG
                 printf("=====\n");
 #endif
                 PedInstance::actionQueueGroupType as;
                 as.group_desc = PedInstance::gd_mStandWalk;
                 as.origin_desc = 1;
-                // TODO : kenya map timeout scenario somewhere
                 int32 has_trigger = -1;
                 while (offset_nxt) {
                     // sc.type
-                    // 1, 8(triggers on our agents) - walking
-                    // 2 - vehicle
-                    // 5, 6 ? (kenya)
-                    // 7, 9(repeat) - end marker
-                    // 10(loop?)?5(has offset <?ped?>)?
-                    // 11 - protected target reached destination(kenya)
+                    // 1 - walking/driving to pos, x,y defined
+                    // 2 - vehicle to use and goto
+                    // 3?(south africa)
+                    // 5?(kenya)
+                    // 6 (kenya) - ped offset when in vehicle, and? (TODO)
+                    // 7 - assasinate target escaped, mission failed (TODO properly)
+                    // 8 - walking to pos, triggers on our agents in range, x,y defined
+                    // 9 - repeat from start, actually this might be end of script
+                    // 10 - train stops and waits
+                    // 11 - protected target reached destination(kenya) (TODO properly)
                     LevelData::Scenarios sc = level_data.scenarios[offset_nxt / 8];
 #ifdef SHOW_SCENARIOS_DEBUG
-                    printf("sc.type = %i, nxt = %i\n", sc.type, offset_nxt / 8);
+                    printf("id = %i, sc.type = %i, nxt = %i\n", i, sc.type, offset_nxt / 8);
 #endif
                     offset_nxt = READ_LE_UINT16(sc.next);
                     assert(offset_nxt != offset_start);
@@ -304,9 +307,9 @@ bool Mission::loadLevel(LevelData::LevelDataAll &level_data)
                         PathNode pn(sc.tilex >> 1, sc.tiley >> 1, sc.tilez,
                             (sc.tilex & 0x01) << 7, (sc.tiley & 0x01) << 7);
                         if (sc.type == 0x08) {
-                            // no need for exclusive wait
                             p->createActQTrigger(as, &pn, 6 * 256);
                             has_trigger = as.actions.size();
+                            // no need for exclusive wait
                             p->createActQWait(as, 3000);
                             as.actions.back().group_desc = PedInstance::gd_mStandWalk;
                         }
@@ -315,7 +318,7 @@ bool Mission::loadLevel(LevelData::LevelDataAll &level_data)
                         else
                             p->createActQWalking(as, &pn, NULL, p->getDir(), 0, true);
                         //p->createActQWalking(as, &pn, NULL, -1);
-                        if (!not_in_vehicle && offset_nxt == 0)
+                        if ((!not_in_vehicle) && offset_nxt == 0)
                             p->createActQResetActionQueue(as);
                     } else if (sc.type == 2) {
                         if (not_in_vehicle) {
@@ -336,10 +339,29 @@ bool Mission::loadLevel(LevelData::LevelDataAll &level_data)
                     } else if (sc.type == 9) {
                         p->createActQResetActionQueue(as);
                     } else if (sc.type == 10) {
-                        p->createActQWait(as, 5000);
-                        if (offset_nxt == 0)
+                        // train will wait
+                        p->createActQWait(as, 10000);
+                        // resetting movement for train
+                        if (offset_nxt == 0) {
                             p->createActQResetActionQueue(as);
+                        }
                     }
+#if 0
+#ifdef _DEBUG
+                    switch (sc.type) {
+                        case 1:
+                        case 2:
+                        case 7:
+                        case 8:
+                        case 9:
+                        case 10:
+                        case 11:
+                            break;
+                        default:
+                            printf("Bingo\n");
+                    }
+#endif
+#endif
                 }
                 if (as.actions.size() != 0) {
                     if (has_trigger != -1) {
@@ -678,7 +700,7 @@ bool Mission::loadLevel(LevelData::LevelDataAll &level_data)
         else {
             printf("num %i\n", i);
             printf("next %i\n", READ_LE_INT16(scenario.next) / 8);
-            printf("object offset %X\n", READ_LE_INT16(scenario.offset_object));
+            printf("object offset 0x%X\n", READ_LE_INT16(scenario.offset_object));
             printf("x = %i, y = %i, z = %i\n",
                    scenario.tilex >> 1,
                    scenario.tiley >> 1,

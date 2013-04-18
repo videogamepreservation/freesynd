@@ -153,9 +153,8 @@ void MissionManager::hackMissions(int n, uint8 *data) {
         // coords x = 72,ox = 128, y = 32, oy = 128, z = 2
         scen_start[0] = (72 << 1) | 1;
         scen_start[1] = (32 << 1) | 1;
-        scen_start[3] = 2;
         // type 1 = reach location
-        scen_start[4] = 1;
+        scen_start[3] = 1;
 
         scen_start += 4;
         WRITE_LE_UINT16(scen_start, 92 *8);
@@ -163,9 +162,8 @@ void MissionManager::hackMissions(int n, uint8 *data) {
         // coords x = 61,ox = 0, y = 32, oy = 0, z = 2
         scen_start[0] = (62 << 1) | 1;
         scen_start[1] = (57 << 1) | 1;
-        scen_start[3] = 2;
         // type 1 = reach location
-        scen_start[4] = 1;
+        scen_start[3] = 1;
 
         scen_start += 4;
         WRITE_LE_UINT16(scen_start, 88 *8);
@@ -173,8 +171,7 @@ void MissionManager::hackMissions(int n, uint8 *data) {
         // coords x = 42,ox = 0, y = 59, oy = 0, z = 2
         scen_start[0] = (42 << 1) | 1;
         scen_start[1] = (59 << 1);
-        scen_start[3] = 2;
         // type 1 = reach location
-        scen_start[4] = 1;
+        scen_start[3] = 1;
     }
 }

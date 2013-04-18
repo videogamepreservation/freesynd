@@ -589,7 +589,7 @@ void GameplayMenu::handleMouseMotion(int x, int y, int state, const int modKeys)
     }
 
     if (target_) {
-#if 0
+#if 1
 #ifdef _DEBUG
         if (modKeys & KMD_ALT) {
             printf("target id  : %i == majorType : %i\n",
