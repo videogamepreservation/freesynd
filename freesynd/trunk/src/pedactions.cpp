@@ -204,6 +204,7 @@ bool PedInstance::createActQFiring(actionQueueGroupType &as, PathNode *tpn,
     aq.state = 1;
     aq.ot_execute |= PedInstance::ai_aWait;
     aq.multi_var.time_var.desc = 1;
+    aq.multi_var.time_var.elapsed = 0;
     as.actions.push_back(aq);
     return true;
 }
@@ -370,10 +371,19 @@ bool PedInstance::createActQFindEnemy(actionQueueGroupType &as) {
     aq.as = PedInstance::pa_smNone;
     aq.group_desc = PedInstance::gd_mThink;
     aq.state = 1;
-    aq.ot_execute = PedInstance::ai_aFindEnemy;
+    aq.ot_execute = PedInstance::ai_aFindEnemy | PedInstance::ai_aWaitToStart;
+    Mod *pMod = slots_[Mod::MOD_BRAIN];
+    int32 tm_wait = tm_before_check_;
+    if (obj_group_def_ == PedInstance::og_dmAgent) {
+        if (pMod)
+            tm_wait -= 25 * (pMod->getVersion() + 2);
+        tm_wait = (double)tm_wait * perception_->getMultiplier();
+    }
+    aq.multi_var.time_var.desc = 0;
+    aq.multi_var.time_var.elapsed = 0;
+    aq.multi_var.time_var.time_before_start = tm_wait;
     as.actions.push_back(aq);
     pedWeaponToUse pw_to_use;
-    Mod *pMod = slots_[Mod::MOD_BRAIN];
     if (getMainType() == PedInstance::m_tpAgent) {
         aq.multi_var.enemy_var.pw_to_use.use_ranks = pMod || (!isOurAgent())
             ? true: false;
@@ -383,24 +393,8 @@ bool PedInstance::createActQFindEnemy(actionQueueGroupType &as) {
             setSelectedWeapon(-1);
         }
         if (wi && wi->canShoot()) {
-            if (pMod) {
-                // This overrides selected weapon
-                // might be confusing for player
-                if (pMod->getVersion() == Mod::MOD_V3) {
-                    pw_to_use.desc = 5;
-                    pw_to_use.wpn.dmg_type = wi->dmgType();
-                } else if (pMod->getVersion() == Mod::MOD_V2) {
-                    pw_to_use.desc = 4;
-                    pw_to_use.wpn.dmg_type = wi->dmgType();
-                } else {
-                    // Mod::MOD_V1
-                    pw_to_use.desc = 3;
-                    pw_to_use.wpn.wpn_type = wi->getWeaponType();
-                }
-            } else {
-                pw_to_use.desc = 2;
-                pw_to_use.wpn.wi = wi;
-            }
+            pw_to_use.desc = 2;
+            pw_to_use.wpn.wi = wi;
         } else {
             pw_to_use.desc = 5;
             pw_to_use.wpn.dmg_type = MapObject::dmg_Physical;

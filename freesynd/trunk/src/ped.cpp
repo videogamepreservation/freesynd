@@ -978,7 +978,8 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                     } else
                         aqt->state |= 8;
                 }
-                if ((aqt->ot_execute & PedInstance::ai_aFindEnemy) != 0)
+                if ((aqt->ot_execute & PedInstance::ai_aFindEnemy) != 0
+                    && (aqt->state & 128) == 0)
                 {
                     bool selfState = is_ignored_;
                     is_ignored_ = true;
@@ -993,8 +994,9 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                         verifyHostilesFound(mission);
 
                     Msmod_t smo_dist;
-                    WeaponInstance *wi = selectedWeapon();
+                    // TODO: reduce inrange calls, later
                     if (hostiles_found_.empty()) {
+                        WeaponInstance *wi = selectedWeapon();
                         // TODO: check for weapons, set the largest shooting
                         // range? not only selected, all?
                         int shot_rng = 0;
@@ -1020,7 +1022,9 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                                     != hostiles_found_.end()
                                     || smo_dist.find(p)
                                     != smo_dist.end())
+                                {
                                     continue;
+                                }
                                 if (p->objGroupDef() == obj_group_def_
                                     && checkFriendIs(p))
                                 {
@@ -1035,23 +1039,14 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                                             if ((!smo->isExcluded())
                                                 && checkHostileIs(smo))
                                             {
-                                                // TODO: reduce inrange calls, later
                                                 // TODO: set ignoreblocker based on Ai
                                                 if (mission->inRangeCPos(
                                                     &cur_xyz,
                                                     &smo, NULL, false, false,
-                                                    view_rng, &distTo)
-                                                    == 1)
+                                                    shot_rng > 0 ? shot_rng
+                                                    : view_rng, &distTo) == 1)
                                                 {
                                                     hostiles_found_.insert(
-                                                        Pairsmod_t(smo, distTo));
-                                                } else if (shot_rng > 0
-                                                    && mission->inRangeCPos(
-                                                    &cur_xyz,
-                                                    &smo, NULL, false, false,
-                                                    shot_rng, &distTo) == 1)
-                                                {
-                                                    smo_dist.insert(
                                                         Pairsmod_t(smo, distTo));
                                                 }
                                             }
@@ -1060,7 +1055,6 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                                     }
                                 } else if (checkHostileIs(p) ) {
                                     // TODO: hostile_desc_alt to checkHostileIs?
-                                    // IPA lvl inteligence?
                                     double distTo = 0;
                                     // TODO: set ignoreblocker based on Ai
                                     if (mission->inRangeCPos(&cur_xyz,
@@ -1068,10 +1062,8 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                                         NULL, false, false,
                                         view_rng, &distTo) == 1)
                                     {
-                                        hostiles_found_.insert(
-                                            Pairsmod_t(
-                                            (ShootableMapObject *)p,
-                                            distTo));
+                                        hostiles_found_.insert(Pairsmod_t(
+                                            (ShootableMapObject *)p, distTo));
                                     }
                                 }
                             }
@@ -1094,10 +1086,8 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                                         NULL, false, false,
                                         view_rng, &distTo) == 1)
                                     {
-                                        hostiles_found_.insert(
-                                            Pairsmod_t(
-                                            (ShootableMapObject *)p,
-                                            distTo));
+                                        hostiles_found_.insert(Pairsmod_t(
+                                            (ShootableMapObject *)p, distTo));
                                     }
                                 }
                             }
@@ -1176,14 +1166,25 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                             // forcing showing a gun
                             selectRequiredWeapon();
                             aqt_attack.ot_execute |= PedInstance::ai_aWaitToStart;
-                            aqt_attack.multi_var.time_var.time_before_start = 5000;
-                            aqt->multi_var.time_var.desc = 1;
+                            aqt_attack.multi_var.time_var.time_before_start = 5000 - tm_before_check_;
+                            aqt_attack.multi_var.time_var.desc = 1;
                             g_App.gameSounds().play(snd::PUTDOWN_WEAPON);
                             // enabling following behavior
                             actionQueueType & aqt_follow = it->actions[indx + 2];
                             aqt_follow.t_smo = aqt->t_smo;
                             aqt_follow.state ^= 64;
                         }
+                        Mod *pMod = slots_[Mod::MOD_EYES];
+                        int32 tm_wait = tm_before_check_;
+                        if (obj_group_def_ == PedInstance::og_dmAgent) {
+                            if (pMod)
+                                tm_wait -= 25 * (pMod->getVersion() + 2);
+                            tm_wait = (double)tm_wait * intelligence_->getMultiplier();
+                        }
+                        aqt->ot_execute |= PedInstance::ai_aWait;
+                        aqt->multi_var.time_var.time_total = tm_wait;
+                        aqt->multi_var.time_var.desc = 2;
+                        aqt->multi_var.time_var.elapsed = 0;
                     }
                 }
                 if ((aqt->ot_execute & PedInstance::ai_aFindNonFriend) != 0)

@@ -244,6 +244,7 @@ bool Mission::loadLevel(LevelData::LevelDataAll &level_data)
                 p->setHealth(16);
                 p->setStartHealth(16);
                 p->setBaseSpeed(256);
+                p->setTimeBeforeCheck(400);
             } else if (i > 7) {
                 unsigned int mt = p->getMainType();
                 p->setObjGroupDef(mt);
@@ -252,18 +253,22 @@ bool Mission::loadLevel(LevelData::LevelDataAll &level_data)
                     p->addEnemyGroupDef(1);
                     p->setBaseSpeed(256);
                     *((ModOwner *)p) = mods_enemy;
+                    p->setTimeBeforeCheck(400);
                 } else if (mt == PedInstance::og_dmGuard) {
                     p->setObjGroupID(3);
                     p->addEnemyGroupDef(1);
                     p->setBaseSpeed(192);
+                    p->setTimeBeforeCheck(300);
                 } else if (mt == PedInstance::og_dmPolice) {
                     p->setObjGroupID(4);
                     p->setHostileDesc(PedInstance::pd_smArmed);
                     p->setBaseSpeed(160);
+                    p->setTimeBeforeCheck(400);
                 } else {
                     p->setObjGroupID(5);
                     // civilians and criminals
                     p->setBaseSpeed(128);
+                    p->setTimeBeforeCheck(600);
                 }
                 p->setSightRange(7 * 256);
                 // TODO: set scenarios
@@ -276,7 +281,7 @@ bool Mission::loadLevel(LevelData::LevelDataAll &level_data)
                     not_in_vehicle = false;
                 if (offset_start)
                     p->dropActQ();
-#define SHOW_SCENARIOS_DEBUG
+//#define SHOW_SCENARIOS_DEBUG
 #ifdef SHOW_SCENARIOS_DEBUG
                 printf("=====\n");
 #endif
@@ -3512,7 +3517,7 @@ void Mission::blockerExists(toDefineXYZ * startXYZ, toDefineXYZ * endXYZ,
     toDefineXYZ blockEndXYZ;
     double closest = -1;
 
-    for (unsigned int i = 0; i < statics_.size(); i++) {
+    for (unsigned int i = 0; i < statics_.size(); ++i) {
         MapObject * s_blocker = statics_[i];
         if (s_blocker->isIgnored())
             continue;
@@ -3531,7 +3536,7 @@ void Mission::blockerExists(toDefineXYZ * startXYZ, toDefineXYZ * endXYZ,
             copyEndXYZ = *endXYZ;
         }
     }
-    for (unsigned int i = 0; i < vehicles_.size(); i++) {
+    for (unsigned int i = 0; i < vehicles_.size(); ++i) {
         MapObject * v_blocker = vehicles_[i];
         if (v_blocker->isIgnored())
             continue;
@@ -3550,7 +3555,7 @@ void Mission::blockerExists(toDefineXYZ * startXYZ, toDefineXYZ * endXYZ,
             copyEndXYZ = *endXYZ;
         }
     }
-    for (unsigned int i = 0; i < peds_.size(); i++) {
+    for (unsigned int i = 0; i < peds_.size(); ++i) {
         MapObject * p_blocker = peds_[i];
         if (p_blocker->isIgnored())
             continue;
@@ -3569,7 +3574,7 @@ void Mission::blockerExists(toDefineXYZ * startXYZ, toDefineXYZ * endXYZ,
             copyEndXYZ = *endXYZ;
         }
     }
-    for (unsigned int i = 0; i < weapons_.size(); i++) {
+    for (unsigned int i = 0; i < weapons_.size(); ++i) {
         MapObject * w_blocker = weapons_[i];
         if (w_blocker->isIgnored())
             continue;
@@ -3660,6 +3665,7 @@ uint8 Mission::inRangeCPos(toDefineXYZ * cp, ShootableMapObject ** t,
             pn->setTileXYZ(tx / 256, ty / 256, tz / 128);
             pn->setOffXYZ(tx % 256, ty % 256, tz % 128);
         }
+        d = maxr;
     }
 
     // NOTE: these values are less then 1, if they are incremented time
@@ -3673,8 +3679,10 @@ uint8 Mission::inRangeCPos(toDefineXYZ * cp, ShootableMapObject ** t,
     int oldy = cy / 256;
     int oldz = cz / 128;
     double dist_close = d;
+    // look note before, should be same increment
+    double dist_dec = 1.0 * 8;
 
-    while (dist_close > 16.0f) {
+    while (dist_close > dist_dec) {
         int nx = (int)sx / 256;
         int ny = (int)sy / 256;
         int nz = (int)sz / 128;
@@ -3707,15 +3715,19 @@ uint8 Mission::inRangeCPos(toDefineXYZ * cp, ShootableMapObject ** t,
                         is_blocked = true;
                 }
                 if (is_blocked) {
+                    sx -= inc_x;
+                    sy -= inc_y;
+                    sz -= inc_z;
+                    double dsx = sx - (double)cx;
+                    double dsy = sy - (double)cy;
+                    double dsz = sz - (double)cz;
+                    dist_close = sqrt(dsx * dsx + dsy * dsy + dsz * dsz);
                     if (block_mask == 1)
                         block_mask = 16;
                     else
                         block_mask |= 16;
                     if (setBlocker) {
                         if (pn) {
-                            sx -= inc_x;
-                            sy -= inc_y;
-                            sz -= inc_z;
                             pn->setTileXYZ((int)sx / 256, (int)sy / 256,
                                 (int)sz / 128);
                             pn->setOffXYZ((int)sx % 256, (int)sy % 256,
@@ -3733,10 +3745,7 @@ uint8 Mission::inRangeCPos(toDefineXYZ * cp, ShootableMapObject ** t,
         sx += inc_x;
         sy += inc_y;
         sz += inc_z;
-        double dsx = sx - (double)tx;
-        double dsy = sy - (double)ty;
-        double dsz = sz - (double)tz;
-        dist_close = sqrt(dsx * dsx + dsy * dsy + dsz * dsz);
+        dist_close -= dist_dec;
     }
     if (checkTileOnly)
         return block_mask;
@@ -3745,27 +3754,17 @@ uint8 Mission::inRangeCPos(toDefineXYZ * cp, ShootableMapObject ** t,
     toDefineXYZ endXYZ = {tx, ty, tz};
     MapObject *blockerObj = NULL;
 
-    double dist_blocker = d;
+    // if blocker will exist it will be always closer then tile
+    // that might block
+    double dist_blocker = (block_mask & 16) != 0 ? dist_close : d;
     blockerExists(&startXYZ, &endXYZ, &dist_blocker, &blockerObj);
 
     if (blockerObj) {
-        bool blockerObj_is_closer = false;
-        if (block_mask != 1 && ((t && *t != blockerObj) || pn)) {
-            int dcx = cx - (int)sx;
-            int dcy = cy - (int)sy;
-            int dcz = cz - (int)sz;
-            if (dist_blocker
-                    < sqrt((double)(dcx * dcx + dcy * dcy + dcz * dcz)))
-            {
-                blockerObj_is_closer = true;
-            }
-        }
-        if (block_mask == 1 && !blockerObj_is_closer) {
+        if (block_mask == 1)
             block_mask = 0;
-            blockerObj_is_closer = true;
-        }
+
         if (setBlocker) {
-            if (pn && blockerObj_is_closer) {
+            if (pn) {
                 pn->setTileXYZ(startXYZ.x / 256, startXYZ.y / 256,
                     startXYZ.z / 128);
                 pn->setOffXYZ(startXYZ.x % 256, startXYZ.y % 256,
@@ -3773,13 +3772,10 @@ uint8 Mission::inRangeCPos(toDefineXYZ * cp, ShootableMapObject ** t,
                 block_mask |= 4;
             }
             if (t) {
-                if (blockerObj_is_closer) {
-                    *t = (ShootableMapObject *)blockerObj;
-                    block_mask |= 2;
-                } else
-                    *t = NULL;
+                *t = (ShootableMapObject *)blockerObj;
+                block_mask |= 2;
             }
-        } else if (blockerObj_is_closer) {
+        } else {
             if (t && *t) {
                 if (*t != blockerObj)
                     block_mask |= 6;

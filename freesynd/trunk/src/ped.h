@@ -341,6 +341,8 @@ public:
     }
     unsigned int objGroupID() { return obj_group_id_; }
 
+    void setTimeBeforeCheck(int32 tm) { tm_before_check_ = tm;}
+
     class Mmuu32_t: public std::multimap<uint32, uint32> {
     public:
         Mmuu32_t() {}
@@ -791,12 +793,15 @@ protected:
     // from this list they will move to friends_found_ if in sight
     std::set <ShootableMapObject *> friends_not_seen_;
     //! defines group obj belongs to (objGroupDefMasks), not unique
-    unsigned int obj_group_def_;
-    unsigned int old_obj_group_def_;
+    uint32 obj_group_def_;
+    uint32 old_obj_group_def_;
 
     //! a unique group identification number, 0 - all group IDs
-    unsigned int obj_group_id_;
-    unsigned int old_obj_group_id_;
+    uint32 obj_group_id_;
+    uint32 old_obj_group_id_;
+
+    //! time wait before checking enviroment (enemies, friends etc)
+    int32 tm_before_check_;
 
     AnimationDrawn drawn_anim_;
 

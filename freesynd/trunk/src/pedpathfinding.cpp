@@ -2394,7 +2394,7 @@ uint8 PedInstance::moveToDir(Mission* m, int elapsed, dirMoveType &dir_move,
 
     while ((int)dist_curr > 0) {
         bool need_bounce = false;
-        double diffx = 0, diffy = 0;
+        double diffx = 0.0, diffy = 0.0;
         if (dir == 0) {
             diffy = 1.0;
         } else if (dir == 64) {
@@ -2430,9 +2430,9 @@ uint8 PedInstance::moveToDir(Mission* m, int elapsed, dirMoveType &dir_move,
         do {
             double px = posx + diffx;
             double py = posy + diffy;
-            int tilenx = diffx >= 0 ? ((int)ceil(px)) / 256
+            int tilenx = diffx >= 0.0 ? ((int)ceil(px)) / 256
                 : ((int)floor(px)) / 256;
-            int tileny = diffy >= 0 ? ((int)ceil(py)) / 256
+            int tileny = diffy >= 0.0 ? ((int)ceil(py)) / 256
                 : ((int)floor(py)) / 256;
             if (tilenx < 0 ||  tileny < 0 || tilenx >= m->mmax_x_
                 || tileny >= m->mmax_y_)
