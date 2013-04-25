@@ -31,6 +31,7 @@
 
 class Mission;
 class MissionBriefing;
+class WeaponInstance;
 
 /*!
  * Mission manager class.
@@ -39,13 +40,15 @@ class MissionBriefing;
 class MissionManager {
 public:
     MissionManager();
-    Mission *loadMission(int n);
+    Mission *loadMission(int n, uint8 *minimap_overlay);
     //! Loads briefing for the given mission id
     MissionBriefing *loadBriefing(int n);
 
 private:
     //! When loading missions, possibly adds some info to the data
     void hackMissions(int n, uint8 *data);
+    Mission * load_level_data(LevelData::LevelDataAll &level_data, uint8 *minimap_overlay);
+    WeaponInstance * createWeaponInstance(uint8 * data);
 };
 
 #endif

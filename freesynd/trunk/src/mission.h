@@ -87,10 +87,8 @@ public:
         COMPLETED = 3
     };
 
-    Mission();
+    Mission(const LevelData::MapInfos & map_infos);
     virtual ~Mission();
-
-    bool loadLevel(LevelData::LevelDataAll &level_data);
 
     /*!
      * Sets the given map for the mission.
@@ -135,15 +133,19 @@ public:
 
     int numPeds() { return (int) peds_.size(); }
     PedInstance *ped(int i) { return peds_[i]; }
+    void addPed(PedInstance *ped) { peds_.push_back(ped); }
 
     int numVehicles() { return (int) vehicles_.size(); }
     VehicleInstance *vehicle(int i) { return vehicles_[i]; }
+    void addVehicle(VehicleInstance *pVehicle) { vehicles_.push_back(pVehicle); }
 
     int numWeapons() { return (int) weapons_.size(); }
     WeaponInstance *weapon(int i) { return weapons_[i]; }
+    void addWeapon(WeaponInstance *w);
 
     int numStatics() { return (int) statics_.size(); }
     Static *statics(int i) { return statics_[i]; }
+    void addStatic(Static *pStatic) { statics_.push_back(pStatic); }
 
     int numSfxObjects() { return (int) sfx_objects_.size(); }
     SFXObject *sfxObjects(int i) { return sfx_objects_[i]; }
@@ -176,6 +178,8 @@ public:
     void start();
     //! Returns mission status
     Status getStatus() { return status_; }
+    //! Adds an objective for the mission
+    void addObjective(ObjectiveDesc *pObjective) { objectives_.push_back(pObjective); }
     //! Check if objectives are completed or failed
     void checkObjectives();
     //! Ends mission with the given status
@@ -187,7 +191,6 @@ public:
     void addWeaponsFromPedToAgent(PedInstance *p, Agent *pAg);
     void end();
 
-    void addWeapon(WeaponInstance *w);
     MapObject * findAt(int tilex, int tiley, int tilez,
         MapObject::MajorTypeEnum *majorT, int *searchIndex, bool only);
     bool setSurfaces();
@@ -221,11 +224,6 @@ public:
     // initialized in setSurfaces, used for in-class calculations
     int mmax_m_all, mmax_m_xy;
 
-    // 0 - not present, 1 - our agent, 2 - enemy agent
-    unsigned char getMinimapOverlay(int x, int y) {
-        return minimap_overlay_[x + y * mmax_x_];
-    }
-
     MiniMap * getMiniMap() { return p_minimap_; }
     /*!
      * Returns the current squad.
@@ -243,7 +241,6 @@ protected:
     bool isSurface(char thisTile);
     bool isStairs(char thisTile);
 
-    WeaponInstance *createWeaponInstance(uint8 *data);
     //! If the current objective has generated an event -> dispatch it
     void handleObjectiveEvent(GameEvent & evt, ObjectiveDesc *pObj);
     //! Sends an event to all listeners
@@ -291,7 +288,7 @@ protected:
     // minimap in colours, map z = 0 tiles transformed based on
     // walkdata->minimap_colours_ in function createMinimap
     MiniMap *p_minimap_;
-    unsigned char minimap_overlay_[128*128];
+   
     uint32 players_group_id_;
     /*!
      * The squad selected for the mission. It contains only active agents.

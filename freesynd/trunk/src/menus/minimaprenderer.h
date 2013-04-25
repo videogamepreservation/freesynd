@@ -89,7 +89,7 @@ class BriefMinimapRenderer : public MinimapRenderer {
     //! Class Constructor.
     BriefMinimapRenderer();
     //! Reset the class with a new mission
-    void init(Mission *pMission, EZoom zoom, bool drawEnemies);
+    void init(Mission *pMission, EZoom zoom, bool drawEnemies, uint8 *minimap_overlay);
 
     //! update the class with elapsed time
     bool handleTick(int elapsed);
@@ -117,6 +117,8 @@ class BriefMinimapRenderer : public MinimapRenderer {
     void updateRenderingInfos();
     //! If minimap is too far right or down, align with right or down border
     void clipMinimapToRightAndDown();
+    //! Tells what is on the given tile
+    uint8 getMinimapOverlay(int x, int y);
 
  protected:
     /*! A timer to control the blinking on the minimap.*/
@@ -134,6 +136,8 @@ class BriefMinimapRenderer : public MinimapRenderer {
     Mission *p_mission_;
     /*! IF true, enemies are drawn on the minimap.*/
     bool b_draw_enemies_;
+    /*! This grid holds position of agents on the minimap.*/
+    uint8 minimap_overlay_[128*128];
 };
 
 

@@ -43,12 +43,14 @@ BriefMinimapRenderer::BriefMinimapRenderer() : mm_timer(500) {
 /*!
  * Init the renderer with a new mission, zoom level and draw_enemies params.
  */
-void BriefMinimapRenderer::init(Mission *pMission, EZoom zoom, bool draw_enemies) {
+void BriefMinimapRenderer::init(Mission *pMission, EZoom zoom, bool draw_enemies, uint8 *minimap_overlay) {
     p_mission_ = pMission;
     setZoom(zoom);
     b_draw_enemies_ = draw_enemies;
     mm_timer.reset();
     minimap_blink_ = 0;
+    // Copy the given minimap overlay inside our copy
+    memcpy(minimap_overlay_, minimap_overlay, sizeof(uint8) * 128*128);
 
     // Initialize minimap origin by looking for the position
     // of the first found agent on the map
@@ -65,7 +67,7 @@ void BriefMinimapRenderer::initMinimapLocation() {
 
     for (int x = 0; x < maxx && (!found); x++) {
         for (int y = 0; y < maxy && (!found); y++) {
-            if (p_mission_->getMinimapOverlay(x, y) == 1) {
+            if (getMinimapOverlay(x, y) == 1) {
                 // We found a tile with an agent on it
                 // stop searching and memorize position
                 world_tx_ = x;
@@ -182,6 +184,13 @@ void BriefMinimapRenderer::scrollDown() {
 }
 
 /*!
+ * \return - not present, 1 - our agent, 2 - enemy agent
+ */
+uint8 BriefMinimapRenderer::getMinimapOverlay(int x, int y) {
+    return minimap_overlay_[x + y * p_mission_->mmax_x_];
+}
+
+/*!
  * Renders the minimap at the given position on the screen.
  * \param screen_x X coord in absolute pixels.
  * \param screen_y Y coord in absolute pixels.
@@ -190,7 +199,7 @@ void BriefMinimapRenderer::render(uint16 screen_x, uint16 screen_y) {
     for (uint16 tx = world_tx_; tx < (world_tx_ + mm_maxtile_); tx++) {
         uint16 xc = screen_x + (tx - world_tx_) * pixpertile_;
         for (uint16 ty = world_ty_; ty < (world_ty_ + mm_maxtile_); ty++) {
-            unsigned char c = p_mission_->getMinimapOverlay(tx, ty);
+            unsigned char c = getMinimapOverlay(tx, ty);
             switch (c) {
                 case 0:
                     c = p_mission_->getMiniMap()->getColourAt(tx, ty);
