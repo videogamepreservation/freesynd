@@ -3520,7 +3520,7 @@ void Mission::blockerExists(toDefineXYZ * startXYZ, toDefineXYZ * endXYZ,
     toDefineXYZ copyEndXYZ = *endXYZ;
     toDefineXYZ blockStartXYZ;
     toDefineXYZ blockEndXYZ;
-    double closest = -1;
+    double closest = *dist;
 
     for (unsigned int i = 0; i < statics_.size(); ++i) {
         MapObject * s_blocker = statics_[i];
@@ -3726,6 +3726,9 @@ uint8 Mission::inRangeCPos(toDefineXYZ * cp, ShootableMapObject ** t,
                     double dsx = sx - (double)cx;
                     double dsy = sy - (double)cy;
                     double dsz = sz - (double)cz;
+                    tx = (int)sx;
+                    ty = (int)sy;
+                    tz = (int)sz;
                     dist_close = sqrt(dsx * dsx + dsy * dsy + dsz * dsz);
                     if (block_mask == 1)
                         block_mask = 16;

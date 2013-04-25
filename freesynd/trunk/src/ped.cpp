@@ -1185,6 +1185,8 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                         aqt->multi_var.time_var.time_total = tm_wait;
                         aqt->multi_var.time_var.desc = 2;
                         aqt->multi_var.time_var.elapsed = 0;
+                        //TODO: selected weapon is ignored after findenemy set,
+                        // update based on selected weapon?
                     }
                 }
                 if ((aqt->ot_execute & PedInstance::ai_aFindNonFriend) != 0)
