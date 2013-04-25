@@ -381,7 +381,7 @@ bool PedInstance::createActQFindEnemy(actionQueueGroupType &as) {
     }
     aq.multi_var.time_var.desc = 0;
     aq.multi_var.time_var.elapsed = 0;
-    aq.multi_var.time_var.time_before_start = tm_wait;
+    aq.multi_var.time_var.time_to_start = tm_wait;
     as.actions.push_back(aq);
     pedWeaponToUse pw_to_use;
     if (getMainType() == PedInstance::m_tpAgent) {

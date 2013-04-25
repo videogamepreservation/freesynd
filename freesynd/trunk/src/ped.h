@@ -341,7 +341,8 @@ public:
     }
     unsigned int objGroupID() { return obj_group_id_; }
 
-    void setTimeBeforeCheck(int32 tm) { tm_before_check_ = tm;}
+    void setTimeBeforeCheck(int32 tm) { tm_before_check_ = tm; }
+    void setBaseModAcc(double mod_acc) { base_mod_acc_ = mod_acc; }
 
     class Mmuu32_t: public std::multimap<uint32, uint32> {
     public:
@@ -644,7 +645,7 @@ public:
                 // = -1 forever(ai_aWait)
                 int32 time_total;
                 // = 0 || t > 0 (ai_aWaitToStart)
-                int32 time_before_start;
+                int32 time_to_start;
                 // wait event, 0 - standalone - time(milliseconds), 1 - waits
                 // till animation finished, 2 - attached to process time
                 uint8 desc;
@@ -756,6 +757,7 @@ public:
      * ipa, etc.
      */
     int getSpeed();
+    void getAccuracy(double &base_acc);
     bool hasAccessCard();
     bool isPersuaded();
 
@@ -802,6 +804,9 @@ protected:
 
     //! time wait before checking enviroment (enemies, friends etc)
     int32 tm_before_check_;
+
+    //! base value that influences accuracy during fire
+    double base_mod_acc_;
 
     AnimationDrawn drawn_anim_;
 

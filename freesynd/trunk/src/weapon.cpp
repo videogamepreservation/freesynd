@@ -580,8 +580,7 @@ bool ProjectileShot::animate(int elapsed, Mission *m) {
 uint16 WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
     int *elapsed, bool ignoreBlocker, uint32 *make_shots)
 {
-    // TODO: check tobj completed action,
-    // TODO : IPA+mods influence
+    //TODO: check tobj completed action
 
     // for weapons that are not using ammo, ammo_remaining_ = -1
     if (ammo_remaining_ == 0) {
@@ -720,21 +719,23 @@ uint16 WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
     if (shots == 0)
         return 2;
 
-    
-    if (owner_ && pWeaponClass_->dmgType() != MapObject::dmg_Mental
-#ifdef _DEBUG
-        && owner_->majorType() == MapObject::mjt_Ped
-#endif
-        &&((PedInstance *)owner_)->isOurAgent()) {
-        m->incStatisticsShots((int32)shots);
-    }
+
     // TODO: fix this, remove auto targetting for perseudatron,
     // use find non friend in ped animate
     // perseudatron skipping, due to no target
+
+    double accuracy = pWeaponClass_->shotAcurracy();
     if (main_type_ != Weapon::Persuadatron)
         this->playSound();
-    // 90% accuracy agent * acurracy weapon
-    double accuracy = 0.9 * pWeaponClass_->shotAcurracy();
+    if (owner_ && owner_->majorType() == MapObject::mjt_Ped)
+    {
+        if (pWeaponClass_->dmgType() != MapObject::dmg_Mental
+            && ((PedInstance *)owner_)->isOurAgent())
+        {
+            m->incStatisticsShots((int32)shots);
+        }
+        ((PedInstance *)owner_)->getAccuracy(accuracy);
+    }
 
     // angle is used to generate random shot with randomizer
     double angle = pWeaponClass_->shotAngle();

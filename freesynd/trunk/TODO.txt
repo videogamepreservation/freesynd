@@ -47,7 +47,6 @@ weapon search and pickup when persuador equips weapon, in view only and
 closest by distance
 ====
 
- - firing delay per ipa (perception?), mod brain
  - instant damage to objects(handleDamage for all destructable)
  
 IHM:

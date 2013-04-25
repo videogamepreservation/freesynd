@@ -245,6 +245,7 @@ bool Mission::loadLevel(LevelData::LevelDataAll &level_data)
                 p->setStartHealth(16);
                 p->setBaseSpeed(256);
                 p->setTimeBeforeCheck(400);
+                p->setBaseModAcc(0.5);
             } else if (i > 7) {
                 unsigned int mt = p->getMainType();
                 p->setObjGroupDef(mt);
@@ -254,21 +255,25 @@ bool Mission::loadLevel(LevelData::LevelDataAll &level_data)
                     p->setBaseSpeed(256);
                     *((ModOwner *)p) = mods_enemy;
                     p->setTimeBeforeCheck(400);
+                    p->setBaseModAcc(0.5);
                 } else if (mt == PedInstance::og_dmGuard) {
                     p->setObjGroupID(3);
                     p->addEnemyGroupDef(1);
                     p->setBaseSpeed(192);
                     p->setTimeBeforeCheck(300);
+                    p->setBaseModAcc(0.45);
                 } else if (mt == PedInstance::og_dmPolice) {
                     p->setObjGroupID(4);
                     p->setHostileDesc(PedInstance::pd_smArmed);
                     p->setBaseSpeed(160);
                     p->setTimeBeforeCheck(400);
+                    p->setBaseModAcc(0.4);
                 } else {
                     p->setObjGroupID(5);
                     // civilians and criminals
                     p->setBaseSpeed(128);
                     p->setTimeBeforeCheck(600);
+                    p->setBaseModAcc(0.2);
                 }
                 p->setSightRange(7 * 256);
                 // TODO: set scenarios

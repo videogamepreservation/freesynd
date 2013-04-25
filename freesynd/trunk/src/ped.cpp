@@ -404,12 +404,12 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                     //if (aqt->multi_var.time_var.desc == 0) {
                         aqt->multi_var.time_var.elapsed += elapsed;
                         if (aqt->multi_var.time_var.elapsed >=
-                            aqt->multi_var.time_var.time_before_start)
+                            aqt->multi_var.time_var.time_to_start)
                         {
                             aqt->state ^= 384;
                             aqt->ot_execute ^= PedInstance::ai_aWaitToStart;
                             elapsed = aqt->multi_var.time_var.elapsed
-                                - aqt->multi_var.time_var.time_before_start;
+                                - aqt->multi_var.time_var.time_to_start;
                             aqt->multi_var.time_var.elapsed = 0;
                         }
                     //}
@@ -1166,7 +1166,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                             // forcing showing a gun
                             selectRequiredWeapon();
                             aqt_attack.ot_execute |= PedInstance::ai_aWaitToStart;
-                            aqt_attack.multi_var.time_var.time_before_start = 5000 - tm_before_check_;
+                            aqt_attack.multi_var.time_var.time_to_start = 5000 - tm_before_check_;
                             aqt_attack.multi_var.time_var.desc = 1;
                             g_App.gameSounds().play(snd::PUTDOWN_WEAPON);
                             // enabling following behavior
@@ -1541,6 +1541,9 @@ PedInstance::PedInstance(Ped *ped, int m) : ShootableMovableMapObject(m),
     adrenaline_  = new IPAStim(IPAStim::Adrenaline);
     perception_  = new IPAStim(IPAStim::Perception);
     intelligence_ = new IPAStim(IPAStim::Intelligence);
+
+    tm_before_check_ = 1000;
+    base_mod_acc_ = 0.1;
 }
 
 PedInstance::~PedInstance()
@@ -2393,6 +2396,42 @@ int PedInstance::getSpeed()
     }
 
     return speed_new;
+}
+
+void PedInstance::getAccuracy(double &base_acc)
+{
+    double base_mod = base_mod_acc_;
+
+    if (obj_group_def_ == PedInstance::og_dmAgent)
+    {
+        Mod *pMod = slots_[Mod::MOD_EYES];
+        if (pMod) {
+            base_mod += 0.006 * (pMod->getVersion() + 1);
+        }
+        pMod = slots_[Mod::MOD_BRAIN];
+       if (pMod) {
+            base_mod += 0.006 * (pMod->getVersion() + 1);
+        }
+        pMod = slots_[Mod::MOD_ARMS];
+        if (pMod) {
+            base_mod += 0.006 * (pMod->getVersion() + 1);
+        }
+        pMod = slots_[Mod::MOD_HEART];
+        if (pMod) {
+            base_mod += 0.006 * (pMod->getVersion() + 1);
+        }
+        pMod = slots_[Mod::MOD_LEGS];
+        if (pMod) {
+            base_mod += 0.006 * (pMod->getVersion() + 1);
+        }
+        // 0.59 max from here
+
+        base_mod -= 0.4;
+        base_mod += 0.4 * (2.0 - adrenaline_->getMultiplier());
+        // 0.99 max after adrenaline
+    }
+
+    base_acc *= 1.0 - base_mod;
 }
 
 bool PedInstance::hasAccessCard()
