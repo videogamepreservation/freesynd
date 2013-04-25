@@ -219,7 +219,7 @@ Weapon * WeaponManager::loadWeapon(Weapon::WeaponType wt) {
         372, Weapon::Minigun_Anim, snd::MINIGUN, Weapon::Minigun,
         MapObject::dmg_Bullet, 5, 100, 75, Weapon::wspt_Minigun,
         SFXObject::sfxt_BulletHit, SFXObject::sfxt_BulletHit,
-        SFXObject::sfxt_Unknown, SFXObject::sfxt_Unknown, 0, 45.0, 0.5, 0, 2,
+        SFXObject::sfxt_Unknown, SFXObject::sfxt_Unknown, 0, 30.0, 0.8, 0, 2,
         1, 25);
             break;
         case Weapon::Flamer:
@@ -254,7 +254,7 @@ Weapon * WeaponManager::loadWeapon(Weapon::WeaponType wt) {
         Weapon::Uzi_Anim, snd::UZI, Weapon::Uzi, MapObject::dmg_Bullet, 1,
         150, 100, Weapon::wspt_Uzi, SFXObject::sfxt_BulletHit,
         SFXObject::sfxt_BulletHit, SFXObject::sfxt_Unknown,
-        SFXObject::sfxt_Unknown, 0, 20.0, 0.7, 0, 2, 1, 5);
+        SFXObject::sfxt_Unknown, 0, 20.0, 0.85, 0, 2, 1, 5);
             break;
         case Weapon::Laser:
             pWeapon = new Weapon(g_App.menus().getMessage("WEAPON_LASER"),
@@ -279,7 +279,7 @@ Weapon * WeaponManager::loadWeapon(Weapon::WeaponType wt) {
         Weapon::Shotgun_Anim, snd::SHOTGUN, Weapon::Shotgun,
         MapObject::dmg_Bullet, 1, 250, 200, Weapon::wspt_Shotgun,
         SFXObject::sfxt_BulletHit, SFXObject::sfxt_BulletHit,
-        SFXObject::sfxt_Unknown, SFXObject::sfxt_Unknown, 0, 60.0, 0.7,
+        SFXObject::sfxt_Unknown, SFXObject::sfxt_Unknown, 0, 45.0, 0.7,
         0, 2, 6, 7);
             break;
         case Weapon::MediKit:

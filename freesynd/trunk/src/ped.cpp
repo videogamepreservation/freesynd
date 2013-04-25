@@ -2431,7 +2431,12 @@ void PedInstance::getAccuracy(double &base_acc)
         // 0.99 max after adrenaline
     }
 
-    base_acc *= 1.0 - base_mod;
+    // NOTE :(1.0 - base_acc) is randomized and not dependent on anything
+    // should be added back
+    // Ex. weapon accuracy 70%, random value 30%, then
+    // 0.7 * (1.0 - base_mod(here 0.5) + (1.0 - 0.7) = 0.65
+    // the shot will be randomized at 65% of weapons max angle
+    base_acc = base_acc * (1.0 - base_mod) + (1.0 - base_acc);
 }
 
 bool PedInstance::hasAccessCard()

@@ -150,22 +150,21 @@ bool PedInstance::createActQFiring(actionQueueGroupType &as, PathNode *tpn,
         if (wi) {
             can_shoot = wi->canShoot();
             does_phys_dmg = wi->doesPhysicalDmg();
+            //TODO: remove?
+            /*
             Mod *pMod = slots_[Mod::MOD_BRAIN];
             if (pMod) {
-                if (pMod->getVersion() == Mod::MOD_V3) {
-                    aq.multi_var.enemy_var.pw_to_use.desc = 5;
-                    aq.multi_var.enemy_var.pw_to_use.wpn.dmg_type = wi->dmgType();
-                } else if (pMod->getVersion() == Mod::MOD_V2) {
-                    aq.multi_var.enemy_var.pw_to_use.desc = 4;
-                    aq.multi_var.enemy_var.pw_to_use.wpn.dmg_type = wi->dmgType();
-                } else {
+                if (pMod->getVersion() == Mod::MOD_V1) {
                     aq.multi_var.enemy_var.pw_to_use.desc = 3;
                     aq.multi_var.enemy_var.pw_to_use.wpn.wpn_type = wi->getWeaponType();
+                } else { // v2, v3
+                    aq.multi_var.enemy_var.pw_to_use.desc = 4;
+                    aq.multi_var.enemy_var.pw_to_use.wpn.dmg_type = wi->dmgType();
                 }
-            } else {
+            } else {*/
                 aq.multi_var.enemy_var.pw_to_use.desc = 2;
                 aq.multi_var.enemy_var.pw_to_use.wpn.wi = wi;
-            }
+            //}
         } else
             return false;
     }
@@ -385,8 +384,7 @@ bool PedInstance::createActQFindEnemy(actionQueueGroupType &as) {
     as.actions.push_back(aq);
     pedWeaponToUse pw_to_use;
     if (getMainType() == PedInstance::m_tpAgent) {
-        aq.multi_var.enemy_var.pw_to_use.use_ranks = pMod || (!isOurAgent())
-            ? true: false;
+        aq.multi_var.enemy_var.pw_to_use.use_ranks = pMod != NULL;
         WeaponInstance *wi = selectedWeapon();
         if (wi && wi->usesAmmo() && wi->ammoRemaining() == 0) {
             wi = NULL;
