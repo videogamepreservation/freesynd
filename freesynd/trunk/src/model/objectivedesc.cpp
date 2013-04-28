@@ -1,6 +1,7 @@
 #include "model/objectivedesc.h"
 #include "ped.h"
 #include "app.h"
+#include "vehicle.h"
 
 ObjPersuade::ObjPersuade(MapObject * pMapObject) : TargetObjective(pMapObject) {
     msg = g_App.menus().getMessage("GOAL_PERSUADE");

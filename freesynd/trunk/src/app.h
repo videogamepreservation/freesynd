@@ -42,7 +42,6 @@
 #include "missionmanager.h"
 #include "weaponmanager.h"
 #include "modmanager.h"
-#include "vehiclemanager.h"
 #include "pedmanager.h"
 #include "sound/soundmanager.h"
 #include "sound/musicmanager.h"
@@ -87,10 +86,6 @@ class App : public Singleton < App > {
 
     MapManager &maps() {
         return maps_;
-    }
-
-    VehicleManager &vehicles() {
-        return vehicles_;
     }
 
     PedManager &peds() {
@@ -184,7 +179,6 @@ private:
     WeaponManager weapons_;
     ModManager mods_;
     MapManager maps_;
-    VehicleManager vehicles_;
     PedManager peds_;
     SoundManager intro_sounds_;
     SoundManager game_sounds_;

@@ -72,7 +72,6 @@ set (SOURCES
 	utils/portablefile.cpp
 	utils/seqmodel.cpp
 	vehicle.cpp
-	vehiclemanager.cpp
 	weapon.cpp
 	weaponmanager.cpp
 )
@@ -108,7 +107,6 @@ set(HEADERS
 	system.h
 	system_sdl.h
 	vehicle.h
-	vehiclemanager.h
 	version.h
 	weapon.h
 	weaponholder.h

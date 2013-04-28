@@ -28,57 +28,57 @@
 #define VEHICLE_H
 
 #include <string>
-#include "mapobject.h"
-#include "path.h"
-#include "weapon.h"
 
-class VehicleInstance;
+#include "mapobject.h"
+#include "ped.h"
 
 /*!
- * Vehicle class.
+ * This class holds informations about the animation of a vehicle.
  */
-class Vehicle {
+class VehicleAnimation {
 public:
-    Vehicle() {}
-    virtual ~Vehicle() {}
-    Vehicle(const char *vehicle_name, int first_anim);
+    /*!
+     * This enumeration lists the type of animations.
+     */
+    enum AnimationType {
+        //! Vehicule under normal condition
+        kNormalAnim,
+        //! Burning vehicle
+        kOnFireAnim,
+        //! Burnt vehicle
+        kBurntAnim,
+    } ;
 
-    const char *name() { return name_.c_str(); }
-
+    VehicleAnimation();
+    virtual ~VehicleAnimation() {}
+    
+    //! Draw the vehicle
     void draw(int x, int y, int dir, int frame);
-    void drawOnFire(int x, int y, int dir, int frame);
-    void drawBurnt(int x, int y, int dir, int frame);
 
-    VehicleInstance *createInstance(int map);
-    void setAnims(int anims) { anims_ = anims; }
-    void setAnimsBurning(int anims) { anims_burning_ = anims; }
-    void setAnimsBurnt(int anims) { anims_burnt_ = anims; }
-
-    typedef enum {
-        NormalAnim,
-        OnFireAnim,
-        BurntAnim,
-    } VehicleAnimation;
-
-    void setVehicleAnim(VehicleAnimation anim) {
+    void set_base_anims(int anims);
+    //void setAnimsBurning(int anims) { anims_burning_ = anims; }
+    //void setAnimsBurnt(int anims) { anims_burnt_ = anims; }
+    //! Sets the current animation for the vehicle
+    void set_animation_type(AnimationType anim) {
         vehicle_anim_ = anim;
     }
-    VehicleAnimation getVehicleAnim() {
+    //! Returns the current vehicle animation
+    AnimationType animation_type() {
         return vehicle_anim_;
     }
 protected:
-    std::string name_;
     int anims_, anims_burning_, anims_burnt_;
-    VehicleAnimation vehicle_anim_;
+    //! Current type of animation
+    AnimationType vehicle_anim_;
 };
 
 /*!
- * Vehicle instance class.
+ * This class represents a Vehicle on a map.
  */
 class VehicleInstance : public ShootableMovableMapObject
 {
 public:
-    VehicleInstance(Vehicle *vehicle, int m);
+    VehicleInstance(VehicleAnimation *vehicle, int m);
     virtual ~VehicleInstance() { delete vehicle_;}
 
     bool animate(int elapsed);
@@ -92,7 +92,6 @@ public:
 
     void setDestinationV(Mission *m, int x, int y, int z, int ox = 128, int oy = 128,
             int new_speed = 160);
-    bool movementV(int elapsed);
 
     PedInstance *getDriver(void) {
         return vehicle_driver_;
@@ -121,13 +120,15 @@ public:
     bool checkHostilesInside(PedInstance *p, unsigned int hostile_desc_alt);
 
 protected:
-    Vehicle *vehicle_;
-    PedInstance *vehicle_driver_;
-    std::set <PedInstance *> all_passengers_;
-
+    bool move_vehicle(int elapsed);
     bool walkable(int x, int y, int z);
     uint16 tileDir(int x, int y, int z);
     bool dirWalkable(PathNode *p, int x, int y, int z);
+
+protected:
+    VehicleAnimation *vehicle_;
+    PedInstance *vehicle_driver_;
+    std::set <PedInstance *> all_passengers_;
 };
 
 #endif

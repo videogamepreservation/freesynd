@@ -34,6 +34,7 @@
 #include "app.h"
 #include "model/objectivedesc.h"
 #include "utils/log.h"
+#include "vehicle.h"
 
 Mission::Mission(const LevelData::MapInfos & map_infos)
 {

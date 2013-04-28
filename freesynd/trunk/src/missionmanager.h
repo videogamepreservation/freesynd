@@ -32,6 +32,7 @@
 class Mission;
 class MissionBriefing;
 class WeaponInstance;
+class VehicleInstance;
 
 /*!
  * Mission manager class.
@@ -48,7 +49,10 @@ private:
     //! When loading missions, possibly adds some info to the data
     void hackMissions(int n, uint8 *data);
     Mission * load_level_data(LevelData::LevelDataAll &level_data, uint8 *minimap_overlay);
-    WeaponInstance * createWeaponInstance(uint8 * data);
+    //! Creates a weapon from the game data
+    WeaponInstance * create_weapon_instance(const LevelData::Weapons &gamdata);
+    //! Creates a vehicle from the game data
+    VehicleInstance * create_vehicle_instance(const LevelData::Cars &gamdata, uint16 map);
 };
 
 #endif

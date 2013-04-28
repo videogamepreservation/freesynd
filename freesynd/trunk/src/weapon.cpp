@@ -30,6 +30,7 @@
 #include <assert.h>
 
 #include "app.h"
+#include "vehicle.h"
 
 #define Z_SHIFT_TO_AIR   4
 

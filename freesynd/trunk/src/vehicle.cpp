@@ -30,38 +30,38 @@
 
 #include "app.h"
 #include "gfx/screen.h"
+#include "vehicle.h"
 
-Vehicle::Vehicle(const char *vehicle_name, int first_anim):
-name_(vehicle_name), anims_(first_anim)
-{
+VehicleAnimation::VehicleAnimation() {
+    vehicle_anim_ = kNormalAnim;
 }
 
-VehicleInstance *Vehicle::createInstance(int map)
+void VehicleAnimation::draw(int x, int y, int dir, int frame)
 {
-    return new VehicleInstance(this, map);
+    switch (vehicle_anim_) {
+        case kNormalAnim:
+            g_App.gameSprites().drawFrame(anims_ + dir * 2, frame, x, y);
+            break;
+        case kOnFireAnim:
+            g_App.gameSprites().drawFrame(anims_burning_ + dir, frame, x, y);
+            break;
+        case kBurntAnim:
+            g_App.gameSprites().drawFrame(anims_burnt_ + dir, frame, x, y);
+            break;
+    }
 }
 
-void Vehicle::draw(int x, int y, int dir, int frame)
-{
-    g_App.gameSprites().drawFrame(anims_ + dir * 2, frame, x, y);
+void VehicleAnimation::set_base_anims(int anims) {
+    anims_ = anims;
+    anims_burning_ = anims + 8;
+    anims_burnt_ = anims + 12;
 }
 
-void Vehicle::drawOnFire(int x, int y, int dir, int frame)
-{
-    g_App.gameSprites().drawFrame(anims_burning_ + dir, frame, x, y);
-}
-
-void Vehicle::drawBurnt(int x, int y, int dir, int frame)
-{
-    g_App.gameSprites().drawFrame(anims_burnt_ + dir, frame, x, y);
-}
-
-VehicleInstance::VehicleInstance(Vehicle * vehicle,
+VehicleInstance::VehicleInstance(VehicleAnimation * vehicle,
 int m):ShootableMovableMapObject(m), vehicle_(vehicle), vehicle_driver_(NULL)
 {
     hold_on_.wayFree = 0;
     rcv_damage_def_ = MapObject::ddmg_Vehicle;
-    vehicle_->setVehicleAnim(Vehicle::NormalAnim);
     major_type_ = MapObject::mjt_Vehicle;
 }
 
@@ -70,22 +70,22 @@ bool VehicleInstance::animate(int elapsed)
     bool updated = false;
 
     if (health_ > 0) {
-        updated = movementV(elapsed);
+        updated = move_vehicle(elapsed);
     }
 
-    switch (vehicle_->getVehicleAnim()) {
-        case Vehicle::NormalAnim:
+    switch (vehicle_->animation_type()) {
+        case VehicleAnimation::kNormalAnim:
             break;
-        case Vehicle::OnFireAnim:
+        case VehicleAnimation::kOnFireAnim:
             if (leftTimeShowAnim(elapsed))
                 updated |= MapObject::animate(elapsed);
             else {
-                vehicle_->setVehicleAnim(Vehicle::BurntAnim);
+                vehicle_->set_animation_type(VehicleAnimation::kBurntAnim);
                 frame_ = 0;
                 updated = true;
             }
             break;
-        case Vehicle::BurntAnim:
+        case VehicleAnimation::kBurntAnim:
             break;
     }
 
@@ -101,17 +101,7 @@ void VehicleInstance::draw(int x, int y)
     if (x < 90 || y < -20)
         return;
 
-    switch (vehicle_->getVehicleAnim()) {
-        case Vehicle::NormalAnim:
-            vehicle_->draw(x, y, getDirection(4), frame_);
-            break;
-        case Vehicle::OnFireAnim:
-            vehicle_->drawOnFire(x, y, getDirection(4), frame_);
-            break;
-        case Vehicle::BurntAnim:
-            vehicle_->drawBurnt(x, y, getDirection(4), frame_);
-            break;
-    }
+    vehicle_->draw(x, y, getDirection(4), frame_);
 }
 
 bool VehicleInstance::walkable(int x, int y, int z)
@@ -641,7 +631,11 @@ void VehicleInstance::setDestinationV(Mission *m, int x, int y, int z, int ox,
     }
 }
 
-bool VehicleInstance::movementV(int elapsed)
+/*!
+ * Moves a vehicle on the map.
+ * \param elapsed Elapsed time sine last frame.
+ */
+bool VehicleInstance::move_vehicle(int elapsed)
 {
     bool updated = false;
     int used_time = elapsed;
@@ -756,7 +750,7 @@ bool VehicleInstance::handleDamage(ShootableMapObject::DamageInflictType *d) {
             case MapObject::dmg_Laser:
             case MapObject::dmg_Burn:
             case MapObject::dmg_Explosion:
-                vehicle_->setVehicleAnim(Vehicle::OnFireAnim);
+                vehicle_->set_animation_type(VehicleAnimation::kOnFireAnim);
                 setTimeShowAnim(10000);
                 break;
         }

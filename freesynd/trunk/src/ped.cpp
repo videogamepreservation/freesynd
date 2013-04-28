@@ -26,6 +26,7 @@
 
 #include "common.h"
 #include "app.h"
+#include "vehicle.h"
 
 Ped::Ped() {
     memset(stand_anims_, 0, sizeof(stand_anims_));

@@ -30,6 +30,7 @@
 #include "resources.h"
 #include "core/missionbriefing.h"
 #include "model/objectivedesc.h"
+#include "vehicle.h"
 
 MissionManager::MissionManager()
 {
@@ -217,7 +218,7 @@ Mission * MissionManager::load_level_data(LevelData::LevelDataAll &level_data, u
         if (car.type == 0x0)
             continue;
         VehicleInstance *v =
-            g_App.vehicles().loadInstance((uint8 *) & car, p_mission->mapId());
+            create_vehicle_instance(car, p_mission->mapId());
         if (v) {
             vindx[i] = p_mission->numVehicles();
             p_mission->addVehicle(v);
@@ -560,7 +561,7 @@ Mission * MissionManager::load_level_data(LevelData::LevelDataAll &level_data, u
         LevelData::Weapons & wref = level_data.weapons[i];
         if(wref.desc == 0)
             continue;
-        WeaponInstance *w = createWeaponInstance((uint8 *) & wref);
+        WeaponInstance *w = create_weapon_instance(wref);
         if (w) {
 #ifdef _DEBUG
             w->setDebugID(i);
@@ -809,12 +810,10 @@ Mission * MissionManager::load_level_data(LevelData::LevelDataAll &level_data, u
 
 }
 
-WeaponInstance * MissionManager::createWeaponInstance(uint8 * data) {
-        LevelData::Weapons * gamdata =
-        (LevelData::Weapons *) data;
+WeaponInstance * MissionManager::create_weapon_instance(const LevelData::Weapons &gamdata) {
     Weapon::WeaponType wType = Weapon::Unknown;
 
-    switch (gamdata->sub_type) {
+    switch (gamdata.sub_type) {
         case 0x01:
             wType = Weapon::Persuadatron;
             break;
@@ -865,11 +864,95 @@ WeaponInstance * MissionManager::createWeaponInstance(uint8 * data) {
     Weapon *pWeapon = g_App.weapons().getWeapon(wType);
     if (pWeapon) {
         WeaponInstance *wi = pWeapon->createInstance();
-        wi->setPosition(gamdata->mapposx[1], gamdata->mapposy[1],
-            READ_LE_UINT16(gamdata->mapposz) >> 7, gamdata->mapposx[0],
-            gamdata->mapposy[0], gamdata->mapposz[0] & 0x7F);
+        wi->setPosition(gamdata.mapposx[1], gamdata.mapposy[1],
+            READ_LE_UINT16(gamdata.mapposz) >> 7, gamdata.mapposx[0],
+            gamdata.mapposy[0], gamdata.mapposz[0] & 0x7F);
         return wi;
     }
 
     return NULL;
+}
+
+/*!
+ *
+ */
+VehicleInstance * MissionManager::create_vehicle_instance(const LevelData::Cars &gamdata, uint16 map)
+{
+    // TODO: check all maps
+    // TODO: train, join somehow
+
+    int hp = READ_LE_INT16(gamdata.health);
+    int dir = gamdata.orientation >> 5;
+
+    VehicleAnimation *vehicleanim = new VehicleAnimation();
+    int cur_anim = READ_LE_UINT16(gamdata.index_current_anim) - dir;
+    //setVehicleBaseAnim(vehicleanim, cur_anim);
+    vehicleanim->set_base_anims(cur_anim);
+    VehicleInstance *vehivle_new = new VehicleInstance(vehicleanim, map);
+    vehivle_new->setHealth(hp);
+    vehivle_new->setStartHealth(hp);
+    vehivle_new->setMainType(gamdata.sub_type);
+    switch (gamdata.sub_type) {
+        case 0x01:
+            // large armored
+            break;
+        case 0x04:
+            // large armored damaged
+            // it is actually base animation and they have 8 directions
+            //setVehicleBaseAnim(vehicleanim, cur_anim - 12 + (dir >> 1));
+            vehicleanim->set_base_anims(cur_anim - 12 + (dir >> 1));
+            vehivle_new->setStartHealth(0);
+            vehivle_new->setHealth(-1);
+            vehivle_new->setIsIgnored(true);
+            vehicleanim->set_animation_type(VehicleAnimation::kBurntAnim);
+            break;
+        case 0x05:
+            // train head
+        case 0x09:
+            // train body
+            break;
+        case 0x0D:
+            // grey vehicle
+            break;
+        case 0x11:
+            // firefighters vehicle
+            break;
+        case 0x1C:
+            // small armored vehicle
+            break;
+        case 0x24:
+            // police vehicle
+            break;
+        case 0x28:
+            // medical vehicle
+            break;
+#if _DEBUG
+        default:
+            printf("uknown vehicle type %02X , %02X, %X\n", gamdata.sub_type,
+                gamdata.orientation,
+                READ_LE_UINT16(gamdata.index_current_frame));
+            printf("x = %i, xoff = %i, ", gamdata.mapposx[1],
+                gamdata.mapposx[0]);
+            printf("y = %i, yoff = %i, ", gamdata.mapposy[1],
+                gamdata.mapposy[0]);
+            printf("z = %i, zoff = %i\n", gamdata.mapposz[1],
+                gamdata.mapposz[0]);
+            break;
+#endif
+    }
+    int z = READ_LE_UINT16(gamdata.mapposz) >> 7;
+
+    // TODO: the size should be adjusted on orientation/direction change
+    // and it should be different per vehicle type
+    vehivle_new->setSizeX(256);
+    vehivle_new->setSizeY(256);
+    vehivle_new->setSizeZ(192);
+
+    int oz = gamdata.mapposz[0] & 0x7F;
+    vehivle_new->setPosition(gamdata.mapposx[1], gamdata.mapposy[1],
+                            z, gamdata.mapposx[0],
+                            gamdata.mapposy[0], oz);
+    vehivle_new->setDirection(gamdata.orientation);
+
+    return vehivle_new;
 }

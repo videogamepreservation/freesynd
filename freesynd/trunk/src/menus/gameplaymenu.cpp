@@ -32,6 +32,7 @@
 #include "gameplaymenu.h"
 #include "gfx/fliplayer.h"
 #include "utils/file.h"
+#include "vehicle.h"
 
 #ifdef _WIN32
 #include <windows.h>
