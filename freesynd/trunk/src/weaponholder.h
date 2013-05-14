@@ -62,6 +62,18 @@ public:
         return w;
     }
 
+    // caller is responsible for freeing the returned value
+    void removeWeaponInstance(WeaponInstance *w) {
+        for (std::vector<WeaponInstance *>::iterator it = weapons_.begin();
+             it != weapons_.end(); ++it)
+        {
+            if (*it == w) {
+                weapons_.erase(it);
+                break;
+            }
+        }
+    }
+
 protected:
     std::vector<WeaponInstance *> weapons_;
 };

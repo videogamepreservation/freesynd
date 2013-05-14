@@ -428,7 +428,7 @@ public:
                 if (it_this->first != first_value)
                     first_value = it_this->first;
                 else {
-                    it_this++;
+                    ++it_this;
                     continue;
                 }
             } while (it_this != this->end());
@@ -466,7 +466,7 @@ public:
                     } else {
                         if (it_this->second != second_value)
                             second_value = it_this->second;
-                        it_this++;
+                        ++it_this;
                         continue;
                     }
                 }

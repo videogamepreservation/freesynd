@@ -66,7 +66,7 @@
         m_fdConstant      = 16,
         m_fdNonWalkable   = 32,
         m_fdDefReq        = 64,
-        m_fdSafeWalk      = 64,
+        m_fdSafeWalk      = 64
     } mapFloodDesc;
 
     typedef struct {

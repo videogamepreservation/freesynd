@@ -112,6 +112,17 @@ public:
 
     FS_Lang currLanguage(void) {return curr_language_; }
 
+    void resetSinceMouseDown() {
+        since_mouse_down_ = 0;
+        mouseup_was_ = false;
+    }
+    bool simpleMouseDown();
+    bool isMouseDragged() { return !(simpleMouseDown() && mouseup_was_ ); }
+    void updtSinceMouseDown(int32 elapsed) {
+        if (!mouseup_was_)
+            since_mouse_down_ += elapsed;
+    }
+
 protected:
     //! Returns a menu with the given id
     Menu * getMenu(int menuId);
@@ -147,6 +158,11 @@ protected:
     SpriteManager *pIntroFontSprites_;
     /*! Font manager.*/
     FontManager fonts_;
+
+    /*! Time since last mouse down event without mouseup*/
+    int32 since_mouse_down_;
+    //! Will not update since_mouse_down_ after this event
+    bool mouseup_was_;
 };
 
 #endif

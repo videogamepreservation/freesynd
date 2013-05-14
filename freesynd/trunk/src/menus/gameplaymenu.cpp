@@ -297,6 +297,7 @@ void GameplayMenu::handleShow() {
 
     // play game track
     g_App.music().playTrack(msc::TRACK_ASSASSINATE);
+    menu_manager_->resetSinceMouseDown();
 }
 
 int qanim = 200, qframe = 0;
@@ -988,10 +989,13 @@ void GameplayMenu::stopShootingEvent(void )
 {
     if (shooting_events_.shooting_) {
         shooting_events_.shooting_ = false;
+        // minimum, 1 if simple click, 2 if longer click
+        uint32 need_shots = menu_manager_->simpleMouseDown() ? 1 : 2;
         for (int i = 0; i < 4; i++) {
             if (shooting_events_.agents_shooting[i]) {
                 shooting_events_.agents_shooting[i] = false;
-                mission_->ped(i)->updtActGFiringShots(shooting_events_.ids[i], 1);
+                mission_->ped(i)->updtActGFiringShots(shooting_events_.ids[i],
+                    need_shots);
             }
         }
     }
@@ -999,9 +1003,8 @@ void GameplayMenu::stopShootingEvent(void )
 
 
 void GameplayMenu::handleMouseUp(int x, int y, int button, const int modKeys) {
-    // TODO: all mouse continued actions should stop, when paused
-    //if (paused_)
-        //return;
+    if (paused_)
+        return;
     if (button == 3) {
         stopShootingEvent();
     }
@@ -1035,6 +1038,7 @@ bool GameplayMenu::handleUnknownKey(Key key, const int modKeys) {
             g_Screen.drawRect(txt_posx - 10, txt_posy - 5,
                 txt_width + 20, txt_height + 10);
             gameFont()->drawText(txt_posx, txt_posy, str_paused.c_str(), 11);
+            stopShootingEvent();
         }
         return true;
     }

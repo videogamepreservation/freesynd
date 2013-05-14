@@ -54,7 +54,7 @@ heading "Configuring FreeSynd".
  
 Commands
 --------
-- Mission Selection:
+-- Mission Selection:
  * 0     : Puts the selector on first mission.
  * Left  : Puts the selector on the next mission.
  * Right : Puts the selector on the previous mission.
@@ -65,18 +65,36 @@ Commands
            upgrade the population status to "very happy".)
  * Page Up / Page Down : Increase / decrease tax rate on selected country by 10%.
  
-- In game:
+-- Agent Selection Menu:
+ * Right Click on agents number: (de-)activates agent
+ * Right Click and drag selected weapon to required agent number to exchange
+ 
+-- In game:
  * F1  : Turns music on/off.
  * F2  : Turns game sounds on/off.
  * 1-4 : Numeric key selects the corresponding agent.
  * 0   : Key 0 cycles between all 4 agents.
  * Ctrl + 0           : Inverts the selection.
- * Ctrl + Left Click  : Sets a waypoint for the selected agents.
  * Left,Right,Up,Down : Scrolls the map.
  * P   : Pauses Game
- * Ctrl + D           : Autodestruction of selected agent(s)
+ * Ctrl + D           : Autodestruction of selected agent(s), if equipped
+ with mod chest v2 or v3 will explode damaging everything nearby
+ * Left Click on item in invetory : (de)selects, activates item
+ * Right Click on item in invetory : drops item from inventory to ground
+ * Left Click on item on map : orders agent(s) to pickup
+ * Left Click on vehicle : orders agent(s) to get inside or leave it,
+ if already inside
  
- - Debug Mode :
+ 
+ Experimental, these commands are added into execution queue:
+ * Ctrl + Left Click  : Sets a waypoint for the selected agents.
+ * Ctrl + Right Click  : Sets a target to shoot for the selected agents.
+ 
+ 
+-- Debug Mode :
+ * Alt  : shows agents walk path, if over an object shows its id and
+major type
+ * Shift : mouse coordinates are printed
 
 Contact
 -------

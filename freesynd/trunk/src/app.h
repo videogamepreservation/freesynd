@@ -128,6 +128,8 @@ class App : public Singleton < App > {
     bool loadGameFromFile(int fileSlot);
 
     static std::string defaultIniFolder();
+
+    int32 getTimeForClick() { return time_for_click_; }
 #ifdef _DEBUG
 public:
     uint8 debug_breakpoint_trigger_;
@@ -166,6 +168,10 @@ private:
     bool fullscreen_;
     /*! True means the intro will be played.*/
     bool playIntro_;
+    /*! Time range between mouse up and down that is treated as click,
+     * if it will be longer it will be treated as dragging
+    */
+    int32 time_for_click_;
     /*! A structure to hold player informations.*/
     std::auto_ptr<GameSession> session_;
     std::auto_ptr<Screen> screen_;

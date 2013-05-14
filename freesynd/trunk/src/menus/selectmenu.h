@@ -29,6 +29,7 @@
 #define SELECTMENU_H
 
 class ListBox;
+class WeaponInstance;
 
 /*!
  * Select Menu class.
@@ -45,6 +46,8 @@ public:
     void handleAction(const int actionId, void *ctx, const int modKeys);
 
 protected:
+    void handleMouseMotion(int x, int y, int state, const int modKeys);
+    void handleMouseUp(int x, int y, int button, const int modKeys);
     bool handleMouseDown(int x, int y, int button, const int modKeys);
     void handleClickOnAgentSelector(const int agent_no, int button);
 
@@ -114,6 +117,13 @@ protected:
     ListBox *pWeaponsLBox_;
     /*! The mods list.*/
     ListBox *pModsLBox_;
+
+    WeaponInstance *weapon_dragged_;
+    struct screenPoint{
+        int x;
+        int y;
+    };
+    screenPoint weapon_pos_;
 };
 
 #endif

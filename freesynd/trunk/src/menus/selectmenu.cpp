@@ -40,6 +40,7 @@ cur_agent_(0), tick_count_(0), rnd_(0), sel_all_(false)
     pSelectedWeap_ = NULL;
     selectedWInstId_ = 0;
     pSelectedMod_ = NULL;
+    weapon_dragged_ = NULL;
     addStatic(85, 35, 545, "#SELECT_TITLE", FontManager::SIZE_4, false);
     txtTimeId_ = addStatic(500, 9, "", FontManager::SIZE_2, true);       // Time
     moneyTxtId_ = addStatic(500, 87, 128, "0", FontManager::SIZE_2, true);     // Money
@@ -207,8 +208,12 @@ void SelectMenu::drawAgent()
         {
             WeaponInstance *wi = selected->weapon(j * 4 + i);
             Weapon *pW = wi->getWeaponClass();
+            screenPoint pos = {366 + i * 32, 308 + j * 32};
+            if (wi == weapon_dragged_ && menu_manager_->isMouseDragged())
+                pos = weapon_pos_;
+
             menuSprites().drawSpriteXYZ(pW->getSmallIconId(),
-                366 + i * 32, 308 + j * 32, 0, false, true);
+                pos.x, pos.y, 0, false, true);
             uint8 data[3] = {204, 204, 204};
             if (pW->ammo() != -1) {
                 int n = wi->ammoRemaining();
@@ -219,8 +224,7 @@ void SelectMenu::drawAgent()
                     n /= pW->ammo();
                 }
                 for (int k = 0; k < n; k++)
-                    g_Screen.scale2x(366 + i * 32 + k + 4,
-                                        308 + j * 32 + 22, 1, 3, data);
+                    g_Screen.scale2x(pos.x + k + 4, pos.y + 22, 1, 3, data);
             }
         }
 }
@@ -336,6 +340,7 @@ void SelectMenu::handleShow() {
     showItemList();
 
     updateAcceptEnabled();
+    menu_manager_->resetSinceMouseDown();
 }
 
 void SelectMenu::handleRender(DirtyList &dirtyList) {
@@ -440,6 +445,7 @@ void SelectMenu::handleLeave() {
     rnd_ = 0;
     cur_agent_ = 0;
     sel_all_ = false;
+    weapon_dragged_ = NULL;
 }
 
 /*!
@@ -476,6 +482,55 @@ void SelectMenu::updateAcceptEnabled() {
         }
     }
     getOption(acceptButId_)->setWidgetEnabled(found);
+}
+
+void SelectMenu::handleMouseMotion(int x, int y, int state, const int modKeys)
+{
+    if (weapon_dragged_) {
+        weapon_pos_.x = x;
+        weapon_pos_.y = y;
+    }
+}
+
+void SelectMenu::handleMouseUp(int x, int y, int button, const int modKeys)
+{
+    if (button == 3) {
+        Agent *selected = g_Session.agents().squadMember(cur_agent_);
+        if (selected == NULL)
+            weapon_dragged_ = NULL;
+        if (weapon_dragged_) {
+            int target = -1;
+            if (x >= 20 && x <= 140) {
+                if (y >= 84 && y <= 150) {
+                    if (x >= 82) {
+                        target = 1;
+                    } else {
+                        target = 0;
+                    }
+                }
+                if (y >= 162 && y <= 228) {
+                    if (x >= 82) {
+                        target = 3;
+                    } else {
+                        target = 2;
+                    }
+                }
+            }
+            Agent *reciever = target != -1
+                ? g_Session.agents().squadMember(target) : NULL;
+            if (target != cur_agent_ && reciever
+                && reciever->numWeapons() < 8)
+            {
+                selected->removeWeaponInstance(weapon_dragged_);
+                reciever->addWeapon(weapon_dragged_);
+
+                pSelectedWeap_ = NULL;
+                selectedWInstId_ = 0;
+                showItemList();
+            }
+            weapon_dragged_ = NULL;
+        }
+    }
 }
 
 bool SelectMenu::handleMouseDown(int x, int y, int button, const int modKeys)
@@ -518,9 +573,15 @@ bool SelectMenu::handleMouseDown(int x, int y, int button, const int modKeys)
                 // 2/ computes the id of the selected weapon and selects it
                 newId++;
 
+                WeaponInstance *wi = selected->weapon(newId - 1);
+                if (button == 3) {
+                    weapon_dragged_ = wi;
+                    weapon_pos_.x = x;
+                    weapon_pos_.y = y;
+                }
+
                 if (newId != selectedWInstId_) { // Do something only if a different weapon is selected
                     selectedWInstId_ = newId;
-                    WeaponInstance *wi = selected->weapon(selectedWInstId_ -1);
                     pSelectedWeap_ = wi->getWeaponClass();
                     addDirtyRect(500, 105,  125, 235);
                     // 3/ see if reload button should be displayed,

@@ -2312,24 +2312,28 @@ bool PedInstance::movementP(Mission *m, int elapsed)
                 && nxtTileZ == tile_z_ 
                 && dest_path_.front().offX() == off_x_
                 && dest_path_.front().offY() == off_y_)
+            {
                 dest_path_.pop_front();
+            }
             if (dest_path_.size() == 0)
                 speed_ = 0;
 
             updated = true;
         }
 
-            if ((state_ & pa_smFollowing) != 0) {
-                toDefineXYZ xyz;
-                // TODO: calculate length for dest_path_?
-                // TODO: too big elapsed makes ped move to close to target
-                dest_path_.back().convertPosToXYZ(&xyz);
-                double dist_cur = distanceToPosXYZ(&xyz);
-                if (dist_cur < (double)dist_to_pos_) {
-                    dest_path_.clear();
-                    speed_ = 0;
-                }
+        if ((state_ & pa_smFollowing) != 0) {
+            toDefineXYZ xyz;
+            // TODO: too big elapsed makes ped move to close to target
+            // possible solution will be to use movedir like movement
+            // and calculate distance at every step, but it is
+            // a high cpu consuming
+            dest_path_.back().convertPosToXYZ(&xyz);
+            double dist_cur = distanceToPosXYZ(&xyz);
+            if (dist_cur < (double)dist_to_pos_) {
+                dest_path_.clear();
+                speed_ = 0;
             }
+        }
 
         offzOnStairs(m->mtsurfaces_[tile_x_ + tile_y_ * m->mmax_x_
             + tile_z_ * m->mmax_m_xy].twd);
@@ -2443,15 +2447,15 @@ uint8 PedInstance::moveToDir(Mission* m, int elapsed, dirMoveType &dir_move,
             if (tile_x_ != tilenx || tile_y_ != tileny) {
                 // TODO: check for stairs and offset should be correct,
                 // to avoid jumping on top of stairs
-                int8 dec_z = 0;
+                int32 dec_z = 0;
                 if (tilenx - tile_x_ == 0) {
                     if (tileny - tile_y_ > 0) {
                         if ((fpd->dirh & 0x01) == 0x01) {
                             ++tile_z_;
-                            dec_z = -1;
+                            --dec_z;
                         } else if ((fpd->dirl & 0x01) == 0x01) {
-                            tile_z_--;
-                            dec_z = 1;
+                            --tile_z_;
+                            ++dec_z;
                         } else if ((fpd->dirm & 0x01) != 0x01) {
                             need_bounce = true;
                             break;
@@ -2459,10 +2463,10 @@ uint8 PedInstance::moveToDir(Mission* m, int elapsed, dirMoveType &dir_move,
                     } else {
                         if ((fpd->dirh & 0x10) == 0x10) {
                             ++tile_z_;
-                            dec_z = -1;
+                            --dec_z;
                         } else if ((fpd->dirl & 0x10) == 0x10) {
                             --tile_z_;
-                            dec_z = 1;
+                            ++dec_z;
                         } else if ((fpd->dirm & 0x10) != 0x10) {
                             need_bounce = true;
                             break;
@@ -2472,10 +2476,10 @@ uint8 PedInstance::moveToDir(Mission* m, int elapsed, dirMoveType &dir_move,
                     if (tilenx - tile_x_ > 0) {
                         if ((fpd->dirh & 0x04) == 0x04) {
                             ++tile_z_;
-                            dec_z = -1;
+                            --dec_z;
                         } else if ((fpd->dirl & 0x04) == 0x04) {
                             --tile_z_;
-                            dec_z = 1;
+                            ++dec_z;
                         } else if ((fpd->dirm & 0x04) != 0x04) {
                             need_bounce = true;
                             break;
@@ -2483,10 +2487,10 @@ uint8 PedInstance::moveToDir(Mission* m, int elapsed, dirMoveType &dir_move,
                     } else {
                         if ((fpd->dirh & 0x40) == 0x40) {
                             ++tile_z_;
-                            dec_z = -1;
+                            --dec_z;
                         } else if ((fpd->dirl & 0x40) == 0x40) {
                             --tile_z_;
-                            dec_z = 1;
+                            ++dec_z;
                         } else if ((fpd->dirm & 0x40) != 0x40) {
                             need_bounce = true;
                             break;
@@ -2516,6 +2520,16 @@ uint8 PedInstance::moveToDir(Mission* m, int elapsed, dirMoveType &dir_move,
                         }
                     }
                 }
+
+#if 0
+#ifdef _DEBUG
+                if (getDebugID() == 8) {
+                    printf("x %i, y %i, z %i\n", tile_x_, tile_y_, tile_z_ + dec_z);
+                    printf("nx %i, ny %i, nz %i\n", tilenx, tileny, tile_z_);
+                }
+#endif
+#endif
+
                 floodPointDesc *fpd_prv = fpd;
                 fpd = &(m->mdpoints_[tilenx + tileny * m->mmax_x_
                     + tile_z_ * m->mmax_m_xy]);
@@ -2524,6 +2538,7 @@ uint8 PedInstance::moveToDir(Mission* m, int elapsed, dirMoveType &dir_move,
                     need_bounce = true;
                     break;
                 }
+
                 tile_x_ = tilenx;
                 tile_y_ = tileny;
                 if (dir_move.dir_modifier != 0) {
@@ -2565,15 +2580,17 @@ uint8 PedInstance::moveToDir(Mission* m, int elapsed, dirMoveType &dir_move,
             posx = px;
             posy = py;
         } while (dist_passsed < dist_curr);
-        if (diffx >= 0)
+
+        if (diffx >= 0.0)
             // & 0x00FF = % 256
             off_x_ = ((int)ceil(posx)) & 0x00FF;
         else
             off_x_ = ((int)floor(posx)) & 0x00FF;
-        if (diffy >= 0)
+        if (diffy >= 0.0)
             off_y_ = ((int)ceil(posy)) & 0x00FF;
         else
             off_y_ = ((int)floor(posy)) & 0x00FF;
+
         dist_curr -= dist_passsed;
         if (need_bounce && should_bounce) {
             if (move_to_pos) {

@@ -783,9 +783,9 @@ bool Mission::setSurfaces() {
     mmax_m_xy = mmax_x_ * mmax_y_;
     memset((void *)mtsurfaces_, 0, mmax_m_all * sizeof(surfaceDesc));
     memset((void *)mdpoints_, 0, mmax_m_all * sizeof(floodPointDesc));
-    for (int ix = 0; ix < mmax_x_; ix++) {
-        for (int iy = 0; iy < mmax_y_; iy++) {
-            for (int iz = 0; iz < mmax_z_; iz++) {
+    for (int ix = 0; ix < mmax_x_; ++ix) {
+        for (int iy = 0; iy < mmax_y_; ++iy) {
+            for (int iz = 0; iz < mmax_z_; ++iz) {
                 mtsurfaces_[ix + iy * mmax_x_ + iz * mmax_m_xy].twd =
                     g_App.walkdata_p_[p_map_->tileAt(ix, iy, iz)];
             }
@@ -794,7 +794,7 @@ bool Mission::setSurfaces() {
 
     // to make surfaces where large doors are located walkable
     for (std::vector<Static *>::iterator it = statics_.begin();
-        it != statics_.end(); it++)
+        it != statics_.end(); ++it)
     {
         Static *s = *it;
         if (s->getMainType() == Static::smt_LargeDoor) {
@@ -818,7 +818,7 @@ bool Mission::setSurfaces() {
     //printf("surface data size %i\n", sizeof(surfaceDesc) * mmax_m_all);
     //printf("flood data size %i\n", sizeof(floodPointDesc) * mmax_m_all);
 
-    for (unsigned int i = 0; i < peds_.size(); i++) {
+    for (unsigned int i = 0; i < peds_.size(); ++i) {
         PedInstance *p = peds_[i];
         int x = p->tileX();
         int y = p->tileY();

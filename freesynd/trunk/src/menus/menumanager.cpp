@@ -61,6 +61,9 @@ MenuManager::MenuManager():
     nextMenuId_ = -1;
 
     pIntroFontSprites_ = NULL;
+
+    since_mouse_down_ = 0;
+    mouseup_was_ = false;
 }
 
 MenuManager::~MenuManager()
@@ -164,8 +167,10 @@ void MenuManager::destroy() {
     // NOTE: it might be better to create our deallocator
     // of resource in App class to have correct sequence of destructors
     if (current_) {
-        if (menus_.find(current_->getId()) == menus_.end())
+        if (menus_.find(current_->getId()) == menus_.end()) {
             delete current_;
+            current_ = NULL;
+        }
     }
 
     for (std::map<int, Menu*>::iterator it = menus_.begin();
@@ -435,6 +440,8 @@ void MenuManager::handleEvents() {
                 current_->mouseMotionEvent(evt.motion.x, evt.motion.y, evt.motion.state, evt.motion.keyMods);
             break;
         case EVT_MSE_DOWN:
+            since_mouse_down_ = 0;
+            mouseup_was_ = false;
 #ifdef _DEBUG
             // Display mouse coordinate
             if (evt.button.keyMods & KMD_SHIFT) {
@@ -447,6 +454,7 @@ void MenuManager::handleEvents() {
             }
             break;
         case EVT_MSE_UP:
+            mouseup_was_ = true;
             if (current_ && !drop_events_) {
                 current_->mouseUpEvent(evt.button.x, evt.button.y, evt.button.button, evt.button.keyMods);
             }
@@ -460,4 +468,8 @@ void MenuManager::handleEvents() {
             break;
         }
     }
+}
+
+bool MenuManager::simpleMouseDown() {
+    return g_App.getTimeForClick() < since_mouse_down_;
 }

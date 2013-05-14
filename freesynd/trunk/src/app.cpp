@@ -171,6 +171,7 @@ bool App::readConfiguration() {
         string ourDataDir;
         conf.readInto(fullscreen_, "fullscreen", false);
         conf.readInto(playIntro_, "play_intro", true);
+        conf.readInto(time_for_click_, "time_for_click", 80);
         bool origDataDirFound = conf.readInto(origDataDir, "data_dir");
         bool ourDataDirFound = conf.readInto(ourDataDir, "freesynd_data_dir");
 
@@ -648,13 +649,14 @@ void App::run(int start_mission) {
 
     int lasttick = SDL_GetTicks();
     while (running_) {
-        menus_.handleEvents();
         int curtick = SDL_GetTicks();
         int diff_ticks = curtick - lasttick;
+        menus_.updtSinceMouseDown(diff_ticks);
+        menus_.handleEvents();/*
         if (diff_ticks < 30) {
             SDL_Delay(30 - diff_ticks);
             continue;
-        }
+        }*/
         menus_.handleTick(diff_ticks);
         menus_.renderMenu();
         lasttick = curtick;
