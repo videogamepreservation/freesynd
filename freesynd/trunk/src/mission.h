@@ -133,7 +133,7 @@ public:
 
     int numPeds() { return (int) peds_.size(); }
     PedInstance *ped(int i) { return peds_[i]; }
-    void addPed(PedInstance *ped) { peds_.push_back(ped); }
+    void addPed(PedInstance *p) { peds_.push_back(p); }
 
     int numVehicles() { return (int) vehicles_.size(); }
     VehicleInstance *vehicle(int i) { return vehicles_[i]; }

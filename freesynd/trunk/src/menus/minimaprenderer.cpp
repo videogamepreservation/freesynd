@@ -451,14 +451,23 @@ void GamePlayMinimapRenderer::render(uint16 screen_x, uint16 screen_y) {
     // In this loop, we fill the buffer with floor colour. the first row and column
     // is not filled
 
-    for (int j = 0; j < mm_maxtile_; j++) {
+    for (int j = 0; j < mm_maxtile_; ++j) {
+        // pointer to first row
+        uint8* frow = minimap_layer + (j + 1) * pixpertile_ * pixpertile_ * mm_layer_size
+            + pixpertile_;
         for (int i = 0; i < mm_maxtile_; i++) {
             uint8 gcolour = p_mission_->getMiniMap()->getColourAt(world_tx_ + i, world_ty_ + j);
-            for (char inc = 0; inc < pixpertile_; inc ++) {
-                memset(minimap_layer + (j + 1) * pixpertile_ * pixpertile_ * mm_layer_size + 
-                    (i + 1) * pixpertile_ + inc * pixpertile_ * mm_layer_size,
-                    gcolour, pixpertile_);
-            }
+            // pointer to row we draw at
+            uint8 *drow = frow + i * pixpertile_;
+            for (uint8 inc = 0; inc < pixpertile_; ++inc)
+                *drow++ = gcolour;
+        }
+        for (uint8 inc = 1; inc < pixpertile_; ++inc) {
+            uint8 *drow = frow + inc * pixpertile_ * mm_layer_size;
+            uint8 *local_frow = frow;
+            const uint32 sz = pixpertile_ * mm_maxtile_;
+            for (uint32 i = 0; i < sz; ++i)
+                *drow++ = *local_frow++;
         }
     }
 
@@ -574,8 +583,8 @@ void GamePlayMinimapRenderer::drawPedestrians(uint8 * a_minimap) {
                         size_t ped_width = 2;
                         size_t ped_height = 2;
                         if (mm_timer_ped.state()) {
-                            px -= 1;
-                            py -= 1;
+                            --px;
+                            --py;
                             
                             // draw the square
                             drawFillRect(a_minimap, px, py, ped_width, ped_height, fs_cmn::kColorWhite);

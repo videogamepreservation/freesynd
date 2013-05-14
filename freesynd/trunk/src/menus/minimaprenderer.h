@@ -243,12 +243,14 @@ class GamePlayMinimapRenderer : public MinimapRenderer, GameEventListener {
      * \param height height of the rect to draw
      * \param color the color to fill the rect
      */
-    void drawFillRect(uint8 * a_buffer, int mm_x, int mm_y, size_t width,
-                        size_t height, uint8 color) {
-        for (size_t inc = 0; inc < height; inc ++) {
-            memset(a_buffer +
-                (mm_y + inc) * pixpertile_ * (mm_maxtile_ + 1) + mm_x,
-                color, width);
+    inline void drawFillRect(uint8 * a_buffer, int mm_x, int mm_y, size_t width,
+                        size_t height, uint8 color)
+    {
+        uint8 *draw_base = a_buffer + mm_y * pixpertile_ * (mm_maxtile_ + 1) + mm_x;
+        for (size_t inc = 0; inc < height; ++inc) {
+            uint8 *draw_at = draw_base + inc * pixpertile_ * (mm_maxtile_ + 1);
+            for (size_t i = 0; i < width; ++i)
+                *draw_at++ = color;
         }
     }
 

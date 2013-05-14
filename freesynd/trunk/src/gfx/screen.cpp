@@ -245,12 +245,8 @@ void Screen::drawHLine(int x, int y, int length, uint8 color)
         return;
 
     uint8 *pixel_ptr = pixels_ + y * width_ + x;
-    if (length < 32) {
-        while (length--) {
-            *(pixel_ptr++) = color;
-        }
-    } else
-        memset(pixel_ptr, color, length);
+    while (length--)
+        *pixel_ptr++ = color;
 
     dirty_ = true;
 }
@@ -368,16 +364,11 @@ void Screen::drawRect(int x, int y, int width, int height, uint8 color)
         return;
     // NOTE: we don't handle properly clipping by (x,y), do we need it?
 
-    if (width > 32) {
-        for (int i = 0; i < height; i++) {
-            memset(pixels_ + x + width_ * (y + i), color, width);
-        }
-    } else {
-        for (int i = 0; i < height; i++) {
-            uint8 *p_pixels = pixels_ + x + width_ * (y + i);
-            for (int w = 0; w != width; w++)
-                *p_pixels++ = color;
-        }
+
+    for (int i = 0; i < height; i++) {
+        uint8 *p_pixels = pixels_ + x + width_ * (y + i);
+        for (int w = 0; w != width; w++)
+            *p_pixels++ = color;
     }
     dirty_ = true;
 }
