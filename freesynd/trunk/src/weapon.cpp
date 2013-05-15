@@ -133,13 +133,10 @@ bool WeaponInstance::animate(int elapsed) {
                 g_App.gameSounds().play(snd::TIMEBOMB);
             }
             processed_time_ += elapsed;
-            if (processed_time_ >= pWeaponClass_->timeForShot()) {
-                // setting these values here to avoid recursion
-                map_ = -1;
-                setIsIgnored(true);
-                health_ = 0;
-            }
+            is_ignored_ = true;
             if ((inflictDamage(NULL, NULL, &tm_left)) == 0) {
+                map_ = -1;
+                health_ = 0;
                 deactivate();
                 Mission *m = g_Session.getMission();
                 SFXObject *so = new SFXObject(m->map(),
@@ -154,6 +151,7 @@ bool WeaponInstance::animate(int elapsed) {
                     pWeaponClass_->anims()->rd_anim);
                 return true;
             }
+            is_ignored_ = false;
             time_consumed_ = true;
         } else if (main_type_ == Weapon::Persuadatron) {
             int tm_left = elapsed;
@@ -1320,7 +1318,7 @@ bool WeaponInstance::handleDamage(ShootableMapObject::DamageInflictType * d)
         if (main_type_ == Weapon::TimeBomb) {
             deactivate();
             map_ = -1;
-            setIsIgnored(true);
+            is_ignored_ = true;
             health_ = 0;
             int tm = pWeaponClass_->timeForShot();
             if ((inflictDamage(NULL, NULL, &tm)) == 0) {
@@ -1360,10 +1358,12 @@ void ShotClass::rangeDamageAnim(toDefineXYZ &cp, double dmg_rng,
     // don't draw in air(, stairs problem?)
     double angle_inc = PI;
     const uint8 waves = (int)dmg_rng / 144 + 1;
+
     for (uint8 i = 0; i < waves; i++) {
         double base_angle = 0.0;
         if (rand() % 100 > 74)
             base_angle += angle_inc;
+
         for (int j = 0; j < (4 << i); j++) {
             double x = (double)(144 * i) * cos(base_angle);
             double y = (double)(144 * i) * sin(base_angle);
@@ -1372,6 +1372,7 @@ void ShotClass::rangeDamageAnim(toDefineXYZ &cp, double dmg_rng,
                 (base_pos.y + (int)y) / 256,
                 base_pos.z / 128, (base_pos.x + (int)x) % 256,
                 (base_pos.y + (int)y) % 256, base_pos.z % 128);
+
             uint8 block_mask = m->inRangeCPos(&cp, NULL, &pn, true, true, dmg_rng);
             if (block_mask != 32) {
                 SFXObject *so = new SFXObject(m->map(), rngdamg_anim,
@@ -1398,14 +1399,17 @@ void ShotClass::createExplosion(ShootableMapObject* tobj, double dmg_rng,
     toDefineXYZ xyz;
     tobj->convertPosToXYZ(&xyz);
     xyz.z += 8;
+
     m->getInRangeAll(&xyz, all_targets, Weapon::stm_AllObjects,
         true, dmg_rng);
+
     for (std::vector<ShootableMapObject *>::iterator it = all_targets.begin();
         it != all_targets.end(); it++)
     {
         // TODO: set direction?
         ShootableMapObject *smo = *it;
         smo->handleDamage(&dit);
+
         SFXObject *so = new SFXObject(m->map(), SFXObject::sfxt_ExplosionBall);
         so->setPosition(smo->tileX(), smo->tileY(), smo->tileZ(), smo->offX(),
             smo->offY(), smo->offZ());

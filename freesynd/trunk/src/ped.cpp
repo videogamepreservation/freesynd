@@ -1464,16 +1464,18 @@ void PedInstance::kill() {
         health_ = -1;
         actions_property_ = 1;
         switchActionStateTo(PedInstance::pa_smDead);
-        if (!weapons_.empty())
-            dropAllWeapons();
         is_ignored_ = true;
         setDrawnAnim(PedInstance::ad_DieAnim);
         Mod *pMod = slots_[Mod::MOD_CHEST];
         if (pMod && pMod->getVersion() > Mod::MOD_V1) {
+            destroyAllWeapons();
             ShotClass explosion;
             explosion.createExplosion(this, 512.0);
             setDrawnAnim(PedInstance::ad_StandBurnAnim);
             setTimeShowAnim(4000);
+        } else {
+            if (!weapons_.empty())
+                dropAllWeapons();
         }
     }
 }
@@ -2225,6 +2227,7 @@ bool PedInstance::handleDamage(ShootableMapObject::DamageInflictType *d) {
         switch ((unsigned int)d->dtype) {
             case MapObject::dmg_Bullet:
                 setDrawnAnim(PedInstance::ad_DieAnim);
+                dropAllWeapons();
                 break;
             case MapObject::dmg_Laser:
                 setDrawnAnim(PedInstance::ad_VaporizeAnim);
@@ -2244,10 +2247,9 @@ bool PedInstance::handleDamage(ShootableMapObject::DamageInflictType *d) {
                 break;
             case MapObject::dmg_Hit:
                 setDrawnAnim(PedInstance::ad_HitAnim);
+                dropAllWeapons();
                 break;
         }
-        if (!weapons_.empty())
-            dropAllWeapons();
         is_ignored_ = true;
     } else {
         // TODO: agent sometime can survive explosion, they need to walk burning?

@@ -1122,11 +1122,19 @@ bool GameplayMenu::handleUnknownKey(Key key, const int modKeys) {
         g_App.gameSounds().toggleSound();
     } else if (isLetterD(key.unicode)) { // selected agents are killed with 'd'
         if (ctrl) {
+            // excluding all selected agents from recieve damage from agent
+            // near, to make simultanious explosion
             for (int i = 0; i < 4; i++) {
-                PedInstance *pAgent = mission_->getSquad()->member(i);
-                if (pAgent && selection_.isAgentSelected(i)) {
-                    pAgent->kill();
-                }
+                PedInstance *p_agent = mission_->getSquad()->member(i);
+                if (p_agent && selection_.isAgentSelected(i))
+                    p_agent->setIsIgnored(true);
+            }
+
+            for (int i = 0; i < 4; i++) {
+                PedInstance *p_agent = mission_->getSquad()->member(i);
+
+                if (p_agent && selection_.isAgentSelected(i))
+                    p_agent->kill();
             }
         }
     } else {

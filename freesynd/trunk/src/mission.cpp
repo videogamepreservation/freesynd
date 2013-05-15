@@ -3102,7 +3102,7 @@ void Mission::getInRangeAll(toDefineXYZ * cp,
    bool checkTileOnly, double maxr)
 {
     if (mask & MapObject::mjt_Ped) {
-        for (int i = 0; i < numPeds(); i++) {
+        for (int i = 0; i < numPeds(); ++i) {
             ShootableMapObject *p = ped(i);
             if (!p->isIgnored())
                 if (inRangeCPos(cp, &p, NULL, false, checkTileOnly,
@@ -3113,7 +3113,7 @@ void Mission::getInRangeAll(toDefineXYZ * cp,
         }
     }
     if (mask & MapObject::mjt_Static) {
-        for (int i = 0; i < numStatics(); i++) {
+        for (int i = 0; i < numStatics(); ++i) {
             ShootableMapObject *st = statics(i);
             if (!st->isIgnored())
                 if (inRangeCPos(cp, &st, NULL, false, checkTileOnly,
@@ -3124,7 +3124,7 @@ void Mission::getInRangeAll(toDefineXYZ * cp,
         }
     }
     if (mask & MapObject::mjt_Vehicle) {
-        for (int i = 0; i < numVehicles(); i++) {
+        for (int i = 0; i < numVehicles(); ++i) {
             ShootableMapObject *v = vehicle(i);
             if (!v->isIgnored())
                 if (inRangeCPos(cp, &v, NULL, false, checkTileOnly,
@@ -3135,7 +3135,7 @@ void Mission::getInRangeAll(toDefineXYZ * cp,
         }
     }
     if (mask & MapObject::mjt_Weapon) {
-        for (int i = 0; i < numWeapons(); i++) {
+        for (int i = 0; i < numWeapons(); ++i) {
             ShootableMapObject *w = weapon(i);
             if (!w->isIgnored())
                 if (inRangeCPos(cp, &w, NULL, false, checkTileOnly,
@@ -3157,7 +3157,7 @@ bool Mission::getShootableTile(int &x, int &y, int &z, int &ox, int &oy,
     unsigned char twd;
     unsigned int cindx;
     do {
-        bz--;
+        --bz;
         int bzm = bz - 1;
         bx = x * 256 + ox + 128 * bzm;
         box = bx % 256;
@@ -3185,7 +3185,7 @@ bool Mission::getShootableTile(int &x, int &y, int &z, int &ox, int &oy,
                         cindx = (bx - 1) + by * mmax_x_ + bzm * mmax_m_xy;
                         if (mtsurfaces_[cindx].twd == 0x01) {
                             gotit = true;
-                            bx--;
+                            --bx;
                             box = dx + 256;
                             boy = dy;
                         }
@@ -3206,7 +3206,7 @@ bool Mission::getShootableTile(int &x, int &y, int &z, int &ox, int &oy,
                                 cindx = (bx + 1) + by * mmax_x_ + bzm * mmax_m_xy;
                                 if (mtsurfaces_[cindx].twd == 0x02) {
                                     gotit = true;
-                                    bx++;
+                                    ++bx;
                                     box = dx - 256;
                                     boy = dy;
                                 }
@@ -3217,7 +3217,7 @@ bool Mission::getShootableTile(int &x, int &y, int &z, int &ox, int &oy,
                             cindx = (bx - 1) + by * mmax_x_ + bzm * mmax_m_xy;
                             if (mtsurfaces_[cindx].twd == 0x02) {
                                 gotit = true;
-                                bx--;
+                                --bx;
                                 box = dx + 256;
                                 boy = dy;
                             }
@@ -3250,7 +3250,7 @@ bool Mission::getShootableTile(int &x, int &y, int &z, int &ox, int &oy,
                             cindx = bx + (by - 1) * mmax_x_ + bzm * mmax_m_xy;
                             if (mtsurfaces_[cindx].twd == 0x03) {
                                 gotit = true;
-                                by--;
+                                --by;
                                 box = dx;
                                 boy = dy + 256;
                             }
@@ -3270,7 +3270,7 @@ bool Mission::getShootableTile(int &x, int &y, int &z, int &ox, int &oy,
                         cindx = bx + (by - 1) * mmax_x_ + bzm * mmax_m_xy;
                         if (mtsurfaces_[cindx].twd == 0x04) {
                             gotit = true;
-                            by--;
+                            --by;
                             box = dx;
                             boy = dy + 256;
                         }
@@ -3290,7 +3290,7 @@ bool Mission::getShootableTile(int &x, int &y, int &z, int &ox, int &oy,
                     dy = (boy * 2) / 3;
                     dx = (box + 256) - dy / 2;
                     if (dx < 256) {
-                        bx--;
+                        --bx;
                         gotit = true;
                         box = dx;
                         boy = dy;
@@ -3299,7 +3299,7 @@ bool Mission::getShootableTile(int &x, int &y, int &z, int &ox, int &oy,
                     dx = ((box + 256) * 2) / 3;
                     dy = boy - dx / 2;
                     if (dy >= 0) {
-                        bx--;
+                        --bx;
                         gotit = true;
                         box = dx;
                         boy = dy;
@@ -3313,7 +3313,7 @@ bool Mission::getShootableTile(int &x, int &y, int &z, int &ox, int &oy,
                     dy = ((boy + 256) * 2) / 3;
                     dx = box - dy / 2;
                     if (dx >= 0) {
-                        by--;
+                        --by;
                         gotit = true;
                         box = dx;
                         boy = dy;
@@ -3322,14 +3322,14 @@ bool Mission::getShootableTile(int &x, int &y, int &z, int &ox, int &oy,
                     dx = (box * 2) / 3;
                     dy = (boy + 256) - dx / 2;
                     if (dy < 256) {
-                        by--;
+                        --by;
                         gotit = true;
                         box = dx;
                         boy = dy;
                     }
                 }
                 if(!gotit && box < 128 && (bx - 1) >= 0) {
-                    cindx--;
+                    --cindx;
                     int dx2 = 0;
                     int dy2 = 0;
                     twd = mtsurfaces_[cindx].twd;
@@ -3337,8 +3337,8 @@ bool Mission::getShootableTile(int &x, int &y, int &z, int &ox, int &oy,
                         dy2 = ((boy + 256) * 2) / 3;
                         dx2 = (box + 256) - dy2 / 2;
                         if (dx2 < 256 && dy2 < 256) {
-                            bx--;
-                            by--;
+                            --bx;
+                            --by;
                             gotit = true;
                             box = dx2;
                             boy = dy2;
@@ -3347,8 +3347,8 @@ bool Mission::getShootableTile(int &x, int &y, int &z, int &ox, int &oy,
                         dx2 = ((box + 256) * 2) / 3;
                         dy2 = (boy + 256) - dx2 / 2;
                         if (dx2 < 256 && dy2 < 256) {
-                            bx--;
-                            by--;
+                            --bx;
+                            --by;
                             gotit = true;
                             box = dx2;
                             boy = dy2;
@@ -3363,19 +3363,19 @@ bool Mission::getShootableTile(int &x, int &y, int &z, int &ox, int &oy,
         switch (twd) {
             case 0x01:
                 oz = 127 - (boy >> 1);
-                bz--;
+                --bz;
                 break;
             case 0x02:
                 oz = boy >> 1;
-                bz--;
+                --bz;
                 break;
             case 0x03:
                 oz = box >> 1;
-                bz--;
+                --bz;
                 break;
             case 0x04:
                 oz = 127 - (box >> 1);
-                bz--;
+                --bz;
                 break;
             default:
                 twd = mtsurfaces_[bx + by * mmax_x_ + bz * mmax_m_xy].twd;
