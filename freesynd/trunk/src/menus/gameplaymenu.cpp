@@ -56,6 +56,7 @@ mm_renderer_()
     scroll_x_ = 0;
     scroll_y_ = 0;
     shooting_events_.clear();
+    ipa_chng_.ipa_chng = -1;
 }
 
 /*!
@@ -473,6 +474,7 @@ void GameplayMenu::handleLeave()
     scroll_y_ = 0;
     shooting_events_.clear();
     paused_ = false;
+    ipa_chng_.ipa_chng = -1;
 }
 
 void GameplayMenu::handleMouseMotion(int x, int y, int state, const int modKeys)
@@ -480,6 +482,29 @@ void GameplayMenu::handleMouseMotion(int x, int y, int state, const int modKeys)
     last_motion_tick_ = tick_count_;
     last_motion_x_ = x;
     last_motion_y_ = y;
+    // locking mouse motion on ipa change until mouseup is recieved
+    if (ipa_chng_.ipa_chng != -1 && menu_manager_->isMouseDragged()) {
+        PedInstance *p = mission_->ped(ipa_chng_.agent_used);
+        if (p->isAlive()) {
+            int percent = agt_sel_renderer_.getPercentageAnyX(
+                ipa_chng_.agent_used, x);
+
+            // if agent is in selected group we will update all groups IPA
+            if (selection_.isAgentSelected(ipa_chng_.agent_used)) {
+                for (uint8 i = 0; i < 4; ++i) {
+                    if (selection_.isAgentSelected(i)) {
+                        setIPAForAgent(i, (IPAStim::IPAType)ipa_chng_.ipa_chng,
+                            percent);
+                    }
+                }
+            } else {
+                setIPAForAgent(ipa_chng_.agent_used,
+                    (IPAStim::IPAType)ipa_chng_.ipa_chng, percent);
+            }
+            return;
+        } else
+            ipa_chng_.ipa_chng = -1;
+    }
 
     if (last_motion_x_ < 5) {
         scroll_x_ = - SCROLL_STEP;
@@ -498,9 +523,9 @@ void GameplayMenu::handleMouseMotion(int x, int y, int state, const int modKeys)
 
     if (x > 128) {
 #ifdef _DEBUG
-        for (int i = 0; mission_ && i < mission_->numPeds(); i++) {
+        for (int i = 0; mission_ && i < mission_->numPeds(); ++i) {
 #else
-        for (int i = 8; mission_ && i < mission_->numPeds(); i++) {
+        for (int i = 8; mission_ && i < mission_->numPeds(); ++i) {
 #endif
             PedInstance *p = mission_->ped(i);
             if (p->isAlive() && p->map() != -1) {
@@ -527,7 +552,7 @@ void GameplayMenu::handleMouseMotion(int x, int y, int state, const int modKeys)
             }
         }
 
-        for (int i = 0; mission_ && i < mission_->numVehicles(); i++) {
+        for (int i = 0; mission_ && i < mission_->numVehicles(); ++i) {
             VehicleInstance *v = mission_->vehicle(i);
             if (v->isAlive()) {
                 int px = v->screenX() - 20;
@@ -552,7 +577,7 @@ void GameplayMenu::handleMouseMotion(int x, int y, int state, const int modKeys)
             }
         }
 
-        for (int i = 0; mission_ && i < mission_->numWeapons(); i++) {
+        for (int i = 0; mission_ && i < mission_->numWeapons(); ++i) {
             WeaponInstance *w = mission_->weapon(i);
 
             if (w->map() != -1) {
@@ -570,7 +595,7 @@ void GameplayMenu::handleMouseMotion(int x, int y, int state, const int modKeys)
         }
 #if 0
 #ifdef _DEBUG
-        for (int i = 0; mission_ && i < mission_->numStatics(); i++) {
+        for (int i = 0; mission_ && i < mission_->numStatics(); ++i) {
             Static *s = mission_->statics(i);
 
             if (s->map() != -1) {
@@ -661,7 +686,6 @@ void GameplayMenu::handleMouseMotion(int x, int y, int state, const int modKeys)
             }
         }
     }
-
 }
 
 bool GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
@@ -689,7 +713,9 @@ bool GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
                 selectAgent(selEvt.agentSlot, ctrl);
                 break;
             case SelectorEvent::kSelectIpa:
-                handleClickOnIPA(selEvt, button, modKeys);
+                ipa_chng_.ipa_chng = selEvt.IpaType;
+                ipa_chng_.agent_used = selEvt.agentSlot;
+                setIPAForAgent(selEvt.agentSlot, selEvt.IpaType, selEvt.percentage);
                 break;
             case SelectorEvent::kNone:
                 break;
@@ -779,26 +805,29 @@ void GameplayMenu::handleClickOnWeaponSelector(int x, int y, int button,
     addDirtyRect(0, 207, 128, 64);
 }
 
-void GameplayMenu::handleClickOnIPA(const SelectorEvent & evt, int button, const int modKeys)
+void GameplayMenu::setIPAForAgent(size_t slot, IPAStim::IPAType ipa_type, int percentage)
 {
-    PedInstance *ped = mission_->ped(evt.agentSlot);
-    switch(evt.IpaType)
+    PedInstance *ped = mission_->ped(slot);
+    if (ped->isDead())
+        return;
+
+    switch(ipa_type)
     {
         case IPAStim::Adrenaline:
-            ped->adrenaline_->setAmount(evt.percentage);
+            ped->adrenaline_->setAmount(percentage);
             break;
         case IPAStim::Perception:
-            ped->perception_->setAmount(evt.percentage);
+            ped->perception_->setAmount(percentage);
             break;
         case IPAStim::Intelligence:
-            ped->intelligence_->setAmount(evt.percentage);
+            ped->intelligence_->setAmount(percentage);
             break;
     }
 }
 
 void GameplayMenu::updateIPALevelMeters(int elapsed)
 {
-    for (int agent = 0; agent < 4; agent++) {
+    for (int agent = 0; agent < 4; ++agent) {
         PedInstance *ped = mission_->ped(agent);
         if (ped->isAlive())
             ped->updtIPATime(elapsed);
@@ -810,7 +839,7 @@ void GameplayMenu::handleClickOnMap(int x, int y, int button, const int modKeys)
                     world_y_ + y);
 
     if (button == 1) {
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < 4; ++i) {
             PedInstance *ped = mission_->ped(i);
             MapTilePoint mapPt(mapPt_base);
             if (selection_.isAgentSelected(i)) {
@@ -910,7 +939,7 @@ void GameplayMenu::handleClickOnMap(int x, int y, int button, const int modKeys)
 #endif
             }
         }
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < 4; ++i) {
             if (selection_.isAgentSelected(i)) {
                 PedInstance * pa = mission_->ped(i);
                 PedInstance::actionQueueGroupType as;
@@ -939,15 +968,15 @@ void GameplayMenu::handleClickOnMap(int x, int y, int button, const int modKeys)
 
 void GameplayMenu::handleClickOnMinimap(int x, int y) {
     MapTilePoint pt_base = mm_renderer_.minimapToMapPoint(x - kMiniMapScreenX, y - kMiniMapScreenY);
-    for (size_t i = 0; i < 4; i++) {
+    for (size_t i = 0; i < 4; ++i) {
         MapTilePoint pt(pt_base);
         if (selection_.isAgentSelected(i)) {
             PedInstance *ped = mission_->ped(i);
             bool isForGroup = selection_.size() > 1;
             pt.tz = ped->tileZ();
-            if (!mission_->getWalkableClosestByZ(pt))
-                break;
-            if (!setDestinationPoint(pt, isForGroup, false, i, ped)) {
+            if (!(mission_->getWalkableClosestByZ(pt)
+                && setDestinationPoint(pt, isForGroup, false, i, ped)))
+            {
                 break;
             }
         }
@@ -1002,9 +1031,10 @@ void GameplayMenu::stopShootingEvent(void )
 }
 
 
-void GameplayMenu::handleMouseUp(int x, int y, int button, const int modKeys) {
-    if (paused_)
-        return;
+void GameplayMenu::handleMouseUp(int x, int y, int button, const int modKeys)
+{
+    ipa_chng_.ipa_chng = -1;
+
     if (button == 3) {
         stopShootingEvent();
     }

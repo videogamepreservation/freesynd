@@ -457,7 +457,7 @@ bool PedInstance::setActQInQueue(actionQueueGroupType &as,
         std::vector <actionQueueGroupType>::iterator it_s
             = actions_queue_.end();
         for (std::vector <actionQueueGroupType>::iterator it =
-            actions_queue_.begin(); it != actions_queue_.end(); it++)
+            actions_queue_.begin(); it != actions_queue_.end(); ++it)
         {
             if (discarding) {
                 discardActG(it);
@@ -508,7 +508,7 @@ bool PedInstance::addDefActsToActions(actionQueueGroupType &as) {
 
 void PedInstance::discardActG(uint32 id) {
     for (std::vector <actionQueueGroupType>::iterator it =
-        actions_queue_.begin(); it != actions_queue_.end(); it++)
+        actions_queue_.begin(); it != actions_queue_.end(); ++it)
     {
         if (it->group_id == id) {
             discardActG(it);
@@ -522,8 +522,8 @@ void PedInstance::discardActG(std::vector <actionQueueGroupType>::iterator it_a)
 {
     if ((it_a->state & 14) == 2) {
         for (std::vector <actionQueueType>::iterator it =
-            it_a->actions.begin(); it != it_a->actions.end(); it++
-        ) {
+            it_a->actions.begin(); it != it_a->actions.end(); ++it)
+        {
             if ((it->state & 12) == 0 || (it->state & 128) != 0) {
                 it->state |= 8;
                 it->state &= ~128;
@@ -537,7 +537,7 @@ void PedInstance::discardActG(std::vector <actionQueueGroupType>::iterator it_a)
 
 void PedInstance::dropActQ() {
     for (std::vector <actionQueueGroupType>::iterator it =
-        actions_queue_.begin(); it != actions_queue_.end(); it++)
+        actions_queue_.begin(); it != actions_queue_.end(); ++it)
     {
             discardActG(it);
     }
@@ -547,11 +547,11 @@ void PedInstance::dropActQ() {
 void PedInstance::updtActGFiringShots(uint32 id, uint32 make_shots)
 {
     for (std::vector <actionQueueGroupType>::iterator it =
-        actions_queue_.begin(); it != actions_queue_.end(); it++)
+        actions_queue_.begin(); it != actions_queue_.end(); ++it)
     {
             if (it->group_id == id) {
                 for (std::vector <actionQueueType>::iterator it_a =
-                    it->actions.begin(); it_a != it->actions.end(); it++)
+                    it->actions.begin(); it_a != it->actions.end(); ++it)
                 {
                     if ((it_a->ot_execute & (PedInstance::ai_aDestroyObject
                         | PedInstance::ai_aAttackLocation
@@ -570,11 +570,11 @@ void PedInstance::updtActGFiring(uint32 id, PathNode* tpn,
     ShootableMapObject* tsmo)
 {
     for (std::vector <actionQueueGroupType>::iterator it =
-        actions_queue_.begin(); it != actions_queue_.end(); it++)
+        actions_queue_.begin(); it != actions_queue_.end(); ++it)
     {
             if (it->group_id == id) {
                 for (std::vector <actionQueueType>::iterator it_a =
-                    it->actions.begin(); it_a != it->actions.end(); it++)
+                    it->actions.begin(); it_a != it->actions.end(); ++it)
                 {
                     if ((it_a->ot_execute & (PedInstance::ai_aDestroyObject
                         | PedInstance::ai_aAttackLocation)) != 0)
@@ -612,7 +612,7 @@ void PedInstance::updtActGFiring(uint32 id, PathNode* tpn,
 
 bool PedInstance::checkActGCompleted(uint32 desc) {
     for (std::vector <actionQueueGroupType>::iterator it =
-        actions_queue_.begin(); it != actions_queue_.end(); it++)
+        actions_queue_.begin(); it != actions_queue_.end(); ++it)
     {
         if ((it->origin_desc) == desc && (it->state & 4) != 0)
             return true;
@@ -622,7 +622,7 @@ bool PedInstance::checkActGCompleted(uint32 desc) {
 
 void PedInstance::pauseAllInActG(actionQueueGroupType &as, uint32 start_pos) {
     for (std::vector <actionQueueType>::iterator it =
-        as.actions.begin() + start_pos; it != as.actions.end(); it++)
+        as.actions.begin() + start_pos; it != as.actions.end(); ++it)
     {
         it->state |= 64;
     }

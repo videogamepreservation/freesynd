@@ -41,6 +41,7 @@ cur_agent_(0), tick_count_(0), rnd_(0), sel_all_(false)
     selectedWInstId_ = 0;
     pSelectedMod_ = NULL;
     weapon_dragged_ = NULL;
+
     addStatic(85, 35, 545, "#SELECT_TITLE", FontManager::SIZE_4, false);
     txtTimeId_ = addStatic(500, 9, "", FontManager::SIZE_2, true);       // Time
     moneyTxtId_ = addStatic(500, 87, 128, "0", FontManager::SIZE_2, true);     // Money
@@ -203,9 +204,9 @@ void SelectMenu::drawAgent()
 
     // write inventory
     for (int j = 0; j < 2; j++)
-        for (int i = 0; i < 4
-            && (j * 4 + i < selected->numWeapons()); i++)
+        for (int i = 0; i < 4 && (j * 4 + i < selected->numWeapons()); ++i)
         {
+            // TODO: make weapon to be drawn at end
             WeaponInstance *wi = selected->weapon(j * 4 + i);
             Weapon *pW = wi->getWeaponClass();
             screenPoint pos = {366 + i * 32, 308 + j * 32};
@@ -414,8 +415,6 @@ void SelectMenu::handleRender(DirtyList &dirtyList) {
             break;
     }
 
-    drawAgent();
-
     if (pSelectedWeap_) {
         uint8 ldata[62];
         memset(ldata, 16, sizeof(ldata));
@@ -435,6 +434,8 @@ void SelectMenu::handleRender(DirtyList &dirtyList) {
 
         drawSelectedModInfos(504, 108);
     }
+
+    drawAgent();
 }
 
 void SelectMenu::handleLeave() {

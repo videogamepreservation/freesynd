@@ -107,11 +107,11 @@ void IPAStim::processTicks(int elapsed)
     {
         if(effect_ > amount_)
         {
-            effect_--;
+            --effect_;
         }
         else if(effect_ < amount_)
         {
-            effect_++;
+            ++effect_;
         }
         else // equal
         {
@@ -127,16 +127,16 @@ void IPAStim::processTicks(int elapsed)
                 effect_ = ++amount_;
             }
         }
-        assert(effect_ >=0 && effect_ <= 100);
+        assert(effect_ >= 0 && effect_ <= 100);
     }
 
     // The dependency indicator always creaps towards amount
     if(dependency_timer_.update(elapsed))
     {
         if (dependency_ > amount_) {
-            dependency_--;
+            --dependency_;
         } else if (dependency_ < amount_) {
-            dependency_++;
+            ++dependency_;
         } else {
             // equal
             if (amount_ < 50) {
@@ -147,7 +147,7 @@ void IPAStim::processTicks(int elapsed)
                 --dependency_;
             }
         }
-        assert(dependency_ >=0 && dependency_ <= 100);
+        assert(dependency_ >= 0 && dependency_ <= 100);
 
     }
 }

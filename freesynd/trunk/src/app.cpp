@@ -652,11 +652,11 @@ void App::run(int start_mission) {
         int curtick = SDL_GetTicks();
         int diff_ticks = curtick - lasttick;
         menus_.updtSinceMouseDown(diff_ticks);
-        menus_.handleEvents();/*
+        menus_.handleEvents();
         if (diff_ticks < 30) {
             SDL_Delay(30 - diff_ticks);
             continue;
-        }*/
+        }
         menus_.handleTick(diff_ticks);
         menus_.renderMenu();
         lasttick = curtick;

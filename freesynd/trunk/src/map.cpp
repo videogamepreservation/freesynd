@@ -291,7 +291,7 @@ void Map::draw(int scrollX, int scrollY, MapHelper * helper)
         int ye = sh + inc;
         int ys = ye - max_z_ - 2;
         int z = max_z_ + 1;
-        for (int yb = ys; yb < ye; yb++) {
+        for (int yb = ys; yb < ye; ++yb) {
             if (yb < 0 || yb < sh || yb >= shm) {
                 --z;
                 continue;

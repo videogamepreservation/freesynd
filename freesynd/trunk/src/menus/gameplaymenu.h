@@ -54,8 +54,8 @@ protected:
     void handleMouseUp(int x, int y, int button, const int modKeys);
     //! Handles the user's click on weapon selector
     void handleClickOnWeaponSelector(int x, int y, int button, const int modKeys);
-    //! Handles the user's click on a IPA selector
-    void handleClickOnIPA(const SelectorEvent & evt, int button, const int modKeys);
+    //! sets IPA level for defined agent, selector
+    void setIPAForAgent(size_t slot, IPAStim::IPAType ipa_type, int percentage);
     //! Handles the user's click on the map
     void handleClickOnMap(int x, int y, int button, const int modKeys);
     //! Handles the user's click on the minimap
@@ -115,7 +115,7 @@ protected:
     /*! This renderer is in charge of drawing the IPA meters.*/
     AgentSelectorRenderer agt_sel_renderer_;
     bool pressed_btn_select_all_;
-    struct {
+    struct ShootingEvents {
         bool shooting_;
         bool agents_shooting[4];
         uint32 ids[4];
@@ -131,6 +131,14 @@ protected:
             ids[3] = 0;
         }
     } shooting_events_;
+
+    // when ipa is manipulated this represents
+    struct IPA_manipulation {
+        // ipa that is manipulated
+        int8 ipa_chng;
+        // agent to base IPA's update on
+        uint8 agent_used;
+    } ipa_chng_;
 };
 
 #endif

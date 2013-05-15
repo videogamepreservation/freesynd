@@ -66,19 +66,19 @@ void AgentSelectorRenderer::scanCoordsForIPA(int x, int y, SelectorEvent & evt)
 {
     IPAStim::IPAType types[] = {IPAStim::Adrenaline, IPAStim::Perception, IPAStim::Intelligence};
     // For each agent
-    for(size_t a = 0; a < 4; a++)
+    for(size_t a = 0; a < 4; ++a)
     {
         int barLeft = getIpaBarLeftForAgent(a);
         if(x >= barLeft && x <= barLeft + kIpaBarWidth)
         {
             // For each type of IPA
-            for (int i=0; i<3; i++) {
+            for (int i = 0; i < 3; ++i) {
                 int barTop = getIpaBarTop(a, types[i]);
-                if( y>= barTop && y <= barTop + kIpaBarHeight) {
+                if( y >= barTop && y <= barTop + kIpaBarHeight) {
                     evt.eventType = SelectorEvent::kSelectIpa;
                     evt.agentSlot = a;
                     evt.IpaType = types[i];
-                    evt.percentage = get_percentage(a, x);
+                    evt.percentage = getPercentage(barLeft, x);
                     return;
                 }
             }

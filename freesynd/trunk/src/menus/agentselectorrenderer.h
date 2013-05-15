@@ -112,10 +112,7 @@ private:
      */
     int getIpaBarLeftForAgent(size_t agent)
     {
-        if(agent % 2 == 1)
-            return kIpaBarLeft24;
-        else
-            return kIpaBarLeft13;
+        return (agent % 2 == 1) ? kIpaBarLeft24 : kIpaBarLeft13;
     }
     
     /*!
@@ -157,14 +154,25 @@ private:
     /*!
      *
      */
-    int get_percentage(size_t agent, int x)
+    int getPercentage(int left, int x)
     {
-        int left = getIpaBarLeftForAgent(agent);
         int offset = x - left;
         return (int)(((float)offset / (float) kIpaBarWidth) * 100.0);
     }
 
     void drawSelectorForAgent(size_t agentSlot, PedInstance *pAgent, bool isSelected);
+
+public:
+    //! gets percentage for any x coord
+    int getPercentageAnyX(size_t agent, int x) {
+        int barLeft = getIpaBarLeftForAgent(agent);
+        if (x < barLeft)
+            x = barLeft;
+        if (x > barLeft + kIpaBarWidth)
+            x = barLeft + kIpaBarWidth;
+
+        return getPercentage(barLeft, x);
+    }
 };
 
 #endif  // MENUS_AGENTSELECTORRENDERER_H_

@@ -97,7 +97,6 @@ void Menu::addDirtyRect(int x, int y, int width, int height) {
 
 void Menu::render(DirtyList &dirtyList)
 {
-    handleRender(dirtyList);
 
     for (std::list < MenuText >::iterator it = statics_.begin();
         it != statics_.end(); it++) {
@@ -114,6 +113,7 @@ void Menu::render(DirtyList &dirtyList)
                 a->draw();
             }
     }
+    handleRender(dirtyList);
 }
 
 /*!

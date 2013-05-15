@@ -67,15 +67,15 @@ public:
     // "effect" may not currently be used.
     void setLevels(int amount, int dependency, int effect = 0);
     
-    void setAmount(int percentage) {  amount_ = percentage; }
+    void setAmount(int percentage) { amount_ = percentage; }
 
     int getAmount()     const { return amount_; }
     int getDependency() const { return dependency_; }
     int getEffect()    const { return effect_; }
     IPAType getType()   const { return ipa_type_; }
-    
+
     void processTicks(int elapsed);
-    
+
 private:
     // Used to select colors when rendering
     IPAType ipa_type_;
@@ -83,31 +83,31 @@ private:
     // Allow pretty debug
     static const char * IPANames[3];
 #endif
-    
+
     // These are percentages - 50% is the neutral mid-point
     int amount_, dependency_;
-    
+
     // The darker bar that grows to match 'amount'. If you watch
     // the behaviour of this in the original Syndicate it grows from
     // the dependency line to meet the currently set 'amount'. Once the
     // two are equal it disappears and the 'amount' starts
     // moving towards the dependency line.
     int effect_;
-    
+
     // Given a percentage returns that % of 1 to 2
     // i.e. instead of 0 to 2
     float part_of_two(int percentage) const
     {
         return (((float)percentage)/100.0f) + 1.0f;
     }
-    
+
     enum IPADir {
         IPA_boost,
         IPA_reduce
     };
     IPADir direction() const
-        { return amount_ - dependency_ >=0 ? IPA_boost : IPA_reduce; }
-    
+        { return amount_ - dependency_ >= 0 ? IPA_boost : IPA_reduce; }
+
     int getMagnitude() const;
 
     // A one second timer, IPA's seem to adjust themselves

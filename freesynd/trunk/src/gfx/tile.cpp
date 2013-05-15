@@ -60,17 +60,17 @@ bool Tile::drawTo(uint8 * screen, int swidth, int sheight, int x, int y)
 
     uint8 *ptr_a_pixels = a_pixels_ + ((TILE_HEIGHT - 1) - (ylow - y)) * TILE_WIDTH;
     uint8 *ptr_screen = screen + ylow * swidth + xlow;
-    for (int j = ylow; j < yhigh; j++)
+    for (int j = ylow; j < yhigh; ++j)
     {
         uint8 *cp_ptr_a_pixels = ptr_a_pixels;
         ptr_a_pixels -= TILE_WIDTH;
         uint8 *cp_ptr_screen = ptr_screen;
         ptr_screen += swidth;
-        for (int i = xlow; i < xhigh; i++) {
+        for (int i = xlow; i < xhigh; ++i) {
             uint8 c = *cp_ptr_a_pixels++;
             if (c != 255)
                 *cp_ptr_screen = c;
-            cp_ptr_screen++;
+            ++cp_ptr_screen;
         }
     }
     return true;
