@@ -202,19 +202,36 @@ void SelectMenu::drawAgent()
     menu_manager_->blitFromBackground(302, 232, 10, 2);
     menu_manager_->blitFromBackground(264, 256, 30, 2);
 
-    // write inventory
-    for (int j = 0; j < 2; j++)
+    // draw inventory
+    screenPoint pos[8];
+    WeaponInstance * draw_weapons[8];
+    for (uint8 i = 0; i < 8; ++i) {
+        draw_weapons[i] = NULL;
+    }
+    for (int j = 0, k = 0; j < 2; ++j)
         for (int i = 0; i < 4 && (j * 4 + i < selected->numWeapons()); ++i)
         {
             // TODO: make weapon to be drawn at end
             WeaponInstance *wi = selected->weapon(j * 4 + i);
-            Weapon *pW = wi->getWeaponClass();
-            screenPoint pos = {366 + i * 32, 308 + j * 32};
-            if (wi == weapon_dragged_ && menu_manager_->isMouseDragged())
-                pos = weapon_pos_;
+            if (wi == weapon_dragged_ && menu_manager_->isMouseDragged()) {
+                pos[7] = weapon_pos_;
+                draw_weapons[7] = wi;
+            } else {
+                draw_weapons[k] = wi;
+                screenPoint pos_l = {366 + i * 32, 308 + j * 32};
+                pos[k] = pos_l;
+                ++k;
+            }
 
+        }
+
+    for (uint8 i = 0; i < 8; ++i) {
+        WeaponInstance *wi = draw_weapons[i];
+
+        if (wi) {
+            Weapon *pW = wi->getWeaponClass();
             menuSprites().drawSpriteXYZ(pW->getSmallIconId(),
-                pos.x, pos.y, 0, false, true);
+                pos[i].x, pos[i].y, 0, false, true);
             uint8 data[3] = {204, 204, 204};
             if (pW->ammo() != -1) {
                 int n = wi->ammoRemaining();
@@ -225,9 +242,10 @@ void SelectMenu::drawAgent()
                     n /= pW->ammo();
                 }
                 for (int k = 0; k < n; k++)
-                    g_Screen.scale2x(pos.x + k + 4, pos.y + 22, 1, 3, data);
+                    g_Screen.scale2x(pos[i].x + k + 4, pos[i].y + 22, 1, 3, data);
             }
         }
+    }
 }
 
 void SelectMenu::handleTick(int elapsed)
@@ -490,6 +508,7 @@ void SelectMenu::handleMouseMotion(int x, int y, int state, const int modKeys)
     if (weapon_dragged_) {
         weapon_pos_.x = x;
         weapon_pos_.y = y;
+        needRendering();
     }
 }
 
