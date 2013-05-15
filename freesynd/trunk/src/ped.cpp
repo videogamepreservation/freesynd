@@ -1157,6 +1157,19 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                         aqt->state |= 4;
                         set_nxt_act = true;
                     }
+
+                    // agents with inteleigence and perception boosted
+                    // will be shooting, or with mod brain lvl 3
+                    if (set_nxt_act && obj_group_def_ == PedInstance::og_dmAgent
+                        && isOurAgent())
+                    {
+                        Mod *pMod = slots_[Mod::MOD_BRAIN];
+                        set_nxt_act = (perception_->getMultiplier() > 1.0
+                            && intelligence_->getMultiplier() > 1.0)
+                            || (pMod && pMod->getVersion() == Mod::MOD_V3)
+                            ? true: false;
+                    }
+
                     if (set_nxt_act) {
                         actionQueueType & aqt_attack = it->actions[indx + 1];
                         aqt_attack.t_smo = aqt->t_smo;
@@ -1190,7 +1203,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                         aqt->multi_var.time_var.time_total = tm_wait;
                         aqt->multi_var.time_var.desc = 2;
                         aqt->multi_var.time_var.elapsed = 0;
-                        //TODO: selected weapon is ignored after findenemy set,
+                        // TODO: selected weapon is ignored after findenemy set,
                         // update based on selected weapon?
                     }
                 }
