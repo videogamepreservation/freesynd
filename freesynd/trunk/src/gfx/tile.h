@@ -74,7 +74,7 @@ public:
         kNbTypes  = 0x11,
     };
 
-    Tile(uint8 id_set, uint8 *tile_Data, bool all_alpha, EType type_set);
+    Tile(uint8 id_set, uint8 *tile_Data, bool not_alpha, EType type_set);
     ~Tile();
 
     //! Returns the tile id 
@@ -92,8 +92,9 @@ public:
     }
 
     //! Draws the tile to the given surface
-    bool drawTo(uint8 *screen, int swidth, int sheight, int x, int y,
-            bool clear = false);
+    bool drawTo(uint8 *screen, int swidth, int sheight, int x, int y);
+
+    inline bool notTransparent() { return not_alpha_; }
 
 protected:
     /*! Each tile has a unique id.*/
@@ -101,7 +102,7 @@ protected:
     /*! The pixels that compose the tile.*/
     uint8 *a_pixels_;
     /*! A quick flag to tell that all pixel are transparent.*/
-    bool b_all_alpha_;
+    bool not_alpha_;
     /*! The tile type. */
     EType e_type_;
 };

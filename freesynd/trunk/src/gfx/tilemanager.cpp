@@ -120,17 +120,17 @@ Tile * TileManager::loadTile(uint8 * tileData, uint8 id, Tile::EType type)
     }
 
     // If at least one pixel is not transparent
-    // b_all_alpha will be false and so tile will be drawn
-    bool b_all_alpha = true;
+    // not_alpha will be true and so tile will be drawn
+    bool not_alpha = false;
     for (int h = 0; h < TILE_HEIGHT; h++) {
         for (int w = 0; w < TILE_WIDTH; w++)
             if (a_tile_data[h * TILE_HEIGHT + w] != 255) {
-                b_all_alpha = false;
+                not_alpha = true;
                 break;
             }
     }
 
-    Tile *p_tile = new Tile(id, a_tile_data, b_all_alpha, type);
+    Tile *p_tile = new Tile(id, a_tile_data, not_alpha, type);
     return p_tile;
 }
 

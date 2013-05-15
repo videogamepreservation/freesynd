@@ -29,13 +29,13 @@
 #include "tile.h"
 
 
-Tile::Tile(uint8 id_set, uint8 *tile_Data, bool all_alpha, EType type_set)
+Tile::Tile(uint8 id_set, uint8 *tile_Data, bool not_alpha, EType type_set)
 {
     i_id_ = id_set;
     e_type_ = type_set;
     a_pixels_ = new uint8[TILE_WIDTH * TILE_HEIGHT];
     memcpy(a_pixels_, tile_Data, TILE_WIDTH * TILE_HEIGHT);
-    b_all_alpha_ = all_alpha;
+    not_alpha_ = not_alpha;
 }
 
 Tile::~Tile() 
@@ -43,19 +43,13 @@ Tile::~Tile()
     delete[] a_pixels_;
 }
 
-bool Tile::drawTo(uint8 * screen, int swidth, int sheight, int x, int y,
-                  bool clear)
+bool Tile::drawTo(uint8 * screen, int swidth, int sheight, int x, int y)
 {
-    //if (b_all_alpha_)
-        //return false;
-
     if (x + TILE_WIDTH < 0 || y + TILE_HEIGHT < 0
         || x >= swidth || y >= sheight)
     {
         return false;
     }
-    if (clear)
-        memset(screen, 255, swidth * sheight);
 
     int xlow = x < 0 ? 0 : x;
     int clipped_w = TILE_WIDTH - (xlow - x);

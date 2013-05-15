@@ -287,19 +287,19 @@ void Map::draw(int scrollX, int scrollY, MapHelper * helper)
      //  z = 0 - is minimap data and mapdata
     int chky = sh < 0 ? 0 : sh;
     int zr = shm + max_z_ + 1;
-    for (int inc = 0; inc < zr; inc++) {
+    for (int inc = 0; inc < zr; ++inc) {
         int ye = sh + inc;
         int ys = ye - max_z_ - 2;
         int z = max_z_ + 1;
         for (int yb = ys; yb < ye; yb++) {
             if (yb < 0 || yb < sh || yb >= shm) {
-                z--;
+                --z;
                 continue;
             }
             int h = yb;
-            for (int w = sw; h >= chky && w < max_x_; w++) {
+            for (int w = sw; h >= chky && w < max_x_; ++w) {
                 if (w < 0 || h >= max_y_) {
-                    h--;
+                    --h;
                     continue;
                 }
                 int screen_w = (max_x_ + (w - h)) * (TILE_WIDTH / 2);
@@ -316,7 +316,7 @@ void Map::draw(int scrollX, int scrollY, MapHelper * helper)
 #endif
                     if (z < max_z_) {
                         Tile *p_tile = a_tiles_[(h * max_x_ + w) * max_z_ + z];
-                        if (p_tile->id() > 4) {
+                        if (p_tile->notTransparent()) {
                             int dx = 0, dy = 0;
                             if (screen_w - scrollX < 0)
                                 dx = -(screen_w - scrollX);
@@ -327,7 +327,7 @@ void Map::draw(int scrollX, int scrollY, MapHelper * helper)
                                     g_Screen.gameScreenWidth(),
                                     g_Screen.gameScreenHeight(),
                                     screen_w - cmx,
-                                    coord_h - scrollY, false);
+                                    coord_h - scrollY);
                             }
                         }
                     }
@@ -337,9 +337,9 @@ void Map::draw(int scrollX, int scrollY, MapHelper * helper)
                             coord_h - scrollY + TILE_HEIGHT / 3 * 2);
                     }
                 }
-                h--;
+                --h;
             }
-            z--;
+            --z;
         }
     }
 
