@@ -160,6 +160,8 @@ namespace fs_cmn {
     static const uint8 kColorLightRed = 14;
     /*! Color constant : Blue */
     static const uint8 kColorBlue = 15;
+    /*! Color constant : Dark Green */
+    static const uint8 kColorDarkGreen = 16;
 };
 
 inline void boxify(int &left, int &width, int x1, int x2)

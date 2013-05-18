@@ -314,9 +314,6 @@ Mission * MissionManager::load_level_data(LevelData::LevelDataAll &level_data, u
                 p->addEnemyGroupDef(3);
                 p->setHostileDesc(PedInstance::pd_smArmed);
                 p->setSightRange(7 * 256);
-                // not in all missions our agents health is 16, this fixes it
-                p->setHealth(16);
-                p->setStartHealth(16);
                 p->setBaseSpeed(256);
                 p->setTimeBeforeCheck(400);
                 p->setBaseModAcc(0.5);

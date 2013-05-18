@@ -50,16 +50,8 @@ public:
     bool isMale() { return male_; }
     bool isActive() { return active_; }
     void setActive(bool a) { active_ = a; }
-    int health() { return health_; }
-    bool isAlive() { return health_ > 0; }
-    bool isDead() { return health_ <= 0; }
-
-    void setHealth(int n) {
-        if (n > 255)
-            n = 255;
-
-        health_ = n;
-    }
+    bool isAlive() { return is_alive_; }
+    void set_dead() { is_alive_ = false; }
 
     void removeAllWeapons();
 
@@ -76,7 +68,7 @@ protected:
     std::string name_;
     bool male_;
     bool active_;
-    int health_;
+    bool is_alive_;
 };
 
 #endif

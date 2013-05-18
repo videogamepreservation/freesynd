@@ -153,6 +153,8 @@ protected:
     int persuade_anim_;
 };
 
+class Agent;
+
 /*!
  * Pedestrian instance class.
  */
@@ -162,6 +164,8 @@ class PedInstance : public ShootableMovableMapObject, public WeaponHolder,
 public:
     PedInstance(Ped *ped, int m);
     ~PedInstance();
+    //! Initialize the ped instance as an agent
+    bool initAsAgent(Agent *p_agent);
 
     typedef enum {
         ad_NoAnimation,

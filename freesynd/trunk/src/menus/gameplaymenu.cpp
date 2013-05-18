@@ -1530,7 +1530,7 @@ void GameplayMenu::updateSelectionForDeadAgents() {
         if (mission_->ped(i) && mission_->ped(i)->isOurAgent()) {
             if (g_Session.agents().squadMember(i)->isAlive() && mission_->ped(i)->isDead()) {
                 // TODO change this
-                g_Session.agents().squadMember(i)->setHealth(0);
+                g_Session.agents().squadMember(i)->set_dead();
                 selection_.deselectAgent(i);
                 b_agentDied = true;
             }

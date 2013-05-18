@@ -1583,6 +1583,34 @@ PedInstance::~PedInstance()
     intelligence_ = NULL;
 }
 
+/*!
+ * Initialize the ped instance as an agent.
+ * \param p_agent The agent reference
+ * \return true if the resulting agent is active for the mission.
+ */
+bool PedInstance::initAsAgent(Agent *p_agent) {
+    if (p_agent && p_agent->isActive()) {
+        // not in all missions our agents health is 16, this fixes it
+        setHealth(16);
+        setStartHealth(16);
+        while (p_agent->numWeapons()) {
+            WeaponInstance *wi = p_agent->removeWeapon(0);
+            addWeapon(wi);
+            wi->setOwner(this);
+            wi->setIsIgnored(true);
+        }
+        setAgentIs(PedInstance::Agent_Active);
+        *((ModOwner *)this) = *((ModOwner *)p_agent);
+        return true;
+    } else {
+        setHealth(-1);
+        setAgentIs(PedInstance::Agent_Non_Active);
+        setIsIgnored(true);
+        setStateMasks(PedInstance::pa_smUnavailable);
+        return false;
+    }
+}
+
 void PedInstance::draw(int x, int y) {
 
     // ensure on map

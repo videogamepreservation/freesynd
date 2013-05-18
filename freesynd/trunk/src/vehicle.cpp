@@ -73,20 +73,14 @@ bool VehicleInstance::animate(int elapsed)
         updated = move_vehicle(elapsed);
     }
 
-    switch (vehicle_->animation_type()) {
-        case VehicleAnimation::kNormalAnim:
-            break;
-        case VehicleAnimation::kOnFireAnim:
-            if (leftTimeShowAnim(elapsed))
-                updated |= MapObject::animate(elapsed);
-            else {
-                vehicle_->set_animation_type(VehicleAnimation::kBurntAnim);
-                frame_ = 0;
-                updated = true;
-            }
-            break;
-        case VehicleAnimation::kBurntAnim:
-            break;
+    if (vehicle_->animation_type() == VehicleAnimation::kOnFireAnim) {
+        if (leftTimeShowAnim(elapsed))
+            updated |= MapObject::animate(elapsed);
+        else {
+            vehicle_->set_animation_type(VehicleAnimation::kBurntAnim);
+            frame_ = 0;
+            updated = true;
+        }
     }
 
     return updated;
@@ -641,13 +635,15 @@ bool VehicleInstance::move_vehicle(int elapsed)
     int used_time = elapsed;
 
     while ((!dest_path_.empty()) && used_time != 0) {
-        if (hold_on_.wayFree == 1) {
+        if (hold_on_.wayFree == 1) { // Must wait
             return updated;
         } else if (hold_on_.wayFree == 2){
-            dest_path_.clear();
-            speed_ = 0;
+            // Must stop : clear destination and stop
+            resetDest_Speed();
             return updated;
         }
+
+        // Get distance between car and next NodePath
         int adx =
             dest_path_.front().tileX() * 256 + dest_path_.front().offX();
         int ady =
@@ -657,11 +653,13 @@ bool VehicleInstance::move_vehicle(int elapsed)
         int diffx = adx - atx, diffy = ady - aty;
 
         if (abs(diffx) < 16 && abs(diffy) < 16) {
+            // We reached the next point : remove it from path
             off_y_ = dest_path_.front().offY();
             off_x_ = dest_path_.front().offX();
             tile_y_ = dest_path_.front().tileY();
             tile_x_ = dest_path_.front().tileX();
             dest_path_.pop_front();
+            // There's no following point so stop moving
             if (dest_path_.size() == 0)
                 speed_ = 0;
             updated = true;
@@ -669,13 +667,13 @@ bool VehicleInstance::move_vehicle(int elapsed)
             setDirection(diffx, diffy, &dir_);
             int dx = 0, dy = 0;
             double d = sqrt((double)(diffx * diffx + diffy * diffy));
-            // object will not move over a distance he can actually move
+            // This is the time for all the remaining distance to the node
             double avail_time_use = (d / (double)speed_) * 1000.0;
-            // correcting time availiable for this distance to time
-            // we can use
+            // correcting time available regarding the time we have
             if (avail_time_use > used_time)
                 avail_time_use = used_time;
 
+            // computes distance travelled by vehicle in the available time
             if (abs(diffx) > 0)
                 // dx = diffx * (speed_ * used_time / 1000) / d;
                 dx = (int)((diffx * (speed_ * avail_time_use) / d) / 1000);
@@ -683,6 +681,7 @@ bool VehicleInstance::move_vehicle(int elapsed)
                 // dy = diffy * (speed_ * used_time / 1000) / d;
                 dy = (int)((diffy * (speed_ * avail_time_use) / d) / 1000);
 
+            // Updates the available time
             if (dx || dy) {
                 int prv_time = used_time;
                 if (dx) {
@@ -698,6 +697,7 @@ bool VehicleInstance::move_vehicle(int elapsed)
             } else
                 used_time = 0;
 
+            // Moves vehicle
             updatePlacement(off_x_ + dx, off_y_ + dy);
 #if 0
             if (updatePlacement(off_x_ + dx, off_y_ + dy)) {

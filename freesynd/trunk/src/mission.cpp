@@ -380,26 +380,14 @@ void Mission::start()
     for (int i = 0; i < 4; ++i) {
         PedInstance *p = peds_[i];
         Agent *pAg = g_Session.agents().squadMember(i);
-        if (pAg && pAg->isActive()) {
+        if (p->initAsAgent(pAg)) {
             stats_.agents += 1;
-            p->setHealth(pAg->health() *
-                            peds_[i]->health() / 255);
-            while (pAg->numWeapons()) {
-                WeaponInstance *wi = pAg->removeWeapon(0);
-                weapons_.push_back(wi);
-                p->addWeapon(wi);
-                wi->setOwner(p);
-                wi->setIsIgnored(true);
+            // adds all agent's weapons to the mission weapons
+            for (int wi=0; wi<p->numWeapons(); wi++) {
+                addWeapon(p->weapon(wi));
             }
-            p->setAgentIs(PedInstance::Agent_Active);
-            *((ModOwner *)p) = *((ModOwner *)pAg);
             // adds the agent to the mission squad
             p_squad_->setMember(i, p);
-        } else {
-            p->setHealth(-1);
-            p->setAgentIs(PedInstance::Agent_Non_Active);
-            p->setIsIgnored(true);
-            p->setStateMasks(PedInstance::pa_smUnavailable);
         }
     }
 

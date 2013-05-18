@@ -279,6 +279,14 @@ void SelectMenu::updateClock() {
 void SelectMenu::drawSelectedWeaponInfos(int x, int y) {
     char tmp[100];
 
+    // Draw a border around cancel button
+    g_Screen.drawRect(502, 268, 124, 2, fs_cmn::kColorDarkGreen);
+    g_Screen.drawRect(502, 292, 124, 2, fs_cmn::kColorDarkGreen);
+    g_Screen.drawRect(502, 318, 124, 2, fs_cmn::kColorDarkGreen);
+
+    // Draw the selected weapon big icon
+    menuSprites().drawSpriteXYZ(pSelectedWeap_->getBigIconId(), 502, 106, 0, false, true);
+
     const int shifted_x = x + 52;
     getMenuFont(FontManager::SIZE_1)->drawText(x, y, pSelectedWeap_->getName(), true);
     y += 12;
@@ -329,6 +337,11 @@ void SelectMenu::drawSelectedWeaponInfos(int x, int y) {
 
 void SelectMenu::drawSelectedModInfos(int x, int y)
 {
+    // Draw a border around cancel button
+    g_Screen.drawRect(502, 268, 124, 2, fs_cmn::kColorDarkGreen);
+    g_Screen.drawRect(502, 292, 124, 2, fs_cmn::kColorDarkGreen);
+    g_Screen.drawRect(502, 318, 124, 2, fs_cmn::kColorDarkGreen);
+    
     getMenuFont(FontManager::SIZE_1)->drawText(x, y, pSelectedMod_->getName(), true);
     char tmp[100];
     sprintf(tmp, "COST   :%d", pSelectedMod_->cost());
@@ -366,9 +379,6 @@ void SelectMenu::handleRender(DirtyList &dirtyList) {
     g_Screen.drawLogo(18, 14, g_Session.getLogo(), g_Session.getLogoColour());
 
     // write team member icons and health
-    uint8 data[4], datag[4];
-    memset(data, 204, 4);
-    memset(datag, 10, 4);
     Agent *t1 = g_Session.agents().squadMember(AgentManager::kSlot1);
     Agent *t2 = g_Session.agents().squadMember(AgentManager::kSlot2);
     Agent *t3 = g_Session.agents().squadMember(AgentManager::kSlot3);
@@ -376,41 +386,33 @@ void SelectMenu::handleRender(DirtyList &dirtyList) {
     if (t1) {
         if (t1->isActive()) {
             menuSprites().drawSpriteXYZ(Sprite::MSPR_SELECT_1, 20, 84, 0, false, true);
-            for (int i = 0; i < t1->health() * 35 / 255; i++)
-                g_Screen.scale2x(68, 122 - i, 3, 1, data);
+            g_Screen.drawRect(68, 88, 6, 36, 204);
         } else {
-            for (int i = 0; i < t1->health() * 35 / 255; i++)
-                g_Screen.scale2x(68, 122 - i, 3, 1, datag);
+            g_Screen.drawRect(68, 88, 6, 36, 10);
         }
     }
     if (t2) {
         if (t2->isActive()) {
             menuSprites().drawSpriteXYZ(Sprite::MSPR_SELECT_2, 82, 84, 0, false, true);
-            for (int i = 0; i < t2->health() * 35 / 255; i++)
-                g_Screen.scale2x(132, 122 - i, 3, 1, data);
+            g_Screen.drawRect(132, 88, 6, 36, 204);
         } else {
-            for (int i = 0; i < t2->health() * 35 / 255; i++)
-                g_Screen.scale2x(132, 122 - i, 3, 1, datag);
+            g_Screen.drawRect(132, 88, 6, 36, 10);
         }
     }
     if (t3) {
         if (t3->isActive()) {
             menuSprites().drawSpriteXYZ(Sprite::MSPR_SELECT_3, 20, 162, 0, false, true);
-            for (int i = 0; i < t3->health() * 35 / 255; i++)
-                g_Screen.scale2x(68, 200 - i, 3, 1, data);
+            g_Screen.drawRect(68, 166, 6, 36, 204);
         } else {
-            for (int i = 0; i < t3->health() * 35 / 255; i++)
-                g_Screen.scale2x(68, 200 - i, 3, 1, datag);
+            g_Screen.drawRect(68, 166, 6, 36, 10);
         }
     }
     if (t4) {
         if (t4->isActive()) {
             menuSprites().drawSpriteXYZ(Sprite::MSPR_SELECT_4, 82, 162, 0, false, true);
-            for (int i = 0; i < t4->health() * 35 / 255; i++)
-                g_Screen.scale2x(132, 200 - i, 3, 1, data);
+            g_Screen.drawRect(132, 166, 6, 36, 204);
         } else {
-            for (int i = 0; i < t4->health() * 35 / 255; i++)
-                g_Screen.scale2x(132, 200 - i, 3, 1, datag);
+            g_Screen.drawRect(132, 166, 6, 36, 10);
         }
     }
     if (sel_all_) {
@@ -434,22 +436,8 @@ void SelectMenu::handleRender(DirtyList &dirtyList) {
     }
 
     if (pSelectedWeap_) {
-        uint8 ldata[62];
-        memset(ldata, 16, sizeof(ldata));
-        g_Screen.scale2x(502, 268, sizeof(ldata), 1, ldata);
-        g_Screen.scale2x(502, 292, sizeof(ldata), 1, ldata);
-        g_Screen.scale2x(502, 318, sizeof(ldata), 1, ldata);
-        
-        menuSprites().drawSpriteXYZ(pSelectedWeap_->getBigIconId(), 502, 106, 0, false, true);
         drawSelectedWeaponInfos(504, 194);
-    
     } else if (pSelectedMod_) {
-        uint8 ldata[62];
-        memset(ldata, 16, sizeof(ldata));
-        g_Screen.scale2x(502, 268, sizeof(ldata), 1, ldata);
-        g_Screen.scale2x(502, 292, sizeof(ldata), 1, ldata);
-        g_Screen.scale2x(502, 318, sizeof(ldata), 1, ldata);
-
         drawSelectedModInfos(504, 108);
     }
 

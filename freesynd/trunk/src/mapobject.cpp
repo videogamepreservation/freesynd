@@ -535,6 +535,12 @@ speed_(0), base_speed_(0), dist_to_pos_(0)
 {
 }
 
+/*!
+ * This method adds the given offsets to the object's offX and offY 
+ * and moves it to a new tile if necessary.
+ * \param nOffX amount to add to offX
+ * \param nOffY amount to add to offY
+ */
 bool ShootableMovableMapObject::updatePlacement(int nOffX, int nOffY)
 {
 

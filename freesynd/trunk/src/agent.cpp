@@ -42,8 +42,9 @@ int Agent::agentCnt = 1;
  * \param male True means the agent is a male.
  */
 Agent::Agent(const char *agent_name, bool male) : name_(agent_name),
-male_(male), active_(true), health_(255) {
+male_(male), active_(true) {
     id_ = agentCnt++;
+    is_alive_ = true;
 }
 
 Agent::~Agent() {
@@ -64,8 +65,8 @@ bool Agent::saveToFile(PortableFile &file) {
     file.write8b(male_);
     // active : true = 1, false = 0
     file.write8b(active_);
-    // Health
-    file.write32(health_);
+    // Health : not used
+    file.write32(0);
     // Mods
     int nb = 0;
     for (int i = 0; i < 6; i++) {
@@ -108,8 +109,8 @@ bool Agent::loadFromFile(PortableFile &infile, const FormatVersion& v) {
     male_ = infile.read8b();
     // active
     active_ = infile.read8b();
-    // health
-    health_ = infile.read32();
+    // health : not used
+    int health = infile.read32();
     
     return true;
 }
