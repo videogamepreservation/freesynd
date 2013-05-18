@@ -99,12 +99,12 @@ void DebriefMenu::handleShow() {
     MissionStats *pStats = pMission->getStatistics();
 
     // update time
-    g_Session.researchManager().addListener(this);
+    g_gameCtrl.addListener(this, GameEvent::kGame);
     int elapsed = pStats->mission_duration;
     g_Session.updateTime(elapsed);
     if (pMission->completed())
         g_Session.completeSelectedBlock();
-    g_Session.researchManager().removeListener(this);
+    g_gameCtrl.removeListener(this, GameEvent::kGame);
 
     updateStatsFields(pMission);
 
@@ -188,9 +188,9 @@ void DebriefMenu::handleLeave() {
 }
 
 void DebriefMenu::handleGameEvent(GameEvent evt) {
-    if (evt.type_ == GameEvent::GE_SEARCH) {
+    if (evt.type == GameEvent::kResearch) {
         // A research has ended, so check which type
-        Research *pRes = static_cast<Research *> (evt.pCtxt_);
+        Research *pRes = static_cast<Research *> (evt.pCtxt);
          // Is it equipment or mods research?
          if (pRes->getType() == Research::EQUIPS) {
              // Get researched weapon type

@@ -227,6 +227,7 @@ GamePlayMinimapRenderer::GamePlayMinimapRenderer() :
     mm_timer_signal(250) {
     p_mission_ = NULL;
     handleClearSignal();
+    g_gameCtrl.addListener(this, GameEvent::kMission);
 }
 
 /*!
@@ -247,7 +248,6 @@ void GamePlayMinimapRenderer::init(Mission *pMission, bool b_scannerEnabled) {
     mm_timer_weap.reset();
     mm_timer_signal.reset();
     handleClearSignal();
-    p_mission_->addListener(this);
 }
 
 void GamePlayMinimapRenderer::updateRenderingInfos() {
@@ -311,7 +311,7 @@ void GamePlayMinimapRenderer::centerOn(uint16 tileX, uint16 tileY, int offX, int
  * The catched events are for detecting signals setup.
  */
 void GamePlayMinimapRenderer::handleGameEvent(GameEvent evt) {
-    switch (evt.type_) {
+    switch (evt.type) {
     case GameEvent::kObjEvacuate:
         handleEvacuationSet();
         break;

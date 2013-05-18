@@ -230,12 +230,6 @@ public:
      */
     Squad * getSquad() { return p_squad_; }
 
-    //! Adds a listener for mission events
-    void addListener(GameEventListener *pListener);
-    //! Removes a listener
-    void removeListener(GameEventListener *pListener);
-    void removeListeners();
-
 protected:
     bool sWalkable(char thisTile, char upperTile);
     bool isSurface(char thisTile);
@@ -294,8 +288,6 @@ protected:
      * The squad selected for the mission. It contains only active agents.
      */
     Squad *p_squad_;
-    /*! List of listeners for missions events.*/
-    std::list<GameEventListener *> listeners_;
 };
 
 #endif

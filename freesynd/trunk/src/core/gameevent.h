@@ -23,12 +23,30 @@
 #ifndef GAMEVENT_H
 #define GAMEVENT_H
 
+/*!
+ * An event is dispatched by the Game controller towards listener that
+ * will handle it. There are several stream on which events are posted:
+ * A game stream that concerns general events and a mission stream that
+ * contains events inside a mission.
+ */
 class GameEvent {
 public:
+    /*!
+     * The different streams.
+     */
+    enum EEventStream {
+        //! General events
+        kGame,
+        //! In mission events
+        kMission
+    };
+
     enum EEventType {
         kNone,
-        GE_AGENT,
-        GE_SEARCH,
+        /*! An agent died during a mission.*/
+        kAgentDied,
+        /*! A research has ended.*/
+        kResearch,
         /*! Sent when evacuation order arrives.*/
         kObjEvacuate,
         /*! Sent when an objective with a MapObject target arrives.*/
@@ -38,14 +56,23 @@ public:
         /*! Send when all the objectives of a mission are completed.*/
         kObjSucceed
     };
-
-    EEventType type_;
-    void *pCtxt_;
+    //! The stream on which the event is posted
+    EEventStream stream;
+    //! The type of event
+    EEventType type;
+    //! An event may hold information for the listener
+    void *pCtxt;
 };
 
+/*!
+ * A listener will receive events on the stream he has subscrived.
+ */
 class GameEventListener {
 public:
     virtual ~GameEventListener() {}
+    /*!
+     * This method is called when an event is posted.
+     */
     virtual void handleGameEvent(GameEvent evt) = 0;
 };
 

@@ -27,7 +27,6 @@
 #include <fstream>
 
 #include "core/research.h"
-#include "core/gameevent.h"
 #include "utils/seqmodel.h"
 #include "utils/portablefile.h"
 
@@ -66,9 +65,6 @@ public:
     void start(Research *pResearch);
     // Processes all engaged research
     int process(int hourElapsed, int moneyLeft);
-    //! Adds a listener for research event
-    void addListener(GameEventListener *pListener);
-    void removeListener(GameEventListener *pListener);
 
     //! Save instance to file
     bool saveToFile(PortableFile &file);
@@ -90,8 +86,6 @@ protected:
     VectorModel<Research *> availableModsSearch_;
     /*! List of all currently available research on weapons.*/
     VectorModel<Research *> availableWeaponsSearch_;
-    /*! List of listeners for research events.*/
-    std::list<GameEventListener *> listeners_;
     /*! There is only one active search at a time.*/
     Research *pCurrResearch_;
 };

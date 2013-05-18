@@ -457,7 +457,6 @@ void GameplayMenu::handleLeave()
     menu_manager_->setDefaultPalette();
     mission_->end();
     selection_.clear();
-    mission_->removeListeners();
 
     tick_count_ = 0;
     last_animate_tick_ = 0;

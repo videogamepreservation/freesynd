@@ -34,7 +34,6 @@ ResearchManager::ResearchManager() {
 ResearchManager::~ResearchManager() {
     LOG(Log::k_FLG_MEM, "ResearchManager", "~ResearchManager", ("Destruction..."))
     destroy();
-    listeners_.clear();
 }
 
 void ResearchManager::destroy() {
@@ -177,30 +176,12 @@ bool ResearchManager::reset() {
     return true;
 }
 
-void ResearchManager::addListener(GameEventListener *pListener) {
-    if (pListener) {
-        listeners_.push_back(pListener);
-    }
-}
-
-void ResearchManager::removeListener(GameEventListener *pListener) {
-    for (std::list < GameEventListener * >::iterator it = listeners_.begin();
-         it != listeners_.end(); it++) {
-             if (pListener == *it) {
-                 listeners_.erase(it);
-                 return;
-             }
-    }
-}
-
 void ResearchManager::fireGameEvent(Research *pResearch) {
-    for (std::list < GameEventListener * >::iterator it = listeners_.begin();
-                        it != listeners_.end(); it++) {
-        GameEvent evt;
-        evt.type_ = GameEvent::GE_SEARCH;
-        evt.pCtxt_ = pResearch;
-        (*it)->handleGameEvent(evt);
-    }
+    GameEvent evt;
+    evt.stream = GameEvent::kGame;
+    evt.type = GameEvent::kResearch;
+    evt.pCtxt = pResearch;
+    g_gameCtrl.fireGameEvent(evt);
 }
 
 void ResearchManager::start(Research *pResearch) {

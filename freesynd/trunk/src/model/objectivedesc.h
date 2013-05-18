@@ -93,8 +93,8 @@ public:
     GameEvent start() {
         status = kStarted;
         GameEvent evt;
-        evt.type_ = GameEvent::kNone;
-        evt.pCtxt_ = NULL;
+        evt.type = GameEvent::kNone;
+        evt.pCtxt = NULL;
         handleStart(evt);
         return evt;
     }
@@ -106,7 +106,7 @@ public:
      */
     GameEvent evaluate(Mission *pMission) {
         GameEvent evt;
-        evt.type_ = GameEvent::kNone;
+        evt.type = GameEvent::kNone;
         selfEvaluate(evt, pMission);
         return evt;
     }
@@ -139,7 +139,7 @@ protected:
      */
     void selfEvaluate(GameEvent &evt, Mission *pMission) {
         status = kCompleted;
-        evt.type_ = GameEvent::kObjSucceed;
+        evt.type = GameEvent::kObjSucceed;
     }
 };
 
@@ -175,8 +175,8 @@ protected:
      * the target to the user (signal on the map).
      */
     void handleStart(GameEvent &evt) {
-        evt.type_ = GameEvent::kObjTargetSet;
-        evt.pCtxt_ = p_target_;
+        evt.type = GameEvent::kObjTargetSet;
+        evt.pCtxt = p_target_;
     }
 
     /*!
@@ -185,8 +185,8 @@ protected:
      * \param succeeded True means objective is completed with success.
      */
     void endObjective(GameEvent &evt, bool succeeded) {
-        evt.type_ = GameEvent::kObjTargetCleared;
-        evt.pCtxt_ = p_target_;
+        evt.type = GameEvent::kObjTargetCleared;
+        evt.pCtxt = p_target_;
         status = succeeded ? kCompleted : kFailed;
     }
 
@@ -285,8 +285,8 @@ public:
     ObjEvacuate(int x, int y, int z, std::vector <PedInstance *> &lstOfPeds);
 
     void handleStart(GameEvent &evt) {
-        evt.type_ = GameEvent::kObjEvacuate;
-        evt.pCtxt_ = NULL;
+        evt.type = GameEvent::kObjEvacuate;
+        evt.pCtxt = NULL;
     }
 
 protected:

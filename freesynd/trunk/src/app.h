@@ -46,6 +46,7 @@
 #include "sound/soundmanager.h"
 #include "sound/musicmanager.h"
 #include "core/gamesession.h"
+#include "core/gamecontroller.h"
 
 /*!
  * Application class.
@@ -174,6 +175,8 @@ private:
     int32 time_for_click_;
     /*! A structure to hold player informations.*/
     std::auto_ptr<GameSession> session_;
+    /*! Controls the game logic. */
+    std::auto_ptr<GameController> game_ctlr_;
     std::auto_ptr<Screen> screen_;
     std::auto_ptr<System> system_;
 

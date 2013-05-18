@@ -80,8 +80,6 @@ Mission::~Mission()
     if (p_squad_) {
         delete p_squad_;
     }
-
-    listeners_.clear();
 }
 
 /*!
@@ -465,7 +463,7 @@ void Mission::checkObjectives() {
         // Checks if the objective is completed
         GameEvent evt = pObj->evaluate(this);
         // the objective may have generated an event
-        if (evt.type_ != GameEvent::kNone) {
+        if (evt.type != GameEvent::kNone) {
             // so dispatch it
             handleObjectiveEvent(evt, pObj);
         }
@@ -482,10 +480,10 @@ void Mission::checkObjectives() {
 }
 
 void Mission::handleObjectiveEvent(GameEvent & evt, ObjectiveDesc *pObj) {
-    switch(evt.type_) {
+    switch(evt.type) {
     case GameEvent::kObjTargetSet:
         {
-        MapObject *pObject = static_cast<MapObject *>(evt.pCtxt_);
+        MapObject *pObject = static_cast<MapObject *>(evt.pCtxt);
         p_minimap_->setTarget(pObject);
         }
         break;
@@ -505,7 +503,11 @@ void Mission::handleObjectiveEvent(GameEvent & evt, ObjectiveDesc *pObj) {
     default:
         break;
     }
-    fireGameEvent(evt);
+
+    if (evt.type != GameEvent::kNone) {
+        evt.stream = GameEvent::kMission;
+        g_gameCtrl.fireGameEvent(evt);
+    }
 }
 
 /*!
@@ -527,50 +529,6 @@ void Mission::endWithStatus(Status status) {
         break;
     case RUNNING:
         break;
-    }
-}
-
-/*! 
- * Adds a listener to the list of listeners of mission events.
- * \param pListener The listener
- */
-void Mission::addListener(GameEventListener *pListener) {
-    if (pListener) {
-        listeners_.push_back(pListener);
-    }
-}
-
-/*! 
- * Removes the listener from the list of listeners of mission events.
- * \param pListener The listener
- */
-void Mission::removeListener(GameEventListener *pListener) {
-    for (std::list < GameEventListener * >::iterator it = listeners_.begin();
-         it != listeners_.end(); it++) {
-             if (pListener == *it) {
-                 listeners_.erase(it);
-                 return;
-             }
-    }
-}
-
-/*! 
- * Removes all listeners from the list of listeners of mission events.
- */
-void Mission::removeListeners() {
-    listeners_.clear();
-}
-
-/*! 
- * Sends the event to all listeners of mission events.
- * \param evt The event to send
- */
-void Mission::fireGameEvent(GameEvent &evt) {
-    if (evt.type_ != GameEvent::kNone) {
-        for (std::list < GameEventListener * >::iterator it = listeners_.begin();
-                            it != listeners_.end(); it++) {
-            (*it)->handleGameEvent(evt);
-        }
     }
 }
 

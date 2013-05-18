@@ -232,5 +232,5 @@ void ObjEvacuate::selfEvaluate(GameEvent &evt, Mission *pMission) {
 
     // If we're here, then all peds are in the circle -> objective is completed
     status = kCompleted;
-    evt.type_ = GameEvent::kObjTargetCleared;
+    evt.type = GameEvent::kObjTargetCleared;
 }

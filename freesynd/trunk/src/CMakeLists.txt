@@ -13,6 +13,7 @@ set (SOURCES
 	model/objectivedesc.cpp
 	core/squad.cpp
 	core/gamesession.cpp
+	core/gamecontroller.cpp
 	core/missionbriefing.cpp
 	core/research.cpp
 	core/researchmanager.cpp
@@ -114,6 +115,7 @@ set(HEADERS
 	core/gameevent.h
 	core/squad.h
 	core/gamesession.h
+	core/gamecontroller.h
 	core/missionbriefing.h
 	core/research.h
 	core/researchmanager.h

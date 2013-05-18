@@ -78,7 +78,7 @@ ResearchMenu::ResearchMenu(MenuManager * m):Menu(m, MENU_RESEARCH, MENU_SELECT, 
     fundCurrLblId_ = addStatic(16, 242, 129, "", FontManager::SIZE_2, true);    // Current Funding label
     searchTitleLblId_ = addStatic(158, 86, "", FontManager::SIZE_2, true);    // Current search title
 
-    g_Session.researchManager().addListener(this);
+    g_gameCtrl.addListener(this, GameEvent::kGame);
 }
 
 /*!
@@ -391,9 +391,9 @@ void ResearchMenu::handleAction(const int actionId, void *ctx, const int modKeys
 }
 
 void ResearchMenu::handleGameEvent(GameEvent evt) {
-    if (evt.type_ == GameEvent::GE_SEARCH) {
+    if (evt.type == GameEvent::kResearch) {
         // A research has ended
-        Research *pRes = static_cast<Research *> (evt.pCtxt_);
+        Research *pRes = static_cast<Research *> (evt.pCtxt);
 
         // If current graph was for this research, make it disappear
         if (pResForGraph_ && pResForGraph_->getId() == pRes->getId()) {
