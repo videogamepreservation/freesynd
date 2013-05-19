@@ -144,7 +144,7 @@ class SquadSelection {
     //! selects/deselects agent
     bool selectAgent(size_t agentNo, bool addToGroup);
     //! Force deselection of agent
-    void deselectAgent(size_t agentNo);
+    void deselectAgent(PedInstance *p_ped);
     //! Selects/deselects all agent
     void selectAllAgents(bool b_selectAll);
     //! Returns the leader's slot

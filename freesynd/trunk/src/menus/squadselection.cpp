@@ -101,12 +101,17 @@ bool SquadSelection::selectAgent(size_t agentNo, bool addToGroup) {
 
 /*!
  * Deselects an agent. Called when an agent died.
- * \param agentNo
+ * \param p_ped The agent to deselect.
  */
-void SquadSelection::deselectAgent(size_t agentNo) {
-    selected_agents_ &= ~(1 << agentNo);
-    // check if leader was deselected
-    checkLeader(agentNo);
+void SquadSelection::deselectAgent(PedInstance *p_ped) {
+    for (size_t i = AgentManager::kSlot1; i < AgentManager::kMaxSlot; i++) {
+        if (pSquad_->member(i) == p_ped) {
+            selected_agents_ &= ~(1 << i);
+            // check if leader was deselected
+            checkLeader(i);
+            return;
+        }
+    }
 }
 
 /*!

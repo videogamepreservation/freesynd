@@ -30,6 +30,7 @@
 #include "agentselectorrenderer.h"
 #include "minimaprenderer.h"
 #include "squadselection.h"
+#include "core/gameevent.h"
 
 class Mission;
 class IPAStim;
@@ -37,7 +38,7 @@ class IPAStim;
 /*!
  * Gameplay Menu class.
  */
-class GameplayMenu : public Menu {
+class GameplayMenu : public Menu, GameEventListener {
 public:
     GameplayMenu(MenuManager *m);
     //! Update the menu state
@@ -73,7 +74,7 @@ protected:
     void selectAllAgents();
 
     //! Deselect agent if he died
-    void updateSelectionForDeadAgents();
+    void updateSelectionForDeadAgent(PedInstance *p_ped);
     //! updates visual markers for our agents
     void updtAgentsMarker();
 
@@ -87,6 +88,9 @@ protected:
     void updateSelectAll();
     //! Update the target value for adrenaline etc for an agent
     void updateIPALevelMeters(int elapsed);
+
+    //! Handles game events
+    void handleGameEvent(GameEvent evt);
 
 protected:
     /*! Origin of the minimap on the screen.*/

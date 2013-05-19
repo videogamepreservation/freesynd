@@ -57,6 +57,7 @@ mm_renderer_()
     scroll_y_ = 0;
     shooting_events_.clear();
     ipa_chng_.ipa_chng = -1;
+    g_gameCtrl.addListener(this, GameEvent::kMission);
 }
 
 /*!
@@ -357,8 +358,6 @@ void GameplayMenu::handleTick(int elapsed)
             }
         }
     }
-
-    updateSelectionForDeadAgents();
 
     updateMinimap(elapsed);
 
@@ -1522,36 +1521,24 @@ void GameplayMenu::updtAgentsMarker()
 /*!
  * This method checks among the squad to see if an agent died and deselects him.
  */
-void GameplayMenu::updateSelectionForDeadAgents() {
-    // TODO change the way this detection is made. It's not clean. use events
-    bool b_agentDied = false;
-    for (size_t i = AgentManager::kSlot1; i < AgentManager::kMaxSlot; i++) {
-        if (mission_->ped(i) && mission_->ped(i)->isOurAgent()) {
-            if (g_Session.agents().squadMember(i)->isAlive() && mission_->ped(i)->isDead()) {
-                // TODO change this
-                g_Session.agents().squadMember(i)->set_dead();
-                selection_.deselectAgent(i);
-                b_agentDied = true;
-            }
-        }
-    }
-    // At least one agent died
-    if (b_agentDied) {
-        // if selection is empty after agent's death
-        // selects the first selectable agent
-        if (selection_.size() == 0) {
-            for (size_t i = AgentManager::kSlot1; i < AgentManager::kMaxSlot; i++) {
-                if (selection_.selectAgent(i, false)) {
-                    // Agent has been selected -> quit
-                    break;
-                }
-            }
-        }
+void GameplayMenu::updateSelectionForDeadAgent(PedInstance *p_ped) {
+    // Deselects dead agent
+    selection_.deselectAgent(p_ped);
 
-        // anyway updates markers
-        updtAgentsMarker();
-        updateSelectAll();
+    // if selection is empty after agent's death
+    // selects the first selectable agent
+    if (selection_.size() == 0) {
+        for (size_t i = AgentManager::kSlot1; i < AgentManager::kMaxSlot; i++) {
+            if (selection_.selectAgent(i, false)) {
+                // Agent has been selected -> quit
+                break;
+            }
+        }
     }
+
+    // anyway updates markers
+    updtAgentsMarker();
+    updateSelectAll();
 }
 
 /*!
@@ -1590,4 +1577,14 @@ void GameplayMenu::updateSelectAll() {
     // then button is pressed.
     pressed_btn_select_all_ = ((nbAgentAlive == selection_.size()
         && nbAgentAlive != 0) || nbAgentAlive == 1);
+}
+
+/**
+ * Method to intercept game events.
+ */
+void GameplayMenu::handleGameEvent(GameEvent evt) {
+    if (evt.type == GameEvent::kAgentDied) {
+        PedInstance *p_ped = static_cast<PedInstance *> (evt.pCtxt);
+        updateSelectionForDeadAgent(p_ped);
+    }
 }

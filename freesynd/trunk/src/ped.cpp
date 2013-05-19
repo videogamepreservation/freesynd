@@ -2279,6 +2279,14 @@ bool PedInstance::handleDamage(ShootableMapObject::DamageInflictType *d) {
                 break;
         }
         is_ignored_ = true;
+        // send an event to alert agent died
+        if (isOurAgent()) {
+            GameEvent evt;
+            evt.stream = GameEvent::kMission;
+            evt.type = GameEvent::kAgentDied;
+            evt.pCtxt = this;
+            g_gameCtrl.fireGameEvent(evt);
+        }
     } else {
         // TODO: agent sometime can survive explosion, they need to walk burning?
         setDrawnAnim(PedInstance::ad_HitAnim);
