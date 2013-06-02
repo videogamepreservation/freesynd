@@ -334,7 +334,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
     if (actions_queue_.empty()) {
         // TODO: use default_actions_ to fill it up
 #if 1
-        if ((state_ & pa_smDead) == 0) {
+        if ((state_ & pa_smCheckExcluded) == 0) {
             actionQueueGroupType as;
             if (createActQFindEnemy(as)) {
                 as.group_id = 0;
@@ -1258,7 +1258,15 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                                 closest = *it_msmod;
                             ++it_msmod;
                         }
-                        aqt->t_smo = closest.first;
+                        std::vector <actionQueueType>::iterator searched =
+                            findActInQueue(PedInstance::ai_aAquireControl,
+                            *it, it->actions.begin());
+
+                        if (searched != it->actions.end()) {
+                            actionQueueType & aqt_aq_cont = *searched;
+                            aqt_aq_cont.t_smo = closest.first;
+                            aqt_aq_cont.state ^= 64;
+                        }
                         aqt->state |= 4;
                     }
                 }
@@ -1411,18 +1419,18 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
         {
             // checking for action groups availiable in queue
             // will add from default_actions_ if not availiable
-            uint32 groups_availiable = 0;
+            uint32 groups_used = 0;
             for (std::vector <actionQueueGroupType>::iterator it =
                  actions_queue_.begin(); it != actions_queue_.end(); ++it)
             {
                 if ((it->state & 128) == 0 && (it->state & 76) != 0)
                     continue;
 
-                groups_availiable |= it->group_desc;
+                groups_used |= it->group_desc;
             }
 
             // TODO: use default_actions_
-            if ((groups_availiable & (PedInstance::gd_mThink
+            if ((groups_used & (PedInstance::gd_mThink
                                       | PedInstance::gd_mFire)) == 0)
             {
                 actionQueueGroupType as;
@@ -1562,7 +1570,7 @@ PedInstance::PedInstance(Ped *ped, int m) : ShootableMovableMapObject(m),
     obj_group_id_(0), old_obj_group_id_(0),
     drawn_anim_(PedInstance::ad_StandAnim),
     sight_range_(0), selected_weapon_(-1), in_vehicle_(NULL),
-    agent_is_(PedInstance::Not_Agent)
+    agent_is_(PedInstance::Not_Agent), owner_(NULL)
 {
     hold_on_.wayFree = 0;
     rcv_damage_def_ = MapObject::ddmg_Ped;
@@ -1865,8 +1873,7 @@ bool PedInstance::selectRequiredWeapon(pedWeaponToUse *pw_to_use) {
                         }
                     } else {
                         found = true;
-                        found_weapons.push_back(std::make_pair(pWI->rank(),
-                            i));
+                        found_weapons.push_back(std::make_pair(pWI->rank(), i));
                     }
                 }
             }
@@ -1886,8 +1893,7 @@ bool PedInstance::selectRequiredWeapon(pedWeaponToUse *pw_to_use) {
                         }
                     } else {
                         found = true;
-                        found_weapons.push_back(std::make_pair(pWI->rank(),
-                            i));
+                        found_weapons.push_back(std::make_pair(pWI->rank(), i));
                     }
                 }
             }
@@ -2227,28 +2233,31 @@ bool PedInstance::handleDamage(ShootableMapObject::DamageInflictType *d) {
         ((PedInstance *)d->d_owner)->cpyEnemyDefs(enemy_group_defs_);
         dropActQ();
         assert(d->d_owner != NULL);
+        owner_ = d->d_owner;
 
         // adding following behavior for persuaded
+        //-----remove, TODO: reset default actions
         PedInstance::actionQueueGroupType as;
         as.group_id = 0;
         as.group_desc = PedInstance::gd_mExclusive;
         createActQWait(as, 2000);
         as.main_act = as.actions.size() - 1;
         as.origin_desc = 4;
-        addActQToQueue(as);
+        actions_queue_.push_back(as);
 
         as.actions.clear();
 
-        createActQFollowing(as, d->d_owner, 0, 192);
+        createActQFollowing(as, owner_, 0, 192);
         as.main_act = as.actions.size() - 1;
         as.group_desc = PedInstance::gd_mStandWalk;
-        addActQToQueue(as);
+        actions_queue_.push_back(as);
+        //-----remove
+
         setDrawnAnim(PedInstance::ad_PersuadedAnim);
         desc_state_ |= pd_smControlled;
         friends_found_.clear();
         hostiles_found_.clear();
         hostile_desc_ = ((PedInstance *)d->d_owner)->hostileDesc();
-        // TODO: set default_actions_ to owners
         return true;
     }
 

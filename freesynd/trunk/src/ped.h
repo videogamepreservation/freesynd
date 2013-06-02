@@ -187,7 +187,7 @@ public:
         ad_SmokeBurnAnim,
         ad_DeadBurnAnim,
         ad_PersuadedAnim
-    }AnimationDrawn;
+    } AnimationDrawn;
 
     typedef enum {
         m_tpPedestrian = 0x01,
@@ -195,7 +195,7 @@ public:
         m_tpPolice = 0x04,
         m_tpGuard = 0x08,
         m_tpCriminal = 0x10
-    }mainPedType;
+    } mainPedType;
 
     typedef enum {
         pa_smNone = 0x0,
@@ -712,7 +712,7 @@ public:
     void clearActQ() { actions_queue_.clear(); }
 
     void createDefQueue();
-    bool addDefActsToActions(actionQueueGroupType &as);
+    void addDefActsToActions(uint32 groups_used);
     void clearDefActs() { default_actions_.clear(); }
 
     void dropActQ();
@@ -825,6 +825,9 @@ protected:
     int selected_weapon_;
     VehicleInstance *in_vehicle_;
     agentAndNonEnum agent_is_;
+    //! controller of ped - for persuaded
+    ShootableMapObject *owner_;
+    //TODO: not used to remove??
     bool walkable(int x, int y, int z) { return true; }
 
 private:

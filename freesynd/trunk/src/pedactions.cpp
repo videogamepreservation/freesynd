@@ -525,31 +525,45 @@ void PedInstance::createDefQueue() {
     default_actions_.clear();
 
     actionQueueGroupType as;
+    as.origin_desc = 2;
     if (createActQFindEnemy(as)) {
         as.group_id = 0;
         as.main_act = 0;
         as.group_desc = PedInstance::gd_mThink | PedInstance::gd_mFire;
-        as.origin_desc = 2;
         default_actions_.push_back(as);
     }
-    if (obj_group_def_ == PedInstance::og_dmAgent) {
-        if (isOurAgent()) {
-            as.clear();
-            createActQFindNonFriend(as);
-            default_actions_.insert(default_actions_.begin(), as);
-        }
+    if ((desc_state_ & PedInstance::pd_smControlled) != 0) {
+        // TODO: create check owner action to set owner correctly,
+        // when one of our agents dies it will be possible to switch
+        // to follow and mimic actions of other alive agents
+        as.group_id = 0;
+        createActQFollowing(as, owner_, 0, 192);
+        as.main_act = as.actions.size() - 1;
+        as.group_desc = PedInstance::gd_mStandWalk;
+        actions_queue_.push_back(as);
+    } else {
+        if (obj_group_def_ == PedInstance::og_dmAgent) {
+            if (isOurAgent()) {
+                as.actions.clear();
+                as.main_act = 0;
+                createActQFindNonFriend(as);
+                default_actions_.insert(default_actions_.begin(), as);
+            }
+        }/* else if (obj_group_def_ == PedInstance::og_dmCivilian
+                   || obj_group_def_ == PedInstance::og_dmCriminal)
+        {
+            ;
+        }*/
     }
 }
 
-bool PedInstance::addDefActsToActions(actionQueueGroupType &as) {
-    /*
-    for (std::vector <actionQueueGroupType>::iterator it = actions_queue_.begin();
-        it != actions_queue_.end(); it++)
+void PedInstance::addDefActsToActions(uint32 groups_used) {
+    for (std::vector <actionQueueGroupType>::iterator it = default_actions_.begin();
+        it != default_actions_.end(); ++it)
     {
+        if ((groups_used & it->group_desc) == 0)
+            actions_queue_.push_back(*it);
     }
-    */
-    actions_queue_.push_back(as);
-    return true;
 }
 
 void PedInstance::discardActG(uint32 id) {
