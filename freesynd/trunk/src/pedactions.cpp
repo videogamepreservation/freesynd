@@ -27,7 +27,7 @@
 void PedInstance::createActQStanding(actionQueueGroupType &as) {
     as.state = 1;
     actionQueueType aq;
-    aq.ot_execute = PedInstance::ai_aWait;
+    aq.act_exec = PedInstance::ai_aWait;
     aq.as = PedInstance::pa_smStanding;
     aq.state = 1;
     aq.multi_var.time_var.desc = 0;
@@ -43,7 +43,7 @@ void PedInstance::createActQWalking(actionQueueGroupType &as, PathNode *tpn,
     as.state = 1;
     actionQueueType aq;
     aq.as = PedInstance::pa_smWalking;
-    aq.ot_execute = PedInstance::ai_aReachLocation;
+    aq.act_exec = PedInstance::ai_aReachLocation;
     aq.group_desc = PedInstance::gd_mStandWalk;
     aq.state = 1;
     aq.multi_var.dist_var.dir = dir;
@@ -83,7 +83,7 @@ void PedInstance::createActQHit(actionQueueGroupType &as, PathNode *tpn,
     as.state = 1;
     actionQueueType aq;
     aq.as = PedInstance::pa_smHit;
-    aq.ot_execute = PedInstance::ai_aReachLocation;
+    aq.act_exec = PedInstance::ai_aReachLocation;
     aq.group_desc = PedInstance::gd_mExclusive;
     aq.multi_var.dist_var.speed = -1;
     aq.state = 1;
@@ -184,11 +184,11 @@ bool PedInstance::createActQFiring(actionQueueGroupType &as, PathNode *tpn,
         aq.multi_var.enemy_var.shots_done = 0;
         if (tpn) {
             aq.t_pn = *tpn;
-            aq.ot_execute = PedInstance::ai_aAttackLocation;
+            aq.act_exec = PedInstance::ai_aAttackLocation;
             aq.t_smo = NULL;
         } else {
             aq.t_smo = tsmo;
-            aq.ot_execute = PedInstance::ai_aDestroyObject;
+            aq.act_exec = PedInstance::ai_aDestroyObject;
         }
     } else {
         if (tsmo && tsmo->majorType() == MapObject::mjt_Ped) {
@@ -196,12 +196,12 @@ bool PedInstance::createActQFiring(actionQueueGroupType &as, PathNode *tpn,
             aq.multi_var.enemy_var.make_shots = make_shots;
             aq.multi_var.enemy_var.shots_done = 0;
             aq.t_smo = tsmo;
-            aq.ot_execute = PedInstance::ai_aAquireControl;
+            aq.act_exec = PedInstance::ai_aAquireControl;
         } else
             return false;
     }
     aq.state = 1;
-    aq.ot_execute |= PedInstance::ai_aWait;
+    aq.act_exec |= PedInstance::ai_aWait;
     aq.multi_var.time_var.desc = 1;
     aq.multi_var.time_var.elapsed = 0;
     as.actions.push_back(aq);
@@ -214,7 +214,7 @@ void PedInstance::createActQFollowing(actionQueueGroupType &as,
     as.state = 1;
     actionQueueType aq;
     aq.as = PedInstance::pa_smFollowing;
-    aq.ot_execute = PedInstance::ai_aFollowObject;
+    aq.act_exec = PedInstance::ai_aFollowObject;
     aq.group_desc = PedInstance::gd_mStandWalk;
     aq.state = 1;
     aq.t_smo = tsmo;
@@ -233,8 +233,8 @@ void PedInstance::createActQPickUp(actionQueueGroupType &as,
     aq.state = 1;
     aq.t_smo = tsmo;
     aq.as = PedInstance::pa_smPickUp;
-    aq.ot_execute = PedInstance::ai_aPickUpObject;
-    aq.ot_execute |= PedInstance::ai_aWait;
+    aq.act_exec = PedInstance::ai_aPickUpObject;
+    aq.act_exec |= PedInstance::ai_aWait;
     aq.multi_var.time_var.desc = 1;
     aq.group_desc = PedInstance::gd_mExclusive;
     as.actions.push_back(aq);
@@ -246,11 +246,11 @@ void PedInstance::createActQPutDown(actionQueueGroupType &as,
     as.state = 1;
     actionQueueType aq;
     aq.as = PedInstance::pa_smPutDown;
-    aq.ot_execute = PedInstance::ai_aPutDownObject;
+    aq.act_exec = PedInstance::ai_aPutDownObject;
     aq.group_desc = PedInstance::gd_mExclusive;
     aq.state = 1;
     aq.t_smo = tsmo;
-    aq.ot_execute |= PedInstance::ai_aWait;
+    aq.act_exec |= PedInstance::ai_aWait;
     aq.multi_var.time_var.desc = 1;
     as.actions.push_back(aq);
 }
@@ -259,7 +259,7 @@ void PedInstance::createActQBurning(actionQueueGroupType &as) {
     as.state = 1;
     actionQueueType aq;
     aq.as = PedInstance::pa_smBurning;
-    aq.ot_execute = PedInstance::ai_aReachLocation;
+    aq.act_exec = PedInstance::ai_aReachLocation;
     aq.multi_var.dist_var.dir = rand() % 256;
     aq.multi_var.dist_var.dist = rand() % 256 + 128;
     aq.multi_var.dist_var.speed = -1;
@@ -278,7 +278,7 @@ void PedInstance::createActQBurning(actionQueueGroupType &as) {
     aq.group_desc = PedInstance::gd_mExclusive;
     as.actions.push_back(aq);
     aq.as = PedInstance::pa_smBurning;
-    aq.ot_execute = PedInstance::ai_aWait;
+    aq.act_exec = PedInstance::ai_aWait;
     aq.multi_var.time_var.elapsed = 0;
     aq.multi_var.time_var.time_total = 1000;
     aq.multi_var.time_var.desc = 0;
@@ -298,7 +298,7 @@ void PedInstance::createActQGetInCar(actionQueueGroupType &as,
     aq.condition = 0;
     aq.as = PedInstance::pa_smGetInCar;
     aq.group_desc = PedInstance::gd_mExclusive;
-    aq.ot_execute = PedInstance::ai_aAquireControl;
+    aq.act_exec = PedInstance::ai_aAquireControl;
     as.actions.push_back(aq);
 }
 
@@ -313,7 +313,7 @@ void PedInstance::createActQUsingCar(actionQueueGroupType &as, PathNode *tpn,
     aq.condition = 1;
     aq.as = PedInstance::pa_smNone;
     aq.group_desc = PedInstance::gd_mStandWalk;
-    aq.ot_execute = PedInstance::ai_aUseObject;
+    aq.act_exec = PedInstance::ai_aUseObject;
     as.actions.push_back(aq);
 }
 
@@ -328,7 +328,7 @@ void PedInstance::createActQInCar(actionQueueGroupType &as, PathNode *tpn,
     aq.condition = 0;
     aq.as = PedInstance::pa_smNone;
     aq.group_desc = PedInstance::gd_mStandWalk;
-    aq.ot_execute = PedInstance::ai_aUseObject;
+    aq.act_exec = PedInstance::ai_aUseObject;
     as.actions.push_back(aq);
 }
 
@@ -338,7 +338,7 @@ void PedInstance::createActQLeaveCar(actionQueueGroupType &as,
     as.state = 1;
     actionQueueType aq;
     aq.as = PedInstance::pa_smLeaveCar;
-    aq.ot_execute = PedInstance::ai_aLoseControl;
+    aq.act_exec = PedInstance::ai_aLoseControl;
     aq.state = 1;
     aq.t_smo = tsmo;
     aq.group_desc = PedInstance::gd_mExclusive;
@@ -357,7 +357,7 @@ void PedInstance::createActQWait(actionQueueGroupType &as, int tm_wait, uint8 de
         aq.state = 1 | 4;
     else
         aq.state = 1 | 32;
-    aq.ot_execute = PedInstance::ai_aWait;
+    aq.act_exec = PedInstance::ai_aWait;
     aq.multi_var.time_var.desc = desc;
     aq.multi_var.time_var.elapsed = 0;
     aq.multi_var.time_var.time_total = tm_wait;
@@ -370,7 +370,7 @@ bool PedInstance::createActQFindEnemy(actionQueueGroupType &as) {
     aq.as = PedInstance::pa_smNone;
     aq.group_desc = PedInstance::gd_mThink;
     aq.state = 1;
-    aq.ot_execute = PedInstance::ai_aFindEnemy | PedInstance::ai_aWaitToStart;
+    aq.act_exec = PedInstance::ai_aFindEnemy | PedInstance::ai_aWaitToStart;
     Mod *pMod = slots_[Mod::MOD_BRAIN];
     int32 tm_wait = tm_before_check_;
     if (obj_group_def_ == PedInstance::og_dmAgent) {
@@ -383,7 +383,7 @@ bool PedInstance::createActQFindEnemy(actionQueueGroupType &as) {
     aq.multi_var.time_var.time_to_start = tm_wait;
     as.actions.push_back(aq);
     pedWeaponToUse pw_to_use;
-    if (getMainType() == PedInstance::m_tpAgent) {
+    if (obj_group_def_ == PedInstance::og_dmAgent) {
         aq.multi_var.enemy_var.pw_to_use.use_ranks = pMod != NULL;
         WeaponInstance *wi = selectedWeapon();
         if (wi && wi->usesAmmo() && wi->ammoRemaining() == 0) {
@@ -410,13 +410,39 @@ bool PedInstance::createActQFindEnemy(actionQueueGroupType &as) {
     return true;
 }
 
+void PedInstance::createActQFindNonFriend(actionQueueGroupType &as)
+{
+    as.state = 1;
+    actionQueueType aq;
+    aq.as = PedInstance::pa_smNone;
+    aq.group_desc = PedInstance::gd_mThink;
+    aq.state = 1;
+    aq.act_exec = PedInstance::ai_aFindNonFriend | PedInstance::ai_aWaitToStart;
+    Mod *pMod = slots_[Mod::MOD_BRAIN];
+    int32 tm_wait = tm_before_check_;
+    if (obj_group_def_ == PedInstance::og_dmAgent) {
+        if (pMod)
+            tm_wait -= 25 * (pMod->getVersion() + 2);
+        tm_wait = (double)tm_wait * perception_->getMultiplier();
+    }
+    aq.multi_var.time_var.desc = 0;
+    aq.multi_var.time_var.elapsed = 0;
+    aq.multi_var.time_var.time_to_start = tm_wait;
+    as.actions.push_back(aq);
+    pedWeaponToUse pw_to_use;
+    pw_to_use.desc = 4;
+    pw_to_use.wpn.dmg_type = MapObject::dmg_Mental;
+    if (createActQFiring(as, NULL, NULL, false, 0, &pw_to_use))
+        as.actions.back().state |= 64;
+}
+
 void PedInstance::createActQResetActionQueue(actionQueueGroupType &as) {
     as.state = 1;
     actionQueueType aq;
     aq.as = PedInstance::pa_smNone;
     aq.group_desc = PedInstance::gd_mExclusive;
     aq.state = 1;
-    aq.ot_execute = PedInstance::ai_aResetActionQueueQueue;
+    aq.act_exec = PedInstance::ai_aResetActionQueueQueue;
     as.actions.push_back(aq);
 }
 
@@ -426,7 +452,7 @@ void PedInstance::createActQDeselectCurWeapon(actionQueueGroupType &as) {
     aq.as = PedInstance::pa_smNone;
     aq.group_desc = PedInstance::gd_mFire;
     aq.state = 1;
-    aq.ot_execute = PedInstance::ai_aDeselectCurWeapon;
+    aq.act_exec = PedInstance::ai_aDeselectCurWeapon;
     as.actions.push_back(aq);
 }
 
@@ -438,7 +464,7 @@ void PedInstance::createActQTrigger(actionQueueGroupType &as, PathNode *tpn,
     aq.as = PedInstance::pa_smNone;
     aq.group_desc = PedInstance::gd_mExclusive;
     aq.state = 1;
-    aq.ot_execute = PedInstance::ai_aTrigger;
+    aq.act_exec = PedInstance::ai_aTrigger;
     aq.t_pn = *tpn;
     aq.multi_var.dist_var.dist = range;
     as.actions.push_back(aq);
@@ -493,6 +519,26 @@ bool PedInstance::addActQToQueue(actionQueueGroupType &as,
         as.group_id = 0;
     actions_queue_.push_back(as);
     return true;
+}
+
+void PedInstance::createDefQueue() {
+    default_actions_.clear();
+
+    actionQueueGroupType as;
+    if (createActQFindEnemy(as)) {
+        as.group_id = 0;
+        as.main_act = 0;
+        as.group_desc = PedInstance::gd_mThink | PedInstance::gd_mFire;
+        as.origin_desc = 2;
+        default_actions_.push_back(as);
+    }
+    if (obj_group_def_ == PedInstance::og_dmAgent) {
+        if (isOurAgent()) {
+            as.clear();
+            createActQFindNonFriend(as);
+            default_actions_.insert(default_actions_.begin(), as);
+        }
+    }
 }
 
 bool PedInstance::addDefActsToActions(actionQueueGroupType &as) {
@@ -553,7 +599,7 @@ void PedInstance::updtActGFiringShots(uint32 id, uint32 make_shots)
                 for (std::vector <actionQueueType>::iterator it_a =
                     it->actions.begin(); it_a != it->actions.end(); ++it)
                 {
-                    if ((it_a->ot_execute & (PedInstance::ai_aDestroyObject
+                    if ((it_a->act_exec & (PedInstance::ai_aDestroyObject
                         | PedInstance::ai_aAttackLocation
                         | PedInstance::ai_aAquireControl)) != 0)
                     {
@@ -576,24 +622,24 @@ void PedInstance::updtActGFiring(uint32 id, PathNode* tpn,
                 for (std::vector <actionQueueType>::iterator it_a =
                     it->actions.begin(); it_a != it->actions.end(); ++it)
                 {
-                    if ((it_a->ot_execute & (PedInstance::ai_aDestroyObject
+                    if ((it_a->act_exec & (PedInstance::ai_aDestroyObject
                         | PedInstance::ai_aAttackLocation)) != 0)
                     {
-                        it_a->ot_execute &= PedInstance::ai_aAll
+                        it_a->act_exec &= PedInstance::ai_aAll
                             ^ (PedInstance::ai_aDestroyObject
                             | PedInstance::ai_aAttackLocation);
-                        // TODO : update with when condition will be used
+                        // TODO : update when condition will be used
                         if (tsmo) {
                             it_a->t_smo = tsmo;
-                            it_a->ot_execute |= PedInstance::ai_aDestroyObject;
+                            it_a->act_exec |= PedInstance::ai_aDestroyObject;
                         } else {
                             it_a->t_pn = *tpn;
-                            it_a->ot_execute |= PedInstance::ai_aAttackLocation;
+                            it_a->act_exec |= PedInstance::ai_aAttackLocation;
                             it_a->t_smo = NULL;
                         }
                         break;
                     }
-                    if ((it_a->ot_execute
+                    if ((it_a->act_exec
                         & (PedInstance::ai_aAquireControl)) != 0)
                     {
                         if (tsmo) {
@@ -627,3 +673,18 @@ void PedInstance::pauseAllInActG(actionQueueGroupType &as, uint32 start_pos) {
         it->state |= 64;
     }
 }
+
+std::vector <PedInstance::actionQueueType>::iterator PedInstance::findActInQueue(uint32 act_find,
+    actionQueueGroupType &as, std::vector <actionQueueType>::iterator search_from)
+{
+    for (std::vector <actionQueueType>::iterator it =
+        search_from; it != as.actions.end(); ++it)
+    {
+        if ((it->act_exec & act_find) != 0) {
+            return it;
+        }
+    }
+    return as.actions.end();
+}
+
+

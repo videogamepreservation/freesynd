@@ -612,7 +612,7 @@ public:
         // action state (pedActionStateMasks)
         uint32 as;
         // PedInstance::AiAction
-        uint32 ot_execute;
+        uint32 act_exec;
         PathNode t_pn;
         // ai_aFindEnemy sets this value, others use
         ShootableMapObject *t_smo;
@@ -696,19 +696,25 @@ public:
         uint16 state;
         uint32 group_id;
         /* which process created this action group:
-         * 0 - unknown, 1 - script, 2 - from default_actions_, 3 - other group
-         * created this group, 4 - user input
+         * 0 - unknown, 1 - script, 2 - from default_actions_, 3 - other action
+         * group created this group, 4 - user input
          */
         uint8 origin_desc;
     } actionQueueGroupType;
 
+    // act_find (PedInstance::AiAction)
+    std::vector <actionQueueType>::iterator findActInQueue(uint32 act_find,
+        actionQueueGroupType &as, std::vector <actionQueueType>::iterator search_from);
     bool setActQInQueue(actionQueueGroupType &as,
         uint32 * id = NULL);
     bool addActQToQueue(actionQueueGroupType &as,
         uint32 * id = NULL);
     void clearActQ() { actions_queue_.clear(); }
+
+    void createDefQueue();
     bool addDefActsToActions(actionQueueGroupType &as);
     void clearDefActs() { default_actions_.clear(); }
+
     void dropActQ();
 
     void createActQStanding(actionQueueGroupType &as);
@@ -743,6 +749,8 @@ public:
                         uint8 desc = 0);
 
     bool createActQFindEnemy(actionQueueGroupType &as);
+    void createActQFindNonFriend(actionQueueGroupType &as);
+
     void createActQResetActionQueue(actionQueueGroupType &as);
     void createActQDeselectCurWeapon(actionQueueGroupType &as);
     void createActQTrigger(actionQueueGroupType &as, PathNode *tpn, int32 range);
@@ -791,12 +799,11 @@ protected:
     Mmuu32_t emulated_group_defs_;
     // not set anywhere but used
     Mmuu32_t friend_group_defs_;
-    // std::set <unsigned int> emulated_failed_groups_;
-    // dicovered hostiles are set here, only within sight range
+    //! dicovered hostiles are set here, only within sight range
     Msmod_t hostiles_found_;
-    // used by police officers, for now friends forever mode
+    //! used by police officers, for now friends forever mode
     std::set <ShootableMapObject *> friends_found_;
-    // from this list they will move to friends_found_ if in sight
+    //! from this list they will move to friends_found_ if in sight
     std::set <ShootableMapObject *> friends_not_seen_;
     //! defines group obj belongs to (objGroupDefMasks), not unique
     uint32 obj_group_def_;
@@ -818,7 +825,7 @@ protected:
     int selected_weapon_;
     VehicleInstance *in_vehicle_;
     agentAndNonEnum agent_is_;
-    bool walkable(int x, int y, int z) { return true; };
+    bool walkable(int x, int y, int z) { return true; }
 
 private:
     int getClosestDirs(int dir, int& closest, int& closer);
