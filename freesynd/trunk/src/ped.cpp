@@ -1210,7 +1210,8 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                             if (pMod)
                                 tm_wait -= 25 * (pMod->getVersion() + 2);
                             tm_wait = (double)tm_wait * intelligence_->getMultiplier();
-                        } else if (obj_group_def_ == PedInstance::og_dmCivilian)
+                        } else if (obj_group_def_ == PedInstance::og_dmCivilian
+                            && (desc_state_ & pd_smControlled) == 0)
                         {
                             searched = findActInQueue(PedInstance::ai_aReachLocation,
                                 *it, it->actions.begin());

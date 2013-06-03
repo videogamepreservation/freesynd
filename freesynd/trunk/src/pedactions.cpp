@@ -410,7 +410,7 @@ bool PedInstance::createActQFindEnemy(actionQueueGroupType &as) {
     createActQWalking(as, NULL, NULL, 0);
     as.actions.back().act_exec |= PedInstance::ai_aTimeExecute;
     as.actions.back().multi_var.time_var.exec_elapsed = 0;
-    as.actions.back().multi_var.time_var.exec_time = 5000;
+    as.actions.back().multi_var.time_var.exec_time = 3000;
     as.actions.back().multi_var.dist_var.speed = 512;
     as.actions.back().state |= 64;
     return true;
