@@ -34,9 +34,16 @@ endif ()
 set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${EXTRA_C_FLAGS}")
 set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${EXTRA_CXX_FLAGS}")
 
+# Use -DDATA_DIR to override data location
+if(NOT DATA_DIR)
+    if(UNIX)
+        SET(DATA_DIR "${CMAKE_INSTALL_PREFIX}/share/freesynd/")
+    endif(UNIX)
+endif(NOT DATA_DIR)
+
 # Set standard definitions for all platforms.
 add_definitions (-DSYSTEM_SDL)
-add_definitions (-DPREFIX=\"${CMAKE_INSTALL_PREFIX}\")
+add_definitions (-DPREFIX=\"${DATA_DIR}\")
 
 # Locate libs we depend on directly.
 find_package (SDL)
@@ -70,7 +77,7 @@ else ()
 	# We only define an install target if we're doing a release build.
 	# Furthermore, on Mac, the data folder is a part of the app bundle.
 	if (NOT APPLE)
-		install (DIRECTORY data DESTINATION share/freesynd PATTERN .svn EXCLUDE)
+		install (DIRECTORY data DESTINATION ${DATA_DIR} PATTERN .svn EXCLUDE)
 	endif ()
 endif ()
 

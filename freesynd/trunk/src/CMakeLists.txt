@@ -183,6 +183,13 @@ add_executable (freesynd ${SOURCES} ${HEADERS})
 
 target_link_libraries (freesynd ${PNG_LIBRARIES} ${SDL_LIBRARY} ${SDLIMAGE_LIBRARY} ${SDLMIXER_LIBRARY})
 
+# Use -DBIN_DIR to override binary installation location
+if(NOT BIN_DIR)
+    if(UNIX)
+        SET(BIN_DIR "${CMAKE_INSTALL_PREFIX}/bin")
+    endif(UNIX)
+endif(NOT BIN_DIR)
+
 if (BUILD_DEV_TOOLS)
 	add_executable (dump
 		dump.cpp
@@ -203,7 +210,7 @@ else ()
 	if (APPLE)
 		install (TARGETS freesynd DESTINATION /Applications)
 	else ()
-		install (TARGETS freesynd DESTINATION bin)
+		install (TARGETS freesynd DESTINATION ${BIN_DIR})
 	endif ()
 endif ()
 

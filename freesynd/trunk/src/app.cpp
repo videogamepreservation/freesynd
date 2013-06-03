@@ -189,7 +189,7 @@ bool App::readConfiguration() {
                 return false;
             }
 #else
-            ourDataDir = PREFIX"/share/freesynd/data";
+            ourDataDir = PREFIX"/data";
 #endif
         }
         addMissingSlash(ourDataDir);

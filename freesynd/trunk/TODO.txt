@@ -24,11 +24,11 @@ trash bin/phone booth should be desctrutable with proper animation.
    vehicle: max people can hold; speed per type; damage can inflict/recieve per type;
 radius of damage when destroyed
    people: add IPA levels and their modification through gameplay menu and influence
-of these levels on different properties of people - speed, inteligence, accuracy,
-viewing range(?), health recovery(?); mods properties should affect IPAs; damage
+of these levels on different properties of people - inteligence, viewing range(?),
+ health recovery(?); mods properties should affect IPAs; damage
 recieved modifier, if we don't want to recalculate all the time; persuade power
 points; persuade points needed to persuade - this value will be added to agent
-that succesfully persuaded; weapon range modifier(?); accuracy modifier/property(?);
+that succesfully persuaded; weapon range modifier(?);
  - static objects: damage recieve value; destructable or not
  
  A.I:
