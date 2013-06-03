@@ -829,6 +829,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                 }
                 if ((aqt->act_exec & PedInstance::ai_aFollowObject) != 0)
                 {
+                    // TODO: review, reduce code(, in sight when no weapon?)
                     if (aqt->state == 1 || aqt->state == 17) {
                         speed_ = aqt->multi_var.dist_var.speed != -1
                             ? aqt->multi_var.dist_var.speed: getSpeed();
@@ -1175,23 +1176,24 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                             findActInQueue(PedInstance::ai_aDestroyObject,
                                 *it, it->actions.begin());
 
-                        if (searched != it->actions.end()) {
+                        if ((!weapons_.empty()) && searched != it->actions.end())
+                        {
                             actionQueueType & aqt_attack = *searched;
                             aqt_attack.t_smo = aqt->t_smo;
                             // action is ready, removing not ready flag
                             // enabling destroyobject action
                             aqt_attack.state ^= 64;
-                            it->main_act++;
+                            it->main_act = std::distance(it->actions.begin(), searched);
                             if (obj_group_def_ == og_dmPolice
                                 // only non controlled will follow and wait
                                 && (desc_state_ & pd_smControlled) == 0)
                             {
                                 // forcing showing a gun
                                 selectRequiredWeapon();
+                                g_App.gameSounds().play(snd::PUTDOWN_WEAPON);
                                 aqt_attack.act_exec |= PedInstance::ai_aWaitToStart;
                                 aqt_attack.multi_var.time_var.time_to_start = 5000 - tm_before_check_;
                                 aqt_attack.multi_var.time_var.desc = 1;
-                                g_App.gameSounds().play(snd::PUTDOWN_WEAPON);
                                 // enabling following behavior
                                 searched = findActInQueue(PedInstance::ai_aFollowObject,
                                     *it, it->actions.begin());
@@ -1208,9 +1210,25 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                             if (pMod)
                                 tm_wait -= 25 * (pMod->getVersion() + 2);
                             tm_wait = (double)tm_wait * intelligence_->getMultiplier();
+                        } else if (obj_group_def_ == PedInstance::og_dmCivilian)
+                        {
+                            searched = findActInQueue(PedInstance::ai_aReachLocation,
+                                *it, it->actions.begin());
+                            if (searched != it->actions.end()) {
+                                // enabling panic
+                                actionQueueType & aqt_panic = *searched;
+                                aqt_panic.state ^= 64;
+                                // setting opposite direction for movement
+                                int tx, ty, dirmove;
+                                aqt->t_smo->convertPosToXY(&tx, &ty);
+                                setDirection(tx - (tile_x_ * 256 + off_x_),
+                                    ty - (tile_y_ * 256 + off_y_), &dirmove);
+                                aqt_panic.multi_var.dist_var.dir = (dirmove + 128) % 256;
+                                it->main_act = std::distance(it->actions.begin(), searched);
+                            }
                         }
                         aqt->act_exec |= PedInstance::ai_aWait;
-                        aqt->multi_var.time_var.time_total = tm_wait;
+                        aqt->multi_var.time_var.time_wait = tm_wait;
                         aqt->multi_var.time_var.desc = 2;
                         aqt->multi_var.time_var.elapsed = 0;
                         // TODO: selected weapon is ignored after findenemy set,
@@ -1278,7 +1296,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                             aqt->state |= 130;
                             aqt->multi_var.time_var.elapsed += elapsed;
                             if (aqt->multi_var.time_var.elapsed
-                                >= aqt->multi_var.time_var.time_total)
+                                >= aqt->multi_var.time_var.time_wait)
                             {
                                 aqt->state &= (65535 ^ 128);
                                 aqt->state |= 4;
@@ -1315,7 +1333,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                             if ((aqt->state & 128) != 0) {
                                 aqt->multi_var.time_var.elapsed += elapsed;
                                 if (aqt->multi_var.time_var.elapsed
-                                    >= aqt->multi_var.time_var.time_total)
+                                    >= aqt->multi_var.time_var.time_wait)
                                 {
                                     aqt->state &= (65535 ^ 160);
                                 }
@@ -1323,6 +1341,20 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                                 aqt->state |= 130;
                         } else
                             aqt->state &= (65535 ^ 32);
+                    }
+                }
+                if ((aqt->act_exec & PedInstance::ai_aTimeExecute) != 0)
+                {
+                    aqt->multi_var.time_var.exec_elapsed += elapsed;
+                    if (aqt->multi_var.time_var.exec_elapsed
+                        >= aqt->multi_var.time_var.exec_time)
+                    {
+                        aqt->multi_var.time_var.exec_elapsed = 0;
+                        if ((aqt->state & 12) == 0) {
+                            aqt->state &= 3;
+                            aqt->state |= 8;
+                            printf("time");
+                        }
                     }
                 }
                 if ((aqt->act_exec & PedInstance::ai_aResetActionQueueQueue) != 0)
@@ -1336,6 +1368,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                         aqt_reset.state &= ((65535 ^ 14));
                         aqt_reset.multi_var.enemy_var.shots_done = 0;
                         aqt_reset.multi_var.time_var.elapsed = 0;
+                        aqt_reset.multi_var.time_var.exec_elapsed = 0;
                         aqt_reset.multi_var.dist_var.dist_walked = 0;
                         if ((aqt_reset.act_exec & PedInstance::ai_aWait) != 0
                             && aqt_reset.multi_var.time_var.desc == 1)
@@ -1795,19 +1828,29 @@ void PedInstance::setSelectedWeapon(int n) {
     if (n != -1) {
         assert((size_t)selected_weapon_ < weapons_.size());
         WeaponInstance *wi = weapons_[selected_weapon_];
-        if (wi->usesAmmo() && wi->ammoRemaining() == 0)
-            return;
+
+        if (wi->usesAmmo()) {
+            if (wi->ammoRemaining() == 0) {
+                desc_state_ |= pd_smNoAmmunition;
+                return;
+            } else {
+                desc_state_ &= pd_smAll ^ pd_smNoAmmunition;
+            }
+        } else {
+            desc_state_ &= pd_smAll ^ pd_smNoAmmunition;
+        }
+
+        if (wi->doesPhysicalDmg())
+            desc_state_ |= pd_smArmed;
+        else
+            desc_state_ &= pd_smAll ^ pd_smArmed;
+
         if (wi->getMainType() == Weapon::EnergyShield)
             setRcvDamageDef(MapObject::ddmg_PedWithEnergyShield);
         if (wi->getMainType() != Weapon::TimeBomb)
             wi->activate();
         if (wi->getWeaponType() == Weapon::AccessCard)
             addEmulatedGroupDef(4, og_dmPolice);
-        if (wi->doesPhysicalDmg()) {
-            desc_state_ |= pd_smArmed;
-            if (wi->ammoRemaining() == 0)
-                desc_state_ |= pd_smNoAmmunition;
-        }
     }
 }
 

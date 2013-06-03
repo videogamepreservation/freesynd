@@ -32,7 +32,7 @@ void PedInstance::createActQStanding(actionQueueGroupType &as) {
     aq.state = 1;
     aq.multi_var.time_var.desc = 0;
     aq.multi_var.time_var.elapsed = 0;
-    aq.multi_var.time_var.time_total = -1;
+    aq.multi_var.time_var.time_wait = -1;
     aq.group_desc = PedInstance::gd_mStandWalk;
     as.actions.push_back(aq);
 }
@@ -280,7 +280,7 @@ void PedInstance::createActQBurning(actionQueueGroupType &as) {
     aq.as = PedInstance::pa_smBurning;
     aq.act_exec = PedInstance::ai_aWait;
     aq.multi_var.time_var.elapsed = 0;
-    aq.multi_var.time_var.time_total = 1000;
+    aq.multi_var.time_var.time_wait = 1000;
     aq.multi_var.time_var.desc = 0;
     aq.group_desc = PedInstance::gd_mExclusive;
     as.actions.push_back(aq);
@@ -360,7 +360,7 @@ void PedInstance::createActQWait(actionQueueGroupType &as, int tm_wait, uint8 de
     aq.act_exec = PedInstance::ai_aWait;
     aq.multi_var.time_var.desc = desc;
     aq.multi_var.time_var.elapsed = 0;
-    aq.multi_var.time_var.time_total = tm_wait;
+    aq.multi_var.time_var.time_wait = tm_wait;
     as.actions.push_back(aq);
 }
 
@@ -368,7 +368,7 @@ bool PedInstance::createActQFindEnemy(actionQueueGroupType &as) {
     as.state = 1;
     actionQueueType aq;
     aq.as = PedInstance::pa_smNone;
-    aq.group_desc = PedInstance::gd_mThink;
+    aq.group_desc = PedInstance::gd_mThink | PedInstance::gd_mExclusive;
     aq.state = 1;
     aq.act_exec = PedInstance::ai_aFindEnemy | PedInstance::ai_aWaitToStart;
     Mod *pMod = slots_[Mod::MOD_BRAIN];
@@ -406,6 +406,12 @@ bool PedInstance::createActQFindEnemy(actionQueueGroupType &as) {
     else
         return false;
     createActQFollowing(as, NULL, 1);
+    as.actions.back().state |= 64;
+    createActQWalking(as, NULL, NULL, 0);
+    as.actions.back().act_exec |= PedInstance::ai_aTimeExecute;
+    as.actions.back().multi_var.time_var.exec_elapsed = 0;
+    as.actions.back().multi_var.time_var.exec_time = 5000;
+    as.actions.back().multi_var.dist_var.speed = 512;
     as.actions.back().state |= 64;
     return true;
 }
@@ -540,7 +546,7 @@ void PedInstance::createDefQueue() {
         createActQFollowing(as, owner_, 0, 192);
         as.main_act = as.actions.size() - 1;
         as.group_desc = PedInstance::gd_mStandWalk;
-        actions_queue_.push_back(as);
+        default_actions_.push_back(as);
     } else {
         if (obj_group_def_ == PedInstance::og_dmAgent) {
             if (isOurAgent()) {

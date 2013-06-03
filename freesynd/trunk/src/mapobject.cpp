@@ -163,7 +163,7 @@ void MapObject::setDirection(int posx, int posy, int * dir) {
     }
     if (direction != -1) {
         if (dir == NULL)
-            this->dir_ = direction;
+            dir_ = direction;
         else
             *dir = direction;
     }

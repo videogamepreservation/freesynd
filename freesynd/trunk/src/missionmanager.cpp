@@ -339,11 +339,17 @@ Mission * MissionManager::load_level_data(LevelData::LevelDataAll &level_data, u
                     p->setBaseSpeed(160);
                     p->setTimeBeforeCheck(400);
                     p->setBaseModAcc(0.4);
-                } else {
+                } else if (mt == PedInstance::og_dmCivilian) {
                     p->setObjGroupID(5);
-                    // civilians and criminals
+                    p->addEnemyGroupDef(6);
+                    p->setHostileDesc(PedInstance::pd_smArmed);
                     p->setBaseSpeed(128);
                     p->setTimeBeforeCheck(600);
+                    p->setBaseModAcc(0.2);
+                } else if (mt == PedInstance::og_dmCriminal) {
+                    p->setObjGroupID(6);
+                    p->setBaseSpeed(128);
+                    p->setTimeBeforeCheck(500);
                     p->setBaseModAcc(0.2);
                 }
                 p->setSightRange(7 * 256);

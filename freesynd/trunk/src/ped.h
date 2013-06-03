@@ -584,7 +584,8 @@ public:
         // Objects should be at defined location
         ai_aReachLocation = 0x0080,
         ai_aFollowObject = 0x0100,
-        // Should wait some time or works as delay for other action
+        // Should wait some time to end or works as delay for other action
+        // to have animation drawn, or as simple wait
         ai_aWait = 0x0200,
         ai_aAttackLocation = 0x0400,
         // in range of current weapon or inrange of other friendly units:
@@ -595,6 +596,11 @@ public:
         ai_aResetActionQueueQueue = 0x2000,
         ai_aDeselectCurWeapon = 0x4000,
         ai_aTrigger = 0x8000,
+        // checking persuador to mimic his actions and to follow him
+        ai_aCheckOwner = 0x10000,
+        // action should be executed within this time limit, if it will
+        // not complete (any result) in time it will be marked as failed
+        ai_aTimeExecute = 0x20000,
         ai_aNonFinishable = 0x80000000,
         ai_aAll = 0xFFFFFFFF
     } AiAction;
@@ -647,9 +653,13 @@ public:
             struct {
                 int32 elapsed;
                 // = -1 forever(ai_aWait)
-                int32 time_total;
+                int32 time_wait;
                 // = 0 || t > 0 (ai_aWaitToStart)
                 int32 time_to_start;
+                // time for execution of action(ai_aTimeExecute)
+                int32 exec_time;
+                // time action was executing(ai_aTimeExecute)
+                int32 exec_elapsed;
                 // wait event, 0 - standalone - time(milliseconds), 1 - waits
                 // till animation finished, 2 - attached to process time
                 uint8 desc;
