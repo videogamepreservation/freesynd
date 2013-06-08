@@ -120,46 +120,6 @@ int Mission::mapHeight()
     return p_map_->height();
 }
 
-int Mission::startX()
-{
-    int x = p_map_->tileToScreenX(peds_[0]->tileX(),
-        peds_[0]->tileY(), mmax_z_ + 1, 0, 0);
-    x -= (GAME_SCREEN_WIDTH - 129) / 2;
-    if (x < 0)
-        x = 0;
-    return x;
-}
-
-int Mission::startY()
-{
-    int y = p_map_->tileToScreenY(peds_[0]->tileX(),
-        peds_[0]->tileY(), mmax_z_ + 1, 0, 0);
-    y -= GAME_SCREEN_HEIGHT / 2;
-    if (y < 0)
-        y = 0;
-    return y;
-}
-
-int Mission::minScreenX()
-{
-    return p_map_->tileToScreenX(min_x_, min_y_, 0, 0, 0);
-}
-
-int Mission::minScreenY()
-{
-    return p_map_->tileToScreenY(min_x_, min_y_, 0, 0, 0);
-}
-
-int Mission::maxScreenX()
-{
-    return p_map_->tileToScreenX(max_x_, max_y_, 0, 0, 0);
-}
-
-int Mission::maxScreenY()
-{
-    return p_map_->tileToScreenY(max_x_, max_y_, 0, 0, 0);
-}
-
 int fastKey(int tx, int ty, int tz)
 {
     return tx | (ty << 8) | (tz << 16);

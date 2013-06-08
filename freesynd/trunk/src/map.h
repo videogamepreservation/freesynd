@@ -106,8 +106,6 @@ public:
 
     int tileToScreenX(int x, int y, int z, int pX, int pY);
     int tileToScreenY(int x, int y, int z, int pX, int pY);
-    int screenToTileX(int x, int y, int &ox);
-    int screenToTileY(int x, int y, int &oy);
     //! Converts a Map tile position to a screen position
     MapScreenPoint tileToScreenPoint(int x, int y, int z, int pX, int pY);
     //! Converts a screen position in pixel into a Map tile position

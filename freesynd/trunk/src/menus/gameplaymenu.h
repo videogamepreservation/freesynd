@@ -65,9 +65,12 @@ protected:
     void drawSelectAllButton();
     void drawMissionHint(int elapsed);
     void drawWeaponSelectors();
-    //! Scroll the map vertically or horizontally.
-    bool scroll();
-    void improveScroll(int &newScrollX, int &newScrollY);
+    //! Scroll the map horizontally.
+    bool scrollOnX();
+    //! Scroll the map vertically.
+    bool scrollOnY();
+    //void improveScroll(int &newScrollX, int &newScrollY);
+    void initWorldCoords();
     //! Selects/deselects an agent
     void selectAgent(size_t agentNo, bool addToGroup);
     //! Selects/deselects all agents

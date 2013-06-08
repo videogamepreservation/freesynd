@@ -166,35 +166,6 @@ MapTilePoint Map::screenToTilePoint(int x, int y)
     return mtp;
 }
 
-int Map::screenToTileX(int x, int y, int &ox)
-{
-    x -= (max_x_ + 1) * (TILE_WIDTH / 2);
-    // x now equals fx * TILE_WIDTH / 2 - fy * TILE_WIDTH / 2
-    // which equals TILE_WIDTH/2 * (fx - fy)
-    y -= (max_z_ + 1) * (TILE_HEIGHT / 3);
-    // y now equals (fx + fy) * TILE_HEIGHT / 3
-    float dx = (float) x / (TILE_WIDTH / 2);
-    float dy = (float) y / (TILE_HEIGHT / 3);
-    // dx equals fx - fy
-    // dy equals fx + fy
-    float r = (dx + dy) / 2;
-    int ri = (int) r;
-    ox = (int) ((r - ri) * 256);
-    return ri;
-}
-
-int Map::screenToTileY(int x, int y, int &oy)
-{
-    x -= (max_x_ + 1) * (TILE_WIDTH / 2);
-    y -= (max_z_ + 1) * (TILE_HEIGHT / 3);
-    float dx = (float) x / (TILE_WIDTH / 2);
-    float dy = (float) y / (TILE_HEIGHT / 3);
-    float r = (dy - dx) / 2;
-    int ri = (int) r;
-    oy = (int) ((r - ri) * 256);
-    return ri;
-}
-
 int Map::maxZAt(int x, int y)
 {
     assert(x < max_x_);
@@ -259,12 +230,12 @@ void Map::draw(int scrollX, int scrollY, MapHelper * helper)
     if (scrollY + g_Screen.gameScreenHeight() >= map_height_)
         scrollY = map_height_ - g_Screen.gameScreenHeight();
 
-    int ox, oy;
-    int sw = screenToTileX(scrollX, scrollY, ox);
+    MapTilePoint mtp = screenToTilePoint(scrollX, scrollY);
+    int sw = mtp.tx;
     int chk = g_Screen.gameScreenWidth() / (TILE_WIDTH / 2) + 2
         + g_Screen.gameScreenHeight() / (TILE_HEIGHT / 3) + max_z_ * 2;
     int swm = sw + chk;
-    int sh = screenToTileY(scrollX, scrollY, oy) - 8;
+    int sh = mtp.ty - 8;
 #if 0
     // HACK for map dump
     sh = 0;

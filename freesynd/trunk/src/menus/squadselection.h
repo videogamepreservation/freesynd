@@ -149,6 +149,8 @@ class SquadSelection {
     void selectAllAgents(bool b_selectAll);
     //! Returns the leader's slot
     size_t getLeaderSlot() { return leader_; }
+    // Returns the leader as a PedInstance
+    PedInstance * leader() { return pSquad_->member(leader_);}
 
  private:
     /*!

@@ -109,18 +109,12 @@ public:
 
     int mapWidth();
     int mapHeight();
-    int startX();
-    int startY();
 
     int minX() { return min_x_; }
     int minY() { return min_y_; }
     int maxX() { return max_x_; }
     int maxY() { return max_y_; }
 
-    int minScreenX();
-    int minScreenY();
-    int maxScreenX();
-    int maxScreenY();
     void drawMap(int scrollx, int scrolly);
 
     //--- MapHelper stuff
