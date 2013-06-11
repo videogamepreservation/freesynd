@@ -30,18 +30,27 @@
 #include "loadingmenu.h"
 
 LoadingMenu::LoadingMenu(MenuManager * m):Menu(m, MENU_LOADING, MENU_MAIN),
-tick_count_(-500)
+    timer_(2000)
 {
     isCachable_ = false;
+    do_load_ = true;
     addStatic(0, 180, g_Screen.gameScreenWidth(), "#LDGAME_TITLE", FontManager::SIZE_4, true);
 }
 
 void LoadingMenu::handleTick(int elapsed)
 {
-    tick_count_ += elapsed;
-    if (tick_count_ >= 2000) {
-        g_Session.getMission()->setSurfaces();
-        tick_count_ = -500;
+    if (do_load_) {
+        // Loads mission
+        int id = g_Session.getSelectedBlock().mis_id;
+        Mission *pMission = g_App.missions().loadMission(id);
+        assert(pMission != NULL);
+        pMission->setSurfaces();
+        g_Session.setMission(pMission);
+
+        do_load_ = false;
+    }
+
+    if (timer_.update(elapsed)) {
         menu_manager_->gotoMenu(Menu::MENU_GAMEPLAY);
     }
 }

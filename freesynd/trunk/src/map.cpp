@@ -323,6 +323,10 @@ void Map::draw(int scrollX, int scrollY, MapHelper * helper)
 
 }
 
+const uint8 MiniMap::kOverlayNone = 0;
+const uint8 MiniMap::kOverlayOurAgent = 1;
+const uint8 MiniMap::kOverlayEnemyAgent = 2;
+
 /*!
  * Construct the minimap from the given map.
  * \param p_map

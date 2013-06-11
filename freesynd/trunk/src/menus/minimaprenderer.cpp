@@ -22,6 +22,7 @@
 
 #include "app.h"
 #include "menus/minimaprenderer.h"
+#include "core/missionbriefing.h"
 #include "mission.h"
 #include "gfx/screen.h"
 #include "vehicle.h"
@@ -43,15 +44,13 @@ BriefMinimapRenderer::BriefMinimapRenderer() : mm_timer(500) {
 /*!
  * Init the renderer with a new mission, zoom level and draw_enemies params.
  */
-void BriefMinimapRenderer::init(Mission *pMission, EZoom zoom, bool draw_enemies, uint8 *minimap_overlay) {
-    p_mission_ = pMission;
+void BriefMinimapRenderer::init(MissionBriefing *p_briefing, EZoom zoom, bool draw_enemies) {
+    p_mb_ = p_briefing;
     setZoom(zoom);
     b_draw_enemies_ = draw_enemies;
     mm_timer.reset();
     minimap_blink_ = 0;
-    // Copy the given minimap overlay inside our copy
-    memcpy(minimap_overlay_, minimap_overlay, sizeof(uint8) * 128*128);
-
+    
     // Initialize minimap origin by looking for the position
     // of the first found agent on the map
     initMinimapLocation();
@@ -62,12 +61,12 @@ void BriefMinimapRenderer::init(Mission *pMission, EZoom zoom, bool draw_enemies
  */
 void BriefMinimapRenderer::initMinimapLocation() {
     bool found = false;
-    int maxx = p_mission_->mmax_x_;
-    int maxy = p_mission_->mmax_y_;
+    int maxx = p_mb_->minimap()->max_x();
+    int maxy = p_mb_->minimap()->max_y();
 
     for (int x = 0; x < maxx && (!found); x++) {
         for (int y = 0; y < maxy && (!found); y++) {
-            if (getMinimapOverlay(x, y) == 1) {
+            if (p_mb_->getMinimapOverlay(x, y) == MiniMap::kOverlayOurAgent) {
                 // We found a tile with an agent on it
                 // stop searching and memorize position
                 world_tx_ = x;
@@ -88,16 +87,16 @@ void BriefMinimapRenderer::initMinimapLocation() {
  *
  */
 void BriefMinimapRenderer::clipMinimapToRightAndDown() {
-    if ((world_tx_ + mm_maxtile_) >= p_mission_->mmax_x_) {
+    if ((world_tx_ + mm_maxtile_) >= p_mb_->minimap()->max_x()) {
         // We assume that map size in tiles (p_mission_->mmax_x_)
         // is bigger than the minimap size (mm_maxtile_)
-        world_tx_ = p_mission_->mmax_x_ - mm_maxtile_;
+        world_tx_ = p_mb_->minimap()->max_x() - mm_maxtile_;
     }
 
-    if ((world_ty_ + mm_maxtile_) >= p_mission_->mmax_y_) {
+    if ((world_ty_ + mm_maxtile_) >= p_mb_->minimap()->max_y()) {
         // We assume that map size in tiles (p_mission_->mmax_y_)
         // is bigger than the minimap size (mm_maxtile_)
-        world_ty_ = p_mission_->mmax_y_ - mm_maxtile_;
+        world_ty_ = p_mb_->minimap()->max_y() - mm_maxtile_;
     }
 }
 
@@ -184,13 +183,6 @@ void BriefMinimapRenderer::scrollDown() {
 }
 
 /*!
- * \return - not present, 1 - our agent, 2 - enemy agent
- */
-uint8 BriefMinimapRenderer::getMinimapOverlay(int x, int y) {
-    return minimap_overlay_[x + y * p_mission_->mmax_x_];
-}
-
-/*!
  * Renders the minimap at the given position on the screen.
  * \param screen_x X coord in absolute pixels.
  * \param screen_y Y coord in absolute pixels.
@@ -199,10 +191,10 @@ void BriefMinimapRenderer::render(uint16 screen_x, uint16 screen_y) {
     for (uint16 tx = world_tx_; tx < (world_tx_ + mm_maxtile_); tx++) {
         uint16 xc = screen_x + (tx - world_tx_) * pixpertile_;
         for (uint16 ty = world_ty_; ty < (world_ty_ + mm_maxtile_); ty++) {
-            unsigned char c = getMinimapOverlay(tx, ty);
+            uint8 c = p_mb_->getMinimapOverlay(tx, ty);
             switch (c) {
                 case 0:
-                    c = p_mission_->getMiniMap()->getColourAt(tx, ty);
+                    c = p_mb_->minimap()->getColourAt(tx, ty);
                     break;
                 case 1:
                     c = minimap_blink_ ? 14 : 12;
@@ -211,7 +203,7 @@ void BriefMinimapRenderer::render(uint16 screen_x, uint16 screen_y) {
                     if (b_draw_enemies_)
                         c = minimap_blink_ ? 14 : 5;
                     else
-                        c = p_mission_->getMiniMap()->getColourAt(tx, ty);
+                        c = p_mb_->minimap()->getColourAt(tx, ty);
             }
             g_Screen.drawRect(xc, screen_y + (ty - world_ty_) * pixpertile_, pixpertile_,
                 pixpertile_, c);

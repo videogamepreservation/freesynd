@@ -125,10 +125,6 @@ void BriefMenu::handleShow() {
 
     // grab mission info
     int cur_miss = g_Session.getSelectedBlock().mis_id;
-    uint8 minimap_overlay[128*128];
-    Mission *pMission = g_App.missions().loadMission(cur_miss, minimap_overlay);
-    assert(pMission != NULL);
-    g_Session.setMission(pMission);
 
     // Loads mission briefing
     p_briefing_ = g_App.missions().loadBriefing(cur_miss);
@@ -146,7 +142,7 @@ void BriefMenu::handleShow() {
     
     bool drawEnemies = enh_lvl == p_briefing_->nb_enhts();
 
-    mm_renderer_.init(pMission, zoom, drawEnemies, minimap_overlay);
+    mm_renderer_.init(p_briefing_, zoom, drawEnemies);
 
     updateClock();
 

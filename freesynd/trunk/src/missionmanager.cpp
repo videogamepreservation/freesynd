@@ -74,6 +74,18 @@ MissionBriefing *MissionManager::loadBriefing(int n) {
     }
     delete[] data;
 
+    // Loads the mission to get the minimap
+    LevelData::LevelDataAll level_data;
+    if (load_level_data(n, level_data)) {
+        uint16 map_id = READ_LE_UINT16(level_data.mapinfos.map);
+        Map *p_map = g_App.maps().loadMap(map_id);
+        if (p_map == NULL) {
+            delete p_mb;
+            return NULL;
+        }
+        p_mb->init_minimap(p_map, level_data);
+    }
+
     return p_mb;
 }
 
@@ -84,17 +96,43 @@ MissionBriefing *MissionManager::loadBriefing(int n) {
  * \param n Mission id.
  * \return NULL if Mission could not be loaded.
  */
-Mission *MissionManager::loadMission(int n, uint8 *minimap_overlay)
+Mission *MissionManager::loadMission(int n)
 {
     LOG(Log::k_FLG_IO, "MissionManager", "loadMission()", ("loading mission %i", n));
 
+    // Initialize LevelData structure from data read in file
+    LevelData::LevelDataAll level_data;
+    if (load_level_data(n, level_data)) {
+
+        Mission *m = create_mission(level_data);
+
+        if (m) {
+            Map *p_map = g_App.maps().loadMap(m->mapId());
+            if (p_map == NULL) {
+                delete m;
+                return NULL;
+            }
+            m->set_map(p_map);
+        }
+
+        return m;
+    }
+
+    return NULL;
+}
+
+/*!
+ * Creates a Mission object from the LevelDataAll structure and fills the overlay for the
+ * briefing minimap.
+ */
+bool MissionManager::load_level_data(int n, LevelData::LevelDataAll &level_data) {
     char tmp[100];
     int size;
     
     sprintf(tmp, GAME_PATTERN, n);
     uint8 *data = File::loadOriginalFile(tmp, size);
     if (data == NULL) {
-        return NULL;
+        return false;
     }
 
 #if 1
@@ -102,7 +140,6 @@ Mission *MissionManager::loadMission(int n, uint8 *minimap_overlay)
 #endif
 
     // Initialize LevelData structure from data read in file
-    LevelData::LevelDataAll level_data;
     memset(&level_data, 0, sizeof(level_data));
     copydata(u01, 0);
     copydata(map, 6);
@@ -118,20 +155,7 @@ Mission *MissionManager::loadMission(int n, uint8 *minimap_overlay)
     copydata(objectives, 113974);
     copydata(u11, 114058);
 
-    Mission *m = load_level_data(level_data, minimap_overlay);
-
-    delete[] data;
-
-    if (m) {
-        Map *p_map = g_App.maps().loadMap(m->mapId());
-        if (p_map == NULL) {
-            delete m;
-            return NULL;
-        }
-        m->set_map(p_map);
-    }
-
-    return m;
+    return true;
 }
 
 /*!
@@ -177,10 +201,9 @@ void MissionManager::hackMissions(int n, uint8 *data) {
 }
 
 /*!
- * Creates a Mission object from the LevelDataAll structure and fills the overlay for the
- * briefing minimap.
+ * Creates a Mission object from the LevelDataAll structure.
  */
-Mission * MissionManager::load_level_data(LevelData::LevelDataAll &level_data, uint8 *minimap_overlay) {
+Mission * MissionManager::create_mission(LevelData::LevelDataAll &level_data) {
     Mission *p_mission = new Mission(level_data.mapinfos);
 
     // NOTE: Original objects data is based on offsets, but our objetcs are different
@@ -482,48 +505,6 @@ Mission * MissionManager::load_level_data(LevelData::LevelDataAll &level_data, u
     }
 
 #endif
-    // NOTE: this part transcodes original map overlay for minimap into
-    // our representation, in original agent our/enemy is defined by ped offset
-    // or by weapon offset - if weapon has owner we look into type/index of
-    // owner to define our/enemy state; original map overlay is 16384x2
-    // array(container), only using map size we can correctly use our
-    // minimap_overlay_; our agent = 1, enemy agent = 2, tile doesn't have
-    // ped = 0
-    // First, put zero every where
-    memset(minimap_overlay, 0, 128*128);
-    for (uint32 i = 0; i < (128*128); i++) {
-        uint32 pin = READ_LE_UINT16(level_data.map.objs + i * 2);
-        if (pin >= 0x0002 && pin < 0x5C02) {
-            if (pin >= 0x0002 && pin < 0x02e2) {
-                minimap_overlay[i] = 1;
-            } else {
-                pin = pindx[(pin - 2) / 92];
-                if (pin != 0xFFFF && p_mission->ped(pin)->getMainType()
-                    == PedInstance::m_tpAgent) {
-                    minimap_overlay[i] = 2;
-                }
-            }
-        } else if (pin >= 0x9562 && pin < 0xDD62) {
-            pin = (pin - 0x9562) / 36; // 36 = weapon data size
-            LevelData::Weapons & wref = level_data.weapons[pin];
-            if (wref.desc == 0x05) {
-                pin = READ_LE_UINT16(wref.offset_owner);
-                if (pin != 0) {
-                    pin = (pin - 2) / 92; // 92 = ped data size
-                    if (pin > 7) {
-                        if (pindx[pin] != 0xFFFF
-                            && p_mission->ped(pindx[pin])->getMainType()
-                            == PedInstance::m_tpAgent)
-                        {
-                            minimap_overlay[i] = 2;
-                        }
-                    } else {
-                        minimap_overlay[i] = 1;
-                    }
-                }
-            }
-        }
-    }
     
 #if 0
     // for hacking statics data

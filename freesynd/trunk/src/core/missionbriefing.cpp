@@ -3,6 +3,7 @@
  *  FreeSynd - a remake of the classic Bullfrog game "Syndicate".       *
  *                                                                      *
  *   Copyright (C) 2012  Benoit Blancard <benblan@users.sourceforge.net>*
+ *   Copyright (C) 2010  Bohdan Stelmakh <chamel@users.sourceforge.net> *
  *                                                                      *
  *    This program is free software;  you can redistribute it and / or  *
  *  modify it  under the  terms of the  GNU General  Public License as  *
@@ -24,6 +25,7 @@
 #include <string>
 
 #include "core/missionbriefing.h"
+#include "map.h"
 
 const int MissionBriefing::kMaxInfos = MAX_INFOS;
 const int MissionBriefing::kMaxEnht = MAX_ENHT;
@@ -31,6 +33,7 @@ const int MissionBriefing::kMaxEnht = MAX_ENHT;
 MissionBriefing::MissionBriefing() {
     i_nb_infos_ = 0;
     i_nb_enhts_ = 0;
+    p_minimap_ = NULL;
 
     for (int i = 0; i < kMaxInfos; i++) {
         a_info_costs_[i] = 0;
@@ -39,6 +42,10 @@ MissionBriefing::MissionBriefing() {
     for (int i = 0; i < kMaxEnht; i++) {
         a_enhts_costs_[i] = 0;
     }
+}
+
+MissionBriefing::~MissionBriefing() {
+    delete p_minimap_;
 }
 
 /*!
@@ -109,4 +116,65 @@ bool MissionBriefing::loadBriefing(uint8 * missData, int size) {
     }
 
     return true;
+}
+
+/*!
+ * This method creates the minimap from the given map.
+ * Then it creates a minimap overlay that tells for each tile
+ * whether there is an agent (our/enemy) on it or not.
+ * \param p_map The big map used to create the minimap
+ * \param level_data Mission infos to create the overlay
+ */
+void MissionBriefing::init_minimap(Map *p_map, LevelData::LevelDataAll &level_data) {
+    // Create the minimap
+    p_minimap_ = new MiniMap(p_map);
+
+    // Then create the minimap overlay
+    // First, put zero every where
+    memset(minimap_overlay_, MiniMap::kOverlayNone, 128*128);
+
+    // We use 2 infos to create the overlay: by ped offset or by weapon offset
+    // - if weapon has owner we look into type/index of
+    // owner to define our/enemy type; 
+    // original map overlay is a 16384x2 array(container), only using map size 
+    // we can correctly use our minimap_overlay_; 
+    // our agent = 1, enemy agent = 2, tile doesn't have ped = 0
+    for (uint32 i = 0; i < (128*128); i++) {
+        uint32 pin = READ_LE_UINT16(level_data.map.objs + i * 2);
+        if (pin >= 0x0002 && pin < 0x5C02) {  // Pointing to the Pedestrian section
+            if (pin >= 0x0002 && pin < 0x02e2) {  // Pointing to one of our agents
+                minimap_overlay_[i] = MiniMap::kOverlayOurAgent;
+            } else {
+                LevelData::People ped = level_data.people[(pin - 2) / 92];
+                if (ped.type_ped == 2) { // We take only agent type
+                    minimap_overlay_[i] = MiniMap::kOverlayEnemyAgent;
+                }
+            }
+        } else if (pin >= 0x9562 && pin < 0xDD62) {  // Pointing to the Weapon section
+            pin = (pin - 0x9562) / 36; // 36 = weapon data size
+            LevelData::Weapons & wref = level_data.weapons[pin];
+            if (wref.desc == 0x05) {
+                pin = READ_LE_UINT16(wref.offset_owner);
+                if (pin != 0) {
+                    pin = (pin - 2) / 92; // 92 = ped data size
+                    if (pin > 7) {
+                        LevelData::People ped = level_data.people[(pin - 2) / 92];
+                        if (ped.type_ped == 2) {
+                            minimap_overlay_[i] = MiniMap::kOverlayEnemyAgent;
+                        }
+                    } else {
+                        // from 0 to 7 are our agents
+                        minimap_overlay_[i] = MiniMap::kOverlayOurAgent;
+                    }
+                }
+            }
+        }
+    }
+}
+
+/*!
+ * \return - not present, 1 - our agent, 2 - enemy agent
+ */
+uint8 MissionBriefing::getMinimapOverlay(int x, int y) {
+    return minimap_overlay_[x + y * p_minimap_->max_x()];
 }

@@ -62,6 +62,7 @@ Map * MapManager::loadMap(uint16 i_mapNum)
     LOG(Log::k_FLG_IO, "MapManager", "loadMap()", ("loading map %i", i_mapNum));
     // First look in cache
     if (maps_.find(i_mapNum) != maps_.end()) {
+        LOG(Log::k_FLG_IO, "MapManager", "loadMap()", ("Map is already in cache"));
         return maps_[i_mapNum];
     }
     

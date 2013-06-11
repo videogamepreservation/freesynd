@@ -41,14 +41,18 @@ class VehicleInstance;
 class MissionManager {
 public:
     MissionManager();
-    Mission *loadMission(int n, uint8 *minimap_overlay);
+    //! Loads mission for the given mission id
+    Mission *loadMission(int n);
     //! Loads briefing for the given mission id
     MissionBriefing *loadBriefing(int n);
 
 private:
     //! When loading missions, possibly adds some info to the data
     void hackMissions(int n, uint8 *data);
-    Mission * load_level_data(LevelData::LevelDataAll &level_data, uint8 *minimap_overlay);
+    //! Reads the mission file and return a representation of that file
+    bool load_level_data(int n, LevelData::LevelDataAll &level_data);
+    // Instanciate a mission from the data file
+    Mission * create_mission(LevelData::LevelDataAll &level_data);
     //! Creates a weapon from the game data
     WeaponInstance * create_weapon_instance(const LevelData::Weapons &gamdata);
     //! Creates a vehicle from the game data

@@ -135,9 +135,20 @@ protected:
  */
 class MiniMap {
 public:
+    /*! Constant for the minimap overlay : no overlay */
+    static const uint8 kOverlayNone;
+    /*! Constant for the minimap overlay : the agent is our. */
+    static const uint8 kOverlayOurAgent;
+    /*! Constant for the minimap overlay : this is an enemy agent. */
+    static const uint8 kOverlayEnemyAgent;
+
     MiniMap(Map *p_map);
     ~MiniMap();
 
+    /*! Returns the map width in tiles.*/
+    int max_x() { return mmax_x_;}
+    /*! Returns the map height in tiles.*/
+    int max_y() { return mmax_y_;}
     uint8 getColourAt(int x, int y);
 
     //! Defines a source on the minimap for the signal

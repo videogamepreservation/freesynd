@@ -26,9 +26,13 @@
 #include <string>
 
 #include "common.h"
+#include "model/leveldata.h"
 
 #define MAX_INFOS   10
 #define MAX_ENHT    10
+
+class Map;
+class MiniMap;
 
 /*!
  * MissionBriefing contains descriptive elements of a mission :
@@ -46,9 +50,13 @@ class MissionBriefing {
 
     /*! Class constructor.*/
     MissionBriefing();
+    /*! class destructor.*/
+    ~MissionBriefing();
 
     //! Loads briefing from the given file
     bool loadBriefing(uint8 * missData, int size);
+    //! Init the minimap and minimap overlay
+    void init_minimap(Map *p_map, LevelData::LevelDataAll &level_data);
 
     //! Returns the number of available informations
     int nb_infos() { return i_nb_infos_; }
@@ -91,6 +99,12 @@ class MissionBriefing {
         return infoLvl <= i_nb_infos_ ?a_briefing_[infoLvl].c_str() : ""; 
     }
 
+    //! Returns the minimap
+    MiniMap * minimap() { return p_minimap_; }
+
+    //! Tells what is on the given tile
+    uint8 getMinimapOverlay(int x, int y);
+
  private:
     /*! Briefing text is stored in an array. Each entry is the text for
      * the current level of information.*/
@@ -103,6 +117,10 @@ class MissionBriefing {
     int i_nb_enhts_;
     /*! An array of prices for each available enhancements for the mission.*/
     int a_enhts_costs_[MAX_ENHT];
+    /*! The minimap displayed in the brief menu.*/
+    MiniMap *p_minimap_;
+    /*! This grid holds position of agents on the minimap.*/
+    uint8 minimap_overlay_[128*128];
 };
 
 #endif  // CORE_MISSIONBRIEFING_H_

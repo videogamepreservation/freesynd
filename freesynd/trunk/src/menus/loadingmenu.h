@@ -25,10 +25,10 @@
 #ifndef LOADINGMENU_H
 #define LOADINGMENU_H
 
-class Mission;
+#include "utils/timer.h"
 
 /*!
- * Loading Menu class.
+ * This menu is in charge of loading the mission.
  */
 class LoadingMenu : public Menu {
 public:
@@ -37,7 +37,12 @@ public:
     void handleTick(int elapsed);
 
 protected:
-    int tick_count_;
+    /*! This is a flag to load the mission only once.*/
+    bool do_load_;
+    /*! This timer is used to be sure we can see the loading screen.
+     * We don't want the application to be too fast!
+     */
+    fs_utils::Timer timer_;
 };
 
 #endif
