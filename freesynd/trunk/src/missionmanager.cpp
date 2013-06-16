@@ -606,7 +606,6 @@ Mission * MissionManager::create_mission(LevelData::LevelDataAll &level_data) {
     // max 5(6 read) objectives
     std::vector <PedInstance *> peds_evacuate;
     for (uint8 i = 0; i < 6; i++) {
-        //bool isset = false;
         ObjectiveDesc *objd = NULL;
 
         LevelData::Objectives & obj = level_data.objectives[i];
@@ -640,8 +639,7 @@ Mission * MissionManager::create_mission(LevelData::LevelDataAll &level_data) {
                     pLastObj->subobjindx = objectives_.size();
                     objd->indx_grpid.targetindx = pLastObj->indx_grpid.targetindx;
                     objd->targettype = pLastObj->targettype;
-                    isset = true;*/
-                    //isset = true;
+                    */
                 }
             }
                 break;
@@ -657,8 +655,6 @@ Mission * MissionManager::create_mission(LevelData::LevelDataAll &level_data) {
                         printf("0x01 incorrect offset");
                 } else
                     printf("0x01 type not matched");
-
-                //isset = true;
                 break;
             case 0x02: // Assassinate a civilian
                 if (bindx > 0 && bindx < 0x5C02) {

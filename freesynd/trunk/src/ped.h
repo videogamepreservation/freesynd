@@ -601,6 +601,7 @@ public:
         // action should be executed within this time limit, if it will
         // not complete (any result) in time it will be marked as failed
         ai_aTimeExecute = 0x20000,
+        ai_aFindWeapon = 0x40000,
         ai_aNonFinishable = 0x80000000,
         ai_aAll = 0xFFFFFFFF
     } AiAction;
@@ -701,6 +702,8 @@ public:
         // index refers to action, state of which defines state of group
         uint32 main_act;
         // same as in actionQueueType, groupDescMasks
+        // NOTE: this value is never set in createActQ* functions, should be
+        // always set before adding to one of actions queues
         uint32 group_desc;
         // same as in actionQueueType.state
         uint16 state;
@@ -756,7 +759,7 @@ public:
     void createActQLeaveCar(actionQueueGroupType &as,
         ShootableMapObject *tsmo);
     void createActQWait(actionQueueGroupType& as, int tm_wait,
-                        uint8 desc = 0);
+        uint8 desc = 0);
 
     bool createActQFindEnemy(actionQueueGroupType &as);
     void createActQFindNonFriend(actionQueueGroupType &as);
@@ -764,6 +767,9 @@ public:
     void createActQResetActionQueue(actionQueueGroupType &as);
     void createActQDeselectCurWeapon(actionQueueGroupType &as);
     void createActQTrigger(actionQueueGroupType &as, PathNode *tpn, int32 range);
+
+    void createActQFindWeapon(actionQueueGroupType &as,
+        pedWeaponToUse *pw_to_use = NULL, int dist = -1);
     
     void discardActG(uint32 id);
     void discardActG(std::vector <actionQueueGroupType>::iterator it_a);

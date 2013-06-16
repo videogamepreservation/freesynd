@@ -1209,7 +1209,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                         if (obj_group_def_ == PedInstance::og_dmAgent) {
                             if (pMod)
                                 tm_wait -= 25 * (pMod->getVersion() + 2);
-                            tm_wait = (double)tm_wait * intelligence_->getMultiplier();
+                            tm_wait = (double)tm_wait * (1.0 / intelligence_->getMultiplier());
                         } else if (obj_group_def_ == PedInstance::og_dmCivilian
                             && (desc_state_ & pd_smControlled) == 0)
                         {
@@ -1354,7 +1354,6 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                         if ((aqt->state & 12) == 0) {
                             aqt->state &= 3;
                             aqt->state |= 8;
-                            printf("time");
                         }
                     }
                 }
@@ -1873,7 +1872,8 @@ bool PedInstance::selectRequiredWeapon(pedWeaponToUse *pw_to_use) {
             if (pw_to_use->wpn.wi == wi) {
                 found = true;
             } else {
-                for (uint8 i = 0; i < numWeapons(); ++i) {
+                sz = weapons_.size();
+                for (uint8 i = 0; i < sz; ++i) {
                     if (weapon(i) == wi) {
                         setSelectedWeapon(i);
                         found = true;
@@ -1883,11 +1883,10 @@ bool PedInstance::selectRequiredWeapon(pedWeaponToUse *pw_to_use) {
             }
             break;
         case 3:
-            sz = numWeapons();
+            sz = weapons_.size();
             for (uint8 i = 0; i < sz; ++i) {
-                WeaponInstance *pWI = weapon(i);
-                if (pWI->getWeaponType() == pw_to_use->wpn.wpn_type)
-                {
+                WeaponInstance *pWI = weapons_[i];
+                if (pWI->getWeaponType() == pw_to_use->wpn.wpn_type) {
                     if (pWI->usesAmmo()) {
                         if (pWI->ammoRemaining()) {
                             found = true;
@@ -1903,9 +1902,9 @@ bool PedInstance::selectRequiredWeapon(pedWeaponToUse *pw_to_use) {
             }
             break;
         case 4:
-            sz = numWeapons();
+            sz = weapons_.size();
             for (uint8 i = 0; i < sz; ++i) {
-                WeaponInstance *pWI = weapon(i);
+                WeaponInstance *pWI = weapons_[i];
                 if (pWI->canShoot()
                     && pWI->doesDmgStrict(pw_to_use->wpn.dmg_type))
                 {
@@ -1923,17 +1922,16 @@ bool PedInstance::selectRequiredWeapon(pedWeaponToUse *pw_to_use) {
             }
             break;
         case 5:
-            sz = numWeapons();
+            sz = weapons_.size();
             for (uint8 i = 0; i < sz; ++i) {
-                WeaponInstance *pWI = weapon(i);
+                WeaponInstance *pWI = weapons_[i];
                 if (pWI->canShoot()
                     && pWI->doesDmgNonStrict(pw_to_use->wpn.dmg_type))
                 {
                     if (pWI->usesAmmo()) {
                         if (pWI->ammoRemaining()) {
                             found = true;
-                            found_weapons.push_back(std::make_pair(pWI->rank(),
-                                i));
+                            found_weapons.push_back(std::make_pair(pWI->rank(), i));
                         }
                     } else {
                         found = true;

@@ -49,6 +49,7 @@ void PedInstance::createActQWalking(actionQueueGroupType &as, PathNode *tpn,
     aq.multi_var.dist_var.dir = dir;
     aq.multi_var.dist_var.dist = dist;
     aq.multi_var.dist_var.speed = -1;
+    // TODO: set condition as function parameter and set values based on it?
     if (dir == -1) {
         if (tpn) {
             aq.t_pn = *tpn;
@@ -69,9 +70,9 @@ void PedInstance::createActQWalking(actionQueueGroupType &as, PathNode *tpn,
             // direction will be calculated from objects position
             aq.t_smo = tsmo;
             aq.condition = 4;
-        } else { // directional movement only
+        } else {
+            // directional movement only
             aq.condition = 1;
-            aq.multi_var.dist_var.dir_move.bounce = bounce;
         }
     }
     as.actions.push_back(aq);
@@ -172,7 +173,13 @@ bool PedInstance::createActQFiring(actionQueueGroupType &as, PathNode *tpn,
     if (!can_shoot)
         return false;
 
-    aq.multi_var.enemy_var.pw_to_use.use_ranks = slots_[Mod::MOD_BRAIN] ? true: false;
+    if (pw_to_use == NULL) {
+        if (obj_group_def_ == PedInstance::og_dmAgent) {
+            aq.multi_var.enemy_var.pw_to_use.use_ranks =
+                slots_[Mod::MOD_BRAIN] ? true: false;
+        } else
+            aq.multi_var.enemy_var.pw_to_use.use_ranks = false;
+    }
     aq.multi_var.enemy_var.value = value;
     aq.multi_var.enemy_var.forced_shot = forced_shot;
     if (does_phys_dmg) {
@@ -372,19 +379,24 @@ bool PedInstance::createActQFindEnemy(actionQueueGroupType &as) {
     aq.state = 1;
     aq.act_exec = PedInstance::ai_aFindEnemy | PedInstance::ai_aWaitToStart;
     Mod *pMod = slots_[Mod::MOD_BRAIN];
+
+    pedWeaponToUse pw_to_use;
+    pw_to_use.use_ranks = false;
+
     int32 tm_wait = tm_before_check_;
     if (obj_group_def_ == PedInstance::og_dmAgent) {
-        if (pMod)
+        if (pMod) {
             tm_wait -= 25 * (pMod->getVersion() + 2);
-        tm_wait = (double)tm_wait * perception_->getMultiplier();
+            pw_to_use.use_ranks = true;
+        }
+        tm_wait = (double)tm_wait * (1.0 / perception_->getMultiplier());
     }
     aq.multi_var.time_var.desc = 0;
     aq.multi_var.time_var.elapsed = 0;
     aq.multi_var.time_var.time_to_start = tm_wait;
     as.actions.push_back(aq);
-    pedWeaponToUse pw_to_use;
+
     if (obj_group_def_ == PedInstance::og_dmAgent) {
-        aq.multi_var.enemy_var.pw_to_use.use_ranks = pMod != NULL;
         WeaponInstance *wi = selectedWeapon();
         if (wi && wi->usesAmmo() && wi->ammoRemaining() == 0) {
             wi = NULL;
@@ -429,7 +441,7 @@ void PedInstance::createActQFindNonFriend(actionQueueGroupType &as)
     if (obj_group_def_ == PedInstance::og_dmAgent) {
         if (pMod)
             tm_wait -= 25 * (pMod->getVersion() + 2);
-        tm_wait = (double)tm_wait * perception_->getMultiplier();
+        tm_wait = (double)tm_wait * (1.0 / perception_->getMultiplier());
     }
     aq.multi_var.time_var.desc = 0;
     aq.multi_var.time_var.elapsed = 0;
@@ -474,6 +486,44 @@ void PedInstance::createActQTrigger(actionQueueGroupType &as, PathNode *tpn,
     aq.t_pn = *tpn;
     aq.multi_var.dist_var.dist = range;
     as.actions.push_back(aq);
+}
+
+void PedInstance::createActQFindWeapon(actionQueueGroupType &as,
+    pedWeaponToUse *pw_to_use, int dist)
+{
+    as.state = 1;
+    actionQueueType aq;
+    aq.as = PedInstance::pa_smNone;
+    aq.group_desc = PedInstance::gd_mThink | PedInstance::gd_mExclusive;
+    aq.state = 1;
+    aq.act_exec = PedInstance::ai_aFindWeapon | PedInstance::ai_aWaitToStart;
+    aq.multi_var.dist_var.dist = dist;
+    aq.multi_var.enemy_var.pw_to_use.use_ranks = false;
+    Mod *pMod = slots_[Mod::MOD_BRAIN];
+    int32 tm_wait = tm_before_check_;
+    if (obj_group_def_ == PedInstance::og_dmAgent) {
+        if (pMod) {
+            tm_wait -= 25 * (pMod->getVersion() + 2);
+            aq.multi_var.enemy_var.pw_to_use.use_ranks = true;
+        }
+        tm_wait = (double)tm_wait * (1.0 / perception_->getMultiplier());
+    }
+    aq.multi_var.time_var.desc = 0;
+    aq.multi_var.time_var.elapsed = 0;
+    aq.multi_var.time_var.time_to_start = tm_wait;
+
+    pedWeaponToUse local_pw_to_use;
+    if (!pw_to_use) {
+        pw_to_use = &local_pw_to_use;
+        local_pw_to_use.desc = 5;
+        local_pw_to_use.wpn.dmg_type = MapObject::dmg_Physical;
+    }
+
+    as.actions.push_back(aq);
+
+    createActQPickUp(as, NULL);
+    as.actions[1].state |= 64;
+    as.actions[2].state |= 64;
 }
 
 bool PedInstance::setActQInQueue(actionQueueGroupType &as,
@@ -535,6 +585,8 @@ void PedInstance::createDefQueue() {
     if (createActQFindEnemy(as)) {
         as.group_id = 0;
         as.main_act = 0;
+        // NOTE: not adding gd_mStandWalk because it will be usually blocked
+        // and will not be added from defaults
         as.group_desc = PedInstance::gd_mThink | PedInstance::gd_mFire;
         default_actions_.push_back(as);
     }
@@ -552,6 +604,7 @@ void PedInstance::createDefQueue() {
             if (isOurAgent()) {
                 as.actions.clear();
                 as.main_act = 0;
+                as.group_desc = PedInstance::gd_mThink | PedInstance::gd_mFire;
                 createActQFindNonFriend(as);
                 default_actions_.insert(default_actions_.begin(), as);
             }
