@@ -1236,7 +1236,8 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                         // update based on selected weapon?
                     }
                 }
-                if ((aqt->act_exec & PedInstance::ai_aFindNonFriend) != 0)
+                if ((aqt->act_exec & PedInstance::ai_aFindNonFriend) != 0
+                    && (aqt->state & 128) == 0)
                 {
                     bool selfState = is_ignored_;
                     // NOTE : can be done as in ai_aFindEnemy with objects
@@ -1288,6 +1289,69 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                         }
                         aqt->state |= 4;
                     }
+                }
+                if ((aqt->act_exec & PedInstance::ai_aFindWeapon) != 0
+                        && (aqt->state & 128) == 0)
+                {
+                    if (weapons_.size() < 8) {
+                        Msmod_t wpns_dist;
+                        int view_rng = aqt->multi_var.dist_var.dist != -1
+                            ? aqt->multi_var.dist_var.dist : sight_range_;
+                        toDefineXYZ cur_xyz;
+                        convertPosToXYZ(&cur_xyz);
+                        cur_xyz.z += (size_z_ >> 1);
+                        int numweapons = mission->numWeapons();
+                        for (int32 i = 0; i < numweapons; ++i) {
+                            WeaponInstance *w = mission->weapon(i);
+                            if (w->isIgnored())
+                                continue;
+                            if (w->canShoot() && w->usesAmmo()
+                                && w->ammoRemaining() > 0)
+                            {
+                                double distTo = 0;
+                                if (mission->inRangeCPos(&cur_xyz,
+                                    (ShootableMapObject **)(&w), NULL, false, true,
+                                    view_rng, &distTo) == 1)
+                                {
+                                    wpns_dist.insert(Pairsmod_t(
+                                        (ShootableMapObject *)w, distTo));
+                                }
+                            }
+                        }
+                        if (wpns_dist.empty())
+                            aqt->state |= 8;
+                        else {
+                            Msmod_t::iterator it_msmod = wpns_dist.begin();
+                            Pairsmod_t closest = *it_msmod;
+                            ++it_msmod;
+                            while (it_msmod != wpns_dist.end()) {
+                                if (it_msmod->second < closest.second)
+                                    closest = *it_msmod;
+                                ++it_msmod;
+                            }
+                            std::vector <actionQueueType>::iterator searched =
+                                findActInQueue(PedInstance::ai_aReachLocation,
+                                *it, it->actions.begin());
+
+                            if (searched != it->actions.end()) {
+                                actionQueueType & aqt_gotoweap = *searched;
+                                aqt_gotoweap.t_smo = closest.first;
+                                searched = findActInQueue(PedInstance::ai_aPickUpObject,
+                                    *it, it->actions.begin());
+                                if (searched != it->actions.end()) {
+                                    actionQueueType & aqt_pick = *searched;
+                                    aqt_pick.t_smo = closest.first;
+                                    aqt_pick.state ^= 64;
+                                    // enabling here because if for some
+                                    // reasons pickup will not be availiable
+                                    // we don't need to go to weapon
+                                    aqt_gotoweap.state ^= 64;
+                                }
+                            }
+                            aqt->state |= 4;
+                        }
+                    } else
+                        aqt->state |= 8;
                 }
                 if ((aqt->act_exec & (PedInstance::ai_aWait
                     | PedInstance::ai_aWaitToStart)) == PedInstance::ai_aWait)
