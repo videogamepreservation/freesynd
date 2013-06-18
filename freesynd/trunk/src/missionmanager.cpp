@@ -31,6 +31,8 @@
 #include "core/missionbriefing.h"
 #include "model/objectivedesc.h"
 #include "vehicle.h"
+#include "mission.h"
+#include "core/squad.h"
 
 MissionManager::MissionManager()
 {
@@ -290,14 +292,10 @@ Mission * MissionManager::create_mission(LevelData::LevelDataAll &level_data) {
         //if (i == 40)
             //i = 40;
         LevelData::People & pedref = level_data.people[i];
-        if(pedref.type == 0x0 || pedref.desc == 0x0D || pedref.desc == 0x0C)
-            continue;
+        
         PedInstance *p =
-            g_App.peds().loadInstance((uint8 *) & pedref, p_mission->mapId());
+            g_App.peds().loadInstance(pedref, i, p_mission->mapId());
         if (p) {
-#ifdef _DEBUG
-            p->setDebugID(i);
-#endif
             if (pedref.desc == 0x05) {
                 if (driverindx[i] != 0xFFFF) {
                     p->putInVehicle(p_mission->vehicle(driverindx[i]),
@@ -330,17 +328,18 @@ Mission * MissionManager::create_mission(LevelData::LevelDataAll &level_data) {
             }
             pindx[i] = p_mission->numPeds();
             p_mission->addPed(p);
-            if (i < 4) {
-                p->setObjGroupID(p_mission->playersGroupID());
-                p->setObjGroupDef(PedInstance::og_dmAgent);
-                p->addEnemyGroupDef(2);
-                p->addEnemyGroupDef(3);
-                p->setHostileDesc(PedInstance::pd_smArmed);
-                p->setSightRange(7 * 256);
-                p->setBaseSpeed(256);
-                p->setTimeBeforeCheck(400);
-                p->setBaseModAcc(0.5);
-            } else if (i > 7) {
+
+            if (i < AgentManager::kMaxSlot) {
+                // We're loading one of our agents
+                Agent *pAg = g_Session.agents().squadMember(i);
+                p->initAsAgent(pAg, p_mission->playersGroupID());
+                // adds all agent's weapons to the mission weapons
+                for (int wi=0; wi<p->numWeapons(); wi++) {
+                    p_mission->addWeapon(p->weapon(wi));
+                }
+                // adds the agent to the mission squad
+                p_mission->getSquad()->setMember(i, p);
+            } else {
                 unsigned int mt = p->getMainType();
                 p->setObjGroupDef(mt);
                 if (mt == PedInstance::og_dmAgent) {
@@ -484,12 +483,6 @@ Mission * MissionManager::create_mission(LevelData::LevelDataAll &level_data) {
 #ifdef SHOW_SCENARIOS_DEBUG
                 printf("+++++\n");
 #endif
-            } else if (i > 3 && i < 8) {
-                p->setMap(-1);
-                p->setHealth(-1);
-                p->setIsIgnored(true);
-                p->setStateMasks(PedInstance::pa_smUnavailable);
-                p->setAgentIs(PedInstance::Agent_Non_Active);
             }
         }
     }

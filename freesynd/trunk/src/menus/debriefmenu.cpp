@@ -28,6 +28,8 @@
 #include <assert.h>
 #include "app.h"
 #include "debriefmenu.h"
+#include "mission.h"
+#include "core/squad.h"
 
 DebriefMenu::DebriefMenu(MenuManager *m) : Menu(m, MENU_DEBRIEF, MENU_MAIN, "mdebrief.dat",
      "mdeout.dat") {
@@ -148,9 +150,9 @@ void DebriefMenu::updateStatsFields(Mission *pMission) {
 
 void DebriefMenu::checkNewWeaponFound() {
 
-    for (int i=0; i<4; i++) {
-        if (g_Session.agents().squadMember(i)) {
-            Agent *pAgent = g_Session.agents().squadMember(i);
+    for (size_t i=0; i<AgentManager::kMaxSlot; i++) {
+        Agent *pAgent = g_Session.agents().squadMember(i);
+        if (pAgent) {
             for (int wi=0; wi < pAgent->numWeapons(); wi++) {
                 Weapon *pWeapon = pAgent->weapon(wi)->getWeaponClass();
 

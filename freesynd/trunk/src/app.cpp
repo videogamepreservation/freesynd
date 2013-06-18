@@ -464,7 +464,7 @@ void App::cheatAccelerateTime() {
 void App::cheatFemaleRecruits() {
     g_Session.agents().reset(true);
 
-    for (int i = 0; i < 4; i++)
+    for (size_t i = 0; i < AgentManager::kMaxSlot; i++)
         g_Session.agents().setSquadMember(i, g_Session.agents().agent(i));
 }
 

@@ -30,11 +30,13 @@
 #include <assert.h>
 #include <string>
 
+#include "mission.h"
 #include "gfx/screen.h"
 #include "app.h"
 #include "model/objectivedesc.h"
 #include "utils/log.h"
 #include "vehicle.h"
+#include "core/squad.h"
 
 Mission::Mission(const LevelData::MapInfos & map_infos)
 {
@@ -154,9 +156,9 @@ void Mission::createFastKeys(int tilex, int tiley, int maxtilex, int maxtiley) {
     fast_sfx_objects_cache_.clear();
 
     // updating position for visual markers
-    for (unsigned int i = 0; i < 4; i++) {
-        PedInstance *p = peds_[i];
-        if (p->agentIs() == PedInstance::Agent_Active && p->isAlive()) {
+    for (size_t i = 0; i < AgentManager::kMaxSlot; i++) {
+        PedInstance *p = p_squad_->member(i);
+        if (p != NULL && p->isAlive()) {
             if (p->tileX() >= tilex && p->tileX() < maxtilex
                 && p->tileY() >= tiley && p->tileY() < maxtiley)
             {
@@ -186,9 +188,9 @@ void Mission::createFastKeys(int tilex, int tiley, int maxtilex, int maxtiley) {
     }
 
     // peds
-    for (unsigned int i = 0; i < 4; i++) {
-        PedInstance *p = peds_[i];
-        if (p->agentIs() == PedInstance::Agent_Active && p->map() != -1) {
+    for (size_t i = 0; i < AgentManager::kMaxSlot; i++) {
+        PedInstance *p = p_squad_->member(i);
+        if (p != NULL && p->map() != -1) {
             if (p->tileX() >= tilex && p->tileX() < maxtilex
                 && p->tileY() >= tiley && p->tileY() < maxtiley)
             {
@@ -197,7 +199,7 @@ void Mission::createFastKeys(int tilex, int tiley, int maxtilex, int maxtiley) {
             }
         }
     }
-    for (unsigned int i = 8; i < peds_.size(); i++) {
+    for (size_t i = p_squad_->size(); i < peds_.size(); i++) {
         PedInstance *p = peds_[i];
         if (p->map() != -1) {
             if (p->tileX() >= tilex && p->tileX() < maxtilex
@@ -320,7 +322,7 @@ void Mission::start()
 {
     LOG(Log::k_FLG_GAME, "Mission", "start()", ("Start mission"));
     // Reset mission statistics
-    stats_.agents = 0;
+    stats_.agents = p_squad_->size();
     stats_.mission_duration = 0;
     stats_.agentCaptured = 0;
     stats_.enemyKilled = 0;
@@ -331,23 +333,8 @@ void Mission::start()
     stats_.convinced = 0;
     stats_.nbOfShots = 0;
     stats_.nbOfHits = 0;
-    // Clear squad
-    p_squad_->clear();
-    cur_objective_ = 0;
 
-    for (int i = 0; i < 4; ++i) {
-        PedInstance *p = peds_[i];
-        Agent *pAg = g_Session.agents().squadMember(i);
-        if (p->initAsAgent(pAg)) {
-            stats_.agents += 1;
-            // adds all agent's weapons to the mission weapons
-            for (int wi=0; wi<p->numWeapons(); wi++) {
-                addWeapon(p->weapon(wi));
-            }
-            // adds the agent to the mission squad
-            p_squad_->setMember(i, p);
-        }
-    }
+    cur_objective_ = 0;
 
     // creating a list of available weapons
     // TODO: consider weight of weapons when adding?
@@ -372,7 +359,7 @@ void Mission::start()
 
     // TODO: check whether enemy agents weapons are equal to best two
     // if not set them
-    for (uint16 i = 8, sz = peds_.size(); i < sz; ++i) {
+    for (uint16 i = p_squad_->size(), sz = peds_.size(); i < sz; ++i) {
         PedInstance *p = peds_[i];
         if (p->objGroupDef() == PedInstance::og_dmAgent &&
             p->numWeapons() == 0)
@@ -515,7 +502,7 @@ void Mission::addWeaponsFromPedToAgent(PedInstance* p, Agent* pAg)
 void Mission::end()
 {
     LOG(Log::k_FLG_GAME, "Mission", "end()", ("End mission"));
-    for (unsigned int i = 8; i < peds_.size(); i++) {
+    for (unsigned int i = p_squad_->size(); i < peds_.size(); i++) {
         PedInstance *p = peds_[i];
         if (p->isDead()) {
             switch (p->getMainType()) {

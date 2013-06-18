@@ -48,11 +48,17 @@ public:
     bool hasScanner();
     //! Returns true if at least one agent is alive
     bool isAllDead();
+    //! Returns the size of the squad (with the dead agents)
+    size_t size() { return size_; }
 private:
     /*!
      * Selected agents for the next mission. Up to 4 agents.
      */
     PedInstance *a_members_[4];
+    /*!
+     * The number of active agents on the squad (dead or alive).
+     */
+    size_t size_;
 };
 
 #endif  // CORE_SQUAD_H_

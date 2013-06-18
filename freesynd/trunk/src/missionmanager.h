@@ -28,6 +28,7 @@
 #include <map>
 
 #include "common.h"
+#include "model/leveldata.h"
 
 class Mission;
 class MissionBriefing;

@@ -738,7 +738,7 @@ void SelectMenu::handleAction(const int actionId, void *ctx, const int modKeys)
         // Buying weapon
         if (pSelectedWeap_) {
             if (sel_all_) {
-                for (int n = 0; n < 4; n++) {
+                for (size_t n = 0; n < AgentManager::kMaxSlot; n++) {
                     Agent *selected = g_Session.agents().squadMember(n);
                     if (selected && selected->numWeapons() < 8
                         && g_Session.getMoney() >= pSelectedWeap_->cost()) {
@@ -759,7 +759,7 @@ void SelectMenu::handleAction(const int actionId, void *ctx, const int modKeys)
             needRendering();
         } else if (pSelectedMod_) {
             if (sel_all_) {
-                for (int n = 0; n < 4; n++) {
+                for (size_t n = 0; n < AgentManager::kMaxSlot; n++) {
                     Agent *selected = g_Session.agents().squadMember(n);
                     if (selected && selected->canHaveMod(pSelectedMod_)
                         && g_Session.getMoney() >= pSelectedMod_->cost()) {

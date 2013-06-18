@@ -24,6 +24,7 @@
 #define MENUS_SQUADSELECTION_H_
 
 #include "core/squad.h"
+#include "agentmanager.h"
 
 /*!
  * This class manages the agents selection during a gameplay session.
@@ -63,10 +64,10 @@ class SquadSelection {
              */
             Iterator& operator++()
             {
-                while (idx_ < 4)
+                while (idx_ < AgentManager::kMaxSlot)
                 {
                     idx_ += 1;
-                    if (idx_ < 4 && pSel_->isAgentSelected(idx_)) {
+                    if (idx_ < AgentManager::kMaxSlot && pSel_->isAgentSelected(idx_)) {
                         break;
                     }
                 }
@@ -111,7 +112,7 @@ class SquadSelection {
      */
     Iterator begin() {
 
-        for (size_t idx=0; idx < 4; idx++)
+        for (size_t idx=0; idx < AgentManager::kMaxSlot; idx++)
         {
             if (isAgentSelected(idx)) {
                 return Iterator(idx, this);

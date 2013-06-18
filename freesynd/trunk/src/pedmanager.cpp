@@ -134,31 +134,51 @@ void PedManager::setPed(Ped *pedanim, unsigned short baseAnim)
     pedanim->setPersuadeAnim(236);
 }
 
-PedInstance *PedManager::loadInstance(uint8 * data, int map)
+/*!
+ * Instanciate a PedInstance from the given data.
+ * \param gamdata
+ * \param ped_idx Index of the ped in the file.
+ * \param map id of the map
+ * \return NULL if the ped could not be created.
+ */
+PedInstance *PedManager::loadInstance(LevelData::People & gamdata, uint16 ped_idx, int map)
 {
-    LevelData::People * gamdata =
-        (LevelData::People *) data;
+    if(gamdata.type == 0x0 || gamdata.desc == 0x0D || gamdata.desc == 0x0C)
+        return NULL;
 
-    int hp = READ_LE_INT16(gamdata->health);
+    if (ped_idx < 4 && !g_Session.agents().isSquadSlotActive(ped_idx)) {
+        // Creates agent only if he's active
+        return NULL;
+    }if (ped_idx >= 4 && ped_idx < 8) {
+        // Ped between index 4 and 7 are not used
+        // In original game must be the place where persuaded agents were stored
+        return NULL;
+    }
 
     Ped *pedanim = new Ped();
-    setPed(pedanim, READ_LE_UINT16(gamdata->index_base_anim));
+    setPed(pedanim, READ_LE_UINT16(gamdata.index_base_anim));
     PedInstance *newped = pedanim->createInstance(map);
+
+#ifdef _DEBUG
+        newped->setDebugID(ped_idx);
+#endif
+
+    int hp = READ_LE_INT16(gamdata.health);
     if (hp <= 0)
         hp = 2;
     newped->setStartHealth(hp);
 
-    newped->setDirection(gamdata->orientation);
-    if (gamdata->state == 0x11) {
+    newped->setDirection(gamdata.orientation);
+    if (gamdata.state == 0x11) {
         newped->setDrawnAnim(PedInstance::ad_DeadAnim);
         newped->setHealth(-1);
         newped->setStateMasks(PedInstance::pa_smDead);
     } else {
         newped->setHealth(hp);
         newped->setStateMasks(PedInstance::pa_smStanding);
-        if (gamdata->state == 0x10) {
+        if (gamdata.state == 0x10) {
             PedInstance::actionQueueGroupType as;
-            newped->createActQWalking(as, NULL, NULL, gamdata->orientation);
+            newped->createActQWalking(as, NULL, NULL, gamdata.orientation);
             as.main_act = as.actions.size() - 1;
             as.group_desc = PedInstance::gd_mStandWalk;
             as.origin_desc = 2;
@@ -168,24 +188,24 @@ PedInstance *PedManager::loadInstance(uint8 * data, int map)
     // this is tile based Z we get, realword Z is in gamdata,
     // for correct calculations of viewpoint, target hit etc.
     // Zr = (Zt * 128) / 256
-    int z = READ_LE_UINT16(gamdata->mapposz) >> 7;
+    int z = READ_LE_UINT16(gamdata.mapposz) >> 7;
     // some peds have z = 0 - map paraguay
-    int oz = gamdata->mapposz[0] & 0x7F;
+    int oz = gamdata.mapposz[0] & 0x7F;
     newped->setSizeX(32);
     newped->setSizeY(32);
     newped->setSizeZ(256);
-    //printf("x %i y %i z %i ox %i oy %i oz %i\n", gamdata->mapposx[1], gamdata->mapposy[1], z, gamdata->mapposx[0], gamdata->mapposy[0], oz);
-    newped->setPosition(gamdata->mapposx[1], gamdata->mapposy[1],
-                        z, gamdata->mapposx[0],
-                        gamdata->mapposy[0], oz);
-    newped->setMainType(gamdata->type_ped);
+    //printf("x %i y %i z %i ox %i oy %i oz %i\n", gamdata.mapposx[1], gamdata.mapposy[1], z, gamdata.mapposx[0], gamdata.mapposy[0], oz);
+    newped->setPosition(gamdata.mapposx[1], gamdata.mapposy[1],
+                        z, gamdata.mapposx[0],
+                        gamdata.mapposy[0], oz);
+    newped->setMainType(gamdata.type_ped);
 
-    newped->setAllAdrenaLevels(gamdata->adrena_amount,
-        gamdata->adrena_dependency, gamdata->adrena_effect);
-    newped->setAllInteliLevels(gamdata->inteli_amount,
-        gamdata->inteli_dependency, gamdata->inteli_effect);
-    newped->setAllPercepLevels(gamdata->percep_amount,
-        gamdata->percep_dependency, gamdata->percep_effect);
+    newped->setAllAdrenaLevels(gamdata.adrena_amount,
+        gamdata.adrena_dependency, gamdata.adrena_effect);
+    newped->setAllInteliLevels(gamdata.inteli_amount,
+        gamdata.inteli_dependency, gamdata.inteli_effect);
+    newped->setAllPercepLevels(gamdata.percep_amount,
+        gamdata.percep_dependency, gamdata.percep_effect);
 
     return newped;
 }

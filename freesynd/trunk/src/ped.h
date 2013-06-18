@@ -165,7 +165,7 @@ public:
     PedInstance(Ped *ped, int m);
     ~PedInstance();
     //! Initialize the ped instance as an agent
-    bool initAsAgent(Agent *p_agent);
+    void initAsAgent(Agent *p_agent, unsigned int obj_group_id);
 
     typedef enum {
         ad_NoAnimation,

@@ -34,6 +34,7 @@ void Squad::clear() {
     for (size_t s = 0; s < AgentManager::kMaxSlot; s++) {
         a_members_[s] = NULL;
     }
+    size_ = 0;
 }
 
 /*!
@@ -44,6 +45,14 @@ void Squad::clear() {
 void Squad::setMember(size_t slotId, PedInstance *pPedAgent) {
     assert(slotId < AgentManager::kMaxSlot);
     a_members_[slotId] = pPedAgent;
+    
+    // recount the number of agent
+    size_ = 0;
+    for (size_t i=0; i < AgentManager::kMaxSlot; i++) {
+        if (a_members_[i]) {
+            size_++;
+        }
+    }
 };
 
 //! Returns the agent on the given slot

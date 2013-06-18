@@ -33,6 +33,7 @@
 #include "gfx/fliplayer.h"
 #include "utils/file.h"
 #include "vehicle.h"
+#include "mission.h"
 
 #ifdef _WIN32
 #include <windows.h>
@@ -496,7 +497,7 @@ void GameplayMenu::handleMouseMotion(int x, int y, int state, const int modKeys)
 
             // if agent is in selected group we will update all groups IPA
             if (selection_.isAgentSelected(ipa_chng_.agent_used)) {
-                for (uint8 i = 0; i < 4; ++i) {
+                for (uint8 i = 0; i < AgentManager::kMaxSlot; ++i) {
                     if (selection_.isAgentSelected(i)) {
                         setIPAForAgent(i, (IPAStim::IPAType)ipa_chng_.ipa_chng,
                             percent);
@@ -530,7 +531,7 @@ void GameplayMenu::handleMouseMotion(int x, int y, int state, const int modKeys)
 #ifdef _DEBUG
         for (int i = 0; mission_ && i < mission_->numPeds(); ++i) {
 #else
-        for (int i = 8; mission_ && i < mission_->numPeds(); ++i) {
+        for (int i = mission_->getSquad()->size(); mission_ && i < mission_->numPeds(); ++i) {
 #endif
             PedInstance *p = mission_->ped(i);
             if (p->isAlive() && p->map() != -1) {
@@ -648,9 +649,9 @@ void GameplayMenu::handleMouseMotion(int x, int y, int state, const int modKeys)
     if (shooting_events_.shooting_) {
         MapTilePoint mtp = mission_->get_map()->screenToTilePoint(world_x_ + x - 129,
                 world_y_ + y);
-        for (int i = 0; i < 4; i++) {
+        for (size_t i = 0; i < AgentManager::kMaxSlot; i++) {
             if (shooting_events_.agents_shooting[i]) {
-                PedInstance * pa = mission_->ped(i);
+                PedInstance * pa = mission_->getSquad()->member(i);
                 PathNode *pn = NULL;
                 if (target_) {
                     int tilez = target_->tileZ() * 128 + target_->offZ()
@@ -827,9 +828,9 @@ void GameplayMenu::setIPAForAgent(size_t slot, IPAStim::IPAType ipa_type, int pe
 
 void GameplayMenu::updateIPALevelMeters(int elapsed)
 {
-    for (int agent = 0; agent < 4; ++agent) {
-        PedInstance *ped = mission_->ped(agent);
-        if (ped->isAlive())
+    for (size_t agent = 0; agent < AgentManager::kMaxSlot; ++agent) {
+        PedInstance *ped = mission_->getSquad()->member(agent);
+        if (ped && ped->isAlive())
             ped->updtIPATime(elapsed);
     }
 }
@@ -839,8 +840,8 @@ void GameplayMenu::handleClickOnMap(int x, int y, int button, const int modKeys)
                     world_y_ + y);
 
     if (button == 1) {
-        for (int i = 0; i < 4; ++i) {
-            PedInstance *ped = mission_->ped(i);
+        for (size_t i = 0; i < AgentManager::kMaxSlot; ++i) {
+            PedInstance *ped = mission_->getSquad()->member(i);
             MapTilePoint mapPt(mapPt_base);
             if (selection_.isAgentSelected(i)) {
                 PedInstance::actionQueueGroupType as;
@@ -939,9 +940,9 @@ void GameplayMenu::handleClickOnMap(int x, int y, int button, const int modKeys)
 #endif
             }
         }
-        for (int i = 0; i < 4; ++i) {
+        for (size_t i = 0; i < AgentManager::kMaxSlot; ++i) {
             if (selection_.isAgentSelected(i)) {
-                PedInstance * pa = mission_->ped(i);
+                PedInstance * pa = mission_->getSquad()->member(i);
                 PedInstance::actionQueueGroupType as;
                 as.main_act = 0;
                 as.group_desc = PedInstance::gd_mFire;
@@ -968,10 +969,10 @@ void GameplayMenu::handleClickOnMap(int x, int y, int button, const int modKeys)
 
 void GameplayMenu::handleClickOnMinimap(int x, int y) {
     MapTilePoint pt_base = mm_renderer_.minimapToMapPoint(x - kMiniMapScreenX, y - kMiniMapScreenY);
-    for (size_t i = 0; i < 4; ++i) {
+    for (size_t i = 0; i < AgentManager::kMaxSlot; ++i) {
         MapTilePoint pt(pt_base);
         if (selection_.isAgentSelected(i)) {
-            PedInstance *ped = mission_->ped(i);
+            PedInstance *ped = mission_->getSquad()->member(i);
             bool isForGroup = selection_.size() > 1;
             pt.tz = ped->tileZ();
             if (!(mission_->getWalkableClosestByZ(pt)
@@ -1020,10 +1021,10 @@ void GameplayMenu::stopShootingEvent(void )
         shooting_events_.shooting_ = false;
         // minimum, 1 if simple click, 2 if longer click
         uint32 need_shots = menu_manager_->simpleMouseDown() ? 1 : 2;
-        for (int i = 0; i < 4; i++) {
+        for (size_t i = 0; i < AgentManager::kMaxSlot; i++) {
             if (shooting_events_.agents_shooting[i]) {
                 shooting_events_.agents_shooting[i] = false;
-                mission_->ped(i)->updtActGFiringShots(shooting_events_.ids[i],
+                mission_->getSquad()->member(i)->updtActGFiringShots(shooting_events_.ids[i],
                     need_shots);
             }
         }
@@ -1154,13 +1155,13 @@ bool GameplayMenu::handleUnknownKey(Key key, const int modKeys) {
         if (ctrl) {
             // excluding all selected agents from recieve damage from agent
             // near, to make simultanious explosion
-            for (int i = 0; i < 4; i++) {
+            for (size_t i = 0; i < AgentManager::kMaxSlot; i++) {
                 PedInstance *p_agent = mission_->getSquad()->member(i);
                 if (p_agent && selection_.isAgentSelected(i))
                     p_agent->setIsIgnored(true);
             }
 
-            for (int i = 0; i < 4; i++) {
+            for (size_t i = 0; i < AgentManager::kMaxSlot; i++) {
                 PedInstance *p_agent = mission_->getSquad()->member(i);
 
                 if (p_agent && selection_.isAgentSelected(i))
@@ -1408,7 +1409,7 @@ void GameplayMenu::drawMissionHint(int elapsed) {
 void GameplayMenu::drawWeaponSelectors() {
     PedInstance *p = NULL;
 
-    p = mission_->ped(selection_.getLeaderSlot());
+    p = selection_.leader();
 
     if (p) {
         bool draw_pw = true;
@@ -1568,9 +1569,9 @@ void GameplayMenu::updateMinimap(int elapsed) {
 void GameplayMenu::updateSelectAll() {
     uint8 nbAgentAlive = 0;
     // count the number of remaining agents
-    for (int indx = 0; indx < 4; indx++) {
-        PedInstance *pAgent = mission_->ped(indx);
-        if (pAgent->isAlive()) {
+    for (size_t indx = 0; indx < AgentManager::kMaxSlot; indx++) {
+        PedInstance *pAgent = mission_->getSquad()->member(indx);
+        if (pAgent && pAgent->isAlive()) {
             nbAgentAlive++;
         }
     }

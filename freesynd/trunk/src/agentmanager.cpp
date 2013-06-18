@@ -143,13 +143,13 @@ void AgentManager::reset(bool onlyWomen) {
     }
 
     // Then recreate the first 8 available agents
-    for (int i = 0; i < 8; i++) {
+    for (size_t i = 0; i < 8; i++) {
         Agent * pAgent = new Agent(g_AgentNames[nextName_], onlyWomen ? true : ((i % 2) == 0));
         pAgent->addWeapon(g_App.weapons().getWeapon(Weapon::Pistol)->createInstance());
         
         agents_.setAt(i, pAgent);
         // Adds the first 4 agents to the squad
-        if (i < 4) {
+        if (i < kMaxSlot) {
             setSquadMember(i, pAgent);
         }
         nextName_++;

@@ -36,13 +36,13 @@
 #include "weapon.h"
 #include "map.h"
 #include "model/leveldata.h"
-#include "core/squad.h"
 #include "core/gameevent.h"
 
 class VehicleInstance;
 class PedInstance;
 class Agent;
 class ObjectiveDesc;
+class Squad;
 
 /*!
  * A structure that holds mission statistics.

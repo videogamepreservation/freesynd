@@ -27,6 +27,8 @@
 #include "common.h"
 #include "app.h"
 #include "vehicle.h"
+#include "mission.h"
+#include "core/squad.h"
 
 Ped::Ped() {
     memset(stand_anims_, 0, sizeof(stand_anims_));
@@ -383,8 +385,9 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                     toDefineXYZ xyz;
                     aqt->t_pn.convertPosToXYZ(&xyz);
                     aqt->state |= 2;
-                    for (uint8 i = 0; i < 4; ++i) {
-                        if((int32)(mission->ped(i)->distanceToPosXYZ(&xyz))
+                    for (uint8 i = 0; i < AgentManager::kMaxSlot; ++i) {
+                        PedInstance *p_agent = mission->getSquad()->member(i);
+                        if(p_agent && (int32)(p_agent->distanceToPosXYZ(&xyz))
                            < aqt->multi_var.dist_var.dist)
                         {
                             for (std::vector <actionQueueType>::iterator it_a
@@ -1699,29 +1702,30 @@ PedInstance::~PedInstance()
 /*!
  * Initialize the ped instance as an agent.
  * \param p_agent The agent reference
- * \return true if the resulting agent is active for the mission.
+ * \param obj_group_id Id of the agent's group.
  */
-bool PedInstance::initAsAgent(Agent *p_agent) {
-    if (p_agent && p_agent->isActive()) {
-        // not in all missions our agents health is 16, this fixes it
-        setHealth(16);
-        setStartHealth(16);
-        while (p_agent->numWeapons()) {
-            WeaponInstance *wi = p_agent->removeWeapon(0);
-            addWeapon(wi);
-            wi->setOwner(this);
-            wi->setIsIgnored(true);
-        }
-        setAgentIs(PedInstance::Agent_Active);
-        *((ModOwner *)this) = *((ModOwner *)p_agent);
-        return true;
-    } else {
-        setHealth(-1);
-        setAgentIs(PedInstance::Agent_Non_Active);
-        setIsIgnored(true);
-        setStateMasks(PedInstance::pa_smUnavailable);
-        return false;
+void PedInstance::initAsAgent(Agent *p_agent, unsigned int obj_group_id) {
+    // not in all missions our agents health is 16, this fixes it
+    setHealth(16);
+    setStartHealth(16);
+    while (p_agent->numWeapons()) {
+        WeaponInstance *wi = p_agent->removeWeapon(0);
+        addWeapon(wi);
+        wi->setOwner(this);
+        wi->setIsIgnored(true);
     }
+    setAgentIs(PedInstance::Agent_Active);
+    *((ModOwner *)this) = *((ModOwner *)p_agent);
+
+    setObjGroupID(obj_group_id);
+    setObjGroupDef(PedInstance::og_dmAgent);
+    addEnemyGroupDef(2);
+    addEnemyGroupDef(3);
+    setHostileDesc(PedInstance::pd_smArmed);
+    setSightRange(7 * 256);
+    setBaseSpeed(256);
+    setTimeBeforeCheck(400);
+    setBaseModAcc(0.5);
 }
 
 void PedInstance::draw(int x, int y) {

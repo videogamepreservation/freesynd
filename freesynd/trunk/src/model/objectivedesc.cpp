@@ -2,6 +2,8 @@
 #include "ped.h"
 #include "app.h"
 #include "vehicle.h"
+#include "mission.h"
+#include "core/squad.h"
 
 ObjPersuade::ObjPersuade(MapObject * pMapObject) : TargetObjective(pMapObject) {
     msg = g_App.menus().getMessage("GOAL_PERSUADE");
@@ -171,7 +173,7 @@ ObjEliminate::ObjEliminate(PedInstance::objGroupDefMasks subtype) :
  * \param pMission
  */
 void ObjEliminate::selfEvaluate(GameEvent &evt, Mission *pMission) {
-    for (int i = 8; i< pMission->numPeds(); i++) {
+    for (int i = pMission->getSquad()->size(); i< pMission->numPeds(); i++) {
         PedInstance *pPed = pMission->ped(i);
 
         if(pPed->objGroupDef() == groupDefMask_
