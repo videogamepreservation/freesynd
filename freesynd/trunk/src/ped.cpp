@@ -1177,7 +1177,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                     if (set_nxt_act) {
                         std::vector <actionQueueType>::iterator searched =
                             findActInQueue(PedInstance::ai_aDestroyObject,
-                                *it, it->actions.begin());
+                                *it, aqt);
 
                         if ((!weapons_.empty()) && searched != it->actions.end())
                         {
@@ -1199,7 +1199,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                                 aqt_attack.multi_var.time_var.desc = 1;
                                 // enabling following behavior
                                 searched = findActInQueue(PedInstance::ai_aFollowObject,
-                                    *it, it->actions.begin());
+                                    *it, searched);
                                 if (searched != it->actions.end()) {
                                     actionQueueType & aqt_follow = *searched;
                                     aqt_follow.t_smo = aqt->t_smo;
@@ -1217,7 +1217,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                             && (desc_state_ & pd_smControlled) == 0)
                         {
                             searched = findActInQueue(PedInstance::ai_aReachLocation,
-                                *it, it->actions.begin());
+                                *it, aqt);
                             if (searched != it->actions.end()) {
                                 // enabling panic
                                 actionQueueType & aqt_panic = *searched;
@@ -1283,7 +1283,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                         }
                         std::vector <actionQueueType>::iterator searched =
                             findActInQueue(PedInstance::ai_aAquireControl,
-                            *it, it->actions.begin());
+                            *it, aqt);
 
                         if (searched != it->actions.end()) {
                             actionQueueType & aqt_aq_cont = *searched;
@@ -1334,13 +1334,13 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                             }
                             std::vector <actionQueueType>::iterator searched =
                                 findActInQueue(PedInstance::ai_aReachLocation,
-                                *it, it->actions.begin());
+                                *it, aqt);
 
                             if (searched != it->actions.end()) {
                                 actionQueueType & aqt_gotoweap = *searched;
                                 aqt_gotoweap.t_smo = closest.first;
                                 searched = findActInQueue(PedInstance::ai_aPickUpObject,
-                                    *it, it->actions.begin());
+                                    *it, searched);
                                 if (searched != it->actions.end()) {
                                     actionQueueType & aqt_pick = *searched;
                                     aqt_pick.t_smo = closest.first;
@@ -2570,7 +2570,7 @@ int PedInstance::getSpeed()
 
     if (weight_inv > weight_max) {
         if ((weight_inv / weight_max) > 1)
-            speed_new = 0;
+            speed_new = 64;
         else
             speed_new /= 2;
     }
@@ -2579,11 +2579,33 @@ int PedInstance::getSpeed()
     {
         // See the comments in the IPAStim class for details on the multiplier
         // algorithm for adrenaline
-        return (int)((float)speed_new * adrenaline_->getMultiplier());
+        speed_new = (int)((float)speed_new * adrenaline_->getMultiplier());
+    }
+
+    if (desc_state_ == PedInstance::pd_smControlled) {
+        speed_new *= ((PedInstance *)owner_)->getSpeedOwnerBoost();
+        speed_new >>= 1;
     }
 
     return speed_new;
 }
+
+// NOTE: returned value is *2, it should be should be corrected
+// during calculations with /2
+int PedInstance::getSpeedOwnerBoost()
+{
+    if (obj_group_def_ == PedInstance::og_dmAgent)
+    {
+        float ipa_adr = adrenaline_->getMultiplier();
+        if (ipa_adr > 1.0)
+            return 4;
+        else if (ipa_adr < 1.0)
+            return 1;
+    }
+
+    return 2;
+}
+
 
 void PedInstance::getAccuracy(double &base_acc)
 {

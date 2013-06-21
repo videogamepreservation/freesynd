@@ -718,7 +718,7 @@ public:
     // act_find (PedInstance::AiAction)
     std::vector <actionQueueType>::iterator findActInQueue(uint32 act_find,
         actionQueueGroupType &as, std::vector <actionQueueType>::iterator search_from);
-    bool setActQInQueue(actionQueueGroupType &as,
+    void setActQInQueue(actionQueueGroupType &as,
         uint32 * id = NULL);
     bool addActQToQueue(actionQueueGroupType &as,
         uint32 * id = NULL);
@@ -770,6 +770,8 @@ public:
 
     void createActQFindWeapon(actionQueueGroupType &as,
         pedWeaponToUse *pw_to_use = NULL, int dist = -1);
+
+    void createActQCheckOwner(actionQueueGroupType &as);
     
     void discardActG(uint32 id);
     void discardActG(std::vector <actionQueueGroupType>::iterator it_a);
@@ -785,6 +787,8 @@ public:
      * ipa, etc.
      */
     int getSpeed();
+    int getSpeedOwnerBoost();
+
     void getAccuracy(double &base_acc);
     bool hasAccessCard();
     bool isPersuaded();

@@ -522,11 +522,35 @@ void PedInstance::createActQFindWeapon(actionQueueGroupType &as,
     as.actions.push_back(aq);
 
     createActQPickUp(as, NULL);
-    as.actions[1].state |= 64;
-    as.actions[2].state |= 64;
+    std::vector <actionQueueType>::reverse_iterator it = as.actions.rbegin();
+    (it++)->state |= 64;
+    it->state |= 64;
 }
 
-bool PedInstance::setActQInQueue(actionQueueGroupType &as,
+void PedInstance::createActQCheckOwner(actionQueueGroupType &as) {
+    as.state = 1;
+    actionQueueType aq;
+    aq.as = PedInstance::pa_smNone;
+    aq.group_desc = PedInstance::gd_mThink | PedInstance::gd_mExclusive;
+    aq.act_exec = PedInstance::ai_aCheckOwner | PedInstance::ai_aWaitToStart;
+    Mod *pMod = slots_[Mod::MOD_BRAIN];
+    int32 tm_wait = tm_before_check_;
+    if (obj_group_def_ == PedInstance::og_dmAgent) {
+        if (pMod) {
+            tm_wait -= 25 * (pMod->getVersion() + 2);
+        }
+        tm_wait = (double)tm_wait * (1.0 / perception_->getMultiplier());
+    }
+    aq.multi_var.time_var.desc = 0;
+    aq.multi_var.time_var.elapsed = 0;
+    aq.multi_var.time_var.time_to_start = tm_wait;
+    as.actions.push_back(aq);
+    int indx = as.actions.size();
+    createActQFindWeapon(as);
+    as.actions[indx].state |= 64;
+}
+
+void PedInstance::setActQInQueue(actionQueueGroupType &as,
     uint32 * id)
 {
     // NOTE: if action is invalidated - all remaining actions in queue are
@@ -562,7 +586,6 @@ bool PedInstance::setActQInQueue(actionQueueGroupType &as,
         as.group_id = 0;
     }
     actions_queue_.push_back(as);
-    return true;
 }
 
 bool PedInstance::addActQToQueue(actionQueueGroupType &as,
