@@ -157,38 +157,9 @@ bool WeaponInstance::animate(int elapsed) {
             int tm_left = elapsed;
             inflictDamage(NULL, NULL, &tm_left);
         }
-        if (time_consumed_) {
-            time_consumed_ = false;
-        } else if (weapon_used_time_ != 0 ) {
-            weapon_used_time_ += elapsed;
-            if (weapon_used_time_ > (pWeaponClass_->timeForShot()
-                + pWeaponClass_->timeReload()))
-            {
-                weapon_used_time_ = 0;
-            }
-        }
-    } else if (weapon_used_time_ != 0 ) {
-        weapon_used_time_ += elapsed;
-        if (weapon_used_time_ > (pWeaponClass_->timeForShot()
-            + pWeaponClass_->timeReload()))
-        {
-            weapon_used_time_ = 0;
-        }
-    } else {
-        if (main_type_ == Weapon::EnergyShield) {
-            if (ammo_remaining_ != 0
-                && ammo_remaining_ < pWeaponClass_->ammo())
-                return false;
-            int tm_left = elapsed;
-            int ammoused = getShots(&tm_left) * pWeaponClass_->ammoPerShot();
-            if (ammo_remaining_ != 0
-                && ammo_remaining_ != pWeaponClass_->ammo())
-            {
-                ammo_remaining_ += ammoused;
-                if (ammo_remaining_ > pWeaponClass_->ammo())
-                    ammo_remaining_ = pWeaponClass_->ammo();
-            }
-        }
+        updtWeaponUsedTime(elapsed);
+    } else if (weapon_used_time_ != 0) {
+        updtWeaponUsedTime(elapsed);
     }
 
     if (map_ == -1)
@@ -1339,6 +1310,19 @@ bool WeaponInstance::handleDamage(ShootableMapObject::DamageInflictType * d)
         }
     }
     return true;
+}
+
+void WeaponInstance::updtWeaponUsedTime(int elapsed) {
+    if (time_consumed_) {
+        time_consumed_ = false;
+    } else if (weapon_used_time_ != 0 ) {
+        weapon_used_time_ += elapsed;
+        if (weapon_used_time_ >= (pWeaponClass_->timeForShot()
+            + pWeaponClass_->timeReload()))
+        {
+            weapon_used_time_ = 0;
+        }
+    }
 }
 
 /*! Draws animation of impact/explosion

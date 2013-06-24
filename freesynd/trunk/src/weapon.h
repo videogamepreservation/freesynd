@@ -367,6 +367,7 @@ public:
         return pWeaponClass_->dmgType();
     }
     int getWeight() { return pWeaponClass_->weight(); }
+    void updtWeaponUsedTime(int elapsed);
 
 protected:
     Weapon *pWeaponClass_;

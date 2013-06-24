@@ -1356,6 +1356,46 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                     } else
                         aqt->state |= 8;
                 }
+                if ((aqt->act_exec & PedInstance::ai_aCheckOwner) != 0
+                    && (aqt->state & 128) == 0)
+                {
+                    if (owner_) {
+                        if (owner_->isDead()){
+                            owner_ = NULL;
+                            Squad *sq = mission->getSquad();
+                            for (uint8 i = 0; i < AgentManager::kMaxSlot; ++i) {
+                                PedInstance *p = sq->member(i);
+                                if (p->isAlive()) {
+                                    owner_ = p;
+                                    break;
+                                }
+                            }
+                        }
+                        if (owner_ && owner_->isAlive()) {
+                            if (((PedInstance *)owner_)->isArmed()) {
+                                if (weapons_.empty()) {
+                                    // enable find and pickup weapon
+                                    std::vector <actionQueueType>::iterator searched =
+                                        findActInQueue(PedInstance::ai_aFindWeapon,
+                                        *it, aqt);
+                                    if (searched != it->actions.end()) {
+                                        actionQueueType & aqt_findweap = *searched;
+                                        aqt_findweap.state ^= 64;
+                                        it->main_act = std::distance(
+                                            it->actions.begin(), searched);
+                                    }
+                                } else {
+                                    ;
+                                    // TODO: get owners target and shoot it
+                                }
+                            }
+                            // TODO: deselect weapon
+                            aqt->state |= 4;
+                        } else
+                            aqt->state |= 8;
+                    } else
+                        aqt->state |= 8;
+                }
                 if ((aqt->act_exec & (PedInstance::ai_aWait
                     | PedInstance::ai_aWaitToStart)) == PedInstance::ai_aWait)
                 {
@@ -1883,10 +1923,10 @@ void PedInstance::setSelectedWeapon(int n) {
     if (selected_weapon_ != -1) {
         assert((size_t)selected_weapon_ < weapons_.size());
         WeaponInstance *wi = weapons_[selected_weapon_];
-        if (wi->getMainType() == Weapon::EnergyShield)
+        if (wi->getWeaponType() == Weapon::EnergyShield) {
             setRcvDamageDef(MapObject::ddmg_Ped);
-        if (wi->getMainType() != Weapon::TimeBomb)
             wi->deactivate();
+        }
         if (wi->getWeaponType() == Weapon::AccessCard)
             rmEmulatedGroupDef(4, og_dmPolice);
         desc_state_ &= (pd_smAll ^ (pd_smArmed | pd_smNoAmmunition));
@@ -1913,10 +1953,10 @@ void PedInstance::setSelectedWeapon(int n) {
         else
             desc_state_ &= pd_smAll ^ pd_smArmed;
 
-        if (wi->getMainType() == Weapon::EnergyShield)
+        if (wi->getWeaponType() == Weapon::EnergyShield) {
             setRcvDamageDef(MapObject::ddmg_PedWithEnergyShield);
-        if (wi->getMainType() != Weapon::TimeBomb)
             wi->activate();
+        }
         if (wi->getWeaponType() == Weapon::AccessCard)
             addEmulatedGroupDef(4, og_dmPolice);
     }
@@ -2089,6 +2129,8 @@ void PedInstance::dropWeapon(WeaponInstance *wi) {
     wi->setPosition(tile_x_, tile_y_, tile_z_, off_x_, off_y_, off_z_);
     if (wi->getMainType() == Weapon::TimeBomb)
         wi->activate();
+    else
+        wi->deactivate();
 }
 
 void PedInstance::dropAllWeapons() {
@@ -2104,6 +2146,7 @@ void PedInstance::dropAllWeapons() {
     {
         WeaponInstance *w = *it;
         w->setMap(map());
+        // randomizing location for drop
         int ox = rand() % 256;
         int oy = rand() % 256;
         w->setPosition(tile_x_, tile_y_, tile_z_, ox, oy);
