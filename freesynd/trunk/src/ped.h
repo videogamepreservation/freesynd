@@ -242,7 +242,7 @@ public:
     WeaponInstance *selectedWeapon() {
         return selected_weapon_ >= 0
                 && selected_weapon_ < (int) weapons_.size()
-            ? weapons_[selected_weapon_] : 0;
+            ? weapons_[selected_weapon_] : NULL;
     }
 
     void setSelectedWeapon(int n);
@@ -762,7 +762,7 @@ public:
         uint8 desc = 0);
 
     bool createActQFindEnemy(actionQueueGroupType &as);
-    void createActQFindNonFriend(actionQueueGroupType &as);
+    bool createActQFindNonFriend(actionQueueGroupType &as);
 
     void createActQResetActionQueue(actionQueueGroupType &as);
     void createActQDeselectCurWeapon(actionQueueGroupType &as);
@@ -796,6 +796,7 @@ public:
     void cpyEnemyDefs(Mmuu32_t &eg_defs) { eg_defs = enemy_group_defs_; }
     bool isArmed() { return (desc_state_ & pd_smArmed); }
     bool isExcluded() { return (state_ & pa_smCheckExcluded) != 0; }
+    void updtPreferedWeapon();
     
     IPAStim *adrenaline_;
     IPAStim *perception_;
@@ -844,6 +845,7 @@ protected:
 
     int sight_range_;
     int selected_weapon_;
+    pedWeaponToUse prefered_weapon_;
     VehicleInstance *in_vehicle_;
     agentAndNonEnum agent_is_;
     //! controller of ped - for persuaded

@@ -365,6 +365,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                 break;
 
             uint32 acts_g_prcssd = 0;
+            updtPreferedWeapon();
             for (uint32 indx = 0; indx < it->actions.size(); ++indx)
             {
                 std::vector <actionQueueType>::iterator aqt = it->actions.begin() + indx;
@@ -592,7 +593,8 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                             // friendly units can see it we should fail,
                             // use check from findenemy?
                             WeaponInstance *wi = selectedWeapon();
-                            if (wi && wi->ammoRemaining() > 0)
+                            if (wi && wi->ammoRemaining() > 0 && wi->canShoot()
+                                && wi->doesPhysicalDmg())
                             {
                                 int tm_left = elapsed;
                                 uint32 make_shots = aqt->multi_var.enemy_var.make_shots;
@@ -1235,8 +1237,6 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                         aqt->multi_var.time_var.time_wait = tm_wait;
                         aqt->multi_var.time_var.desc = 2;
                         aqt->multi_var.time_var.elapsed = 0;
-                        // TODO: selected weapon is ignored after findenemy set,
-                        // update based on selected weapon?
                     }
                 }
                 if ((aqt->act_exec & PedInstance::ai_aFindNonFriend) != 0
@@ -1967,13 +1967,14 @@ bool PedInstance::selectRequiredWeapon(pedWeaponToUse *pw_to_use) {
     // pair <rank, indx>
     std::vector < std::pair<int, int> > found_weapons;
     uint8 sz;
-    pedWeaponToUse local_pw_to_use;
 
     if (!pw_to_use) {
-        pw_to_use = &local_pw_to_use;
-        local_pw_to_use.desc = 5;
-        local_pw_to_use.wpn.dmg_type = MapObject::dmg_Physical;
+        pw_to_use = &prefered_weapon_;
+    } else if (prefered_weapon_.desc != 5) {
+        // overriding selection to respect users choice
+        pw_to_use = &prefered_weapon_;
     }
+
     bool found = false;
     switch (pw_to_use->desc) {
         case 2:
@@ -2075,9 +2076,9 @@ void PedInstance::selectNextWeapon() {
 
         if (cur_sel_weapon) {
             for (int i = 0; i < numWeapons(); ++i) {
-                WeaponInstance * wi = weapon(i);
-                if (i != selected_weapon_ && wi->ammoRemaining()
-                        && wi->getMainType() == cur_sel_weapon->getMainType())
+                WeaponInstance * wi = weapons_[i];
+                if (i != selected_weapon_ && wi->usesAmmo() && wi->ammoRemaining()
+                        && wi->getWeaponType() == cur_sel_weapon->getWeaponType())
                 {
                     if (nextWeapon == -1)
                         nextWeapon = i;
@@ -2090,13 +2091,30 @@ void PedInstance::selectNextWeapon() {
                     }
                 }
             }
+            if (nextWeapon == -1) {
+                for (int i = 0; i < numWeapons(); ++i) {
+                    WeaponInstance * wi = weapons_[i];
+                    if (i != selected_weapon_ && wi->usesAmmo() && wi->ammoRemaining()
+                            && wi->doesDmgNonStrict(cur_sel_weapon->dmgType()))
+                    {
+                        if (nextWeapon == -1)
+                            nextWeapon = i;
+                        else {
+                            if (wi->ammoRemaining()
+                                < weapon(nextWeapon)->ammoRemaining())
+                            {
+                                nextWeapon = i;
+                            }
+                        }
+                    }
+                }
+            }
+            if (nextWeapon != -1)
+                setSelectedWeapon(nextWeapon);
         }
 
-        setSelectedWeapon(-1);
         if (nextWeapon == -1)
             selectRequiredWeapon();
-        else
-            setSelectedWeapon(nextWeapon);
     } else
         selectRequiredWeapon();
 }
@@ -2109,6 +2127,7 @@ void PedInstance::dropWeapon(int n) {
 
 void PedInstance::dropWeapon(WeaponInstance *wi) {
     bool upd_selected = selected_weapon_ != -1;
+
     if (selectedWeapon() == wi) {
         setSelectedWeapon(-1);
         upd_selected = false;
@@ -2119,7 +2138,7 @@ void PedInstance::dropWeapon(WeaponInstance *wi) {
         if ((*it) == wi) {
             weapons_.erase(it);
             if (upd_selected && selected_weapon_ > i)
-                selected_weapon_--;
+                --selected_weapon_;
             break;
         }
     }
@@ -2705,4 +2724,14 @@ bool PedInstance::isPersuaded()
         && obj_group_id_ == g_Session.getMission()->playersGroupID();
 }
 
+void PedInstance::updtPreferedWeapon() {
+    if (selected_weapon_ != -1) {
+        WeaponInstance *wi = weapons_[selected_weapon_];
+        prefered_weapon_.desc = 2;
+        prefered_weapon_.wpn.wi = wi;
+    } else {
+        prefered_weapon_.desc = 5;
+        prefered_weapon_.wpn.dmg_type = MapObject::dmg_Physical;
+    }
+}
 

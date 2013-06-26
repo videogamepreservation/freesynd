@@ -101,6 +101,7 @@ bool PedInstance::createActQFiring(actionQueueGroupType &as, PathNode *tpn,
     ShootableMapObject *tsmo, bool forced_shot, uint32 make_shots, 
     pedWeaponToUse *pw_to_use, int32 value)
 {
+    // TODO: review, if no weapon found or selected assume physical damage?
     as.state = 1;
     actionQueueType aq;
     aq.group_desc = PedInstance::gd_mFire;
@@ -428,7 +429,7 @@ bool PedInstance::createActQFindEnemy(actionQueueGroupType &as) {
     return true;
 }
 
-void PedInstance::createActQFindNonFriend(actionQueueGroupType &as)
+bool PedInstance::createActQFindNonFriend(actionQueueGroupType &as)
 {
     as.state = 1;
     actionQueueType aq;
@@ -452,6 +453,10 @@ void PedInstance::createActQFindNonFriend(actionQueueGroupType &as)
     pw_to_use.wpn.dmg_type = MapObject::dmg_Mental;
     if (createActQFiring(as, NULL, NULL, false, 0, &pw_to_use))
         as.actions.back().state |= 64;
+    else
+        return false;
+
+    return true;
 }
 
 void PedInstance::createActQResetActionQueue(actionQueueGroupType &as) {
@@ -512,12 +517,8 @@ void PedInstance::createActQFindWeapon(actionQueueGroupType &as,
     aq.multi_var.time_var.elapsed = 0;
     aq.multi_var.time_var.time_to_start = tm_wait;
 
-    pedWeaponToUse local_pw_to_use;
-    if (!pw_to_use) {
-        pw_to_use = &local_pw_to_use;
-        local_pw_to_use.desc = 5;
-        local_pw_to_use.wpn.dmg_type = MapObject::dmg_Physical;
-    }
+    if (!pw_to_use)
+        pw_to_use = &prefered_weapon_;
 
     as.actions.push_back(aq);
 
@@ -612,7 +613,8 @@ void PedInstance::createDefQueue() {
         // and will not be added from defaults
         as.group_desc = PedInstance::gd_mThink | PedInstance::gd_mFire;
         default_actions_.push_back(as);
-    }
+    } else
+        as.actions.clear();
     if ((desc_state_ & PedInstance::pd_smControlled) != 0) {
         // TODO: create check owner action to set owner correctly,
         // when one of our agents dies it will be possible to switch
@@ -628,8 +630,10 @@ void PedInstance::createDefQueue() {
                 as.actions.clear();
                 as.main_act = 0;
                 as.group_desc = PedInstance::gd_mThink | PedInstance::gd_mFire;
-                createActQFindNonFriend(as);
-                default_actions_.insert(default_actions_.begin(), as);
+                if (createActQFindNonFriend(as))
+                    default_actions_.insert(default_actions_.begin(), as);
+                else
+                    as.actions.clear();
             }
         }/* else if (obj_group_def_ == PedInstance::og_dmCivilian
                    || obj_group_def_ == PedInstance::og_dmCriminal)
