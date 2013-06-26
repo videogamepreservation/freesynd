@@ -616,13 +616,18 @@ public:
     } groupDescMasks;
 
     typedef struct {
+        PathNode t_pn;
+        ShootableMapObject *t_smo;
+        // 0 - unset, 1 - use t_pn, 2 - use t_smo, 3 - both are set
+        uint8 desc;
+    } targetDescType;
+
+    typedef struct {
         // action state (pedActionStateMasks)
         uint32 as;
         // PedInstance::AiAction
         uint32 act_exec;
-        PathNode t_pn;
-        // ai_aFindEnemy sets this value, others use
-        ShootableMapObject *t_smo;
+        targetDescType target;
         // 0b(1) - not started, 1b(2) - executing, 2b(4) - finished, 3b(8) - failed,
         // 4b(16) - suspended, 5b(32) - waiting to complete (ai_aWait),
         // 6b(64) - not ready (empty, should be skipped), 7b(128) - waiting (ai_aWait
@@ -797,6 +802,7 @@ public:
     bool isArmed() { return (desc_state_ & pd_smArmed); }
     bool isExcluded() { return (state_ & pa_smCheckExcluded) != 0; }
     void updtPreferedWeapon();
+    targetDescType * lastFiringTarget() { return &last_firing_target_; }
     
     IPAStim *adrenaline_;
     IPAStim *perception_;
@@ -850,7 +856,8 @@ protected:
     agentAndNonEnum agent_is_;
     //! controller of ped - for persuaded
     ShootableMapObject *owner_;
-    //TODO: not used to remove??
+    targetDescType last_firing_target_;
+
     bool walkable(int x, int y, int z) { return true; }
 
 private:

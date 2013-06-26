@@ -52,10 +52,12 @@ void PedInstance::createActQWalking(actionQueueGroupType &as, PathNode *tpn,
     // TODO: set condition as function parameter and set values based on it?
     if (dir == -1) {
         if (tpn) {
-            aq.t_pn = *tpn;
+            aq.target.t_pn = *tpn;
+            aq.target.desc = 1;
             aq.condition = 0;
         } else {
-            aq.t_smo = tsmo;
+            aq.target.desc = 2;
+            aq.target.t_smo = tsmo;
             aq.condition = 2;
         }
     } else {
@@ -64,15 +66,18 @@ void PedInstance::createActQWalking(actionQueueGroupType &as, PathNode *tpn,
         aq.multi_var.dist_var.dir_move.bounce = bounce;
         if (tpn) {
             // direction will be calculated from pathnode position
-            aq.t_pn = *tpn;
+            aq.target.t_pn = *tpn;
+            aq.target.desc = 1;
             aq.condition = 3;
         } else if (tsmo) {
             // direction will be calculated from objects position
-            aq.t_smo = tsmo;
+            aq.target.t_smo = tsmo;
+            aq.target.desc = 2;
             aq.condition = 4;
         } else {
             // directional movement only
             aq.condition = 1;
+            aq.target.desc = 0;
         }
     }
     as.actions.push_back(aq);
@@ -92,8 +97,10 @@ void PedInstance::createActQHit(actionQueueGroupType &as, PathNode *tpn,
     aq.multi_var.dist_var.dir = dir;
     aq.condition = 1;
     // calculate direction from this point
-    if (dir == -1)
-        aq.t_pn = *tpn;
+    if (dir == -1) {
+        aq.target.t_pn = *tpn;
+        aq.target.desc = 1;
+    }
     as.actions.push_back(aq);
 }
 
@@ -102,6 +109,7 @@ bool PedInstance::createActQFiring(actionQueueGroupType &as, PathNode *tpn,
     pedWeaponToUse *pw_to_use, int32 value)
 {
     // TODO: review, if no weapon found or selected assume physical damage?
+    // should be possible to create without a target
     as.state = 1;
     actionQueueType aq;
     aq.group_desc = PedInstance::gd_mFire;
@@ -167,8 +175,12 @@ bool PedInstance::createActQFiring(actionQueueGroupType &as, PathNode *tpn,
                 aq.multi_var.enemy_var.pw_to_use.desc = 2;
                 aq.multi_var.enemy_var.pw_to_use.wpn.wi = wi;
             //}
-        } else
-            return false;
+        } else {
+            can_shoot = true;
+            does_phys_dmg = true;
+            aq.multi_var.enemy_var.pw_to_use.desc = 5;
+            aq.multi_var.enemy_var.pw_to_use.wpn.dmg_type = MapObject::dmg_Physical;
+        }
     }
 
     if (!can_shoot)
@@ -191,22 +203,22 @@ bool PedInstance::createActQFiring(actionQueueGroupType &as, PathNode *tpn,
         aq.multi_var.enemy_var.make_shots = make_shots;
         aq.multi_var.enemy_var.shots_done = 0;
         if (tpn) {
-            aq.t_pn = *tpn;
+            aq.target.t_pn = *tpn;
+            aq.target.desc = 1;
             aq.act_exec = PedInstance::ai_aAttackLocation;
-            aq.t_smo = NULL;
+            aq.target.t_smo = NULL;
         } else {
-            aq.t_smo = tsmo;
+            aq.target.t_smo = tsmo;
+            aq.target.desc = 2;
             aq.act_exec = PedInstance::ai_aDestroyObject;
         }
     } else {
-        if (tsmo && tsmo->majorType() == MapObject::mjt_Ped) {
-            aq.as = PedInstance::pa_smNone;
-            aq.multi_var.enemy_var.make_shots = make_shots;
-            aq.multi_var.enemy_var.shots_done = 0;
-            aq.t_smo = tsmo;
-            aq.act_exec = PedInstance::ai_aAquireControl;
-        } else
-            return false;
+        aq.as = PedInstance::pa_smNone;
+        aq.multi_var.enemy_var.make_shots = make_shots;
+        aq.multi_var.enemy_var.shots_done = 0;
+        aq.target.t_smo = tsmo;
+        aq.target.desc = 2;
+        aq.act_exec = PedInstance::ai_aAquireControl;
     }
     aq.state = 1;
     aq.act_exec |= PedInstance::ai_aWait;
@@ -225,7 +237,8 @@ void PedInstance::createActQFollowing(actionQueueGroupType &as,
     aq.act_exec = PedInstance::ai_aFollowObject;
     aq.group_desc = PedInstance::gd_mStandWalk;
     aq.state = 1;
-    aq.t_smo = tsmo;
+    aq.target.t_smo = tsmo;
+    aq.target.desc = 2;
     aq.multi_var.dist_var.dist = dist;
     aq.multi_var.dist_var.speed = -1;
     aq.condition = condition;
@@ -239,7 +252,8 @@ void PedInstance::createActQPickUp(actionQueueGroupType &as,
     createActQWalking(as, NULL, tsmo);
     actionQueueType aq;
     aq.state = 1;
-    aq.t_smo = tsmo;
+    aq.target.t_smo = tsmo;
+    aq.target.desc = 2;
     aq.as = PedInstance::pa_smPickUp;
     aq.act_exec = PedInstance::ai_aPickUpObject;
     aq.act_exec |= PedInstance::ai_aWait;
@@ -257,7 +271,8 @@ void PedInstance::createActQPutDown(actionQueueGroupType &as,
     aq.act_exec = PedInstance::ai_aPutDownObject;
     aq.group_desc = PedInstance::gd_mExclusive;
     aq.state = 1;
-    aq.t_smo = tsmo;
+    aq.target.t_smo = tsmo;
+    aq.target.desc = 2;
     aq.act_exec |= PedInstance::ai_aWait;
     aq.multi_var.time_var.desc = 1;
     as.actions.push_back(aq);
@@ -301,7 +316,8 @@ void PedInstance::createActQGetInCar(actionQueueGroupType &as,
     createActQWalking(as, NULL, tsmo, dir);
     actionQueueType aq;
     aq.state = 1;
-    aq.t_smo = tsmo;
+    aq.target.t_smo = tsmo;
+    aq.target.desc = 2;
     // TODO: change this use enum
     aq.condition = 0;
     aq.as = PedInstance::pa_smGetInCar;
@@ -316,8 +332,9 @@ void PedInstance::createActQUsingCar(actionQueueGroupType &as, PathNode *tpn,
     as.state = 1;
     actionQueueType aq;
     aq.state = 1;
-    aq.t_smo = tsmo;
-    aq.t_pn = *tpn;
+    aq.target.desc = 3;
+    aq.target.t_smo = tsmo;
+    aq.target.t_pn = *tpn;
     aq.condition = 1;
     aq.as = PedInstance::pa_smNone;
     aq.group_desc = PedInstance::gd_mStandWalk;
@@ -331,8 +348,9 @@ void PedInstance::createActQInCar(actionQueueGroupType &as, PathNode *tpn,
     as.state = 1;
     actionQueueType aq;
     aq.state = 1;
-    aq.t_smo = tsmo;
-    aq.t_pn = *tpn;
+    aq.target.desc = 3;
+    aq.target.t_smo = tsmo;
+    aq.target.t_pn = *tpn;
     aq.condition = 0;
     aq.as = PedInstance::pa_smNone;
     aq.group_desc = PedInstance::gd_mStandWalk;
@@ -348,7 +366,8 @@ void PedInstance::createActQLeaveCar(actionQueueGroupType &as,
     aq.as = PedInstance::pa_smLeaveCar;
     aq.act_exec = PedInstance::ai_aLoseControl;
     aq.state = 1;
-    aq.t_smo = tsmo;
+    aq.target.desc = 2;
+    aq.target.t_smo = tsmo;
     aq.group_desc = PedInstance::gd_mExclusive;
     as.actions.push_back(aq);
 }
@@ -403,7 +422,7 @@ bool PedInstance::createActQFindEnemy(actionQueueGroupType &as) {
             wi = NULL;
             setSelectedWeapon(-1);
         }
-        if (wi && wi->canShoot()) {
+        if (wi && wi->canShoot() && wi->doesPhysicalDmg()) {
             pw_to_use.desc = 2;
             pw_to_use.wpn.wi = wi;
         } else {
@@ -488,7 +507,7 @@ void PedInstance::createActQTrigger(actionQueueGroupType &as, PathNode *tpn,
     aq.group_desc = PedInstance::gd_mExclusive;
     aq.state = 1;
     aq.act_exec = PedInstance::ai_aTrigger;
-    aq.t_pn = *tpn;
+    aq.target.t_pn = *tpn;
     aq.multi_var.dist_var.dist = range;
     as.actions.push_back(aq);
 }
@@ -518,7 +537,9 @@ void PedInstance::createActQFindWeapon(actionQueueGroupType &as,
     aq.multi_var.time_var.time_to_start = tm_wait;
 
     if (!pw_to_use)
-        pw_to_use = &prefered_weapon_;
+        aq.multi_var.enemy_var.pw_to_use = prefered_weapon_;
+    else
+        aq.multi_var.enemy_var.pw_to_use = *pw_to_use;
 
     as.actions.push_back(aq);
 
@@ -549,6 +570,8 @@ void PedInstance::createActQCheckOwner(actionQueueGroupType &as) {
     int indx = as.actions.size();
     createActQFindWeapon(as);
     as.actions[indx].state |= 64;
+    if (createActQFiring(as, NULL, NULL))
+        as.actions.back().state |= 64;
 }
 
 void PedInstance::setActQInQueue(actionQueueGroupType &as,
@@ -730,12 +753,12 @@ void PedInstance::updtActGFiring(uint32 id, PathNode* tpn,
                             | PedInstance::ai_aAttackLocation);
                         // TODO : update when condition will be used
                         if (tsmo) {
-                            it_a->t_smo = tsmo;
+                            it_a->target.t_smo = tsmo;
                             it_a->act_exec |= PedInstance::ai_aDestroyObject;
                         } else {
-                            it_a->t_pn = *tpn;
+                            it_a->target.t_pn = *tpn;
                             it_a->act_exec |= PedInstance::ai_aAttackLocation;
-                            it_a->t_smo = NULL;
+                            it_a->target.t_smo = NULL;
                         }
                         break;
                     }
@@ -743,10 +766,10 @@ void PedInstance::updtActGFiring(uint32 id, PathNode* tpn,
                         & (PedInstance::ai_aAquireControl)) != 0)
                     {
                         if (tsmo) {
-                            it_a->t_smo = tsmo;
+                            it_a->target.t_smo = tsmo;
                         } else {
-                            it_a->t_pn = *tpn;
-                            it_a->t_smo = NULL;
+                            it_a->target.t_pn = *tpn;
+                            it_a->target.t_smo = NULL;
                         }
                         break;
                     }
