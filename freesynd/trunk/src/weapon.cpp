@@ -153,10 +153,10 @@ bool WeaponInstance::animate(int elapsed) {
             }
             is_ignored_ = false;
             time_consumed_ = true;
-        } else if (main_type_ == Weapon::Persuadatron) {
+        }/* else if (main_type_ == Weapon::Persuadatron) {
             int tm_left = elapsed;
             inflictDamage(NULL, NULL, &tm_left);
-        }
+        }*/
         updtWeaponUsedTime(elapsed);
     } else if (weapon_used_time_ != 0) {
         updtWeaponUsedTime(elapsed);
@@ -771,7 +771,7 @@ uint16 WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
         }
         if (shot_prop & Weapon::spe_ShootsWhileNoTarget) {
             std::vector <Weapon::ShotDesc> gen_shots;
-            if (shot_prop & Weapon::spe_PointToPoint) {
+            if (shot_prop & Weapon::spe_PointToPoint) {/*
                 if (!tobj) {
                     getNonFriendInRange(&cp, smp, false);
                     if (smp) {
@@ -779,7 +779,7 @@ uint16 WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
                         gen_shots.back().smo = smp;
                         this->playSound();
                     }
-                }
+                }*/
                 if (tobj && tobj->majorType() == MapObject::mjt_Ped) {
                     if (((PedInstance *)owner_)->checkFriendIs(
                         (PedInstance *)tobj))

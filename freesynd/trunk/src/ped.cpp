@@ -269,7 +269,9 @@ void PedInstance::switchActionStateFrom(uint32 as) {
             break;
         case pa_smDead:
             state_ = pa_smDead;
+#ifdef _DEBUG
             printf("It's alive!\n");
+#endif
             break;
         case pa_smUnavailable:
             state_ = pa_smUnavailable;
@@ -308,6 +310,8 @@ void PedInstance::setActionStateToDrawnAnim(void) {
 
 bool PedInstance::animate(int elapsed, Mission *mission) {
     // TODO: proper handling for exclusive states, switching;
+    // TODO: weapon selection action, and use only deselectweapon
+    // to disarm
 
     if (agent_is_ == PedInstance::Agent_Non_Active)
         return false;
@@ -327,27 +331,28 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                 && (it->origin_desc != 1))
             {
                 actions_queue_.erase(it);
-                continue;
             }
         }
     }
+#if 0
+#ifdef _DEBUG
+    if ((desc_state_ & pd_smControlled) != 0) {
+        for (uint32 indx = 0; indx < actions_queue_.size(); ++indx) {
+            std::vector <actionQueueGroupType>::iterator it =
+                actions_queue_.begin() + indx;
+            printf("act = %x , stt = %i\n", it->actions[0].act_exec, it->actions[0].state);
+        }
+        printf("=====end\n");
+    }
+#endif
+#endif
 
     last_firing_target_.desc = 0;
     // NOTE: some actions have remaining time, it is lost for now
     if (actions_queue_.empty()) {
-        // TODO: use default_actions_ to fill it up
-#if 1
         if ((state_ & pa_smCheckExcluded) == 0) {
-            actionQueueGroupType as;
-            if (createActQFindEnemy(as)) {
-                as.group_id = 0;
-                as.main_act = 0;
-                as.group_desc = PedInstance::gd_mThink | PedInstance::gd_mFire;
-                as.origin_desc = 2;
-                actions_queue_.push_back(as);
-            }
+            addDefActsToActions();
         }
-#endif
     } else {
         friends_not_seen_.clear();
         // TODO: xor finished and failed, should all actions
@@ -363,7 +368,9 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                 break;
             if ((it->group_desc & PedInstance::gd_mExclusive) != 0
                 && groups_processed != 0)
+            {
                 break;
+            }
 
             uint32 acts_g_prcssd = 0;
             updtPreferedWeapon();
@@ -372,16 +379,22 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                 std::vector <actionQueueType>::iterator aqt = it->actions.begin() + indx;
                 if ((acts_g_prcssd & aqt->group_desc) != 0
                     || (acts_g_prcssd & groups_processed) != 0)
+                {
                     break;
+                }
                 if ((aqt->state & 128) == 0 && (aqt->state & 76) != 0)
                     continue;
                 if ((aqt->group_desc & PedInstance::gd_mExclusive) != 0
                     && acts_g_prcssd != 0)
+                {
                     break;
+                }
+#ifdef _DEBUG
                 if ((aqt->act_exec & PedInstance::ai_aNone) != 0)
                 {
                     printf("obj_None");
                 }
+#endif
                 if ((aqt->act_exec & PedInstance::ai_aTrigger) != 0)
                 {
                     toDefineXYZ xyz;
@@ -1251,56 +1264,66 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                 if ((aqt->act_exec & PedInstance::ai_aFindNonFriend) != 0
                     && (aqt->state & 128) == 0)
                 {
-                    bool selfState = is_ignored_;
-                    // NOTE : can be done as in ai_aFindEnemy with objects
-                    // passing within same group + def
-                    Msmod_t nf_dist;
-                    toDefineXYZ cur_xyz;
-                    convertPosToXYZ(&cur_xyz);
-                    cur_xyz.z += (size_z_ >> 1);
-                    int num_peds = mission->numPeds();
-                    int view_rng = sight_range_;
-                    for (int i = 0; i < num_peds; ++i) {
-                        PedInstance *p = mission->ped(i);
-                        if ((p->state_ & pa_smCheckExcluded) != 0
-                            || p->isIgnored() || p == this)
-                        {
-                            continue;
-                        }
-                        if (!checkFriendIs(p) ) {
-                            double distTo = 0;
-                            if (mission->inRangeCPos(&cur_xyz,
-                                (ShootableMapObject **)(&p), NULL, false, false,
-                                view_rng, &distTo) == 1)
+                    WeaponInstance *wi = selectedWeapon();
+                    if (wi && wi->getWeaponType() == Weapon::Persuadatron) {
+                        bool selfState = is_ignored_;
+                        is_ignored_ = true;
+                        // NOTE : can be done as in ai_aFindEnemy with objects
+                        // passing within same group + def
+                        Msmod_t nf_dist;
+                        toDefineXYZ cur_xyz;
+                        convertPosToXYZ(&cur_xyz);
+                        cur_xyz.z += (size_z_ >> 1);
+                        int num_peds = mission->numPeds();
+
+                        // NOTE: this range should be always the same valuse as
+                        // persuadatron max range
+                        int view_rng = wi->range();
+                        for (int i = 0; i < num_peds; ++i) {
+                            PedInstance *p = mission->ped(i);
+                            if ((p->state_ & pa_smCheckExcluded) != 0
+                                || p->isIgnored() || p == this)
                             {
-                                nf_dist.insert(Pairsmod_t(
-                                    (ShootableMapObject *)p, distTo));
+                                continue;
+                            }
+                            if (!checkFriendIs(p) ) {
+                                double distTo = 0;
+                                if (mission->inRangeCPos(&cur_xyz,
+                                    (ShootableMapObject **)(&p), NULL, false, false,
+                                    view_rng, &distTo) == 1)
+                                {
+                                    nf_dist.insert(Pairsmod_t(
+                                        (ShootableMapObject *)p, distTo));
+                                }
                             }
                         }
-                    }
-                    is_ignored_ = selfState;
-                    if (nf_dist.empty())
-                        aqt->state |= 8;
-                    else {
-                        Msmod_t::iterator it_msmod = nf_dist.begin();
-                        Pairsmod_t closest = *it_msmod;
-                        ++it_msmod;
-                        while (it_msmod != nf_dist.end()) {
-                            if (it_msmod->second < closest.second)
-                                closest = *it_msmod;
+                        is_ignored_ = selfState;
+                        if (nf_dist.empty())
+                            aqt->state |= 8;
+                        else {
+                            Msmod_t::iterator it_msmod = nf_dist.begin();
+                            Pairsmod_t closest = *it_msmod;
                             ++it_msmod;
-                        }
-                        std::vector <actionQueueType>::iterator searched =
-                            findActInQueue(PedInstance::ai_aAquireControl,
-                            *it, aqt);
+                            while (it_msmod != nf_dist.end()) {
+                                if (it_msmod->second < closest.second)
+                                    closest = *it_msmod;
+                                ++it_msmod;
+                            }
+                            std::vector <actionQueueType>::iterator searched =
+                                findActInQueue(PedInstance::ai_aAquireControl,
+                                *it, aqt);
 
-                        if (searched != it->actions.end()) {
-                            actionQueueType & aqt_aq_cont = *searched;
-                            aqt_aq_cont.target.t_smo = closest.first;
-                            aqt_aq_cont.state ^= 64;
+                            if (searched != it->actions.end()) {
+                                actionQueueType & aqt_aq_cont = *searched;
+                                aqt_aq_cont.target.t_smo = closest.first;
+                                aqt_aq_cont.state ^= 64;
+                                it->main_act = std::distance(
+                                    it->actions.begin(), searched);
+                            }
+                            aqt->state |= 4;
                         }
-                        aqt->state |= 4;
-                    }
+                    } else
+                        aqt->state |= 8;
                 }
                 if ((aqt->act_exec & PedInstance::ai_aFindWeapon) != 0
                         && (aqt->state & 128) == 0)
@@ -1411,6 +1434,8 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                                             aqt_attack.target = *t_fire;
                                             aqt_attack.state ^= 64;
                                         }
+                                        it->main_act = std::distance(
+                                            it->actions.begin(), searched);
                                     } else
                                         aqt->state |= 8;
                                 }
@@ -1532,28 +1557,20 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                     break;
 
                 if ((aqt->state & 256) != 0) {
-                    if ((aqt->group_desc & PedInstance::gd_mExclusive) != 0)
-                        break;
-                    continue;
+                    acts_g_prcssd |= aqt->group_desc;
                 } else if ((aqt->state & 32) != 0) {
-                    if ((aqt->group_desc & PedInstance::gd_mExclusive) != 0)
-                        it->state |= 2;
                     switchActionStateTo(aqt->as);
                     acts_g_prcssd |= aqt->group_desc;
                 } else if ((aqt->state & 16) != 0) {
                     switchActionStateFrom(aqt->as);
-                    acts_g_prcssd |= aqt->group_desc;
                 } else if ((aqt->state & 8) != 0) {
                     if ((aqt->state & 2) != 0)
                         switchActionStateFrom(aqt->as);
-                    if ((aqt->group_desc & PedInstance::gd_mExclusive) != 0)
-                        it->state |= 8;
+                    acts_g_prcssd |= aqt->group_desc;
                 } else if ((aqt->state & 4) != 0) {
                     switchActionStateFrom(aqt->as);
                     acts_g_prcssd |= aqt->group_desc;
                 } else if ((aqt->state & 2) != 0) {
-                    if ((aqt->group_desc & PedInstance::gd_mExclusive) != 0)
-                        it->state |= 2;
                     if (!((aqt->act_exec & (PedInstance::ai_aWait
                         | PedInstance::ai_aWaitToStart)) == PedInstance::ai_aWait
                         && aqt->multi_var.time_var.desc == 1))
@@ -1567,9 +1584,12 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                     printf("should not get here, aqt->state = 1\n");
                 }
 #endif
+
                 if ((aqt->group_desc & PedInstance::gd_mExclusive) != 0
                     && ((aqt->state & 12) == 0 || (aqt->state & 128) != 0))
+                {
                     break;
+                }
                 if (acts_g_prcssd == PedInstance::gd_mAll)
                     break;
             }
@@ -1577,18 +1597,20 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
 
             if ((it->group_desc & PedInstance::gd_mExclusive) != 0
                 && ((it->state & 12) == 0 || (it->state & 128) != 0))
+            {
                 break;
+            }
             groups_processed |= acts_g_prcssd;
 
             if (groups_processed == PedInstance::gd_mAll
                 || (groups_processed & PedInstance::gd_mExclusive))
+            {
                 break;
+            }
         }
-#if 1
+
         if ((groups_processed & PedInstance::gd_mExclusive) == 0
-            && (state_ & pa_smDead) == 0
-            && (groups_processed & (PedInstance::gd_mThink
-            | PedInstance::gd_mFire)) == 0)
+            && (state_ & pa_smDead) == 0)
         {
             // checking for action groups availiable in queue
             // will add from default_actions_ if not availiable
@@ -1602,21 +1624,8 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                 groups_used |= it->group_desc;
             }
 
-            // TODO: use default_actions_
-            if ((groups_used & (PedInstance::gd_mThink
-                                      | PedInstance::gd_mFire)) == 0)
-            {
-                actionQueueGroupType as;
-                if (createActQFindEnemy(as)) {
-                    as.group_id = 0;
-                    as.main_act = 0;
-                    as.group_desc = PedInstance::gd_mThink | PedInstance::gd_mFire;
-                    as.origin_desc = 2;
-                    actions_queue_.insert(actions_queue_.begin(), as);
-                }
-            }
+            addDefActsToActions(groups_used);
         }
-#endif
     }
 
     if (!friends_not_seen_.empty()) {
@@ -2440,9 +2449,12 @@ bool PedInstance::handleDamage(ShootableMapObject::DamageInflictType *d) {
         dropActQ();
         assert(d->d_owner != NULL);
         owner_ = d->d_owner;
+        desc_state_ |= pd_smControlled;
+        friends_found_.clear();
+        hostiles_found_.clear();
+        hostile_desc_ = ((PedInstance *)d->d_owner)->hostileDesc();
 
-        // adding following behavior for persuaded
-        //-----remove, TODO: reset default actions
+        // adding following behavior
         PedInstance::actionQueueGroupType as;
         as.group_id = 0;
         as.group_desc = PedInstance::gd_mExclusive;
@@ -2451,19 +2463,12 @@ bool PedInstance::handleDamage(ShootableMapObject::DamageInflictType *d) {
         as.origin_desc = 4;
         actions_queue_.push_back(as);
 
-        as.actions.clear();
+        default_actions_.clear();
+        createDefQueue();
 
-        createActQFollowing(as, owner_, 0, 192);
-        as.main_act = as.actions.size() - 1;
-        as.group_desc = PedInstance::gd_mStandWalk;
-        actions_queue_.push_back(as);
-        //-----remove
+        addDefActsToActions();
 
         setDrawnAnim(PedInstance::ad_PersuadedAnim);
-        desc_state_ |= pd_smControlled;
-        friends_found_.clear();
-        hostiles_found_.clear();
-        hostile_desc_ = ((PedInstance *)d->d_owner)->hostileDesc();
         return true;
     }
 

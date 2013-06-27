@@ -593,15 +593,15 @@ public:
         ai_aFindEnemy = 0x0800,
         // in range of current weapon
         ai_aFindNonFriend = 0x1000,
-        ai_aResetActionQueueQueue = 0x2000,
-        ai_aDeselectCurWeapon = 0x4000,
-        ai_aTrigger = 0x8000,
+        ai_aDeselectCurWeapon = 0x2000,
+        ai_aTrigger = 0x4000,
         // checking persuador to mimic his actions and to follow him
-        ai_aCheckOwner = 0x10000,
+        ai_aCheckOwner = 0x8000,
         // action should be executed within this time limit, if it will
         // not complete (any result) in time it will be marked as failed
-        ai_aTimeExecute = 0x20000,
-        ai_aFindWeapon = 0x40000,
+        ai_aTimeExecute = 0x10000,
+        ai_aFindWeapon = 0x20000,
+        ai_aResetActionQueueQueue = 0x40000000,
         ai_aNonFinishable = 0x80000000,
         ai_aAll = 0xFFFFFFFF
     } AiAction;
@@ -730,7 +730,7 @@ public:
     void clearActQ() { actions_queue_.clear(); }
 
     void createDefQueue();
-    void addDefActsToActions(uint32 groups_used);
+    void addDefActsToActions(uint32 groups_used = 0);
     void clearDefActs() { default_actions_.clear(); }
 
     void dropActQ();

@@ -381,6 +381,12 @@ void Mission::start()
             }
         }
     }
+
+    for (uint16 i = 0, sz = peds_.size(); i < sz; ++i) {
+        PedInstance *p = peds_[i];
+        if (p->isAlive())
+            p->createDefQueue();
+    }
 }
 
 /*! 
