@@ -201,7 +201,7 @@ Weapon * WeaponManager::loadWeapon(Weapon::WeaponType wt) {
             pWeapon = new Weapon(g_App.menus().getMessage("WEAPON_PERSUADERTRON"),
         14, 64, 5000, -1, 256, -1,
         -1, 367, Weapon::Unarmed_Anim, snd::PERSUADE, Weapon::Persuadatron,
-        MapObject::dmg_Mental, 1, 150, 25, Weapon::wspt_Persuadatron,
+        MapObject::dmg_Persuasion, 1, 150, 25, Weapon::wspt_Persuadatron,
         SFXObject::sfxt_Unknown, SFXObject::sfxt_Unknown,
         SFXObject::sfxt_Unknown, SFXObject::sfxt_Unknown, 0, 1.0, 1.0);
             break;

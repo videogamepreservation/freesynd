@@ -737,7 +737,7 @@ bool VehicleInstance::move_vehicle(int elapsed)
 
 
 bool VehicleInstance::handleDamage(ShootableMapObject::DamageInflictType *d) {
-    if (health_ <= 0 || d->dtype == MapObject::dmg_Mental)
+    if (health_ <= 0 || d->dtype == MapObject::dmg_Persuasion)
         return false;
     health_ -= d->dvalue;
     if (health_ <= 0) {

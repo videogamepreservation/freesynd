@@ -1240,7 +1240,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                                 tm_wait -= 25 * (pMod->getVersion() + 2);
                             tm_wait = (double)tm_wait * (1.0 / intelligence_->getMultiplier());
                         } else if (obj_group_def_ == PedInstance::og_dmCivilian
-                            && (desc_state_ & pd_smControlled) == 0)
+                            && (rcv_damage_def_ & MapObject::dmg_Panic) != 0)
                         {
                             searched = findActInQueue(PedInstance::ai_aReachLocation,
                                 *it, aqt);
@@ -2443,7 +2443,7 @@ bool PedInstance::handleDamage(ShootableMapObject::DamageInflictType *d) {
 
     if ((d->dtype & MapObject::dmg_Physical) != 0)
         health_ -= d->dvalue;
-    else if (d->dtype == MapObject::dmg_Mental) {
+    else if (d->dtype == MapObject::dmg_Persuasion) {
         // TODO: check for required number of persuade points before applying
         // they should be influenced by mod brain
         setObjGroupID(((PedInstance *)d->d_owner)->objGroupID());
@@ -2471,6 +2471,7 @@ bool PedInstance::handleDamage(ShootableMapObject::DamageInflictType *d) {
         addDefActsToActions();
 
         setDrawnAnim(PedInstance::ad_PersuadedAnim);
+        setRcvDamageDef(MapObject::ddmg_PedPanicImmune);
         return true;
     }
 

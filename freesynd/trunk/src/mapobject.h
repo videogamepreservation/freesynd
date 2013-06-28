@@ -44,22 +44,25 @@ public:
 
     virtual void draw(int x, int y) = 0;
     typedef enum {
-        dmg_None = 0,
-        dmg_Bullet = 1,
-        dmg_Laser = 2,
-        dmg_Burn = 4,
-        dmg_Explosion = 8,
-        dmg_Hit = 16,
+        dmg_None = 0x0000,
+        dmg_Bullet = 0x0001,
+        dmg_Laser = 0x0002,
+        dmg_Burn = 0x0004,
+        dmg_Explosion = 0x0008,
+        dmg_Hit = 0x0010,
         dmg_Physical = (dmg_Bullet | dmg_Laser | dmg_Burn | dmg_Explosion | dmg_Hit),
-        dmg_Mental = 32,
-        dmg_Heal = 64,
-        dmg_All = 127
+        dmg_Persuasion = 0x0020,
+        dmg_Heal = 0x0040,
+        dmg_Panic = 0x0080,
+        dmg_Mental = (dmg_Persuasion | dmg_Panic),
+        dmg_All = 0xFFFF
     } DamageType;
 
     typedef enum {
         ddmg_Invulnerable = dmg_None,
         ddmg_Ped = dmg_All,
-        ddmg_PedWithEnergyShield = dmg_Explosion | dmg_Hit | dmg_Heal,
+        ddmg_PedPanicImmune = dmg_All ^ dmg_Panic,
+        ddmg_PedWithEnergyShield = dmg_Explosion | dmg_Hit | dmg_Heal | dmg_Panic,
         ddmg_Vehicle = dmg_Bullet | dmg_Laser | dmg_Burn | dmg_Explosion,
         ddmg_StaticTree = dmg_Laser | dmg_Burn | dmg_Explosion,
         ddmg_StaticWindow = dmg_Bullet | dmg_Explosion,

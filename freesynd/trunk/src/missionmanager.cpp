@@ -642,6 +642,7 @@ Mission * MissionManager::create_mission(LevelData::LevelDataAll &level_data) {
                     if ((cindx * 92 + 2) == bindx && pindx[cindx] != 0xFFFF) {
                         PedInstance *p = p_mission->ped(pindx[cindx]);
                         objd = new ObjPersuade(p);
+                        p->setRcvDamageDef(MapObject::ddmg_PedPanicImmune);
                         // Adds the ped to the list of peds to evacuate
                         peds_evacuate.push_back(p);
                     } else
@@ -653,7 +654,9 @@ Mission * MissionManager::create_mission(LevelData::LevelDataAll &level_data) {
                 if (bindx > 0 && bindx < 0x5C02) {
                     cindx = (bindx - 2) / 92;
                     if ((cindx * 92 + 2) == bindx && pindx[cindx] != 0xFFFF) {
-                        objd = new ObjAssassinate(p_mission->ped(pindx[cindx]));
+                        PedInstance *p = p_mission->ped(pindx[cindx]);
+                        p->setRcvDamageDef(MapObject::ddmg_PedPanicImmune);
+                        objd = new ObjAssassinate(p);
                     } else
                         printf("0x02 incorrect offset");
                 } else
@@ -663,7 +666,9 @@ Mission * MissionManager::create_mission(LevelData::LevelDataAll &level_data) {
                 if (bindx > 0 && bindx < 0x5C02) {
                     cindx = (bindx - 2) / 92;
                     if ((cindx * 92 + 2) == bindx && pindx[cindx] != 0xFFFF) {
-                        objd = new ObjProtect(p_mission->ped(pindx[cindx]));
+                        PedInstance *p = p_mission->ped(pindx[cindx]);
+                        p->setRcvDamageDef(MapObject::ddmg_PedPanicImmune);
+                        objd = new ObjProtect(p);
                     } else
                         printf("0x03 incorrect offset");
                 } else

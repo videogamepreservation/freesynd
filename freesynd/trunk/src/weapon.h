@@ -120,7 +120,7 @@ public:
     }
 
     bool doesMentalDmg() {
-        return (dmg_type_ & MapObject::dmg_Mental) != 0;
+        return (dmg_type_ & MapObject::dmg_Persuasion) != 0;
     }
 
     bool doesPhysicalDmg() {

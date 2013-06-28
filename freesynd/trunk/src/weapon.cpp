@@ -699,7 +699,7 @@ uint16 WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
         this->playSound();
     if (owner_ && owner_->majorType() == MapObject::mjt_Ped)
     {
-        if (pWeaponClass_->dmgType() != MapObject::dmg_Mental
+        if (pWeaponClass_->dmgType() != MapObject::dmg_Persuasion
             && ((PedInstance *)owner_)->isOurAgent())
         {
             m->incStatisticsShots((int32)shots);

@@ -468,7 +468,7 @@ bool PedInstance::createActQFindNonFriend(actionQueueGroupType &as)
     as.actions.push_back(aq);
     pedWeaponToUse pw_to_use;
     pw_to_use.desc = 4;
-    pw_to_use.wpn.dmg_type = MapObject::dmg_Mental;
+    pw_to_use.wpn.dmg_type = MapObject::dmg_Persuasion;
     if (createActQFiring(as, NULL, NULL, false, 0, &pw_to_use))
         as.actions.back().state |= 64;
     else
