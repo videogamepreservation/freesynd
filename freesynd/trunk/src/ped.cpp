@@ -728,10 +728,11 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                             }
                         } else if (aqt->condition == 1) {
                             // TODO: check already at location
+                            int dist = aqt->multi_var.dist_var.dist;
                             moveToDir(mission, elapsed,
                                 aqt->multi_var.dist_var.dir_move,
                                 aqt->multi_var.dist_var.dir, -1, -1,
-                                aqt->multi_var.dist_var.dist);
+                                &dist);
                             aqt->state |= 2;
                         } else if (aqt->condition == 2) {
                             bool set_new_dest = true;
@@ -762,26 +763,28 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                             }
                         } else if (aqt->condition == 3) {
                             // TODO: check already at location
-                            int pos_x, pos_y;
-                            aqt->target.t_pn.convertPosToXY(&pos_x, &pos_y);
-                            int diffx = pos_x - tile_x_ * 256 - off_x_;
-                            int diffy = pos_y - tile_y_ * 256 - off_y_;
+                            aqt->target.t_pn.convertPosToXY(&aqt->target.t_xyz.x,
+                                &aqt->target.t_xyz.y);
+                            int diffx = aqt->target.t_xyz.x - tile_x_ * 256 - off_x_;
+                            int diffy = aqt->target.t_xyz.y - tile_y_ * 256 - off_y_;
+
+                            int dist = aqt->multi_var.dist_var.dist;
                             dist_to_pos_ = (int)sqrt((double)
                                 (diffx * diffx + diffy * diffy));
                             moveToDir(mission, elapsed,
                                 aqt->multi_var.dist_var.dir_move,
-                                -1, pos_x, pos_y,
-                                aqt->multi_var.dist_var.dist);
+                                -1, aqt->target.t_xyz.x, aqt->target.t_xyz.y,
+                                &dist);
                             aqt->state |= 2;
                         } else if (aqt->condition == 4) {
                             // TODO: check already at location
                             int pos_x, pos_y;
                             aqt->target.t_smo->convertPosToXY(&pos_x, &pos_y);
                             dist_to_pos_ = this->distanceTo(aqt->target.t_smo);
+                            int dist = aqt->multi_var.dist_var.dist;
                             moveToDir(mission, elapsed,
                                 aqt->multi_var.dist_var.dir_move,
-                                -1, pos_x, pos_y,
-                                aqt->multi_var.dist_var.dist);
+                                -1, pos_x, pos_y, &dist);
                             aqt->state |= 2;
                         }
                     }
@@ -793,24 +796,23 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                             if (speed_ == 0)
                                 aqt->state |= 4;
                         } else if (aqt->condition == 1) {
+                            int dist = aqt->multi_var.dist_var.dist;
                             moveToDir(mission, elapsed,
                                 aqt->multi_var.dist_var.dir_move,
                                 aqt->multi_var.dist_var.dir, -1, -1,
-                                aqt->multi_var.dist_var.dist);
+                                &dist);
                             aqt->multi_var.dist_var.dir = dir_;
                         } else if (aqt->condition == 3) {
-                            //dir_last_ = -1;
-                            int pos_x, pos_y;
-                            aqt->target.t_pn.convertPosToXY(&pos_x, &pos_y);
-                            int diffx = pos_x - tile_x_ * 256 - off_x_;
-                            int diffy = pos_y - tile_y_ * 256 - off_y_;
+                            int diffx = aqt->target.t_xyz.x - tile_x_ * 256 - off_x_;
+                            int diffy = aqt->target.t_xyz.y - tile_y_ * 256 - off_y_;
                             dist_to_pos_ = (int)sqrt((double)
                                 (diffx * diffx + diffy * diffy));
+                            int dist = aqt->multi_var.dist_var.dist;
                             if (dist_to_pos_ > 0) {
                                 moveToDir(mission, elapsed,
                                     aqt->multi_var.dist_var.dir_move,
-                                    -1, pos_x, pos_y,
-                                    aqt->multi_var.dist_var.dist);
+                                    -1, aqt->target.t_xyz.x, aqt->target.t_xyz.y,
+                                    &dist);
                                 if (tile_x_ == aqt->target.t_pn.tileX()
                                     && tile_y_ == aqt->target.t_pn.tileY()
                                     // TODO: add correct z or ignore it?
@@ -830,13 +832,13 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                             aqt->target.t_smo->convertPosToXY(&pos_x, &pos_y);
                             int diffx = pos_x - tile_x_ * 256 - off_x_;
                             int diffy = pos_y - tile_y_ * 256 - off_y_;
+                            int dist = aqt->multi_var.dist_var.dist;
                             dist_to_pos_ = (int)sqrt((double)
                                 (diffx * diffx + diffy * diffy));
                             if (dist_to_pos_ > 0) {
                                 moveToDir(mission, elapsed,
                                     aqt->multi_var.dist_var.dir_move,
-                                    -1, pos_x, pos_y,
-                                    aqt->multi_var.dist_var.dist);
+                                    -1, pos_x, pos_y, &dist);
                                 if (samePosition(aqt->target.t_smo)) {
                                     aqt->state |= 4;
                                     speed_ = 0;

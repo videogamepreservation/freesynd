@@ -79,14 +79,14 @@ void PedInstance::setDestinationP(Mission *m, int x, int y, int z,
     if(targetd->t == m_fdNonWalkable || map_ == -1 || health_ <= 0) {
         printf("==== unwalk target: x %i; y %i; z %i, ox %i, oy %i\n",
             x, y, z, ox, oy);
-        printf("Movement to nonwalkable postion\n");
+        printf("setDestinationP, Movement to nonwalkable postion\n");
         return;
     }
 
     if(based->t == m_fdNonWalkable) {
         printf("==== unwalk pos: x %i; y %i; z %i, ox %i, oy %i, oz %i\n",
             tile_x_, tile_y_, tile_z_, off_x_, off_y_, off_z_);
-        printf("Movement from nonwalkable postion\n");
+        printf("setDestinationP, Movement from nonwalkable postion\n");
         return;
     }
 
@@ -2344,21 +2344,26 @@ bool PedInstance::movementP(Mission *m, int elapsed)
     return updated;
 }
 
-// TODO: add responses, possible failure, bounced etc.
+/*! \returns bitmask :
+ * 0b(1) - success, 1b(2) - bounced, 2b(4) - need bounce (for bounce forbidden),
+ * 3b(8) - non-walkable tile as base, 4b(16) - wrong direction,
+ * 5b(32) - dist passed set, 6b(64) -  bouncing restored original dir
+ * (loop is possible)
+ */
 uint8 PedInstance::moveToDir(Mission* m, int elapsed, dirMoveType &dir_move,
-    int dir, int t_posx, int t_posy, int dist)
+    int dir, int t_posx, int t_posy, int* dist, bool set_dist)
 {
     floodPointDesc *based = &(m->mdpoints_[tile_x_
         + tile_y_ * m->mmax_x_ + tile_z_ * m->mmax_m_xy]);
-    if(based->t == m_fdNonWalkable) {
+    if (based->t == m_fdNonWalkable) {
         printf("==== unwalk pos: x %i; y %i; z %i, ox %i, oy %i, oz %i\n",
             tile_x_, tile_y_, tile_z_, off_x_, off_y_, off_z_);
-        printf("Movement from nonwalkable postion\n");
-        return false;
+        printf("moveToDir, Movement from nonwalkable postion\n");
+        return 8;
     }
 
     // TODO: set safewalk need, somewhere
-    bool check_safe_walk = true;
+    bool check_safe_walk = dir_move.safe_walk;
 
     // TODO: find safewalk tile and use normal pathfinding
     // to get there
@@ -2370,7 +2375,7 @@ uint8 PedInstance::moveToDir(Mission* m, int elapsed, dirMoveType &dir_move,
             setDirection(t_posx - tile_x_ * 256 - off_x_,
                 t_posy - tile_y_ * 256 - off_y_, &dir);
             if (dir == -1)
-                return false;
+                return 16;
             move_to_pos = true;
             if (dir_move.dir_modifier == 0)
                 dir_move.dir_orig = dir;
@@ -2379,18 +2384,20 @@ uint8 PedInstance::moveToDir(Mission* m, int elapsed, dirMoveType &dir_move,
             dir_move.dir_orig = dir;
         }
     }
+
     double dist_curr = (elapsed * speed_) / 1000.0;
-    if (dist == 0) {
+    if (dist == NULL || (dist && *dist == 0)) {
          if (dist_to_pos_ > 0 && (int)dist_curr > dist_to_pos_)
              dist_curr = (double) dist_to_pos_;
-    } else if ((int) dist_curr > dist)
-        dist_curr = (double)dist;
-    bool bounced = false;
+    } else if ((int) dist_curr > (*dist))
+        dist_curr = (double)(*dist);
     bool should_bounce = dir_move.bounce;
 
     if (dir_move.dir_modifier != 0) {
         dir = dir_move.dir_last;
     }
+    double dist_overral = 0;
+    uint8 move_mask = 1;
 
     while ((int)dist_curr > 0) {
         bool need_bounce = false;
@@ -2588,7 +2595,11 @@ uint8 PedInstance::moveToDir(Mission* m, int elapsed, dirMoveType &dir_move,
             off_y_ = ((int)floor(posy)) & 0x00FF;
 
         dist_curr -= dist_passsed;
+        if (set_dist)
+            dist_overral += dist_passsed;
+
         if (need_bounce && should_bounce) {
+            move_mask |= 2;
             if (move_to_pos) {
                 if (dir_move.dir_modifier == 0) {
                     dir_move.modifier_value = 64;
@@ -2643,6 +2654,7 @@ uint8 PedInstance::moveToDir(Mission* m, int elapsed, dirMoveType &dir_move,
                     dir_move.dir_modifier = 0;
                     dir_move.dir_last = -1;
                     dir = dir_move.dir_orig;
+                    move_mask |= 64;
                     break;
                 }
             } else if (dir_move.dir_modifier) {
@@ -2683,20 +2695,20 @@ uint8 PedInstance::moveToDir(Mission* m, int elapsed, dirMoveType &dir_move,
             dir = dir_move.dir_last;
         } else {
             setDirection(dir);
-            // TODO: movement should announce failure
-            if (need_bounce)
+            if (need_bounce) {
+                move_mask ^= 1;
+                move_mask |= 4;
                 break;
+            }
         }
-        bounced = bounced || need_bounce;
     }
     offzOnStairs(m->mtsurfaces_[tile_x_ + tile_y_ * m->mmax_x_
         + tile_z_ * m->mmax_m_xy].twd);
 
-    // TODO: handle bounce answer everywhere
-    return bounced;
+    return move_mask;
 }
 
-int PedInstance::getClosestDirs(int dir, int& closest, int& closer) {
+inline int PedInstance::getClosestDirs(int dir, int& closest, int& closer) {
     // & 0x003F = % 64
     int mod = dir & 0x003F;
     if (mod == 0) {

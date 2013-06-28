@@ -291,6 +291,8 @@ public:
         // to decide whether to continue movement by changing
         // direction or not
         bool bounce;
+        // walkn only on "safe" tiles
+        bool safe_walk;
         // when closest is used and first movement is successful
         bool on_new_tile;
         void clear() {
@@ -299,11 +301,13 @@ public:
             modifier_value = 0;
             bounce = false;
             on_new_tile = false;
+            safe_walk = true;
         }
     } dirMoveType;
 
     uint8 moveToDir(Mission *m, int elapsed, dirMoveType &dir_move,
-        int dir = -1, int t_posx = -1, int t_posy = -1, int dist = 0);
+        int dir = -1, int t_posx = -1, int t_posy = -1, int *dist = NULL,
+        bool set_dist = false);
 
     void setAllAdrenaLevels(uint8 amount, uint8 depend, uint8 effect) {
         adrenaline_->setLevels256(amount, depend, effect);
@@ -618,7 +622,9 @@ public:
     typedef struct {
         PathNode t_pn;
         ShootableMapObject *t_smo;
+        toDefineXYZ t_xyz;
         // 0 - unset, 1 - use t_pn, 2 - use t_smo, 3 - both are set
+        // 4 - t_xyz used
         uint8 desc;
     } targetDescType;
 
@@ -861,7 +867,7 @@ protected:
     bool walkable(int x, int y, int z) { return true; }
 
 private:
-    int getClosestDirs(int dir, int& closest, int& closer);
+    inline int getClosestDirs(int dir, int& closest, int& closer);
 };
 
 #endif

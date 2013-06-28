@@ -49,6 +49,7 @@ void PedInstance::createActQWalking(actionQueueGroupType &as, PathNode *tpn,
     aq.multi_var.dist_var.dir = dir;
     aq.multi_var.dist_var.dist = dist;
     aq.multi_var.dist_var.speed = -1;
+    aq.multi_var.dist_var.dir_move.clear();
     // TODO: set condition as function parameter and set values based on it?
     if (dir == -1) {
         if (tpn) {
@@ -61,8 +62,6 @@ void PedInstance::createActQWalking(actionQueueGroupType &as, PathNode *tpn,
             aq.condition = 2;
         }
     } else {
-        aq.multi_var.dist_var.dir_move.clear();
-        // TODO: implement response from directional movement
         aq.multi_var.dist_var.dir_move.bounce = bounce;
         if (tpn) {
             // direction will be calculated from pathnode position
