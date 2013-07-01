@@ -313,9 +313,6 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
     // TODO: weapon selection action, and use only deselectweapon
     // to disarm
 
-    if (agent_is_ == PedInstance::Agent_Non_Active)
-        return false;
-
     bool updated = false;
     if (actions_property_ == 1) {
         dropActQ();
@@ -1707,9 +1704,6 @@ void PedInstance::showPath(int scrollX, int scrollY) {
     int px = screenX();
     int py = screenY() - tile_z_ * TILE_HEIGHT/3 + TILE_HEIGHT/3;
 
-    if (agent_is_ == PedInstance::Agent_Non_Active)
-        return;
-
     for (std::list<PathNode>::iterator it = dest_path_.begin();
             it != dest_path_.end(); ++it) {
         PathNode & d = *it;
@@ -1754,13 +1748,14 @@ PedInstance::PedInstance(Ped *ped, int m) : ShootableMovableMapObject(m),
     obj_group_id_(0), old_obj_group_id_(0),
     drawn_anim_(PedInstance::ad_StandAnim),
     sight_range_(0), selected_weapon_(-1), in_vehicle_(NULL),
-    agent_is_(PedInstance::Not_Agent), owner_(NULL)
+    owner_(NULL)
 {
     hold_on_.wayFree = 0;
     rcv_damage_def_ = MapObject::ddmg_Ped;
     major_type_ = MapObject::mjt_Ped;
     state_ = PedInstance::pa_smNone;
     actions_property_ = 0;
+    is_our_ = false;
     
     adrenaline_  = new IPAStim(IPAStim::Adrenaline);
     perception_  = new IPAStim(IPAStim::Perception);
@@ -1785,7 +1780,7 @@ PedInstance::~PedInstance()
 }
 
 /*!
- * Initialize the ped instance as an agent.
+ * Initialize the ped instance as one of our agent.
  * \param p_agent The agent reference
  * \param obj_group_id Id of the agent's group.
  */
@@ -1799,7 +1794,7 @@ void PedInstance::initAsAgent(Agent *p_agent, unsigned int obj_group_id) {
         wi->setOwner(this);
         wi->setIsIgnored(true);
     }
-    setAgentIs(PedInstance::Agent_Active);
+    set_is_our(true);
     *((ModOwner *)this) = *((ModOwner *)p_agent);
 
     setObjGroupID(obj_group_id);
@@ -1817,9 +1812,6 @@ void PedInstance::draw(int x, int y) {
 
     // ensure on map
     if (x < 110 || y < 0 || map_ == -1)
-        return;
-
-    if (agent_is_ == PedInstance::Agent_Non_Active)
         return;
 
     Weapon::WeaponAnimIndex weapon_idx =
@@ -1888,9 +1880,6 @@ void PedInstance::draw(int x, int y) {
 }
 
 void PedInstance::drawSelectorAnim(int x, int y) {
-
-    if (agent_is_ == PedInstance::Agent_Non_Active)
-        return;
 
     Weapon::WeaponAnimIndex weapon_idx =
         selectedWeapon() ? selectedWeapon()->index() : Weapon::Unarmed_Anim;
@@ -2390,7 +2379,7 @@ bool PedInstance::handleDrawnAnim(int elapsed) {
             break;
         case PedInstance::ad_VaporizeAnim:
             if (frame_ >= ped_->lastVaporizeFrame(getDirection())) {
-                if (agent_is_ == PedInstance::Agent_Active) {
+                if (is_our_) {
                     setDrawnAnim(PedInstance::ad_DeadAgentAnim);
                 } else {
                     setDrawnAnim(PedInstance::ad_NoAnimation);

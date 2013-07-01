@@ -28,9 +28,14 @@
 
 #include <stdio.h>
 #include <assert.h>
-#include "app.h"
-#include "utils/file.h"
+
 #include "confmenu.h"
+#include "menus/menumanager.h"
+#include "core/gamecontroller.h"
+#include "core/gamesession.h"
+#include "utils/file.h"
+#include "gfx/screen.h"
+#include "system.h"
 
 #define NAME_MAX_SIZE 16
 #define MAX_COLOUR 8
@@ -194,10 +199,11 @@ void ConfMenu::handleAction(const int actionId, void *ctx, const int modKeys) {
     } else if (actionId == cancelButId_) {
         showMainPanel();
     } else if (actionId == acceptButId_) {
-        g_Session.setCompanyName(getStatic(toAcceptCmpNameTxtId_)->getText().c_str());
-        g_Session.setUserName(getStatic(toAcceptUsrNameTxtId_)->getText().c_str());
-        g_Session.setLogo(toAcceptLogo_);
-        g_Session.setLogoColour(g_Colours[toAcceptColourId_]);
+        // Effectively change the user's informations
+        g_gameCtrl.change_user_infos(getStatic(toAcceptCmpNameTxtId_)->getText().c_str(),
+            getStatic(toAcceptUsrNameTxtId_)->getText().c_str(),
+            toAcceptLogo_,
+            g_Colours[toAcceptColourId_]);
     }
 }
 

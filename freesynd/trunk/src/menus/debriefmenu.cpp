@@ -98,14 +98,10 @@ void DebriefMenu::handleShow() {
     g_System.showCursor();
 
     Mission *pMission = g_Session.getMission();
-    MissionStats *pStats = pMission->getStatistics();
 
-    // update time
+    // update game state and listen for any change
     g_gameCtrl.addListener(this, GameEvent::kGame);
-    int elapsed = pStats->mission_duration;
-    g_Session.updateTime(elapsed);
-    if (pMission->completed())
-        g_Session.completeSelectedBlock();
+    g_gameCtrl.handle_mission_end(pMission);
     g_gameCtrl.removeListener(this, GameEvent::kGame);
 
     updateStatsFields(pMission);

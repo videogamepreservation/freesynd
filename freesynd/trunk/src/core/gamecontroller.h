@@ -34,6 +34,8 @@
 #include "utils/singleton.h"
 #include "core/gameevent.h"
 
+class Mission;
+
 /*!
  * The game controller holds the game logic.
  */
@@ -58,11 +60,18 @@ class GameController : public Singleton < GameController > {
     //! Sends the event to the listeners
     void fireGameEvent(GameEvent & evt);
 
+    //! Changes the user preferences (from the config menu)
+    void change_user_infos(const char *company_name, const char *player_name, 
+                            int logo, int color);
+    //! Checks if mission is completed and updates game state
+    void handle_mission_end(Mission *p_mission);
 private:
     /*! List of listeners for game stream events.*/
     std::list<GameEventListener *> game_listeners_;
     /*! List of listeners for mission stream events.*/
     std::list<GameEventListener *> mission_listeners_;
+    //! Simulates syndicates fighting for countries
+    void simulate_enemy_moves();
 };
 
 #define g_gameCtrl    GameController::singleton()

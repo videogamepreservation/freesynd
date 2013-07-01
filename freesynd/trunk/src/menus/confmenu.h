@@ -27,6 +27,7 @@
 #ifndef CONFMENU_H
 #define CONFMENU_H
 
+#include "menus/menu.h"
 /*!
  * Configuration Menu class.
  */

@@ -687,7 +687,7 @@ bool App::saveGameToFile(int fileSlot, std::string name) {
     if (outfile) {
         // write file format version
         outfile.write8(1); // major
-        outfile.write8(1); // minor
+        outfile.write8(2); // minor
 
         // Slot name is 31 characters long, nul-padded
         outfile.write_string(name, 31);

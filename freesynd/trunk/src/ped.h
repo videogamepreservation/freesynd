@@ -166,6 +166,12 @@ public:
     ~PedInstance();
     //! Initialize the ped instance as an agent
     void initAsAgent(Agent *p_agent, unsigned int obj_group_id);
+    //! Returns true if the agent is one of us.
+    bool isOurAgent() { return is_our_; }
+    //! Sets if the agent is one of us or not
+    void set_is_our(bool is_our) { is_our_ = is_our; }
+    
+    
 
     typedef enum {
         ad_NoAnimation,
@@ -258,17 +264,6 @@ public:
     void putInVehicle(VehicleInstance *v, pedActionStateMasks add_state);
     void leaveVehicle();
     bool setVehicleIgnore(bool ignored);
-
-    typedef enum {
-        Not_Agent,
-        Agent_Non_Active,
-        Agent_Active
-    } agentAndNonEnum;
-
-    void setAgentIs(agentAndNonEnum set_agent_as) { agent_is_ = set_agent_as; }
-    agentAndNonEnum agentIs() { return agent_is_; }
-    // our agent
-    bool isOurAgent() { return agent_is_ == Agent_Active; }
 
     int map();
     AnimationDrawn drawnAnim(void);
@@ -859,7 +854,8 @@ protected:
     int selected_weapon_;
     pedWeaponToUse prefered_weapon_;
     VehicleInstance *in_vehicle_;
-    agentAndNonEnum agent_is_;
+    //! This flag tells if this is our agent, assuming it's an agent.
+    bool is_our_;
     //! controller of ped - for persuaded
     ShootableMapObject *owner_;
     targetDescType last_firing_target_;

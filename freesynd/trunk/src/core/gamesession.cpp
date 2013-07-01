@@ -83,6 +83,8 @@ Block g_Blocks[50] = {
     {"#CNTRY_25", 48000000, 48000000, 25, 30, 0, STAT_VERY_HAPPY, 0, 0, BLK_UNAVAIL, NULL, 0, 0, 0}
 };
 
+int g_syndicate_color_id[7];
+
 const int GameSession::HOUR_DELAY = 4000;
 const int GameSession::NB_MISSION = 50;
 
@@ -107,12 +109,25 @@ void GameSession::destroy() {
 bool GameSession::reset() {
     destroy();
 
+    // Init default colors for enemy syndicates
+    g_syndicate_color_id[0] = 7;
+    g_syndicate_color_id[1] = 14;
+    g_syndicate_color_id[2] = 3;
+    g_syndicate_color_id[3] = 11;
+    g_syndicate_color_id[4] = 12;
+    g_syndicate_color_id[5] = 13;
+    g_syndicate_color_id[6] = 15;
+
+    // Init default value for player
     logo_ = 0;
     logo_colour_ = 6;
     company_name_.clear();
     username_.clear();
     money_ = 30000;
-    selected_blck_ = 9; // By default, the index of West Europe
+
+    // this array contains the initial number of countries for each enemy syndicate
+    int map_count [7] = {7, 7, 7, 7, 7, 7, 8};
+    // init the map
     for (int i=0; i<NB_MISSION; i++) {
         g_Blocks[i].status = enable_all_mis_ ? BLK_AVAIL : BLK_UNAVAIL;
         g_Blocks[i].tax = 30;
@@ -122,17 +137,24 @@ bool GameSession::reset() {
         g_Blocks[i].daysToNextStatus = 0;
         g_Blocks[i].daysStatusElapsed = 0;
 
-        // Find a colour different from the user colour
+        // Find a enemy syndicate as owner
+        bool found_owner = false;
         do {
-            int index = rand() % (sizeof(g_Colours) / sizeof(int));
-            g_Blocks[i].colour = g_Colours[index];
-        } while (g_Blocks[i].colour == getLogoColour());
+            int index = rand() % 7;
+            if (map_count[index] > 0) {
+                g_Blocks[i].syndicate_owner = index;
+                map_count[index] -= 1;
+                found_owner = true;
+            }
+        } while (!found_owner);
 
         // Reset briefing information
         g_Blocks[i].infoLevel = 0;
         g_Blocks[i].enhanceLevel = 0;
     }
 
+    // By default, West Europe is the first playable mission
+    selected_blck_ = 9;
     g_Blocks[selected_blck_].status = BLK_AVAIL;
 
     time_hour_ = 0;
@@ -154,6 +176,36 @@ Block & GameSession::getSelectedBlock() {
     return g_Blocks[selected_blck_];
 }
 
+/*!
+ * Returns the color of the given block depending on its owner.
+ * If the block is finished then the owner is the player
+ * else it's the syndicate given by Block.syndicate_owner.
+ * \param blk The block to find the color.
+ */
+uint8 GameSession::get_owner_color(Block & blk) {
+    switch (blk.status) {
+    case BLK_FINISHED:
+    case BLK_REBEL:
+        return getLogoColour();
+    default:
+        return g_syndicate_color_id[blk.syndicate_owner];
+    }
+}
+
+/*!
+ * The player has changed color. It's already an enemy syndicate color
+ * so invert colors.
+ */
+void GameSession::exchange_color_wt_syndicate(uint8 new_color) {
+    for (int i=0; i<7; i++) {
+        if (g_syndicate_color_id[i] == new_color) {
+            g_syndicate_color_id[i] = getLogoColour();
+            break;
+        }
+    }
+    setLogoColour(new_color);
+}
+
 void GameSession::setMission(Mission *pMission) {
     if ((pMission == NULL && mission_) || pMission != mission_) {
         if (mission_) {
@@ -168,25 +220,10 @@ void GameSession::setMission(Mission *pMission) {
  * The block cannot be played again, a tax is set
  * and next missions are made available.
  */
-void GameSession::completeSelectedBlock() {
+void GameSession::mark_selected_block_completed() {
     g_Blocks[selected_blck_].status = BLK_FINISHED;
     g_Blocks[selected_blck_].popStatus = STAT_VERY_HAPPY;
-    g_Blocks[selected_blck_].colour = getLogoColour();
-
-    // Make the next missions available
-    if (g_Blocks[selected_blck_].next != NULL) {
-        char s[50];
-        strcpy(s, g_Blocks[selected_blck_].next);
-        char *token = strtok(s, ":");
-        while ( token != NULL ) {
-            int id = atoi(token);
-            if (g_Blocks[id].status == BLK_UNAVAIL) {
-                // Make available only if the mission is not already finished
-                g_Blocks[id].status = BLK_AVAIL;
-            }
-            token = strtok(NULL, ":");
-        }
-    }
+    g_Blocks[selected_blck_].syndicate_owner = 0;
 }
 
 void GameSession::cheatEnableAllMission() { 
@@ -505,7 +542,8 @@ bool GameSession::saveToFile(PortableFile &file) {
         file.write32(g_Blocks[i].daysToNextStatus);
         file.write32(g_Blocks[i].daysStatusElapsed);
         file.write32(g_Blocks[i].status);
-        file.write8(g_Blocks[i].colour);
+        // NOTE : before 1.2 we were saving the block color
+        file.write8(g_Blocks[i].syndicate_owner);
         file.write8(g_Blocks[i].infoLevel);
         // NOTE: format version 1.0 had a bug where infoLevel was written again instead of enhanceLevel.
         file.write8(g_Blocks[i].enhanceLevel);
@@ -560,15 +598,22 @@ bool GameSession::loadFromFile(PortableFile &infile, const FormatVersion& v) {
             default: g_Blocks[i].status = BLK_UNAVAIL;break;
         }
 
-        // Read colour
-        g_Blocks[i].colour = infile.read8();
-        if (g_Blocks[i].status != BLK_FINISHED && g_Blocks[i].status != BLK_REBEL &&
-            g_Blocks[i].colour == logo_colour_) {
-            // Find a colour different from the user colour
-            do {
-                int index = rand() % (sizeof(g_Colours) / sizeof(int));
-                g_Blocks[i].colour = g_Colours[index];
-            } while (g_Blocks[i].colour == getLogoColour());
+        // Read owner (before 1.2 it was color)
+        g_Blocks[i].syndicate_owner = 0;
+        uint8 value = infile.read8();
+        if (v.majorVersion() == 1 && v.minorVersion() < 2) {
+            if (g_Blocks[i].status != BLK_FINISHED && g_Blocks[i].status != BLK_REBEL) {
+                // The block is not owned by the player
+                // so assigned it to the syndicate with the read color
+                for (int s_idx=0; s_idx<7; s_idx++) {
+                    if (value == g_syndicate_color_id[s_idx]) {
+                        g_Blocks[i].syndicate_owner = s_idx;
+                    }
+                }
+            }
+        } else {
+            // We read the owner
+            g_Blocks[i].syndicate_owner = value;
         }
 
         g_Blocks[i].infoLevel = infile.read8();

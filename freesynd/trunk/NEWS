@@ -11,7 +11,8 @@ Changes
 
 Fixed Bugs
 ----------
-  *
+  * When player changes its color, if an enemy syndicate already had that
+    color, change the enemy color.
 
 Features added
 ----------

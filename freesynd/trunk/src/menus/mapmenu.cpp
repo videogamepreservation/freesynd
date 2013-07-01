@@ -99,8 +99,6 @@ struct BlockDisplay {
     { {504, 160}, {471, 197}, {507, 211}, {536, 207}}
 };
 
-extern int g_Colours[8];
-
 
 /*!
  * Class constructor.
@@ -347,7 +345,7 @@ void MapMenu::handleRender(DirtyList &dirtyList) {
                 if (data[j] == 0)
                     data[j] = 255;
                 else
-                    data[j] = blk.colour;
+                    data[j] = g_Session.get_owner_color(blk);
             g_Screen.scale2x(g_BlocksDisplay[i].pos.x,
                 g_BlocksDisplay[i].pos.y, 64, 44, data, 64);
         }

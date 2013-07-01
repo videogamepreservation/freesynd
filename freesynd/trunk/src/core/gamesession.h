@@ -79,8 +79,9 @@ typedef struct Block_ {
     Status_Blk status;
     /*! The list of blocks available after finishing this mission.*/
     const char *next;
-    /*! Country color.*/
-    uint8 colour;
+    /*! This is the index in the enemy syndicate array to get the color.
+     This field is used if status field is BLK_UNAVAIL or BLK_AVAIL.*/
+    uint8 syndicate_owner;
     /*! Informations level for briefing. */
     unsigned char infoLevel;
     /*! Details level for briefing. */
@@ -208,6 +209,12 @@ public:
      */
     void setSelectedBlockId(uint8 index) { if (index < 50) selected_blck_ = index; }
 
+    //! Returns the block's color depending on who owns it
+    uint8 get_owner_color(Block & blk);
+
+    //! Change the player color for the enemy syndicate color.
+    void exchange_color_wt_syndicate(uint8 player_color);
+
     /*!
      * Return the currently played mission.
      * \return Can be NULL.
@@ -221,7 +228,7 @@ public:
     void setMission(Mission *pMission);
 
     //! Update state when finishing a mission
-    void completeSelectedBlock();
+    void mark_selected_block_completed();
 
     //! Cheat method to enable all missions
     void cheatEnableAllMission();

@@ -69,8 +69,6 @@ tiles drawing order
  - add sound effects (needs "compare testing" against original syndicate)
  - mapmenu:
 ====
-player color update - if changed in configmenu, change color for
-non-player owned territory after player color change;
 in original territory owners changed, it was like other syndicates where
 capturing territories
 ====
