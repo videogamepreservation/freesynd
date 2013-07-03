@@ -745,7 +745,7 @@ Static *Static::loadInstance(uint8 * data, int m)
             break;
         case 0x11:
             // ???? what is this
-            //s = new EtcObj(m, curanim, curanim, curanim);
+            //s = new EtcObj(m, bas, curanim, curanim);
             //printf("0x11 anim %X\n", curanim);
             break;
         case 0x12:
@@ -821,34 +821,37 @@ Static *Static::loadInstance(uint8 * data, int m)
             //printf("0x1C anim %X\n", curanim);
             break;
         case 0x1F:
-            // advertisement on wall + brokem signal
+            // advertisement on wall
             s = new EtcObj(m, curanim, curanim, curanim);
             s->setMainType(smt_Advertisement);
             s->setIsIgnored(true);
             break;
         case 0x20:
-            // window without light animated
-            s = new EtcObj(m, curanim, curanim, curanim);
+            // window without light
+            s = new AnimWindow(m, curanim);
             s->setIsIgnored(true);
             break;
         case 0x21:
             // window without light animated
-            s = new EtcObj(m, curanim, curanim, curanim);
+            s = new AnimWindow(m, curanim);
             s->setIsIgnored(true);
+            s->setFramesPerSec(2);
             break;
         case 0x23:
             // window with person's shadow
-            s = new EtcObj(m, curanim, curanim, curanim);
+            s = new AnimWindow(m, curanim);
+            s->setFramesPerSec(2);
             s->setIsIgnored(true);
             break;
         case 0x24:
             // window with person's shadow
-            s = new EtcObj(m, curanim, curanim, curanim);
+            s = new AnimWindow(m, curanim);
+            s->setFramesPerSec(2);
             s->setIsIgnored(true);
             break;
         case 0x25:
             // window without light
-            s = new EtcObj(m, curanim, curanim, curanim);
+            s = new AnimWindow(m, curanim);
             s->setIsIgnored(true);
             break;
         case 0x26:
@@ -903,8 +906,8 @@ Static *Static::loadInstance(uint8 * data, int m)
     return s;
 }
 
-Door::Door(int m, int anim, int closingAnim, int openAnim, int openingAnim):Static(m),
-anim_(anim), closing_anim_(closingAnim),open_anim_(openAnim),
+Door::Door(int m, int anim, int closingAnim, int openAnim, int openingAnim)
+: Static(m), anim_(anim), closing_anim_(closingAnim),open_anim_(openAnim),
 opening_anim_(openingAnim)
 {
     state_ = Static::sttdoor_Closed;
@@ -1396,7 +1399,7 @@ bool LargeDoor::isPathBlocker()
 }
 
 
-Tree::Tree(int m, int anim, int burningAnim, int damagedAnim):Static(m),
+Tree::Tree(int m, int anim, int burningAnim, int damagedAnim) : Static(m),
 anim_(anim), burning_anim_(burningAnim), damaged_anim_(damagedAnim)
 {
     rcv_damage_def_ = MapObject::ddmg_StaticTree;
@@ -1450,8 +1453,8 @@ bool Tree::handleDamage(ShootableMapObject::DamageInflictType *d) {
     return true;
 }
 
-WindowObj::WindowObj(int m, int anim,int openAnim,
-int breakingAnim, int damagedAnim):Static(m),
+WindowObj::WindowObj(int m, int anim, int openAnim,
+int breakingAnim, int damagedAnim) : Static(m),
 anim_(anim), open_anim_(openAnim), breaking_anim_(breakingAnim),
 damaged_anim_(damagedAnim)
 {
@@ -1492,7 +1495,7 @@ bool WindowObj::handleDamage(ShootableMapObject::DamageInflictType *d) {
     return true;
 }
 
-EtcObj::EtcObj(int m, int anim, int burningAnim , int damagedAnim):Static(m),
+EtcObj::EtcObj(int m, int anim, int burningAnim, int damagedAnim) : Static(m),
 anim_(anim), burning_anim_(burningAnim), damaged_anim_(damagedAnim)
 {
     rcv_damage_def_ = MapObject::ddmg_StaticGeneral;
@@ -1519,7 +1522,7 @@ void NeonSign::draw(int x, int y)
     g_App.gameSprites().drawFrame(anim_, frame_, x, y);
 }
 
-Semaphore::Semaphore(int m, int anim, int damagedAnim):Static(m),
+Semaphore::Semaphore(int m, int anim, int damagedAnim) : Static(m),
 anim_(anim), damaged_anim_(damagedAnim), elapsed_left_smaller_(0),
 elapsed_left_bigger_(0), up_down_(1)
 {
@@ -1610,5 +1613,24 @@ void Semaphore::draw(int x, int y)
 {
     addOffs(x, y);
     g_App.gameSprites().drawFrame(anim_ +  state_, frame_, x, y);
+}
+
+AnimWindow::AnimWindow(int m, int anim) : Static(m),
+anim_(anim)
+{
+    rcv_damage_def_ = MapObject::ddmg_StaticGeneral;
+    major_type_ = MapObject::mjt_Static;
+    main_type_ = smt_AnimatedWindow;
+}
+
+void AnimWindow::draw(int x, int y)
+{
+    addOffs(x, y);
+    g_App.gameSprites().drawFrame(anim_, frame_, x, y);
+}
+
+bool AnimWindow::animate(int elapsed, Mission *obj)
+{
+    return MapObject::animate(elapsed);
 }
 

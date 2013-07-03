@@ -443,7 +443,9 @@ public:
     static Static *loadInstance(uint8 *data, int m);
     virtual ~Static() {}
 
-    virtual bool animate(int elapsed, Mission *obj) { return MapObject::animate(elapsed); }
+    virtual bool animate(int elapsed, Mission *obj) {
+        return MapObject::animate(elapsed);
+    }
 #ifdef _DEBUG
     bool useTargetCursor() { return true; }
 #endif
@@ -477,6 +479,15 @@ public:
     }stateWindows;
 
     typedef enum {
+        sttawnd_LightOn = 0,
+        sttawnd_LightOff,
+        sttawnd_LightSwitching,
+        sttawnd_PedAppears,
+        sttawnd_ShowPed,
+        sttawnd_PedDisappears
+    }stateAnimatedWindows;
+
+    typedef enum {
         // NOTE: should be the same name as Class
         smt_None = 0,
         smt_Advertisement,
@@ -485,6 +496,7 @@ public:
         smt_LargeDoor,
         smt_Tree,
         smt_Window,
+        smt_AnimatedWindow,
         smt_NeonSign
     }staticMainType;
 
@@ -561,7 +573,7 @@ protected:
  */
 class EtcObj : public Static {
 public:
-    EtcObj(int m, int anim, int burningAnim , int damagedAnim);
+    EtcObj(int m, int anim, int burningAnim, int damagedAnim);
     virtual ~EtcObj() {}
 
     void draw(int x, int y);
@@ -611,5 +623,19 @@ protected:
     int up_down_;
 };
 
+/*!
+ * AnimatedWindow map object class.
+ */
+class AnimWindow : public Static {
+public:
+    AnimWindow(int m, int anim);
+    virtual ~AnimWindow() {}
+
+    bool animate(int elapsed, Mission *obj);
+    void draw(int x, int y);
+
+protected:
+    int anim_;
+};
 
 #endif

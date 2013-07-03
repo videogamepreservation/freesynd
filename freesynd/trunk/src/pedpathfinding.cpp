@@ -2353,6 +2353,7 @@ bool PedInstance::movementP(Mission *m, int elapsed)
 uint8 PedInstance::moveToDir(Mission* m, int elapsed, dirMoveType &dir_move,
     int dir, int t_posx, int t_posy, int* dist, bool set_dist)
 {
+    // TODO: better non-posiotional random walking
     floodPointDesc *based = &(m->mdpoints_[tile_x_
         + tile_y_ * m->mmax_x_ + tile_z_ * m->mmax_m_xy]);
     if (based->t == m_fdNonWalkable) {

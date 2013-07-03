@@ -1599,6 +1599,9 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
             {
                 break;
             }
+            // TODO : remove exclusive state,
+            // it should influence group or all groups?
+            // add exclusive state from group?
             groups_processed |= acts_g_prcssd;
 
             if (groups_processed == PedInstance::gd_mAll

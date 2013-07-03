@@ -45,6 +45,8 @@ const int SCROLL_STEP = 16;
 const int GameplayMenu::kMiniMapScreenX = 0;
 const int GameplayMenu::kMiniMapScreenY = 46 + 44 + 10 + 46 + 44 + 15 + 2 * 32 + 2;
 
+//#define ANIM_PLUS_FRAME_VIEW
+
 GameplayMenu::GameplayMenu(MenuManager *m) :
 Menu(m, MENU_GAMEPLAY, MENU_DEBRIEF, "", "mscrenup.dat"),
 tick_count_(0), last_animate_tick_(0), last_motion_tick_(0),
@@ -306,7 +308,9 @@ void GameplayMenu::handleShow() {
     menu_manager_->resetSinceMouseDown();
 }
 
-int qanim = 200, qframe = 0;
+#ifdef ANIM_PLUS_FRAME_VIEW
+int qanim = 1959, qframe = 0;
+#endif
 
 void GameplayMenu::handleTick(int elapsed)
 {
@@ -429,7 +433,7 @@ void GameplayMenu::handleRender(DirtyList &dirtyList)
     }
 #endif
     // this is used in combination with keys
-#if 0
+#ifdef ANIM_PLUS_FRAME_VIEW
     g_App.gameSprites().drawFrame(qanim, qframe, 320, 200);
 #endif
 #endif
@@ -1247,45 +1251,45 @@ bool GameplayMenu::handleUnknownKey(Key key, const int modKeys) {
         mission_->ped(0)->tileZ());
 #endif
 
-#if 0
+#ifdef ANIM_PLUS_FRAME_VIEW
     // used to see animations by number + frame
-    if (key == KEY_a) {
+    if (key.unicode == 'a') {
         qanim--;
         if (qanim < 0)
             qanim = 0;
     }
 
-    if (key == KEY_s) {
+    if (key.unicode == 's') {
         qanim++;
         if (qanim > 1969)
             qanim = 1969;
     }
 
-    if (key == KEY_q) {
+    if (key.unicode == 'q') {
         qanim -= 8;
         if (qanim < 0)
             qanim = 0;
     }
 
-    if (key == KEY_w) {
+    if (key.unicode == 'w') {
         qanim += 8;
         if (qanim > 1969)
             qanim = 1969;
     }
 
-    if (key == KEY_x) {
+    if (key.unicode == 'x') {
         qframe++;
         if (qframe > 30)
             qframe = 0;
     }
 
-    if (key == KEY_z) {
+    if (key.unicode == 'z') {
         qframe--;
         if (qframe < 0)
             qframe = 0;
     }
 
-    if (key == KEY_SPACE)
+    if (key.unicode == ' ')
         printf("qanim %i qframe %i\n", qanim, qframe);
 #endif
 
