@@ -72,6 +72,8 @@ private:
     std::list<GameEventListener *> mission_listeners_;
     //! Simulates syndicates fighting for countries
     void simulate_enemy_moves();
+    // helper method
+    int get_nb_mvt_for_active_synds(int nb_active_synds);
 };
 
 #define g_gameCtrl    GameController::singleton()

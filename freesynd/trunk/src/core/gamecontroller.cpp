@@ -159,7 +159,9 @@ void GameController::handle_mission_end(Mission *p_mission) {
 }
 
 /*!
- *
+ * This method simulates enemy syndicates activtiy
+ * by changing ownership of a random number of countries (depending on 
+ * the number of remaining syndicates).
  */
 void GameController::simulate_enemy_moves() {
     // Total number of active syndicates ie syndicates
@@ -181,39 +183,79 @@ void GameController::simulate_enemy_moves() {
     }
 
     // Computes how many movements (ie change country ownership) we will simulate
-    int nb_mvt = 0;
-    switch(nb_active_synds) {
-    case 7:
-        nb_mvt = rand() % 9 + 2; // between 2 and 10 moves
-        break;
-    case 6:
-        nb_mvt = rand() % 7 + 2; // between 2 and 8 moves
-        break;
-    case 5:
-        nb_mvt = rand() % 6 + 2; // between 2 and 7 moves
-        break;
-    case 4:
-        nb_mvt = rand() % 5 + 1; // between 1 and 5 moves
-        break;
-    case 3:
-        nb_mvt = rand() % 4 + 1; // between 1 and 4 moves
-        break;
-    case 2:
-        nb_mvt = rand() % 2 + 1; // between 1 and 2 moves
-        break;
-    default:
-        nb_mvt = 0;
-        break;
-    }
+    int nb_mvt = get_nb_mvt_for_active_synds(nb_active_synds);
 
     // Simulate movements
-    // TODO : finish implementation
 
-    // synchronize movements with map
-    for (int i=0; i<7; i++) {
-        for (std::list < int >::iterator it = blocks_per_synd[i].begin();
-         it != blocks_per_synd[i].end(); it++) {
-             g_Session.getBlock(*it).syndicate_owner = i;
-        }
+    // this list stores id of missions that shifted
+    // to prevent movint them multiple times
+    std::list<int> used_block; 
+    while (nb_mvt > 0) {
+        nb_mvt--;
+        bool move_done = false;
+        do {
+            // randomly chose a syndicate
+            // that will lose a country
+            int synd_from_id = rand() % 7;
+            if (!blocks_per_synd[synd_from_id].empty()) {
+                // randomly chose one of its countries
+                int m_pos = rand() % blocks_per_synd[synd_from_id].size();
+                int i = 0;
+                for (std::list < int >::iterator it = blocks_per_synd[synd_from_id].begin();
+                        it != blocks_per_synd[synd_from_id].end(); it++) {
+                    if (i == m_pos) {
+                        // First check to see if mission hasn't already been shited before
+                        bool is_in_list = false;
+                        for (std::list < int >::iterator used_it = used_block.begin(); 
+                                used_it != used_block.end(); used_it++) {
+                            if (*it == *used_it) {
+                                is_in_list = true;
+                                break;
+                            }
+                        }
+                        if (!is_in_list) {
+                            int synd_to_id;
+                            do {
+                                // find another syndicate that owns countries.
+                                // synds that do not have countries are out
+                                synd_to_id = rand() % 7;
+                            } while (synd_from_id == synd_to_id || blocks_per_synd[synd_to_id].empty());
+
+                            // Gives the country to the other syndicate
+                            g_Session.getBlock(*it).syndicate_owner = synd_to_id;
+                            used_block.push_back(*it); // remember we used this mission
+                            move_done = true;
+                        }
+                        // out anyway
+                        break;
+                    }
+
+                    i++;
+                } // end for
+            } // end if
+        } while (!move_done);
+    }
+}
+
+/*!
+ * Returns a random number of shifts given the number of
+ * syndicates in activity.
+ */
+int GameController::get_nb_mvt_for_active_synds(int nb_active_synds) {
+    switch(nb_active_synds) {
+    case 7:
+        return rand() % 9 + 2; // between 2 and 10 moves
+    case 6:
+        return rand() % 7 + 2; // between 2 and 8 moves
+    case 5:
+        return rand() % 6 + 2; // between 2 and 7 moves
+    case 4:
+        return rand() % 5 + 1; // between 1 and 5 moves
+    case 3:
+        return rand() % 4 + 1; // between 1 and 4 moves
+    case 2:
+        return rand() % 2 + 1; // between 1 and 2 moves
+    default:
+        return 0;
     }
 }
