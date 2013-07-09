@@ -37,6 +37,7 @@
 #include "weaponholder.h"
 #include "weapon.h"
 #include "ipastim.h"
+#include "core/actions.h"
 
 class PedInstance;
 class Mission;
@@ -236,15 +237,16 @@ public:
 
     void showPath(int scrollX, int scrollY);
 
-    void kill();
     void switchActionStateTo(uint32 as);
     void switchActionStateFrom(uint32 as);
     void setActionStateToDrawnAnim(void);
     bool animate(int elapsed, Mission *mission);
     void drawSelectorAnim(int x, int y);
 
-    bool inSightRange(MapObject *t);
-
+    //*************************************
+    // Weapon management
+    //*************************************
+    //! Returns the currently used weapon or null if no weapon is used
     WeaponInstance *selectedWeapon() {
         return selected_weapon_ >= 0
                 && selected_weapon_ < (int) weapons_.size()
@@ -257,8 +259,10 @@ public:
     void dropWeapon(int n);
     void dropWeapon(WeaponInstance *w);
     void dropAllWeapons();
+    void destroyAllWeapons();
     bool wePickupWeapon();
 
+    bool inSightRange(MapObject *t);
     VehicleInstance *inVehicle();
 
     void putInVehicle(VehicleInstance *v, pedActionStateMasks add_state);
@@ -321,8 +325,9 @@ public:
         intelligence_->processTicks(elapsed);
     }
 
+    //! Forces agent to kill himself
+    void commit_suicide();
     bool handleDamage(ShootableMapObject::DamageInflictType *d);
-    void destroyAllWeapons();
 
     void setDescStateMasks(unsigned int desc_state) {
         desc_state_ = desc_state;
@@ -714,11 +719,8 @@ public:
         // same as in actionQueueType.state
         uint16 state;
         uint32 group_id;
-        /* which process created this action group:
-         * 0 - unknown, 1 - script, 2 - from default_actions_, 3 - other action
-         * group created this group, 4 - user input
-         */
-        uint8 origin_desc;
+        //! Which process created this action group
+        fs_actions::CreatOrigin origin_desc;
     } actionQueueGroupType;
 
     // act_find (PedInstance::AiAction)
@@ -785,7 +787,7 @@ public:
     void updtActGFiringShots(uint32 id, uint32 make_shots);
     void updtActGFiring(uint32 id, PathNode *tpn,
         ShootableMapObject *tsmo = NULL);
-    bool checkActGCompleted(uint32 desc);
+    bool checkActGCompleted(fs_actions::CreatOrigin origin);
     void pauseAllInActG(actionQueueGroupType &as, uint32 start_pos = 1);
 
     /*! 
@@ -800,7 +802,7 @@ public:
     bool isPersuaded();
 
     void cpyEnemyDefs(Mmuu32_t &eg_defs) { eg_defs = enemy_group_defs_; }
-    bool isArmed() { return (desc_state_ & pd_smArmed); }
+    bool isArmed() { return (desc_state_ & pd_smArmed) != 0; }
     bool isExcluded() { return (state_ & pa_smCheckExcluded) != 0; }
     void updtPreferedWeapon();
     targetDescType * lastFiringTarget() { return &last_firing_target_; }

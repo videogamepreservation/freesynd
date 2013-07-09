@@ -325,7 +325,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                 actions_queue_.begin() + indx;
             if ((it->state & 128) == 0 && (it->state & 12) != 0
                 // do not remove scripted actions
-                && (it->origin_desc != 1))
+                && (it->origin_desc != fs_actions::kOrigScript))
             {
                 actions_queue_.erase(it);
             }
@@ -1659,15 +1659,21 @@ PedInstance *Ped::createInstance(int map) {
     return new PedInstance(this, map);
 }
 
-void PedInstance::kill() {
+/*!
+ * Forces an agent to commit suicide.
+ * If he's equiped with the good version of Mod Chest, he will
+ * explodes causing damage on nearby Peds but all his weapons will
+ * be destroyed.
+ * Else he dies alone leaving his wepons on the ground.
+ */
+void PedInstance::commit_suicide() {
     if (health_ > 0) {
         health_ = -1;
         actions_property_ = 1;
         switchActionStateTo(PedInstance::pa_smDead);
         is_ignored_ = true;
         setDrawnAnim(PedInstance::ad_DieAnim);
-        Mod *pMod = slots_[Mod::MOD_CHEST];
-        if (pMod && pMod->getVersion() > Mod::MOD_V1) {
+        if (hasMinimumVersionOfMod(Mod::MOD_CHEST, Mod::MOD_V2)) {
             destroyAllWeapons();
             ShotClass explosion;
             explosion.createExplosion(this, 512.0);
@@ -2454,7 +2460,7 @@ bool PedInstance::handleDamage(ShootableMapObject::DamageInflictType *d) {
         as.group_desc = PedInstance::gd_mExclusive;
         createActQWait(as, 2000);
         as.main_act = as.actions.size() - 1;
-        as.origin_desc = 4;
+        as.origin_desc = fs_actions::kOrigUser;
         actions_queue_.push_back(as);
 
         default_actions_.clear();

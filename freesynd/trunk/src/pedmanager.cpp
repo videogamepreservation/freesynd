@@ -181,7 +181,7 @@ PedInstance *PedManager::loadInstance(LevelData::People & gamdata, uint16 ped_id
             newped->createActQWalking(as, NULL, NULL, gamdata.orientation);
             as.main_act = as.actions.size() - 1;
             as.group_desc = PedInstance::gd_mStandWalk;
-            as.origin_desc = 2;
+            as.origin_desc = fs_actions::kOrigDefault;
             newped->addActQToQueue(as);
         }
     }

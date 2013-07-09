@@ -70,7 +70,7 @@ void ObjProtect::selfEvaluate(GameEvent &evt, Mission *pMission) {
         // Target is dead -> objective is failed
         endObjective(evt, false);
     } else {
-        if(p->checkActGCompleted(1))
+        if(p->checkActGCompleted(fs_actions::kOrigScript))
             endObjective(evt, true);
     }
 }

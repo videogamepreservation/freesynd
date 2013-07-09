@@ -391,7 +391,7 @@ Mission * MissionManager::create_mission(LevelData::LevelDataAll &level_data) {
 #endif
                 PedInstance::actionQueueGroupType as;
                 as.group_desc = PedInstance::gd_mStandWalk;
-                as.origin_desc = 1;
+                as.origin_desc = fs_actions::kOrigScript;
                 int32 has_trigger = -1;
                 while (offset_nxt) {
                     // sc.type

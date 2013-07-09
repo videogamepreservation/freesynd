@@ -119,6 +119,7 @@ set(HEADERS
 	core/missionbriefing.h
 	core/research.h
 	core/researchmanager.h
+	core/actions.h
 	gfx/dirtylist.h
 	gfx/fliplayer.h
 	gfx/font.h

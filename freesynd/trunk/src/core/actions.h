@@ -6,8 +6,8 @@
  *   Copyright (C) 2005  Joost Peters  <joostp@users.sourceforge.net>   *
  *   Copyright (C) 2006  Trent Waddington <qg@biodome.org>              *
  *   Copyright (C) 2006  Tarjei Knapstad <tarjei.knapstad@gmail.com>    *
- *   Copyright (C) 2011  Bohdan Stelmakh <chamel@users.sourceforge.net> *
- *   Copyright (C) 2011  Joey Parrish  <joey.parrish@gmail.com>         *
+ *   Copyright (C) 2010  Bohdan Stelmakh <chamel@users.sourceforge.net> *
+ *   Copyright (C) 2013  Benoit Blancard <benblan@users.sourceforge.net>*
  *                                                                      *
  *    This program is free software;  you can redistribute it and / or  *
  *  modify it  under the  terms of the  GNU General  Public License as  *
@@ -24,61 +24,27 @@
  *  The full text of the license is also included in the file COPYING.  *
  *                                                                      *
  ************************************************************************/
-#ifndef MODOWNER_H
-#define MODOWNER_H
-#include "mod.h"
 
-class ModOwner {
-public:
-    ModOwner() {
-        for (int i = 0; i < 6; i++)
-            slots_[i] = NULL;
-    }
-    /*!
-    * Returns true if the agent can be equiped with that mod version.
-    */
-    bool canHaveMod(Mod *pNewMod) {
-        if (pNewMod == NULL) {
-            return false;
-        }
+#ifndef CORE_ACTIONS_H_
+#define CORE_ACTIONS_H_
 
-        Mod *pMod = slots_[pNewMod->getType()];
-        if (pMod) {
-            // Agent has a mod of the same type
-            // Returns true if equiped version if less than new version
-            return (pMod->getVersion() < pNewMod->getVersion());
-        }
-        
-        // There is no mod of that type so agent can be equiped
-        return true;
-    }
-
-    void addMod(Mod *pNewMod) {
-        if (pNewMod) {
-            slots_[pNewMod->getType()] = pNewMod;
-        }
-    }
-
-    Mod *slot(int n) {
-        assert(n < 6);
-        return slots_[n];
-    }
+namespace fs_actions {
 
     /*!
-     * Returns true if the owner is equiped with mod of the
-     * given type and at least of given version.
+     * List the different process by which action can be created.
      */
-    bool hasMinimumVersionOfMod(Mod::EModType type, Mod::EModVersion version) {
-        Mod *pMod = slots_[type];
-        return (pMod && pMod->getVersion() >= version);
-    }
-
-    void clearSlots() {
-        for (int i = 0; i < 6; i++)
-            slots_[i] = NULL;
-    }
-protected:
-    Mod *slots_[6];
+    enum CreatOrigin {
+        //! Origin unknown
+        kOrigUnknow = 0,
+        //! By script
+        kOrigScript = 1,
+        //! From default action list
+        kOrigDefault = 2,
+        //! By another action group
+        kOrigAction = 3,
+        //! From user input
+        kOrigUser = 4
+    };
 };
 
-#endif
+#endif // CORE_ACTIONS_H_

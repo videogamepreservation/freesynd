@@ -795,7 +795,7 @@ void GameplayMenu::handleClickOnWeaponSelector(int x, int y, int button,
                 PedInstance::actionQueueGroupType as;
                 as.main_act = 0;
                 as.group_desc = PedInstance::gd_mExclusive;
-                as.origin_desc = 4;
+                as.origin_desc = fs_actions::kOrigUser;
                 pLeader->createActQPutDown(as, pLeader->weapon(w_num));
                 if (modKeys & KMD_CTRL)
                     pLeader->addActQToQueue(as);
@@ -897,7 +897,7 @@ void GameplayMenu::handleClickOnMap(int x, int y, int button, const int modKeys)
                 if (action) {
                     as.main_act = as.actions.size() - 1;
                     as.group_desc = PedInstance::gd_mStandWalk;
-                    as.origin_desc = 4;
+                    as.origin_desc = fs_actions::kOrigUser;
                     if (modKeys & KMD_CTRL)
                         ped->addActQToQueue(as);
                     else
@@ -950,7 +950,7 @@ void GameplayMenu::handleClickOnMap(int x, int y, int button, const int modKeys)
                 PedInstance::actionQueueGroupType as;
                 as.main_act = 0;
                 as.group_desc = PedInstance::gd_mFire;
-                as.origin_desc = 4;
+                as.origin_desc = fs_actions::kOrigUser;
                 if (pn) {
                     if (modKeys & KMD_CTRL) {
                         if (pa->createActQFiring(as, pn, NULL, true))
@@ -1010,7 +1010,7 @@ bool GameplayMenu::setDestinationPoint(const MapTilePoint &mapPt, bool isForGrou
     p_ped->createActQWalking(as, &tpn, NULL);
     as.main_act = as.actions.size() - 1;
     as.group_desc = PedInstance::gd_mStandWalk;
-    as.origin_desc = 4;
+    as.origin_desc = fs_actions::kOrigUser;
     if (addDestPt)
         p_ped->addActQToQueue(as);
     else
@@ -1159,17 +1159,14 @@ bool GameplayMenu::handleUnknownKey(Key key, const int modKeys) {
         if (ctrl) {
             // excluding all selected agents from recieve damage from agent
             // near, to make simultanious explosion
-            for (size_t i = 0; i < AgentManager::kMaxSlot; i++) {
-                PedInstance *p_agent = mission_->getSquad()->member(i);
-                if (p_agent && selection_.isAgentSelected(i))
-                    p_agent->setIsIgnored(true);
+            for (SquadSelection::Iterator it = selection_.begin();
+                            it != selection_.end(); ++it) {
+                    (*it)->setIsIgnored(true);
             }
 
-            for (size_t i = 0; i < AgentManager::kMaxSlot; i++) {
-                PedInstance *p_agent = mission_->getSquad()->member(i);
-
-                if (p_agent && selection_.isAgentSelected(i))
-                    p_agent->kill();
+            for (SquadSelection::Iterator it = selection_.begin();
+                            it != selection_.end(); ++it) {
+                    (*it)->commit_suicide();
             }
         }
     } else {
@@ -1196,7 +1193,7 @@ bool GameplayMenu::handleUnknownKey(Key key, const int modKeys) {
             ped->createActQWalking(as, NULL, NULL, 160, 1024);
             as.main_act = as.actions.size() - 1;
             as.group_desc = PedInstance::gd_mStandWalk;
-            as.origin_desc = 4;
+            as.origin_desc = fs_actions::kOrigUser;
             if (modKeys & KMD_CTRL)
                 ped->addActQToQueue(as);
             else

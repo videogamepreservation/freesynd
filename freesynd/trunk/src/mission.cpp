@@ -550,7 +550,6 @@ void Mission::end()
             Agent *pAg = g_Session.agents().squadMember(i);
             if (p_pedAgent->isDead()) {
                 // an agent died -> remove him from cryo
-                p_pedAgent->destroyAllWeapons();
                 g_Session.agents().destroyAgentSlot(i);
             } else {
                 // synch only weapons

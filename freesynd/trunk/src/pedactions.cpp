@@ -605,13 +605,9 @@ void PedInstance::setActQInQueue(actionQueueGroupType &as,
             actions_queue_.erase(it_s, actions_queue_.end());
         setActionStateToDrawnAnim();
     }
-    if (id != NULL) {
-        as.group_id = action_grp_id_++;
-        *id = as.group_id;
-    } else {
-        as.group_id = 0;
-    }
-    actions_queue_.push_back(as);
+
+    // finally add the action group
+    addActQToQueue(as, id);
 }
 
 bool PedInstance::addActQToQueue(actionQueueGroupType &as,
@@ -630,7 +626,7 @@ void PedInstance::createDefQueue() {
     default_actions_.clear();
 
     actionQueueGroupType as;
-    as.origin_desc = 2;
+    as.origin_desc = fs_actions::kOrigDefault;
     as.main_act = 0;
 
     if (createActQFindEnemy(as)) {
@@ -780,11 +776,11 @@ void PedInstance::updtActGFiring(uint32 id, PathNode* tpn,
     }
 }
 
-bool PedInstance::checkActGCompleted(uint32 desc) {
+bool PedInstance::checkActGCompleted(fs_actions::CreatOrigin origin) {
     for (std::vector <actionQueueGroupType>::iterator it =
         actions_queue_.begin(); it != actions_queue_.end(); ++it)
     {
-        if ((it->origin_desc) == desc && (it->state & 4) != 0)
+        if ((it->origin_desc) == origin && (it->state & 4) != 0)
             return true;
     }
     return false;
