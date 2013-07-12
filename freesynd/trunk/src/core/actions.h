@@ -2,10 +2,6 @@
  *                                                                      *
  *  FreeSynd - a remake of the classic Bullfrog game "Syndicate".       *
  *                                                                      *
- *   Copyright (C) 2005  Stuart Binge  <skbinge@gmail.com>              *
- *   Copyright (C) 2005  Joost Peters  <joostp@users.sourceforge.net>   *
- *   Copyright (C) 2006  Trent Waddington <qg@biodome.org>              *
- *   Copyright (C) 2006  Tarjei Knapstad <tarjei.knapstad@gmail.com>    *
  *   Copyright (C) 2010  Bohdan Stelmakh <chamel@users.sourceforge.net> *
  *   Copyright (C) 2013  Benoit Blancard <benblan@users.sourceforge.net>*
  *                                                                      *
@@ -45,6 +41,6 @@ namespace fs_actions {
         //! From user input
         kOrigUser = 4
     };
-};
+}
 
 #endif // CORE_ACTIONS_H_
