@@ -17,12 +17,12 @@ Fixed Bugs
 Features added
 ----------
   * Mission ownership on map menu changes to simulate syndicate fighting for terrotories.
+  * Animation for animated windows
 
 Known issues with this release
 ------------------------------
   * Agent AI is partially operational.
   * PathFinding requires improvement (path smoothing)
-  * No animation for animated windows
   * Map drawing is buggy
   * Not all weapons correctly function.
 

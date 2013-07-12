@@ -184,9 +184,10 @@ namespace LevelData {
         uint8 mapposx[2];
         uint8 mapposy[2];
         uint8 mapposz[2];
-        // 0x04 - on map
+        // 0x04 - on map;
         // 0x06 - on map, but why not 0x04?
-        // 0x07 - on map(not sure), but why not 0x04?
+        // 0x07 - on map, objects visibility is dependent on
+        // orientation 0x40, 0x80 are drawn
         uint8 desc;
         uint8 unkn11;
         uint8 unkn12;
@@ -209,9 +210,9 @@ namespace LevelData {
     struct Weapons {
         uint8 offset_next[2];
         uint8 offset_prev[2];
-        uint8 mapposx[2];;
-        uint8 mapposy[2];;
-        uint8 mapposz[2];;
+        uint8 mapposx[2];
+        uint8 mapposy[2];
+        uint8 mapposz[2];
         // 0x04 on map
         // 0x05 not on map(in inventory)
         uint8 desc;
@@ -348,6 +349,6 @@ namespace LevelData {
         /* 113974 */ Objectives objectives[6];
         /* 114058 */ Unkn11 u11;
     };
-};
+}
 
 #endif  // MODEL_LEVELDATA_H_

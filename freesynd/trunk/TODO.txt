@@ -15,8 +15,7 @@ have proper state set if destroyed, the attribute health is good but states are
 easier to check in bulk with one varible single check instead of different variables
 and multiple checks;
  statics - I have added hack for advertisement boards to draw them, it should be removed
-and special attribute added to draw them at the end instead of that, animated
-widows are not animated at all need separate class and animation switching,
+and special attribute added to draw them at the end instead of that,
 trash bin/phone booth should be desctrutable with proper animation.
 ====
 

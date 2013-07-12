@@ -605,10 +605,11 @@ Static *Static::loadInstance(uint8 * data, int m)
         (LevelData::Statics *) data;
     Static *s = NULL;
 
-    // TODO: find where object current state is,
-    // some windows are broken/open etc
-    // Also verify whether object description is correct
+    // TODO: verify whether object description is correct
     // subtype for doors, use instead orientation?
+
+    // NOTE: objects states are usually mixed with type,
+    // no separation between object type and its state
     uint16 curanim = READ_LE_UINT16(gamdata->index_current_anim);
     uint16 baseanim = READ_LE_UINT16(gamdata->index_base_anim);
     uint16 curframe = READ_LE_UINT16(gamdata->index_current_frame);
@@ -826,34 +827,58 @@ Static *Static::loadInstance(uint8 * data, int m)
             s->setMainType(smt_Advertisement);
             s->setIsIgnored(true);
             break;
+
         case 0x20:
             // window without light
             s = new AnimWindow(m, curanim);
             s->setIsIgnored(true);
+            s->setFramesPerSec(4);
+            s->setStateMasks(sttawnd_LightOff);
+            s->setTimeShowAnim(30000 + (rand() % 30000));
             break;
         case 0x21:
-            // window without light animated
-            s = new AnimWindow(m, curanim);
+            // window light turns on
+            s = new AnimWindow(m, curanim - 2);
             s->setIsIgnored(true);
-            s->setFramesPerSec(2);
-            break;
+            s->setFramesPerSec(4);
+            s->setTimeShowAnim(1000 + (rand() % 1000));
+            s->setStateMasks(sttawnd_LightSwitching);
+
+            // NOTE : 0x22 should have existed but it doesn't appear anywhere
+
         case 0x23:
-            // window with person's shadow
-            s = new AnimWindow(m, curanim);
-            s->setFramesPerSec(2);
+            // window with person's shadow non animated,
+            // even though on 1 map person appears I will ignore it
+            s = new AnimWindow(m, 1959 + 6 + ((gamdata->orientation & 0x40) >> 5));
+            s->setFramesPerSec(4);
             s->setIsIgnored(true);
+            s->setStateMasks(sttawnd_ShowPed);
+            s->setTimeShowAnim(15000 + (rand() % 5000));
             break;
         case 0x24:
-            // window with person's shadow
-            s = new AnimWindow(m, curanim);
-            s->setFramesPerSec(2);
+            // window with person's shadow, hides, actually animation
+            // is of ped standing, but I will ignore it
+            s = new AnimWindow(m, 1959 + 8 + ((gamdata->orientation & 0x40) >> 5));
+            s->setFramesPerSec(4);
             s->setIsIgnored(true);
+            s->setStateMasks(sttawnd_PedDisappears);
             break;
         case 0x25:
-            // window without light
             s = new AnimWindow(m, curanim);
             s->setIsIgnored(true);
+
+            // NOTE : orientation, I assume, plays role of hidding object,
+            // orientation 0x40, 0x80 are drawn (gamdata->desc always 7)
+            // window without light
+            s->setTimeShowAnim(30000 + (rand() % 30000));
+            if (gamdata->orientation == 0x40 || gamdata->orientation == 0x80)
+                s->setStateMasks(sttawnd_LightOff);
+            else
+                s->setStateMasks(sttawnd_LightOn);
+
+            s->setFramesPerSec(4);
             break;
+
         case 0x26:
             // 0x00,0x80 south - north = 0
             // 0x40,0xC0 weast - east = 2
@@ -870,7 +895,7 @@ Static *Static::loadInstance(uint8 * data, int m)
                 s->setSizeZ(192);
             }
             break;
-#if _DEBUG
+#ifdef _DEBUG
         default:
             printf("uknown static object type %02X , %02X, %X\n",
                 gamdata->sub_type, gamdata->orientation,
@@ -1546,10 +1571,6 @@ bool Semaphore::animate(int elapsed, Mission *obj) {
         int z = tile_z_ * 128 + off_z_ - chng;
         tile_z_ = z / 128;
         off_z_ = z % 128;
-        /*
-        if (elapsed_left_bigger_ == 0)
-            return false;
-        */
         return true;
     }
 
@@ -1625,12 +1646,83 @@ anim_(anim)
 
 void AnimWindow::draw(int x, int y)
 {
+    if (state_ == Static::sttawnd_LightOn)
+        return;
     addOffs(x, y);
-    g_App.gameSprites().drawFrame(anim_, frame_, x, y);
+    g_App.gameSprites().drawFrame(anim_ + (state_ << 1), frame_, x, y);
 }
 
 bool AnimWindow::animate(int elapsed, Mission *obj)
 {
+    switch (state_) {
+        case Static::sttawnd_LightOff:
+            if (!leftTimeShowAnim(elapsed)) {
+                // decide to start switching lights on
+                // or continue being in dark
+                if (rand() % 100 > 60) {
+                    setTimeShowAnim(30000 + (rand() % 30000));
+                } else {
+                    state_ = Static::sttawnd_LightSwitching;
+                    frame_ = 0;
+                    setTimeShowAnim(1000 + (rand() % 1000));
+                }
+            }
+            break;
+        case Static::sttawnd_LightSwitching:
+            if (!leftTimeShowAnim(elapsed)) {
+                state_ = Static::sttawnd_LightOn;
+                setTimeShowAnim(30000 + (rand() % 30000));
+            }
+            break;
+        case Static::sttawnd_PedAppears:
+            if (frame_ >= g_App.gameSprites().lastFrame(anim_
+                + (Static::sttawnd_PedAppears << 1)))
+            {
+                state_ = Static::sttawnd_ShowPed;
+                setTimeShowAnim(15000 + (rand() % 15000));
+            }
+            break;
+        case Static::sttawnd_ShowPed:
+            if (!leftTimeShowAnim(elapsed)) {
+                // continue showing ped or hide it
+                if (rand() % 100 > 50) {
+                    setTimeShowAnim(15000 + (rand() % 5000));
+                } else {
+                    frame_ = 0;
+                    state_ = Static::sttawnd_PedDisappears;
+                }
+            }
+            break;
+        case Static::sttawnd_PedDisappears:
+            if (frame_ >= g_App.gameSprites().lastFrame(anim_
+                + (Static::sttawnd_PedDisappears << 1)))
+            {
+                state_ = Static::sttawnd_LightOn;
+                setTimeShowAnim(30000 + (rand() % 30000));
+            }
+            break;
+        case Static::sttawnd_LightOn:
+            if (!leftTimeShowAnim(elapsed)) {
+                // we will continue showing lightson or switch
+                // lights off or show ped
+                int rnd_v = rand() % 100;
+                if (rnd_v > 80) {
+                    setTimeShowAnim(30000 + (rand() % 30000));
+                } else if (rnd_v > 60) {
+                    frame_ = 0;
+                    state_ = Static::sttawnd_PedAppears;
+                } else if (rnd_v > 10) {
+                    state_ = Static::sttawnd_LightOff;
+                    setTimeShowAnim(30000 + (rand() % 30000));
+                } else {
+                    frame_ = 0;
+                    state_ = Static::sttawnd_LightSwitching;
+                    setTimeShowAnim(1000 + (rand() % 1000));
+                }
+            }
+            break;
+    }
+
     return MapObject::animate(elapsed);
 }
 

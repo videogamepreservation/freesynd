@@ -479,12 +479,12 @@ public:
     }stateWindows;
 
     typedef enum {
-        sttawnd_LightOn = 0,
-        sttawnd_LightOff,
+        sttawnd_LightOff = 0,
         sttawnd_LightSwitching,
         sttawnd_PedAppears,
         sttawnd_ShowPed,
-        sttawnd_PedDisappears
+        sttawnd_PedDisappears,
+        sttawnd_LightOn
     }stateAnimatedWindows;
 
     typedef enum {
