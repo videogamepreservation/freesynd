@@ -194,13 +194,13 @@ bool PedInstance::createActQFiring(actionQueueGroupType &as, PathNode *tpn,
     }
     aq.multi_var.enemy_var.value = value;
     aq.multi_var.enemy_var.forced_shot = forced_shot;
+    aq.multi_var.enemy_var.shots_done = 0;
+    aq.multi_var.enemy_var.make_shots = make_shots;
     if (does_phys_dmg) {
         aq.as = PedInstance::pa_smFiring;
         // TODO: use condition to set more information for action execution
         // continuos shooting until ammo ends(or all weapons ammo),
         // until target destroyed, type of damage that will complete action
-        aq.multi_var.enemy_var.make_shots = make_shots;
-        aq.multi_var.enemy_var.shots_done = 0;
         if (tpn) {
             aq.target.t_pn = *tpn;
             aq.target.desc = 1;
@@ -213,10 +213,8 @@ bool PedInstance::createActQFiring(actionQueueGroupType &as, PathNode *tpn,
         }
     } else {
         aq.as = PedInstance::pa_smNone;
-        aq.multi_var.enemy_var.make_shots = make_shots;
-        aq.multi_var.enemy_var.shots_done = 0;
         aq.target.t_smo = tsmo;
-        aq.target.desc = 2;
+        aq.target.desc = 0;
         aq.act_exec = PedInstance::ai_aAquireControl;
     }
     aq.state = 1;
@@ -569,7 +567,7 @@ void PedInstance::createActQCheckOwner(actionQueueGroupType &as) {
     aq.multi_var.time_var.elapsed = 0;
     aq.multi_var.time_var.time_to_start = tm_wait;
     as.actions.push_back(aq);
-    if (createActQFiring(as, NULL, NULL))
+    if (createActQFiring(as, NULL, NULL, false, 1))
         as.actions.back().state |= 64;
 }
 

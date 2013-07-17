@@ -627,13 +627,13 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                                         else {
                                             aqt->multi_var.enemy_var.shots_done += shots_done;
                                             if (make_shots != 0 && make_shots
-                                                <= shots_done
-                                                + aqt->multi_var.enemy_var.shots_done)
+                                                <= aqt->multi_var.enemy_var.shots_done)
                                             {
                                                 aqt->state |= 4;
                                             }
                                         }
                                     }
+                                    // TODO: don't hide weapon for our agents
                                     wi = selectedWeapon();
                                     if (wi && wi->ammoRemaining() == 0) {
                                         // hiding weapon without ammo
@@ -1013,12 +1013,11 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                             if (answ == 0 || answ == 2) {
                                 aqt->state |= 2;
                                 if (shots_done != 0) {
-                                    // enable animation compeletion
+                                    // enable animation completion
                                     aqt->state |= 32;
                                     aqt->multi_var.enemy_var.shots_done += shots_done;
                                     if (make_shots != 0 && make_shots
-                                        <= shots_done
-                                        + aqt->multi_var.enemy_var.shots_done)
+                                        <= aqt->multi_var.enemy_var.shots_done)
                                     {
                                         aqt->state |= 4;
                                     }
@@ -1414,7 +1413,10 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                 {
                     if (owner_) {
                         bool disable_walking = false;
-                        if (owner_->isDead()){
+                        std::vector <actionQueueGroupType>::iterator it_walk =
+                            findQueueInActQueue(it->group_id + 2);
+
+                        if (owner_->isDead()) {
                             // agent is dead choose another agent from alive
                             owner_ = NULL;
                             Squad *sq = mission->getSquad();
@@ -1422,18 +1424,16 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                                 PedInstance *p = sq->member(i);
                                 if (p->isAlive()) {
                                     owner_ = p;
+                                    if (it_walk != actions_queue_.end()) {
+                                        std::vector <actionQueueType>::iterator searched =
+                                            findActInQueue(PedInstance::ai_aFollowObject,
+                                            *it_walk, it_walk->actions.begin());
+                                        if (searched != it_walk->actions.end()) {
+                                            actionQueueType & aqt_follow = *searched;
+                                            aqt_follow.target.t_smo = owner_;
+                                        }
+                                    }
                                     break;
-                                }
-                            }
-                            std::vector <actionQueueGroupType>::iterator it_walk =
-                                findQueueInActQueue(it->group_id + 2);
-                            if (it_walk != actions_queue_.end()) {
-                                std::vector <actionQueueType>::iterator searched =
-                                    findActInQueue(PedInstance::ai_aFollowObject,
-                                    *it_walk, it_walk->actions.begin());
-                                if (searched != it_walk->actions.end()) {
-                                    actionQueueType & aqt_follow = *searched;
-                                    aqt_follow.target.t_smo = owner_;
                                 }
                             }
                         }
@@ -1451,8 +1451,10 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                                         if ((it_wpn->state & 64) != 0) {
                                             it_wpn->state ^= 64;
                                         }
-                                    }
+                                    } else
+                                        aqt->state |= 8;
                                 } else {
+                                    selected_weapon_ = 0;
                                     std::vector <actionQueueType>::iterator searched =
                                         findActInQueue(PedInstance::ai_aDestroyObject,
                                         *it, aqt);
@@ -1462,17 +1464,21 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                                             ((PedInstance *)owner_)->lastFiringTarget();
                                         if (t_fire->desc == 1) {
                                             // changing action to execute
-                                            aqt_attack.act_exec = PedInstance::ai_aAttackLocation;
+                                            aqt_attack.act_exec = PedInstance::ai_aAttackLocation
+                                                | PedInstance::ai_aWait;
                                             aqt_attack.target = *t_fire;
                                             aqt_attack.state ^= 64;
+                                            it->main_act = std::distance(
+                                                it->actions.begin(), searched);
                                         } else if (t_fire->desc == 2) {
                                             // already ai_aDestroyObject, but to be sure set again
-                                            aqt_attack.act_exec = PedInstance::ai_aDestroyObject;
+                                            aqt_attack.act_exec = PedInstance::ai_aDestroyObject
+                                                | PedInstance::ai_aWait;
                                             aqt_attack.target = *t_fire;
                                             aqt_attack.state ^= 64;
+                                            it->main_act = std::distance(
+                                                it->actions.begin(), searched);
                                         }
-                                        it->main_act = std::distance(
-                                            it->actions.begin(), searched);
                                     } else
                                         aqt->state |= 8;
                                 }
@@ -1488,17 +1494,13 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                             aqt = it->actions.begin() + indx;
                             aqt->state |= 8;
                             disable_walking = true;
+                            switchActionStateFrom(pa_smFiring);
+                            switchActionStateFrom(pa_smWalking);
                         }
-                        if (disable_walking) {
-                            std::vector <actionQueueGroupType>::iterator it_walk =
-                                findQueueInActQueue(it->group_id + 2);
-                            if (it_walk != actions_queue_.end()) {
-                                it_walk->state |= 64;
-                            }
-                        } else {
-                            std::vector <actionQueueGroupType>::iterator it_walk =
-                                findQueueInActQueue(it->group_id + 2);
-                            if (it_walk != actions_queue_.end()) {
+                        if (it_walk != actions_queue_.end()) {
+                            if (disable_walking) {
+                                    it_walk->state |= 64;
+                            } else {
                                 it_walk->state &= (0xFFFF ^ 64);
                                 std::vector <actionQueueType>::iterator searched =
                                     findActInQueue(PedInstance::ai_aFollowObject,
@@ -1514,10 +1516,13 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                                             aqt_rnd.multi_var.dist_var.dist_walked = 0;
                                             aqt_rnd.multi_var.dist_var.dir = rand() % 256;
                                         }
-                                    }
-                                }
+                                    } else
+                                        aqt->state |= 8;
+                                } else
+                                    aqt->state |= 8;
                             }
-                        }
+                        } else
+                            aqt->state |= 8;
                     } else
                         aqt->state |= 8;
                 }

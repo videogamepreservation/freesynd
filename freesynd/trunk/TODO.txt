@@ -39,10 +39,7 @@ that succesfully persuaded; weapon range modifier(?);
  - damage inflicted by vehicles/weapons, variate by type of damage and range
  - state of vehicles/people/objects should change correctly due to gameplay:
    switch of state due to damage
-   change in behavior due to persuade:
-====
-attack target of persuador
-====
+   change in behavior due to persuade - test all
 
  - instant damage to objects(handleDamage for all destructable)
  
