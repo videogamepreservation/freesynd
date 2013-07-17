@@ -2397,7 +2397,7 @@ uint8 PedInstance::moveToDir(Mission* m, int elapsed, dirMoveType &dir_move,
     if (dir_move.dir_modifier != 0) {
         dir = dir_move.dir_last;
     }
-    double dist_overral = 0;
+    double dist_total = 0;
     uint8 move_mask = 1;
 
     while ((int)dist_curr > 0) {
@@ -2597,7 +2597,7 @@ uint8 PedInstance::moveToDir(Mission* m, int elapsed, dirMoveType &dir_move,
 
         dist_curr -= dist_passsed;
         if (set_dist)
-            dist_overral += dist_passsed;
+            dist_total += dist_passsed;
 
         if (need_bounce && should_bounce) {
             move_mask |= 2;
@@ -2705,6 +2705,8 @@ uint8 PedInstance::moveToDir(Mission* m, int elapsed, dirMoveType &dir_move,
     }
     offzOnStairs(m->mtsurfaces_[tile_x_ + tile_y_ * m->mmax_x_
         + tile_z_ * m->mmax_m_xy].twd);
+    if (set_dist && dist != NULL)
+        *dist = (int)dist_total;
 
     return move_mask;
 }

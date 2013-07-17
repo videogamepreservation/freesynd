@@ -679,10 +679,14 @@ public:
             struct {
                 // move into this direction, -1 is unset
                 int32 dir;
-                // dist to target pos/object
+                // dist to target pos/object, 0 is unset/not used
                 int32 dist;
                 // already walked distance
                 int32 dist_walked;
+                // radius for distance checking
+                // dist + rd > cur_dist > dist - rd
+                // 0 or > 0
+                int32 rd;
                 // -1 is unset
                 int32 speed;
                 dirMoveType dir_move;
@@ -726,6 +730,8 @@ public:
     // act_find (PedInstance::AiAction)
     std::vector <actionQueueType>::iterator findActInQueue(uint32 act_find,
         actionQueueGroupType &as, std::vector <actionQueueType>::iterator search_from);
+
+    std::vector <actionQueueGroupType>::iterator findQueueInActQueue(uint32 id);
     void setActQInQueue(actionQueueGroupType &as,
         uint32 * id = NULL);
     bool addActQToQueue(actionQueueGroupType &as,
@@ -749,7 +755,7 @@ public:
         uint32 make_shots = 0, pedWeaponToUse *pw_to_use = NULL,
         int32 value = -1);
     void createActQFollowing(actionQueueGroupType &as,
-        ShootableMapObject *tsmo, uint32 condition, int32 dist = 128);
+        ShootableMapObject *tsmo, uint32 condition, int32 dist = 128, int32 rd = 0);
 
     void createActQPickUp(actionQueueGroupType &as,
         ShootableMapObject *tsmo);

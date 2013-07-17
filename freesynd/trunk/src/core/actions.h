@@ -2,7 +2,7 @@
  *                                                                      *
  *  FreeSynd - a remake of the classic Bullfrog game "Syndicate".       *
  *                                                                      *
- *   Copyright (C) 2010  Bohdan Stelmakh <chamel@users.sourceforge.net> *
+ *   Copyright (C) 2013  Bohdan Stelmakh <chamel@users.sourceforge.net> *
  *   Copyright (C) 2013  Benoit Blancard <benblan@users.sourceforge.net>*
  *                                                                      *
  *    This program is free software;  you can redistribute it and / or  *
@@ -39,7 +39,9 @@ namespace fs_actions {
         //! By another action group
         kOrigAction = 3,
         //! From user input
-        kOrigUser = 4
+        kOrigUser = 4,
+        //! Something happened that generated this action
+        kOrigEvent = 5
     };
 }
 

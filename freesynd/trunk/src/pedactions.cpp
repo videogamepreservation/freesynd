@@ -228,7 +228,7 @@ bool PedInstance::createActQFiring(actionQueueGroupType &as, PathNode *tpn,
 }
 
 void PedInstance::createActQFollowing(actionQueueGroupType &as,
-    ShootableMapObject *tsmo, uint32 condition, int32 dist)
+    ShootableMapObject *tsmo, uint32 condition, int32 dist, int32 rd)
 {
     as.state = 1;
     actionQueueType aq;
@@ -240,6 +240,7 @@ void PedInstance::createActQFollowing(actionQueueGroupType &as,
     aq.target.desc = 2;
     aq.multi_var.dist_var.dist = dist;
     aq.multi_var.dist_var.speed = -1;
+    aq.multi_var.dist_var.rd = rd;
     aq.condition = condition;
     as.actions.push_back(aq);
 }
@@ -633,26 +634,31 @@ void PedInstance::createDefQueue() {
         // NOTE: not adding gd_mStandWalk because it will be usually blocked
         // and will not be added from defaults
         as.group_desc = PedInstance::gd_mThink | PedInstance::gd_mFire;
+        as.group_id = action_grp_id_++;
         default_actions_.push_back(as);
     }
     as.actions.clear();
     if ((desc_state_ & PedInstance::pd_smControlled) != 0) {
         createActQCheckOwner(as);
         as.group_desc = PedInstance::gd_mThink | PedInstance::gd_mFire;
+        as.group_id = action_grp_id_++;
         default_actions_.push_back(as);
         as.actions.clear();
-        // TODO: random walking when close to agent that controls ped
-        createActQFollowing(as, owner_, 0, 192);
         as.group_desc = PedInstance::gd_mStandWalk;
+        createActQFollowing(as, owner_, 0, 192, 256);
+        createActQWalking(as, NULL, NULL, rand() % 256, 128);
+        as.state |= 64;
+        as.group_id = action_grp_id_++;
         default_actions_.push_back(as);
     } else {
         if (obj_group_def_ == PedInstance::og_dmAgent) {
             if (isOurAgent()) {
                 as.actions.clear();
                 as.group_desc = PedInstance::gd_mThink | PedInstance::gd_mFire;
-                if (createActQFindNonFriend(as))
+                if (createActQFindNonFriend(as)) {
+                    as.group_id = action_grp_id_++;
                     default_actions_.insert(default_actions_.begin(), as);
-                else
+                } else
                     as.actions.clear();
             }
         }/* else if (obj_group_def_ == PedInstance::og_dmCivilian
@@ -667,8 +673,11 @@ void PedInstance::addDefActsToActions(uint32 groups_used) {
     for (std::vector <actionQueueGroupType>::iterator it = default_actions_.begin();
         it != default_actions_.end(); ++it)
     {
-        if ((groups_used & it->group_desc) == 0)
-            addActQToQueue(*it);
+        if ((groups_used & it->group_desc) == 0
+            && findQueueInActQueue(it->group_id) == actions_queue_.end())
+        {
+            actions_queue_.push_back(*it);
+        }
     }
 }
 
@@ -805,6 +814,17 @@ std::vector <PedInstance::actionQueueType>::iterator PedInstance::findActInQueue
         }
     }
     return as.actions.end();
+}
+
+std::vector <PedInstance::actionQueueGroupType>::iterator PedInstance::findQueueInActQueue(uint32 id)
+{
+    for (std::vector <actionQueueGroupType>::iterator it =
+        actions_queue_.begin(); it != actions_queue_.end(); ++it)
+    {
+        if ((it->group_id) == id)
+            return it;
+    }
+    return actions_queue_.end();
 }
 
 

@@ -41,7 +41,6 @@ that succesfully persuaded; weapon range modifier(?);
    switch of state due to damage
    change in behavior due to persuade:
 ====
-randomly walking when agent(persuador) stopped;
 weapon search and pickup when persuador equips weapon, in view only and
 closest by distance
 ====
