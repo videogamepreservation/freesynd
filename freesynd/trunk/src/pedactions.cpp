@@ -569,10 +569,6 @@ void PedInstance::createActQCheckOwner(actionQueueGroupType &as) {
     aq.multi_var.time_var.elapsed = 0;
     aq.multi_var.time_var.time_to_start = tm_wait;
     as.actions.push_back(aq);
-
-    int indx = as.actions.size();
-    createActQFindWeapon(as);
-    as.actions[indx].state |= 64;
     if (createActQFiring(as, NULL, NULL))
         as.actions.back().state |= 64;
 }
@@ -644,16 +640,24 @@ void PedInstance::createDefQueue() {
         as.group_id = action_grp_id_++;
         default_actions_.push_back(as);
         as.actions.clear();
+
+        createActQFindWeapon(as);
+        as.group_desc = PedInstance::gd_mThink | PedInstance::gd_mFire;
+        as.state |= 64;
+        as.group_id = action_grp_id_++;
+        default_actions_.push_back(as);
+        as.actions.clear();
+
         as.group_desc = PedInstance::gd_mStandWalk;
         createActQFollowing(as, owner_, 0, 192, 256);
         createActQWalking(as, NULL, NULL, rand() % 256, 128);
         as.state |= 64;
         as.group_id = action_grp_id_++;
         default_actions_.push_back(as);
+        as.actions.clear();
     } else {
         if (obj_group_def_ == PedInstance::og_dmAgent) {
             if (isOurAgent()) {
-                as.actions.clear();
                 as.group_desc = PedInstance::gd_mThink | PedInstance::gd_mFire;
                 if (createActQFindNonFriend(as)) {
                     as.group_id = action_grp_id_++;

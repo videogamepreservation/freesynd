@@ -41,8 +41,7 @@ that succesfully persuaded; weapon range modifier(?);
    switch of state due to damage
    change in behavior due to persuade:
 ====
-weapon search and pickup when persuador equips weapon, in view only and
-closest by distance
+attack target of persuador
 ====
 
  - instant damage to objects(handleDamage for all destructable)
