@@ -55,13 +55,24 @@ IRC Channel<br />
 irc://irc.freenode.net/#freesynd
 </a>
 </small>
+<br /><br />
+
+Forum<br />
+<small>
+<a href="http://sourceforge.net/p/freesynd/discussion/" >
+Freesynd Forum
+</a>
+</small>
+<br />
 </p>
 
 <hr />
 
 <h2>Roadmap</h2>
 
-<?php printRoadMap() ?>
+<a href="http://sourceforge.net/p/freesynd/wiki/RoadMap/">
+Roadmap WIKI
+</a>
 
 <hr />
 
