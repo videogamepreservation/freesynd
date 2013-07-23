@@ -1,0 +1,132 @@
+<html>
+<head>
+<title>EPOLL SYSTEM v3.1 | README</title>
+<style>
+<!--
+body{background:#FFFFFF;color:#000000;font-family:verdana;font-size:9pt;}
+a:link{color:#0000AA;text-decoration:none;}
+a:active{color:red;text-decoration:none;}
+a:visited{color:#0000AA;text-decoration:none;}
+a:hover{color:red;text-decoration:none;}
+.main{color:#000000;font-family:verdana;font-size:9pt;}
+.sm{font-size:8pt;}
+.error{font-size:8pt;color:red;}
+.button{font-family:verdana;font-size:8pt;font-weight:600;width:150;text-align:center;}
+-->
+</style>
+</head>
+<body top-margin="0" left-margin="0" right-margin="0">
+<table style="margin-top:0;margin-bottom:4;" width="600" bgcolor="#000066" cellpadding="0" cellspacing="0" border="0" align="center"><tr><td>
+<table align="center" width="600" cellspacing="1" cellpadding="1" border="0" class="main">
+<tr><td bgcolor="#cccccc" align="center" class="main">
+<h3 style="margin-top:1;margin-bottom:1;">EPOLL SYSTEM v3.1 - README</h3>
+</td></tr>
+</table>
+</td></tr>
+</table>
+<table width="600" bgcolor="#000066" cellpadding="0" cellspacing="0" border="0" align="center"><tr><td>
+<table align="center" width="600" cellspacing="1" cellpadding="1" border="0" class="main">
+<tr><td align="left" bgcolor="#d5d5d5" class="sm">
+<div align="center"><b>О скрипте:</b></div>
+<div align="left" style="margin-left:15;margin-top:4;margin-bottom:4;margin-right:15;">
+<b>EPOLL 3.1</b> - это скрипт для создания неограниченого количества опросов на вашем сайте. Каждый из опросов может иметь до 99-и вариантов ответа. Далее описаны возможности и особенности скрипта скрипта:<br>
+- Не использует БД. Вся информация хранится в двух текстовых файлах.<br>
+- Нет ограничений на количество созданых опросов.<br>
+- Внешний вид формы голосования можно настроить.<br>
+- Все операции проводятся через админцентр с паролем.<br>
+- Через админцентр можно: Добавлять, Удалять опросы и просматривать их статистику.<br>
+- Скрипт выдаёт результаты в виде горизонтальных колонок (разноцветных или серых).<br>
+- Скрипт производит правильный подсчёт процентного соотношения голосов.<br>
+- Если за какой-либо вариант ответа проголосовало людей меньше 1% (округлённо - 0%), то выводится сотая часть числа процентов (Например: 0,05%).<br>
+- Вы можете разместить сразу несколько форм для голосования на одной странице.<br>
+- Форма голосования вставляется на страницу при помощи функции include().<br>
+- Опции голосования, а также его внешний вид настраиваются на странице с голосованием (перед процедурой include() ).<br>
+- Пользоваться скриптом стало ещё легче!<br>
+<strong>Новое в версии 2.1</strong>:<br>
+- Поменялись имена переменных.<br>
+- Исправлена ошибка при размещении нескольких опросов на одной странице.<br>
+- Испрвлена ошибка в панели администрирования при отображении общего кол-ва опросов.<br>
+- Добавлена проверка на заранее отправленый голос при отображении формы голосования.<br>
+- Изменился вид отображения результатов.<br>
+- Исправлены недочёты в форме голосования.<br>
+- Исправлена ошибка с блокировкой при смене голосования.<br>
+</div><br>
+</td></tr>
+<tr><td align="left" bgcolor="#d5d5d5" class="sm">
+<div align="center"><b>Установка и Проверка:</b></div>
+<div align="left" style="margin-left:15;margin-top:4;margin-bottom:4;margin-right:15;">
+1) Закачайте все файлы в отдельную папку на вашем сервере и установите для них следующие права доступа:<br>
+- add.php (Default)<br>
+- admin.php (Default)<br>
+- conf.php (Default)<br>
+- func.php (Default)<br>
+- form.php (Default)<br>
+- data.dat (777)<br>
+- pollcfg.dat (777)<br>
+- password.dat (777)<br>
+<u>Создание:</u><br>
+2.1) Откройте в броузере файл admin.php и введите пароль: 1 (Его стоит сменить)<br>
+2.2) Зайдите в радел "Создание нового опроса".<br>
+2.3) Введите уникальное имя опроса (Например: poll), вопрос и количество вариантов ответа.<br>
+2.4) Теперь, если вы всё правильно сделали, вам откроется 2-й шаг создания опроса. Введите варианты ответа и нажмите "Добавить опрос".<br>
+2.5) Если написано, что опрос создан - вы создали новый опрос с именем poll. <br>
+<u>Размещение:</u><br>
+3.1) Откройте файл, где будет размещён опрос и добавте в него следующий код (меняя значения переменных):
+<fieldset style="font-size:8pt;font-family:verdana;">
+<legend style="font-size:8pt;font-family:verdana;font-weight:600;" align="center">PHP код</legend>
+&lt;?<br>
+//Begin Epoll 3.1<br>
+$pollname="poll";<br>
+$p_path="scripts/epoll/";<br>
+$p_submit="Голосовать";<br>
+$p_align="center";<br>
+$p_width="250";<br>
+$p_font="verdana";<br>
+$p_txtsize="8pt";<br>
+$p_bcolor="#000000";<br>
+$p_bgcolor="#E5E5E5";<br>
+$p_txtcolor="#000000";<br>
+$p_bwidth="1";<br>
+$p_days="";<br>
+$p_coltype="0";<br>
+$p_rwidth="500";<br>
+include($p_path."form.php");<br>
+//End Epoll 3.1<br>
+?&gt;<br>
+</fieldset>
+$pollname - Уникальное имя опроса<br>
+$p_path - Путь к папке скрипта<br>
+$p_submit - Текст на кнопке submit<br>
+$p_align - Выравнивание таблицы с опросом<br>
+$p_width - Ширина таблицы<br>
+$p_font - Тип шрифта<br>
+$p_txtsize - Размер шрифта<br>
+$p_bcolor - Цвет границ<br>
+$p_bgcolor - Цвет фона<br>
+$p_txtcolor - Цвет текста<br>
+$p_days - Длительность запрета на повторный голос (в днях), не вводите ничего, если хотите чтобы действовала только проверка на флуд (5 секунд)<br>
+$p_coltype - Тип заполнения колонок результатов: 1- разноцветный, 0 - одноцветный (#cccccc) (рекомендую)<br>
+$p_rwidth - Ширина таблицы результатов<br>
+<br>
+3.2) Теперь откройте через броузер файл с опросом. Если вы увидели перед собой форму опроса, то вы записали всё правильно.<br>
+3.3) Попробуйте проголосовать. После заполнения формы нажмите кнопку "Голосовать". Откроется новое окно с результатами. Если вы увидели надпись: "Ваш голос принят", то скрипт работает нормально.<br>
+<br>
+4) Чтобы вставить другой опрос, нужно разместить тот же код, только поменять имя опроса.
+</div><br>
+</td></tr>
+<tr><td align="left" bgcolor="#d5d5d5" class="sm">
+<div align="center"><b>Скрипт проверен на работоспособность!<br>Если у вас есть впоросы к автору скрипта их можно отправить мне на e-mail (egorix@yandex.ru) или на ICQ (339309471).<br>
+Желаю удачи!</b></div>
+</td></tr>
+</table>
+</td></tr>
+</table>
+<table style="margin-top:4;margin-bottom:0;" width="600" bgcolor="#000066" cellpadding="0" cellspacing="0" border="0" align="center"><tr><td>
+<table align="center" width="600" cellspacing="1" cellpadding="1" border="0" class="main">
+<tr><td align="center" bgcolor="#cccccc" class="sm"><a href="http://egorix.net.ru" target="_blank">Powered by Egorix</a></td></tr>
+</table>
+</td></tr>
+</table>
+</body>
+</html>
+

@@ -1,5 +1,11 @@
 <?xml version='1.0' standalone='yes'?>
 <news>>
+	<item title="Icons and voting" date="2013-07-23" author="Bohdan Stelmakh"
+	rssDesc="New icons need user voting." id="13">
+	Thanks to contribution from Pawel Swoboda and Oscar Natividad we have two icons now,
+	but which to choose? Dear users, please, vote for your preference
+	at [[http://freesynd.sourceforge.net/icons_view/ ICONS_PAGE]].
+	</item>
 	<item title="Release 0.7.1" date="2013-04-09" author="Bohdan Stelmakh"
 	rssDesc="The development version 0.7.1 of Freesynd is available for download." id="12">
 	Small improvements were done in this release, we hope you will enjoy it.
