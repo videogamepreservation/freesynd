@@ -1,26 +1,28 @@
 <?
 // EPoll 3.1
+$txt_scr_fnfound = '<div align=center style="font-family:verdana;font-size:8pt;color:red;">Script was not installed properly, file not found: <b>';
+$txt_scr_permfail = '<div align=center style="font-family:verdana;font-size:8pt;color:red;">Wrong permissiona are set for file: <b>';
 function check($datafile,$cfgfile,$passfile){
 if(phpversion()<4.3){
-exit("<div align=center style=\"font-family:verdana;font-size:8pt;color:red;\">Скрипт нормально работает при установленом PHP версии 4.3 или выше. Ваша версия PHP: ".phpversion()."</div><br>");
+exit("<div align=center style=\"font-family:verdana;font-size:8pt;color:red;\">Script requires PHP 4.3 or above. You PHP version is: ".phpversion()."</div><br>");
 }
 if(!file_exists($datafile)){
-exit("<div align=center style=\"font-family:verdana;font-size:8pt;color:red;\">Скрипт неправильно установлен, не найден файл: <b>".$datafile."</b></div><br>");
+exit($txt_scr_fnfound.$datafile."</b></div><br>");
 }
 if(!file_exists($passfile)){
-exit("<div align=center style=\"font-family:verdana;font-size:8pt;color:red;\">Скрипт неправильно установлен, не найден файл: <b>".$passfile."</b></div><br>");
+exit($txt_scr_fnfound.$passfile."</b></div><br>");
 }
 if(!file_exists($cfgfile)){
-exit("<div align=center style=\"font-family:verdana;font-size:8pt;color:red;\">Скрипт неправильно установлен, не найден файл: <b>".$cfgfile."</b></div><br>");
+exit($txt_scr_fnfound.$cfgfile."</b></div><br>");
 }
 if(!is_readable($datafile) || !is_writeable($datafile)){
-exit("<div align=center style=\"font-family:verdana;font-size:8pt;color:red;\">Вы неправильно выставили права доступа для файла <b>".$datafile."</b></div><br>");
+exit($txt_scr_permfail.$datafile."</b></div><br>");
 }
 if(!is_readable($passfile) || !is_writeable($passfile)){
-exit("<div align=center style=\"font-family:verdana;font-size:8pt;color:red;\">Вы неправильно выставили права доступа для файла <b>".$passfile."</b></div><br>");
+exit($txt_scr_permfail.$passfile."</b></div><br>");
 }
 if(!is_readable($cfgfile) || !is_writeable($cfgfile)){
-exit("<div align=center style=\"font-family:verdana;font-size:8pt;color:red;\">Вы неправильно выставили права доступа для файла <b>".$cfgfile."</b></div><br>");
+exit($txt_scr_permfail.$cfgfile."</b></div><br>");
 }
 }
 function color($i,$type){

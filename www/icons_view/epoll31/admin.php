@@ -1,8 +1,8 @@
 <?
 // EPoll 3.1
-// Скрипт для создания неограниченого количества опросов посетителей
+// Script for creating unlimited number of polls
 //
-// Автор скрипта: Egorix (http://egorix.net.ru)
+// Script author: Egorix (http://egorix.net.ru)
 //
 include("conf.php");
 include("func.php");
@@ -14,14 +14,14 @@ $_GET['pass']=md5($_POST['pass']);
 if (!login($_GET['pass'],$passfile)){
 $pc=false;
 if (isset($_POST['pass'])){
-$error="Вы ввели неверный пароль";
+$error="Wrong password entered";
 }else{
-$error="Вам необходимо авторизироваться";
+$error="You need to login first";
 }
 }else{
 $pc=true;
 if (isset($_POST['pass'])){
-$error="Вы удачно вошли";
+$error="Logged in successfully";
 }
 }
 if ($pc){
@@ -41,7 +41,7 @@ break;
 if($find){
 $stat=true;
 }else{
-$error="Опрос не найден!";
+$error="Poll not found!";
 $stat=false;
 }
 }
@@ -61,18 +61,18 @@ break;
 }
 if(!$ex){
 $addp=1;
-$error="Первый шаг успешно пройден!";
+$error="Step 1, successful!";
 }else{
 $addp=0;
-$error="Опрос с именем <b>".$_GET['name']."</b> уже есть! Выберите другое имя!";
+$error="Poll named <b>".$_GET['name']."</b> already exist! Choose another name!";
 }
 }else{
 $addp=0;
-$error="Задайте правильное значение количества вариантов ответа!";
+$error="Please enter correct number of answers!";
 }
 }else{
 $addp=0;
-$error="Все формы должны быть заполнены!";
+$error="All form fields should be filled!";
 }
 if(isset($_GET['a1'])){
 //Check2
@@ -105,14 +105,14 @@ fclose($fh1);
 fclose($fh2);
 if($wr1 && $wr2){
 $addp=2;
-$error="Опрос <b>".$_GET['name']."</b> Создан!";
+$error="Poll <b>".$_GET['name']."</b> Created!";
 }else{
 $addp=0;
-$error="Ошибка записи в файл!";
+$error="Error while writting to file!";
 }
 }else{
 $addp="1";
-$error="Все формы должны быть заполнены!";
+$error="All form fields should be filled!";
 }
 }
 }
@@ -136,10 +136,10 @@ fclose($fh1);
 fclose($fh2);
 if($ex){
 $del=true;
-$error="Опрос - <b>".$_GET['name']."</b> удалён!";
+$error="Poll - <b>".$_GET['name']."</b> deleted!";
 }else{
 $del=false;
-$error="Опрос не найден!";
+$error="Poll not found!";
 }
 }
 // CHANGE PASSWORD
@@ -155,7 +155,7 @@ $string=$data[$i]."|::|";
 fwrite($fh,$string,strlen($string));
 fclose($fh);
 }
-$error="Вы сменили свой пароль на \"".$_GET['npass']."\"";
+$error="You have changed password to \"".$_GET['npass']."\"";
 $_GET['pass']=md5($_GET['npass']);
 $cpok=true;
 }
@@ -207,41 +207,41 @@ if(!$pc){
 <tr><td align="center" bgcolor="#d5d5d5">
 <form method="post" style="margin-top:5;margin-bottom:5;">
 <input type="password" name="pass" style="width:150;"><br>
-<input type="submit" value="Войти" class="button">
+<input type="submit" value="Р’РѕР№С‚Рё" class="button">
 </form>
 </td></tr>
 <?
 }else{
 ?>
 <tr><td align="center" bgcolor="#d5d5d5" class="sm">
-<a href="?pass=<?print$_GET['pass'];?>">Информация</a><br>
-<a href="?do=stat&pass=<?print$_GET['pass'];?>">Статистика опросов</a><br>
-<a href="?do=add&pass=<?print$_GET['pass'];?>">Создать новый опрос</a><br>
-<a href="?do=del&pass=<?print$_GET['pass'];?>">Удалить опрос</a><br>
-<a href="?do=cp&pass=<?print$_GET['pass'];?>">Изменить пароль</a><br>
-<a href="?">Выход</a><br>
+<a href="?pass=<?print$_GET['pass'];?>">Information</a><br>
+<a href="?do=stat&pass=<?print$_GET['pass'];?>">Polls statistic</a><br>
+<a href="?do=add&pass=<?print$_GET['pass'];?>">Create new poll</a><br>
+<a href="?do=del&pass=<?print$_GET['pass'];?>">Delete poll</a><br>
+<a href="?do=cp&pass=<?print$_GET['pass'];?>">Change password</a><br>
+<a href="?">Exit</a><br>
 </td></tr>
 <?
 if ($do!="add" && $do!="del" && $do!="stat" && $do!="cp"){
 ?>
 <tr><td align="left" bgcolor="#d5d5d5" class="sm">
-<div align="center"><b>Общая информация:</b></div>
+<div align="center"><b>Script's use information:</b></div>
 <div align="left" style="margin-left:25;margin-top:4;margin-bottom:4;">
 <?
 if(isset($_COOKIE['epoll_admin_lastvisit'])){
-print "Ваше последнее посещение: ".$_COOKIE['epoll_admin_lastvisit']."<br><br>";
+print "Your last visit: ".$_COOKIE['epoll_admin_lastvisit']."<br><br>";
 }
 $dat=file($polldata);
 $num=count($dat);
-print "Всего опросов: ".$num."<br>";
+print "Total polls: ".$num."<br>";
 ?>
 </div><br>
-<div align="center"><b>Право на авторство:</b></div>
+<div align="center"><b>Copyright:</b></div>
 <div align="left" style="margin-left:25;margin-top:4;margin-bottom:4;">
-Автор скрипта: <b><?print$script_owner;?></b><br>
+Author script: <b><?print$script_owner;?></b><br>
 E-mail: <?print$owner_email;?><br>
 ICQ: <?print$owner_icq;?><br>
-Сайт: <a href="<?print$owner_website;?>" target="_blank"><?print$owner_website;?></a>
+Website: <a href="<?print$owner_website;?>" target="_blank"><?print$owner_website;?></a>
 </div><br>
 </td></tr>
 <?
@@ -249,7 +249,7 @@ ICQ: <?print$owner_icq;?><br>
 if(!$stat){
 ?>
 <tr><td align="left" bgcolor="#d5d5d5" class="sm">
-<div align="center" class="main"><b>Статистика опросов</b></div>
+<div align="center" class="main"><b>Polls statistic</b></div>
 </td></tr>
 <tr><td align="center" bgcolor="#AAAAAA" class="sm">
 <table bgcolor="#000066" cellpadding="0" cellspacing="0" border="0" align="center"><tr><td>
@@ -259,10 +259,10 @@ $dat=file($pollcfg);
 if(sizeof($dat)!=0){
 for($i=0;$i<sizeof($dat);$i++){
 $data=explode("|::|",$dat[$i]);
-print "<tr class=\"sm\"><td align=center width=\"20%\" bgcolor=#d5d5d5><a href=\"?do=stat&pass=".$_GET['pass']."&name=".$data[0]."\" title=\"Смотреть статистику\"><b>".$data[0]."</b></a></td><td align=left width=\"80%\" bgcolor=#d5d5d5>".$data[1]."</td></tr>";
+print "<tr class=\"sm\"><td align=center width=\"20%\" bgcolor=#d5d5d5><a href=\"?do=stat&pass=".$_GET['pass']."&name=".$data[0]."\" title=\"РЎРјРѕС‚СЂРµС‚СЊ СЃС‚Р°С‚РёСЃС‚РёРєСѓ\"><b>".$data[0]."</b></a></td><td align=left width=\"80%\" bgcolor=#d5d5d5>".$data[1]."</td></tr>";
 }
 }else{
-print "<tr class=\"sm\"><td align=center width=\"100%\" bgcolor=#d5d5d5>Вы не создали ни одного опроса!</td></tr>";
+print "<tr class=\"sm\"><td align=center width=\"100%\" bgcolor=#d5d5d5>You don't have polls created!</td></tr>";
 }
 ?>
 </table>
@@ -273,7 +273,7 @@ print "<tr class=\"sm\"><td align=center width=\"100%\" bgcolor=#d5d5d5>Вы не со
 }else{
 ?>
 <tr><td align="left" bgcolor="#d5d5d5" class="sm">
-<div align="center" class="main"><b>Статистика опроса - <?print$_GET['name'];?></b></div>
+<div align="center" class="main"><b>Polls statistic - <?print$_GET['name'];?></b></div>
 <div align="left" style="margin-left:25;margin-top:4;margin-bottom:4;">
 <br>
 <?
@@ -296,7 +296,7 @@ $a2[$i-2]=$data2[$i];
 }
 $question=$data2[1];
 $question=stripslashes($question);
-print "<div align=left><b>Вопрос:</b> ".$question."</div><br>";
+print "<div align=left><b>Question:</b> ".$question."</div><br>";
 if($all!=0){
 for($i=0;$i<$num;$i++){
 $apr[$i]=round(($a1[$i]/$all)*100)."%";
@@ -306,17 +306,17 @@ $apr[$i]=round(($a1[$i]/$all)*100,2)."%";
 }
 for($i=0;$i<$num;$i++){
 $il=$i+1;
-print "<div align=left class=text><u>Вариант ответа №".$il.":</u> ".$a2[$i]." - <b>".$apr[$i]."</b> ( ".$a1[$i]." )</div>";
+print "<div align=left class=text><u>Answer в„–".$il.":</u> ".$a2[$i]." - <b>".$apr[$i]."</b> ( ".$a1[$i]." )</div>";
 }
-print "<br><div align=left><b>Всего голосов:</b> ".$all."</div>";
-print "<div align=left><b>Последний голос отдан:</b> ".$last."</div><br>";
+print "<br><div align=left><b>Total votes:</b> ".$all."</div>";
+print "<div align=left><b>Last vote:</b> ".$last."</div><br>";
 }else{
-print "Ещё никто не проголосовал!";
-print "<div align=left>Дата создания опроса: ".$last."</div><br>";
+print "No one has voted yet!";
+print "<div align=left>Poll was created on: ".$last."</div><br>";
 }
 ?>
 <br>
-<div align="center"><b><a href="?do=stat&pass=<?print$_GET['pass'];?>"><<< Вернуться назад</a></b></div>
+<div align="center"><b><a href="?do=stat&pass=<?print$_GET['pass'];?>"><<< To previuos page</a></b></div>
 </div><br>
 </td></tr>
 <?
@@ -325,20 +325,20 @@ if($do=="add"){
 if($addp==0 || $addp==""){
 ?>
 <tr><td align="left" bgcolor="#d5d5d5" class="sm">
-<div align="center"><b>Создание опроса (Шаг 1):</b></div>
+<div align="center"><b>Creating poll (Step 1):</b></div>
 <div align="left" style="margin-left:25;margin-top:4;margin-bottom:4;">
 <form method="get" style="margin-top:5;margin-bottom:5;">
-Уникальное имя голосования:<br>
-(Максимум 10 символов) (Используйте только латинские буквы)<br>
+Unique name for poll:<br>
+(Max 10 characters)<br>
 <input type="text" name="name" size="15" maxlength="10"><br>
-Вопрос голосования:<br>
+Question for poll:<br>
 <input type="text" name="question" size="45"><br>
-Количество вариантов ответа:<br>
-(Не больше 99-и) (Рекомендовано: меньше 15 штук)<br>
+Number of answers:<br>
+(Not more then 99) (Recomended: less then 15)<br>
 <input type="text" name="num" size="5" maxlength="2"><br>
 <input type="hidden" name="pass" value="<?print$_GET['pass'];?>">
 <input type="hidden" name="do" value="add">
-<input type="submit" value="Далее" class="button">
+<input type="submit" value="Next" class="button">
 </form>
 </div><br>
 </td></tr>
@@ -346,7 +346,7 @@ if($addp==0 || $addp==""){
 }elseif($addp==1){
 ?>
 <tr><td align="left" bgcolor="#d5d5d5" class="sm">
-<div align="center"><b>Создание опроса (Шаг 2):</b></div>
+<div align="center"><b>Creating poll (Step 2):</b></div>
 <div align="left" style="margin-left:25;margin-top:4;margin-bottom:4;">
 <form method="get" style="margin-top:5;margin-bottom:5;">
 <?
@@ -355,7 +355,7 @@ $_GET['question']=ereg_replace("\"","&quot;",$_GET['question']);
 ?>
 <b><?print$_GET['name'];?></b> - <?print$_GET['question'];?><br>
 <br>
-Возможные варианты ответа:<br>
+Possible answers:<br>
 <?
 for($i=0;$i<$_GET['num'];$i++){
 $il=$i+1;
@@ -367,17 +367,17 @@ print "<input type=\"text\" name=\"a".$il."\" size=\"45\"><br>";
 <input type="hidden" name="question" value="<?print$_GET['question'];?>">
 <input type="hidden" name="num" value="<?print$_GET['num'];?>">
 <input type="hidden" name="name" value="<?print$_GET['name'];?>">
-<input type="submit" value="Создать опрос" class="button">
+<input type="submit" value="Create poll" class="button">
 </form>
 <br>
-<div align="center"><b><a href="?do=add&pass=<?print$_GET['pass'];?>"><<< Вернуться назад</a></b></div>
+<div align="center"><b><a href="?do=add&pass=<?print$_GET['pass'];?>"><<< To previuos page</a></b></div>
 </div><br>
 </td></tr>
 <?
 }elseif($addp==2){
 ?>
 <tr><td align="left" bgcolor="#d5d5d5" class="sm">
-<div align="center"><b><a href="?do=add&pass=<?print$_GET['pass'];?>"><<< Вернуться назад</a></b></div>
+<div align="center"><b><a href="?do=add&pass=<?print$_GET['pass'];?>"><<< To previuos page</a></b></div>
 </td></tr>
 <?
 }}
@@ -385,7 +385,7 @@ if($do=="del"){
 if(!$del){
 ?>
 <tr><td align="left" bgcolor="#d5d5d5" class="sm">
-<div align="center" class="main"><b>Удаление опросов</b></div>
+<div align="center" class="main"><b>Delete polls</b></div>
 </td></tr>
 <tr><td align="center" bgcolor="#AAAAAA" class="sm">
 <table bgcolor="#000066" cellpadding="0" cellspacing="0" border="0" align="center"><tr><td>
@@ -395,10 +395,10 @@ $dat=file($pollcfg);
 if(sizeof($dat)!=0){
 for($i=0;$i<sizeof($dat);$i++){
 $data=explode("|::|",$dat[$i]);
-print "<tr class=\"sm\"><td align=center width=\"20%\" bgcolor=#d5d5d5><a href=\"?do=del&pass=".$_GET['pass']."&name=".$data[0]."\" title=\"Удалить этот опрос\"><b>".$data[0]."</b></a></td><td align=left width=\"80%\" bgcolor=#d5d5d5>".$data[1]."</td></tr>";
+print "<tr class=\"sm\"><td align=center width=\"20%\" bgcolor=#d5d5d5><a href=\"?do=del&pass=".$_GET['pass']."&name=".$data[0]."\" title=\"РЈРґР°Р»РёС‚СЊ СЌС‚РѕС‚ РѕРїСЂРѕСЃ\"><b>".$data[0]."</b></a></td><td align=left width=\"80%\" bgcolor=#d5d5d5>".$data[1]."</td></tr>";
 }
 }else{
-print "<tr class=\"sm\"><td align=center width=\"100%\" bgcolor=#d5d5d5>Вы не создали ни одного опроса!</td></tr>";
+print "<tr class=\"sm\"><td align=center width=\"100%\" bgcolor=#d5d5d5>You don't have polls created!</td></tr>";
 }
 ?>
 </table>
@@ -409,7 +409,7 @@ print "<tr class=\"sm\"><td align=center width=\"100%\" bgcolor=#d5d5d5>Вы не со
 }else{
 ?>
 <tr><td align="left" bgcolor="#d5d5d5" class="sm">
-<div align="center"><b><a href="?do=del&pass=<?print$_GET['pass'];?>"><<< Вернуться назад</a></b></div>
+<div align="center"><b><a href="?do=del&pass=<?print$_GET['pass'];?>"><<< To previuos page</a></b></div>
 </td></tr>
 <?
 }}
@@ -418,14 +418,14 @@ if(!$cpok){
 if(is_writeable($passfile)){
 ?>
 <tr><td align="left" bgcolor="#d5d5d5" class="sm">
-<div align="center"><b>Смена пароля</b></div>
+<div align="center"><b>Change password</b></div>
 <div align="left" style="margin-left:25;margin-top:4;margin-bottom:4;">
 <form method="get" style="margin-top:5;margin-bottom:5;">
-Новый пароль:<br>
+РќРѕРІС‹Р№ РїР°СЂРѕР»СЊ:<br>
 <input type="text" name="npass" size="20" value="<?print$ed_name;?>"><br>
 <input type="hidden" name="pass" value="<?print$_GET['pass'];?>">
 <input type="hidden" name="do" value="cp">
-<input type="submit" value="Сменить">
+<input type="submit" value="Change">
 </form>
 </div><br>
 </td></tr>
@@ -433,14 +433,14 @@ if(is_writeable($passfile)){
 }else{
 ?>
 <tr><td align="left" bgcolor="#d5d5d5" class="sm">
-<div align="center"><b>Вы не можете сменить пароль (Права доступа у файла <b><?print$passfile;?></b> не разрешают запись!)</b>!</div>
+<div align="center"><b>You cannot change password (Permissions for file <b><?print$passfile;?></b> forbid writting!)</b>!</div>
 </td></tr>
 <?
 }
 }else{
 ?>
 <tr><td align="left" bgcolor="#d5d5d5" class="sm">
-<div align="center"><b><a href="?do=cp&pass=<?print$_GET['pass'];?>"><<< Вернуться назад</a></b></div>
+<div align="center"><b><a href="?do=cp&pass=<?print$_GET['pass'];?>"><<< To previuos page</a></b></div>
 </td></tr>
 <?
 }}

@@ -27,97 +27,89 @@ a:hover{color:red;text-decoration:none;}
 <table width="600" bgcolor="#000066" cellpadding="0" cellspacing="0" border="0" align="center"><tr><td>
 <table align="center" width="600" cellspacing="1" cellpadding="1" border="0" class="main">
 <tr><td align="left" bgcolor="#d5d5d5" class="sm">
-<div align="center"><b>О скрипте:</b></div>
+<div align="center"><b>About script:</b></div>
 <div align="left" style="margin-left:15;margin-top:4;margin-bottom:4;margin-right:15;">
-<b>EPOLL 3.1</b> - это скрипт для создания неограниченого количества опросов на вашем сайте. Каждый из опросов может иметь до 99-и вариантов ответа. Далее описаны возможности и особенности скрипта скрипта:<br>
-- Не использует БД. Вся информация хранится в двух текстовых файлах.<br>
-- Нет ограничений на количество созданых опросов.<br>
-- Внешний вид формы голосования можно настроить.<br>
-- Все операции проводятся через админцентр с паролем.<br>
-- Через админцентр можно: Добавлять, Удалять опросы и просматривать их статистику.<br>
-- Скрипт выдаёт результаты в виде горизонтальных колонок (разноцветных или серых).<br>
-- Скрипт производит правильный подсчёт процентного соотношения голосов.<br>
-- Если за какой-либо вариант ответа проголосовало людей меньше 1% (округлённо - 0%), то выводится сотая часть числа процентов (Например: 0,05%).<br>
-- Вы можете разместить сразу несколько форм для голосования на одной странице.<br>
-- Форма голосования вставляется на страницу при помощи функции include().<br>
-- Опции голосования, а также его внешний вид настраиваются на странице с голосованием (перед процедурой include() ).<br>
-- Пользоваться скриптом стало ещё легче!<br>
-<strong>Новое в версии 2.1</strong>:<br>
-- Поменялись имена переменных.<br>
-- Исправлена ошибка при размещении нескольких опросов на одной странице.<br>
-- Испрвлена ошибка в панели администрирования при отображении общего кол-ва опросов.<br>
-- Добавлена проверка на заранее отправленый голос при отображении формы голосования.<br>
-- Изменился вид отображения результатов.<br>
-- Исправлены недочёты в форме голосования.<br>
-- Исправлена ошибка с блокировкой при смене голосования.<br>
-</div><br>
+<b>EPOLL 3.1</b> - Script for creating unlimited number of polls. Every poll can have up to 99 answers. Description of features:<br />
+- No database used. All information is stored in 3 files.<br />
+- No limit for polls number.<br />
+- Poll's form style can be configured.<br />
+- All operations done using administration panel: adding polls, deletion and statistic viewing.<br />
+- Results are shown in rows, cam be gray or multi color.<br />
+- Correct calculation of percents.<br />
+- If any answer was voted by less then 1% of voters, result will be shown with hudredth part (Example : 0,05).
+- Multiple number of forms can be displayed at same web page.<br />
+- Poll form is inserted using include() function.<br />
+- Poll options and its style are configured on web page were poll is located ( before function include() ).<br />
+</div><br />
 </td></tr>
 <tr><td align="left" bgcolor="#d5d5d5" class="sm">
-<div align="center"><b>Установка и Проверка:</b></div>
+<div align="center"><b>Install and Testing:</b></div>
 <div align="left" style="margin-left:15;margin-top:4;margin-bottom:4;margin-right:15;">
-1) Закачайте все файлы в отдельную папку на вашем сервере и установите для них следующие права доступа:<br>
-- add.php (Default)<br>
-- admin.php (Default)<br>
-- conf.php (Default)<br>
-- func.php (Default)<br>
-- form.php (Default)<br>
-- data.dat (777)<br>
-- pollcfg.dat (777)<br>
-- password.dat (777)<br>
-<u>Создание:</u><br>
-2.1) Откройте в броузере файл admin.php и введите пароль: 1 (Его стоит сменить)<br>
-2.2) Зайдите в радел "Создание нового опроса".<br>
-2.3) Введите уникальное имя опроса (Например: poll), вопрос и количество вариантов ответа.<br>
-2.4) Теперь, если вы всё правильно сделали, вам откроется 2-й шаг создания опроса. Введите варианты ответа и нажмите "Добавить опрос".<br>
-2.5) Если написано, что опрос создан - вы создали новый опрос с именем poll. <br>
-<u>Размещение:</u><br>
-3.1) Откройте файл, где будет размещён опрос и добавте в него следующий код (меняя значения переменных):
+1) Install following all files into separate folder on your server and set required permissions:<br />
+- add.php (Default)<br />
+- admin.php (Default)<br />
+- conf.php (Default)<br />
+- func.php (Default)<br />
+- form.php (Default)<br />
+- data.dat (777)<br />
+- pollcfg.dat (777)<br />
+- password.dat (777)<br />
+<u>Creating poll:</u><br />
+2.1) Open in browser file admin.php and enter password: 1 (it should be changed)<br />
+2.2) Choose "Create new poll".<br />
+2.3) Enter unique poll name (Example: poll), question and number of possible answers.<br />
+2.4) If everything was correctly done step 2 will be available. Fill all answers fiels and click "Create poll".<br />
+2.5) On successful creation of poll a message will be shown. <br />
+<u>Adding poll to web page:</u><br />
+3.1) Open file, where poll is required and add following code, change values of variables to configure:
 <fieldset style="font-size:8pt;font-family:verdana;">
-<legend style="font-size:8pt;font-family:verdana;font-weight:600;" align="center">PHP код</legend>
-&lt;?<br>
-//Begin Epoll 3.1<br>
-$pollname="poll";<br>
-$p_path="scripts/epoll/";<br>
-$p_submit="Голосовать";<br>
-$p_align="center";<br>
-$p_width="250";<br>
-$p_font="verdana";<br>
-$p_txtsize="8pt";<br>
-$p_bcolor="#000000";<br>
-$p_bgcolor="#E5E5E5";<br>
-$p_txtcolor="#000000";<br>
-$p_bwidth="1";<br>
-$p_days="";<br>
-$p_coltype="0";<br>
-$p_rwidth="500";<br>
-include($p_path."form.php");<br>
-//End Epoll 3.1<br>
-?&gt;<br>
+<legend style="font-size:8pt;font-family:verdana;font-weight:600;" align="center">PHP РєРѕРґ</legend>
+&lt;?<br />
+//Begin Epoll 3.1<br />
+$pollname="poll";<br />
+$p_path="scripts/epoll/";<br />
+$p_submit="Р“РѕР»РѕСЃРѕРІР°С‚СЊ";<br />
+$p_align="center";<br />
+$p_width="250";<br />
+$p_font="verdana";<br />
+$p_txtsize="8pt";<br />
+$p_bcolor="#000000";<br />
+$p_bgcolor="#E5E5E5";<br />
+$p_txtcolor="#000000";<br />
+$p_bwidth="1";<br />
+$p_days="";<br />
+$p_coltype="0";<br />
+$p_rwidth="500";<br />
+include($p_path."form.php");<br />
+//End Epoll 3.1<br />
+?&gt;<br />
 </fieldset>
-$pollname - Уникальное имя опроса<br>
-$p_path - Путь к папке скрипта<br>
-$p_submit - Текст на кнопке submit<br>
-$p_align - Выравнивание таблицы с опросом<br>
-$p_width - Ширина таблицы<br>
-$p_font - Тип шрифта<br>
-$p_txtsize - Размер шрифта<br>
-$p_bcolor - Цвет границ<br>
-$p_bgcolor - Цвет фона<br>
-$p_txtcolor - Цвет текста<br>
-$p_days - Длительность запрета на повторный голос (в днях), не вводите ничего, если хотите чтобы действовала только проверка на флуд (5 секунд)<br>
-$p_coltype - Тип заполнения колонок результатов: 1- разноцветный, 0 - одноцветный (#cccccc) (рекомендую)<br>
-$p_rwidth - Ширина таблицы результатов<br>
-<br>
-3.2) Теперь откройте через броузер файл с опросом. Если вы увидели перед собой форму опроса, то вы записали всё правильно.<br>
-3.3) Попробуйте проголосовать. После заполнения формы нажмите кнопку "Голосовать". Откроется новое окно с результатами. Если вы увидели надпись: "Ваш голос принят", то скрипт работает нормально.<br>
-<br>
-4) Чтобы вставить другой опрос, нужно разместить тот же код, только поменять имя опроса.
-</div><br>
+$pollname - Unique polls name, from created polls<br />
+$p_path - Path to script's folder<br />
+$p_submit - Text for "submit" button<br />
+$p_align - Poll table alignement<br />
+$p_width - Table width<br />
+$p_font - Font type<br />
+$p_txtsize - Font size<br />
+$p_bcolor - Border color<br />
+$p_bgcolor - Background color<br />
+$p_txtcolor - Text color<br />
+$p_days - Time between re-voting in days, for prevent spamming only don't change this value, it will be set to 5 seconds.<br />
+$p_coltype - Type of colomn background: 1- different color per colomn, 0 - same color (#cccccc) (recomended)<br />
+$p_rwidth - Result table width<br />
+<br />
+3.2) Now open previously modified file in browser, if you see polls form everything was done correctly.<br />
+3.3) Try to vote. After filling form press "Vote" button. A window with results will open. If you see a message: "Vote successful", script is working.<br />
+<br />
+4) In order to add another poll, same code can be used, but poll's name must be changed.
+</div><br />
 </td></tr>
 <tr><td align="left" bgcolor="#d5d5d5" class="sm">
-<div align="center"><b>Скрипт проверен на работоспособность!<br>Если у вас есть впоросы к автору скрипта их можно отправить мне на e-mail (egorix@yandex.ru) или на ICQ (339309471).<br>
-Желаю удачи!</b></div>
+<div align="center"><b>Script was tested to work!<br />If you have any question about script contact author: <br /> e-mail (egorix@yandex.ru) or ICQ (339309471).<br />
+Good luck!</b></div>
 </td></tr>
+<tr><td align="left" bgcolor="#d5d5d5" class="sm">
+<small>Translated into english by chamel.</small></td></tr>
 </table>
 </td></tr>
 </table>

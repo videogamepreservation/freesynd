@@ -1,10 +1,9 @@
 <?
 // EPoll 3.1
-// Скрипт для создания неограниченого количества опросов посетителей
+// Script for creating unlimited number of polls
 //
-// Автор скрипта: Egorix (http://egorix.net.ru)
+// Script author: Egorix (http://egorix.net.ru)
 //
-// Ничего не меняйте в коде скрипта иначе он не будет работать нормально!
 // BEGIN
 $dat=file("pollcfg.dat");
 for($i=0;$i<sizeof($dat);$i++){
@@ -158,7 +157,7 @@ print "<table align=left bgcolor=#000033 cellpadding=0 cellspacing=0 width=".$tw
 </table>
 <?
 print "<br><div align=left><b>Total votes:</b> ".$all."</div>";
-print "<div align=left><b>Last vote was for:</b> ".$last."</div><br>";
+print "<div align=left><b>Last vote:</b> ".$last."</div><br>";
 }else{
 print "No one has voted yet!";
 print "<div align=left>Poll was created on: ".$last."</div><br>";
@@ -194,7 +193,7 @@ a:hover{text-decoration:none;color:#0000EE;}
 ?>
 <table align=center width="<?print$w;?>" cellpadding=0 cellspacing=0 border=0 bgcolor="#000000" style="margin-top:5;margin-bottom:5;"><tr><td>
 <table width="<?print$w;?>" align=center cellpadding=1 cellspacing=1 border=0><tr bgcolor="#EEEEEE" style="{font-size:8pt;color:#000044;font-family:verdana;}"><td align="center">
-<a href="http://egorix.net.ru" target="_blank" title="Перейти на сайт автора скрипта EPoll 3.1 (Egorix)">Powered by EPoll 3.1</a>
+<a href="http://egorix.net.ru" target="_blank" title="To website of script EPoll 3.1 author (Egorix)">Powered by EPoll 3.1</a>
 </td></tr></table>
 </td></tr></table>
 </body>

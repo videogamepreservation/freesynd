@@ -1,15 +1,14 @@
 <?
 // EPoll 3.1
-// Скрипт для создания неограниченого количества опросов посетителей
+// Script for creating unlimited number of polls
 //
-// Автор скрипта: Egorix (http://egorix.net.ru)
+// Script author: Egorix (http://egorix.net.ru)
 //
-// Ничего не меняйте в коде скрипта иначе он не будет работать нормально!
 // BEGIN
 //
 $inc="";
 if(!file_exists($p_path."func.php") || !file_exists($p_path."conf.php")){
-print "<div align=center style=\"font-family:verdana;font-size:8pt;color:red;\">Неверно установлен путь к папке скрипта! Помощь в файле <b>README.html</b></div><br>";
+print "<div align=center style=\"font-family:verdana;font-size:8pt;color:red;\">Path to script's directory is wrong! For more information look in <b>README.html</b></div><br>";
 }else{
 if(!$inc){
 include($p_path."conf.php");
@@ -63,7 +62,7 @@ $q="";
 ?>
 <table align=<?print$p_align;?> width="<?print$p_width;?>" cellpadding=0 cellspacing=0 border=0 bgcolor="<?print$p_bcolor;?>"><tr><td>
 <table width="<?print$p_width;?>" align=center cellpadding=2 cellspacing=<?print$p_bwidth;?> border=0><tr bgcolor="<?print$p_bgcolor;?>" style="{font-size:<?print$p_txtsize;?>;color:<?print$p_txtcolor;?>;font-family:<?print$p_font;?>;}"><td>
-<div align="center">Опрос <b><?print$pollname;?></b> не найден!</b></div>
+<div align="center">Poll <b><?print$pollname;?></b> not found!</b></div>
 </td></tr></table>
 </td></tr></table>
 <?
@@ -72,7 +71,7 @@ $q="";
 ?>
 <table align=<?print$p_align;?> width="<?print$p_width;?>" cellpadding=0 cellspacing=0 border=0 bgcolor="<?print$p_bcolor;?>"><tr><td>
 <table width="<?print$p_width;?>" align=center cellpadding=2 cellspacing=<?print$p_bwidth;?> border=0><tr bgcolor="<?print$p_bgcolor;?>" style="{font-size:<?print$p_txtsize;?>;color:<?print$p_txtcolor;?>;font-family:<?print$p_font;?>;}"><td>
-<div align="center">Вы не задали имя опроса</b></div>
+<div align="center">Poll name is not set</b></div>
 </td></tr></table>
 </td></tr></table>
 <?
