@@ -1,8 +1,8 @@
 <?
-// EPoll 3.1
+// EPoll 3.2
 // Script for creating unlimited number of polls
 //
-// Script author: Egorix (http://egorix.net.ru)
+// Script author: Egorix (http://duet.kiev.ua)
 //
 // BEGIN
 $dat=file("pollcfg.dat");
@@ -28,6 +28,13 @@ $w=500;
 include("conf.php");
 include("func.php");
 check($polldata,$pollcfg,$passfile);
+// Anti_hack
+$_GET['name']=normal($_GET['name']);
+$_GET['w']=normal($_GET['w']);
+$_GET['days']=normal($_GET['days']);
+$_GET['coltype']=normal($_GET['coltype']);
+$_GET['vote']=normal($_GET['vote']);
+// *
 if($_GET['name']!=""){
 if($_GET['vote']!=""){
 $name=$_GET['name'];
@@ -78,7 +85,7 @@ $error="You cannot vote in this poll";
 <head>
 <title>Poll Results</title>
 <style>
-body{background-color:#FFFFFF;font-family:verdana;font-size:8pt;}
+body{background-color:#FFFFFF;font-family:verdana;font-size:9pt;}
 a:link{text-decoration:none;color:#000066;}
 a:hover{text-decoration:none;color:#0000EE;}
 .sm{font-family:verdana;font-size:8pt;color:#000033;}
@@ -89,7 +96,7 @@ a:hover{text-decoration:none;color:#0000EE;}
 if(isset($error)){
 ?>
 <table align=center width="<?print$w;?>" cellpadding=0 cellspacing=0 border=0 bgcolor="#000000" style="margin-top:5;margin-bottom:5;"><tr><td>
-<table width="<?print$w;?>" align=center cellpadding=2 cellspacing=1 border=0><tr bgcolor="#EEEEEE" style="{font-size:8pt;color:#000044;font-family:verdana;}"><td>
+<table width="<?print$w;?>" align=center cellpadding=2 cellspacing=1 border=0><tr bgcolor="#F9EEC1" style="{font-size:8pt;color:#000044;font-family:verdana;}"><td>
 <div align="center" style="color:red;"><?print$error;?></div>
 </td></tr></table>
 </td></tr></table>
@@ -97,7 +104,7 @@ if(isset($error)){
 }
 ?>
 <table align=center width="<?print$w;?>" cellpadding=0 cellspacing=0 border=0 bgcolor="#000000" style="margin-top:5;margin-bottom:5;"><tr><td>
-<table width="<?print$w;?>" align=center cellpadding=2 cellspacing=1 border=0><tr bgcolor="#EEEEEE" style="{font-size:8pt;color:#000044;font-family:verdana;}"><td>
+<table width="<?print$w;?>" align=center cellpadding=2 cellspacing=1 border=0><tr bgcolor="#FDF6D7" style="{font-size:8pt;color:#000044;font-family:verdana;}"><td>
 <h5 align="center" style="margin-bottom:5;">Poll Results</h5>
 <div align="left" style="font-size:8pt;">
 <?
@@ -145,8 +152,8 @@ for($i=0;$i<$num;$i++){
 $il=$i+1;
 $tw=$apr[$i];
 ?>
-<tr class="sm" bgcolor="#E5E5E5"><td width="3%" rowspan="2" align="center" valign="middle" bgcolor="#D3D3D3"><strong><?print$il;?></strong></td><td width="97%" colspan="2" align="left" valign="middle"><?print$a2[$i];?></td>
-<tr class="sm" bgcolor="#E5E5E5"><td width="20%" align="left" valign="middle"><strong><?print$apr[$i];?></strong> ( <?print$a1[$i];?> )</td><td width="77%" align="left" valign="middle">
+<tr class="sm" bgcolor="#F7EEC7"><td width="3%" rowspan="2" align="center" valign="middle" bgcolor="#ECE1B1"><strong><?print$il;?></strong></td><td width="97%" colspan="2" align="left" valign="middle"><?print$a2[$i];?></td>
+<tr class="sm" bgcolor="#F7EEC7"><td width="20%" align="left" valign="middle"><strong><?print$apr[$i];?></strong> ( <?print$a1[$i];?> )</td><td width="77%" align="left" valign="middle">
 <?
 print "<table align=left bgcolor=#000033 cellpadding=0 cellspacing=0 width=".$tw." height=\"15\"><tr><td><table width=\"100%\" cellpadding=0 cellspacing=1 align=left height=\"15\"><tr><td bgcolor=".color($i,$coltype)."><font style=\"font-size:6pt;color:".color($i,$coltype)."\">&nbsp;</font></td></tr></table></td></tr></table>";
 ?>
@@ -184,7 +191,7 @@ a:hover{text-decoration:none;color:#0000EE;}
 </head>
 <body>
 <table align=center width="<?print$w;?>" cellpadding=0 cellspacing=0 border=0 bgcolor="#000000" style="margin-top:5;margin-bottom:5;"><tr><td>
-<table width="<?print$w;?>" align=center cellpadding=2 cellspacing=1 border=0><tr bgcolor="#EEEEEE" style="{font-size:8pt;color:#000044;font-family:verdana;}"><td>
+<table width="<?print$w;?>" align=center cellpadding=2 cellspacing=1 border=0><tr bgcolor="#F9EEC1" style="{font-size:8pt;color:#000044;font-family:verdana;}"><td>
 <h3 align="center" style="margin-top:10;margin-bottom:10;">Poll not found</h3>
 </td></tr></table>
 </td></tr></table>
@@ -192,10 +199,12 @@ a:hover{text-decoration:none;color:#0000EE;}
 }
 ?>
 <table align=center width="<?print$w;?>" cellpadding=0 cellspacing=0 border=0 bgcolor="#000000" style="margin-top:5;margin-bottom:5;"><tr><td>
-<table width="<?print$w;?>" align=center cellpadding=1 cellspacing=1 border=0><tr bgcolor="#EEEEEE" style="{font-size:8pt;color:#000044;font-family:verdana;}"><td align="center">
-<a href="http://egorix.net.ru" target="_blank" title="To website of script EPoll 3.1 author (Egorix)">Powered by EPoll 3.1</a>
+<table width="<?print$w;?>" align=center cellpadding=1 cellspacing=1 border=0><tr bgcolor="#F9EEC1" style="{font-size:8pt;color:#000044;font-family:verdana;}"><td align="center">
+<a href="http://duet.kiev.ua" target="_blank" title="To website of script EPoll 3.2 author (Egorix)">Powered by EPoll 3.2</a>
 </td></tr></table>
 </td></tr></table>
+<br>
+<div align="center"><span style="font-size:9pt;font-weight:600;">[ <a href="javascript:window.close()">Close Window</a> ]</span></div>
 </body>
 </html>
 <?

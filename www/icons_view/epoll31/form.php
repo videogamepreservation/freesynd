@@ -1,8 +1,8 @@
 <?
-// EPoll 3.1
+// EPoll 3.2
 // Script for creating unlimited number of polls
 //
-// Script author: Egorix (http://egorix.net.ru)
+// Script author: Egorix (http://duet.kiev.ua)
 //
 // BEGIN
 //
@@ -32,7 +32,7 @@ if($ex){
 <table align=<?print$p_align;?> width="<?print$p_width;?>" cellpadding=0 cellspacing=0 border=0 bgcolor="<?print$p_bcolor;?>"><tr><td>
 <table width="<?print$p_width;?>" align=center cellpadding=2 cellspacing=<?print$p_bwidth;?> border=0><tr bgcolor="<?print$p_bgcolor;?>" style="{font-size:<?print$p_txtsize;?>;color:<?print$p_txtcolor;?>;font-family:<?print$p_font;?>;}"><td>
 <form name="<?print$pollname;?>" action="<?print$p_path;?>add.php" method="get" target="_blank" style="{font-size:<?print$p_txtsize;?>;color:<?print$p_txtcolor;?>;font-family:<?print$p_font;?>;margin:0,0,0,0;}">
-<div align="center"><b><?print$p_q;?></b></div><br>
+<div align="center"><b style="color:red;"><?print$p_q;?></b></div><br>
 <?
 $cname=md5("epoll-".$p_q);
 for($i=0;$i<sizeof($q);$i++){
@@ -52,7 +52,8 @@ $q="";
 <input type="hidden" name="days" value="<?print$p_days;?>">
 <input type="hidden" name="w" value="<?print$p_rwidth;?>">
 <input type="hidden" name="coltype" value="<?print$p_coltype;?>">
-<div align="center"><input type="submit" <?if(isset($_COOKIE[$cname])){print"disabled";}?> value="<?print$p_submit;?>" style="font-size:8pt;font-family:verdana;font-weight:600;"></div>
+<br>
+<div align="center"><input type="submit" class="button" style="width:100px;" <?if(isset($_COOKIE[$cname])){print"disabled";}?> value="<?print$p_submit;?>" style="font-size:8pt;font-family:verdana;font-weight:600;"></div>
 <div align="center"><a href="<?print$p_path;?>add.php?name=<?print$pollname;?>&w=<?print$p_rwidth;?>&coltype=<?print$p_coltype;?>" target="_blank" title="View poll results">Results</a>
 </form>
 </td></tr></table>

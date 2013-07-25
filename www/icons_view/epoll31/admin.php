@@ -1,17 +1,19 @@
 <?
-// EPoll 3.1
+// EPoll 3.2
 // Script for creating unlimited number of polls
 //
-// Script author: Egorix (http://egorix.net.ru)
+// Script author: Egorix (http://duet.kiev.ua)
 //
+session_name("epolladmin");
+session_start();
 include("conf.php");
 include("func.php");
 check($polldata,$pollcfg,$passfile);
 $do=$_GET['do'];
-if (isset($_POST['pass'])){
-$_GET['pass']=md5($_POST['pass']);
+if(isset($_POST['pass'])){
+$_SESSION['pass']=$_POST['pass'];
 }
-if (!login($_GET['pass'],$passfile)){
+if(!login($_SESSION['pass'],$passfile)){
 $pc=false;
 if (isset($_POST['pass'])){
 $error="Wrong password entered";
@@ -20,11 +22,12 @@ $error="You need to login first";
 }
 }else{
 $pc=true;
-if (isset($_POST['pass'])){
+if(isset($_POST['pass'])){
 $error="Logged in successfully";
+$_SESSION['pass']=$_POST['pass'];
 }
 }
-if ($pc){
+if($pc){
 // ~~~~~~~~~START~~~~~~~~~~~
 // STATISTIC
 if($do=="stat"){
@@ -144,28 +147,30 @@ $error="Poll not found!";
 }
 // CHANGE PASSWORD
 if($do=="cp" && isset($_GET['npass'])){
-$dat[]=file($passfile);
-$data=explode("|::|",$dat[0]);
 $fh=fopen($passfile,"w");
+$str="<?\n";
+$str.="\\*|::|";
+$str.=md5($_GET['npass']);
+$str.="|::|*\\\n";
+$str.="?>";
+$cpok=fwrite($fh,$str,strlen($str));
 fclose($fh);
-$data[0]=md5($_GET['npass']);
-for($i=0;$i<sizeof($data);$i++){
-$fh=fopen($passfile,"a");
-$string=$data[$i]."|::|";
-fwrite($fh,$string,strlen($string));
-fclose($fh);
-}
 $error="You have changed password to \"".$_GET['npass']."\"";
-$_GET['pass']=md5($_GET['npass']);
-$cpok=true;
+$_SESSION['pass']=$_GET['npass'];
 }
+// EXIT
+if($do=="exit"){
+$_SESSION['pass']="";
+header("Location: ?");
+}
+// *
 // ~~~~~~~~~~END~~~~~~~~~~~~
 setcookie("epoll_admin_lastvisit",tdate("-"),time()+60*60*24*365);
 }
 ?>
 <html>
 <head>
-<title>EPOLL SYSTEM v3.1 | ADMIN PANEL</title>
+<title>EPOLL SYSTEM v3.2 | ADMIN PANEL</title>
 <style>
 <!--
 body{background:#FFFFFF;color:#000000;font-family:verdana;font-size:9pt;}
@@ -185,7 +190,7 @@ input {border:#000000 1px Solid; background-color:#E9E9E9;font-family:verdana;fo
 <table style="margin-top:0;margin-bottom:4;" width="600" bgcolor="#000066" cellpadding="0" cellspacing="0" border="0" align="center"><tr><td>
 <table align="center" width="600" cellspacing="1" cellpadding="1" border="0" class="main">
 <tr><td bgcolor="#cccccc" align="center" class="main">
-<h3 style="margin-top:1;margin-bottom:1;">EPOLL SYSTEM v3.1</h3>
+<h3 style="margin-top:1;margin-bottom:1;">EPOLL SYSTEM v3.2</h3>
 </td></tr>
 </table>
 </td></tr>
@@ -207,19 +212,19 @@ if(!$pc){
 <tr><td align="center" bgcolor="#d5d5d5">
 <form method="post" style="margin-top:5;margin-bottom:5;">
 <input type="password" name="pass" style="width:150;"><br>
-<input type="submit" value="Войти" class="button">
+<input type="submit" value="Login" class="button">
 </form>
 </td></tr>
 <?
 }else{
 ?>
 <tr><td align="center" bgcolor="#d5d5d5" class="sm">
-<a href="?pass=<?print$_GET['pass'];?>">Information</a><br>
-<a href="?do=stat&pass=<?print$_GET['pass'];?>">Polls statistic</a><br>
-<a href="?do=add&pass=<?print$_GET['pass'];?>">Create new poll</a><br>
-<a href="?do=del&pass=<?print$_GET['pass'];?>">Delete poll</a><br>
-<a href="?do=cp&pass=<?print$_GET['pass'];?>">Change password</a><br>
-<a href="?">Exit</a><br>
+<a href="?">Information</a><br>
+<a href="?do=stat">Polls statistic</a><br>
+<a href="?do=add">Create new poll</a><br>
+<a href="?do=del">Delete poll</a><br>
+<a href="?do=cp">Change password</a><br>
+<a href="?do=exit">Exit</a><br>
 </td></tr>
 <?
 if ($do!="add" && $do!="del" && $do!="stat" && $do!="cp"){
@@ -259,7 +264,7 @@ $dat=file($pollcfg);
 if(sizeof($dat)!=0){
 for($i=0;$i<sizeof($dat);$i++){
 $data=explode("|::|",$dat[$i]);
-print "<tr class=\"sm\"><td align=center width=\"20%\" bgcolor=#d5d5d5><a href=\"?do=stat&pass=".$_GET['pass']."&name=".$data[0]."\" title=\"Смотреть статистику\"><b>".$data[0]."</b></a></td><td align=left width=\"80%\" bgcolor=#d5d5d5>".$data[1]."</td></tr>";
+print "<tr class=\"sm\"><td align=center width=\"20%\" bgcolor=#d5d5d5><a href=\"?do=stat&name=".$data[0]."\" title=\"Смотреть статистику\"><b>".$data[0]."</b></a></td><td align=left width=\"80%\" bgcolor=#d5d5d5>".$data[1]."</td></tr>";
 }
 }else{
 print "<tr class=\"sm\"><td align=center width=\"100%\" bgcolor=#d5d5d5>You don't have polls created!</td></tr>";
@@ -316,7 +321,7 @@ print "<div align=left>Poll was created on: ".$last."</div><br>";
 }
 ?>
 <br>
-<div align="center"><b><a href="?do=stat&pass=<?print$_GET['pass'];?>"><<< To previuos page</a></b></div>
+<div align="center"><b><a href="?do=stat>"><<< To previuos page</a></b></div>
 </div><br>
 </td></tr>
 <?
@@ -336,7 +341,6 @@ Question for poll:<br>
 Number of answers:<br>
 (Not more then 99) (Recomended: less then 15)<br>
 <input type="text" name="num" size="5" maxlength="2"><br>
-<input type="hidden" name="pass" value="<?print$_GET['pass'];?>">
 <input type="hidden" name="do" value="add">
 <input type="submit" value="Next" class="button">
 </form>
@@ -362,7 +366,6 @@ $il=$i+1;
 print "<input type=\"text\" name=\"a".$il."\" size=\"45\"><br>";
 }
 ?>
-<input type="hidden" name="pass" value="<?print$_GET['pass'];?>">
 <input type="hidden" name="do" value="add">
 <input type="hidden" name="question" value="<?print$_GET['question'];?>">
 <input type="hidden" name="num" value="<?print$_GET['num'];?>">
@@ -370,14 +373,14 @@ print "<input type=\"text\" name=\"a".$il."\" size=\"45\"><br>";
 <input type="submit" value="Create poll" class="button">
 </form>
 <br>
-<div align="center"><b><a href="?do=add&pass=<?print$_GET['pass'];?>"><<< To previuos page</a></b></div>
+<div align="center"><b><a href="?do=add>"><<< To previuos page</a></b></div>
 </div><br>
 </td></tr>
 <?
 }elseif($addp==2){
 ?>
 <tr><td align="left" bgcolor="#d5d5d5" class="sm">
-<div align="center"><b><a href="?do=add&pass=<?print$_GET['pass'];?>"><<< To previuos page</a></b></div>
+<div align="center"><b><a href="?do=add>"><<< To previuos page</a></b></div>
 </td></tr>
 <?
 }}
@@ -395,7 +398,7 @@ $dat=file($pollcfg);
 if(sizeof($dat)!=0){
 for($i=0;$i<sizeof($dat);$i++){
 $data=explode("|::|",$dat[$i]);
-print "<tr class=\"sm\"><td align=center width=\"20%\" bgcolor=#d5d5d5><a href=\"?do=del&pass=".$_GET['pass']."&name=".$data[0]."\" title=\"Удалить этот опрос\"><b>".$data[0]."</b></a></td><td align=left width=\"80%\" bgcolor=#d5d5d5>".$data[1]."</td></tr>";
+print "<tr class=\"sm\"><td align=center width=\"20%\" bgcolor=#d5d5d5><a href=\"?do=del&name=".$data[0]."\" title=\"Удалить этот опрос\"><b>".$data[0]."</b></a></td><td align=left width=\"80%\" bgcolor=#d5d5d5>".$data[1]."</td></tr>";
 }
 }else{
 print "<tr class=\"sm\"><td align=center width=\"100%\" bgcolor=#d5d5d5>You don't have polls created!</td></tr>";
@@ -409,7 +412,7 @@ print "<tr class=\"sm\"><td align=center width=\"100%\" bgcolor=#d5d5d5>You don'
 }else{
 ?>
 <tr><td align="left" bgcolor="#d5d5d5" class="sm">
-<div align="center"><b><a href="?do=del&pass=<?print$_GET['pass'];?>"><<< To previuos page</a></b></div>
+<div align="center"><b><a href="?do=del>"><<< To previuos page</a></b></div>
 </td></tr>
 <?
 }}
@@ -421,9 +424,8 @@ if(is_writeable($passfile)){
 <div align="center"><b>Change password</b></div>
 <div align="left" style="margin-left:25;margin-top:4;margin-bottom:4;">
 <form method="get" style="margin-top:5;margin-bottom:5;">
-Новый пароль:<br>
+New password:<br>
 <input type="text" name="npass" size="20" value="<?print$ed_name;?>"><br>
-<input type="hidden" name="pass" value="<?print$_GET['pass'];?>">
 <input type="hidden" name="do" value="cp">
 <input type="submit" value="Change">
 </form>
@@ -440,7 +442,7 @@ if(is_writeable($passfile)){
 }else{
 ?>
 <tr><td align="left" bgcolor="#d5d5d5" class="sm">
-<div align="center"><b><a href="?do=cp&pass=<?print$_GET['pass'];?>"><<< To previuos page</a></b></div>
+<div align="center"><b><a href="?do=cp>"><<< To previuos page</a></b></div>
 </td></tr>
 <?
 }}
@@ -452,7 +454,7 @@ if(is_writeable($passfile)){
 </table>
 <table style="margin-top:4;margin-bottom:0;" width="600" bgcolor="#000066" cellpadding="0" cellspacing="0" border="0" align="center"><tr><td>
 <table align="center" width="600" cellspacing="1" cellpadding="1" border="0" class="main">
-<tr><td align="center" bgcolor="#cccccc" class="sm"><a href="http://egorix.net.ru" target="_blank">Powered by Egorix</a></td></tr>
+<tr><td align="center" bgcolor="#cccccc" class="sm"><a href="http://duet.kiev.ua" target="_blank">Powered by Egorix</a></td></tr>
 </table>
 </td></tr>
 </table>
