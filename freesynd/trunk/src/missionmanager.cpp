@@ -349,18 +349,21 @@ Mission * MissionManager::create_mission(LevelData::LevelDataAll &level_data) {
                     *((ModOwner *)p) = mods_enemy;
                     p->setTimeBeforeCheck(400);
                     p->setBaseModAcc(0.5);
+                    p->setPersuasionPoints(32);
                 } else if (mt == PedInstance::og_dmGuard) {
                     p->setObjGroupID(3);
                     p->addEnemyGroupDef(1);
                     p->setBaseSpeed(192);
                     p->setTimeBeforeCheck(300);
                     p->setBaseModAcc(0.45);
+                    p->setPersuasionPoints(4);
                 } else if (mt == PedInstance::og_dmPolice) {
                     p->setObjGroupID(4);
                     p->setHostileDesc(PedInstance::pd_smArmed);
                     p->setBaseSpeed(160);
                     p->setTimeBeforeCheck(400);
                     p->setBaseModAcc(0.4);
+                    p->setPersuasionPoints(8);
                 } else if (mt == PedInstance::og_dmCivilian) {
                     p->setObjGroupID(5);
                     p->addEnemyGroupDef(6);
@@ -368,11 +371,13 @@ Mission * MissionManager::create_mission(LevelData::LevelDataAll &level_data) {
                     p->setBaseSpeed(128);
                     p->setTimeBeforeCheck(600);
                     p->setBaseModAcc(0.2);
+                    p->setPersuasionPoints(1);
                 } else if (mt == PedInstance::og_dmCriminal) {
                     p->setObjGroupID(6);
                     p->setBaseSpeed(128);
                     p->setTimeBeforeCheck(500);
                     p->setBaseModAcc(0.2);
+                    p->setPersuasionPoints(1);
                 }
                 p->setSightRange(7 * 256);
                 // TODO: set scenarios

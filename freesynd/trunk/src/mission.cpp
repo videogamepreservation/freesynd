@@ -510,6 +510,9 @@ void Mission::end()
     LOG(Log::k_FLG_GAME, "Mission", "end()", ("End mission"));
     for (unsigned int i = p_squad_->size(); i < peds_.size(); i++) {
         PedInstance *p = peds_[i];
+        // TODO: influence country happiness with number of killed overall
+        // civilians+police, more killed less happy
+        // TODO: add money per every persuaded non-agent ped
         if (p->isDead()) {
             switch (p->getMainType()) {
                 case PedInstance::m_tpAgent:

@@ -796,7 +796,7 @@ uint16 WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
                 gen_shots.push_back(base_shot);
             }
             if (range_damage) {
-                for (unsigned int i = 0; i < gen_shots.size(); i++) {
+                for (unsigned int i = 0; i < gen_shots.size(); ++i) {
                     std::vector<ShootableMapObject *> all_targets;
 
                     Weapon::ShotDesc &sdc = gen_shots[i];
@@ -805,7 +805,7 @@ uint16 WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
                     getInRangeAll(sdc.tp, all_targets, mask,
                         true, pWeaponClass_->rangeDmg());
                     for (unsigned int indx = 0; indx < all_targets.size();
-                        indx++)
+                        ++indx)
                     {
                         ShootableMapObject * smo = all_targets[indx];
                         Weapon::ShotDesc sd;
@@ -830,7 +830,7 @@ uint16 WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
             std::vector <Weapon::ShotDesc> gen_shots;
             if (shot_prop & Weapon::spe_PointToManyPoints)
                 ammoused *= getWeaponClass()->shotsPerAmmo();
-            for (int i = 0; i < ammoused; i++) {
+            for (int i = 0; i < ammoused; ++i) {
                 gen_shots.push_back(base_shot);
                 Weapon::ShotDesc &last_one = gen_shots.back();
                 shotTargetRandomizer(&cp, &(last_one.tp), angle);
@@ -840,7 +840,7 @@ uint16 WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
                     last_one.tp.y % 256, last_one.tp.z % 128);
             }
             if (range_damage) {
-                for (unsigned int i = 0; i < gen_shots.size(); i++) {
+                for (unsigned int i = 0; i < gen_shots.size(); ++i) {
                     std::vector<ShootableMapObject *> all_targets;
 
                     Weapon::ShotDesc &sdc = gen_shots[i];
@@ -849,7 +849,7 @@ uint16 WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
                     getInRangeAll(sdc.tp, all_targets, mask,
                         true, pWeaponClass_->rangeDmg());
                     for (unsigned int indx = 0; indx < all_targets.size();
-                        indx++)
+                        ++indx)
                     {
                         ShootableMapObject * smo = all_targets[indx];
                         Weapon::ShotDesc sd;

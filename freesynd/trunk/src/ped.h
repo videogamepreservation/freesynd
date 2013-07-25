@@ -232,8 +232,13 @@ public:
     void setFrame(int f) { frame_ = f; }
 
     void setSightRange(int new_sight_range) { sight_range_ = new_sight_range; }
-
     int sightRange() { return sight_range_; }
+
+    void setPersuasionPoints(int points) { persuasion_points_ = points; }
+    int persuasionPoints() {return persuasion_points_; }
+    bool canPersuade(int points);
+    void addPersuaded(PedInstance *p);
+    void rmvPersuaded(PedInstance *p);
 
     void showPath(int scrollX, int scrollY);
 
@@ -867,6 +872,9 @@ protected:
     //! controller of ped - for persuaded
     ShootableMapObject *owner_;
     targetDescType last_firing_target_;
+    //! points needed to persuade ped
+    int persuasion_points_;
+    std::set <PedInstance *> persuaded_group_;
 
     bool walkable(int x, int y, int z) { return true; }
 

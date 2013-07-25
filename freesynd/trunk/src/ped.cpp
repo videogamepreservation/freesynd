@@ -1417,6 +1417,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                             findQueueInActQueue(it->group_id + 2);
 
                         if (owner_->isDead()) {
+                            ((PedInstance *)owner_)->rmvPersuaded(this);
                             // agent is dead choose another agent from alive
                             owner_ = NULL;
                             Squad *sq = mission->getSquad();
@@ -1433,6 +1434,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                                             aqt_follow.target.t_smo = owner_;
                                         }
                                     }
+                                    p->addPersuaded(this);
                                     break;
                                 }
                             }
@@ -1830,7 +1832,7 @@ PedInstance::PedInstance(Ped *ped, int m) : ShootableMovableMapObject(m),
     obj_group_id_(0), old_obj_group_id_(0),
     drawn_anim_(PedInstance::ad_StandAnim),
     sight_range_(0), selected_weapon_(-1), in_vehicle_(NULL),
-    owner_(NULL)
+    owner_(NULL), persuasion_points_(0)
 {
     hold_on_.wayFree = 0;
     rcv_damage_def_ = MapObject::ddmg_Ped;
@@ -2515,8 +2517,10 @@ bool PedInstance::handleDamage(ShootableMapObject::DamageInflictType *d) {
     if ((d->dtype & MapObject::dmg_Physical) != 0)
         health_ -= d->dvalue;
     else if (d->dtype == MapObject::dmg_Persuasion) {
-        // TODO: check for required number of persuade points before applying
-        // they should be influenced by mod brain
+        if (!(d->d_owner && ((PedInstance *)d->d_owner)->canPersuade(persuasion_points_)))
+            return false;
+
+        ((PedInstance *)d->d_owner)->addPersuaded(this);
         setObjGroupID(((PedInstance *)d->d_owner)->objGroupID());
         ((PedInstance *)d->d_owner)->cpyEnemyDefs(enemy_group_defs_);
         dropActQ();
@@ -2553,6 +2557,8 @@ bool PedInstance::handleDamage(ShootableMapObject::DamageInflictType *d) {
         health_ = 0;
         actions_property_ = 1;
         switchActionStateTo(PedInstance::pa_smDead);
+        if ((desc_state_ & pd_smControlled) != 0 && owner_)
+            ((PedInstance *)owner_)->rmvPersuaded(this);
 
         switch ((unsigned int)d->dtype) {
             case MapObject::dmg_Bullet:
@@ -2810,7 +2816,7 @@ void PedInstance::getAccuracy(double &base_acc)
         }
         // 0.59 max from here
 
-        base_mod -= 0.4;
+        base_mod -= 0.4 * (2.0 - perception_->getMultiplier());
         base_mod += 0.4 * (2.0 - adrenaline_->getMultiplier());
         // 0.99 max after adrenaline
     }
@@ -2846,5 +2852,48 @@ void PedInstance::updtPreferedWeapon() {
         prefered_weapon_.desc = 5;
         prefered_weapon_.wpn.dmg_type = MapObject::dmg_Physical;
     }
+}
+
+bool PedInstance::canPersuade(int points) {
+    Mod *pMod = slots_[Mod::MOD_BRAIN];
+    if (pMod) {
+        switch (pMod->getVersion()) {
+            case Mod::MOD_V1:
+                // /=2
+                points >>= 1;
+                break;
+            case Mod::MOD_V2:
+                // *=4
+                points <<= 2;
+                points /= 3;
+                break;
+            case Mod::MOD_V3:
+                // /=4
+                points >>= 2;
+                break;
+        }
+        if (points == 0)
+            ++points;
+    }
+    // always 1
+    int points_avail = 1;
+    for (std::set <PedInstance *>::iterator it = persuaded_group_.begin();
+         it != persuaded_group_.end(); ++it)
+    {
+        // NOTE: mods influence "to persuade" points, but not
+        // of already persuaded
+        points_avail += (*it)->persuasionPoints();
+    }
+    return points <= points_avail;
+}
+
+void PedInstance::addPersuaded(PedInstance *p) {
+    persuaded_group_.insert(p);
+}
+
+void PedInstance::rmvPersuaded(PedInstance *p) {
+    std::set <PedInstance *>::iterator it =  persuaded_group_.find(p);
+    if (it != persuaded_group_.end())
+        persuaded_group_.erase(it);
 }
 
