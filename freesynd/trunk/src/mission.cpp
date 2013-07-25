@@ -394,12 +394,6 @@ void Mission::start()
  * mission status.
  */
 void Mission::checkObjectives() {
-    // checking agents, if all are dead -> mission failed
-    if (p_squad_->isAllDead()) {
-        endWithStatus(FAILED);
-        return;
-    }
-
     // We only check the current objective
     if (cur_objective_ < objectives_.size()) {
         ObjectiveDesc * pObj = objectives_[cur_objective_];
@@ -2998,6 +2992,19 @@ uint8 Mission::inRangeCPos(toDefineXYZ * cp, ShootableMapObject ** t,
     return block_mask;
 }
 
+/*!
+ * Returns all objects of given type that are in the range of the given point.
+ * Methods searches through those objects:
+ * - Ped : must be not ignored and alive
+ * - Static : must be not ignored
+ * - Vehicle : must be not ignored
+ * - Weapon : must be not ignored
+ * \param cp The central point
+ * \param targets The list of found objects
+ * \param mask A mask to select the type of objects
+ * \param checkTileOnly
+ * \param maxr The range
+ */
 void Mission::getInRangeAll(toDefineXYZ * cp,
    std::vector<ShootableMapObject *> & targets, uint8 mask,
    bool checkTileOnly, double maxr)
@@ -3005,7 +3012,7 @@ void Mission::getInRangeAll(toDefineXYZ * cp,
     if (mask & MapObject::mjt_Ped) {
         for (int i = 0; i < numPeds(); ++i) {
             ShootableMapObject *p = ped(i);
-            if (!p->isIgnored())
+            if (!p->isIgnored() && p->isAlive())
                 if (inRangeCPos(cp, &p, NULL, false, checkTileOnly,
                     maxr) == 1)
                 {

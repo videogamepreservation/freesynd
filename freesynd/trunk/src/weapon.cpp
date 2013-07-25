@@ -1402,3 +1402,18 @@ void ShotClass::createExplosion(ShootableMapObject* tobj, double dmg_rng,
     }
     rangeDamageAnim(xyz, dmg_rng, SFXObject::sfxt_ExplosionFire);
 }
+
+/*!
+ * This method creates a damage of type Bullet but with enough damage value
+ * to kill the agent and inflicts it to the agent. Used when agent commit suicide.
+ * \param p_ped The agent that will suicide.
+ */
+void ShotClass::make_self_shot(PedInstance *p_ped) {
+    ShootableMapObject::DamageInflictType dit;
+    dit.dtype = MapObject::dmg_Bullet;
+    dit.d_owner = p_ped;
+    dit.dvalue = PedInstance::kAgentMaxHealth;
+    dit.ddir = -1;
+
+    p_ped->handleDamage(&dit);
+}

@@ -253,7 +253,16 @@ protected:
     int weight_;
 };
 
+class PedInstance;
+
 class ShotClass {
+public:
+    static void rangeDamageAnim(toDefineXYZ &cp, double dmg_rng,
+        int rngdamg_anim);
+    static void createExplosion(ShootableMapObject *tobj, double dmg_rng, int dmg_value = 16);
+    //! This method is used for an agent to shoot himself
+    static void make_self_shot(PedInstance *p_ped);
+
 public:
     ShotClass(ShootableMapObject *tobj = NULL) : owner_(NULL),
         target_object_(tobj){}
@@ -266,14 +275,12 @@ public:
 
     void shotTargetRandomizer(toDefineXYZ * cp, toDefineXYZ * tp, double angle,
         double dist_new = -1, bool exclude_z = false);
-    void rangeDamageAnim(toDefineXYZ &cp, double dmg_rng,
-        int rngdamg_anim);
-    void createExplosion(ShootableMapObject *tobj, double dmg_rng, int dmg_value = 16);
 
 protected:
     void makeShot(bool rangeChecked, toDefineXYZ &cp, int anim_hit,
         std::vector <Weapon::ShotDesc> &all_shots, int anim_obj_hit,
         WeaponInstance *w = NULL);
+
 protected:
     ShootableMapObject *owner_;
     ShootableMapObject *target_object_;

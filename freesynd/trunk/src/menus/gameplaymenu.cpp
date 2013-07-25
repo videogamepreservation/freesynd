@@ -758,7 +758,7 @@ void GameplayMenu::handleClickOnWeaponSelector(int x, int y, int button,
     int w_num = ((y - (2 + 46 + 44 + 10 + 46 + 44 + 15)) / 32) * 4
             + x / 32;
     bool weapon_is_selected = false;
-    PedInstance *pLeader = mission_->ped(selection_.getLeaderSlot());
+    PedInstance *pLeader = selection_.leader();
     if (pLeader->isAlive()) {
         if (w_num < pLeader->numWeapons()) {
             if (button == 1) {
@@ -1155,19 +1155,16 @@ bool GameplayMenu::handleUnknownKey(Key key, const int modKeys) {
         g_App.music().toggleMusic();
     } else if (key.keyFunc == KFC_F2) { // Sound Control
         g_App.gameSounds().toggleSound();
-    } else if (isLetterD(key.unicode)) { // selected agents are killed with 'd'
-        if (ctrl) {
-            // excluding all selected agents from recieve damage from agent
-            // near, to make simultanious explosion
-            for (SquadSelection::Iterator it = selection_.begin();
-                            it != selection_.end(); ++it) {
-                    (*it)->setIsIgnored(true);
-            }
+    } else if (isLetterD(key.unicode) && ctrl) { // selected agents are killed with 'd'
+        // save current selection as it will be modified when agents die
+        std::vector<PedInstance *> agents_suicide;
+        for (SquadSelection::Iterator it = selection_.begin();
+                        it != selection_.end(); ++it) {
+                agents_suicide.push_back(*it);
+        }
 
-            for (SquadSelection::Iterator it = selection_.begin();
-                            it != selection_.end(); ++it) {
-                    (*it)->commit_suicide();
-            }
+        for (size_t i=0; i < agents_suicide.size(); i++) {
+            agents_suicide[i]->commit_suicide();
         }
     } else {
         consumed = false;
@@ -1588,6 +1585,12 @@ void GameplayMenu::updateSelectAll() {
  */
 void GameplayMenu::handleGameEvent(GameEvent evt) {
     if (evt.type == GameEvent::kAgentDied) {
+        // checking agents, if all are dead -> mission failed
+        if (mission_->getSquad()->isAllDead()) {
+            mission_->endWithStatus(Mission::FAILED);
+        }
+
+        // Anyway update selection
         PedInstance *p_ped = static_cast<PedInstance *> (evt.pCtxt);
         updateSelectionForDeadAgent(p_ped);
     }

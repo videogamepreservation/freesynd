@@ -332,6 +332,21 @@ protected:
  */
 class ShootableMapObject : public MapObject {
 public:
+    /*!
+     * This structure holds informations on the damage inflicted to a ShootableMapObject.
+     */
+    struct DamageInflictType {
+        //! The type of damage
+        DamageType dtype;
+        //! The value of the damage
+        int dvalue;
+        //! direction damage comes from, should be angle 256 degree based
+        int ddir;
+        //! The object that inflicted the damage
+        ShootableMapObject * d_owner;
+    };
+
+public:
     ShootableMapObject(int m);
     virtual ~ShootableMapObject() {}
 
@@ -360,13 +375,6 @@ public:
 
         start_health_ = n;
     }
-    typedef struct {
-        DamageType dtype;
-        int dvalue;
-        //! direction damage comes from, should be angle 256 degree based
-        int ddir;
-        ShootableMapObject * d_owner;
-    } DamageInflictType;
 
     virtual bool handleDamage(ShootableMapObject::DamageInflictType * d) {
         if (health_ <= 0 || rcv_damage_def_ == MapObject::ddmg_Invulnerable

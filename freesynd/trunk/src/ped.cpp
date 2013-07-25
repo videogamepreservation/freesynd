@@ -30,6 +30,8 @@
 #include "mission.h"
 #include "core/squad.h"
 
+const int PedInstance::kAgentMaxHealth = 16;
+
 Ped::Ped() {
     memset(stand_anims_, 0, sizeof(stand_anims_));
     memset(walk_anims_, 0, sizeof(walk_anims_));
@@ -313,9 +315,9 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
     // to disarm
 
     bool updated = false;
-    if (actions_property_ == 1) {
+    if (drop_actions_) {
         dropActQ();
-        actions_property_ = 0;
+        drop_actions_ = false;
     }
 
     if (!actions_queue_.empty()) {
@@ -356,7 +358,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
         uint32 groups_processed = 0;
         for (std::vector <actionQueueGroupType>::iterator it =
             actions_queue_.begin(); it != actions_queue_.end()
-            && actions_property_ == 0; ++it)
+            && !drop_actions_; ++it)
         {
             if ((it->state & 128) == 0 && (it->state & 76) != 0)
                 continue;
@@ -1627,7 +1629,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                     if ((aqt->state & 12) != 0)
                         aqt->state &= ((65535 ^ 14));
                 }
-                if (actions_property_ != 0)
+                if (drop_actions_)
                     break;
 
                 if ((aqt->state & 256) != 0) {
@@ -1742,22 +1744,12 @@ PedInstance *Ped::createInstance(int map) {
  * Else he dies alone leaving his wepons on the ground.
  */
 void PedInstance::commit_suicide() {
-    if (health_ > 0) {
-        health_ = -1;
-        actions_property_ = 1;
-        switchActionStateTo(PedInstance::pa_smDead);
-        is_ignored_ = true;
-        setDrawnAnim(PedInstance::ad_DieAnim);
-        if (hasMinimumVersionOfMod(Mod::MOD_CHEST, Mod::MOD_V2)) {
-            destroyAllWeapons();
-            ShotClass explosion;
-            explosion.createExplosion(this, 512.0);
-            setDrawnAnim(PedInstance::ad_StandBurnAnim);
-            setTimeShowAnim(4000);
-        } else {
-            if (!weapons_.empty())
-                dropAllWeapons();
-        }
+    if (hasMinimumVersionOfMod(Mod::MOD_CHEST, Mod::MOD_V2)) {
+        // Having a chest v2 makes agent explodes
+        ShotClass::createExplosion(this, 512.0);
+    } else {
+        // else he just shoot himself
+        ShotClass::make_self_shot(this);
     }
 }
 
@@ -1838,7 +1830,7 @@ PedInstance::PedInstance(Ped *ped, int m) : ShootableMovableMapObject(m),
     rcv_damage_def_ = MapObject::ddmg_Ped;
     major_type_ = MapObject::mjt_Ped;
     state_ = PedInstance::pa_smNone;
-    actions_property_ = 0;
+    drop_actions_ = false;
     is_our_ = false;
     
     adrenaline_  = new IPAStim(IPAStim::Adrenaline);
@@ -1870,8 +1862,8 @@ PedInstance::~PedInstance()
  */
 void PedInstance::initAsAgent(Agent *p_agent, unsigned int obj_group_id) {
     // not in all missions our agents health is 16, this fixes it
-    setHealth(16);
-    setStartHealth(16);
+    setHealth(kAgentMaxHealth);
+    setStartHealth(kAgentMaxHealth);
     while (p_agent->numWeapons()) {
         WeaponInstance *wi = p_agent->removeWeapon(0);
         addWeapon(wi);
@@ -2555,12 +2547,12 @@ bool PedInstance::handleDamage(ShootableMapObject::DamageInflictType *d) {
 
     if (health_ <= 0) {
         health_ = 0;
-        actions_property_ = 1;
+        drop_actions_ = true;
         switchActionStateTo(PedInstance::pa_smDead);
         if ((desc_state_ & pd_smControlled) != 0 && owner_)
             ((PedInstance *)owner_)->rmvPersuaded(this);
 
-        switch ((unsigned int)d->dtype) {
+        switch (d->dtype) {
             case MapObject::dmg_Bullet:
                 setDrawnAnim(PedInstance::ad_DieAnim);
                 dropAllWeapons();
@@ -2586,7 +2578,7 @@ bool PedInstance::handleDamage(ShootableMapObject::DamageInflictType *d) {
                 dropAllWeapons();
                 break;
         }
-        is_ignored_ = true;
+
         // send an event to alert agent died
         if (isOurAgent()) {
             GameEvent evt;
