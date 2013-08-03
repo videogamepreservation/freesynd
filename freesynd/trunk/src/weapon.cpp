@@ -1371,14 +1371,14 @@ void ShotClass::rangeDamageAnim(toDefineXYZ &cp, double dmg_rng,
 }
 
 void ShotClass::createExplosion(ShootableMapObject* tobj, double dmg_rng,
-    int dmg_value)
+    int dmg_value, bool is_suicide)
 {
     Mission *m = g_Session.getMission();
     std::vector<ShootableMapObject *> all_targets;
     ShootableMapObject::DamageInflictType dit;
     dit.d_owner = tobj;
     dit.dvalue = dmg_value;
-    dit.dtype = MapObject::dmg_Explosion;
+    dit.dtype = is_suicide ? MapObject::dmg_Explosion_Suicide : MapObject::dmg_Explosion;
     dit.ddir = -1;
     toDefineXYZ xyz;
     tobj->convertPosToXYZ(&xyz);

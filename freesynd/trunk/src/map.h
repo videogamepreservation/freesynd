@@ -155,14 +155,8 @@ public:
     void setTarget(MapObject *pTarget);
     //! Return the curent target. May be null
     MapObject * target() { return p_target_; }
-    //! Return the target position
-    MapTilePoint targetPosition();
     //! Clear the target source
     void clearTarget();
-    //! Defines the evacuation point on the minimap
-    void setEvacuationPoint(const toDefineXYZ &evacPt);
-    //! Return the evacuation position
-    void evacuationPoint(toDefineXYZ &evacPt);
 
 private:
     /* An array with the same size of the real map but containing
@@ -174,8 +168,6 @@ private:
     int mmax_y_;
     /*! Current target emitting a signal.*/
     MapObject *p_target_;
-    /*! Coords on the world map of the signal source.*/
-    toDefineXYZ evacPt_;
 };
 
 #endif

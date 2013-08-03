@@ -277,8 +277,8 @@ class GamePlayMinimapRenderer : public MinimapRenderer, GameEventListener {
 
     //! Clear all signals on map
     void handleClearSignal();
-    void handleTargetSet();
-    void handleEvacuationSet();
+    void handleTargetSet(GameEvent &evt);
+    void handleEvacuationSet(GameEvent &evt);
  private:
      /*! Radius of the red evacuation circle.*/
     static const int kEvacuationRadius;

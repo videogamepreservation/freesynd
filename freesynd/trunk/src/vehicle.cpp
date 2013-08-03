@@ -58,7 +58,7 @@ void VehicleAnimation::set_base_anims(int anims) {
 }
 
 VehicleInstance::VehicleInstance(VehicleAnimation * vehicle,
-int m):ShootableMovableMapObject(m), vehicle_(vehicle), vehicle_driver_(NULL)
+int m):Vehicle(m), vehicle_(vehicle), vehicle_driver_(NULL)
 {
     hold_on_.wayFree = 0;
     rcv_damage_def_ = MapObject::ddmg_Vehicle;

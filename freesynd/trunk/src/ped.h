@@ -334,6 +334,10 @@ public:
 
     //! Forces agent to kill himself
     void commit_suicide();
+    //! Indicates the agent is commiting suicide
+    bool is_suiciding() { return is_suiciding_; }
+    void set_is_suiciding(bool flag) { is_suiciding_ = flag; }
+
     bool handleDamage(ShootableMapObject::DamageInflictType *d);
 
     void setDescStateMasks(unsigned int desc_state) {
@@ -876,6 +880,8 @@ protected:
     //! points needed to persuade ped
     int persuasion_points_;
     std::set <PedInstance *> persuaded_group_;
+    //! Flag to mark suiciding agent
+    bool is_suiciding_;
 
     bool walkable(int x, int y, int z) { return true; }
 

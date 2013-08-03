@@ -43,20 +43,21 @@ public:
     virtual ~MapObject() {}
 
     virtual void draw(int x, int y) = 0;
-    typedef enum {
+    enum DamageType {
         dmg_None = 0x0000,
         dmg_Bullet = 0x0001,
         dmg_Laser = 0x0002,
         dmg_Burn = 0x0004,
         dmg_Explosion = 0x0008,
+        dmg_Explosion_Suicide = 0x0100, // Explosion of suiciding agent
         dmg_Hit = 0x0010,
-        dmg_Physical = (dmg_Bullet | dmg_Laser | dmg_Burn | dmg_Explosion | dmg_Hit),
+        dmg_Physical = (dmg_Bullet | dmg_Laser | dmg_Burn | dmg_Explosion | dmg_Hit | dmg_Explosion_Suicide),
         dmg_Persuasion = 0x0020,
         dmg_Heal = 0x0040,
         dmg_Panic = 0x0080,
         dmg_Mental = (dmg_Persuasion | dmg_Panic),
         dmg_All = 0xFFFF
-    } DamageType;
+    };
 
     typedef enum {
         ddmg_Invulnerable = dmg_None,

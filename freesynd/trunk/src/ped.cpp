@@ -1746,7 +1746,7 @@ PedInstance *Ped::createInstance(int map) {
 void PedInstance::commit_suicide() {
     if (hasMinimumVersionOfMod(Mod::MOD_CHEST, Mod::MOD_V2)) {
         // Having a chest v2 makes agent explodes
-        ShotClass::createExplosion(this, 512.0);
+        ShotClass::createExplosion(this, 512.0, 16, true);
     } else {
         // else he just shoot himself
         ShotClass::make_self_shot(this);
@@ -1840,6 +1840,7 @@ PedInstance::PedInstance(Ped *ped, int m) : ShootableMovableMapObject(m),
     tm_before_check_ = 1000;
     base_mod_acc_ = 0.1;
     last_firing_target_.desc = 0;
+    is_suiciding_ = false;
 }
 
 PedInstance::~PedInstance()
@@ -2573,6 +2574,16 @@ bool PedInstance::handleDamage(ShootableMapObject::DamageInflictType *d) {
                 destroyAllWeapons();
                 setTimeShowAnim(4000);
                 break;
+            case MapObject::dmg_Explosion_Suicide:
+                if (is_suiciding()) {
+                    set_is_suiciding(false);
+                    setDrawnAnim(PedInstance::ad_StandBurnAnim);
+                    destroyAllWeapons();
+                    setTimeShowAnim(4000);
+                    break;
+                }
+                // If the agent was not suiciding himself
+                // he is not burnt but dies as a normal hit
             case MapObject::dmg_Hit:
                 setDrawnAnim(PedInstance::ad_HitAnim);
                 dropAllWeapons();

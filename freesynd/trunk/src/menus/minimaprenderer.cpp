@@ -305,12 +305,14 @@ void GamePlayMinimapRenderer::centerOn(uint16 tileX, uint16 tileY, int offX, int
 void GamePlayMinimapRenderer::handleGameEvent(GameEvent evt) {
     switch (evt.type) {
     case GameEvent::kObjEvacuate:
-        handleEvacuationSet();
+        handleEvacuationSet(evt);
         break;
     case GameEvent::kObjTargetSet:
-        handleTargetSet();
+        handleTargetSet(evt);
         break;
-    case GameEvent::kObjTargetCleared:
+    case GameEvent::kObjCompleted:
+    case GameEvent::kObjFailed:
+        p_minimap_->clearTarget();
         handleClearSignal();
         break;
     default:
@@ -319,9 +321,12 @@ void GamePlayMinimapRenderer::handleGameEvent(GameEvent evt) {
     }
 }
 
-void GamePlayMinimapRenderer::handleEvacuationSet() {
+void GamePlayMinimapRenderer::handleEvacuationSet(GameEvent &evt) {
     handleClearSignal();
-    p_minimap_->evacuationPoint(signalSourceXYZ_);
+    toDefineXYZ * p_point = static_cast<toDefineXYZ *>(evt.pCtxt);
+    signalSourceXYZ_.x = p_point->x;
+    signalSourceXYZ_.y = p_point->y;
+    signalSourceXYZ_.z = p_point->z;
    
     signalType_ = kEvacuation;
 
@@ -347,10 +352,12 @@ void GamePlayMinimapRenderer::handleClearSignal() {
 /*!
  * Defines a signal position on the map.
  */
-void GamePlayMinimapRenderer::handleTargetSet() {
+void GamePlayMinimapRenderer::handleTargetSet(GameEvent &evt) {
     handleClearSignal();
     // get the target current position
-    p_minimap_->target()->convertPosToXYZ(&signalSourceXYZ_);
+    MapObject *p_target = static_cast<MapObject *>(evt.pCtxt);
+    p_minimap_->setTarget(p_target);
+    p_target->convertPosToXYZ(&signalSourceXYZ_);
     signalType_ = kTarget;
 }
 

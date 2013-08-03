@@ -51,10 +51,10 @@ public:
         kObjEvacuate,
         /*! Sent when an objective with a MapObject target arrives.*/
         kObjTargetSet,
-        /*! Sent when an objective with a MapObject target is finished.*/
-        kObjTargetCleared,
-        /*! Send when all the objectives of a mission are completed.*/
-        kObjSucceed
+        /*! Sent when an objective has failed.*/
+        kObjFailed,
+        /*! Send when an objective has been completed succesfuly.*/
+        kObjCompleted
     };
     //! The stream on which the event is posted
     EEventStream stream;

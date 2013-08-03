@@ -388,30 +388,3 @@ void MiniMap::setTarget(MapObject *pTarget) {
 void MiniMap::clearTarget() {
     p_target_ = NULL;
 }
-//! Defines the evacuation point on the minimap
-void MiniMap::setEvacuationPoint(const toDefineXYZ &evacPt) {
-    evacPt_.x = evacPt.x;
-    evacPt_.y = evacPt.y;
-    evacPt_.z = evacPt.z;
-}
-
-//! Return the evacuation position
-void MiniMap::evacuationPoint(toDefineXYZ &evacPt) {
-    evacPt.x = evacPt_.x;
-    evacPt.y = evacPt_.y;
-    evacPt.z = evacPt_.z;
-}
-
-//! Return the target position
-MapTilePoint MiniMap::targetPosition() {
-    MapTilePoint mtp;
-    if (p_target_) {
-        // TODO MapObject should already have a MapTilePoint
-        mtp.tx = p_target_->tileX();
-        mtp.ty = p_target_->tileY();
-        mtp.tz = p_target_->tileZ();
-        mtp.ox = p_target_->offX();
-        mtp.oy = p_target_->offY();
-    }
-    return mtp; 
-}

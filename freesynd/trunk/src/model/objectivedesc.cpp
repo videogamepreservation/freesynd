@@ -1,9 +1,57 @@
+/************************************************************************
+ *                                                                      *
+ *  FreeSynd - a remake of the classic Bullfrog game "Syndicate".       *
+ *                                                                      *
+ *   Copyright (C) 2010  Bohdan Stelmakh <chamel@users.sourceforge.net> *
+ *   Copyright (C) 2013  Benoit Blancard <benblan@users.sourceforge.net>*
+ *                                                                      *
+ *    This program is free software;  you can redistribute it and / or  *
+ *  modify it  under the  terms of the  GNU General  Public License as  *
+ *  published by the Free Software Foundation; either version 2 of the  *
+ *  License, or (at your option) any later version.                     *
+ *                                                                      *
+ *    This program is  distributed in the hope that it will be useful,  *
+ *  but WITHOUT  ANY WARRANTY;  without even  the implied  warranty of  *
+ *  MERCHANTABILITY  or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU  *
+ *  General Public License for more details.                            *
+ *                                                                      *
+ *    You can view the GNU  General Public License, online, at the GNU  *
+ *  project's  web  site;  see <http://www.gnu.org/licenses/gpl.html>.  *
+ *  The full text of the license is also included in the file COPYING.  *
+ *                                                                      *
+ ************************************************************************/
+
 #include "model/objectivedesc.h"
 #include "ped.h"
 #include "app.h"
 #include "vehicle.h"
 #include "mission.h"
 #include "core/squad.h"
+
+/*!
+ * A common method to end targeted objective.
+ * \param succeeded True means objective is completed with success.
+ */
+void ObjectiveDesc::endObjective(bool succeeded) {
+    status = succeeded ? kCompleted : kFailed;
+
+    GameEvent evt;
+    evt.stream = GameEvent::kMission;
+    evt.type = succeeded ? GameEvent::kObjCompleted : GameEvent::kObjFailed;
+    evt.pCtxt = NULL;
+    g_gameCtrl.fireGameEvent(evt);
+}
+
+/*!
+ * All targeted objectives sets the current target to the objective target.
+ */
+void TargetObjective::handleStart(Mission *p_mission) {
+    GameEvent evt;
+    evt.stream = GameEvent::kMission;
+    evt.type = GameEvent::kObjTargetSet;
+    evt.pCtxt = p_target_;
+    g_gameCtrl.fireGameEvent(evt);
+}
 
 ObjPersuade::ObjPersuade(MapObject * pMapObject) : TargetObjective(pMapObject) {
     msg = g_App.menus().getMessage("GOAL_PERSUADE");
@@ -14,15 +62,15 @@ ObjPersuade::ObjPersuade(MapObject * pMapObject) : TargetObjective(pMapObject) {
  * \param evt
  * \param pMission
  */
-void ObjPersuade::selfEvaluate(GameEvent &evt, Mission *pMission) {
+void ObjPersuade::evaluate(Mission *pMission) {
     PedInstance *p = static_cast<PedInstance *>(p_target_);
     if (p->isDead())
     {
         // Target is dead -> mission is failed
-        endObjective(evt, false);
+        endObjective(false);
     } else if (p->isPersuaded())
     {
-        endObjective(evt, true);
+        endObjective(true);
     }
 }
 
@@ -35,12 +83,12 @@ ObjAssassinate::ObjAssassinate(MapObject * pMapObject) : TargetObjective(pMapObj
  * \param evt
  * \param pMission
  */
-void ObjAssassinate::selfEvaluate(GameEvent &evt, Mission *pMission) {
+void ObjAssassinate::evaluate(Mission *pMission) {
     PedInstance *p = static_cast<PedInstance *>(p_target_);
     if (p->isDead())
     {
         // Target is dead -> objective is completed
-        endObjective(evt, true);
+        endObjective(true);
     } else {
         int x = p->tileX();
         int y = p->tileY();
@@ -50,7 +98,7 @@ void ObjAssassinate::selfEvaluate(GameEvent &evt, Mission *pMission) {
             || y < (pMission->minY() >> 1)
             || y > pMission->maxY() + ((pMission->mmax_y_ - pMission->maxY()) >> 1)))
         {
-            endObjective(evt, false);
+            endObjective(false);
         }
     }
 }
@@ -64,14 +112,14 @@ ObjProtect::ObjProtect(MapObject * pMapObject) : TargetObjective(pMapObject) {
  * \param evt
  * \param pMission
  */
-void ObjProtect::selfEvaluate(GameEvent &evt, Mission *pMission) {
+void ObjProtect::evaluate(Mission *pMission) {
     PedInstance *p = static_cast<PedInstance *>(p_target_);
     if (p->isDead()) {
         // Target is dead -> objective is failed
-        endObjective(evt, false);
+        endObjective(false);
     } else {
         if(p->checkActGCompleted(fs_actions::kOrigScript))
-            endObjective(evt, true);
+            endObjective(true);
     }
 }
 
@@ -88,11 +136,11 @@ ObjDestroyVehicle::ObjDestroyVehicle(MapObject * pVehicle) : TargetObjective(pVe
  * \param evt
  * \param pMission
  */
-void ObjDestroyVehicle::selfEvaluate(GameEvent &evt, Mission *pMission) {
+void ObjDestroyVehicle::evaluate(Mission *pMission) {
     VehicleInstance *pVehicle = static_cast<VehicleInstance *>(p_target_);
 
     if (pVehicle->isDead()) {
-        endObjective(evt, true);
+        endObjective(true);
     }
 }
 
@@ -109,17 +157,17 @@ ObjUseVehicle::ObjUseVehicle(MapObject * pVehicle) : TargetObjective(pVehicle) {
  * \param evt
  * \param pMission
  */
-void ObjUseVehicle::selfEvaluate(GameEvent &evt, Mission *pMission) {
+void ObjUseVehicle::evaluate(Mission *pMission) {
     VehicleInstance *pVehicle = static_cast<VehicleInstance *>(p_target_);
 
     if (pVehicle->isDead()) {
-        endObjective(evt, false);
+        endObjective(false);
         return;
     }
     
     PedInstance *p = pVehicle->getDriver();
     if (p && p->isOurAgent()) {
-        endObjective(evt, true);
+        endObjective(true);
     }
 }
 
@@ -136,17 +184,17 @@ ObjTakeWeapon::ObjTakeWeapon(MapObject * pWeapon) : TargetObjective(pWeapon) {
  * \param evt
  * \param pMission
  */
-void ObjTakeWeapon::selfEvaluate(GameEvent &evt, Mission *pMission) {
+void ObjTakeWeapon::evaluate(Mission *pMission) {
     WeaponInstance *pWeapon = static_cast<WeaponInstance *>(p_target_);
 
     if (pWeapon->isDead()) {
-        endObjective(evt, false);
+        endObjective(false);
     } else {
         ShootableMapObject *owner = pWeapon->getOwner();
         if (owner && owner->majorType() == MapObject::mjt_Ped
             && ((PedInstance *)owner)->isOurAgent())
         {
-            endObjective(evt, true);
+            endObjective(true);
         }
     }
 }
@@ -169,10 +217,9 @@ ObjEliminate::ObjEliminate(PedInstance::objGroupDefMasks subtype) :
 
 /*!
  * Evaluate the objective.
- * \param evt
  * \param pMission
  */
-void ObjEliminate::selfEvaluate(GameEvent &evt, Mission *pMission) {
+void ObjEliminate::evaluate(Mission *pMission) {
     for (int i = pMission->getSquad()->size(); i< pMission->numPeds(); i++) {
         PedInstance *pPed = pMission->ped(i);
 
@@ -199,12 +246,20 @@ ObjEvacuate::ObjEvacuate(int x, int y, int z, std::vector <PedInstance *> &lstOf
     }
 }
 
+void ObjEvacuate::handleStart(Mission *p_mission) {
+    GameEvent evt;
+    evt.stream = GameEvent::kMission;
+    evt.type = GameEvent::kObjEvacuate;
+    evt.pCtxt = &pos_xyz;
+    g_gameCtrl.fireGameEvent(evt);
+}
+
+
 /*!
  * Evaluate the objective.
- * \param evt
  * \param pMission
  */
-void ObjEvacuate::selfEvaluate(GameEvent &evt, Mission *pMission) {
+void ObjEvacuate::evaluate(Mission *pMission) {
     // evacuating people
     for (std::vector<PedInstance *>::iterator it_p
         = pedsToEvacuate.begin();
@@ -212,8 +267,7 @@ void ObjEvacuate::selfEvaluate(GameEvent &evt, Mission *pMission) {
     {
         if ((*it_p)->health() < 0) {
             // One of the peds is dead, objective is failed
-            status = kFailed;
-            return;
+            endObjective(false);
         }
 
         if ((*it_p)->distanceToPosXYZ(&pos_xyz) > 512) {
@@ -233,6 +287,5 @@ void ObjEvacuate::selfEvaluate(GameEvent &evt, Mission *pMission) {
     }
 
     // If we're here, then all peds are in the circle -> objective is completed
-    status = kCompleted;
-    evt.type = GameEvent::kObjTargetCleared;
+    endObjective(true);
 }

@@ -229,10 +229,6 @@ protected:
     bool isSurface(char thisTile);
     bool isStairs(char thisTile);
 
-    //! If the current objective has generated an event -> dispatch it
-    void handleObjectiveEvent(GameEvent & evt, ObjectiveDesc *pObj);
-    //! Sends an event to all listeners
-    void fireGameEvent(GameEvent &evt);
 protected:
     
     // eventually all this level data will be replaced by objects like this:

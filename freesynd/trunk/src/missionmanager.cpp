@@ -746,8 +746,7 @@ Mission * MissionManager::create_mission(LevelData::LevelDataAll &level_data) {
         }
     }
 
-    // Add a special Objective to end a mission
-    p_mission->addObjective(new ObjSucceed());
+    // Clear temp list
     peds_evacuate.clear();
 
 #if 0

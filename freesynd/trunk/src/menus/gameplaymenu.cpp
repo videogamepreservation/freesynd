@@ -1161,6 +1161,7 @@ bool GameplayMenu::handleUnknownKey(Key key, const int modKeys) {
         for (SquadSelection::Iterator it = selection_.begin();
                         it != selection_.end(); ++it) {
                 agents_suicide.push_back(*it);
+                (*it)->set_is_suiciding(true);
         }
 
         for (size_t i=0; i < agents_suicide.size(); i++) {
@@ -1588,6 +1589,10 @@ void GameplayMenu::handleGameEvent(GameEvent evt) {
         // checking agents, if all are dead -> mission failed
         if (mission_->getSquad()->isAllDead()) {
             mission_->endWithStatus(Mission::FAILED);
+            // clear signal on minimap
+            GameEvent evt;
+            evt.type = GameEvent::kObjFailed;
+            mm_renderer_.handleGameEvent(evt);
         }
 
         // Anyway update selection

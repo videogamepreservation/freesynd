@@ -73,9 +73,17 @@ protected:
 };
 
 /*!
+ * Generic class for all transports.
+ */
+class Vehicle : public ShootableMovableMapObject{
+public:
+    Vehicle(int m) : ShootableMovableMapObject(m) {}
+};
+
+/*!
  * This class represents a Vehicle on a map.
  */
-class VehicleInstance : public ShootableMovableMapObject
+class VehicleInstance : public Vehicle
 {
 public:
     VehicleInstance(VehicleAnimation *vehicle, int m);

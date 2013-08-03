@@ -403,17 +403,11 @@ void Mission::checkObjectives() {
         if (pObj->status == kNotStarted) {
             LOG(Log::k_FLG_GAME, "Mission", "checkObjectives()", ("Start objective : %d", cur_objective_));
             // An objective has just started, warn all listeners
-            GameEvent evt = pObj->start();
-            handleObjectiveEvent(evt, pObj);
+            pObj->start(this);
         }
 
         // Checks if the objective is completed
-        GameEvent evt = pObj->evaluate(this);
-        // the objective may have generated an event
-        if (evt.type != GameEvent::kNone) {
-            // so dispatch it
-            handleObjectiveEvent(evt, pObj);
-        }
+        pObj->evaluate(this);
 
         if (pObj->isTerminated()) {
             if (pObj->status == kFailed) {
@@ -421,39 +415,12 @@ void Mission::checkObjectives() {
             } else {
                 // Objective is completed -> go to next one
                 cur_objective_++;
+                if (cur_objective_ >= objectives_.size()) {
+                    // the last objective has been completed : mission succeeded
+                    endWithStatus(COMPLETED);
+                }
             }
         }
-    }
-}
-
-void Mission::handleObjectiveEvent(GameEvent & evt, ObjectiveDesc *pObj) {
-    switch(evt.type) {
-    case GameEvent::kObjTargetSet:
-        {
-        MapObject *pObject = static_cast<MapObject *>(evt.pCtxt);
-        p_minimap_->setTarget(pObject);
-        }
-        break;
-    case GameEvent::kObjEvacuate:
-        {
-        ObjEvacuate * pObjEvac = static_cast<ObjEvacuate *>(pObj);
-        p_minimap_->setEvacuationPoint(pObjEvac->posXYZ());
-        }
-        break;
-    case GameEvent::kObjTargetCleared:
-        p_minimap_->clearTarget();
-        break;
-    case GameEvent::kObjSucceed:
-        // Special event to know a mission is completed
-        endWithStatus(COMPLETED);
-        break;
-    default:
-        break;
-    }
-
-    if (evt.type != GameEvent::kNone) {
-        evt.stream = GameEvent::kMission;
-        g_gameCtrl.fireGameEvent(evt);
     }
 }
 

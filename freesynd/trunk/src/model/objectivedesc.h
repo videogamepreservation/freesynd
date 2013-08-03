@@ -2,6 +2,7 @@
  *                                                                      *
  *  FreeSynd - a remake of the classic Bullfrog game "Syndicate".       *
  *                                                                      *
+ *   Copyright (C) 2010  Bohdan Stelmakh <chamel@users.sourceforge.net> *
  *   Copyright (C) 2013  Benoit Blancard <benblan@users.sourceforge.net>*
  *                                                                      *
  *    This program is free software;  you can redistribute it and / or  *
@@ -85,62 +86,32 @@ public:
 
     /*!
      * This method declares the objective as 'started'.
-     * Returns an event that should be send to all listeners interested by
-     * it.
-     * The returned event depends on the type of objective. By default,
-     * the event is "no event".
+     * Then calls handleStart() to give the class the ability
+     * to customize the start phase.
      */
-    GameEvent start() {
+    void start(Mission *p_mission) {
         status = kStarted;
-        GameEvent evt;
-        evt.type = GameEvent::kNone;
-        evt.pCtxt = NULL;
-        handleStart(evt);
-        return evt;
+        handleStart(p_mission);
     }
 
     /*!
      * This method is call to evaluate the status of the objective in the
      * current mission.
-     * It returns an event that will be dispatched to all listeners.
+     * Subclasses must implements this method.
      */
-    GameEvent evaluate(Mission *pMission) {
-        GameEvent evt;
-        evt.type = GameEvent::kNone;
-        selfEvaluate(evt, pMission);
-        return evt;
-    }
+    virtual void evaluate(Mission *pMission) = 0;
 
 protected:
     /*!
-     * Subclasses should implements this method to specify
-     * an event that occurs on starting.
+     * Subclasses should implements this method to do specific tasks on starting.
      */
-    virtual void handleStart(GameEvent &evt) {}
+    virtual void handleStart(Mission *p_mission) {}
 
     /*!
-     * Subclasses must implements this method to evaluate their status.
+     * A common method to end objective.
+     * \param succeeded True means objective is completed with success.
      */
-    virtual void selfEvaluate(GameEvent &evt, Mission *pMission) = 0;
-};
-
-/*!
- * A special objective which only role is to mark the end
- * of a mission.
- */
-class ObjSucceed : public ObjectiveDesc {
-public:
-    ObjSucceed() : ObjectiveDesc() {}
-
-protected:
-    /*!
-     * Evaluating this objective means all objective before
-     * have succeeded so the mission is completed.
-     */
-    void selfEvaluate(GameEvent &evt, Mission *pMission) {
-        status = kCompleted;
-        evt.type = GameEvent::kObjSucceed;
-    }
+    void endObjective(bool succeeded);
 };
 
 /*!
@@ -151,8 +122,7 @@ class ObjEliminate : public ObjectiveDesc {
 public:
     ObjEliminate(PedInstance::objGroupDefMasks subtype);
 
-protected:
-    void selfEvaluate(GameEvent &evt, Mission *pMission);
+    void evaluate(Mission *pMission);
 
 protected:
     /*! The group to eliminate.*/
@@ -174,21 +144,7 @@ protected:
      * All targeted objectives sends the same event to indicate
      * the target to the user (signal on the map).
      */
-    void handleStart(GameEvent &evt) {
-        evt.type = GameEvent::kObjTargetSet;
-        evt.pCtxt = p_target_;
-    }
-
-    /*!
-     * A common method to end targeted objective.
-     * \param evt An event that will be set to kObjTargetCleared
-     * \param succeeded True means objective is completed with success.
-     */
-    void endObjective(GameEvent &evt, bool succeeded) {
-        evt.type = GameEvent::kObjTargetCleared;
-        evt.pCtxt = p_target_;
-        status = succeeded ? kCompleted : kFailed;
-    }
+    void handleStart(Mission *p_mission);
 
 protected:
     MapObject *p_target_;
@@ -201,8 +157,7 @@ class ObjPersuade : public TargetObjective {
 public:
     ObjPersuade(MapObject * pMapObject);
 
-protected:
-    void selfEvaluate(GameEvent &evt, Mission *pMission);
+    void evaluate(Mission *pMission);
 };
 
 /*!
@@ -212,8 +167,7 @@ class ObjAssassinate : public TargetObjective {
 public:
     ObjAssassinate(MapObject * pMapObject);
 
-protected:
-    void selfEvaluate(GameEvent &evt, Mission *pMission);
+    void evaluate(Mission *pMission);
 };
 
 /*!
@@ -223,8 +177,7 @@ class ObjProtect : public TargetObjective {
 public:
     ObjProtect(MapObject * pMapObject);
 
-protected:
-    void selfEvaluate(GameEvent &evt, Mission *pMission);
+    void evaluate(Mission *pMission);
 };
 
 /*!
@@ -234,8 +187,7 @@ class ObjDestroyVehicle : public TargetObjective {
 public:
     ObjDestroyVehicle(MapObject * pVehicle);
 
-protected:
-    void selfEvaluate(GameEvent &evt, Mission *pMission);
+    void evaluate(Mission *pMission);
 };
 
 /*!
@@ -245,8 +197,7 @@ class ObjUseVehicle : public TargetObjective {
 public:
     ObjUseVehicle(MapObject * pVehicle);
 
-protected:
-    void selfEvaluate(GameEvent &evt, Mission *pMission);
+    void evaluate(Mission *pMission);
 };
 
 /*!
@@ -256,8 +207,7 @@ class ObjTakeWeapon : public TargetObjective {
 public:
     ObjTakeWeapon(MapObject * pWeapon);
 
-protected:
-    void selfEvaluate(GameEvent &evt, Mission *pMission);
+    void evaluate(Mission *pMission);
 };
 
 /*!
@@ -284,13 +234,9 @@ class ObjEvacuate : public LocationObjective {
 public:
     ObjEvacuate(int x, int y, int z, std::vector <PedInstance *> &lstOfPeds);
 
-    void handleStart(GameEvent &evt) {
-        evt.type = GameEvent::kObjEvacuate;
-        evt.pCtxt = NULL;
-    }
+    void handleStart(Mission *p_mission);
 
-protected:
-    void selfEvaluate(GameEvent &evt, Mission *pMission);
+    void evaluate(Mission *pMission);
 
 protected:
     std::vector <PedInstance *> pedsToEvacuate;
