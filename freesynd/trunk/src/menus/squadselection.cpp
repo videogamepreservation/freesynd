@@ -156,3 +156,38 @@ void SquadSelection::checkLeader(size_t agentNo) {
         }
     }
 }
+
+/*!
+ * Deselects all selected agents selected weapon.
+ */
+void SquadSelection::deselect_all_weapons() {
+    for (SquadSelection::Iterator it = begin(); it != end(); ++it) {
+            (*it)->deselectWeapon();
+    }
+}
+
+/*!
+ * Selects the given weapon for the leader and updates weapon selection
+ * for other selected agents.
+ * \param weapon_idx The index in the leader inventory of the weapon to select.
+ * \param apply_to_all In case of Medikit, all selected agents must use one.
+ */
+void SquadSelection::select_weapon_from_leader(int weapon_idx, bool apply_to_all) {
+    PedInstance *pLeader = leader();
+    PedInstance::WeaponSelectCriteria pw_to_use;
+    pw_to_use.desc = WeaponHolder::WeaponSelectCriteria::kCritPlayerSelection;
+    pw_to_use.criteria.wi = pLeader->weapon(weapon_idx);
+    pw_to_use.apply_to_all = apply_to_all;
+
+    for (SquadSelection::Iterator it = begin(); it != end(); ++it)
+    {
+        PedInstance *ped = *it;
+        if (pLeader == ped) {
+            // Forces selection of the weapon for the leader
+            pLeader->selectWeapon(weapon_idx);
+        } else {
+            // For other agents, it depends on their actual selection
+           ped->selectRequiredWeapon(&pw_to_use);
+        }
+    } // end for
+}

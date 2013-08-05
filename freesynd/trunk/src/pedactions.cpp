@@ -105,7 +105,7 @@ void PedInstance::createActQHit(actionQueueGroupType &as, PathNode *tpn,
 
 bool PedInstance::createActQFiring(actionQueueGroupType &as, PathNode *tpn,
     ShootableMapObject *tsmo, bool forced_shot, uint32 make_shots, 
-    pedWeaponToUse *pw_to_use, int32 value)
+    WeaponSelectCriteria *pw_to_use, int32 value)
 {
     // TODO: review, if no weapon found or selected assume physical damage?
     // should be possible to create without a target
@@ -117,39 +117,39 @@ bool PedInstance::createActQFiring(actionQueueGroupType &as, PathNode *tpn,
     Weapon *pWeapon = NULL;
     if (pw_to_use) {
         switch (pw_to_use->desc) {
-            case 1:
-                pw_to_use->wpn.wi = weapon(pw_to_use->wpn.indx);
-                can_shoot = pw_to_use->wpn.wi->canShoot();
-                does_phys_dmg = pw_to_use->wpn.wi->doesPhysicalDmg();
-                pw_to_use->desc = 2;
+            case WeaponHolder::WeaponSelectCriteria::kCritIndex:
+                pw_to_use->criteria.wi = weapon(pw_to_use->criteria.indx);
+                can_shoot = pw_to_use->criteria.wi->canShoot();
+                does_phys_dmg = pw_to_use->criteria.wi->doesPhysicalDmg();
+                pw_to_use->desc = WeaponHolder::WeaponSelectCriteria::kCritPointer;
                 break;
-            case 2:
+            case WeaponHolder::WeaponSelectCriteria::kCritPointer:
                 // pointer
-                can_shoot = pw_to_use->wpn.wi->canShoot();
-                does_phys_dmg = pw_to_use->wpn.wi->doesPhysicalDmg();
+                can_shoot = pw_to_use->criteria.wi->canShoot();
+                does_phys_dmg = pw_to_use->criteria.wi->doesPhysicalDmg();
                 break;
-            case 3:
+            case WeaponHolder::WeaponSelectCriteria::kCritWeaponType:
                 // weapon type
-                pWeapon = g_App.weapons().getWeapon(pw_to_use->wpn.wpn_type);
+                pWeapon = g_App.weapons().getWeapon(pw_to_use->criteria.wpn_type);
                 can_shoot = pWeapon->canShoot();
                 does_phys_dmg = pWeapon->doesPhysicalDmg();
                 break;
-            case 4:
+            case WeaponHolder::WeaponSelectCriteria::kCritDamageStrict:
                 // strict damage type
                 if(!g_App.weapons().checkDmgTypeCanShootStrict(
-                    pw_to_use->wpn.dmg_type, can_shoot)) {
+                    pw_to_use->criteria.dmg_type, can_shoot)) {
                     return false;
                 }
-                does_phys_dmg = (pw_to_use->wpn.dmg_type
+                does_phys_dmg = (pw_to_use->criteria.dmg_type
                     & MapObject::dmg_Physical) != 0;
                 break;
-            case 5:
+            case WeaponHolder::WeaponSelectCriteria::kCritDamageNonStrict:
                 // non-strict damage type
                 if(!g_App.weapons().checkDmgTypeCanShootNonStrict(
-                    pw_to_use->wpn.dmg_type, can_shoot)) {
+                    pw_to_use->criteria.dmg_type, can_shoot)) {
                     return false;
                 }
-                does_phys_dmg = (pw_to_use->wpn.dmg_type
+                does_phys_dmg = (pw_to_use->criteria.dmg_type
                     & MapObject::dmg_Physical) != 0;
                 break;
         }
@@ -171,14 +171,14 @@ bool PedInstance::createActQFiring(actionQueueGroupType &as, PathNode *tpn,
                     aq.multi_var.enemy_var.pw_to_use.wpn.dmg_type = wi->dmgType();
                 }
             } else {*/
-                aq.multi_var.enemy_var.pw_to_use.desc = 2;
-                aq.multi_var.enemy_var.pw_to_use.wpn.wi = wi;
+            aq.multi_var.enemy_var.pw_to_use.desc = WeaponHolder::WeaponSelectCriteria::kCritPointer;
+                aq.multi_var.enemy_var.pw_to_use.criteria.wi = wi;
             //}
         } else {
             can_shoot = true;
             does_phys_dmg = true;
-            aq.multi_var.enemy_var.pw_to_use.desc = 5;
-            aq.multi_var.enemy_var.pw_to_use.wpn.dmg_type = MapObject::dmg_Physical;
+            aq.multi_var.enemy_var.pw_to_use.desc = WeaponHolder::WeaponSelectCriteria::kCritDamageNonStrict;
+            aq.multi_var.enemy_var.pw_to_use.criteria.dmg_type = MapObject::dmg_Physical;
         }
     }
 
@@ -398,7 +398,7 @@ bool PedInstance::createActQFindEnemy(actionQueueGroupType &as) {
     aq.act_exec = PedInstance::ai_aFindEnemy | PedInstance::ai_aWaitToStart;
     Mod *pMod = slots_[Mod::MOD_BRAIN];
 
-    pedWeaponToUse pw_to_use;
+    WeaponSelectCriteria pw_to_use;
     pw_to_use.use_ranks = false;
 
     int32 tm_wait = tm_before_check_;
@@ -418,18 +418,18 @@ bool PedInstance::createActQFindEnemy(actionQueueGroupType &as) {
         WeaponInstance *wi = selectedWeapon();
         if (wi && wi->usesAmmo() && wi->ammoRemaining() == 0) {
             wi = NULL;
-            setSelectedWeapon(-1);
+            deselectWeapon();
         }
         if (wi && wi->canShoot() && wi->doesPhysicalDmg()) {
-            pw_to_use.desc = 2;
-            pw_to_use.wpn.wi = wi;
+            pw_to_use.desc = WeaponHolder::WeaponSelectCriteria::kCritPointer;
+            pw_to_use.criteria.wi = wi;
         } else {
-            pw_to_use.desc = 5;
-            pw_to_use.wpn.dmg_type = MapObject::dmg_Physical;
+            pw_to_use.desc = WeaponHolder::WeaponSelectCriteria::kCritDamageNonStrict;
+            pw_to_use.criteria.dmg_type = MapObject::dmg_Physical;
         }
     } else {
-        pw_to_use.desc = 5;
-        pw_to_use.wpn.dmg_type = MapObject::dmg_Physical;
+        pw_to_use.desc = WeaponHolder::WeaponSelectCriteria::kCritDamageNonStrict;
+        pw_to_use.criteria.dmg_type = MapObject::dmg_Physical;
     }
     if (createActQFiring(as, NULL, NULL, false, 0, &pw_to_use))
         as.actions.back().state |= 64;
@@ -465,9 +465,9 @@ bool PedInstance::createActQFindNonFriend(actionQueueGroupType &as)
     aq.multi_var.time_var.elapsed = 0;
     aq.multi_var.time_var.time_to_start = tm_wait;
     as.actions.push_back(aq);
-    pedWeaponToUse pw_to_use;
-    pw_to_use.desc = 4;
-    pw_to_use.wpn.dmg_type = MapObject::dmg_Persuasion;
+    WeaponSelectCriteria pw_to_use;
+    pw_to_use.desc = WeaponHolder::WeaponSelectCriteria::kCritDamageStrict;
+    pw_to_use.criteria.dmg_type = MapObject::dmg_Persuasion;
     if (createActQFiring(as, NULL, NULL, false, 0, &pw_to_use))
         as.actions.back().state |= 64;
     else
@@ -511,7 +511,7 @@ void PedInstance::createActQTrigger(actionQueueGroupType &as, PathNode *tpn,
 }
 
 void PedInstance::createActQFindWeapon(actionQueueGroupType &as,
-    pedWeaponToUse *pw_to_use, int dist)
+    WeaponSelectCriteria *pw_to_use, int dist)
 {
     as.state = 1;
     actionQueueType aq;

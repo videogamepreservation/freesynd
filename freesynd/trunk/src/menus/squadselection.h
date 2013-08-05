@@ -153,6 +153,13 @@ class SquadSelection {
     // Returns the leader as a PedInstance
     PedInstance * leader() { return pSquad_->member(leader_);}
 
+    //*************************************
+    // Action on multiple agents
+    //*************************************
+    //! Deselects all selected agents weapons
+    void deselect_all_weapons();
+    //! Select a weapon for the leader and for all selected agents
+    void select_weapon_from_leader(int weapon_idx, bool apply_to_all);
  private:
     /*!
      * Return true if an agent can be selected :

@@ -75,6 +75,8 @@ protected:
     void selectAgent(size_t agentNo, bool addToGroup);
     //! Selects/deselects all agents
     void selectAllAgents();
+    //! Reacts to a weapon selection/deselection
+    void handleWeaponSelection(uint8 weapon_idx, bool ctrl);
 
     //! Deselect agent if he died
     void updateSelectionForDeadAgent(PedInstance *p_ped);

@@ -371,7 +371,6 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
             }
 
             uint32 acts_g_prcssd = 0;
-            updtPreferedWeapon();
             for (uint32 indx = 0; indx < it->actions.size(); ++indx)
             {
                 std::vector <actionQueueType>::iterator aqt = it->actions.begin() + indx;
@@ -1621,7 +1620,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                 }
                 if ((aqt->act_exec & PedInstance::ai_aDeselectCurWeapon) != 0)
                 {
-                    setSelectedWeapon(-1);
+                    deselectWeapon();
                     aqt->state |= 4;
                 }
                 if ((aqt->act_exec & PedInstance::ai_aNonFinishable) != 0)
@@ -1823,7 +1822,7 @@ PedInstance::PedInstance(Ped *ped, int m) : ShootableMovableMapObject(m),
     old_obj_group_def_(PedInstance::og_dmUndefined),
     obj_group_id_(0), old_obj_group_id_(0),
     drawn_anim_(PedInstance::ad_StandAnim),
-    sight_range_(0), selected_weapon_(-1), in_vehicle_(NULL),
+    sight_range_(0), in_vehicle_(NULL),
     owner_(NULL), persuasion_points_(0)
 {
     hold_on_.wayFree = 0;
@@ -2029,205 +2028,53 @@ bool PedInstance::inSightRange(MapObject *t) {
     return this->distanceTo(t) < sight_range_;
 }
 
-void PedInstance::setSelectedWeapon(int n) {
-
-    if (selected_weapon_ != -1) {
-        assert((size_t)selected_weapon_ < weapons_.size());
-        WeaponInstance *wi = weapons_[selected_weapon_];
-        if (wi->getWeaponType() == Weapon::EnergyShield) {
-            setRcvDamageDef(MapObject::ddmg_Ped);
-            wi->deactivate();
-        }
-        if (wi->getWeaponType() == Weapon::AccessCard)
-            rmEmulatedGroupDef(4, og_dmPolice);
-        desc_state_ &= (pd_smAll ^ (pd_smArmed | pd_smNoAmmunition));
+/*!
+ * Called when a weapon has been deselected.
+ * \param wi The deselected weapon
+ */
+void PedInstance::handleWeaponDeselected(WeaponInstance * wi) {
+    if (wi->getWeaponType() == Weapon::EnergyShield) {
+        setRcvDamageDef(MapObject::ddmg_Ped);
+        wi->deactivate();
     }
+    if (wi->getWeaponType() == Weapon::AccessCard)
+        rmEmulatedGroupDef(4, og_dmPolice);
+    desc_state_ &= (pd_smAll ^ (pd_smArmed | pd_smNoAmmunition));
+}
 
-    selected_weapon_ = n;
-    if (n != -1) {
-        assert((size_t)selected_weapon_ < weapons_.size());
-        WeaponInstance *wi = weapons_[selected_weapon_];
-
-        if (wi->usesAmmo()) {
-            if (wi->ammoRemaining() == 0) {
-                desc_state_ |= pd_smNoAmmunition;
-                return;
-            } else {
-                desc_state_ &= pd_smAll ^ pd_smNoAmmunition;
-            }
+/*!
+ * Called when a weapon has been selected.
+ * \param wi The selected weapon
+ */
+void PedInstance::handleWeaponSelected(WeaponInstance * wi) {
+    if (wi->usesAmmo()) {
+        if (wi->ammoRemaining() == 0) {
+            desc_state_ |= pd_smNoAmmunition;
+            return;
         } else {
             desc_state_ &= pd_smAll ^ pd_smNoAmmunition;
         }
-
-        if (wi->doesPhysicalDmg())
-            desc_state_ |= pd_smArmed;
-        else
-            desc_state_ &= pd_smAll ^ pd_smArmed;
-
-        if (wi->getWeaponType() == Weapon::EnergyShield) {
-            setRcvDamageDef(MapObject::ddmg_PedWithEnergyShield);
-            wi->activate();
-        }
-        if (wi->getWeaponType() == Weapon::AccessCard)
-            addEmulatedGroupDef(4, og_dmPolice);
-    }
-}
-
-bool PedInstance::selectRequiredWeapon(pedWeaponToUse *pw_to_use) {
-    WeaponInstance *wi = selectedWeapon();
-    // pair <rank, indx>
-    std::vector < std::pair<int, int> > found_weapons;
-    uint8 sz;
-
-    if (!pw_to_use) {
-        pw_to_use = &prefered_weapon_;
-    } else if (prefered_weapon_.desc != 5) {
-        // overriding selection to respect users choice
-        pw_to_use = &prefered_weapon_;
+    } else {
+        desc_state_ &= pd_smAll ^ pd_smNoAmmunition;
     }
 
-    bool found = false;
-    switch (pw_to_use->desc) {
-        case 2:
-            if (pw_to_use->wpn.wi == wi) {
-                found = true;
-            } else {
-                sz = weapons_.size();
-                for (uint8 i = 0; i < sz; ++i) {
-                    if (weapon(i) == wi) {
-                        setSelectedWeapon(i);
-                        found = true;
-                        break;
-                    }
-                }
-            }
-            break;
-        case 3:
-            sz = weapons_.size();
-            for (uint8 i = 0; i < sz; ++i) {
-                WeaponInstance *pWI = weapons_[i];
-                if (pWI->getWeaponType() == pw_to_use->wpn.wpn_type) {
-                    if (pWI->usesAmmo()) {
-                        if (pWI->ammoRemaining()) {
-                            found = true;
-                            setSelectedWeapon(i);
-                            break;
-                        }
-                    } else {
-                        found = true;
-                        setSelectedWeapon(i);
-                        break;
-                    }
-                }
-            }
-            break;
-        case 4:
-            sz = weapons_.size();
-            for (uint8 i = 0; i < sz; ++i) {
-                WeaponInstance *pWI = weapons_[i];
-                if (pWI->canShoot()
-                    && pWI->doesDmgStrict(pw_to_use->wpn.dmg_type))
-                {
-                    if (pWI->usesAmmo()) {
-                        if (pWI->ammoRemaining()) {
-                            found = true;
-                            found_weapons.push_back(std::make_pair(pWI->rank(),
-                                i));
-                        }
-                    } else {
-                        found = true;
-                        found_weapons.push_back(std::make_pair(pWI->rank(), i));
-                    }
-                }
-            }
-            break;
-        case 5:
-            sz = weapons_.size();
-            for (uint8 i = 0; i < sz; ++i) {
-                WeaponInstance *pWI = weapons_[i];
-                if (pWI->canShoot()
-                    && pWI->doesDmgNonStrict(pw_to_use->wpn.dmg_type))
-                {
-                    if (pWI->usesAmmo()) {
-                        if (pWI->ammoRemaining()) {
-                            found = true;
-                            found_weapons.push_back(std::make_pair(pWI->rank(), i));
-                        }
-                    } else {
-                        found = true;
-                        found_weapons.push_back(std::make_pair(pWI->rank(), i));
-                    }
-                }
-            }
-            break;
+    if (wi->doesPhysicalDmg())
+        desc_state_ |= pd_smArmed;
+    else
+        desc_state_ &= pd_smAll ^ pd_smArmed;
+
+    switch(wi->getWeaponType()) {
+    case Weapon::EnergyShield:
+        setRcvDamageDef(MapObject::ddmg_PedWithEnergyShield);
+        wi->activate();
+        break;
+    case Weapon::AccessCard:
+        addEmulatedGroupDef(4, og_dmPolice);
+        break;
+    case Weapon::MediKit:
+        wi->activate();
+        break;
     }
-
-    if (!found_weapons.empty()) {
-        int best_rank = -1;
-        int indx = -1;
-        if (pw_to_use->use_ranks) {
-            sz = found_weapons.size();
-            for (uint8 i = 0; i < sz; ++i) {
-                if (best_rank < found_weapons[i].first) {
-                    best_rank = found_weapons[i].first;
-                    indx = found_weapons[i].second;
-                }
-            }
-            setSelectedWeapon(indx);
-        } else
-            setSelectedWeapon(found_weapons[0].second);
-    }
-    return found;
-}
-
-void PedInstance::selectNextWeapon() {
-    if (selected_weapon_ != -1) {
-        int nextWeapon = -1;
-        WeaponInstance *cur_sel_weapon = (WeaponInstance *)weapon(selected_weapon_);
-
-        if (cur_sel_weapon) {
-            for (int i = 0; i < numWeapons(); ++i) {
-                WeaponInstance * wi = weapons_[i];
-                if (i != selected_weapon_ && wi->usesAmmo() && wi->ammoRemaining()
-                        && wi->getWeaponType() == cur_sel_weapon->getWeaponType())
-                {
-                    if (nextWeapon == -1)
-                        nextWeapon = i;
-                    else {
-                        if (wi->ammoRemaining()
-                            < weapon(nextWeapon)->ammoRemaining())
-                        {
-                            nextWeapon = i;
-                        }
-                    }
-                }
-            }
-            if (nextWeapon == -1) {
-                for (int i = 0; i < numWeapons(); ++i) {
-                    WeaponInstance * wi = weapons_[i];
-                    if (i != selected_weapon_ && wi->usesAmmo() && wi->ammoRemaining()
-                            && wi->doesDmgNonStrict(cur_sel_weapon->dmgType()))
-                    {
-                        if (nextWeapon == -1)
-                            nextWeapon = i;
-                        else {
-                            if (wi->ammoRemaining()
-                                < weapon(nextWeapon)->ammoRemaining())
-                            {
-                                nextWeapon = i;
-                            }
-                        }
-                    }
-                }
-            }
-            if (nextWeapon != -1)
-                setSelectedWeapon(nextWeapon);
-        }
-
-        if (nextWeapon == -1)
-            selectRequiredWeapon();
-    } else
-        selectRequiredWeapon();
 }
 
 void PedInstance::dropWeapon(int n) {
@@ -2240,7 +2087,7 @@ void PedInstance::dropWeapon(WeaponInstance *wi) {
     bool upd_selected = selected_weapon_ != -1;
 
     if (selectedWeapon() == wi) {
-        setSelectedWeapon(-1);
+        deselectWeapon();
         upd_selected = false;
     }
     for (int i = 0; i < (int)weapons_.size(); ++i)
@@ -2266,7 +2113,7 @@ void PedInstance::dropWeapon(WeaponInstance *wi) {
 void PedInstance::dropAllWeapons() {
 
     setRcvDamageDef(MapObject::ddmg_Ped);
-    setSelectedWeapon(-1);
+    deselectWeapon();
     Mission *m = g_Session.getMission();
     uint8 twd = m->mtsurfaces_[tile_x_ + m->mmax_x_ * tile_y_
         + m->mmax_m_xy * tile_z_].twd;
@@ -2606,7 +2453,7 @@ bool PedInstance::handleDamage(ShootableMapObject::DamageInflictType *d) {
 }
 
 void PedInstance::destroyAllWeapons() {
-    setSelectedWeapon(-1);
+    deselectWeapon();
     while (!weapons_.empty()) {
         WeaponInstance * w = removeWeapon(0);
         w->setMap(-1);
@@ -2844,17 +2691,6 @@ bool PedInstance::isPersuaded()
 {
     return (desc_state_ & pd_smControlled) != 0
         && obj_group_id_ == g_Session.getMission()->playersGroupID();
-}
-
-void PedInstance::updtPreferedWeapon() {
-    if (selected_weapon_ != -1) {
-        WeaponInstance *wi = weapons_[selected_weapon_];
-        prefered_weapon_.desc = 2;
-        prefered_weapon_.wpn.wi = wi;
-    } else {
-        prefered_weapon_.desc = 5;
-        prefered_weapon_.wpn.dmg_type = MapObject::dmg_Physical;
-    }
 }
 
 bool PedInstance::canPersuade(int points) {

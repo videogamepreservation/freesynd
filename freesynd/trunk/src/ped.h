@@ -253,16 +253,6 @@ public:
     //*************************************
     // Weapon management
     //*************************************
-    //! Returns the currently used weapon or null if no weapon is used
-    WeaponInstance *selectedWeapon() {
-        return selected_weapon_ >= 0
-                && selected_weapon_ < (int) weapons_.size()
-            ? weapons_[selected_weapon_] : NULL;
-    }
-
-    void setSelectedWeapon(int n);
-
-    void selectNextWeapon();
     void dropWeapon(int n);
     void dropWeapon(WeaponInstance *w);
     void dropAllWeapons();
@@ -557,29 +547,6 @@ public:
         pd_smAll = 0xFFFF
     } pedDescStateMasks;
 
-    typedef struct {
-        union {
-            // weapon index from weapons_ in mission_
-            uint32 indx;
-            // use only this weapon for attack
-            WeaponInstance *wi;
-            // use only this type of weapon
-            Weapon::WeaponType wpn_type;
-            // use weapon that inflicts this type of damage
-            // MapObject::DamageType
-            uint32 dmg_type;
-        } wpn;
-        // union descriptor
-        // 0 - not set, 1 - indx, 2 - pointer, 3 - weapon type,
-        // 4 - damage type strict (type == dmg_type),
-        // 5 - damage type non-strict (type & dmg_type != 0)
-        // NOTE: indx should be used only when loading game script;
-        // 4,5 - when that can shoot only
-        uint8 desc;
-        bool use_ranks;
-    } pedWeaponToUse;
-    bool selectRequiredWeapon(pedWeaponToUse *pw_to_use = NULL);
-
     typedef enum {
         ai_aNone = 0x0,
         // Setup control over object where possible to lose this control
@@ -668,7 +635,7 @@ public:
                 uint32 make_shots;
                 uint32 shots_done;
                 bool forced_shot;
-                pedWeaponToUse pw_to_use;
+                WeaponSelectCriteria pw_to_use;
                 // upon reaching this value action is complete;
                 // health dropped to this value( or persuade resistance points?)
                 int32 value;
@@ -763,7 +730,7 @@ public:
         int32 dir = -1);
     bool createActQFiring(actionQueueGroupType &as, PathNode *tpn,
         ShootableMapObject *tsmo = NULL, bool forced_shot = false,
-        uint32 make_shots = 0, pedWeaponToUse *pw_to_use = NULL,
+        uint32 make_shots = 0, WeaponSelectCriteria *pw_to_use = NULL,
         int32 value = -1);
     void createActQFollowing(actionQueueGroupType &as,
         ShootableMapObject *tsmo, uint32 condition, int32 dist = 128, int32 rd = 0);
@@ -794,7 +761,7 @@ public:
     void createActQTrigger(actionQueueGroupType &as, PathNode *tpn, int32 range);
 
     void createActQFindWeapon(actionQueueGroupType &as,
-        pedWeaponToUse *pw_to_use = NULL, int dist = -1);
+        WeaponSelectCriteria *pw_to_use = NULL, int dist = -1);
 
     void createActQCheckOwner(actionQueueGroupType &as);
     
@@ -821,13 +788,22 @@ public:
     void cpyEnemyDefs(Mmuu32_t &eg_defs) { eg_defs = enemy_group_defs_; }
     bool isArmed() { return (desc_state_ & pd_smArmed) != 0; }
     bool isExcluded() { return (state_ & pa_smCheckExcluded) != 0; }
-    void updtPreferedWeapon();
     targetDescType * lastFiringTarget() { return &last_firing_target_; }
     
     IPAStim *adrenaline_;
     IPAStim *perception_;
     IPAStim *intelligence_;
-    
+protected:
+    /*!
+     * Called when a weapon has been deselected.
+     * \param wi The deselected weapon
+     */
+    void handleWeaponDeselected(WeaponInstance * wi);
+    /*!
+     * Called when a weapon has been selected.
+     * \param wi The selected weapon
+     */
+    void handleWeaponSelected(WeaponInstance * wi);
 protected:
     Ped *ped_;
     //! If this flag is true, all actions should be dropped
@@ -869,8 +845,6 @@ protected:
     AnimationDrawn drawn_anim_;
 
     int sight_range_;
-    int selected_weapon_;
-    pedWeaponToUse prefered_weapon_;
     VehicleInstance *in_vehicle_;
     //! This flag tells if this is our agent, assuming it's an agent.
     bool is_our_;

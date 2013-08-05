@@ -122,6 +122,7 @@ bool WeaponInstance::animate(int elapsed) {
                 ammo_remaining_ = 0;
                 ((PedInstance *)owner_)->selectNextWeapon();
                 weapon_used_time_ = 0;
+                deactivate();
             }
             return true;
         } else if (main_type_ == Weapon::TimeBomb) {

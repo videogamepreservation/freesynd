@@ -11,6 +11,7 @@ set (SOURCES
 	agentmanager.cpp
 	app.cpp
 	model/objectivedesc.cpp
+	model/weaponholder.cpp
 	core/squad.cpp
 	core/gamesession.cpp
 	core/gamecontroller.cpp
@@ -19,7 +20,7 @@ set (SOURCES
 	core/researchmanager.cpp
 	default_ini.h
 	freesynd.cpp
-  ipastim.cpp
+    ipastim.cpp
 	gfx/dirtylist.cpp
 	gfx/fliplayer.cpp
 	gfx/font.cpp

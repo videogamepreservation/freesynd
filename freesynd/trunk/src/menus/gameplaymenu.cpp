@@ -757,47 +757,21 @@ void GameplayMenu::handleClickOnWeaponSelector(int x, int y, int button,
 {
     int w_num = ((y - (2 + 46 + 44 + 10 + 46 + 44 + 15)) / 32) * 4
             + x / 32;
-    bool weapon_is_selected = false;
     PedInstance *pLeader = selection_.leader();
     if (pLeader->isAlive()) {
+        bool is_ctrl = (modKeys & KMD_CTRL) != 0;
         if (w_num < pLeader->numWeapons()) {
             if (button == 1) {
-                WeaponInstance *wi = pLeader->weapon(w_num);
-                bool deselect_curr = false;
-
-                if (pLeader->selectedWeapon() == wi)
-                    deselect_curr = true;
-
-                for (SquadSelection::Iterator it = selection_.begin();
-                     it != selection_.end(); ++it)
-                {
-                    PedInstance *ped = *it;
-                    if (deselect_curr)
-                        ped->setSelectedWeapon(-1);
-                    else {
-                        if (pLeader == ped) {
-                            pLeader->setSelectedWeapon(w_num);
-                        } else {
-                            WeaponInstance *pWI = ped->selectedWeapon();
-                            if ((pWI && pWI->getWeaponType() != wi->getWeaponType())
-                                 || !pWI)
-                            {
-                                PedInstance::pedWeaponToUse pw_to_use;
-                                pw_to_use.desc = 3;
-                                pw_to_use.wpn.wpn_type = wi->getWeaponType();
-                                ped->selectRequiredWeapon(&pw_to_use);
-                            }
-                        }
-                    }
-                    weapon_is_selected = true;
-                } // end for
+                // Button 1 : selection/deselection of weapon for all selection
+                handleWeaponSelection(w_num, is_ctrl);
             } else {
+                // Button 3 : drop weapon from selected agent inventory
                 PedInstance::actionQueueGroupType as;
                 as.main_act = 0;
                 as.group_desc = PedInstance::gd_mExclusive;
                 as.origin_desc = fs_actions::kOrigUser;
                 pLeader->createActQPutDown(as, pLeader->weapon(w_num));
-                if (modKeys & KMD_CTRL)
+                if (is_ctrl)
                     pLeader->addActQToQueue(as);
                 else
                     pLeader->setActQInQueue(as);
@@ -805,8 +779,6 @@ void GameplayMenu::handleClickOnWeaponSelector(int x, int y, int button,
         }
     }
     // redraw weapon selector
-    if (weapon_is_selected)
-        g_App.gameSounds().play(snd::SPEECH_SELECTED);
     addDirtyRect(0, 207, 128, 64);
 }
 
@@ -1051,11 +1023,6 @@ bool GameplayMenu::handleUnknownKey(Key key, const int modKeys) {
     bool change = false; /* indicator whether menu should be redrawn */
     bool consumed = true;
 
-    if (mission_ == NULL) {
-        // Mission must not be null
-        return false;
-    }
-
     // Pause/unpause game
     if (isLetterP(key.unicode)) {
         if (paused_) {
@@ -1085,18 +1052,6 @@ bool GameplayMenu::handleUnknownKey(Key key, const int modKeys) {
     if (modKeys & KMD_CTRL) {
         ctrl = true;
     }
-
-#ifdef _DEBUG
-    if (isLetterH(key.unicode)) {
-        mission_->endWithStatus(Mission::COMPLETED);
-        return true;
-    }
-
-    if (isLetterG(key.unicode)) {
-        mission_->endWithStatus(Mission::FAILED);
-        return true;
-    }
-#endif
 
     // SPACE is pressed when the mission failed or succeeded to return
     // to menu
@@ -1155,6 +1110,22 @@ bool GameplayMenu::handleUnknownKey(Key key, const int modKeys) {
         g_App.music().toggleMusic();
     } else if (key.keyFunc == KFC_F2) { // Sound Control
         g_App.gameSounds().toggleSound();
+    }
+
+#ifdef _DEBUG
+    else if (key.keyFunc == KFC_F3) {
+        mission_->endWithStatus(Mission::COMPLETED);
+        return true;
+    } else if (key.keyFunc == KFC_F4) {
+        mission_->endWithStatus(Mission::FAILED);
+        return true;
+    }
+#endif
+    else if (key.keyFunc >= KFC_F5 && key.keyFunc <= KFC_F12) {
+        // Those keys are direct access to inventory
+        uint8 weapon_idx = (uint8) key.keyFunc - (uint8) KFC_F5;
+        handleWeaponSelection(weapon_idx, ctrl);
+        return true;
     } else if (isLetterD(key.unicode) && ctrl) { // selected agents are killed with 'd'
         // save current selection as it will be modified when agents die
         std::vector<PedInstance *> agents_suicide;
@@ -1435,6 +1406,8 @@ void GameplayMenu::drawWeaponSelectors() {
                         && (mission_hint_ % 20) < 10
                         && target_->map() != -1)
                     {
+                        // player is pointing a weapon on the ground and there's space
+                        // in the inventory to display its icon
                         wi = (WeaponInstance *)target_;
                         draw_pw = false;
                         s = wi->getWeaponClass()->selector() + 40;
@@ -1579,6 +1552,24 @@ void GameplayMenu::updateSelectAll() {
     // then button is pressed.
     pressed_btn_select_all_ = ((nbAgentAlive == selection_.size()
         && nbAgentAlive != 0) || nbAgentAlive == 1);
+}
+
+/*!
+ *
+ */
+void GameplayMenu::handleWeaponSelection(uint8 weapon_idx, bool ctrl) {
+    PedInstance *pLeader = selection_.leader();
+
+    if (weapon_idx < pLeader->numWeapons()) {
+        WeaponInstance *wi = pLeader->weapon(weapon_idx);
+        if (pLeader->selectedWeapon() == wi) {
+            // Player clicked on an already selected weapon -> deselect
+            selection_.deselect_all_weapons();
+        } else {
+            selection_.select_weapon_from_leader(weapon_idx, ctrl);
+        }
+    }
+    g_App.gameSounds().play(snd::SPEECH_SELECTED);
 }
 
 /**

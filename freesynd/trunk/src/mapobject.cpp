@@ -1654,7 +1654,7 @@ void AnimWindow::draw(int x, int y)
 
 bool AnimWindow::animate(int elapsed, Mission *obj)
 {
-/*    switch (state_) {
+    switch (state_) {
         case Static::sttawnd_LightOff:
             if (!leftTimeShowAnim(elapsed)) {
                 // decide to start switching lights on
@@ -1723,7 +1723,7 @@ bool AnimWindow::animate(int elapsed, Mission *obj)
             break;
     }
 
-    return MapObject::animate(elapsed);*/
+    return MapObject::animate(elapsed);
     return false;
 }
 
