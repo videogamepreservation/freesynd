@@ -32,6 +32,8 @@
 #include "mission.h"
 
 GameController::GameController() {
+    agents_.setModManager(&mods_);
+    agents_.setWeaponManager(&weapons_);
 }
 
 GameController::~GameController() {
@@ -40,7 +42,12 @@ GameController::~GameController() {
 }
 
 bool GameController::reset() {
-    return false;
+    // Reset default mods and weapons
+    mods_.reset();
+    weapons_.reset();
+    // TODO add reading cheatcode for onlywomen parameter
+    agents_.reset();
+    return true;
 }
 
 /*! 

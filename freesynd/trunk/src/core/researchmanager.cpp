@@ -21,11 +21,12 @@
  *                                                                      *
  ************************************************************************/
 
-#include "app.h"
 #include "researchmanager.h"
 #include "utils/log.h"
 #include "utils/file.h"
 #include "utils/configfile.h"
+#include "core/gamecontroller.h"
+#include "app.h"
 
 ResearchManager::ResearchManager() {
     pCurrResearch_ = NULL;
@@ -106,7 +107,7 @@ Research *ResearchManager::loadResearch(Weapon::WeaponType wt) {
             Research *pRes = new Research(wt, name, fund, nextWeap);
             
             // Check if searched weapon has already been discovered
-            Weapon *pW = g_App.weapons().getWeapon(wt);
+            Weapon *pW = g_gameCtrl.weapons().getWeapon(wt);
             if (pW->wasSubmittedToSearch()) {
                 pRes->improve(pW);
             }
@@ -205,14 +206,14 @@ void ResearchManager::complete(Research *pResearch) {
     Research *pNextRes = NULL;
     // Enable new weapon or mods
     if (pResearch->getType() == Research::EQUIPS) {
-        g_App.weapons().enableWeapon(pResearch->getSearchWeapon());
+        g_gameCtrl.weapons().enableWeapon(pResearch->getSearchWeapon());
         // Loads next research
         if (pResearch->getNextWeaponRes() != Weapon::Unknown) {
             pNextRes = loadResearch(pResearch->getNextWeaponRes());
         }
 
     } else {
-        g_App.mods().enableMod(pResearch->getSearchModType(), pResearch->getSearchModVersion());
+        g_gameCtrl.mods().enableMod(pResearch->getSearchModType(), pResearch->getSearchModVersion());
         // Loads next research
         if (pResearch->getSearchModVersion() == Mod::MOD_V2) {
             pNextRes = loadResearch(pResearch->getSearchModType(), Mod::MOD_V3);

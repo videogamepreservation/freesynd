@@ -24,15 +24,19 @@
 
 #include <stdio.h>
 #include <assert.h>
+
+#include "missionmanager.h"
 #include "app.h"
 #include "utils/file.h"
 #include "utils/log.h"
 #include "resources.h"
+#include "core/gamecontroller.h"
 #include "core/missionbriefing.h"
 #include "model/objectivedesc.h"
 #include "vehicle.h"
 #include "mission.h"
 #include "core/squad.h"
+#include "pedmanager.h"
 
 MissionManager::MissionManager()
 {
@@ -281,20 +285,21 @@ Mission * MissionManager::create_mission(LevelData::LevelDataAll &level_data) {
 #endif
     ModOwner mods_enemy;
     // enemies get top version of mods
-    mods_enemy.addMod(g_App.mods().getHighestVersion(Mod::MOD_LEGS));
-    mods_enemy.addMod(g_App.mods().getHighestVersion(Mod::MOD_ARMS));
-    mods_enemy.addMod(g_App.mods().getHighestVersion(Mod::MOD_CHEST));
-    mods_enemy.addMod(g_App.mods().getHighestVersion(Mod::MOD_HEART));
-    mods_enemy.addMod(g_App.mods().getHighestVersion(Mod::MOD_EYES));
-    mods_enemy.addMod(g_App.mods().getHighestVersion(Mod::MOD_BRAIN));
+    mods_enemy.addMod(g_gameCtrl.mods().getHighestVersion(Mod::MOD_LEGS));
+    mods_enemy.addMod(g_gameCtrl.mods().getHighestVersion(Mod::MOD_ARMS));
+    mods_enemy.addMod(g_gameCtrl.mods().getHighestVersion(Mod::MOD_CHEST));
+    mods_enemy.addMod(g_gameCtrl.mods().getHighestVersion(Mod::MOD_HEART));
+    mods_enemy.addMod(g_gameCtrl.mods().getHighestVersion(Mod::MOD_EYES));
+    mods_enemy.addMod(g_gameCtrl.mods().getHighestVersion(Mod::MOD_BRAIN));
     
+    PedManager peds;
     for (uint16 i = 0; i < 256; i++) {
         //if (i == 40)
             //i = 40;
         LevelData::People & pedref = level_data.people[i];
         
         PedInstance *p =
-            g_App.peds().loadInstance(pedref, i, p_mission->mapId());
+            peds.loadInstance(pedref, i, p_mission->mapId());
         if (p) {
             if (pedref.desc == 0x05) {
                 if (driverindx[i] != 0xFFFF) {
@@ -331,7 +336,7 @@ Mission * MissionManager::create_mission(LevelData::LevelDataAll &level_data) {
 
             if (i < AgentManager::kMaxSlot) {
                 // We're loading one of our agents
-                Agent *pAg = g_Session.agents().squadMember(i);
+                Agent *pAg = g_gameCtrl.agents().squadMember(i);
                 p->initAsAgent(pAg, p_mission->playersGroupID());
                 // adds all agent's weapons to the mission weapons
                 for (int wi=0; wi<p->numWeapons(); wi++) {
@@ -843,7 +848,7 @@ WeaponInstance * MissionManager::create_weapon_instance(const LevelData::Weapons
             break;
     }
 
-    Weapon *pWeapon = g_App.weapons().getWeapon(wType);
+    Weapon *pWeapon = g_gameCtrl.weapons().getWeapon(wType);
     if (pWeapon) {
         WeaponInstance *wi = pWeapon->createInstance();
         wi->setPosition(gamdata.mapposx[1], gamdata.mapposy[1],

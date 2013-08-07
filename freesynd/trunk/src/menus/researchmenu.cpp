@@ -52,9 +52,9 @@ ResearchMenu::ResearchMenu(MenuManager * m):Menu(m, MENU_RESEARCH, MENU_SELECT, 
     pFieldModsLBox_->setModel(g_Session.researchManager().getAvailableModsSearch());
 
     pEquipsLBox_ = addListBox(504, 110,  122, 230, tab_ == TAB_EQUIPS);
-    pEquipsLBox_->setModel(g_App.weapons().getAvailableWeapons());
+    pEquipsLBox_->setModel(g_gameCtrl.weapons().getAvailableWeapons());
     pModsLBox_ = addListBox(504, 110,  122, 230, tab_ == TAB_MODS);
-    pModsLBox_->setModel(g_App.mods().getAvalaibleMods());
+    pModsLBox_->setModel(g_gameCtrl.mods().getAvalaibleMods());
 
     // Close Mods/Equips details button
     cancelDescId_ = addOption(500, 320,  127, 22,  "#MENU_CANCEL_BUT", FontManager::SIZE_2, MENU_NO_MENU, false);

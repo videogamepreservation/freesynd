@@ -26,8 +26,10 @@
 
 #include <stdio.h>
 #include <assert.h>
-#include "app.h"
 
+#include "agentmanager.h"
+#include "weaponmanager.h"
+#include "modmanager.h"
 
 const char * const g_AgentNames[] = {
     "AFSHAR",
@@ -145,7 +147,7 @@ void AgentManager::reset(bool onlyWomen) {
     // Then recreate the first 8 available agents
     for (size_t i = 0; i < 8; i++) {
         Agent * pAgent = new Agent(g_AgentNames[nextName_], onlyWomen ? true : ((i % 2) == 0));
-        pAgent->addWeapon(g_App.weapons().getWeapon(Weapon::Pistol)->createInstance());
+        pAgent->addWeapon(pWeaponManager_->getWeapon(Weapon::Pistol)->createInstance());
         
         agents_.setAt(i, pAgent);
         // Adds the first 4 agents to the squad
@@ -227,7 +229,7 @@ bool AgentManager::loadFromFile(PortableFile &infile, const FormatVersion& v) {
                 }
                 // add the mod
                 if (mt != Mod::Unknown) {
-                    pAgent->addMod(g_App.mods().getMod(mt, mv));
+                    pAgent->addMod(pModManager_->getMod(mt, mv));
                 }
             }
             // Weapons
@@ -282,7 +284,7 @@ bool AgentManager::loadFromFile(PortableFile &infile, const FormatVersion& v) {
                         wt = Weapon::Unknown;
                 }
                 if (wt != Weapon::Unknown) {
-                    WeaponInstance *pInst = g_App.weapons().getWeapon(wt)->createInstance();
+                    WeaponInstance *pInst = pWeaponManager_->getWeapon(wt)->createInstance();
                     int ammo = infile.read32();
                     pInst->setAmmoRemaining(ammo);
                     pAgent->addWeapon(pInst);

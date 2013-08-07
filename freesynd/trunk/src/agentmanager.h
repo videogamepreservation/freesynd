@@ -34,6 +34,9 @@
 extern const char * const g_AgentNames[];
 extern const int g_NumAgentNames;
 
+class WeaponManager;
+class ModManager;
+
 /*!
  * Agent Manager class.
  *
@@ -59,6 +62,14 @@ public:
 
     AgentManager();
     ~AgentManager();
+
+    void setWeaponManager(WeaponManager *pWeaponManager) {
+        pWeaponManager_ = pWeaponManager;
+    }
+
+    void setModManager(ModManager *pModManager) {
+        pModManager_ = pModManager;
+    }
 
     void loadAgents();
     void reset(bool onlyWomen = false);
@@ -113,6 +124,10 @@ protected:
      */
     Agent *a_squad_[4];
     int nextName_;
+    //! The weapon manager
+    WeaponManager *pWeaponManager_;
+    //! The mod manager
+    ModManager *pModManager_;
 };
 
 #endif

@@ -339,7 +339,7 @@ void Mission::start()
     // creating a list of available weapons
     // TODO: consider weight of weapons when adding?
     std::vector <Weapon *> wpns;
-    g_App.weapons().getAvailable(MapObject::dmg_Bullet, wpns);
+    g_gameCtrl.weapons().getAvailable(MapObject::dmg_Bullet, wpns);
     int indx_best = -1;
     int indx_second = -1;
     for (int i = 0, sz = wpns.size(), rank_best = -1, rank_second = -1;
@@ -355,7 +355,7 @@ void Mission::start()
             indx_second = i;
         }
     }
-    Weapon *bomb = g_App.weapons().getAvailable(Weapon::TimeBomb);
+    Weapon *bomb = g_gameCtrl.weapons().getAvailable(Weapon::TimeBomb);
 
     // TODO: check whether enemy agents weapons are equal to best two
     // if not set them
@@ -496,7 +496,7 @@ void Mission::end()
             if (p->objGroupDef() == PedInstance::og_dmAgent) {
                 stats_.agentCaptured++;
                 if (completed()) {
-                    Agent *pAg = g_Session.agents().createAgent(false);
+                    Agent *pAg = g_gameCtrl.agents().createAgent(false);
                     if (pAg) {
                         addWeaponsFromPedToAgent(p, pAg);
                         *((ModOwner *)pAg) = *((ModOwner *)p);
@@ -511,10 +511,10 @@ void Mission::end()
     for (size_t i = AgentManager::kSlot1; i < AgentManager::kMaxSlot; i++) {
         PedInstance *p_pedAgent = p_squad_->member(i);
         if (p_pedAgent) {
-            Agent *pAg = g_Session.agents().squadMember(i);
+            Agent *pAg = g_gameCtrl.agents().squadMember(i);
             if (p_pedAgent->isDead()) {
                 // an agent died -> remove him from cryo
-                g_Session.agents().destroyAgentSlot(i);
+                g_gameCtrl.agents().destroyAgentSlot(i);
             } else {
                 // synch only weapons
                 addWeaponsFromPedToAgent(p_pedAgent, pAg);

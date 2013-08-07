@@ -27,6 +27,8 @@
 #include "common.h"
 #include "app.h"
 #include "vehicle.h"
+#include "core/gamesession.h"
+#include "mission.h"
 
 MapObject::MapObject(int m):size_x_(1), size_y_(1), size_z_(2),
     map_(m), frame_(0), elapsed_carry_(0),

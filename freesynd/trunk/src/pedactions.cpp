@@ -21,7 +21,7 @@
  ************************************************************************/
 
 #include "ped.h"
-#include "app.h"
+#include "core/gamecontroller.h"
 
 
 void PedInstance::createActQStanding(actionQueueGroupType &as) {
@@ -130,13 +130,13 @@ bool PedInstance::createActQFiring(actionQueueGroupType &as, PathNode *tpn,
                 break;
             case WeaponHolder::WeaponSelectCriteria::kCritWeaponType:
                 // weapon type
-                pWeapon = g_App.weapons().getWeapon(pw_to_use->criteria.wpn_type);
+                pWeapon = g_gameCtrl.weapons().getWeapon(pw_to_use->criteria.wpn_type);
                 can_shoot = pWeapon->canShoot();
                 does_phys_dmg = pWeapon->doesPhysicalDmg();
                 break;
             case WeaponHolder::WeaponSelectCriteria::kCritDamageStrict:
                 // strict damage type
-                if(!g_App.weapons().checkDmgTypeCanShootStrict(
+                if(!g_gameCtrl.weapons().checkDmgTypeCanShootStrict(
                     pw_to_use->criteria.dmg_type, can_shoot)) {
                     return false;
                 }
@@ -145,7 +145,7 @@ bool PedInstance::createActQFiring(actionQueueGroupType &as, PathNode *tpn,
                 break;
             case WeaponHolder::WeaponSelectCriteria::kCritDamageNonStrict:
                 // non-strict damage type
-                if(!g_App.weapons().checkDmgTypeCanShootNonStrict(
+                if(!g_gameCtrl.weapons().checkDmgTypeCanShootNonStrict(
                     pw_to_use->criteria.dmg_type, can_shoot)) {
                     return false;
                 }

@@ -23,6 +23,7 @@
 #include "menus/agentselectorrenderer.h"
 #include "gfx/screen.h"
 #include "app.h"
+#include "ped.h"
 
 const int AgentSelectorRenderer::kIpaBarWidth = 56;
 const int AgentSelectorRenderer::kIpaBarHeight = 10;

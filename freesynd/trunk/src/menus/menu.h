@@ -183,6 +183,10 @@ protected:
     MenuFont * getMenuFont(FontManager::EFontSize size);
     //! Convenient method to return the game font
     GameFont *gameFont();
+    //! Convenient method to get messages
+    std::string getMessage(const std::string & id);
+    //! Convenient method to get messages
+    void getMessage(const std::string & id, std::string & msg);
 
 protected:
     class HotKey {

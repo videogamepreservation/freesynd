@@ -505,3 +505,11 @@ MenuFont * Menu::getMenuFont(FontManager::EFontSize size) {
 GameFont *Menu::gameFont() {
     return menu_manager_->fonts().gameFont();
 }
+
+std::string Menu::getMessage(const std::string & id) {
+    return menu_manager_->getMessage(id);
+}
+
+void Menu::getMessage(const std::string & id, std::string & msg) {
+    menu_manager_->getMessage(id, msg);
+}

@@ -26,6 +26,7 @@
 #define LOADINGMENU_H
 
 #include "utils/timer.h"
+#include "menus/menu.h"
 
 /*!
  * This menu is in charge of loading the mission.

@@ -26,8 +26,11 @@
 
 #include <stdio.h>
 #include <assert.h>
-#include "app.h"
+
 #include "loadingmenu.h"
+#include "gfx/screen.h"
+#include "mission.h"
+#include "app.h"
 
 LoadingMenu::LoadingMenu(MenuManager * m):Menu(m, MENU_LOADING, MENU_MAIN),
     timer_(2000)

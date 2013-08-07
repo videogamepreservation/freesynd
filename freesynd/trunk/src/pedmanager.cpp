@@ -26,7 +26,9 @@
 
 #include <stdio.h>
 #include <assert.h>
-#include "app.h"
+
+#include "pedmanager.h"
+#include "core/gamecontroller.h"
 
 PedManager::PedManager()
 {
@@ -146,7 +148,7 @@ PedInstance *PedManager::loadInstance(LevelData::People & gamdata, uint16 ped_id
     if(gamdata.type == 0x0 || gamdata.desc == 0x0D || gamdata.desc == 0x0C)
         return NULL;
 
-    if (ped_idx < 4 && !g_Session.agents().isSquadSlotActive(ped_idx)) {
+    if (ped_idx < 4 && !g_gameCtrl.agents().isSquadSlotActive(ped_idx)) {
         // Creates agent only if he's active
         return NULL;
     }if (ped_idx >= 4 && ped_idx < 8) {

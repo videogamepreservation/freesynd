@@ -185,10 +185,6 @@ public:
         return researchMan_;
     }
 
-    AgentManager &agents() {
-        return agents_;
-    }
-
     //! Sets the representation of the time in the given string
     void getTimeAsStr(char *dest);
 
@@ -298,10 +294,6 @@ private:
     bool replay_mission_;
     /*! Manager for researches. */
     ResearchManager researchMan_;
-    /*!
-     * Manager of agent.
-     */
-    AgentManager agents_;
 };
 
 #define g_Session   GameSession::singleton()

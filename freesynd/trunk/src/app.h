@@ -38,11 +38,7 @@
 #include "path.h"
 #include "menus/menumanager.h"
 #include "mapmanager.h"
-#include "mission.h"
 #include "missionmanager.h"
-#include "weaponmanager.h"
-#include "modmanager.h"
-#include "pedmanager.h"
 #include "sound/soundmanager.h"
 #include "sound/musicmanager.h"
 #include "core/gamesession.h"
@@ -77,20 +73,8 @@ class App : public Singleton < App > {
         return missions_;
     }
 
-    WeaponManager &weapons() {
-        return weapons_;
-    }
-
-    ModManager &mods() {
-        return mods_;
-    }
-
     MapManager &maps() {
         return maps_;
-    }
-
-    PedManager &peds() {
-        return peds_;
     }
 
     SoundManager &introSounds() {
@@ -185,10 +169,7 @@ private:
     GameSpriteManager game_sprites_;
     MenuManager menus_;
     MissionManager missions_;
-    WeaponManager weapons_;
-    ModManager mods_;
     MapManager maps_;
-    PedManager peds_;
     SoundManager intro_sounds_;
     SoundManager game_sounds_;
     MusicManager music_;

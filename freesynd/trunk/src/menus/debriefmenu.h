@@ -26,7 +26,10 @@
 #ifndef DEBRIEFMENU_H
 #define DEBRIEFMENU_H
 
+#include "menus/menu.h"
 #include "core/gameevent.h"
+
+class Mission;
 
 /*!
  * Menu displaying statistics about the last mission played.
