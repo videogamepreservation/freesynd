@@ -28,7 +28,6 @@
 #include <set>
 
 #include "../common.h"
-#include "agentmanager.h"
 #include "core/researchmanager.h"
 #include "utils/portablefile.h"
 

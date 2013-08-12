@@ -54,6 +54,7 @@
 #include "utils/log.h"
 #include "utils/configfile.h"
 #include "utils/portablefile.h"
+#include "agent.h"
 
 App::App(bool disable_sound):
 session_(new GameSession()), game_ctlr_(new GameController), 

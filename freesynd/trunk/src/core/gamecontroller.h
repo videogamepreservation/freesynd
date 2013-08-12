@@ -36,6 +36,7 @@
 #include "agentmanager.h"
 #include "weaponmanager.h"
 #include "modmanager.h"
+#include "missionmanager.h"
 
 class Mission;
 
@@ -78,6 +79,10 @@ class GameController : public Singleton < GameController > {
         return mods_;
     }
 
+    MissionManager &missions() {
+        return missions_;
+    }
+
     //*************************************
     // Game services
     //*************************************
@@ -101,6 +106,8 @@ private:
     WeaponManager weapons_;
     /*! Manager of mods.*/
     ModManager mods_;
+    /*! Manager of missions.*/
+    MissionManager missions_;
     /*! List of listeners for game stream events.*/
     std::list<GameEventListener *> game_listeners_;
     /*! List of listeners for mission stream events.*/

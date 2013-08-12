@@ -38,7 +38,6 @@
 #include "path.h"
 #include "menus/menumanager.h"
 #include "mapmanager.h"
-#include "missionmanager.h"
 #include "sound/soundmanager.h"
 #include "sound/musicmanager.h"
 #include "core/gamesession.h"
@@ -67,10 +66,6 @@ class App : public Singleton < App > {
 
     MenuManager &menus() {
         return menus_;
-    }
-
-    MissionManager &missions() {
-        return missions_;
     }
 
     MapManager &maps() {
@@ -168,7 +163,6 @@ private:
 
     GameSpriteManager game_sprites_;
     MenuManager menus_;
-    MissionManager missions_;
     MapManager maps_;
     SoundManager intro_sounds_;
     SoundManager game_sounds_;

@@ -35,7 +35,7 @@ const int WeaponHolder::kNoWeaponSelected = -1;
 WeaponHolder::WeaponHolder() {
     // -1 means no weapon is selected
     selected_weapon_ = -1;
-    prefered_weapon_.desc = WeaponSelectCriteria::kCritNotSet;
+    updtPreferedWeapon();
 }
 
 /*!
@@ -133,7 +133,7 @@ bool WeaponHolder::selectRequiredWeapon(WeaponSelectCriteria *pw_to_use) {
 
     bool found = false;
     switch (pw_to_use->desc) {
-        case WeaponHolder::WeaponSelectCriteria::kCritPointer:
+        case WeaponSelectCriteria::kCritPointer:
             if (pw_to_use->criteria.wi == wi) {
                 found = true;
             } else {
@@ -146,7 +146,7 @@ bool WeaponHolder::selectRequiredWeapon(WeaponSelectCriteria *pw_to_use) {
                 }
             }
             break;
-        case WeaponHolder::WeaponSelectCriteria::kCritWeaponType:
+        case WeaponSelectCriteria::kCritWeaponType:
             for (uint8 i = 0; i < sz; ++i) {
                 WeaponInstance *pWI = weapons_[i];
                 if (pWI->getWeaponType() == pw_to_use->criteria.wpn_type) {
@@ -164,7 +164,7 @@ bool WeaponHolder::selectRequiredWeapon(WeaponSelectCriteria *pw_to_use) {
                 }
             }
             break;
-        case WeaponHolder::WeaponSelectCriteria::kCritDamageStrict:
+        case WeaponSelectCriteria::kCritDamageStrict:
             for (uint8 i = 0; i < sz; ++i) {
                 WeaponInstance *pWI = weapons_[i];
                 if (pWI->canShoot()
