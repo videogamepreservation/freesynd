@@ -30,6 +30,7 @@
 #include "app.h"
 #include "utils/file.h"
 #include "briefmenu.h"
+#include "menus/gamemenuid.h"
 #include "core/missionbriefing.h"
 
 const int BriefMenu::kMiniMapScreenX = 504;
@@ -42,7 +43,7 @@ const int BriefMenu::kMaxLinePerPage = 14;
 #define EXECUTION_SPEED_TIME
 #endif
 BriefMenu::BriefMenu(MenuManager * m)
-    : Menu(m, MENU_BRIEF, MENU_MAP, "mbrief.dat", "mbrieout.dat"),
+    : Menu(m, fs_game_menus::kMenuIdBrief, fs_game_menus::kMenuIdMap, "mbrief.dat", "mbrieout.dat"),
         start_line_(0), p_briefing_(NULL), mm_renderer_() {
     addStatic(85, 35, 545, "#BRIEF_TITLE", FontManager::SIZE_4, false);
     txtTimeId_ = addStatic(500, 9, "", FontManager::SIZE_2, true);       // Time
@@ -54,11 +55,11 @@ BriefMenu::BriefMenu(MenuManager * m)
     registerHotKey(KFC_LEFT, prevButId_);
 
     // Accept button
-    addOption(17, 347, 128, 25, "#MENU_ACC_BUT", FontManager::SIZE_2, MENU_SELECT);
+    addOption(17, 347, 128, 25, "#MENU_ACC_BUT", FontManager::SIZE_2, fs_game_menus::kMenuIdSelect);
     // Map button
-    addOption(148, 347, 99, 25, "#BRIEF_MAP", FontManager::SIZE_2, MENU_MAP);
+    addOption(148, 347, 99, 25, "#BRIEF_MAP", FontManager::SIZE_2, fs_game_menus::kMenuIdMap);
     // Main menu button
-    addOption(500, 347,  128, 25, "#MENU_MAIN_BUT", FontManager::SIZE_2, MENU_MAIN);
+    addOption(500, 347,  128, 25, "#MENU_MAIN_BUT", FontManager::SIZE_2, fs_game_menus::kMenuIdMain);
 
     // Money
     txtMoneyId_ = addStatic(500, 87, 127, "0", FontManager::SIZE_2, true);     // textfield

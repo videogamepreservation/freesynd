@@ -1,4 +1,4 @@
-#include "gfx/screen.h"
+/*#include "gfx/screen.h"
 #include "gfx/spritemanager.h"
 #include "mapmanager.h"
 #include "utils/file.h"
@@ -460,4 +460,148 @@ void Screen::blit(int x, int y, int width, int height, const uint8 *pixeldata,
 void Screen::scale2x(int x, int y, int width, int height,
         const uint8 *pixeldata, int stride, bool transp) {
 
+}
+*/
+
+/************************************************************************
+ *                                                                      *
+ *  FreeSynd - a remake of the classic Bullfrog game "Syndicate".       *
+ *                                                                      *
+ *   Copyright (C) 2005  Stuart Binge  <skbinge@gmail.com>              *
+ *   Copyright (C) 2005  Joost Peters  <joostp@users.sourceforge.net>   *
+ *   Copyright (C) 2006  Trent Waddington <qg@biodome.org>              *
+ *   Copyright (C) 2010  Benoit Blancard <benblan@users.sourceforge.net>*
+ *                                                                      *
+ *    This program is free software;  you can redistribute it and / or  *
+ *  modify it  under the  terms of the  GNU General  Public License as  *
+ *  published by the Free Software Foundation; either version 2 of the  *
+ *  License, or (at your option) any later version.                     *
+ *                                                                      *
+ *    This program is  distributed in the hope that it will be useful,  *
+ *  but WITHOUT  ANY WARRANTY;  without even  the implied  warranty of  *
+ *  MERCHANTABILITY  or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU  *
+ *  General Public License for more details.                            *
+ *                                                                      *
+ *    You can view the GNU  General Public License, online, at the GNU  *
+ *  project's  web  site;  see <http://www.gnu.org/licenses/gpl.html>.  *
+ *  The full text of the license is also included in the file COPYING.  *
+ *                                                                      *
+ ************************************************************************/
+
+#include <memory>
+
+#include <cstdio>
+#include <cstdlib>
+
+#include "common.h"
+#include "editor/editorapp.h"
+#include "utils/file.h"
+#include "utils/log.h"
+#include "default_ini.h"
+
+#ifdef _WIN32
+#include <windows.h>
+#include <io.h>
+#else
+#include <time.h>
+#include <dirent.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#endif
+
+#ifdef SYSTEM_SDL
+#ifdef _WIN32
+#undef main
+#else
+#include <SDL_main.h>           //This is required on OSX for remapping of main()
+#endif
+#endif
+
+void print_usage() {
+    printf("usage: freesynd [options...]\n");
+    printf("    -h, --help            display this help and exit.\n");
+    printf("    -i, --ini <path>      specify the location of the FreeSynd config file.\n");
+    printf("    --nosound             disable all sound.\n");
+
+#ifdef _WIN32
+    printf(" (default: freesynd.ini in the same folder as freesynd.exe)\n");
+#elif defined(__APPLE__)
+    printf(" (default: $HOME/Library/Application Support/FreeSynd/freesynd.ini)\n");
+#else
+    printf(" (default: $HOME/.freesynd/freesynd.ini)\n");
+#endif
+}
+
+int main(int argc, char *argv[]) {
+
+#ifdef _WIN32
+    srand(GetTickCount());
+#else
+    srand((unsigned) time(NULL));
+#endif
+
+    // This variable stores the path to the Freesynd configuration file.
+    std::string iniPath;
+
+    bool disable_sound = true;
+
+    for (int i = 1; i < argc; ++i) {
+
+        if (0 == strcmp("-h", argv[i]) || 0 == strcmp("--help", argv[i])) {
+            print_usage();
+            return 1;
+        }
+
+        if (0 == strcmp("-i", argv[i]) || 0 == strcmp("--ini", argv[i])) {
+            i++;
+            iniPath = argv[i];
+        }
+    }
+
+#ifdef _DEBUG
+    // Initialize log
+    Log::initialize(Log::k_FLG_ALL, "editor.log");
+#endif
+
+    if (iniPath.size() == 0) {
+        iniPath.assign(EditorApp::defaultIniFolder());
+        iniPath.append("/freesynd.ini");
+#ifdef _WIN32
+        if (_access(iniPath.c_str(), 0) != 0)
+#else
+        struct stat st;
+        if (stat(iniPath.c_str(), &st))
+#endif
+        {
+            FILE *f = fopen(iniPath.c_str(), "w");
+            if (!f) {
+                FSERR(Log::k_FLG_IO, "Freesynd", "main", ("Cannot create default ini file at %s", iniPath.c_str()))
+                return -1;
+            }
+            fwrite(embedded_default_ini_data, 1, embedded_default_ini_size, f);
+            fclose(f);
+        }
+    }
+
+    LOG(Log::k_FLG_INFO, "Main", "main", ("----- Initializing application..."))
+    std::auto_ptr<EditorApp> app(new EditorApp(disable_sound));
+
+    if (app->initialize(iniPath)) {
+        LOG(Log::k_FLG_INFO, "Main", "main", ("----- Initializing application completed"))
+        LOG(Log::k_FLG_INFO, "Main", "main", ("----- Starting game loop"))
+        app->run();
+    } else {
+        LOG(Log::k_FLG_INFO, "Main", "main", ("----- Initializing application failed"))
+    }
+
+    // Destroy application
+    LOG(Log::k_FLG_INFO, "Main", "main", ("----- End of game loop. Destroy application"))
+    app->destroy();
+
+#ifdef _DEBUG
+    // Close log
+    Log::close();
+#endif
+
+    return 0;
 }

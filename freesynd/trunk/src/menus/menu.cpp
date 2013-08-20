@@ -34,22 +34,7 @@
 #include "gfx/screen.h"
 
 const int Menu::MENU_NO_MENU = -1;
-const int Menu::MENU_MAIN = 0;
-const int Menu::MENU_BRIEF = 1;
-const int Menu::MENU_CONF = 2;
-const int Menu::MENU_DEBRIEF = 3;
-const int Menu::MENU_GAMEPLAY = 4;
-const int Menu::MENU_LOADING = 5;
-const int Menu::MENU_LOGOUT = 6;
-const int Menu::MENU_RESEARCH = 7;
-const int Menu::MENU_SELECT = 8;
-const int Menu::MENU_LDSAVE = 9;
-const int Menu::MENU_MAP = 10;
-const int Menu::MENU_FLI_SUCCESS = 11;
-const int Menu::MENU_FLI_FAILED_MISSION = 12;
-const int Menu::MENU_FLI_TITLE = 13;
-const int Menu::MENU_FLI_INTRO = 14;
-const int Menu::MENU_FLI_GAME_LOST = 15;
+const int Menu::kMenuIdLogout = 6;
 
 Menu::Menu(MenuManager * menuManager, int id, int parentId, 
     const char *showAnim, const char *leaveAnim) :
@@ -152,7 +137,7 @@ void Menu::leave() {
  */
 int Menu::addStatic(int x, int y, const char *text, FontManager::EFontSize size, bool highlighted) {
 
-    MenuText m(x, y, text, getMenuFont(size), highlighted, true);
+    MenuText m(this, x, y, text, getMenuFont(size), highlighted, true);
     statics_.push_back(m);
     return m.getId();
 }
@@ -171,7 +156,7 @@ int Menu::addStatic(int x, int y, const char *text, FontManager::EFontSize size,
  * \returns The newly created widget id.
  */
 int Menu::addStatic(int x, int y, int width, const char *text, FontManager::EFontSize size, bool highlighted) {
-    MenuText m(x, y, width, text, getMenuFont(size), highlighted, true);
+    MenuText m(this, x, y, width, text, getMenuFont(size), highlighted, true);
     statics_.push_back(m);
     return m.getId();
 }

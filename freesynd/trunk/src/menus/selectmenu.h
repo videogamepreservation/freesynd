@@ -33,6 +33,7 @@
 class ListBox;
 class WeaponInstance;
 class Weapon;
+class Mod;
 
 /*!
  * Select Menu class.

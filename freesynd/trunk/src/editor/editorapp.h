@@ -41,25 +41,20 @@
 #include "sound/soundmanager.h"
 #include "sound/musicmanager.h"
 #include "core/appcontext.h"
-#include "core/gamesession.h"
-#include "core/gamecontroller.h"
 
 /*!
- * Application class.
- * Used for managing game settings and workflows.
+ * Editor Application class.
  */
-class App : public Singleton < App > {
+class EditorApp : public Singleton < EditorApp > {
   public:
-    App(bool disable_sound);
-    virtual ~App();
+    EditorApp(bool disable_sound);
+    virtual ~EditorApp();
 
     //! Initialize application
     bool initialize(const std::string& iniPath);
 
     // patched version
     uint8 walkdata_p_[256];
-
-    void setCheatCode(const char *name);
 
     GameSpriteManager &gameSprites() {
         return game_sprites_;
@@ -86,9 +81,7 @@ class App : public Singleton < App > {
     }
 
     //! Main application method
-    void run(int start_mission);
-    //! Reset the application data
-    bool reset();
+    void run();
 
     void quit() {
         running_ = false;
@@ -102,11 +95,6 @@ class App : public Singleton < App > {
     void destroy();
 
     void waitForKeyPress();
-
-    //! Save game to a file
-    bool saveGameToFile(int fileSlot, std::string name);
-    //! Load game from a file
-    bool loadGameFromFile(int fileSlot);
 
     static std::string defaultIniFolder();
 
@@ -128,34 +116,15 @@ private:
     //! Sets the intro flag to false in the config file
     void updateIntroFlag();
 
-    void cheatFunds() {
-        g_Session.setMoney(100000000);
-    }
-
-    void cheatRepeatOrCompleteMission();
-    void cheatWeaponsAndMods();
-    void cheatEquipAllMods();
-    void cheatAnyMission();
-    void cheatResurrectAgents();
-    void cheatOwnAllCountries();
-    void cheatAccelerateTime();
-    void cheatFemaleRecruits();
-    void cheatEquipFancyWeapons();
-
 private:
     bool running_;
     /*! True means the game will run in fullscreen. */
     bool fullscreen_;
-    /*! True means the intro will be played.*/
-    bool playIntro_;
-    /*! A structure to hold general application informations.*/
-    std::auto_ptr<AppContext> context_;
-    /*! A structure to hold player informations.*/
-    std::auto_ptr<GameSession> session_;
-    /*! Controls the game logic. */
-    std::auto_ptr<GameController> game_ctlr_;
+
     std::auto_ptr<Screen> screen_;
     std::auto_ptr<System> system_;
+    /*! A structure to hold general application informations.*/
+    std::auto_ptr<AppContext> context_;
 
     std::string iniPath_;
 
@@ -167,6 +136,6 @@ private:
     MusicManager music_;
 };
 
-#define g_App   App::singleton()
+#define g_App   EditorApp::singleton()
 
 #endif

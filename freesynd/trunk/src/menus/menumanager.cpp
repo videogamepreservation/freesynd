@@ -27,30 +27,23 @@
 #include <stdio.h>
 #include <assert.h>
 
-#include "app.h"
+#include "menus/menumanager.h"
+#include "core/appcontext.h"
 #include "system.h"
 #include "utils/configfile.h"
 #include "utils/file.h"
 #include "utils/log.h"
 #include "gfx/fliplayer.h"
-#include "mainmenu.h"
-#include "confmenu.h"
-#include "mapmenu.h"
-#include "briefmenu.h"
-#include "selectmenu.h"
-#include "researchmenu.h"
-#include "loadsavemenu.h"
-#include "loadingmenu.h"
-#include "gameplaymenu.h"
-#include "debriefmenu.h"
-#include "logoutmenu.h"
-#include "flimenu.h"
+#include "gfx/screen.h"
+#include "sound/soundmanager.h"
 
-
-MenuManager::MenuManager(): 
+MenuManager::MenuManager(MenuFactory *pFactory, SoundManager *pGameSounds): 
     dirtyList_(g_Screen.gameScreenWidth(), g_Screen.gameScreenHeight()),
     menuSprites_(), fonts_()
 {
+    pFactory_ = pFactory;
+    pGameSounds_ = pGameSounds;
+    pFactory_->setMenuManager(this);
     drop_events_ = false;
     background_ = new uint8[g_Screen.gameScreenWidth() * g_Screen.gameScreenHeight()];
     memset(background_, 0, g_Screen.gameScreenHeight() * g_Screen.gameScreenWidth());
@@ -68,6 +61,7 @@ MenuManager::MenuManager():
 
 MenuManager::~MenuManager()
 {
+    delete pFactory_;
 }
 
 /*!
@@ -185,7 +179,7 @@ void MenuManager::setDefaultPalette() {
 void MenuManager::setPaletteForMission(int i_id) {
     // I'm not sure of the way we get the palette
     char spal[20];
-    sprintf(spal,"hpal0%i.dat",g_Session.getSelectedBlock().mis_id % 5 + 1);
+    sprintf(spal,"hpal0%i.dat", i_id % 5 + 1);
     setPalette(spal);
 }
 
@@ -254,38 +248,7 @@ Menu * MenuManager::getMenu(int menuId) {
 
     // menu is not in cache so create it
     // some menus are not saved in cache as they are not accessed many times
-    Menu *pMenu = NULL;
-
-    if (menuId == Menu::MENU_MAIN) {
-        pMenu =  new MainMenu(this);
-    } else if (menuId == Menu::MENU_BRIEF) {
-        pMenu =  new BriefMenu(this);
-    } else if (menuId == Menu::MENU_CONF) {
-        pMenu =  new ConfMenu(this);
-    } else if (menuId == Menu::MENU_DEBRIEF) {
-        pMenu =  new DebriefMenu(this);
-    } else if (menuId == Menu::MENU_GAMEPLAY) {
-        pMenu =  new GameplayMenu(this);
-    } else if (menuId == Menu::MENU_LOADING) {
-        pMenu =  new LoadingMenu(this);
-    } else if (menuId == Menu::MENU_LOGOUT) {
-        pMenu =  new LogoutMenu(this);
-    } else if (menuId == Menu::MENU_RESEARCH) {
-        pMenu =  new ResearchMenu(this);
-    } else if (menuId == Menu::MENU_SELECT) {
-        pMenu =  new SelectMenu(this);
-    } else if (menuId == Menu::MENU_LDSAVE) {
-        pMenu =  new LoadSaveMenu(this);
-    } else if (menuId == Menu::MENU_MAP) {
-        pMenu =  new MapMenu(this);
-    } else if (menuId == Menu::MENU_FLI_SUCCESS ||
-        menuId == Menu::MENU_FLI_FAILED_MISSION || 
-        menuId == Menu::MENU_FLI_TITLE|| 
-        menuId == Menu::MENU_FLI_INTRO) {
-        pMenu =  new FliMenu(this, menuId);
-    } else {
-        FSERR(Log::k_FLG_UI, "MenuManager", "getMenu", ("Cannot open Menu : unknown id"));
-    }
+    Menu *pMenu = pFactory_->createMenu(menuId);
 
     if (pMenu && pMenu->isCachable()) {
         menus_[menuId] = pMenu;
@@ -337,7 +300,7 @@ void MenuManager::showMenu(Menu *pMenu) {
     if (pMenu->hasShowAnim()) {
         // Stop processing event during menu transitions
         drop_events_ = true;
-        FliPlayer fliPlayer;
+        FliPlayer fliPlayer(this);
         uint8 *data;
         int size;
         data = File::loadOriginalFile(pMenu->getShowAnimName(), size);
@@ -378,12 +341,12 @@ void MenuManager::leaveMenu(Menu *pMenu) {
 
     if (pMenu->hasLeaveAnim()) {
         drop_events_ = true;
-        FliPlayer fliPlayer;
+        FliPlayer fliPlayer(this);
         uint8 *data;
         int size;
         data = File::loadOriginalFile(pMenu->getLeaveAnimName(), size);
         fliPlayer.loadFliData(data);
-        g_App.gameSounds().play(snd::MENU_CHANGE);
+        pGameSounds_->play(snd::MENU_CHANGE);
         fliPlayer.play();
         delete[] data;
         drop_events_ = false;
@@ -433,7 +396,7 @@ void MenuManager::handleEvents() {
     while(g_System.pumpEvents(&evt)) {
         switch(evt.type) {
         case EVT_QUIT:
-            gotoMenu(Menu::MENU_LOGOUT);
+            gotoMenu(Menu::kMenuIdLogout);
             break;
         case EVT_MSE_MOTION:
             if (current_ && !drop_events_)
@@ -471,5 +434,5 @@ void MenuManager::handleEvents() {
 }
 
 bool MenuManager::simpleMouseDown() {
-    return g_App.getTimeForClick() < since_mouse_down_;
+    return g_Ctx.getTimeForClick() < since_mouse_down_;
 }

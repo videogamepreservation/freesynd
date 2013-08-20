@@ -30,6 +30,7 @@
 #include <assert.h>
 #include "app.h"
 #include "gameplaymenu.h"
+#include "menus/gamemenuid.h"
 #include "gfx/fliplayer.h"
 #include "utils/file.h"
 #include "vehicle.h"
@@ -48,7 +49,7 @@ const int GameplayMenu::kMiniMapScreenY = 46 + 44 + 10 + 46 + 44 + 15 + 2 * 32 +
 //#define ANIM_PLUS_FRAME_VIEW
 
 GameplayMenu::GameplayMenu(MenuManager *m) :
-Menu(m, MENU_GAMEPLAY, MENU_DEBRIEF, "", "mscrenup.dat"),
+Menu(m, fs_game_menus::kMenuIdGameplay, fs_game_menus::kMenuIdDebrief, "", "mscrenup.dat"),
 tick_count_(0), last_animate_tick_(0), last_motion_tick_(0),
 last_motion_x_(320), last_motion_y_(240), mission_hint_ticks_(0), 
 mission_hint_(0), mission_(NULL), world_x_(0),
@@ -1062,11 +1063,11 @@ bool GameplayMenu::handleUnknownKey(Key key, const int modKeys) {
             leaveAnim_ = "";
             if (mission_->completed()) {
                 // Display success animation
-                menu_manager_->gotoMenu(Menu::MENU_FLI_SUCCESS);
+                menu_manager_->gotoMenu(fs_game_menus::kMenuIdFliSuccess);
             }
             else if (mission_->failed()) {
                 
-                menu_manager_->gotoMenu(Menu::MENU_FLI_FAILED_MISSION);
+                menu_manager_->gotoMenu(fs_game_menus::kMenuIdFliFailedMission);
             }
 
             return true;

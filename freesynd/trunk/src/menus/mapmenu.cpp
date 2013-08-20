@@ -29,6 +29,7 @@
 #include "app.h"
 #include "utils/file.h"
 #include "menus/mapmenu.h"
+#include "menus/gamemenuid.h"
 
 struct pos {
     int x;
@@ -105,13 +106,13 @@ struct BlockDisplay {
  * \param m The menu manager.
  */
 MapMenu::MapMenu(MenuManager * m)
-    :  Menu(m, MENU_MAP, MENU_MAIN, "mmap.dat", "mmapout.dat"),
+    :  Menu(m, fs_game_menus::kMenuIdMap, fs_game_menus::kMenuIdMain, "mmap.dat", "mmapout.dat"),
 mapblk_data_(NULL), select_tick_count_(0) {
     //
     briefButId_ = addOption(17, 347, 128, 25, "#MAP_BRIEF_BUT",
-        FontManager::SIZE_2, MENU_BRIEF);
+        FontManager::SIZE_2, fs_game_menus::kMenuIdBrief);
     addOption(500, 347,  128, 25, "#MENU_MAIN_BUT",
-        FontManager::SIZE_2, MENU_MAIN);
+        FontManager::SIZE_2, fs_game_menus::kMenuIdMain);
 
     // Country name
     txtCountryId_ = addStatic(188, 312, 270, "", FontManager::SIZE_1,

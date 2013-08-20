@@ -30,6 +30,8 @@
 #include "gfx/fontmanager.h"
 #include "utils/seqmodel.h"
 
+class Menu;
+
 /*!
  * This is a graphical component. It's the base class
  * for all widgets (text, button, ...).
@@ -53,19 +55,21 @@ public:
 
     /*!
      * Constructs a widget with given size and location.
+     * \param peer The parent menu.
      * \param x X coordinate
      * \param y Y coordinate
      * \param widht Widget width
      * \param height Widget height
      * \param visible True means the widget is drawn
      */
-    Widget(int x, int y, int width, int height, bool visible) {
+    Widget(Menu *peer, int x, int y, int width, int height, bool visible) {
         id_ = ++widgetCnt;
         x_ = x;
         y_ = y;
         width_ = width;
         height_ = height;
         visible_ = visible;
+        peer_ = peer;
     }
     
     /*!
@@ -80,6 +84,10 @@ public:
      * Returns the widget id.
      */
     int getId() { return id_; }
+    /*!
+     * Returns the parent.
+     */
+    Menu * getPeer() { return peer_; }
 
     virtual void setLocation(int x, int y);
     int getX() { return x_; }
@@ -110,6 +118,8 @@ private:
 
     /*! A unique ID identifying the widget.*/
     int id_;
+    /*! Every widget belongs to a menu.*/
+    Menu *peer_;
 };
 
 //! A text widget.
@@ -124,14 +134,14 @@ public:
     /*!
      * Use this constructor to left align text. Widget width will depend on text and font.
      */
-    MenuText(int x, int y, const char *text, MenuFont *pFont, bool highlighted,
+    MenuText(Menu *peer, int x, int y, const char *text, MenuFont *pFont, bool highlighted,
             bool visible = true);
 
     /*!
      * Use this constructor to specify text alignment. Widget width will be fixed but text position
      * will depend of font size and text length.
      */
-    MenuText(int x, int y, int width, const char *text, MenuFont *pFont, bool highlighted,
+    MenuText(Menu *peer, int x, int y, int width, const char *text, MenuFont *pFont, bool highlighted,
             bool visible = true, bool centered = true);
 
     virtual ~MenuText() {}
@@ -173,7 +183,6 @@ protected:
     MenuFont *pFont_;
 };
 
-class Menu;
 class Sprite;
 
 /*!
@@ -182,8 +191,7 @@ class Sprite;
 class ActionWidget : public Widget {
 public:
     ActionWidget(Menu *peer, int x, int y, int width, int height, bool visible, bool isEnabled = true) 
-        : Widget(x, y, width, height, visible) {
-            peer_ = peer;
+        : Widget(peer, x, y, width, height, visible) {
             enabled_ = isEnabled;
     }
 
@@ -205,7 +213,6 @@ public:
     virtual void handleFocusLost() {}
 
 protected:
-    Menu *peer_;
     bool enabled_;
 };
 

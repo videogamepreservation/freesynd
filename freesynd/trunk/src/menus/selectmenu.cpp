@@ -32,12 +32,13 @@
 #include "mod.h"
 #include "selectmenu.h"
 #include "menus/menumanager.h"
+#include "menus/gamemenuid.h"
 #include "core/gamecontroller.h"
 #include "core/gamesession.h"
 #include "gfx/screen.h"
 #include "system.h"
 
-SelectMenu::SelectMenu(MenuManager * m):Menu(m, MENU_SELECT, MENU_BRIEF, "mselect.dat",
+SelectMenu::SelectMenu(MenuManager * m):Menu(m, fs_game_menus::kMenuIdSelect, fs_game_menus::kMenuIdBrief, "mselect.dat",
     "mselout.dat"),
 cur_agent_(0), tick_count_(0), rnd_(0), sel_all_(false)
 {
@@ -51,12 +52,12 @@ cur_agent_(0), tick_count_(0), rnd_(0), sel_all_(false)
     txtTimeId_ = addStatic(500, 9, "", FontManager::SIZE_2, true);       // Time
     moneyTxtId_ = addStatic(500, 87, 128, "0", FontManager::SIZE_2, true);     // Money
 
-    addOption(16, 234, 129, 25, "#SELECT_RES_BUT", FontManager::SIZE_2, MENU_RESEARCH);
+    addOption(16, 234, 129, 25, "#SELECT_RES_BUT", FontManager::SIZE_2, fs_game_menus::kMenuIdResearch);
     teamButId_ = addToggleAction(16, 262, 129, 25, "#SELECT_TEAM_BUT", FontManager::SIZE_2, false);
     modsButId_ = addToggleAction(16, 290, 129, 25, "#MENU_MODS_BUT", FontManager::SIZE_2, false);
     equipButId_ = addToggleAction(16, 318, 129, 25, "#MENU_EQUIP_BUT", FontManager::SIZE_2, true);
-    acceptButId_ = addOption(16, 346, 129, 25, "#MENU_ACC_BUT", FontManager::SIZE_2, MENU_LOADING);
-    addOption(500, 347,  128, 25, "#MENU_MAIN_BUT", FontManager::SIZE_2, MENU_MAIN);
+    acceptButId_ = addOption(16, 346, 129, 25, "#MENU_ACC_BUT", FontManager::SIZE_2, fs_game_menus::kMenuIdLoading);
+    addOption(500, 347,  128, 25, "#MENU_MAIN_BUT", FontManager::SIZE_2, fs_game_menus::kMenuIdMain);
 
     // Team list
     pTeamLBox_ = addTeamListBox(502, 106, 124, 236, false);

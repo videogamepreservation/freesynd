@@ -27,7 +27,9 @@
 #define RESEARCHMENU_H
 
 #include "core/gameevent.h"
+#include "menus/menu.h"
 
+class Research;
 /*!
  * Research class.
  */

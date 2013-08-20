@@ -51,13 +51,14 @@ typedef struct FrameTypeChunkHeader {
 } FrameTypeChunkHeader;
 
 class Font;
+class MenuManager;
 
 /*!
  * A player for fli animation.
  */
 class FliPlayer {
 public:
-    FliPlayer() : fli_data_(0), offscreen_(0) {}
+    FliPlayer(MenuManager *pManager) : fli_data_(0), offscreen_(0) {pManager_ = pManager;}
     virtual ~FliPlayer();
 
     //! Play an entire animation without interruption
@@ -88,6 +89,7 @@ protected:
     const uint8 *offscreen_;
     uint8 palette_[256 * 3];
     FliHeader fli_info_;
+    MenuManager *pManager_;
 };
 
 #endif

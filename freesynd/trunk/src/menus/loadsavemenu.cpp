@@ -28,13 +28,14 @@
 #include <assert.h>
 #include "app.h"
 #include "loadsavemenu.h"
+#include "menus/gamemenuid.h"
 #include "utils/file.h"
 
 const int LoadSaveMenu::X_ORIGIN = 165;
 const int LoadSaveMenu::Y_ORIGIN = 100;
 const size_t LoadSaveMenu::NAME_MAX_SIZE = 31;
 
-LoadSaveMenu::LoadSaveMenu(MenuManager * m):Menu(m, MENU_LDSAVE, MENU_MAIN, "mlosa.dat",
+LoadSaveMenu::LoadSaveMenu(MenuManager * m):Menu(m, fs_game_menus::kMenuIdLdSave, fs_game_menus::kMenuIdMain, "mlosa.dat",
      "mlosaout.dat")
 {
     isCachable_ = false;
@@ -46,7 +47,7 @@ LoadSaveMenu::LoadSaveMenu(MenuManager * m):Menu(m, MENU_LDSAVE, MENU_MAIN, "mlo
     // Save button
     saveButId_ = addOption(147, 346, 99, 25, "#LS_SAVE_BUT", FontManager::SIZE_2);
     // Main menu button
-    addOption(501, 346, 126, 25, "#MENU_MAIN_BUT", FontManager::SIZE_2, MENU_MAIN);
+    addOption(501, 346, 126, 25, "#MENU_MAIN_BUT", FontManager::SIZE_2, fs_game_menus::kMenuIdMain);
 
     std::string label;
     g_App.menus().getMessage("MENU_LB_EMPTY", label);
@@ -92,14 +93,14 @@ void LoadSaveMenu::handleAction(const int actionId, void *ctx, const int modKeys
         if (editNameId_ != -1) {
             if (g_App.loadGameFromFile(editNameId_)) {
                 editNameId_ = -1;
-                menu_manager_->gotoMenu(Menu::MENU_MAIN);
+                menu_manager_->gotoMenu(fs_game_menus::kMenuIdMain);
             }
         }
     } else if (actionId == saveButId_) {
         if (editNameId_ != -1 && pTextFields_[editNameId_]->getText().size() != 0) {
             if (g_App.saveGameToFile(editNameId_, pTextFields_[editNameId_]->getText())) {
                 editNameId_ = -1;
-                menu_manager_->gotoMenu(Menu::MENU_MAIN);
+                menu_manager_->gotoMenu(fs_game_menus::kMenuIdMain);
             }
         }
     }

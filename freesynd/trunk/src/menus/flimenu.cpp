@@ -22,6 +22,7 @@
 
 #include "app.h"
 #include "menus/flimenu.h"
+#include "menus/gamemenuid.h"
 #include "utils/file.h"
 #include "gfx/screen.h"
 
@@ -100,7 +101,7 @@ const FrameEvent no_event[] = {
     {(uint16)-1, msc::NO_TRACK, snd::NO_SOUND, 0x0, NULL }
 };
 
-FliMenu::FliMenu(MenuManager *m, int menuId) : Menu(m, menuId, Menu::MENU_MAIN), fliPlayer_()
+FliMenu::FliMenu(MenuManager *m, int menuId) : Menu(m, menuId, fs_game_menus::kMenuIdMain), fliPlayer_(m)
 {
     fliIndex_ = 0;
     pData_ = NULL;
@@ -108,21 +109,21 @@ FliMenu::FliMenu(MenuManager *m, int menuId) : Menu(m, menuId, Menu::MENU_MAIN),
     isCachable_ = false;
     currSubTitle_ = "";
 
-    if (menuId == Menu::MENU_FLI_SUCCESS || menuId == Menu::MENU_FLI_FAILED_MISSION) {
-        if (menuId == Menu::MENU_FLI_SUCCESS) {
+    if (menuId == fs_game_menus::kMenuIdFliSuccess || menuId == fs_game_menus::kMenuIdFliFailedMission) {
+        if (menuId == fs_game_menus::kMenuIdFliSuccess) {
             addFliDesc("mgamewin.dat", 66, false, true, mission_win);
-        } else if (menuId == Menu::MENU_FLI_FAILED_MISSION) {
+        } else if (menuId == fs_game_menus::kMenuIdFliFailedMission) {
             addFliDesc("mendlose.dat", 66, false, true, mission_failed);
-        } else if (menuId == Menu::MENU_FLI_GAME_LOST) {
+        } else if (menuId == fs_game_menus::kMenuIdFliGameLost) {
             // All availiable agents are dead
             // TODO: use it
             addFliDesc("mlosegam.dat", 66, false, true, game_lost);
         }
         // common fli to prepare next menu show
         addFliDesc("mscrenup.dat", 50, false, false, menu_up);
-        nextMenu_ = Menu::MENU_DEBRIEF;
-    } else if (menuId == Menu::MENU_FLI_TITLE || menuId == Menu::MENU_FLI_INTRO) {
-        if ( menuId == Menu::MENU_FLI_INTRO) {
+        nextMenu_ = fs_game_menus::kMenuIdDebrief;
+    } else if (menuId == fs_game_menus::kMenuIdFliTitle || menuId == fs_game_menus::kMenuIdFliIntro) {
+        if ( menuId == fs_game_menus::kMenuIdFliIntro) {
             // Display the intro animation
             addFliDesc("intro.dat", 66, false, true, intro);
         }
@@ -130,7 +131,7 @@ FliMenu::FliMenu(MenuManager *m, int menuId) : Menu(m, menuId, Menu::MENU_MAIN),
         addFliDesc("mtitle.dat", 66, true, true, no_event);
         // common fli to prepare next menu show
         addFliDesc("mscrenup.dat", 50, false, false, menu_up);
-        nextMenu_ = Menu::MENU_MAIN;
+        nextMenu_ = fs_game_menus::kMenuIdMain;
     }
 
 }

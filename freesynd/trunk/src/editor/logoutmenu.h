@@ -6,7 +6,6 @@
  *   Copyright (C) 2005  Joost Peters  <joostp@users.sourceforge.net>   *
  *   Copyright (C) 2006  Trent Waddington <qg@biodome.org>              *
  *   Copyright (C) 2006  Tarjei Knapstad <tarjei.knapstad@gmail.com>    *
- *   Copyright (C) 2010  Benoit Blancard <benblan@users.sourceforge.net>*
  *                                                                      *
  *    This program is free software;  you can redistribute it and / or  *
  *  modify it  under the  terms of the  GNU General  Public License as  *
@@ -24,20 +23,22 @@
  *                                                                      *
  ************************************************************************/
 
-#include "logoutmenu.h"
-#include "menus/gamemenuid.h"
-#include "app.h"
+#ifndef LOGOUTMENU_H
+#define LOGOUTMENU_H
 
-LogoutMenu::LogoutMenu(MenuManager * m):Menu(m, kMenuIdLogout, fs_game_menus::kMenuIdMain),
-tick_count_(0)
-{
-    isCachable_ = false;
-    addStatic(0, 180, g_Screen.gameScreenWidth(), "#LGOUT_TITLE", FontManager::SIZE_4, true);
-}
+#include "menus/menu.h"
 
-void LogoutMenu::handleTick(int elapsed)
-{
-    tick_count_ += elapsed;
-    if (tick_count_ > 2000)
-        g_App.quit();
-}
+/*!
+ * Menu showed when leaving the application.
+ */
+class LogoutMenu : public Menu {
+public:
+    LogoutMenu(MenuManager *m);
+
+    void handleTick(int elapsed);
+
+protected:
+    int tick_count_;
+};
+
+#endif

@@ -5,7 +5,6 @@
  *   Copyright (C) 2005  Stuart Binge  <skbinge@gmail.com>              *
  *   Copyright (C) 2005  Joost Peters  <joostp@users.sourceforge.net>   *
  *   Copyright (C) 2006  Trent Waddington <qg@biodome.org>              *
- *   Copyright (C) 2006  Tarjei Knapstad <tarjei.knapstad@gmail.com>    *
  *   Copyright (C) 2010  Benoit Blancard <benblan@users.sourceforge.net>*
  *                                                                      *
  *    This program is free software;  you can redistribute it and / or  *
@@ -24,20 +23,38 @@
  *                                                                      *
  ************************************************************************/
 
-#include "logoutmenu.h"
-#include "menus/gamemenuid.h"
-#include "app.h"
+//include <stdio.h>
+//include <assert.h>
 
-LogoutMenu::LogoutMenu(MenuManager * m):Menu(m, kMenuIdLogout, fs_game_menus::kMenuIdMain),
-tick_count_(0)
+#include "menus/menu.h"
+#include "menus/menumanager.h"
+#include "editor/mainmenu.h"
+#include "editor/editormenuid.h"
+#include "gfx/screen.h"
+#include "system.h"
+
+MainMenu::MainMenu(MenuManager * m):Menu(m, fs_edit_menus::kMenuIdMain, fs_edit_menus::kMenuIdMain, "mscrenup.dat", "mscrenup.dat")
 {
     isCachable_ = false;
-    addStatic(0, 180, g_Screen.gameScreenWidth(), "#LGOUT_TITLE", FontManager::SIZE_4, true);
+    addStatic(0, 40, g_Screen.gameScreenWidth(), "GAME EDITOR", FontManager::SIZE_4, false);
+
+    quitButId_ = addOption(201, 266, 300, 25, "#MAIN_QUIT", FontManager::SIZE_3, MENU_NO_MENU, true, false);
 }
 
-void LogoutMenu::handleTick(int elapsed)
+void MainMenu::handleShow()
 {
-    tick_count_ += elapsed;
-    if (tick_count_ > 2000)
-        g_App.quit();
+    // If we came from the intro, the cursor is invisible
+    // otherwise, it does no harm
+    g_System.useMenuCursor();
+    g_System.showCursor();
+}
+
+void MainMenu::handleLeave() {
+    g_System.hideCursor();
+}
+
+void MainMenu::handleAction(const int actionId, void *ctx, const int modKeys)
+{
+    if (actionId == quitButId_)
+        menu_manager_->gotoMenu(Menu::kMenuIdLogout);
 }

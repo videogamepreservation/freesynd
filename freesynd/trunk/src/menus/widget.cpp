@@ -1,5 +1,9 @@
-#include "widget.h"
-#include "app.h"
+#include <stdarg.h>
+
+#include "menus/widget.h"
+#include "menus/menu.h"
+#include "menus/menumanager.h"
+#include "gfx/screen.h"
 #include "utils/utf8.h"
 
 int Widget::widgetCnt = 0;
@@ -10,7 +14,7 @@ int Widget::widgetCnt = 0;
  */
 void Widget::redraw() {
     if (visible_) {
-        g_App.menus().addRect(x_, y_, width_, height_);
+        getPeer()->addDirtyRect(x_, y_, width_, height_);
     }
 }
 
@@ -23,14 +27,14 @@ void Widget::setVisible(bool visible) {
     if (visible != visible_) {
         // forcing widget update, if it becomes invisible widget erased,
         // if becomes visible widget is drawn
-        g_App.menus().addRect(x_, y_, width_, height_);
+        getPeer()->addDirtyRect(x_, y_, width_, height_);
         visible_ = visible;
     }
 }
 
-MenuText::MenuText(int x, int y, const char *text, MenuFont *pFont, 
+MenuText::MenuText(Menu *peer, int x, int y, const char *text, MenuFont *pFont, 
                    bool highlighted, bool visible): 
-            Widget(x, y, 0, 0, visible)
+            Widget(peer, x, y, 0, 0, visible)
 {
         highlighted_ = highlighted;
         centered_ = false;
@@ -43,9 +47,9 @@ MenuText::MenuText(int x, int y, const char *text, MenuFont *pFont,
         updateText(text);
 }
 
-MenuText::MenuText(int x, int y, int width, const char *text, MenuFont *pFont, 
+MenuText::MenuText(Menu *peer, int x, int y, int width, const char *text, MenuFont *pFont, 
                    bool highlighted, bool visible, bool centered): 
-            Widget(x, y, width, 0, visible)
+            Widget(peer, x, y, width, 0, visible)
 {
         
     highlighted_ = highlighted;
@@ -66,7 +70,7 @@ void MenuText::updateText(const char *text) {
         // Erase the # caracter
         lbl.erase(0, 1);
         // and looks for the message in the langage file
-        g_App.menus().getMessage(lbl.c_str(), lbl);
+        getPeer()->getMessage(lbl.c_str(), lbl);
     }
     text_ = lbl;
 
@@ -109,7 +113,7 @@ void MenuText::setTextFormated(const char * format, ...) {
         // Erase the # caracter
         lbl.erase(0, 1);
         // and looks for the message in the langage file
-        g_App.menus().getMessage(lbl.c_str(), lbl);
+        getPeer()->getMessage(lbl.c_str(), lbl);
     }
 
     va_start(list, format);
@@ -160,7 +164,7 @@ void ActionWidget::setWidgetEnabled(bool enabled) {
 Option::Option(Menu *peer, int x, int y, int width, int height, const char *text,
     MenuFont *pFont, int to, bool visible, bool centered, int darkWidgetId,
     int lightWidgetId) : ActionWidget(peer, x, y, width, height, visible),
-    text_(x, y, width - 4, text, pFont, false, true, centered)
+    text_(peer, x, y, width - 4, text, pFont, false, true, centered)
 {
         to_ = to;
         darkWidget_ = NULL;
@@ -245,12 +249,12 @@ void Option::draw() {
  * another menu if the field "to" has been set.
  */
 void Option::executeAction(const int modKeys) {
-    if (peer_ && this->isVisible()) {
-        peer_->handleAction(getId(), NULL, modKeys);
+    if (getPeer() && this->isVisible()) {
+        getPeer()->handleAction(getId(), NULL, modKeys);
     }
 
     if (to_ != -1) {
-        g_App.menus().gotoMenu(to_);
+        getPeer()->getMenuManager()->gotoMenu(to_);
         return;
     }
 }
@@ -389,10 +393,10 @@ void ListBox::handleMouseMotion(int x, int y, int state, const int modKeys) {
 
 void ListBox::handleMouseDown(int x, int y, int button, const int modKeys) {
     if (focusedLine_ != -1 && pModel_) {
-        if (peer_) {
+        if (getPeer()) {
             // call the peer handleAction method giving the index of pressed line.
             std::pair<int, void *> tuple = std::make_pair(focusedLine_, pModel_->getElement(focusedLine_));
-            peer_->handleAction(getId(), &tuple, modKeys);
+            getPeer()->handleAction(getId(), &tuple, modKeys);
             
         }
     }
@@ -407,7 +411,7 @@ const int TeamListBox::LINE_OFFSET = 20;
 
 TeamListBox::TeamListBox(Menu *peer, int x, int y, int width, int height, MenuFont *pFont, bool visible) :
         ListBox(peer, x, y, width, height, pFont, visible) {
-    pTitle_ = new MenuText(x, y, width, "#SELECT_CRYO_TITLE", pFont, true);
+    pTitle_ = new MenuText(peer, x, y, width, "#SELECT_CRYO_TITLE", pFont, true);
     lUnderline_ = pFont_->textWidth(pTitle_->getText().c_str(), false);
     xUnderline_ = (x + x + width) / 2  - lUnderline_ / 2;
     yUnderline_ = y + pFont_->textHeight();
@@ -416,7 +420,7 @@ TeamListBox::TeamListBox(Menu *peer, int x, int y, int width, int height, MenuFo
         squadLines_[i] = i;
     }
 
-    g_App.menus().getMessage("MENU_LB_EMPTY", emptyLbl_);
+    getPeer()->getMessage("MENU_LB_EMPTY", emptyLbl_);
 }
 
 TeamListBox::~TeamListBox() {
@@ -487,7 +491,7 @@ std::string TextField::emptyLbl_ = "";
 
 TextField::TextField(Menu *peer, int x, int y, int width, int height, MenuFont *pFont,
             int maxSize, bool displayEmpty, bool visible) 
-            : ActionWidget(peer, x, y, width, height, visible), text_(x, y, width, "", pFont, false, visible, false) {
+            : ActionWidget(peer, x, y, width, height, visible), text_(peer, x, y, width, "", pFont, false, visible, false) {
 
     // Position the button text in the middle of height
     // add 1 pixel to height to compensate lost of division
@@ -688,7 +692,7 @@ bool TextField::handleKey(Key key, const int modKeys) {
 }
 
 void TextField::handleMouseDown(int x, int y, int button, const int modKeys) {
-    peer_->captureInputBy(this);
+    getPeer()->captureInputBy(this);
 
     char src[100];
     size_t sizeByte = text_.getText().size();

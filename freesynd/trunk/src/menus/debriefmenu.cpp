@@ -28,6 +28,7 @@
 #include <assert.h>
 
 #include "debriefmenu.h"
+#include "menus/gamemenuid.h"
 #include "mission.h"
 #include "core/squad.h"
 #include "core/gamecontroller.h"
@@ -35,7 +36,7 @@
 #include "system.h"
 #include "gfx/screen.h"
 
-DebriefMenu::DebriefMenu(MenuManager *m) : Menu(m, MENU_DEBRIEF, MENU_MAIN, "mdebrief.dat",
+DebriefMenu::DebriefMenu(MenuManager *m) : Menu(m, fs_game_menus::kMenuIdDebrief, fs_game_menus::kMenuIdMain, "mdebrief.dat",
      "mdeout.dat") {
     int y = 35;
     int right_x = 310;
@@ -89,8 +90,8 @@ DebriefMenu::DebriefMenu(MenuManager *m) : Menu(m, MENU_DEBRIEF, MENU_MAIN, "mde
     y += 14;
     txtNewWeap2Id_ = addStatic(left_x, y, "", FontManager::SIZE_2, true);
 
-    addOption(16, 346, 129, 25, "#MENU_ACC_BUT", FontManager::SIZE_2, MENU_MAP);
-    addOption(500, 347,  128, 25, "#MENU_MAIN_BUT", FontManager::SIZE_2, MENU_MAIN);
+    addOption(16, 346, 129, 25, "#MENU_ACC_BUT", FontManager::SIZE_2, fs_game_menus::kMenuIdMap);
+    addOption(500, 347,  128, 25, "#MENU_MAIN_BUT", FontManager::SIZE_2, fs_game_menus::kMenuIdMain);
 }
 
 /*!

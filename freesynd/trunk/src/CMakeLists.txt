@@ -47,6 +47,7 @@ set (SOURCES
 	menus/mapmenu.cpp
 	menus/menu.cpp
 	menus/menumanager.cpp
+	menus/gamemenufactory.cpp
 	menus/researchmenu.cpp
 	menus/selectmenu.cpp
 	menus/squadselection.cpp
@@ -113,6 +114,7 @@ set(HEADERS
 	weapon.h
 	weaponholder.h
 	weaponmanager.h
+	core/appcontext.h
 	core/gameevent.h
 	core/squad.h
 	core/gamesession.h
@@ -146,6 +148,8 @@ set(HEADERS
 	menus/mapmenu.h
 	menus/menu.h
 	menus/menumanager.h
+	menus/gamemenufactory.h
+	menus/gamemenuid.h
 	menus/researchmenu.h
 	menus/selectmenu.h
 	menus/squadselection.h
@@ -180,6 +184,7 @@ source_group(Core REGULAR_EXPRESSION core/*)
 source_group(Gfx REGULAR_EXPRESSION gfx/*)
 source_group(Sound REGULAR_EXPRESSION sound/*)
 source_group(Model REGULAR_EXPRESSION model/*)
+source_group(Editor REGULAR_EXPRESSION editor/*)
 
 add_executable (freesynd ${SOURCES} ${HEADERS})
 
@@ -193,20 +198,50 @@ if(NOT BIN_DIR)
 endif(NOT BIN_DIR)
 
 if (BUILD_DEV_TOOLS)
+	set(DEV_TOOLS_HEADERS
+		editor/editorapp.h
+		editor/editormenufactory.h
+		editor/editormenuid.h
+		editor/logoutmenu.h
+		editor/mainmenu.h)
+	
 	add_executable (dump
 		dump.cpp
+		gfx/dirtylist.cpp
+		gfx/fliplayer.cpp
+		gfx/font.cpp
+		gfx/fontmanager.cpp
+		gfx/screen.cpp
 		gfx/sprite.cpp
 		gfx/spritemanager.cpp
 		gfx/tile.cpp
 		gfx/tilemanager.cpp
+		sound/audio.cpp
+		sound/musicmanager.cpp
+		sound/sdlmixermusic.cpp
+		sound/sdlmixersound.cpp
+		sound/soundmanager.cpp
+		sound/xmidi.cpp
+		menus/menu.cpp
+		menus/menumanager.cpp
+		menus/widget.cpp
 		map.cpp
 		mapmanager.cpp
 		utils/dernc.cpp
 		utils/file.cpp
 		utils/log.cpp
 		utils/portablefile.cpp
+		utils/configfile.cpp
+		utils/ccrc32.cpp
+		utils/seqmodel.cpp
+		editor/editorapp.cpp
+		editor/editormenufactory.cpp
+		editor/logoutmenu.cpp
+		editor/mainmenu.cpp
+		system_sdl.cpp
+		${DEV_TOOLS_HEADERS}
 	)
-	target_link_libraries (dump ${PNG_LIBRARIES})
+	target_link_libraries (dump ${PNG_LIBRARIES} ${SDL_LIBRARY} ${SDLIMAGE_LIBRARY} ${SDLMIXER_LIBRARY})
 else ()
 	# We only define an install target if we're doing a release build.
 	if (APPLE)

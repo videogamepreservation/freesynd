@@ -35,6 +35,20 @@
 
 class SpriteManager;
 class ConfigFile;
+class MenuManager;
+class SoundManager;
+
+/*!
+ * This abstract class is responsible for instanciating menus from a given id.
+ */
+class MenuFactory {
+public:
+    virtual Menu * createMenu(const int menuId) = 0;
+    void setMenuManager(MenuManager *pManager) { pManager_ = pManager; }
+
+protected:
+    MenuManager *pManager_;
+};
 
 /*!
  * Menu manager class.
@@ -51,7 +65,7 @@ public:
         GERMAN = 3
     };
 
-    MenuManager();
+    MenuManager(MenuFactory *pFactory, SoundManager *pGameSounds);
     ~MenuManager();
 
     bool initialize(bool loadIntroFont);
@@ -134,6 +148,8 @@ protected:
     void changeCurrentMenu();
 
 protected:
+    /** The menu factory.*/
+    MenuFactory *pFactory_;
     /** The list of currently loaded menus.*/
     std::map<int, Menu *> menus_;
     /** The current menu being displayed.*/
@@ -158,6 +174,7 @@ protected:
     SpriteManager *pIntroFontSprites_;
     /*! Font manager.*/
     FontManager fonts_;
+    SoundManager *pGameSounds_;
 
     /*! Time since last mouse down event without mouseup*/
     int32 since_mouse_down_;

@@ -28,6 +28,7 @@
 #include "common.h"
 #include "map.h"
 #include "utils/timer.h"
+#include "core/gameevent.h"
 
 class Mission;
 class MissionBriefing;

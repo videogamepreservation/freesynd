@@ -33,8 +33,9 @@
 #include "core/gamecontroller.h"
 #include "core/gamesession.h"
 #include "menus/menumanager.h"
+#include "menus/gamemenuid.h"
 
-LoadingMenu::LoadingMenu(MenuManager * m):Menu(m, MENU_LOADING, MENU_MAIN),
+LoadingMenu::LoadingMenu(MenuManager * m):Menu(m, fs_game_menus::kMenuIdLoading, fs_game_menus::kMenuIdMain),
     timer_(2000)
 {
     isCachable_ = false;
@@ -56,6 +57,6 @@ void LoadingMenu::handleTick(int elapsed)
     }
 
     if (timer_.update(elapsed)) {
-        menu_manager_->gotoMenu(Menu::MENU_GAMEPLAY);
+        menu_manager_->gotoMenu(fs_game_menus::kMenuIdGameplay);
     }
 }

@@ -27,7 +27,7 @@
 #include "fliplayer.h"
 #include "screen.h"
 #include "utils/log.h"
-#include "app.h"
+#include "menus/menumanager.h"
 
 #if 0 // TMN: Data for playing samples during intro video. Hardcoded from intro.exe.
 
@@ -441,7 +441,7 @@ bool FliPlayer::play(bool intro, Font *pIntroFont) {
     int cur_frame = 0;
     while (hasFrames()) {
         // Consumes events now so they won't be piled up after the animation
-        g_App.menus().handleEvents();
+        pManager_->handleEvents();
 
         if (!decodeFrame())
             break;

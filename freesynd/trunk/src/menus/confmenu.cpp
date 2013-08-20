@@ -31,6 +31,7 @@
 
 #include "confmenu.h"
 #include "menus/menumanager.h"
+#include "menus/gamemenuid.h"
 #include "core/gamecontroller.h"
 #include "core/gamesession.h"
 #include "utils/file.h"
@@ -44,7 +45,7 @@ int g_Colours[MAX_COLOUR] = { 6, 7, 14, 3, 11, 12, 13, 15 };
 
 
 ConfMenu::ConfMenu(MenuManager *m) :
-Menu(m, MENU_CONF, MENU_MAIN, "mconfup.dat", "mconfout.dat") {
+Menu(m, fs_game_menus::kMenuIdConf, fs_game_menus::kMenuIdMain, "mconfup.dat", "mconfout.dat") {
     isCachable_ = false;
     toAcceptLogo_ = 0;
     toAcceptColourId_ = 0;
@@ -57,9 +58,9 @@ Menu(m, MENU_CONF, MENU_MAIN, "mconfup.dat", "mconfout.dat") {
     compNameButId_ = addOption(325, 90, 240, 20, "#CONF_COM_NAME_BUT", FontManager::SIZE_2, MENU_NO_MENU, true, false, Sprite::MSPR_BULLET_D, Sprite::MSPR_BULLET_L);
     userNameButId_ = addOption(325, 115, 240, 20, "#CONF_YOUR_NAME_BUT", FontManager::SIZE_2, MENU_NO_MENU, true, false, Sprite::MSPR_BULLET_D, Sprite::MSPR_BULLET_L);
     // Accept button
-    acceptButId_ = addOption(17, 347, 128, 25, "#MENU_ACC_BUT", FontManager::SIZE_2, MENU_MAIN);
+    acceptButId_ = addOption(17, 347, 128, 25, "#MENU_ACC_BUT", FontManager::SIZE_2, fs_game_menus::kMenuIdMain);
     // Main menu button
-    menuButId_ = addOption(500, 347,  128, 25, "#MENU_MAIN_BUT", FontManager::SIZE_2, MENU_MAIN);
+    menuButId_ = addOption(500, 347,  128, 25, "#MENU_MAIN_BUT", FontManager::SIZE_2, fs_game_menus::kMenuIdMain);
 
     createPanels();
 

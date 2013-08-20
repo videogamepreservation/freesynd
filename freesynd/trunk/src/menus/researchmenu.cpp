@@ -28,8 +28,9 @@
 #include "app.h"
 #include "core/research.h"
 #include "researchmenu.h"
+#include "menus/gamemenuid.h"
 
-ResearchMenu::ResearchMenu(MenuManager * m):Menu(m, MENU_RESEARCH, MENU_SELECT, "mresrch.dat", "mresout.dat")
+ResearchMenu::ResearchMenu(MenuManager * m):Menu(m, fs_game_menus::kMenuIdResearch, fs_game_menus::kMenuIdSelect, "mresrch.dat", "mresout.dat")
 {
     tab_ = TAB_EQUIPS;
     pSelectedWeapon_ = NULL;
@@ -43,8 +44,8 @@ ResearchMenu::ResearchMenu(MenuManager * m):Menu(m, MENU_RESEARCH, MENU_SELECT, 
 
     modsButId_ = addToggleAction(16, 290, 129, 25, "#MENU_MODS_BUT", FontManager::SIZE_2, tab_ == TAB_MODS);
     equipButId_ = addToggleAction(16, 318, 129, 25,  "#MENU_EQUIP_BUT", FontManager::SIZE_2, tab_ == TAB_EQUIPS);
-    addOption(16, 346, 129, 25,  "#MENU_ACC_BUT", FontManager::SIZE_2, MENU_SELECT);
-    addOption(500, 347,  128, 25, "#MENU_MAIN_BUT", FontManager::SIZE_2, MENU_MAIN);
+    addOption(16, 346, 129, 25,  "#MENU_ACC_BUT", FontManager::SIZE_2, fs_game_menus::kMenuIdSelect);
+    addOption(500, 347,  128, 25, "#MENU_MAIN_BUT", FontManager::SIZE_2, fs_game_menus::kMenuIdMain);
 
     pFieldEquipLBox_ = addListBox(20, 84,  122, 120, tab_ == TAB_EQUIPS);
     pFieldEquipLBox_->setModel(g_Session.researchManager().getAvailableWeaponsSearch());
