@@ -70,8 +70,6 @@ session_(new GameSession()), game_ctlr_(new GameController),
     , intro_sounds_(disable_sound), game_sounds_(disable_sound), music_(disable_sound),
     menus_(new GameMenuFactory(), &game_sounds_)
 {
-    fullscreen_ = false;
-    playIntro_ = true;
     running_ = true;
 #ifdef _DEBUG
     debug_breakpoint_trigger_ = 0;
@@ -175,8 +173,8 @@ bool App::readConfiguration() {
         ConfigFile conf(iniPath_);
         string origDataDir;
         string ourDataDir;
-        conf.readInto(fullscreen_, "fullscreen", false);
-        conf.readInto(playIntro_, "play_intro", true);
+        context_->setFullScreen(conf.read("fullscreen", false));
+        context_->setPlayIntro(conf.read("play_intro", true));
         context_->setTimeForClick(conf.read("time_for_click", 80));
         bool origDataDirFound = conf.readInto(origDataDir, "data_dir");
         bool ourDataDirFound = conf.readInto(ourDataDir, "freesynd_data_dir");
@@ -208,19 +206,19 @@ bool App::readConfiguration() {
 
         switch (conf.read("language", 0)) {
             case 0:
-                menus_.setLanguage(MenuManager::ENGLISH);
+                context_->setLanguage(AppContext::ENGLISH);
                 break;
             case 1:
-                menus_.setLanguage(MenuManager::FRENCH);
+                context_->setLanguage(AppContext::FRENCH);
                 break;
             case 2:
-                menus_.setLanguage(MenuManager::ITALIAN);
+                context_->setLanguage(AppContext::ITALIAN);
                 break;
             case 3:
-                menus_.setLanguage(MenuManager::GERMAN);
+                context_->setLanguage(AppContext::GERMAN);
                 break;
             default:
-                menus_.setLanguage(MenuManager::ENGLISH);
+                context_->setLanguage(AppContext::ENGLISH);
                 break;
         }
 
@@ -377,12 +375,12 @@ bool App::initialize(const std::string& iniPath) {
     }
 
     LOG(Log::k_FLG_INFO, "App", "initialize", ("initializing system..."))
-    if (!system_->initialize(fullscreen_)) {
+    if (!system_->initialize(context_->isFullScreen())) {
         return false;
     }
 
     LOG(Log::k_FLG_INFO, "App", "initialize", ("initializing menus..."))
-    if (!menus_.initialize(playIntro_)) {
+    if (!menus_.initialize(context_->isPlayIntro())) {
         return false;
     }
 
@@ -399,7 +397,7 @@ bool App::initialize(const std::string& iniPath) {
         return false;
     }
 
-    if (playIntro_) {
+    if (context_->isPlayIntro()) {
         LOG(Log::k_FLG_INFO, "App", "initialize", ("Loading intro sounds..."))
         if (!intro_sounds_.loadSounds(SoundManager::SAMPLES_INTRO)) {
             return false;
@@ -627,7 +625,7 @@ void App::run(int start_mission) {
 #endif
 
     if (start_mission == -1) {
-        if (playIntro_) {
+        if (context_->isPlayIntro()) {
             menus_.gotoMenu(fs_game_menus::kMenuIdFliIntro);
             // Update intro flag so intro won't be played next time
             updateIntroFlag();

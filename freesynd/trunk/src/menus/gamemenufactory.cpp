@@ -23,27 +23,54 @@
  *                                                                      *
  ************************************************************************/
 
-#include "editor/editormenufactory.h"
-#include "editor/editormenuid.h"
+#include "menus/gamemenufactory.h"
+#include "menus/gamemenuid.h"
+#include "menus/mainmenu.h"
+#include "menus/confmenu.h"
+#include "menus/mapmenu.h"
+#include "menus/briefmenu.h"
+#include "menus/selectmenu.h"
+#include "menus/researchmenu.h"
+#include "menus/loadsavemenu.h"
+#include "menus/loadingmenu.h"
+#include "menus/gameplaymenu.h"
+#include "menus/debriefmenu.h"
+#include "menus/logoutmenu.h"
+#include "menus/flimenu.h"
 #include "utils/log.h"
-#include "editor/mainmenu.h"
-#include "editor/logoutmenu.h"
-#include "editor/gfxmenu.h"
-#include "editor/fontmenu.h"
 
-Menu * EditorMenuFactory::createMenu(const int menuId) {
+Menu * GameMenuFactory::createMenu(const int menuId) {
     Menu *pMenu = NULL;
 
-    if (menuId == fs_edit_menus::kMenuIdMain) {
+    if (menuId == fs_game_menus::kMenuIdMain) {
         pMenu =  new MainMenu(pManager_);
+    } else if (menuId == fs_game_menus::kMenuIdBrief) {
+        pMenu =  new BriefMenu(pManager_);
+    } else if (menuId == fs_game_menus::kMenuIdConf) {
+        pMenu =  new ConfMenu(pManager_);
+    } else if (menuId == fs_game_menus::kMenuIdDebrief) {
+        pMenu =  new DebriefMenu(pManager_);
+    } else if (menuId == fs_game_menus::kMenuIdGameplay) {
+        pMenu =  new GameplayMenu(pManager_);
+    } else if (menuId == fs_game_menus::kMenuIdLoading) {
+        pMenu =  new LoadingMenu(pManager_);
     } else if (menuId == Menu::kMenuIdLogout) {
         pMenu =  new LogoutMenu(pManager_);
-    } else if (menuId == fs_edit_menus::kMenuIdGfx) {
-        pMenu =  new GfxMenu(pManager_);
-    } else if (menuId == fs_edit_menus::kMenuIdFont) {
-        pMenu =  new FontMenu(pManager_);
+    } else if (menuId == fs_game_menus::kMenuIdResearch) {
+        pMenu =  new ResearchMenu(pManager_);
+    } else if (menuId == fs_game_menus::kMenuIdSelect) {
+        pMenu =  new SelectMenu(pManager_);
+    } else if (menuId == fs_game_menus::kMenuIdLdSave) {
+        pMenu =  new LoadSaveMenu(pManager_);
+    } else if (menuId == fs_game_menus::kMenuIdMap) {
+        pMenu =  new MapMenu(pManager_);
+    } else if (menuId == fs_game_menus::kMenuIdFliSuccess ||
+        menuId == fs_game_menus::kMenuIdFliFailedMission || 
+        menuId == fs_game_menus::kMenuIdFliTitle|| 
+        menuId == fs_game_menus::kMenuIdFliIntro) {
+        pMenu =  new FliMenu(pManager_, menuId);
     } else {
-        FSERR(Log::k_FLG_UI, "EditorMenuFactory", "createMenu", ("Cannot create Menu : unknown id (%d)", menuId));
+        FSERR(Log::k_FLG_UI, "GameMenuFactory", "createMenu", ("Cannot create Menu : unknown id (%d)", menuId));
     }
 
     return pMenu;

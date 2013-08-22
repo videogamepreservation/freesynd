@@ -23,36 +23,62 @@
  *                                                                      *
  ************************************************************************/
 
-#include "menus/menu.h"
-#include "menus/menumanager.h"
-#include "editor/mainmenu.h"
-#include "editor/editormenuid.h"
-#include "gfx/screen.h"
-#include "system.h"
+#include "appcontext.h"
+#include "utils/file.h"
+#include "utils/log.h"
 
-MainMenu::MainMenu(MenuManager * m):Menu(m, fs_edit_menus::kMenuIdMain, fs_edit_menus::kMenuIdMain, "mscrenup.dat", "")
-{
-    isCachable_ = false;
-    addStatic(0, 40, g_Screen.gameScreenWidth(), "GAME EDITOR", FontManager::SIZE_4, false);
-
-    addOption(201, 130, 300, 25, "GRAPHICS", FontManager::SIZE_3, fs_edit_menus::kMenuIdGfx, true, false);
-    quitButId_ = addOption(201, 266, 300, 25, "#MAIN_QUIT", FontManager::SIZE_3, MENU_NO_MENU, true, false);
+AppContext::AppContext() { 
+    time_for_click_ = 80; 
+    fullscreen_ = false;
+    playIntro_ = true;
+    language_ = NULL;
 }
 
-void MainMenu::handleShow()
-{
-    // If we came from the intro, the cursor is invisible
-    // otherwise, it does no harm
-    g_System.useMenuCursor();
-    g_System.showCursor();
+AppContext::~AppContext() { 
+    if (language_) {
+        delete language_;
+        language_ = NULL;
+    }
 }
 
-void MainMenu::handleLeave() {
-    g_System.hideCursor();
+void AppContext::setLanguage(FS_Lang lang) {
+    std::string filename(File::dataFullPath("lang/"));
+    switch (lang) {
+        case ENGLISH:
+            filename.append("english.lng");
+            break;
+        case FRENCH:
+            filename.append("french.lng");
+            break;
+        case ITALIAN:
+            filename.append("italian.lng");
+            break;
+        case GERMAN:
+            filename.append("german.lng");
+            break;
+        default:
+            filename.append("english.lng");
+            lang = ENGLISH;
+            break;
+    }
+
+    try {
+        language_ = new ConfigFile(filename);
+        curr_language_ = lang;
+    } catch (...) {
+        printf("ERROR : Unable to load language file %s.\n", filename.c_str());
+        language_ = NULL;
+    }
 }
 
-void MainMenu::handleAction(const int actionId, void *ctx, const int modKeys)
-{
-    if (actionId == quitButId_)
-        menu_manager_->gotoMenu(Menu::kMenuIdLogout);
+std::string AppContext::getMessage(const std::string & id) {
+    std::string msg;
+    getMessage(id, msg);
+    return msg;
+}
+
+void AppContext::getMessage(const std::string & id, std::string & msg) {
+    if (!language_ || !language_->readInto(msg, id)) {
+        msg = "?";
+    }
 }

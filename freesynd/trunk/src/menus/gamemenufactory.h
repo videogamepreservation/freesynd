@@ -23,36 +23,18 @@
  *                                                                      *
  ************************************************************************/
 
-#include "menus/menu.h"
-#include "menus/menumanager.h"
-#include "editor/mainmenu.h"
-#include "editor/editormenuid.h"
-#include "gfx/screen.h"
-#include "system.h"
+#ifndef MENUS_GAMEMENUFACTORY_
+#define MENUS_GAMEMENUFACTORY_
 
-MainMenu::MainMenu(MenuManager * m):Menu(m, fs_edit_menus::kMenuIdMain, fs_edit_menus::kMenuIdMain, "mscrenup.dat", "")
-{
-    isCachable_ = false;
-    addStatic(0, 40, g_Screen.gameScreenWidth(), "GAME EDITOR", FontManager::SIZE_4, false);
+#include "common.h"
+#include "menumanager.h"
 
-    addOption(201, 130, 300, 25, "GRAPHICS", FontManager::SIZE_3, fs_edit_menus::kMenuIdGfx, true, false);
-    quitButId_ = addOption(201, 266, 300, 25, "#MAIN_QUIT", FontManager::SIZE_3, MENU_NO_MENU, true, false);
-}
+/*!
+ * 
+ */
+class GameMenuFactory : public MenuFactory {
+public:
+    Menu * createMenu(const int menuId);
+};
 
-void MainMenu::handleShow()
-{
-    // If we came from the intro, the cursor is invisible
-    // otherwise, it does no harm
-    g_System.useMenuCursor();
-    g_System.showCursor();
-}
-
-void MainMenu::handleLeave() {
-    g_System.hideCursor();
-}
-
-void MainMenu::handleAction(const int actionId, void *ctx, const int modKeys)
-{
-    if (actionId == quitButId_)
-        menu_manager_->gotoMenu(Menu::kMenuIdLogout);
-}
+#endif // MENUS_GAMEMENUFACTORY_

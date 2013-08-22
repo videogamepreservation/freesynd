@@ -40,7 +40,7 @@
 #include "mapmanager.h"
 #include "sound/soundmanager.h"
 #include "sound/musicmanager.h"
-#include "core/appcontext.h"
+#include "appcontext.h"
 #include "core/gamesession.h"
 #include "core/gamecontroller.h"
 
@@ -144,10 +144,6 @@ private:
 
 private:
     bool running_;
-    /*! True means the game will run in fullscreen. */
-    bool fullscreen_;
-    /*! True means the intro will be played.*/
-    bool playIntro_;
     /*! A structure to hold general application informations.*/
     std::auto_ptr<AppContext> context_;
     /*! A structure to hold player informations.*/

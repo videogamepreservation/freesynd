@@ -5,6 +5,7 @@
 #include "menus/menumanager.h"
 #include "gfx/screen.h"
 #include "utils/utf8.h"
+#include "appcontext.h"
 
 int Widget::widgetCnt = 0;
 
@@ -70,7 +71,7 @@ void MenuText::updateText(const char *text) {
         // Erase the # caracter
         lbl.erase(0, 1);
         // and looks for the message in the langage file
-        getPeer()->getMessage(lbl.c_str(), lbl);
+        g_Ctx.getMessage(lbl.c_str(), lbl);
     }
     text_ = lbl;
 
@@ -113,7 +114,7 @@ void MenuText::setTextFormated(const char * format, ...) {
         // Erase the # caracter
         lbl.erase(0, 1);
         // and looks for the message in the langage file
-        getPeer()->getMessage(lbl.c_str(), lbl);
+        g_Ctx.getMessage(lbl.c_str(), lbl);
     }
 
     va_start(list, format);
@@ -420,7 +421,7 @@ TeamListBox::TeamListBox(Menu *peer, int x, int y, int width, int height, MenuFo
         squadLines_[i] = i;
     }
 
-    getPeer()->getMessage("MENU_LB_EMPTY", emptyLbl_);
+    g_Ctx.getMessage("MENU_LB_EMPTY", emptyLbl_);
 }
 
 TeamListBox::~TeamListBox() {

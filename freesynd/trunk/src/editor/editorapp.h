@@ -40,7 +40,7 @@
 #include "mapmanager.h"
 #include "sound/soundmanager.h"
 #include "sound/musicmanager.h"
-#include "core/appcontext.h"
+#include "appcontext.h"
 
 /*!
  * Editor Application class.
@@ -118,8 +118,6 @@ private:
 
 private:
     bool running_;
-    /*! True means the game will run in fullscreen. */
-    bool fullscreen_;
 
     std::auto_ptr<Screen> screen_;
     std::auto_ptr<System> system_;

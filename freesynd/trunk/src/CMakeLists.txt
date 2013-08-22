@@ -7,6 +7,7 @@ embed_data (../freesynd.ini embedded_default_ini default_ini.h)
 include_directories (${CMAKE_CURRENT_BINARY_DIR})
 
 set (SOURCES
+	appcontext.cpp
 	agent.cpp
 	agentmanager.cpp
 	app.cpp
@@ -86,6 +87,7 @@ if (APPLE AND "${SDL_INCLUDE_DIR}" MATCHES ".framework")
 endif()
 
 set(HEADERS
+	appcontext.h
 	agent.h
 	agentmanager.h
 	app.h
@@ -114,7 +116,6 @@ set(HEADERS
 	weapon.h
 	weaponholder.h
 	weaponmanager.h
-	core/appcontext.h
 	core/gameevent.h
 	core/squad.h
 	core/gamesession.h
@@ -203,7 +204,9 @@ if (BUILD_DEV_TOOLS)
 		editor/editormenufactory.h
 		editor/editormenuid.h
 		editor/logoutmenu.h
-		editor/mainmenu.h)
+		editor/mainmenu.h
+		editor/gfxmenu.h
+		editor/fontmenu.h)
 	
 	add_executable (dump
 		dump.cpp
@@ -225,6 +228,7 @@ if (BUILD_DEV_TOOLS)
 		menus/menu.cpp
 		menus/menumanager.cpp
 		menus/widget.cpp
+		appcontext.cpp
 		map.cpp
 		mapmanager.cpp
 		utils/dernc.cpp
@@ -238,6 +242,8 @@ if (BUILD_DEV_TOOLS)
 		editor/editormenufactory.cpp
 		editor/logoutmenu.cpp
 		editor/mainmenu.cpp
+		editor/gfxmenu.cpp
+		editor/fontmenu.cpp
 		system_sdl.cpp
 		${DEV_TOOLS_HEADERS}
 	)

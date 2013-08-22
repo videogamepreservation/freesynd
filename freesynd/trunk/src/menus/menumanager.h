@@ -55,16 +55,6 @@ protected:
  */
 class MenuManager {
 public:
-    /*!
-     * Available language in the game.
-     */
-    enum FS_Lang {
-        ENGLISH = 0,
-        FRENCH = 1,
-        ITALIAN = 2,
-        GERMAN = 3
-    };
-
     MenuManager(MenuFactory *pFactory, SoundManager *pGameSounds);
     ~MenuManager();
 
@@ -73,7 +63,6 @@ public:
     //! Destroy all menus and resources
     void destroy();
 
-    void setLanguage(FS_Lang lang);
     std::string getMessage(const std::string & id);
     void getMessage(const std::string & id, std::string & msg);
 
@@ -124,8 +113,6 @@ public:
     //! Returns true if a menu is being displayed
     bool showingMenu() { return current_ != NULL; }
 
-    FS_Lang currLanguage(void) {return curr_language_; }
-
     void resetSinceMouseDown() {
         since_mouse_down_ = 0;
         mouseup_was_ = false;
@@ -164,9 +151,6 @@ protected:
     bool needBackground_;
     /*! Dirty rects list. */
     DirtyList   dirtyList_;
-    /*! Language file. */
-    ConfigFile  *language_;
-    FS_Lang curr_language_;
 
     /*! Sprite manager for menu sprites.*/
     SpriteManager menuSprites_;

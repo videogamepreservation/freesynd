@@ -50,17 +50,17 @@ MissionManager::MissionManager()
 MissionBriefing *MissionManager::loadBriefing(int n) {
     char tmp[100];
     // Briefing file depends on the current language
-    switch(g_App.menus().currLanguage()) {
-        case MenuManager::ENGLISH:
+    switch(g_Ctx.currLanguage()) {
+        case AppContext::ENGLISH:
             sprintf(tmp, MISSION_PATTERN_EN, n);
             break;
-        case MenuManager::FRENCH:
+        case AppContext::FRENCH:
             sprintf(tmp, MISSION_PATTERN_FR, n);
             break;
-        case MenuManager::ITALIAN:
+        case AppContext::ITALIAN:
             sprintf(tmp, MISSION_PATTERN_IT, n);
             break;
-        case MenuManager::GERMAN:
+        case AppContext::GERMAN:
             sprintf(tmp, MISSION_PATTERN_GE, n);
             break;
     }

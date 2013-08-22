@@ -28,7 +28,7 @@
 #include <assert.h>
 
 #include "menus/menumanager.h"
-#include "core/appcontext.h"
+#include "appcontext.h"
 #include "system.h"
 #include "utils/configfile.h"
 #include "utils/file.h"
@@ -48,7 +48,6 @@ MenuManager::MenuManager(MenuFactory *pFactory, SoundManager *pGameSounds):
     background_ = new uint8[g_Screen.gameScreenWidth() * g_Screen.gameScreenHeight()];
     memset(background_, 0, g_Screen.gameScreenHeight() * g_Screen.gameScreenWidth());
     needBackground_ = false;
-    language_ = NULL;
     
     current_ = NULL;
     nextMenuId_ = -1;
@@ -143,11 +142,6 @@ void MenuManager::destroy() {
         background_ = NULL;
     }
 
-    if (language_) {
-        delete language_;
-        language_ = NULL;
-    }
-
     if (pIntroFontSprites_) {
         delete pIntroFontSprites_;
         pIntroFontSprites_ = NULL;
@@ -198,46 +192,12 @@ void MenuManager::setPalette(const char *fname, bool sixbit) {
     }
 }
 
-void MenuManager::setLanguage(FS_Lang lang) {
-    std::string filename(File::dataFullPath("lang/"));
-    switch (lang) {
-        case ENGLISH:
-            filename.append("english.lng");
-            break;
-        case FRENCH:
-            filename.append("french.lng");
-            break;
-        case ITALIAN:
-            filename.append("italian.lng");
-            break;
-        case GERMAN:
-            filename.append("german.lng");
-            break;
-        default:
-            filename.append("english.lng");
-            lang = ENGLISH;
-            break;
-    }
-
-    try {
-        language_ = new ConfigFile(filename);
-        curr_language_ = lang;
-    } catch (...) {
-        printf("ERROR : Unable to load language file %s.\n", filename.c_str());
-        language_ = NULL;
-    }
-}
-
 std::string MenuManager::getMessage(const std::string & id) {
-    std::string msg;
-    getMessage(id, msg);
-    return msg;
+    return g_Ctx.getMessage(id);
 }
 
 void MenuManager::getMessage(const std::string & id, std::string & msg) {
-    if (!language_ || !language_->readInto(msg, id)) {
-        msg = "?";
-    }
+    g_Ctx.getMessage(id, msg);
 }
 
 Menu * MenuManager::getMenu(int menuId) {

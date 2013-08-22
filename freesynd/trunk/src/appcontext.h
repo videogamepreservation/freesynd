@@ -5,7 +5,9 @@
  *   Copyright (C) 2005  Stuart Binge  <skbinge@gmail.com>              *
  *   Copyright (C) 2005  Joost Peters  <joostp@users.sourceforge.net>   *
  *   Copyright (C) 2006  Trent Waddington <qg@biodome.org>              *
+ *   Copyright (C) 2006  Tarjei Knapstad <tarjei.knapstad@gmail.com>    *
  *   Copyright (C) 2013  Benoit Blancard <benblan@users.sourceforge.net>*
+ *   Copyright (C) 2010  Bohdan Stelmakh <chamel@users.sourceforge.net> *
  *                                                                      *
  *    This program is free software;  you can redistribute it and / or  *
  *  modify it  under the  terms of the  GNU General  Public License as  *
@@ -23,36 +25,58 @@
  *                                                                      *
  ************************************************************************/
 
-#include "menus/menu.h"
-#include "menus/menumanager.h"
-#include "editor/mainmenu.h"
-#include "editor/editormenuid.h"
-#include "gfx/screen.h"
-#include "system.h"
+#ifndef CORE_APPCONTEXT_H_
+#define CORE_APPCONTEXT_H_
 
-MainMenu::MainMenu(MenuManager * m):Menu(m, fs_edit_menus::kMenuIdMain, fs_edit_menus::kMenuIdMain, "mscrenup.dat", "")
-{
-    isCachable_ = false;
-    addStatic(0, 40, g_Screen.gameScreenWidth(), "GAME EDITOR", FontManager::SIZE_4, false);
+#include "common.h"
+#include "utils/configfile.h"
 
-    addOption(201, 130, 300, 25, "GRAPHICS", FontManager::SIZE_3, fs_edit_menus::kMenuIdGfx, true, false);
-    quitButId_ = addOption(201, 266, 300, 25, "#MAIN_QUIT", FontManager::SIZE_3, MENU_NO_MENU, true, false);
-}
+/*!
+ * This class stores application level parameters.
+ */
+class AppContext : public Singleton < AppContext > {
+public:
+    /*!
+     * Available language in the game.
+     */
+    enum FS_Lang {
+        ENGLISH = 0,
+        FRENCH = 1,
+        ITALIAN = 2,
+        GERMAN = 3
+    };
 
-void MainMenu::handleShow()
-{
-    // If we came from the intro, the cursor is invisible
-    // otherwise, it does no harm
-    g_System.useMenuCursor();
-    g_System.showCursor();
-}
+    AppContext();
+    ~AppContext();
 
-void MainMenu::handleLeave() {
-    g_System.hideCursor();
-}
+    bool isFullScreen() { return fullscreen_; }
+    void setFullScreen(bool isFull) { fullscreen_ = isFull; }
 
-void MainMenu::handleAction(const int actionId, void *ctx, const int modKeys)
-{
-    if (actionId == quitButId_)
-        menu_manager_->gotoMenu(Menu::kMenuIdLogout);
-}
+    bool isPlayIntro() { return playIntro_; }
+    void setPlayIntro(bool doPlay) { playIntro_ = doPlay; }
+
+    void setTimeForClick(int32 time) { time_for_click_ = time; }
+    int32 getTimeForClick() { return time_for_click_; }
+
+    void setLanguage(FS_Lang lang);
+    FS_Lang currLanguage(void) {return curr_language_; }
+    std::string getMessage(const std::string & id);
+    void getMessage(const std::string & id, std::string & msg);
+    
+private:
+    /*! True means the game will run in fullscreen. */
+    bool fullscreen_;
+    /*! True means the intro will be played.*/
+    bool playIntro_;
+    /*! Time range between mouse up and down that is treated as click,
+     * if it will be longer it will be treated as dragging
+    */
+    int32 time_for_click_;
+    /*! Language file. */
+    ConfigFile  *language_;
+    FS_Lang curr_language_;
+};
+
+#define g_Ctx   AppContext::singleton()
+
+#endif // CORE_APPCONTEXT_H_

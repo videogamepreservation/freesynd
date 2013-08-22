@@ -68,7 +68,6 @@ EditorApp::EditorApp(bool disable_sound):
     , intro_sounds_(disable_sound), game_sounds_(disable_sound), music_(disable_sound),
     menus_(new EditorMenuFactory(), &game_sounds_)
 {
-    fullscreen_ = false;
     running_ = true;
 #ifdef _DEBUG
     debug_breakpoint_trigger_ = 0;
@@ -172,7 +171,7 @@ bool EditorApp::readConfiguration() {
         ConfigFile conf(iniPath_);
         string origDataDir;
         string ourDataDir;
-        conf.readInto(fullscreen_, "fullscreen", false);
+        context_->setFullScreen(conf.read("fullscreen", false));
         context_->setTimeForClick(conf.read("time_for_click", 80));
         bool origDataDirFound = conf.readInto(origDataDir, "data_dir");
         bool ourDataDirFound = conf.readInto(ourDataDir, "freesynd_data_dir");
@@ -204,19 +203,19 @@ bool EditorApp::readConfiguration() {
 
         switch (conf.read("language", 0)) {
             case 0:
-                menus_.setLanguage(MenuManager::ENGLISH);
+                context_->setLanguage(AppContext::ENGLISH);
                 break;
             case 1:
-                menus_.setLanguage(MenuManager::FRENCH);
+                context_->setLanguage(AppContext::FRENCH);
                 break;
             case 2:
-                menus_.setLanguage(MenuManager::ITALIAN);
+                context_->setLanguage(AppContext::ITALIAN);
                 break;
             case 3:
-                menus_.setLanguage(MenuManager::GERMAN);
+                context_->setLanguage(AppContext::GERMAN);
                 break;
             default:
-                menus_.setLanguage(MenuManager::ENGLISH);
+                context_->setLanguage(AppContext::ENGLISH);
                 break;
         }
 
@@ -373,7 +372,7 @@ bool EditorApp::initialize(const std::string& iniPath) {
     }
 
     LOG(Log::k_FLG_INFO, "EditorApp", "initialize", ("initializing system..."))
-    if (!system_->initialize(fullscreen_)) {
+    if (!system_->initialize(context_->isFullScreen())) {
         return false;
     }
 

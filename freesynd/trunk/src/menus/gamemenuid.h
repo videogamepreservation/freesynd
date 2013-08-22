@@ -23,36 +23,25 @@
  *                                                                      *
  ************************************************************************/
 
-#include "menus/menu.h"
-#include "menus/menumanager.h"
-#include "editor/mainmenu.h"
-#include "editor/editormenuid.h"
-#include "gfx/screen.h"
-#include "system.h"
+#ifndef MENUS_GAMEMENUID_H_
+#define MENUS_GAMEMENUID_H_
 
-MainMenu::MainMenu(MenuManager * m):Menu(m, fs_edit_menus::kMenuIdMain, fs_edit_menus::kMenuIdMain, "mscrenup.dat", "")
-{
-    isCachable_ = false;
-    addStatic(0, 40, g_Screen.gameScreenWidth(), "GAME EDITOR", FontManager::SIZE_4, false);
+namespace fs_game_menus {
+    static const int kMenuIdMain = 0;
+    static const int kMenuIdBrief = 1;
+    static const int kMenuIdConf = 2;
+    static const int kMenuIdDebrief = 3;
+    static const int kMenuIdGameplay = 4;
+    static const int kMenuIdLoading = 5;
+    static const int kMenuIdResearch = 7;
+    static const int kMenuIdSelect = 8;
+    static const int kMenuIdLdSave = 9;
+    static const int kMenuIdMap = 10;
+    static const int kMenuIdFliSuccess = 11;
+    static const int kMenuIdFliFailedMission = 12;
+    static const int kMenuIdFliTitle = 13;
+    static const int kMenuIdFliIntro = 14;
+    static const int kMenuIdFliGameLost = 15;
+};
 
-    addOption(201, 130, 300, 25, "GRAPHICS", FontManager::SIZE_3, fs_edit_menus::kMenuIdGfx, true, false);
-    quitButId_ = addOption(201, 266, 300, 25, "#MAIN_QUIT", FontManager::SIZE_3, MENU_NO_MENU, true, false);
-}
-
-void MainMenu::handleShow()
-{
-    // If we came from the intro, the cursor is invisible
-    // otherwise, it does no harm
-    g_System.useMenuCursor();
-    g_System.showCursor();
-}
-
-void MainMenu::handleLeave() {
-    g_System.hideCursor();
-}
-
-void MainMenu::handleAction(const int actionId, void *ctx, const int modKeys)
-{
-    if (actionId == quitButId_)
-        menu_manager_->gotoMenu(Menu::kMenuIdLogout);
-}
+#endif  // MENUS_GAMEMENUID_H_

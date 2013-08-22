@@ -23,36 +23,63 @@
  *                                                                      *
  ************************************************************************/
 
-#include "menus/menu.h"
+#include "editor/fontmenu.h"
 #include "menus/menumanager.h"
-#include "editor/mainmenu.h"
 #include "editor/editormenuid.h"
 #include "gfx/screen.h"
 #include "system.h"
 
-MainMenu::MainMenu(MenuManager * m):Menu(m, fs_edit_menus::kMenuIdMain, fs_edit_menus::kMenuIdMain, "mscrenup.dat", "")
+FontMenu::FontMenu(MenuManager * m):
+    Menu(m, fs_edit_menus::kMenuIdFont, fs_edit_menus::kMenuIdGfx, "", "")
 {
     isCachable_ = false;
-    addStatic(0, 40, g_Screen.gameScreenWidth(), "GAME EDITOR", FontManager::SIZE_4, false);
-
-    addOption(201, 130, 300, 25, "GRAPHICS", FontManager::SIZE_3, fs_edit_menus::kMenuIdGfx, true, false);
-    quitButId_ = addOption(201, 266, 300, 25, "#MAIN_QUIT", FontManager::SIZE_3, MENU_NO_MENU, true, false);
+    
 }
 
-void MainMenu::handleShow()
+void FontMenu::handleShow()
 {
     // If we came from the intro, the cursor is invisible
     // otherwise, it does no harm
     g_System.useMenuCursor();
     g_System.showCursor();
+
+    g_Screen.clear(0);
+    menu_manager_->setDefaultPalette();
+    displayFont();
 }
 
-void MainMenu::handleLeave() {
+void FontMenu::handleLeave() {
     g_System.hideCursor();
 }
 
-void MainMenu::handleAction(const int actionId, void *ctx, const int modKeys)
-{
-    if (actionId == quitButId_)
-        menu_manager_->gotoMenu(Menu::kMenuIdLogout);
+void FontMenu::displayFont() {
+
+    int spriteX = 0;
+    int spriteY = 0;
+    int lineMaxHeight = 0;
+    for (int s = 0; s < menuSprites().spriteCount(); s++) {
+        int sprh = menuSprites().sprite(s)->height();
+        int sprw = menuSprites().sprite(s)->width();
+
+        if (sprw != 0 && sprh != 0) {
+            if (sprh > lineMaxHeight) {
+                lineMaxHeight = sprh;
+            }
+
+            if (spriteX + sprw > g_Screen.gameScreenWidth()) {
+                spriteX = 0;
+                spriteY += lineMaxHeight;
+                lineMaxHeight = sprh;
+            }
+        
+            if (spriteY + sprh > g_Screen.gameScreenHeight()) {
+                printf("Fin de boucle\n");
+                break;
+            }
+
+            menuSprites().drawSpriteXYZ(s, spriteX, spriteY, 0);
+            spriteX += sprw;
+        }
+    }
 }
+
