@@ -23,32 +23,29 @@
  *                                                                      *
  ************************************************************************/
 
-#include "editor/gfxmenu.h"
-#include "menus/menumanager.h"
-#include "editor/editormenuid.h"
-#include "gfx/screen.h"
-#include "system.h"
+#ifndef EDITOR_ANIMMENU_H_
+#define EDITOR_ANIMMENU_H_
 
-GfxMenu::GfxMenu(MenuManager * m):
-    Menu(m, fs_edit_menus::kMenuIdGfx, fs_edit_menus::kMenuIdMain, "mscrenup.dat", "")
-{
-    isCachable_ = false;
-    addStatic(0, 40, g_Screen.gameScreenWidth(), "GRAPHICS", FontManager::SIZE_4, false);
+#include "menus/menu.h"
+/*!
+ * Animation menu.
+ */
+class AnimMenu : public Menu {
+public:
+    AnimMenu(MenuManager *m);
 
-    addOption(201, 130, 300, 25, "MENU SPRITES", FontManager::SIZE_3, fs_edit_menus::kMenuIdFont, true, false);
-    addOption(201, 150, 300, 25, "ANIMATIONS", FontManager::SIZE_3, fs_edit_menus::kMenuIdAnim, true, false);
-    addOption(201, 266, 300, 25, "BACK", FontManager::SIZE_3, fs_edit_menus::kMenuIdMain, true, false);
-}
+    void handleShow();
+    void handleRender(DirtyList &dirtyList);
+    void handleLeave();
 
-void GfxMenu::handleShow()
-{
-    // If we came from the intro, the cursor is invisible
-    // otherwise, it does no harm
-    g_System.useMenuCursor();
-    g_System.showCursor();
-}
+protected:
+    bool handleUnknownKey(Key key, const int modKeys);
 
-void GfxMenu::handleLeave() {
-    g_System.hideCursor();
-}
+    void displayFont();
 
+protected:
+    int animId_;
+    int frameId_;
+};
+
+#endif // EDITOR_ANIMMENU_H_

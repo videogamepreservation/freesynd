@@ -30,6 +30,7 @@
 #include "editor/logoutmenu.h"
 #include "editor/gfxmenu.h"
 #include "editor/fontmenu.h"
+#include "editor/animmenu.h"
 
 Menu * EditorMenuFactory::createMenu(const int menuId) {
     Menu *pMenu = NULL;
@@ -42,6 +43,8 @@ Menu * EditorMenuFactory::createMenu(const int menuId) {
         pMenu =  new GfxMenu(pManager_);
     } else if (menuId == fs_edit_menus::kMenuIdFont) {
         pMenu =  new FontMenu(pManager_);
+    } else if (menuId == fs_edit_menus::kMenuIdAnim) {
+        pMenu =  new AnimMenu(pManager_);
     } else {
         FSERR(Log::k_FLG_UI, "EditorMenuFactory", "createMenu", ("Cannot create Menu : unknown id (%d)", menuId));
     }

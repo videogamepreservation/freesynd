@@ -63,9 +63,6 @@ public:
     //! Destroy all menus and resources
     void destroy();
 
-    std::string getMessage(const std::string & id);
-    void getMessage(const std::string & id, std::string & msg);
-
     //! Return the menu sprites manager
     SpriteManager &menuSprites() {
         return menuSprites_;

@@ -192,14 +192,6 @@ void MenuManager::setPalette(const char *fname, bool sixbit) {
     }
 }
 
-std::string MenuManager::getMessage(const std::string & id) {
-    return g_Ctx.getMessage(id);
-}
-
-void MenuManager::getMessage(const std::string & id, std::string & msg) {
-    g_Ctx.getMessage(id, msg);
-}
-
 Menu * MenuManager::getMenu(int menuId) {
     // look in the cache
     if (menus_.find(menuId) != menus_.end()) {

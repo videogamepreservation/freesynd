@@ -30,6 +30,7 @@ namespace fs_edit_menus {
     static const int kMenuIdMain = 0;
     static const int kMenuIdGfx = 1;
     static const int kMenuIdFont = 2;
+    static const int kMenuIdAnim = 3;
 };
 
 #endif // EDITOR_EDITORMENUID_H_

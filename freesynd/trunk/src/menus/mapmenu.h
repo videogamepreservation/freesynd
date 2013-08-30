@@ -29,6 +29,8 @@
 
 #include <assert.h>
 
+#include "menus/menu.h"
+
 //! Displays the mission selection map.
 /*!
  * This menu displays a world map on which the player

@@ -74,10 +74,7 @@ public:
         Shotgun_Anim
     } WeaponAnimIndex;
 
-    Weapon(WeaponType w_type, ConfigFile &conf,
-            int w_shot_speed = 0,
-            int w_dmg_per_shot = 1, int w_shots_per_ammo = 1,
-            int w_weight = 1);
+    Weapon(WeaponType w_type, ConfigFile &conf);
 
     const char *getName() { return name_.c_str(); }
 
@@ -256,6 +253,7 @@ protected:
     int shot_speed_;
     //! shotgun only for now
     int shots_per_ammo_;
+    //! The weight of a weapon influences the agent's speed
     int weight_;
 };
 

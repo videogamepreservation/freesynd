@@ -38,15 +38,10 @@
 
 #define Z_SHIFT_TO_AIR   4
 
-Weapon::Weapon(WeaponType w_type, ConfigFile &conf,
-    int w_shot_speed, int w_dmg_per_shot, int w_shots_per_ammo, int w_weight)
+Weapon::Weapon(WeaponType w_type, ConfigFile &conf)
 {
-    dmg_per_shot_ = w_dmg_per_shot;
     type_ = w_type;
     submittedToSearch_ = false;
-    shot_speed_ = w_shot_speed;
-    shots_per_ammo_ = w_shots_per_ammo;
-    weight_ = w_weight;
 
     switch(w_type) {
         case Weapon::Pistol:
@@ -205,7 +200,7 @@ void Weapon::initFromConfig(WeaponType w_type, ConfigFile &conf) {
 
     try {
         sprintf(propName, pattern, w_type, "name");
-        name_ = g_App.menus().getMessage(conf.read<std::string>(propName));
+        name_ = g_Ctx.getMessage(conf.read<std::string>(propName));
 
         sprintf(propName, pattern, w_type, "icon.small");
         small_icon_ = conf.read<int>(propName);
@@ -234,7 +229,15 @@ void Weapon::initFromConfig(WeaponType w_type, ConfigFile &conf) {
         sprintf(propName, pattern, w_type, "shotangle");
         shot_angle_ = conf.read<double>(propName);
         sprintf(propName, pattern, w_type, "shotaccuracy");
-    shot_accuracy_ = conf.read<double>(propName);
+        shot_accuracy_ = conf.read<double>(propName);
+        sprintf(propName, pattern, w_type, "shotspeed");
+        shot_speed_ = conf.read<int>(propName);
+        sprintf(propName, pattern, w_type, "dmg_per_shot");
+        dmg_per_shot_ = conf.read<int>(propName);
+        sprintf(propName, pattern, w_type, "shots_per_ammo");
+        shots_per_ammo_ = conf.read<int>(propName);
+        sprintf(propName, pattern, w_type, "weight");
+        weight_ = conf.read<int>(propName);
     } catch (...) {
         FSERR(Log::k_FLG_GAME, "Weapon", "initFromConfig", ("Cannot load weapon %d : %s\n", w_type, propName))
     }

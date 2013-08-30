@@ -30,6 +30,7 @@
 
 #include "menus/menu.h"
 #include "menus/menumanager.h"
+#include "appcontext.h"
 #include "gfx/fliplayer.h"
 #include "gfx/screen.h"
 
@@ -492,9 +493,9 @@ GameFont *Menu::gameFont() {
 }
 
 std::string Menu::getMessage(const std::string & id) {
-    return menu_manager_->getMessage(id);
+    return g_Ctx.getMessage(id);
 }
 
 void Menu::getMessage(const std::string & id, std::string & msg) {
-    menu_manager_->getMessage(id, msg);
+    g_Ctx.getMessage(id, msg);
 }

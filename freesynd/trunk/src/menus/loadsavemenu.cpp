@@ -50,7 +50,7 @@ LoadSaveMenu::LoadSaveMenu(MenuManager * m):Menu(m, fs_game_menus::kMenuIdLdSave
     addOption(501, 346, 126, 25, "#MENU_MAIN_BUT", FontManager::SIZE_2, fs_game_menus::kMenuIdMain);
 
     std::string label;
-    g_App.menus().getMessage("MENU_LB_EMPTY", label);
+    g_Ctx.getMessage("MENU_LB_EMPTY", label);
     TextField::setEmptyLabel(label);
     
     int y = Y_ORIGIN;

@@ -1031,7 +1031,7 @@ bool GameplayMenu::handleUnknownKey(Key key, const int modKeys) {
         } else {
             paused_ = true;
             // TODO: translate all paused texts
-            std::string str_paused = g_App.menus().getMessage("GAME_PAUSED");
+            std::string str_paused = getMessage("GAME_PAUSED");
             MenuFont *font_used = getMenuFont(FontManager::SIZE_1);
             int txt_width = font_used->textWidth(str_paused.c_str(), false);
             int txt_posx = g_Screen.gameScreenWidth() / 2 - txt_width / 2;
@@ -1321,15 +1321,15 @@ void GameplayMenu::drawMissionHint(int elapsed) {
         for (SquadSelection::Iterator it = selection_.begin();
                             it != selection_.end(); ++it) {
             if ((*it)->isMoving()) {
-                str = g_App.menus().getMessage("HINT_GOING");
+                str = getMessage("HINT_GOING");
             } else {
-                str = g_App.menus().getMessage("HINT_OBSERVING");
+                str = getMessage("HINT_OBSERVING");
             }
             if ((*it)->wePickupWeapon()) {
-                str = g_App.menus().getMessage("HINT_PICKUP_WEAPON");
+                str = getMessage("HINT_PICKUP_WEAPON");
             }
             if ((*it)->drawnAnim() == PedInstance::ad_HitAnim) {
-                str = g_App.menus().getMessage("HINT_HIT_BY_BULLET");
+                str = getMessage("HINT_HIT_BY_BULLET");
             }
         }
         txtColor = 14;
@@ -1346,18 +1346,18 @@ void GameplayMenu::drawMissionHint(int elapsed) {
         if (mission_) {
             mission_->objectiveMsg(str);
             if (mission_->failed()) {
-                str = g_App.menus().getMessage("HINT_MISSION_FAILED");
+                str = getMessage("HINT_MISSION_FAILED");
                 text_pw = false;
             }
 
             if (mission_->completed()) {
-                str = g_App.menus().getMessage("HINT_MISSION_COMPLETE");
+                str = getMessage("HINT_MISSION_COMPLETE");
                 text_pw = false;
             }
 
             if (mission_hint_ > 40 && mission_hint_ < 61)
                 if (mission_->completed() || mission_->failed()) {
-                    str = g_App.menus().getMessage("HINT_PRESS_SPACE");
+                    str = getMessage("HINT_PRESS_SPACE");
                     text_pw = false;
                 }
         }

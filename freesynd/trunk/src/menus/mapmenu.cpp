@@ -26,10 +26,14 @@
 
 #include <stdio.h>
 #include <assert.h>
-#include "app.h"
+
 #include "utils/file.h"
 #include "menus/mapmenu.h"
 #include "menus/gamemenuid.h"
+#include "core/gamesession.h"
+#include "gfx/screen.h"
+#include "system.h"
+#include "menus/menumanager.h"
 
 struct pos {
     int x;

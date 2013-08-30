@@ -22,10 +22,11 @@
  ************************************************************************/
 
 #include "model/objectivedesc.h"
+#include "appcontext.h"
 #include "ped.h"
-#include "app.h"
 #include "vehicle.h"
 #include "mission.h"
+#include "core/gamecontroller.h"
 #include "core/squad.h"
 
 /*!
@@ -54,7 +55,7 @@ void TargetObjective::handleStart(Mission *p_mission) {
 }
 
 ObjPersuade::ObjPersuade(MapObject * pMapObject) : TargetObjective(pMapObject) {
-    msg = g_App.menus().getMessage("GOAL_PERSUADE");
+    msg = g_Ctx.getMessage("GOAL_PERSUADE");
 }
 
 /*!
@@ -75,7 +76,7 @@ void ObjPersuade::evaluate(Mission *pMission) {
 }
 
 ObjAssassinate::ObjAssassinate(MapObject * pMapObject) : TargetObjective(pMapObject) {
-    msg = g_App.menus().getMessage("GOAL_ASSASSINATE");
+    msg = g_Ctx.getMessage("GOAL_ASSASSINATE");
 }
 
 /*!
@@ -104,7 +105,7 @@ void ObjAssassinate::evaluate(Mission *pMission) {
 }
 
 ObjProtect::ObjProtect(MapObject * pMapObject) : TargetObjective(pMapObject) {
-    msg = g_App.menus().getMessage("GOAL_PROTECT");
+    msg = g_Ctx.getMessage("GOAL_PROTECT");
 }
 
 /*!
@@ -128,7 +129,7 @@ void ObjProtect::evaluate(Mission *pMission) {
  * \param
  */
 ObjDestroyVehicle::ObjDestroyVehicle(MapObject * pVehicle) : TargetObjective(pVehicle) {
-    msg = g_App.menus().getMessage("GOAL_DESTROY_VEHICLE");
+    msg = g_Ctx.getMessage("GOAL_DESTROY_VEHICLE");
 }
 
 /*!
@@ -149,7 +150,7 @@ void ObjDestroyVehicle::evaluate(Mission *pMission) {
  * \param
  */
 ObjUseVehicle::ObjUseVehicle(MapObject * pVehicle) : TargetObjective(pVehicle) {
-    msg = g_App.menus().getMessage("GOAL_USE_VEHICLE");
+    msg = g_Ctx.getMessage("GOAL_USE_VEHICLE");
 }
 
 /*!
@@ -176,7 +177,7 @@ void ObjUseVehicle::evaluate(Mission *pMission) {
  * \param
  */
 ObjTakeWeapon::ObjTakeWeapon(MapObject * pWeapon) : TargetObjective(pWeapon) {
-    msg = g_App.menus().getMessage("GOAL_TAKE_WEAPON");
+    msg = g_Ctx.getMessage("GOAL_TAKE_WEAPON");
 }
 
 /*!
@@ -202,11 +203,11 @@ void ObjTakeWeapon::evaluate(Mission *pMission) {
 ObjEliminate::ObjEliminate(PedInstance::objGroupDefMasks subtype) : 
         ObjectiveDesc() {
     if (subtype == PedInstance::og_dmAgent) {
-        msg = g_App.menus().getMessage("GOAL_ELIMINATE_AGENTS");
+        msg = g_Ctx.getMessage("GOAL_ELIMINATE_AGENTS");
         groupDefMask_ = subtype;
         indx_grpid.grpid = 2;
     } else if (subtype == PedInstance::og_dmPolice) {
-        msg = g_App.menus().getMessage("GOAL_ELIMINATE_POLICE");
+        msg = g_Ctx.getMessage("GOAL_ELIMINATE_POLICE");
         groupDefMask_ = subtype;
         indx_grpid.grpid = 4;
     } else {
@@ -237,7 +238,7 @@ void ObjEliminate::evaluate(Mission *pMission) {
 
 ObjEvacuate::ObjEvacuate(int x, int y, int z, std::vector <PedInstance *> &lstOfPeds) : 
         LocationObjective(x, y, z) {
-    msg = g_App.menus().getMessage("GOAL_EVACUATE");
+    msg = g_Ctx.getMessage("GOAL_EVACUATE");
     // Copy all peds in the local list
     for (std::vector<PedInstance *>::iterator it_p = lstOfPeds.begin();
             it_p != lstOfPeds.end(); it_p++)

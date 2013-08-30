@@ -26,7 +26,7 @@
 #include "utils/file.h"
 #include "utils/configfile.h"
 #include "core/gamecontroller.h"
-#include "app.h"
+#include "appcontext.h"
 
 ResearchManager::ResearchManager() {
     pCurrResearch_ = NULL;
@@ -76,7 +76,7 @@ Research *ResearchManager::loadResearch(Weapon::WeaponType wt) {
 
             sprintf(tmp, pattern, wt, "name");
             conf.readInto(name, tmp);
-            g_App.menus().getMessage(name, name);
+            g_Ctx.getMessage(name, name);
             sprintf(tmp, pattern, wt, "minFund");
             conf.readInto(fund, tmp);
             sprintf(tmp, pattern, wt, "next");
@@ -136,7 +136,7 @@ Research *ResearchManager::loadResearch(Mod::EModType mt, Mod::EModVersion versi
 
         sprintf(tmp, pattern, mt, version, "name");
         conf.readInto(name, tmp);
-        g_App.menus().getMessage(name, name);
+        g_Ctx.getMessage(name, name);
         sprintf(tmp, pattern, mt, version, "minFund");
         conf.readInto(min, tmp, 0);
 

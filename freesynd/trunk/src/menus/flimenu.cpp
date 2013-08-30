@@ -246,7 +246,7 @@ void FliMenu::handleTick(int elapsed)
                     }
                     // Draw subtitle
                     if (desc.evtList[i].subtitle != NULL) {
-                        menu_manager_->getMessage(desc.evtList[i].subtitle, currSubTitle_);
+                        getMessage(desc.evtList[i].subtitle, currSubTitle_);
                     } else {
                         currSubTitle_ = "";
                     }

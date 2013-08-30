@@ -27,7 +27,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include "modmanager.h"
-#include "app.h"
+#include "appcontext.h"
 
 ModManager::ModManager()
 {
@@ -132,103 +132,103 @@ Mod *ModManager::loadMod(Mod::EModType mt, Mod::EModVersion ver) {
     if (mt == Mod::MOD_LEGS) {
         if (ver == Mod::MOD_V1) {
             return new
-                  Mod(g_App.menus().getMessage("MOD_LEGS_V1"), Mod::MOD_LEGS, Mod::MOD_V1, 6000,
-                        g_App.menus().getMessage("MOD_LEGS_V1_DESC"),
+                  Mod(g_Ctx.getMessage("MOD_LEGS_V1"), Mod::MOD_LEGS, Mod::MOD_V1, 6000,
+                        g_Ctx.getMessage("MOD_LEGS_V1_DESC"),
                         33, 37);
         } else if (ver == Mod::MOD_V2) {
             return new
-                  Mod(g_App.menus().getMessage("MOD_LEGS_V2"), Mod::MOD_LEGS, Mod::MOD_V2, 30000,
-                      g_App.menus().getMessage("MOD_LEGS_V2_DESC"),
+                  Mod(g_Ctx.getMessage("MOD_LEGS_V2"), Mod::MOD_LEGS, Mod::MOD_V2, 30000,
+                      g_Ctx.getMessage("MOD_LEGS_V2_DESC"),
                       34, 38);
         } else if (ver == Mod::MOD_V3) {
             return new
-                  Mod(g_App.menus().getMessage("MOD_LEGS_V3"), Mod::MOD_LEGS, Mod::MOD_V3, 60000,
-                      g_App.menus().getMessage("MOD_LEGS_V3_DESC"),
+                  Mod(g_Ctx.getMessage("MOD_LEGS_V3"), Mod::MOD_LEGS, Mod::MOD_V3, 60000,
+                      g_Ctx.getMessage("MOD_LEGS_V3_DESC"),
                       35, 39);
         }
     } else if (mt == Mod::MOD_ARMS) {
         if (ver == Mod::MOD_V1) {
             return new
-                  Mod(g_App.menus().getMessage("MOD_ARMS_V1"), Mod::MOD_ARMS, Mod::MOD_V1, 5000,
-                      g_App.menus().getMessage("MOD_ARMS_V1_DESC"),
+                  Mod(g_Ctx.getMessage("MOD_ARMS_V1"), Mod::MOD_ARMS, Mod::MOD_V1, 5000,
+                      g_Ctx.getMessage("MOD_ARMS_V1_DESC"),
                       41, 45);
         } else if (ver == Mod::MOD_V2) {
             return new
-                  Mod(g_App.menus().getMessage("MOD_ARMS_V2"), Mod::MOD_ARMS, Mod::MOD_V2, 25000,
-                      g_App.menus().getMessage("MOD_ARMS_V2_DESC"),
+                  Mod(g_Ctx.getMessage("MOD_ARMS_V2"), Mod::MOD_ARMS, Mod::MOD_V2, 25000,
+                      g_Ctx.getMessage("MOD_ARMS_V2_DESC"),
                       42, 46);
         } else if (ver == Mod::MOD_V3) {
             return new
-                  Mod(g_App.menus().getMessage("MOD_ARMS_V3"), Mod::MOD_ARMS, Mod::MOD_V3, 50000,
-                      g_App.menus().getMessage("MOD_ARMS_V3_DESC"),
+                  Mod(g_Ctx.getMessage("MOD_ARMS_V3"), Mod::MOD_ARMS, Mod::MOD_V3, 50000,
+                      g_Ctx.getMessage("MOD_ARMS_V3_DESC"),
                       43, 47);
         }
     } else if (mt == Mod::MOD_CHEST) {
         if (ver == Mod::MOD_V1) {
             return new
-                  Mod(g_App.menus().getMessage("MOD_CHEST_V1"), Mod::MOD_CHEST, Mod::MOD_V1, 8000,
-                      g_App.menus().getMessage("MOD_CHEST_V1_DESC"),
+                  Mod(g_Ctx.getMessage("MOD_CHEST_V1"), Mod::MOD_CHEST, Mod::MOD_V1, 8000,
+                      g_Ctx.getMessage("MOD_CHEST_V1_DESC"),
                       48, 51);
         } else if (ver == Mod::MOD_V2) {
             return new
-                  Mod(g_App.menus().getMessage("MOD_CHEST_V2"), Mod::MOD_CHEST, Mod::MOD_V2, 40000,
-                      g_App.menus().getMessage("MOD_CHEST_V2_DESC"),
+                  Mod(g_Ctx.getMessage("MOD_CHEST_V2"), Mod::MOD_CHEST, Mod::MOD_V2, 40000,
+                      g_Ctx.getMessage("MOD_CHEST_V2_DESC"),
                       49, 52);
         } else if (ver == Mod::MOD_V3) {
             return new
-                  Mod(g_App.menus().getMessage("MOD_CHEST_V3"), Mod::MOD_CHEST, Mod::MOD_V3, 80000,
-                      g_App.menus().getMessage("MOD_CHEST_V3_DESC"),
+                  Mod(g_Ctx.getMessage("MOD_CHEST_V3"), Mod::MOD_CHEST, Mod::MOD_V3, 80000,
+                      g_Ctx.getMessage("MOD_CHEST_V3_DESC"),
                       50, 53);
         }
     } else if (mt == Mod::MOD_HEART) {
         if (ver == Mod::MOD_V1) {
             return new
-                  Mod(g_App.menus().getMessage("MOD_HEART_V1"), Mod::MOD_HEART, Mod::MOD_V1, 4500,
-                      g_App.menus().getMessage("MOD_HEART_V1_DESC"),
+                  Mod(g_Ctx.getMessage("MOD_HEART_V1"), Mod::MOD_HEART, Mod::MOD_V1, 4500,
+                      g_Ctx.getMessage("MOD_HEART_V1_DESC"),
                       54);
         } else if (ver == Mod::MOD_V2) {
             return new
-                  Mod(g_App.menus().getMessage("MOD_HEART_V2"), Mod::MOD_HEART, Mod::MOD_V2, 22500,
-                      g_App.menus().getMessage("MOD_HEART_V2_DESC"),
+                  Mod(g_Ctx.getMessage("MOD_HEART_V2"), Mod::MOD_HEART, Mod::MOD_V2, 22500,
+                      g_Ctx.getMessage("MOD_HEART_V2_DESC"),
                       55);
         } else if (ver == Mod::MOD_V3) {
             return new
-                  Mod(g_App.menus().getMessage("MOD_HEART_V3"), Mod::MOD_HEART, Mod::MOD_V3, 45000,
-                      g_App.menus().getMessage("MOD_HEART_V3_DESC"),
+                  Mod(g_Ctx.getMessage("MOD_HEART_V3"), Mod::MOD_HEART, Mod::MOD_V3, 45000,
+                      g_Ctx.getMessage("MOD_HEART_V3_DESC"),
                       56);
         }
     } else if (mt == Mod::MOD_EYES) {
         if (ver == Mod::MOD_V1) {
             return new
-                  Mod(g_App.menus().getMessage("MOD_EYES_V1"), Mod::MOD_EYES, Mod::MOD_V1, 4500,
-                      g_App.menus().getMessage("MOD_EYES_V1_DESC"),
+                  Mod(g_Ctx.getMessage("MOD_EYES_V1"), Mod::MOD_EYES, Mod::MOD_V1, 4500,
+                      g_Ctx.getMessage("MOD_EYES_V1_DESC"),
                       60);
         } else if (ver == Mod::MOD_V2) {
             return new
-                  Mod(g_App.menus().getMessage("MOD_EYES_V2"), Mod::MOD_EYES, Mod::MOD_V2, 22500,
-                      g_App.menus().getMessage("MOD_EYES_V2_DESC"),
+                  Mod(g_Ctx.getMessage("MOD_EYES_V2"), Mod::MOD_EYES, Mod::MOD_V2, 22500,
+                      g_Ctx.getMessage("MOD_EYES_V2_DESC"),
                       61);
         } else if (ver == Mod::MOD_V3) {
             return new
-                  Mod(g_App.menus().getMessage("MOD_EYES_V3"), Mod::MOD_EYES, Mod::MOD_V3, 45000,
-                      g_App.menus().getMessage("MOD_EYES_V3_DESC"),
+                  Mod(g_Ctx.getMessage("MOD_EYES_V3"), Mod::MOD_EYES, Mod::MOD_V3, 45000,
+                      g_Ctx.getMessage("MOD_EYES_V3_DESC"),
                       62);
         }
     } else if (mt == Mod::MOD_BRAIN) {
         if (ver == Mod::MOD_V1) {
             return new
-                  Mod(g_App.menus().getMessage("MOD_BRAIN_V1"), Mod::MOD_BRAIN, Mod::MOD_V1, 4500,
-                      g_App.menus().getMessage("MOD_BRAIN_V1_DESC"),
+                  Mod(g_Ctx.getMessage("MOD_BRAIN_V1"), Mod::MOD_BRAIN, Mod::MOD_V1, 4500,
+                      g_Ctx.getMessage("MOD_BRAIN_V1_DESC"),
                       57);
         } else if (ver == Mod::MOD_V2) {
             return new
-                  Mod(g_App.menus().getMessage("MOD_BRAIN_V2"), Mod::MOD_BRAIN, Mod::MOD_V2, 22500,
-                      g_App.menus().getMessage("MOD_BRAIN_V2_DESC"),
+                  Mod(g_Ctx.getMessage("MOD_BRAIN_V2"), Mod::MOD_BRAIN, Mod::MOD_V2, 22500,
+                      g_Ctx.getMessage("MOD_BRAIN_V2_DESC"),
                       58);
         } else if (ver == Mod::MOD_V3) {
             return new
-                  Mod(g_App.menus().getMessage("MOD_BRAIN_V3"), Mod::MOD_BRAIN, Mod::MOD_V3, 45000, 
-                      g_App.menus().getMessage("MOD_BRAIN_V3_DESC"),
+                  Mod(g_Ctx.getMessage("MOD_BRAIN_V3"), Mod::MOD_BRAIN, Mod::MOD_V3, 45000, 
+                      g_Ctx.getMessage("MOD_BRAIN_V3_DESC"),
                       59);
         }
     }

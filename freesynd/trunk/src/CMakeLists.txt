@@ -206,7 +206,8 @@ if (BUILD_DEV_TOOLS)
 		editor/logoutmenu.h
 		editor/mainmenu.h
 		editor/gfxmenu.h
-		editor/fontmenu.h)
+		editor/fontmenu.h
+		editor/animmenu.h)
 	
 	add_executable (dump
 		dump.cpp
@@ -244,6 +245,7 @@ if (BUILD_DEV_TOOLS)
 		editor/mainmenu.cpp
 		editor/gfxmenu.cpp
 		editor/fontmenu.cpp
+		editor/animmenu.cpp
 		system_sdl.cpp
 		${DEV_TOOLS_HEADERS}
 	)
