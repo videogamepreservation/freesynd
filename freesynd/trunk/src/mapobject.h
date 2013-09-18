@@ -153,8 +153,6 @@ public:
 
     virtual bool animate(int elapsed);
 
-    virtual bool useTargetCursor() { return false; }
-
     void setSubType(int objSubType) { sub_type_ = objSubType; }
     int getSubType() { return sub_type_; }
     void setMainType(int objMainType) { main_type_ = objMainType; }
@@ -401,9 +399,6 @@ public:
     ShootableMovableMapObject(int m);
     virtual ~ShootableMovableMapObject() {}
 
-    // only vehicles and peds for which this is true?
-    virtual bool useTargetCursor() { return true; }
-
     void setSpeed(int new_speed) {
         speed_ = new_speed;
     }
@@ -455,9 +450,7 @@ public:
     virtual bool animate(int elapsed, Mission *obj) {
         return MapObject::animate(elapsed);
     }
-#ifdef _DEBUG
-    bool useTargetCursor() { return true; }
-#endif
+
     typedef enum {
         sttdoor_Closed = 0,
         sttdoor_Closing,

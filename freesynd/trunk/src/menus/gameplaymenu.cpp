@@ -635,17 +635,18 @@ void GameplayMenu::handleMouseMotion(int x, int y, int state, const int modKeys)
         }
 #endif
 #endif
-        if (target_->useTargetCursor() ) {
+        if (target_->majorType() == MapObject::mjt_Ped || 
+            target_->majorType() == MapObject::mjt_Vehicle) {
             if (inrange)
                 g_System.useTargetRedCursor();
             else
                 g_System.useTargetCursor();
-        } else if (target_->majorType() == MapObject::mjt_Weapon)
+        } else if (target_->majorType() == MapObject::mjt_Weapon) {
             g_System.usePickupCursor();
-    } else {
-        if (x > 128)
+        }
+    } else if (x > 128) {
             g_System.usePointerCursor();
-        else
+    } else {
             g_System.usePointerYellowCursor();
     }
 

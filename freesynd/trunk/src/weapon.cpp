@@ -188,6 +188,7 @@ Weapon::Weapon(WeaponType w_type, ConfigFile &conf)
 #if _DEBUG
             printf("unknown weapon loaded(%i), NULL passed", w_type);
 #endif
+            break;
     }
 
     // initialize other properties

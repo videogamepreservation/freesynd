@@ -833,16 +833,12 @@ Static *Static::loadInstance(uint8 * data, int m)
         case 0x20:
             // window without light
             s = new AnimWindow(m, curanim);
-            s->setIsIgnored(true);
-            s->setFramesPerSec(4);
             s->setStateMasks(sttawnd_LightOff);
             s->setTimeShowAnim(30000 + (rand() % 30000));
             break;
         case 0x21:
             // window light turns on
             s = new AnimWindow(m, curanim - 2);
-            s->setIsIgnored(true);
-            s->setFramesPerSec(4);
             s->setTimeShowAnim(1000 + (rand() % 1000));
             s->setStateMasks(sttawnd_LightSwitching);
 
@@ -851,9 +847,7 @@ Static *Static::loadInstance(uint8 * data, int m)
         case 0x23:
             // window with person's shadow non animated,
             // even though on 1 map person appears I will ignore it
-            s = new AnimWindow(m, 1959 + 6 + ((gamdata->orientation & 0x40) >> 5));
-            s->setFramesPerSec(4);
-            s->setIsIgnored(true);
+            s = new AnimWindow(m, 1959 + ((gamdata->orientation & 0x40) >> 5));
             s->setStateMasks(sttawnd_ShowPed);
             s->setTimeShowAnim(15000 + (rand() % 5000));
             break;
@@ -861,13 +855,10 @@ Static *Static::loadInstance(uint8 * data, int m)
             // window with person's shadow, hides, actually animation
             // is of ped standing, but I will ignore it
             s = new AnimWindow(m, 1959 + 8 + ((gamdata->orientation & 0x40) >> 5));
-            s->setFramesPerSec(4);
-            s->setIsIgnored(true);
             s->setStateMasks(sttawnd_PedDisappears);
             break;
         case 0x25:
             s = new AnimWindow(m, curanim);
-            s->setIsIgnored(true);
 
             // NOTE : orientation, I assume, plays role of hidding object,
             // orientation 0x40, 0x80 are drawn (gamdata->desc always 7)
@@ -878,7 +869,6 @@ Static *Static::loadInstance(uint8 * data, int m)
             else
                 s->setStateMasks(sttawnd_LightOn);
 
-            s->setFramesPerSec(4);
             break;
 
         case 0x26:
@@ -1644,10 +1634,14 @@ anim_(anim)
     rcv_damage_def_ = MapObject::ddmg_StaticGeneral;
     major_type_ = MapObject::mjt_Static;
     main_type_ = smt_AnimatedWindow;
+    setIsIgnored(true);
+    setFramesPerSec(4);
 }
 
 void AnimWindow::draw(int x, int y)
 {
+    // When light is on, don't draw window
+    // because lighted window is part of the map
     if (state_ == Static::sttawnd_LightOn)
         return;
     addOffs(x, y);

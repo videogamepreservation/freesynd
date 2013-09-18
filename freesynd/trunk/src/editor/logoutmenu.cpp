@@ -28,7 +28,7 @@
 #include "editor/editormenuid.h"
 #include "editorapp.h"
 
-LogoutMenu::LogoutMenu(MenuManager * m):Menu(m, kMenuIdLogout, fs_edit_menus::kMenuIdMain),
+LogoutMenu::LogoutMenu(MenuManager * m):Menu(m, kMenuIdLogout, fs_edit_menus::kMenuIdMain, "mdeout.dat"),
 tick_count_(0)
 {
     isCachable_ = false;
