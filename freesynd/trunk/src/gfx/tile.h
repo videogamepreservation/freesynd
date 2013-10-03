@@ -93,6 +93,8 @@ public:
 
     //! Draws the tile to the given surface
     bool drawTo(uint8 *screen, int swidth, int sheight, int x, int y);
+    //! Draws the tile to the screen
+    bool drawToScreen(int x, int y);
 
     inline bool notTransparent() { return not_alpha_; }
 

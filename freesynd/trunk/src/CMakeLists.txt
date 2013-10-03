@@ -35,6 +35,7 @@ set (SOURCES
 	mapobject.cpp
 	mapmanager.cpp
 	menus/agentselectorrenderer.cpp
+	menus/maprenderer.cpp
 	menus/minimaprenderer.cpp
 	menus/briefmenu.cpp
 	menus/confmenu.cpp
@@ -136,6 +137,7 @@ set(HEADERS
 	model/objectivedesc.h
 	model/leveldata.h
 	menus/agentselectorrenderer.h
+	menus/maprenderer.h
 	menus/minimaprenderer.h
 	menus/briefmenu.h
 	menus/confmenu.h

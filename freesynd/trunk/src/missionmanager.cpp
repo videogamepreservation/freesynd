@@ -119,6 +119,7 @@ Mission *MissionManager::loadMission(int n)
                 return NULL;
             }
             m->set_map(p_map);
+            m->setSurfaces();
         }
 
         return m;

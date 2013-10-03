@@ -28,6 +28,7 @@
 #define GAMEPLAYMENU_H
 
 #include "agentselectorrenderer.h"
+#include "maprenderer.h"
 #include "minimaprenderer.h"
 #include "squadselection.h"
 #include "core/gameevent.h"
@@ -119,6 +120,8 @@ protected:
     SquadSelection selection_;
     /*! Object mouse cursor is above*/ 
     ShootableMapObject *target_;
+    /*! This renderer is in charge of drawing the map.*/
+    MapRenderer map_renderer_;
     /*! This renderer is in charge of drawing the minimap.*/
     GamePlayMinimapRenderer mm_renderer_;
     /*! This renderer is in charge of drawing the IPA meters.*/

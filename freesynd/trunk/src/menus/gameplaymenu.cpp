@@ -296,7 +296,8 @@ void GameplayMenu::handleShow() {
 
     updtAgentsMarker();
 
-    // Reset the minimap
+    // Init renderers
+    map_renderer_.init(mission_);
     mm_renderer_.init(mission_, mission_->getSquad()->hasScanner());
     centerMinimapOnLeader();
 
@@ -343,7 +344,7 @@ void GameplayMenu::handleTick(int elapsed)
         int diff = tick_count_ - last_animate_tick_;
         last_animate_tick_ = tick_count_;
 
-        for (int i = 0; i < mission_->numSfxObjects(); i++) {
+        for (size_t i = 0; i < mission_->numSfxObjects(); i++) {
             change |= mission_->sfxObjects(i)->animate(diff);
             if (mission_->sfxObjects(i)->sfxLifeOver()) {
                 mission_->delSfxObject(i);
@@ -351,19 +352,19 @@ void GameplayMenu::handleTick(int elapsed)
             }
         }
 
-        for (int i = 0; i < mission_->numPeds(); i++)
+        for (size_t i = 0; i < mission_->numPeds(); i++)
             change |= mission_->ped(i)->animate(diff, mission_);
 
-        for (int i = 0; i < mission_->numVehicles(); i++)
+        for (size_t i = 0; i < mission_->numVehicles(); i++)
             change |= mission_->vehicle(i)->animate(diff);
 
-        for (int i = 0; i < mission_->numWeapons(); i++)
+        for (size_t i = 0; i < mission_->numWeapons(); i++)
             change |= mission_->weapon(i)->animate(diff);
 
-        for (int i = 0; i < mission_->numStatics(); i++)
+        for (size_t i = 0; i < mission_->numStatics(); i++)
             change |= mission_->statics(i)->animate(diff, mission_);
 
-        for (int i = 0; i < mission_->numPrjShots(); i++) {
+        for (size_t i = 0; i < mission_->numPrjShots(); i++) {
             change |= mission_->prjShots(i)->animate(diff, mission_);
             if (mission_->prjShots(i)->prjsLifeOver()) {
                 mission_->delPrjShot(i);
@@ -388,7 +389,7 @@ void GameplayMenu::handleTick(int elapsed)
 void GameplayMenu::handleRender(DirtyList &dirtyList)
 {
     g_Screen.clear(0);
-    mission_->drawMap(world_x_, world_y_);
+    map_renderer_.render(world_x_, world_y_);
     g_Screen.drawRect(0,0, 129, GAME_SCREEN_HEIGHT);
     agt_sel_renderer_.render(selection_, mission_->getSquad());
     drawSelectAllButton();
@@ -534,9 +535,9 @@ void GameplayMenu::handleMouseMotion(int x, int y, int state, const int modKeys)
 
     if (x > 128) {
 #ifdef _DEBUG
-        for (int i = 0; mission_ && i < mission_->numPeds(); ++i) {
+        for (size_t i = 0; mission_ && i < mission_->numPeds(); ++i) {
 #else
-        for (int i = mission_->getSquad()->size(); mission_ && i < mission_->numPeds(); ++i) {
+        for (size_t i = mission_->getSquad()->size(); mission_ && i < mission_->numPeds(); ++i) {
 #endif
             PedInstance *p = mission_->ped(i);
             if (p->isAlive() && p->map() != -1) {
@@ -563,7 +564,7 @@ void GameplayMenu::handleMouseMotion(int x, int y, int state, const int modKeys)
             }
         }
 
-        for (int i = 0; mission_ && i < mission_->numVehicles(); ++i) {
+        for (size_t i = 0; mission_ && i < mission_->numVehicles(); ++i) {
             VehicleInstance *v = mission_->vehicle(i);
             if (v->isAlive()) {
                 int px = v->screenX() - 20;
@@ -588,7 +589,7 @@ void GameplayMenu::handleMouseMotion(int x, int y, int state, const int modKeys)
             }
         }
 
-        for (int i = 0; mission_ && i < mission_->numWeapons(); ++i) {
+        for (size_t i = 0; mission_ && i < mission_->numWeapons(); ++i) {
             WeaponInstance *w = mission_->weapon(i);
 
             if (w->map() != -1) {
@@ -1018,8 +1019,6 @@ void GameplayMenu::handleMouseUp(int x, int y, int button, const int modKeys)
         stopShootingEvent();
     }
 }
-
-extern int topz;
 
 bool GameplayMenu::handleUnknownKey(Key key, const int modKeys) {
     bool change = false; /* indicator whether menu should be redrawn */

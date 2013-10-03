@@ -221,7 +221,7 @@ ObjEliminate::ObjEliminate(PedInstance::objGroupDefMasks subtype) :
  * \param pMission
  */
 void ObjEliminate::evaluate(Mission *pMission) {
-    for (int i = pMission->getSquad()->size(); i< pMission->numPeds(); i++) {
+    for (size_t i = pMission->getSquad()->size(); i< pMission->numPeds(); i++) {
         PedInstance *pPed = pMission->ped(i);
 
         if(pPed->objGroupDef() == groupDefMask_

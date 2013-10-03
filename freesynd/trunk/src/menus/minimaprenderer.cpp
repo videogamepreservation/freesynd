@@ -498,7 +498,7 @@ void GamePlayMinimapRenderer::render(uint16 screen_x, uint16 screen_y) {
 }
 
 void GamePlayMinimapRenderer::drawCars(uint8 *a_minimap) {
-    for (int i = 0; i < p_mission_->numVehicles(); i++) {
+    for (size_t i = 0; i < p_mission_->numVehicles(); i++) {
         VehicleInstance *p_vehicle = p_mission_->vehicle(i);
         int tx = p_vehicle->tileX();
         int ty = p_vehicle->tileY();
@@ -526,7 +526,7 @@ void GamePlayMinimapRenderer::drawCars(uint8 *a_minimap) {
 
 void GamePlayMinimapRenderer::drawWeapons(uint8 * a_minimap) {
     const size_t weapon_size = 2;
-    for (int i = 0; i < p_mission_->numWeapons(); i++)
+    for (size_t i = 0; i < p_mission_->numWeapons(); i++)
     {
         WeaponInstance * w = p_mission_->weapon(i);
         // we draw weapons that have no owner ie that are on the ground
@@ -551,7 +551,7 @@ void GamePlayMinimapRenderer::drawWeapons(uint8 * a_minimap) {
 }
 
 void GamePlayMinimapRenderer::drawPedestrians(uint8 * a_minimap) {
-    for (int i = 0; i < p_mission_->numPeds(); i++)
+    for (size_t i = 0; i < p_mission_->numPeds(); i++)
     {
         PedInstance *p_ped = p_mission_->ped(i);
         // we are not showing dead or peds inside vehicle

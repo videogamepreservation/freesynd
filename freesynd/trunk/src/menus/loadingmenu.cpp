@@ -50,7 +50,6 @@ void LoadingMenu::handleTick(int elapsed)
         int id = g_Session.getSelectedBlock().mis_id;
         Mission *pMission = g_gameCtrl.missions().loadMission(id);
         assert(pMission != NULL);
-        pMission->setSurfaces();
         g_Session.setMission(pMission);
 
         do_load_ = false;

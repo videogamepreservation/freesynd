@@ -1349,7 +1349,7 @@ void WeaponInstance::getHostileInRange(toDefineXYZ * cp,
     Mission * m = g_Session.getMission();
 
     if (mask & MapObject::mjt_Ped) {
-        for (int i = 0; i < m->numPeds(); i++) {
+        for (size_t i = 0; i < m->numPeds(); i++) {
             ShootableMapObject *p = m->ped(i);
             if (!p->isIgnored() && (((PedInstance *)owner_)->checkHostileIs(p)
                 || ((PedInstance *)owner_)->isInHostilesFound(p))
@@ -1373,7 +1373,7 @@ void WeaponInstance::getHostileInRange(toDefineXYZ * cp,
         }
     }
     if (mask & MapObject::mjt_Vehicle) {
-        for (int i = 0; i < m->numVehicles(); i++) {
+        for (size_t i = 0; i < m->numVehicles(); i++) {
             ShootableMapObject *v = m->vehicle(i);
             if (!v->isIgnored() && (((PedInstance *)owner_)->checkHostileIs(v)
                 || ((PedInstance *)owner_)->isInHostilesFound(v))
@@ -1422,7 +1422,7 @@ void WeaponInstance::getNonFriendInRange(toDefineXYZ * cp,
     if (maxr == -1)
         maxr = range();
 
-    for (int i = 0; i < m->numPeds(); i++) {
+    for (size_t i = 0; i < m->numPeds(); i++) {
         ShootableMapObject *p = m->ped(i);
         if (!p->isIgnored()
             // TODO: inrange if checktileonly = false might return "7"

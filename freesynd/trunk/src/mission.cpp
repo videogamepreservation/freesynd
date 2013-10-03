@@ -122,202 +122,6 @@ int Mission::mapHeight()
     return p_map_->height();
 }
 
-int fastKey(int tx, int ty, int tz)
-{
-    return tx | (ty << 8) | (tz << 16);
-}
-
-int fastKey(MapObject * m)
-{
-    return fastKey(m->tileX(), m->tileY(), m->tileZ());
-}
-
-void Mission::createFastKeys(int tilex, int tiley, int maxtilex, int maxtiley) {
-
-    if (tilex < 0)
-        tilex = 0;
-    if (tiley < 0)
-        tiley = 0;
-    if (maxtilex >= mmax_x_)
-        maxtilex = mmax_x_;
-    if (maxtiley >= mmax_y_)
-        maxtiley = mmax_y_;
-
-    cache_vehicles_.clear();
-    cache_peds_.clear();
-    cache_weapons_.clear();
-    cache_statics_.clear();
-    cache_sfx_objects_.clear();
-
-    fast_vehicle_cache_.clear();
-    fast_ped_cache_.clear();
-    fast_weapon_cache_.clear();
-    fast_statics_cache_.clear();
-    fast_sfx_objects_cache_.clear();
-
-    // updating position for visual markers
-    for (size_t i = 0; i < AgentManager::kMaxSlot; i++) {
-        PedInstance *p = p_squad_->member(i);
-        if (p != NULL && p->isAlive()) {
-            if (p->tileX() >= tilex && p->tileX() < maxtilex
-                && p->tileY() >= tiley && p->tileY() < maxtiley)
-            {
-                //sfx_objects_[i]->setPosition(p->tileX(), p->tileY(), p->tileZ(),
-                    //p->offX(), p->offY(), p->offZ() + 320);
-                sfx_objects_[i + 4]->setPosition(p->tileX(), p->tileY(),
-                    p->tileZ(), p->offX() - 16, p->offY(), p->offZ() + 256);
-            }
-        } else {
-            //sfx_objects_[i]->setMap(-1);
-            sfx_objects_[i + 4]->setMap(-1);
-        }
-    }
-        
-
-    // vehicles
-    for (unsigned int i = 0; i < vehicles_.size(); i++) {
-        VehicleInstance *v = vehicles_[i];
-        if (v->tileX() >= tilex && v->tileX() < maxtilex
-            && v->tileY() >= tiley && v->tileY() < maxtiley)
-        {
-            // NOTE: a trick to make vehicles be drawn correctly z+1
-            fast_vehicle_cache_.insert(fastKey(v->tileX(),
-                v->tileY(), v->tileZ() + 1));
-            cache_vehicles_.push_back(v);
-        }
-    }
-
-    // peds
-    for (size_t i = 0; i < AgentManager::kMaxSlot; i++) {
-        PedInstance *p = p_squad_->member(i);
-        if (p != NULL && p->map() != -1) {
-            if (p->tileX() >= tilex && p->tileX() < maxtilex
-                && p->tileY() >= tiley && p->tileY() < maxtiley)
-            {
-                fast_ped_cache_.insert(fastKey(p));
-                cache_peds_.push_back(p);
-            }
-        }
-    }
-    for (size_t i = p_squad_->size(); i < peds_.size(); i++) {
-        PedInstance *p = peds_[i];
-        if (p->map() != -1) {
-            if (p->tileX() >= tilex && p->tileX() < maxtilex
-                && p->tileY() >= tiley && p->tileY() < maxtiley)
-            {
-                fast_ped_cache_.insert(fastKey(p));
-                cache_peds_.push_back(p);
-            }
-        }
-    }
-
-    // weapons
-    for (unsigned int i = 0; i < weapons_.size(); i++) {
-        WeaponInstance *w = weapons_[i];
-        if (w->map() != -1 && w->tileX() >= tilex && w->tileX() < maxtilex
-            && w->tileY() >= tiley && w->tileY() < maxtiley)
-        {
-            fast_weapon_cache_.insert(fastKey(w));
-            cache_weapons_.push_back(w);
-        }
-    }
-
-    // statics
-    for (unsigned int i = 0; i < statics_.size(); i++) {
-        Static *s = statics_[i];
-        if (s->tileX() >= tilex && s->tileX() < maxtilex
-            && s->tileY() >= tiley && s->tileY() < maxtiley)
-        {
-            fast_statics_cache_.insert(fastKey(s));
-            cache_statics_.push_back(s);
-        }
-    }
-
-    // sfx objects
-    for (unsigned int i = 0; i < sfx_objects_.size(); i++) {
-        SFXObject *so = sfx_objects_[i];
-        if (so->map() != -1 && so->tileX() >= tilex && so->tileX() < maxtilex
-            && so->tileY() >= tiley && so->tileY() < maxtiley)
-        {
-            fast_sfx_objects_cache_.insert(fastKey(so));
-            cache_sfx_objects_.push_back(so);
-        }
-    }
-}
-
-void Mission::drawMap(int scrollx, int scrolly)
-{
-    p_map_->draw(scrollx, scrolly, this);
-}
-
-void Mission::drawAt(int tilex, int tiley, int tilez, int x, int y)
-{
-    int key = fastKey(tilex, tiley, tilez);
-
-    if (fast_vehicle_cache_.find(key) != fast_vehicle_cache_.end()) {
-        // draw vehicles
-        for (unsigned int i = 0; i < cache_vehicles_.size(); i++)
-            if (cache_vehicles_[i]->tileX() == tilex
-                && cache_vehicles_[i]->tileY() == tiley
-                // NOTE: a trick to make vehicles be drawn correctly z+1
-                && (cache_vehicles_[i]->tileZ() + 1) == tilez)
-                cache_vehicles_[i]->draw(x, y);
-    }
-
-    if (fast_ped_cache_.find(key) != fast_ped_cache_.end()) {
-        // draw peds
-        for (unsigned int i = 0; i < cache_peds_.size(); i++)
-            if (cache_peds_[i]->tileX() == tilex
-                && cache_peds_[i]->tileY() == tiley
-                && cache_peds_[i]->tileZ() == tilez) {
-                cache_peds_[i]->draw(x, y);
-#if 0
-                g_Screen.drawLine(x - TILE_WIDTH / 2, y,
-                                  x + TILE_WIDTH / 2, y, 11);
-                g_Screen.drawLine(x + TILE_WIDTH / 2, y,
-                                  x + TILE_WIDTH / 2, y + TILE_HEIGHT,
-                                  11);
-                g_Screen.drawLine(x + TILE_WIDTH / 2, y + TILE_HEIGHT,
-                                  x - TILE_WIDTH / 2, y + TILE_HEIGHT,
-                                  11);
-                g_Screen.drawLine(x - TILE_WIDTH / 2, y + TILE_HEIGHT,
-                                  x - TILE_WIDTH / 2, y, 11);
-#endif
-
-            }
-    }
-
-    if (fast_weapon_cache_.find(key) != fast_weapon_cache_.end()) {
-        // draw weapons
-        for (unsigned int i = 0; i < cache_weapons_.size(); i++)
-            if (cache_weapons_[i]->map() != -1 && cache_weapons_[i]->tileX() == tilex
-                && cache_weapons_[i]->tileY() == tiley
-                && cache_weapons_[i]->tileZ() == tilez) {
-                cache_weapons_[i]->draw(x, y);
-            }
-    }
-
-    if (fast_statics_cache_.find(key) != fast_statics_cache_.end()) {
-        // draw statics
-        for (unsigned int i = 0; i < cache_statics_.size(); i++)
-            if (cache_statics_[i]->tileX() == tilex
-                && cache_statics_[i]->tileY() == tiley
-                && cache_statics_[i]->tileZ() == tilez) {
-                cache_statics_[i]->draw(x, y);
-            }
-    }
-
-    if (fast_sfx_objects_cache_.find(key) != fast_sfx_objects_cache_.end()) {
-        // draw sfx objects
-        for (unsigned int i = 0; i < cache_sfx_objects_.size(); i++)
-            if (cache_sfx_objects_[i]->tileX() == tilex
-                && cache_sfx_objects_[i]->tileY() == tiley
-                && cache_sfx_objects_[i]->tileZ() == tilez) {
-                cache_sfx_objects_[i]->draw(x, y);
-            }
-    }
-}
-
 void Mission::start()
 {
     LOG(Log::k_FLG_GAME, "Mission", "start()", ("Start mission"));
@@ -2977,7 +2781,7 @@ void Mission::getInRangeAll(toDefineXYZ * cp,
    bool checkTileOnly, double maxr)
 {
     if (mask & MapObject::mjt_Ped) {
-        for (int i = 0; i < numPeds(); ++i) {
+        for (size_t i = 0; i < numPeds(); ++i) {
             ShootableMapObject *p = ped(i);
             if (!p->isIgnored() && p->isAlive())
                 if (inRangeCPos(cp, &p, NULL, false, checkTileOnly,
@@ -2988,7 +2792,7 @@ void Mission::getInRangeAll(toDefineXYZ * cp,
         }
     }
     if (mask & MapObject::mjt_Static) {
-        for (int i = 0; i < numStatics(); ++i) {
+        for (size_t i = 0; i < numStatics(); ++i) {
             ShootableMapObject *st = statics(i);
             if (!st->isIgnored())
                 if (inRangeCPos(cp, &st, NULL, false, checkTileOnly,
@@ -2999,7 +2803,7 @@ void Mission::getInRangeAll(toDefineXYZ * cp,
         }
     }
     if (mask & MapObject::mjt_Vehicle) {
-        for (int i = 0; i < numVehicles(); ++i) {
+        for (size_t i = 0; i < numVehicles(); ++i) {
             ShootableMapObject *v = vehicle(i);
             if (!v->isIgnored())
                 if (inRangeCPos(cp, &v, NULL, false, checkTileOnly,
@@ -3010,7 +2814,7 @@ void Mission::getInRangeAll(toDefineXYZ * cp,
         }
     }
     if (mask & MapObject::mjt_Weapon) {
-        for (int i = 0; i < numWeapons(); ++i) {
+        for (size_t i = 0; i < numWeapons(); ++i) {
             ShootableMapObject *w = weapon(i);
             if (!w->isIgnored())
                 if (inRangeCPos(cp, &w, NULL, false, checkTileOnly,

@@ -34,17 +34,6 @@ class Tile;
 class TileManager;
 
 /*!
- * Map helper class.
- */
-class MapHelper {
-public:
-    virtual ~ MapHelper() {}
-    virtual void drawAt(int tilex, int tiley, int tilez, int x, int y) = 0;
-    virtual void createFastKeys(int tilex, int tiley,
-        int maxtilex, int maxtiley) = 0;
-};
-
-/*!
  * This a convenient structure to store a position
  * in map tile coordinates.
  */
@@ -97,7 +86,6 @@ public:
     ~Map();
 
     bool loadMap(uint8 *mapData);
-    void draw(int scrollX, int scrollY, MapHelper *helper);
 
     uint16 id() { return i_id_; }
     int width() { return map_width_; }
