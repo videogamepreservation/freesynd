@@ -51,7 +51,7 @@ public:
         return peds_[n];
     }
 
-    PedInstance *loadInstance(LevelData::People & ped_data, uint16 ped_idx, int map);
+    PedInstance *loadInstance(const LevelData::People & ped_data, uint16 ped_idx, int map);
 
 protected:
     // TODO: remove this everywhere(?)

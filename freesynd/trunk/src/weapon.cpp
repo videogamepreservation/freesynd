@@ -951,7 +951,7 @@ uint16 WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
                     }
                 }*/
                 if (tobj && tobj->majorType() == MapObject::mjt_Ped) {
-                    if (((PedInstance *)owner_)->checkFriendIs(
+                    if (((PedInstance *)owner_)->isFriendWith(
                         (PedInstance *)tobj))
                     {
                         tobj = NULL;
@@ -1351,7 +1351,7 @@ void WeaponInstance::getHostileInRange(toDefineXYZ * cp,
     if (mask & MapObject::mjt_Ped) {
         for (size_t i = 0; i < m->numPeds(); i++) {
             ShootableMapObject *p = m->ped(i);
-            if (!p->isIgnored() && (((PedInstance *)owner_)->checkHostileIs(p)
+            if (!p->isIgnored() && (((PedInstance *)owner_)->isHostileTo(p)
                 || ((PedInstance *)owner_)->isInHostilesFound(p))
                 && m->inRangeCPos(cp, &p, NULL, false, checkTileOnly, maxr,
                 &d) == 1)
@@ -1375,7 +1375,7 @@ void WeaponInstance::getHostileInRange(toDefineXYZ * cp,
     if (mask & MapObject::mjt_Vehicle) {
         for (size_t i = 0; i < m->numVehicles(); i++) {
             ShootableMapObject *v = m->vehicle(i);
-            if (!v->isIgnored() && (((PedInstance *)owner_)->checkHostileIs(v)
+            if (!v->isIgnored() && (((PedInstance *)owner_)->isHostileTo(v)
                 || ((PedInstance *)owner_)->isInHostilesFound(v))
                 && m->inRangeCPos(cp, &v, NULL, false, checkTileOnly, maxr,
                 &d) == 1)
@@ -1428,7 +1428,7 @@ void WeaponInstance::getNonFriendInRange(toDefineXYZ * cp,
             // TODO: inrange if checktileonly = false might return "7"
             // different handling for this we might shoot if blocker
             // is not friendly
-            && !(((PedInstance *)owner_)->checkFriendIs((PedInstance *)p))
+            && !(((PedInstance *)owner_)->isFriendWith((PedInstance *)p))
             && m->inRangeCPos(cp, &p, NULL, false, checkTileOnly, maxr,
             &d) == 1)
         {

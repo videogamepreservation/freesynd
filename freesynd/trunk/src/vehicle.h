@@ -78,6 +78,20 @@ protected:
 class Vehicle : public ShootableMovableMapObject{
 public:
     Vehicle(int m) : ShootableMovableMapObject(m) {}
+
+    //! Adds the given ped to the list of passengers
+    virtual void addPassenger(PedInstance *p);
+    //! Returns true if given ped is in the vehicle
+    bool isInsideVehicle(PedInstance *p) {
+        return (passengers_.find(p) != passengers_.end());
+    }
+    //! Returns true if the vehicle contains one of our agent
+    bool containsOurAgents();
+    //! Returns true if the vehicle contains peds considered hostile by the given ped
+    bool containsHostilesForPed(PedInstance *p, unsigned int hostile_desc_alt);
+protected:
+    /*! The passengers of the vehicle.*/
+    std::set <PedInstance *> passengers_;
 };
 
 /*!
@@ -101,31 +115,27 @@ public:
     void setDestinationV(Mission *m, int x, int y, int z, int ox = 128, int oy = 128,
             int new_speed = 160);
 
+    //! Adds the given ped to the list of passengers
+    void addPassenger(PedInstance *p);
+
     PedInstance *getDriver(void) {
         return vehicle_driver_;
     }
     void setDriver(PedInstance *vehicleDriver) {
         if (vehicle_driver_ == NULL)
             vehicle_driver_ = vehicleDriver;
-        all_passengers_.insert(vehicleDriver);
+        passengers_.insert(vehicleDriver);
     }
     void removeDriver(PedInstance *vehicleDriver);
-    void forceSetDriver(PedInstance *vehicleDriver) {
-        vehicle_driver_ = vehicleDriver;
-        all_passengers_.insert(vehicleDriver);
-    }
+    void forceSetDriver(PedInstance *vehicleDriver);
     bool hasDriver() { return (vehicle_driver_ != NULL); }
     bool isDriver(PedInstance *vehicleDriver) {
         if (vehicle_driver_ == NULL)
             return false;
         return (vehicle_driver_ == vehicleDriver);
     }
-    bool isInsideVehicle(PedInstance *p) {
-        return (all_passengers_.find(p) != all_passengers_.end());
-    }
 
     bool handleDamage(ShootableMapObject::DamageInflictType *d);
-    bool checkHostilesInside(PedInstance *p, unsigned int hostile_desc_alt);
 
 protected:
     bool move_vehicle(int elapsed);
@@ -136,7 +146,6 @@ protected:
 protected:
     VehicleAnimation *vehicle_;
     PedInstance *vehicle_driver_;
-    std::set <PedInstance *> all_passengers_;
 };
 
 #endif

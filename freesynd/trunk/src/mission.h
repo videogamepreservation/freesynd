@@ -38,7 +38,7 @@
 #include "model/leveldata.h"
 #include "core/gameevent.h"
 
-class VehicleInstance;
+class Vehicle;
 class PedInstance;
 class Agent;
 class ObjectiveDesc;
@@ -122,8 +122,8 @@ public:
     void addPed(PedInstance *p) { peds_.push_back(p); }
 
     size_t numVehicles() { return vehicles_.size(); }
-    VehicleInstance *vehicle(size_t i) { return vehicles_[i]; }
-    void addVehicle(VehicleInstance *pVehicle) { vehicles_.push_back(pVehicle); }
+    Vehicle *vehicle(size_t i) { return vehicles_[i]; }
+    void addVehicle(Vehicle *pVehicle) { vehicles_.push_back(pVehicle); }
 
     size_t numWeapons() { return weapons_.size(); }
     WeaponInstance *weapon(size_t i) { return weapons_[i]; }
@@ -223,8 +223,8 @@ protected:
 
 protected:
     
-    // eventually all this level data will be replaced by objects like this:
-    std::vector<VehicleInstance *> vehicles_;
+    /*! List of all vehicles, cars and train.*/
+    std::vector<Vehicle *> vehicles_;
     std::vector<PedInstance *> peds_;
     std::vector<WeaponInstance *> weapons_;
     std::vector<Static *> statics_;

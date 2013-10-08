@@ -175,7 +175,7 @@ void MapRenderer::createFastKeys(int tilex, int tiley, int maxtilex, int maxtile
 
     // vehicles
     for (unsigned int i = 0; i < pMission_->numVehicles(); i++) {
-        VehicleInstance *v = pMission_->vehicle(i);
+        Vehicle *v = pMission_->vehicle(i);
         if (v->tileX() >= tilex && v->tileX() < maxtilex
             && v->tileY() >= tiley && v->tileY() < maxtiley) {
             // NOTE: a trick to make vehicles be drawn correctly z+1

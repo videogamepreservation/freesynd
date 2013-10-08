@@ -34,7 +34,7 @@
 class Mission;
 class Map;
 class MapObject;
-class VehicleInstance;
+class Vehicle;
 class PedInstance;
 class WeaponInstance;
 class Static;
@@ -59,7 +59,7 @@ private:
     Mission *pMission_;
     Map *pMap_;
 
-    std::vector<VehicleInstance *> cache_vehicles_;
+    std::vector<Vehicle *> cache_vehicles_;
     std::vector<PedInstance *> cache_peds_;
     std::vector<WeaponInstance *> cache_weapons_;
     std::vector<Static *> cache_statics_;

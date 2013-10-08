@@ -183,7 +183,7 @@ class GamePlayMinimapRenderer : public MinimapRenderer, GameEventListener {
     //! called when zoom changes
     void updateRenderingInfos();
     //! Draw all visible cars
-    void drawCars(uint8 * a_minimap);
+    void drawVehicles(uint8 * a_minimap);
     //! Draw all visible dropped weapons
     void drawWeapons(uint8 * a_minimap);
     //! Draw visible peds

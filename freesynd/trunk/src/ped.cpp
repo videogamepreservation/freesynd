@@ -499,7 +499,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                                 int tm_left = elapsed;
                                 uint16 answ = wi->inflictDamage(aqt->target.t_smo, NULL, &tm_left);
                                 if (answ == 0) {
-                                    if (checkFriendIs((PedInstance *)aqt->target.t_smo))
+                                    if (isFriendWith((PedInstance *)aqt->target.t_smo))
                                         aqt->state |= 4;
                                 } else if (answ == 2) {
                                     aqt->state |= 2;
@@ -598,7 +598,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                             aqt->state |= 12;
                         } else if ((aqt->target.t_smo->majorType() == MapObject::mjt_Ped
                             ? aqt->multi_var.enemy_var.forced_shot
-                            || !checkFriendIs((PedInstance *)aqt->target.t_smo) : true)
+                            || !isFriendWith((PedInstance *)aqt->target.t_smo) : true)
                             && selectRequiredWeapon(&aqt->multi_var.enemy_var.pw_to_use))
                         {
                             // TODO: if object can't see target and none of
@@ -652,7 +652,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                     {
                         //if (aqt->multi_var.time_var.desc == 0) {
                             if ((aqt->target.t_smo->majorType() == MapObject::mjt_Ped
-                                && !checkHostileIs((PedInstance *)aqt->target.t_smo))
+                                && !isHostileTo((PedInstance *)aqt->target.t_smo))
                                 || aqt->target.t_smo->isDead())
                             {
                                 aqt->act_exec &= PedInstance::ai_aAll
@@ -1078,7 +1078,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                                     continue;
                                 }
                                 if (p->objGroupDef() == obj_group_def_
-                                    && checkFriendIs(p))
+                                    && isFriendWith(p))
                                 {
                                     Msmod_t::iterator it_s, it_e;
                                     if (p->getHostilesFoundIt(it_s, it_e)) {
@@ -1089,7 +1089,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                                             // become invalidated by other
                                             // peds actions
                                             if ((!smo->isExcluded())
-                                                && checkHostileIs(smo))
+                                                && isHostileTo(smo))
                                             {
                                                 // TODO: set ignoreblocker based on Ai
                                                 if (mission->inRangeCPos(
@@ -1105,8 +1105,8 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                                             ++it_s;
                                         } while (it_s != it_e);
                                     }
-                                } else if (checkHostileIs(p) ) {
-                                    // TODO: hostile_desc_alt to checkHostileIs?
+                                } else if (isHostileTo(p) ) {
+                                    // TODO: hostile_desc_alt to isHostileTo?
                                     double distTo = 0;
                                     // TODO: set ignoreblocker based on Ai
                                     if (mission->inRangeCPos(&cur_xyz,
@@ -1129,8 +1129,8 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                                 {
                                     continue;
                                 }
-                                if (checkHostileIs(p) ) {
-                                    // TODO: hostile_desc_alt to checkHostileIs?
+                                if (isHostileTo(p) ) {
+                                    // TODO: hostile_desc_alt to isHostileTo?
                                     double distTo = 0;
                                     // TODO: set ignoreblocker based on Ai
                                     if (mission->inRangeCPos(&cur_xyz,
@@ -1146,8 +1146,8 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                         }
                         int num_vehicles = mission->numVehicles();
                         for (int i = 0; i < num_vehicles; ++i) {
-                            VehicleInstance *v = mission->vehicle(i);
-                            if ((!v->isExcluded()) && v->checkHostilesInside(this, 0))
+                            Vehicle *v = mission->vehicle(i);
+                            if ((!v->isExcluded()) && v->containsHostilesForPed(this, 0))
                             {
                                 double distTo = 0;
                                 // TODO: set ignoreblocker based on Ai
@@ -1305,7 +1305,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                             {
                                 continue;
                             }
-                            if (!checkFriendIs(p) ) {
+                            if (!isFriendWith(p) ) {
                                 double distTo = 0;
                                 if (mission->inRangeCPos(&cur_xyz,
                                     (ShootableMapObject **)(&p), NULL, false, false,
@@ -2496,40 +2496,52 @@ bool PedInstance::isInEmulatedGroupDef(PedInstance::Mmuu32_t &r_egd,
     return emulated_group_defs_.isIn_All(r_egd);
 }
 
-bool PedInstance::checkHostileIs(ShootableMapObject *obj,
+/*!
+ * Returns true if the given object is considered hostile by this Ped.
+ * If object is a Vehicle, check if it contains hostiles inside.
+ * If it is another Ped, check if he is a friend or in a opposite group
+ * \param obj The object whom hostility is being evaluated
+ * \param hostile_desc_alt
+ * \return true if object is considered hostile
+ */
+bool PedInstance::isHostileTo(ShootableMapObject *obj,
     unsigned int hostile_desc_alt)
 {
-    bool hostile_rsp = false;
-    bool friend_is = false;
+    bool isHostile = false;
 
     if (obj->majorType() == MapObject::mjt_Vehicle) {
-        hostile_rsp = ((VehicleInstance *)obj)->checkHostilesInside(
+        Vehicle *pVehicle = static_cast<Vehicle *>(obj);
+        isHostile = pVehicle->containsHostilesForPed(
             this, hostile_desc_alt);
     } else if (obj->majorType() == MapObject::mjt_Ped) {
-        if (checkFriendIs((PedInstance *)obj))
-            friend_is = true;
-        if (((PedInstance *)obj)->emulatedGroupDefsEmpty()) {
-            hostile_rsp =
-                isInEnemyGroupDef(((PedInstance *)obj)->objGroupID(),
-                ((PedInstance *)obj)->objGroupDef());
-        } else {
-            hostile_rsp =
-                ((PedInstance *)obj)->isInEmulatedGroupDef(enemy_group_defs_);
-        }
-        if (!(hostile_rsp || friend_is)) {
-            if (hostile_desc_alt == PedInstance::pd_smUndefined)
-                hostile_desc_alt = hostile_desc_;
-            hostile_rsp = (((PedInstance *)obj)->descStateMasks()
-                & hostile_desc_alt) != 0;
+        PedInstance *pPed = static_cast<PedInstance *>(obj);
+        if (!isFriendWith(pPed)) {
+            // Ped is not a declared friend, check its group
+            if ((pPed)->emulatedGroupDefsEmpty()) {
+                isHostile =
+                    isInEnemyGroupDef(pPed->objGroupID(), pPed->objGroupDef());
+            } else {
+                isHostile = pPed->isInEmulatedGroupDef(enemy_group_defs_);
+            }
+            if (!isHostile) {
+                if (hostile_desc_alt == PedInstance::pd_smUndefined)
+                    hostile_desc_alt = hostile_desc_;
+                isHostile = (pPed->descStateMasks() & hostile_desc_alt) != 0;
+            }
         }
     }
 
-    return hostile_rsp;
+    return isHostile;
 }
 
-bool PedInstance::checkFriendIs(PedInstance *p) {
-    // Friend can be neutral to be sure that object is hostile use
-    // checkHostileIs and check hostiles_found_(isInHostilesFound)
+/*!
+ * Friend can be neutral to be sure that object is hostile use
+ * isHostileTo and check hostiles_found_(isInHostilesFound)
+ * \param p
+ * \return True if other ped is considered a friend.
+ */
+bool PedInstance::isFriendWith(PedInstance *p) {
+    // Search ped in friends
     if (friends_found_.find(p) != friends_found_.end())
         return true;
     if (p->isInEmulatedGroupDef(obj_group_id_, obj_group_def_)) {
@@ -2562,9 +2574,9 @@ void PedInstance::verifyHostilesFound(Mission *m) {
         ShootableMapObject *smo = it->first;
         double distTo = 0;
         if (smo->isDead() || (smo->majorType() == MapObject::mjt_Ped
-            && checkFriendIs((PedInstance *)(smo)))
+            && isFriendWith((PedInstance *)(smo)))
             || (smo->majorType() == MapObject::mjt_Vehicle
-            && ((VehicleInstance *)smo)->checkHostilesInside(this, hostile_desc_))
+            && ((VehicleInstance *)smo)->containsHostilesForPed(this, hostile_desc_))
             || (m->inRangeCPos(&cur_xyz, &smo, NULL, false, false,
             check_rng, &distTo) != 1))
         {

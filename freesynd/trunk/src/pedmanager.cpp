@@ -143,9 +143,11 @@ void PedManager::setPed(Ped *pedanim, unsigned short baseAnim)
  * \param map id of the map
  * \return NULL if the ped could not be created.
  */
-PedInstance *PedManager::loadInstance(LevelData::People & gamdata, uint16 ped_idx, int map)
+PedInstance *PedManager::loadInstance(const LevelData::People & gamdata, uint16 ped_idx, int map)
 {
-    if(gamdata.type == 0x0 || gamdata.desc == 0x0D || gamdata.desc == 0x0C)
+    if(gamdata.type == 0x0 || 
+        gamdata.location == LevelData::kPeopleLocNotVisible || 
+        gamdata.location == LevelData::kPeopleLocAboveWalkSurf)
         return NULL;
 
     if (ped_idx < 4 && !g_gameCtrl.agents().isSquadSlotActive(ped_idx)) {

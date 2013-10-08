@@ -516,10 +516,11 @@ public:
         it_e = hostiles_found_.end();
         return true;
     }
-
-    bool checkHostileIs(ShootableMapObject *obj,
+    //! Verify hostility between this Ped and the object
+    bool isHostileTo(ShootableMapObject *obj,
         unsigned int hostile_desc_alt = 0);
-    bool checkFriendIs(PedInstance *p);
+    //! Verify if this ped is friend with the given ped
+    bool isFriendWith(PedInstance *p);
 
     typedef enum {
         og_dmUndefined = 0x0,

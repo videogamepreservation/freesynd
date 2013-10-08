@@ -48,6 +48,23 @@ public:
     MissionBriefing *loadBriefing(int n);
 
 private:
+    /*!
+     * NOTE: Original objects data is based on offsets, but our objects are different
+     * in size and are not in a single memory block.
+     * Because of this indexes in our data, "arrays" are mirrored for object's
+     * position within original array.
+     */
+    struct DataIndex {
+        // indexes within vehicle array
+        uint16 vindx[64];
+        // indexes within peds array
+        uint16 pindx[256];
+        // contains indexes for driver's vehicle
+        uint16 driverindx[256];
+        uint16 windx[512];
+    };
+
+private:
     //! When loading missions, possibly adds some info to the data
     void hackMissions(int n, uint8 *data);
     //! Reads the mission file and return a representation of that file
@@ -56,8 +73,14 @@ private:
     Mission * create_mission(LevelData::LevelDataAll &level_data);
     //! Creates a weapon from the game data
     WeaponInstance * create_weapon_instance(const LevelData::Weapons &gamdata);
+    //! Creates all vehicles
+    void createVehicles(const LevelData::LevelDataAll &level_data, 
+                            DataIndex &di, Mission *pMission);
     //! Creates a vehicle from the game data
-    VehicleInstance * create_vehicle_instance(const LevelData::Cars &gamdata, uint16 map);
+    VehicleInstance * createVehicleInstance(const LevelData::Cars &gamdata, uint16 map);
+    //! Creates all peds
+    void createPeds(const LevelData::LevelDataAll &level_data, 
+                            DataIndex &di, Mission *pMission);
 };
 
 #endif

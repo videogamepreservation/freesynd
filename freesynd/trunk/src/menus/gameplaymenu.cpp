@@ -565,7 +565,7 @@ void GameplayMenu::handleMouseMotion(int x, int y, int state, const int modKeys)
         }
 
         for (size_t i = 0; mission_ && i < mission_->numVehicles(); ++i) {
-            VehicleInstance *v = mission_->vehicle(i);
+            Vehicle *v = mission_->vehicle(i);
             if (v->isAlive()) {
                 int px = v->screenX() - 20;
                 int py = v->screenY() - 10 - v->tileZ() * TILE_HEIGHT/3;

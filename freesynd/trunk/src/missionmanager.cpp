@@ -38,6 +38,28 @@
 #include "core/squad.h"
 #include "pedmanager.h"
 
+class LoadMissionException : public std::exception
+{
+public:
+    LoadMissionException( const char * Msg )
+    {
+        this->msg = Msg;
+    }
+ 
+    virtual ~LoadMissionException() throw()
+    {
+ 
+    }
+ 
+    virtual const char * what() const throw()
+    {
+        return this->msg.c_str();
+    }
+ 
+private:
+    std::string msg;
+};
+
 MissionManager::MissionManager()
 {
 }
@@ -213,22 +235,12 @@ void MissionManager::hackMissions(int n, uint8 *data) {
 Mission * MissionManager::create_mission(LevelData::LevelDataAll &level_data) {
     Mission *p_mission = new Mission(level_data.mapinfos);
 
-    // NOTE: Original objects data is based on offsets, but our objetcs are different
-    // in size and are not in a single memory block, because of this indexes
-    // in our data "arrays" are mirrored for object's position within original
-    // array
-
-    // indexes within vehicle array
-    uint16 vindx[64];
-    // indexes within peds array
-    uint16 pindx[256];
-    // contains indexes for driver's vehicle
-    uint16 driverindx[256];
-    uint16 windx[512];
-    memset(vindx, 0xFF, 2*64);
-    memset(pindx, 0xFF, 2*256);
-    memset(driverindx, 0xFF, 2*256);
-    memset(windx, 0xFF, 2*512);
+    // Init indexes
+    DataIndex di;
+    memset(di.vindx, 0xFF, 2*64);
+    memset(di.pindx, 0xFF, 2*256);
+    memset(di.driverindx, 0xFF, 2*256);
+    memset(di.windx, 0xFF, 2*512);
 
 #if 0
     // for hacking vehicles data
@@ -241,262 +253,10 @@ Mission * MissionManager::create_mission(LevelData::LevelDataAll &level_data) {
     }
 
 #endif
-
-    for (uint8 i = 0; i < 64; i++) {
-        LevelData::Cars & car = level_data.cars[i];
-        // car.sub_type 0x09 - train
-        if (car.type == 0x0)
-            continue;
-        VehicleInstance *v =
-            create_vehicle_instance(car, p_mission->mapId());
-        if (v) {
-            vindx[i] = p_mission->numVehicles();
-            p_mission->addVehicle(v);
-            if (car.offset_of_driver != 0 && ((car.offset_of_driver - 2) / 92 + 2) * 92
-                == car.offset_of_driver)
-            {
-                driverindx[(car.offset_of_driver - 2) / 92] = vindx[i];
-            }
-#ifdef _DEBUG
-            v->setDebugID(i);
-#endif
-        }
-    }
-
+    try {
+        createVehicles(level_data, di, p_mission);
     
-#if 0
-    // for hacking peds data
-    char nameSp[256];
-    sprintf(nameSp, "peds%02X.hex", p_mission->mapId());
-    FILE *staticsFp = fopen(nameSp,"wb");
-    if (staticsFp) {
-        fwrite(level_data.people, 1, 256*92, staticsFp);
-        fclose(staticsFp);
-    }
-#endif
-#ifdef _DEBUG
-    std::map <uint32, std::string> obj_ids;
-    // NOTE: not very useful way of remembering "Who is who"
-    obj_ids[0] = "Undefined";
-    obj_ids[p_mission->playersGroupID()] = "Players Agents or Persuaded";
-    obj_ids[2] = "Enemy Agents";
-    obj_ids[3] = "Enemy Guards";
-    obj_ids[4] = "Policemen";
-    obj_ids[5] = "Civilians";
-#endif
-    ModOwner mods_enemy;
-    // enemies get top version of mods
-    mods_enemy.addMod(g_gameCtrl.mods().getHighestVersion(Mod::MOD_LEGS));
-    mods_enemy.addMod(g_gameCtrl.mods().getHighestVersion(Mod::MOD_ARMS));
-    mods_enemy.addMod(g_gameCtrl.mods().getHighestVersion(Mod::MOD_CHEST));
-    mods_enemy.addMod(g_gameCtrl.mods().getHighestVersion(Mod::MOD_HEART));
-    mods_enemy.addMod(g_gameCtrl.mods().getHighestVersion(Mod::MOD_EYES));
-    mods_enemy.addMod(g_gameCtrl.mods().getHighestVersion(Mod::MOD_BRAIN));
-    
-    PedManager peds;
-    for (uint16 i = 0; i < 256; i++) {
-        //if (i == 40)
-            //i = 40;
-        LevelData::People & pedref = level_data.people[i];
-        
-        PedInstance *p =
-            peds.loadInstance(pedref, i, p_mission->mapId());
-        if (p) {
-            if (pedref.desc == 0x05) {
-                if (driverindx[i] != 0xFFFF) {
-                    p->putInVehicle(p_mission->vehicle(driverindx[i]),
-                        PedInstance::pa_smUsingCar);
-                    VehicleInstance *v = p_mission->vehicle(driverindx[i]);
-                    assert(v);
-                    if (v->hasDriver()) {
-                        PedInstance *curr_driver = v->getDriver();
-                        curr_driver->leaveVehicle();
-                        curr_driver->putInVehicle(v, PedInstance::pa_smInCar);
-                        v->setDriver(p);
-                        v->setDriver(curr_driver);
-                    } else
-                        v->setDriver(p);
-                } else {
-                    uint16 vin = READ_LE_UINT16(pedref.offset_of_vehicle);
-                    if (vin != 0) {
-                        vin = (vin - 0x5C02) / 42; // 42 vehicle data size
-                        vin = vindx[vin];
-                        if (vin != 0xFFFF) {
-                            VehicleInstance *v = p_mission->vehicle(vin);
-                            v->setDriver(p);
-                            if (v->isDriver(p))
-                                p->putInVehicle(v, PedInstance::pa_smUsingCar);
-                            else
-                                p->putInVehicle(v, PedInstance::pa_smInCar);
-                        }
-                    }
-                }
-            }
-            pindx[i] = p_mission->numPeds();
-            p_mission->addPed(p);
-
-            if (i < AgentManager::kMaxSlot) {
-                // We're loading one of our agents
-                Agent *pAg = g_gameCtrl.agents().squadMember(i);
-                p->initAsAgent(pAg, p_mission->playersGroupID());
-                // adds all agent's weapons to the mission weapons
-                for (int wi=0; wi<p->numWeapons(); wi++) {
-                    p_mission->addWeapon(p->weapon(wi));
-                }
-                // adds the agent to the mission squad
-                p_mission->getSquad()->setMember(i, p);
-            } else {
-                unsigned int mt = p->getMainType();
-                p->setObjGroupDef(mt);
-                if (mt == PedInstance::og_dmAgent) {
-                    p->setObjGroupID(2);
-                    p->addEnemyGroupDef(1);
-                    p->setBaseSpeed(256);
-                    *((ModOwner *)p) = mods_enemy;
-                    p->setTimeBeforeCheck(400);
-                    p->setBaseModAcc(0.5);
-                    p->setPersuasionPoints(32);
-                } else if (mt == PedInstance::og_dmGuard) {
-                    p->setObjGroupID(3);
-                    p->addEnemyGroupDef(1);
-                    p->setBaseSpeed(192);
-                    p->setTimeBeforeCheck(300);
-                    p->setBaseModAcc(0.45);
-                    p->setPersuasionPoints(4);
-                } else if (mt == PedInstance::og_dmPolice) {
-                    p->setObjGroupID(4);
-                    p->setHostileDesc(PedInstance::pd_smArmed);
-                    p->setBaseSpeed(160);
-                    p->setTimeBeforeCheck(400);
-                    p->setBaseModAcc(0.4);
-                    p->setPersuasionPoints(8);
-                } else if (mt == PedInstance::og_dmCivilian) {
-                    p->setObjGroupID(5);
-                    p->addEnemyGroupDef(6);
-                    p->setHostileDesc(PedInstance::pd_smArmed);
-                    p->setBaseSpeed(128);
-                    p->setTimeBeforeCheck(600);
-                    p->setBaseModAcc(0.2);
-                    p->setPersuasionPoints(1);
-                } else if (mt == PedInstance::og_dmCriminal) {
-                    p->setObjGroupID(6);
-                    p->setBaseSpeed(128);
-                    p->setTimeBeforeCheck(500);
-                    p->setBaseModAcc(0.2);
-                    p->setPersuasionPoints(1);
-                }
-                p->setSightRange(7 * 256);
-                // TODO: set scenarios
-                
-                uint16 offset_start = READ_LE_UINT16(pedref.offset_scenario_start);
-                uint16 offset_nxt = offset_start;
-                VehicleInstance *v = p->inVehicle();
-                bool not_in_vehicle = true;
-                if (v)
-                    not_in_vehicle = false;
-                if (offset_start)
-                    p->dropActQ();
-//#define SHOW_SCENARIOS_DEBUG
-#ifdef SHOW_SCENARIOS_DEBUG
-                printf("=====\n");
-#endif
-                PedInstance::actionQueueGroupType as;
-                as.group_desc = PedInstance::gd_mStandWalk;
-                as.origin_desc = fs_actions::kOrigScript;
-                int32 has_trigger = -1;
-                while (offset_nxt) {
-                    // sc.type
-                    // 1 - walking/driving to pos, x,y defined
-                    // 2 - vehicle to use and goto
-                    // 3?(south africa)
-                    // 5?(kenya)
-                    // 6 (kenya) - ped offset when in vehicle, and? (TODO)
-                    // 7 - assasinate target escaped, mission failed (TODO properly)
-                    // 8 - walking to pos, triggers on our agents in range, x,y defined
-                    // 9 - repeat from start, actually this might be end of script
-                    // 10 - train stops and waits
-                    // 11 - protected target reached destination(kenya) (TODO properly)
-                    LevelData::Scenarios sc = level_data.scenarios[offset_nxt / 8];
-#ifdef SHOW_SCENARIOS_DEBUG
-                    printf("id = %i, sc.type = %i, nxt = %i\n", i, sc.type, offset_nxt / 8);
-#endif
-                    offset_nxt = READ_LE_UINT16(sc.next);
-                    assert(offset_nxt != offset_start);
-
-                    if (sc.tilex != 0 && sc.tiley != 0) {
-                        PathNode pn(sc.tilex >> 1, sc.tiley >> 1, sc.tilez,
-                            (sc.tilex & 0x01) << 7, (sc.tiley & 0x01) << 7);
-                        if (sc.type == 0x08) {
-                            p->createActQTrigger(as, &pn, 6 * 256);
-                            has_trigger = as.actions.size();
-                            // no need for exclusive wait
-                            p->createActQWait(as, 3000);
-                            as.actions.back().group_desc = PedInstance::gd_mStandWalk;
-                        }
-                        if (v)
-                            p->createActQUsingCar(as, &pn, v);
-                        else
-                            p->createActQWalking(as, &pn, NULL, p->getDir(), 0, true);
-                        //p->createActQWalking(as, &pn, NULL, -1);
-                        if ((!not_in_vehicle) && offset_nxt == 0)
-                            p->createActQResetActionQueue(as);
-                    } else if (sc.type == 2) {
-                        if (not_in_vehicle) {
-                            uint16 bindx = READ_LE_UINT16(sc.offset_object);
-                            // TODO: test all maps for objects other then vehicle
-                            assert(bindx >= 0x5C02 && bindx < 0x6682);
-                            bindx -= 0x5C02;
-                            bindx /= 42;
-                            if (vindx[bindx] != 0xFFFF) {
-                                v = p_mission->vehicle(vindx[bindx]);
-                                p->createActQGetInCar(as, v);
-                            }
-                        } else {
-                            PathNode pn(v->tileX(), v->tileY(), v->tileZ(),
-                                v->offX(), v->offY());
-                            p->createActQUsingCar(as, &pn, v);
-                        }
-                    } else if (sc.type == 9) {
-                        p->createActQResetActionQueue(as);
-                    } else if (sc.type == 10) {
-                        // train will wait
-                        p->createActQWait(as, 10000);
-                        // resetting movement for train
-                        if (offset_nxt == 0) {
-                            p->createActQResetActionQueue(as);
-                        }
-                    }
-#if 0
-#ifdef _DEBUG
-                    switch (sc.type) {
-                        case 1:
-                        case 2:
-                        case 7:
-                        case 8:
-                        case 9:
-                        case 10:
-                        case 11:
-                            break;
-                        default:
-                            printf("Bingo\n");
-                    }
-#endif
-#endif
-                }
-                if (as.actions.size() != 0) {
-                    if (has_trigger != -1) {
-                        p->pauseAllInActG(as, (uint32)has_trigger);
-                        as.main_act = (uint32)has_trigger - 1;
-                    } else
-                        as.main_act = as.actions.size() - 1;
-                    p->addActQToQueue(as);
-                }
-#ifdef SHOW_SCENARIOS_DEBUG
-                printf("+++++\n");
-#endif
-            }
-        }
-    }
+        createPeds(level_data, di, p_mission);
 
 #if 0
     // for hacking map data
@@ -558,14 +318,14 @@ Mission * MissionManager::create_mission(LevelData::LevelDataAll &level_data) {
                 uint16 offset_owner = READ_LE_UINT16(wref.offset_owner);
                 if (offset_owner != 0) {
                     offset_owner = (offset_owner - 2) / 92; // 92 = ped data size
-                    if (offset_owner > 7 && pindx[offset_owner] != 0xFFFF) {
+                    if (offset_owner > 7 && di.pindx[offset_owner] != 0xFFFF) {
                         // TODO: still there is a problem of weapons setup
                         // some police officers can have more then 1 weapon
                         // others none (pacific Rim)
-                        p_mission->ped(pindx[offset_owner])->addWeapon(w);
-                        w->setOwner(p_mission->ped(pindx[offset_owner]));
+                        p_mission->ped(di.pindx[offset_owner])->addWeapon(w);
+                        w->setOwner(p_mission->ped(di.pindx[offset_owner]));
                         w->setIsIgnored(true);
-                        windx[i] = p_mission->numWeapons();
+                        di.windx[i] = p_mission->numWeapons();
                         p_mission->addWeapon(w);
                     } else {
                         delete w;
@@ -576,7 +336,7 @@ Mission * MissionManager::create_mission(LevelData::LevelDataAll &level_data) {
             } else {
                 w->setMap(p_mission->mapId());
                 w->setOwner(NULL);
-                windx[i] = p_mission->numWeapons();
+                di.windx[i] = p_mission->numWeapons();
                 p_mission->addWeapon(w);
             }
         }
@@ -650,8 +410,8 @@ Mission * MissionManager::create_mission(LevelData::LevelDataAll &level_data) {
             case 0x01:
                 if (bindx > 0 && bindx < 0x5C02) {
                     cindx = (bindx - 2) / 92;
-                    if ((cindx * 92 + 2) == bindx && pindx[cindx] != 0xFFFF) {
-                        PedInstance *p = p_mission->ped(pindx[cindx]);
+                    if ((cindx * 92 + 2) == bindx && di.pindx[cindx] != 0xFFFF) {
+                        PedInstance *p = p_mission->ped(di.pindx[cindx]);
                         objd = new ObjPersuade(p);
                         p->setRcvDamageDef(MapObject::ddmg_PedPanicImmune);
                         // Adds the ped to the list of peds to evacuate
@@ -664,8 +424,8 @@ Mission * MissionManager::create_mission(LevelData::LevelDataAll &level_data) {
             case 0x02: // Assassinate a civilian
                 if (bindx > 0 && bindx < 0x5C02) {
                     cindx = (bindx - 2) / 92;
-                    if ((cindx * 92 + 2) == bindx && pindx[cindx] != 0xFFFF) {
-                        PedInstance *p = p_mission->ped(pindx[cindx]);
+                    if ((cindx * 92 + 2) == bindx && di.pindx[cindx] != 0xFFFF) {
+                        PedInstance *p = p_mission->ped(di.pindx[cindx]);
                         p->setRcvDamageDef(MapObject::ddmg_PedPanicImmune);
                         objd = new ObjAssassinate(p);
                     } else
@@ -676,8 +436,8 @@ Mission * MissionManager::create_mission(LevelData::LevelDataAll &level_data) {
             case 0x03:
                 if (bindx > 0 && bindx < 0x5C02) {
                     cindx = (bindx - 2) / 92;
-                    if ((cindx * 92 + 2) == bindx && pindx[cindx] != 0xFFFF) {
-                        PedInstance *p = p_mission->ped(pindx[cindx]);
+                    if ((cindx * 92 + 2) == bindx && di.pindx[cindx] != 0xFFFF) {
+                        PedInstance *p = p_mission->ped(di.pindx[cindx]);
                         p->setRcvDamageDef(MapObject::ddmg_PedPanicImmune);
                         objd = new ObjProtect(p);
                     } else
@@ -689,8 +449,8 @@ Mission * MissionManager::create_mission(LevelData::LevelDataAll &level_data) {
                 if (bindx >= 0x9562 && bindx < 0xDD62) {
                     bindx -= 0x9562;
                     cindx = bindx / 36;
-                    if ((cindx * 36) == bindx && windx[cindx] != 0xFFFF) {
-                        objd = new ObjTakeWeapon(p_mission->weapon(windx[cindx]));
+                    if ((cindx * 36) == bindx && di.windx[cindx] != 0xFFFF) {
+                        objd = new ObjTakeWeapon(p_mission->weapon(di.windx[cindx]));
                     } else
                         printf("0x05 incorrect offset");
                 } else
@@ -707,8 +467,8 @@ Mission * MissionManager::create_mission(LevelData::LevelDataAll &level_data) {
                 if (bindx >= 0x5C02 && bindx < 0x6682) {
                     bindx -= 0x5C02;
                     cindx = bindx / 42;
-                    if ((cindx * 42) == bindx && vindx[cindx] != 0xFFFF) {
-                        objd = new ObjDestroyVehicle(p_mission->vehicle(vindx[cindx]));
+                    if ((cindx * 42) == bindx && di.vindx[cindx] != 0xFFFF) {
+                        objd = new ObjDestroyVehicle(p_mission->vehicle(di.vindx[cindx]));
                     } else
                         printf("0x0E incorrect offset");
                 } else
@@ -719,8 +479,8 @@ Mission * MissionManager::create_mission(LevelData::LevelDataAll &level_data) {
                 if (bindx >= 0x5C02 && bindx < 0x6682) {
                     bindx -= 0x5C02;
                     cindx = bindx / 42;
-                    if ((cindx * 42) == bindx && vindx[cindx] != 0xFFFF) {
-                        objd = new ObjUseVehicle(p_mission->vehicle(vindx[cindx]));
+                    if ((cindx * 42) == bindx && di.vindx[cindx] != 0xFFFF) {
+                        objd = new ObjUseVehicle(p_mission->vehicle(di.vindx[cindx]));
                         // TODO Do we have to add the vehicle to the list of object to evacuate?
                     } else
                         printf("0x0F incorrect offset");
@@ -796,6 +556,13 @@ Mission * MissionManager::create_mission(LevelData::LevelDataAll &level_data) {
 
     return p_mission;
 
+    } catch (const LoadMissionException & ex) {
+        FSERR(Log::k_FLG_GAME, "Mission", "loadMission", ("Failed to load mission %s\n", ex.what()));
+        if (p_mission) {
+            delete p_mission;
+        }
+        return NULL;
+    }
 }
 
 WeaponInstance * MissionManager::create_weapon_instance(const LevelData::Weapons &gamdata) {
@@ -861,10 +628,33 @@ WeaponInstance * MissionManager::create_weapon_instance(const LevelData::Weapons
     return NULL;
 }
 
+
+void MissionManager::createVehicles(const LevelData::LevelDataAll &level_data, DataIndex &di, Mission *pMission) {
+    for (uint8 i = 0; i < 64; i++) {
+        const LevelData::Cars & car = level_data.cars[i];
+        // car.sub_type 0x09 - train
+        if (car.type == 0x0)
+            continue;
+        VehicleInstance *v =
+            createVehicleInstance(car, pMission->mapId());
+        if (v) {
+            di.vindx[i] = pMission->numVehicles();
+            pMission->addVehicle(v);
+            if (car.offset_of_driver != 0 && ((car.offset_of_driver - 2) / 92 + 2) * 92
+                == car.offset_of_driver)
+            {
+                di.driverindx[(car.offset_of_driver - 2) / 92] = di.vindx[i];
+            }
+#ifdef _DEBUG
+            v->setDebugID(i);
+#endif
+        }
+    }
+}
 /*!
  *
  */
-VehicleInstance * MissionManager::create_vehicle_instance(const LevelData::Cars &gamdata, uint16 map)
+VehicleInstance * MissionManager::createVehicleInstance(const LevelData::Cars &gamdata, uint16 map)
 {
     // TODO: check all maps
     // TODO: train, join somehow
@@ -943,4 +733,238 @@ VehicleInstance * MissionManager::create_vehicle_instance(const LevelData::Cars 
     vehivle_new->setDirection(gamdata.orientation);
 
     return vehivle_new;
+}
+
+void MissionManager::createPeds(const LevelData::LevelDataAll &level_data, DataIndex &di, Mission *pMission) {
+
+#if 0
+    // for hacking peds data
+    char nameSp[256];
+    sprintf(nameSp, "peds%02X.hex", p_mission->mapId());
+    FILE *staticsFp = fopen(nameSp,"wb");
+    if (staticsFp) {
+        fwrite(level_data.people, 1, 256*92, staticsFp);
+        fclose(staticsFp);
+    }
+#endif
+#ifdef _DEBUG
+    std::map <uint32, std::string> obj_ids;
+    // NOTE: not very useful way of remembering "Who is who"
+    obj_ids[0] = "Undefined";
+    obj_ids[pMission->playersGroupID()] = "Players Agents or Persuaded";
+    obj_ids[2] = "Enemy Agents";
+    obj_ids[3] = "Enemy Guards";
+    obj_ids[4] = "Policemen";
+    obj_ids[5] = "Civilians";
+#endif
+    ModOwner mods_enemy;
+    // enemies get top version of mods
+    mods_enemy.addMod(g_gameCtrl.mods().getHighestVersion(Mod::MOD_LEGS));
+    mods_enemy.addMod(g_gameCtrl.mods().getHighestVersion(Mod::MOD_ARMS));
+    mods_enemy.addMod(g_gameCtrl.mods().getHighestVersion(Mod::MOD_CHEST));
+    mods_enemy.addMod(g_gameCtrl.mods().getHighestVersion(Mod::MOD_HEART));
+    mods_enemy.addMod(g_gameCtrl.mods().getHighestVersion(Mod::MOD_EYES));
+    mods_enemy.addMod(g_gameCtrl.mods().getHighestVersion(Mod::MOD_BRAIN));
+    
+    PedManager peds;
+    for (uint16 i = 0; i < 256; i++) {
+        //if (i == 40)
+            //i = 40;
+        const LevelData::People & pedref = level_data.people[i];
+        
+        PedInstance *p =
+            peds.loadInstance(pedref, i, pMission->mapId());
+        if (p) {
+            if (pedref.location == LevelData::kPeopleLocInVehicle) {
+                uint16 vid = 0xFFFF;  // Id of the vehicle
+                bool setDriver = false;  // Tells if ped should be the driver
+                if (di.driverindx[i] != 0xFFFF) {
+                    // Current ped is the driver
+                    vid = di.driverindx[i];
+                    setDriver = true;
+                } else {
+                    // Current ped is just a passenger
+                    uint16 vin = READ_LE_UINT16(pedref.offset_of_vehicle);
+                    if (vin != 0) {
+                        vin = (vin - 0x5C02) / 42; // 42 vehicle data size
+                        vid = di.vindx[vin];
+                    }
+                }
+
+                if(vid == 0xFFFF) {
+                    throw LoadMissionException("Vehicle not found");
+                }
+                Vehicle *pVehicle = pMission->vehicle(vid);
+
+                pVehicle->addPassenger(p);
+                if (setDriver) {
+                    VehicleInstance *pCar = dynamic_cast<VehicleInstance *>(pVehicle);
+                    pCar->forceSetDriver(p);
+                }
+            }
+            di.pindx[i] = pMission->numPeds();
+            pMission->addPed(p);
+
+            if (i < AgentManager::kMaxSlot) {
+                // We're loading one of our agents
+                Agent *pAg = g_gameCtrl.agents().squadMember(i);
+                p->initAsAgent(pAg, pMission->playersGroupID());
+                // adds all agent's weapons to the mission weapons
+                for (int wi=0; wi<p->numWeapons(); wi++) {
+                    pMission->addWeapon(p->weapon(wi));
+                }
+                // adds the agent to the mission squad
+                pMission->getSquad()->setMember(i, p);
+            } else {
+                unsigned int mt = p->getMainType();
+                p->setObjGroupDef(mt);
+                if (mt == PedInstance::og_dmAgent) {
+                    p->setObjGroupID(2);
+                    p->addEnemyGroupDef(1);
+                    p->setBaseSpeed(256);
+                    *((ModOwner *)p) = mods_enemy;
+                    p->setTimeBeforeCheck(400);
+                    p->setBaseModAcc(0.5);
+                    p->setPersuasionPoints(32);
+                } else if (mt == PedInstance::og_dmGuard) {
+                    p->setObjGroupID(3);
+                    p->addEnemyGroupDef(1);
+                    p->setBaseSpeed(192);
+                    p->setTimeBeforeCheck(300);
+                    p->setBaseModAcc(0.45);
+                    p->setPersuasionPoints(4);
+                } else if (mt == PedInstance::og_dmPolice) {
+                    p->setObjGroupID(4);
+                    p->setHostileDesc(PedInstance::pd_smArmed);
+                    p->setBaseSpeed(160);
+                    p->setTimeBeforeCheck(400);
+                    p->setBaseModAcc(0.4);
+                    p->setPersuasionPoints(8);
+                } else if (mt == PedInstance::og_dmCivilian) {
+                    p->setObjGroupID(5);
+                    p->addEnemyGroupDef(6);
+                    p->setHostileDesc(PedInstance::pd_smArmed);
+                    p->setBaseSpeed(128);
+                    p->setTimeBeforeCheck(600);
+                    p->setBaseModAcc(0.2);
+                    p->setPersuasionPoints(1);
+                } else if (mt == PedInstance::og_dmCriminal) {
+                    p->setObjGroupID(6);
+                    p->setBaseSpeed(128);
+                    p->setTimeBeforeCheck(500);
+                    p->setBaseModAcc(0.2);
+                    p->setPersuasionPoints(1);
+                }
+                p->setSightRange(7 * 256);
+                // TODO: set scenarios
+                
+                uint16 offset_start = READ_LE_UINT16(pedref.offset_scenario_start);
+                uint16 offset_nxt = offset_start;
+                Vehicle *v = p->inVehicle();
+                bool not_in_vehicle = true;
+                if (v)
+                    not_in_vehicle = false;
+                if (offset_start)
+                    p->dropActQ();
+//#define SHOW_SCENARIOS_DEBUG
+#ifdef SHOW_SCENARIOS_DEBUG
+                printf("=====\n");
+#endif
+                PedInstance::actionQueueGroupType as;
+                as.group_desc = PedInstance::gd_mStandWalk;
+                as.origin_desc = fs_actions::kOrigScript;
+                int32 has_trigger = -1;
+                while (offset_nxt) {
+                    // sc.type
+                    // 1 - walking/driving to pos, x,y defined
+                    // 2 - vehicle to use and goto
+                    // 3?(south africa)
+                    // 5?(kenya)
+                    // 6 (kenya) - ped offset when in vehicle, and? (TODO)
+                    // 7 - assasinate target escaped, mission failed (TODO properly)
+                    // 8 - walking to pos, triggers on our agents in range, x,y defined
+                    // 9 - repeat from start, actually this might be end of script
+                    // 10 - train stops and waits
+                    // 11 - protected target reached destination(kenya) (TODO properly)
+                    LevelData::Scenarios sc = level_data.scenarios[offset_nxt / 8];
+#ifdef SHOW_SCENARIOS_DEBUG
+                    printf("id = %i, sc.type = %i, nxt = %i\n", i, sc.type, offset_nxt / 8);
+#endif
+                    offset_nxt = READ_LE_UINT16(sc.next);
+                    assert(offset_nxt != offset_start);
+
+                    if (sc.tilex != 0 && sc.tiley != 0) {
+                        PathNode pn(sc.tilex >> 1, sc.tiley >> 1, sc.tilez,
+                            (sc.tilex & 0x01) << 7, (sc.tiley & 0x01) << 7);
+                        if (sc.type == 0x08) {
+                            p->createActQTrigger(as, &pn, 6 * 256);
+                            has_trigger = as.actions.size();
+                            // no need for exclusive wait
+                            p->createActQWait(as, 3000);
+                            as.actions.back().group_desc = PedInstance::gd_mStandWalk;
+                        }
+                        if (v)
+                            p->createActQUsingCar(as, &pn, v);
+                        else
+                            p->createActQWalking(as, &pn, NULL, p->getDir(), 0, true);
+                        //p->createActQWalking(as, &pn, NULL, -1);
+                        if ((!not_in_vehicle) && offset_nxt == 0)
+                            p->createActQResetActionQueue(as);
+                    } else if (sc.type == 2) {
+                        if (not_in_vehicle) {
+                            uint16 bindx = READ_LE_UINT16(sc.offset_object);
+                            // TODO: test all maps for objects other then vehicle
+                            assert(bindx >= 0x5C02 && bindx < 0x6682);
+                            bindx -= 0x5C02;
+                            bindx /= 42;
+                            if (di.vindx[bindx] != 0xFFFF) {
+                                v = pMission->vehicle(di.vindx[bindx]);
+                                p->createActQGetInCar(as, v);
+                            }
+                        } else {
+                            PathNode pn(v->tileX(), v->tileY(), v->tileZ(),
+                                v->offX(), v->offY());
+                            p->createActQUsingCar(as, &pn, v);
+                        }
+                    } else if (sc.type == 9) {
+                        p->createActQResetActionQueue(as);
+                    } else if (sc.type == 10) {
+                        // train will wait
+                        p->createActQWait(as, 10000);
+                        // resetting movement for train
+                        if (offset_nxt == 0) {
+                            p->createActQResetActionQueue(as);
+                        }
+                    }
+#if 0
+#ifdef _DEBUG
+                    switch (sc.type) {
+                        case 1:
+                        case 2:
+                        case 7:
+                        case 8:
+                        case 9:
+                        case 10:
+                        case 11:
+                            break;
+                        default:
+                            printf("Bingo\n");
+                    }
+#endif
+#endif
+                }
+                if (as.actions.size() != 0) {
+                    if (has_trigger != -1) {
+                        p->pauseAllInActG(as, (uint32)has_trigger);
+                        as.main_act = (uint32)has_trigger - 1;
+                    } else
+                        as.main_act = as.actions.size() - 1;
+                    p->addActQToQueue(as);
+                }
+#ifdef SHOW_SCENARIOS_DEBUG
+                printf("+++++\n");
+#endif
+            }
+        }
+    }
 }

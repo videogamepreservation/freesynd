@@ -75,12 +75,15 @@ namespace LevelData {
         // to convert to our system use as uint16(LE)
         // tile = (uint16)/128, offz =(uint16)%128 or offz = mapposz[0] & 0x1F
         uint8 mapposz[2];
-        //0x04 - ped on map
-        //0x05 - ped not on map(driving)
-        //0x0D - they are not visible/present on original map(on water located), purpose?
-        //0x0C - located level above possible walking surface, purpose?
-        //0x0D and 0x0C are excluded from being loaded
-        uint8 desc;
+        /*!
+         * This field gives information on the ped location. Values are:
+         * 0x04 - ped on map
+         * 0x05 - ped not on map(driving)
+         * 0x0D - they are not visible/present on original map(on water located), purpose?
+         * 0x0C - located level above possible walking surface, purpose?
+         * 0x0D and 0x0C are excluded from being loaded
+         */
+        uint8 location;
         // 0x0 - standing, 0x10 - walking, 0x11 - dead
         uint8 state;
         uint8 unkn3[2];         // nothing changes when this changes
@@ -349,6 +352,15 @@ namespace LevelData {
         /* 113974 */ Objectives objectives[6];
         /* 114058 */ Unkn11 u11;
     };
+
+    /*! Constant for field People::location : Ped is on the map.*/
+    static const int kPeopleLocOnMap = 0x04;
+    /*! Constant for field People::location : Ped is in a vehicle.*/
+    static const int kPeopleLocInVehicle = 0x05;
+    /*! Constant for field People::location : located level above possible walking surface, purpose?*/
+    static const int kPeopleLocAboveWalkSurf = 0x0C;
+    /*! Constant for field People::location : they are not visible/present on original map(on water located), purpose?*/
+    static const int kPeopleLocNotVisible = 0x0D;
 }
 
 #endif  // MODEL_LEVELDATA_H_
