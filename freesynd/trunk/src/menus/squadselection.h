@@ -25,6 +25,7 @@
 
 #include "core/squad.h"
 #include "agentmanager.h"
+#include "map.h"
 
 /*!
  * This class manages the agents selection during a gameplay session.
@@ -160,6 +161,14 @@ class SquadSelection {
     void deselect_all_weapons();
     //! Select a weapon for the leader and for all selected agents
     void select_weapon_from_leader(int weapon_idx, bool apply_to_all);
+    //! Go and pick up weapon
+    void pickupWeapon(ShootableMapObject *pWeapon, bool addAction);
+    //! Follow Ped
+    void followPed(ShootableMapObject *pPed, bool addAction);
+    //! Enter or leave the vehicle : do the same as leader
+    void enterOrLeaveVehicle(ShootableMapObject *pVehicle, bool addAction);
+    //! Move selected agents to the given point
+    void moveTo(MapTilePoint &mapPt, bool addAction);
  private:
     /*!
      * Return true if an agent can be selected :

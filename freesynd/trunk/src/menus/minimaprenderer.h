@@ -27,6 +27,7 @@
 
 #include "common.h"
 #include "map.h"
+#include "pathsurfaces.h"
 #include "utils/timer.h"
 #include "core/gameevent.h"
 

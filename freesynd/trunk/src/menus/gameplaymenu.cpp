@@ -389,7 +389,7 @@ void GameplayMenu::handleTick(int elapsed)
 void GameplayMenu::handleRender(DirtyList &dirtyList)
 {
     g_Screen.clear(0);
-    map_renderer_.render(world_x_, world_y_);
+    map_renderer_.render(world_x_, world_y_, &selection_);
     g_Screen.drawRect(0,0, 129, GAME_SCREEN_HEIGHT);
     agt_sel_renderer_.render(selection_, mission_->getSquad());
     drawSelectAllButton();
@@ -397,14 +397,7 @@ void GameplayMenu::handleRender(DirtyList &dirtyList)
     drawWeaponSelectors();
     mm_renderer_.render(kMiniMapScreenX, kMiniMapScreenY);
 
-#ifdef _DEBUG
-    if (g_System.getKeyModState() & KMD_LALT) {
-        for (SquadSelection::Iterator it = selection_.begin();
-            it != selection_.end(); ++it) {
-            (*it)->showPath(world_x_, world_y_);
-        }
-    }
-    
+#ifdef _DEBUG    
     // drawing of different sprites
 //    g_App.gameSprites().sprite(9 * 40 + 1)->draw(0, 0, 0, false, true);
 #if 0
@@ -818,79 +811,26 @@ void GameplayMenu::handleClickOnMap(int x, int y, int button, const int modKeys)
     MapTilePoint mapPt_base = mission_->get_map()->screenToTilePoint(world_x_ + x - 129,
                     world_y_ + y);
 
-    if (button == 1) {
-        for (size_t i = 0; i < AgentManager::kMaxSlot; ++i) {
-            PedInstance *ped = mission_->getSquad()->member(i);
-            MapTilePoint mapPt(mapPt_base);
-            if (selection_.isAgentSelected(i)) {
-                PedInstance::actionQueueGroupType as;
-                bool action = false;
-                if (target_) {
-                    switch (target_->majorType()) {
-                        case MapObject::mjt_Ped:
-                            // TODO : Should we also follow a vehicle if it is
-                            // being driven / has a driver?
-                            ped->createActQFollowing(as, target_, 0, 192);
-                            action = true;
-                            break;
-                         case MapObject::mjt_Weapon:
-                            ped->createActQPickUp(as, target_);
-                            action = true;
-                            break;
-                         case MapObject::mjt_Vehicle:
-                            if (ped->inVehicle() == target_) {
-                                ped->createActQLeaveCar(as, target_);
-                                action = true;
-                            } else if (target_->isAlive())
-                            {
-                                ped->createActQGetInCar(as, target_);
-                                action = true;
-                            }
-                            break;
-                         default:
-                             break;
-                    }
-                } else if (ped->inVehicle()) {
-                    if (ped == ped->inVehicle()->getDriver())
-                    {
-                        int stx = mapPt.tx;
-                        int sty = mapPt.ty;
-                        //int sox = ox;
-                        //int soy = oy;
-                        stx = mapPt.tx * 256 + mapPt.ox + 128 * (ped->inVehicle()->tileZ() - 1);
-                        //sox = stx % 256;
-                        stx = stx / 256;
-                        sty = mapPt.ty * 256 + mapPt.oy + 128 * (ped->inVehicle()->tileZ() - 1);
-                        //soy = sty % 256;
-                        sty = sty / 256;
-                        PathNode tpn = PathNode(stx, sty, 0, 128, 128);
-                        ped->createActQUsingCar(as, &tpn, ped->inVehicle());
-                        action = true;
-                    }
-                }
-                
-                if (action) {
-                    as.main_act = as.actions.size() - 1;
-                    as.group_desc = PedInstance::gd_mStandWalk;
-                    as.origin_desc = fs_actions::kOrigUser;
-                    if (modKeys & KMD_CTRL)
-                        ped->addActQToQueue(as);
-                    else
-                        ped->setActQInQueue(as);
-                } else {
-                    bool isForGroup = selection_.size() > 1;
-                    bool addDestPt = (modKeys & KMD_CTRL) != 0;
-                    if (!mission_->getWalkable(mapPt))
-                        break;
-                    if (!setDestinationPoint(mapPt, isForGroup, addDestPt, i, ped)) {
-                        // could not set destination point -> we can stop
-                        // TODO: if one agent can't move there, all should stop?
-                        break;
-                    }
-                }
-            } // end of if selected
-        } // end of for
-    } else if (button == 3) {
+    bool ctrl = (modKeys & KMD_CTRL) != 0;
+    if (button == kMouseLeftButton) {
+        if (target_) {
+            switch (target_->majorType()) {
+            case MapObject::mjt_Weapon:
+                selection_.pickupWeapon(target_, ctrl);
+                break;
+            case MapObject::mjt_Ped:
+                selection_.followPed(target_, ctrl);
+                break;
+            case MapObject::mjt_Vehicle:
+                selection_.enterOrLeaveVehicle(target_, ctrl);
+                break;
+            default:
+                break;
+            }
+        } else if (mission_->getWalkable(mapPt_base)) {
+            selection_.moveTo(mapPt_base, ctrl);
+        }
+    } else if (button == kMouseRightButton) {
         // TODO: use directly mapPt_base?
         MapTilePoint mapPt(mapPt_base);
         PathNode *pn = NULL;
@@ -927,7 +867,7 @@ void GameplayMenu::handleClickOnMap(int x, int y, int button, const int modKeys)
                 as.group_desc = PedInstance::gd_mFire;
                 as.origin_desc = fs_actions::kOrigUser;
                 if (pn) {
-                    if (modKeys & KMD_CTRL) {
+                    if (ctrl) {
                         if (pa->createActQFiring(as, pn, NULL, true))
                             pa->addActQToQueue(as);
                     } else {
@@ -946,52 +886,23 @@ void GameplayMenu::handleClickOnMap(int x, int y, int button, const int modKeys)
     }
 }
 
+/*!
+ * User has clicked on the minimap. All selected agent go to destination.
+ * Clicking on the minimap does not allow to shoot or to use objects.
+ * \param x minimap coordinate
+ * \param y minimap coordinate
+ */
 void GameplayMenu::handleClickOnMinimap(int x, int y) {
-    MapTilePoint pt_base = mm_renderer_.minimapToMapPoint(x - kMiniMapScreenX, y - kMiniMapScreenY);
-    for (size_t i = 0; i < AgentManager::kMaxSlot; ++i) {
-        MapTilePoint pt(pt_base);
-        if (selection_.isAgentSelected(i)) {
-            PedInstance *ped = mission_->getSquad()->member(i);
-            bool isForGroup = selection_.size() > 1;
-            pt.tz = ped->tileZ();
-            if (!(mission_->getWalkableClosestByZ(pt)
-                && setDestinationPoint(pt, isForGroup, false, i, ped)))
-            {
-                break;
-            }
-        }
-    }
-}
-
-bool GameplayMenu::setDestinationPoint(const MapTilePoint &mapPt, bool isForGroup, bool addDestPt, size_t agentNo, PedInstance *p_ped) {
-    
-    MapTilePoint tmpPt(mapPt);
-
-    if (isForGroup) {
-        //TODO: current group position is like
-        // in original this can make non-tile
-        // oriented
-        //int sox = (i % 2) * (i - 2) * 16;
-        //int soy = ((i + 1) % 2) * (i - 1) * 8;
-
-        //this should be romoved if non-tile
-        //position needed
-        tmpPt.ox = 63 + 128 * (agentNo % 2);
-        tmpPt.oy = 63 + 128 * (agentNo >> 1);
-    }
-
-    PedInstance::actionQueueGroupType as;
-    PathNode tpn = PathNode(tmpPt.tx, tmpPt.ty, tmpPt.tz, tmpPt.ox, tmpPt.oy, 0);
-    p_ped->createActQWalking(as, &tpn, NULL);
-    as.main_act = as.actions.size() - 1;
-    as.group_desc = PedInstance::gd_mStandWalk;
-    as.origin_desc = fs_actions::kOrigUser;
-    if (addDestPt)
-        p_ped->addActQToQueue(as);
-    else
-        p_ped->setActQInQueue(as);
-
-    return true;
+    // convert minimap coordinate in map coordinate
+    MapTilePoint pt = mm_renderer_.minimapToMapPoint(x - kMiniMapScreenX, y - kMiniMapScreenY);
+    // As minimap is flat, we can't see the height. So take the Z coordinate
+    // of the leader as a reference
+    pt.tz = selection_.leader()->tileZ();
+    if (mission_->getWalkableClosestByZ(pt))
+    {
+        // Destination is walkable so go
+        selection_.moveTo(pt, false);
+     }
 }
 
 void GameplayMenu::stopShootingEvent(void )

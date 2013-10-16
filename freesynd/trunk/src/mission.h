@@ -186,7 +186,8 @@ public:
     bool getShootableTile(int &x, int &y, int &z, int &ox, int &oy, int &oz);
     bool isTileSolid(int x, int y, int z, int ox, int oy, int oz);
 
-    void adjXYZ(int &x, int &y, int &z);
+    //! TODO remove method
+    void adjXYZ(int &x, int &y, int &z) { p_map_->adjXYZ(x, y, z); }
 
     void blockerExists(toDefineXYZ * startXYZ, toDefineXYZ * endXYZ,
         double *dist, MapObject** blockerObj);

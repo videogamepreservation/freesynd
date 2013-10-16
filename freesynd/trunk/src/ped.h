@@ -715,6 +715,20 @@ public:
         uint32 * id = NULL);
     bool addActQToQueue(actionQueueGroupType &as,
         uint32 * id = NULL);
+    /*!
+     * Add the action to the list of actions.
+     * \param as The action to add
+     * \param append True means the action is added after existing actions. False
+     *   means the action is the only one executed.
+     * \param id
+     */
+    void addAction(actionQueueGroupType &as, bool append = false, uint32 * id = NULL) {
+        if (append) {
+            addActQToQueue(as, id);
+        } else {
+            setActQInQueue(as, id);
+        }
+    }
     void clearActQ() { actions_queue_.clear(); }
 
     void createDefQueue();
@@ -746,8 +760,6 @@ public:
     void createActQGetInCar(actionQueueGroupType &as,
         ShootableMapObject *tsmo, int32 dir = -1);
     void createActQUsingCar(actionQueueGroupType &as, PathNode *tpn,
-        ShootableMapObject *tsmo);
-    void createActQInCar(actionQueueGroupType &as, PathNode *tpn,
         ShootableMapObject *tsmo);
     void createActQLeaveCar(actionQueueGroupType &as,
         ShootableMapObject *tsmo);

@@ -31,6 +31,7 @@
 
 #include "mapobject.h"
 #include "ped.h"
+#include "map.h"
 
 /*!
  * This class holds informations about the animation of a vehicle.
@@ -74,10 +75,16 @@ protected:
 
 /*!
  * Generic class for all transports.
+ * Transport can be driven or not.
  */
 class Vehicle : public ShootableMovableMapObject{
 public:
-    Vehicle(int m) : ShootableMovableMapObject(m) {}
+    Vehicle(int m, bool drivable) : ShootableMovableMapObject(m) {
+        isDrivable_ = drivable;
+    }
+
+    //! Return true if vehicle can be driven by a ped
+    bool isDrivable() { return isDrivable_; }
 
     //! Adds the given ped to the list of passengers
     virtual void addPassenger(PedInstance *p);
@@ -92,6 +99,10 @@ public:
 protected:
     /*! The passengers of the vehicle.*/
     std::set <PedInstance *> passengers_;
+
+private:
+    /*! A vehicle can be driven (car) or not (train).*/
+    bool isDrivable_;
 };
 
 /*!
@@ -112,8 +123,7 @@ public:
         speed_ = new_speed;
     }
 
-    void setDestinationV(Mission *m, int x, int y, int z, int ox = 128, int oy = 128,
-            int new_speed = 160);
+    void setDestinationV(int x, int y, int z, int ox = 128, int oy = 128, int new_speed = 160);
 
     //! Adds the given ped to the list of passengers
     void addPassenger(PedInstance *p);

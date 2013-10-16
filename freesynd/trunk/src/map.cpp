@@ -100,6 +100,22 @@ void Map::mapDimensions(int *x, int *y, int *z)
     *z = maxZ();
 }
 
+/*!
+ * Clip x,y,z to map dimensions.
+ */
+void Map::adjXYZ(int &x, int &y, int &z) {
+    if (x < 0)
+        x = 0;
+    if (y < 0)
+        y = 0;
+    if (z < 0 || z >= maxZ())
+        z = 0;
+    if (x >= maxX())
+        x = maxX() - 1;
+    if (y >= maxY())
+        y = maxY() - 1;
+}
+
 float scalexPx = 256.0f;
 float scalexPy = 256.0f;
 float scaleyPx = 256.0f;

@@ -46,6 +46,10 @@ class Menu {
 public:
     static const int MENU_NO_MENU;
     static const int kMenuIdLogout;
+    /*! Id of the mouse left button.*/
+    static const int kMouseLeftButton;
+    /*! Id of the mouse right button.*/
+    static const int kMouseRightButton;
 
     /*!
         * Menu constructor.

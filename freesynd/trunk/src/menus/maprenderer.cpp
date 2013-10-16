@@ -34,6 +34,8 @@
 #include "core/squad.h"
 #include "gfx/screen.h"
 #include "gfx/tile.h"
+#include "system.h"
+#include "menus/squadselection.h"
 
 void MapRenderer::init(Mission *pMission) {
     pMission_ = pMission;
@@ -43,7 +45,7 @@ void MapRenderer::init(Mission *pMission) {
 /**
  * Draw tiles and map objects.
  */
-void MapRenderer::render(int worldX, int worldY) {
+void MapRenderer::render(int worldX, int worldY, SquadSelection *pSelection) {
     // TODO: after a lot of attempts to fix this, map drawing remains buggy
     MapTilePoint mtp = pMap_->screenToTilePoint(worldX, worldY);
     int sw = mtp.tx;
@@ -121,6 +123,15 @@ void MapRenderer::render(int worldX, int worldY) {
             --tile_z;
         }
     }
+
+#ifdef _DEBUG
+    if (g_System.getKeyModState() & KMD_LALT) {
+        for (SquadSelection::Iterator it = pSelection->begin();
+            it != pSelection->end(); ++it) {
+            (*it)->showPath(worldX, worldY);
+        }
+    }
+#endif
 
 #ifdef EXECUTION_SPEED_TIME
     printf("+++++++++++++++++++++++++++");

@@ -26,12 +26,12 @@
 #define MAP_H
 
 #include "common.h"
-#include "mapobject.h"
 
 #define NUM_MAPS               59
 
 class Tile;
 class TileManager;
+class MapObject;
 
 /*!
  * This a convenient structure to store a position
@@ -91,6 +91,8 @@ public:
     int width() { return map_width_; }
     int height() { return map_height_; }
     void mapDimensions(int *x, int *y, int *z);
+    //! Clip x,y,z to map dimensions
+    void adjXYZ(int &x, int &y, int &z);
 
     int tileToScreenX(int x, int y, int z, int pX, int pY);
     int tileToScreenY(int x, int y, int z, int pX, int pY);

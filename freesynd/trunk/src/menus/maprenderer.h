@@ -39,12 +39,13 @@ class PedInstance;
 class WeaponInstance;
 class Static;
 class SFXObject;
+class SquadSelection;
 
 class MapRenderer {
 public:
     void init(Mission *pMission);
 
-    void render(int worldX, int worldY);
+    void render(int worldX, int worldY, SquadSelection *pSelection);
 
 private:
     static int fastKey(int tx, int ty, int tz) {

@@ -340,22 +340,6 @@ void PedInstance::createActQUsingCar(actionQueueGroupType &as, PathNode *tpn,
     as.actions.push_back(aq);
 }
 
-void PedInstance::createActQInCar(actionQueueGroupType &as, PathNode *tpn,
-    ShootableMapObject *tsmo)
-{
-    as.state = 1;
-    actionQueueType aq;
-    aq.state = 1;
-    aq.target.desc = 3;
-    aq.target.t_smo = tsmo;
-    aq.target.t_pn = *tpn;
-    aq.condition = 0;
-    aq.as = PedInstance::pa_smNone;
-    aq.group_desc = PedInstance::gd_mStandWalk;
-    aq.act_exec = PedInstance::ai_aUseObject;
-    as.actions.push_back(aq);
-}
-
 void PedInstance::createActQLeaveCar(actionQueueGroupType &as,
         ShootableMapObject *tsmo)
 {

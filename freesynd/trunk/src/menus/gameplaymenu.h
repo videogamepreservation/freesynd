@@ -84,7 +84,6 @@ protected:
     //! updates visual markers for our agents
     void updtAgentsMarker();
 
-    bool setDestinationPoint(const MapTilePoint &mapPt, bool isForGroup, bool addDestPt, size_t agentNo, PedInstance *p_ped);
     void stopShootingEvent(void);
     //! Centers the minimap on the selection leader
     void centerMinimapOnLeader();

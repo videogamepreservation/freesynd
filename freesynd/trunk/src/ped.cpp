@@ -452,7 +452,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                                         }
                                     }
                                     if ((state_ & PedInstance::pa_smUsingCar) != 0) {
-                                        v->setDestinationV(mission, aqt->target.t_pn.tileX(),
+                                        v->setDestinationV(aqt->target.t_pn.tileX(),
                                             aqt->target.t_pn.tileY(), aqt->target.t_pn.tileZ(),
                                             aqt->target.t_pn.offX(), aqt->target.t_pn.offY(), 1024);
                                         if (v->isMoving()) {
@@ -471,7 +471,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                                     if (checkCurrPosTileOnly(aqt->target.t_pn))
                                         aqt->state |= 4;
                                     else {
-                                        v->setDestinationV(mission, aqt->target.t_pn.tileX(),
+                                        v->setDestinationV(aqt->target.t_pn.tileX(),
                                             aqt->target.t_pn.tileY(), aqt->target.t_pn.tileZ(),
                                             aqt->target.t_pn.offX(), aqt->target.t_pn.offY(), 1024);
                                         if (v->isMoving()) {

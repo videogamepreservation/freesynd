@@ -42,6 +42,9 @@ class WeaponInstance;
  */
 class Agent : public WeaponHolder, public ModOwner {
 public:
+    /*! Defines the maximum number of weapons an agent can carry.*/
+    static const uint8 kMaxWeaponPerAgent;
+
     Agent(const char *agent_name, bool male);
     ~Agent();
 

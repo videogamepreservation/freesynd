@@ -31,7 +31,6 @@
 #include "app.h"
 #include "gfx/screen.h"
 #include "vehicle.h"
-#include "mission.h"
 
 VehicleAnimation::VehicleAnimation() {
     vehicle_anim_ = kNormalAnim;
@@ -94,8 +93,8 @@ bool Vehicle::containsHostilesForPed(PedInstance* p,
     return false;
 }
 
-VehicleInstance::VehicleInstance(VehicleAnimation * vehicle,
-int m):Vehicle(m), vehicle_(vehicle), vehicle_driver_(NULL)
+VehicleInstance::VehicleInstance(VehicleAnimation * vehicle, int m):
+    Vehicle(m, true), vehicle_(vehicle), vehicle_driver_(NULL)
 {
     hold_on_.wayFree = 0;
     rcv_damage_def_ = MapObject::ddmg_Vehicle;
@@ -377,8 +376,7 @@ bool VehicleInstance::dirWalkable(PathNode *p, int x, int y, int z) {
     return false;
 }
 
-void VehicleInstance::setDestinationV(Mission *m, int x, int y, int z, int ox,
-                                       int oy, int new_speed)
+void VehicleInstance::setDestinationV(int x, int y, int z, int ox, int oy, int new_speed)
 {
     std::map < PathNode, uint16 > open;
     std::set < PathNode > closed;
@@ -386,8 +384,9 @@ void VehicleInstance::setDestinationV(Mission *m, int x, int y, int z, int ox,
     int basex = tile_x_, basey = tile_y_;
     std::vector < PathNode > path2add;
     path2add.reserve(16);
+    Map *pMap = g_App.maps().map(map_);
 
-    m->adjXYZ(x, y, z);
+    pMap->adjXYZ(x, y, z);
     // NOTE: we will be using lower tiles, later will restore Z coord
     z = tile_z_ - 1;
 
@@ -415,7 +414,7 @@ void VehicleInstance::setDestinationV(Mission *m, int x, int y, int z, int ox,
         // we got somewhere we shouldn't, we need to find somewhere that is walkable
         PathNode pntile(tile_x_ , tile_y_, z, off_x_, off_y_);
         for (int i = 1; i < 16; i++) {
-            if (tile_x_ + i >= m->mmax_x_)
+            if (tile_x_ + i >= pMap->maxX())
                 break;
             pntile.setTileX(tile_x_ + i);
             path2wtile.push_back(pntile);
@@ -472,7 +471,7 @@ void VehicleInstance::setDestinationV(Mission *m, int x, int y, int z, int ox,
         path2wtile.clear();
         pntile = PathNode(tile_x_ , tile_y_, z, off_x_, off_y_);
         for (int i = 1; i < 16; i++) {
-            if (tile_y_ + i >= m->mmax_y_)
+            if (tile_y_ + i >= pMap->maxY())
                 break;
             pntile.setTileY(tile_y_ + i);
             path2wtile.push_back(pntile);
