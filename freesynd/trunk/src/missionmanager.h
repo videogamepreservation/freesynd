@@ -71,6 +71,8 @@ private:
     bool load_level_data(int n, LevelData::LevelDataAll &level_data);
     // Instanciate a mission from the data file
     Mission * create_mission(LevelData::LevelDataAll &level_data);
+    //! Creates all weapons
+    void createWeapons(const LevelData::LevelDataAll &level_data, DataIndex &di, Mission *pMission);
     //! Creates a weapon from the game data
     WeaponInstance * create_weapon_instance(const LevelData::Weapons &gamdata);
     //! Creates all vehicles
@@ -81,6 +83,12 @@ private:
     //! Creates all peds
     void createPeds(const LevelData::LevelDataAll &level_data, 
                             DataIndex &di, Mission *pMission);
+    //! Creates objectives
+    void createObjectives(const LevelData::LevelDataAll &level_data, 
+                            DataIndex &di, Mission *pMission);
+
+    //! Export data for debug (will be moved in editor)
+    void exportMissionData(LevelData::LevelDataAll &level_data, Mission *pMission);
 };
 
 #endif

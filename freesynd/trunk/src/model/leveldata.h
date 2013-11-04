@@ -361,6 +361,9 @@ namespace LevelData {
     static const int kPeopleLocAboveWalkSurf = 0x0C;
     /*! Constant for field People::location : they are not visible/present on original map(on water located), purpose?*/
     static const int kPeopleLocNotVisible = 0x0D;
+    /*! Constant for field Scenario::type : this is a trigger. 
+     * Agents will trigger it when they enter the circle defined by the center and a fixed radius.*/
+    static const int kScenarioTypeTrigger = 0x08;
 }
 
 #endif  // MODEL_LEVELDATA_H_

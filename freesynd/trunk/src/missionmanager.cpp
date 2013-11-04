@@ -229,6 +229,76 @@ void MissionManager::hackMissions(int n, uint8 *data) {
     }
 }
 
+void MissionManager::exportMissionData(LevelData::LevelDataAll &level_data, Mission *pMission) {
+
+#if 0
+    // for hacking vehicles data
+    char nameSv[256];
+    sprintf(nameSv, "vehicles%02X.hex", pMission->mapId());
+    FILE *staticsFv = fopen(nameSv,"wb");
+    if (staticsFv) {
+        fwrite(level_data.cars, 1, 42*64, staticsFv);
+        fclose(staticsFv);
+    }
+#endif
+
+#if 0
+    // for hacking map data
+    char nameSmap[256];
+    sprintf(nameSmap, "map%02X.hex", pMission->mapId());
+    FILE *staticsFmap = fopen(nameSmap,"wb");
+    if (staticsFmap) {
+        fwrite(level_data.map.objs, 1, 32768, staticsFmap);
+        fclose(staticsFmap);
+    }
+
+#endif
+    
+#if 0
+    // for hacking statics data
+    char nameSs[256];
+    sprintf(nameSs, "statics%02X.hex", pMission->mapId());
+    FILE *staticsFs = fopen(nameSs,"wb");
+    if (staticsFs) {
+        fwrite(level_data.statics, 1, 12000, staticsFs);
+        fclose(staticsFs);
+    }
+#endif
+
+#if 0
+    // for hacking weapons data
+    char nameSw[256];
+    sprintf(nameSw, "weapons%02X.hex", pMission->mapId());
+    FILE *staticsFw = fopen(nameSw,"wb");
+    if (staticsFw) {
+        fwrite(level_data.weapons, 1, 36*512, staticsFw);
+        fclose(staticsFw);
+    }
+#endif
+
+#if 0
+    // for hacking objectives data
+    char nameSo[256];
+    sprintf(nameSo, "obj%02X.hex", pMission->mapId());
+    FILE *staticsFo = fopen(nameSo,"wb");
+    if (staticsFo) {
+        fwrite(level_data.objectives, 1, 140, staticsFo);
+        fclose(staticsFo);
+    }
+#endif
+
+#if 0
+    // for hacking scenarios data
+    char nameSss[256];
+    sprintf(nameSss, "scenarios%02X.hex", pMission->mapId());
+    FILE *staticsFss = fopen(nameSss,"wb");
+    if (staticsFss) {
+        fwrite(level_data.scenarios, 1, 2048 * 8, staticsFss);
+        fclose(staticsFss);
+    }
+#endif
+}
+
 /*!
  * Creates a Mission object from the LevelDataAll structure.
  */
@@ -242,289 +312,25 @@ Mission * MissionManager::create_mission(LevelData::LevelDataAll &level_data) {
     memset(di.driverindx, 0xFF, 2*256);
     memset(di.windx, 0xFF, 2*512);
 
-#if 0
-    // for hacking vehicles data
-    char nameSv[256];
-    sprintf(nameSv, "vehicles%02X.hex", p_mission->mapId());
-    FILE *staticsFv = fopen(nameSv,"wb");
-    if (staticsFv) {
-        fwrite(level_data.cars, 1, 42*64, staticsFv);
-        fclose(staticsFv);
-    }
-
-#endif
     try {
         createVehicles(level_data, di, p_mission);
     
         createPeds(level_data, di, p_mission);
 
-#if 0
-    // for hacking map data
-    char nameSmap[256];
-    sprintf(nameSmap, "map%02X.hex", p_mission->mapId());
-    FILE *staticsFmap = fopen(nameSmap,"wb");
-    if (staticsFmap) {
-        fwrite(level_data.map.objs, 1, 32768, staticsFmap);
-        fclose(staticsFmap);
-    }
-
-#endif
-    
-#if 0
-    // for hacking statics data
-    char nameSs[256];
-    sprintf(nameSs, "statics%02X.hex", p_mission->mapId());
-    FILE *staticsFs = fopen(nameSs,"wb");
-    if (staticsFs) {
-        fwrite(level_data.statics, 1, 12000, staticsFs);
-        fclose(staticsFs);
-    }
-#endif
-
-    for (uint16 i = 0; i < 400; i++) {
-        LevelData::Statics & sref = level_data.statics[i];
-        if(sref.desc == 0)
-            continue;
-        Static *s = Static::loadInstance((uint8 *) & sref, p_mission->mapId());
-        if (s) {
-            p_mission->addStatic(s);
-#ifdef _DEBUG
-            s->setDebugID(i);
-#endif
-        }
-    }
-
-#if 0
-    // for hacking weapons data
-    char nameSw[256];
-    sprintf(nameSw, "weapons%02X.hex", p_mission->mapId());
-    FILE *staticsFw = fopen(nameSw,"wb");
-    if (staticsFw) {
-        fwrite(level_data.weapons, 1, 36*512, staticsFw);
-        fclose(staticsFw);
-    }
-#endif
-    
-    for (uint16 i = 0; i < 512; i++) {
-        LevelData::Weapons & wref = level_data.weapons[i];
-        if(wref.desc == 0)
-            continue;
-        WeaponInstance *w = create_weapon_instance(wref);
-        if (w) {
-#ifdef _DEBUG
-            w->setDebugID(i);
-#endif
-            if (wref.desc == 0x05) {
-                uint16 offset_owner = READ_LE_UINT16(wref.offset_owner);
-                if (offset_owner != 0) {
-                    offset_owner = (offset_owner - 2) / 92; // 92 = ped data size
-                    if (offset_owner > 7 && di.pindx[offset_owner] != 0xFFFF) {
-                        // TODO: still there is a problem of weapons setup
-                        // some police officers can have more then 1 weapon
-                        // others none (pacific Rim)
-                        p_mission->ped(di.pindx[offset_owner])->addWeapon(w);
-                        w->setOwner(p_mission->ped(di.pindx[offset_owner]));
-                        w->setIsIgnored(true);
-                        di.windx[i] = p_mission->numWeapons();
-                        p_mission->addWeapon(w);
-                    } else {
-                        delete w;
-                    }
-                } else {
-                    delete w;
-                }
-            } else {
-                w->setMap(p_mission->mapId());
-                w->setOwner(NULL);
-                di.windx[i] = p_mission->numWeapons();
-                p_mission->addWeapon(w);
+        for (uint16 i = 0; i < 400; i++) {
+            LevelData::Statics & sref = level_data.statics[i];
+            if(sref.desc == 0)
+                continue;
+            Static *s = Static::loadInstance((uint8 *) & sref, p_mission->mapId());
+            if (s) {
+                p_mission->addStatic(s);
             }
         }
-    }
+    
+        createWeapons(level_data, di, p_mission);
+    
+        createObjectives(level_data, di, p_mission);
 
-#if 0
-    // for hacking objectives data
-    char nameSo[256];
-    sprintf(nameSo, "obj%02X.hex", p_mission->mapId());
-    FILE *staticsFo = fopen(nameSo,"wb");
-    if (staticsFo) {
-        fwrite(level_data.objectives, 1, 140, staticsFo);
-        fclose(staticsFo);
-    }
-#endif
-    // 0x01 offset of ped
-    // 0x02 offset of ped
-    // 0x03 offset of ped, next objective 0x00 + coord, nxt 0x00 + offset of ped
-    // second objective is where ped should go, third ped that should reach it
-    // also can be without those data or can have offset of ped + coord
-    // 0x05 offset of weapon
-    // 0x0E offset of vehicle
-    // 0x0F offset of vehicle
-    // 0x10 coordinates
-    // looks like that objectives even if they are defined where not fully
-    // defined(or are correct), indonesia has one objective but has 2
-    // 0x0 objectives with peds offset + coords, rockies mission
-    // has 0x0e objective + 0x01 but offsets are wrong as in original
-    // gameplay only 1 persuade + evacuate present, in description
-    // 0x0e + 2 x 0x01 + 0x0f, because of this careful loading required
-    // max 5(6 read) objectives
-    std::vector <PedInstance *> peds_evacuate;
-    for (uint8 i = 0; i < 6; i++) {
-        ObjectiveDesc *objd = NULL;
-
-        LevelData::Objectives & obj = level_data.objectives[i];
-        unsigned int bindx = READ_LE_UINT16(obj.offset), cindx = 0;
-        // TODO: checking is implemented for correct offset, because
-        // in game data objective description is not correctly defined
-        // some offsets are wrong, objective type is missing somewhere
-        // check this, also 0x03 is not fully implemented
-        // Also for some objectives there should be "small" actions defined
-        // inside ped data, in 1 lvl when agents are close to target
-        // ped goes to car and moves to location, if reached mission is
-        // failed, similar actions are in many missions(scenarios defines this)
-
-        switch (READ_LE_UINT16(obj.type)) {
-            case 0x00:
-            {
-                int x = READ_LE_INT16(obj.mapposx);
-                if (x != 0) {
-/*                    objd = new LocationObjective(objv_ReachLocation,
-                       READ_LE_INT16(obj.mapposx),
-                       READ_LE_INT16(obj.mapposy),
-                       READ_LE_INT16(obj.mapposz));
-                    //objd->pos_xyz.x = READ_LE_INT16(obj.mapposx);
-                    //objd->pos_xyz.y = READ_LE_INT16(obj.mapposy);
-                    //objd->pos_xyz.z = READ_LE_INT16(obj.mapposz);
-                    objd->msg = "";
-                    objd->condition = 32;
-                    assert(objectives_.size() != 0);
-                    ObjectiveDesc *pLastObj = objectives_.back();
-                    pLastObj->condition |= 1;
-                    pLastObj->subobjindx = objectives_.size();
-                    objd->indx_grpid.targetindx = pLastObj->indx_grpid.targetindx;
-                    objd->targettype = pLastObj->targettype;
-                    */
-                }
-            }
-                break;
-            case 0x01:
-                if (bindx > 0 && bindx < 0x5C02) {
-                    cindx = (bindx - 2) / 92;
-                    if ((cindx * 92 + 2) == bindx && di.pindx[cindx] != 0xFFFF) {
-                        PedInstance *p = p_mission->ped(di.pindx[cindx]);
-                        objd = new ObjPersuade(p);
-                        p->setRcvDamageDef(MapObject::ddmg_PedPanicImmune);
-                        // Adds the ped to the list of peds to evacuate
-                        peds_evacuate.push_back(p);
-                    } else
-                        printf("0x01 incorrect offset");
-                } else
-                    printf("0x01 type not matched");
-                break;
-            case 0x02: // Assassinate a civilian
-                if (bindx > 0 && bindx < 0x5C02) {
-                    cindx = (bindx - 2) / 92;
-                    if ((cindx * 92 + 2) == bindx && di.pindx[cindx] != 0xFFFF) {
-                        PedInstance *p = p_mission->ped(di.pindx[cindx]);
-                        p->setRcvDamageDef(MapObject::ddmg_PedPanicImmune);
-                        objd = new ObjAssassinate(p);
-                    } else
-                        printf("0x02 incorrect offset");
-                } else
-                    printf("0x02 type not matched");
-                break;
-            case 0x03:
-                if (bindx > 0 && bindx < 0x5C02) {
-                    cindx = (bindx - 2) / 92;
-                    if ((cindx * 92 + 2) == bindx && di.pindx[cindx] != 0xFFFF) {
-                        PedInstance *p = p_mission->ped(di.pindx[cindx]);
-                        p->setRcvDamageDef(MapObject::ddmg_PedPanicImmune);
-                        objd = new ObjProtect(p);
-                    } else
-                        printf("0x03 incorrect offset");
-                } else
-                    printf("0x03 type not matched");
-                break;
-            case 0x05:
-                if (bindx >= 0x9562 && bindx < 0xDD62) {
-                    bindx -= 0x9562;
-                    cindx = bindx / 36;
-                    if ((cindx * 36) == bindx && di.windx[cindx] != 0xFFFF) {
-                        objd = new ObjTakeWeapon(p_mission->weapon(di.windx[cindx]));
-                    } else
-                        printf("0x05 incorrect offset");
-                } else
-                    printf("0x05 type not matched %X", bindx);
-
-                break;
-            case 0x0A:
-                objd = new ObjEliminate(PedInstance::og_dmPolice);
-                break;
-            case 0x0B:
-                objd = new ObjEliminate(PedInstance::og_dmAgent);
-                break;
-            case 0x0E:
-                if (bindx >= 0x5C02 && bindx < 0x6682) {
-                    bindx -= 0x5C02;
-                    cindx = bindx / 42;
-                    if ((cindx * 42) == bindx && di.vindx[cindx] != 0xFFFF) {
-                        objd = new ObjDestroyVehicle(p_mission->vehicle(di.vindx[cindx]));
-                    } else
-                        printf("0x0E incorrect offset");
-                } else
-                    printf("0x0E type not matched");
-
-                break;
-            case 0x0F:
-                if (bindx >= 0x5C02 && bindx < 0x6682) {
-                    bindx -= 0x5C02;
-                    cindx = bindx / 42;
-                    if ((cindx * 42) == bindx && di.vindx[cindx] != 0xFFFF) {
-                        objd = new ObjUseVehicle(p_mission->vehicle(di.vindx[cindx]));
-                        // TODO Do we have to add the vehicle to the list of object to evacuate?
-                    } else
-                        printf("0x0F incorrect offset");
-                } else
-                    printf("0x0F type not matched");
-                break;
-            case 0x10:
-                // realworld coordinates, not tile based
-                objd = new ObjEvacuate(READ_LE_INT16(obj.mapposx),
-                    READ_LE_INT16(obj.mapposy),
-                    READ_LE_INT16(obj.mapposz),
-                    peds_evacuate);
-
-                break;
-#ifdef _DEBUG
-            default:
-                FSERR(Log::k_FLG_GAME, "Mission", "loadLevel", ("Unknown objective %X\n", READ_LE_UINT16(obj.type)));
-                break;
-#endif
-        }
-
-        // An objective has been created, adds it to the list
-        // of objectives
-        if (objd != NULL) {
-            p_mission->addObjective(objd);
-        } else {
-            // TODO add a better error handling
-            break;
-        }
-    }
-
-    // Clear temp list
-    peds_evacuate.clear();
-
-#if 0
-    // for hacking scenarios data
-    char nameSss[256];
-    sprintf(nameSss, "scenarios%02X.hex", p_mission->mapId());
-    FILE *staticsFss = fopen(nameSss,"wb");
-    if (staticsFss) {
-        fwrite(level_data.scenarios, 1, 2048 * 8, staticsFss);
-        fclose(staticsFss);
-    }
-#endif
 #ifdef SHOW_SCENARIOS_DEBUG
     for (uint16 i = 1; i < 2047; i++) {
         LevelData::Scenarios & scenario = level_data.scenarios[i];
@@ -543,18 +349,18 @@ Mission * MissionManager::create_mission(LevelData::LevelDataAll &level_data) {
     }
 #endif
 
-    // adding visual markers(arrow + 1,2,3,4) above our agents
-    // availiable/selected on screen
-    p_mission->addSfxObject(new SFXObject(-1, SFXObject::sfxt_SelArrow));
-    p_mission->addSfxObject(new SFXObject(-1, SFXObject::sfxt_SelArrow));
-    p_mission->addSfxObject(new SFXObject(-1, SFXObject::sfxt_SelArrow));
-    p_mission->addSfxObject(new SFXObject(-1, SFXObject::sfxt_SelArrow));
-    p_mission->addSfxObject(new SFXObject(p_mission->mapId(), SFXObject::sfxt_AgentFirst));
-    p_mission->addSfxObject(new SFXObject(p_mission->mapId(), SFXObject::sfxt_AgentSecond));
-    p_mission->addSfxObject(new SFXObject(p_mission->mapId(), SFXObject::sfxt_AgentThird));
-    p_mission->addSfxObject(new SFXObject(p_mission->mapId(), SFXObject::sfxt_AgentFourth));
+        // adding visual markers(arrow + 1,2,3,4) above our agents
+        // availiable/selected on screen
+        p_mission->addSfxObject(new SFXObject(-1, SFXObject::sfxt_SelArrow));
+        p_mission->addSfxObject(new SFXObject(-1, SFXObject::sfxt_SelArrow));
+        p_mission->addSfxObject(new SFXObject(-1, SFXObject::sfxt_SelArrow));
+        p_mission->addSfxObject(new SFXObject(-1, SFXObject::sfxt_SelArrow));
+        p_mission->addSfxObject(new SFXObject(p_mission->mapId(), SFXObject::sfxt_AgentFirst));
+        p_mission->addSfxObject(new SFXObject(p_mission->mapId(), SFXObject::sfxt_AgentSecond));
+        p_mission->addSfxObject(new SFXObject(p_mission->mapId(), SFXObject::sfxt_AgentThird));
+        p_mission->addSfxObject(new SFXObject(p_mission->mapId(), SFXObject::sfxt_AgentFourth));
 
-    return p_mission;
+        return p_mission;
 
     } catch (const LoadMissionException & ex) {
         FSERR(Log::k_FLG_GAME, "Mission", "loadMission", ("Failed to load mission %s\n", ex.what()));
@@ -562,6 +368,42 @@ Mission * MissionManager::create_mission(LevelData::LevelDataAll &level_data) {
             delete p_mission;
         }
         return NULL;
+    }
+}
+
+void MissionManager::createWeapons(const LevelData::LevelDataAll &level_data, DataIndex &di, Mission *pMission) {
+    for (uint16 i = 0; i < 512; i++) {
+        const LevelData::Weapons & wref = level_data.weapons[i];
+        if(wref.desc == 0)
+            continue;
+        WeaponInstance *w = create_weapon_instance(wref);
+        if (w) {
+            if (wref.desc == 0x05) {
+                uint16 offset_owner = READ_LE_UINT16(wref.offset_owner);
+                if (offset_owner != 0) {
+                    offset_owner = (offset_owner - 2) / 92; // 92 = ped data size
+                    if (offset_owner > 7 && di.pindx[offset_owner] != 0xFFFF) {
+                        // TODO: still there is a problem of weapons setup
+                        // some police officers can have more then 1 weapon
+                        // others none (pacific Rim)
+                        pMission->ped(di.pindx[offset_owner])->addWeapon(w);
+                        w->setOwner(pMission->ped(di.pindx[offset_owner]));
+                        w->setIsIgnored(true);
+                        di.windx[i] = pMission->numWeapons();
+                        pMission->addWeapon(w);
+                    } else {
+                        delete w;
+                    }
+                } else {
+                    delete w;
+                }
+            } else {
+                w->setMap(pMission->mapId());
+                w->setOwner(NULL);
+                di.windx[i] = pMission->numWeapons();
+                pMission->addWeapon(w);
+            }
+        }
     }
 }
 
@@ -645,9 +487,6 @@ void MissionManager::createVehicles(const LevelData::LevelDataAll &level_data, D
             {
                 di.driverindx[(car.offset_of_driver - 2) / 92] = di.vindx[i];
             }
-#ifdef _DEBUG
-            v->setDebugID(i);
-#endif
         }
     }
 }
@@ -768,8 +607,6 @@ void MissionManager::createPeds(const LevelData::LevelDataAll &level_data, DataI
     
     PedManager peds;
     for (uint16 i = 0; i < 256; i++) {
-        //if (i == 40)
-            //i = 40;
         const LevelData::People & pedref = level_data.people[i];
         
         PedInstance *p =
@@ -870,10 +707,15 @@ void MissionManager::createPeds(const LevelData::LevelDataAll &level_data, DataI
 #ifdef SHOW_SCENARIOS_DEBUG
                 printf("=====\n");
 #endif
+                if (p->getDebugID() == 17)
+                    printf("Scenario for %d\n", i);
+
                 PedInstance::actionQueueGroupType as;
                 as.group_desc = PedInstance::gd_mStandWalk;
                 as.origin_desc = fs_actions::kOrigScript;
+                // this field will hold the index of a potential trigger
                 int32 has_trigger = -1;
+
                 while (offset_nxt) {
                     // sc.type
                     // 1 - walking/driving to pos, x,y defined
@@ -894,9 +736,10 @@ void MissionManager::createPeds(const LevelData::LevelDataAll &level_data, DataI
                     assert(offset_nxt != offset_start);
 
                     if (sc.tilex != 0 && sc.tiley != 0) {
+                        // This scenario defines something that uses a location
                         PathNode pn(sc.tilex >> 1, sc.tiley >> 1, sc.tilez,
                             (sc.tilex & 0x01) << 7, (sc.tiley & 0x01) << 7);
-                        if (sc.type == 0x08) {
+                        if (sc.type == LevelData::kScenarioTypeTrigger) {
                             p->createActQTrigger(as, &pn, 6 * 256);
                             has_trigger = as.actions.size();
                             // no need for exclusive wait
@@ -955,6 +798,8 @@ void MissionManager::createPeds(const LevelData::LevelDataAll &level_data, DataI
                 }
                 if (as.actions.size() != 0) {
                     if (has_trigger != -1) {
+                        // A trigger was defined, so all actions after it
+                        // are paused until the trigger is set off.
                         p->pauseAllInActG(as, (uint32)has_trigger);
                         as.main_act = (uint32)has_trigger - 1;
                     } else
@@ -967,4 +812,170 @@ void MissionManager::createPeds(const LevelData::LevelDataAll &level_data, DataI
             }
         }
     }
+}
+
+void MissionManager::createObjectives(const LevelData::LevelDataAll &level_data,
+                                        DataIndex &di, Mission *pMission) {
+    // 0x01 offset of ped
+    // 0x02 offset of ped
+    // 0x03 offset of ped, next objective 0x00 + coord, nxt 0x00 + offset of ped
+    // second objective is where ped should go, third ped that should reach it
+    // also can be without those data or can have offset of ped + coord
+    // 0x05 offset of weapon
+    // 0x0E offset of vehicle
+    // 0x0F offset of vehicle
+    // 0x10 coordinates
+    // looks like that objectives even if they are defined where not fully
+    // defined(or are correct), indonesia has one objective but has 2
+    // 0x0 objectives with peds offset + coords, rockies mission
+    // has 0x0e objective + 0x01 but offsets are wrong as in original
+    // gameplay only 1 persuade + evacuate present, in description
+    // 0x0e + 2 x 0x01 + 0x0f, because of this careful loading required
+    // max 5(6 read) objectives
+    std::vector <PedInstance *> peds_evacuate;
+    for (uint8 i = 0; i < 6; i++) {
+        ObjectiveDesc *objd = NULL;
+
+        const LevelData::Objectives & obj = level_data.objectives[i];
+        unsigned int bindx = READ_LE_UINT16(obj.offset), cindx = 0;
+        // TODO: checking is implemented for correct offset, because
+        // in game data objective description is not correctly defined
+        // some offsets are wrong, objective type is missing somewhere
+        // check this, also 0x03 is not fully implemented
+        // Also for some objectives there should be "small" actions defined
+        // inside ped data, in 1 lvl when agents are close to target
+        // ped goes to car and moves to location, if reached mission is
+        // failed, similar actions are in many missions(scenarios defines this)
+
+        switch (READ_LE_UINT16(obj.type)) {
+            case 0x00:
+            {
+                int x = READ_LE_INT16(obj.mapposx);
+                if (x != 0) {
+/*                    objd = new LocationObjective(objv_ReachLocation,
+                       READ_LE_INT16(obj.mapposx),
+                       READ_LE_INT16(obj.mapposy),
+                       READ_LE_INT16(obj.mapposz));
+                    //objd->pos_xyz.x = READ_LE_INT16(obj.mapposx);
+                    //objd->pos_xyz.y = READ_LE_INT16(obj.mapposy);
+                    //objd->pos_xyz.z = READ_LE_INT16(obj.mapposz);
+                    objd->msg = "";
+                    objd->condition = 32;
+                    assert(objectives_.size() != 0);
+                    ObjectiveDesc *pLastObj = objectives_.back();
+                    pLastObj->condition |= 1;
+                    pLastObj->subobjindx = objectives_.size();
+                    objd->indx_grpid.targetindx = pLastObj->indx_grpid.targetindx;
+                    objd->targettype = pLastObj->targettype;
+                    */
+                }
+            }
+                break;
+            case 0x01:
+                if (bindx > 0 && bindx < 0x5C02) {
+                    cindx = (bindx - 2) / 92;
+                    if ((cindx * 92 + 2) == bindx && di.pindx[cindx] != 0xFFFF) {
+                        PedInstance *p = pMission->ped(di.pindx[cindx]);
+                        objd = new ObjPersuade(p);
+                        p->setRcvDamageDef(MapObject::ddmg_PedPanicImmune);
+                        // Adds the ped to the list of peds to evacuate
+                        peds_evacuate.push_back(p);
+                    } else
+                        printf("0x01 incorrect offset");
+                } else
+                    printf("0x01 type not matched");
+                break;
+            case 0x02: // Assassinate a civilian
+                if (bindx > 0 && bindx < 0x5C02) {
+                    cindx = (bindx - 2) / 92;
+                    if ((cindx * 92 + 2) == bindx && di.pindx[cindx] != 0xFFFF) {
+                        PedInstance *p = pMission->ped(di.pindx[cindx]);
+                        p->setRcvDamageDef(MapObject::ddmg_PedPanicImmune);
+                        objd = new ObjAssassinate(p);
+                    } else
+                        printf("0x02 incorrect offset");
+                } else
+                    printf("0x02 type not matched");
+                break;
+            case 0x03:
+                if (bindx > 0 && bindx < 0x5C02) {
+                    cindx = (bindx - 2) / 92;
+                    if ((cindx * 92 + 2) == bindx && di.pindx[cindx] != 0xFFFF) {
+                        PedInstance *p = pMission->ped(di.pindx[cindx]);
+                        p->setRcvDamageDef(MapObject::ddmg_PedPanicImmune);
+                        objd = new ObjProtect(p);
+                    } else
+                        printf("0x03 incorrect offset");
+                } else
+                    printf("0x03 type not matched");
+                break;
+            case 0x05:
+                if (bindx >= 0x9562 && bindx < 0xDD62) {
+                    bindx -= 0x9562;
+                    cindx = bindx / 36;
+                    if ((cindx * 36) == bindx && di.windx[cindx] != 0xFFFF) {
+                        objd = new ObjTakeWeapon(pMission->weapon(di.windx[cindx]));
+                    } else
+                        printf("0x05 incorrect offset");
+                } else
+                    printf("0x05 type not matched %X", bindx);
+
+                break;
+            case 0x0A:
+                objd = new ObjEliminate(PedInstance::og_dmPolice);
+                break;
+            case 0x0B:
+                objd = new ObjEliminate(PedInstance::og_dmAgent);
+                break;
+            case 0x0E:
+                if (bindx >= 0x5C02 && bindx < 0x6682) {
+                    bindx -= 0x5C02;
+                    cindx = bindx / 42;
+                    if ((cindx * 42) == bindx && di.vindx[cindx] != 0xFFFF) {
+                        objd = new ObjDestroyVehicle(pMission->vehicle(di.vindx[cindx]));
+                    } else
+                        printf("0x0E incorrect offset");
+                } else
+                    printf("0x0E type not matched");
+
+                break;
+            case 0x0F:
+                if (bindx >= 0x5C02 && bindx < 0x6682) {
+                    bindx -= 0x5C02;
+                    cindx = bindx / 42;
+                    if ((cindx * 42) == bindx && di.vindx[cindx] != 0xFFFF) {
+                        objd = new ObjUseVehicle(pMission->vehicle(di.vindx[cindx]));
+                        // TODO Do we have to add the vehicle to the list of object to evacuate?
+                    } else
+                        printf("0x0F incorrect offset");
+                } else
+                    printf("0x0F type not matched");
+                break;
+            case 0x10:
+                // realworld coordinates, not tile based
+                objd = new ObjEvacuate(READ_LE_INT16(obj.mapposx),
+                    READ_LE_INT16(obj.mapposy),
+                    READ_LE_INT16(obj.mapposz),
+                    peds_evacuate);
+
+                break;
+#ifdef _DEBUG
+            default:
+                FSERR(Log::k_FLG_GAME, "Mission", "loadLevel", ("Unknown objective %X\n", READ_LE_UINT16(obj.type)));
+                break;
+#endif
+        }
+
+        // An objective has been created, adds it to the list
+        // of objectives
+        if (objd != NULL) {
+            pMission->addObjective(objd);
+        } else {
+            // TODO add a better error handling
+            break;
+        }
+    }
+
+    // Clear temp list
+    peds_evacuate.clear();
 }

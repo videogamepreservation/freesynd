@@ -30,6 +30,10 @@
 #include "core/gamesession.h"
 #include "mission.h"
 
+#ifdef _DEBUG
+uint32 MapObject::debugIdCnt = 0;
+#endif
+
 MapObject::MapObject(int m):size_x_(1), size_y_(1), size_z_(2),
     map_(m), frame_(0), elapsed_carry_(0),
     frames_per_sec_(8), sub_type_(0), main_type_(0),
@@ -39,7 +43,7 @@ MapObject::MapObject(int m):size_x_(1), size_y_(1), size_z_(2),
     state_(0xFFFFFFFF)
 {
 #ifdef _DEBUG
-    debug_id_ = 0xFFFFFFFF;
+    debugId_ = ++debugIdCnt;
 #endif
 }
 

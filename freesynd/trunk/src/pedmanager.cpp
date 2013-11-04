@@ -163,10 +163,6 @@ PedInstance *PedManager::loadInstance(const LevelData::People & gamdata, uint16 
     setPed(pedanim, READ_LE_UINT16(gamdata.index_base_anim));
     PedInstance *newped = pedanim->createInstance(map);
 
-#ifdef _DEBUG
-        newped->setDebugID(ped_idx);
-#endif
-
     int hp = READ_LE_INT16(gamdata.health);
     if (hp <= 0)
         hp = 2;
