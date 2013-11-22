@@ -38,7 +38,7 @@
 #include "weaponholder.h"
 #include "weapon.h"
 #include "ipastim.h"
-#include "core/actions.h"
+#include "ia/actions.h"
 
 class PedInstance;
 class Mission;

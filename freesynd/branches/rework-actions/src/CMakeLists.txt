@@ -19,6 +19,7 @@ set (SOURCES
 	core/missionbriefing.cpp
 	core/research.cpp
 	core/researchmanager.cpp
+	ia/action.cpp
 	default_ini.h
 	freesynd.cpp
     ipastim.cpp
@@ -95,7 +96,7 @@ set(HEADERS
 	common.h
 	config.h
 	cp437.h
-  ipastim.h
+    ipastim.h
 	keys.h
 	map.h
 	mapmanager.h
@@ -124,7 +125,7 @@ set(HEADERS
 	core/missionbriefing.h
 	core/research.h
 	core/researchmanager.h
-	core/actions.h
+	ia/actions.h
 	gfx/dirtylist.h
 	gfx/fliplayer.h
 	gfx/font.h
@@ -188,6 +189,7 @@ source_group(Gfx REGULAR_EXPRESSION gfx/*)
 source_group(Sound REGULAR_EXPRESSION sound/*)
 source_group(Model REGULAR_EXPRESSION model/*)
 source_group(Editor REGULAR_EXPRESSION editor/*)
+source_group(IA REGULAR_EXPRESSION ia/*)
 
 add_executable (freesynd ${SOURCES} ${HEADERS})
 
