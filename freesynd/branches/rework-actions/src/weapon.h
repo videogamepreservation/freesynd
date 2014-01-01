@@ -33,6 +33,7 @@
 #include "mapobject.h"
 #include "sound/sound.h"
 #include "utils/configfile.h"
+#include "model/shot.h"
 
 class WeaponInstance;
 
@@ -139,7 +140,9 @@ public:
         spe_ChangeAttribute = 0x0100,
         spe_SelfDestruction = 0x0200,
         spe_TargetPedOnly = 0x0400,
-        spe_CanShoot = 0x0800
+        spe_CanShoot = 0x0800,
+        //! Automatic weapon can shot continuously
+        spe_Automatic = 0X1000
     } ShotPropertyEnum;
 
     typedef enum {
@@ -156,16 +159,16 @@ public:
             (spe_PointToManyPoints | spe_TargetReachInstant | spe_UsesAmmo
             | spe_CanShoot),
         wspt_Uzi = (spe_PointToPoint | spe_TargetReachInstant
-            | spe_UsesAmmo | spe_CanShoot),
+            | spe_UsesAmmo | spe_CanShoot | spe_Automatic),
         wspt_Minigun =
             (spe_PointToManyPoints | spe_TargetReachInstant | spe_UsesAmmo
-            | spe_CanShoot),
+            | spe_CanShoot | spe_Automatic),
         wspt_Laser =
             (spe_PointToPoint | spe_TargetReachInstant
             | spe_RangeDamageOnReach | spe_UsesAmmo | spe_CanShoot),
         wspt_Flamer =
             (spe_PointToPoint | spe_TargetReachNeedTime | spe_UsesAmmo
-            | spe_CanShoot),
+            | spe_CanShoot | spe_Automatic),
         wspt_LongRange =
             (spe_PointToPoint | spe_TargetReachInstant | spe_UsesAmmo
             | spe_CanShoot),
@@ -214,6 +217,14 @@ public:
     int shotsPerAmmo() { return shots_per_ammo_; }
     bool usesAmmo() {
         return (shotProperty() & Weapon::spe_UsesAmmo) != 0;
+    }
+    /*!
+     * Return true if weapon is automatic.
+     * With automatic weapon, player can keep mouse clicked
+     * to shoot continuously.
+     */
+    bool isAutomatic() {
+        return (shotProperty() & Weapon::spe_Automatic) != 0;
     }
 
 protected:
@@ -325,8 +336,8 @@ public:
     void playSound();
 
     void resetWeaponUsedTime() { weapon_used_time_ = 0; }
-
-    uint8 inRange(toDefineXYZ & cp, ShootableMapObject ** t,
+    //! Check if target is in range and if there's something blocking the shoot
+    uint8 checkRangeAndBlocker(toDefineXYZ & cp, ShootableMapObject ** t,
         PathNode * pn = NULL, bool setBlocker = false,
         bool checkTileOnly = false, int maxr = -1);
     uint8 inRangeNoCP(ShootableMapObject ** t, PathNode * pn = NULL,
@@ -379,6 +390,13 @@ public:
     }
     int getWeight() { return pWeaponClass_->weight(); }
     void updtWeaponUsedTime(int elapsed);
+
+    //! Shoot target
+    void shoot(Mission *pMission, PathNode &targetLoc);
+
+protected:
+    //! Fills the ShotAttributes with values
+    void fillShotAttributes(Mission *pMission, const PathNode &targetLoc, ShotAttributes &att);
 
 protected:
     Weapon *pWeaponClass_;

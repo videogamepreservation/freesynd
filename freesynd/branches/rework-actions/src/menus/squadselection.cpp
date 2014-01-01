@@ -328,12 +328,17 @@ void SquadSelection::moveTo(MapTilePoint &mapPt, bool addAction) {
     } // end of for
 }
 
-void SquadSelection::shootAt(PathNode &pn) {
+/*!
+ * Each selected agent will use his weapon and shoot at the given target.
+ * Agent will shoot only if he's armed and ready to shoot.
+ * \param aimedPt Where the agent must shoot
+ */
+void SquadSelection::shootAt(PathNode &aimedPt) {
     for (SquadSelection::Iterator it = begin(); it != end(); ++it) {
         PedInstance *pAgent = *it;
         
         if (pAgent->canAddShootAction()) {
-            pAgent->addActionShootAt(pn);
+            pAgent->addActionShootAt(aimedPt);
         }
     }
 }

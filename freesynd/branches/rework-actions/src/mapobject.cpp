@@ -425,10 +425,18 @@ void MapObject::offzOnStairs(uint8 twd) {
     }
 }
 
-SFXObject::SFXObject(int m, int type, int t_show) : MapObject(m),
+/*!
+ * Constructor of the class.
+ * \param m Map id
+ * \param type Type of SfxObject (see SFXObject::SfxTypeEnum)
+ * \param t_show
+ * \param managed True means object i created/destroyed by another object than Mission
+ */
+SFXObject::SFXObject(int m, int type, int t_show, bool managed) : MapObject(m),
     sfx_life_over_(false), draw_all_frames_(true), elapsed_left_(0)
 {
     main_type_ = type;
+    managed_ = managed;
     setTimeShowAnim(0);
     switch(type) {
         case SFXObject::sfxt_Unknown:

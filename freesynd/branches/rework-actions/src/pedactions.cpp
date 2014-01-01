@@ -31,11 +31,11 @@
  * \param pAction The action to add
  * \param appendAction If true action is append after all existing actions.
  */
-void PedInstance::addAction(fs_actions::Action *pAction, bool appendAction) {
+void PedInstance::addMovementAction(fs_actions::MovementAction *pAction, bool appendAction) {
     if (currentAction_ == NULL) {
         currentAction_ = pAction;
     } else if (appendAction) {
-        fs_actions::Action *pAct = currentAction_;
+        fs_actions::MovementAction *pAct = currentAction_;
         while(pAct->next()) {
             pAct = pAct->next();
         }
@@ -48,13 +48,22 @@ void PedInstance::addAction(fs_actions::Action *pAction, bool appendAction) {
 
 /*!
  * Removes all actions.
- * \param pAction
  */
 void PedInstance::destroyAllActions() {
     while (currentAction_ != NULL) {
-        fs_actions::Action *pNext = currentAction_->next();
+        fs_actions::MovementAction *pNext = currentAction_->next();
         delete currentAction_;
         currentAction_ = pNext;
+    }
+}
+
+/*!
+ * Removes the current shoot action.
+ */
+void PedInstance::destroyShootAction() {
+    if (pShootAction_ != NULL) {
+        delete pShootAction_;
+        pShootAction_ = NULL;
     }
 }
 
@@ -66,12 +75,12 @@ void PedInstance::destroyAllActions() {
  */
 void PedInstance::addActionWalk(const PathNode &tpn, fs_actions::CreatOrigin origin, bool appendAction) {
     fs_actions::WalkAction *action = new fs_actions::WalkAction(origin, tpn);
-    addAction(action, appendAction);
+    addMovementAction(action, appendAction);
 }
 
 void PedInstance::addActionFollowPed(PedInstance *pPed) {
     fs_actions::FollowAction *pAction = new fs_actions::FollowAction(pPed);
-    addAction(pAction, false);
+    addMovementAction(pAction, false);
 }
 
 /*!
@@ -81,7 +90,7 @@ void PedInstance::addActionFollowPed(PedInstance *pPed) {
  */
 void PedInstance::addActionPutdown(uint8 weaponIndex, bool appendAction) {
     fs_actions::PutdownWeaponAction *action = new fs_actions::PutdownWeaponAction(weaponIndex);
-    addAction(action, appendAction);
+    addMovementAction(action, appendAction);
 }
 
 /*!
@@ -92,10 +101,10 @@ void PedInstance::addActionPutdown(uint8 weaponIndex, bool appendAction) {
 void PedInstance::addActionPickup(WeaponInstance *pWeapon, bool appendAction) {
     // First go to weapon
     fs_actions::WalkAction *action = new fs_actions::WalkAction(fs_actions::kOrigUser, pWeapon);
-    addAction(action, appendAction);
+    addMovementAction(action, appendAction);
     // Then pick it up
     fs_actions::PickupWeaponAction *pPuAction = new fs_actions::PickupWeaponAction(pWeapon);
-    addAction(pPuAction, true);
+    addMovementAction(pPuAction, true);
 }
 
 /*!
@@ -106,21 +115,34 @@ void PedInstance::addActionPickup(WeaponInstance *pWeapon, bool appendAction) {
 void PedInstance::addActionEnterVehicle(Vehicle *pVehicle, bool appendAction) {
     // First go to vehicle
     fs_actions::WalkAction *action = new fs_actions::WalkAction(fs_actions::kOrigUser, (ShootableMapObject *) pVehicle);
-    addAction(action, appendAction);
+    addMovementAction(action, appendAction);
     // Then get in
     fs_actions::EnterVehicleAction *enterAct = new fs_actions::EnterVehicleAction(pVehicle);
-    addAction(enterAct, true);
+    addMovementAction(enterAct, true);
 }
 
 //! Adds action to drive vehicle to destination
 void PedInstance::addActionDriveVehicle(fs_actions::CreatOrigin origin, 
         VehicleInstance *pVehicle, PathNode &destination, bool appendAction) {
     fs_actions::DriveVehicleAction *pAction = new fs_actions::DriveVehicleAction(origin, pVehicle, destination);
-    addAction(pAction, appendAction);
+    addMovementAction(pAction, appendAction);
 }
 
-void PedInstance::addActionShootAt(PathNode &pn) {
-    printf("addActionShootAt not implemented\n");
+/*!
+ * Adds an action of shooting at something/somewhere.
+ * \param aimedPt Where the ped must shoot
+ */
+void PedInstance::addActionShootAt(const PathNode &aimedPt) {
+    if (pShootAction_ == NULL) {
+        // adds precision to the shoot
+        PathNode adjAimedPt = aimedPt;
+        adjustAimedPtWithRangeAndAccuracy(selectedWeapon()->getWeaponClass(), adjAimedPt);
+        if (selectedWeapon()->getWeaponClass()->isAutomatic()) {
+            pShootAction_ = new fs_actions::AutomaticShootAction(fs_actions::kOrigUser, adjAimedPt);
+        } else {
+            pShootAction_ = new fs_actions::ShootAction(fs_actions::kOrigUser, adjAimedPt);
+        }
+    }
 }
 
 void PedInstance::createActQStanding(actionQueueGroupType &as) {

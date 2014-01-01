@@ -21,8 +21,8 @@
  *                                                                      *
  ************************************************************************/
 
-#ifndef CORE_ACTIONS_H_
-#define CORE_ACTIONS_H_
+#ifndef IA_ACTIONS_H_
+#define IA_ACTIONS_H_
 
 #include "path.h"
 
@@ -54,16 +54,14 @@ namespace fs_actions {
     };
 
     /*!
-     * This Action class is an abstract class representing an action that a ped can do
-     * like walking, driving a car or pick up someting.
-     * Every action has current attributes :
+     * The Action class is an abstract class representing an action that a ped can do
+     * like walking, driving a car, pick up someting or shoot.
+     * Every action has following attributes :
      *   - status (from not started to finished), 
      *   - origin : can be created from game file or after a player action. When
      *      an action is finished it is removed from the list except for scripted actions
      *      which are replayed.
-     *   - exclusive : if an action is exclusive, ped cannot shoot while executing this action.
-     * 
-     * Actions can be queued, so there's a field to store the next action.
+     * Subclasses must implement the execute() method.
      */
     class Action {
     public:
@@ -72,9 +70,11 @@ namespace fs_actions {
             //! Initial status for action
             kActStatusNotStarted,
             //! When action is running
-            kActStatusStarted,
+            kActStatusRunning,
             //! When action needs to wait for the end of animation to complete
             kActStatusWaitForAnim,
+            //! When action needs to wait for some time to complete
+            kActStatusWaitForTime,
             //! When action ends with success
             kActStatusSucceeded,
             //! When action ends with failure
@@ -82,9 +82,51 @@ namespace fs_actions {
         };
 
         //! Constructor for the class
-        Action(CreatOrigin origin, bool isExclusive = false, bool canExecVehicle = false);
+        Action(CreatOrigin origin);
         //! Destructor of the class
-        virtual ~Action() { pNext_ = NULL; } 
+        virtual ~Action() { } 
+
+        //! Entry point to execute the action
+        virtual bool execute(int elapsed, Mission *pMission, PedInstance *pPed) = 0;
+
+        //! Returns true if action is waiting for animation to end
+        bool isWaitingForAnimation() { return status_ == kActStatusWaitForAnim; }
+        //! Returns true if action has succeeded or failed
+        bool isFinished() { return status_ == kActStatusSucceeded || status_ == kActStatusFailed; }
+
+        //! Sets the status to Running
+        void setRunning() { status_ = kActStatusRunning; }
+        //! Sets the status to WaitForTime
+        void setWaitingForTime() { status_ = kActStatusWaitForTime; }
+        //! Sets the status to Succeeded
+        void setSucceeded() { status_ = kActStatusSucceeded; }
+        //! Sets the status to Failed
+        void setFailed() { status_ = kActStatusFailed; }
+        
+    protected:
+        CreatOrigin origin_;
+        /*! This is the status of the action.*/
+        ActionStatus status_;
+    };
+
+    /*!
+     * MovementAction (not happy with the name) are every action a Ped can make except shooting.
+     * A Ped can chain multiple MovementActions.
+     * Normaly, a ped can shoot while doing movement actions except if current action is exclusive.
+     * For example, ped cannot shoot while dropping his weapon on the ground.
+     * Some actions are not possible while ped is in car (like walking) and other are (like driving).
+     * The targetState field stores the state that the ped will have when action is realized.
+     *
+     * MovementAction exposes 2 methods for subclasses to implement :
+     * - doStart() : method called one time when action is first started
+     * - doExecute() : method called every time to do the action implementation
+     */
+    class MovementAction : public Action {
+    public:
+        //! Constructor for the class
+        MovementAction(CreatOrigin origin, bool isExclusive = false, bool canExecVehicle = false);
+        //! Destructor of the class
+        virtual ~MovementAction() { pNext_ = NULL; }
 
         //! Entry point to execute the action
         bool execute(int elapsed, Mission *pMission, PedInstance *pPed);
@@ -93,40 +135,33 @@ namespace fs_actions {
         bool isExclusive() { return isExclusive_; }
         //! Returns true if the action can be executed while ped is in a vehicle
         bool canExecInVehicle() { return canExecInVehicle_; }
-
-        bool isWaitingForAnimation() { return status_ == kActStatusWaitForAnim; }
-        bool isFinished() { return status_ == kActStatusSucceeded || status_ == kActStatusFailed; }
-
-        void setRunning() { status_ = kActStatusStarted; }
-        void setSucceeded() { status_ = kActStatusSucceeded; }
-        void setFailed() { status_ = kActStatusFailed; }
-
+        //! A completed action can be removed only if not created by scenario files
         bool canRemove() { return origin_ != kOrigScript; }
-        Action *next() { return pNext_; }
-        void setNext(Action *pAction) { pNext_ = pAction; }
+
+        //! Return the next action in the list
+        MovementAction *next() { return pNext_; }
+        //! Set the next action
+        void setNext(MovementAction *pAction) { pNext_ = pAction; }
     protected:
         //! Subclasses must implement this method to do somthing at the begining of the action
         virtual void doStart(Mission *pMission, PedInstance *pPed) {}
         //! Sublasses must implement this method to realize this action
         virtual bool doExecute(int elapsed, Mission *pMission, PedInstance *pPed) = 0;
     protected:
-        CreatOrigin origin_;
-        /*! This is the status of the action.*/
-        ActionStatus status_;
-        /*! */
-        uint8 targetState_;
         /*! When this flag is set, the ped cannot shoot.*/
         bool isExclusive_;
         /*! This flag tells that the action can be executed when ped is in a vehicule.*/
         bool canExecInVehicle_;
-
-        Action *pNext_;
+        /*! Store the state the ped will have when executing the action.*/
+        uint8 targetState_;
+        /*! Next action in the chain.*/
+        MovementAction *pNext_;
     };
 
     /*!
      * This action is used to move a ped to a given point by walking.
      */
-    class WalkAction : public Action {
+    class WalkAction : public MovementAction {
     public:
         //! Walt to given point
         WalkAction(CreatOrigin origin, PathNode pn, int speed = -1);
@@ -137,7 +172,9 @@ namespace fs_actions {
         void doStart(Mission *pMission, PedInstance *pPed);
         bool doExecute(int elapsed, Mission *pMission, PedInstance *pPed);
     protected:
+        /*! Where to walk to.*/
         PathNode dest_;
+        /*! Speed used to walk to destination.*/
         int newSpeed_;
     };
 
@@ -146,7 +183,7 @@ namespace fs_actions {
      * Both must be walking.
      * This action is only available to player.
      */
-    class FollowAction : public Action {
+    class FollowAction : public MovementAction {
     public:
         //! Walt to given point
         FollowAction(PedInstance *pTarget);
@@ -173,7 +210,7 @@ namespace fs_actions {
      * position in the agent's inventory) on the ground.
      * It is only available for our agents (so it's a player action).
      */
-    class PutdownWeaponAction : public Action {
+    class PutdownWeaponAction : public MovementAction {
     public:
         PutdownWeaponAction(uint8 weaponIdx);
 
@@ -181,6 +218,7 @@ namespace fs_actions {
         void doStart(Mission *pMission, PedInstance *pPed);
         bool doExecute(int elapsed, Mission *pMission, PedInstance *pPed);
     protected:
+        /*! Index of the weapon to drop in the ped's inventory.*/
         uint8 weaponIdx_;
     };
 
@@ -189,7 +227,7 @@ namespace fs_actions {
      * and to add it in his inventory.
      * It is only available for our agents (so it's a player action).
      */
-    class PickupWeaponAction : public Action {
+    class PickupWeaponAction : public MovementAction {
     public:
         PickupWeaponAction(WeaponInstance *pWeapon);
 
@@ -197,13 +235,14 @@ namespace fs_actions {
         void doStart(Mission *pMission, PedInstance *pPed);
         bool doExecute(int elapsed, Mission *pMission, PedInstance *pPed);
     protected:
+        /*! The weapon to pick up.*/
         WeaponInstance *pWeapon_;
     };
 
     /*!
      * This action is used to get a ped in a vehicle.
      */
-    class EnterVehicleAction : public Action {
+    class EnterVehicleAction : public MovementAction {
     public:
         EnterVehicleAction(Vehicle *pVehicle);
 
@@ -211,13 +250,14 @@ namespace fs_actions {
         void doStart(Mission *pMission, PedInstance *pPed);
         bool doExecute(int elapsed, Mission *pMission, PedInstance *pPed);
     protected:
+        /*! The vehicle to enter.*/
         Vehicle *pVehicle_;
     };
 
     /*!
      * This action is used to drive a vehicle to a point.
      */
-    class DriveVehicleAction : public Action {
+    class DriveVehicleAction : public MovementAction {
     public:
         DriveVehicleAction(CreatOrigin origin, VehicleInstance *pVehicle, PathNode &dest);
 
@@ -229,6 +269,40 @@ namespace fs_actions {
         VehicleInstance *pVehicle_;
         /*! Destination point.*/
         PathNode dest_;
+    };
+
+    /*!
+     * This action is used to shoot. A ped can only have a single shoot action
+     * at a given time.
+     */
+    class ShootAction : public Action {
+    public:
+        ShootAction(CreatOrigin origin, PathNode &aimedAt);
+
+        //! Entry point to execute the action
+        bool execute(int elapsed, Mission *pMission, PedInstance *pPed);
+        //! Stop shooting (mainly used with AutomaticShootAction)
+        virtual void stop() {};
+    protected:
+        bool doShoot(int elapsed, Mission *pMission, PedInstance *pPed);
+    protected:
+        //! Where the player aimed with the mouse
+        PathNode aimedAt_;
+        //! Time to wait between two shoot actions
+        int timeToWait_;
+    };
+
+    /*!
+     * This action is used to shoot with automatic gun.
+     */
+    class AutomaticShootAction : public ShootAction {
+    public:
+        AutomaticShootAction(CreatOrigin origin, PathNode &dest);
+
+        void stop();
+    protected:
+        bool doExecute(int elapsed, Mission *pMission, PedInstance *pPed);
+
     };
 
     /*!
@@ -245,4 +319,4 @@ namespace fs_actions {
     };
 }
 
-#endif // CORE_ACTIONS_H_
+#endif // IA_ACTIONS_H_

@@ -36,6 +36,7 @@
 #include "weapon.h"
 #include "map.h"
 #include "model/leveldata.h"
+#include "model/shot.h"
 #include "core/gameevent.h"
 
 class Vehicle;
@@ -139,11 +140,22 @@ public:
     size_t numPrjShots() { return prj_shots_.size(); }
     ProjectileShot *prjShots(size_t i) { return prj_shots_[i]; }
 
+    size_t numShots() { return shots_.size(); }
+    Shot *shots(size_t i) { return shots_[i]; }
+
     void addSfxObject(SFXObject *so) {
         sfx_objects_.push_back(so);
     }
+    /*!
+     * Removes SfxObject at given position in the list of sfxobjects.
+     * Object is freed only if not managed by another object.
+     * \param i position of object in the list.
+     */
     void delSfxObject(size_t i) {
-        delete sfx_objects_[i];
+        if (!sfx_objects_[i]->isManaged()) {
+            // object is not managed so delete it
+            delete sfx_objects_[i];
+        }
         sfx_objects_.erase((sfx_objects_.begin() + i));
     }
 
@@ -153,6 +165,14 @@ public:
     void delPrjShot(size_t i) {
         delete prj_shots_[i];
         prj_shots_.erase((prj_shots_.begin() + i));
+    }
+
+    void addShot(Shot *prj) {
+        shots_.push_back(prj);
+    }
+    void delShot(size_t i) {
+        delete shots_[i];
+        shots_.erase((shots_.begin() + i));
     }
 
     /*! Return the mission statistics. */
@@ -231,6 +251,7 @@ protected:
     std::vector<Static *> statics_;
     std::vector<SFXObject *> sfx_objects_;
     std::vector<ProjectileShot *> prj_shots_;
+    std::vector<Shot *> shots_;
 
     std::vector <ObjectiveDesc *> objectives_;
     //std::vector <ObjectiveDesc> sub_objectives_;

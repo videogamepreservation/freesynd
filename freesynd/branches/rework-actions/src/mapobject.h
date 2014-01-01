@@ -82,6 +82,19 @@ public:
         off_z_ = off_z;
     }
 
+    /*!
+     * Set the position of the object to be the given one.
+     * \param pos New object position
+     */
+    void setPosition(const PathNode &pos) {
+        tile_x_ = pos.tileX();
+        tile_y_ = pos.tileY();
+        tile_z_ = pos.tileZ();
+        off_x_ = pos.offX();
+        off_y_ = pos.offY();
+        off_z_ = pos.offZ();
+    }
+
     int tileX() { return tile_x_; }
     int tileY() { return tile_y_; }
     int tileZ() { return tile_z_; }
@@ -304,10 +317,12 @@ private:
  */
 class SFXObject : public MapObject {
 public:
-    SFXObject(int m, int type, int t_show = 0);
+    SFXObject(int m, int type, int t_show = 0, bool managed = false);
     virtual ~SFXObject() {}
 
     bool sfxLifeOver() { return sfx_life_over_; }
+    //! Return true if object is managed by another object
+    bool isManaged() { return managed_; }
 
     void draw(int x, int y);
     bool animate(int elapsed);
@@ -319,7 +334,7 @@ public:
         }
     }
 
-    typedef enum {
+    enum SfxTypeEnum {
         sfxt_Unknown = 0,
         sfxt_BulletHit = 1,
         sfxt_FlamerFire = 2,
@@ -333,13 +348,15 @@ public:
         sfxt_AgentSecond = 10,
         sfxt_AgentThird = 11,
         sfxt_AgentFourth = 12
-    }SfxTypeEnum;
+    };
 protected:
     int anim_;
     bool sfx_life_over_;
     // to draw all frames or first frame only
     bool draw_all_frames_;
     int elapsed_left_;
+    //! True means the life of the object is managed by something else than gameplaymenu
+    bool managed_;
 };
 
 /*!

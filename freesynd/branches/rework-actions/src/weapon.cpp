@@ -30,11 +30,11 @@
 #include <assert.h>
 
 #include "app.h"
+#include "utils/log.h"
 #include "weapon.h"
 #include "ped.h"
 #include "vehicle.h"
 #include "mission.h"
-#include "utils/log.h"
 
 #define Z_SHIFT_TO_AIR   4
 
@@ -834,7 +834,7 @@ uint16 WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
         pn = *tp;
     uint8 has_blocker = 1;
     if (tobj || tp)
-        has_blocker = inRange(cp, &smp, &pn);
+        has_blocker = checkRangeAndBlocker(cp, &smp, &pn);
     if ((has_blocker & 62) != 0) {
         if (!ignoreBlocker) {
             if (make_shots)
@@ -970,7 +970,7 @@ uint16 WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
                     std::vector<ShootableMapObject *> all_targets;
 
                     Weapon::ShotDesc &sdc = gen_shots[i];
-                    inRange(cp, &sdc.smo, &sdc.tpn, true);
+                    checkRangeAndBlocker(cp, &sdc.smo, &sdc.tpn, true);
                     sdc.tpn.convertPosToXYZ(&sdc.tp);
                     getInRangeAll(sdc.tp, all_targets, mask,
                         true, pWeaponClass_->rangeDmg());
@@ -1014,7 +1014,7 @@ uint16 WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
                     std::vector<ShootableMapObject *> all_targets;
 
                     Weapon::ShotDesc &sdc = gen_shots[i];
-                    inRange(cp, &sdc.smo, &sdc.tpn, true);
+                    checkRangeAndBlocker(cp, &sdc.smo, &sdc.tpn, true);
                     sdc.tpn.convertPosToXYZ(&sdc.tp);
                     getInRangeAll(sdc.tp, all_targets, mask,
                         true, pWeaponClass_->rangeDmg());
@@ -1059,7 +1059,7 @@ void WeaponInstance::playSound() {
     g_App.gameSounds().play(pWeaponClass_->getSound());
 }
 
-uint8 WeaponInstance::inRange(toDefineXYZ & cp, ShootableMapObject ** t,
+uint8 WeaponInstance::checkRangeAndBlocker(toDefineXYZ & cp, ShootableMapObject ** t,
     PathNode * pn, bool setBlocker, bool checkTileOnly, int maxr)
 {
     // NOTE: too many calculations of type tile*tilesize + off,
@@ -1106,7 +1106,7 @@ uint8 WeaponInstance::inRangeNoCP(ShootableMapObject ** t, PathNode * pn,
         cxyz.z = tile_z_ * 128 + off_z_ + Z_SHIFT_TO_AIR;
     }
 
-    return inRange(cxyz, t, pn, setBlocker, checkTileOnly, maxr);
+    return checkRangeAndBlocker(cxyz, t, pn, setBlocker, checkTileOnly, maxr);
 }
 
 int WeaponInstance::getShots(int *elapsed, uint32 make_shots) {
@@ -1216,6 +1216,53 @@ void WeaponInstance::deactivate() {
         weapon_used_time_ = 0;
 }
 
+/*!
+ * For shooting, we first record the context of the shooting (in ShotAttributes), then create
+ * a shot (depending on the type of weapon used) and finally decrease ammo.
+ * This method is used only for shooting weapons.
+ * \param pMission Mission data
+ * \param aimedAt Where the player wants to shoot
+ */
+void WeaponInstance::shoot(Mission *pMission, PathNode &aimedAt) {
+
+    ShotAttributes att;
+    fillShotAttributes(pMission, aimedAt, att);
+
+    if (getWeaponType() == Weapon::GaussGun) {
+        // TODO : complete;
+    } else if (getWeaponType() == Weapon::Flamer) {
+        // TODO : complete;
+    } else {
+        // For other weapons, damage are done immediatly because projectile speed
+        // is too high to draw them
+        InstantImpactShot shot(pMission, att);
+        shot.inflictDamage(pMission);
+    }
+
+    ammo_remaining_ -= pWeaponClass_->ammoPerShot();
+    if (ammo_remaining_ < 0) {
+        ammo_remaining_ = 0;
+    }
+}
+
+/*!
+ * Fills the ShotAttributes structure with needed information.
+ * \param pMission Mission data
+ * \param targetLoc Where to shoot
+ * \param att Structure to fill
+ */
+void WeaponInstance::fillShotAttributes(Mission *pMission, const PathNode &targetLoc, ShotAttributes &att) {
+    att.impactLoc = targetLoc;
+    att.hitAnimId = pWeaponClass_->anims()->hit_anim;
+    att.pWeapon = this;
+    att.pShooter = dynamic_cast<PedInstance *>(owner_);
+
+    att.damage.dtype = pWeaponClass_->dmgType();
+    att.damage.dvalue =  pWeaponClass_->damagePerShot();
+    att.damage.d_owner = owner_;
+    att.damage.ddir = getDirection();
+}
+
 void ShotClass::makeShot(bool rangeChecked, toDefineXYZ &cp, int anim_hit,
     std::vector <Weapon::ShotDesc> &all_shots, int anim_obj_hit,
     WeaponInstance * w)
@@ -1231,7 +1278,7 @@ void ShotClass::makeShot(bool rangeChecked, toDefineXYZ &cp, int anim_hit,
             has_blocker = 1;
         else {
             assert(w != NULL);
-            has_blocker = w->inRange(cp, &smp, &pn, true);
+            has_blocker = w->checkRangeAndBlocker(cp, &smp, &pn, true);
         }
         // TODO: set direction?
         d.ddir = -1;

@@ -171,6 +171,7 @@ class SquadSelection {
     void enterOrLeaveVehicle(Vehicle *pVehicle, bool addAction);
     //! Move selected agents to the given point
     void moveTo(MapTilePoint &mapPt, bool addAction);
+    //! Every selected armed agent shoot at location
     void shootAt(PathNode &pn);
  private:
     /*!

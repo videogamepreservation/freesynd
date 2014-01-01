@@ -264,13 +264,15 @@ public:
     // Action management
     //*************************************
     //! Adds the given action to the list of actions
-    void addAction(fs_actions::Action *pAction, bool appendAction);
+    void addMovementAction(fs_actions::MovementAction *pAction, bool appendAction);
     //! Removes all ped's actions
     void destroyAllActions();
+    //! Removes ped's action of shooting
+    void destroyShootAction();
     //! Execute the current action if any
     bool executeAction(int elapsed, Mission *pMission);
     //! Execute a shoot if any
-    bool executeShootAction();
+    bool executeShootAction(int elapsed, Mission *pMission);
     
     //! Adds action to walk to a given destination
     void addActionWalk(const PathNode &tpn, fs_actions::CreatOrigin origin, bool appendAction);
@@ -285,7 +287,8 @@ public:
     //! Adds action to drive vehicle to destination
     void addActionDriveVehicle(fs_actions::CreatOrigin origin, 
            VehicleInstance *pVehicle, PathNode &destination, bool appendAction);
-    void addActionShootAt(PathNode &pn);
+    //! Adds action to shoot somewhere
+    void addActionShootAt(const PathNode &aimedPt);
 
     //*************************************
     // Movement management
@@ -306,8 +309,22 @@ public:
     void dropAllWeapons();
     void destroyAllWeapons();
     bool wePickupWeapon();
+
+    //*************************************
+    // Shoot & Damage management
+    //*************************************
     //! Return true if ped can shoot
     bool canAddShootAction();
+    //! Return true if ped is currently shooting (ie there's a ShootAction)
+    bool isShooting() { return pShootAction_ != NULL; }
+    //! Make the ped stop shooting (mainly for automatic weapon)
+    void stopShooting();
+    //! Update the ped's shooting direction and target
+    void updateShootingDirection(Mission *pMission, ShootableMapObject *pTarget, PathNode &shootPt);
+    //! Adjust aimed point with user accuracy and weapon max range
+    void adjustAimedPtWithRangeAndAccuracy(Weapon *pWeaponClass, PathNode &aimedPt);
+    //! Gets the time before a ped can shoot again
+    int getTimeBetweenShoots(WeaponInstance *pWeapon);
 
     bool inSightRange(MapObject *t);
     VehicleInstance *inVehicle();
@@ -869,7 +886,9 @@ protected:
     /*! Ped's behaviour.*/
     fs_actions::Behaviour *pBehaviour_;
     /*! Current action*/
-    fs_actions::Action *currentAction_;
+    fs_actions::MovementAction *currentAction_;
+    /*! Current action of shooting*/
+    fs_actions::ShootAction *pShootAction_;
 
 
     uint32 action_grp_id_;
@@ -918,8 +937,6 @@ protected:
     std::set <PedInstance *> persuaded_group_;
     //! Flag to mark suiciding agent
     bool is_suiciding_;
-    //! Convenient field to store current number of shoot actions in queue
-    uint8 nbShootInQueue_;
 
     bool walkable(int x, int y, int z) { return true; }
 

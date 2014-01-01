@@ -300,6 +300,7 @@ void GameplayMenu::handleShow() {
     map_renderer_.init(mission_);
     mm_renderer_.init(mission_, mission_->getSquad()->hasScanner());
     centerMinimapOnLeader();
+    isPlayerShooting_ = false;
 
     // Change cursor to game cursor
     g_System.usePointerCursor();
@@ -345,8 +346,9 @@ void GameplayMenu::handleTick(int elapsed)
         last_animate_tick_ = tick_count_;
 
         for (size_t i = 0; i < mission_->numSfxObjects(); i++) {
-            change |= mission_->sfxObjects(i)->animate(diff);
-            if (mission_->sfxObjects(i)->sfxLifeOver()) {
+            SFXObject *pSfx = mission_->sfxObjects(i);
+            change |= pSfx->animate(diff);
+            if (pSfx->sfxLifeOver()) {
                 mission_->delSfxObject(i);
                 i--;
             }
@@ -368,6 +370,14 @@ void GameplayMenu::handleTick(int elapsed)
             change |= mission_->prjShots(i)->animate(diff, mission_);
             if (mission_->prjShots(i)->prjsLifeOver()) {
                 mission_->delPrjShot(i);
+                i--;
+            }
+        }
+
+        for (size_t i = 0; i < mission_->numShots(); i++) {
+            change |= mission_->shots(i)->animate(diff, mission_);
+            if (mission_->shots(i)->isLifeOver()) {
+                mission_->delShot(i);
                 i--;
             }
         }
@@ -644,45 +654,18 @@ void GameplayMenu::handleMouseMotion(int x, int y, int state, const int modKeys)
             g_System.usePointerYellowCursor();
     }
 
-    if (x < 129)
+    if (x < 129) {
         stopShootingEvent();
-    if (shooting_events_.shooting_) {
-        MapTilePoint mtp = mission_->get_map()->screenToTilePoint(world_x_ + x - 129,
-                world_y_ + y);
-        for (size_t i = 0; i < AgentManager::kMaxSlot; i++) {
-            if (shooting_events_.agents_shooting[i]) {
-                PedInstance * pa = mission_->getSquad()->member(i);
-                PathNode *pn = NULL;
-                if (target_) {
-                    int tilez = target_->tileZ() * 128 + target_->offZ()
-                        + (target_->sizeZ() >> 1);
-                    int offz = tilez % 128;
-                    tilez /= 128;
-                    pn = new PathNode(target_->tileX(), target_->tileY(), tilez,
-                        target_->offX(), target_->offY(), offz);
-                } else {
-                    int stx = mtp.tx;
-                    int sty = mtp.ty;
-                    int stz = 0;
-                    int sox = mtp.ox;
-                    int soy = mtp.oy;
-                    int oz = 0;
-                    if (mission_->getShootableTile(stx, sty, stz,
-                        sox, soy, oz))
-                    {
-                        pn = new PathNode(stx, sty, stz, sox, soy, oz);
-#if 0
-                        printf("shooting at\n x = %i, y=%i, z=%i\n",
-                            stx, sty, stz);
-                        printf("shooting pos\n ox = %i, oy=%i, oz=%i\n",
-                            sox, soy, oz);
-#endif
-                    }
-                }
-                if (pn) {
-                    pa->updtActGFiring(shooting_events_.ids[i], pn,
-                        NULL);
-                    delete pn;
+    }
+
+    if (isPlayerShooting_) {
+        // update direction for each shooting player
+        PathNode dest;
+        if (getAimedAt(x, y, dest)) {
+            for (SquadSelection::Iterator it = selection_.begin(); it != selection_.end(); ++it) {
+                PedInstance *pAgent = *it;
+                if (pAgent->isShooting()) {
+                    pAgent->updateShootingDirection(mission_, target_, dest);
                 }
             }
         }
@@ -693,7 +676,8 @@ bool GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
 {
     if (paused_)
         return true;
-    if (button == 3) {
+    if (button == kMouseRightButton) {
+        // TODO : a supprimer
         stopShootingEvent();
     }
 
@@ -730,7 +714,7 @@ bool GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
         {
             // user clicked on the weapon selector
             handleClickOnWeaponSelector(x, y, button, modKeys);
-        } else if ( y > kMiniMapScreenY && button == 1) {
+        } else if ( y > kMiniMapScreenY && button == kMouseLeftButton) {
             handleClickOnMinimap(x, y);
         }
     } else {
@@ -757,7 +741,7 @@ void GameplayMenu::handleClickOnWeaponSelector(int x, int y, int button,
     if (pLeader->isAlive()) {
         bool is_ctrl = (modKeys & KMD_CTRL) != 0;
         if (w_num < pLeader->numWeapons()) {
-            if (button == 1) {
+            if (button == kMouseLeftButton) {
                 // Button 1 : selection/deselection of weapon for all selection
                 handleWeaponSelection(w_num, is_ctrl);
             } else {
@@ -802,6 +786,12 @@ void GameplayMenu::updateIPALevelMeters(int elapsed)
 void GameplayMenu::handleClickOnMap(int x, int y, int button, const int modKeys) {
     MapTilePoint mapPt = mission_->get_map()->screenToTilePoint(world_x_ + x - 129,
                     world_y_ + y);
+#ifdef _DEBUG
+    if ((modKeys & KMD_ALT) != 0) {
+        printf("Tile x:%d, y:%d, z:%d, ox:%d, oy:%d\n", mapPt.tx, mapPt.ty, mapPt.tz, mapPt.ox, mapPt.oy);
+        return;
+    }
+#endif //_DEBUG
 
     bool ctrl = (modKeys & KMD_CTRL) != 0;
     if (button == kMouseLeftButton) {
@@ -824,74 +814,10 @@ void GameplayMenu::handleClickOnMap(int x, int y, int button, const int modKeys)
         }
     } else if (button == kMouseRightButton) {
         PathNode pn;
-        bool doShoot = false;
-        if (target_) {
-            int tilez = target_->tileZ() * 128 + target_->offZ() + (target_->sizeZ() >> 1);
-            int offz = tilez % 128;
-            tilez /= 128;
-            //pn = new PathNode(target_->tileX(), target_->tileY(), tilez,
-            //    target_->offX(), target_->offY(), offz);
-            doShoot = true;
-            pn.setTileX(target_->tileX());
-            pn.setTileY(target_->tileY());
-            pn.setTileZ(tilez);
-            pn.setOffX(target_->offX());
-            pn.setOffY(target_->offY());
-            pn.setOffZ(offz);
-        } else {
-            int stx = mapPt.tx;
-            int sty = mapPt.ty;
-            int stz = 0;
-            int sox = mapPt.ox;
-            int soy = mapPt.oy;
-            int oz = 0;
-            if (mission_->getShootableTile(stx, sty, stz,
-                sox, soy, oz))
-            {
-                //pn = new PathNode(stx, sty, stz, sox, soy, oz);
-                doShoot = true;
-                pn.setTileX(stx);
-                pn.setTileY(sty);
-                pn.setTileZ(stz);
-                pn.setOffX(sox);
-                pn.setOffY(soy);
-                pn.setOffZ(oz);
-#if 0
-                printf("shooting at\n x = %i, y=%i, z=%i\n",
-                        stx, sty, stz);
-                printf("shooting pos\n ox = %i, oy=%i, oz=%i\n",
-                        sox, soy, oz);
-#endif
-            }
-        }
-
-        if (doShoot) {
+        if (getAimedAt(x, y, pn)) {
+            isPlayerShooting_ = true;
             selection_.shootAt(pn);
         }
-        /*for (size_t i = 0; i < AgentManager::kMaxSlot; ++i) {
-            if (selection_.isAgentSelected(i)) {
-                PedInstance * pa = mission_->getSquad()->member(i);
-                PedInstance::actionQueueGroupType as;
-                as.main_act = 0;
-                as.group_desc = PedInstance::gd_mFire;
-                as.origin_desc = fs_actions::kOrigUser;
-                if (pn) {
-                    if (ctrl) {
-                        if (pa->createActQFiring(as, pn, NULL, true))
-                            pa->addActQToQueue(as);
-                    } else {
-                        if (pa->createActQFiring(as, pn, NULL, true))
-                        {
-                            shooting_events_.agents_shooting[i] = true;
-                            shooting_events_.shooting_ = true;
-                            pa->setActQInQueue(as, &shooting_events_.ids[i]);
-                        }
-                    }
-                }
-            }
-        }
-        if (pn)
-            delete pn;*/
     }
 }
 
@@ -914,8 +840,67 @@ void GameplayMenu::handleClickOnMinimap(int x, int y) {
      }
 }
 
+/*!
+ * Set the point on the map the player is aiming at.
+ * It depends on whether the player has clicked on a shootable target 
+ * or a point on the ground.
+ * \param x mouse X coord on screen
+ * \param y mouse Y coord on screen
+ * \param loc Finale location
+ * \return True if location has been set.
+ */
+bool GameplayMenu::getAimedAt(int x, int y, PathNode &locToSet) {
+    bool locationSet = false;
+
+    if (target_) {
+        //  Player has aimed an object
+        // z is set to half the size of the object 
+        int tilez = target_->tileZ() * 128 + target_->offZ() + (target_->sizeZ() >> 1);
+        int offz = tilez % 128;
+        tilez /= 128;
+        locationSet = true;
+        locToSet.setTileX(target_->tileX());
+        locToSet.setTileY(target_->tileY());
+        locToSet.setTileZ(tilez);
+        locToSet.setOffX(target_->offX());
+        locToSet.setOffY(target_->offY());
+        locToSet.setOffZ(offz);
+    } else {
+        MapTilePoint mapPt = mission_->get_map()->screenToTilePoint(world_x_ + x - 129,
+                    world_y_ + y);
+        mapPt.tz = 0;
+        int oz = 0;
+        if (mission_->getShootableTile(mapPt.tx, mapPt.ty, mapPt.tz, mapPt.ox, mapPt.oy, oz)) {
+            locationSet = true;
+            locToSet.setTileX(mapPt.tx);
+            locToSet.setTileY(mapPt.ty);
+            locToSet.setTileZ(mapPt.tz);
+            locToSet.setOffX(mapPt.ox);
+            locToSet.setOffY(mapPt.oy);
+            locToSet.setOffZ(oz);
+#if 0
+            printf("shooting at\n x = %i, y=%i, z=%i\n",
+                    stx, sty, stz);
+            printf("shooting pos\n ox = %i, oy=%i, oz=%i\n",
+                    sox, soy, oz);
+#endif
+        }
+    }
+
+    return locationSet;
+}
+
 void GameplayMenu::stopShootingEvent(void )
 {
+    isPlayerShooting_ = false;
+    for (SquadSelection::Iterator it = selection_.begin(); it != selection_.end(); ++it) {
+        PedInstance *pAgent = *it;
+        
+        if (pAgent->isShooting()) {
+            pAgent->stopShooting();
+        }
+    }
+
     if (shooting_events_.shooting_) {
         shooting_events_.shooting_ = false;
         // minimum, 1 if simple click, 2 if longer click
@@ -935,9 +920,10 @@ void GameplayMenu::handleMouseUp(int x, int y, int button, const int modKeys)
 {
     ipa_chng_.ipa_chng = -1;
 
-    if (button == 3) {
+    if (button == kMouseRightButton && isPlayerShooting_) {
         stopShootingEvent();
     }
+    
 }
 
 bool GameplayMenu::handleUnknownKey(Key key, const int modKeys) {

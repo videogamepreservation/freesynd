@@ -13,6 +13,7 @@ set (SOURCES
 	app.cpp
 	model/objectivedesc.cpp
 	model/weaponholder.cpp
+	model/shot.cpp
 	core/squad.cpp
 	core/gamesession.cpp
 	core/gamecontroller.cpp
@@ -137,6 +138,7 @@ set(HEADERS
 	gfx/tilemanager.h
 	model/objectivedesc.h
 	model/leveldata.h
+	model/shot.h
 	menus/agentselectorrenderer.h
 	menus/maprenderer.h
 	menus/minimaprenderer.h

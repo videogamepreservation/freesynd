@@ -40,19 +40,43 @@ const int FollowAction::kFollowDistance = 192;
 void NopeBehaviour::execute(Mission *pMission, PedInstance *pPed) {
 }
 
-Action::Action(CreatOrigin origin, bool isExclusive, bool canExecVehicle) {
+/*!
+ * Default constructor.
+ * \param origin Who has created this action.
+ */
+Action::Action(CreatOrigin origin) {
     origin_ = origin;
     status_ = kActStatusNotStarted;
+}
+
+/*!
+ * Default constructor.
+ * \param origin Who has created this action.
+ * \param isExclusive Does action allow shooting
+ * \param canExecVehicle Is action is allowed while ped is in vehicle
+ */
+MovementAction::MovementAction(CreatOrigin origin, bool isExclusive, bool canExecVehicle) :
+Action(origin) {
     pNext_ = NULL;
     isExclusive_ = isExclusive;
     canExecInVehicle_ = canExecVehicle;
     targetState_ = PedInstance::pa_smNone;
 }
 
-bool Action::execute(int elapsed, Mission *pMission, PedInstance *pPed) {
+/*!
+ * Action execution.
+ * If action is not started :
+ *   - if ped is in a vehicle and action cannot be executed inside, fail
+ *   - else call doStart()
+ * If action has failed, exit.
+ * Else change Ped's state to targetState.
+ * Calls doExecute() method.
+ * If action is finished (failed or succeeded), quits state.
+ */
+bool MovementAction::execute(int elapsed, Mission *pMission, PedInstance *pPed) {
     if (status_ == kActStatusNotStarted) {
         // Action is not started so start it
-        status_ = kActStatusStarted;
+        status_ = kActStatusRunning;
         if (pPed->inVehicle() && !canExecInVehicle()) {
             // Ped is in a vehicle and action cannot be executed in a vehicle
             setFailed();
@@ -81,13 +105,13 @@ bool Action::execute(int elapsed, Mission *pMission, PedInstance *pPed) {
 }
 
 WalkAction::WalkAction(CreatOrigin origin, PathNode pn, int speed) :
-    Action(origin) {
+    MovementAction(origin) {
     newSpeed_ = speed;
     dest_ = pn;
     targetState_ = PedInstance::pa_smWalking;
 }
 
-WalkAction::WalkAction(CreatOrigin origin, ShootableMapObject *smo, int speed) : Action(origin) {
+WalkAction::WalkAction(CreatOrigin origin, ShootableMapObject *smo, int speed) : MovementAction(origin) {
     newSpeed_ = speed;
     // Set destination point
     dest_.setTileX(smo->tileX());
@@ -99,7 +123,7 @@ WalkAction::WalkAction(CreatOrigin origin, ShootableMapObject *smo, int speed) :
 }
 
 void WalkAction::doStart(Mission *pMission, PedInstance *pPed) {
-    // then go to given location at given speed
+    // Go to given location at given speed
     if (!pPed->setDestination(pMission, dest_, newSpeed_)) {
         setFailed();
         return;
@@ -107,8 +131,8 @@ void WalkAction::doStart(Mission *pMission, PedInstance *pPed) {
 }
 
 /*!
- * This method first update movement for the ped.
- * Then if the ped has no more destination point, that means that
+ * This method first updates movement for the ped.
+ * Then if the ped has no more destination point, it means that
  * he has arrived.
  * Else action continue.
  * \param elapsed Time elapsed since last frame
@@ -129,7 +153,7 @@ bool WalkAction::doExecute(int elapsed, Mission *pMission, PedInstance *pPed) {
  * \param pTarget The ped to follow.
  */
 FollowAction::FollowAction(PedInstance *pTarget) :
-Action(kOrigUser) {
+MovementAction(kOrigUser) {
     pTarget_ = pTarget;
     targetState_ = PedInstance::pa_smWalking;
 }
@@ -195,7 +219,7 @@ bool FollowAction::doExecute(int elapsed, Mission *pMission, PedInstance *pPed) 
     return updated;
 }
 
-PutdownWeaponAction::PutdownWeaponAction(uint8 weaponIdx) : Action(kOrigUser, true) {
+PutdownWeaponAction::PutdownWeaponAction(uint8 weaponIdx) : MovementAction(kOrigUser, true) {
     weaponIdx_ = weaponIdx;
     targetState_ = PedInstance::pa_smPutDown;
 }
@@ -217,7 +241,7 @@ bool PutdownWeaponAction::doExecute(int elapsed, Mission *pMission, PedInstance 
 }
 
 PickupWeaponAction::PickupWeaponAction(WeaponInstance *pWeapon) :
-    Action(fs_actions::kOrigUser, true) {
+    MovementAction(fs_actions::kOrigUser, true) {
     pWeapon_ = pWeapon;
     targetState_ = PedInstance::pa_smPickUp;
 }
@@ -232,7 +256,6 @@ void PickupWeaponAction::doStart(Mission *pMission, PedInstance *pPed) {
     } else {
         // the animation must run first then the object will be picked up
         status_ = kActStatusWaitForAnim;
-        //pPed->goToState(PedInstance::pa_smPickUp);
     }
 }
 
@@ -244,12 +267,11 @@ bool PickupWeaponAction::doExecute(int elapsed, Mission *pMission, PedInstance *
         pWeapon_->deactivate();
         pPed->addWeapon(pWeapon_);
         setSucceeded();
-        //pPed->leaveState(PedInstance::pa_smPickUp);
     }
     return true;
 }
 
-EnterVehicleAction::EnterVehicleAction(Vehicle *pVehicle) : Action(kOrigUser, true) {
+EnterVehicleAction::EnterVehicleAction(Vehicle *pVehicle) : MovementAction(kOrigUser, true) {
     pVehicle_ = pVehicle;
 }
 
@@ -271,7 +293,7 @@ bool EnterVehicleAction::doExecute(int elapsed, Mission *pMission, PedInstance *
 }
 
 DriveVehicleAction::DriveVehicleAction(CreatOrigin origin, VehicleInstance *pVehicle, PathNode &dest) : 
-    Action(origin, false, true) {
+    MovementAction(origin, false, true) {
     pVehicle_ = pVehicle;
     dest_ = dest;
 }
@@ -291,4 +313,80 @@ bool DriveVehicleAction::doExecute(int elapsed, Mission *pMission, PedInstance *
         setSucceeded();
     }
     return true;
+}
+
+ShootAction::ShootAction(CreatOrigin origin, PathNode &aimedAt) : 
+    Action(origin) {
+        aimedAt_ = aimedAt;
+}
+
+/*!
+ * Execute the shoot action.
+ * When action starts, it sets the firing state (and animation) then
+ * waits for the end of animation.
+ * \param elapsed Time since last frame.
+ * \param pMission Mission data
+ * \param pPed The ped executing the action.
+ * \return true to redraw
+ */
+bool ShootAction::execute(int elapsed, Mission *pMission, PedInstance *pPed) {
+    if (status_ == kActStatusNotStarted) {
+        // The first time
+        status_ = kActStatusWaitForAnim;
+        WeaponInstance *pWeapon = pPed->selectedWeapon();
+        pWeapon->playSound();
+
+        // change state to firing
+        pPed->goToState(PedInstance::pa_smFiring);
+    }
+
+    bool update = doShoot(elapsed, pMission, pPed);
+
+    return update;
+}
+
+/*!
+ * Execute the shoot action.
+ * When animation is over, use the weapon to shoot and wait for weapon
+ * to reload before finishing.
+ * \param elapsed Time since last frame.
+ * \param pMission Mission data
+ * \param pPed The ped executing the action.
+ * \return always return true
+ */
+bool ShootAction::doShoot(int elapsed, Mission *pMission, PedInstance *pPed) {
+    if (status_ == kActStatusRunning) {
+        WeaponInstance *pWeapon = pPed->selectedWeapon();
+        pWeapon->shoot(pMission, aimedAt_);
+        // Shooting animation is finished
+        pPed->leaveState(PedInstance::pa_smFiring);
+
+        // The action is complete only after a certain laps of time to
+        // simulate the fact that the weapon needs to be reloaded
+        // and the shooter's reactivity to that
+        timeToWait_ = pPed->getTimeBetweenShoots(pWeapon);
+        setWaitingForTime();
+    } else if (status_ == kActStatusWaitForTime) {
+        timeToWait_ -= elapsed;
+        if (timeToWait_ <= 0) {
+            // time is reached so action can finish
+            setSucceeded();
+        }
+    }
+
+    return true;
+}
+
+AutomaticShootAction::AutomaticShootAction(CreatOrigin origin, PathNode &aimedAt) : 
+    ShootAction(origin, aimedAt) {
+
+}
+
+bool AutomaticShootAction::doExecute(int elapsed, Mission *pMission, PedInstance *pPed) {
+    printf("AutomaticShootAction::doExecute\n");
+    return false;
+}
+
+void AutomaticShootAction::stop() {
+    setSucceeded();
 }

@@ -65,10 +65,13 @@ Mission::~Mission()
         delete peds_[i];
     for (unsigned int i = 0; i < weapons_.size(); i++)
         delete weapons_[i];
-    for (unsigned int i = 0; i < sfx_objects_.size(); i++)
-        delete sfx_objects_[i];
+    while (sfx_objects_.size() != 0) {
+        delSfxObject(0);
+    }
     for (unsigned int i = 0; i < prj_shots_.size(); i++)
         delete prj_shots_[i];
+    for (unsigned int i = 0; i < shots_.size(); i++)
+        delete shots_[i];
     for (unsigned int i = 0; i < statics_.size(); i++)
         delete statics_[i];
     for (unsigned int i = 0; i < objectives_.size(); i++)

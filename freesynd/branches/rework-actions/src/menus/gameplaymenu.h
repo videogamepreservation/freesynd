@@ -48,6 +48,9 @@ public:
     void handleRender(DirtyList &dirtyList);
     void handleLeave();
 
+    //! Handles game events
+    void handleGameEvent(GameEvent evt);
+
 protected:
     bool handleUnknownKey(Key key, const int modKeys);
 
@@ -83,7 +86,8 @@ protected:
     void updateSelectionForDeadAgent(PedInstance *p_ped);
     //! updates visual markers for our agents
     void updtAgentsMarker();
-
+    //! Set loc param with point on the map where player clicked to shoot
+    bool getAimedAt(int x, int y, PathNode &loc);
     void stopShootingEvent(void);
     //! Centers the minimap on the selection leader
     void centerMinimapOnLeader();
@@ -93,9 +97,6 @@ protected:
     void updateSelectAll();
     //! Update the target value for adrenaline etc for an agent
     void updateIPALevelMeters(int elapsed);
-
-    //! Handles game events
-    void handleGameEvent(GameEvent evt);
 
 protected:
     /*! Origin of the minimap on the screen.*/
@@ -126,6 +127,8 @@ protected:
     /*! This renderer is in charge of drawing the IPA meters.*/
     AgentSelectorRenderer agt_sel_renderer_;
     bool pressed_btn_select_all_;
+    /*! Flag to store the fact that player is currently shooting.*/
+    bool isPlayerShooting_;
     struct ShootingEvents {
         bool shooting_;
         bool agents_shooting[4];

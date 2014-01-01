@@ -365,8 +365,8 @@ bool PedInstance::animate2(int elapsed, Mission *mission) {
     bool update = executeAction(elapsed, mission);
 
     // cannot shoot if ped is doing something exlusive
-    if (currentAction_ && !currentAction_->isExclusive()) {
-        update |= executeShootAction();
+    if (currentAction_ == NULL || !currentAction_->isExclusive()) {
+        update |= executeShootAction(elapsed, mission);
     }
 
     if (updateAnimation(elapsed)) {
@@ -374,6 +374,10 @@ bool PedInstance::animate2(int elapsed, Mission *mission) {
         if (currentAction_ && currentAction_->isWaitingForAnimation()) {
             // so continue action
             currentAction_->setRunning();
+        }
+        if (pShootAction_ && pShootAction_->isWaitingForAnimation()) {
+            // so continue action
+            pShootAction_->setRunning();
         }
     }
 
@@ -393,7 +397,7 @@ bool PedInstance::executeAction(int elapsed, Mission *pMission) {
         updated |= currentAction_->execute(elapsed, pMission, this);
         if (currentAction_->isFinished()) {
             // current action is finished : go to next one
-            fs_actions::Action *pNext = currentAction_->next();
+            fs_actions::MovementAction *pNext = currentAction_->next();
             if (currentAction_->canRemove()) {
                 // but before erase action
                 delete currentAction_;
@@ -412,14 +416,25 @@ bool PedInstance::executeAction(int elapsed, Mission *pMission) {
 /*!
  * Executes a shoot action.
  */
-bool PedInstance::executeShootAction() {
-    return false;
+bool PedInstance::executeShootAction(int elapsed, Mission *pMission) {
+    bool updated = false;
+    if(pShootAction_ != NULL) {
+        // execute action
+        updated |= pShootAction_->execute(elapsed, pMission, this);
+        if (pShootAction_->isFinished()) {
+            // erase action
+            delete pShootAction_;
+            pShootAction_ = NULL;
+        }
+    }
+
+    return updated;
 }
 
 /*!
  * Return true if :
  * - is not doing something that prevents him from shooting
- * - the shoot action buffer is not full
+ * - is not already shooting
  * - has a weapon in hand
  * - weapon is for shooting (ie not a scanner for example)
  */
@@ -428,11 +443,103 @@ bool PedInstance::canAddShootAction() {
         return false;
     }
 
-    if (nbShootInQueue_ >= 3) {
+    if (pShootAction_ != NULL) {
         return false;
     }
+
     WeaponInstance *pWi = selectedWeapon();
     return (pWi != NULL && pWi->canShoot() && pWi->ammoRemaining() > 0);
+}
+
+/*!
+ * Terminate the current shoot action.
+ */
+void PedInstance::stopShooting() {
+    pShootAction_->stop();
+}
+
+/*!
+ * Update the ped's shooting direction and target.
+ */
+void PedInstance::updateShootingDirection(Mission *pMission, ShootableMapObject *pTarget, PathNode &shootPt) {
+    WeaponInstance *pWeapon = selectedWeapon();
+    int xb = tileX() * 256 + offX();
+    int yb = tileY() * 256 + offY();
+    int txb = 0;
+    int tyb = 0;
+    if (pWeapon->getMainType() == Weapon::Flamer) {
+        int dir = getDirection(8);
+        switch (dir) {
+            case 0:
+                yb += 160;
+                break;
+            case 1:
+                xb += 96;
+                yb += 96;
+                break;
+            case 2:
+                xb += 160;
+                break;
+            case 3:
+                xb += 96;
+                yb -= 96;
+                break;
+            case 4:
+                yb -= 160;
+                break;
+            case 5:
+                xb -= 96;
+                yb -= 96;
+                break;
+            case 6:
+                xb -= 160;
+                break;
+            case 7:
+                xb -= 96;
+                yb += 96;
+                break;
+        }
+    }
+
+    if (xb < 0 || (xb > (pMission->mmax_x_ - 1) * 256))
+        return;
+    if (yb < 0 || (yb > (pMission->mmax_y_ - 1) * 256))
+        return;
+
+    int cz = tileZ() * 128 + offZ() + (sizeZ() >> 1);
+    if (cz > (pMission->mmax_z_ - 1) * 128)
+        return;
+    if (pMission->isTileSolid(xb / 256, yb / 256, cz / 128, xb % 256,
+        yb % 256, cz % 128))
+    {
+        return;
+    }
+
+    if (pTarget) {
+        txb = pTarget->tileX() * 256 + pTarget->offX();
+        tyb = pTarget->tileY() * 256 + pTarget->offY();
+    } else {
+        txb = shootPt.tileX() * 256 + shootPt.offX();
+        tyb = shootPt.tileY() * 256 + shootPt.offY();
+    }
+
+    int dir = -1;
+    pWeapon->setDirection(txb - xb, tyb - yb, &dir);
+    if (dir != -1)
+        setDirection(dir);
+}
+
+/*!
+ * Returns the mean time between two shoots.
+ * When a ped has shot, it takes time to shoot again : time to reload,
+ * time for the shot and ped's reactivity (IPA and Mods)
+ * \param pWeapon The weapon used to shoot
+ * \return Time to wait
+ */
+int PedInstance::getTimeBetweenShoots(WeaponInstance *pWeapon) {
+    // TODO : Add IPA and mods influence
+    return pWeapon->getWeaponClass()->timeForShot() + 
+            pWeapon->getWeaponClass()->timeReload();
 }
 
 bool PedInstance::animate(int elapsed, Mission *mission) {
@@ -1972,7 +2079,7 @@ PedInstance::PedInstance(Ped *ped, int m) : ShootableMovableMapObject(m),
     // Todo : adds a behaviour for the type of ped
     pBehaviour_ = new fs_actions::NopeBehaviour();
     currentAction_ = NULL;
-    nbShootInQueue_ = 0;
+    pShootAction_ = NULL;
 }
 
 PedInstance::~PedInstance()
@@ -1990,6 +2097,7 @@ PedInstance::~PedInstance()
     delete pBehaviour_;
     pBehaviour_ = NULL;
     destroyAllActions();
+    destroyShootAction();
 }
 
 /*!
@@ -2792,6 +2900,54 @@ int PedInstance::getSpeedOwnerBoost()
     return 2;
 }
 
+/*!
+ * Adds a little imprecision to the aimed point. Precision depends
+ * on the weapon used, the ped's mods and IPA levels.
+ * \param pWeaponClass The type of weapon used to shoot
+ * \param aimedPt Where the player has clicked on the map. This point
+ * will be updated to reflet the influence of precision.
+ */
+void PedInstance::adjustAimedPtWithRangeAndAccuracy(Weapon *pWeaponClass, PathNode &aimedPt) {
+    // First adjust Range
+    int cx = tileX() * 256 + offX();
+    int cy = tileY() * 256 + offY();
+    int cz = tileZ() * 128 + offZ();
+    if (cz > (g_App.maps().map(map_)->maxZ() - 1) * 128)
+        return;
+    
+    int tx = aimedPt.tileX() * 256 + aimedPt.offX();
+    int ty = aimedPt.tileY() * 256 + aimedPt.offY();
+    int tz = aimedPt.tileZ() * 128 + aimedPt.offZ();
+    if (tz > (g_App.maps().map(map_)->maxZ() - 1) * 128)
+        return;
+
+    double d = 0;
+    d = sqrt((double)((tx - cx) * (tx - cx) + (ty - cy) * (ty - cy)
+        + (tz - cz) * (tz - cz)));
+
+    if (d == 0)
+        return;
+
+    double sx = (double) cx;
+    double sy = (double) cy;
+    double sz = (double) cz;
+
+    double maxr = (double) pWeaponClass->range();
+    if (d >= maxr) {
+
+        double dist_k = maxr / d;
+        tx = cx + (int)((tx - cx) * dist_k);
+        ty = cy + (int)((ty - cy) * dist_k);
+        tz = cz + (int)((tz - cz) * dist_k);
+
+        aimedPt.setTileXYZ(tx / 256, ty / 256, tz / 128);
+        aimedPt.setOffXYZ(tx % 256, ty % 256, tz % 128);
+    }
+
+
+    double accuracy = pWeaponClass->shotAcurracy();
+    // TODO Add imprecision and accuracy
+}
 
 void PedInstance::getAccuracy(double &base_acc)
 {
