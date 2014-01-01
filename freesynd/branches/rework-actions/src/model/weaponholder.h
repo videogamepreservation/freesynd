@@ -117,6 +117,11 @@ public:
 
 protected:
     /*!
+     * Called before a weapon is selected to check if weapon can be selected.
+     * \param wi The weapon to select
+     */
+    virtual bool canSelectWeapon(WeaponInstance *pNewWeapon) { return true;}
+    /*!
      * Called when a weapon has been deselected.
      * \param wi The deselected weapon
      */

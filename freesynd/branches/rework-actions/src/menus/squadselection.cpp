@@ -160,7 +160,7 @@ void SquadSelection::checkLeader(size_t agentNo) {
 /*!
  * Deselects all selected agents selected weapon.
  */
-void SquadSelection::deselect_all_weapons() {
+void SquadSelection::deselectAllWeapons() {
     for (SquadSelection::Iterator it = begin(); it != end(); ++it) {
             (*it)->deselectWeapon();
     }
@@ -172,7 +172,7 @@ void SquadSelection::deselect_all_weapons() {
  * \param weapon_idx The index in the leader inventory of the weapon to select.
  * \param apply_to_all In case of Medikit, all selected agents must use one.
  */
-void SquadSelection::select_weapon_from_leader(int weapon_idx, bool apply_to_all) {
+void SquadSelection::selectWeaponFromLeader(int weapon_idx, bool apply_to_all) {
     PedInstance *pLeader = leader();
     PedInstance::WeaponSelectCriteria pw_to_use;
     pw_to_use.desc = WeaponHolder::WeaponSelectCriteria::kCritPlayerSelection;
@@ -336,9 +336,6 @@ void SquadSelection::moveTo(MapTilePoint &mapPt, bool addAction) {
 void SquadSelection::shootAt(PathNode &aimedPt) {
     for (SquadSelection::Iterator it = begin(); it != end(); ++it) {
         PedInstance *pAgent = *it;
-        
-        if (pAgent->canAddShootAction()) {
-            pAgent->addActionShootAt(aimedPt);
-        }
+        pAgent->addActionShootAt(aimedPt);
     }
 }

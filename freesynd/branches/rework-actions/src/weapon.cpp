@@ -285,15 +285,6 @@ bool WeaponInstance::animate(int elapsed) {
             } else
                 ammo_remaining_ -= ammoused;
             return true;
-        } else if (main_type_ == Weapon::MediKit) {
-            if (owner_->health() != owner_->startHealth()) {
-                owner_->setHealth(owner_->startHealth());
-                ammo_remaining_ = 0;
-                ((PedInstance *)owner_)->selectNextWeapon();
-                weapon_used_time_ = 0;
-                deactivate();
-            }
-            return true;
         } else if (main_type_ == Weapon::TimeBomb) {
             int tm_left = elapsed;
             if (((processed_time_ / 750)
@@ -1217,18 +1208,15 @@ void WeaponInstance::deactivate() {
 }
 
 /*!
- * For shooting, we first record the context of the shooting (in ShotAttributes), then create
- * a shot (depending on the type of weapon used) and finally decrease ammo.
- * This method is used only for shooting weapons.
+ * Use weapon and decrease ammo.
+ * This method is used only for shooting weapons and Medikit.
  * \param pMission Mission data
  * \param aimedAt Where the player wants to shoot
  */
-void WeaponInstance::shoot(Mission *pMission, PathNode &aimedAt) {
-
-    ShotAttributes att;
-    fillShotAttributes(pMission, aimedAt, att);
-
-    if (getWeaponType() == Weapon::GaussGun) {
+void WeaponInstance::fire(Mission *pMission, ShotAttributes &att) {
+    if (getWeaponType() == Weapon::MediKit) {
+        att.pShooter->setHealth(att.pShooter->startHealth());
+    } else if (getWeaponType() == Weapon::GaussGun) {
         // TODO : complete;
     } else if (getWeaponType() == Weapon::Flamer) {
         // TODO : complete;

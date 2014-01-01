@@ -35,7 +35,7 @@
 #include "mapobject.h"
 #include "modowner.h"
 #include "gfx/spritemanager.h"
-#include "weaponholder.h"
+#include "model/weaponholder.h"
 #include "weapon.h"
 #include "ipastim.h"
 #include "ia/actions.h"
@@ -267,12 +267,12 @@ public:
     void addMovementAction(fs_actions::MovementAction *pAction, bool appendAction);
     //! Removes all ped's actions
     void destroyAllActions();
-    //! Removes ped's action of shooting
-    void destroyShootAction();
+    //! Removes ped's action of using weapon
+    void destroyUseWeaponAction();
     //! Execute the current action if any
     bool executeAction(int elapsed, Mission *pMission);
-    //! Execute a shoot if any
-    bool executeShootAction(int elapsed, Mission *pMission);
+    //! Execute a weapon action if any
+    bool executeUseWeaponAction(int elapsed, Mission *pMission);
     
     //! Adds action to walk to a given destination
     void addActionWalk(const PathNode &tpn, fs_actions::CreatOrigin origin, bool appendAction);
@@ -287,8 +287,12 @@ public:
     //! Adds action to drive vehicle to destination
     void addActionDriveVehicle(fs_actions::CreatOrigin origin, 
            VehicleInstance *pVehicle, PathNode &destination, bool appendAction);
+    //! Return true if ped can use a weapon
+    bool canAddUseWeaponAction(WeaponInstance *pWeapon = NULL);
     //! Adds action to shoot somewhere
     void addActionShootAt(const PathNode &aimedPt);
+    //!
+    void addActionUseMedikit();
 
     //*************************************
     // Movement management
@@ -313,12 +317,10 @@ public:
     //*************************************
     // Shoot & Damage management
     //*************************************
-    //! Return true if ped can shoot
-    bool canAddShootAction();
-    //! Return true if ped is currently shooting (ie there's a ShootAction)
-    bool isShooting() { return pShootAction_ != NULL; }
-    //! Make the ped stop shooting (mainly for automatic weapon)
-    void stopShooting();
+    //! Return true if ped is currently using a weapon (ie there's an active action)
+    bool isUsingWeapon() { return pUseWeaponAction_ != NULL; }
+    //! Make the ped stop using weapon (mainly for automatic weapon)
+    void stopUsingWeapon();
     //! Update the ped's shooting direction and target
     void updateShootingDirection(Mission *pMission, ShootableMapObject *pTarget, PathNode &shootPt);
     //! Adjust aimed point with user accuracy and weapon max range
@@ -867,6 +869,11 @@ public:
     IPAStim *intelligence_;
 protected:
     /*!
+     * Called before a weapon is selected to check if weapon can be selected.
+     * \param wi The weapon to select
+     */
+    bool canSelectWeapon(WeaponInstance *pNewWeapon);
+    /*!
      * Called when a weapon has been deselected.
      * \param wi The deselected weapon
      */
@@ -887,8 +894,8 @@ protected:
     fs_actions::Behaviour *pBehaviour_;
     /*! Current action*/
     fs_actions::MovementAction *currentAction_;
-    /*! Current action of shooting*/
-    fs_actions::ShootAction *pShootAction_;
+    /*! Current action of using a weapon.*/
+    fs_actions::UseWeaponAction *pUseWeaponAction_;
 
 
     uint32 action_grp_id_;

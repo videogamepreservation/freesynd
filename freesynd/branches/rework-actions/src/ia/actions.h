@@ -272,17 +272,26 @@ namespace fs_actions {
     };
 
     /*!
-     * This action is used to shoot. A ped can only have a single shoot action
+     * This action is for using a weapon. A ped can only have a single weapon action
      * at a given time.
      */
-    class ShootAction : public Action {
+    class UseWeaponAction : public Action {
+    public:
+        UseWeaponAction(CreatOrigin origin) : Action(origin) {};
+
+        //! Stop shooting (mainly used with AutomaticShootAction)
+        virtual void stop() {};
+    };
+
+    /*!
+     * This action is used to shoot with a one shot gun.
+     */
+    class ShootAction : public UseWeaponAction {
     public:
         ShootAction(CreatOrigin origin, PathNode &aimedAt);
 
         //! Entry point to execute the action
         bool execute(int elapsed, Mission *pMission, PedInstance *pPed);
-        //! Stop shooting (mainly used with AutomaticShootAction)
-        virtual void stop() {};
     protected:
         bool doShoot(int elapsed, Mission *pMission, PedInstance *pPed);
     protected:
@@ -303,6 +312,20 @@ namespace fs_actions {
     protected:
         bool doExecute(int elapsed, Mission *pMission, PedInstance *pPed);
 
+    };
+
+    /*!
+     * This action is for healing the owner with a medikit.
+     */
+    class UseMedikitAction : public UseWeaponAction {
+    public:
+        UseMedikitAction(CreatOrigin origin) : UseWeaponAction(origin) {}
+
+        //! Entry point to execute the action
+        bool execute(int elapsed, Mission *pMission, PedInstance *pPed);
+    protected:
+        //! Time to wait between two weapon actions
+        int timeToWait_;
     };
 
     /*!

@@ -194,6 +194,9 @@ void Mission::start()
         if (p->isAlive())
             p->createDefQueue();
     }
+
+    // temp
+    peds_[0]->setHealth(10);
 }
 
 /*! 

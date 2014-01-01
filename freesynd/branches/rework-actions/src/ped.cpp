@@ -366,7 +366,7 @@ bool PedInstance::animate2(int elapsed, Mission *mission) {
 
     // cannot shoot if ped is doing something exlusive
     if (currentAction_ == NULL || !currentAction_->isExclusive()) {
-        update |= executeShootAction(elapsed, mission);
+        update |= executeUseWeaponAction(elapsed, mission);
     }
 
     if (updateAnimation(elapsed)) {
@@ -375,9 +375,9 @@ bool PedInstance::animate2(int elapsed, Mission *mission) {
             // so continue action
             currentAction_->setRunning();
         }
-        if (pShootAction_ && pShootAction_->isWaitingForAnimation()) {
+        if (pUseWeaponAction_ && pUseWeaponAction_->isWaitingForAnimation()) {
             // so continue action
-            pShootAction_->setRunning();
+            pUseWeaponAction_->setRunning();
         }
     }
 
@@ -416,15 +416,19 @@ bool PedInstance::executeAction(int elapsed, Mission *pMission) {
 /*!
  * Executes a shoot action.
  */
-bool PedInstance::executeShootAction(int elapsed, Mission *pMission) {
+bool PedInstance::executeUseWeaponAction(int elapsed, Mission *pMission) {
     bool updated = false;
-    if(pShootAction_ != NULL) {
+    if(pUseWeaponAction_ != NULL) {
         // execute action
-        updated |= pShootAction_->execute(elapsed, pMission, this);
-        if (pShootAction_->isFinished()) {
+        updated |= pUseWeaponAction_->execute(elapsed, pMission, this);
+        if (pUseWeaponAction_->isFinished()) {
+            // change weapon if empty
+            if (selectedWeapon()->ammoRemaining() == 0) {
+                selectNextWeapon();
+            }
             // erase action
-            delete pShootAction_;
-            pShootAction_ = NULL;
+            delete pUseWeaponAction_;
+            pUseWeaponAction_ = NULL;
         }
     }
 
@@ -433,29 +437,31 @@ bool PedInstance::executeShootAction(int elapsed, Mission *pMission) {
 
 /*!
  * Return true if :
- * - is not doing something that prevents him from shooting
- * - is not already shooting
+ * - is not doing something that prevents him from using weapon
+ * - is not already using a weapon
  * - has a weapon in hand
- * - weapon is for shooting (ie not a scanner for example)
+ * - weapon is usable (ie a shooting weapon or a medikit)
  */
-bool PedInstance::canAddShootAction() {
+bool PedInstance::canAddUseWeaponAction(WeaponInstance *pWeapon) {
     if (currentAction_ != NULL && currentAction_->isExclusive()) {
         return false;
     }
 
-    if (pShootAction_ != NULL) {
+    if (pUseWeaponAction_ != NULL) {
         return false;
     }
 
-    WeaponInstance *pWi = selectedWeapon();
-    return (pWi != NULL && pWi->canShoot() && pWi->ammoRemaining() > 0);
+    WeaponInstance *pWi = pWeapon != NULL ? pWeapon : selectedWeapon();
+    return (pWi != NULL && 
+            (pWi->canShoot() || pWi->getWeaponType() == Weapon::MediKit) &&
+            pWi->ammoRemaining() > 0);
 }
 
 /*!
- * Terminate the current shoot action.
+ * Terminate the current action of using weapon.
  */
-void PedInstance::stopShooting() {
-    pShootAction_->stop();
+void PedInstance::stopUsingWeapon() {
+    pUseWeaponAction_->stop();
 }
 
 /*!
@@ -2079,7 +2085,7 @@ PedInstance::PedInstance(Ped *ped, int m) : ShootableMovableMapObject(m),
     // Todo : adds a behaviour for the type of ped
     pBehaviour_ = new fs_actions::NopeBehaviour();
     currentAction_ = NULL;
-    pShootAction_ = NULL;
+    pUseWeaponAction_ = NULL;
 }
 
 PedInstance::~PedInstance()
@@ -2097,7 +2103,7 @@ PedInstance::~PedInstance()
     delete pBehaviour_;
     pBehaviour_ = NULL;
     destroyAllActions();
-    destroyShootAction();
+    destroyUseWeaponAction();
 }
 
 /*!
@@ -2274,6 +2280,20 @@ bool PedInstance::inSightRange(MapObject *t) {
 }
 
 /*!
+ * Called before a weapon is selected to check if weapon can be selected.
+ * \param wi The weapon to select
+ */
+bool PedInstance::canSelectWeapon(WeaponInstance *pNewWeapon) {
+    if (pNewWeapon->getWeaponType() == Weapon::MediKit) {
+        // we cas use medikit only if ped is hurt
+        return health() != startHealth() &&
+            canAddUseWeaponAction(pNewWeapon);
+    }
+
+    return true;
+}
+
+/*!
  * Called when a weapon has been deselected.
  * \param wi The deselected weapon
  */
@@ -2317,7 +2337,7 @@ void PedInstance::handleWeaponSelected(WeaponInstance * wi) {
         addEmulatedGroupDef(4, og_dmPolice);
         break;
     case Weapon::MediKit:
-        wi->activate();
+        addActionUseMedikit();
         break;
     }
 }

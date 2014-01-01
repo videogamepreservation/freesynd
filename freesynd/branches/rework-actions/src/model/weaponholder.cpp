@@ -79,12 +79,15 @@ void WeaponHolder::removeWeaponInstance(WeaponInstance *w) {
  */
 void WeaponHolder::selectWeapon(uint8 n) {
     assert(n < weapons_.size());
-    // First deselect current weapon
-    deselectWeapon();
+    WeaponInstance *pNewWeapon = weapons_[n];
+    if (canSelectWeapon(pNewWeapon)) {
+        // First deselect current weapon
+        deselectWeapon();
 
-    selected_weapon_ = n;
-    handleWeaponSelected(weapons_[selected_weapon_]);
-    updtPreferedWeapon();
+        selected_weapon_ = n;
+        handleWeaponSelected(pNewWeapon);
+        updtPreferedWeapon();
+    }
 }
 
 /*!

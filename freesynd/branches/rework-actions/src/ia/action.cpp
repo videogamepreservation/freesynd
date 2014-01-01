@@ -316,7 +316,7 @@ bool DriveVehicleAction::doExecute(int elapsed, Mission *pMission, PedInstance *
 }
 
 ShootAction::ShootAction(CreatOrigin origin, PathNode &aimedAt) : 
-    Action(origin) {
+    UseWeaponAction(origin) {
         aimedAt_ = aimedAt;
 }
 
@@ -357,7 +357,9 @@ bool ShootAction::execute(int elapsed, Mission *pMission, PedInstance *pPed) {
 bool ShootAction::doShoot(int elapsed, Mission *pMission, PedInstance *pPed) {
     if (status_ == kActStatusRunning) {
         WeaponInstance *pWeapon = pPed->selectedWeapon();
-        pWeapon->shoot(pMission, aimedAt_);
+        ShotAttributes att;
+        pWeapon->fillShotAttributes(pMission, aimedAt_, att);
+        pWeapon->fire(pMission, att);
         // Shooting animation is finished
         pPed->leaveState(PedInstance::pa_smFiring);
 
@@ -389,4 +391,42 @@ bool AutomaticShootAction::doExecute(int elapsed, Mission *pMission, PedInstance
 
 void AutomaticShootAction::stop() {
     setSucceeded();
+}
+
+/*!
+ * Execute the shoot action.
+ * When action starts, it sets the firing state (and animation) then
+ * waits for the end of animation.
+ * \param elapsed Time since last frame.
+ * \param pMission Mission data
+ * \param pPed The ped executing the action.
+ * \return true to redraw
+ */
+bool UseMedikitAction::execute(int elapsed, Mission *pMission, PedInstance *pPed) {
+    bool update = false;
+    if (status_ == kActStatusNotStarted) {
+        // set time before completing action
+        WeaponInstance *pWeapon = pPed->selectedWeapon();
+        status_ = kActStatusWaitForTime;
+        timeToWait_ = pPed->getTimeBetweenShoots(pWeapon);
+
+        if (pWeapon->getWeaponType() != Weapon::MediKit) {
+            setFailed();
+        } else {
+            pWeapon->playSound();
+            ShotAttributes att;
+            att.pShooter = pPed;
+            pWeapon->fire(pMission, att);
+            update = true;
+        }
+    } else if (status_ == kActStatusWaitForTime) {
+        timeToWait_ -= elapsed;
+        if (timeToWait_ <= 0) {
+            // time is reached so action can finish
+            setSucceeded();
+            update = true;
+        }
+    }
+
+    return update;
 }

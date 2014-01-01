@@ -58,12 +58,12 @@ void PedInstance::destroyAllActions() {
 }
 
 /*!
- * Removes the current shoot action.
+ * Removes the current use weapon action.
  */
-void PedInstance::destroyShootAction() {
-    if (pShootAction_ != NULL) {
-        delete pShootAction_;
-        pShootAction_ = NULL;
+void PedInstance::destroyUseWeaponAction() {
+    if (pUseWeaponAction_ != NULL) {
+        delete pUseWeaponAction_;
+        pUseWeaponAction_ = NULL;
     }
 }
 
@@ -133,16 +133,23 @@ void PedInstance::addActionDriveVehicle(fs_actions::CreatOrigin origin,
  * \param aimedPt Where the ped must shoot
  */
 void PedInstance::addActionShootAt(const PathNode &aimedPt) {
-    if (pShootAction_ == NULL) {
+    if (canAddUseWeaponAction()) {
         // adds precision to the shoot
         PathNode adjAimedPt = aimedPt;
         adjustAimedPtWithRangeAndAccuracy(selectedWeapon()->getWeaponClass(), adjAimedPt);
         if (selectedWeapon()->getWeaponClass()->isAutomatic()) {
-            pShootAction_ = new fs_actions::AutomaticShootAction(fs_actions::kOrigUser, adjAimedPt);
+            pUseWeaponAction_ = new fs_actions::AutomaticShootAction(fs_actions::kOrigUser, adjAimedPt);
         } else {
-            pShootAction_ = new fs_actions::ShootAction(fs_actions::kOrigUser, adjAimedPt);
+            pUseWeaponAction_ = new fs_actions::ShootAction(fs_actions::kOrigUser, adjAimedPt);
         }
     }
+}
+
+/*!
+ * Adds an action to use the medikit on the owner.
+ */
+void PedInstance::addActionUseMedikit() {
+    pUseWeaponAction_ = new fs_actions::UseMedikitAction(fs_actions::kOrigUser);
 }
 
 void PedInstance::createActQStanding(actionQueueGroupType &as) {

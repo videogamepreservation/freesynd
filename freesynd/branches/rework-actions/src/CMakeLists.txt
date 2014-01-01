@@ -117,7 +117,6 @@ set(HEADERS
 	vehicle.h
 	version.h
 	weapon.h
-	weaponholder.h
 	weaponmanager.h
 	core/gameevent.h
 	core/squad.h
@@ -139,6 +138,7 @@ set(HEADERS
 	model/objectivedesc.h
 	model/leveldata.h
 	model/shot.h
+	model/weaponholder.h
 	menus/agentselectorrenderer.h
 	menus/maprenderer.h
 	menus/minimaprenderer.h
