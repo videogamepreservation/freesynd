@@ -749,7 +749,7 @@ void SelectMenu::handleAction(const int actionId, void *ctx, const int modKeys)
                     if (selected && selected->numWeapons() < 8
                         && g_Session.getMoney() >= pSelectedWeap_->cost()) {
                         g_Session.setMoney(g_Session.getMoney() - pSelectedWeap_->cost());
-                        selected->addWeapon(pSelectedWeap_->createInstance());
+                        selected->addWeapon(WeaponInstance::createInstance(pSelectedWeap_));
                         getStatic(moneyTxtId_)->setTextFormated("%d", g_Session.getMoney());
                     }
                 }
@@ -758,7 +758,7 @@ void SelectMenu::handleAction(const int actionId, void *ctx, const int modKeys)
                 if (selected && selected->numWeapons() < 8
                     && g_Session.getMoney() >= pSelectedWeap_->cost()) {
                     g_Session.setMoney(g_Session.getMoney() - pSelectedWeap_->cost());
-                    selected->addWeapon(pSelectedWeap_->createInstance());
+                    selected->addWeapon(WeaponInstance::createInstance(pSelectedWeap_));
                     getStatic(moneyTxtId_)->setTextFormated("%d", g_Session.getMoney());
                 }
             }

@@ -35,15 +35,11 @@
 #include "utils/configfile.h"
 #include "model/shot.h"
 
-class WeaponInstance;
-
 /*!
  * Weapon class.
  */
 class Weapon {
 public:
-
-    WeaponInstance *createInstance();
     enum WeaponType {
         Unknown = 0,
         Pistol = 1,
@@ -74,6 +70,20 @@ public:
         Gauss_Anim,
         Shotgun_Anim
     } WeaponAnimIndex;
+
+    /*!
+     * This structure holds animation ids of impacts for a weapon.
+     */
+    struct ImpactAnims {
+        //! Animation played when impact is on the ground.
+        int groundHit;
+        //! Animation played when impact is on a living object.
+        int objectHit;
+        int trace_anim;
+        /*! if weapon can do range damage this is used for range definition
+         * with animation.*/
+        int rd_anim;
+    };
 
     Weapon(WeaponType w_type, ConfigFile &conf);
 
@@ -195,20 +205,10 @@ public:
         ShootableMapObject *target_object;
     }ShotDesc;
 
-    typedef struct {
-        // when weapon hits something other then object, ground
-        int hit_anim;
-        int obj_hit_anim;
-        int trace_anim;
-        // if weapon can do range damage this is used for range definition
-        // with animation
-        int rd_anim;
-    }ad_HitAnims;
-
     // (WeaponShotPropertyType)
     unsigned int shotProperty() { return shot_property_; }
 
-    ad_HitAnims * anims() { return &anims_; }
+    ImpactAnims * impactAnims() { return &impactAnims_; }
     int rangeDmg() { return range_dmg_; }
     double shotAngle() { return shot_angle_; }
     double shotAcurracy() { return shot_accuracy_; }
@@ -239,12 +239,9 @@ protected:
     /*! The price to reload the weapon.*/
     int ammo_cost_;
     int ammo_, range_, dmg_per_shot_;
-    int anim_;
     int rank_;  //!> weapon rank
     WeaponType type_;
     MapObject::DamageType dmg_type_;
-    WeaponAnimIndex idx_;
-    snd::InGameSample sample_;
     int ammo_per_shot_;
     //! time weapon uses to do a single shot
     int time_for_shot_;
@@ -254,7 +251,6 @@ protected:
     bool submittedToSearch_;
     //WeaponShotPropertyType
     uint32 shot_property_;
-    ad_HitAnims anims_;
     int range_dmg_;
     //! some weapons have wider shot
     double shot_angle_;
@@ -266,6 +262,13 @@ protected:
     int shots_per_ammo_;
     //! The weight of a weapon influences the agent's speed
     int weight_;
+    //!
+    WeaponAnimIndex idx_;
+    int anim_;
+    //! Set of ids of impacts animation
+    ImpactAnims impactAnims_;
+    //! Sound of weapon
+    snd::InGameSample sample_;
 };
 
 class PedInstance;
@@ -306,6 +309,9 @@ protected:
  */
 class WeaponInstance : public ShootableMapObject, public ShotClass{
 public:
+    //! Creates a instance for the given weapon class
+    static WeaponInstance *createInstance(Weapon *pWeaponClass);
+
     WeaponInstance(Weapon *w);
 
     int ammoRemaining() { return ammo_remaining_; }
@@ -417,7 +423,7 @@ protected:
 class ProjectileShot: public ShotClass {
 public:
     ProjectileShot(toDefineXYZ &cp, Weapon::ShotDesc & sd, int d_range,
-        Weapon::ad_HitAnims *panims, ShootableMapObject * ignrd_obj = NULL,
+        Weapon::ImpactAnims *panims, ShootableMapObject * ignrd_obj = NULL,
         int range_max = 1, int shot_speed = 0);
     ~ProjectileShot() {}
     bool animate(int elapsed, Mission *m);
@@ -439,6 +445,6 @@ protected:
     double inc_x_;
     double inc_y_;
     double inc_z_;
-    Weapon::ad_HitAnims anims_;
+    Weapon::ImpactAnims anims_;
 };
 #endif

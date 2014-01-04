@@ -460,7 +460,7 @@ WeaponInstance * MissionManager::create_weapon_instance(const LevelData::Weapons
 
     Weapon *pWeapon = g_gameCtrl.weapons().getWeapon(wType);
     if (pWeapon) {
-        WeaponInstance *wi = pWeapon->createInstance();
+        WeaponInstance *wi = WeaponInstance::createInstance(pWeapon);
         wi->setPosition(gamdata.mapposx[1], gamdata.mapposy[1],
             READ_LE_UINT16(gamdata.mapposz) >> 7, gamdata.mapposx[0],
             gamdata.mapposy[0], gamdata.mapposz[0] & 0x7F);
@@ -749,7 +749,7 @@ void MissionManager::createPeds(const LevelData::LevelDataAll &level_data, DataI
                         if (v)
                             p->createActQUsingCar(as, &pn, v);
                         else
-                            p->createActQWalking(as, &pn, NULL, p->getDir(), 0, true);
+                            p->createActQWalking(as, &pn, NULL, p->direction(), 0, true);
                         //p->createActQWalking(as, &pn, NULL, -1);
                         if ((!not_in_vehicle) && offset_nxt == 0)
                             p->createActQResetActionQueue(as);

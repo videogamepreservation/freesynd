@@ -2655,8 +2655,10 @@ bool PedInstance::handleDamage(ShootableMapObject::DamageInflictType *d) {
         return true;
     }
 
-    if (d->ddir != -1)
-        dir_ = (d->ddir + 128) % 256;
+    // Change direction due to impact
+    toDefineXYZ locW;
+    convertPosToXYZ(&locW);
+    setDirection(d->originLocW.x - locW.x, d->originLocW.y - locW.y);
 
     if (health_ <= 0) {
         health_ = 0;

@@ -477,38 +477,38 @@ void App::cheatEquipFancyWeapons() {
         g_gameCtrl.agents().agent(i)->removeAllWeapons();
 #ifdef _DEBUG
         g_gameCtrl.agents().agent(i)->addWeapon(
-            g_gameCtrl.weapons().getWeapon(Weapon::Minigun)->createInstance());
+            WeaponInstance::createInstance(g_gameCtrl.weapons().getWeapon(Weapon::Minigun)));
         g_gameCtrl.agents().agent(i)->addWeapon(
-            g_gameCtrl.weapons().getWeapon(Weapon::TimeBomb)->createInstance());
+            WeaponInstance::createInstance(g_gameCtrl.weapons().getWeapon(Weapon::TimeBomb)));
         g_gameCtrl.agents().agent(i)->addWeapon(
-            g_gameCtrl.weapons().getWeapon(Weapon::GaussGun)->createInstance());
+            WeaponInstance::createInstance(g_gameCtrl.weapons().getWeapon(Weapon::GaussGun)));
         g_gameCtrl.agents().agent(i)->addWeapon(
-            g_gameCtrl.weapons().getWeapon(Weapon::Flamer)->createInstance());
+            WeaponInstance::createInstance(g_gameCtrl.weapons().getWeapon(Weapon::Flamer)));
         g_gameCtrl.agents().agent(i)->addWeapon(
-            g_gameCtrl.weapons().getWeapon(Weapon::Uzi)->createInstance());
+            WeaponInstance::createInstance(g_gameCtrl.weapons().getWeapon(Weapon::Uzi)));
         g_gameCtrl.agents().agent(i)->addWeapon(
-            g_gameCtrl.weapons().getWeapon(Weapon::Persuadatron)->createInstance());
+            WeaponInstance::createInstance(g_gameCtrl.weapons().getWeapon(Weapon::Persuadatron)));
         g_gameCtrl.agents().agent(i)->addWeapon(
-            g_gameCtrl.weapons().getWeapon(Weapon::Laser)->createInstance());
+            WeaponInstance::createInstance(g_gameCtrl.weapons().getWeapon(Weapon::Laser)));
         g_gameCtrl.agents().agent(i)->addWeapon(
-            g_gameCtrl.weapons().getWeapon(Weapon::AccessCard)->createInstance());
+            WeaponInstance::createInstance(g_gameCtrl.weapons().getWeapon(Weapon::AccessCard)));
 #else
         g_gameCtrl.agents().agent(i)->addWeapon(
-                g_gameCtrl.weapons().getWeapon(Weapon::Minigun)->createInstance());
+                WeaponInstance::createInstance(g_gameCtrl.weapons().getWeapon(Weapon::Minigun)));
         g_gameCtrl.agents().agent(i)->addWeapon(
-                g_gameCtrl.weapons().getWeapon(Weapon::Minigun)->createInstance());
+                WeaponInstance::createInstance(g_gameCtrl.weapons().getWeapon(Weapon::Minigun)));
         g_gameCtrl.agents().agent(i)->addWeapon(
-                g_gameCtrl.weapons().getWeapon(Weapon::Persuadatron)->createInstance());
+                WeaponInstance::createInstance(g_gameCtrl.weapons().getWeapon(Weapon::Persuadatron)));
         g_gameCtrl.agents().agent(i)->addWeapon(
-                g_gameCtrl.weapons().getWeapon(Weapon::TimeBomb)->createInstance());
+                WeaponInstance::createInstance(g_gameCtrl.weapons().getWeapon(Weapon::TimeBomb)));
         g_gameCtrl.agents().agent(i)->addWeapon(
-                g_gameCtrl.weapons().getWeapon(Weapon::EnergyShield)->createInstance());
+                WeaponInstance::createInstance(g_gameCtrl.weapons().getWeapon(Weapon::EnergyShield)));
         g_gameCtrl.agents().agent(i)->addWeapon(
-                g_gameCtrl.weapons().getWeapon(Weapon::EnergyShield)->createInstance());
+                WeaponInstance::createInstance(g_gameCtrl.weapons().getWeapon(Weapon::EnergyShield)));
         g_gameCtrl.agents().agent(i)->addWeapon(
-                g_gameCtrl.weapons().getWeapon(Weapon::Laser)->createInstance());
+                WeaponInstance::createInstance(g_gameCtrl.weapons().getWeapon(Weapon::Laser)));
         g_gameCtrl.agents().agent(i)->addWeapon(
-                g_gameCtrl.weapons().getWeapon(Weapon::Laser)->createInstance());
+                WeaponInstance::createInstance(g_gameCtrl.weapons().getWeapon(Weapon::Laser)));
 #endif
         }
     }

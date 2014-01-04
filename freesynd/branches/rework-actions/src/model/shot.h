@@ -38,12 +38,10 @@ class WeaponInstance;
 class PedInstance;
 
 struct ShotAttributes {
-    /** Who made this shot.*/
+    /*! Who made this shot.*/
     PedInstance *pShooter;
-    /** weapon used to fire the shot.*/
+    /*! weapon used to fire the shot.*/
     WeaponInstance *pWeapon;
-    //ShootableMapObject *pTarget;
-    int hitAnimId;
     PathNode impactLoc;
     ShootableMapObject::DamageInflictType damage;
 };
@@ -85,6 +83,8 @@ private:
     void getAllShootablesWithinRange(Mission *pMission, toDefineXYZ &originLocW, std::vector<ShootableMapObject *> &objInRangeLst);
     //!
     ShootableMapObject *checkHitTarget(std::vector<ShootableMapObject *> objInRangeLst, toDefineXYZ &originLocW, PathNode &impactLocT);
+    //!
+    void createImpactAnimation(Mission *pMission, ShootableMapObject * pTargetHit, PathNode &impactLocT);
 };
 
 #endif // MODEL_SHOT_H_

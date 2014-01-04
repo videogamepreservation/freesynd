@@ -631,14 +631,6 @@ void GameplayMenu::handleMouseMotion(int x, int y, int state, const int modKeys)
     }
 
     if (target_) {
-#if 1
-#ifdef _DEBUG
-        if (modKeys & KMD_ALT) {
-            printf("target id  : %i == majorType : %i\n",
-                target_->getDebugID(), target_->majorType());
-        }
-#endif
-#endif
         if (target_->majorType() == MapObject::mjt_Ped || 
             target_->majorType() == MapObject::mjt_Vehicle) {
             if (inrange)
@@ -788,7 +780,13 @@ void GameplayMenu::handleClickOnMap(int x, int y, int button, const int modKeys)
                     world_y_ + y);
 #ifdef _DEBUG
     if ((modKeys & KMD_ALT) != 0) {
-        printf("Tile x:%d, y:%d, z:%d, ox:%d, oy:%d\n", mapPt.tx, mapPt.ty, mapPt.tz, mapPt.ox, mapPt.oy);
+        printf("Tile x:%d, y:%d, z:%d, ox:%d, oy:%d\n", 
+            mapPt.tx, mapPt.ty, mapPt.tz, mapPt.ox, mapPt.oy);
+
+        if (target_) {
+            printf("target id  : %i == majorType : %i\n",
+                target_->getDebugID(), target_->majorType());
+        }
         return;
     }
 #endif //_DEBUG

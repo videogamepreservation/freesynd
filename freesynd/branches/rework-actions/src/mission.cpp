@@ -174,13 +174,13 @@ void Mission::start()
             int index_give = indx_best;
             if (indx_second != -1 && (rand() & 0xFF) > 200)
                 index_give = indx_second;
-            WeaponInstance *wi = wpns[index_give]->createInstance();
+            WeaponInstance *wi = WeaponInstance::createInstance(wpns[index_give]);
             p->addWeapon(wi);
             wi->setOwner(p);
             wi->setIsIgnored(true);
             weapons_.push_back(wi);
             if (bomb) {
-                WeaponInstance *w_bomb = bomb->createInstance();
+                WeaponInstance *w_bomb = WeaponInstance::createInstance(bomb);
                 p->addWeapon(w_bomb);
                 w_bomb->setOwner(p);
                 w_bomb->setIsIgnored(true);
@@ -194,9 +194,6 @@ void Mission::start()
         if (p->isAlive())
             p->createDefQueue();
     }
-
-    // temp
-    peds_[0]->setHealth(10);
 }
 
 /*! 
@@ -2561,9 +2558,12 @@ void Mission::blockerExists(toDefineXYZ * startXYZ, toDefineXYZ * endXYZ,
 
 /*!
 * \return mask where bits are:
-* 0b - target in range(1); 1b - blocker is object, "t" is set(2)
-* 2b - blocker object, "pn" is set(4), 3b - reachable point set,
-* 4b - blocker tile, "pn" is set(16), 5b - out of visible reach(32)
+* - 0b : target in range(1) 
+* - 1b : blocker is object, "t" is set(2)
+* - 2b : blocker object, "pn" is set(4)
+* - 3b : reachable point set (8)
+* - 4b : blocker tile, "pn" is set(16)
+* - 5b : out of visible reach(32)
 * NOTE: only if "pn" or "t" are not null, variables are set
 */
 uint8 Mission::inRangeCPos(toDefineXYZ * cp, ShootableMapObject ** t,

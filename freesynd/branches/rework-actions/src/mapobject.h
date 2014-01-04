@@ -223,7 +223,7 @@ public:
     void setDirection(int dir);
     void setDirection(int posx, int posy, int * dir = NULL);
 
-    int getDir() { return dir_;}
+    int direction() { return dir_;}
     int getDirection(int snum = 8);
 
     void setTimeShowAnim(int t) {
@@ -374,6 +374,8 @@ public:
         int dvalue;
         //! direction damage comes from, should be angle 256 degree based
         int ddir;
+        //! Location of origin of shot
+        toDefineXYZ originLocW;
         //! The object that inflicted the damage
         ShootableMapObject * d_owner;
     };

@@ -147,7 +147,7 @@ void AgentManager::reset(bool onlyWomen) {
     // Then recreate the first 8 available agents
     for (size_t i = 0; i < 8; i++) {
         Agent * pAgent = new Agent(g_AgentNames[nextName_], onlyWomen ? true : ((i % 2) == 0));
-        pAgent->addWeapon(pWeaponManager_->getWeapon(Weapon::Pistol)->createInstance());
+        pAgent->addWeapon(WeaponInstance::createInstance(pWeaponManager_->getWeapon(Weapon::Pistol)));
         
         agents_.setAt(i, pAgent);
         // Adds the first 4 agents to the squad
@@ -284,7 +284,7 @@ bool AgentManager::loadFromFile(PortableFile &infile, const FormatVersion& v) {
                         wt = Weapon::Unknown;
                 }
                 if (wt != Weapon::Unknown) {
-                    WeaponInstance *pInst = pWeaponManager_->getWeapon(wt)->createInstance();
+                    WeaponInstance *pInst = WeaponInstance::createInstance(pWeaponManager_->getWeapon(wt));
                     int ammo = infile.read32();
                     pInst->setAmmoRemaining(ammo);
                     pAgent->addWeapon(pInst);

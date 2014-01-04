@@ -49,140 +49,140 @@ Weapon::Weapon(WeaponType w_type, ConfigFile &conf)
             sample_ = snd::PISTOL;
             dmg_type_ = MapObject::dmg_Bullet;
             shot_property_ = Weapon::wspt_Pistol;
-            anims_.hit_anim = SFXObject::sfxt_BulletHit;
-            anims_.obj_hit_anim = SFXObject::sfxt_BulletHit;
-            anims_.trace_anim = SFXObject::sfxt_Unknown;
-            anims_.rd_anim = SFXObject::sfxt_Unknown; 
+            impactAnims_.groundHit = SFXObject::sfxt_BulletHit;
+            impactAnims_.objectHit = SFXObject::sfxt_BulletHit;
+            impactAnims_.trace_anim = SFXObject::sfxt_Unknown;
+            impactAnims_.rd_anim = SFXObject::sfxt_Unknown; 
             break;
         case Weapon::Minigun:
             idx_ = Weapon::Minigun_Anim;
             sample_ = snd::MINIGUN;
             dmg_type_ = MapObject::dmg_Bullet;
             shot_property_ = Weapon::wspt_Minigun;
-            anims_.hit_anim = SFXObject::sfxt_BulletHit;
-            anims_.obj_hit_anim = SFXObject::sfxt_BulletHit;
-            anims_.trace_anim = SFXObject::sfxt_Unknown;
-            anims_.rd_anim = SFXObject::sfxt_Unknown; 
+            impactAnims_.groundHit = SFXObject::sfxt_BulletHit;
+            impactAnims_.objectHit = SFXObject::sfxt_BulletHit;
+            impactAnims_.trace_anim = SFXObject::sfxt_Unknown;
+            impactAnims_.rd_anim = SFXObject::sfxt_Unknown; 
             break;
         case Weapon::Flamer:
             idx_ = Weapon::Flamer_Anim;
             sample_ = snd::FLAME;
             dmg_type_ = MapObject::dmg_Burn;
             shot_property_ = Weapon::wspt_Flamer;
-            anims_.hit_anim = SFXObject::sfxt_FlamerFire;
-            anims_.obj_hit_anim = SFXObject::sfxt_FlamerFire;
-            anims_.trace_anim = SFXObject::sfxt_FlamerFire;
-            anims_.rd_anim = SFXObject::sfxt_Unknown; 
+            impactAnims_.groundHit = SFXObject::sfxt_FlamerFire;
+            impactAnims_.objectHit = SFXObject::sfxt_FlamerFire;
+            impactAnims_.trace_anim = SFXObject::sfxt_FlamerFire;
+            impactAnims_.rd_anim = SFXObject::sfxt_Unknown; 
             break;
         case Weapon::LongRange:
             idx_ = Weapon::LongRange_Anim;
             sample_ = snd::LONGRANGE;
             dmg_type_ = MapObject::dmg_Bullet;
             shot_property_ = Weapon::wspt_LongRange;
-            anims_.hit_anim = SFXObject::sfxt_BulletHit;
-            anims_.obj_hit_anim = SFXObject::sfxt_BulletHit;
-            anims_.trace_anim = SFXObject::sfxt_Unknown;
-            anims_.rd_anim = SFXObject::sfxt_Unknown; 
+            impactAnims_.groundHit = SFXObject::sfxt_BulletHit;
+            impactAnims_.objectHit = SFXObject::sfxt_BulletHit;
+            impactAnims_.trace_anim = SFXObject::sfxt_Unknown;
+            impactAnims_.rd_anim = SFXObject::sfxt_Unknown; 
             break;
         case Weapon::EnergyShield:
             idx_ = Weapon::EnergyShield_Anim;
             sample_ = snd::NO_SOUND;
             dmg_type_ = MapObject::dmg_None;
             shot_property_ = Weapon::wspt_EnergyShield;
-            anims_.hit_anim = SFXObject::sfxt_Unknown;
-            anims_.obj_hit_anim = SFXObject::sfxt_Unknown;
-            anims_.trace_anim = SFXObject::sfxt_Unknown;
-            anims_.rd_anim = SFXObject::sfxt_Unknown; 
+            impactAnims_.groundHit = SFXObject::sfxt_Unknown;
+            impactAnims_.objectHit = SFXObject::sfxt_Unknown;
+            impactAnims_.trace_anim = SFXObject::sfxt_Unknown;
+            impactAnims_.rd_anim = SFXObject::sfxt_Unknown; 
             break;
         case Weapon::Uzi:
             idx_ = Weapon::Uzi_Anim;
             sample_ = snd::UZI;
             dmg_type_ = MapObject::dmg_Bullet;
             shot_property_ = Weapon::wspt_Uzi;
-            anims_.hit_anim = SFXObject::sfxt_BulletHit;
-            anims_.obj_hit_anim = SFXObject::sfxt_BulletHit;
-            anims_.trace_anim = SFXObject::sfxt_Unknown;
-            anims_.rd_anim = SFXObject::sfxt_Unknown; 
+            impactAnims_.groundHit = SFXObject::sfxt_BulletHit;
+            impactAnims_.objectHit = SFXObject::sfxt_BulletHit;
+            impactAnims_.trace_anim = SFXObject::sfxt_Unknown;
+            impactAnims_.rd_anim = SFXObject::sfxt_Unknown; 
             break;
         case Weapon::Laser:
             idx_ = Weapon::Laser_Anim;
             sample_ = snd::LASER;
             dmg_type_ = MapObject::dmg_Laser;
             shot_property_ = Weapon::wspt_Laser;
-            anims_.hit_anim = SFXObject::sfxt_Fire_LongSmoke;
-            anims_.obj_hit_anim = SFXObject::sfxt_Unknown;
-            anims_.trace_anim = SFXObject::sfxt_Unknown;
-            anims_.rd_anim = SFXObject::sfxt_Unknown; 
+            impactAnims_.groundHit = SFXObject::sfxt_Fire_LongSmoke;
+            impactAnims_.objectHit = SFXObject::sfxt_Unknown;
+            impactAnims_.trace_anim = SFXObject::sfxt_Unknown;
+            impactAnims_.rd_anim = SFXObject::sfxt_Unknown; 
             break;
         case Weapon::GaussGun:
             idx_ = Weapon::Gauss_Anim;
             sample_ = snd::GAUSSGUN;
             dmg_type_ = MapObject::dmg_Explosion;
             shot_property_ = Weapon::wspt_GaussGun;
-            anims_.hit_anim = SFXObject::sfxt_ExplosionFire;
-            anims_.obj_hit_anim = SFXObject::sfxt_ExplosionBall;
-            anims_.trace_anim = SFXObject::sfxt_Smoke;
-            anims_.rd_anim = SFXObject::sfxt_LargeFire; 
+            impactAnims_.groundHit = SFXObject::sfxt_ExplosionFire;
+            impactAnims_.objectHit = SFXObject::sfxt_ExplosionBall;
+            impactAnims_.trace_anim = SFXObject::sfxt_Smoke;
+            impactAnims_.rd_anim = SFXObject::sfxt_LargeFire; 
             break;
         case Weapon::Shotgun:
             idx_ = Weapon::Shotgun_Anim;
             sample_ = snd::SHOTGUN;
             dmg_type_ = MapObject::dmg_Bullet;
             shot_property_ = Weapon::wspt_Shotgun;
-            anims_.hit_anim = SFXObject::sfxt_BulletHit;
-            anims_.obj_hit_anim = SFXObject::sfxt_BulletHit;
-            anims_.trace_anim = SFXObject::sfxt_Unknown;
-            anims_.rd_anim = SFXObject::sfxt_Unknown; 
+            impactAnims_.groundHit = SFXObject::sfxt_BulletHit;
+            impactAnims_.objectHit = SFXObject::sfxt_BulletHit;
+            impactAnims_.trace_anim = SFXObject::sfxt_Unknown;
+            impactAnims_.rd_anim = SFXObject::sfxt_Unknown; 
             break;
         case Weapon::MediKit:
             idx_ = Weapon::Unarmed_Anim;
             sample_ = snd::NO_SOUND;
             dmg_type_ = MapObject::dmg_Heal;
             shot_property_ = Weapon::wspt_MediKit;
-            anims_.hit_anim = SFXObject::sfxt_Unknown;
-            anims_.obj_hit_anim = SFXObject::sfxt_Unknown;
-            anims_.trace_anim = SFXObject::sfxt_Unknown;
-            anims_.rd_anim = SFXObject::sfxt_Unknown; 
+            impactAnims_.groundHit = SFXObject::sfxt_Unknown;
+            impactAnims_.objectHit = SFXObject::sfxt_Unknown;
+            impactAnims_.trace_anim = SFXObject::sfxt_Unknown;
+            impactAnims_.rd_anim = SFXObject::sfxt_Unknown; 
             break;
         case Weapon::Scanner:
             idx_ = Weapon::Unarmed_Anim;
             sample_ = snd::NO_SOUND;
             dmg_type_ = MapObject::dmg_None;
             shot_property_ = Weapon::wspt_Scanner;
-            anims_.hit_anim = SFXObject::sfxt_Unknown;
-            anims_.obj_hit_anim = SFXObject::sfxt_Unknown;
-            anims_.trace_anim = SFXObject::sfxt_Unknown;
-            anims_.rd_anim = SFXObject::sfxt_Unknown; 
+            impactAnims_.groundHit = SFXObject::sfxt_Unknown;
+            impactAnims_.objectHit = SFXObject::sfxt_Unknown;
+            impactAnims_.trace_anim = SFXObject::sfxt_Unknown;
+            impactAnims_.rd_anim = SFXObject::sfxt_Unknown; 
             break;
         case Weapon::AccessCard:
             idx_ = Weapon::Unarmed_Anim;
             sample_ = snd::NO_SOUND;
             dmg_type_ = MapObject::dmg_None;
             shot_property_ = Weapon::wspt_AccessCard;
-            anims_.hit_anim = SFXObject::sfxt_Unknown;
-            anims_.obj_hit_anim = SFXObject::sfxt_Unknown;
-            anims_.trace_anim = SFXObject::sfxt_Unknown;
-            anims_.rd_anim = SFXObject::sfxt_Unknown; 
+            impactAnims_.groundHit = SFXObject::sfxt_Unknown;
+            impactAnims_.objectHit = SFXObject::sfxt_Unknown;
+            impactAnims_.trace_anim = SFXObject::sfxt_Unknown;
+            impactAnims_.rd_anim = SFXObject::sfxt_Unknown; 
             break;
         case Weapon::TimeBomb:
             idx_ = Weapon::Unarmed_Anim;
             sample_ = snd::EXPLOSION;
             dmg_type_ = MapObject::dmg_Explosion;
             shot_property_ = Weapon::wspt_TimeBomb;
-            anims_.hit_anim = SFXObject::sfxt_ExplosionFire;
-            anims_.obj_hit_anim = SFXObject::sfxt_ExplosionBall;
-            anims_.trace_anim = SFXObject::sfxt_Unknown;
-            anims_.rd_anim = SFXObject::sfxt_ExplosionFire; 
+            impactAnims_.groundHit = SFXObject::sfxt_ExplosionFire;
+            impactAnims_.objectHit = SFXObject::sfxt_ExplosionBall;
+            impactAnims_.trace_anim = SFXObject::sfxt_Unknown;
+            impactAnims_.rd_anim = SFXObject::sfxt_ExplosionFire; 
             break;
         case Weapon::Persuadatron:
             idx_ = Weapon::Unarmed_Anim;
             sample_ = snd::PERSUADE;
             dmg_type_ = MapObject::dmg_Persuasion;
             shot_property_ = Weapon::wspt_Persuadatron;
-            anims_.hit_anim = SFXObject::sfxt_Unknown;
-            anims_.obj_hit_anim = SFXObject::sfxt_Unknown;
-            anims_.trace_anim = SFXObject::sfxt_Unknown;
-            anims_.rd_anim = SFXObject::sfxt_Unknown; 
+            impactAnims_.groundHit = SFXObject::sfxt_Unknown;
+            impactAnims_.objectHit = SFXObject::sfxt_Unknown;
+            impactAnims_.trace_anim = SFXObject::sfxt_Unknown;
+            impactAnims_.rd_anim = SFXObject::sfxt_Unknown; 
             break;
         default:
 #if _DEBUG
@@ -244,8 +244,13 @@ void Weapon::initFromConfig(WeaponType w_type, ConfigFile &conf) {
     }
 }
 
-WeaponInstance *Weapon::createInstance() {
-    return new WeaponInstance(this);
+/*!
+ * Creates a new instance of Weapon instance for the given weapon class.
+ * \param pWeaponClass Class of weapon
+ * \return an instance of WeaponInstance
+ */
+WeaponInstance *WeaponInstance::createInstance(Weapon *pWeaponClass) {
+    return new WeaponInstance(pWeaponClass);
 }
 
 WeaponInstance::WeaponInstance(Weapon * w) : ShootableMapObject(-1),
@@ -301,7 +306,7 @@ bool WeaponInstance::animate(int elapsed) {
                 deactivate();
                 Mission *m = g_Session.getMission();
                 SFXObject *so = new SFXObject(m->map(),
-                    pWeaponClass_->anims()->hit_anim);
+                    pWeaponClass_->impactAnims()->groundHit);
                 so->setPosition(tile_x_, tile_y_, tile_z_,
                     off_x_, off_y_, off_z_);
                 m->addSfxObject(so);
@@ -309,7 +314,7 @@ bool WeaponInstance::animate(int elapsed) {
                     tile_y_ * 256 + off_y_, tile_z_ * 128 + off_z_};
 
                 rangeDamageAnim(cur_pos, (double)pWeaponClass_->rangeDmg(),
-                    pWeaponClass_->anims()->rd_anim);
+                    pWeaponClass_->impactAnims()->rd_anim);
                 return true;
             }
             is_ignored_ = false;
@@ -460,7 +465,7 @@ void ShotClass::shotTargetRandomizer(toDefineXYZ * cp, toDefineXYZ * tp,
 }
 
 ProjectileShot::ProjectileShot(toDefineXYZ &cp, Weapon::ShotDesc & sd,
-    int d_range, Weapon::ad_HitAnims *panims, ShootableMapObject * ignrd_obj,
+    int d_range, Weapon::ImpactAnims *panims, ShootableMapObject * ignrd_obj,
     int range_max, int shot_speed)
 {
     cur_pos_ = cp;
@@ -649,12 +654,12 @@ bool ProjectileShot::animate(int elapsed, Mission *m) {
             sd.d.d_owner = owner_;
             sd.target_object = target_object_;
             all_shots.push_back(sd);
-            makeShot(true, base_pos_, anims_.hit_anim, all_shots,
-                anims_.obj_hit_anim);
+            makeShot(true, base_pos_, anims_.groundHit, all_shots,
+                anims_.objectHit);
         } else {
             // TODO: if projectile hits water, should hit and flames be drawn?
             SFXObject *so = new SFXObject(m->map(),
-                anims_.hit_anim);
+                anims_.groundHit);
             so->setPosition(cur_pos_.x / 256, cur_pos_.y / 256,
                 cur_pos_.z / 128, cur_pos_.x % 256, cur_pos_.y % 256,
                 cur_pos_.z % 128);
@@ -688,8 +693,8 @@ bool ProjectileShot::animate(int elapsed, Mission *m) {
                 sd.target_object = target_object_;
                 all_shots.push_back(sd);
             }
-            makeShot(true, cp, anims_.hit_anim, all_shots,
-                anims_.obj_hit_anim);
+            makeShot(true, cp, anims_.groundHit, all_shots,
+                anims_.objectHit);
             rangeDamageAnim(cur_pos_, (double)dmg_range_, anims_.rd_anim);
             g_App.gameSounds().play(snd::EXPLOSION);
         }
@@ -925,7 +930,7 @@ uint16 WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
             Weapon::ShotDesc shot_new = base_shot;
             shotTargetRandomizer(&cp, &(shot_new.tp), angle);
             ProjectileShot *prjs = new ProjectileShot(cp, shot_new,
-                pWeaponClass_->rangeDmg(), pWeaponClass_->anims(),
+                pWeaponClass_->rangeDmg(), pWeaponClass_->impactAnims(),
                 owner_, range(), pWeaponClass_->shotSpeed());
             m->addPrjShot(prjs);
             continue;
@@ -1036,8 +1041,8 @@ uint16 WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
                 all_shots = gen_shots;
             }
         }
-        makeShot(range_damage, cp, pWeaponClass_->anims()->hit_anim, all_shots,
-            pWeaponClass_->anims()->obj_hit_anim, this);
+        makeShot(range_damage, cp, pWeaponClass_->impactAnims()->groundHit, all_shots,
+            pWeaponClass_->impactAnims()->objectHit, this);
         all_shots.clear();
     }
     return 0;
@@ -1241,14 +1246,17 @@ void WeaponInstance::fire(Mission *pMission, ShotAttributes &att) {
  */
 void WeaponInstance::fillShotAttributes(Mission *pMission, const PathNode &targetLoc, ShotAttributes &att) {
     att.impactLoc = targetLoc;
-    att.hitAnimId = pWeaponClass_->anims()->hit_anim;
     att.pWeapon = this;
     att.pShooter = dynamic_cast<PedInstance *>(owner_);
 
     att.damage.dtype = pWeaponClass_->dmgType();
     att.damage.dvalue =  pWeaponClass_->damagePerShot();
     att.damage.d_owner = owner_;
-    att.damage.ddir = getDirection();
+    if (owner_) {
+        owner_->convertPosToXYZ(&(att.damage.originLocW));
+    } else {
+        this->convertPosToXYZ(&(att.damage.originLocW));
+    }
 }
 
 void ShotClass::makeShot(bool rangeChecked, toDefineXYZ &cp, int anim_hit,
@@ -1501,7 +1509,7 @@ bool WeaponInstance::handleDamage(ShootableMapObject::DamageInflictType * d)
 
                 Mission *m = g_Session.getMission();
                 SFXObject *so = new SFXObject(m->map(),
-                    pWeaponClass_->anims()->hit_anim);
+                    pWeaponClass_->impactAnims()->groundHit);
                 so->setPosition(tile_x_, tile_y_, tile_z_,
                     off_x_, off_y_, off_z_);
                 m->addSfxObject(so);
@@ -1509,7 +1517,7 @@ bool WeaponInstance::handleDamage(ShootableMapObject::DamageInflictType * d)
                     tile_y_ * 256 + off_y_, tile_z_ * 128 + off_z_};
 
                 rangeDamageAnim(cur_pos, (double)pWeaponClass_->rangeDmg(),
-                    pWeaponClass_->anims()->rd_anim);
+                    pWeaponClass_->impactAnims()->rd_anim);
                 return true;
             }
         }

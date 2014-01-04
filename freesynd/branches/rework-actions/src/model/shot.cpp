@@ -61,10 +61,7 @@ void InstantImpactShot::inflictDamage(Mission *pMission) {
             hitsByObject[pTargetHit] = hitsByObject[pTargetHit] + 1;
         }
         // creates impact sprite
-        SFXObject *sfxImpact = new SFXObject(pMission->map(), attributes_.hitAnimId);
-        sfxImpact->setPosition(impactLocT);
-        sfxImpact->correctZ();
-        pMission->addSfxObject(sfxImpact);
+        createImpactAnimation(pMission, pTargetHit, impactLocT);
     }
 
     // finally distribute damage
@@ -252,6 +249,25 @@ void InstantImpactShot::getAllShootablesWithinRange(Mission *pMission,
  */
 ShootableMapObject *InstantImpactShot::checkHitTarget(std::vector<ShootableMapObject *> objInRangeLst, toDefineXYZ &originLocW, PathNode &impactLocT) {
     ShootableMapObject *pTarget = NULL;
+    // TODO reimplement to use objInRangeLst
     uint8 has_blocker = attributes_.pWeapon->checkRangeAndBlocker(originLocW, &pTarget, &impactLocT, true);
     return pTarget;
+}
+
+/*!
+ * Creates the impact animation based on the type of target hit.
+ * Some weapons can have no animations for an impact.
+ */
+void InstantImpactShot::createImpactAnimation(Mission *pMission, ShootableMapObject * pTargetHit, PathNode &impactLocT) {
+    int impactAnimId = 
+        (pTargetHit != NULL ? 
+            attributes_.pWeapon->getWeaponClass()->impactAnims()->objectHit :
+            attributes_.pWeapon->getWeaponClass()->impactAnims()->groundHit);
+
+    if (impactAnimId != SFXObject::sfxt_Unknown) {
+        SFXObject *so = new SFXObject(pMission->map(), impactAnimId);
+        so->setPosition(impactLocT);
+        so->correctZ();
+        pMission->addSfxObject(so);
+    }
 }
