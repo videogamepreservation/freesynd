@@ -25,10 +25,10 @@
 #define IA_ACTIONS_H_
 
 #include "path.h"
+#include "mapobject.h"
 
 class Mission;
 class PedInstance;
-class ShootableMapObject;
 class WeaponInstance;
 class Vehicle;
 class VehicleInstance;
@@ -65,6 +65,15 @@ namespace fs_actions {
      */
     class Action {
     public:
+        //! What type of action
+        enum ActionType {
+            //! The walk action
+            kActTypeWalk,
+            //! For all type of hit action
+            kActTypeHit,
+            kActTypeUndefined
+        };
+
         //! Possible status of an action.
         enum ActionStatus {
             //! Initial status for action
@@ -78,17 +87,21 @@ namespace fs_actions {
             //! When action ends with success
             kActStatusSucceeded,
             //! When action ends with failure
-            kActStatusFailed
+            kActStatusFailed,
+            //! When action is suspended during its execution
+            kActStatusSuspended
         };
 
         //! Constructor for the class
-        Action(CreatOrigin origin);
+        Action(ActionType type, CreatOrigin origin);
         //! Destructor of the class
-        virtual ~Action() { } 
+        virtual ~Action() { }
 
         //! Entry point to execute the action
         virtual bool execute(int elapsed, Mission *pMission, PedInstance *pPed) = 0;
 
+        //! Returns the type of action
+        ActionType type() { return type_; }
         //! Returns true if action is waiting for animation to end
         bool isWaitingForAnimation() { return status_ == kActStatusWaitForAnim; }
         //! Returns true if action has succeeded or failed
@@ -104,6 +117,8 @@ namespace fs_actions {
         void setFailed() { status_ = kActStatusFailed; }
         
     protected:
+        /*! The type of action.*/
+        ActionType type_;
         CreatOrigin origin_;
         /*! This is the status of the action.*/
         ActionStatus status_;
@@ -124,19 +139,23 @@ namespace fs_actions {
     class MovementAction : public Action {
     public:
         //! Constructor for the class
-        MovementAction(CreatOrigin origin, bool isExclusive = false, bool canExecVehicle = false);
+        MovementAction(ActionType type, CreatOrigin origin, bool isExclusive = false, bool canExecVehicle = false);
         //! Destructor of the class
         virtual ~MovementAction() { pNext_ = NULL; }
 
         //! Entry point to execute the action
         bool execute(int elapsed, Mission *pMission, PedInstance *pPed);
+        //! Suspend action (normally because ped was hit by a weapon)
+        virtual void suspend(Mission *pMission, PedInstance *pPed);
+        //! Resume action
+        virtual void resume(Mission *pMission, PedInstance *pPed);
+        //! Returns true if action is currently suspended
+        bool isSuspended() { return status_ == kActStatusSuspended; }
 
         //! Returns true if action is exclusive
         bool isExclusive() { return isExclusive_; }
         //! Returns true if the action can be executed while ped is in a vehicle
         bool canExecInVehicle() { return canExecInVehicle_; }
-        //! A completed action can be removed only if not created by scenario files
-        bool canRemove() { return origin_ != kOrigScript; }
 
         //! Return the next action in the list
         MovementAction *next() { return pNext_; }
@@ -153,9 +172,11 @@ namespace fs_actions {
         /*! This flag tells that the action can be executed when ped is in a vehicule.*/
         bool canExecInVehicle_;
         /*! Store the state the ped will have when executing the action.*/
-        uint8 targetState_;
+        uint32 targetState_;
         /*! Next action in the chain.*/
         MovementAction *pNext_;
+        /*! This is the status of the action before it was suspended.*/
+        ActionStatus savedStatus_;
     };
 
     /*!
@@ -272,12 +293,55 @@ namespace fs_actions {
     };
 
     /*!
+     * A HitAction is used to implement the reaction of the ped to an impact.
+     * When a Ped is hit by a shot, a HitAction is created and inserted directly
+     * as the ped's current action but only if current action is not already
+     * a HitAction.
+     */
+    class HitAction : public MovementAction {
+    public:
+        //! Constructor of the class
+        HitAction(CreatOrigin origin, ShootableMapObject::DamageInflictType d) : 
+          MovementAction(kActTypeHit, origin) {
+            damage_ = d;
+        }
+    protected:
+        //! Stores the damage received
+        ShootableMapObject::DamageInflictType damage_;
+    };
+
+    /*!
+     * This action is used to represent a hit by a bullet
+     * or explosion.
+     */
+    class RecoilHitAction : public HitAction {
+    public:
+        //! 
+        RecoilHitAction(ShootableMapObject::DamageInflictType d);
+    protected:
+        void doStart(Mission *pMission, PedInstance *pPed);
+        bool doExecute(int elapsed, Mission *pMission, PedInstance *pPed);
+    };
+
+    /*!
+     * This action is used to represent a hit by a laser.
+     */
+    class LaserHitAction : public HitAction {
+    public:
+        //! 
+        LaserHitAction(ShootableMapObject::DamageInflictType d);
+    protected:
+        void doStart(Mission *pMission, PedInstance *pPed);
+        bool doExecute(int elapsed, Mission *pMission, PedInstance *pPed);
+    };
+
+    /*!
      * This action is for using a weapon. A ped can only have a single weapon action
      * at a given time.
      */
     class UseWeaponAction : public Action {
     public:
-        UseWeaponAction(CreatOrigin origin) : Action(origin) {};
+        UseWeaponAction(CreatOrigin origin) : Action(kActTypeUndefined, origin) {};
 
         //! Stop shooting (mainly used with AutomaticShootAction)
         virtual void stop() {};

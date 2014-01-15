@@ -51,8 +51,8 @@ public:
         dmg_Burn = 0x0004,
         dmg_Explosion = 0x0008,
         dmg_Explosion_Suicide = 0x0100, // Explosion of suiciding agent
-        dmg_Hit = 0x0010,
-        dmg_Physical = (dmg_Bullet | dmg_Laser | dmg_Burn | dmg_Explosion | dmg_Hit | dmg_Explosion_Suicide),
+        dmg_Collision = 0x0010, // By car or door
+        dmg_Physical = (dmg_Bullet | dmg_Laser | dmg_Burn | dmg_Explosion | dmg_Collision | dmg_Explosion_Suicide),
         dmg_Persuasion = 0x0020,
         dmg_Heal = 0x0040,
         dmg_Panic = 0x0080,
@@ -64,7 +64,7 @@ public:
         ddmg_Invulnerable = dmg_None,
         ddmg_Ped = dmg_All,
         ddmg_PedPanicImmune = dmg_All ^ dmg_Panic,
-        ddmg_PedWithEnergyShield = dmg_Explosion | dmg_Hit | dmg_Heal | dmg_Panic,
+        ddmg_PedWithEnergyShield = dmg_Explosion | dmg_Collision | dmg_Heal | dmg_Panic,
         ddmg_Vehicle = dmg_Bullet | dmg_Laser | dmg_Burn | dmg_Explosion,
         ddmg_StaticTree = dmg_Laser | dmg_Burn | dmg_Explosion,
         ddmg_StaticWindow = dmg_Bullet | dmg_Explosion,
@@ -408,6 +408,14 @@ public:
             n = -1;
 
         start_health_ = n;
+    }
+
+    /*!
+     * Method called when object is hit by a weapon shot.
+     * \param d Damage description
+     */
+    virtual void handleHit(DamageInflictType &d) {
+        handleDamage(&d);
     }
 
     virtual bool handleDamage(ShootableMapObject::DamageInflictType * d) {

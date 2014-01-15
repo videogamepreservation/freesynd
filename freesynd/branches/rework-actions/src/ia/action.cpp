@@ -44,9 +44,10 @@ void NopeBehaviour::execute(Mission *pMission, PedInstance *pPed) {
  * Default constructor.
  * \param origin Who has created this action.
  */
-Action::Action(CreatOrigin origin) {
+Action::Action(ActionType type, CreatOrigin origin) {
     origin_ = origin;
     status_ = kActStatusNotStarted;
+    type_ = type;
 }
 
 /*!
@@ -55,8 +56,8 @@ Action::Action(CreatOrigin origin) {
  * \param isExclusive Does action allow shooting
  * \param canExecVehicle Is action is allowed while ped is in vehicle
  */
-MovementAction::MovementAction(CreatOrigin origin, bool isExclusive, bool canExecVehicle) :
-Action(origin) {
+MovementAction::MovementAction(ActionType type, CreatOrigin origin, bool isExclusive, bool canExecVehicle) :
+Action(type, origin) {
     pNext_ = NULL;
     isExclusive_ = isExclusive;
     canExecInVehicle_ = canExecVehicle;
@@ -72,6 +73,7 @@ Action(origin) {
  * Else change Ped's state to targetState.
  * Calls doExecute() method.
  * If action is finished (failed or succeeded), quits state.
+ * \return True to update screen.
  */
 bool MovementAction::execute(int elapsed, Mission *pMission, PedInstance *pPed) {
     if (status_ == kActStatusNotStarted) {
@@ -104,14 +106,28 @@ bool MovementAction::execute(int elapsed, Mission *pMission, PedInstance *pPed) 
     return update;
 }
 
+void MovementAction::suspend(Mission *pMission, PedInstance *pPed) { 
+    if (status_ != kActStatusNotStarted) {
+        pPed->leaveState(targetState_);
+        savedStatus_ = status_;
+        status_ = kActStatusSuspended;
+    }
+}
+
+void MovementAction::resume(Mission *pMission, PedInstance *pPed) { 
+    status_ = savedStatus_;
+    pPed->goToState(targetState_);
+}
+
 WalkAction::WalkAction(CreatOrigin origin, PathNode pn, int speed) :
-    MovementAction(origin) {
+    MovementAction(kActTypeWalk, origin) {
     newSpeed_ = speed;
     dest_ = pn;
     targetState_ = PedInstance::pa_smWalking;
 }
 
-WalkAction::WalkAction(CreatOrigin origin, ShootableMapObject *smo, int speed) : MovementAction(origin) {
+WalkAction::WalkAction(CreatOrigin origin, ShootableMapObject *smo, int speed) : 
+MovementAction(kActTypeWalk, origin) {
     newSpeed_ = speed;
     // Set destination point
     dest_.setTileX(smo->tileX());
@@ -153,7 +169,7 @@ bool WalkAction::doExecute(int elapsed, Mission *pMission, PedInstance *pPed) {
  * \param pTarget The ped to follow.
  */
 FollowAction::FollowAction(PedInstance *pTarget) :
-MovementAction(kOrigUser) {
+MovementAction(kActTypeUndefined, kOrigUser) {
     pTarget_ = pTarget;
     targetState_ = PedInstance::pa_smWalking;
 }
@@ -219,7 +235,7 @@ bool FollowAction::doExecute(int elapsed, Mission *pMission, PedInstance *pPed) 
     return updated;
 }
 
-PutdownWeaponAction::PutdownWeaponAction(uint8 weaponIdx) : MovementAction(kOrigUser, true) {
+PutdownWeaponAction::PutdownWeaponAction(uint8 weaponIdx) : MovementAction(kActTypeUndefined, kOrigUser, true) {
     weaponIdx_ = weaponIdx;
     targetState_ = PedInstance::pa_smPutDown;
 }
@@ -241,7 +257,7 @@ bool PutdownWeaponAction::doExecute(int elapsed, Mission *pMission, PedInstance 
 }
 
 PickupWeaponAction::PickupWeaponAction(WeaponInstance *pWeapon) :
-    MovementAction(fs_actions::kOrigUser, true) {
+    MovementAction(kActTypeUndefined, fs_actions::kOrigUser, true) {
     pWeapon_ = pWeapon;
     targetState_ = PedInstance::pa_smPickUp;
 }
@@ -271,7 +287,7 @@ bool PickupWeaponAction::doExecute(int elapsed, Mission *pMission, PedInstance *
     return true;
 }
 
-EnterVehicleAction::EnterVehicleAction(Vehicle *pVehicle) : MovementAction(kOrigUser, true) {
+EnterVehicleAction::EnterVehicleAction(Vehicle *pVehicle) : MovementAction(kActTypeUndefined, kOrigUser, true) {
     pVehicle_ = pVehicle;
 }
 
@@ -293,7 +309,7 @@ bool EnterVehicleAction::doExecute(int elapsed, Mission *pMission, PedInstance *
 }
 
 DriveVehicleAction::DriveVehicleAction(CreatOrigin origin, VehicleInstance *pVehicle, PathNode &dest) : 
-    MovementAction(origin, false, true) {
+    MovementAction(kActTypeUndefined, origin, false, true) {
     pVehicle_ = pVehicle;
     dest_ = dest;
 }
@@ -310,6 +326,74 @@ void DriveVehicleAction::doStart(Mission *pMission, PedInstance *pPed) {
 
 bool DriveVehicleAction::doExecute(int elapsed, Mission *pMission, PedInstance *pPed) {
     if (pPed->checkCurrPosTileOnly(dest_)) {
+        setSucceeded();
+    }
+    return true;
+}
+
+RecoilHitAction::RecoilHitAction(ShootableMapObject::DamageInflictType d) : 
+HitAction(kOrigAction, d) {
+    targetState_ = PedInstance::pa_smHit;
+}
+
+/*!
+ * 
+ * \param pMission Mission data
+ * \param pPed The ped executing the action.
+ */
+void RecoilHitAction::doStart(Mission *pMission, PedInstance *pPed) {
+    // Change direction due to impact
+    toDefineXYZ locW;
+    pPed->convertPosToXYZ(&locW);
+    pPed->setDirection(damage_.originLocW.x - locW.x, damage_.originLocW.y - locW.y);
+    status_ = kActStatusWaitForAnim;
+}
+
+/*!
+ * 
+ * \param elapsed Time elapsed since last frame
+ * \param pMission Mission data
+ * \param pPed The ped executing the action.
+ */
+bool RecoilHitAction::doExecute(int elapsed, Mission *pMission, PedInstance *pPed) {
+    if (status_ == kActStatusRunning) {
+        if (pPed->handleDeath(damage_)) {
+            targetState_ = PedInstance::pa_smNone;
+        }
+        setSucceeded();
+    }
+    return true;
+}
+
+LaserHitAction::LaserHitAction(ShootableMapObject::DamageInflictType d) : 
+HitAction(kOrigAction, d) {
+    targetState_ = PedInstance::pa_smHitByLaser;
+}
+
+/*!
+ * 
+ * \param pMission Mission data
+ * \param pPed The ped executing the action.
+ */
+void LaserHitAction::doStart(Mission *pMission, PedInstance *pPed) {
+    // Change direction due to impact
+    toDefineXYZ locW;
+    pPed->convertPosToXYZ(&locW);
+    pPed->setDirection(damage_.originLocW.x - locW.x, damage_.originLocW.y - locW.y);
+    status_ = kActStatusWaitForAnim;
+}
+
+/*!
+ * 
+ * \param elapsed Time elapsed since last frame
+ * \param pMission Mission data
+ * \param pPed The ped executing the action.
+ */
+bool LaserHitAction::doExecute(int elapsed, Mission *pMission, PedInstance *pPed) {
+    if (status_ == kActStatusRunning) {
+        if (pPed->handleDeath(damage_)) {
+            targetState_ = PedInstance::pa_smNone;
+        }
         setSucceeded();
     }
     return true;

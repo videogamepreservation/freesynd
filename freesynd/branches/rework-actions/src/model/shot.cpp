@@ -68,7 +68,7 @@ void InstantImpactShot::inflictDamage(Mission *pMission) {
     std::map<ShootableMapObject *, int>::iterator it;
     for (it = hitsByObject.begin(); it != hitsByObject.end(); it++) {
         attributes_.damage.dvalue = (*it).second * attributes_.pWeapon->getWeaponClass()->damagePerShot();
-        (*it).first->handleDamage(&(attributes_.damage));
+        (*it).first->handleHit(attributes_.damage);
     }
 }
 

@@ -174,7 +174,8 @@ int Ped::lastPersuadeFrame() {
     return g_App.gameSprites().lastFrame(persuade_anim_);
 }
 
-void PedInstance::switchActionStateTo(uint32 as) {
+bool PedInstance::switchActionStateTo(uint32 as) {
+    uint32 prevState = state_;
     switch(as) {
         case pa_smNone:
             //printf("Ped has undefined state");
@@ -191,6 +192,9 @@ void PedInstance::switchActionStateTo(uint32 as) {
             break;
         case pa_smHit:
             state_ = pa_smHit;
+            break;
+        case pa_smHitByLaser:
+            state_ = pa_smHitByLaser;
             break;
         case pa_smFiring:
             state_ |= pa_smFiring;
@@ -227,9 +231,15 @@ void PedInstance::switchActionStateTo(uint32 as) {
             state_ = pa_smUnavailable;
             break;
     }
+
+    return prevState != state_;
 }
 
-void PedInstance::switchActionStateFrom(uint32 as) {
+/*!
+ * \return true if state has changed.
+ */
+bool PedInstance::switchActionStateFrom(uint32 as) {
+    uint32 prevState = state_;
     switch(as) {
         case pa_smNone:
             //printf("Ped has undefined state");
@@ -242,7 +252,8 @@ void PedInstance::switchActionStateFrom(uint32 as) {
             state_ |= pa_smStanding;
             break;
         case pa_smHit:
-            state_ &= pa_smAll ^ pa_smHit;
+        case pa_smHitByLaser:
+            state_ = pa_smStanding;
             break;
         case pa_smFiring:
             state_ &= pa_smAll ^ pa_smFiring;
@@ -280,6 +291,8 @@ void PedInstance::switchActionStateFrom(uint32 as) {
             state_ = pa_smUnavailable;
             break;
     }
+
+    return prevState != state_;
 }
 
 void PedInstance::setActionStateToDrawnAnim(void) {
@@ -304,10 +317,14 @@ void PedInstance::setActionStateToDrawnAnim(void) {
         setDrawnAnim(PedInstance::ad_PutdownAnim);
     } else if ((state_ & (pa_smUsingCar | pa_smInCar)) != 0) {
         setDrawnAnim(PedInstance::ad_StandAnim);
+    } else if ((state_ & pa_smHit) != 0) {
+        setDrawnAnim(PedInstance::ad_HitAnim);
+    } else if ((state_ & pa_smHitByLaser) != 0) {
+        setDrawnAnim(PedInstance::ad_VaporizeAnim);
     }
 #ifdef _DEBUG
     if (state_ ==  pa_smNone)
-        printf("undefined state_\n");
+        printf("setActionStateToDrawnAnim : undefined state_ %d\n", state_);
 #endif
 }
 
@@ -317,8 +334,9 @@ void PedInstance::setActionStateToDrawnAnim(void) {
  * \param as new state
  */
 void PedInstance::goToState(uint32 as) {
-    switchActionStateTo(as);
-    setActionStateToDrawnAnim();
+    if(switchActionStateTo(as)) {
+        setActionStateToDrawnAnim();
+    }
 }
 
 /*!
@@ -327,8 +345,9 @@ void PedInstance::goToState(uint32 as) {
  * \param as new state
  */
 void PedInstance::leaveState(uint32 as) {
-    switchActionStateFrom(as);
-    setActionStateToDrawnAnim();
+    if (switchActionStateFrom(as)) {
+        setActionStateToDrawnAnim();
+    }
 }
 
 /*!
@@ -396,13 +415,19 @@ bool PedInstance::executeAction(int elapsed, Mission *pMission) {
         // execute action
         updated |= currentAction_->execute(elapsed, pMission, this);
         if (currentAction_->isFinished()) {
-            // current action is finished : go to next one
-            fs_actions::MovementAction *pNext = currentAction_->next();
-            if (currentAction_->canRemove()) {
-                // but before erase action
+            if (health_ == 0) {
+                // Ped may have died during execution of a HitAction.
+                destroyAllActions();
+            } else {
+                // current action is finished : go to next one
+                fs_actions::MovementAction *pNext = currentAction_->next();
                 delete currentAction_;
+                currentAction_ = pNext;
+                // If next action was suspended, resume it
+                if (currentAction_ != NULL && currentAction_->isSuspended()) {
+                    currentAction_->resume(pMission, this);
+                }
             }
-            currentAction_ = pNext;
         } else {
             // current action is still running, so stop iterate now
             // we will continue next time
@@ -1981,15 +2006,21 @@ PedInstance *Ped::createInstance(int map) {
  * If he's equiped with the good version of Mod Chest, he will
  * explodes causing damage on nearby Peds but all his weapons will
  * be destroyed.
- * Else he dies alone leaving his wepons on the ground.
+ * Else he dies alone leaving his weapons on the ground.
  */
-void PedInstance::commit_suicide() {
+void PedInstance::commitSuicide() {
     if (hasMinimumVersionOfMod(Mod::MOD_CHEST, Mod::MOD_V2)) {
         // Having a chest v2 makes agent explodes
         ShotClass::createExplosion(this, 512.0, 16, true);
     } else {
         // else he just shoot himself
-        ShotClass::make_self_shot(this);
+        ShootableMapObject::DamageInflictType dit;
+        dit.dtype = MapObject::dmg_Bullet;
+        dit.d_owner = this;
+        // force damage value to agent health so he's killed at once
+        dit.dvalue = PedInstance::kAgentMaxHealth;
+
+        handleDamage(&dit);
     }
 }
 
@@ -2536,8 +2567,6 @@ bool PedInstance::handleDrawnAnim(int elapsed) {
         case PedInstance::ad_HitAnim:
             if (frame_ < ped_->lastHitFrame(getDirection()))
                 answer = false;
-            else if (health_ <= 0)
-                setDrawnAnim(PedInstance::ad_DieAnim);
             break;
         case PedInstance::ad_DieAnim:
             if (frame_ < ped_->lastDieFrame()) {
@@ -2567,15 +2596,9 @@ bool PedInstance::handleDrawnAnim(int elapsed) {
                 answer = false;
             break;
         case PedInstance::ad_VaporizeAnim:
-            if (frame_ >= ped_->lastVaporizeFrame(getDirection())) {
-                if (is_our_) {
-                    setDrawnAnim(PedInstance::ad_DeadAgentAnim);
-                } else {
-                    setDrawnAnim(PedInstance::ad_NoAnimation);
-                }
-                map_ = -1;
-            } else
+            if (frame_ < ped_->lastVaporizeFrame(getDirection())) {
                 answer = false;
+            }
             break;
         case PedInstance::ad_SinkAnim:
             // TODO: use this in future
@@ -2612,6 +2635,64 @@ bool PedInstance::handleDrawnAnim(int elapsed) {
             break;
     }
     return answer;
+}
+
+/*!
+ * Method called when object is hit by a weapon shot.
+ * \param d Damage description
+ */
+void PedInstance::handleHit(DamageInflictType &d) {
+    if (health_ > 0) {
+        // TODO : Add ped's resistance with mods
+        health_ -= d.dvalue;
+        if (health_ <= 0) {
+            health_ = 0;
+        }
+
+        // Only add a hit if ped is not currently being hit
+        if (currentAction_ == NULL || currentAction_->type() != fs_actions::Action::kActTypeHit) {
+            insertHitAction(d);
+        }
+    }
+}
+
+/*!
+ * Method called when object is hit by a weapon shot.
+ * \param d Damage description
+ * \return true if Ped has died
+ */
+bool PedInstance::handleDeath(ShootableMapObject::DamageInflictType &d) {
+    if (health_ == 0) {
+        clearDestination();
+        switchActionStateTo(PedInstance::pa_smDead);
+        if ((desc_state_ & pd_smControlled) != 0 && owner_)
+            ((PedInstance *)owner_)->rmvPersuaded(this);
+
+        switch (d.dtype) {
+            case MapObject::dmg_Bullet:
+                setDrawnAnim(PedInstance::ad_DieAnim);
+                dropAllWeapons();
+                break;
+            case MapObject::dmg_Laser:
+                if (is_our_) {
+                    setDrawnAnim(PedInstance::ad_DeadAgentAnim);
+                } else {
+                    setDrawnAnim(PedInstance::ad_NoAnimation);
+                }
+                destroyAllWeapons();
+                break;
+        }
+        // send an event to alert agent died
+        if (isOurAgent()) {
+            GameEvent evt;
+            evt.stream = GameEvent::kMission;
+            evt.type = GameEvent::kAgentDied;
+            evt.pCtxt = this;
+            g_gameCtrl.fireGameEvent(evt);
+        }
+    }
+
+    return health_ == 0;
 }
 
 bool PedInstance::handleDamage(ShootableMapObject::DamageInflictType *d) {
@@ -2700,7 +2781,7 @@ bool PedInstance::handleDamage(ShootableMapObject::DamageInflictType *d) {
                 }
                 // If the agent was not suiciding himself
                 // he is not burnt but dies as a normal hit
-            case MapObject::dmg_Hit:
+            case MapObject::dmg_Collision:
                 setDrawnAnim(PedInstance::ad_HitAnim);
                 dropAllWeapons();
                 break;

@@ -1237,7 +1237,7 @@ bool LargeDoor::animate(int elapsed, Mission *obj)
                 {
                     p = *it;
                     ShootableMapObject::DamageInflictType d;
-                    d.dtype = MapObject::dmg_Hit;
+                    d.dtype = MapObject::dmg_Collision;
                     d.d_owner = NULL;
                     d.dvalue = 1024;
                     d.ddir = -1;

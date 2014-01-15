@@ -278,8 +278,6 @@ public:
     static void rangeDamageAnim(toDefineXYZ &cp, double dmg_rng,
         int rngdamg_anim);
     static void createExplosion(ShootableMapObject *tobj, double dmg_rng, int dmg_value = 16, bool is_suicide = false);
-    //! This method is used for an agent to shoot himself
-    static void make_self_shot(PedInstance *p_ped);
 
 public:
     ShotClass(ShootableMapObject *tobj = NULL) : owner_(NULL),

@@ -129,6 +129,34 @@ void PedInstance::addActionDriveVehicle(fs_actions::CreatOrigin origin,
 }
 
 /*!
+ * Insert the given action before any action in list and suspend currently executing action.
+ */
+void PedInstance::insertHitAction(DamageInflictType &d) {
+    fs_actions::HitAction *pHitAct = NULL;
+    if (d.dtype & (dmg_Bullet | dmg_Explosion | dmg_Collision)) {
+        // When hit by a bullet, explosion or collision, ped is ejected
+        pHitAct = new fs_actions::RecoilHitAction(d);
+    } else if (d.dtype & dmg_Burn) {
+
+
+    } else if (d.dtype & dmg_Laser) {
+        // When hit by a laser, ped is vaporized
+        pHitAct = new fs_actions::LaserHitAction(d);
+    }
+
+    if (pHitAct != NULL) {
+        //! if there was an action executing, suspends it
+        if (currentAction_ != NULL) {
+            fs_actions::MovementAction *pPrevAct = currentAction_;
+            pPrevAct->suspend(NULL, this);
+            pHitAct->setNext(pPrevAct);
+        }
+
+        currentAction_ = pHitAct;
+    }
+}
+
+/*!
  * Adds an action of shooting at something/somewhere.
  * \param aimedPt Where the ped must shoot
  */

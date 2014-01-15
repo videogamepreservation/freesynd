@@ -1041,7 +1041,7 @@ bool GameplayMenu::handleUnknownKey(Key key, const int modKeys) {
         }
 
         for (size_t i=0; i < agents_suicide.size(); i++) {
-            agents_suicide[i]->commit_suicide();
+            agents_suicide[i]->commitSuicide();
         }
     } else {
         consumed = false;

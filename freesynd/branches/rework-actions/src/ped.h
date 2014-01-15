@@ -40,7 +40,7 @@
 #include "ipastim.h"
 #include "ia/actions.h"
 
-class PedInstance;
+class Agent;
 class Mission;
 class VehicleInstance;
 class Vehicle;
@@ -156,8 +156,6 @@ protected:
     int persuade_anim_;
 };
 
-class Agent;
-
 /*!
  * Pedestrian instance class.
  */
@@ -208,7 +206,8 @@ public:
         m_tpCriminal = 0x10
     } mainPedType;
 
-    typedef enum {
+    //! MapObject::state_
+    enum pedActionStateMasks {
         pa_smNone = 0x0,
         pa_smStanding = 0x0001,
         pa_smWalking = 0x0002,
@@ -227,9 +226,11 @@ public:
         pa_smDead = 0x1000,
         // this object should be ignored in all Ai procedures
         pa_smUnavailable = 0x2000,
+        //! When a ped is hit by a laser
+        pa_smHitByLaser = 0x4000,
         pa_smCheckExcluded = pa_smDead | pa_smUnavailable,
         pa_smAll = 0xFFFF
-    } pedActionStateMasks; // MapObject::state_
+    };
 
     void draw(int x, int y);
 
@@ -246,8 +247,8 @@ public:
 
     void showPath(int scrollX, int scrollY);
 
-    void switchActionStateTo(uint32 as);
-    void switchActionStateFrom(uint32 as);
+    bool switchActionStateTo(uint32 as);
+    bool switchActionStateFrom(uint32 as);
     void setActionStateToDrawnAnim(void);
     bool animate(int elapsed, Mission *mission);
     //! Temporary version of animate()
@@ -291,7 +292,7 @@ public:
     bool canAddUseWeaponAction(WeaponInstance *pWeapon = NULL);
     //! Adds action to shoot somewhere
     void addActionShootAt(const PathNode &aimedPt);
-    //!
+    //! Adds action to use medikit
     void addActionUseMedikit();
 
     //*************************************
@@ -327,6 +328,18 @@ public:
     void adjustAimedPtWithRangeAndAccuracy(Weapon *pWeaponClass, PathNode &aimedPt);
     //! Gets the time before a ped can shoot again
     int getTimeBetweenShoots(WeaponInstance *pWeapon);
+
+    //! Forces agent to kill himself
+    void commitSuicide();
+    //! Indicates the agent is commiting suicide
+    bool is_suiciding() { return is_suiciding_; }
+    void set_is_suiciding(bool flag) { is_suiciding_ = flag; }
+
+    //! Method called when object is hit by a weapon shot.
+    void handleHit(ShootableMapObject::DamageInflictType &d);
+    //! Method called to check if ped has died
+    bool handleDeath(ShootableMapObject::DamageInflictType &d);
+    bool handleDamage(ShootableMapObject::DamageInflictType *d);
 
     bool inSightRange(MapObject *t);
     VehicleInstance *inVehicle();
@@ -385,14 +398,6 @@ public:
         perception_->processTicks(elapsed);
         intelligence_->processTicks(elapsed);
     }
-
-    //! Forces agent to kill himself
-    void commit_suicide();
-    //! Indicates the agent is commiting suicide
-    bool is_suiciding() { return is_suiciding_; }
-    void set_is_suiciding(bool flag) { is_suiciding_ = flag; }
-
-    bool handleDamage(ShootableMapObject::DamageInflictType *d);
 
     void setDescStateMasks(unsigned int desc_state) {
         desc_state_ = desc_state;
@@ -883,6 +888,9 @@ protected:
      * \param wi The selected weapon
      */
     void handleWeaponSelected(WeaponInstance * wi);
+
+    //! Creates and insert a HitAction for the ped
+    void insertHitAction(DamageInflictType &d);
 protected:
     Ped *ped_;
     //! If this flag is true, all actions should be dropped
