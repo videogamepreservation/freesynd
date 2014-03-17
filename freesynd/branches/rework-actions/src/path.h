@@ -90,4 +90,34 @@ protected:
     int tile_x_, tile_y_, tile_z_, off_x_, off_y_, off_z_;
 };
 
+/*!
+ * This structure is used to store movement informations
+ * while ped is moving to a direction.
+ * Used by moveTodir().
+ */
+struct DirMoveType {
+        int32 dir_orig;
+        int32 dir_last;
+        int32 dir_closest;
+        int32 dir_closer;
+        int32 dir_modifier;
+        int32 modifier_value;
+        // directional movement only
+        // to decide whether to continue movement by changing
+        // direction or not
+        bool bounce;
+        // walkn only on "safe" tiles
+        bool safe_walk;
+        // when closest is used and first movement is successful
+        bool on_new_tile;
+        void clear() {
+            dir_last = -1;
+            dir_modifier = 0;
+            modifier_value = 0;
+            bounce = false;
+            on_new_tile = false;
+            safe_walk = true;
+        }
+    };
+
 #endif

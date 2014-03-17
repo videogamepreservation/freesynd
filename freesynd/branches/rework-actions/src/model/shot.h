@@ -37,19 +37,10 @@ class Mission;
 class WeaponInstance;
 class PedInstance;
 
-struct ShotAttributes {
-    /*! Who made this shot.*/
-    PedInstance *pShooter;
-    /*! weapon used to fire the shot.*/
-    WeaponInstance *pWeapon;
-    PathNode impactLoc;
-    ShootableMapObject::DamageInflictType damage;
-};
-
 class Shot {
 public:
-    Shot(ShotAttributes &att) {
-        attributes_ = att;
+    Shot(ShootableMapObject::DamageInflictType &dmg) {
+        dmg_ = dmg;
     }
     virtual ~Shot() {}
 
@@ -58,9 +49,13 @@ public:
 
     virtual void inflictDamage(Mission *pMission) = 0;
 
-    ShotAttributes & getAttributes() { return attributes_; }
+    ShootableMapObject::DamageInflictType & getAttributes() { return dmg_; }
 protected:
-    ShotAttributes attributes_;
+    //!
+    void getAllShootablesWithinRange(Mission *pMission, toDefineXYZ &originLocW, std::vector<ShootableMapObject *> &objInRangeLst, bool includeShooter);
+protected:
+    // The damage that will be inflicted by this shot
+    ShootableMapObject::DamageInflictType dmg_;
 };
 
 /*!
@@ -70,7 +65,7 @@ protected:
  */
 class InstantImpactShot : public Shot {
 public:
-    InstantImpactShot(Mission *pMission, ShotAttributes &att);
+    InstantImpactShot(ShootableMapObject::DamageInflictType &dmg) : Shot(dmg) {}
 
     virtual bool animate(int elapsed, Mission *m) { return false; }
     virtual bool isLifeOver() { return true; }
@@ -80,11 +75,28 @@ private:
     //! 
     void diffuseImpact(Mission *m, toDefineXYZ &originLocW, PathNode &impactLocT);
     //!
-    void getAllShootablesWithinRange(Mission *pMission, toDefineXYZ &originLocW, std::vector<ShootableMapObject *> &objInRangeLst);
-    //!
     ShootableMapObject *checkHitTarget(std::vector<ShootableMapObject *> objInRangeLst, toDefineXYZ &originLocW, PathNode &impactLocT);
     //!
     void createImpactAnimation(Mission *pMission, ShootableMapObject * pTargetHit, PathNode &impactLocT);
+};
+
+/*!
+ * This class represents an explosion caused by a time bomb, an agent's
+ * suicide or a car explosion.
+ */
+class Explosion : public Shot {
+public:
+    //! Creates an explosion
+    static void createExplosion(Mission *pMission, ShootableMapObject *pOwner, double range, int dmgValue = 16);
+
+    Explosion(ShootableMapObject::DamageInflictType &dmg) : Shot(dmg) {};
+
+    bool animate(int elapsed, Mission *m) { return false; }
+    bool isLifeOver() { return true; }
+
+    void inflictDamage(Mission *pMission);
+private:
+    void rangeDamageAnim(Mission *pMission, toDefineXYZ &cp, double dmg_rng, int rngdamg_anim);
 };
 
 #endif // MODEL_SHOT_H_

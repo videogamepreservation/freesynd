@@ -228,6 +228,8 @@ public:
         pa_smUnavailable = 0x2000,
         //! When a ped is hit by a laser
         pa_smHitByLaser = 0x4000,
+        //! When a ped is walking and burning
+        pa_smWalkingBurning = 0x8000,
         pa_smCheckExcluded = pa_smDead | pa_smUnavailable,
         pa_smAll = 0xFFFF
     };
@@ -331,9 +333,6 @@ public:
 
     //! Forces agent to kill himself
     void commitSuicide();
-    //! Indicates the agent is commiting suicide
-    bool is_suiciding() { return is_suiciding_; }
-    void set_is_suiciding(bool flag) { is_suiciding_ = flag; }
 
     //! Method called when object is hit by a weapon shot.
     void handleHit(ShootableMapObject::DamageInflictType &d);
@@ -352,31 +351,6 @@ public:
     AnimationDrawn drawnAnim(void);
     void setDrawnAnim(AnimationDrawn drawn_anim);
     bool handleDrawnAnim(int elapsed);
-
-    typedef struct {
-        int32 dir_orig;
-        int32 dir_last;
-        int32 dir_closest;
-        int32 dir_closer;
-        int32 dir_modifier;
-        int32 modifier_value;
-        // directional movement only
-        // to decide whether to continue movement by changing
-        // direction or not
-        bool bounce;
-        // walkn only on "safe" tiles
-        bool safe_walk;
-        // when closest is used and first movement is successful
-        bool on_new_tile;
-        void clear() {
-            dir_last = -1;
-            dir_modifier = 0;
-            modifier_value = 0;
-            bounce = false;
-            on_new_tile = false;
-            safe_walk = true;
-        }
-    } dirMoveType;
 
     uint8 moveToDir(Mission *m, int elapsed, dirMoveType &dir_move,
         int dir = -1, int t_posx = -1, int t_posy = -1, int *dist = NULL,
@@ -950,8 +924,6 @@ protected:
     //! points needed to persuade ped
     int persuasion_points_;
     std::set <PedInstance *> persuaded_group_;
-    //! Flag to mark suiciding agent
-    bool is_suiciding_;
 
     bool walkable(int x, int y, int z) { return true; }
 

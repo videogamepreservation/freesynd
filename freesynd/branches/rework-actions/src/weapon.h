@@ -395,10 +395,8 @@ public:
     int getWeight() { return pWeaponClass_->weight(); }
     void updtWeaponUsedTime(int elapsed);
 
-    //! Fills the ShotAttributes with values
-    void fillShotAttributes(Mission *pMission, const PathNode &targetLoc, ShotAttributes &att);
     //! Use weapon
-    void fire(Mission *pMission, ShotAttributes &att);
+    void fire(Mission *pMission, ShootableMapObject::DamageInflictType &dmg);
 
 protected:
     Weapon *pWeaponClass_;

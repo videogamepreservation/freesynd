@@ -1037,7 +1037,6 @@ bool GameplayMenu::handleUnknownKey(Key key, const int modKeys) {
         for (SquadSelection::Iterator it = selection_.begin();
                         it != selection_.end(); ++it) {
                 agents_suicide.push_back(*it);
-                (*it)->set_is_suiciding(true);
         }
 
         for (size_t i=0; i < agents_suicide.size(); i++) {

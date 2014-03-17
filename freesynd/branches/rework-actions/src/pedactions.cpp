@@ -129,12 +129,27 @@ void PedInstance::addActionDriveVehicle(fs_actions::CreatOrigin origin,
 }
 
 /*!
- * Insert the given action before any action in list and suspend currently executing action.
+ * Insert an action of type HitAction before any action in list and suspend
+ * currently executing action.
  */
 void PedInstance::insertHitAction(DamageInflictType &d) {
     fs_actions::HitAction *pHitAct = NULL;
-    if (d.dtype & (dmg_Bullet | dmg_Explosion | dmg_Collision)) {
-        // When hit by a bullet, explosion or collision, ped is ejected
+    if (d.d_owner == this) { // it's a suicide
+        if (d.dtype == dmg_Bullet) {
+            // Ped's instantly dead
+            pHitAct = new fs_actions::FallDeadHitAction(d);
+        } else {
+            // it's an explosion : walk and burn
+            pHitAct = new fs_actions::WalkBurnHitAction(d);
+        }
+    } else if (d.dtype & dmg_Explosion) {
+        if (hasMinimumVersionOfMod(Mod::MOD_CHEST, Mod::MOD_V2)) {
+            pHitAct = new fs_actions::RecoilHitAction(d);
+        } else {
+            pHitAct = new fs_actions::WalkBurnHitAction(d);
+        }
+    } else if (d.dtype & (dmg_Bullet | dmg_Collision)) {
+        // When hit by a bullet or collision, ped is ejected
         pHitAct = new fs_actions::RecoilHitAction(d);
     } else if (d.dtype & dmg_Burn) {
 

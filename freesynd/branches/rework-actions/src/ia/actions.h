@@ -301,13 +301,21 @@ namespace fs_actions {
     class HitAction : public MovementAction {
     public:
         //! Constructor of the class
-        HitAction(CreatOrigin origin, ShootableMapObject::DamageInflictType d) : 
-          MovementAction(kActTypeHit, origin) {
-            damage_ = d;
-        }
+        HitAction(CreatOrigin origin, ShootableMapObject::DamageInflictType &d);
     protected:
         //! Stores the damage received
         ShootableMapObject::DamageInflictType damage_;
+    };
+
+    /*!
+     * This action is used to represent a hit when ped is suiciding by bullet.
+     */
+    class FallDeadHitAction : public HitAction {
+    public:
+        //! 
+        FallDeadHitAction(ShootableMapObject::DamageInflictType &d);
+    protected:
+        bool doExecute(int elapsed, Mission *pMission, PedInstance *pPed);
     };
 
     /*!
@@ -317,7 +325,7 @@ namespace fs_actions {
     class RecoilHitAction : public HitAction {
     public:
         //! 
-        RecoilHitAction(ShootableMapObject::DamageInflictType d);
+        RecoilHitAction(ShootableMapObject::DamageInflictType &d);
     protected:
         void doStart(Mission *pMission, PedInstance *pPed);
         bool doExecute(int elapsed, Mission *pMission, PedInstance *pPed);
@@ -329,10 +337,31 @@ namespace fs_actions {
     class LaserHitAction : public HitAction {
     public:
         //! 
-        LaserHitAction(ShootableMapObject::DamageInflictType d);
+        LaserHitAction(ShootableMapObject::DamageInflictType &d);
     protected:
         void doStart(Mission *pMission, PedInstance *pPed);
         bool doExecute(int elapsed, Mission *pMission, PedInstance *pPed);
+    };
+
+    /*!
+     * This class is used when a ped is burned. He walks while burning.
+     * The ped walks towards a random direction.
+     */
+    class WalkBurnHitAction : public HitAction {
+    public:
+        //! 
+        WalkBurnHitAction(ShootableMapObject::DamageInflictType &d);
+    protected:
+        void doStart(Mission *pMission, PedInstance *pPed);
+        bool doExecute(int elapsed, Mission *pMission, PedInstance *pPed);
+
+    protected:
+        /*! Structure to hold information while walking.*/
+        dirMoveType moveDirdesc_;
+        /*! Used to store the distance the ped has walked.*/
+        int walkedDist_;
+        /*! The direction he will walked towards.*/
+        int moveDirection_;
     };
 
     /*!
@@ -358,6 +387,8 @@ namespace fs_actions {
         bool execute(int elapsed, Mission *pMission, PedInstance *pPed);
     protected:
         bool doShoot(int elapsed, Mission *pMission, PedInstance *pPed);
+        //! Fills the ShotAttributes with values
+        void fillDamageDesc(Mission *pMission, PedInstance *pShooter, WeaponInstance *pWeapon, ShootableMapObject::DamageInflictType &dmg);
     protected:
         //! Where the player aimed with the mouse
         PathNode aimedAt_;

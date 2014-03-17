@@ -34,6 +34,7 @@
 #include "pathsurfaces.h"
 
 class Mission;
+class WeaponInstance;
 
 /*!
  * Map object class.
@@ -50,9 +51,8 @@ public:
         dmg_Laser = 0x0002,
         dmg_Burn = 0x0004,
         dmg_Explosion = 0x0008,
-        dmg_Explosion_Suicide = 0x0100, // Explosion of suiciding agent
         dmg_Collision = 0x0010, // By car or door
-        dmg_Physical = (dmg_Bullet | dmg_Laser | dmg_Burn | dmg_Explosion | dmg_Collision | dmg_Explosion_Suicide),
+        dmg_Physical = (dmg_Bullet | dmg_Laser | dmg_Burn | dmg_Explosion | dmg_Collision),
         dmg_Persuasion = 0x0020,
         dmg_Heal = 0x0040,
         dmg_Panic = 0x0080,
@@ -370,14 +370,20 @@ public:
     struct DamageInflictType {
         //! The type of damage
         DamageType dtype;
+        //! Range of damage
+        double range;
         //! The value of the damage
         int dvalue;
         //! direction damage comes from, should be angle 256 degree based
         int ddir;
+        //! Location of aimed point
+        PathNode aimedLoc;
         //! Location of origin of shot
         toDefineXYZ originLocW;
         //! The object that inflicted the damage
         ShootableMapObject * d_owner;
+        //! The weapon that generated this damage
+        WeaponInstance *pWeapon;
     };
 
 public:
@@ -408,6 +414,12 @@ public:
             n = -1;
 
         start_health_ = n;
+    }
+    /*!
+     * Reset current ped's health to starting health.
+     */
+    void resetHealth() {
+        health_ = start_health_;
     }
 
     /*!

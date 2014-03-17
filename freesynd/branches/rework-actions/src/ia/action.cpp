@@ -331,7 +331,36 @@ bool DriveVehicleAction::doExecute(int elapsed, Mission *pMission, PedInstance *
     return true;
 }
 
-RecoilHitAction::RecoilHitAction(ShootableMapObject::DamageInflictType d) : 
+HitAction::HitAction(CreatOrigin origin, ShootableMapObject::DamageInflictType &d) : 
+MovementAction(kActTypeHit, origin) {
+    damage_.aimedLoc = d.aimedLoc;
+    damage_.dtype = d.dtype;
+    damage_.dvalue = d.dvalue;
+    damage_.d_owner = d.d_owner;
+    damage_.originLocW = d.originLocW;
+    damage_.pWeapon = d.pWeapon;
+}
+
+FallDeadHitAction::FallDeadHitAction(ShootableMapObject::DamageInflictType &d) : 
+HitAction(kOrigAction, d) {
+    targetState_ = PedInstance::pa_smNone;
+}
+
+/*!
+ * 
+ * \param elapsed Time elapsed since last frame
+ * \param pMission Mission data
+ * \param pPed The ped executing the action.
+ */
+bool FallDeadHitAction::doExecute(int elapsed, Mission *pMission, PedInstance *pPed) {
+    if (status_ == kActStatusRunning) {
+        pPed->handleDeath(damage_);
+        setSucceeded();
+    }
+    return true;
+}
+
+RecoilHitAction::RecoilHitAction(ShootableMapObject::DamageInflictType &d) : 
 HitAction(kOrigAction, d) {
     targetState_ = PedInstance::pa_smHit;
 }
@@ -365,7 +394,7 @@ bool RecoilHitAction::doExecute(int elapsed, Mission *pMission, PedInstance *pPe
     return true;
 }
 
-LaserHitAction::LaserHitAction(ShootableMapObject::DamageInflictType d) : 
+LaserHitAction::LaserHitAction(ShootableMapObject::DamageInflictType &d) : 
 HitAction(kOrigAction, d) {
     targetState_ = PedInstance::pa_smHitByLaser;
 }
@@ -396,6 +425,45 @@ bool LaserHitAction::doExecute(int elapsed, Mission *pMission, PedInstance *pPed
         }
         setSucceeded();
     }
+    return true;
+}
+
+WalkBurnHitAction::WalkBurnHitAction(ShootableMapObject::DamageInflictType &d) : 
+HitAction(kOrigAction, d) {
+    targetState_ = PedInstance::pa_smWalkingBurning;
+}
+
+/*!
+ * 
+ * \param pMission Mission data
+ * \param pPed The ped executing the action.
+ */
+void WalkBurnHitAction::doStart(Mission *pMission, PedInstance *pPed) {
+    moveDirdesc_.clear();
+    walkedDist_ = 0;
+    moveDirection_ = rand() % 256;
+    pPed->setSpeed(pPed->getDefaultSpeed());
+}
+
+/*!
+ * 
+ * \param elapsed Time elapsed since last frame
+ * \param pMission Mission data
+ * \param pPed The ped executing the action.
+ */
+bool WalkBurnHitAction::doExecute(int elapsed, Mission *pMission, PedInstance *pPed) {
+    int walkDistDiff = 0;
+    pPed->moveToDir(pMission, elapsed, moveDirdesc_, moveDirection_, -1, -1, &walkDistDiff, true);
+    walkedDist_ += walkDistDiff;
+
+    if (walkedDist_ >= 800) {
+        setSucceeded();
+
+        if (pPed->handleDeath(damage_)) {
+            targetState_ = PedInstance::pa_smNone;
+        }
+    }
+
     return true;
 }
 
@@ -441,9 +509,9 @@ bool ShootAction::execute(int elapsed, Mission *pMission, PedInstance *pPed) {
 bool ShootAction::doShoot(int elapsed, Mission *pMission, PedInstance *pPed) {
     if (status_ == kActStatusRunning) {
         WeaponInstance *pWeapon = pPed->selectedWeapon();
-        ShotAttributes att;
-        pWeapon->fillShotAttributes(pMission, aimedAt_, att);
-        pWeapon->fire(pMission, att);
+        ShootableMapObject::DamageInflictType dmg;
+        fillDamageDesc(pMission, pPed, pWeapon, dmg);
+        pWeapon->fire(pMission, dmg);
         // Shooting animation is finished
         pPed->leaveState(PedInstance::pa_smFiring);
 
@@ -463,6 +531,25 @@ bool ShootAction::doShoot(int elapsed, Mission *pMission, PedInstance *pPed) {
     return true;
 }
 
+/*!
+ * Fills the ShotAttributes structure with needed information.
+ * \param pMission Mission data
+ * \param targetLoc Where to shoot
+ * \param dmg Structure to fill
+ */
+void ShootAction::fillDamageDesc(Mission *pMission,
+                                    PedInstance *pShooter,
+                                    WeaponInstance *pWeapon,
+                                    ShootableMapObject::DamageInflictType &dmg) {
+    dmg.pWeapon = pWeapon;
+    dmg.dtype = pWeapon->getWeaponClass()->dmgType();
+    dmg.dvalue =  pWeapon->getWeaponClass()->damagePerShot();
+    dmg.range = pWeapon->getWeaponClass()->range();
+    dmg.d_owner = pShooter;
+    dmg.aimedLoc = aimedAt_;
+    pShooter->convertPosToXYZ(&(dmg.originLocW));
+}
+
 AutomaticShootAction::AutomaticShootAction(CreatOrigin origin, PathNode &aimedAt) : 
     ShootAction(origin, aimedAt) {
 
@@ -478,9 +565,7 @@ void AutomaticShootAction::stop() {
 }
 
 /*!
- * Execute the shoot action.
- * When action starts, it sets the firing state (and animation) then
- * waits for the end of animation.
+ * Execute the Use medikit action.
  * \param elapsed Time since last frame.
  * \param pMission Mission data
  * \param pPed The ped executing the action.
@@ -498,9 +583,9 @@ bool UseMedikitAction::execute(int elapsed, Mission *pMission, PedInstance *pPed
             setFailed();
         } else {
             pWeapon->playSound();
-            ShotAttributes att;
-            att.pShooter = pPed;
-            pWeapon->fire(pMission, att);
+            ShootableMapObject::DamageInflictType dmg;
+            dmg.d_owner = pPed;
+            pWeapon->fire(pMission, dmg);
             update = true;
         }
     } else if (status_ == kActStatusWaitForTime) {

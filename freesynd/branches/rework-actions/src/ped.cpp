@@ -190,6 +190,9 @@ bool PedInstance::switchActionStateTo(uint32 as) {
                 | pa_smUsingCar | pa_smInCar));
             state_ |= pa_smWalking;
             break;
+        case pa_smWalkingBurning:
+            state_ = pa_smWalkingBurning;
+            break;
         case pa_smHit:
             state_ = pa_smHit;
             break;
@@ -269,6 +272,9 @@ bool PedInstance::switchActionStateFrom(uint32 as) {
         case pa_smBurning:
             state_ &= pa_smAll ^ pa_smBurning;
             break;
+        case pa_smWalkingBurning:
+            state_ = pa_smBurning;
+            break;
         case pa_smGetInCar:
             state_ &= pa_smAll ^ (pa_smStanding | pa_smGetInCar);
             break;
@@ -290,6 +296,8 @@ bool PedInstance::switchActionStateFrom(uint32 as) {
         case pa_smUnavailable:
             state_ = pa_smUnavailable;
             break;
+        default:
+            state_ = pa_smStanding;
     }
 
     return prevState != state_;
@@ -306,6 +314,8 @@ void PedInstance::setActionStateToDrawnAnim(void) {
             setDrawnAnim(PedInstance::ad_WalkFireAnim);
         else
             setDrawnAnim(PedInstance::ad_WalkAnim);
+    } else if ((state_ & pa_smWalkingBurning) != 0) {
+        setDrawnAnim(PedInstance::ad_WalkBurnAnim);
     } else if ((state_ & pa_smStanding) != 0) {
         if ((state_ & pa_smFiring) != 0)
             setDrawnAnim(PedInstance::ad_StandFireAnim);
@@ -2004,14 +2014,14 @@ PedInstance *Ped::createInstance(int map) {
 /*!
  * Forces an agent to commit suicide.
  * If he's equiped with the good version of Mod Chest, he will
- * explodes causing damage on nearby Peds but all his weapons will
+ * explode causing damage on nearby Peds and all his weapons will
  * be destroyed.
  * Else he dies alone leaving his weapons on the ground.
  */
 void PedInstance::commitSuicide() {
     if (hasMinimumVersionOfMod(Mod::MOD_CHEST, Mod::MOD_V2)) {
-        // Having a chest v2 makes agent explodes
-        ShotClass::createExplosion(this, 512.0, 16, true);
+        // Having a chest v2 makes agent explode
+        Explosion::createExplosion(g_Session.getMission(), this, 512.0, 16);
     } else {
         // else he just shoot himself
         ShootableMapObject::DamageInflictType dit;
@@ -2020,7 +2030,7 @@ void PedInstance::commitSuicide() {
         // force damage value to agent health so he's killed at once
         dit.dvalue = PedInstance::kAgentMaxHealth;
 
-        handleDamage(&dit);
+        handleHit(dit);
     }
 }
 
@@ -2111,7 +2121,6 @@ PedInstance::PedInstance(Ped *ped, int m) : ShootableMovableMapObject(m),
     tm_before_check_ = 1000;
     base_mod_acc_ = 0.1;
     last_firing_target_.desc = 0;
-    is_suiciding_ = false;
 
     // Todo : adds a behaviour for the type of ped
     pBehaviour_ = new fs_actions::NopeBehaviour();
@@ -2681,6 +2690,18 @@ bool PedInstance::handleDeath(ShootableMapObject::DamageInflictType &d) {
                 }
                 destroyAllWeapons();
                 break;
+            case MapObject::dmg_Explosion:
+                if (hasMinimumVersionOfMod(Mod::MOD_CHEST, Mod::MOD_V2) &&
+                    d.d_owner != this) {
+                    setDrawnAnim(PedInstance::ad_DieAnim);
+                    dropAllWeapons();
+                } else {
+                    // was burning because not enough protected or suicide
+                    // so die burning
+                    setDrawnAnim(PedInstance::ad_DieBurnAnim);
+                    destroyAllWeapons();
+                }
+                break;
         }
         // send an event to alert agent died
         if (isOurAgent()) {
@@ -2771,16 +2792,6 @@ bool PedInstance::handleDamage(ShootableMapObject::DamageInflictType *d) {
                 destroyAllWeapons();
                 setTimeShowAnim(4000);
                 break;
-            case MapObject::dmg_Explosion_Suicide:
-                if (is_suiciding()) {
-                    set_is_suiciding(false);
-                    setDrawnAnim(PedInstance::ad_StandBurnAnim);
-                    destroyAllWeapons();
-                    setTimeShowAnim(4000);
-                    break;
-                }
-                // If the agent was not suiciding himself
-                // he is not burnt but dies as a normal hit
             case MapObject::dmg_Collision:
                 setDrawnAnim(PedInstance::ad_HitAnim);
                 dropAllWeapons();

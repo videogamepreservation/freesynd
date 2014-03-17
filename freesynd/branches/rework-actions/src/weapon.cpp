@@ -1218,9 +1218,9 @@ void WeaponInstance::deactivate() {
  * \param pMission Mission data
  * \param aimedAt Where the player wants to shoot
  */
-void WeaponInstance::fire(Mission *pMission, ShotAttributes &att) {
+void WeaponInstance::fire(Mission *pMission, ShootableMapObject::DamageInflictType &dmg) {
     if (getWeaponType() == Weapon::MediKit) {
-        att.pShooter->setHealth(att.pShooter->startHealth());
+        dmg.d_owner->resetHealth();
     } else if (getWeaponType() == Weapon::GaussGun) {
         // TODO : complete;
     } else if (getWeaponType() == Weapon::Flamer) {
@@ -1228,34 +1228,13 @@ void WeaponInstance::fire(Mission *pMission, ShotAttributes &att) {
     } else {
         // For other weapons, damage are done immediatly because projectile speed
         // is too high to draw them
-        InstantImpactShot shot(pMission, att);
+        InstantImpactShot shot(dmg);
         shot.inflictDamage(pMission);
     }
 
     ammo_remaining_ -= pWeaponClass_->ammoPerShot();
     if (ammo_remaining_ < 0) {
         ammo_remaining_ = 0;
-    }
-}
-
-/*!
- * Fills the ShotAttributes structure with needed information.
- * \param pMission Mission data
- * \param targetLoc Where to shoot
- * \param att Structure to fill
- */
-void WeaponInstance::fillShotAttributes(Mission *pMission, const PathNode &targetLoc, ShotAttributes &att) {
-    att.impactLoc = targetLoc;
-    att.pWeapon = this;
-    att.pShooter = dynamic_cast<PedInstance *>(owner_);
-
-    att.damage.dtype = pWeaponClass_->dmgType();
-    att.damage.dvalue =  pWeaponClass_->damagePerShot();
-    att.damage.d_owner = owner_;
-    if (owner_) {
-        owner_->convertPosToXYZ(&(att.damage.originLocW));
-    } else {
-        this->convertPosToXYZ(&(att.damage.originLocW));
     }
 }
 
@@ -1591,7 +1570,7 @@ void ShotClass::createExplosion(ShootableMapObject* tobj, double dmg_rng,
     ShootableMapObject::DamageInflictType dit;
     dit.d_owner = tobj;
     dit.dvalue = dmg_value;
-    dit.dtype = is_suicide ? MapObject::dmg_Explosion_Suicide : MapObject::dmg_Explosion;
+    dit.dtype = MapObject::dmg_Explosion;
     dit.ddir = -1;
     toDefineXYZ xyz;
     tobj->convertPosToXYZ(&xyz);
