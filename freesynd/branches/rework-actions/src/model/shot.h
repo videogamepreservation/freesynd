@@ -96,7 +96,7 @@ public:
 
     void inflictDamage(Mission *pMission);
 private:
-    void rangeDamageAnim(Mission *pMission, toDefineXYZ &cp, double dmg_rng, int rngdamg_anim);
+    void generateFlameWaves(Mission *pMission, toDefineXYZ &cp, double dmg_rng, int rngdamg_anim);
 };
 
 #endif // MODEL_SHOT_H_

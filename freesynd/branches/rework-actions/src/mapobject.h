@@ -415,6 +415,16 @@ public:
 
         start_health_ = n;
     }
+
+    /*!
+     * Remove a certain amount of health.
+     */
+    void decreaseHealth(int amount) {
+        health_ -= amount;
+        if (health_ <= 0) {
+            health_ = 0;
+        }
+    }
     /*!
      * Reset current ped's health to starting health.
      */
@@ -427,6 +437,7 @@ public:
      * \param d Damage description
      */
     virtual void handleHit(DamageInflictType &d) {
+        // TODO : remove handleDamage()
         handleDamage(&d);
     }
 

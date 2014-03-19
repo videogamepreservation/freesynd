@@ -36,6 +36,7 @@ using namespace fs_actions;
 // Constant definition
 //*************************************
 const int FollowAction::kFollowDistance = 192;
+const int WalkBurnHitAction::kMaxDistanceToWalkBurning = 800;
 
 void NopeBehaviour::execute(Mission *pMission, PedInstance *pPed) {
 }
@@ -456,7 +457,7 @@ bool WalkBurnHitAction::doExecute(int elapsed, Mission *pMission, PedInstance *p
     pPed->moveToDir(pMission, elapsed, moveDirdesc_, moveDirection_, -1, -1, &walkDistDiff, true);
     walkedDist_ += walkDistDiff;
 
-    if (walkedDist_ >= 800) {
+    if (walkedDist_ >= kMaxDistanceToWalkBurning) {
         setSucceeded();
 
         if (pPed->handleDeath(damage_)) {

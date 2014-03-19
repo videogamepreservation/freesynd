@@ -223,8 +223,10 @@ weapon.11.range=1000
 weapon.11.rank=-1
 weapon.11.anim=378
 weapon.11.ammopershot=1
+# This is the time before the bomb explodes
 weapon.11.timeforshot=15000
-weapon.11.timereload=1
+# for bomb, this field is used to delay the tick sound effect
+weapon.11.timereload=800
 weapon.11.damagerange=512
 weapon.11.shotangle=0.0
 weapon.11.shotaccuracy=0.0

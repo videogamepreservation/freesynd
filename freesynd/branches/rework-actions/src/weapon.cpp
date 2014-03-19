@@ -254,7 +254,7 @@ WeaponInstance *WeaponInstance::createInstance(Weapon *pWeaponClass) {
 }
 
 WeaponInstance::WeaponInstance(Weapon * w) : ShootableMapObject(-1),
-processed_time_(0)
+    bombSoundTimer(w->timeReload()), bombExplosionTimer(w->timeForShot())
 {
     pWeaponClass_ = w;
     ammo_remaining_ = w->ammo();
@@ -291,38 +291,20 @@ bool WeaponInstance::animate(int elapsed) {
                 ammo_remaining_ -= ammoused;
             return true;
         } else if (main_type_ == Weapon::TimeBomb) {
-            int tm_left = elapsed;
-            if (((processed_time_ / 750)
-                < (processed_time_ + elapsed) / 750)
-                && (processed_time_ + elapsed) / 750 != (pWeaponClass_->timeForShot() / 750))
-            {
+            if (bombSoundTimer.update(elapsed)) {
                 g_App.gameSounds().play(snd::TIMEBOMB);
             }
-            processed_time_ += elapsed;
+            
             is_ignored_ = true;
-            if ((inflictDamage(NULL, NULL, &tm_left)) == 0) {
-                map_ = -1;
-                health_ = 0;
-                deactivate();
-                Mission *m = g_Session.getMission();
-                SFXObject *so = new SFXObject(m->map(),
-                    pWeaponClass_->impactAnims()->groundHit);
-                so->setPosition(tile_x_, tile_y_, tile_z_,
-                    off_x_, off_y_, off_z_);
-                m->addSfxObject(so);
-                toDefineXYZ cur_pos = {tile_x_ * 256 + off_x_,
-                    tile_y_ * 256 + off_y_, tile_z_ * 128 + off_z_};
-
-                rangeDamageAnim(cur_pos, (double)pWeaponClass_->rangeDmg(),
-                    pWeaponClass_->impactAnims()->rd_anim);
+            if (bombExplosionTimer.update(elapsed)) {
+                ShootableMapObject::DamageInflictType dmg;
+                fire(g_Session.getMission(), dmg);
                 return true;
             }
             is_ignored_ = false;
             time_consumed_ = true;
-        }/* else if (main_type_ == Weapon::Persuadatron) {
-            int tm_left = elapsed;
-            inflictDamage(NULL, NULL, &tm_left);
-        }*/
+        }
+
         updtWeaponUsedTime(elapsed);
     } else if (weapon_used_time_ != 0) {
         updtWeaponUsedTime(elapsed);
@@ -1216,7 +1198,7 @@ void WeaponInstance::deactivate() {
  * Use weapon and decrease ammo.
  * This method is used only for shooting weapons and Medikit.
  * \param pMission Mission data
- * \param aimedAt Where the player wants to shoot
+ * \param dmg Information on the damage to perform
  */
 void WeaponInstance::fire(Mission *pMission, ShootableMapObject::DamageInflictType &dmg) {
     if (getWeaponType() == Weapon::MediKit) {
@@ -1225,6 +1207,12 @@ void WeaponInstance::fire(Mission *pMission, ShootableMapObject::DamageInflictTy
         // TODO : complete;
     } else if (getWeaponType() == Weapon::Flamer) {
         // TODO : complete;
+    }  else if (getWeaponType() == Weapon::TimeBomb) {
+        map_ = -1;
+        health_ = 0;
+        deactivate();
+        Explosion::createExplosion(pMission, this, 
+            (double)pWeaponClass_->rangeDmg(), pWeaponClass_->damagePerShot());
     } else {
         // For other weapons, damage are done immediatly because projectile speed
         // is too high to draw them
@@ -1475,33 +1463,15 @@ void WeaponInstance::getNonFriendInRange(toDefineXYZ * cp,
     }
 }
 
-bool WeaponInstance::handleDamage(ShootableMapObject::DamageInflictType * d)
+void WeaponInstance::handleHit(ShootableMapObject::DamageInflictType & d)
 {
-    if (health_ > 0) {
-        if (main_type_ == Weapon::TimeBomb) {
-            deactivate();
-            map_ = -1;
-            is_ignored_ = true;
-            health_ = 0;
-            int tm = pWeaponClass_->timeForShot();
-            if ((inflictDamage(NULL, NULL, &tm)) == 0) {
-
-                Mission *m = g_Session.getMission();
-                SFXObject *so = new SFXObject(m->map(),
-                    pWeaponClass_->impactAnims()->groundHit);
-                so->setPosition(tile_x_, tile_y_, tile_z_,
-                    off_x_, off_y_, off_z_);
-                m->addSfxObject(so);
-                toDefineXYZ cur_pos = {tile_x_ * 256 + off_x_,
-                    tile_y_ * 256 + off_y_, tile_z_ * 128 + off_z_};
-
-                rangeDamageAnim(cur_pos, (double)pWeaponClass_->rangeDmg(),
-                    pWeaponClass_->impactAnims()->rd_anim);
-                return true;
-            }
-        }
+    // When a bomb is hit, it explodes
+    if (main_type_ == Weapon::TimeBomb && health_ > 0) {
+        is_ignored_ = true;
+        // we pass the given DamageInflictType just for the compiler
+        // as it is not used by the fire method for a Bomb
+        fire(g_Session.getMission(), d);
     }
-    return true;
 }
 
 void WeaponInstance::updtWeaponUsedTime(int elapsed) {
@@ -1560,37 +1530,4 @@ void ShotClass::rangeDamageAnim(toDefineXYZ &cp, double dmg_rng,
         }
         angle_inc /= 2.0;
     }
-}
-
-void ShotClass::createExplosion(ShootableMapObject* tobj, double dmg_rng,
-    int dmg_value, bool is_suicide)
-{
-    Mission *m = g_Session.getMission();
-    std::vector<ShootableMapObject *> all_targets;
-    ShootableMapObject::DamageInflictType dit;
-    dit.d_owner = tobj;
-    dit.dvalue = dmg_value;
-    dit.dtype = MapObject::dmg_Explosion;
-    dit.ddir = -1;
-    toDefineXYZ xyz;
-    tobj->convertPosToXYZ(&xyz);
-    xyz.z += 8;
-
-    m->getInRangeAll(&xyz, all_targets, Weapon::stm_AllObjects,
-        true, dmg_rng);
-
-    for (std::vector<ShootableMapObject *>::iterator it = all_targets.begin();
-        it != all_targets.end(); it++)
-    {
-        // TODO: set direction?
-        ShootableMapObject *smo = *it;
-        smo->handleDamage(&dit);
-
-        SFXObject *so = new SFXObject(m->map(), SFXObject::sfxt_ExplosionBall);
-        so->setPosition(smo->tileX(), smo->tileY(), smo->tileZ(), smo->offX(),
-            smo->offY(), smo->offZ());
-        so->correctZ();
-        m->addSfxObject(so);
-    }
-    rangeDamageAnim(xyz, dmg_rng, SFXObject::sfxt_ExplosionFire);
 }

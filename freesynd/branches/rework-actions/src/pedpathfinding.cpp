@@ -2372,7 +2372,7 @@ bool PedInstance::movementP(Mission *m, int elapsed)
  * 5b(32) - dist passed set, 6b(64) -  bouncing restored original dir
  * (loop is possible)
  */
-uint8 PedInstance::moveToDir(Mission* m, int elapsed, dirMoveType &dir_move,
+uint8 PedInstance::moveToDir(Mission* m, int elapsed, DirMoveType &dir_move,
     int dir, int t_posx, int t_posy, int* dist, bool set_dist)
 {
     // TODO: better non-posiotional random walking

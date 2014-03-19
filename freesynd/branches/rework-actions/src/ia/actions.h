@@ -356,8 +356,14 @@ namespace fs_actions {
         bool doExecute(int elapsed, Mission *pMission, PedInstance *pPed);
 
     protected:
+        /*!
+         * A constant to define the maximum distance a ped
+         * can walk while burning before dying.
+         */
+        static const int kMaxDistanceToWalkBurning;
+
         /*! Structure to hold information while walking.*/
-        dirMoveType moveDirdesc_;
+        DirMoveType moveDirdesc_;
         /*! Used to store the distance the ped has walked.*/
         int walkedDist_;
         /*! The direction he will walked towards.*/

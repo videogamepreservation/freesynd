@@ -27,6 +27,7 @@
 
 #include <map>
 
+#include "app.h"
 #include "model/shot.h"
 #include "mission.h"
 #include "ped.h"
@@ -83,11 +84,11 @@ void Shot::getAllShootablesWithinRange(Mission *pMission,
         }
     }
 
-    // look at all weapons except the weapon that generated the shot
+    // look at all weapons on the ground except the weapon that generated the shot
     for (size_t i = 0; i < pMission->numWeapons(); ++i) {
-        ShootableMapObject *w = pMission->weapon(i);
-        if (w != dmg_.pWeapon &&
-            pMission->inRangeCPos(&originLocW, &w, NULL, false, true, dmg_.range) == 1) {
+        WeaponInstance *w = pMission->weapon(i);
+        if (w != dmg_.pWeapon && w->map() != -1 &&
+            pMission->inRangeCPos(&originLocW, (ShootableMapObject **)w, NULL, false, true, dmg_.range) == 1) {
                 objInRangeVec.push_back(w);
         }
     }
@@ -252,7 +253,10 @@ void InstantImpactShot::diffuseImpact(Mission *pMission, toDefineXYZ &originLocW
 }
 
 /*!
- *
+ * Look in the given list of reachable object if an object is hit by an impact.
+ * If there's something between the origin and the estimated impact, impactLocT
+ * is updated.
+ * \return Return the found object or NULL if no object was hit
  */
 ShootableMapObject *InstantImpactShot::checkHitTarget(std::vector<ShootableMapObject *> objInRangeLst, toDefineXYZ &originLocW, PathNode &impactLocT) {
     ShootableMapObject *pTarget = NULL;
@@ -289,14 +293,13 @@ void InstantImpactShot::createImpactAnimation(Mission *pMission, ShootableMapObj
 void Explosion::createExplosion(Mission *pMission, ShootableMapObject *pOwner, double range, int dmgValue) {
     ShootableMapObject::DamageInflictType dmg;
     if (pOwner && pOwner->majorType() == MapObject::mjt_Weapon) {
-        // It's a bomb that exploded
+        // It's a bomb that exploded (other waepons do not explode)
         dmg.pWeapon = dynamic_cast<WeaponInstance *>(pOwner);
-        dmg.d_owner = NULL;
     } else {
         dmg.pWeapon = NULL;
-        dmg.d_owner = pOwner;
     }
     
+    dmg.d_owner = pOwner;
     dmg.dtype = MapObject::dmg_Explosion;
     dmg.range = range;
     dmg.dvalue =  dmgValue;
@@ -307,24 +310,30 @@ void Explosion::createExplosion(Mission *pMission, ShootableMapObject *pOwner, d
     explosion.inflictDamage(pMission);
 }
 
+/*!
+ * 
+ */
 void Explosion::inflictDamage(Mission *pMission) {
     std::vector<ShootableMapObject *> objInRangeLst;
-
+    // Get all destructible objects in range
     getAllShootablesWithinRange(pMission, dmg_.originLocW, objInRangeLst, true);
 
     for (std::vector<ShootableMapObject *>::iterator it = objInRangeLst.begin();
         it != objInRangeLst.end(); it++)
     {
         ShootableMapObject *smo = *it;
+        // distribute damage
         smo->handleHit(dmg_);
-
+        // draw a explosion ball above each object that was hit
         SFXObject *so = new SFXObject(pMission->map(), SFXObject::sfxt_ExplosionBall);
         so->setPosition(smo->tileX(), smo->tileY(), smo->tileZ(), smo->offX(),
             smo->offY(), smo->offZ());
         so->correctZ();
         pMission->addSfxObject(so);
     }
-    rangeDamageAnim(pMission, dmg_.originLocW, dmg_.range, SFXObject::sfxt_ExplosionFire);
+    // create the ring of fire around the origin of explosion
+    generateFlameWaves(pMission, dmg_.originLocW, dmg_.range, SFXObject::sfxt_ExplosionFire);
+    g_App.gameSounds().play(snd::EXPLOSION_BIG);
 }
 
 /*! Draws animation of impact/explosion
@@ -332,7 +341,7 @@ void Explosion::inflictDamage(Mission *pMission) {
  * @param dmg_rng effective range for drawing
  * @param rngdamg_anim animation to be used for drawing
  */
-void Explosion::rangeDamageAnim(Mission *pMission, toDefineXYZ &cp, double dmg_rng,
+void Explosion::generateFlameWaves(Mission *pMission, toDefineXYZ &cp, double dmg_rng,
     int rngdamg_anim)
 {
     toDefineXYZ base_pos = cp;

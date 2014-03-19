@@ -33,6 +33,7 @@
 #include "mapobject.h"
 #include "sound/sound.h"
 #include "utils/configfile.h"
+#include "utils/timer.h"
 #include "model/shot.h"
 
 /*!
@@ -271,13 +272,10 @@ protected:
     snd::InGameSample sample_;
 };
 
-class PedInstance;
-
 class ShotClass {
 public:
     static void rangeDamageAnim(toDefineXYZ &cp, double dmg_rng,
         int rngdamg_anim);
-    static void createExplosion(ShootableMapObject *tobj, double dmg_rng, int dmg_value = 16, bool is_suicide = false);
 
 public:
     ShotClass(ShootableMapObject *tobj = NULL) : owner_(NULL),
@@ -361,7 +359,7 @@ public:
     void getNonFriendInRange(toDefineXYZ * cp,
         ShootableMapObject * & target, bool checkTileOnly = true,
         int maxr = -1);
-    bool handleDamage(ShootableMapObject::DamageInflictType * d);
+    void handleHit(ShootableMapObject::DamageInflictType & d);
 
     bool canShoot() {
         return pWeaponClass_->canShoot();
@@ -407,7 +405,9 @@ protected:
     * */
     int weapon_used_time_;
     // used for timebomb sound effect
-    int processed_time_;
+    fs_utils::Timer bombSoundTimer;
+    /*! Timer used for bomb explosion.*/
+    fs_utils::Timer bombExplosionTimer;
     bool activated_;
     /*! used to avoid double consuming of same elapsed time,
     * if ped shoots, time is consumed and should not be reused by weapon,

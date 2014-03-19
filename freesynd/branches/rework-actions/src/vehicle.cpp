@@ -799,15 +799,19 @@ bool VehicleInstance::move_vehicle(int elapsed)
 }
 
 
-bool VehicleInstance::handleDamage(ShootableMapObject::DamageInflictType *d) {
-    if (health_ <= 0 || d->dtype == MapObject::dmg_Persuasion)
-        return false;
-    health_ -= d->dvalue;
-    if (health_ <= 0) {
-        health_ = 0;
+/*!
+ * Method called when object is hit by a weapon shot.
+ * \param d Damage description
+ */
+void VehicleInstance::handleHit(ShootableMapObject::DamageInflictType &d) {
+    if (health_ <= 0 || d.dtype == MapObject::dmg_Persuasion)
+        return;
+
+    decreaseHealth(d.dvalue);
+    if (health_ == 0) {
         is_ignored_ = true;
         clearDestination();
-        switch ((unsigned int)d->dtype) {
+        switch ((unsigned int)d.dtype) {
             case MapObject::dmg_Bullet:
             case MapObject::dmg_Laser:
             case MapObject::dmg_Burn:
@@ -822,12 +826,11 @@ bool VehicleInstance::handleDamage(ShootableMapObject::DamageInflictType *d) {
             PedInstance *p = *(passengers_.begin());
             dropPassenger(p);
         }
-        ShotClass explosion;
-        explosion.createExplosion(this, 512.0);
+        
+        Explosion::createExplosion(g_Session.getMission(), this, 512.0);
     } else {// NOTE: maybe reduce speed on hit?
         // TODO: let passengers know that vehicle is attacked
     }
-    return true;
 }
 
 /*!

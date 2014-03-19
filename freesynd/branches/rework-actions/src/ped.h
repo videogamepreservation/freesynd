@@ -334,6 +334,8 @@ public:
     //! Forces agent to kill himself
     void commitSuicide();
 
+    //! Return the damage after applying protection of Mod
+    int getRealDamage(ShootableMapObject::DamageInflictType &d);
     //! Method called when object is hit by a weapon shot.
     void handleHit(ShootableMapObject::DamageInflictType &d);
     //! Method called to check if ped has died
@@ -352,7 +354,7 @@ public:
     void setDrawnAnim(AnimationDrawn drawn_anim);
     bool handleDrawnAnim(int elapsed);
 
-    uint8 moveToDir(Mission *m, int elapsed, dirMoveType &dir_move,
+    uint8 moveToDir(Mission *m, int elapsed, DirMoveType &dir_move,
         int dir = -1, int t_posx = -1, int t_posy = -1, int *dist = NULL,
         bool set_dist = false);
 
@@ -711,7 +713,7 @@ public:
                 int32 rd;
                 // -1 is unset
                 int32 speed;
-                dirMoveType dir_move;
+                DirMoveType dir_move;
             } dist_var;
         } multi_var;
         /* for ai_aReachLocation 0 - go to location, 1 - go to direction,

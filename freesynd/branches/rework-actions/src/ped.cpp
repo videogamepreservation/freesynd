@@ -2647,16 +2647,21 @@ bool PedInstance::handleDrawnAnim(int elapsed) {
 }
 
 /*!
+ * Return the damage after applying reduction of Mod protection.
+ * \param d Damage description
+ */
+int PedInstance::getRealDamage(ShootableMapObject::DamageInflictType &d) {
+    // TODO : implement
+    return d.dvalue;
+}
+
+/*!
  * Method called when object is hit by a weapon shot.
  * \param d Damage description
  */
 void PedInstance::handleHit(DamageInflictType &d) {
     if (health_ > 0) {
-        // TODO : Add ped's resistance with mods
-        health_ -= d.dvalue;
-        if (health_ <= 0) {
-            health_ = 0;
-        }
+        decreaseHealth(getRealDamage(d));
 
         // Only add a hit if ped is not currently being hit
         if (currentAction_ == NULL || currentAction_->type() != fs_actions::Action::kActTypeHit) {

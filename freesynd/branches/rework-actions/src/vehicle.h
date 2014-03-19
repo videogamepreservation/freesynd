@@ -153,7 +153,7 @@ public:
         return (vehicle_driver_ == vehicleDriver);
     }
 
-    bool handleDamage(ShootableMapObject::DamageInflictType *d);
+    void handleHit(ShootableMapObject::DamageInflictType &d);
 
 protected:
     bool move_vehicle(int elapsed);
