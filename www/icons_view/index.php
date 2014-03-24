@@ -1,7 +1,7 @@
 <html>
 	<body style="background-color: gray">
 		<H2>Icons in different sizes</H2>
-		<br /><?
+		<br /><?php
  //Begin Epoll 3.1
  $pollname="icon";
  $p_path="epoll31/";
@@ -23,8 +23,9 @@
 		<br />
 		<?php
 		$sizes = array(16, 24, 32, 48, 64, 96, 128, 256, 512);
-		$names = array('./FS_icon-512x512.svg' => '"FS icon" by Pawel Swoboda',
-'./Freesynd_rev7.svg' => '"Syndilogo" - Oscar Natividad');
+		$names = array('./FS_icon-rev3-512x512.svg' => '"FS icon" by Pawel Swoboda',
+'./Freesynd_rev7.svg' => '"Syndilogo" - Oscar Natividad',
+'./freesyndicon.svg' => '"Freesynd icon" - Nick Parker-Stevens');
 		
 		foreach ($names as $fname => $authname) {
 			echo '<br /> <hr />';

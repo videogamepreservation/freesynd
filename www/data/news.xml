@@ -1,5 +1,15 @@
 <?xml version='1.0' standalone='yes'?>
-<news>>
+<news>
+	<item title="News Icons" date="2014-03-24" author="Benoit Blancard"
+	rssDesc="Last call before" id="13">
+	Hi all! It's been a while since the poll on the FreeSynd icon has been launched.
+	The project's activity was really low so we never took the time to choose the winner. I apologize to
+	our contributors who did a great job!{{br /}}
+	Anyway, lately Pawel has sent a new release for his icon and Nick Parker-Stevens also submitted his contribution
+	which I'm pleased to include in the contest.{{br /}}
+	So I announce that, in two weeks from now, the poll will be closed and the winner be chosen based on the votings!
+	Good luck every one!
+	</item>
 	<item title="Icons and voting" date="2013-07-23" author="Bohdan Stelmakh"
 	rssDesc="New icons need user voting." id="13">
 	Thanks to contribution from Pawel Swoboda and Oscar Natividad we have two icons now,
