@@ -70,8 +70,6 @@ Mission::~Mission()
     }
     for (unsigned int i = 0; i < prj_shots_.size(); i++)
         delete prj_shots_[i];
-    for (unsigned int i = 0; i < shots_.size(); i++)
-        delete shots_[i];
     for (unsigned int i = 0; i < statics_.size(); i++)
         delete statics_[i];
     for (unsigned int i = 0; i < objectives_.size(); i++)

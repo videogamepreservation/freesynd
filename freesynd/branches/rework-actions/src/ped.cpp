@@ -32,6 +32,7 @@
 #include "core/squad.h"
 
 const int PedInstance::kAgentMaxHealth = 16;
+const int PedInstance::kDefaultShootReactionTime = 200;
 
 Ped::Ped() {
     memset(stand_anims_, 0, sizeof(stand_anims_));
@@ -568,18 +569,23 @@ void PedInstance::updateShootingDirection(Mission *pMission, ShootableMapObject 
     pWeapon->setDirection(txb - xb, tyb - yb, &dir);
     if (dir != -1)
         setDirection(dir);
+
+    if (pUseWeaponAction_ && pUseWeaponAction_->type() == fs_actions::Action::kActTypeShoot) {
+        fs_actions::ShootAction *pShoot = dynamic_cast<fs_actions::ShootAction *>(pUseWeaponAction_);
+        pShoot->setAimedAt(shootPt);
+    }
 }
 
 /*!
  * Returns the mean time between two shoots.
- * When a ped has shot, it takes time to shoot again : time to reload,
- * time for the shot and ped's reactivity (IPA and Mods)
+ * When a ped has shot, it takes time to shoot again : time to reload 
+ * the weapon + ped's reactivity time (influenced by IPA and Mods)
  * \param pWeapon The weapon used to shoot
  * \return Time to wait
  */
 int PedInstance::getTimeBetweenShoots(WeaponInstance *pWeapon) {
     // TODO : Add IPA and mods influence
-    return pWeapon->getWeaponClass()->timeForShot() + 
+    return kDefaultShootReactionTime + 
             pWeapon->getWeaponClass()->timeReload();
 }
 

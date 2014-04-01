@@ -469,8 +469,12 @@ bool WalkBurnHitAction::doExecute(int elapsed, Mission *pMission, PedInstance *p
 }
 
 ShootAction::ShootAction(CreatOrigin origin, PathNode &aimedAt) : 
-    UseWeaponAction(origin) {
+    UseWeaponAction(origin, kActTypeShoot) {
         aimedAt_ = aimedAt;
+}
+
+void ShootAction::setAimedAt(PathNode &aimedAt) {
+    aimedAt_ = aimedAt;
 }
 
 /*!
@@ -552,17 +556,39 @@ void ShootAction::fillDamageDesc(Mission *pMission,
 }
 
 AutomaticShootAction::AutomaticShootAction(CreatOrigin origin, PathNode &aimedAt) : 
-    ShootAction(origin, aimedAt) {
-
+        ShootAction(origin, aimedAt) {
+    stopShooting_ = false;
 }
 
-bool AutomaticShootAction::doExecute(int elapsed, Mission *pMission, PedInstance *pPed) {
-    printf("AutomaticShootAction::doExecute\n");
-    return false;
+bool AutomaticShootAction::execute(int elapsed, Mission *pMission, PedInstance *pPed) {
+    if (status_ == kActStatusNotStarted) {
+        // The first time
+        status_ = kActStatusWaitForAnim;
+        // change state to firing
+        pPed->goToState(PedInstance::pa_smFiring);
+        pPed->setFramesPerSec(16);
+    } else if (status_ == kActStatusRunning) {
+        WeaponInstance *pWeapon = pPed->selectedWeapon();
+        ShootableMapObject::DamageInflictType dmg;
+        fillDamageDesc(pMission, pPed, pWeapon, dmg);
+        pWeapon->playSound();
+        pWeapon->fire(pMission, dmg);
+
+        if (pWeapon->ammoRemaining() == 0 || stopShooting_) {
+            // Shooting animation is finished
+            pPed->leaveState(PedInstance::pa_smFiring);
+            setSucceeded();
+        } else {
+            status_ = kActStatusWaitForAnim;
+            pPed->setFrame(0);
+        }
+    }
+
+    return true;
 }
 
 void AutomaticShootAction::stop() {
-    setSucceeded();
+    stopShooting_ = true;
 }
 
 /*!

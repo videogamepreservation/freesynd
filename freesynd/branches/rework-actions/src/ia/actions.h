@@ -65,12 +65,18 @@ namespace fs_actions {
      */
     class Action {
     public:
-        //! What type of action
+        /*! 
+         * What type of action.
+         * Only usefull types are defined.
+         * Other actions have type kActTypeUndefined.
+         */
         enum ActionType {
             //! The walk action
             kActTypeWalk,
             //! For all type of hit action
             kActTypeHit,
+            //! Action of shooting
+            kActTypeShoot,
             kActTypeUndefined
         };
 
@@ -377,6 +383,7 @@ namespace fs_actions {
     class UseWeaponAction : public Action {
     public:
         UseWeaponAction(CreatOrigin origin) : Action(kActTypeUndefined, origin) {};
+        UseWeaponAction(CreatOrigin origin, ActionType type) : Action(type, origin) {};
 
         //! Stop shooting (mainly used with AutomaticShootAction)
         virtual void stop() {};
@@ -391,6 +398,8 @@ namespace fs_actions {
 
         //! Entry point to execute the action
         bool execute(int elapsed, Mission *pMission, PedInstance *pPed);
+        //! Update target position
+        void setAimedAt(PathNode &aimedAt);
     protected:
         bool doShoot(int elapsed, Mission *pMission, PedInstance *pPed);
         //! Fills the ShotAttributes with values
@@ -409,10 +418,11 @@ namespace fs_actions {
     public:
         AutomaticShootAction(CreatOrigin origin, PathNode &dest);
 
+        bool execute(int elapsed, Mission *pMission, PedInstance *pPed);
         void stop();
     protected:
-        bool doExecute(int elapsed, Mission *pMission, PedInstance *pPed);
-
+        //! when set to true, shooting stops
+        bool stopShooting_;
     };
 
     /*!

@@ -140,9 +140,6 @@ public:
     size_t numPrjShots() { return prj_shots_.size(); }
     ProjectileShot *prjShots(size_t i) { return prj_shots_[i]; }
 
-    size_t numShots() { return shots_.size(); }
-    Shot *shots(size_t i) { return shots_[i]; }
-
     void addSfxObject(SFXObject *so) {
         sfx_objects_.push_back(so);
     }
@@ -165,14 +162,6 @@ public:
     void delPrjShot(size_t i) {
         delete prj_shots_[i];
         prj_shots_.erase((prj_shots_.begin() + i));
-    }
-
-    void addShot(Shot *prj) {
-        shots_.push_back(prj);
-    }
-    void delShot(size_t i) {
-        delete shots_[i];
-        shots_.erase((shots_.begin() + i));
     }
 
     /*! Return the mission statistics. */
@@ -251,7 +240,6 @@ protected:
     std::vector<Static *> statics_;
     std::vector<SFXObject *> sfx_objects_;
     std::vector<ProjectileShot *> prj_shots_;
-    std::vector<Shot *> shots_;
 
     std::vector <ObjectiveDesc *> objectives_;
     //std::vector <ObjectiveDesc> sub_objectives_;

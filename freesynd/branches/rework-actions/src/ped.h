@@ -165,6 +165,9 @@ class PedInstance : public ShootableMovableMapObject, public WeaponHolder,
 public:
     //! starting health for agents
     static const int kAgentMaxHealth;
+    //! Default time for a ped between two shoots
+    static const int kDefaultShootReactionTime;
+
     PedInstance(Ped *ped, int m);
     ~PedInstance();
     //! Initialize the ped instance as an agent

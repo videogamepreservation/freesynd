@@ -88,7 +88,7 @@ protected:
     void updtAgentsMarker();
     //! Set loc param with point on the map where player clicked to shoot
     bool getAimedAt(int x, int y, PathNode &loc);
-    void stopShootingEvent(void);
+    void stopShootingEvent();
     //! Centers the minimap on the selection leader
     void centerMinimapOnLeader();
     //! Animate the minimap
@@ -129,22 +129,6 @@ protected:
     bool pressed_btn_select_all_;
     /*! Flag to store the fact that player is currently shooting.*/
     bool isPlayerShooting_;
-    struct ShootingEvents {
-        bool shooting_;
-        bool agents_shooting[4];
-        uint32 ids[4];
-        void clear() {
-            shooting_ = false;
-            agents_shooting[0] = false;
-            agents_shooting[1] = false;
-            agents_shooting[2] = false;
-            agents_shooting[3] = false;
-            ids[0] = 0;
-            ids[1] = 0;
-            ids[2] = 0;
-            ids[3] = 0;
-        }
-    } shooting_events_;
 
     // when ipa is manipulated this represents
     struct IPA_manipulation {

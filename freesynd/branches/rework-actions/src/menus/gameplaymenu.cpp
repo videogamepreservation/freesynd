@@ -59,7 +59,6 @@ mm_renderer_()
 {
     scroll_x_ = 0;
     scroll_y_ = 0;
-    shooting_events_.clear();
     ipa_chng_.ipa_chng = -1;
     g_gameCtrl.addListener(this, GameEvent::kMission);
 }
@@ -373,14 +372,6 @@ void GameplayMenu::handleTick(int elapsed)
                 i--;
             }
         }
-
-        for (size_t i = 0; i < mission_->numShots(); i++) {
-            change |= mission_->shots(i)->animate(diff, mission_);
-            if (mission_->shots(i)->isLifeOver()) {
-                mission_->delShot(i);
-                i--;
-            }
-        }
     }
 
     updateMinimap(elapsed);
@@ -487,7 +478,6 @@ void GameplayMenu::handleLeave()
     mission_ = NULL;
     scroll_x_ = 0;
     scroll_y_ = 0;
-    shooting_events_.clear();
     paused_ = false;
     ipa_chng_.ipa_chng = -1;
 }
@@ -668,10 +658,6 @@ bool GameplayMenu::handleMouseDown(int x, int y, int button, const int modKeys)
 {
     if (paused_)
         return true;
-    if (button == kMouseRightButton) {
-        // TODO : a supprimer
-        stopShootingEvent();
-    }
 
     if (x < 129) {
         bool ctrl = false;  // Is control button pressed
@@ -888,7 +874,10 @@ bool GameplayMenu::getAimedAt(int x, int y, PathNode &locToSet) {
     return locationSet;
 }
 
-void GameplayMenu::stopShootingEvent(void )
+/*!
+ *
+ */
+void GameplayMenu::stopShootingEvent()
 {
     isPlayerShooting_ = false;
     for (SquadSelection::Iterator it = selection_.begin(); it != selection_.end(); ++it) {
@@ -896,19 +885,6 @@ void GameplayMenu::stopShootingEvent(void )
         
         if (pAgent->isUsingWeapon()) {
             pAgent->stopUsingWeapon();
-        }
-    }
-
-    if (shooting_events_.shooting_) {
-        shooting_events_.shooting_ = false;
-        // minimum, 1 if simple click, 2 if longer click
-        uint32 need_shots = menu_manager_->simpleMouseDown() ? 1 : 2;
-        for (size_t i = 0; i < AgentManager::kMaxSlot; i++) {
-            if (shooting_events_.agents_shooting[i]) {
-                shooting_events_.agents_shooting[i] = false;
-                mission_->getSquad()->member(i)->updtActGFiringShots(shooting_events_.ids[i],
-                    need_shots);
-            }
         }
     }
 }
