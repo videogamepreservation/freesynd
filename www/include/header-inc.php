@@ -64,6 +64,8 @@ $title = "News";
 	
 	<link rel="alternate feed" type="application/rss+xml" title="Freesynd News" href="data/rss-news.xml" />
 	<link rel="alternate feed" type="application/rss+xml" title="Freesynd SVN Activity" href="http://sourceforge.net/p/freesynd/code/feed/" />
+	<!-- link rel="icon" type="image/png" href="images/favicon.png" / -->
+	<link rel="shortcut icon" href="images/favicon.png" />
 
     <script type="text/javascript" src="clock.js"></script>
   </head>

@@ -1,7 +1,13 @@
 <?xml version='1.0' standalone='yes'?>
 <news>
+	<item title="And the winner is..." date="2014-04-16" author="Benoit Blancard"
+	rssDesc="Freesynd icon contest result" id="15">
+	Finally! The poll has come to an end. And the winner is Oscar Natividad with his work Syndilogo!{{br /}}
+	Congratulations to him and many thanks to all contributors (Pawel and Nick).{{br /}}
+	{{img src="images/freesynd-logo.svg" width="128px" height="128px"/}}
+	</item>
 	<item title="News Icons" date="2014-03-24" author="Benoit Blancard"
-	rssDesc="Last call before" id="13">
+	rssDesc="Last call before" id="14">
 	Hi all! It's been a while since the poll on the FreeSynd icon has been launched.
 	The project's activity was really low so we never took the time to choose the winner. I apologize to
 	our contributors who did a great job!{{br /}}
