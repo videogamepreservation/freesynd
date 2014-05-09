@@ -35,6 +35,7 @@
 #include "ped.h"
 #include "vehicle.h"
 #include "mission.h"
+#include "model/shot.h"
 
 #define Z_SHIFT_TO_AIR   4
 
@@ -446,246 +447,6 @@ void ShotClass::shotTargetRandomizer(toDefineXYZ * cp, toDefineXYZ * tp,
     tp->z = gtz;
 }
 
-ProjectileShot::ProjectileShot(toDefineXYZ &cp, Weapon::ShotDesc & sd,
-    int d_range, Weapon::ImpactAnims *panims, ShootableMapObject * ignrd_obj,
-    int range_max, int shot_speed)
-{
-    cur_pos_ = cp;
-    base_pos_ = cur_pos_;
-    sd_prj_ = sd;
-    dmg_range_ = d_range;
-    anims_ = *panims;
-    dist_max_ = range_max;
-    dist_passed_ = 0;
-    speed_ = shot_speed;
-    last_anim_dist_ = 0;
-    life_over_ = false;
-    double diffx = (double)(sd.tp.x - cur_pos_.x);
-    double diffy = (double)(sd.tp.y - cur_pos_.y);
-    double diffz = (double)(sd.tp.z - cur_pos_.z);
-    cur_dist_ = sqrt(diffx * diffx + diffy * diffy + diffz * diffz);
-    if (cur_dist_ != 0) {
-        inc_x_ = diffx / cur_dist_;
-        inc_y_ = diffy / cur_dist_;
-        inc_z_ = diffz / cur_dist_;
-    }
-    cur_dist_ = 0;
-    ignored_obj_ = ignrd_obj;
-    owner_ = sd.d.d_owner;
-    target_object_ = sd.target_object;
-}
-
-bool ProjectileShot::animate(int elapsed, Mission *m) {
-
-    assert(!life_over_);
-    bool draw_impact = false;
-    bool self_remove = false;
-
-    double inc_dist = speed_ * (double)elapsed / 1000;
-    if ((cur_dist_ + inc_dist) > dist_max_) {
-        assert(cur_dist_ <= dist_max_);
-        inc_dist = dist_max_ - cur_dist_;
-        self_remove = true;
-    }
-    double was_dist = cur_dist_;
-    cur_dist_ += inc_dist;
-    bool ignored_state;
-
-    if (ignored_obj_) {
-        ignored_state = ignored_obj_->isIgnored();
-        ignored_obj_->setIsIgnored(true);
-    }
-
-    toDefineXYZ reached_pos;
-    bool do_recalc = false;
-    reached_pos.x = base_pos_.x + (int)(inc_x_ * cur_dist_);
-    if (reached_pos.x < 0) {
-        reached_pos.x = 0;
-        self_remove = true;
-        do_recalc = true;
-    } else if (reached_pos.x > (m->mmax_x_ - 1) * 256) {
-        reached_pos.x = (m->mmax_x_ - 1) * 256;
-        self_remove = true;
-        do_recalc = true;
-    }
-    if (do_recalc) {
-        do_recalc = false;
-        if (inc_x_ != 0) {
-            cur_dist_ = (double)(reached_pos.x - base_pos_.x) / inc_x_;
-        }
-    }
-
-    reached_pos.y = base_pos_.y + (int)(inc_y_ * cur_dist_);
-    if (reached_pos.y < 0) {
-        reached_pos.y = 0;
-        self_remove = true;
-        do_recalc = true;
-    } else if (reached_pos.y > (m->mmax_y_ - 1) * 256) {
-        reached_pos.y = (m->mmax_y_ - 1) * 256;
-        self_remove = true;
-        do_recalc = true;
-    }
-    if (do_recalc) {
-        do_recalc = false;
-        if (inc_y_ != 0) {
-            cur_dist_ = (double)(reached_pos.y - base_pos_.y) / inc_y_;
-            reached_pos.x = base_pos_.x + (int)(inc_x_ * cur_dist_);
-        }
-    }
-
-    reached_pos.z = base_pos_.z + (int)(inc_z_ * cur_dist_);
-    if (reached_pos.z < 0) {
-        reached_pos.z = 0;
-        self_remove = true;
-        do_recalc = true;
-    } else if (reached_pos.z > (m->mmax_z_ - 1) * 128) {
-        reached_pos.z = (m->mmax_z_ - 1) * 128;
-        self_remove = true;
-        do_recalc = true;
-    }
-    if (do_recalc) {
-        if (inc_z_ != 0) {
-            cur_dist_ = (double)(reached_pos.z - base_pos_.z) / inc_z_;
-            reached_pos.x = base_pos_.x + (int)(inc_x_ * cur_dist_);
-            reached_pos.y = base_pos_.y + (int)(inc_y_ * cur_dist_);
-        }
-    }
-
-    PathNode pn(reached_pos.x / 256, reached_pos.y / 256,
-        reached_pos.z / 128, reached_pos.x % 256, reached_pos.y % 256,
-        reached_pos.z % 128);
-    ShootableMapObject * smo = NULL;
-    // maxr here is set to maximum that projectile can fly from its
-    // current position
-    uint8 block_mask = m->inRangeCPos(
-        &cur_pos_, &smo, &pn, true, false, dist_max_ - was_dist);
-    if (block_mask == 1) {
-        if (reached_pos.x == sd_prj_.tp.x
-            && reached_pos.y == sd_prj_.tp.y
-            && reached_pos.z == sd_prj_.tp.z)
-        {
-            draw_impact = true;
-            self_remove = true;
-        }
-    } else if (block_mask == 32) {
-        self_remove = true;
-    } else {
-        reached_pos.x = pn.tileX() * 256 + pn.offX();
-        reached_pos.y = pn.tileY() * 256 + pn.offY();
-        reached_pos.z = pn.tileZ() * 128 + pn.offZ();
-        draw_impact = true;
-        self_remove = true;
-    }
-    // TODO : set this somewhere?
-    // gauss
-    // distance between 2 animations
-    double anim_d = 64;
-    if (dmg_range_ == 0)
-        //flamer
-        anim_d = 64;
-    double diffx = (double) (base_pos_.x - reached_pos.x);
-    double diffy = (double) (base_pos_.y - reached_pos.y);
-    double diffz = (double) (base_pos_.z - reached_pos.z);
-    double d = sqrt(diffx * diffx + diffy * diffy
-        + diffz * diffz);
-
-    if (d > last_anim_dist_) {
-        int diff_dist = (int) ((d - last_anim_dist_) / anim_d);
-        if (diff_dist != 0) {
-            for (int i = 1; i <= diff_dist; i++) {
-                toDefineXYZ t;
-                last_anim_dist_ += anim_d;
-                t.x = base_pos_.x + (int)(last_anim_dist_ * inc_x_);
-                t.y = base_pos_.y + (int)(last_anim_dist_ * inc_y_);
-                t.z = base_pos_.z + (int)(last_anim_dist_ * inc_z_);
-                if (dmg_range_ != 0) {
-                    t.z += 128;
-                    if (t.z > (m->mmax_z_ - 1) * 128)
-                        t.z = (m->mmax_z_ - 1) * 128;
-                }
-                SFXObject *so = new SFXObject(m->map(),
-                    anims_.trace_anim);
-                so->setPosition(t.x / 256, t.y / 256, t.z / 128, t.x % 256,
-                    t.y % 256, t.z % 128 );
-                m->addSfxObject(so);
-            }
-        }
-    }
-    cur_pos_ = reached_pos;
-
-    // additional check for distance, just to be sure
-    if (!self_remove) {
-        if (d <= dist_max_)
-            cur_dist_ = d;
-        else
-            self_remove = true;
-    }
-
-    if (ignored_obj_) {
-        ignored_obj_->setIsIgnored(ignored_state);
-    }
-
-    if (draw_impact) {
-        std::vector <Weapon::ShotDesc> all_shots;
-        if (dmg_range_ == 0) {
-            Weapon::ShotDesc sd;
-            sd.tp = cur_pos_;
-            sd.tpn = pn;
-            sd.d = sd_prj_.d;
-            sd.smo = smo;
-            sd.d.d_owner = owner_;
-            sd.target_object = target_object_;
-            all_shots.push_back(sd);
-            makeShot(true, base_pos_, anims_.groundHit, all_shots,
-                anims_.objectHit);
-        } else {
-            // TODO: if projectile hits water, should hit and flames be drawn?
-            SFXObject *so = new SFXObject(m->map(),
-                anims_.groundHit);
-            so->setPosition(cur_pos_.x / 256, cur_pos_.y / 256,
-                cur_pos_.z / 128, cur_pos_.x % 256, cur_pos_.y % 256,
-                cur_pos_.z % 128);
-            m->addSfxObject(so);
-
-            toDefineXYZ cp = cur_pos_;
-            // off_z_ < 128, needs to be zero here
-            cp.z = (cp.z & 0xFFFFFF80) + 16;
-            if (cp.z > (m->mmax_z_ - 1) * 128)
-                cp.z = (m->mmax_z_ - 1) * 128;
-
-            std::vector <ShootableMapObject *> all_targets;
-            g_Session.getMission()->getInRangeAll(&cp, all_targets,
-                Weapon::stm_AllObjects, true, dmg_range_ + 96);
-            for (unsigned int indx = 0; indx < all_targets.size();
-                indx++)
-            {
-                smo = all_targets[indx];
-                Weapon::ShotDesc sd;
-                sd.tp.x = smo->tileX() * 256 + smo->offX();
-                sd.tp.y = smo->tileY() * 256 + smo->offY();
-                sd.tp.z = smo->tileZ() * 128 + smo->offZ();
-                sd.tpn.setTileXYZ(smo->tileX(), smo->tileY(),
-                    smo->tileZ());
-                sd.tpn.setOffXYZ(smo->offX(), smo->offY(),
-                    smo->offZ());
-                // TODO: set direction, if object servives it will need it
-                sd.d = sd_prj_.d;
-                sd.smo = smo;
-                sd.d.d_owner = owner_;
-                sd.target_object = target_object_;
-                all_shots.push_back(sd);
-            }
-            makeShot(true, cp, anims_.groundHit, all_shots,
-                anims_.objectHit);
-            rangeDamageAnim(cur_pos_, (double)dmg_range_, anims_.rd_anim);
-            g_App.gameSounds().play(snd::EXPLOSION);
-        }
-    }
-    if (self_remove)
-        life_over_ = self_remove;
-    return true;
-}
-
 /*!
  * \return mask of different actions done
  * 0b - no ammo (1), 1b - not enough time for single shot (2),
@@ -908,15 +669,7 @@ uint16 WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
             } else
                 ammo_remaining_ -= ammoused;
         }
-        if (shot_prop & Weapon::spe_CreatesProjectile) {
-            Weapon::ShotDesc shot_new = base_shot;
-            shotTargetRandomizer(&cp, &(shot_new.tp), angle);
-            ProjectileShot *prjs = new ProjectileShot(cp, shot_new,
-                pWeaponClass_->rangeDmg(), pWeaponClass_->impactAnims(),
-                owner_, range(), pWeaponClass_->shotSpeed());
-            m->addPrjShot(prjs);
-            continue;
-        }
+
         if (shot_prop & Weapon::spe_ShootsWhileNoTarget) {
             std::vector <Weapon::ShotDesc> gen_shots;
             if (shot_prop & Weapon::spe_PointToPoint) {/*
@@ -1176,8 +929,7 @@ void WeaponInstance::getInRangeAll(toDefineXYZ & cp,
 }
 
 void WeaponInstance::activate() {
-    //if (main_type_ == Weapon::TimeBomb)
-        activated_ = true;
+    activated_ = true;
 }
 
 void WeaponInstance::deactivate() {
@@ -1196,7 +948,8 @@ void WeaponInstance::fire(Mission *pMission, ShootableMapObject::DamageInflictTy
     if (getWeaponType() == Weapon::MediKit) {
         dmg.d_owner->resetHealth();
     } else if (getWeaponType() == Weapon::GaussGun) {
-        // TODO : complete;
+        GaussGunShot *pShot = new GaussGunShot(dmg);
+        pMission->addPrjShot(pShot);
     } else if (getWeaponType() == Weapon::Flamer) {
         // TODO : complete;
     }  else if (getWeaponType() == Weapon::TimeBomb) {

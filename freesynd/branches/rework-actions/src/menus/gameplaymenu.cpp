@@ -35,6 +35,7 @@
 #include "utils/file.h"
 #include "vehicle.h"
 #include "mission.h"
+#include "model/shot.h"
 
 #ifdef _WIN32
 #include <windows.h>
@@ -367,7 +368,7 @@ void GameplayMenu::handleTick(int elapsed)
 
         for (size_t i = 0; i < mission_->numPrjShots(); i++) {
             change |= mission_->prjShots(i)->animate(diff, mission_);
-            if (mission_->prjShots(i)->prjsLifeOver()) {
+            if (mission_->prjShots(i)->isLifeOver()) {
                 mission_->delPrjShot(i);
                 i--;
             }

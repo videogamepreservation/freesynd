@@ -32,6 +32,7 @@
 #include "app.h"
 #include "gfx/screen.h"
 #include "vehicle.h"
+#include "model/shot.h"
 
 VehicleAnimation::VehicleAnimation() {
     vehicle_anim_ = kNormalAnim;

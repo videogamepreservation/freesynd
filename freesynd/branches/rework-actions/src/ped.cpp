@@ -30,6 +30,7 @@
 #include "vehicle.h"
 #include "mission.h"
 #include "core/squad.h"
+#include "model/shot.h"
 
 const int PedInstance::kAgentMaxHealth = 16;
 const int PedInstance::kDefaultShootReactionTime = 200;
@@ -2388,10 +2389,18 @@ void PedInstance::handleWeaponSelected(WeaponInstance * wi) {
     }
 }
 
-void PedInstance::dropWeapon(int n) {
+/*!
+ * Drops the weapon at given index.
+ * \param n Index of weapon in the agent inventory.
+ * \return the instance of dropped weapon
+ */
+WeaponInstance * PedInstance::dropWeapon(int n) {
     assert(n >= 0 && n < (int) weapons_.size());
 
-    dropWeapon(weapons_[n]);
+    WeaponInstance *pWeapon = weapons_[n];
+    dropWeapon(pWeapon);
+
+    return pWeapon;
 }
 
 void PedInstance::dropWeapon(WeaponInstance *wi) {
@@ -2415,10 +2424,9 @@ void PedInstance::dropWeapon(WeaponInstance *wi) {
     wi->setMap(map_);
     wi->setIsIgnored();
     wi->setPosition(tile_x_, tile_y_, tile_z_, off_x_, off_y_, off_z_);
-    if (wi->getMainType() == Weapon::TimeBomb)
-        wi->activate();
-    else
+    if (wi->getMainType() == Weapon::EnergyShield) {
         wi->deactivate();
+    }
 }
 
 void PedInstance::dropAllWeapons() {
@@ -2441,10 +2449,9 @@ void PedInstance::dropAllWeapons() {
         w->offzOnStairs(twd);
         w->setOwner(NULL);
         w->setIsIgnored();
-        if (w->getMainType() == Weapon::TimeBomb)
-            w->activate();
-        else
+        if (w->getMainType() == Weapon::EnergyShield) {
             w->deactivate();
+        }
     }
     weapons_.clear();
 }

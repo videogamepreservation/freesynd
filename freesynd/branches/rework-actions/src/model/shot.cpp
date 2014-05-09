@@ -291,6 +291,13 @@ void InstantImpactShot::createImpactAnimation(Mission *pMission, ShootableMapObj
  * \param The value of the damage
  */
 void Explosion::createExplosion(Mission *pMission, ShootableMapObject *pOwner, double range, int dmgValue) {
+    toDefineXYZ location;
+    pOwner->convertPosToXYZ(&location);
+    
+    createExplosion(pMission, pOwner, location, range, dmgValue);
+}
+
+void Explosion::createExplosion(Mission *pMission, ShootableMapObject *pOwner, toDefineXYZ &location, double range, int dmgValue) {
     ShootableMapObject::DamageInflictType dmg;
     if (pOwner && pOwner->majorType() == MapObject::mjt_Weapon) {
         // It's a bomb that exploded (other waepons do not explode)
@@ -303,12 +310,21 @@ void Explosion::createExplosion(Mission *pMission, ShootableMapObject *pOwner, d
     dmg.dtype = MapObject::dmg_Explosion;
     dmg.range = range;
     dmg.dvalue =  dmgValue;
-    pOwner->convertPosToXYZ(&(dmg.originLocW));
+    dmg.originLocW = location;
     dmg.originLocW.z += 8;
 
     Explosion explosion(dmg);
     explosion.inflictDamage(pMission);
 }
+
+Explosion::Explosion(ShootableMapObject::DamageInflictType &dmg) : Shot(dmg) {
+    // GaussGun has a different animation for explosion
+    if (dmg_.pWeapon && dmg_.pWeapon->getWeaponType() == Weapon::GaussGun) {
+        rngDmgAnim_ = SFXObject::sfxt_LargeFire;
+    } else {
+        rngDmgAnim_ = SFXObject::sfxt_ExplosionFire;
+    }
+};
 
 /*!
  * 
@@ -332,17 +348,16 @@ void Explosion::inflictDamage(Mission *pMission) {
         pMission->addSfxObject(so);
     }
     // create the ring of fire around the origin of explosion
-    generateFlameWaves(pMission, dmg_.originLocW, dmg_.range, SFXObject::sfxt_ExplosionFire);
+    generateFlameWaves(pMission, dmg_.originLocW, dmg_.range);
     g_App.gameSounds().play(snd::EXPLOSION_BIG);
 }
 
 /*! Draws animation of impact/explosion
- * @param cp current position (center)
- * @param dmg_rng effective range for drawing
- * @param rngdamg_anim animation to be used for drawing
+ * \param pMission Mission data
+ * \param cp current position (center)
+ * \param dmg_rng effective range for drawing
  */
-void Explosion::generateFlameWaves(Mission *pMission, toDefineXYZ &cp, double dmg_rng,
-    int rngdamg_anim)
+void Explosion::generateFlameWaves(Mission *pMission, toDefineXYZ &cp, double dmg_rng)
 {
     toDefineXYZ base_pos = cp;
     cp.z += 4;
@@ -369,7 +384,7 @@ void Explosion::generateFlameWaves(Mission *pMission, toDefineXYZ &cp, double dm
 
             uint8 block_mask = pMission->inRangeCPos(&cp, NULL, &pn, true, true, dmg_rng);
             if (block_mask != 32) {
-                SFXObject *so = new SFXObject(pMission->map(), rngdamg_anim,
+                SFXObject *so = new SFXObject(pMission->map(), rngDmgAnim_,
                                 100 * (rand() % 16));
                 so->setPosition(pn.tileX(), pn.tileY(), pn.tileZ(),
                                 pn.offX(), pn.offY(), pn.offZ());
@@ -377,5 +392,217 @@ void Explosion::generateFlameWaves(Mission *pMission, toDefineXYZ &cp, double dm
             }
         }
         angle_inc /= 2.0;
+    }
+}
+
+
+GaussGunShot::GaussGunShot(ShootableMapObject::DamageInflictType &dmg)  : Shot(dmg) {
+    elapsed_ = -1;
+    lifeOver_ = false;
+    drawImpact_ = false;
+
+    curPos_ = dmg.originLocW;
+    currentDistance_ = 0;
+    lastAnimDist_ = 0;
+    // distance from origin of shoot to target on each axis
+    dmg.aimedLoc.convertPosToXYZ(&targetLocW_);
+    double diffx = (double)(targetLocW_.x - curPos_.x);
+    double diffy = (double)(targetLocW_.y - curPos_.y);
+    double diffz = (double)(targetLocW_.z - curPos_.z);
+
+    double distanceToTarget  = sqrt(diffx * diffx + diffy * diffy + diffz * diffz);
+    if (distanceToTarget != 0) {
+        incX_ = diffx / distanceToTarget;
+        incY_ = diffy / distanceToTarget;
+        incZ_ = diffz / distanceToTarget;
+    }
+
+    speed_ = dmg.pWeapon->getWeaponClass()->shotSpeed();
+    distanceMax_ = dmg.pWeapon->getWeaponClass()->range();
+    if (distanceToTarget < distanceMax_) {
+        distanceMax_ = distanceToTarget;
+    }
+}
+
+bool GaussGunShot::animate(int elapsed, Mission *pMission) {
+    if (elapsed_ == -1) {
+        // It's the first time the animate method is called since shot
+        // was created : start counting
+        elapsed_ = 0;
+        return false;
+    }
+
+    if (moveProjectile(elapsed, pMission)) {
+        inflictDamage(pMission);
+    }
+    
+    return true;
+}
+
+void GaussGunShot::inflictDamage(Mission *pMission) {
+    lifeOver_ = true;
+
+    if (drawImpact_) {
+        int dmgRange = dmg_.pWeapon->getWeaponClass()->rangeDmg();
+        Explosion::createExplosion(pMission, dmg_.pWeapon, curPos_, dmgRange, dmg_.dvalue);
+    }
+}
+
+/*!
+ * Updates the projectile position and animation of trace.
+ * \param elapsed Time elapsed since last frame.
+ * \param pMission Mission data
+ * \return True if projectile has reached its target or max distance.
+ */
+bool GaussGunShot::moveProjectile(int elapsed, Mission *pMission) {
+    bool endMove = false;
+    elapsed_ += elapsed;
+
+    // Distance crossed in the elapsed time
+    double inc_dist = speed_ * (double)elapsed / 1000;
+    if ((currentDistance_ + inc_dist) > distanceMax_) {
+        // Projectile reached the maximum distance
+        assert(currentDistance_ <= distanceMax_);
+        inc_dist = distanceMax_ - currentDistance_;
+        endMove = true;
+    }
+
+    double was_dist = currentDistance_;
+    currentDistance_ += inc_dist;
+    toDefineXYZ reached_pos;
+    bool do_recalc = false;
+
+    reached_pos.x = dmg_.originLocW.x + (int)(incX_ * currentDistance_);
+    if (reached_pos.x < 0) {
+        reached_pos.x = 0;
+        endMove = true;
+        do_recalc = true;
+    } else if (reached_pos.x > (pMission->mmax_x_ - 1) * 256) {
+        reached_pos.x = (pMission->mmax_x_ - 1) * 256;
+        endMove = true;
+        do_recalc = true;
+    }
+    if (do_recalc) {
+        do_recalc = false;
+        if (incX_ != 0) {
+            currentDistance_ = (double)(reached_pos.x - dmg_.originLocW.x) / incX_;
+        }
+    }
+
+    reached_pos.y = dmg_.originLocW.y + (int)(incY_ * currentDistance_);
+    if (reached_pos.y < 0) {
+        reached_pos.y = 0;
+        endMove = true;
+        do_recalc = true;
+    } else if (reached_pos.y > (pMission->mmax_y_ - 1) * 256) {
+        reached_pos.y = (pMission->mmax_y_ - 1) * 256;
+        endMove = true;
+        do_recalc = true;
+    }
+    if (do_recalc) {
+        do_recalc = false;
+        if (incY_ != 0) {
+            currentDistance_ = (double)(reached_pos.y - dmg_.originLocW.y) / incY_;
+            reached_pos.x = dmg_.originLocW.x + (int)(incX_ * currentDistance_);
+        }
+    }
+
+    reached_pos.z = dmg_.originLocW.z + (int)(incZ_ * currentDistance_);
+    if (reached_pos.z < 0) {
+        reached_pos.z = 0;
+        endMove = true;
+        do_recalc = true;
+    } else if (reached_pos.z > (pMission->mmax_z_ - 1) * 128) {
+        reached_pos.z = (pMission->mmax_z_ - 1) * 128;
+        endMove = true;
+        do_recalc = true;
+    }
+    if (do_recalc) {
+        if (incZ_ != 0) {
+            currentDistance_ = (double)(reached_pos.z - dmg_.originLocW.z) / incZ_;
+            reached_pos.x = dmg_.originLocW.x + (int)(incX_ * currentDistance_);
+            reached_pos.y = dmg_.originLocW.y + (int)(incY_ * currentDistance_);
+        }
+    }
+
+    PathNode pn(reached_pos.x / 256, reached_pos.y / 256,
+        reached_pos.z / 128, reached_pos.x % 256, reached_pos.y % 256,
+        reached_pos.z % 128);
+    ShootableMapObject * smo = NULL;
+    // force shooter to be ignored when searching for blockers
+    bool previousIgnoreState = dmg_.d_owner->isIgnored();
+    dmg_.d_owner->setIsIgnored(true);
+
+    // maxr here is set to maximum that projectile can fly from its
+    // current position
+    uint8 block_mask = pMission->inRangeCPos(
+        &curPos_, &smo, &pn, true, false, distanceMax_ - was_dist);
+
+    if (block_mask == 1) {
+        // ??
+        if (reached_pos.x == targetLocW_.x
+            && reached_pos.y == targetLocW_.y
+            && reached_pos.z == targetLocW_.z)
+        {
+            drawImpact_ = true;
+            endMove = true;
+        }
+    } else if (block_mask == 32) {
+        // projectile is out of map : do not draw exmplosion
+        // not sure if necessary
+        endMove = true;
+    } else {
+        reached_pos.x = pn.tileX() * 256 + pn.offX();
+        reached_pos.y = pn.tileY() * 256 + pn.offY();
+        reached_pos.z = pn.tileZ() * 128 + pn.offZ();
+        drawImpact_ = true;
+        endMove = true;
+    }
+
+    drawTrace(pMission, reached_pos);
+
+    curPos_ = reached_pos;
+
+    dmg_.d_owner->setIsIgnored(previousIgnoreState);
+
+    return endMove;
+}
+
+/*!
+ * Draws the animation of smoke begind the projectile.
+ * \param pMission Mission data
+ * \param currentPos Current position of projectile.
+ */
+void GaussGunShot::drawTrace(Mission *pMission, toDefineXYZ currentPos) {
+    // distance between 2 animations
+    double anim_d = 64;
+
+    double diffx = (double) (dmg_.originLocW.x - currentPos.x);
+    double diffy = (double) (dmg_.originLocW.y - currentPos.y);
+    double diffz = (double) (dmg_.originLocW.z - currentPos.z);
+    double d = sqrt(diffx * diffx + diffy * diffy
+        + diffz * diffz);
+
+    if (d > lastAnimDist_) {
+        int diff_dist = (int) ((d - lastAnimDist_) / anim_d);
+        if (diff_dist != 0) {
+            for (int i = 1; i <= diff_dist; i++) {
+                toDefineXYZ t;
+                lastAnimDist_ += anim_d;
+                t.x = dmg_.originLocW.x + (int)(lastAnimDist_ * incX_);
+                t.y = dmg_.originLocW.y + (int)(lastAnimDist_ * incY_);
+                t.z = dmg_.originLocW.z + (int)(lastAnimDist_ * incZ_);
+                
+                t.z += 128;
+                if (t.z > (pMission->mmax_z_ - 1) * 128)
+                    t.z = (pMission->mmax_z_ - 1) * 128;
+
+                SFXObject *so = new SFXObject(pMission->map(),
+                    dmg_.pWeapon->getWeaponClass()->impactAnims()->trace_anim);
+                so->setPosition(t.x / 256, t.y / 256, t.z / 128, t.x % 256,
+                    t.y % 256, t.z % 128 );
+                pMission->addSfxObject(so);
+            }
+        }
     }
 }

@@ -37,15 +37,16 @@ class Mission;
 class WeaponInstance;
 class PedInstance;
 
+/*!
+ * A shot is the result of the action of a weapon.
+ * It's the shot that inflicts damage.
+ */
 class Shot {
 public:
     Shot(ShootableMapObject::DamageInflictType &dmg) {
         dmg_ = dmg;
     }
     virtual ~Shot() {}
-
-    virtual bool animate(int elapsed, Mission *m) = 0;
-    virtual bool isLifeOver() = 0;
 
     virtual void inflictDamage(Mission *pMission) = 0;
 
@@ -67,9 +68,6 @@ class InstantImpactShot : public Shot {
 public:
     InstantImpactShot(ShootableMapObject::DamageInflictType &dmg) : Shot(dmg) {}
 
-    virtual bool animate(int elapsed, Mission *m) { return false; }
-    virtual bool isLifeOver() { return true; }
-
     void inflictDamage(Mission *pMission);
 private:
     //! 
@@ -86,17 +84,70 @@ private:
  */
 class Explosion : public Shot {
 public:
-    //! Creates an explosion
+    //! Creates an explosion at the location of owner
     static void createExplosion(Mission *pMission, ShootableMapObject *pOwner, double range, int dmgValue = 16);
+    //! Creates an explosion at the given location
+    static void createExplosion(Mission *pMission, ShootableMapObject *pOwner, toDefineXYZ &location, double range, int dmgValue);
 
-    Explosion(ShootableMapObject::DamageInflictType &dmg) : Shot(dmg) {};
-
-    bool animate(int elapsed, Mission *m) { return false; }
-    bool isLifeOver() { return true; }
+    Explosion(ShootableMapObject::DamageInflictType &dmg);
 
     void inflictDamage(Mission *pMission);
 private:
-    void generateFlameWaves(Mission *pMission, toDefineXYZ &cp, double dmg_rng, int rngdamg_anim);
+    void generateFlameWaves(Mission *pMission, toDefineXYZ &cp, double dmg_rng);
+
+private:
+    /*! Type of animation for the explosion.*/
+    int rngDmgAnim_;
+};
+
+/*!
+ * Shot made by Gauss Gun.
+ * The Gauss Gun shoots a projectile that flies until it hist its target
+ * then it explodes burning everything around.
+ * When flying, the projectile leaves a trace of smoke behind it.
+ */
+class GaussGunShot: public Shot {
+public:
+    //! Constructor
+    GaussGunShot(ShootableMapObject::DamageInflictType &dmg);
+    //! Destructor
+    ~GaussGunShot() {}
+
+    //! Animate the shot
+    bool animate(int elapsed, Mission *m);
+    //! Returns true if shot can be destroyed
+    bool isLifeOver() { return lifeOver_; }
+
+    void inflictDamage(Mission *pMission);
+
+protected:
+    //! Update projectile position
+    bool moveProjectile(int elapsed, Mission *pMission);
+    void drawTrace(Mission *pMission, toDefineXYZ currentPos);
+protected:
+    /*! This tells if the shot object shot be destroyed.*/
+    bool lifeOver_;
+    int elapsed_;
+    /*! Current position of projectile.*/
+    toDefineXYZ curPos_;
+    /*! Position of the target.*/
+    toDefineXYZ targetLocW_;
+    /*! Projectile position incrementation on X axis.*/
+    double incX_;
+    /*! Projectile position incrementation on Y axis.*/
+    double incY_;
+    /*! Projectile position incrementation on Z axis.*/
+    double incZ_;
+    /*! Projectile speed.*/
+    double speed_;
+    /*! Updated distance from origin to current projectile's position.*/
+    double currentDistance_;
+    /*! Maximum distance the projectile can go.*/
+    double distanceMax_;
+    /*! Position of the last trace animation.*/
+    double lastAnimDist_;
+    /*! flag to know if we can draw the explosion.*/
+    bool drawImpact_;
 };
 
 #endif // MODEL_SHOT_H_

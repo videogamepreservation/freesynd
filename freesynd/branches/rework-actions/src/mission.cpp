@@ -37,6 +37,7 @@
 #include "utils/log.h"
 #include "vehicle.h"
 #include "core/squad.h"
+#include "model/shot.h"
 
 Mission::Mission(const LevelData::MapInfos & map_infos)
 {
@@ -83,6 +84,11 @@ Mission::~Mission()
     if (p_squad_) {
         delete p_squad_;
     }
+}
+
+void Mission::delPrjShot(size_t i) {
+    delete prj_shots_[i];
+    prj_shots_.erase((prj_shots_.begin() + i));
 }
 
 /*!
@@ -2555,14 +2561,16 @@ void Mission::blockerExists(toDefineXYZ * startXYZ, toDefineXYZ * endXYZ,
 }
 
 /*!
-* \return mask where bits are:
-* - 0b : target in range(1) 
-* - 1b : blocker is object, "t" is set(2)
-* - 2b : blocker object, "pn" is set(4)
-* - 3b : reachable point set (8)
-* - 4b : blocker tile, "pn" is set(16)
-* - 5b : out of visible reach(32)
-* NOTE: only if "pn" or "t" are not null, variables are set
+ * \param maxr maximum distance we can run
+ * \return mask where bits are:
+ * - 0b : target in range(1) 
+ * - 1b : blocker is object, "t" is set(2)
+ * - 2b : blocker object, "pn" is set(4)
+ * - 3b : reachable point set (8)
+ * - 4b : blocker tile, "pn" is set(16)
+ * - 5b : out of visible reach(32)
+ * NOTE: only if "pn" or "t" are not null, variables are set
+
 */
 uint8 Mission::inRangeCPos(toDefineXYZ * cp, ShootableMapObject ** t,
     PathNode * pn, bool setBlocker, bool checkTileOnly, double maxr,
@@ -2576,6 +2584,7 @@ uint8 Mission::inRangeCPos(toDefineXYZ * cp, ShootableMapObject ** t,
     int cz = (*cp).z;
     if (cz > (mmax_z_ - 1) * 128)
         return 32;
+    // tx,ty, tz are target coords
     int tx = 0;
     int ty = 0;
     int tz = 0;
@@ -2591,6 +2600,7 @@ uint8 Mission::inRangeCPos(toDefineXYZ * cp, ShootableMapObject ** t,
     if (tz > (mmax_z_ - 1) * 128)
         return 32;
 
+    // d is the distance between the origin and the target
     double d = 0;
     d = sqrt((double)((tx - cx) * (tx - cx) + (ty - cy) * (ty - cy)
         + (tz - cz) * (tz - cz)));
@@ -2606,6 +2616,8 @@ uint8 Mission::inRangeCPos(toDefineXYZ * cp, ShootableMapObject ** t,
     double sz = (double) cz;
 
     if (d >= maxr) {
+        // the distance we have to run (d) is higher than the maximum
+        // distance we can run (maxr)
         block_mask = 0;
         if (pn == NULL)
             return block_mask;
@@ -2613,10 +2625,12 @@ uint8 Mission::inRangeCPos(toDefineXYZ * cp, ShootableMapObject ** t,
             tz -= 128;
             *t = NULL;
         }
+        // set target position to maxr
         double dist_k = (double)maxr / d;
         tx = cx + (int)((tx - cx) * dist_k);
         ty = cy + (int)((ty - cy) * dist_k);
         tz = cz + (int)((tz - cz) * dist_k);
+        // set mask to indicate maxr is reached
         block_mask = 8;
         if (setBlocker) {
             pn->setTileXYZ(tx / 256, ty / 256, tz / 128);
@@ -2682,6 +2696,7 @@ uint8 Mission::inRangeCPos(toDefineXYZ * cp, ShootableMapObject ** t,
                     ty = (int)sy;
                     tz = (int)sz;
                     dist_close = sqrt(dsx * dsx + dsy * dsy + dsz * dsz);
+                    // set mask to indicate path is blocked by a tile
                     if (block_mask == 1)
                         block_mask = 16;
                     else
@@ -2706,7 +2721,7 @@ uint8 Mission::inRangeCPos(toDefineXYZ * cp, ShootableMapObject ** t,
         sy += inc_y;
         sz += inc_z;
         dist_close -= dist_dec;
-    }
+    } // end while
     if (checkTileOnly)
         return block_mask;
 

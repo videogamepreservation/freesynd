@@ -34,7 +34,6 @@
 #include "sound/sound.h"
 #include "utils/configfile.h"
 #include "utils/timer.h"
-#include "model/shot.h"
 
 /*!
  * Weapon class.
@@ -415,31 +414,4 @@ protected:
     bool time_consumed_;
 };
 
-class ProjectileShot: public ShotClass {
-public:
-    ProjectileShot(toDefineXYZ &cp, Weapon::ShotDesc & sd, int d_range,
-        Weapon::ImpactAnims *panims, ShootableMapObject * ignrd_obj = NULL,
-        int range_max = 1, int shot_speed = 0);
-    ~ProjectileShot() {}
-    bool animate(int elapsed, Mission *m);
-    bool prjsLifeOver() { return life_over_; }
-
-protected:
-    toDefineXYZ cur_pos_;
-    toDefineXYZ base_pos_;
-    Weapon::ShotDesc sd_prj_;
-    int dmg_range_;
-    double dist_max_;
-    double dist_passed_;
-    double last_anim_dist_;
-    double cur_dist_;
-    double speed_;
-    bool life_over_;
-    // owner should be ignored
-    ShootableMapObject * ignored_obj_;
-    double inc_x_;
-    double inc_y_;
-    double inc_z_;
-    Weapon::ImpactAnims anims_;
-};
 #endif

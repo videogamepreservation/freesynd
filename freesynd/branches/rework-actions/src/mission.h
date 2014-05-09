@@ -36,7 +36,7 @@
 #include "weapon.h"
 #include "map.h"
 #include "model/leveldata.h"
-#include "model/shot.h"
+//include "model/shot.h"
 #include "core/gameevent.h"
 
 class Vehicle;
@@ -44,6 +44,7 @@ class PedInstance;
 class Agent;
 class ObjectiveDesc;
 class Squad;
+class GaussGunShot;
 
 /*!
  * A structure that holds mission statistics.
@@ -138,7 +139,7 @@ public:
     SFXObject *sfxObjects(size_t i) { return sfx_objects_[i]; }
 
     size_t numPrjShots() { return prj_shots_.size(); }
-    ProjectileShot *prjShots(size_t i) { return prj_shots_[i]; }
+    GaussGunShot *prjShots(size_t i) { return prj_shots_[i]; }
 
     void addSfxObject(SFXObject *so) {
         sfx_objects_.push_back(so);
@@ -156,13 +157,10 @@ public:
         sfx_objects_.erase((sfx_objects_.begin() + i));
     }
 
-    void addPrjShot(ProjectileShot *prj) {
+    void addPrjShot(GaussGunShot *prj) {
         prj_shots_.push_back(prj);
     }
-    void delPrjShot(size_t i) {
-        delete prj_shots_[i];
-        prj_shots_.erase((prj_shots_.begin() + i));
-    }
+    void delPrjShot(size_t i);
 
     /*! Return the mission statistics. */
     MissionStats *getStatistics() { return &stats_; }
@@ -239,7 +237,7 @@ protected:
     std::vector<WeaponInstance *> weapons_;
     std::vector<Static *> statics_;
     std::vector<SFXObject *> sfx_objects_;
-    std::vector<ProjectileShot *> prj_shots_;
+    std::vector<GaussGunShot *> prj_shots_;
 
     std::vector <ObjectiveDesc *> objectives_;
     //std::vector <ObjectiveDesc> sub_objectives_;

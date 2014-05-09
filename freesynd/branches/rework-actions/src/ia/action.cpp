@@ -250,7 +250,11 @@ void PutdownWeaponAction::doStart(Mission *pMission, PedInstance *pPed) {
  */
 bool PutdownWeaponAction::doExecute(int elapsed, Mission *pMission, PedInstance *pPed) {
     if (status_ != kActStatusWaitForAnim) {
-        pPed->dropWeapon(weaponIdx_);
+        WeaponInstance *pWeapon = pPed->dropWeapon(weaponIdx_);
+        // Dropping a timebomb means activate it to explode
+        if (pWeapon->getWeaponType() == Weapon::TimeBomb) {
+            pWeapon->activate();
+        }
         setSucceeded();
     }
 

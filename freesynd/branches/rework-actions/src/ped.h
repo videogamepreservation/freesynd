@@ -314,7 +314,7 @@ public:
     //*************************************
     // Weapon management
     //*************************************
-    void dropWeapon(int n);
+    WeaponInstance * dropWeapon(int n);
     void dropWeapon(WeaponInstance *w);
     void dropAllWeapons();
     void destroyAllWeapons();
