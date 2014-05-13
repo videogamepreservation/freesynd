@@ -417,6 +417,20 @@ public:
     }
 
     /*!
+     * Add a certain amount to health.
+     * \return true if health reached max
+     * \param amount how much to increase health
+     */
+    bool increaseHealth(int amount) {
+        health_ += amount;
+        if (health_ > start_health_) {
+            health_ = start_health_;
+        }
+
+        return health_ == start_health_;
+    }
+
+    /*!
      * Remove a certain amount of health.
      */
     void decreaseHealth(int amount) {

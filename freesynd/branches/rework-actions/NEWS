@@ -18,6 +18,7 @@ Features added
 ----------
   * Mission ownership on map menu changes to simulate syndicate fighting for terrotories.
   * Animation for animated windows
+  * Agent's life is now restored automatically if he wears an upgraded chest
 
 Known issues with this release
 ------------------------------

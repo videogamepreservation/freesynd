@@ -31,6 +31,7 @@
 #include "mission.h"
 #include "core/squad.h"
 #include "model/shot.h"
+#include "ia/behaviour.h"
 
 const int PedInstance::kAgentMaxHealth = 16;
 const int PedInstance::kDefaultShootReactionTime = 200;
@@ -387,10 +388,8 @@ bool PedInstance::updateAnimation(int elapsed) {
  * \return True if something has changed (so update rendering)
  */
 bool PedInstance::animate2(int elapsed, Mission *mission) {
-    if (currentAction_ == NULL) {
-        // Ped is doing nothing right now, so behave
-        pBehaviour_->execute(mission, this);
-    }
+    // Execute current behaviour
+    pBehaviour_->execute(elapsed, mission);
 
     // Execute any active action
     bool update = executeAction(elapsed, mission);
@@ -2130,7 +2129,7 @@ PedInstance::PedInstance(Ped *ped, int m) : ShootableMovableMapObject(m),
     last_firing_target_.desc = 0;
 
     // Todo : adds a behaviour for the type of ped
-    pBehaviour_ = new fs_actions::NopeBehaviour();
+    pBehaviour_ = new NopeBehaviour(this);
     currentAction_ = NULL;
     pUseWeaponAction_ = NULL;
 }
@@ -2180,6 +2179,10 @@ void PedInstance::initAsAgent(Agent *p_agent, unsigned int obj_group_id) {
     setBaseSpeed(256);
     setTimeBeforeCheck(400);
     setBaseModAcc(0.5);
+
+    // sets AgentBehaviour here because earlier we don't know if ped is an agent
+    delete pBehaviour_;
+    pBehaviour_ = new AgentBehaviour(this);
 }
 
 void PedInstance::draw(int x, int y) {
@@ -2352,6 +2355,10 @@ void PedInstance::handleWeaponDeselected(WeaponInstance * wi) {
     if (wi->getWeaponType() == Weapon::AccessCard)
         rmEmulatedGroupDef(4, og_dmPolice);
     desc_state_ &= (pd_smAll ^ (pd_smArmed | pd_smNoAmmunition));
+
+    if (wi->getWeaponType() == Weapon::Persuadatron) {
+        pBehaviour_->handleBehaviourEvent(Behaviour::kBehvEvtPersuadotronDeactivated);
+    }
 }
 
 /*!
@@ -2385,6 +2392,9 @@ void PedInstance::handleWeaponSelected(WeaponInstance * wi) {
         break;
     case Weapon::MediKit:
         addActionUseMedikit();
+        break;
+    case Weapon::Persuadatron:
+        pBehaviour_->handleBehaviourEvent(Behaviour::kBehvEvtPersuadotronActivated);
         break;
     }
 }
@@ -2680,6 +2690,9 @@ void PedInstance::handleHit(DamageInflictType &d) {
         if (currentAction_ == NULL || currentAction_->type() != fs_actions::Action::kActTypeHit) {
             insertHitAction(d);
         }
+
+        // Alert behaviour
+        pBehaviour_->handleBehaviourEvent(Behaviour::kBehvEvtAgentHit);
     }
 }
 
@@ -2734,27 +2747,22 @@ bool PedInstance::handleDeath(ShootableMapObject::DamageInflictType &d) {
     return health_ == 0;
 }
 
-bool PedInstance::handleDamage(ShootableMapObject::DamageInflictType *d) {
-    if (health_ <= 0 || rcv_damage_def_ == MapObject::ddmg_Invulnerable
-        || (d->dtype & rcv_damage_def_) == 0)
-        return false;
+/*!
+ * Called when an agent tries to persuad this ped.
+ * \param pAgent Agent trying to persuad
+ */
+void PedInstance::handlePersuadedBy(PedInstance *pAgent) {
+    if (pAgent->canPersuade(persuasion_points_)) {
 
-    if ((d->dtype & MapObject::dmg_Physical) != 0)
-        health_ -= d->dvalue;
-    else if (d->dtype == MapObject::dmg_Persuasion) {
-        if (!(d->d_owner && ((PedInstance *)d->d_owner)->canPersuade(persuasion_points_)))
-            return false;
-
-        ((PedInstance *)d->d_owner)->addPersuaded(this);
-        setObjGroupID(((PedInstance *)d->d_owner)->objGroupID());
-        ((PedInstance *)d->d_owner)->cpyEnemyDefs(enemy_group_defs_);
+        pAgent->addPersuaded(this);
+        setObjGroupID(pAgent->objGroupID());
+        pAgent->cpyEnemyDefs(enemy_group_defs_);
         dropActQ();
-        assert(d->d_owner != NULL);
-        owner_ = d->d_owner;
+        owner_ = pAgent;
         desc_state_ |= pd_smControlled;
         friends_found_.clear();
         hostiles_found_.clear();
-        hostile_desc_ = ((PedInstance *)d->d_owner)->hostileDesc();
+        hostile_desc_ = pAgent->hostileDesc();
 
         // adding following behavior
         PedInstance::actionQueueGroupType as;
@@ -2772,7 +2780,20 @@ bool PedInstance::handleDamage(ShootableMapObject::DamageInflictType *d) {
 
         setDrawnAnim(PedInstance::ad_PersuadedAnim);
         setRcvDamageDef(MapObject::ddmg_PedPanicImmune);
-        return true;
+        g_App.gameSounds().play(snd::PERSUADE);
+    }
+}
+
+bool PedInstance::handleDamage(ShootableMapObject::DamageInflictType *d) {
+    if (health_ <= 0 || rcv_damage_def_ == MapObject::ddmg_Invulnerable
+        || (d->dtype & rcv_damage_def_) == 0)
+        return false;
+
+    if ((d->dtype & MapObject::dmg_Physical) != 0)
+        health_ -= d->dvalue;
+    else if (d->dtype == MapObject::dmg_Persuasion) {
+        handlePersuadedBy((PedInstance *)d->d_owner);
+        return isPersuaded();
     }
 
     // Change direction due to impact

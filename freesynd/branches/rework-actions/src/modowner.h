@@ -77,6 +77,24 @@ public:
         for (int i = 0; i < 6; i++)
             slots_[i] = NULL;
     }
+
+    /*!
+     * This method returns the amount of time before health
+     * is restored when a ped owns the right version of Chest.
+     * \return 0 if ped do not have good chest.
+     */
+    uint16 getHealthRegenerationPeriod() {
+        Mod *pMod = slots_[Mod::MOD_CHEST];
+        if (pMod) {
+            // TODO : add different times depending on version of chest
+            if (pMod->getVersion() >= Mod::MOD_V1) {
+                return 4000;
+            }
+        }
+        
+        return 0;
+    }
+
 protected:
     Mod *slots_[6];
 };

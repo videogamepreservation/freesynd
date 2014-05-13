@@ -157,8 +157,7 @@ public:
 
     typedef enum {
         wspt_None = spe_None,
-        wspt_Persuadatron = (spe_PointToPoint | spe_TargetReachInstant
-            | spe_TargetPedOnly | spe_CanShoot),
+        wspt_Persuadatron = spe_None,
         wspt_Pistol =
             (spe_PointToPoint | spe_TargetReachInstant | spe_UsesAmmo
             | spe_CanShoot),

@@ -21,6 +21,7 @@ set (SOURCES
 	core/research.cpp
 	core/researchmanager.cpp
 	ia/action.cpp
+	ia/behaviour.cpp
 	default_ini.h
 	freesynd.cpp
     ipastim.cpp
@@ -126,6 +127,7 @@ set(HEADERS
 	core/research.h
 	core/researchmanager.h
 	ia/actions.h
+	ia/behaviour.h
 	gfx/dirtylist.h
 	gfx/fliplayer.h
 	gfx/font.h

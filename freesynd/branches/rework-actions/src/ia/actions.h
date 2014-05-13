@@ -438,19 +438,6 @@ namespace fs_actions {
         //! Time to wait between two weapon actions
         int timeToWait_;
     };
-
-    /*!
-     * A behaviour is used to determine default actions for ped.
-     */
-    class Behaviour {
-        public:
-        virtual void execute(Mission *pMission, PedInstance *pPed) = 0;
-    };
-
-    class NopeBehaviour : public Behaviour {
-    public:
-        void execute(Mission *pMission, PedInstance *pPed);
-    };
 }
 
 #endif // IA_ACTIONS_H_

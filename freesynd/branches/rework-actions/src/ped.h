@@ -41,6 +41,7 @@
 #include "ia/actions.h"
 
 class Agent;
+class Behaviour;
 class Mission;
 class VehicleInstance;
 class Vehicle;
@@ -344,6 +345,9 @@ public:
     //! Method called to check if ped has died
     bool handleDeath(ShootableMapObject::DamageInflictType &d);
     bool handleDamage(ShootableMapObject::DamageInflictType *d);
+
+    //! Method called when an agent try to persuad this ped
+    void handlePersuadedBy(PedInstance *pAgent);
 
     bool inSightRange(MapObject *t);
     VehicleInstance *inVehicle();
@@ -878,7 +882,7 @@ protected:
     std::vector <actionQueueGroupType> default_actions_;
 
     /*! Ped's behaviour.*/
-    fs_actions::Behaviour *pBehaviour_;
+    Behaviour *pBehaviour_;
     /*! Current action*/
     fs_actions::MovementAction *currentAction_;
     /*! Current action of using a weapon.*/

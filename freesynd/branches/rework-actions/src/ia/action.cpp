@@ -38,9 +38,6 @@ using namespace fs_actions;
 const int FollowAction::kFollowDistance = 192;
 const int WalkBurnHitAction::kMaxDistanceToWalkBurning = 800;
 
-void NopeBehaviour::execute(Mission *pMission, PedInstance *pPed) {
-}
-
 /*!
  * Default constructor.
  * \param origin Who has created this action.
