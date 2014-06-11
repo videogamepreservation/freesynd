@@ -240,6 +240,8 @@ void Weapon::initFromConfig(WeaponType w_type, ConfigFile &conf) {
         shots_per_ammo_ = conf.read<int>(propName);
         sprintf(propName, pattern, w_type, "weight");
         weight_ = conf.read<int>(propName);
+        sprintf(propName, pattern, w_type, "auto.fire_rate");
+        fireRate_ = conf.read<int>(propName, 0);
     } catch (...) {
         FSERR(Log::k_FLG_GAME, "Weapon", "initFromConfig", ("Cannot load weapon %d : %s\n", w_type, propName))
     }
@@ -255,8 +257,8 @@ WeaponInstance *WeaponInstance::createInstance(Weapon *pWeaponClass) {
 }
 
 WeaponInstance::WeaponInstance(Weapon * w) : ShootableMapObject(-1),
-    bombSoundTimer(w->timeReload()), bombExplosionTimer(w->timeForShot())
-{
+    bombSoundTimer(w->timeReload()), bombExplosionTimer(w->timeForShot()),
+    flamerTimer_(180) {
     pWeaponClass_ = w;
     ammo_remaining_ = w->ammo();
     weapon_used_time_ = 0;
@@ -275,6 +277,7 @@ WeaponInstance::WeaponInstance(Weapon * w) : ShootableMapObject(-1),
     }
     health_ = 1;
     start_health_ = 1;
+    pFlamerShot_ = NULL;
 }
 
 bool WeaponInstance::animate(int elapsed) {
@@ -299,7 +302,7 @@ bool WeaponInstance::animate(int elapsed) {
             is_ignored_ = true;
             if (bombExplosionTimer.update(elapsed)) {
                 ShootableMapObject::DamageInflictType dmg;
-                fire(g_Session.getMission(), dmg);
+                fire(g_Session.getMission(), dmg, elapsed);
                 return true;
             }
             is_ignored_ = false;
@@ -943,15 +946,66 @@ void WeaponInstance::deactivate() {
  * This method is used only for shooting weapons and Medikit.
  * \param pMission Mission data
  * \param dmg Information on the damage to perform
+ * \param elapsed Time since last frame
  */
-void WeaponInstance::fire(Mission *pMission, ShootableMapObject::DamageInflictType &dmg) {
+void WeaponInstance::fire(Mission *pMission, ShootableMapObject::DamageInflictType &dmg, int elapsed) {
     if (getWeaponType() == Weapon::MediKit) {
         dmg.d_owner->resetHealth();
     } else if (getWeaponType() == Weapon::GaussGun) {
         GaussGunShot *pShot = new GaussGunShot(dmg);
         pMission->addPrjShot(pShot);
     } else if (getWeaponType() == Weapon::Flamer) {
-        // TODO : complete;
+        // when targeting a point with the flamer, the point of impact
+        // circles around the target.
+        // We use the weapon's direction field to store a logical direction
+        // which will give the current moving point of impact
+        toDefineXYZ xyz;
+        dmg.aimedLoc.convertPosToXYZ(&xyz);
+        
+        switch(direction()) {
+        case 0:
+            xyz.y += 160;
+            break;
+        case 1:
+            xyz.x += 96;
+            xyz.y += 96;
+            break;
+        case 2:
+            xyz.x += 160;
+            break;
+        case 3:
+            xyz.x += 96;
+            xyz.y -= 96;
+            break;
+        case 4:
+            xyz.y -= 160;
+            break;
+        case 5:
+            xyz.x -= 96;
+            xyz.y -= 96;
+            break;
+        case 6:
+            xyz.x -= 160;
+            break;
+        case 7:
+            xyz.x -= 96;
+            xyz.y += 96;
+            break;
+        }
+
+        dmg.aimedLoc.setTileX(xyz.x / 256);
+        dmg.aimedLoc.setTileY(xyz.y / 256);
+        dmg.aimedLoc.setOffXY(xyz.x % 256, xyz.y % 256);
+
+        if (pFlamerShot_ == NULL) {
+            pFlamerShot_ = new FlamerShot(dmg);
+            pMission->addPrjShot(pFlamerShot_);
+        }
+
+        // Change direction for next time
+        if (flamerTimer_.update(elapsed)) {
+            setDirection((direction() + 1) % 8);
+        }
     }  else if (getWeaponType() == Weapon::TimeBomb) {
         map_ = -1;
         health_ = 0;
@@ -968,6 +1022,17 @@ void WeaponInstance::fire(Mission *pMission, ShootableMapObject::DamageInflictTy
     ammo_remaining_ -= pWeaponClass_->ammoPerShot();
     if (ammo_remaining_ < 0) {
         ammo_remaining_ = 0;
+    }
+}
+
+/*!
+ * Called when player stops using the weapon.
+ * Used to reset the pFlamerShot_ field
+ */
+void WeaponInstance::stopShooting() {
+    if (pFlamerShot_ != NULL) {
+        pFlamerShot_->stop();
+        pFlamerShot_ = NULL;
     }
 }
 
@@ -1215,7 +1280,8 @@ void WeaponInstance::handleHit(ShootableMapObject::DamageInflictType & d)
         is_ignored_ = true;
         // we pass the given DamageInflictType just for the compiler
         // as it is not used by the fire method for a Bomb
-        fire(g_Session.getMission(), d);
+        // same for elapsed
+        fire(g_Session.getMission(), d, 0);
     }
 }
 

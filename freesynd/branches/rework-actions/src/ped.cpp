@@ -429,6 +429,7 @@ bool PedInstance::executeAction(int elapsed, Mission *pMission) {
             if (health_ == 0) {
                 // Ped may have died during execution of a HitAction.
                 destroyAllActions();
+                destroyUseWeaponAction();
             } else {
                 // current action is finished : go to next one
                 fs_actions::MovementAction *pNext = currentAction_->next();
@@ -459,7 +460,7 @@ bool PedInstance::executeUseWeaponAction(int elapsed, Mission *pMission) {
         updated |= pUseWeaponAction_->execute(elapsed, pMission, this);
         if (pUseWeaponAction_->isFinished()) {
             // change weapon if empty
-            if (selectedWeapon()->ammoRemaining() == 0) {
+            if (selectedWeapon() && selectedWeapon()->ammoRemaining() == 0) {
                 selectNextWeapon();
             }
             // erase action
@@ -504,44 +505,10 @@ void PedInstance::stopUsingWeapon() {
  * Update the ped's shooting direction and target.
  */
 void PedInstance::updateShootingDirection(Mission *pMission, ShootableMapObject *pTarget, PathNode &shootPt) {
-    WeaponInstance *pWeapon = selectedWeapon();
     int xb = tileX() * 256 + offX();
     int yb = tileY() * 256 + offY();
     int txb = 0;
     int tyb = 0;
-    if (pWeapon->getMainType() == Weapon::Flamer) {
-        int dir = getDirection(8);
-        switch (dir) {
-            case 0:
-                yb += 160;
-                break;
-            case 1:
-                xb += 96;
-                yb += 96;
-                break;
-            case 2:
-                xb += 160;
-                break;
-            case 3:
-                xb += 96;
-                yb -= 96;
-                break;
-            case 4:
-                yb -= 160;
-                break;
-            case 5:
-                xb -= 96;
-                yb -= 96;
-                break;
-            case 6:
-                xb -= 160;
-                break;
-            case 7:
-                xb -= 96;
-                yb += 96;
-                break;
-        }
-    }
 
     if (xb < 0 || (xb > (pMission->mmax_x_ - 1) * 256))
         return;
@@ -565,12 +532,11 @@ void PedInstance::updateShootingDirection(Mission *pMission, ShootableMapObject 
         tyb = shootPt.tileY() * 256 + shootPt.offY();
     }
 
-    int dir = -1;
-    pWeapon->setDirection(txb - xb, tyb - yb, &dir);
-    if (dir != -1)
-        setDirection(dir);
+    setDirection(txb - xb, tyb - yb);
 
+    // If ped is currently shooting (ie there's an action of type UseWeapon
     if (pUseWeaponAction_ && pUseWeaponAction_->type() == fs_actions::Action::kActTypeShoot) {
+        // then update the action with new shooting target
         fs_actions::ShootAction *pShoot = dynamic_cast<fs_actions::ShootAction *>(pUseWeaponAction_);
         pShoot->setAimedAt(shootPt);
     }

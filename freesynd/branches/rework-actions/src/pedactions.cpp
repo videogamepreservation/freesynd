@@ -152,8 +152,7 @@ void PedInstance::insertHitAction(DamageInflictType &d) {
         // When hit by a bullet or collision, ped is ejected
         pHitAct = new fs_actions::RecoilHitAction(d);
     } else if (d.dtype & dmg_Burn) {
-
-
+        pHitAct = new fs_actions::WalkBurnHitAction(d);
     } else if (d.dtype & dmg_Laser) {
         // When hit by a laser, ped is vaporized
         pHitAct = new fs_actions::LaserHitAction(d);
@@ -179,11 +178,12 @@ void PedInstance::addActionShootAt(const PathNode &aimedPt) {
     if (canAddUseWeaponAction()) {
         // adds precision to the shoot
         PathNode adjAimedPt = aimedPt;
-        adjustAimedPtWithRangeAndAccuracy(selectedWeapon()->getWeaponClass(), adjAimedPt);
-        if (selectedWeapon()->getWeaponClass()->isAutomatic()) {
-            pUseWeaponAction_ = new fs_actions::AutomaticShootAction(fs_actions::kOrigUser, adjAimedPt);
+        WeaponInstance *pWeapon = selectedWeapon();
+        adjustAimedPtWithRangeAndAccuracy(pWeapon->getWeaponClass(), adjAimedPt);
+        if (pWeapon->getWeaponClass()->isAutomatic()) {
+            pUseWeaponAction_ = new fs_actions::AutomaticShootAction(fs_actions::kOrigUser, adjAimedPt, pWeapon);
         } else {
-            pUseWeaponAction_ = new fs_actions::ShootAction(fs_actions::kOrigUser, adjAimedPt);
+            pUseWeaponAction_ = new fs_actions::ShootAction(fs_actions::kOrigUser, adjAimedPt, pWeapon);
         }
     }
 }

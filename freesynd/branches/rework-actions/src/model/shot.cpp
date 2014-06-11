@@ -395,17 +395,16 @@ void Explosion::generateFlameWaves(Mission *pMission, toDefineXYZ &cp, double dm
     }
 }
 
-
-GaussGunShot::GaussGunShot(ShootableMapObject::DamageInflictType &dmg)  : Shot(dmg) {
+ProjectileShot::ProjectileShot(ShootableMapObject::DamageInflictType &dmg) : Shot(dmg) {
     elapsed_ = -1;
     lifeOver_ = false;
-    drawImpact_ = false;
-
     curPos_ = dmg.originLocW;
     currentDistance_ = 0;
-    lastAnimDist_ = 0;
+
+    speed_ = dmg.pWeapon->getWeaponClass()->shotSpeed();
     // distance from origin of shoot to target on each axis
     dmg.aimedLoc.convertPosToXYZ(&targetLocW_);
+
     double diffx = (double)(targetLocW_.x - curPos_.x);
     double diffy = (double)(targetLocW_.y - curPos_.y);
     double diffz = (double)(targetLocW_.z - curPos_.z);
@@ -417,10 +416,23 @@ GaussGunShot::GaussGunShot(ShootableMapObject::DamageInflictType &dmg)  : Shot(d
         incZ_ = diffz / distanceToTarget;
     }
 
-    speed_ = dmg.pWeapon->getWeaponClass()->shotSpeed();
     distanceMax_ = dmg.pWeapon->getWeaponClass()->range();
     if (distanceToTarget < distanceMax_) {
         distanceMax_ = distanceToTarget;
+    }
+}
+
+GaussGunShot::GaussGunShot(ShootableMapObject::DamageInflictType &dmg) : ProjectileShot(dmg) {
+    drawImpact_ = false;
+    lastAnimDist_ = 0;
+}
+
+void GaussGunShot::inflictDamage(Mission *pMission) {
+    lifeOver_ = true;
+
+    if (drawImpact_) {
+        int dmgRange = dmg_.pWeapon->getWeaponClass()->rangeDmg();
+        Explosion::createExplosion(pMission, dmg_.pWeapon, curPos_, dmgRange, dmg_.dvalue);
     }
 }
 
@@ -437,15 +449,6 @@ bool GaussGunShot::animate(int elapsed, Mission *pMission) {
     }
     
     return true;
-}
-
-void GaussGunShot::inflictDamage(Mission *pMission) {
-    lifeOver_ = true;
-
-    if (drawImpact_) {
-        int dmgRange = dmg_.pWeapon->getWeaponClass()->rangeDmg();
-        Explosion::createExplosion(pMission, dmg_.pWeapon, curPos_, dmgRange, dmg_.dvalue);
-    }
 }
 
 /*!
@@ -605,4 +608,29 @@ void GaussGunShot::drawTrace(Mission *pMission, toDefineXYZ currentPos) {
             }
         }
     }
+}
+
+FlamerShot::FlamerShot(ShootableMapObject::DamageInflictType &dmg) : ProjectileShot(dmg) {
+    dmg_.originLocW.z += 100;
+    pObjectHit_ = NULL;
+    printf("flamerShot create\n");
+}
+
+
+bool FlamerShot::animate(int elapsed, Mission *pMission) {
+    printf("flamerShot::animate\n");
+    return true;
+}
+
+void FlamerShot::inflictDamage(Mission *pMission) {
+    lifeOver_ = true;
+
+    if (pObjectHit_) {
+        printf("hit smthing\n");
+        pObjectHit_->handleHit(dmg_);
+    }
+}
+
+void FlamerShot::stop() {
+    lifeOver_ = true;
 }

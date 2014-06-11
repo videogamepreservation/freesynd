@@ -83,6 +83,7 @@ weapon.4.shotspeed=0
 weapon.4.dmg_per_shot=2
 weapon.4.shots_per_ammo=1
 weapon.4.weight=5
+weapon.4.auto.fire_rate=250
 
 # MiniGun
 weapon.5.name=WEAPON_MINI_GUN
@@ -104,6 +105,7 @@ weapon.5.shotspeed=0
 weapon.5.dmg_per_shot=2
 weapon.5.shots_per_ammo=1
 weapon.5.weight=25
+weapon.5.auto.fire_rate=250
 
 # Laser
 weapon.6.name=WEAPON_LASER
@@ -147,6 +149,7 @@ weapon.7.shotspeed=2200
 weapon.7.dmg_per_shot=8
 weapon.7.shots_per_ammo=1
 weapon.7.weight=15
+weapon.7.auto.fire_rate=100
 
 # Long Range
 weapon.8.name=WEAPON_LONG_RANGE

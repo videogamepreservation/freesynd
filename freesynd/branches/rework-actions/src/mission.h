@@ -44,6 +44,7 @@ class PedInstance;
 class Agent;
 class ObjectiveDesc;
 class Squad;
+class ProjectileShot;
 class GaussGunShot;
 
 /*!
@@ -138,9 +139,6 @@ public:
     size_t numSfxObjects() { return sfx_objects_.size(); }
     SFXObject *sfxObjects(size_t i) { return sfx_objects_[i]; }
 
-    size_t numPrjShots() { return prj_shots_.size(); }
-    GaussGunShot *prjShots(size_t i) { return prj_shots_[i]; }
-
     void addSfxObject(SFXObject *so) {
         sfx_objects_.push_back(so);
     }
@@ -157,9 +155,27 @@ public:
         sfx_objects_.erase((sfx_objects_.begin() + i));
     }
 
-    void addPrjShot(GaussGunShot *prj) {
+    /*!
+     * Adds the given ProjectileShot to the list of animated shots.
+     * \param prj The projectile to add
+     */
+    void addPrjShot(ProjectileShot *prj) {
         prj_shots_.push_back(prj);
     }
+    /*!
+     * Returns the number of currently animated ProjectileShot.
+     */
+    size_t numPrjShots() { return prj_shots_.size(); }
+    /*!
+     * Return the projectile at the given index.
+     * \param i Index of the projectile
+     * \return The projectile found.
+     */
+    ProjectileShot *prjShots(size_t i) { return prj_shots_[i]; }
+    /*!
+     * Destroy the projectile at given index.
+     * \param i Index of the projectile
+     */
     void delPrjShot(size_t i);
 
     /*! Return the mission statistics. */
@@ -237,7 +253,7 @@ protected:
     std::vector<WeaponInstance *> weapons_;
     std::vector<Static *> statics_;
     std::vector<SFXObject *> sfx_objects_;
-    std::vector<GaussGunShot *> prj_shots_;
+    std::vector<ProjectileShot *> prj_shots_;
 
     std::vector <ObjectiveDesc *> objectives_;
     //std::vector <ObjectiveDesc> sub_objectives_;

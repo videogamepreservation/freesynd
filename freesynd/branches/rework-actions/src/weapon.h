@@ -35,6 +35,8 @@
 #include "utils/configfile.h"
 #include "utils/timer.h"
 
+class FlamerShot;
+
 /*!
  * Weapon class.
  */
@@ -214,6 +216,8 @@ public:
     int ammoCost() { return ammo_cost_; }
     int shotSpeed() { return shot_speed_; }
     int shotsPerAmmo() { return shots_per_ammo_; }
+    //! Returns the fire rate expressed in time between two shots
+    int fireRate() { return fireRate_; }
     bool usesAmmo() {
         return (shotProperty() & Weapon::spe_UsesAmmo) != 0;
     }
@@ -261,6 +265,8 @@ protected:
     int shots_per_ammo_;
     //! The weight of a weapon influences the agent's speed
     int weight_;
+    //! The fire rate expressed by time between two shots. Only for automatic weapons
+    int fireRate_;
     //!
     WeaponAnimIndex idx_;
     int anim_;
@@ -391,7 +397,9 @@ public:
     void updtWeaponUsedTime(int elapsed);
 
     //! Use weapon
-    void fire(Mission *pMission, ShootableMapObject::DamageInflictType &dmg);
+    void fire(Mission *pMission, ShootableMapObject::DamageInflictType &dmg, int elapsed);
+    //! Tells the weapon to stop shooting (only used for flamer)
+    void stopShooting();
 
 protected:
     Weapon *pWeaponClass_;
@@ -405,12 +413,15 @@ protected:
     fs_utils::Timer bombSoundTimer;
     /*! Timer used for bomb explosion.*/
     fs_utils::Timer bombExplosionTimer;
+    /*! Timer used for rotating flamer direction.*/
+    fs_utils::Timer flamerTimer_;
     bool activated_;
     /*! used to avoid double consuming of same elapsed time,
     * if ped shoots, time is consumed and should not be reused by weapon,
     * NOTE: ped animate executed before weapon animate
     */
     bool time_consumed_;
+    FlamerShot *pFlamerShot_;
 };
 
 #endif

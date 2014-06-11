@@ -26,6 +26,7 @@
 
 #include "path.h"
 #include "mapobject.h"
+#include "utils/timer.h"
 
 class Mission;
 class PedInstance;
@@ -374,6 +375,8 @@ namespace fs_actions {
         int walkedDist_;
         /*! The direction he will walked towards.*/
         int moveDirection_;
+        /*! Duration of burning.*/
+        fs_utils::Timer burnTimer_;
     };
 
     /*!
@@ -382,11 +385,18 @@ namespace fs_actions {
      */
     class UseWeaponAction : public Action {
     public:
-        UseWeaponAction(CreatOrigin origin) : Action(kActTypeUndefined, origin) {};
-        UseWeaponAction(CreatOrigin origin, ActionType type) : Action(type, origin) {};
+        UseWeaponAction(CreatOrigin origin, WeaponInstance *pWeapon) : Action(kActTypeUndefined, origin) {
+            pWeapon_ = pWeapon;
+        };
+        UseWeaponAction(CreatOrigin origin, ActionType type, WeaponInstance *pWeapon) : Action(type, origin) {
+            pWeapon_ = pWeapon;
+        };
 
         //! Stop shooting (mainly used with AutomaticShootAction)
         virtual void stop() {};
+    protected:
+        //! The weapon to use
+        WeaponInstance *pWeapon_;
     };
 
     /*!
@@ -394,7 +404,7 @@ namespace fs_actions {
      */
     class ShootAction : public UseWeaponAction {
     public:
-        ShootAction(CreatOrigin origin, PathNode &aimedAt);
+        ShootAction(CreatOrigin origin, PathNode &aimedAt, WeaponInstance *pWeapon);
 
         //! Entry point to execute the action
         bool execute(int elapsed, Mission *pMission, PedInstance *pPed);
@@ -416,13 +426,13 @@ namespace fs_actions {
      */
     class AutomaticShootAction : public ShootAction {
     public:
-        AutomaticShootAction(CreatOrigin origin, PathNode &dest);
+        AutomaticShootAction(CreatOrigin origin, PathNode &dest, WeaponInstance *pWeapon);
 
         bool execute(int elapsed, Mission *pMission, PedInstance *pPed);
         void stop();
     protected:
-        //! when set to true, shooting stops
-        bool stopShooting_;
+        /*! Fire rate.*/
+        fs_utils::Timer fireRateTimer_;
     };
 
     /*!
@@ -430,7 +440,7 @@ namespace fs_actions {
      */
     class UseMedikitAction : public UseWeaponAction {
     public:
-        UseMedikitAction(CreatOrigin origin) : UseWeaponAction(origin) {}
+        UseMedikitAction(CreatOrigin origin) : UseWeaponAction(origin, NULL) {}
 
         //! Entry point to execute the action
         bool execute(int elapsed, Mission *pMission, PedInstance *pPed);

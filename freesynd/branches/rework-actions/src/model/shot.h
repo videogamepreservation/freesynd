@@ -101,22 +101,58 @@ private:
 };
 
 /*!
+ * Base class of shots whose path is drawn.
+ */
+class ProjectileShot: public Shot {
+public:
+    //! Constructor
+    ProjectileShot(ShootableMapObject::DamageInflictType &dmg);
+
+    //! Animate the shot
+    virtual bool animate(int elapsed, Mission *m) = 0;
+
+    //! Returns true if shot can be destroyed
+    bool isLifeOver() { return lifeOver_; }
+
+protected:
+    /*! This tells if the shot object shot be destroyed.*/
+    bool lifeOver_;
+    int elapsed_;
+    /*! Projectile speed.*/
+    double speed_;
+
+    /*! Current position of projectile.*/
+    toDefineXYZ curPos_;
+    /*! Position of the target.*/
+    toDefineXYZ targetLocW_;
+
+    /*! Projectile position incrementation on X axis.*/
+    double incX_;
+    /*! Projectile position incrementation on Y axis.*/
+    double incY_;
+    /*! Projectile position incrementation on Z axis.*/
+    double incZ_;
+
+    /*! Maximum distance the projectile can go.*/
+    double distanceMax_;
+    /*! Updated distance from origin to current projectile's position.*/
+    double currentDistance_;
+};
+
+/*!
  * Shot made by Gauss Gun.
  * The Gauss Gun shoots a projectile that flies until it hist its target
  * then it explodes burning everything around.
  * When flying, the projectile leaves a trace of smoke behind it.
  */
-class GaussGunShot: public Shot {
+class GaussGunShot: public ProjectileShot {
 public:
     //! Constructor
     GaussGunShot(ShootableMapObject::DamageInflictType &dmg);
     //! Destructor
     ~GaussGunShot() {}
 
-    //! Animate the shot
     bool animate(int elapsed, Mission *m);
-    //! Returns true if shot can be destroyed
-    bool isLifeOver() { return lifeOver_; }
 
     void inflictDamage(Mission *pMission);
 
@@ -125,29 +161,27 @@ protected:
     bool moveProjectile(int elapsed, Mission *pMission);
     void drawTrace(Mission *pMission, toDefineXYZ currentPos);
 protected:
-    /*! This tells if the shot object shot be destroyed.*/
-    bool lifeOver_;
-    int elapsed_;
-    /*! Current position of projectile.*/
-    toDefineXYZ curPos_;
-    /*! Position of the target.*/
-    toDefineXYZ targetLocW_;
-    /*! Projectile position incrementation on X axis.*/
-    double incX_;
-    /*! Projectile position incrementation on Y axis.*/
-    double incY_;
-    /*! Projectile position incrementation on Z axis.*/
-    double incZ_;
-    /*! Projectile speed.*/
-    double speed_;
-    /*! Updated distance from origin to current projectile's position.*/
-    double currentDistance_;
-    /*! Maximum distance the projectile can go.*/
-    double distanceMax_;
     /*! Position of the last trace animation.*/
     double lastAnimDist_;
     /*! flag to know if we can draw the explosion.*/
     bool drawImpact_;
+};
+
+/*!
+ * Shot made with the flame thrower.
+ */
+class FlamerShot: public ProjectileShot {
+public:
+    //! Constructor
+    FlamerShot(ShootableMapObject::DamageInflictType &dmg);
+
+    void inflictDamage(Mission *pMission);
+
+    bool animate(int elapsed, Mission *m);
+    //! Stops the shot
+    void stop();
+protected:
+    ShootableMapObject *pObjectHit_;
 };
 
 #endif // MODEL_SHOT_H_

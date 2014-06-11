@@ -431,7 +431,7 @@ bool LaserHitAction::doExecute(int elapsed, Mission *pMission, PedInstance *pPed
 }
 
 WalkBurnHitAction::WalkBurnHitAction(ShootableMapObject::DamageInflictType &d) : 
-HitAction(kOrigAction, d) {
+HitAction(kOrigAction, d),burnTimer_(300) {
     targetState_ = PedInstance::pa_smWalkingBurning;
 }
 
@@ -458,7 +458,8 @@ bool WalkBurnHitAction::doExecute(int elapsed, Mission *pMission, PedInstance *p
     pPed->moveToDir(pMission, elapsed, moveDirdesc_, moveDirection_, -1, -1, &walkDistDiff, true);
     walkedDist_ += walkDistDiff;
 
-    if (walkedDist_ >= kMaxDistanceToWalkBurning) {
+    //if (walkedDist_ >= kMaxDistanceToWalkBurning) {
+    if (burnTimer_.update(elapsed)) {
         setSucceeded();
 
         if (pPed->handleDeath(damage_)) {
@@ -469,8 +470,8 @@ bool WalkBurnHitAction::doExecute(int elapsed, Mission *pMission, PedInstance *p
     return true;
 }
 
-ShootAction::ShootAction(CreatOrigin origin, PathNode &aimedAt) : 
-    UseWeaponAction(origin, kActTypeShoot) {
+ShootAction::ShootAction(CreatOrigin origin, PathNode &aimedAt, WeaponInstance *pWeapon) : 
+    UseWeaponAction(origin, kActTypeShoot, pWeapon) {
         aimedAt_ = aimedAt;
 }
 
@@ -491,8 +492,7 @@ bool ShootAction::execute(int elapsed, Mission *pMission, PedInstance *pPed) {
     if (status_ == kActStatusNotStarted) {
         // The first time
         status_ = kActStatusWaitForAnim;
-        WeaponInstance *pWeapon = pPed->selectedWeapon();
-        pWeapon->playSound();
+        pWeapon_->playSound();
 
         // change state to firing
         pPed->goToState(PedInstance::pa_smFiring);
@@ -514,17 +514,16 @@ bool ShootAction::execute(int elapsed, Mission *pMission, PedInstance *pPed) {
  */
 bool ShootAction::doShoot(int elapsed, Mission *pMission, PedInstance *pPed) {
     if (status_ == kActStatusRunning) {
-        WeaponInstance *pWeapon = pPed->selectedWeapon();
         ShootableMapObject::DamageInflictType dmg;
-        fillDamageDesc(pMission, pPed, pWeapon, dmg);
-        pWeapon->fire(pMission, dmg);
+        fillDamageDesc(pMission, pPed, pWeapon_, dmg);
+        pWeapon_->fire(pMission, dmg, elapsed);
         // Shooting animation is finished
         pPed->leaveState(PedInstance::pa_smFiring);
 
         // The action is complete only after a certain laps of time to
         // simulate the fact that the weapon needs to be reloaded
         // and the shooter's reactivity to that
-        timeToWait_ = pPed->getTimeBetweenShoots(pWeapon);
+        timeToWait_ = pPed->getTimeBetweenShoots(pWeapon_);
         setWaitingForTime();
     } else if (status_ == kActStatusWaitForTime) {
         timeToWait_ -= elapsed;
@@ -556,26 +555,37 @@ void ShootAction::fillDamageDesc(Mission *pMission,
     pShooter->convertPosToXYZ(&(dmg.originLocW));
 }
 
-AutomaticShootAction::AutomaticShootAction(CreatOrigin origin, PathNode &aimedAt) : 
-        ShootAction(origin, aimedAt) {
-    stopShooting_ = false;
+AutomaticShootAction::AutomaticShootAction(CreatOrigin origin, PathNode &aimedAt, WeaponInstance *pWeapon) : 
+        ShootAction(origin, aimedAt, pWeapon),
+        fireRateTimer_(pWeapon->getWeaponClass()->fireRate())
+{
 }
 
 bool AutomaticShootAction::execute(int elapsed, Mission *pMission, PedInstance *pPed) {
-    if (status_ == kActStatusNotStarted) {
+    /*if (status_ == kActStatusNotStarted) {
         // The first time
         status_ = kActStatusWaitForAnim;
         // change state to firing
         pPed->goToState(PedInstance::pa_smFiring);
         pPed->setFramesPerSec(16);
     } else if (status_ == kActStatusRunning) {
-        WeaponInstance *pWeapon = pPed->selectedWeapon();
-        ShootableMapObject::DamageInflictType dmg;
-        fillDamageDesc(pMission, pPed, pWeapon, dmg);
-        pWeapon->playSound();
-        pWeapon->fire(pMission, dmg);
+        if (pPed->isAlive()) {
+            WeaponInstance *pWeapon = pPed->selectedWeapon();
+            ShootableMapObject::DamageInflictType dmg;
+            fillDamageDesc(pMission, pPed, pWeapon, dmg);
+            pWeapon->playSound();
+            pWeapon->fire(pMission, dmg, elapsed);
+            
+            if (pWeapon->ammoRemaining() == 0) {
+                // stop shooting because no more ammo
+                stopShooting_ = true;
+            }
+        } else {
+            // stop shooting because ped is dead during shooting
+            stopShooting_ = true;
+        }
 
-        if (pWeapon->ammoRemaining() == 0 || stopShooting_) {
+        if (stopShooting_) {
             // Shooting animation is finished
             pPed->leaveState(PedInstance::pa_smFiring);
             setSucceeded();
@@ -583,13 +593,45 @@ bool AutomaticShootAction::execute(int elapsed, Mission *pMission, PedInstance *
             status_ = kActStatusWaitForAnim;
             pPed->setFrame(0);
         }
+    }*/
+
+    if (status_ == kActStatusNotStarted) {
+        setRunning();
+        // change state to firing
+        pPed->goToState(PedInstance::pa_smFiring);
+        //pPed->setFramesPerSec(16);
+    } else if (status_ == kActStatusRunning) {
+        if (pPed->isDead() || pWeapon_->ammoRemaining() == 0) {
+            stop();
+        } else if (fireRateTimer_.update(elapsed)) {
+            ShootableMapObject::DamageInflictType dmg;
+            fillDamageDesc(pMission, pPed, pWeapon_, dmg);
+            pWeapon_->playSound();
+            pWeapon_->fire(pMission, dmg, elapsed);
+        }
+    } else if (status_ == kActStatusWaitForTime) {
+        timeToWait_ -= elapsed;
+        if (timeToWait_ <= 0) {
+            // time is reached so action can finish
+            setSucceeded();
+        }
     }
 
     return true;
 }
 
 void AutomaticShootAction::stop() {
-    stopShooting_ = true;
+    pWeapon_->stopShooting();
+    if (status_ == kActStatusRunning) {
+        PedInstance *pPed = dynamic_cast<PedInstance *>(pWeapon_->getOwner());
+        // Shooting animation is finished
+        pPed->leaveState(PedInstance::pa_smFiring);
+        // The action is complete only after a certain laps of time to
+        // simulate the fact that the weapon needs to be reloaded
+        // and the shooter's reactivity to that
+        timeToWait_ = pPed->getTimeBetweenShoots(pWeapon_);
+        setWaitingForTime();
+    }
 }
 
 /*!
@@ -603,17 +645,16 @@ bool UseMedikitAction::execute(int elapsed, Mission *pMission, PedInstance *pPed
     bool update = false;
     if (status_ == kActStatusNotStarted) {
         // set time before completing action
-        WeaponInstance *pWeapon = pPed->selectedWeapon();
         status_ = kActStatusWaitForTime;
-        timeToWait_ = pPed->getTimeBetweenShoots(pWeapon);
+        timeToWait_ = pPed->getTimeBetweenShoots(pWeapon_);
 
-        if (pWeapon->getWeaponType() != Weapon::MediKit) {
+        if (pWeapon_->getWeaponType() != Weapon::MediKit) {
             setFailed();
         } else {
-            pWeapon->playSound();
+            pWeapon_->playSound();
             ShootableMapObject::DamageInflictType dmg;
             dmg.d_owner = pPed;
-            pWeapon->fire(pMission, dmg);
+            pWeapon_->fire(pMission, dmg, elapsed);
             update = true;
         }
     } else if (status_ == kActStatusWaitForTime) {
