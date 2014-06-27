@@ -95,6 +95,15 @@ public:
         off_z_ = pos.offZ();
     }
 
+    /*!
+     * Set the position of the object to be the given one.
+     * \param pos New object position
+     */
+    void setPosition(const toDefineXYZ &pos) {
+        setPosition(pos.x / 256, pos.y / 256, pos.z / 128, pos.x % 256,
+                    pos.y % 256, pos.z % 128 );
+    }
+
     int tileX() { return tile_x_; }
     int tileY() { return tile_y_; }
     int tileZ() { return tile_z_; }

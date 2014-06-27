@@ -75,7 +75,7 @@ public:
         tile_z_ = z;
     }
 
-    void convertPosToXYZ(toDefineXYZ *xyz) {
+    void convertPosToXYZ(toDefineXYZ *xyz) const {
         xyz->x = tile_x_ * 256 + off_x_;
         xyz->y = tile_y_ * 256 + off_y_;
         xyz->z = tile_z_ * 128 + off_z_;

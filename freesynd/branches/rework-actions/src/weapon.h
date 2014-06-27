@@ -398,8 +398,6 @@ public:
 
     //! Use weapon
     void fire(Mission *pMission, ShootableMapObject::DamageInflictType &dmg, int elapsed);
-    //! Tells the weapon to stop shooting (only used for flamer)
-    void stopShooting();
 
 protected:
     Weapon *pWeaponClass_;

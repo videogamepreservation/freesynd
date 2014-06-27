@@ -553,6 +553,43 @@ void ShootAction::fillDamageDesc(Mission *pMission,
     dmg.d_owner = pShooter;
     dmg.aimedLoc = aimedAt_;
     pShooter->convertPosToXYZ(&(dmg.originLocW));
+
+    if (pWeapon->getWeaponType() == Weapon::Flamer) {
+        toDefineXYZ *initPos = new toDefineXYZ();
+        // the weapon is located at half the size of the shooter
+        dmg.originLocW.z += pShooter->sizeZ() >> 1;
+
+        switch(pShooter->getDirection()) {
+        case 0:
+            initPos->y += 200;
+            break;
+        case 1:
+            initPos->x += 100;
+            initPos->y += 100;
+            break;
+        case 2:
+            initPos->x += 200;
+            break;
+        case 3:
+            initPos->x += 130;
+            initPos->y -= 120;
+            break;
+        case 4:
+            initPos->y -= 200;
+            break;
+        case 5:
+            initPos->x -= 100;
+            initPos->y -= 100;
+            break;
+        case 6:
+            initPos->x -= 200;
+            break;
+        case 7:
+            initPos->x -= 130;
+            initPos->y += 120;
+            break;
+        }
+    }
 }
 
 AutomaticShootAction::AutomaticShootAction(CreatOrigin origin, PathNode &aimedAt, WeaponInstance *pWeapon) : 
@@ -595,15 +632,19 @@ bool AutomaticShootAction::execute(int elapsed, Mission *pMission, PedInstance *
         }
     }*/
 
+    bool firstTime = false;
     if (status_ == kActStatusNotStarted) {
         setRunning();
         // change state to firing
         pPed->goToState(PedInstance::pa_smFiring);
         //pPed->setFramesPerSec(16);
-    } else if (status_ == kActStatusRunning) {
+        firstTime = true;
+    }
+    
+    if (status_ == kActStatusRunning) {
         if (pPed->isDead() || pWeapon_->ammoRemaining() == 0) {
             stop();
-        } else if (fireRateTimer_.update(elapsed)) {
+        } else if (firstTime || fireRateTimer_.update(elapsed)) {
             ShootableMapObject::DamageInflictType dmg;
             fillDamageDesc(pMission, pPed, pWeapon_, dmg);
             pWeapon_->playSound();
@@ -621,7 +662,6 @@ bool AutomaticShootAction::execute(int elapsed, Mission *pMission, PedInstance *
 }
 
 void AutomaticShootAction::stop() {
-    pWeapon_->stopShooting();
     if (status_ == kActStatusRunning) {
         PedInstance *pPed = dynamic_cast<PedInstance *>(pWeapon_->getOwner());
         // Shooting animation is finished

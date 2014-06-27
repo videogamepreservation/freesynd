@@ -43,9 +43,9 @@
  * \param includeShooter if true, owner of the shot will be include in the result list
  */
 void Shot::getAllShootablesWithinRange(Mission *pMission,
-                                                    toDefineXYZ &originLocW,
-                                                    std::vector<ShootableMapObject *> &objInRangeVec,
-                                                    bool includeShooter) {
+                                       toDefineXYZ &originLocW,
+                                       std::vector<ShootableMapObject *> &objInRangeVec,
+                                       bool includeShooter) {
     // Look at all peds
     for (size_t i = 0; i < pMission->numPeds(); ++i) {
         ShootableMapObject *p = pMission->ped(i);
@@ -110,7 +110,7 @@ void InstantImpactShot::inflictDamage(Mission *pMission) {
         PathNode impactLocT = dmg_.aimedLoc;
         if (nbImpacts > 1) {
             // When multiple impacts, they're spread
-            diffuseImpact(pMission, originLocW, impactLocT);
+            diffuseImpact(pMission, originLocW, &impactLocT);
         }
 
         // Verify if shot hit something or was blocked by a tile
@@ -130,7 +130,7 @@ void InstantImpactShot::inflictDamage(Mission *pMission) {
     }
 }
 
-void InstantImpactShot::diffuseImpact(Mission *pMission, toDefineXYZ &originLocW, PathNode &impactLocT) {
+void InstantImpactShot::diffuseImpact(Mission *pMission, const toDefineXYZ &originLocW, PathNode *impactLocT) {
     double angle = dmg_.pWeapon->getWeaponClass()->shotAngle();
     if (angle == 0)
         return;
@@ -141,7 +141,7 @@ void InstantImpactShot::diffuseImpact(Mission *pMission, toDefineXYZ &originLocW
     int cz = originLocW.z;
 
     toDefineXYZ impactLocW;
-    impactLocT.convertPosToXYZ(&impactLocW);
+    impactLocT->convertPosToXYZ(&impactLocW);
     int tx = impactLocW.x;
     int ty = impactLocW.y;
     int tz = impactLocW.z;
@@ -248,8 +248,8 @@ void InstantImpactShot::diffuseImpact(Mission *pMission, toDefineXYZ &originLocW
     assert(gtx >= 0 && gty >= 0 && gtz >= 0);
     assert(gtx <= max_x && gty <= max_y && gtz <= max_z);
 
-    impactLocT.setTileXYZ(gtx / 256, gty / 256, gtz / 128);
-    impactLocT.setOffXYZ(gtx % 256, gtx % 256, gtz % 128);
+    impactLocT->setTileXYZ(gtx / 256, gty / 256, gtz / 128);
+    impactLocT->setOffXYZ(gtx % 256, gtx % 256, gtz % 128);
 }
 
 /*!
@@ -297,7 +297,7 @@ void Explosion::createExplosion(Mission *pMission, ShootableMapObject *pOwner, d
     createExplosion(pMission, pOwner, location, range, dmgValue);
 }
 
-void Explosion::createExplosion(Mission *pMission, ShootableMapObject *pOwner, toDefineXYZ &location, double range, int dmgValue) {
+void Explosion::createExplosion(Mission *pMission, ShootableMapObject *pOwner, const toDefineXYZ &location, double range, int dmgValue) {
     ShootableMapObject::DamageInflictType dmg;
     if (pOwner && pOwner->majorType() == MapObject::mjt_Weapon) {
         // It's a bomb that exploded (other waepons do not explode)
@@ -317,7 +317,7 @@ void Explosion::createExplosion(Mission *pMission, ShootableMapObject *pOwner, t
     explosion.inflictDamage(pMission);
 }
 
-Explosion::Explosion(ShootableMapObject::DamageInflictType &dmg) : Shot(dmg) {
+Explosion::Explosion(const ShootableMapObject::DamageInflictType &dmg) : Shot(dmg) {
     // GaussGun has a different animation for explosion
     if (dmg_.pWeapon && dmg_.pWeapon->getWeaponType() == Weapon::GaussGun) {
         rngDmgAnim_ = SFXObject::sfxt_LargeFire;
@@ -348,7 +348,7 @@ void Explosion::inflictDamage(Mission *pMission) {
         pMission->addSfxObject(so);
     }
     // create the ring of fire around the origin of explosion
-    generateFlameWaves(pMission, dmg_.originLocW, dmg_.range);
+    generateFlameWaves(pMission, &(dmg_.originLocW), dmg_.range);
     g_App.gameSounds().play(snd::EXPLOSION_BIG);
 }
 
@@ -357,12 +357,12 @@ void Explosion::inflictDamage(Mission *pMission) {
  * \param cp current position (center)
  * \param dmg_rng effective range for drawing
  */
-void Explosion::generateFlameWaves(Mission *pMission, toDefineXYZ &cp, double dmg_rng)
+void Explosion::generateFlameWaves(Mission *pMission, toDefineXYZ *cp, double dmg_rng)
 {
-    toDefineXYZ base_pos = cp;
-    cp.z += 4;
-    if (cp.z > (pMission->mmax_z_ - 1) * 128)
-        cp.z = (pMission->mmax_z_ - 1) * 128;
+    toDefineXYZ base_pos = *cp;
+    cp->z += 4;
+    if (cp->z > (pMission->mmax_z_ - 1) * 128)
+        cp->z = (pMission->mmax_z_ - 1) * 128;
     // TODO: exclude flames on water, put these flames to the ground,
     // don't draw in air(, stairs problem?)
     double angle_inc = PI;
@@ -382,7 +382,7 @@ void Explosion::generateFlameWaves(Mission *pMission, toDefineXYZ &cp, double dm
                 base_pos.z / 128, (base_pos.x + (int)x) % 256,
                 (base_pos.y + (int)y) % 256, base_pos.z % 128);
 
-            uint8 block_mask = pMission->inRangeCPos(&cp, NULL, &pn, true, true, dmg_rng);
+            uint8 block_mask = pMission->inRangeCPos(cp, NULL, &pn, true, true, dmg_rng);
             if (block_mask != 32) {
                 SFXObject *so = new SFXObject(pMission->map(), rngDmgAnim_,
                                 100 * (rand() % 16));
@@ -395,16 +395,18 @@ void Explosion::generateFlameWaves(Mission *pMission, toDefineXYZ &cp, double dm
     }
 }
 
-ProjectileShot::ProjectileShot(ShootableMapObject::DamageInflictType &dmg) : Shot(dmg) {
+ProjectileShot::ProjectileShot(const ShootableMapObject::DamageInflictType &dmg) : Shot(dmg) {
     elapsed_ = -1;
-    lifeOver_ = false;
     curPos_ = dmg.originLocW;
     currentDistance_ = 0;
+    lifeOver_ = false;
+    drawImpact_ = false;
+    pShootableHit_ = NULL;
 
     speed_ = dmg.pWeapon->getWeaponClass()->shotSpeed();
     // distance from origin of shoot to target on each axis
     dmg.aimedLoc.convertPosToXYZ(&targetLocW_);
-
+    
     double diffx = (double)(targetLocW_.x - curPos_.x);
     double diffy = (double)(targetLocW_.y - curPos_.y);
     double diffz = (double)(targetLocW_.z - curPos_.z);
@@ -422,21 +424,7 @@ ProjectileShot::ProjectileShot(ShootableMapObject::DamageInflictType &dmg) : Sho
     }
 }
 
-GaussGunShot::GaussGunShot(ShootableMapObject::DamageInflictType &dmg) : ProjectileShot(dmg) {
-    drawImpact_ = false;
-    lastAnimDist_ = 0;
-}
-
-void GaussGunShot::inflictDamage(Mission *pMission) {
-    lifeOver_ = true;
-
-    if (drawImpact_) {
-        int dmgRange = dmg_.pWeapon->getWeaponClass()->rangeDmg();
-        Explosion::createExplosion(pMission, dmg_.pWeapon, curPos_, dmgRange, dmg_.dvalue);
-    }
-}
-
-bool GaussGunShot::animate(int elapsed, Mission *pMission) {
+bool ProjectileShot::animate(int elapsed, Mission *pMission) {
     if (elapsed_ == -1) {
         // It's the first time the animate method is called since shot
         // was created : start counting
@@ -457,7 +445,7 @@ bool GaussGunShot::animate(int elapsed, Mission *pMission) {
  * \param pMission Mission data
  * \return True if projectile has reached its target or max distance.
  */
-bool GaussGunShot::moveProjectile(int elapsed, Mission *pMission) {
+bool ProjectileShot::moveProjectile(int elapsed, Mission *pMission) {
     bool endMove = false;
     elapsed_ += elapsed;
 
@@ -531,7 +519,7 @@ bool GaussGunShot::moveProjectile(int elapsed, Mission *pMission) {
     PathNode pn(reached_pos.x / 256, reached_pos.y / 256,
         reached_pos.z / 128, reached_pos.x % 256, reached_pos.y % 256,
         reached_pos.z % 128);
-    ShootableMapObject * smo = NULL;
+    
     // force shooter to be ignored when searching for blockers
     bool previousIgnoreState = dmg_.d_owner->isIgnored();
     dmg_.d_owner->setIsIgnored(true);
@@ -539,7 +527,7 @@ bool GaussGunShot::moveProjectile(int elapsed, Mission *pMission) {
     // maxr here is set to maximum that projectile can fly from its
     // current position
     uint8 block_mask = pMission->inRangeCPos(
-        &curPos_, &smo, &pn, true, false, distanceMax_ - was_dist);
+        &curPos_, &pShootableHit_, &pn, true, false, distanceMax_ - was_dist);
 
     if (block_mask == 1) {
         // ??
@@ -547,6 +535,7 @@ bool GaussGunShot::moveProjectile(int elapsed, Mission *pMission) {
             && reached_pos.y == targetLocW_.y
             && reached_pos.z == targetLocW_.z)
         {
+            
             drawImpact_ = true;
             endMove = true;
         }
@@ -569,6 +558,19 @@ bool GaussGunShot::moveProjectile(int elapsed, Mission *pMission) {
     dmg_.d_owner->setIsIgnored(previousIgnoreState);
 
     return endMove;
+}
+
+GaussGunShot::GaussGunShot(const ShootableMapObject::DamageInflictType &dmg) : ProjectileShot(dmg) {
+    lastAnimDist_ = 0;
+}
+
+void GaussGunShot::inflictDamage(Mission *pMission) {
+    lifeOver_ = true;
+
+    if (drawImpact_) {
+        int dmgRange = dmg_.pWeapon->getWeaponClass()->rangeDmg();
+        Explosion::createExplosion(pMission, dmg_.pWeapon, curPos_, dmgRange, dmg_.dvalue);
+    }
 }
 
 /*!
@@ -610,27 +612,26 @@ void GaussGunShot::drawTrace(Mission *pMission, toDefineXYZ currentPos) {
     }
 }
 
-FlamerShot::FlamerShot(ShootableMapObject::DamageInflictType &dmg) : ProjectileShot(dmg) {
-    dmg_.originLocW.z += 100;
-    pObjectHit_ = NULL;
-    printf("flamerShot create\n");
+FlamerShot::FlamerShot(const ShootableMapObject::DamageInflictType &dmg) :
+    ProjectileShot(dmg) {
 }
 
+/*!
+ * Draws the animation of smoke begind the projectile.
+ * \param pMission Mission data
+ * \param currentPos Current position of projectile.
+ */
+void FlamerShot::drawTrace(Mission *pMission, toDefineXYZ currentPos) {
 
-bool FlamerShot::animate(int elapsed, Mission *pMission) {
-    printf("flamerShot::animate\n");
-    return true;
+    SFXObject *so = new SFXObject(pMission->map(),
+                    dmg_.pWeapon->getWeaponClass()->impactAnims()->trace_anim);
+    so->setPosition(currentPos);
+    pMission->addSfxObject(so);
 }
 
 void FlamerShot::inflictDamage(Mission *pMission) {
     lifeOver_ = true;
-
-    if (pObjectHit_) {
-        printf("hit smthing\n");
-        pObjectHit_->handleHit(dmg_);
+    if (pShootableHit_ != NULL) {
+        pShootableHit_->handleHit(dmg_);
     }
-}
-
-void FlamerShot::stop() {
-    lifeOver_ = true;
 }

@@ -29,6 +29,7 @@
 #define MODEL_SHOT_H_
 
 #include <vector>
+#include <list>
 
 #include "path.h"
 #include "mapobject.h"
@@ -42,8 +43,8 @@ class PedInstance;
  * It's the shot that inflicts damage.
  */
 class Shot {
-public:
-    Shot(ShootableMapObject::DamageInflictType &dmg) {
+ public:
+    explicit Shot(const ShootableMapObject::DamageInflictType &dmg) {
         dmg_ = dmg;
     }
     virtual ~Shot() {}
@@ -51,10 +52,14 @@ public:
     virtual void inflictDamage(Mission *pMission) = 0;
 
     ShootableMapObject::DamageInflictType & getAttributes() { return dmg_; }
-protected:
+ protected:
     //!
-    void getAllShootablesWithinRange(Mission *pMission, toDefineXYZ &originLocW, std::vector<ShootableMapObject *> &objInRangeLst, bool includeShooter);
-protected:
+    void getAllShootablesWithinRange(
+        Mission *pMission,
+        toDefineXYZ &originLocW,
+        std::vector<ShootableMapObject *> &objInRangeLst,
+        bool includeShooter);
+ protected:
     // The damage that will be inflicted by this shot
     ShootableMapObject::DamageInflictType dmg_;
 };
@@ -65,17 +70,24 @@ protected:
  * uzi, laser, long range.
  */
 class InstantImpactShot : public Shot {
-public:
-    InstantImpactShot(ShootableMapObject::DamageInflictType &dmg) : Shot(dmg) {}
+ public:
+    explicit InstantImpactShot(
+        const ShootableMapObject::DamageInflictType &dmg) : Shot(dmg) {}
 
     void inflictDamage(Mission *pMission);
-private:
-    //! 
-    void diffuseImpact(Mission *m, toDefineXYZ &originLocW, PathNode &impactLocT);
+ private:
+    //! Spread the impact on the ground
+    void diffuseImpact(Mission *m, const toDefineXYZ &originLocW,
+                       PathNode *impactLocT);
     //!
-    ShootableMapObject *checkHitTarget(std::vector<ShootableMapObject *> objInRangeLst, toDefineXYZ &originLocW, PathNode &impactLocT);
+    ShootableMapObject *checkHitTarget(
+        std::vector<ShootableMapObject *> objInRangeLst,
+        toDefineXYZ &originLocW,
+        PathNode &impactLocT);
     //!
-    void createImpactAnimation(Mission *pMission, ShootableMapObject * pTargetHit, PathNode &impactLocT);
+    void createImpactAnimation(Mission *pMission,
+                               ShootableMapObject * pTargetHit,
+                               PathNode &impactLocT);
 };
 
 /*!
@@ -83,19 +95,22 @@ private:
  * suicide or a car explosion.
  */
 class Explosion : public Shot {
-public:
+ public:
     //! Creates an explosion at the location of owner
-    static void createExplosion(Mission *pMission, ShootableMapObject *pOwner, double range, int dmgValue = 16);
+    static void createExplosion(Mission *pMission, ShootableMapObject *pOwner,
+                                double range, int dmgValue = 16);
     //! Creates an explosion at the given location
-    static void createExplosion(Mission *pMission, ShootableMapObject *pOwner, toDefineXYZ &location, double range, int dmgValue);
+    static void createExplosion(Mission *pMission, ShootableMapObject *pOwner,
+                                const toDefineXYZ &location, double range,
+                                int dmgValue);
 
-    Explosion(ShootableMapObject::DamageInflictType &dmg);
+    explicit Explosion(const ShootableMapObject::DamageInflictType &dmg);
 
     void inflictDamage(Mission *pMission);
-private:
-    void generateFlameWaves(Mission *pMission, toDefineXYZ &cp, double dmg_rng);
+ private:
+    void generateFlameWaves(Mission *pMission, toDefineXYZ *cp, double dmg_rng);
 
-private:
+ private:
     /*! Type of animation for the explosion.*/
     int rngDmgAnim_;
 };
@@ -104,17 +119,21 @@ private:
  * Base class of shots whose path is drawn.
  */
 class ProjectileShot: public Shot {
-public:
+ public:
     //! Constructor
-    ProjectileShot(ShootableMapObject::DamageInflictType &dmg);
+    explicit ProjectileShot(const ShootableMapObject::DamageInflictType &dmg);
 
     //! Animate the shot
-    virtual bool animate(int elapsed, Mission *m) = 0;
+    virtual bool animate(int elapsed, Mission *m);
 
     //! Returns true if shot can be destroyed
     bool isLifeOver() { return lifeOver_; }
 
-protected:
+ protected:
+    //! Update projectile position
+    bool moveProjectile(int elapsed, Mission *pMission);
+    virtual void drawTrace(Mission *pMission, toDefineXYZ currentPos) = 0;
+ protected:
     /*! This tells if the shot object shot be destroyed.*/
     bool lifeOver_;
     int elapsed_;
@@ -137,6 +156,10 @@ protected:
     double distanceMax_;
     /*! Updated distance from origin to current projectile's position.*/
     double currentDistance_;
+    /*! flag to know if we can draw the impact of the shot.*/
+    bool drawImpact_;
+    /*! Not null if the projectile has to touch smth destroyable.*/
+    ShootableMapObject * pShootableHit_;
 };
 
 /*!
@@ -146,42 +169,35 @@ protected:
  * When flying, the projectile leaves a trace of smoke behind it.
  */
 class GaussGunShot: public ProjectileShot {
-public:
+ public:
     //! Constructor
-    GaussGunShot(ShootableMapObject::DamageInflictType &dmg);
+    explicit GaussGunShot(const ShootableMapObject::DamageInflictType &dmg);
     //! Destructor
     ~GaussGunShot() {}
 
-    bool animate(int elapsed, Mission *m);
-
     void inflictDamage(Mission *pMission);
-
-protected:
+ protected:
     //! Update projectile position
-    bool moveProjectile(int elapsed, Mission *pMission);
     void drawTrace(Mission *pMission, toDefineXYZ currentPos);
-protected:
+ protected:
     /*! Position of the last trace animation.*/
     double lastAnimDist_;
-    /*! flag to know if we can draw the explosion.*/
-    bool drawImpact_;
 };
 
 /*!
  * Shot made with the flame thrower.
  */
 class FlamerShot: public ProjectileShot {
-public:
+ public:
     //! Constructor
-    FlamerShot(ShootableMapObject::DamageInflictType &dmg);
+    explicit FlamerShot(const ShootableMapObject::DamageInflictType &dmg);
+    //! Desctructor
+    ~FlamerShot() {}
 
     void inflictDamage(Mission *pMission);
 
-    bool animate(int elapsed, Mission *m);
-    //! Stops the shot
-    void stop();
-protected:
-    ShootableMapObject *pObjectHit_;
+ protected:
+    void drawTrace(Mission *pMission, toDefineXYZ currentPos);
 };
 
-#endif // MODEL_SHOT_H_
+#endif  // MODEL_SHOT_H_

@@ -997,10 +997,8 @@ void WeaponInstance::fire(Mission *pMission, ShootableMapObject::DamageInflictTy
         dmg.aimedLoc.setTileY(xyz.y / 256);
         dmg.aimedLoc.setOffXY(xyz.x % 256, xyz.y % 256);
 
-        if (pFlamerShot_ == NULL) {
-            pFlamerShot_ = new FlamerShot(dmg);
-            pMission->addPrjShot(pFlamerShot_);
-        }
+        FlamerShot *pFlamerShot = new FlamerShot(dmg);
+        pMission->addPrjShot(pFlamerShot);
 
         // Change direction for next time
         if (flamerTimer_.update(elapsed)) {
@@ -1022,17 +1020,6 @@ void WeaponInstance::fire(Mission *pMission, ShootableMapObject::DamageInflictTy
     ammo_remaining_ -= pWeaponClass_->ammoPerShot();
     if (ammo_remaining_ < 0) {
         ammo_remaining_ = 0;
-    }
-}
-
-/*!
- * Called when player stops using the weapon.
- * Used to reset the pFlamerShot_ field
- */
-void WeaponInstance::stopShooting() {
-    if (pFlamerShot_ != NULL) {
-        pFlamerShot_->stop();
-        pFlamerShot_ = NULL;
     }
 }
 
