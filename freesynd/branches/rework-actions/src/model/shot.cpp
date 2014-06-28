@@ -612,8 +612,21 @@ void GaussGunShot::drawTrace(Mission *pMission, toDefineXYZ currentPos) {
     }
 }
 
-FlamerShot::FlamerShot(const ShootableMapObject::DamageInflictType &dmg) :
-    ProjectileShot(dmg) {
+FlamerShot::FlamerShot(Mission *pMission, const ShootableMapObject::DamageInflictType &dmg) :
+        ProjectileShot(dmg) {
+    // We create a SFXObjet that we keep in memory to updateits position
+    pFlame_ = new SFXObject(pMission->map(),
+                            dmg_.pWeapon->getWeaponClass()->impactAnims()->trace_anim);
+    // The sfxObject will loop to keep it alive
+    pFlame_->setLoopAnimation(true);
+    pFlame_->setPosition(dmg.originLocW);
+    pMission->addSfxObject(pFlame_);
+}
+
+FlamerShot::~FlamerShot() {
+    if(pFlame_ != NULL) {
+        delete pFlame_;
+    }
 }
 
 /*!
@@ -623,15 +636,18 @@ FlamerShot::FlamerShot(const ShootableMapObject::DamageInflictType &dmg) :
  */
 void FlamerShot::drawTrace(Mission *pMission, toDefineXYZ currentPos) {
 
-    SFXObject *so = new SFXObject(pMission->map(),
-                    dmg_.pWeapon->getWeaponClass()->impactAnims()->trace_anim);
-    so->setPosition(currentPos);
-    pMission->addSfxObject(so);
+    pFlame_->setPosition(currentPos);
 }
 
 void FlamerShot::inflictDamage(Mission *pMission) {
     lifeOver_ = true;
+    // target was hit (or shot reached an end)  so we
+    // can get rid of sfxobject
+    // it will be destroyed by the GameplayMenu loop
+    pFlame_->setLoopAnimation(false);
+    pFlame_ = NULL;
     if (pShootableHit_ != NULL) {
         pShootableHit_->handleHit(dmg_);
     }
 }
+

@@ -561,32 +561,32 @@ void ShootAction::fillDamageDesc(Mission *pMission,
 
         switch(pShooter->getDirection()) {
         case 0:
-            initPos->y += 200;
+            dmg.originLocW.y += 200;
             break;
         case 1:
-            initPos->x += 100;
-            initPos->y += 100;
+            dmg.originLocW.x += 100;
+            dmg.originLocW.y += 100;
             break;
         case 2:
-            initPos->x += 200;
+            dmg.originLocW.x += 200;
             break;
         case 3:
-            initPos->x += 130;
-            initPos->y -= 120;
+            dmg.originLocW.x += 130;
+            dmg.originLocW.y -= 120;
             break;
         case 4:
-            initPos->y -= 200;
+            dmg.originLocW.y -= 200;
             break;
         case 5:
-            initPos->x -= 100;
-            initPos->y -= 100;
+            dmg.originLocW.x -= 100;
+            dmg.originLocW.y -= 100;
             break;
         case 6:
-            initPos->x -= 200;
+            dmg.originLocW.x -= 200;
             break;
         case 7:
-            initPos->x -= 130;
-            initPos->y += 120;
+            dmg.originLocW.x -= 130;
+            dmg.originLocW.y += 120;
             break;
         }
     }

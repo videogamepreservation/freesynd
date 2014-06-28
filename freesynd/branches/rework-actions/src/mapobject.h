@@ -332,6 +332,10 @@ public:
     bool sfxLifeOver() { return sfx_life_over_; }
     //! Return true if object is managed by another object
     bool isManaged() { return managed_; }
+    //! Set whether animation should loop or not
+    void setLoopAnimation(bool flag) { loopAnimation_ = flag; }
+    //! Reset animation
+    void reset();
 
     void draw(int x, int y);
     bool animate(int elapsed);
@@ -363,6 +367,8 @@ protected:
     bool sfx_life_over_;
     // to draw all frames or first frame only
     bool draw_all_frames_;
+    //! Tells if the animation should restart automatically after ending
+    bool loopAnimation_;
     int elapsed_left_;
     //! True means the life of the object is managed by something else than gameplaymenu
     bool managed_;

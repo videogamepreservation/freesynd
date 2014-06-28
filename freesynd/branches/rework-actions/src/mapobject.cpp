@@ -25,6 +25,7 @@
  ************************************************************************/
 
 #include "common.h"
+#include "utils/log.h"
 #include "app.h"
 #include "vehicle.h"
 #include "core/gamesession.h"
@@ -430,17 +431,18 @@ void MapObject::offzOnStairs(uint8 twd) {
  * \param m Map id
  * \param type Type of SfxObject (see SFXObject::SfxTypeEnum)
  * \param t_show
- * \param managed True means object i created/destroyed by another object than Mission
+ * \param managed True means object is destroyed by another object than Mission
  */
-SFXObject::SFXObject(int m, int type, int t_show, bool managed) : MapObject(m),
-    sfx_life_over_(false), draw_all_frames_(true), elapsed_left_(0)
-{
+SFXObject::SFXObject(int m, int type, int t_show, bool managed) : MapObject(m) {
     main_type_ = type;
     managed_ = managed;
+    draw_all_frames_ = true;
+    loopAnimation_ = false;
     setTimeShowAnim(0);
+    reset();
     switch(type) {
         case SFXObject::sfxt_Unknown:
-            printf("Unknown sfx created");
+            FSERR(Log::k_FLG_UI, "SFXObject", "SFXObject", ("Sfx object of type Unknown created"));
             sfx_life_over_ = true;
             break;
         case SFXObject::sfxt_BulletHit:
@@ -519,7 +521,11 @@ bool SFXObject::animate(int elapsed) {
         if (frame_ > g_App.gameSprites().lastFrame(anim_)
             && !leftTimeShowAnim(elapsed))
         {
-            sfx_life_over_ = true;
+            if (loopAnimation_) {
+                reset();
+            } else {
+                sfx_life_over_ = true;
+            }
         }
         return changed;
     }
@@ -536,6 +542,12 @@ void SFXObject::correctZ() {
         tile_z_ = z / 128;
         off_z_ = z % 128;
     }
+}
+
+void SFXObject::reset() {
+    sfx_life_over_ = false;
+    frame_ = 0;
+    elapsed_left_ = 0;
 }
 
 ShootableMapObject::ShootableMapObject(int m):MapObject(m)

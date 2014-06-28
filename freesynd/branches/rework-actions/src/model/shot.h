@@ -131,7 +131,7 @@ class ProjectileShot: public Shot {
 
  protected:
     //! Update projectile position
-    bool moveProjectile(int elapsed, Mission *pMission);
+    virtual bool moveProjectile(int elapsed, Mission *pMission);
     virtual void drawTrace(Mission *pMission, toDefineXYZ currentPos) = 0;
  protected:
     /*! This tells if the shot object shot be destroyed.*/
@@ -190,14 +190,17 @@ class GaussGunShot: public ProjectileShot {
 class FlamerShot: public ProjectileShot {
  public:
     //! Constructor
-    explicit FlamerShot(const ShootableMapObject::DamageInflictType &dmg);
+    explicit FlamerShot(Mission *pMission, const ShootableMapObject::DamageInflictType &dmg);
     //! Desctructor
-    ~FlamerShot() {}
+    ~FlamerShot();
 
     void inflictDamage(Mission *pMission);
 
  protected:
     void drawTrace(Mission *pMission, toDefineXYZ currentPos);
+ protected:
+    //! The flame that represents the shot
+    SFXObject *pFlame_;
 };
 
 #endif  // MODEL_SHOT_H_

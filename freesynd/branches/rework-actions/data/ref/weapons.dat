@@ -145,11 +145,11 @@ weapon.7.timereload=50
 weapon.7.damagerange=0
 weapon.7.shotangle=2.0
 weapon.7.shotaccuracy=0.9
-weapon.7.shotspeed=2200
+weapon.7.shotspeed=1000
 weapon.7.dmg_per_shot=8
 weapon.7.shots_per_ammo=1
 weapon.7.weight=15
-weapon.7.auto.fire_rate=400
+weapon.7.auto.fire_rate=150
 
 # Long Range
 weapon.8.name=WEAPON_LONG_RANGE

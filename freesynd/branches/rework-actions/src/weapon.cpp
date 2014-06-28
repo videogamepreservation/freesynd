@@ -997,7 +997,7 @@ void WeaponInstance::fire(Mission *pMission, ShootableMapObject::DamageInflictTy
         dmg.aimedLoc.setTileY(xyz.y / 256);
         dmg.aimedLoc.setOffXY(xyz.x % 256, xyz.y % 256);
 
-        FlamerShot *pFlamerShot = new FlamerShot(dmg);
+        FlamerShot *pFlamerShot = new FlamerShot(pMission, dmg);
         pMission->addPrjShot(pFlamerShot);
 
         // Change direction for next time
