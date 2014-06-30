@@ -280,8 +280,6 @@ void PickupWeaponAction::doStart(Mission *pMission, PedInstance *pPed) {
 bool PickupWeaponAction::doExecute(int elapsed, Mission *pMission, PedInstance *pPed) {
     if (status_ != kActStatusWaitForAnim) {
         pWeapon_->setOwner(pPed);
-        pWeapon_->setMap(-1);
-        pWeapon_->setIsIgnored(true);
         pWeapon_->deactivate();
         pPed->addWeapon(pWeapon_);
         setSucceeded();
@@ -431,7 +429,7 @@ bool LaserHitAction::doExecute(int elapsed, Mission *pMission, PedInstance *pPed
 }
 
 WalkBurnHitAction::WalkBurnHitAction(ShootableMapObject::DamageInflictType &d) : 
-HitAction(kOrigAction, d),burnTimer_(300) {
+HitAction(kOrigAction, d),burnTimer_(1000) {
     targetState_ = PedInstance::pa_smWalkingBurning;
 }
 
@@ -599,39 +597,6 @@ AutomaticShootAction::AutomaticShootAction(CreatOrigin origin, PathNode &aimedAt
 }
 
 bool AutomaticShootAction::execute(int elapsed, Mission *pMission, PedInstance *pPed) {
-    /*if (status_ == kActStatusNotStarted) {
-        // The first time
-        status_ = kActStatusWaitForAnim;
-        // change state to firing
-        pPed->goToState(PedInstance::pa_smFiring);
-        pPed->setFramesPerSec(16);
-    } else if (status_ == kActStatusRunning) {
-        if (pPed->isAlive()) {
-            WeaponInstance *pWeapon = pPed->selectedWeapon();
-            ShootableMapObject::DamageInflictType dmg;
-            fillDamageDesc(pMission, pPed, pWeapon, dmg);
-            pWeapon->playSound();
-            pWeapon->fire(pMission, dmg, elapsed);
-            
-            if (pWeapon->ammoRemaining() == 0) {
-                // stop shooting because no more ammo
-                stopShooting_ = true;
-            }
-        } else {
-            // stop shooting because ped is dead during shooting
-            stopShooting_ = true;
-        }
-
-        if (stopShooting_) {
-            // Shooting animation is finished
-            pPed->leaveState(PedInstance::pa_smFiring);
-            setSucceeded();
-        } else {
-            status_ = kActStatusWaitForAnim;
-            pPed->setFrame(0);
-        }
-    }*/
-
     bool firstTime = false;
     if (status_ == kActStatusNotStarted) {
         setRunning();

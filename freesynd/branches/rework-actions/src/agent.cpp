@@ -51,11 +51,6 @@ Agent::~Agent() {
     removeAllWeapons();
 }
 
-void Agent::removeAllWeapons() {
-    while (weapons_.size())
-        delete removeWeapon(0);
-}
-
 bool Agent::saveToFile(PortableFile &file) {
     // id
     file.write32(id_);

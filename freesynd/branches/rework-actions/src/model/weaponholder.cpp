@@ -40,17 +40,28 @@ WeaponHolder::WeaponHolder() {
 }
 
 /*!
+ * Adds the givent weapon to the inventory.
+ * Weapon is placed at the end of the inventory.
+ * \param w The weapon to add
+ */
+void WeaponHolder::addWeapon(WeaponInstance *w) {
+    assert(w);
+    assert(weapons_.size() < kMaxHoldedWeapons);
+    w->setMap(-1);
+    w->setIsIgnored(true);
+    weapons_.push_back(w);
+}
+
+/*!
  * Removes the weapon at the given index in the inventory.
  * Caller is responsible for freeing the returned value.
  * \param n The index. Must be less than the total number of weapons.
  * \return The removed weapon or NULL if not found.
  */
-WeaponInstance *WeaponHolder::removeWeapon(uint8 n) {
+WeaponInstance *WeaponHolder::removeWeaponAtIndex(uint8 n) {
     if (n < weapons_.size()) {
         WeaponInstance *w = weapons_[n];
-        std::vector<WeaponInstance *>::iterator it = weapons_.begin() + n;
-
-        weapons_.erase(it);
+        removeWeapon(w);
         return w;
     }
 
@@ -58,19 +69,45 @@ WeaponInstance *WeaponHolder::removeWeapon(uint8 n) {
 }
 
 /*!
- * Removes the given weapon from the inventory.
+ * Deselects and removes the given weapon from the inventory.
  * Caller is responsible for freeing the returned value.
  * \param w The weapon instance.
  */
-void WeaponHolder::removeWeaponInstance(WeaponInstance *w) {
-    for (std::vector<WeaponInstance *>::iterator it = weapons_.begin();
-            it != weapons_.end(); ++it)
-    {
-        if (*it == w) {
+void WeaponHolder::removeWeapon(WeaponInstance *wi) {
+    // if no weapon was selected before dropping,
+    // no use to update selection
+    bool upd_selected = selected_weapon_ != kNoWeaponSelected;
+
+    for (int i = 0; i < (int)weapons_.size(); ++i) {
+        std::vector <WeaponInstance *>::iterator it = weapons_.begin() + i;
+        if ((*it) == wi) {
+            if (selectedWeapon() == wi) {
+                deselectWeapon();
+                // when dropping the selected weapon
+                // we don't select another weapon after
+                upd_selected = false;
+            }
+
+            // shift index to selected weapon if dropped weapon index
+            // was before selected weapon
+            if (upd_selected && selected_weapon_ > i)
+                --selected_weapon_;
+
             weapons_.erase(it);
+            wi->setOwner(NULL);
+
             break;
         }
     }
+}
+
+/*!
+ * Removes all weapons from the inventory.
+ * Caller is responsible for freeing the removed instances.
+ */
+void WeaponHolder::removeAllWeapons() {
+    while (weapons_.size())
+        delete removeWeaponAtIndex(0);
 }
 
 /*!

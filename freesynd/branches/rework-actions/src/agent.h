@@ -54,8 +54,6 @@ public:
     bool isAlive() { return is_alive_; }
     void set_dead() { is_alive_ = false; }
 
-    void removeAllWeapons();
-
     //! Save instance to file
     bool saveToFile(PortableFile &file);
     //! Load instance from file

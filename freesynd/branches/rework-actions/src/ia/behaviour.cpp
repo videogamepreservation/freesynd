@@ -54,6 +54,10 @@ void AgentBehaviour::handleBehaviourEvent(BehaviourEvent evtType) {
 }
 
 void AgentBehaviour::execute(int elapsed, Mission *pMission) {
+    if (pThisPed_->isDead()) {
+        return;
+    }
+
     // If Agent is equiped with right chest, his health periodically updates
     if (doRegenerates_ && healthTimer_.update(elapsed)) {
         if (pThisPed_->increaseHealth(kRegeratesHealthStep)) {

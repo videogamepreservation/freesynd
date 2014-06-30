@@ -86,17 +86,15 @@ public:
         return weapons_[n];
     }
 
-    void addWeapon(WeaponInstance *w) {
-        assert(w);
-        assert(weapons_.size() < kMaxHoldedWeapons);
-        weapons_.push_back(w);
-    }
+    void addWeapon(WeaponInstance *w);
 
     //! Removes the weapon from the inventory at the given index.
-    WeaponInstance *removeWeapon(uint8 n);
+    WeaponInstance *removeWeaponAtIndex(uint8 n);
 
     //! Removes the given weapon from the inventory.
-    void removeWeaponInstance(WeaponInstance *w);
+    void removeWeapon(WeaponInstance *w);
+    //! Removes all weapons in the inventory
+    void WeaponHolder::removeAllWeapons();
 
     //! Selects the weapon at given index in the inventory
     void selectWeapon(uint8 n);

@@ -181,13 +181,11 @@ void Mission::start()
             WeaponInstance *wi = WeaponInstance::createInstance(wpns[index_give]);
             p->addWeapon(wi);
             wi->setOwner(p);
-            wi->setIsIgnored(true);
             weapons_.push_back(wi);
             if (bomb) {
                 WeaponInstance *w_bomb = WeaponInstance::createInstance(bomb);
                 p->addWeapon(w_bomb);
                 w_bomb->setOwner(p);
-                w_bomb->setIsIgnored(true);
                 weapons_.push_back(w_bomb);
             }
         }
@@ -260,7 +258,7 @@ void Mission::endWithStatus(Status status) {
 void Mission::addWeaponsFromPedToAgent(PedInstance* p, Agent* pAg)
 {
     while (p->numWeapons()) {
-        WeaponInstance *wi = p->removeWeapon(0);
+        WeaponInstance *wi = p->removeWeaponAtIndex(0);
         std::vector < WeaponInstance * >::iterator it =
             weapons_.begin();
         while (it != weapons_.end() && *it != wi)

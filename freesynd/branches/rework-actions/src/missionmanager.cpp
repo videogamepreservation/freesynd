@@ -388,7 +388,6 @@ void MissionManager::createWeapons(const LevelData::LevelDataAll &level_data, Da
                         // others none (pacific Rim)
                         pMission->ped(di.pindx[offset_owner])->addWeapon(w);
                         w->setOwner(pMission->ped(di.pindx[offset_owner]));
-                        w->setIsIgnored(true);
                         di.windx[i] = pMission->numWeapons();
                         pMission->addWeapon(w);
                     } else {

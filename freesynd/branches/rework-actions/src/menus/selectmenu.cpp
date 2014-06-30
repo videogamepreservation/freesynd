@@ -535,7 +535,7 @@ void SelectMenu::handleMouseUp(int x, int y, int button, const int modKeys)
             if (target != cur_agent_ && reciever
                 && reciever->numWeapons() < 8)
             {
-                selected->removeWeaponInstance(weapon_dragged_);
+                selected->removeWeapon(weapon_dragged_);
                 reciever->addWeapon(weapon_dragged_);
 
                 pSelectedWeap_ = NULL;
@@ -789,7 +789,7 @@ void SelectMenu::handleAction(const int actionId, void *ctx, const int modKeys)
     } else if (actionId == sellButId_ && selectedWInstId_) {
         addDirtyRect(360, 305, 135, 70);
         Agent *selected = g_gameCtrl.agents().squadMember(cur_agent_);
-        WeaponInstance *pWi = selected->removeWeapon(selectedWInstId_ - 1);
+        WeaponInstance *pWi = selected->removeWeaponAtIndex(selectedWInstId_ - 1);
         g_Session.setMoney(g_Session.getMoney() + pWi->getWeaponClass()->cost());
         getStatic(moneyTxtId_)->setTextFormated("%d", g_Session.getMoney());
         delete pWi;

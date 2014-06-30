@@ -276,7 +276,7 @@ bool PedInstance::switchActionStateFrom(uint32 as) {
             state_ &= pa_smAll ^ pa_smBurning;
             break;
         case pa_smWalkingBurning:
-            state_ = pa_smBurning;
+            state_ = pa_smStanding;
             break;
         case pa_smGetInCar:
             state_ &= pa_smAll ^ (pa_smStanding | pa_smGetInCar);
@@ -828,10 +828,8 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                             aqt->state |= 8;
                         else {
                             wi->setOwner(this);
-                            wi->setMap(-1);
-                            wi->setIsIgnored(true);
                             wi->deactivate();
-                            weapons_.push_back(wi);
+                            addWeapon(wi);
                             aqt->state |= 36;
                         }
                     }
@@ -2128,10 +2126,9 @@ void PedInstance::initAsAgent(Agent *p_agent, unsigned int obj_group_id) {
     setHealth(kAgentMaxHealth);
     setStartHealth(kAgentMaxHealth);
     while (p_agent->numWeapons()) {
-        WeaponInstance *wi = p_agent->removeWeapon(0);
+        WeaponInstance *wi = p_agent->removeWeaponAtIndex(0);
         addWeapon(wi);
         wi->setOwner(this);
-        wi->setIsIgnored(true);
     }
     set_is_our(true);
     *((ModOwner *)this) = *((ModOwner *)p_agent);
@@ -2380,56 +2377,27 @@ WeaponInstance * PedInstance::dropWeapon(int n) {
 }
 
 void PedInstance::dropWeapon(WeaponInstance *wi) {
-    bool upd_selected = selected_weapon_ != -1;
-
-    if (selectedWeapon() == wi) {
-        deselectWeapon();
-        upd_selected = false;
-    }
-    for (int i = 0; i < (int)weapons_.size(); ++i)
-    {
-        std::vector <WeaponInstance *>::iterator it = weapons_.begin() + i;
-        if ((*it) == wi) {
-            weapons_.erase(it);
-            if (upd_selected && selected_weapon_ > i)
-                --selected_weapon_;
-            break;
-        }
-    }
-    wi->setOwner(NULL);
+    removeWeapon(wi);
+    
     wi->setMap(map_);
     wi->setIsIgnored();
     wi->setPosition(tile_x_, tile_y_, tile_z_, off_x_, off_y_, off_z_);
-    if (wi->getMainType() == Weapon::EnergyShield) {
-        wi->deactivate();
-    }
 }
 
 void PedInstance::dropAllWeapons() {
-
-    setRcvDamageDef(MapObject::ddmg_Ped);
-    deselectWeapon();
     Mission *m = g_Session.getMission();
     uint8 twd = m->mtsurfaces_[tile_x_ + m->mmax_x_ * tile_y_
         + m->mmax_m_xy * tile_z_].twd;
 
-    for (std::vector < WeaponInstance * >::iterator it
-        = weapons_.begin(); it != weapons_.end(); ++it)
-    {
-        WeaponInstance *w = *it;
-        w->setMap(map());
+    while (weapons_.size()) {
+        WeaponInstance *w = dropWeapon(0);
+
         // randomizing location for drop
         int ox = rand() % 256;
         int oy = rand() % 256;
         w->setPosition(tile_x_, tile_y_, tile_z_, ox, oy);
         w->offzOnStairs(twd);
-        w->setOwner(NULL);
-        w->setIsIgnored();
-        if (w->getMainType() == Weapon::EnergyShield) {
-            w->deactivate();
-        }
     }
-    weapons_.clear();
 }
 
 bool PedInstance::wePickupWeapon() {
@@ -2688,6 +2656,7 @@ bool PedInstance::handleDeath(ShootableMapObject::DamageInflictType &d) {
                 destroyAllWeapons();
                 break;
             case MapObject::dmg_Explosion:
+            case MapObject::dmg_Burn:
                 if (hasMinimumVersionOfMod(Mod::MOD_CHEST, Mod::MOD_V2) &&
                     d.d_owner != this) {
                     setDrawnAnim(PedInstance::ad_DieAnim);
@@ -2819,14 +2788,10 @@ bool PedInstance::handleDamage(ShootableMapObject::DamageInflictType *d) {
 }
 
 void PedInstance::destroyAllWeapons() {
-    deselectWeapon();
     while (!weapons_.empty()) {
-        WeaponInstance * w = removeWeapon(0);
+        WeaponInstance * w = dropWeapon(0);
         w->setMap(-1);
-        w->setPosition(tile_x_, tile_y_, tile_z_, off_x_, off_y_, off_z_);
-        w->setOwner(NULL);
         w->setIsIgnored(true);
-        w->deactivate();
     }
 }
 
