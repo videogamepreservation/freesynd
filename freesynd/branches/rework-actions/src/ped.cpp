@@ -502,43 +502,13 @@ void PedInstance::stopUsingWeapon() {
 }
 
 /*!
- * Update the ped's shooting direction and target.
+ * Update the ped's shooting target.
+ * \param aimedPt New target position
  */
-void PedInstance::updateShootingDirection(Mission *pMission, ShootableMapObject *pTarget, PathNode &shootPt) {
-    int xb = tileX() * 256 + offX();
-    int yb = tileY() * 256 + offY();
-    int txb = 0;
-    int tyb = 0;
-
-    if (xb < 0 || (xb > (pMission->mmax_x_ - 1) * 256))
-        return;
-    if (yb < 0 || (yb > (pMission->mmax_y_ - 1) * 256))
-        return;
-
-    int cz = tileZ() * 128 + offZ() + (sizeZ() >> 1);
-    if (cz > (pMission->mmax_z_ - 1) * 128)
-        return;
-    if (pMission->isTileSolid(xb / 256, yb / 256, cz / 128, xb % 256,
-        yb % 256, cz % 128))
-    {
-        return;
-    }
-
-    if (pTarget) {
-        txb = pTarget->tileX() * 256 + pTarget->offX();
-        tyb = pTarget->tileY() * 256 + pTarget->offY();
-    } else {
-        txb = shootPt.tileX() * 256 + shootPt.offX();
-        tyb = shootPt.tileY() * 256 + shootPt.offY();
-    }
-
-    setDirection(txb - xb, tyb - yb);
-
-    // If ped is currently shooting (ie there's an action of type UseWeapon
-    if (pUseWeaponAction_ && pUseWeaponAction_->type() == fs_actions::Action::kActTypeShoot) {
-        // then update the action with new shooting target
+void PedInstance::updateShootingTarget(const PathNode &aimedPt) {
+    if (pUseWeaponAction_->type() == fs_actions::Action::kActTypeShoot) {
         fs_actions::ShootAction *pShoot = dynamic_cast<fs_actions::ShootAction *>(pUseWeaponAction_);
-        pShoot->setAimedAt(shootPt);
+        pShoot->setAimedAt(aimedPt);
     }
 }
 

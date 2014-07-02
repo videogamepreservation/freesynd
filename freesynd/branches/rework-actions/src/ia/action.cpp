@@ -29,6 +29,7 @@
 #include "ped.h"
 #include "weapon.h"
 #include "vehicle.h"
+#include "mission.h"
 
 using namespace fs_actions;
 
@@ -473,14 +474,26 @@ ShootAction::ShootAction(CreatOrigin origin, PathNode &aimedAt, WeaponInstance *
         aimedAt_ = aimedAt;
 }
 
-void ShootAction::setAimedAt(PathNode &aimedAt) {
+void ShootAction::setAimedAt(const PathNode &aimedAt) {
     aimedAt_ = aimedAt;
+}
+
+void ShootAction::updateShootingDirection(Mission *pMission, PedInstance *pPed, const PathNode &shootPt) {
+    int xb = pPed->tileX() * 256 + pPed->offX();
+    int yb = pPed->tileY() * 256 + pPed->offY();
+    int cz = pPed->tileZ() * 128 + pPed->offZ() + (pPed->sizeZ() >> 1);
+    int txb = shootPt.tileX() * 256 + shootPt.offX();
+    int tyb = shootPt.tileY() * 256 + shootPt.offY();
+
+    pPed->setDirection(txb - xb, tyb - yb);
 }
 
 /*!
  * Execute the shoot action.
- * When action starts, it sets the firing state (and animation) then
- * waits for the end of animation.
+ * When action starts, it sets the firing state (and animation), fires 
+ * the weapon and then waits for the end of animation.
+ * When animation is over, wait for weapon
+ * to reload before finishing.
  * \param elapsed Time since last frame.
  * \param pMission Mission data
  * \param pPed The ped executing the action.
@@ -488,33 +501,18 @@ void ShootAction::setAimedAt(PathNode &aimedAt) {
  */
 bool ShootAction::execute(int elapsed, Mission *pMission, PedInstance *pPed) {
     if (status_ == kActStatusNotStarted) {
-        // The first time
-        status_ = kActStatusWaitForAnim;
-        pWeapon_->playSound();
-
-        // change state to firing
-        pPed->goToState(PedInstance::pa_smFiring);
-    }
-
-    bool update = doShoot(elapsed, pMission, pPed);
-
-    return update;
-}
-
-/*!
- * Execute the shoot action.
- * When animation is over, use the weapon to shoot and wait for weapon
- * to reload before finishing.
- * \param elapsed Time since last frame.
- * \param pMission Mission data
- * \param pPed The ped executing the action.
- * \return always return true
- */
-bool ShootAction::doShoot(int elapsed, Mission *pMission, PedInstance *pPed) {
-    if (status_ == kActStatusRunning) {
+        // Turn to target
+        updateShootingDirection(pMission, pPed, aimedAt_);
+        // Shoot
         ShootableMapObject::DamageInflictType dmg;
         fillDamageDesc(pMission, pPed, pWeapon_, dmg);
+        pWeapon_->playSound();
         pWeapon_->fire(pMission, dmg, elapsed);
+        // change state to firing
+        pPed->goToState(PedInstance::pa_smFiring);
+        // waiting for animation to complete
+        status_ = kActStatusWaitForAnim;
+    } else if (status_ == kActStatusRunning) {
         // Shooting animation is finished
         pPed->leaveState(PedInstance::pa_smFiring);
 
@@ -602,7 +600,7 @@ bool AutomaticShootAction::execute(int elapsed, Mission *pMission, PedInstance *
         setRunning();
         // change state to firing
         pPed->goToState(PedInstance::pa_smFiring);
-        //pPed->setFramesPerSec(16);
+        pWeapon_->setDirection(0);
         firstTime = true;
     }
     
@@ -610,6 +608,7 @@ bool AutomaticShootAction::execute(int elapsed, Mission *pMission, PedInstance *
         if (pPed->isDead() || pWeapon_->ammoRemaining() == 0) {
             stop();
         } else if (firstTime || fireRateTimer_.update(elapsed)) {
+            updateShootingDirection(pMission, pPed, aimedAt_);
             ShootableMapObject::DamageInflictType dmg;
             fillDamageDesc(pMission, pPed, pWeapon_, dmg);
             pWeapon_->playSound();

@@ -529,6 +529,7 @@ void GameplayMenu::handleMouseMotion(int x, int y, int state, const int modKeys)
 
     if (x > 128) {
 #ifdef _DEBUG
+        // During debug our agents are included in possible targets
         for (size_t i = 0; mission_ && i < mission_->numPeds(); ++i) {
 #else
         for (size_t i = mission_->getSquad()->size(); mission_ && i < mission_->numPeds(); ++i) {
@@ -648,7 +649,9 @@ void GameplayMenu::handleMouseMotion(int x, int y, int state, const int modKeys)
             for (SquadSelection::Iterator it = selection_.begin(); it != selection_.end(); ++it) {
                 PedInstance *pAgent = *it;
                 if (pAgent->isUsingWeapon()) {
-                    pAgent->updateShootingDirection(mission_, target_, dest);
+                    // If ped is currently shooting
+                    // then update the action with new shooting target
+                    pAgent->updateShootingTarget(dest);
                 }
             }
         }

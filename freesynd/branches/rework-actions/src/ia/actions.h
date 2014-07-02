@@ -409,9 +409,10 @@ namespace fs_actions {
         //! Entry point to execute the action
         bool execute(int elapsed, Mission *pMission, PedInstance *pPed);
         //! Update target position
-        void setAimedAt(PathNode &aimedAt);
+        void setAimedAt(const PathNode &aimedAt);
     protected:
-        bool doShoot(int elapsed, Mission *pMission, PedInstance *pPed);
+        //! Update the ped's direction
+        void updateShootingDirection(Mission *pMission, PedInstance *pPed, const PathNode &shootPt);
         //! Fills the ShotAttributes with values
         void fillDamageDesc(Mission *pMission, PedInstance *pShooter, WeaponInstance *pWeapon, ShootableMapObject::DamageInflictType &dmg);
     protected:
