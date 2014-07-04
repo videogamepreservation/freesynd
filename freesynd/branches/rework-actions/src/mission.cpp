@@ -2559,53 +2559,45 @@ void Mission::blockerExists(toDefineXYZ * startXYZ, toDefineXYZ * endXYZ,
 }
 
 /*!
- * \param maxr maximum distance we can run
- * \return mask where bits are:
- * - 0b : target in range(1) 
- * - 1b : blocker is object, "t" is set(2)
- * - 2b : blocker object, "pn" is set(4)
- * - 3b : reachable point set (8)
- * - 4b : blocker tile, "pn" is set(16)
- * - 5b : out of visible reach(32)
- * NOTE: only if "pn" or "t" are not null, variables are set
-
-*/
-uint8 Mission::inRangeCPos(toDefineXYZ * cp, ShootableMapObject ** t,
-    PathNode * pn, bool setBlocker, bool checkTileOnly, double maxr,
-    double * distTo)
-{
+ * Verify that the path from originLoc to pTargetLoc is not blocked by a tile.
+ * If such a tile exists, pTargetLoc is updated with the position of the blocking tile.
+ * \param originLoc Path starting point
+ * \param pTargetLoc Path end point
+ * \param updateLoc Set to true to update pTargetLoc when blocking tile is found
+ * \param distanceMax Maximum distance we cannot cross. If distanceMax is
+ *   reached before pTargetLoc, then path is stopped.
+ * \param pInitialDistance This is the distance between origin and initial target position
+ * \return a bitmask indicating the type of result:
+ *      - 0b(1) : target in range
+ *      - 3b(8) : distanceMax is reached
+ *      - 4b(16): blocker tile, "pTargetLoc" is set
+ *      - 5b(32): out of visible reach
+ */
+uint8 Mission::checkBlockedByTile(const toDefineXYZ & originLoc, PathNode *pTargetLoc,
+                                  bool updateLoc, double distanceMax, double *pInitialDistance) {
     // TODO: some objects mid point is higher then map z
-    assert(maxr >= 0);
+    assert(distanceMax >= 0);
 
-    int cx = (*cp).x;
-    int cy = (*cp).y;
-    int cz = (*cp).z;
+    int cx = originLoc.x;
+    int cy = originLoc.y;
+    int cz = originLoc.z;
     if (cz > (mmax_z_ - 1) * 128)
         return 32;
-    // tx,ty, tz are target coords
-    int tx = 0;
-    int ty = 0;
-    int tz = 0;
-    if (t && *t) {
-        tx = (*t)->tileX() * 256 + (*t)->offX();
-        ty = (*t)->tileY() * 256 + (*t)->offY();
-        tz = (*t)->tileZ() * 128 + (*t)->offZ() + ((*t)->sizeZ() >> 1);
-    } else {
-        tx = pn->tileX() * 256 + pn->offX();
-        ty = pn->tileY() * 256 + pn->offY();
-        tz = pn->tileZ() * 128 + pn->offZ();
-    }
-    if (tz > (mmax_z_ - 1) * 128)
+    // These are target coords
+    toDefineXYZ targetWLoc;
+    pTargetLoc->convertPosToXYZ(&targetWLoc);
+
+    if (targetWLoc.z > (mmax_z_ - 1) * 128)
         return 32;
 
     // d is the distance between the origin and the target
     double d = 0;
-    d = sqrt((double)((tx - cx) * (tx - cx) + (ty - cy) * (ty - cy)
-        + (tz - cz) * (tz - cz)));
+    d = sqrt((double)((targetWLoc.x - cx) * (targetWLoc.x - cx) + (targetWLoc.y - cy) * (targetWLoc.y - cy)
+        + (targetWLoc.z - cz) * (targetWLoc.z - cz)));
     uint8 block_mask = 1;
 
-    if (distTo)
-        *distTo = d;
+    if (pInitialDistance)
+        *pInitialDistance = d;
     if (d == 0)
         return block_mask;
 
@@ -2613,36 +2605,30 @@ uint8 Mission::inRangeCPos(toDefineXYZ * cp, ShootableMapObject ** t,
     double sy = (double) cy;
     double sz = (double) cz;
 
-    if (d >= maxr) {
-        // the distance we have to run (d) is higher than the maximum
-        // distance we can run (maxr)
-        block_mask = 0;
-        if (pn == NULL)
-            return block_mask;
-        if (t && *t) {
-            tz -= 128;
-            *t = NULL;
-        }
-        // set target position to maxr
-        double dist_k = (double)maxr / d;
-        tx = cx + (int)((tx - cx) * dist_k);
-        ty = cy + (int)((ty - cy) * dist_k);
-        tz = cz + (int)((tz - cz) * dist_k);
-        // set mask to indicate maxr is reached
+    if (d >= distanceMax) {
+        // the distance we have to cross (d) is higher than the maximum
+        // distance we are allowed to cross (distanceMax)
+
+        // update target position according to distanceMax
+        double dist_k = (double)distanceMax / d;
+        targetWLoc.x = cx + (int)((targetWLoc.x - cx) * dist_k);
+        targetWLoc.y = cy + (int)((targetWLoc.y - cy) * dist_k);
+        targetWLoc.z = cz + (int)((targetWLoc.z - cz) * dist_k);
+        // set mask to indicate distanceMax is reached
         block_mask = 8;
-        if (setBlocker) {
-            pn->setTileXYZ(tx / 256, ty / 256, tz / 128);
-            pn->setOffXYZ(tx % 256, ty % 256, tz % 128);
+        if (updateLoc) {
+            pTargetLoc->setTileXYZ(targetWLoc.x / 256, targetWLoc.y / 256, targetWLoc.z / 128);
+            pTargetLoc->setOffXYZ(targetWLoc.x % 256, targetWLoc.y % 256, targetWLoc.z % 128);
         }
-        d = maxr;
+        d = distanceMax;
     }
 
     // NOTE: these values are less then 1, if they are incremented time
     // required to check range will be shorter less precise check, if
     // decremented longer more precise. Increment is (n * 8)
-    double inc_x = ((tx - cx) * 8) / d;
-    double inc_y = ((ty - cy) * 8) / d;
-    double inc_z = ((tz - cz) * 8) / d;
+    double inc_x = ((targetWLoc.x - cx) * 8) / d;
+    double inc_y = ((targetWLoc.y - cy) * 8) / d;
+    double inc_z = ((targetWLoc.z - cz) * 8) / d;
 
     int oldx = cx / 256;
     int oldy = cy / 256;
@@ -2690,23 +2676,20 @@ uint8 Mission::inRangeCPos(toDefineXYZ * cp, ShootableMapObject ** t,
                     double dsx = sx - (double)cx;
                     double dsy = sy - (double)cy;
                     double dsz = sz - (double)cz;
-                    tx = (int)sx;
-                    ty = (int)sy;
-                    tz = (int)sz;
+                    targetWLoc.x = (int)sx;
+                    targetWLoc.y = (int)sy;
+                    targetWLoc.z = (int)sz;
                     dist_close = sqrt(dsx * dsx + dsy * dsy + dsz * dsz);
                     // set mask to indicate path is blocked by a tile
                     if (block_mask == 1)
                         block_mask = 16;
                     else
                         block_mask |= 16;
-                    if (setBlocker) {
-                        if (pn) {
-                            pn->setTileXYZ((int)sx / 256, (int)sy / 256,
-                                (int)sz / 128);
-                            pn->setOffXYZ((int)sx % 256, (int)sy % 256,
-                                (int)sz % 128);
-                        }
-                        break;
+                    if (updateLoc) {
+                        pTargetLoc->setTileXYZ((int)sx / 256, (int)sy / 256,
+                            (int)sz / 128);
+                        pTargetLoc->setOffXYZ((int)sx % 256, (int)sy % 256,
+                            (int)sz % 128);
                     }
                     break;
                 }
@@ -2720,16 +2703,66 @@ uint8 Mission::inRangeCPos(toDefineXYZ * cp, ShootableMapObject ** t,
         sz += inc_z;
         dist_close -= dist_dec;
     } // end while
+
+    return block_mask;
+}
+
+/*!
+ * \param maxr maximum distance we can run
+ * \return mask where bits are:
+ * - 0b : target in range(1) 
+ * - 1b : blocker is object, "t" is set(2)
+ * - 2b : blocker object, "pn" is set(4)
+ * - 3b : reachable point set (8)
+ * - 4b : blocker tile, "pn" is set(16)
+ * - 5b : out of visible reach(32)
+ * NOTE: only if "pn" or "t" are not null, variables are set
+
+*/
+uint8 Mission::inRangeCPos(toDefineXYZ * originLoc, ShootableMapObject ** t,
+    PathNode * pn, bool setBlocker, bool checkTileOnly, double maxr,
+    double * distTo)
+{
+    // search for a tile blocking the path towards the target
+    // tmp will hold the updated position after that search
+    PathNode tmp;
+    if (t && *t) {
+        tmp.setTileX((*t)->tileX());
+        tmp.setTileY((*t)->tileY());
+        tmp.setTileZ((*t)->tileZ());
+        tmp.setOffX((*t)->offX());
+        tmp.setOffY((*t)->offY());
+        tmp.setOffZ((*t)->offZ());
+    } else {
+        tmp = *pn;
+    }
+    uint8 block_mask = checkBlockedByTile(*originLoc, &tmp, true, maxr, distTo);
+    if (block_mask == 32) {
+        // coords are out of map limits
+        return block_mask;
+    }
+
+    if (setBlocker) {
+        pn->setTileXYZ(tmp.tileX(), tmp.tileY(), tmp.tileZ());
+        pn->setOffXYZ(tmp.offX(), tmp.offY(), tmp.offZ());
+    }
+
     if (checkTileOnly)
         return block_mask;
 
-    toDefineXYZ startXYZ = {cx, cy, cz};
-    toDefineXYZ endXYZ = {tx, ty, tz};
+    toDefineXYZ startXYZ = *originLoc;
+    toDefineXYZ endXYZ;
+    tmp.convertPosToXYZ(&endXYZ);
     MapObject *blockerObj = NULL;
 
-    // if blocker will exist it will be always closer then tile
-    // that might block
-    double dist_blocker = (block_mask & 16) != 0 ? dist_close : d;
+    // We search for a possible object blocking the way on the path
+    // between origin and the reached position
+    int tx = tmp.tileX() * 256 + tmp.offX();
+    int ty = tmp.tileY() * 256 + tmp.offY();
+    int tz = tmp.tileZ() * 128 + tmp.offZ();
+    double dist_blocker = sqrt((double)((tx - originLoc->x) * 
+        (tx - originLoc->x) + (ty - originLoc->y) * (ty - originLoc->y)
+        + (tz - originLoc->z) * (tz - originLoc->z)));
     blockerExists(&startXYZ, &endXYZ, &dist_blocker, &blockerObj);
 
     if (blockerObj) {

@@ -42,7 +42,7 @@ public:
         //! An agent has deactivated his Persuadotron
         kBehvEvtPersuadotronDeactivated,
         //! An ped has been hit
-        kBehvEvtAgentHit
+        kBehvEvtHit
     };
 
     Behaviour(PedInstance *pPed) { pThisPed_ = pPed; }

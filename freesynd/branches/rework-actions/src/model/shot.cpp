@@ -33,75 +33,12 @@
 #include "ped.h"
 #include "vehicle.h"
 
-/*!
- * Returns all ShootableMapObject that are alive and in range of
- * weapon who generated this shot.
- * Every object found is added to the objInRangeVec vector.
- * \param pMission Mission data
- * \param originLocW Origin of shot
- * \param objInRangeVec Result list
- * \param includeShooter if true, owner of the shot will be include in the result list
- */
-void Shot::getAllShootablesWithinRange(Mission *pMission,
-                                       toDefineXYZ &originLocW,
-                                       std::vector<ShootableMapObject *> &objInRangeVec,
-                                       bool includeShooter) {
-    // Look at all peds
-    for (size_t i = 0; i < pMission->numPeds(); ++i) {
-        ShootableMapObject *p = pMission->ped(i);
-        if (p->isAlive()) {
-            if (p == dmg_.d_owner && !includeShooter) {
-                // sometimes we don't want to include the shooter
-                continue;
-            }
-            if (pMission->inRangeCPos(&originLocW, &p, NULL, false, true, dmg_.range) == 1) {
-                objInRangeVec.push_back(p);
-            }
-        }
-    }
-
-    for (size_t i = 0; i < pMission->numStatics(); ++i) {
-        ShootableMapObject *st = pMission->statics(i);
-        if (!st->isIgnored())
-            if (pMission->inRangeCPos(&originLocW, &st, NULL, false, true, dmg_.range) == 1) {
-                objInRangeVec.push_back(st);
-            }
-    }
-
-    // look at all vehicles
-    for (size_t i = 0; i < pMission->numVehicles(); ++i) {
-        ShootableMapObject *v = pMission->vehicle(i);
-        if (dmg_.d_owner->majorType() == MapObject::mjt_Ped) {
-            PedInstance *pPed = dynamic_cast<PedInstance *>(dmg_.d_owner);
-            if (v == pPed->inVehicle()) {
-                // don't take vehicle if the owner of the shoot is a ped and if he's
-                // in the vehicle (ie hope ped has opened the window)
-                continue;
-            }
-        }
-        if (pMission->inRangeCPos(&originLocW, &v, NULL, false, true, dmg_.range) == 1) {
-                objInRangeVec.push_back(v);
-        }
-    }
-
-    // look at all weapons on the ground except the weapon that generated the shot
-    for (size_t i = 0; i < pMission->numWeapons(); ++i) {
-        WeaponInstance *w = pMission->weapon(i);
-        if (w != dmg_.pWeapon && w->map() != -1 &&
-            pMission->inRangeCPos(&originLocW, (ShootableMapObject **)w, NULL, false, true, dmg_.range) == 1) {
-                objInRangeVec.push_back(w);
-        }
-    }
-}
-
 void InstantImpactShot::inflictDamage(Mission *pMission) {
     toDefineXYZ originLocW; // origin of shooting
     dmg_.d_owner->convertPosToXYZ(&originLocW);
     // get how much impacts does the weapon generate
     int nbImpacts = dmg_.pWeapon->getWeaponClass()->shotsPerAmmo();
-    // Get all potential reachable objects
-    std::vector<ShootableMapObject *> objInRangeLst;
-    getAllShootablesWithinRange(pMission, originLocW, objInRangeLst, false);
+
     // If there are many impacts, a target can be hit by several impacts
     // so this map stores number of impacts for a target
     std::map<ShootableMapObject *, int> hitsByObject;
@@ -114,7 +51,7 @@ void InstantImpactShot::inflictDamage(Mission *pMission) {
         }
 
         // Verify if shot hit something or was blocked by a tile
-        ShootableMapObject *pTargetHit = checkHitTarget(objInRangeLst, originLocW, impactLocT);
+        ShootableMapObject *pTargetHit = checkHitTarget(originLocW, &impactLocT);
         if (pTargetHit != NULL) {
             hitsByObject[pTargetHit] = hitsByObject[pTargetHit] + 1;
         }
@@ -258,10 +195,9 @@ void InstantImpactShot::diffuseImpact(Mission *pMission, const toDefineXYZ &orig
  * is updated.
  * \return Return the found object or NULL if no object was hit
  */
-ShootableMapObject *InstantImpactShot::checkHitTarget(std::vector<ShootableMapObject *> objInRangeLst, toDefineXYZ &originLocW, PathNode &impactLocT) {
+ShootableMapObject *InstantImpactShot::checkHitTarget(toDefineXYZ &originLocW, PathNode *pImpactLocT) {
     ShootableMapObject *pTarget = NULL;
-    // TODO reimplement to use objInRangeLst
-    uint8 has_blocker = dmg_.pWeapon->checkRangeAndBlocker(originLocW, &pTarget, &impactLocT, true);
+    uint8 has_blocker = dmg_.pWeapon->checkRangeAndBlocker(originLocW, &pTarget, pImpactLocT, true);
     return pTarget;
 }
 
@@ -332,7 +268,7 @@ Explosion::Explosion(const ShootableMapObject::DamageInflictType &dmg) : Shot(dm
 void Explosion::inflictDamage(Mission *pMission) {
     std::vector<ShootableMapObject *> objInRangeLst;
     // Get all destructible objects in range
-    getAllShootablesWithinRange(pMission, dmg_.originLocW, objInRangeLst, true);
+    getAllShootablesWithinRange(pMission, dmg_.originLocW, objInRangeLst);
 
     for (std::vector<ShootableMapObject *>::iterator it = objInRangeLst.begin();
         it != objInRangeLst.end(); it++)
@@ -354,15 +290,15 @@ void Explosion::inflictDamage(Mission *pMission) {
 
 /*! Draws animation of impact/explosion
  * \param pMission Mission data
- * \param cp current position (center)
+ * \param origin center of explosion
  * \param dmg_rng effective range for drawing
  */
-void Explosion::generateFlameWaves(Mission *pMission, toDefineXYZ *cp, double dmg_rng)
+void Explosion::generateFlameWaves(Mission *pMission, toDefineXYZ *origin, double dmg_rng)
 {
-    toDefineXYZ base_pos = *cp;
-    cp->z += 4;
-    if (cp->z > (pMission->mmax_z_ - 1) * 128)
-        cp->z = (pMission->mmax_z_ - 1) * 128;
+    toDefineXYZ base_pos = *origin;
+    origin->z += 4;
+    if (origin->z > (pMission->mmax_z_ - 1) * 128)
+        origin->z = (pMission->mmax_z_ - 1) * 128;
     // TODO: exclude flames on water, put these flames to the ground,
     // don't draw in air(, stairs problem?)
     double angle_inc = PI;
@@ -377,21 +313,70 @@ void Explosion::generateFlameWaves(Mission *pMission, toDefineXYZ *cp, double dm
             double x = (double)(144 * i) * cos(base_angle);
             double y = (double)(144 * i) * sin(base_angle);
             base_angle += angle_inc;
-            PathNode pn = PathNode((base_pos.x + (int)x) / 256,
+            PathNode flamePos = PathNode((base_pos.x + (int)x) / 256,
                 (base_pos.y + (int)y) / 256,
                 base_pos.z / 128, (base_pos.x + (int)x) % 256,
                 (base_pos.y + (int)y) % 256, base_pos.z % 128);
 
-            uint8 block_mask = pMission->inRangeCPos(cp, NULL, &pn, true, true, dmg_rng);
+            uint8 block_mask = pMission->checkBlockedByTile(*origin, &flamePos, true, dmg_rng);
             if (block_mask != 32) {
                 SFXObject *so = new SFXObject(pMission->map(), rngDmgAnim_,
                                 100 * (rand() % 16));
-                so->setPosition(pn.tileX(), pn.tileY(), pn.tileZ(),
-                                pn.offX(), pn.offY(), pn.offZ());
+                so->setPosition(flamePos);
                 pMission->addSfxObject(so);
             }
         }
         angle_inc /= 2.0;
+    }
+}
+
+/*!
+ * Returns all ShootableMapObject that are alive and in range of
+ * weapon who generated this shot.
+ * Every object found is added to the objInRangeVec vector.
+ * \param pMission Mission data
+ * \param originLocW Origin of shot
+ * \param objInRangeVec Result list
+ * \param includeShooter if true, owner of the shot will be include in the result list
+ */
+void Explosion::getAllShootablesWithinRange(Mission *pMission,
+                                       toDefineXYZ &originLocW,
+                                       std::vector<ShootableMapObject *> &objInRangeVec) {
+    // Look at all peds
+    for (size_t i = 0; i < pMission->numPeds(); ++i) {
+        ShootableMapObject *p = pMission->ped(i);
+        if (p->isAlive()) {
+            if (pMission->inRangeCPos(&originLocW, &p, NULL, false, true, dmg_.range) == 1) {
+                objInRangeVec.push_back(p);
+            }
+        }
+    }
+
+    for (size_t i = 0; i < pMission->numStatics(); ++i) {
+        ShootableMapObject *st = pMission->statics(i);
+        if (st->isAlive())
+            if (pMission->inRangeCPos(&originLocW, &st, NULL, false, true, dmg_.range) == 1) {
+                objInRangeVec.push_back(st);
+            }
+    }
+
+    // look at all vehicles
+    for (size_t i = 0; i < pMission->numVehicles(); ++i) {
+        ShootableMapObject *v = pMission->vehicle(i);
+        if (v->isAlive()) {
+            if (pMission->inRangeCPos(&originLocW, &v, NULL, false, true, dmg_.range) == 1) {
+                    objInRangeVec.push_back(v);
+            }
+        }
+    }
+
+    // look at all weapons on the ground except the weapon that generated the shot
+    for (size_t i = 0; i < pMission->numWeapons(); ++i) {
+        WeaponInstance *w = pMission->weapon(i);
+        if (w != dmg_.pWeapon && w->map() != -1 &&
+            pMission->inRangeCPos(&originLocW, (ShootableMapObject **)w, NULL, false, true, dmg_.range) == 1) {
+                objInRangeVec.push_back(w);
+        }
     }
 }
 

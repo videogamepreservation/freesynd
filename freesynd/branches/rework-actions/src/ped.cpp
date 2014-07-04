@@ -2596,7 +2596,7 @@ void PedInstance::handleHit(DamageInflictType &d) {
         }
 
         // Alert behaviour
-        pBehaviour_->handleBehaviourEvent(Behaviour::kBehvEvtAgentHit);
+        pBehaviour_->handleBehaviourEvent(Behaviour::kBehvEvtHit);
     }
 }
 

@@ -45,7 +45,7 @@ void AgentBehaviour::handleBehaviourEvent(BehaviourEvent evtType) {
         break;
     case kBehvEvtPersuadotronDeactivated:
         doUsePersuadotron_ = false;
-    case kBehvEvtAgentHit:
+    case kBehvEvtHit:
         if (pThisPed_->hasMinimumVersionOfMod(Mod::MOD_CHEST, Mod::MOD_V2)) {
             doRegenerates_ = true;
         }

@@ -53,13 +53,6 @@ class Shot {
 
     ShootableMapObject::DamageInflictType & getAttributes() { return dmg_; }
  protected:
-    //!
-    void getAllShootablesWithinRange(
-        Mission *pMission,
-        toDefineXYZ &originLocW,
-        std::vector<ShootableMapObject *> &objInRangeLst,
-        bool includeShooter);
- protected:
     // The damage that will be inflicted by this shot
     ShootableMapObject::DamageInflictType dmg_;
 };
@@ -81,9 +74,8 @@ class InstantImpactShot : public Shot {
                        PathNode *impactLocT);
     //!
     ShootableMapObject *checkHitTarget(
-        std::vector<ShootableMapObject *> objInRangeLst,
         toDefineXYZ &originLocW,
-        PathNode &impactLocT);
+        PathNode *impactLocT);
     //!
     void createImpactAnimation(Mission *pMission,
                                ShootableMapObject * pTargetHit,
@@ -108,7 +100,12 @@ class Explosion : public Shot {
 
     void inflictDamage(Mission *pMission);
  private:
-    void generateFlameWaves(Mission *pMission, toDefineXYZ *cp, double dmg_rng);
+    void generateFlameWaves(Mission *pMission, toDefineXYZ *origin, double dmg_rng);
+    //!
+    void getAllShootablesWithinRange(
+        Mission *pMission,
+        toDefineXYZ &originLocW,
+        std::vector<ShootableMapObject *> &objInRangeLst);
 
  private:
     /*! Type of animation for the explosion.*/

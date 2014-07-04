@@ -211,6 +211,8 @@ public:
 
     //! TODO remove method
     void adjXYZ(int &x, int &y, int &z) { p_map_->adjXYZ(x, y, z); }
+    //! Check if a tile is blocking the path between originLoc and pTargetLoc
+    uint8 checkBlockedByTile(const toDefineXYZ & originLoc, PathNode *pTargetLoc, bool updateLoc, double distanceMax, double *pFinalDest = NULL);
 
     void blockerExists(toDefineXYZ * startXYZ, toDefineXYZ * endXYZ,
         double *dist, MapObject** blockerObj);
