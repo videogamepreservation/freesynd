@@ -897,7 +897,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                             | PedInstance::pa_smHit)) != 0)
                             aqt->state |= 8;
                         WeaponInstance *wi = (WeaponInstance *)aqt->target.t_smo;
-                        if (wi->getOwner() != this)
+                        if (wi->owner() != this)
                             aqt->state |= 8;
                         else {
                             dropWeapon(wi);
@@ -2589,6 +2589,11 @@ int PedInstance::getRealDamage(ShootableMapObject::DamageInflictType &d) {
 void PedInstance::handleHit(DamageInflictType &d) {
     if (health_ > 0) {
         decreaseHealth(getRealDamage(d));
+
+        PedInstance *pShooter = dynamic_cast<PedInstance *>(d.d_owner);
+        if (pShooter && pShooter->isOurAgent()) {
+            g_Session.getMission()->stats()->incrHits();
+        }
 
         // Only add a hit if ped is not currently being hit
         if (currentAction_ == NULL || currentAction_->type() != fs_actions::Action::kActTypeHit) {

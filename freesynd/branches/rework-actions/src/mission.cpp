@@ -39,6 +39,24 @@
 #include "core/squad.h"
 #include "model/shot.h"
 
+/*!
+ * Initialize the statistics.
+ * \param nbAgents Number of agents for the mission
+ */
+void MissionStats::init(int nbAgents) {
+    agents_ = nbAgents;
+    missionDuration_ = 0;
+    agentCaptured_ = 0;
+    enemyKilled_ = 0;
+    criminalKilled_ = 0;
+    civilKilled_ = 0;
+    policeKilled_ = 0;
+    guardKilled_ = 0;
+    convinced_ = 0;
+    nbOfShots_ = 0;
+    nbOfHits_ = 0;
+}
+
 Mission::Mission(const LevelData::MapInfos & map_infos)
 {
     status_ = RUNNING;
@@ -133,17 +151,7 @@ void Mission::start()
 {
     LOG(Log::k_FLG_GAME, "Mission", "start()", ("Start mission"));
     // Reset mission statistics
-    stats_.agents = p_squad_->size();
-    stats_.mission_duration = 0;
-    stats_.agentCaptured = 0;
-    stats_.enemyKilled = 0;
-    stats_.criminalKilled = 0;
-    stats_.civilKilled = 0;
-    stats_.policeKilled = 0;
-    stats_.guardKilled = 0;
-    stats_.convinced = 0;
-    stats_.nbOfShots = 0;
-    stats_.nbOfHits = 0;
+    stats_.init(p_squad_->size());
 
     cur_objective_ = 0;
 
@@ -286,24 +294,24 @@ void Mission::end()
         if (p->isDead()) {
             switch (p->getMainType()) {
                 case PedInstance::m_tpAgent:
-                    stats_.enemyKilled++;
+                    stats_.incrEnemyKilled();
                     break;
                 case PedInstance::m_tpCriminal:
-                    stats_.criminalKilled++;
+                    stats_.incrCriminalKilled();
                     break;
                 case PedInstance::m_tpPedestrian:
-                    stats_.civilKilled++;
+                    stats_.incrCivilKilled();
                     break;
                 case PedInstance::m_tpGuard:
-                    stats_.guardKilled++;
+                    stats_.incrGuardKilled();
                     break;
                 case PedInstance::m_tpPolice:
-                    stats_.policeKilled++;
+                    stats_.incrPoliceKilled();
                     break;
             }
         } else if (p->isPersuaded()) {
             if (p->objGroupDef() == PedInstance::og_dmAgent) {
-                stats_.agentCaptured++;
+                stats_.incrAgentCaptured();
                 if (completed()) {
                     Agent *pAg = g_gameCtrl.agents().createAgent(false);
                     if (pAg) {
@@ -312,7 +320,7 @@ void Mission::end()
                     }
                 }
             } else
-                stats_.convinced++;
+                stats_.incrConvinced();
         }
     }
 

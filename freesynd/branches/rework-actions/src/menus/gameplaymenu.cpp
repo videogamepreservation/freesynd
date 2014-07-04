@@ -324,7 +324,7 @@ void GameplayMenu::handleTick(int elapsed)
 
     if (!mission_->completed() && !mission_->failed()) {
         // Update stats
-        mission_->getStatistics()->mission_duration += elapsed;
+        mission_->stats()->incrMissionDuration(elapsed);
 
         // Checks mission objectives
         mission_->checkObjectives();

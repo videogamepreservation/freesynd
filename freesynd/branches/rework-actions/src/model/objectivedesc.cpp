@@ -191,9 +191,8 @@ void ObjTakeWeapon::evaluate(Mission *pMission) {
     if (pWeapon->isDead()) {
         endObjective(false);
     } else {
-        ShootableMapObject *owner = pWeapon->getOwner();
-        if (owner && owner->majorType() == MapObject::mjt_Ped
-            && ((PedInstance *)owner)->isOurAgent())
+        PedInstance *owner = pWeapon->owner();
+        if (owner && owner->isOurAgent())
         {
             endObjective(true);
         }

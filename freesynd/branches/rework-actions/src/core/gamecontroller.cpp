@@ -137,7 +137,7 @@ void GameController::change_user_infos(const char *company_name, const char *pla
 }
 
 void GameController::handle_mission_end(Mission *p_mission) {
-    int elapsed = p_mission->getStatistics()->mission_duration;
+    int elapsed = p_mission->stats()->missionDuration();
     g_Session.updateTime(elapsed);
 
     if (p_mission->completed()) {

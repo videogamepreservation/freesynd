@@ -115,7 +115,7 @@ void DebriefMenu::handleShow() {
 }
 
 void DebriefMenu::updateStatsFields(Mission *pMission) {
-    MissionStats *pStats = pMission->getStatistics();
+    MissionStats *pStats = pMission->stats();
 
     if (pMission->getStatus() == Mission::FAILED) {
         getStatic(txtStatusId_)->setText("#DEBRIEF_MIS_FAILED");
@@ -125,27 +125,26 @@ void DebriefMenu::updateStatsFields(Mission *pMission) {
         getStatic(txtStatusId_)->setText("#DEBRIEF_MIS_ABORT");
     }
 
-    getStatic(txtUsedId_)->setTextFormated("%i", pStats->agents);
-    getStatic(txtAgentCapturedId_)->setTextFormated("%i", pStats->agentCaptured);
+    getStatic(txtUsedId_)->setTextFormated("%i", pStats->agents());
+    getStatic(txtAgentCapturedId_)->setTextFormated("%i", pStats->agentCaptured());
 
     int days = 0;
     int hours = 0;
-    g_Session.getDayHourFromPeriod(pStats->mission_duration, days, hours);
+    g_Session.getDayHourFromPeriod(pStats->missionDuration(), days, hours);
     getStatic(txtTimeId_)->setTextFormated("#DEBRIEF_TIME_FORMAT", hours, days);
-    getStatic(txtAgentKilledId_)->setTextFormated("%i", pStats->enemyKilled);
-    getStatic(txtCrimKilledId_)->setTextFormated("%i", pStats->criminalKilled);
-    getStatic(txtCivilKilledId_)->setTextFormated("%i", pStats->civilKilled);
-    getStatic(txtPoliceKilledId_)->setTextFormated("%i", pStats->policeKilled);
-    getStatic(txtGardKilledId_)->setTextFormated("%i", pStats->guardKilled);
-    getStatic(txtConvincedId_)->setTextFormated("%i", pStats->convinced);
+    getStatic(txtAgentKilledId_)->setTextFormated("%i", pStats->enemyKilled());
+    getStatic(txtCrimKilledId_)->setTextFormated("%i", pStats->criminalKilled());
+    getStatic(txtCivilKilledId_)->setTextFormated("%i", pStats->civilKilled());
+    getStatic(txtPoliceKilledId_)->setTextFormated("%i", pStats->policeKilled());
+    getStatic(txtGardKilledId_)->setTextFormated("%i", pStats->guardKilled());
+    getStatic(txtConvincedId_)->setTextFormated("%i", pStats->convinced());
 
-    if (pStats->nbOfShots == 0) {
+    if (pStats->nbOfShots() == 0) {
         getStatic(txtPrecisionId_)->setText("#DEBRIEF_NO_BULLET");
     } else {
         // NOTE: we count persudatron direct uses too, although don't count
         // hits for objects other then original target
-        int precision = (pStats->nbOfHits * 100) / pStats->nbOfShots ;
-        getStatic(txtPrecisionId_)->setTextFormated("%i%%", precision);
+        getStatic(txtPrecisionId_)->setTextFormated("%i%%", pStats->precision());
     }
 }
 

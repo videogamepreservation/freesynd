@@ -36,6 +36,7 @@
 #include "utils/timer.h"
 
 class FlamerShot;
+class PedInstance;
 
 /*!
  * Weapon class.
@@ -282,14 +283,8 @@ public:
         int rngdamg_anim);
 
 public:
-    ShotClass(ShootableMapObject *tobj = NULL) : owner_(NULL),
-        target_object_(tobj){}
+    ShotClass(ShootableMapObject *tobj = NULL) : target_object_(tobj){}
     ~ShotClass(){}
-    void setOwner(ShootableMapObject *owner) {
-        owner_ = owner;
-    }
-    ShootableMapObject *getOwner() { return owner_; }
-    bool hasOwner() { return owner_ != NULL; }
 
     void shotTargetRandomizer(toDefineXYZ * cp, toDefineXYZ * tp, double angle,
         double dist_new = -1, bool exclude_z = false);
@@ -300,7 +295,6 @@ protected:
         WeaponInstance *w = NULL);
 
 protected:
-    ShootableMapObject *owner_;
     ShootableMapObject *target_object_;
 };
 
@@ -313,6 +307,13 @@ public:
     static WeaponInstance *createInstance(Weapon *pWeaponClass);
 
     WeaponInstance(Weapon *w);
+
+    /*! Sets the owner of the weapon. */
+    void setOwner(PedInstance *owner) { pOwner_ = owner; }
+    /*! Return the owner of the weapon.*/
+    PedInstance *owner() { return pOwner_; }
+    /*! Return true if the weapon has an owner.*/
+    bool hasOwner() { return pOwner_ != NULL; }
 
     int ammoRemaining() { return ammo_remaining_; }
     void setAmmoRemaining(int n) {  ammo_remaining_ = n; }
@@ -401,6 +402,8 @@ public:
 
 protected:
     Weapon *pWeaponClass_;
+    /*! Owner of the weapon.*/
+    PedInstance *pOwner_;
     int ammo_remaining_;
     /*! if this value is smaller time_for_shot_ shot cannot be done 
     * if is greater then time_for_shot_ reload is in execution

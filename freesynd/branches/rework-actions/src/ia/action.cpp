@@ -627,7 +627,7 @@ bool AutomaticShootAction::execute(int elapsed, Mission *pMission, PedInstance *
 
 void AutomaticShootAction::stop() {
     if (status_ == kActStatusRunning) {
-        PedInstance *pPed = dynamic_cast<PedInstance *>(pWeapon_->getOwner());
+        PedInstance *pPed = pWeapon_->owner();
         // Shooting animation is finished
         pPed->leaveState(PedInstance::pa_smFiring);
         // The action is complete only after a certain laps of time to

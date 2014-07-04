@@ -48,32 +48,65 @@ class ProjectileShot;
 class GaussGunShot;
 
 /*!
- * A structure that holds mission statistics.
+ * A class that holds mission statistics.
  */
-typedef struct {
+class MissionStats {
+public:
+    void init(int nbAgents);
+
+    int nbOfShots() { return nbOfShots_; }
+    int precision() { return (nbOfHits_ * 100) / nbOfShots_; }
+    int enemyKilled() { return enemyKilled_;}
+    int criminalKilled() { return criminalKilled_;}
+    int civilKilled() { return civilKilled_;}
+    int policeKilled() { return policeKilled_;}
+    int guardKilled() { return guardKilled_;}
+    int convinced() { return convinced_;}
+    int missionDuration() { return missionDuration_; }
+    int agents() { return agents_; }
+    int agentCaptured() { return agentCaptured_; }
+
+    //! Increments the number of shots by the given amount
+    void incrShots(int shots) { nbOfShots_ += shots; }
+    //! Increments the number of hits by one
+    void incrHits() { nbOfHits_++; }
+    //! Increments the number of hits by the given amount
+    void incrHits(int hits) { nbOfHits_ += hits; }
+    void incrEnemyKilled() { enemyKilled_++; }
+    void incrCriminalKilled() { criminalKilled_++; }
+    void incrCivilKilled() { civilKilled_++; }
+    void incrGuardKilled() { guardKilled_++; }
+    void incrPoliceKilled() { policeKilled_++; }
+    //! 
+    void incrAgentCaptured() { agentCaptured_++; }
+    //! 
+    void incrConvinced() { convinced_++; }
+    //! 
+    void incrMissionDuration(int elapsed) { missionDuration_ += elapsed; }
+private:
     /*! How many agents participated in the mission. */
-    int agents;
+    int agents_;
     /*! How many time did the mission last. */
-    int mission_duration;
+    int missionDuration_;
     /*! How many opposing agents where captured.*/
-    int agentCaptured;
+    int agentCaptured_;
     /*! How many opposing agents where killed.*/
-    int enemyKilled;
+    int enemyKilled_;
     /*! How many criminal where killed.*/
-    int criminalKilled;
+    int criminalKilled_;
     /*! How many civilian where killed.*/
-    int civilKilled;
+    int civilKilled_;
     /*! How many policemen where killed.*/
-    int policeKilled;
+    int policeKilled_;
     /*! How many guards where killed.*/
-    int guardKilled;
+    int guardKilled_;
     /*! How many people where convinced.*/
-    int convinced;
+    int convinced_;
     /*! How many times did agents shoot.*/
-    int nbOfShots;
+    int nbOfShots_;
     /*! How many times did agents hit.*/
-    int nbOfHits;
-} MissionStats;
+    int nbOfHits_;
+};
 
 /*!
  * Contains information read from original mission data file.
@@ -179,10 +212,7 @@ public:
     void delPrjShot(size_t i);
 
     /*! Return the mission statistics. */
-    MissionStats *getStatistics() { return &stats_; }
-    void incStatisticsShots(int shots) { stats_.nbOfShots += shots; }
-    void incStatisticsHits() { stats_.nbOfHits++; }
-    void incStatisticsHits(int hits) { stats_.nbOfHits += hits; }
+    MissionStats *stats() { return &stats_; }
 
     void start();
     //! Returns mission status
