@@ -109,7 +109,7 @@ class Explosion : public Shot {
 
  private:
     /*! Type of animation for the explosion.*/
-    int rngDmgAnim_;
+    SFXObject::SfxTypeEnum rngDmgAnim_;
 };
 
 /*!

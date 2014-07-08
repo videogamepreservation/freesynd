@@ -79,10 +79,10 @@ public:
      */
     struct ImpactAnims {
         //! Animation played when impact is on the ground.
-        int groundHit;
+        SFXObject::SfxTypeEnum groundHit;
         //! Animation played when impact is on a living object.
-        int objectHit;
-        int trace_anim;
+        SFXObject::SfxTypeEnum objectHit;
+        SFXObject::SfxTypeEnum trace_anim;
         /*! if weapon can do range damage this is used for range definition
          * with animation.*/
         int rd_anim;
@@ -193,10 +193,10 @@ public:
             (spe_Owner | spe_ChangeAttribute | spe_UsesAmmo),
     } WeaponShotPropertyType;
 
-    typedef enum {
-        stm_AllObjects = MapObject::mjt_Ped | MapObject::mjt_Vehicle
-        | MapObject::mjt_Static | MapObject::mjt_Weapon
-    } SearchTargetMask;
+    enum SearchTargetMask {
+        stm_AllObjects = MapObject::kNaturePed | MapObject::kNatureVehicle
+        | MapObject::kNatureStatic | MapObject::kNatureWeapon
+    };
 
     typedef struct {
         PathNode tpn;
@@ -279,10 +279,6 @@ protected:
 
 class ShotClass {
 public:
-    static void rangeDamageAnim(toDefineXYZ &cp, double dmg_rng,
-        int rngdamg_anim);
-
-public:
     ShotClass(ShootableMapObject *tobj = NULL) : target_object_(tobj){}
     ~ShotClass(){}
 
@@ -290,8 +286,8 @@ public:
         double dist_new = -1, bool exclude_z = false);
 
 protected:
-    void makeShot(bool rangeChecked, toDefineXYZ &cp, int anim_hit,
-        std::vector <Weapon::ShotDesc> &all_shots, int anim_obj_hit,
+    void makeShot(bool rangeChecked, toDefineXYZ &cp, SFXObject::SfxTypeEnum anim_hit,
+        std::vector <Weapon::ShotDesc> &all_shots, SFXObject::SfxTypeEnum anim_obj_hit,
         WeaponInstance *w = NULL);
 
 protected:
@@ -336,7 +332,7 @@ public:
     Weapon::WeaponType getWeaponType() { return pWeaponClass_->getWeaponType(); }
 
     bool operator==(WeaponInstance wi) {
-        return main_type_ == wi.getMainType();
+        return getWeaponType() == wi.getWeaponType();
     }
 
     //! Plays the weapon's sound.

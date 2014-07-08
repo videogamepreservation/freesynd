@@ -231,7 +231,7 @@ public:
     void end();
 
     MapObject * findAt(int tilex, int tiley, int tilez,
-        MapObject::MajorTypeEnum *majorT, int *searchIndex, bool only);
+        MapObject::ObjectNature *nature, int *searchIndex, bool only);
     bool setSurfaces();
     void clrSurfaces();
     bool getWalkable(MapTilePoint &mtp);

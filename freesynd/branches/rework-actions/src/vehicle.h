@@ -80,12 +80,14 @@ protected:
  */
 class Vehicle : public ShootableMovableMapObject{
 public:
-    Vehicle(int m, bool drivable) : ShootableMovableMapObject(m) {
+    Vehicle(int m, bool drivable) : ShootableMovableMapObject(m, MapObject::kNatureVehicle) {
         isDrivable_ = drivable;
     }
 
     //! Return true if vehicle can be driven by a ped
     bool isDrivable() { return isDrivable_; }
+
+    void setType(uint8 type) { type_ = type; }
 
     //! Adds the given ped to the list of passengers
     virtual void addPassenger(PedInstance *p);
@@ -107,6 +109,8 @@ protected:
 private:
     /*! A vehicle can be driven (car) or not (train).*/
     bool isDrivable_;
+    /*! Type of vehicle.*/
+    uint8 type_;
 };
 
 /*!

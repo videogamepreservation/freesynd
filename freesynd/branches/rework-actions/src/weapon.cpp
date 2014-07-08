@@ -256,17 +256,15 @@ WeaponInstance *WeaponInstance::createInstance(Weapon *pWeaponClass) {
     return new WeaponInstance(pWeaponClass);
 }
 
-WeaponInstance::WeaponInstance(Weapon * w) : ShootableMapObject(-1),
+WeaponInstance::WeaponInstance(Weapon * w) : ShootableMapObject(-1, MapObject::kNatureWeapon),
     bombSoundTimer(w->timeReload()), bombExplosionTimer(w->timeForShot()),
     flamerTimer_(180) {
     pWeaponClass_ = w;
     ammo_remaining_ = w->ammo();
     weapon_used_time_ = 0;
-    major_type_ = MapObject::mjt_Weapon;
     pOwner_ = NULL;
     activated_ = false;
     time_consumed_ = false;
-    main_type_ = w->getWeaponType();
     if (w->getWeaponType() == Weapon::TimeBomb
         || w->getWeaponType() == Weapon::Flamer)
     {
@@ -283,7 +281,7 @@ WeaponInstance::WeaponInstance(Weapon * w) : ShootableMapObject(-1),
 bool WeaponInstance::animate(int elapsed) {
 
     if (activated_) {
-        if (main_type_ == Weapon::EnergyShield) {
+        if (getWeaponType() == Weapon::EnergyShield) {
             if (ammo_remaining_ == 0)
                 return false;
             int tm_left = elapsed;
@@ -294,7 +292,7 @@ bool WeaponInstance::animate(int elapsed) {
             } else
                 ammo_remaining_ -= ammoused;
             return true;
-        } else if (main_type_ == Weapon::TimeBomb) {
+        } else if (getWeaponType() == Weapon::TimeBomb) {
             if (bombSoundTimer.update(elapsed)) {
                 g_App.gameSounds().play(snd::TIMEBOMB);
             }
@@ -483,7 +481,7 @@ uint16 WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
     if (pOwner_) {
         xb = pOwner_->tileX() * 256 + pOwner_->offX();
         yb = pOwner_->tileY() * 256 + pOwner_->offY();
-        if (main_type_ == Weapon::Flamer) {
+        if (getWeaponType() == Weapon::Flamer) {
             int dir = pOwner_->getDirection(8);
             switch (dir) {
                 case 0:
@@ -607,9 +605,9 @@ uint16 WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
     // perseudatron skipping, due to no target
 
     double accuracy = pWeaponClass_->shotAcurracy();
-    if (main_type_ != Weapon::Persuadatron)
+    if (getWeaponType() != Weapon::Persuadatron)
         this->playSound();
-    if (pOwner_ && pOwner_->majorType() == MapObject::mjt_Ped)
+    if (pOwner_ && pOwner_->nature() == MapObject::kNaturePed)
     {
         if (pWeaponClass_->dmgType() != MapObject::dmg_Persuasion
             && pOwner_->isOurAgent())
@@ -684,7 +682,7 @@ uint16 WeaponInstance::inflictDamage(ShootableMapObject * tobj, PathNode * tp,
                         this->playSound();
                     }
                 }*/
-                if (tobj && tobj->majorType() == MapObject::mjt_Ped) {
+                if (tobj && tobj->nature() == MapObject::kNaturePed) {
                     if (pOwner_->isFriendWith(
                         (PedInstance *)tobj))
                     {
@@ -937,7 +935,7 @@ void WeaponInstance::activate() {
 
 void WeaponInstance::deactivate() {
     activated_ = false;
-    if (main_type_ == Weapon::TimeBomb)
+    if (getWeaponType() == Weapon::TimeBomb)
         weapon_used_time_ = 0;
 }
 
@@ -1033,8 +1031,8 @@ void WeaponInstance::fire(Mission *pMission, ShootableMapObject::DamageInflictTy
     }
 }
 
-void ShotClass::makeShot(bool rangeChecked, toDefineXYZ &cp, int anim_hit,
-    std::vector <Weapon::ShotDesc> &all_shots, int anim_obj_hit,
+void ShotClass::makeShot(bool rangeChecked, toDefineXYZ &cp, SFXObject::SfxTypeEnum anim_hit,
+    std::vector <Weapon::ShotDesc> &all_shots, SFXObject::SfxTypeEnum anim_obj_hit,
     WeaponInstance * w)
 {
     Mission *m = g_Session.getMission();
@@ -1079,7 +1077,7 @@ void ShotClass::makeShot(bool rangeChecked, toDefineXYZ &cp, int anim_hit,
                     if (it_a->target_object == smp
                         && it_a->d.d_owner
 #ifdef _DEBUG
-                        && it_a->d.d_owner->majorType() == MapObject::mjt_Ped
+                        && it_a->d.d_owner->nature() == MapObject::kNaturePed
 #endif
                         && ((PedInstance *)it_a->d.d_owner)->isOurAgent())
                     {
@@ -1124,7 +1122,7 @@ void ShotClass::makeShot(bool rangeChecked, toDefineXYZ &cp, int anim_hit,
                     if (it_a->target_object == smp
                         &&it_a->d.d_owner
 #ifdef _DEBUG
-                        && it_a->d.d_owner->majorType() == MapObject::mjt_Ped
+                        && it_a->d.d_owner->nature() == MapObject::kNaturePed
 #endif
                         && ((PedInstance *)it_a->d.d_owner)->isOurAgent())
                     {
@@ -1165,7 +1163,7 @@ void WeaponInstance::getHostileInRange(toDefineXYZ * cp,
     double d = -1;
     Mission * m = g_Session.getMission();
 
-    if (mask & MapObject::mjt_Ped) {
+    if (mask & MapObject::kNaturePed) {
         for (size_t i = 0; i < m->numPeds(); i++) {
             ShootableMapObject *p = m->ped(i);
             if (!p->isIgnored() && (pOwner_->isHostileTo(p)
@@ -1189,7 +1187,7 @@ void WeaponInstance::getHostileInRange(toDefineXYZ * cp,
             }
         }
     }
-    if (mask & MapObject::mjt_Vehicle) {
+    if (mask & MapObject::kNatureVehicle) {
         for (size_t i = 0; i < m->numVehicles(); i++) {
             ShootableMapObject *v = m->vehicle(i);
             if (!v->isIgnored() && (pOwner_->isHostileTo(v)
@@ -1273,7 +1271,7 @@ void WeaponInstance::getNonFriendInRange(toDefineXYZ * cp,
 void WeaponInstance::handleHit(ShootableMapObject::DamageInflictType & d)
 {
     // When a bomb is hit, it explodes
-    if (main_type_ == Weapon::TimeBomb && health_ > 0) {
+    if (getWeaponType() == Weapon::TimeBomb && health_ > 0) {
         is_ignored_ = true;
         // we pass the given DamageInflictType just for the compiler
         // as it is not used by the fire method for a Bomb
@@ -1292,50 +1290,5 @@ void WeaponInstance::updtWeaponUsedTime(int elapsed) {
         {
             weapon_used_time_ = 0;
         }
-    }
-}
-
-/*! Draws animation of impact/explosion
- * @param cp current position (center)
- * @param dmg_rng effective range for drawing
- * @param rngdamg_anim animation to be used for drawing
- */
-void ShotClass::rangeDamageAnim(toDefineXYZ &cp, double dmg_rng,
-    int rngdamg_anim)
-{
-    Mission *m = g_Session.getMission();
-    toDefineXYZ base_pos = cp;
-    cp.z += Z_SHIFT_TO_AIR;
-    if (cp.z > (m->mmax_z_ - 1) * 128)
-        cp.z = (m->mmax_z_ - 1) * 128;
-    // TODO: exclude flames on water, put these flames to the ground,
-    // don't draw in air(, stairs problem?)
-    double angle_inc = PI;
-    const uint8 waves = (int)dmg_rng / 144 + 1;
-
-    for (uint8 i = 0; i < waves; i++) {
-        double base_angle = 0.0;
-        if (rand() % 100 > 74)
-            base_angle += angle_inc;
-
-        for (int j = 0; j < (4 << i); j++) {
-            double x = (double)(144 * i) * cos(base_angle);
-            double y = (double)(144 * i) * sin(base_angle);
-            base_angle += angle_inc;
-            PathNode pn = PathNode((base_pos.x + (int)x) / 256,
-                (base_pos.y + (int)y) / 256,
-                base_pos.z / 128, (base_pos.x + (int)x) % 256,
-                (base_pos.y + (int)y) % 256, base_pos.z % 128);
-
-            uint8 block_mask = m->inRangeCPos(&cp, NULL, &pn, true, true, dmg_rng);
-            if (block_mask != 32) {
-                SFXObject *so = new SFXObject(m->map(), rngdamg_anim,
-                                100 * (rand() % 16));
-                so->setPosition(pn.tileX(), pn.tileY(), pn.tileZ(),
-                                pn.offX(), pn.offY(), pn.offZ());
-                m->addSfxObject(so);
-            }
-        }
-        angle_inc /= 2.0;
     }
 }

@@ -275,7 +275,7 @@ void Mission::addWeaponsFromPedToAgent(PedInstance* p, Agent* pAg)
         weapons_.erase(it);
         wi->deactivate();
         // auto-reload for pistol
-        if (wi->getMainType() == Weapon::Pistol)
+        if (wi->getWeaponType() == Weapon::Pistol)
             wi->setAmmoRemaining(wi->ammo());
         wi->resetWeaponUsedTime();
         pAg->addWeapon(wi);
@@ -292,7 +292,7 @@ void Mission::end()
         // civilians+police, more killed less happy
         // TODO: add money per every persuaded non-agent ped
         if (p->isDead()) {
-            switch (p->getMainType()) {
+            switch (p->type()) {
                 case PedInstance::m_tpAgent:
                     stats_.incrEnemyKilled();
                     break;
@@ -353,62 +353,62 @@ void Mission::addWeapon(WeaponInstance * w)
 }
 
 MapObject * Mission::findAt(int tilex, int tiley, int tilez,
-                            MapObject::MajorTypeEnum *majorT, int *searchIndex,
+                            MapObject::ObjectNature *nature, int *searchIndex,
                             bool only)
 {
-    switch(*majorT) {
-        case MapObject::mjt_Ped:
+    switch(*nature) {
+        case MapObject::kNaturePed:
             for (unsigned int i = *searchIndex; i < peds_.size(); i++)
                 if ((!peds_[i]->isIgnored()) && peds_[i]->tileX() == tilex
                     && peds_[i]->tileY() == tiley
                     && peds_[i]->tileZ() == tilez)
                 {
                     *searchIndex = i + 1;
-                    *majorT = MapObject::mjt_Ped;
+                    *nature = MapObject::kNaturePed;
                     return peds_[i];
                 }
             if(only)
                 return NULL;
             *searchIndex = 0;
-        case MapObject::mjt_Weapon:
+        case MapObject::kNatureWeapon:
             for (unsigned int i = *searchIndex; i < weapons_.size(); i++)
                 if ((!weapons_[i]->isIgnored()) && weapons_[i]->tileX() == tilex
                     && weapons_[i]->tileY() == tiley
                     && weapons_[i]->tileZ() == tilez)
                 {
                     *searchIndex = i + 1;
-                    *majorT = MapObject::mjt_Weapon;
+                    *nature = MapObject::kNatureWeapon;
                     return weapons_[i];
                 }
             if(only)
                 return NULL;
             *searchIndex = 0;
-        case MapObject::mjt_Static:
+        case MapObject::kNatureStatic:
             for (unsigned int i = *searchIndex; i < statics_.size(); i++)
                 if (statics_[i]->tileX() == tilex
                     && statics_[i]->tileY() == tiley
                     && statics_[i]->tileZ() == tilez)
                 {
                     *searchIndex = i + 1;
-                    *majorT = MapObject::mjt_Static;
+                    *nature = MapObject::kNatureStatic;
                     return statics_[i];
                 }
             if(only)
                 return NULL;
             *searchIndex = 0;
-        case MapObject::mjt_Vehicle:
+        case MapObject::kNatureVehicle:
             for (unsigned int i = *searchIndex; i < vehicles_.size(); i++)
                 if (vehicles_[i]->tileX() == tilex
                     && vehicles_[i]->tileY() == tiley
                     && vehicles_[i]->tileZ() == tilez)
                 {
                     *searchIndex = i + 1;
-                    *majorT = MapObject::mjt_Vehicle;
+                    *nature = MapObject::kNatureVehicle;
                     return vehicles_[i];
                 }
             break;
         default:
-            printf("undefined majortype %i", *majorT);
+            printf("undefined majortype %i", *nature);
             break;
     }
     return NULL;
@@ -476,16 +476,16 @@ bool Mission::setSurfaces() {
         it != statics_.end(); ++it)
     {
         Static *s = *it;
-        if (s->getMainType() == Static::smt_LargeDoor) {
+        if (s->type() == Static::smt_LargeDoor) {
             int indx = s->tileX() + s->tileY() * mmax_x_
                 + s->tileZ() * mmax_m_xy;
             mtsurfaces_[indx].twd = 0x00;
-            if (s->getSubType() == 0) {
+            if (s->subType() == Static::kStaticSubtype1) {
                 if (indx - 1 >= 0)
                     mtsurfaces_[indx - 1].twd = 0x00;
                 if (indx + 1 < mmax_m_all)
                     mtsurfaces_[indx + 1].twd = 0x00;
-            } else if (s->getSubType() == 2) {
+            } else if (s->subType() == Static::kStaticSubtype2) {
                 if (indx - mmax_x_ >= 0)
                     mtsurfaces_[indx - mmax_x_].twd = 0x00;
                 if (indx + mmax_x_ < mmax_m_all)
@@ -2825,7 +2825,7 @@ void Mission::getInRangeAll(toDefineXYZ * cp,
    std::vector<ShootableMapObject *> & targets, uint8 mask,
    bool checkTileOnly, double maxr)
 {
-    if (mask & MapObject::mjt_Ped) {
+    if (mask & MapObject::kNaturePed) {
         for (size_t i = 0; i < numPeds(); ++i) {
             ShootableMapObject *p = ped(i);
             if (!p->isIgnored() && p->isAlive())
@@ -2836,7 +2836,7 @@ void Mission::getInRangeAll(toDefineXYZ * cp,
                 }
         }
     }
-    if (mask & MapObject::mjt_Static) {
+    if (mask & MapObject::kNatureStatic) {
         for (size_t i = 0; i < numStatics(); ++i) {
             ShootableMapObject *st = statics(i);
             if (!st->isIgnored())
@@ -2847,7 +2847,7 @@ void Mission::getInRangeAll(toDefineXYZ * cp,
                 }
         }
     }
-    if (mask & MapObject::mjt_Vehicle) {
+    if (mask & MapObject::kNatureVehicle) {
         for (size_t i = 0; i < numVehicles(); ++i) {
             ShootableMapObject *v = vehicle(i);
             if (!v->isIgnored())
@@ -2858,7 +2858,7 @@ void Mission::getInRangeAll(toDefineXYZ * cp,
                 }
         }
     }
-    if (mask & MapObject::mjt_Weapon) {
+    if (mask & MapObject::kNatureWeapon) {
         for (size_t i = 0; i < numWeapons(); ++i) {
             ShootableMapObject *w = weapon(i);
             if (!w->isIgnored())

@@ -113,7 +113,6 @@ VehicleInstance::VehicleInstance(VehicleAnimation * vehicle, int m):
 {
     hold_on_.wayFree = 0;
     rcv_damage_def_ = MapObject::ddmg_Vehicle;
-    major_type_ = MapObject::mjt_Vehicle;
 }
 
 bool VehicleInstance::animate(int elapsed)

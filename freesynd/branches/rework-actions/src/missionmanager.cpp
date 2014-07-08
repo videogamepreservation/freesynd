@@ -504,10 +504,10 @@ VehicleInstance * MissionManager::createVehicleInstance(const LevelData::Cars &g
     int cur_anim = READ_LE_UINT16(gamdata.index_current_anim) - dir;
     //setVehicleBaseAnim(vehicleanim, cur_anim);
     vehicleanim->set_base_anims(cur_anim);
-    VehicleInstance *vehivle_new = new VehicleInstance(vehicleanim, map);
-    vehivle_new->setHealth(hp);
-    vehivle_new->setStartHealth(hp);
-    vehivle_new->setMainType(gamdata.sub_type);
+    VehicleInstance *vehicle_new = new VehicleInstance(vehicleanim, map);
+    vehicle_new->setHealth(hp);
+    vehicle_new->setStartHealth(hp);
+    vehicle_new->setType(gamdata.sub_type);
     switch (gamdata.sub_type) {
         case 0x01:
             // large armored
@@ -517,9 +517,9 @@ VehicleInstance * MissionManager::createVehicleInstance(const LevelData::Cars &g
             // it is actually base animation and they have 8 directions
             //setVehicleBaseAnim(vehicleanim, cur_anim - 12 + (dir >> 1));
             vehicleanim->set_base_anims(cur_anim - 12 + (dir >> 1));
-            vehivle_new->setStartHealth(0);
-            vehivle_new->setHealth(-1);
-            vehivle_new->setIsIgnored(true);
+            vehicle_new->setStartHealth(0);
+            vehicle_new->setHealth(-1);
+            vehicle_new->setIsIgnored(true);
             vehicleanim->set_animation_type(VehicleAnimation::kBurntAnim);
             break;
         case 0x05:
@@ -560,17 +560,17 @@ VehicleInstance * MissionManager::createVehicleInstance(const LevelData::Cars &g
 
     // TODO: the size should be adjusted on orientation/direction change
     // and it should be different per vehicle type
-    vehivle_new->setSizeX(256);
-    vehivle_new->setSizeY(256);
-    vehivle_new->setSizeZ(192);
+    vehicle_new->setSizeX(256);
+    vehicle_new->setSizeY(256);
+    vehicle_new->setSizeZ(192);
 
     int oz = gamdata.mapposz[0] & 0x7F;
-    vehivle_new->setPosition(gamdata.mapposx[1], gamdata.mapposy[1],
+    vehicle_new->setPosition(gamdata.mapposx[1], gamdata.mapposy[1],
                             z, gamdata.mapposx[0],
                             gamdata.mapposy[0], oz);
-    vehivle_new->setDirection(gamdata.orientation);
+    vehicle_new->setDirection(gamdata.orientation);
 
-    return vehivle_new;
+    return vehicle_new;
 }
 
 void MissionManager::createPeds(const LevelData::LevelDataAll &level_data, DataIndex &di, Mission *pMission) {
@@ -652,7 +652,7 @@ void MissionManager::createPeds(const LevelData::LevelDataAll &level_data, DataI
                 // adds the agent to the mission squad
                 pMission->getSquad()->setMember(i, p);
             } else {
-                unsigned int mt = p->getMainType();
+                unsigned int mt = p->type();
                 p->setObjGroupDef(mt);
                 if (mt == PedInstance::og_dmAgent) {
                     p->setObjGroupID(2);

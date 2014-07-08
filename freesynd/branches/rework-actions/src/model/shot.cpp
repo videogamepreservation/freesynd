@@ -206,7 +206,7 @@ ShootableMapObject *InstantImpactShot::checkHitTarget(toDefineXYZ &originLocW, P
  * Some weapons can have no animations for an impact.
  */
 void InstantImpactShot::createImpactAnimation(Mission *pMission, ShootableMapObject * pTargetHit, PathNode &impactLocT) {
-    int impactAnimId = 
+    SFXObject::SfxTypeEnum impactAnimId = 
         (pTargetHit != NULL ? 
             dmg_.pWeapon->getWeaponClass()->impactAnims()->objectHit :
             dmg_.pWeapon->getWeaponClass()->impactAnims()->groundHit);
@@ -235,7 +235,7 @@ void Explosion::createExplosion(Mission *pMission, ShootableMapObject *pOwner, d
 
 void Explosion::createExplosion(Mission *pMission, ShootableMapObject *pOwner, const toDefineXYZ &location, double range, int dmgValue) {
     ShootableMapObject::DamageInflictType dmg;
-    if (pOwner && pOwner->majorType() == MapObject::mjt_Weapon) {
+    if (pOwner && pOwner->nature() == MapObject::kNatureWeapon) {
         // It's a bomb that exploded (other waepons do not explode)
         dmg.pWeapon = dynamic_cast<WeaponInstance *>(pOwner);
     } else {

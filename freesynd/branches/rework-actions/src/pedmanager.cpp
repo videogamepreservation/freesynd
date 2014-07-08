@@ -198,7 +198,7 @@ PedInstance *PedManager::loadInstance(const LevelData::People & gamdata, uint16 
     newped->setPosition(gamdata.mapposx[1], gamdata.mapposy[1],
                         z, gamdata.mapposx[0],
                         gamdata.mapposy[0], oz);
-    newped->setMainType(gamdata.type_ped);
+    newped->setTypeFromValue(gamdata.type_ped);
 
     newped->setAllAdrenaLevels(gamdata.adrena_amount,
         gamdata.adrena_dependency, gamdata.adrena_effect);

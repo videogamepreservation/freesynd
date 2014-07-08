@@ -41,8 +41,23 @@ class WeaponInstance;
  */
 class MapObject {
 public:
-    MapObject(int m);
+    /*!
+     * Express the nature of a MapObject.
+     */
+    enum ObjectNature {
+        kNatureUndefined = 0,
+        kNaturePed = 1,
+        kNatureWeapon = 2,
+        kNatureStatic = 4,
+        kNatureVehicle = 8
+    };
+
+public:
+    MapObject(int m, ObjectNature nature);
     virtual ~MapObject() {}
+
+    //! Return the nature of the object
+    ObjectNature nature() { return nature_; }
 
     virtual void draw(int x, int y) = 0;
     enum DamageType {
@@ -190,10 +205,6 @@ public:
 
     virtual bool animate(int elapsed);
 
-    void setSubType(int objSubType) { sub_type_ = objSubType; }
-    int getSubType() { return sub_type_; }
-    void setMainType(int objMainType) { main_type_ = objMainType; }
-    int getMainType() { return main_type_; }
     void setFramesPerSec(int framesPerSec)
     {
         frames_per_sec_ = framesPerSec;
@@ -253,17 +264,6 @@ public:
     bool isBlocker(toDefineXYZ * startXYZ, toDefineXYZ * endXYZ,
                double * inc_xyz);
 
-    typedef enum {
-        mjt_Undefined = 0,
-        mjt_Ped = 1,
-        mjt_Weapon = 2,
-        mjt_Static = 4,
-        mjt_Vehicle = 8
-    } MajorTypeEnum;
-
-    MajorTypeEnum majorType() { return major_type_; }
-    void setMajorType(MajorTypeEnum mt) { major_type_ = mt; }
-
     void setStateMasks(unsigned int state) {
         state_ = state;
     }
@@ -276,6 +276,8 @@ public:
 #endif
 
 protected:
+    //! the nature of this object
+    ObjectNature nature_;
     /*!
      * Tile based coordinates, tile_x_ and tile_y_ have 256
      * tile_z_ has 128 base
@@ -294,9 +296,6 @@ protected:
     int elapsed_carry_;
     //! how often this frame should be drawn per seccond
     int frames_per_sec_;
-    int sub_type_, main_type_;
-    //! 0 - not defined, 1 - ped, 2 - weapon, 4 - static, 8 - vehicle
-    MajorTypeEnum major_type_;
     DefDamageType rcv_damage_def_;
     //! objects direction
     int dir_;
@@ -326,7 +325,26 @@ private:
  */
 class SFXObject : public MapObject {
 public:
-    SFXObject(int m, int type, int t_show = 0, bool managed = false);
+    /*!
+     * Type of SfxObject.
+     */
+    enum SfxTypeEnum {
+        sfxt_Unknown = 0,
+        sfxt_BulletHit = 1,
+        sfxt_FlamerFire = 2,
+        sfxt_Smoke = 3,
+        sfxt_Fire_LongSmoke = 4,
+        sfxt_ExplosionFire = 5,
+        sfxt_ExplosionBall = 6,
+        sfxt_LargeFire = 7,
+        sfxt_SelArrow = 8,
+        sfxt_AgentFirst = 9,
+        sfxt_AgentSecond = 10,
+        sfxt_AgentThird = 11,
+        sfxt_AgentFourth = 12
+    };
+
+    SFXObject(int m, SfxTypeEnum type, int t_show = 0, bool managed = false);
     virtual ~SFXObject() {}
 
     bool sfxLifeOver() { return sfx_life_over_; }
@@ -346,23 +364,9 @@ public:
             frame_ = 0;
         }
     }
-
-    enum SfxTypeEnum {
-        sfxt_Unknown = 0,
-        sfxt_BulletHit = 1,
-        sfxt_FlamerFire = 2,
-        sfxt_Smoke = 3,
-        sfxt_Fire_LongSmoke = 4,
-        sfxt_ExplosionFire = 5,
-        sfxt_ExplosionBall = 6,
-        sfxt_LargeFire = 7,
-        sfxt_SelArrow = 8,
-        sfxt_AgentFirst = 9,
-        sfxt_AgentSecond = 10,
-        sfxt_AgentThird = 11,
-        sfxt_AgentFourth = 12
-    };
 protected:
+    /*! The type of SfxObject.*/
+    SfxTypeEnum type_;
     int anim_;
     bool sfx_life_over_;
     // to draw all frames or first frame only
@@ -402,7 +406,7 @@ public:
     };
 
 public:
-    ShootableMapObject(int m);
+    ShootableMapObject(int m, ObjectNature nature);
     virtual ~ShootableMapObject() {}
 
     int health() { return health_; }
@@ -491,7 +495,7 @@ public:
  */
 class ShootableMovableMapObject : public ShootableMapObject {
 public:
-    ShootableMovableMapObject(int m);
+    ShootableMovableMapObject(int m, ObjectNature nature);
     virtual ~ShootableMovableMapObject() {}
 
     void setSpeed(int new_speed) {
@@ -543,8 +547,33 @@ protected:
  */
 class Static : public ShootableMapObject {
 public:
+    /*! Const for subtype 1 of Static.*/
+    static const int kStaticSubtype1;
+    /*! Const for subtype 2 of Static.*/
+    static const int kStaticSubtype2;
+
+    enum StaticType {
+        // NOTE: should be the same name as Class
+        smt_None = 0,
+        smt_Advertisement,
+        smt_Semaphore,
+        smt_Door,
+        smt_LargeDoor,
+        smt_Tree,
+        smt_Window,
+        smt_AnimatedWindow,
+        smt_NeonSign
+    };
+public:
     static Static *loadInstance(uint8 *data, int m);
     virtual ~Static() {}
+
+    //! Return the type of statics
+    StaticType type() { return type_; }
+    //! Set the sub type of statics
+    void setSubType(int objSubType) { subType_ = objSubType; }
+    //! Return the type of statics
+    int subType() { return subType_; }
 
     virtual bool animate(int elapsed, Mission *obj) {
         return MapObject::animate(elapsed);
@@ -588,21 +617,18 @@ public:
         sttawnd_LightOn
     }stateAnimatedWindows;
 
-    typedef enum {
-        // NOTE: should be the same name as Class
-        smt_None = 0,
-        smt_Advertisement,
-        smt_Semaphore,
-        smt_Door,
-        smt_LargeDoor,
-        smt_Tree,
-        smt_Window,
-        smt_AnimatedWindow,
-        smt_NeonSign
-    }staticMainType;
+protected:
+    Static(int m, StaticType type) :
+            ShootableMapObject(m, MapObject::kNatureStatic) {
+        type_ = type;
+        subType_ = kStaticSubtype1;
+    }
 
 protected:
-    Static(int m):ShootableMapObject(m) {}
+    /*! Type of statics.*/
+    StaticType type_;
+    /*! Sub division for statics of same type.*/
+    int subType_;
 };
 
 /*!
@@ -674,7 +700,7 @@ protected:
  */
 class EtcObj : public Static {
 public:
-    EtcObj(int m, int anim, int burningAnim, int damagedAnim);
+    EtcObj(int m, int anim, int burningAnim, int damagedAnim, StaticType type = smt_None);
     virtual ~EtcObj() {}
 
     void draw(int x, int y);

@@ -623,13 +623,13 @@ void GameplayMenu::handleMouseMotion(int x, int y, int state, const int modKeys)
     }
 
     if (target_) {
-        if (target_->majorType() == MapObject::mjt_Ped || 
-            target_->majorType() == MapObject::mjt_Vehicle) {
+        if (target_->nature() == MapObject::kNaturePed || 
+            target_->nature() == MapObject::kNatureVehicle) {
             if (inrange)
                 g_System.useTargetRedCursor();
             else
                 g_System.useTargetCursor();
-        } else if (target_->majorType() == MapObject::mjt_Weapon) {
+        } else if (target_->nature() == MapObject::kNatureWeapon) {
             g_System.usePickupCursor();
         }
     } else if (x > 128) {
@@ -775,7 +775,7 @@ void GameplayMenu::handleClickOnMap(int x, int y, int button, const int modKeys)
 
         if (target_) {
             printf("target id  : %i == majorType : %i\n",
-                target_->getDebugID(), target_->majorType());
+                target_->getDebugID(), target_->nature());
         }
         return;
     }
@@ -784,14 +784,14 @@ void GameplayMenu::handleClickOnMap(int x, int y, int button, const int modKeys)
     bool ctrl = (modKeys & KMD_CTRL) != 0;
     if (button == kMouseLeftButton) {
         if (target_) {
-            switch (target_->majorType()) {
-            case MapObject::mjt_Weapon:
+            switch (target_->nature()) {
+            case MapObject::kNatureWeapon:
                 selection_.pickupWeapon(dynamic_cast<WeaponInstance *>(target_), ctrl);
                 break;
-            case MapObject::mjt_Ped:
+            case MapObject::kNaturePed:
                 selection_.followPed(dynamic_cast<PedInstance *>(target_), ctrl);
                 break;
-            case MapObject::mjt_Vehicle:
+            case MapObject::kNatureVehicle:
                 selection_.enterOrLeaveVehicle(dynamic_cast<Vehicle *>(target_), ctrl);
                 break;
             default:
@@ -1191,7 +1191,7 @@ void GameplayMenu::drawMissionHint(int elapsed) {
     mission_hint_ += inc;
 
     bool inversed = false;
-    bool text_pw = (target_ && target_->majorType() == MapObject::mjt_Weapon
+    bool text_pw = (target_ && target_->nature() == MapObject::kNatureWeapon
         && target_->map() != -1);
 
     std::string str;
@@ -1286,7 +1286,7 @@ void GameplayMenu::drawWeaponSelectors() {
                     if (p->selectedWeapon() && p->selectedWeapon() == wi)
                         s += 40;
                 } else if (draw_pw) {
-                    if (target_ && target_->majorType() == MapObject::mjt_Weapon
+                    if (target_ && target_->nature() == MapObject::kNatureWeapon
                         && (mission_hint_ % 20) < 10
                         && target_->map() != -1)
                     {

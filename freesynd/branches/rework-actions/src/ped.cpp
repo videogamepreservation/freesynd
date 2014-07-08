@@ -177,6 +177,26 @@ int Ped::lastPersuadeFrame() {
     return g_App.gameSprites().lastFrame(persuade_anim_);
 }
 
+void PedInstance::setTypeFromValue(uint8 value) {
+    switch(value) {
+    case 0x01:
+        type_ = m_tpPedestrian;
+        break;
+    case 0x02:
+        type_ = m_tpAgent;
+        break;
+    case 0x04:
+        type_ = m_tpPolice;
+        break;
+    case 0x08:
+        type_ = m_tpGuard;
+        break;
+    case 0x10:
+        type_ = m_tpCriminal;
+        break;
+    }
+}
+
 bool PedInstance::switchActionStateTo(uint32 as) {
     uint32 prevState = state_;
     switch(as) {
@@ -711,7 +731,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                 if ((aqt->act_exec & PedInstance::ai_aAquireControl) != 0)
                 {
                     if (aqt->target.t_smo->isAlive()) {
-                        if (aqt->target.t_smo->majorType() == MapObject::mjt_Ped) {
+                        if (aqt->target.t_smo->nature() == MapObject::kNaturePed) {
                             if (selectRequiredWeapon(&aqt->multi_var.enemy_var.pw_to_use))
                             {
                                 WeaponInstance *wi = selectedWeapon();
@@ -726,8 +746,8 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                                     aqt->state |= 8;
                             } else
                                 aqt->state |= 8;
-                        } else if (aqt->target.t_smo->majorType()
-                                    == MapObject::mjt_Vehicle)
+                        } else if (aqt->target.t_smo->nature()
+                                    == MapObject::kNatureVehicle)
                         {
                             VehicleInstance *v = (VehicleInstance *)aqt->target.t_smo;
                             if (v->isAlive() && (state_
@@ -768,10 +788,10 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                 if ((aqt->act_exec & PedInstance::ai_aLoseControl) != 0)
                 {
                     if (aqt->state == 1) {
-                        if (aqt->target.t_smo->majorType() == MapObject::mjt_Ped) {
+                        if (aqt->target.t_smo->nature() == MapObject::kNaturePed) {
                             // TODO: but not now
-                        } else if (aqt->target.t_smo->majorType()
-                                   == MapObject::mjt_Vehicle)
+                        } else if (aqt->target.t_smo->nature()
+                                   == MapObject::kNatureVehicle)
                         {
                             VehicleInstance *v = (VehicleInstance *)aqt->target.t_smo;
                             if (v->isInsideVehicle(this)) {
@@ -812,7 +832,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                             // but goal reached
                             // TODO: projectile shot?
                             aqt->state |= 12;
-                        } else if ((aqt->target.t_smo->majorType() == MapObject::mjt_Ped
+                        } else if ((aqt->target.t_smo->nature() == MapObject::kNaturePed
                             ? aqt->multi_var.enemy_var.forced_shot
                             || !isFriendWith((PedInstance *)aqt->target.t_smo) : true)
                             && selectRequiredWeapon(&aqt->multi_var.enemy_var.pw_to_use))
@@ -867,7 +887,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                     } else if ((aqt->act_exec & PedInstance::ai_aWaitToStart) != 0)
                     {
                         //if (aqt->multi_var.time_var.desc == 0) {
-                            if ((aqt->target.t_smo->majorType() == MapObject::mjt_Ped
+                            if ((aqt->target.t_smo->nature() == MapObject::kNaturePed
                                 && !isHostileTo((PedInstance *)aqt->target.t_smo))
                                 || aqt->target.t_smo->isDead())
                             {
@@ -2036,7 +2056,7 @@ void PedInstance::showPath(int scrollX, int scrollY) {
     }
 }
 
-PedInstance::PedInstance(Ped *ped, int m) : ShootableMovableMapObject(m),
+PedInstance::PedInstance(Ped *ped, int m) : ShootableMovableMapObject(m, MapObject::kNaturePed),
     ped_(ped), action_grp_id_(1),
     desc_state_(PedInstance::pd_smUndefined),
     hostile_desc_(PedInstance::pd_smUndefined),
@@ -2049,7 +2069,6 @@ PedInstance::PedInstance(Ped *ped, int m) : ShootableMovableMapObject(m),
 {
     hold_on_.wayFree = 0;
     rcv_damage_def_ = MapObject::ddmg_Ped;
-    major_type_ = MapObject::mjt_Ped;
     state_ = PedInstance::pa_smNone;
     drop_actions_ = false;
     is_our_ = false;
@@ -2815,11 +2834,11 @@ bool PedInstance::isHostileTo(ShootableMapObject *obj,
 {
     bool isHostile = false;
 
-    if (obj->majorType() == MapObject::mjt_Vehicle) {
+    if (obj->nature() == MapObject::kNatureVehicle) {
         Vehicle *pVehicle = static_cast<Vehicle *>(obj);
         isHostile = pVehicle->containsHostilesForPed(
             this, hostile_desc_alt);
-    } else if (obj->majorType() == MapObject::mjt_Ped) {
+    } else if (obj->nature() == MapObject::kNaturePed) {
         PedInstance *pPed = static_cast<PedInstance *>(obj);
         if (!isFriendWith(pPed)) {
             // Ped is not a declared friend, check its group
@@ -2879,9 +2898,9 @@ void PedInstance::verifyHostilesFound(Mission *m) {
     {
         ShootableMapObject *smo = it->first;
         double distTo = 0;
-        if (smo->isDead() || (smo->majorType() == MapObject::mjt_Ped
+        if (smo->isDead() || (smo->nature() == MapObject::kNaturePed
             && isFriendWith((PedInstance *)(smo)))
-            || (smo->majorType() == MapObject::mjt_Vehicle
+            || (smo->nature() == MapObject::kNatureVehicle
             && ((VehicleInstance *)smo)->containsHostilesForPed(this, hostile_desc_))
             || (m->inRangeCPos(&cur_xyz, &smo, NULL, false, false,
             check_rng, &distTo) != 1))

@@ -168,6 +168,16 @@ public:
     static const int kAgentMaxHealth;
     //! Default time for a ped between two shoots
     static const int kDefaultShootReactionTime;
+    /*!
+     * Type of Ped.
+     */
+    enum PedType {
+        m_tpPedestrian = 0x01,
+        m_tpAgent = 0x02,
+        m_tpPolice = 0x04,
+        m_tpGuard = 0x08,
+        m_tpCriminal = 0x10
+    } ;
 
     PedInstance(Ped *ped, int m);
     ~PedInstance();
@@ -177,8 +187,9 @@ public:
     bool isOurAgent() { return is_our_; }
     //! Sets if the agent is one of us or not
     void set_is_our(bool is_our) { is_our_ = is_our; }
-    
-    
+    //! Return the type of Ped
+    PedType type() { return type_; }
+    void setTypeFromValue(uint8 value);
 
     typedef enum {
         ad_NoAnimation,
@@ -201,14 +212,6 @@ public:
         ad_DeadBurnAnim,
         ad_PersuadedAnim
     } AnimationDrawn;
-
-    typedef enum {
-        m_tpPedestrian = 0x01,
-        m_tpAgent = 0x02,
-        m_tpPolice = 0x04,
-        m_tpGuard = 0x08,
-        m_tpCriminal = 0x10
-    } mainPedType;
 
     //! MapObject::state_
     enum pedActionStateMasks {
@@ -876,6 +879,8 @@ protected:
     void insertHitAction(DamageInflictType &d);
 protected:
     Ped *ped_;
+    //! Type of Ped
+    PedType type_;
     //! If this flag is true, all actions should be dropped
     bool drop_actions_;
     std::vector <actionQueueGroupType> actions_queue_;

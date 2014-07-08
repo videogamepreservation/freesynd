@@ -573,7 +573,7 @@ void GamePlayMinimapRenderer::drawPedestrians(uint8 * a_minimap) {
                 uint8 borderColor = (mm_timer_ped.state()) ? fs_cmn::kColorLightGreen : fs_cmn::kColorBlack;
                 drawPedCircle(a_minimap, px, py, fs_cmn::kColorYellow, borderColor);
             } else {
-                switch (p_ped->getMainType())
+                switch (p_ped->type())
                 {
                 case PedInstance::m_tpPedestrian:
                 case PedInstance::m_tpCriminal:
