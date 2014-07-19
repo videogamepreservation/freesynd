@@ -34,6 +34,7 @@ class Mission;
 class MissionBriefing;
 class WeaponInstance;
 class VehicleInstance;
+class PedInstance;
 
 /*!
  * Mission manager class.
@@ -83,6 +84,7 @@ private:
     //! Creates all peds
     void createPeds(const LevelData::LevelDataAll &level_data, 
                             DataIndex &di, Mission *pMission);
+    void createScriptedActionsForPed(PedInstance *pPed, const LevelData::LevelDataAll &level_data, uint16 pedIdx);
     //! Creates objectives
     void createObjectives(const LevelData::LevelDataAll &level_data, 
                             DataIndex &di, Mission *pMission);

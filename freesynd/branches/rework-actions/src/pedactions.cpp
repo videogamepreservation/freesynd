@@ -78,6 +78,29 @@ void PedInstance::addActionWalk(const PathNode &tpn, fs_actions::CreatOrigin ori
     addMovementAction(action, appendAction);
 }
 
+/*!
+ * Adds the action to walk along given direction.
+ * \param direction Direction to walk
+ * \param origin Origin of action
+ * \param appendAction If true action is append after all existing actions.
+ */
+void PedInstance::addActionWalkToLocUsingDirection(const PathNode &loc, 
+                                  fs_actions::CreatOrigin origin,
+                                  bool appendAction) {
+    fs_actions::WalkToDirectionAction *action = new fs_actions::WalkToDirectionAction(origin, loc);
+    addMovementAction(action, appendAction);
+}
+
+/*!
+ * Adds a trigger.
+ */
+void PedInstance::addActionTrigger(int32 range, const PathNode & loc) {
+    toDefineXYZ locW;
+    loc.convertPosToXYZ(&locW);
+    fs_actions::TriggerAction *action = new fs_actions::TriggerAction(range, locW);
+    addMovementAction(action, true);
+}
+
 void PedInstance::addActionFollowPed(PedInstance *pPed) {
     fs_actions::FollowAction *pAction = new fs_actions::FollowAction(pPed);
     addMovementAction(pAction, false);

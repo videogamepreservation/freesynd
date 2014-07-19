@@ -694,122 +694,187 @@ void MissionManager::createPeds(const LevelData::LevelDataAll &level_data, DataI
                 p->setSightRange(7 * 256);
                 // TODO: set scenarios
                 
-                uint16 offset_start = READ_LE_UINT16(pedref.offset_scenario_start);
-                uint16 offset_nxt = offset_start;
-                Vehicle *v = p->inVehicle();
-                bool not_in_vehicle = true;
-                if (v)
-                    not_in_vehicle = false;
-                if (offset_start)
-                    p->dropActQ();
-//#define SHOW_SCENARIOS_DEBUG
-#ifdef SHOW_SCENARIOS_DEBUG
-                printf("=====\n");
-#endif
-                if (p->getDebugID() == 17)
-                    printf("Scenario for %d\n", i);
+               if (p->useNewAnimation()) {
+                    createScriptedActionsForPed(p, level_data, i);
+                } else {
+                    uint16 offset_start = READ_LE_UINT16(pedref.offset_scenario_start);
+                    uint16 offset_nxt = offset_start;
+                    Vehicle *v = p->inVehicle();
+                    bool notInVehicle = v == NULL;
 
-                PedInstance::actionQueueGroupType as;
-                as.group_desc = PedInstance::gd_mStandWalk;
-                as.origin_desc = fs_actions::kOrigScript;
-                // this field will hold the index of a potential trigger
-                int32 has_trigger = -1;
+                    if (offset_start)
+                        p->dropActQ();
 
-                while (offset_nxt) {
-                    // sc.type
-                    // 1 - walking/driving to pos, x,y defined
-                    // 2 - vehicle to use and goto
-                    // 3?(south africa)
-                    // 5?(kenya)
-                    // 6 (kenya) - ped offset when in vehicle, and? (TODO)
-                    // 7 - assasinate target escaped, mission failed (TODO properly)
-                    // 8 - walking to pos, triggers on our agents in range, x,y defined
-                    // 9 - repeat from start, actually this might be end of script
-                    // 10 - train stops and waits
-                    // 11 - protected target reached destination(kenya) (TODO properly)
-                    LevelData::Scenarios sc = level_data.scenarios[offset_nxt / 8];
-#ifdef SHOW_SCENARIOS_DEBUG
-                    printf("id = %i, sc.type = %i, nxt = %i\n", i, sc.type, offset_nxt / 8);
-#endif
-                    offset_nxt = READ_LE_UINT16(sc.next);
-                    assert(offset_nxt != offset_start);
+                    PedInstance::actionQueueGroupType as;
+                    as.group_desc = PedInstance::gd_mStandWalk;
+                    as.origin_desc = fs_actions::kOrigScript;
+                    // this field will hold the index of a potential trigger
+                    int32 has_trigger = -1;
 
-                    if (sc.tilex != 0 && sc.tiley != 0) {
-                        // This scenario defines something that uses a location
-                        PathNode pn(sc.tilex >> 1, sc.tiley >> 1, sc.tilez,
-                            (sc.tilex & 0x01) << 7, (sc.tiley & 0x01) << 7);
-                        if (sc.type == LevelData::kScenarioTypeTrigger) {
-                            p->createActQTrigger(as, &pn, 6 * 256);
-                            has_trigger = as.actions.size();
-                            // no need for exclusive wait
-                            p->createActQWait(as, 3000);
-                            as.actions.back().group_desc = PedInstance::gd_mStandWalk;
-                        }
-                        if (v)
-                            p->createActQUsingCar(as, &pn, v);
-                        else
-                            p->createActQWalking(as, &pn, NULL, p->direction(), 0, true);
-                        //p->createActQWalking(as, &pn, NULL, -1);
-                        if ((!not_in_vehicle) && offset_nxt == 0)
-                            p->createActQResetActionQueue(as);
-                    } else if (sc.type == 2) {
-                        if (not_in_vehicle) {
-                            uint16 bindx = READ_LE_UINT16(sc.offset_object);
-                            // TODO: test all maps for objects other then vehicle
-                            assert(bindx >= 0x5C02 && bindx < 0x6682);
-                            bindx -= 0x5C02;
-                            bindx /= 42;
-                            if (di.vindx[bindx] != 0xFFFF) {
-                                v = pMission->vehicle(di.vindx[bindx]);
-                                p->createActQGetInCar(as, v);
+                    while (offset_nxt) {
+                        // sc.type
+                        // 1 - walking/driving to pos, x,y defined
+                        // 2 - vehicle to use and goto
+                        // 3?(south africa)
+                        // 5?(kenya)
+                        // 6 (kenya) - ped offset when in vehicle, and? (TODO)
+                        // 7 - assasinate target escaped, mission failed (TODO properly)
+                        // 8 - walking to pos, triggers on our agents in range, x,y defined
+                        // 9 - repeat from start, actually this might be end of script
+                        // 10 - train stops and waits
+                        // 11 - protected target reached destination(kenya) (TODO properly)
+                        LevelData::Scenarios sc = level_data.scenarios[offset_nxt / 8];
+    #ifdef SHOW_SCENARIOS_DEBUG
+                        printf("id = %i, sc.type = %i, nxt = %i\n", i, sc.type, offset_nxt / 8);
+    #endif
+                        offset_nxt = READ_LE_UINT16(sc.next);
+                        assert(offset_nxt != offset_start);
+
+                        if (sc.tilex != 0 && sc.tiley != 0) {
+                            // This scenario defines something that uses a location
+                            PathNode pn(sc.tilex >> 1, sc.tiley >> 1, sc.tilez,
+                                (sc.tilex & 0x01) << 7, (sc.tiley & 0x01) << 7);
+                            if (sc.type == LevelData::kScenarioTypeTrigger) {
+                                p->createActQTrigger(as, &pn, 6 * 256);
+                                has_trigger = as.actions.size();
+                                // no need for exclusive wait
+                                p->createActQWait(as, 3000);
+                                as.actions.back().group_desc = PedInstance::gd_mStandWalk;
                             }
-                        } else {
-                            PathNode pn(v->tileX(), v->tileY(), v->tileZ(),
-                                v->offX(), v->offY());
-                            p->createActQUsingCar(as, &pn, v);
-                        }
-                    } else if (sc.type == 9) {
-                        p->createActQResetActionQueue(as);
-                    } else if (sc.type == 10) {
-                        // train will wait
-                        p->createActQWait(as, 10000);
-                        // resetting movement for train
-                        if (offset_nxt == 0) {
+                            if (v)
+                                p->createActQUsingCar(as, &pn, v);
+                            else
+                                p->createActQWalking(as, &pn, NULL, p->direction(), 0, true);
+                            //p->createActQWalking(as, &pn, NULL, -1);
+                            if ((!notInVehicle) && offset_nxt == 0)
+                                p->createActQResetActionQueue(as);
+                        } else if (sc.type == 2) {
+                            if (notInVehicle) {
+                                uint16 bindx = READ_LE_UINT16(sc.offset_object);
+                                // TODO: test all maps for objects other then vehicle
+                                assert(bindx >= 0x5C02 && bindx < 0x6682);
+                                bindx -= 0x5C02;
+                                bindx /= 42;
+                                if (di.vindx[bindx] != 0xFFFF) {
+                                    v = pMission->vehicle(di.vindx[bindx]);
+                                    p->createActQGetInCar(as, v);
+                                }
+                            } else {
+                                PathNode pn(v->tileX(), v->tileY(), v->tileZ(),
+                                    v->offX(), v->offY());
+                                p->createActQUsingCar(as, &pn, v);
+                            }
+                        } else if (sc.type == 9) {
                             p->createActQResetActionQueue(as);
+                        } else if (sc.type == 10) {
+                            // train will wait
+                            p->createActQWait(as, 10000);
+                            // resetting movement for train
+                            if (offset_nxt == 0) {
+                                p->createActQResetActionQueue(as);
+                            }
                         }
+    #if 0
+    #ifdef _DEBUG
+                        switch (sc.type) {
+                            case 1:
+                            case 2:
+                            case 7:
+                            case 8:
+                            case 9:
+                            case 10:
+                            case 11:
+                                break;
+                            default:
+                                printf("Bingo\n");
+                        }
+    #endif
+    #endif
                     }
-#if 0
-#ifdef _DEBUG
-                    switch (sc.type) {
-                        case 1:
-                        case 2:
-                        case 7:
-                        case 8:
-                        case 9:
-                        case 10:
-                        case 11:
-                            break;
-                        default:
-                            printf("Bingo\n");
+                    if (as.actions.size() != 0) {
+                        if (has_trigger != -1) {
+                            // A trigger was defined, so all actions after it
+                            // are paused until the trigger is set off.
+                            p->pauseAllInActG(as, (uint32)has_trigger);
+                            as.main_act = (uint32)has_trigger - 1;
+                        } else
+                            as.main_act = as.actions.size() - 1;
+                        p->addActQToQueue(as);
                     }
-#endif
-#endif
-                }
-                if (as.actions.size() != 0) {
-                    if (has_trigger != -1) {
-                        // A trigger was defined, so all actions after it
-                        // are paused until the trigger is set off.
-                        p->pauseAllInActG(as, (uint32)has_trigger);
-                        as.main_act = (uint32)has_trigger - 1;
-                    } else
-                        as.main_act = as.actions.size() - 1;
-                    p->addActQToQueue(as);
                 }
 #ifdef SHOW_SCENARIOS_DEBUG
                 printf("+++++\n");
 #endif
-            }
+            }  // end if(i < AgentManager::kMaxSlot)
         }
+    }
+}
+
+void MissionManager::createScriptedActionsForPed(PedInstance *pPed, const LevelData::LevelDataAll &level_data, uint16 pedIdx) {
+    const LevelData::People & pedref = level_data.people[pedIdx];
+    uint16 offset_start = READ_LE_UINT16(pedref.offset_scenario_start);
+    uint16 offset_nxt = offset_start;
+    Vehicle *v = pPed->inVehicle();
+    bool notInVehicle = v == NULL;
+
+    // this field will hold the index of a potential trigger
+    int32 has_trigger = -1;
+
+#ifdef _DEBUG
+    if (offset_nxt) {
+        LOG(Log::k_FLG_GAME, "MissionManager","createScriptedActionsForPed", ("Scenarios for ped : %d", pPed->getDebugID()))
+    }
+#endif
+
+    while (offset_nxt) {
+        // sc.type
+        // 1 - walking/driving to pos, x,y defined
+        // 2 - vehicle to use and goto
+        // 3?(south africa)
+        // 5?(kenya)
+        // 6 (kenya) - ped offset when in vehicle, and? (TODO)
+        // 7 - assasinate target escaped, mission failed (TODO properly)
+        // 8 - walking to pos, triggers on our agents in range, x,y defined
+        // 9 - repeat from start, actually this might be end of script
+        // 10 - train stops and waits
+        // 11 - protected target reached destination(kenya) (TODO properly)
+        LevelData::Scenarios sc = level_data.scenarios[offset_nxt / 8];
+        LOG(Log::k_FLG_GAME, "MissionManager","createScriptedActionsForPed", ("At offset : %d", offset_nxt))
+
+        offset_nxt = READ_LE_UINT16(sc.next);
+        if (offset_nxt == offset_start) {
+            throw LoadMissionException("Bad scenario offset");
+        }
+        
+        if (sc.tilex != 0 && sc.tiley != 0) {
+            // This scenario defines something that uses a location
+            PathNode pn(sc.tilex >> 1, sc.tiley >> 1, sc.tilez,
+                (sc.tilex & 0x01) << 7, (sc.tiley & 0x01) << 7);
+            if (sc.type == LevelData::kScenarioTypeTrigger) {
+                LOG(Log::k_FLG_GAME, "MissionManager","createScriptedActionsForPed", (" - Trigger"))
+                pPed->addActionTrigger(6 * 256, pn);
+            }
+            if (v) {
+                printf("Scenario with car\n");
+                //pPed->createActQUsingCar(as, &pn, v);
+            } else {
+                LOG(Log::k_FLG_GAME, "MissionManager","createScriptedActionsForPed", (" - Walk toward location (%d, %d, %d)", pn.tileX(), pn.tileY(), pn.tileZ()))
+                pPed->addActionWalkToLocUsingDirection(pn, fs_actions::kOrigScript, true);
+            }
+            if ((!notInVehicle) && offset_nxt == 0) {
+                printf("Scenario reset action\n");
+                //pPed->createActQResetActionQueue(as);
+            }
+        } else if (sc.type == LevelData::kScenarioTypeUseVehicle) {
+            LOG(Log::k_FLG_GAME, "MissionManager","createScriptedActionsForPed", (" - Use car"))
+        } else if (sc.type == 9) {
+            LOG(Log::k_FLG_GAME, "MissionManager","createScriptedActionsForPed", (" - type 9"))
+        } else if (sc.type == 10) {
+            printf("Scenario type 10\n");
+        } else {
+            LOG(Log::k_FLG_GAME, "MissionManager","createScriptedActionsForPed", (" - unknown type %d", sc.type))
+        }
+
     }
 }
 

@@ -207,6 +207,47 @@ namespace fs_actions {
     };
 
     /*!
+     * This action is used to move a ped towards a given direction.
+     * Direction is either given directly or using a location.
+     * When direction is given directly, it is possible to specify a distance
+     * so that movement stops when ped travels that distance. 
+     * When direction is given by a location, movement stops when
+     * ped reaches that location.
+     */
+    class WalkToDirectionAction : public MovementAction {
+    public:
+        //! Walt to direction given by point
+        WalkToDirectionAction(CreatOrigin origin, const PathNode &pn);
+
+        void setmaxDistanceToWalk(int distance) { maxDistanceToWalk_ = distance; }
+    protected:
+        void doStart(Mission *pMission, PedInstance *pPed);
+        bool doExecute(int elapsed, Mission *pMission, PedInstance *pPed);
+    protected:
+        /*! Where to walk to.*/
+        toDefineXYZ dest_;
+        /*! Structure to hold information while walking.*/
+        DirMoveType moveDirdesc_;
+        int maxDistanceToWalk_;
+    };
+
+    /*!
+     * A trigger is an action that ends only when one of our agent
+     * enter a zone defined by a center and a radius.
+     */
+    class TriggerAction : public MovementAction {
+    public:
+        TriggerAction(int32 range, const toDefineXYZ &loc);
+    protected:
+        bool doExecute(int elapsed, Mission *pMission, PedInstance *pPed);
+    protected:
+        /*! Center of trigger zone.*/
+        toDefineXYZ centerLoc_;
+        /*! The range of trigger zone.*/
+        int32 range_;
+    };
+
+    /*!
      * This action is used to make a ped follow another ped.
      * Both must be walking.
      * This action is only available to player.
@@ -364,10 +405,10 @@ namespace fs_actions {
 
     protected:
         /*!
-         * A constant to define the maximum distance a ped
-         * can walk while burning before dying.
+         * A constant to define the time a burning ped
+         * can walk before dying.
          */
-        static const int kMaxDistanceToWalkBurning;
+        static const int kTimeToWalkBurning;
 
         /*! Structure to hold information while walking.*/
         DirMoveType moveDirdesc_;

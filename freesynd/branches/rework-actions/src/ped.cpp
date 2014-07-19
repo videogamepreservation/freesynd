@@ -180,19 +180,19 @@ int Ped::lastPersuadeFrame() {
 void PedInstance::setTypeFromValue(uint8 value) {
     switch(value) {
     case 0x01:
-        type_ = m_tpPedestrian;
+        type_ = kPedTypeCivilian;
         break;
     case 0x02:
-        type_ = m_tpAgent;
+        type_ = kPedTypeAgent;
         break;
     case 0x04:
-        type_ = m_tpPolice;
+        type_ = kPedTypePolice;
         break;
     case 0x08:
-        type_ = m_tpGuard;
+        type_ = kPedTypeGuard;
         break;
     case 0x10:
-        type_ = m_tpCriminal;
+        type_ = kPedTypeCriminal;
         break;
     }
 }
@@ -545,9 +545,15 @@ int PedInstance::getTimeBetweenShoots(WeaponInstance *pWeapon) {
             pWeapon->getWeaponClass()->timeReload();
 }
 
+bool PedInstance::useNewAnimation() {
+    return isOurAgent() 
+        || type() == kPedTypeCivilian
+        ;
+}
+
 bool PedInstance::animate(int elapsed, Mission *mission) {
     // Temporarily use new animation for our agent
-    if (isOurAgent()) {
+    if (useNewAnimation()) {
         return animate2(elapsed, mission);
     }
     // TODO: weapon selection action, and use only deselectweapon

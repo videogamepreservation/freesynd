@@ -58,6 +58,8 @@ public:
 
     //! Return the nature of the object
     ObjectNature nature() { return nature_; }
+    //! For debug purpose
+    const char* natureName();
 
     virtual void draw(int x, int y) = 0;
     enum DamageType {
@@ -158,8 +160,8 @@ public:
     }
 
     /*!
-     * Return true is given object is closer to this object than the
-     * given distance.
+     * Return true if the distance between this object and the given object
+     * is less than the given distance.
      * \param pObject The other object.
      * \param distance
      */
@@ -167,6 +169,20 @@ public:
         int cx = tile_x_ * 256 + off_x_ - (pObject->tile_x_ * 256 + pObject->off_x_);
         int cy = tile_y_ * 256 + off_y_ - (pObject->tile_y_ * 256 + pObject->off_y_);
         int cz = tile_z_ * 128 + off_z_ - (pObject->tile_z_ * 128 + pObject->off_z_);
+
+        return (cx * cx + cy * cy + cz * cz) < (distance * distance);
+    }
+
+    /*!
+     * Return true if the distance between this object and the given location
+     * is less than the given distance.
+     * \param loc The location.
+     * \param distance
+     */
+    bool isCloseTo(const toDefineXYZ &loc, int32 distance) {
+        int cx = tile_x_ * 256 + off_x_ - (loc.x);
+        int cy = tile_y_ * 256 + off_y_ - (loc.y);
+        int cz = tile_z_ * 128 + off_z_ - (loc.z);
 
         return (cx * cx + cy * cy + cz * cz) < (distance * distance);
     }

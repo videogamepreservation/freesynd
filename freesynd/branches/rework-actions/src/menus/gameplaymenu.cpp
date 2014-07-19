@@ -774,8 +774,8 @@ void GameplayMenu::handleClickOnMap(int x, int y, int button, const int modKeys)
             mapPt.tx, mapPt.ty, mapPt.tz, mapPt.ox, mapPt.oy);
 
         if (target_) {
-            printf("target id  : %i == majorType : %i\n",
-                target_->getDebugID(), target_->nature());
+            printf("   > target(%i) : %s\n",
+                target_->getDebugID(), target_->natureName());
         }
         return;
     }

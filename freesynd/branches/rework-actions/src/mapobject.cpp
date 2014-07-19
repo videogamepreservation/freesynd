@@ -52,6 +52,21 @@ MapObject::MapObject(int m, ObjectNature nature):size_x_(1), size_y_(1), size_z_
     nature_ = nature; 
 }
 
+const char* MapObject::natureName() {
+    switch (nature_) {
+    case kNaturePed:
+        return "Ped";
+    case kNatureWeapon:
+        return "Weapon";
+    case kNatureStatic:
+        return "Static";
+    case kNatureVehicle:
+        return "Vehicle";
+    default:
+        return "Undefined";
+    }
+}
+
 int MapObject::screenX()
 {
     return g_App.maps().map(map())->tileToScreenX(tile_x_, tile_y_,

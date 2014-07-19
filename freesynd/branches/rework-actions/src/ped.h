@@ -172,15 +172,19 @@ public:
      * Type of Ped.
      */
     enum PedType {
-        m_tpPedestrian = 0x01,
-        m_tpAgent = 0x02,
-        m_tpPolice = 0x04,
-        m_tpGuard = 0x08,
-        m_tpCriminal = 0x10
+        kPedTypeCivilian = 0x01,
+        kPedTypeAgent = 0x02,
+        kPedTypePolice = 0x04,
+        kPedTypeGuard = 0x08,
+        kPedTypeCriminal = 0x10
     } ;
 
     PedInstance(Ped *ped, int m);
     ~PedInstance();
+
+    //! Temporary method
+    bool useNewAnimation();
+
     //! Initialize the ped instance as an agent
     void initAsAgent(Agent *p_agent, unsigned int obj_group_id);
     //! Returns true if the agent is one of us.
@@ -286,6 +290,12 @@ public:
     
     //! Adds action to walk to a given destination
     void addActionWalk(const PathNode &tpn, fs_actions::CreatOrigin origin, bool appendAction);
+    //! Adds action to walk along a given direction
+    void addActionWalkToLocUsingDirection(const PathNode &loc,
+                                  fs_actions::CreatOrigin origin,
+                                  bool appendAction);
+    //! Adds a trigger to the actions
+    void addActionTrigger(int32 range, const PathNode &loc);
     //! Adds action to follow a ped
     void addActionFollowPed(PedInstance *pPed);
     //! Adds action to put down weapon on the ground

@@ -30,6 +30,8 @@
 #include "weapon.h"
 #include "vehicle.h"
 #include "mission.h"
+#include "agentmanager.h"
+#include "core/squad.h"
 
 using namespace fs_actions;
 
@@ -37,7 +39,7 @@ using namespace fs_actions;
 // Constant definition
 //*************************************
 const int FollowAction::kFollowDistance = 192;
-const int WalkBurnHitAction::kMaxDistanceToWalkBurning = 800;
+const int WalkBurnHitAction::kTimeToWalkBurning = 1000;
 
 /*!
  * Default constructor.
@@ -161,6 +163,85 @@ bool WalkAction::doExecute(int elapsed, Mission *pMission, PedInstance *pPed) {
         setSucceeded();
     }
     return updated;
+}
+
+WalkToDirectionAction::WalkToDirectionAction(CreatOrigin origin, const PathNode &dest) : 
+MovementAction(kActTypeWalk, origin) {
+    maxDistanceToWalk_ = 0;
+    dest.convertPosToXYZ(&dest_);
+}
+
+void WalkToDirectionAction::doStart(Mission *pMission, PedInstance *pPed) {
+    moveDirdesc_.clear();
+    pPed->setSpeed(pPed->getDefaultSpeed());
+}
+
+/*!
+ * Ped moves until he reaches destination.
+ * \param elapsed Time elapsed since last frame
+ * \param pMission Mission data
+ * \param pPed The ped executing the action.
+ */
+bool WalkToDirectionAction::doExecute(int elapsed, Mission *pMission, PedInstance *pPed) {
+    bool endAction = false;
+    int diffx = dest_.x - pPed->tileX() * 256 - pPed->offX();
+    int diffy = dest_.y - pPed->tileY() * 256 - pPed->offY();
+
+    // In this case, max distance is the distance between ped and destination location
+    int maxDistanceToWalk = (int)sqrt((double)(diffx * diffx + diffy * diffy));
+
+    if (maxDistanceToWalk > 0) {
+        pPed->moveToDir(pMission, 
+                        elapsed,
+                        moveDirdesc_,
+                        -1,
+                        dest_.x, dest_.y,
+                        &maxDistanceToWalk);
+
+        if (pPed->tileX() * 256 - pPed->offX() == dest_.x
+            && pPed->tileY() * 256 - pPed->offY() == dest_.y)
+            // TODO: add correct z or ignore it?
+        {
+            endAction = true;
+        }
+    } else {
+        endAction = true;
+    }
+
+    if (endAction) {
+        setSucceeded();
+        pPed->clearDestination();
+    }
+
+    return true;
+}
+
+/*!
+ * Constructor.
+ * \param range Radius of the trigger zone
+ * \param loc Center of the trigger zone
+ */
+TriggerAction::TriggerAction(int32 range, const toDefineXYZ &loc) : 
+        MovementAction(kActTypeUndefined, kOrigScript, false, true) {
+    range_ = range;
+    centerLoc_ = loc;
+}
+
+/*!
+ * Check that at least one agent enters the zone.
+ * \param elapsed Time elapsed since last frame
+ * \param pMission Mission data
+ * \param pPed The ped executing the action.
+ */
+bool TriggerAction::doExecute(int elapsed, Mission *pMission, PedInstance *pPed) {
+    for (uint8 i = 0; i < AgentManager::kMaxSlot; ++i) {
+        PedInstance *pAgent = pMission->getSquad()->member(i);
+        if(pAgent && pAgent->isAlive() && pAgent->isCloseTo(centerLoc_, range_)) {
+            setSucceeded();
+            return true;
+        }
+    }
+    return false;
 }
 
 /*!
@@ -430,7 +511,7 @@ bool LaserHitAction::doExecute(int elapsed, Mission *pMission, PedInstance *pPed
 }
 
 WalkBurnHitAction::WalkBurnHitAction(ShootableMapObject::DamageInflictType &d) : 
-HitAction(kOrigAction, d),burnTimer_(1000) {
+HitAction(kOrigAction, d),burnTimer_(kTimeToWalkBurning) {
     targetState_ = PedInstance::pa_smWalkingBurning;
 }
 
@@ -457,7 +538,6 @@ bool WalkBurnHitAction::doExecute(int elapsed, Mission *pMission, PedInstance *p
     pPed->moveToDir(pMission, elapsed, moveDirdesc_, moveDirection_, -1, -1, &walkDistDiff, true);
     walkedDist_ += walkDistDiff;
 
-    //if (walkedDist_ >= kMaxDistanceToWalkBurning) {
     if (burnTimer_.update(elapsed)) {
         setSucceeded();
 

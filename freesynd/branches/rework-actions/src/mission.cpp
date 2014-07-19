@@ -293,19 +293,19 @@ void Mission::end()
         // TODO: add money per every persuaded non-agent ped
         if (p->isDead()) {
             switch (p->type()) {
-                case PedInstance::m_tpAgent:
+                case PedInstance::kPedTypeAgent:
                     stats_.incrEnemyKilled();
                     break;
-                case PedInstance::m_tpCriminal:
+                case PedInstance::kPedTypeCriminal:
                     stats_.incrCriminalKilled();
                     break;
-                case PedInstance::m_tpPedestrian:
+                case PedInstance::kPedTypeCivilian:
                     stats_.incrCivilKilled();
                     break;
-                case PedInstance::m_tpGuard:
+                case PedInstance::kPedTypeGuard:
                     stats_.incrGuardKilled();
                     break;
-                case PedInstance::m_tpPolice:
+                case PedInstance::kPedTypePolice:
                     stats_.incrPoliceKilled();
                     break;
             }
