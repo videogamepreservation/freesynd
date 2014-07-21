@@ -86,21 +86,11 @@ ObjAssassinate::ObjAssassinate(MapObject * pMapObject) : TargetObjective(pMapObj
  */
 void ObjAssassinate::evaluate(Mission *pMission) {
     PedInstance *p = static_cast<PedInstance *>(p_target_);
-    if (p->isDead())
-    {
+    if (p->isDead()) {
         // Target is dead -> objective is completed
         endObjective(true);
-    } else {
-        int x = p->tileX();
-        int y = p->tileY();
-        // target might be off visible area (escaped) -> failed
-        if (p->inVehicle() && (x < (pMission->minX() >> 1)
-            || x > pMission->maxX() + ((pMission->mmax_x_ - pMission->maxX()) >> 1)
-            || y < (pMission->minY() >> 1)
-            || y > pMission->maxY() + ((pMission->mmax_y_ - pMission->maxY()) >> 1)))
-        {
-            endObjective(false);
-        }
+    } else if (p->hasEscaped()) {
+        endObjective(false);
     }
 }
 

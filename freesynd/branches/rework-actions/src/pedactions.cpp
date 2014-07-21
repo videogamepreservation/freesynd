@@ -132,15 +132,16 @@ void PedInstance::addActionPickup(WeaponInstance *pWeapon, bool appendAction) {
 
 /*!
  * Sets or append action to enter the given vehicle.
+ * \param origin
  * \param pVehicle
  * \param appendAction If true action is append after all existing actions.
  */
-void PedInstance::addActionEnterVehicle(Vehicle *pVehicle, bool appendAction) {
+void PedInstance::addActionEnterVehicle(fs_actions::CreatOrigin origin, Vehicle *pVehicle, bool appendAction) {
     // First go to vehicle
-    fs_actions::WalkAction *action = new fs_actions::WalkAction(fs_actions::kOrigUser, (ShootableMapObject *) pVehicle);
+    fs_actions::WalkAction *action = new fs_actions::WalkAction(origin, (ShootableMapObject *) pVehicle);
     addMovementAction(action, appendAction);
     // Then get in
-    fs_actions::EnterVehicleAction *enterAct = new fs_actions::EnterVehicleAction(pVehicle);
+    fs_actions::EnterVehicleAction *enterAct = new fs_actions::EnterVehicleAction(origin, pVehicle);
     addMovementAction(enterAct, true);
 }
 

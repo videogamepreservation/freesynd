@@ -254,7 +254,7 @@ void SquadSelection::enterOrLeaveVehicle(Vehicle *pVehicle, bool addAction) {
         
         if (getIn && !pAgent->inVehicle()) {
             // Agent is out and everybody must get in
-            pAgent->addActionEnterVehicle(pVehicle, addAction);
+            pAgent->addActionEnterVehicle(fs_actions::kOrigUser, pVehicle, addAction);
         } else if (!getIn && pAgent->inVehicle() == pVehicle) {
             // Agent is in the given car and everybody must get out
             // first stops the vehicle if it's a car

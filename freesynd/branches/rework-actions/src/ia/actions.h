@@ -248,6 +248,18 @@ namespace fs_actions {
     };
 
     /*!
+     * This action is used in scripted action when a ped
+     * needs to escape the map and our agents must kill him.
+     */
+    class EscapeAction : public MovementAction {
+    public:
+        EscapeAction():
+            MovementAction(kActTypeUndefined, kOrigScript, false, true) {}
+    protected:
+        bool doExecute(int elapsed, Mission *pMission, PedInstance *pPed);
+    };
+
+    /*!
      * This action is used to make a ped follow another ped.
      * Both must be walking.
      * This action is only available to player.
@@ -313,7 +325,7 @@ namespace fs_actions {
      */
     class EnterVehicleAction : public MovementAction {
     public:
-        EnterVehicleAction(Vehicle *pVehicle);
+        EnterVehicleAction(CreatOrigin origin, Vehicle *pVehicle);
 
     protected:
         void doStart(Mission *pMission, PedInstance *pPed);

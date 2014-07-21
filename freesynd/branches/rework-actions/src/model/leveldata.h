@@ -363,6 +363,8 @@ namespace LevelData {
     static const int kPeopleLocNotVisible = 0x0D;
     /*! Constant for field Scenario::type :  Use vehicle to go somewhere.*/
     static const int kScenarioTypeUseVehicle = 0x02;
+    /*! Constant for field Scenario::type :  Target has escape the map.*/
+    static const int kScenarioTypeEscape = 0x07;
     /*! Constant for field Scenario::type : this is a trigger. 
      * Agents will trigger it when they enter the circle defined by the center and a fixed radius.*/
     static const int kScenarioTypeTrigger = 0x08;

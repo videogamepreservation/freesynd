@@ -137,6 +137,7 @@ MovementAction(kActTypeWalk, origin) {
     dest_.setOffX(smo->offX());
     dest_.setOffY(smo->offY());
     dest_.setOffZ(smo->offZ());
+    targetState_ = PedInstance::pa_smWalking;
 }
 
 void WalkAction::doStart(Mission *pMission, PedInstance *pPed) {
@@ -169,10 +170,12 @@ WalkToDirectionAction::WalkToDirectionAction(CreatOrigin origin, const PathNode 
 MovementAction(kActTypeWalk, origin) {
     maxDistanceToWalk_ = 0;
     dest.convertPosToXYZ(&dest_);
+    targetState_ = PedInstance::pa_smWalking;
 }
 
 void WalkToDirectionAction::doStart(Mission *pMission, PedInstance *pPed) {
     moveDirdesc_.clear();
+    moveDirdesc_.bounce = true;
     pPed->setSpeed(pPed->getDefaultSpeed());
 }
 
@@ -191,7 +194,7 @@ bool WalkToDirectionAction::doExecute(int elapsed, Mission *pMission, PedInstanc
     int maxDistanceToWalk = (int)sqrt((double)(diffx * diffx + diffy * diffy));
 
     if (maxDistanceToWalk > 0) {
-        pPed->moveToDir(pMission, 
+        uint8 res = pPed->moveToDir(pMission, 
                         elapsed,
                         moveDirdesc_,
                         -1,
@@ -242,6 +245,17 @@ bool TriggerAction::doExecute(int elapsed, Mission *pMission, PedInstance *pPed)
         }
     }
     return false;
+}
+
+/*!
+ * This action only sets the ped's state to "Escaped".
+ * \param elapsed Time elapsed since last frame
+ * \param pMission Mission data
+ * \param pPed The ped executing the action.
+ */
+bool EscapeAction::doExecute(int elapsed, Mission *pMission, PedInstance *pPed) {
+    pPed->escape();
+    return true;
 }
 
 /*!
@@ -369,7 +383,8 @@ bool PickupWeaponAction::doExecute(int elapsed, Mission *pMission, PedInstance *
     return true;
 }
 
-EnterVehicleAction::EnterVehicleAction(Vehicle *pVehicle) : MovementAction(kActTypeUndefined, kOrigUser, true) {
+EnterVehicleAction::EnterVehicleAction(CreatOrigin origin, Vehicle *pVehicle) :
+        MovementAction(kActTypeUndefined, origin, true) {
     pVehicle_ = pVehicle;
 }
 

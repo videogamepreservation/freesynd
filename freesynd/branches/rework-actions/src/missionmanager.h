@@ -84,7 +84,10 @@ private:
     //! Creates all peds
     void createPeds(const LevelData::LevelDataAll &level_data, 
                             DataIndex &di, Mission *pMission);
-    void createScriptedActionsForPed(PedInstance *pPed, const LevelData::LevelDataAll &level_data, uint16 pedIdx);
+    void createScriptedActionsForPed(Mission *pMission, 
+                                        DataIndex &di, 
+                                        const LevelData::LevelDataAll &level_data, 
+                                        uint16 pedIdx, PedInstance *pPed);
     //! Creates objectives
     void createObjectives(const LevelData::LevelDataAll &level_data, 
                             DataIndex &di, Mission *pMission);

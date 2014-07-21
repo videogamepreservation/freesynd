@@ -179,6 +179,25 @@ public:
         kPedTypeCriminal = 0x10
     } ;
 
+    enum pedDescStateMasks {
+        pd_smUndefined = 0x0,
+        pd_smControlled = 0x0001,
+        pd_smArmed = 0x0002,
+        // no active action should be done, ex. persuaded ped will shoot target
+        // of persuader only if persuader shoots at it
+        pd_smSupporter = 0x0004,
+        pd_smEnemyInSight = 0x0008,
+        // only if all weapon has no ammunition, persuadatron excludes this
+        // should not be used for hostile_desc_
+        pd_smNoAmmunition = 0x0010,
+        // all non-player controllled peds should have this set
+        pd_smAutoAction = 0x0020,
+        /*! When a mission's objective is to kill a ped and this ped has
+        escaped, this value is used to indicate he's escaped.*/
+        pd_smEscaped = 0x0080,
+        pd_smAll = 0xFFFF
+    };
+
     PedInstance(Ped *ped, int m);
     ~PedInstance();
 
@@ -187,6 +206,10 @@ public:
 
     //! Initialize the ped instance as an agent
     void initAsAgent(Agent *p_agent, unsigned int obj_group_id);
+
+    //*************************************
+    // Properties
+    //*************************************
     //! Returns true if the agent is one of us.
     bool isOurAgent() { return is_our_; }
     //! Sets if the agent is one of us or not
@@ -194,6 +217,10 @@ public:
     //! Return the type of Ped
     PedType type() { return type_; }
     void setTypeFromValue(uint8 value);
+    //! Return true if ped has escaped the map
+    bool hasEscaped() { return IS_FLAG_SET(desc_state_, pd_smEscaped); }
+    //! Indicate that the ped has escaped
+    void escape() { SET_FLAG(desc_state_, pd_smEscaped); }
 
     typedef enum {
         ad_NoAnimation,
@@ -303,7 +330,8 @@ public:
     //! Adds action to pick up weapon from the ground
     void addActionPickup(WeaponInstance *pWeapon, bool appendAction);
     //! Adds action to enter a given vehicle
-    void addActionEnterVehicle(Vehicle *pVehicle, bool appendAction);
+    void addActionEnterVehicle(fs_actions::CreatOrigin origin,
+                                Vehicle *pVehicle, bool appendAction);
     //! Adds action to drive vehicle to destination
     void addActionDriveVehicle(fs_actions::CreatOrigin origin, 
            VehicleInstance *pVehicle, PathNode &destination, bool appendAction);
@@ -596,22 +624,6 @@ public:
         og_dmGuard = 0x08,
         og_dmCriminal = 0x10
     } objGroupDefMasks;
-
-    typedef enum {
-        pd_smUndefined = 0x0,
-        pd_smControlled = 0x0001,
-        pd_smArmed = 0x0002,
-        // no active action should be done, ex. persuaded ped will shoot target
-        // of persuader only if persuader shoots at it
-        pd_smSupporter = 0x0004,
-        pd_smEnemyInSight = 0x0008,
-        // only if all weapon has no ammunition, persuadatron excludes this
-        // should not be used for hostile_desc_
-        pd_smNoAmmunition = 0x0010,
-        // all non-player controllled peds should have this set
-        pd_smAutoAction = 0x0020,
-        pd_smAll = 0xFFFF
-    } pedDescStateMasks;
 
     typedef enum {
         ai_aNone = 0x0,
