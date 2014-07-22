@@ -1973,10 +1973,6 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
     return updated;
 }
 
-PedInstance *Ped::createInstance(int map) {
-    return new PedInstance(this, map);
-}
-
 /*!
  * Forces an agent to commit suicide.
  * If he's equiped with the good version of Mod Chest, he will
@@ -2062,7 +2058,7 @@ void PedInstance::showPath(int scrollX, int scrollY) {
     }
 }
 
-PedInstance::PedInstance(Ped *ped, int m) : ShootableMovableMapObject(m, MapObject::kNaturePed),
+PedInstance::PedInstance(Ped *ped, uint16 id, int m) : ShootableMovableMapObject(id, m, MapObject::kNaturePed),
     ped_(ped), action_grp_id_(1),
     desc_state_(PedInstance::pd_smUndefined),
     hostile_desc_(PedInstance::pd_smUndefined),

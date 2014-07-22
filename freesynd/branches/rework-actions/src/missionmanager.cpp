@@ -321,7 +321,7 @@ Mission * MissionManager::create_mission(LevelData::LevelDataAll &level_data) {
             LevelData::Statics & sref = level_data.statics[i];
             if(sref.desc == 0)
                 continue;
-            Static *s = Static::loadInstance((uint8 *) & sref, p_mission->mapId());
+            Static *s = Static::loadInstance((uint8 *) & sref, i, p_mission->mapId());
             if (s) {
                 p_mission->addStatic(s);
             }
@@ -471,13 +471,13 @@ WeaponInstance * MissionManager::create_weapon_instance(const LevelData::Weapons
 
 
 void MissionManager::createVehicles(const LevelData::LevelDataAll &level_data, DataIndex &di, Mission *pMission) {
-    for (uint8 i = 0; i < 64; i++) {
+    for (uint16 i = 0; i < 64; i++) {
         const LevelData::Cars & car = level_data.cars[i];
         // car.sub_type 0x09 - train
         if (car.type == 0x0)
             continue;
         VehicleInstance *v =
-            createVehicleInstance(car, pMission->mapId());
+            createVehicleInstance(car, i, pMission->mapId());
         if (v) {
             di.vindx[i] = pMission->numVehicles();
             pMission->addVehicle(v);
@@ -492,7 +492,7 @@ void MissionManager::createVehicles(const LevelData::LevelDataAll &level_data, D
 /*!
  *
  */
-VehicleInstance * MissionManager::createVehicleInstance(const LevelData::Cars &gamdata, uint16 map)
+VehicleInstance * MissionManager::createVehicleInstance(const LevelData::Cars &gamdata, uint16 id, uint16 map)
 {
     // TODO: check all maps
     // TODO: train, join somehow
@@ -504,7 +504,7 @@ VehicleInstance * MissionManager::createVehicleInstance(const LevelData::Cars &g
     int cur_anim = READ_LE_UINT16(gamdata.index_current_anim) - dir;
     //setVehicleBaseAnim(vehicleanim, cur_anim);
     vehicleanim->set_base_anims(cur_anim);
-    VehicleInstance *vehicle_new = new VehicleInstance(vehicleanim, map);
+    VehicleInstance *vehicle_new = new VehicleInstance(vehicleanim, id, map);
     vehicle_new->setHealth(hp);
     vehicle_new->setStartHealth(hp);
     vehicle_new->setType(gamdata.sub_type);
@@ -695,7 +695,7 @@ void MissionManager::createPeds(const LevelData::LevelDataAll &level_data, DataI
                 // TODO: set scenarios
                 
                if (p->useNewAnimation()) {
-                    createScriptedActionsForPed(pMission, di, level_data, i, p);
+                    createScriptedActionsForPed(pMission, di, level_data, p);
                 } else {
                     uint16 offset_start = READ_LE_UINT16(pedref.offset_scenario_start);
                     uint16 offset_nxt = offset_start;
@@ -810,8 +810,8 @@ void MissionManager::createPeds(const LevelData::LevelDataAll &level_data, DataI
     }
 }
 
-void MissionManager::createScriptedActionsForPed(Mission *pMission, DataIndex &di, const LevelData::LevelDataAll &level_data, uint16 pedIdx, PedInstance *pPed) {
-    const LevelData::People & pedref = level_data.people[pedIdx];
+void MissionManager::createScriptedActionsForPed(Mission *pMission, DataIndex &di, const LevelData::LevelDataAll &level_data, PedInstance *pPed) {
+    const LevelData::People & pedref = level_data.people[pPed->id()];
     uint16 offset_start = READ_LE_UINT16(pedref.offset_scenario_start);
     uint16 offset_nxt = offset_start;
     Vehicle *v = pPed->inVehicle();
@@ -822,7 +822,7 @@ void MissionManager::createScriptedActionsForPed(Mission *pMission, DataIndex &d
 
 #ifdef _DEBUG
     if (offset_nxt) {
-        LOG(Log::k_FLG_GAME, "MissionManager","createScriptedActionsForPed", ("Scenarios for ped : %d", pPed->getDebugID()))
+        LOG(Log::k_FLG_GAME, "MissionManager","createScriptedActionsForPed", ("Scenarios for ped : %d", pPed->id()))
     }
 #endif
 
@@ -839,7 +839,7 @@ void MissionManager::createScriptedActionsForPed(Mission *pMission, DataIndex &d
         // 10 - train stops and waits
         // 11 - protected target reached destination(kenya) (TODO properly)
         LevelData::Scenarios sc = level_data.scenarios[offset_nxt / 8];
-        LOG(Log::k_FLG_GAME, "MissionManager","createScriptedActionsForPed", ("At offset : %d", offset_nxt))
+        LOG(Log::k_FLG_GAME, "MissionManager","createScriptedActionsForPed", ("At offset %d, type : %d", offset_nxt, sc.type))
 
         offset_nxt = READ_LE_UINT16(sc.next);
         if (offset_nxt == offset_start) {

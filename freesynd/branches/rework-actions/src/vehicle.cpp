@@ -108,8 +108,8 @@ bool Vehicle::containsHostilesForPed(PedInstance* p,
     return false;
 }
 
-VehicleInstance::VehicleInstance(VehicleAnimation * vehicle, int m):
-    Vehicle(m, true), vehicle_(vehicle), vehicle_driver_(NULL)
+VehicleInstance::VehicleInstance(VehicleAnimation * vehicle, uint16 id, int m):
+    Vehicle(id, m, true), vehicle_(vehicle), vehicle_driver_(NULL)
 {
     hold_on_.wayFree = 0;
     rcv_damage_def_ = MapObject::ddmg_Vehicle;

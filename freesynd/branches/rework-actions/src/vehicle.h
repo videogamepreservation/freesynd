@@ -80,7 +80,7 @@ protected:
  */
 class Vehicle : public ShootableMovableMapObject{
 public:
-    Vehicle(int m, bool drivable) : ShootableMovableMapObject(m, MapObject::kNatureVehicle) {
+    Vehicle(uint16 id, int m, bool drivable) : ShootableMovableMapObject(id, m, MapObject::kNatureVehicle) {
         isDrivable_ = drivable;
     }
 
@@ -119,7 +119,7 @@ private:
 class VehicleInstance : public Vehicle
 {
 public:
-    VehicleInstance(VehicleAnimation *vehicle, int m);
+    VehicleInstance(VehicleAnimation *vehicle, uint16 id, int m);
     virtual ~VehicleInstance() { delete vehicle_;}
 
     bool animate(int elapsed);

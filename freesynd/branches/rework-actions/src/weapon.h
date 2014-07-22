@@ -302,7 +302,7 @@ public:
     //! Creates a instance for the given weapon class
     static WeaponInstance *createInstance(Weapon *pWeaponClass);
 
-    WeaponInstance(Weapon *w);
+    WeaponInstance(Weapon *w, uint16 id);
 
     /*! Sets the owner of the weapon. */
     void setOwner(PedInstance *owner) { pOwner_ = owner; }
@@ -397,6 +397,7 @@ public:
     void fire(Mission *pMission, ShootableMapObject::DamageInflictType &dmg, int elapsed);
 
 protected:
+    static uint16 weaponIdCnt;
     Weapon *pWeaponClass_;
     /*! Owner of the weapon.*/
     PedInstance *pOwner_;

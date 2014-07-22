@@ -31,14 +31,12 @@
 #include "core/gamesession.h"
 #include "mission.h"
 
-#ifdef _DEBUG
-uint32 MapObject::debugIdCnt = 0;
-#endif
-
+uint16 SFXObject::sfxIdCnt = 0;
 const int Static::kStaticSubtype1 = 0;
 const int Static::kStaticSubtype2 = 2;
 
-MapObject::MapObject(int m, ObjectNature nature):size_x_(1), size_y_(1), size_z_(2),
+MapObject::MapObject(uint16 id, int m, ObjectNature nature):
+    size_x_(1), size_y_(1), size_z_(2),
     map_(m), frame_(0), elapsed_carry_(0),
     frames_per_sec_(8),
     dir_(0),
@@ -46,10 +44,8 @@ MapObject::MapObject(int m, ObjectNature nature):size_x_(1), size_y_(1), size_z_
     is_ignored_(false), is_frame_drawn_(false),
     state_(0xFFFFFFFF)
 {
-#ifdef _DEBUG
-    debugId_ = ++debugIdCnt;
-#endif
     nature_ = nature; 
+    id_ = id;
 }
 
 const char* MapObject::natureName() {
@@ -452,7 +448,7 @@ void MapObject::offzOnStairs(uint8 twd) {
  * \param t_show
  * \param managed True means object is destroyed by another object than Mission
  */
-SFXObject::SFXObject(int m, SfxTypeEnum type, int t_show, bool managed) : MapObject(m, kNatureUndefined) {
+SFXObject::SFXObject(int m, SfxTypeEnum type, int t_show, bool managed) : MapObject(sfxIdCnt++, m, kNatureUndefined) {
     type_ = type;
     managed_ = managed;
     draw_all_frames_ = true;
@@ -569,15 +565,17 @@ void SFXObject::reset() {
     elapsed_left_ = 0;
 }
 
-ShootableMapObject::ShootableMapObject(int m, ObjectNature nature):MapObject(m, nature)
+ShootableMapObject::ShootableMapObject(uint16 id, int m, ObjectNature nature):
+    MapObject(id, m, nature)
 {
     rcv_damage_def_ = MapObject::ddmg_Invulnerable;
 }
 
-ShootableMovableMapObject::ShootableMovableMapObject(int m, ObjectNature nature):
-    ShootableMapObject(m, nature),
-speed_(0), base_speed_(0), dist_to_pos_(0)
-{
+ShootableMovableMapObject::ShootableMovableMapObject(uint16 id, int m, ObjectNature nature):
+        ShootableMapObject(id, m, nature) {
+    speed_ = 0;
+    base_speed_ = 0;
+    dist_to_pos_ = 0;
 }
 
 /*!
@@ -644,7 +642,7 @@ bool ShootableMovableMapObject::checkCurrPosTileOnly(PathNode &pn) {
         && pn.tileZ() == tile_z_;
 }
 
-Static *Static::loadInstance(uint8 * data, int m)
+Static *Static::loadInstance(uint8 * data, uint16 id, int m)
 {
     LevelData::Statics * gamdata =
         (LevelData::Statics *) data;
@@ -661,14 +659,14 @@ Static *Static::loadInstance(uint8 * data, int m)
     switch(gamdata->sub_type) {
         case 0x01:
             // phone booth
-            s = new EtcObj(m, curanim, curanim, curanim);
+            s = new EtcObj(id, m, curanim, curanim, curanim);
             s->setSizeX(128);
             s->setSizeY(128);
             s->setSizeZ(128);
             break;
         case 0x05:// 1040-1043, 1044 - damaged
             // crossroad things
-            s = new Semaphore(m, 1040, 1044);
+            s = new Semaphore(id, m, 1040, 1044);
             s->setSizeX(48);
             s->setSizeY(48);
             s->setSizeZ(48);
@@ -678,7 +676,7 @@ Static *Static::loadInstance(uint8 * data, int m)
             break;
         case 0x06:
             // crossroad things
-            s = new Semaphore(m, 1040, 1044);
+            s = new Semaphore(id, m, 1040, 1044);
             s->setSizeX(48);
             s->setSizeY(48);
             s->setSizeZ(48);
@@ -688,7 +686,7 @@ Static *Static::loadInstance(uint8 * data, int m)
             break;
         case 0x07:
             // crossroad things
-            s = new Semaphore(m, 1040, 1044);
+            s = new Semaphore(id, m, 1040, 1044);
             s->setSizeX(48);
             s->setSizeY(48);
             s->setSizeZ(48);
@@ -698,7 +696,7 @@ Static *Static::loadInstance(uint8 * data, int m)
             break;
         case 0x08:
             // crossroad things
-            s = new Semaphore(m, 1040, 1044);
+            s = new Semaphore(id, m, 1040, 1044);
             s->setSizeX(48);
             s->setSizeY(48);
             s->setSizeZ(48);
@@ -712,7 +710,7 @@ Static *Static::loadInstance(uint8 * data, int m)
             //printf("0x0B anim %X\n", curanim);
             break;
         case 0x0A:
-            s = new NeonSign(m, curanim);
+            s = new NeonSign(id, m, curanim);
             s->setFrame(g_App.gameSprites().getFrameFromFrameIndx(curframe));
             s->setIsIgnored(true);
             s->setSizeX(32);
@@ -722,14 +720,14 @@ Static *Static::loadInstance(uint8 * data, int m)
         case 0x0C: // closed door
             if (gamdata->orientation == 0x00 || gamdata->orientation == 0x80
                 || gamdata->orientation == 0x7E || gamdata->orientation == 0xFE) {
-                s = new Door(m, baseanim, baseanim + 2, baseanim + 4, baseanim + 6);
+                s = new Door(id, m, baseanim, baseanim + 2, baseanim + 4, baseanim + 6);
                 s->setSubType(kStaticSubtype1);
                 s->setSizeX(256);
                 s->setSizeY(1);
                 s->setSizeZ(196);
             } else {
                 baseanim++;
-                s = new Door(m, baseanim, baseanim + 2, baseanim + 4, baseanim + 6);
+                s = new Door(id, m, baseanim, baseanim + 2, baseanim + 4, baseanim + 6);
                 s->setSubType(kStaticSubtype2);
                 s->setSizeX(1);
                 s->setSizeY(256);
@@ -739,14 +737,14 @@ Static *Static::loadInstance(uint8 * data, int m)
         case 0x0D: // closed door
             if (gamdata->orientation == 0x00 || gamdata->orientation == 0x80
                 || gamdata->orientation == 0x7E || gamdata->orientation == 0xFE) {
-                s = new Door(m, baseanim, baseanim + 2, baseanim + 4, baseanim + 6);
+                s = new Door(id, m, baseanim, baseanim + 2, baseanim + 4, baseanim + 6);
                 s->setSubType(kStaticSubtype1);
                 s->setSizeX(256);
                 s->setSizeY(1);
                 s->setSizeZ(196);
             } else {
                 baseanim++;
-                s = new Door(m, baseanim, baseanim + 2, baseanim + 4, baseanim + 6);
+                s = new Door(id, m, baseanim, baseanim + 2, baseanim + 4, baseanim + 6);
                 s->setSubType(kStaticSubtype2);
                 s->setSizeX(1);
                 s->setSizeY(256);
@@ -756,14 +754,14 @@ Static *Static::loadInstance(uint8 * data, int m)
         case 0x0E: // opening doors, not open
             if (gamdata->orientation == 0x00 || gamdata->orientation == 0x80
                 || gamdata->orientation == 0x7E || gamdata->orientation == 0xFE) {
-                s = new Door(m, baseanim, baseanim + 2, baseanim + 4, baseanim + 6);
+                s = new Door(id, m, baseanim, baseanim + 2, baseanim + 4, baseanim + 6);
                 s->setSubType(kStaticSubtype1);
                 s->setSizeX(256);
                 s->setSizeY(1);
                 s->setSizeZ(196);
             } else {
                 baseanim++;
-                s = new Door(m, baseanim, baseanim + 2, baseanim + 4, baseanim + 6);
+                s = new Door(id, m, baseanim, baseanim + 2, baseanim + 4, baseanim + 6);
                 s->setSubType(kStaticSubtype2);
                 s->setSizeX(1);
                 s->setSizeY(256);
@@ -774,14 +772,14 @@ Static *Static::loadInstance(uint8 * data, int m)
         case 0x0F: // opening doors, not open
             if (gamdata->orientation == 0x00 || gamdata->orientation == 0x80
                 || gamdata->orientation == 0x7E || gamdata->orientation == 0xFE) {
-                s = new Door(m, baseanim, baseanim + 2, baseanim + 4, baseanim + 6);
+                s = new Door(id, m, baseanim, baseanim + 2, baseanim + 4, baseanim + 6);
                 s->setSubType(kStaticSubtype1);
                 s->setSizeX(256);
                 s->setSizeY(1);
                 s->setSizeZ(196);
             } else {
                 baseanim++;
-                s = new Door(m, baseanim, baseanim + 2, baseanim + 4, baseanim + 6);
+                s = new Door(id, m, baseanim, baseanim + 2, baseanim + 4, baseanim + 6);
                 s->setSubType(kStaticSubtype2);
                 s->setSizeX(1);
                 s->setSizeY(256);
@@ -796,7 +794,7 @@ Static *Static::loadInstance(uint8 * data, int m)
             break;
         case 0x12:
             // open window
-            s = new WindowObj(m, curanim - 2, curanim, curanim + 2, curanim + 4);
+            s = new WindowObj(id, m, curanim - 2, curanim, curanim + 2, curanim + 4);
             if (gamdata->orientation == 0x00 || gamdata->orientation == 0x80) {
                 s->setSubType(kStaticSubtype1);
                 s->setSizeX(96);
@@ -814,7 +812,7 @@ Static *Static::loadInstance(uint8 * data, int m)
             break;
         case 0x13:
             // closed window
-            s = new WindowObj(m, curanim, curanim + 2, curanim + 4, curanim + 6);
+            s = new WindowObj(id, m, curanim, curanim + 2, curanim + 4, curanim + 6);
             if (gamdata->orientation == 0x00 || gamdata->orientation == 0x80) {
                 s->setSubType(kStaticSubtype1);
                 s->setSizeX(96);
@@ -832,7 +830,7 @@ Static *Static::loadInstance(uint8 * data, int m)
             break;
         case 0x15:
             // damaged window
-            s = new WindowObj(m, curanim - 6, curanim - 4, curanim - 2, curanim);
+            s = new WindowObj(id, m, curanim - 6, curanim - 4, curanim - 2, curanim);
             s->setIsIgnored(true);
             s->setHealth(0);
             s->setStartHealth(1);
@@ -840,7 +838,7 @@ Static *Static::loadInstance(uint8 * data, int m)
             break;
         case 0x16:
             // TODO: set state if damaged trees exist
-            s = new Tree(m, curanim, curanim + 1, curanim + 2);
+            s = new Tree(id, m, curanim, curanim + 1, curanim + 2);
             s->setSizeX(64);
             s->setSizeY(64);
             s->setSizeZ(256);
@@ -849,14 +847,14 @@ Static *Static::loadInstance(uint8 * data, int m)
             break;
         case 0x19:
             // trash bin
-            s = new EtcObj(m, curanim, curanim, curanim);
+            s = new EtcObj(id, m, curanim, curanim, curanim);
             s->setSizeX(64);
             s->setSizeY(64);
             s->setSizeZ(96);
             break;
         case 0x1A:
             // mail box
-            s = new EtcObj(m, curanim, curanim, curanim);
+            s = new EtcObj(id, m, curanim, curanim, curanim);
             s->setSizeX(64);
             s->setSizeY(64);
             s->setSizeZ(96);
@@ -868,19 +866,19 @@ Static *Static::loadInstance(uint8 * data, int m)
             break;
         case 0x1F:
             // advertisement on wall
-            s = new EtcObj(m, curanim, curanim, curanim, smt_Advertisement);
+            s = new EtcObj(id, m, curanim, curanim, curanim, smt_Advertisement);
             s->setIsIgnored(true);
             break;
 
         case 0x20:
             // window without light
-            s = new AnimWindow(m, curanim);
+            s = new AnimWindow(id, m, curanim);
             s->setStateMasks(sttawnd_LightOff);
             s->setTimeShowAnim(30000 + (rand() % 30000));
             break;
         case 0x21:
             // window light turns on
-            s = new AnimWindow(m, curanim - 2);
+            s = new AnimWindow(id, m, curanim - 2);
             s->setTimeShowAnim(1000 + (rand() % 1000));
             s->setStateMasks(sttawnd_LightSwitching);
 
@@ -889,18 +887,18 @@ Static *Static::loadInstance(uint8 * data, int m)
         case 0x23:
             // window with person's shadow non animated,
             // even though on 1 map person appears I will ignore it
-            s = new AnimWindow(m, 1959 + ((gamdata->orientation & 0x40) >> 5));
+            s = new AnimWindow(id, m, 1959 + ((gamdata->orientation & 0x40) >> 5));
             s->setStateMasks(sttawnd_ShowPed);
             s->setTimeShowAnim(15000 + (rand() % 5000));
             break;
         case 0x24:
             // window with person's shadow, hides, actually animation
             // is of ped standing, but I will ignore it
-            s = new AnimWindow(m, 1959 + 8 + ((gamdata->orientation & 0x40) >> 5));
+            s = new AnimWindow(id, m, 1959 + 8 + ((gamdata->orientation & 0x40) >> 5));
             s->setStateMasks(sttawnd_PedDisappears);
             break;
         case 0x25:
-            s = new AnimWindow(m, curanim);
+            s = new AnimWindow(id, m, curanim);
 
             // NOTE : orientation, I assume, plays role of hidding object,
             // orientation 0x40, 0x80 are drawn (gamdata->desc always 7)
@@ -916,7 +914,7 @@ Static *Static::loadInstance(uint8 * data, int m)
         case 0x26:
             // 0x00,0x80 south - north = 0
             // 0x40,0xC0 weast - east = 2
-            s = new LargeDoor(m, curanim, curanim + 1, curanim + 2);
+            s = new LargeDoor(id, m, curanim, curanim + 1, curanim + 2);
             if (gamdata->orientation == 0x00 || gamdata->orientation == 0x80) {
                 s->setSubType(kStaticSubtype1);
                 s->setSizeX(384);
@@ -965,8 +963,8 @@ Static *Static::loadInstance(uint8 * data, int m)
     return s;
 }
 
-Door::Door(int m, int anim, int closingAnim, int openAnim, int openingAnim) :
-    Static(m, Static::smt_Door), anim_(anim), closing_anim_(closingAnim),
+Door::Door(uint16 id, int m, int anim, int closingAnim, int openAnim, int openingAnim) :
+    Static(id, m, Static::smt_Door), anim_(anim), closing_anim_(closingAnim),
         open_anim_(openAnim), opening_anim_(openingAnim) {
     state_ = Static::sttdoor_Closed;
 }
@@ -1094,8 +1092,8 @@ bool Door::isPathBlocker()
 }
 
 
-LargeDoor::LargeDoor(int m, int anim, int closingAnim, int openingAnim):
-        Static(m, Static::smt_LargeDoor), anim_(anim),
+LargeDoor::LargeDoor(uint16 id, int m, int anim, int closingAnim, int openingAnim):
+        Static(id, m, Static::smt_LargeDoor), anim_(anim),
         closing_anim_(closingAnim), opening_anim_(openingAnim) {
     state_ = Static::sttdoor_Closed;
 }
@@ -1453,8 +1451,8 @@ bool LargeDoor::isPathBlocker()
 }
 
 
-Tree::Tree(int m, int anim, int burningAnim, int damagedAnim) :
-        Static(m, Static::smt_Tree), anim_(anim), burning_anim_(burningAnim),
+Tree::Tree(uint16 id, int m, int anim, int burningAnim, int damagedAnim) :
+        Static(id, m, Static::smt_Tree), anim_(anim), burning_anim_(burningAnim),
         damaged_anim_(damagedAnim) {
     rcv_damage_def_ = MapObject::ddmg_StaticTree;
     state_ = Static::stttree_Healthy;
@@ -1505,9 +1503,9 @@ bool Tree::handleDamage(ShootableMapObject::DamageInflictType *d) {
     return true;
 }
 
-WindowObj::WindowObj(int m, int anim, int openAnim, int breakingAnim,
+WindowObj::WindowObj(uint16 id, int m, int anim, int openAnim, int breakingAnim,
                      int damagedAnim) :
-        Static(m, Static::smt_Window), anim_(anim), open_anim_(openAnim),
+        Static(id, m, Static::smt_Window), anim_(anim), open_anim_(openAnim),
         breaking_anim_(breakingAnim), damaged_anim_(damagedAnim) {
     rcv_damage_def_ = MapObject::ddmg_StaticWindow;
 }
@@ -1544,8 +1542,8 @@ bool WindowObj::handleDamage(ShootableMapObject::DamageInflictType *d) {
     return true;
 }
 
-EtcObj::EtcObj(int m, int anim, int burningAnim, int damagedAnim, StaticType type) :
-        Static(m, type), anim_(anim), burning_anim_(burningAnim),
+EtcObj::EtcObj(uint16 id, int m, int anim, int burningAnim, int damagedAnim, StaticType type) :
+        Static(id, m, type), anim_(anim), burning_anim_(burningAnim),
         damaged_anim_(damagedAnim) {
     rcv_damage_def_ = MapObject::ddmg_StaticGeneral;
 }
@@ -1556,7 +1554,7 @@ void EtcObj::draw(int x, int y)
     g_App.gameSprites().drawFrame(anim_, frame_, x, y);
 }
 
-NeonSign::NeonSign(int m, int anim) : Static(m, Static::smt_NeonSign) {
+NeonSign::NeonSign(uint16 id, int m, int anim) : Static(id, m, Static::smt_NeonSign) {
     anim_ = anim;
 }
 
@@ -1566,8 +1564,8 @@ void NeonSign::draw(int x, int y)
     g_App.gameSprites().drawFrame(anim_, frame_, x, y);
 }
 
-Semaphore::Semaphore(int m, int anim, int damagedAnim) :
-        Static(m, Static::smt_Semaphore), anim_(anim),
+Semaphore::Semaphore(uint16 id, int m, int anim, int damagedAnim) :
+        Static(id, m, Static::smt_Semaphore), anim_(anim),
         damaged_anim_(damagedAnim), elapsed_left_smaller_(0),
         elapsed_left_bigger_(0), up_down_(1) {
     rcv_damage_def_ = MapObject::ddmg_StaticGeneral;
@@ -1653,7 +1651,7 @@ void Semaphore::draw(int x, int y)
     g_App.gameSprites().drawFrame(anim_ +  state_, frame_, x, y);
 }
 
-AnimWindow::AnimWindow(int m, int anim) : Static(m, smt_AnimatedWindow) {
+AnimWindow::AnimWindow(uint16 id, int m, int anim) : Static(id, m, smt_AnimatedWindow) {
     rcv_damage_def_ = MapObject::ddmg_StaticGeneral;
     setIsIgnored(true);
     setFramesPerSec(4);

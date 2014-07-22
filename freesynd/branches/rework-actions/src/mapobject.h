@@ -53,13 +53,16 @@ public:
     };
 
 public:
-    MapObject(int m, ObjectNature nature);
+    MapObject(uint16 id, int m, ObjectNature nature);
     virtual ~MapObject() {}
 
     //! Return the nature of the object
     ObjectNature nature() { return nature_; }
     //! For debug purpose
     const char* natureName();
+
+    //! Return the object's id
+    uint16 id() { return id_; }
 
     virtual void draw(int x, int y) = 0;
     enum DamageType {
@@ -287,13 +290,11 @@ public:
 
     void offzOnStairs(uint8 twd);
 
-#ifdef _DEBUG
-    uint32 getDebugID() { return debugId_; }
-#endif
-
 protected:
     //! the nature of this object
     ObjectNature nature_;
+    //! Id of the object. Id is unique within a nature
+    uint16 id_;
     /*!
      * Tile based coordinates, tile_x_ and tile_y_ have 256
      * tile_z_ has 128 base
@@ -329,11 +330,6 @@ protected:
     uint32 state_;
 
     void addOffs(int &x, int &y);
-#ifdef _DEBUG
-private:
-    static uint32 debugIdCnt;
-    uint32 debugId_;
-#endif
 };
 
 /*!
@@ -381,6 +377,7 @@ public:
         }
     }
 protected:
+    static uint16 sfxIdCnt;
     /*! The type of SfxObject.*/
     SfxTypeEnum type_;
     int anim_;
@@ -422,7 +419,7 @@ public:
     };
 
 public:
-    ShootableMapObject(int m, ObjectNature nature);
+    ShootableMapObject(uint16 id, int m, ObjectNature nature);
     virtual ~ShootableMapObject() {}
 
     int health() { return health_; }
@@ -511,7 +508,7 @@ public:
  */
 class ShootableMovableMapObject : public ShootableMapObject {
 public:
-    ShootableMovableMapObject(int m, ObjectNature nature);
+    ShootableMovableMapObject(uint16 id, int m, ObjectNature nature);
     virtual ~ShootableMovableMapObject() {}
 
     void setSpeed(int new_speed) {
@@ -581,7 +578,7 @@ public:
         smt_NeonSign
     };
 public:
-    static Static *loadInstance(uint8 *data, int m);
+    static Static *loadInstance(uint8 *data, uint16 id, int m);
     virtual ~Static() {}
 
     //! Return the type of statics
@@ -634,8 +631,8 @@ public:
     }stateAnimatedWindows;
 
 protected:
-    Static(int m, StaticType type) :
-            ShootableMapObject(m, MapObject::kNatureStatic) {
+    Static(uint16 id, int m, StaticType type) :
+            ShootableMapObject(id, m, MapObject::kNatureStatic) {
         type_ = type;
         subType_ = kStaticSubtype1;
     }
@@ -652,7 +649,7 @@ protected:
  */
 class Door : public Static {
 public:
-    Door(int m, int anim, int closingAnim, int openAnim, int openingAnim);
+    Door(uint16 id, int m, int anim, int closingAnim, int openAnim, int openingAnim);
     virtual ~Door() {}
 
     void draw(int x, int y);
@@ -668,7 +665,7 @@ protected:
  */
 class LargeDoor : public Static {
 public:
-    LargeDoor(int m, int anim, int closingAnim, int openingAnim);
+    LargeDoor(uint16 id, int m, int anim, int closingAnim, int openingAnim);
     virtual ~LargeDoor() {}
 
     void draw(int x, int y);
@@ -683,7 +680,7 @@ protected:
  */
 class Tree : public Static {
 public:
-    Tree(int m, int anim, int burningAnim, int damagedAnim);
+    Tree(uint16 id, int m, int anim, int burningAnim, int damagedAnim);
     virtual ~Tree() {}
 
     void draw(int x, int y);
@@ -699,7 +696,7 @@ protected:
  */
 class WindowObj : public Static {
 public:
-    WindowObj(int m, int anim, int openAnim, int breakingAnim,
+    WindowObj(uint16 id, int m, int anim, int openAnim, int breakingAnim,
               int damagedAnim);
     virtual ~WindowObj() {}
 
@@ -716,7 +713,7 @@ protected:
  */
 class EtcObj : public Static {
 public:
-    EtcObj(int m, int anim, int burningAnim, int damagedAnim, StaticType type = smt_None);
+    EtcObj(uint16 id, int m, int anim, int burningAnim, int damagedAnim, StaticType type = smt_None);
     virtual ~EtcObj() {}
 
     void draw(int x, int y);
@@ -730,7 +727,7 @@ protected:
  */
 class NeonSign : public Static {
 public:
-    NeonSign(int m, int anim);
+    NeonSign(uint16 id, int m, int anim);
     virtual ~NeonSign() {}
 
     void draw(int x, int y);
@@ -745,7 +742,7 @@ protected:
  */
 class Semaphore : public Static {
 public:
-    Semaphore(int m, int anim, int damagedAnim);
+    Semaphore(uint16 id, int m, int anim, int damagedAnim);
     virtual ~Semaphore() {}
 
     bool animate(int elapsed, Mission *obj);
@@ -771,7 +768,7 @@ protected:
  */
 class AnimWindow : public Static {
 public:
-    AnimWindow(int m, int anim);
+    AnimWindow(uint16 id, int m, int anim);
     virtual ~AnimWindow() {}
 
     bool animate(int elapsed, Mission *obj);

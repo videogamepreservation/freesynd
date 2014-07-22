@@ -93,8 +93,6 @@ public:
 
     void setPersuadeAnim(int anim) { persuade_anim_ = anim; }
 
-    PedInstance *createInstance(int map);
-
     bool drawStandFrame(int x, int y, int dir, int frame,
             Weapon::WeaponAnimIndex weapon = Weapon::Unarmed_Anim);
     int lastStandFrame(int dir, Weapon::WeaponAnimIndex weapon);
@@ -198,7 +196,7 @@ public:
         pd_smAll = 0xFFFF
     };
 
-    PedInstance(Ped *ped, int m);
+    PedInstance(Ped *ped, uint16 id, int m);
     ~PedInstance();
 
     //! Temporary method
