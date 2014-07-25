@@ -169,7 +169,7 @@ PedInstance *PedManager::loadInstance(const LevelData::People & gamdata, uint16 
     newped->setStartHealth(hp);
 
     newped->setDirection(gamdata.orientation);
-    if (gamdata.state == 0x11) {
+    if (gamdata.state == LevelData::kPeopleStateDead) {
         newped->setDrawnAnim(PedInstance::ad_DeadAnim);
         newped->setHealth(-1);
         newped->setStateMasks(PedInstance::pa_smDead);

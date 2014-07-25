@@ -84,7 +84,12 @@ namespace LevelData {
          * 0x0D and 0x0C are excluded from being loaded
          */
         uint8 location;
-        // 0x0 - standing, 0x10 - walking, 0x11 - dead
+        /*!
+         * This field gives information on the ped's state. Values are:
+         * 0x0 - standing
+         * 0x10 - walking
+         * 0x11 - dead
+         */
         uint8 state;
         uint8 unkn3[2];         // nothing changes when this changes
         uint8 index_base_anim[2];  //index in (HSTA-0.ANI)
@@ -273,11 +278,20 @@ namespace LevelData {
         uint8 tiley;
         // tile_z_ = tilez
         uint8 tilez;
-        /* 0x00 - unset scenario type, is found at start of array and end;
-        * 0x01 - has location, no object offset; 0x02 - has object offset, no
-        * location; 0x07 - data is not present (end marker?); 0x08 - has
-        * location, no object offset; 0x09 - data is not present (end marker?);
-        */
+        /*!
+         * Gives the type of scenario. Values are:
+         * 0x00 - unset scenario type, is found at start of array and end;
+         * 0x01 - walking/driving to pos, x,y defined, no object offset;
+         * 0x02 - vehicle to use and goto 
+         * 0x03 - ?(south africa)
+         * 0x05 - ?(kenya)
+         * 0x06 - (kenya) - ped offset when in vehicle, and? (TODO)
+         * 0x07 - assasinate target escaped, mission failed
+         * 0x08 - walking to pos, triggers on our agents in range, x,y defined
+         * 0x09 - repeat from start, actually this might be end of script
+         * 0x0A - train stops and waits
+         * 0x0B - protected target reached destination(kenya) (TODO properly)
+         */
         uint8 type;
     };
 
@@ -361,6 +375,12 @@ namespace LevelData {
     static const int kPeopleLocAboveWalkSurf = 0x0C;
     /*! Constant for field People::location : they are not visible/present on original map(on water located), purpose?*/
     static const int kPeopleLocNotVisible = 0x0D;
+
+    /*! Constant for field People::state : ped is walking.*/
+    static const int kPeopleStateWalking = 0x10;
+    /*! Constant for field People::state : ped is dead.*/
+    static const int kPeopleStateDead = 0x11;
+
     /*! Constant for field Scenario::type :  Use vehicle to go somewhere.*/
     static const int kScenarioTypeUseVehicle = 0x02;
     /*! Constant for field Scenario::type :  Target has escape the map.*/
@@ -368,6 +388,8 @@ namespace LevelData {
     /*! Constant for field Scenario::type : this is a trigger. 
      * Agents will trigger it when they enter the circle defined by the center and a fixed radius.*/
     static const int kScenarioTypeTrigger = 0x08;
+    /*! Constant for field Scenario::type : Reset all scripted action.*/
+    static const int kScenarioTypeReset = 0x09;
 }
 
 #endif  // MODEL_LEVELDATA_H_

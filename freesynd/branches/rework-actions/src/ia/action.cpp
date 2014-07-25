@@ -173,6 +173,15 @@ MovementAction(kActTypeWalk, origin) {
     targetState_ = PedInstance::pa_smWalking;
 }
 
+WalkToDirectionAction::WalkToDirectionAction(CreatOrigin origin) :
+MovementAction(kActTypeWalk, origin) {
+    maxDistanceToWalk_ = 0;
+    dest_.x = -1;
+    dest_.y = -1;
+    dest_.z = -1;
+    targetState_ = PedInstance::pa_smWalking;
+}
+
 void WalkToDirectionAction::doStart(Mission *pMission, PedInstance *pPed) {
     moveDirdesc_.clear();
     moveDirdesc_.bounce = true;
@@ -187,28 +196,45 @@ void WalkToDirectionAction::doStart(Mission *pMission, PedInstance *pPed) {
  */
 bool WalkToDirectionAction::doExecute(int elapsed, Mission *pMission, PedInstance *pPed) {
     bool endAction = false;
-    int diffx = dest_.x - pPed->tileX() * 256 - pPed->offX();
-    int diffy = dest_.y - pPed->tileY() * 256 - pPed->offY();
+    int distanceToWalk = 0;
+    if (dest_.x != -1) {
+        int diffx = dest_.x - pPed->tileX() * 256 - pPed->offX();
+        int diffy = dest_.y - pPed->tileY() * 256 - pPed->offY();
 
-    // In this case, max distance is the distance between ped and destination location
-    int maxDistanceToWalk = (int)sqrt((double)(diffx * diffx + diffy * diffy));
+        // In this case, distance is the distance between ped and destination location
+        distanceToWalk = (int)sqrt((double)(diffx * diffx + diffy * diffy));
 
-    if (maxDistanceToWalk > 0) {
-        uint8 res = pPed->moveToDir(pMission, 
-                        elapsed,
-                        moveDirdesc_,
-                        -1,
-                        dest_.x, dest_.y,
-                        &maxDistanceToWalk);
+        if (distanceToWalk > 0) {
+            uint8 res = pPed->moveToDir(pMission, 
+                            elapsed,
+                            moveDirdesc_,
+                            -1,
+                            dest_.x, dest_.y,
+                            &distanceToWalk);
 
-        if (pPed->tileX() * 256 - pPed->offX() == dest_.x
-            && pPed->tileY() * 256 - pPed->offY() == dest_.y)
-            // TODO: add correct z or ignore it?
-        {
+            if (pPed->tileX() * 256 - pPed->offX() == dest_.x
+                && pPed->tileY() * 256 - pPed->offY() == dest_.y)
+                // TODO: add correct z or ignore it?
+            {
+                endAction = true;
+            }
+        } else {
             endAction = true;
         }
     } else {
-        endAction = true;
+        distanceToWalk = maxDistanceToWalk_ != 0 ? 
+                                maxDistanceToWalk_ - distWalked_ : 0;
+        pPed->moveToDir(pMission,
+                        elapsed,
+                        moveDirdesc_,
+                        -1,
+                        -1, -1,
+                        &distanceToWalk, true);
+
+        if (maxDistanceToWalk_ != 0) {
+            distWalked_ += distanceToWalk;
+            endAction = distWalked_ >= maxDistanceToWalk_;
+        }
     }
 
     if (endAction) {
@@ -254,7 +280,20 @@ bool TriggerAction::doExecute(int elapsed, Mission *pMission, PedInstance *pPed)
  * \param pPed The ped executing the action.
  */
 bool EscapeAction::doExecute(int elapsed, Mission *pMission, PedInstance *pPed) {
+    setSucceeded();
     pPed->escape();
+    return true;
+}
+
+/*!
+ * 
+ * \param elapsed Time elapsed since last frame
+ * \param pMission Mission data
+ * \param pPed The ped executing the action.
+ */
+bool ResetScriptedAction::doExecute(int elapsed, Mission *pMission, PedInstance *pPed) {
+    setSucceeded();
+    printf("ResetScriptedAction : Not implemented\n");
     return true;
 }
 

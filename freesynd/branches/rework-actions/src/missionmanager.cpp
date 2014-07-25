@@ -811,14 +811,14 @@ void MissionManager::createPeds(const LevelData::LevelDataAll &level_data, DataI
 }
 
 void MissionManager::createScriptedActionsForPed(Mission *pMission, DataIndex &di, const LevelData::LevelDataAll &level_data, PedInstance *pPed) {
-    const LevelData::People & pedref = level_data.people[pPed->id()];
-    uint16 offset_start = READ_LE_UINT16(pedref.offset_scenario_start);
+    const LevelData::People & peopleData = level_data.people[pPed->id()];
+    uint16 offset_start = READ_LE_UINT16(peopleData.offset_scenario_start);
     uint16 offset_nxt = offset_start;
     Vehicle *v = pPed->inVehicle();
-    bool notInVehicle = v == NULL;
+    bool isInVehicle = v != NULL;
 
-    // this field will hold the index of a potential trigger
-    int32 has_trigger = -1;
+    // This flag is used to add default actions if ped has no scenario
+    bool hasScenario = false;
 
 #ifdef _DEBUG
     if (offset_nxt) {
@@ -827,18 +827,9 @@ void MissionManager::createScriptedActionsForPed(Mission *pMission, DataIndex &d
 #endif
 
     while (offset_nxt) {
-        // sc.type
-        // 1 - walking/driving to pos, x,y defined
-        // 2 - vehicle to use and goto
-        // 3?(south africa)
-        // 5?(kenya)
-        // 6 (kenya) - ped offset when in vehicle, and? (TODO)
-        // 7 - assasinate target escaped, mission failed
-        // 8 - walking to pos, triggers on our agents in range, x,y defined
-        // 9 - repeat from start, actually this might be end of script
-        // 10 - train stops and waits
-        // 11 - protected target reached destination(kenya) (TODO properly)
+        
         LevelData::Scenarios sc = level_data.scenarios[offset_nxt / 8];
+        hasScenario = true;
         LOG(Log::k_FLG_GAME, "MissionManager","createScriptedActionsForPed", ("At offset %d, type : %d", offset_nxt, sc.type))
 
         offset_nxt = READ_LE_UINT16(sc.next);
@@ -862,12 +853,12 @@ void MissionManager::createScriptedActionsForPed(Mission *pMission, DataIndex &d
                 LOG(Log::k_FLG_GAME, "MissionManager","createScriptedActionsForPed", (" - Walk toward location (%d, %d, %d)", pn.tileX(), pn.tileY(), pn.tileZ()))
                 pPed->addActionWalkToLocUsingDirection(pn, fs_actions::kOrigScript, true);
             }
-            if ((!notInVehicle) && offset_nxt == 0) {
-                printf("Scenario reset action\n");
-                //pPed->createActQResetActionQueue(as);
+            if (isInVehicle && offset_nxt == 0) {
+                LOG(Log::k_FLG_GAME, "MissionManager","createScriptedActionsForPed", (" - Repeat driving scenario"))
+                pPed->addMovementAction(new fs_actions::ResetScriptedAction(), true);
             }
         } else if (sc.type == LevelData::kScenarioTypeUseVehicle) {
-            if (notInVehicle) {
+            if (!isInVehicle) {
                 LOG(Log::k_FLG_GAME, "MissionManager","createScriptedActionsForPed", (" - Enter car"))
                 uint16 bindx = READ_LE_UINT16(sc.offset_object);
                 // TODO: test all maps for objects other then vehicle
@@ -888,14 +879,24 @@ void MissionManager::createScriptedActionsForPed(Mission *pMission, DataIndex &d
         } else if (sc.type == LevelData::kScenarioTypeEscape) {
             LOG(Log::k_FLG_GAME, "MissionManager","createScriptedActionsForPed", (" - Escape"))
             pPed->addMovementAction(new fs_actions::EscapeAction(), true);
-        } else if (sc.type == 9) {
-            LOG(Log::k_FLG_GAME, "MissionManager","createScriptedActionsForPed", (" - type 9"))
+        } else if (sc.type == LevelData::kScenarioTypeReset) {
+            LOG(Log::k_FLG_GAME, "MissionManager","createScriptedActionsForPed", (" - Reset actions"))
+            pPed->addMovementAction(new fs_actions::ResetScriptedAction(), true);
         } else if (sc.type == 10) {
             printf("Scenario type 10\n");
         } else {
             LOG(Log::k_FLG_GAME, "MissionManager","createScriptedActionsForPed", (" - unknown type %d", sc.type))
         }
+    } // end while
 
+    if (!hasScenario) {
+        // When ped has no scenario, check its state : if ped is walking then
+        // add a walking action so that ped can walk the map indefinitly
+        if (peopleData.state == LevelData::kPeopleStateWalking) {
+            pPed->addMovementAction(
+                new fs_actions::WalkToDirectionAction(fs_actions::kOrigDefault), 
+                true);
+        }
     }
 }
 

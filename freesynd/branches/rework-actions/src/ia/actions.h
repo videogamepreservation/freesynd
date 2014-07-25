@@ -207,17 +207,19 @@ namespace fs_actions {
     };
 
     /*!
-     * This action is used to move a ped towards a given direction.
-     * Direction is either given directly or using a location.
-     * When direction is given directly, it is possible to specify a distance
+     * This action is used to move a ped towards a direction.
+     * Direction is either the one he's already pointing to or using a target location.
+     * When direction is given by ped's direction, it is possible to specify a distance
      * so that movement stops when ped travels that distance. 
      * When direction is given by a location, movement stops when
      * ped reaches that location.
      */
     class WalkToDirectionAction : public MovementAction {
     public:
-        //! Walt to direction given by point
+        //! Walk to direction given by point
         WalkToDirectionAction(CreatOrigin origin, const PathNode &pn);
+        //! Walk following ped's direction
+        WalkToDirectionAction(CreatOrigin origin);
 
         void setmaxDistanceToWalk(int distance) { maxDistanceToWalk_ = distance; }
     protected:
@@ -228,6 +230,8 @@ namespace fs_actions {
         toDefineXYZ dest_;
         /*! Structure to hold information while walking.*/
         DirMoveType moveDirdesc_;
+        /*! Count the distance the ped has walked since starting the action.*/
+        int distWalked_;
         int maxDistanceToWalk_;
     };
 
@@ -254,6 +258,17 @@ namespace fs_actions {
     class EscapeAction : public MovementAction {
     public:
         EscapeAction():
+            MovementAction(kActTypeUndefined, kOrigScript, false, true) {}
+    protected:
+        bool doExecute(int elapsed, Mission *pMission, PedInstance *pPed);
+    };
+
+    /*!
+     * This action is used in scripted action to reset all actions.
+     */
+    class ResetScriptedAction : public MovementAction {
+    public:
+        ResetScriptedAction():
             MovementAction(kActTypeUndefined, kOrigScript, false, true) {}
     protected:
         bool doExecute(int elapsed, Mission *pMission, PedInstance *pPed);
