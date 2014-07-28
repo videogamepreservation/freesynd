@@ -24,12 +24,20 @@
 #ifndef IA_BEHAVIOUR_H_
 #define IA_BEHAVIOUR_H_
 
+#include <list>
+
 #include "utils/timer.h"
 
 class Mission;
 class PedInstance;
+class BehaviourComponent;
+
 /*!
- * A behaviour is used to determine default actions for ped.
+ * A Behaviour drives the ped's reactions.
+ * It is composed of a set of components, each one 
+ * responsible for an aspect of the reaction.
+ * Behaviour reacts to events and modify the ped's
+ * actions.
  */
 class Behaviour {
 public:
@@ -45,53 +53,80 @@ public:
         kBehvEvtHit
     };
 
-    Behaviour(PedInstance *pPed) { pThisPed_ = pPed; }
-    virtual ~Behaviour() {}
+    virtual ~Behaviour();
 
-    virtual void execute(int elapsed, Mission *pMission) = 0;
+    void setOwner(PedInstance *pPed) { pThisPed_ = pPed; }
+    //! Adds a component to the behaviour
+    void addComponent(BehaviourComponent *pComp);
 
-    virtual void handleBehaviourEvent(BehaviourEvent evtType) = 0;
+    virtual void execute(int elapsed, Mission *pMission);
 
+    virtual void handleBehaviourEvent(BehaviourEvent evtType);
 protected:
     /*! The ped that use this behaviour.*/
     PedInstance *pThisPed_;
+    /*! List of behaviour components.*/
+    std::list <BehaviourComponent *> compLst_;
 };
 
 /*!
- * This behaviour if for development purpose.
+ * Abstract class that represent an aspect of a behaviour.
+ * A component may be disabled according to certain types of events.
  */
-class NopeBehaviour : public Behaviour {
+class BehaviourComponent {
 public:
-    NopeBehaviour(PedInstance *pPed) : Behaviour(pPed) {}
+    BehaviourComponent() { enabled_ = true; }
+    virtual ~BehaviourComponent() {}
 
-    void execute(int elapsed, Mission *pMission) {}
+    bool isEnabled() { return enabled_; }
+    void setEnabled(bool val) { enabled_ = val; }
 
-    void handleBehaviourEvent(BehaviourEvent evtType) {}
+    virtual void execute(int elapsed, Mission *pMission, PedInstance *pPed) = 0;
+
+    virtual void handleBehaviourEvent(Behaviour::BehaviourEvent evtType, PedInstance *pPed){};
+
+protected:
+    bool enabled_;
 };
 
 /*!
  * This class defines commons behaviours for all agents (good or bad).
+ * It is responsible for :
+ * - regenerating life for agents that are hurt
  */
-class AgentBehaviour : public Behaviour {
+class CommonAgentBehaviourComponent : public BehaviourComponent {
 public:
-    //! Distance under whom an agent is close enough to persuade a ped
-    static const int kMaxDistanceForPersuadotron;
     //! Amount of health regenerated each period
     static const int kRegeratesHealthStep;
 
-    AgentBehaviour(PedInstance *pPed);
+    CommonAgentBehaviourComponent(PedInstance *pPed);
 
-    void execute(int elapsed, Mission *pMission);
+    void execute(int elapsed, Mission *pMission, PedInstance *pPed);
 
-    void handleBehaviourEvent(BehaviourEvent evtType);
-
-protected:
+    void handleBehaviourEvent(Behaviour::BehaviourEvent evtType, PedInstance *pPed);
+private:
     /*! Flag to indicate whether ped can regenerate his health.*/
     bool doRegenerates_;
-    /*! Flag to indicate an agent can use his persuadotron.*/
-    bool doUsePersuadotron_;
     //! used for health regeneration
     fs_utils::Timer healthTimer_;
+};
+
+/*!
+ * Component for user of Persuadotron. Only our agents use this component.
+ */
+class PersuaderBehaviourComponent : public BehaviourComponent {
+public:
+    //! Amount of health regenerated each period
+    static const int kMaxDistanceForPersuadotron;
+
+    PersuaderBehaviourComponent();
+
+    void execute(int elapsed, Mission *pMission, PedInstance *pPed);
+
+    void handleBehaviourEvent(Behaviour::BehaviourEvent evtType, PedInstance *pPed);
+private:
+    /*! Flag to indicate an agent can use his persuadotron.*/
+    bool doUsePersuadotron_;
 };
 
 #endif // IA_BEHAVIOUR_H_

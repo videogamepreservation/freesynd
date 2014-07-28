@@ -42,21 +42,21 @@ public:
     PedManager();
     virtual ~PedManager() {}
 
-    void setPed(Ped *pedanim, unsigned short baseAnim);
-
-    int numPeds() { return peds_.size(); }
-
-    Ped *ped(int n) {
-        assert(n < (int) peds_.size());
-        return peds_[n];
-    }
-
-    PedInstance *loadInstance(const LevelData::People & ped_data, uint16 ped_idx, int map);
-
+    PedInstance *loadInstance(const LevelData::People & ped_data, uint16 ped_idx, int map, uint32 playerGroupId);
 protected:
-    // TODO: remove this everywhere(?)
-    // this class loads peds data and sets animation
-    std::vector<Ped *> peds_;
+    void initAnimation(Ped *pedanim, unsigned short baseAnim);
+    //! Initialize the ped instance as our agent
+    void initOurAgent(Agent *p_agent, unsigned int obj_group_id, PedInstance *pPed);
+    //! Initialize the ped instance as an enemy agent
+    void initEnemyAgent(PedInstance *pPed);
+    //! Initialize the ped instance as a guard
+    void initGuard(PedInstance *pPed);
+    //! Initialize the ped instance as a police
+    void initPolice(PedInstance *pPed);
+    //! Initialize the ped instance as a civilian
+    void initCivilian(PedInstance *pPed);
+    //! Initialize the ped instance as a criminal
+    void initCriminal(PedInstance *pPed);
 };
 
 #endif

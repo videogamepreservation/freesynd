@@ -34,7 +34,7 @@ PedManager::PedManager()
 {
 }
 
-void PedManager::setPed(Ped *pedanim, unsigned short baseAnim)
+void PedManager::initAnimation(Ped *pedanim, unsigned short baseAnim)
 {
     if (baseAnim == 1) {
         pedanim->setStandAnim(Weapon::Unarmed_Anim, 0 + baseAnim);
@@ -143,14 +143,15 @@ void PedManager::setPed(Ped *pedanim, unsigned short baseAnim)
  * \param map id of the map
  * \return NULL if the ped could not be created.
  */
-PedInstance *PedManager::loadInstance(const LevelData::People & gamdata, uint16 ped_idx, int map)
+PedInstance *PedManager::loadInstance(const LevelData::People & gamdata, uint16 ped_idx, int map, uint32 playerGroupId)
 {
     if(gamdata.type == 0x0 || 
         gamdata.location == LevelData::kPeopleLocNotVisible || 
         gamdata.location == LevelData::kPeopleLocAboveWalkSurf)
         return NULL;
 
-    if (ped_idx < 4 && !g_gameCtrl.agents().isSquadSlotActive(ped_idx)) {
+    bool isOurAgent = ped_idx < AgentManager::kMaxSlot;
+    if (isOurAgent && !g_gameCtrl.agents().isSquadSlotActive(ped_idx)) {
         // Creates agent only if he's active
         return NULL;
     }if (ped_idx >= 4 && ped_idx < 8) {
@@ -160,12 +161,17 @@ PedInstance *PedManager::loadInstance(const LevelData::People & gamdata, uint16 
     }
 
     Ped *pedanim = new Ped();
-    setPed(pedanim, READ_LE_UINT16(gamdata.index_base_anim));
-    PedInstance *newped = new PedInstance(pedanim, ped_idx, map);
+    initAnimation(pedanim, READ_LE_UINT16(gamdata.index_base_anim));
+    PedInstance *newped = new PedInstance(pedanim, ped_idx, map, isOurAgent);
 
     int hp = READ_LE_INT16(gamdata.health);
-    if (hp <= 0)
+    if (isOurAgent) {
+        // not in all missions our agents health is 16, this fixes it
+        hp = PedInstance::kAgentMaxHealth;
+    }else if (hp <= 0) {
         hp = 2;
+    }
+
     newped->setStartHealth(hp);
 
     newped->setDirection(gamdata.orientation);
@@ -207,5 +213,138 @@ PedInstance *PedManager::loadInstance(const LevelData::People & gamdata, uint16 
     newped->setAllPercepLevels(gamdata.percep_amount,
         gamdata.percep_dependency, gamdata.percep_effect);
 
+    if (isOurAgent) {
+        // We're loading one of our agents
+        Agent *pAg = g_gameCtrl.agents().squadMember(ped_idx);
+        initOurAgent(pAg, playerGroupId, newped);
+    } else {
+        unsigned int mt = newped->type();
+        newped->setObjGroupDef(mt);
+        if (mt == PedInstance::og_dmAgent) {
+            initEnemyAgent(newped);
+        } else if (mt == PedInstance::og_dmGuard) {
+            initGuard(newped);
+        } else if (mt == PedInstance::og_dmPolice) {
+            initPolice(newped);
+        } else if (mt == PedInstance::og_dmCivilian) {
+            initCivilian(newped);
+        } else if (mt == PedInstance::og_dmCriminal) {
+            initCriminal(newped);
+        }
+        newped->setSightRange(7 * 256);
+    }
+
     return newped;
+}
+
+/*!
+ * Initialize the ped instance as one of our agent.
+ * \param p_agent The agent reference
+ * \param obj_group_id Id of the agent's group.
+ * \param pPed The ped to initialize
+ */
+void PedManager::initOurAgent(Agent *p_agent, unsigned int obj_group_id, PedInstance *pPed) {
+    while (p_agent->numWeapons()) {
+        WeaponInstance *wi = p_agent->removeWeaponAtIndex(0);
+        pPed->addWeapon(wi);
+        wi->setOwner(pPed);
+    }
+    *((ModOwner *)pPed) = *((ModOwner *)p_agent);
+
+    pPed->setObjGroupID(obj_group_id);
+    pPed->setObjGroupDef(PedInstance::og_dmAgent);
+    pPed->addEnemyGroupDef(2);
+    pPed->addEnemyGroupDef(3);
+    pPed->setHostileDesc(PedInstance::pd_smArmed);
+    pPed->setSightRange(7 * 256);
+    pPed->setBaseSpeed(256);
+    pPed->setTimeBeforeCheck(400);
+    pPed->setBaseModAcc(0.5);
+
+    // Set components of behaviour for our agent
+    pPed->behaviour().addComponent(new CommonAgentBehaviourComponent(pPed));
+    pPed->behaviour().addComponent(new PersuaderBehaviourComponent());
+}
+
+/*!
+ * Initialize the ped instance as an enemy agent.
+ * \param p_agent The agent reference
+ * \param obj_group_id Id of the agent's group.
+ * \param pPed The ped to initialize
+ */
+void PedManager::initEnemyAgent(PedInstance *pPed) {
+    pPed->setObjGroupID(2);
+    pPed->addEnemyGroupDef(1);
+    pPed->setBaseSpeed(256);
+    // enemies get top version of mods
+    pPed->addMod(g_gameCtrl.mods().getHighestVersion(Mod::MOD_LEGS));
+    pPed->addMod(g_gameCtrl.mods().getHighestVersion(Mod::MOD_LEGS));
+    pPed->addMod(g_gameCtrl.mods().getHighestVersion(Mod::MOD_ARMS));
+    pPed->addMod(g_gameCtrl.mods().getHighestVersion(Mod::MOD_CHEST));
+    pPed->addMod(g_gameCtrl.mods().getHighestVersion(Mod::MOD_HEART));
+    pPed->addMod(g_gameCtrl.mods().getHighestVersion(Mod::MOD_EYES));
+    pPed->addMod(g_gameCtrl.mods().getHighestVersion(Mod::MOD_BRAIN));
+    pPed->setTimeBeforeCheck(400);
+    pPed->setBaseModAcc(0.5);
+    pPed->setPersuasionPoints(32);
+}
+
+/*!
+ * Initialize the ped instance as a guard.
+ * \param p_agent The agent reference
+ * \param obj_group_id Id of the agent's group.
+ * \param pPed The ped to initialize
+ */
+void PedManager::initGuard(PedInstance *pPed) {
+    pPed->setObjGroupID(3);
+    pPed->addEnemyGroupDef(1);
+    pPed->setBaseSpeed(192);
+    pPed->setTimeBeforeCheck(300);
+    pPed->setBaseModAcc(0.45);
+    pPed->setPersuasionPoints(4);
+}
+
+/*!
+ * Initialize the ped instance as a police.
+ * \param p_agent The agent reference
+ * \param obj_group_id Id of the agent's group.
+ * \param pPed The ped to initialize
+ */
+void PedManager::initPolice(PedInstance *pPed) {
+    pPed->setObjGroupID(4);
+    pPed->setHostileDesc(PedInstance::pd_smArmed);
+    pPed->setBaseSpeed(160);
+    pPed->setTimeBeforeCheck(400);
+    pPed->setBaseModAcc(0.4);
+    pPed->setPersuasionPoints(8);
+} 
+
+/*!
+ * Initialize the ped instance as a civilian.
+ * \param p_agent The agent reference
+ * \param obj_group_id Id of the agent's group.
+ * \param pPed The ped to initialize
+ */
+void PedManager::initCivilian(PedInstance *pPed) {
+    pPed->setObjGroupID(5);
+    pPed->addEnemyGroupDef(6);
+    pPed->setHostileDesc(PedInstance::pd_smArmed);
+    pPed->setBaseSpeed(128);
+    pPed->setTimeBeforeCheck(600);
+    pPed->setBaseModAcc(0.2);
+    pPed->setPersuasionPoints(1);
+} 
+
+/*!
+ * Initialize the ped instance as a criminal.
+ * \param p_agent The agent reference
+ * \param obj_group_id Id of the agent's group.
+ * \param pPed The ped to initialize
+ */
+void PedManager::initCriminal(PedInstance *pPed) {
+    pPed->setObjGroupID(6);
+    pPed->setBaseSpeed(128);
+    pPed->setTimeBeforeCheck(500);
+    pPed->setBaseModAcc(0.2);
+    pPed->setPersuasionPoints(1);
 }

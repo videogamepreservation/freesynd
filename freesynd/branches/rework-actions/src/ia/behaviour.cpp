@@ -29,51 +29,107 @@
 #include "ped.h"
 #include "mission.h"
 
-const int AgentBehaviour::kMaxDistanceForPersuadotron = 50;
-const int AgentBehaviour::kRegeratesHealthStep = 1;
+const int PersuaderBehaviourComponent::kMaxDistanceForPersuadotron = 50;
+const int CommonAgentBehaviourComponent::kRegeratesHealthStep = 1;
 
-AgentBehaviour::AgentBehaviour(PedInstance *pPed) : Behaviour(pPed), healthTimer_(0) {
-    doRegenerates_ = false;
-    healthTimer_.reset(pPed->getHealthRegenerationPeriod());
-    doUsePersuadotron_ = false;
+Behaviour::~Behaviour() {
+    while(compLst_.size() != 0) {
+        BehaviourComponent *pComp = compLst_.front();
+        compLst_.pop_front();
+        delete pComp;
+    }
 }
 
-void AgentBehaviour::handleBehaviourEvent(BehaviourEvent evtType) {
+void Behaviour::handleBehaviourEvent(BehaviourEvent evtType) {
+    for (std::list < BehaviourComponent * >::iterator it = compLst_.begin();
+            it != compLst_.end(); it++) {
+        BehaviourComponent *pComp = *it;
+        if (pComp->isEnabled()) {
+            pComp->handleBehaviourEvent(evtType, pThisPed_);
+        }
+    }
+}
+
+void Behaviour::addComponent(BehaviourComponent *pComp) {
+    compLst_.push_back(pComp);
+}
+
+/*!
+ * Run the execute method  of each component listed in the behaviour.
+ * Component must be enabled.
+ * \param elapsed Time elapsed since last frame
+ * \param pMission Mission data
+ */
+void Behaviour::execute(int elapsed, Mission *pMission) {
+    if (pThisPed_->isDead()) {
+        return;
+    }
+
+    for (std::list < BehaviourComponent * >::iterator it = compLst_.begin();
+            it != compLst_.end(); it++) {
+        BehaviourComponent *pComp = *it;
+        if (pComp->isEnabled()) {
+            pComp->execute(elapsed, pMission, pThisPed_);
+        }
+    }
+}
+
+CommonAgentBehaviourComponent::CommonAgentBehaviourComponent(PedInstance *pPed):
+        BehaviourComponent(), healthTimer_(pPed->getHealthRegenerationPeriod()) {
+    doRegenerates_ = false;
+}
+
+/*!
+ * 
+ * \param elapsed Time elapsed since last frame
+ * \param pMission Mission data
+ * \param pPed The owner of the behaviour
+ */
+void CommonAgentBehaviourComponent::execute(int elapsed, Mission *pMission, PedInstance *pPed) {
+    // If Agent is equiped with right chest, his health periodically updates
+    if (doRegenerates_ && healthTimer_.update(elapsed)) {
+        if (pPed->increaseHealth(kRegeratesHealthStep)) {
+            doRegenerates_ = false;
+        }
+    }
+}
+
+void CommonAgentBehaviourComponent::handleBehaviourEvent(Behaviour::BehaviourEvent evtType, PedInstance *pPed) {
     switch(evtType) {
-    case kBehvEvtPersuadotronActivated:
-        doUsePersuadotron_ = true;
-        break;
-    case kBehvEvtPersuadotronDeactivated:
-        doUsePersuadotron_ = false;
-    case kBehvEvtHit:
-        if (pThisPed_->hasMinimumVersionOfMod(Mod::MOD_CHEST, Mod::MOD_V2)) {
+    case Behaviour::kBehvEvtHit:
+        if (pPed->hasMinimumVersionOfMod(Mod::MOD_CHEST, Mod::MOD_V2)) {
             doRegenerates_ = true;
         }
         break;
     }
 }
 
-void AgentBehaviour::execute(int elapsed, Mission *pMission) {
-    if (pThisPed_->isDead()) {
-        return;
-    }
+PersuaderBehaviourComponent::PersuaderBehaviourComponent():
+        BehaviourComponent() {
+    doUsePersuadotron_ = false;
+}
 
-    // If Agent is equiped with right chest, his health periodically updates
-    if (doRegenerates_ && healthTimer_.update(elapsed)) {
-        if (pThisPed_->increaseHealth(kRegeratesHealthStep)) {
-            doRegenerates_ = false;
-        }
-    }
+void PersuaderBehaviourComponent::execute(int elapsed, Mission *pMission, PedInstance *pPed) {
     // Check if Agent has selected his Persuadotron
     if (doUsePersuadotron_) {
         for (size_t i = 0; i < pMission->numPeds(); i++) {
             PedInstance *pOtherPed = pMission->ped(i);
             // Agent can only persuad peds from another group
-            if (pThisPed_->objGroupID() != pOtherPed->objGroupID() &&
+            if (pPed->objGroupID() != pOtherPed->objGroupID() &&
                     pOtherPed->isAlive() &&
-                    pThisPed_->isCloseTo(pOtherPed, kMaxDistanceForPersuadotron)) {
-                        pOtherPed->handlePersuadedBy(pThisPed_);
+                    pPed->isCloseTo(pOtherPed, kMaxDistanceForPersuadotron)) {
+                        pOtherPed->handlePersuadedBy(pPed);
             }
         }
+    }
+}
+
+void PersuaderBehaviourComponent::handleBehaviourEvent(Behaviour::BehaviourEvent evtType, PedInstance *pPed) {
+    switch(evtType) {
+    case Behaviour::kBehvEvtPersuadotronActivated:
+        doUsePersuadotron_ = true;
+        break;
+    case Behaviour::kBehvEvtPersuadotronDeactivated:
+        doUsePersuadotron_ = false;
     }
 }

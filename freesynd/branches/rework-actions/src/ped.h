@@ -39,9 +39,9 @@
 #include "weapon.h"
 #include "ipastim.h"
 #include "ia/actions.h"
+#include "ia/behaviour.h"
 
 class Agent;
-class Behaviour;
 class Mission;
 class VehicleInstance;
 class Vehicle;
@@ -196,25 +196,22 @@ public:
         pd_smAll = 0xFFFF
     };
 
-    PedInstance(Ped *ped, uint16 id, int m);
+    PedInstance(Ped *ped, uint16 id, int m, bool isOur);
     ~PedInstance();
 
     //! Temporary method
     bool useNewAnimation();
-
-    //! Initialize the ped instance as an agent
-    void initAsAgent(Agent *p_agent, unsigned int obj_group_id);
 
     //*************************************
     // Properties
     //*************************************
     //! Returns true if the agent is one of us.
     bool isOurAgent() { return is_our_; }
-    //! Sets if the agent is one of us or not
-    void set_is_our(bool is_our) { is_our_ = is_our; }
     //! Return the type of Ped
     PedType type() { return type_; }
     void setTypeFromValue(uint8 value);
+    //! Returns the ped's behaviour
+    Behaviour & behaviour() { return behaviour_; }
     //! Return true if ped has escaped the map
     bool hasEscaped() { return IS_FLAG_SET(desc_state_, pd_smEscaped); }
     //! Indicate that the ped has escaped
@@ -907,7 +904,7 @@ protected:
     std::vector <actionQueueGroupType> default_actions_;
 
     /*! Ped's behaviour.*/
-    Behaviour *pBehaviour_;
+    Behaviour behaviour_;
     /*! Current action*/
     fs_actions::MovementAction *currentAction_;
     /*! Current action of using a weapon.*/

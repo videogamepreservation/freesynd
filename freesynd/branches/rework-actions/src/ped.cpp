@@ -409,7 +409,7 @@ bool PedInstance::updateAnimation(int elapsed) {
  */
 bool PedInstance::animate2(int elapsed, Mission *mission) {
     // Execute current behaviour
-    pBehaviour_->execute(elapsed, mission);
+    behaviour_.execute(elapsed, mission);
 
     // Execute any active action
     bool update = executeAction(elapsed, mission);
@@ -2058,7 +2058,8 @@ void PedInstance::showPath(int scrollX, int scrollY) {
     }
 }
 
-PedInstance::PedInstance(Ped *ped, uint16 id, int m) : ShootableMovableMapObject(id, m, MapObject::kNaturePed),
+PedInstance::PedInstance(Ped *ped, uint16 id, int m, bool isOur) :
+    ShootableMovableMapObject(id, m, MapObject::kNaturePed),
     ped_(ped), action_grp_id_(1),
     desc_state_(PedInstance::pd_smUndefined),
     hostile_desc_(PedInstance::pd_smUndefined),
@@ -2073,7 +2074,7 @@ PedInstance::PedInstance(Ped *ped, uint16 id, int m) : ShootableMovableMapObject
     rcv_damage_def_ = MapObject::ddmg_Ped;
     state_ = PedInstance::pa_smNone;
     drop_actions_ = false;
-    is_our_ = false;
+    is_our_ = isOur;
     
     adrenaline_  = new IPAStim(IPAStim::Adrenaline);
     perception_  = new IPAStim(IPAStim::Perception);
@@ -2083,8 +2084,7 @@ PedInstance::PedInstance(Ped *ped, uint16 id, int m) : ShootableMovableMapObject
     base_mod_acc_ = 0.1;
     last_firing_target_.desc = 0;
 
-    // Todo : adds a behaviour for the type of ped
-    pBehaviour_ = new NopeBehaviour(this);
+    behaviour_.setOwner(this);
     currentAction_ = NULL;
     pUseWeaponAction_ = NULL;
 }
@@ -2101,42 +2101,8 @@ PedInstance::~PedInstance()
     delete intelligence_;
     intelligence_ = NULL;
 
-    delete pBehaviour_;
-    pBehaviour_ = NULL;
     destroyAllActions();
     destroyUseWeaponAction();
-}
-
-/*!
- * Initialize the ped instance as one of our agent.
- * \param p_agent The agent reference
- * \param obj_group_id Id of the agent's group.
- */
-void PedInstance::initAsAgent(Agent *p_agent, unsigned int obj_group_id) {
-    // not in all missions our agents health is 16, this fixes it
-    setHealth(kAgentMaxHealth);
-    setStartHealth(kAgentMaxHealth);
-    while (p_agent->numWeapons()) {
-        WeaponInstance *wi = p_agent->removeWeaponAtIndex(0);
-        addWeapon(wi);
-        wi->setOwner(this);
-    }
-    set_is_our(true);
-    *((ModOwner *)this) = *((ModOwner *)p_agent);
-
-    setObjGroupID(obj_group_id);
-    setObjGroupDef(PedInstance::og_dmAgent);
-    addEnemyGroupDef(2);
-    addEnemyGroupDef(3);
-    setHostileDesc(PedInstance::pd_smArmed);
-    setSightRange(7 * 256);
-    setBaseSpeed(256);
-    setTimeBeforeCheck(400);
-    setBaseModAcc(0.5);
-
-    // sets AgentBehaviour here because earlier we don't know if ped is an agent
-    delete pBehaviour_;
-    pBehaviour_ = new AgentBehaviour(this);
 }
 
 void PedInstance::draw(int x, int y) {
@@ -2311,7 +2277,7 @@ void PedInstance::handleWeaponDeselected(WeaponInstance * wi) {
     desc_state_ &= (pd_smAll ^ (pd_smArmed | pd_smNoAmmunition));
 
     if (wi->getWeaponType() == Weapon::Persuadatron) {
-        pBehaviour_->handleBehaviourEvent(Behaviour::kBehvEvtPersuadotronDeactivated);
+        behaviour_.handleBehaviourEvent(Behaviour::kBehvEvtPersuadotronDeactivated);
     }
 }
 
@@ -2348,7 +2314,7 @@ void PedInstance::handleWeaponSelected(WeaponInstance * wi) {
         addActionUseMedikit();
         break;
     case Weapon::Persuadatron:
-        pBehaviour_->handleBehaviourEvent(Behaviour::kBehvEvtPersuadotronActivated);
+        behaviour_.handleBehaviourEvent(Behaviour::kBehvEvtPersuadotronActivated);
         break;
     }
 }
@@ -2622,7 +2588,7 @@ void PedInstance::handleHit(DamageInflictType &d) {
         }
 
         // Alert behaviour
-        pBehaviour_->handleBehaviourEvent(Behaviour::kBehvEvtHit);
+        behaviour_.handleBehaviourEvent(Behaviour::kBehvEvtHit);
     }
 }
 
