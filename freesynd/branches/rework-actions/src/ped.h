@@ -216,6 +216,10 @@ public:
     bool hasEscaped() { return IS_FLAG_SET(desc_state_, pd_smEscaped); }
     //! Indicate that the ped has escaped
     void escape() { SET_FLAG(desc_state_, pd_smEscaped); }
+    //! Return true if ped don't panic
+    bool isPanicImmuned() { return panicImmuned_; }
+    //! Tells the ped not to panic
+    void setPanicImmuned() { panicImmuned_ = true; }
 
     typedef enum {
         ad_NoAnimation,
@@ -301,6 +305,8 @@ public:
     //*************************************
     //! Adds the given action to the list of actions
     void addMovementAction(fs_actions::MovementAction *pAction, bool appendAction);
+    //! Returns the ped's current movement action
+    fs_actions::MovementAction * currentAction() { return currentAction_; }
     //! Removes all ped's actions
     void destroyAllActions();
     //! Removes ped's action of using weapon
@@ -955,6 +961,8 @@ protected:
     //! points needed to persuade ped
     int persuasion_points_;
     std::set <PedInstance *> persuaded_group_;
+    //! Tells whether the panic can react to panic or not
+    bool panicImmuned_;
 
     bool walkable(int x, int y, int z) { return true; }
 

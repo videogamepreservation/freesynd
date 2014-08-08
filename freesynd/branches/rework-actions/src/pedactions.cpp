@@ -41,7 +41,12 @@ void PedInstance::addMovementAction(fs_actions::MovementAction *pAction, bool ap
         }
         pAct->setNext(pAction);
     } else {
-        destroyAllActions();
+        if (currentAction_->origin() != fs_actions::kOrigScript &&
+            currentAction_->origin() != fs_actions::kOrigDefault) {
+            // for scripted and default actions, just forget reference
+            // actions will be reused
+            destroyAllActions();
+        }
         currentAction_ = pAction;
     }
 }

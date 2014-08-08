@@ -76,7 +76,7 @@ public:
         dmg_Persuasion = 0x0020,
         dmg_Heal = 0x0040,
         dmg_Panic = 0x0080,
-        dmg_Mental = (dmg_Persuasion | dmg_Panic),
+        // dmg_Mental = (dmg_Persuasion | dmg_Panic), not used
         dmg_All = 0xFFFF
     };
 

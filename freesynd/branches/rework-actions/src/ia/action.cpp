@@ -43,12 +43,20 @@ const int WalkBurnHitAction::kTimeToWalkBurning = 1000;
 
 /*!
  * Default constructor.
+ * \param type What type of action.
  * \param origin Who has created this action.
  */
 Action::Action(ActionType type, CreatOrigin origin) {
     origin_ = origin;
     status_ = kActStatusNotStarted;
     type_ = type;
+}
+
+/*!
+ * Reset the action.
+ */
+void Action::reset() {
+    status_ = kActStatusNotStarted;
 }
 
 /*!
@@ -171,21 +179,24 @@ MovementAction(kActTypeWalk, origin) {
     maxDistanceToWalk_ = 0;
     dest.convertPosToXYZ(&dest_);
     targetState_ = PedInstance::pa_smWalking;
+    newSpeed_ = -1;
 }
 
-WalkToDirectionAction::WalkToDirectionAction(CreatOrigin origin) :
+WalkToDirectionAction::WalkToDirectionAction(CreatOrigin origin, int speed) :
 MovementAction(kActTypeWalk, origin) {
     maxDistanceToWalk_ = 0;
     dest_.x = -1;
     dest_.y = -1;
     dest_.z = -1;
     targetState_ = PedInstance::pa_smWalking;
+    newSpeed_ = speed;
 }
 
 void WalkToDirectionAction::doStart(Mission *pMission, PedInstance *pPed) {
     moveDirdesc_.clear();
     moveDirdesc_.bounce = true;
-    pPed->setSpeed(pPed->getDefaultSpeed());
+    pPed->setSpeed(newSpeed_ != -1? newSpeed_ : pPed->getDefaultSpeed());
+    distWalked_ = 0;
 }
 
 /*!
@@ -221,9 +232,8 @@ bool WalkToDirectionAction::doExecute(int elapsed, Mission *pMission, PedInstanc
         } else {
             endAction = true;
         }
-    } else {
-        distanceToWalk = maxDistanceToWalk_ != 0 ? 
-                                maxDistanceToWalk_ - distWalked_ : 0;
+    } else if (maxDistanceToWalk_ != 0) {
+        distanceToWalk = maxDistanceToWalk_ - distWalked_;
         pPed->moveToDir(pMission,
                         elapsed,
                         moveDirdesc_,
@@ -231,10 +241,13 @@ bool WalkToDirectionAction::doExecute(int elapsed, Mission *pMission, PedInstanc
                         -1, -1,
                         &distanceToWalk, true);
 
-        if (maxDistanceToWalk_ != 0) {
-            distWalked_ += distanceToWalk;
-            endAction = distWalked_ >= maxDistanceToWalk_;
-        }
+        distWalked_ += distanceToWalk;
+        endAction = distWalked_ >= maxDistanceToWalk_;
+    } else {
+        // just keep moving
+        pPed->moveToDir(pMission,
+                        elapsed,
+                        moveDirdesc_);
     }
 
     if (endAction) {

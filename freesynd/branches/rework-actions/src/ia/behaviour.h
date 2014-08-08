@@ -27,6 +27,7 @@
 #include <list>
 
 #include "utils/timer.h"
+#include "ia/actions.h"
 
 class Mission;
 class PedInstance;
@@ -127,6 +128,39 @@ public:
 private:
     /*! Flag to indicate an agent can use his persuadotron.*/
     bool doUsePersuadotron_;
+};
+
+/*!
+ * Component for civilians who can panic when a gun is out.
+ * Civilians in cars and which have scripted actions don't panic.
+ * Civilians who have this component should only have one defaut action:
+ * walk continuously.
+ */
+class PanicComponent : public BehaviourComponent {
+public:
+    //! Range for looking for armed ped
+    static const int kScoutDistance;
+    //! The distance a panicking ped walks before calming down
+    static const int kDistanceToRun;
+
+    PanicComponent();
+
+    void execute(int elapsed, Mission *pMission, PedInstance *pPed);
+
+    void handleBehaviourEvent(Behaviour::BehaviourEvent evtType, PedInstance *pPed);
+private:
+    //! Checks whether there is an armed ped next to the ped : returns that ped
+    PedInstance * findNearbyArmedPed(Mission *pMission, PedInstance *pPed);
+    //! Makes the ped runs in the opposite direction from the armed ped
+    void  runAway(PedInstance *pPed, PedInstance *pArmedPed, fs_actions::MovementAction *pAction);
+private:
+    /*! This timer is used to delay checking by the ped in order to 
+     * not consume too much CPU.*/
+    fs_utils::Timer scoutTimer_;
+    /*! True when ped is currently in panic.*/
+    bool panicking_;
+    /*! */
+    fs_actions::MovementAction *pDefaultAction_;
 };
 
 #endif // IA_BEHAVIOUR_H_

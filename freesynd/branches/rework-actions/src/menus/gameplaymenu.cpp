@@ -775,7 +775,7 @@ void GameplayMenu::handleClickOnMap(int x, int y, int button, const int modKeys)
 
         if (target_) {
             printf("   > target(%i) : %s\n",
-                target_->getDebugID(), target_->natureName());
+                target_->id(), target_->natureName());
         }
         return;
     }

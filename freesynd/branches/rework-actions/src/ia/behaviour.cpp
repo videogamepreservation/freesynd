@@ -29,8 +29,13 @@
 #include "ped.h"
 #include "mission.h"
 
-const int PersuaderBehaviourComponent::kMaxDistanceForPersuadotron = 50;
+//*************************************
+// Constant definition
+//*************************************
+const int PersuaderBehaviourComponent::kMaxDistanceForPersuadotron = 100;
 const int CommonAgentBehaviourComponent::kRegeratesHealthStep = 1;
+const int PanicComponent::kScoutDistance = 2000;
+const int PanicComponent::kDistanceToRun = 500;
 
 Behaviour::~Behaviour() {
     while(compLst_.size() != 0) {
@@ -131,5 +136,99 @@ void PersuaderBehaviourComponent::handleBehaviourEvent(Behaviour::BehaviourEvent
         break;
     case Behaviour::kBehvEvtPersuadotronDeactivated:
         doUsePersuadotron_ = false;
+    }
+}
+
+PanicComponent::PanicComponent():
+        BehaviourComponent(), scoutTimer_(500) {
+    panicking_ = false;
+    pDefaultAction_ = NULL;
+}
+
+void PanicComponent::execute(int elapsed, Mission *pMission, PedInstance *pPed) {
+    if (pPed->isPanicImmuned()) {
+        return;
+    }
+
+    // True means ped must check if someone's armed around him
+    bool checkArmedPed = false;
+    fs_actions::MovementAction *pAction = pPed->currentAction();
+
+    if (pAction == NULL) {
+        // No action means that ped has finished running
+        // but we are still in panic mode, so check if there are armed people nearby
+        checkArmedPed = true;
+    } else if (!panicking_) {
+        // ped is walking calmly -> check if he should panic
+        if (scoutTimer_.update(elapsed)) {
+            checkArmedPed = true;
+        }
+    }
+
+    if (checkArmedPed) {
+        PedInstance *pArmedPed = findNearbyArmedPed(pMission, pPed);
+        if (pArmedPed) {
+            printf("Panic : %d\n", pPed->id());
+            runAway(pPed, pArmedPed, pAction);
+        } else if (pAction == NULL) {
+            // ped has finished panicking and there no reason to panick
+            // so continue walking normaly
+            pPed->addMovementAction(pDefaultAction_, false);
+            panicking_ = false;
+            printf("End Panic : %d\n", pPed->id());
+        }
+    }
+}
+
+void PanicComponent::handleBehaviourEvent(Behaviour::BehaviourEvent evtType, PedInstance *pPed) {
+    /*switch(evtType) {
+    case Behaviour::kBehvEvtPersuadotronActivated:
+        doUsePersuadotron_ = true;
+        break;
+    case Behaviour::kBehvEvtPersuadotronDeactivated:
+        doUsePersuadotron_ = false;
+    }*/
+}
+
+PedInstance * PanicComponent::findNearbyArmedPed(Mission *pMission, PedInstance *pPed) {
+    for (size_t i = 0; i < pMission->numPeds(); i++) {
+        PedInstance *pOtherPed = pMission->ped(i);
+        // Agent can only persuad peds from another group
+        if (pOtherPed->isArmed() && pPed->isCloseTo(pOtherPed, kScoutDistance)) {
+            return pOtherPed;
+        }
+    }
+    return NULL;
+}
+
+/*!
+ * Makes the ped runs in the opposite way of the armed ped.
+ * Saves the default action so it can be restored when the ped
+ * don't panic anymore.
+ * \param pPed The panicking ped
+ * \param pArmedPed The armed ped that caused the panic
+ * \param pWalkAction The action the ped was doing before panicking
+ */
+void  PanicComponent::runAway(PedInstance *pPed, PedInstance *pArmedPed, fs_actions::MovementAction *pWalkAction) {
+    // setting opposite direction for movement
+    toDefineXYZ thisPedLoc;
+    toDefineXYZ otherLoc;
+    pPed->convertPosToXYZ(&thisPedLoc);
+    pArmedPed->convertPosToXYZ(&otherLoc);
+    
+    pPed->setDirection(otherLoc.x - thisPedLoc.x,
+        otherLoc.y - thisPedLoc.y);
+    // Adds the action of running away
+    fs_actions::WalkToDirectionAction *pAction = 
+        new fs_actions::WalkToDirectionAction(fs_actions::kOrigAction, 256);
+    // walk for a certain distance
+    pAction->setmaxDistanceToWalk(kDistanceToRun);
+    pPed->addMovementAction(pAction, false);
+    panicking_ = true;
+
+    if (pWalkAction != NULL) {
+        // save and reset the default action
+        pDefaultAction_ = pWalkAction;
+        pDefaultAction_->reset();
     }
 }

@@ -2087,6 +2087,7 @@ PedInstance::PedInstance(Ped *ped, uint16 id, int m, bool isOur) :
     behaviour_.setOwner(this);
     currentAction_ = NULL;
     pUseWeaponAction_ = NULL;
+    panicImmuned_ = false;
 }
 
 PedInstance::~PedInstance()
@@ -2676,7 +2677,7 @@ void PedInstance::handlePersuadedBy(PedInstance *pAgent) {
         addDefActsToActions();
 
         setDrawnAnim(PedInstance::ad_PersuadedAnim);
-        setRcvDamageDef(MapObject::ddmg_PedPanicImmune);
+        setPanicImmuned();
         g_App.gameSounds().play(snd::PERSUADE);
     }
 }

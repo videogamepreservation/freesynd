@@ -912,7 +912,7 @@ void MissionManager::createObjectives(const LevelData::LevelDataAll &level_data,
                     if ((cindx * 92 + 2) == bindx && di.pindx[cindx] != 0xFFFF) {
                         PedInstance *p = pMission->ped(di.pindx[cindx]);
                         objd = new ObjPersuade(p);
-                        p->setRcvDamageDef(MapObject::ddmg_PedPanicImmune);
+                        p->setPanicImmuned();
                         // Adds the ped to the list of peds to evacuate
                         peds_evacuate.push_back(p);
                     } else
@@ -925,7 +925,7 @@ void MissionManager::createObjectives(const LevelData::LevelDataAll &level_data,
                     cindx = (bindx - 2) / 92;
                     if ((cindx * 92 + 2) == bindx && di.pindx[cindx] != 0xFFFF) {
                         PedInstance *p = pMission->ped(di.pindx[cindx]);
-                        p->setRcvDamageDef(MapObject::ddmg_PedPanicImmune);
+                        p->setPanicImmuned();
                         objd = new ObjAssassinate(p);
                     } else
                         printf("0x02 incorrect offset");
@@ -937,7 +937,7 @@ void MissionManager::createObjectives(const LevelData::LevelDataAll &level_data,
                     cindx = (bindx - 2) / 92;
                     if ((cindx * 92 + 2) == bindx && di.pindx[cindx] != 0xFFFF) {
                         PedInstance *p = pMission->ped(di.pindx[cindx]);
-                        p->setRcvDamageDef(MapObject::ddmg_PedPanicImmune);
+                        p->setPanicImmuned();
                         objd = new ObjProtect(p);
                     } else
                         printf("0x03 incorrect offset");

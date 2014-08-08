@@ -107,8 +107,12 @@ namespace fs_actions {
         //! Entry point to execute the action
         virtual bool execute(int elapsed, Mission *pMission, PedInstance *pPed) = 0;
 
+        //! Returns origin of the action
+        CreatOrigin origin() { return origin_; }
         //! Returns the type of action
         ActionType type() { return type_; }
+        //! Returns true if action is running
+        bool isRunning() { return status_ == kActStatusRunning; }
         //! Returns true if action is waiting for animation to end
         bool isWaitingForAnimation() { return status_ == kActStatusWaitForAnim; }
         //! Returns true if action has succeeded or failed
@@ -122,6 +126,9 @@ namespace fs_actions {
         void setSucceeded() { status_ = kActStatusSucceeded; }
         //! Sets the status to Failed
         void setFailed() { status_ = kActStatusFailed; }
+
+        //! Reset the action
+        virtual void reset();
         
     protected:
         /*! The type of action.*/
@@ -219,7 +226,7 @@ namespace fs_actions {
         //! Walk to direction given by point
         WalkToDirectionAction(CreatOrigin origin, const PathNode &pn);
         //! Walk following ped's direction
-        WalkToDirectionAction(CreatOrigin origin);
+        WalkToDirectionAction(CreatOrigin origin, int speed = -1);
 
         void setmaxDistanceToWalk(int distance) { maxDistanceToWalk_ = distance; }
     protected:
@@ -233,6 +240,8 @@ namespace fs_actions {
         /*! Count the distance the ped has walked since starting the action.*/
         int distWalked_;
         int maxDistanceToWalk_;
+        /*! Speed used to walk to destination.*/
+        int newSpeed_;
     };
 
     /*!
