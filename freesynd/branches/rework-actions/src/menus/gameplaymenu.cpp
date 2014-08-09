@@ -287,7 +287,8 @@ void GameplayMenu::handleShow() {
     selection_.setSquad(mission_->getSquad());
 
     // init menu internal state
-    pressed_btn_select_all_ = false;
+    isButtonSelectAllPressed_ = false;
+    cntArmedPed_ = 0;
     initWorldCoords();
     
     // set graphic palette
@@ -1168,7 +1169,7 @@ bool GameplayMenu::handleUnknownKey(Key key, const int modKeys) {
 
 void GameplayMenu::drawSelectAllButton() {
     // 64x10
-    if(pressed_btn_select_all_) {
+    if(isButtonSelectAllPressed_) {
         g_App.gameSprites().sprite(1792)->draw(0, 46 + 44, 0);
         g_App.gameSprites().sprite(1793)->draw(64, 46 + 44, 0);
     } else {
@@ -1354,11 +1355,11 @@ void GameplayMenu::selectAgent(size_t agentNo, bool addToGroup) {
  * selected.
  */
 void GameplayMenu::selectAllAgents() {
-    bool prv_state = pressed_btn_select_all_;
-    pressed_btn_select_all_ = !pressed_btn_select_all_;
-    selection_.selectAllAgents(pressed_btn_select_all_);
+    bool prv_state = isButtonSelectAllPressed_;
+    isButtonSelectAllPressed_ = !isButtonSelectAllPressed_;
+    selection_.selectAllAgents(isButtonSelectAllPressed_);
     updateSelectAll();
-    if (pressed_btn_select_all_ != prv_state) {
+    if (isButtonSelectAllPressed_ != prv_state) {
         g_App.gameSounds().play(snd::SPEECH_SELECTED);
         // redraw all agent selectors
         addDirtyRect(0, 0, 128, 180);
@@ -1434,7 +1435,7 @@ void GameplayMenu::updateSelectAll() {
 
     // if number of agents alive is the same as number of selected agents
     // then button is pressed.
-    pressed_btn_select_all_ = ((nbAgentAlive == selection_.size()
+    isButtonSelectAllPressed_ = ((nbAgentAlive == selection_.size()
         && nbAgentAlive != 0) || nbAgentAlive == 1);
 }
 
@@ -1473,5 +1474,29 @@ void GameplayMenu::handleGameEvent(GameEvent evt) {
         // Anyway update selection
         PedInstance *p_ped = static_cast<PedInstance *> (evt.pCtxt);
         updateSelectionForDeadAgent(p_ped);
+    } else if (evt.type == GameEvent::kEvtWeaponOut) {
+        // some ped has shown a weapon, activate panic among civilians
+        cntArmedPed_ += 1;
+        if (cntArmedPed_ == 1) {
+            for (size_t i = 0; i < mission_->numPeds(); i++) {
+                PedInstance *pPed = mission_->ped(i);
+                if (pPed->type() == PedInstance::kPedTypeCivilian &&
+                        !pPed->isPanicImmuned()) {
+                    pPed->behaviour().handleBehaviourEvent(Behaviour::kBehvEvtPanicEnabled);
+                }
+            }
+        }
+    } else if (evt.type == GameEvent::kEvtWeaponCleared) {
+        // some ped has put his weapon away, deactivate panic among civilians
+        cntArmedPed_ -= 1;
+        if (cntArmedPed_ == 0) {
+            for (size_t i = 0; i < mission_->numPeds(); i++) {
+                PedInstance *pPed = mission_->ped(i);
+                if (pPed->type() == PedInstance::kPedTypeCivilian &&
+                        !pPed->isPanicImmuned()) {
+                    pPed->behaviour().handleBehaviourEvent(Behaviour::kBehvEvtPanicDisabled);
+                }
+            }
+        }
     }
 }

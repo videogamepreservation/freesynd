@@ -2605,6 +2605,10 @@ bool PedInstance::handleDeath(ShootableMapObject::DamageInflictType &d) {
         if ((desc_state_ & pd_smControlled) != 0 && owner_)
             ((PedInstance *)owner_)->rmvPersuaded(this);
 
+        if (selectedWeapon() && selectedWeapon()->canShoot()) {
+            GameEvent::sendEvt(GameEvent::kMission, GameEvent::kEvtWeaponCleared);
+        }
+
         switch (d.dtype) {
             case MapObject::dmg_Bullet:
                 setDrawnAnim(PedInstance::ad_DieAnim);
@@ -2634,11 +2638,7 @@ bool PedInstance::handleDeath(ShootableMapObject::DamageInflictType &d) {
         }
         // send an event to alert agent died
         if (isOurAgent()) {
-            GameEvent evt;
-            evt.stream = GameEvent::kMission;
-            evt.type = GameEvent::kAgentDied;
-            evt.pCtxt = this;
-            g_gameCtrl.fireGameEvent(evt);
+            GameEvent::sendEvt(GameEvent::kMission, GameEvent::kAgentDied, this);
         }
     }
 

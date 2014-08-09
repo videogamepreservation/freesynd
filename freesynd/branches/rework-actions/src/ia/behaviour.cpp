@@ -34,7 +34,7 @@
 //*************************************
 const int PersuaderBehaviourComponent::kMaxDistanceForPersuadotron = 100;
 const int CommonAgentBehaviourComponent::kRegeratesHealthStep = 1;
-const int PanicComponent::kScoutDistance = 2000;
+const int PanicComponent::kScoutDistance = 1500;
 const int PanicComponent::kDistanceToRun = 500;
 
 Behaviour::~Behaviour() {
@@ -48,10 +48,7 @@ Behaviour::~Behaviour() {
 void Behaviour::handleBehaviourEvent(BehaviourEvent evtType) {
     for (std::list < BehaviourComponent * >::iterator it = compLst_.begin();
             it != compLst_.end(); it++) {
-        BehaviourComponent *pComp = *it;
-        if (pComp->isEnabled()) {
-            pComp->handleBehaviourEvent(evtType, pThisPed_);
-        }
+        (*it)->handleBehaviourEvent(evtType, pThisPed_);
     }
 }
 
@@ -143,6 +140,9 @@ PanicComponent::PanicComponent():
         BehaviourComponent(), scoutTimer_(500) {
     panicking_ = false;
     pDefaultAction_ = NULL;
+    // this component will be activated by event to
+    // lower CPU consumption
+    setEnabled(false);
 }
 
 void PanicComponent::execute(int elapsed, Mission *pMission, PedInstance *pPed) {
@@ -168,28 +168,37 @@ void PanicComponent::execute(int elapsed, Mission *pMission, PedInstance *pPed) 
     if (checkArmedPed) {
         PedInstance *pArmedPed = findNearbyArmedPed(pMission, pPed);
         if (pArmedPed) {
-            printf("Panic : %d\n", pPed->id());
             runAway(pPed, pArmedPed, pAction);
         } else if (pAction == NULL) {
             // ped has finished panicking and there no reason to panick
             // so continue walking normaly
             pPed->addMovementAction(pDefaultAction_, false);
             panicking_ = false;
-            printf("End Panic : %d\n", pPed->id());
         }
     }
 }
 
 void PanicComponent::handleBehaviourEvent(Behaviour::BehaviourEvent evtType, PedInstance *pPed) {
-    /*switch(evtType) {
-    case Behaviour::kBehvEvtPersuadotronActivated:
-        doUsePersuadotron_ = true;
+    switch(evtType) {
+    case Behaviour::kBehvEvtPanicEnabled:
+        setEnabled(true);
         break;
-    case Behaviour::kBehvEvtPersuadotronDeactivated:
-        doUsePersuadotron_ = false;
-    }*/
+    case Behaviour::kBehvEvtPanicDisabled:
+        setEnabled(false);
+        if (panicking_) {
+            pPed->addMovementAction(pDefaultAction_, false);
+            panicking_ = false;
+        }
+        break;
+    }
 }
 
+/*!
+ * Return the first ped that is close to the given ped and who is armed.
+ * \param pMission
+ * \param pPed
+ * \return NULL if no ped is found
+ */
 PedInstance * PanicComponent::findNearbyArmedPed(Mission *pMission, PedInstance *pPed) {
     for (size_t i = 0; i < pMission->numPeds(); i++) {
         PedInstance *pOtherPed = pMission->ped(i);

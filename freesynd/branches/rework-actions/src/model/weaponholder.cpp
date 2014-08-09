@@ -26,6 +26,7 @@
  ************************************************************************/
 
 #include "weaponholder.h"
+#include "core/gameevent.h"
 
 //*************************************
 // Constant definition
@@ -115,6 +116,7 @@ void WeaponHolder::removeAllWeapons() {
  * Calls onWeaponDeselected() and onWeaponSelected().
  */
 void WeaponHolder::selectWeapon(uint8 n) {
+    bool noWeaponSelected = selected_weapon_ == kNoWeaponSelected;
     assert(n < weapons_.size());
     WeaponInstance *pNewWeapon = weapons_[n];
     if (canSelectWeapon(pNewWeapon)) {
@@ -124,20 +126,28 @@ void WeaponHolder::selectWeapon(uint8 n) {
         selected_weapon_ = n;
         handleWeaponSelected(pNewWeapon);
         updtPreferedWeapon();
+
+        if (noWeaponSelected && selectedWeapon()->canShoot()) {
+            GameEvent::sendEvt(GameEvent::kMission, GameEvent::kEvtWeaponOut);
+        }
     }
 }
 
 /*!
  * Deselects a selected weapon if any.
  * Calls onWeaponDeselected().
+ * \return the deselected weapon.
  */
-void WeaponHolder::deselectWeapon() {
+WeaponInstance * WeaponHolder::deselectWeapon() {
+    WeaponInstance *wi = NULL;
     if (selected_weapon_ != kNoWeaponSelected) {
-        WeaponInstance *wi = weapons_[selected_weapon_];
+        wi = weapons_[selected_weapon_];
         selected_weapon_ = kNoWeaponSelected;
         handleWeaponDeselected(wi);
         updtPreferedWeapon();
     }
+
+    return wi;
 }
 
 /*!

@@ -126,9 +126,12 @@ protected:
     GamePlayMinimapRenderer mm_renderer_;
     /*! This renderer is in charge of drawing the IPA meters.*/
     AgentSelectorRenderer agt_sel_renderer_;
-    bool pressed_btn_select_all_;
+    //! A flag to keep track of the state of the select all button
+    bool isButtonSelectAllPressed_;
     /*! Flag to store the fact that player is currently shooting.*/
     bool isPlayerShooting_;
+    /*! A counter to keep track of armed ped and to activate panic.*/
+    uint16 cntArmedPed_;
 
     // when ipa is manipulated this represents
     struct IPA_manipulation {

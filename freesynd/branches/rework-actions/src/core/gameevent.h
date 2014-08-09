@@ -54,7 +54,11 @@ public:
         /*! Sent when an objective has failed.*/
         kObjFailed,
         /*! Send when an objective has been completed succesfuly.*/
-        kObjCompleted
+        kObjCompleted,
+        /*! Sent when a ped has shown his weapon.*/
+        kEvtWeaponOut,
+        /*! Sent when a ped cleared his weapon.*/
+        kEvtWeaponCleared
     };
     //! The stream on which the event is posted
     EEventStream stream;
@@ -62,6 +66,9 @@ public:
     EEventType type;
     //! An event may hold information for the listener
     void *pCtxt;
+
+    //! Convenient method to send game event
+    static void sendEvt(EEventStream stream, EEventType type, void *pCtx = NULL);
 };
 
 /*!

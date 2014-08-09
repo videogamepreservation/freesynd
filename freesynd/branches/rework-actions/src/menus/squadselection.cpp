@@ -23,6 +23,7 @@
 #include "menus/squadselection.h"
 #include "ped.h"
 #include "vehicle.h"
+#include "core/gameevent.h"
 
 /*!
  * Default constructor.
@@ -162,7 +163,10 @@ void SquadSelection::checkLeader(size_t agentNo) {
  */
 void SquadSelection::deselectAllWeapons() {
     for (SquadSelection::Iterator it = begin(); it != end(); ++it) {
-            (*it)->deselectWeapon();
+        WeaponInstance *pWi = (*it)->deselectWeapon();
+        if (pWi && pWi->canShoot()) {
+            GameEvent::sendEvt(GameEvent::kMission, GameEvent::kEvtWeaponCleared);
+        }
     }
 }
 

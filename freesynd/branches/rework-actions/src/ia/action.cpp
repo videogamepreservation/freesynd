@@ -400,6 +400,10 @@ bool PutdownWeaponAction::doExecute(int elapsed, Mission *pMission, PedInstance 
         if (pWeapon->getWeaponType() == Weapon::TimeBomb) {
             pWeapon->activate();
         }
+
+        if (pPed->selectedWeapon() == NULL && pWeapon->canShoot()) {
+            GameEvent::sendEvt(GameEvent::kMission, GameEvent::kEvtWeaponCleared);
+        }
         setSucceeded();
     }
 

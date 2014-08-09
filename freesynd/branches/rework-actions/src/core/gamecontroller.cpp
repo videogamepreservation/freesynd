@@ -266,3 +266,17 @@ int GameController::get_nb_mvt_for_active_synds(int nb_active_synds) {
         return 0;
     }
 }
+
+/*!
+ * This method is just a wrapper for the call of GameController.fireGameEvent().
+ * \param stream The stream of the event
+ * \param type The type of the event
+ * \param pCtx The context of the event.
+ */
+void GameEvent::sendEvt(EEventStream stream, EEventType type, void *pCtx) {
+    GameEvent evt;
+    evt.stream = stream;
+    evt.type = type;
+    evt.pCtxt = pCtx;
+    g_gameCtrl.fireGameEvent(evt);
+}

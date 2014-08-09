@@ -51,7 +51,11 @@ public:
         //! An agent has deactivated his Persuadotron
         kBehvEvtPersuadotronDeactivated,
         //! An ped has been hit
-        kBehvEvtHit
+        kBehvEvtHit,
+        //! Event to activate the panic component
+        kBehvEvtPanicEnabled,
+        //! Event to deactivate the panic component
+        kBehvEvtPanicDisabled
     };
 
     virtual ~Behaviour();

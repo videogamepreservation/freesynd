@@ -79,10 +79,10 @@ public:
     WeaponHolder();
     virtual ~WeaponHolder() {}
 
-    int numWeapons() { return weapons_.size(); }
+    uint8 numWeapons() { return weapons_.size(); }
 
-    WeaponInstance *weapon(int n) {
-        assert(n < (int) weapons_.size());
+    WeaponInstance *weapon(uint8 n) {
+        assert(n < weapons_.size());
         return weapons_[n];
     }
 
@@ -99,7 +99,7 @@ public:
     //! Selects the weapon at given index in the inventory
     void selectWeapon(uint8 n);
     //! Deselects a selected weapon if any
-    void deselectWeapon();
+    WeaponInstance * deselectWeapon();
 
     //! Returns the currently used weapon or null if no weapon is used
     WeaponInstance *selectedWeapon() {
