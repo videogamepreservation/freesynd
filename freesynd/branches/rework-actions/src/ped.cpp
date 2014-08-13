@@ -1660,7 +1660,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                             findQueueInActQueue(it->group_id + 2);
 
                         if (owner_->isDead()) {
-                            ((PedInstance *)owner_)->rmvPersuaded(this);
+                            owner_->rmvPersuaded(this);
                             // agent is dead choose another agent from alive
                             owner_ = NULL;
                             Squad *sq = mission->getSquad();
@@ -1689,7 +1689,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                                 if ((it_wpn->state & 2) != 0)
                                     disable_walking = true;
                             }
-                            if (((PedInstance *)owner_)->isArmed()) {
+                            if (owner_->isArmed()) {
                                 if (weapons_.empty()) {
                                     // enable find and pickup weapon
                                     if (it_wpn != actions_queue_.end()) {
@@ -1706,7 +1706,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                                     if (searched != it->actions.end()) {
                                         actionQueueType & aqt_attack = *searched;
                                         targetDescType *t_fire =
-                                            ((PedInstance *)owner_)->lastFiringTarget();
+                                            owner_->lastFiringTarget();
                                         if (t_fire->desc == 1) {
                                             // changing action to execute
                                             aqt_attack.act_exec = PedInstance::ai_aAttackLocation
@@ -2598,12 +2598,12 @@ void PedInstance::handleHit(DamageInflictType &d) {
  * \param d Damage description
  * \return true if Ped has died
  */
-bool PedInstance::handleDeath(ShootableMapObject::DamageInflictType &d) {
+bool PedInstance::handleDeath(Mission *pMission, ShootableMapObject::DamageInflictType &d) {
     if (health_ == 0) {
         clearDestination();
         switchActionStateTo(PedInstance::pa_smDead);
-        if ((desc_state_ & pd_smControlled) != 0 && owner_)
-            ((PedInstance *)owner_)->rmvPersuaded(this);
+
+        updatePersuadedRelations(pMission->getSquad());
 
         if (selectedWeapon() && selectedWeapon()->canShoot()) {
             GameEvent::sendEvt(GameEvent::kMission, GameEvent::kEvtWeaponCleared);
@@ -2706,7 +2706,7 @@ bool PedInstance::handleDamage(ShootableMapObject::DamageInflictType *d) {
         destroyAllActions();
         switchActionStateTo(PedInstance::pa_smDead);
         if ((desc_state_ & pd_smControlled) != 0 && owner_)
-            ((PedInstance *)owner_)->rmvPersuaded(this);
+            owner_->rmvPersuaded(this);
 
         switch (d->dtype) {
             case MapObject::dmg_Bullet:
@@ -2924,7 +2924,7 @@ int PedInstance::getDefaultSpeed()
     }
 
     if (desc_state_ == PedInstance::pd_smControlled) {
-        speed_new *= ((PedInstance *)owner_)->getSpeedOwnerBoost();
+        speed_new *= owner_->getSpeedOwnerBoost();
         speed_new >>= 1;
     }
 
@@ -3074,8 +3074,8 @@ bool PedInstance::canPersuade(int points) {
     }
     // always 1
     int points_avail = 1;
-    for (std::set <PedInstance *>::iterator it = persuaded_group_.begin();
-         it != persuaded_group_.end(); ++it)
+    for (std::set <PedInstance *>::iterator it = persuadedSet_.begin();
+         it != persuadedSet_.end(); ++it)
     {
         // NOTE: mods influence "to persuade" points, but not
         // of already persuaded
@@ -3085,12 +3085,39 @@ bool PedInstance::canPersuade(int points) {
 }
 
 void PedInstance::addPersuaded(PedInstance *p) {
-    persuaded_group_.insert(p);
+    persuadedSet_.insert(p);
 }
 
 void PedInstance::rmvPersuaded(PedInstance *p) {
-    std::set <PedInstance *>::iterator it =  persuaded_group_.find(p);
-    if (it != persuaded_group_.end())
-        persuaded_group_.erase(it);
+    std::set <PedInstance *>::iterator it =  persuadedSet_.find(p);
+    if (it != persuadedSet_.end())
+        persuadedSet_.erase(it);
 }
 
+/*!
+ * After a ped died (agent or other), updates the relation between the owner
+ * and the peds he has persuaded.
+ * If dead ped is a persuaded, just removed him from the list of his owner.
+ * If dead ped is our agent, transfer all his persuaded to another living agent.
+ * \param pSquad List of available agents
+ */
+void PedInstance::updatePersuadedRelations(Squad *pSquad) {
+    if (IS_FLAG_SET(desc_state_, pd_smControlled) && owner_ != NULL) {
+        owner_->rmvPersuaded(this);
+        owner_ = NULL;
+    } else if (isOurAgent()) {
+        // our agent is dead, assign all persuaded to another living agent
+        for (uint8 i = 0; i < AgentManager::kMaxSlot; ++i) {
+            PedInstance *pAgent = pSquad->member(i);
+            if (pAgent && pAgent->isAlive()) {
+                while(!persuadedSet_.empty()) {
+                    std::set <PedInstance *>::iterator it = persuadedSet_.begin();
+                    PedInstance *pPed = *it;
+                    persuadedSet_.erase(it);
+                    pAgent->addPersuaded(pPed);
+                }
+                break;
+            }
+        }
+    }
+}

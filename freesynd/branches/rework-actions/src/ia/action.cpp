@@ -507,7 +507,7 @@ HitAction(kOrigAction, d) {
  */
 bool FallDeadHitAction::doExecute(int elapsed, Mission *pMission, PedInstance *pPed) {
     if (status_ == kActStatusRunning) {
-        pPed->handleDeath(damage_);
+        pPed->handleDeath(pMission, damage_);
         setSucceeded();
     }
     return true;
@@ -539,7 +539,7 @@ void RecoilHitAction::doStart(Mission *pMission, PedInstance *pPed) {
  */
 bool RecoilHitAction::doExecute(int elapsed, Mission *pMission, PedInstance *pPed) {
     if (status_ == kActStatusRunning) {
-        if (pPed->handleDeath(damage_)) {
+        if (pPed->handleDeath(pMission, damage_)) {
             targetState_ = PedInstance::pa_smNone;
         }
         setSucceeded();
@@ -573,7 +573,7 @@ void LaserHitAction::doStart(Mission *pMission, PedInstance *pPed) {
  */
 bool LaserHitAction::doExecute(int elapsed, Mission *pMission, PedInstance *pPed) {
     if (status_ == kActStatusRunning) {
-        if (pPed->handleDeath(damage_)) {
+        if (pPed->handleDeath(pMission, damage_)) {
             targetState_ = PedInstance::pa_smNone;
         }
         setSucceeded();
@@ -612,7 +612,7 @@ bool WalkBurnHitAction::doExecute(int elapsed, Mission *pMission, PedInstance *p
     if (burnTimer_.update(elapsed)) {
         setSucceeded();
 
-        if (pPed->handleDeath(damage_)) {
+        if (pPed->handleDeath(pMission, damage_)) {
             targetState_ = PedInstance::pa_smNone;
         }
     }

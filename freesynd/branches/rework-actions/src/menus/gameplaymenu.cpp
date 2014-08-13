@@ -1488,8 +1488,11 @@ void GameplayMenu::handleGameEvent(GameEvent evt) {
         }
     } else if (evt.type == GameEvent::kEvtWeaponCleared) {
         // some ped has put his weapon away, deactivate panic among civilians
-        cntArmedPed_ -= 1;
-        if (cntArmedPed_ == 0) {
+        // we check value just to be sure not to go out of range
+        if (cntArmedPed_ > 1) {
+            cntArmedPed_ -= 1;
+        } else if (cntArmedPed_ == 1) {
+            cntArmedPed_ = 0;
             for (size_t i = 0; i < mission_->numPeds(); i++) {
                 PedInstance *pPed = mission_->ped(i);
                 if (pPed->type() == PedInstance::kPedTypeCivilian &&

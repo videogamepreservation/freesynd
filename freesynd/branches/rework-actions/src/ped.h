@@ -43,6 +43,7 @@
 
 class Agent;
 class Mission;
+class Squad;
 class VehicleInstance;
 class Vehicle;
 
@@ -385,7 +386,7 @@ public:
     //! Method called when object is hit by a weapon shot.
     void handleHit(ShootableMapObject::DamageInflictType &d);
     //! Method called to check if ped has died
-    bool handleDeath(ShootableMapObject::DamageInflictType &d);
+    bool handleDeath(Mission *pMission, ShootableMapObject::DamageInflictType &d);
     bool handleDamage(ShootableMapObject::DamageInflictType *d);
 
     //! Method called when an agent try to persuad this ped
@@ -900,6 +901,9 @@ protected:
 
     //! Creates and insert a HitAction for the ped
     void insertHitAction(DamageInflictType &d);
+
+    //! When a ped dies, changes the persuaded owner/persuaded_group relation.
+    void updatePersuadedRelations(Squad *pSquad);
 protected:
     Ped *ped_;
     //! Type of Ped
@@ -956,11 +960,12 @@ protected:
     //! This flag tells if this is our agent, assuming it's an agent.
     bool is_our_;
     //! controller of ped - for persuaded
-    ShootableMapObject *owner_;
+    PedInstance *owner_;
     targetDescType last_firing_target_;
     //! points needed to persuade ped
     int persuasion_points_;
-    std::set <PedInstance *> persuaded_group_;
+    //! The group of peds that this ped has persuaded
+    std::set <PedInstance *> persuadedSet_;
     //! Tells whether the panic can react to panic or not
     bool panicImmuned_;
 
