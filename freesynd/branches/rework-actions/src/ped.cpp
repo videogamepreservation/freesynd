@@ -448,18 +448,25 @@ bool PedInstance::executeAction(int elapsed, Mission *pMission) {
         if (currentAction_->isFinished()) {
             if (health_ == 0) {
                 // Ped may have died during execution of a HitAction.
-                destroyAllActions();
+                destroyAllActions(true);
                 destroyUseWeaponAction();
             } else {
                 // current action is finished : go to next one
                 fs_actions::MovementAction *pNext = currentAction_->next();
-                delete currentAction_;
+
+                if (currentAction_->origin() != fs_actions::kOrigScript &&
+                        currentAction_->origin() != fs_actions::kOrigDefault) {
+                    delete currentAction_;
+                }
                 currentAction_ = pNext;
                 // If next action was suspended, resume it
                 if (currentAction_ != NULL && currentAction_->isSuspended()) {
                     currentAction_->resume(pMission, this);
                 }
             }
+        } else if (currentAction_->type() == fs_actions::Action::kActTypeReset) {
+            restoreDefaultAction();
+            break;
         } else {
             // current action is still running, so stop iterate now
             // we will continue next time
@@ -2086,6 +2093,7 @@ PedInstance::PedInstance(Ped *ped, uint16 id, int m, bool isOur) :
 
     behaviour_.setOwner(this);
     currentAction_ = NULL;
+    defaultAction_ = NULL;
     pUseWeaponAction_ = NULL;
     panicImmuned_ = false;
 }
@@ -2102,7 +2110,7 @@ PedInstance::~PedInstance()
     delete intelligence_;
     intelligence_ = NULL;
 
-    destroyAllActions();
+    destroyAllActions(true);
     destroyUseWeaponAction();
 }
 
@@ -2703,7 +2711,7 @@ bool PedInstance::handleDamage(ShootableMapObject::DamageInflictType *d) {
         health_ = 0;
         drop_actions_ = true;
         clearDestination();
-        destroyAllActions();
+        destroyAllActions(true);
         switchActionStateTo(PedInstance::pa_smDead);
         if ((desc_state_ & pd_smControlled) != 0 && owner_)
             owner_->rmvPersuaded(this);

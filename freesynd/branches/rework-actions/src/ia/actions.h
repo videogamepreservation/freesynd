@@ -78,6 +78,8 @@ namespace fs_actions {
             kActTypeHit,
             //! Action of shooting
             kActTypeShoot,
+            //! Action of resetting scripted action
+            kActTypeReset,
             kActTypeUndefined
         };
 
@@ -273,14 +275,15 @@ namespace fs_actions {
     };
 
     /*!
-     * This action is used in scripted action to reset all actions.
+     * This action does nothing but its presence makes all scripted to start again.
+     * 
      */
     class ResetScriptedAction : public MovementAction {
     public:
         ResetScriptedAction():
-            MovementAction(kActTypeUndefined, kOrigScript, false, true) {}
+            MovementAction(kActTypeReset, kOrigScript, false, true) {}
     protected:
-        bool doExecute(int elapsed, Mission *pMission, PedInstance *pPed);
+        bool doExecute(int elapsed, Mission *pMission, PedInstance *pPed) { return true; }
     };
 
     /*!

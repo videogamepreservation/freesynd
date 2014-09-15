@@ -309,13 +309,15 @@ public:
     //! Returns the ped's current movement action
     fs_actions::MovementAction * currentAction() { return currentAction_; }
     //! Removes all ped's actions
-    void destroyAllActions();
+    void destroyAllActions(bool includeDefault);
     //! Removes ped's action of using weapon
     void destroyUseWeaponAction();
     //! Execute the current action if any
     bool executeAction(int elapsed, Mission *pMission);
     //! Execute a weapon action if any
     bool executeUseWeaponAction(int elapsed, Mission *pMission);
+    //! Set the default action as the current one
+    void restoreDefaultAction();
     
     //! Adds action to walk to a given destination
     void addActionWalk(const PathNode &tpn, fs_actions::CreatOrigin origin, bool appendAction);
@@ -917,6 +919,11 @@ protected:
     Behaviour behaviour_;
     /*! Current action*/
     fs_actions::MovementAction *currentAction_;
+    /*! Default and scripted actions are actions that can be restored.
+     * A ped can have either one default action or several scripted actions but
+     * not both.
+     */
+    fs_actions::MovementAction *defaultAction_;
     /*! Current action of using a weapon.*/
     fs_actions::UseWeaponAction *pUseWeaponAction_;
 

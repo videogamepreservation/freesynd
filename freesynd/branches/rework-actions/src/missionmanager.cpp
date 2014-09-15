@@ -190,9 +190,16 @@ bool MissionManager::load_level_data(int n, LevelData::LevelDataAll &level_data)
 /*!
  *
  */
-void MissionManager::hackMissions(int n, uint8 *data) {
-    // Kenya map, adding additional walking points to scenarios
-    if (n == 40) {
+void MissionManager::hackMissions(int missionId, uint8 *data) {
+    if (missionId == 10) { // Western Europe
+        // Change the second destination of the car for ped #168
+        // as in original scenario that destination seems non walkable
+        uint8 *scen_start = data + 97128 + 8 * 8;
+        scen_start[4] = 74;
+        scen_start[5] = 120;
+        scen_start[6] = 2;
+    }else if (missionId == 40) {
+        // Kenya map, adding additional walking points to scenarios
         uint8 *scen_start = data + 97128 + 8 * 86;
         // coord offsets changing for next point
         scen_start[4] = ((scen_start[4] & 0xFE) | 1);
@@ -690,10 +697,11 @@ void MissionManager::createPeds(const LevelData::LevelDataAll &level_data, DataI
                                 p->createActQWait(as, 3000);
                                 as.actions.back().group_desc = PedInstance::gd_mStandWalk;
                             }
-                            if (v)
+                            if (v) {
                                 p->createActQUsingCar(as, &pn, v);
-                            else
+                            } else {
                                 p->createActQWalking(as, &pn, NULL, p->direction(), 0, true);
+                            }
                             //p->createActQWalking(as, &pn, NULL, -1);
                             if ((!notInVehicle) && offset_nxt == 0)
                                 p->createActQResetActionQueue(as);
@@ -795,7 +803,7 @@ void MissionManager::createScriptedActionsForPed(Mission *pMission, DataIndex &d
                 pPed->addActionTrigger(6 * 256, pn);
             }
             if (v) {
-                LOG(Log::k_FLG_GAME, "MissionManager","createScriptedActionsForPed", (" - Drive car to (%d, %d, %d)", pn.tileX(), pn.tileY(), pn.tileZ()))
+                LOG(Log::k_FLG_GAME, "MissionManager","createScriptedActionsForPed", (" - Drive car to (%d, %d, %d) (%d, %d)", pn.tileX(), pn.tileY(), pn.tileZ(), pn.offX(), pn.offY()))
                 VehicleInstance *pCar = dynamic_cast<VehicleInstance *>(v);
                 pPed->addActionDriveVehicle(fs_actions::kOrigScript, pCar, pn, true);
             } else {
@@ -821,7 +829,7 @@ void MissionManager::createScriptedActionsForPed(Mission *pMission, DataIndex &d
             } else {
                 PathNode pn(v->tileX(), v->tileY(), v->tileZ(),
                     v->offX(), v->offY());
-                LOG(Log::k_FLG_GAME, "MissionManager","createScriptedActionsForPed", (" - Drive to (%d, %d, %d)", pn.tileX(), pn.tileY(), pn.tileZ()))
+                LOG(Log::k_FLG_GAME, "MissionManager","createScriptedActionsForPed", (" - Drive to (%d, %d, %d) (%d, %d)", pn.tileX(), pn.tileY(), pn.tileZ(), pn.offX(), pn.offY()))
                 VehicleInstance *pCar = dynamic_cast<VehicleInstance *>(v);
                 pPed->addActionDriveVehicle(fs_actions::kOrigScript, pCar, pn, true);
             }

@@ -28,37 +28,58 @@
  * Adds the given action to the list of actions.
  * If appendAction is true, the action is added after all existing actions.
  * Else existing actions are destroyed and new action becomes the only one.
- * \param pAction The action to add
+ * \param pActionToAdd The action to add
  * \param appendAction If true action is append after all existing actions.
+ * \param addToDefault If true adds the action to the list of default actions.
  */
-void PedInstance::addMovementAction(fs_actions::MovementAction *pAction, bool appendAction) {
+void PedInstance::addMovementAction(fs_actions::MovementAction *pActionToAdd, bool appendAction) {
     if (currentAction_ == NULL) {
-        currentAction_ = pAction;
+        currentAction_ = pActionToAdd;
     } else if (appendAction) {
         fs_actions::MovementAction *pAct = currentAction_;
         while(pAct->next()) {
             pAct = pAct->next();
         }
-        pAct->setNext(pAction);
+        pAct->setNext(pActionToAdd);
     } else {
-        if (currentAction_->origin() != fs_actions::kOrigScript &&
-            currentAction_->origin() != fs_actions::kOrigDefault) {
-            // for scripted and default actions, just forget reference
-            // actions will be reused
-            destroyAllActions();
-        }
-        currentAction_ = pAction;
+        // for scripted and default actions, just forget reference because
+        // those actions will be reused
+        destroyAllActions(false);
+        currentAction_ = pActionToAdd;
+    }
+
+    if ((pActionToAdd->origin() == fs_actions::kOrigDefault ||
+            pActionToAdd->origin() == fs_actions::kOrigScript) &&
+            defaultAction_ == NULL) {
+        defaultAction_ = pActionToAdd;
     }
 }
 
 /*!
- * Removes all actions.
+ * Deletes all actions in the ped's list.
+ * \param includeDefault
  */
-void PedInstance::destroyAllActions() {
+void PedInstance::destroyAllActions(bool includeDefault) {
     while (currentAction_ != NULL) {
         fs_actions::MovementAction *pNext = currentAction_->next();
-        delete currentAction_;
+
+        if (currentAction_->origin() != fs_actions::kOrigScript &&
+                currentAction_->origin() != fs_actions::kOrigDefault) {
+            // for scripted and default actions, just forget reference because
+            // those actions are stored in the defaultActionLst field
+            delete currentAction_;
+        }
+
         currentAction_ = pNext;
+    }
+
+    if (includeDefault) {
+        while (defaultAction_ != NULL) {
+            fs_actions::MovementAction *pNext = defaultAction_->next();
+            delete defaultAction_;
+
+            defaultAction_ = pNext;
+        }
     }
 }
 
@@ -69,6 +90,23 @@ void PedInstance::destroyUseWeaponAction() {
     if (pUseWeaponAction_ != NULL) {
         delete pUseWeaponAction_;
         pUseWeaponAction_ = NULL;
+    }
+}
+
+/*!
+ * Set the default action as the current one.
+ */
+void PedInstance::restoreDefaultAction() {
+    if (defaultAction_) {
+        // before restoring, reset all default actions
+        fs_actions::MovementAction *pAction = defaultAction_;
+        while (pAction != NULL) {
+            pAction->reset();
+            pAction = pAction->next();
+        }
+
+        destroyAllActions(false);
+        currentAction_ = defaultAction_;
     }
 }
 

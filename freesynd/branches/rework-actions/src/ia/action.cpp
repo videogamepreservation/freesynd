@@ -299,18 +299,6 @@ bool EscapeAction::doExecute(int elapsed, Mission *pMission, PedInstance *pPed) 
 }
 
 /*!
- * 
- * \param elapsed Time elapsed since last frame
- * \param pMission Mission data
- * \param pPed The ped executing the action.
- */
-bool ResetScriptedAction::doExecute(int elapsed, Mission *pMission, PedInstance *pPed) {
-    setSucceeded();
-    printf("ResetScriptedAction : Not implemented\n");
-    return true;
-}
-
-/*!
  * Class constructor.
  * \param pTarget The ped to follow.
  */

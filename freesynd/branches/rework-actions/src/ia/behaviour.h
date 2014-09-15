@@ -163,8 +163,6 @@ private:
     fs_utils::Timer scoutTimer_;
     /*! True when ped is currently in panic.*/
     bool panicking_;
-    /*! */
-    fs_actions::MovementAction *pDefaultAction_;
 };
 
 #endif // IA_BEHAVIOUR_H_

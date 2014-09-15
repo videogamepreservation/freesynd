@@ -266,7 +266,7 @@ void SquadSelection::enterOrLeaveVehicle(Vehicle *pVehicle, bool addAction) {
                 pVehicle->clearDestination();
                 // tells the driver to stop
                 VehicleInstance *pVi = dynamic_cast<VehicleInstance *>(pVehicle);
-                pVi->getDriver()->destroyAllActions();
+                pVi->getDriver()->destroyAllActions(false);
             }
             // Ped can get off only if vehicle is stopped 
             // (ie trains only stop in stations)

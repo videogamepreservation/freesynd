@@ -38,7 +38,7 @@ Block g_Blocks[50] = {
     {"#CNTRY_20", 54000000, 54000000, 20, 30, 0, STAT_VERY_HAPPY, 0, 0, BLK_UNAVAIL, "10", 0, 0, 0},            // 4 - Scandinavia
     {"#CNTRY_18", 40000000, 40000000, 18, 30, 0, STAT_VERY_HAPPY, 0, 0, BLK_UNAVAIL, "6:12:13", 0, 0, 0},       // 5 - Ural
     {"#CNTRY_22", 54000000, 54000000, 22, 30, 0, STAT_VERY_HAPPY, 0, 0, BLK_UNAVAIL, "7:13", 0, 0, 0},          // 6 - Siberia
-    {"#CNTRY_12", 56000000, 56000000, 12, 30, 0, STAT_VERY_HAPPY, 0, 0, BLK_UNAVAIL, NULL, 0, 0, 0},            // 7 - KAMCHATKA
+    {"#CNTRY_12", 56000000, 56000000, 12, 30, 0, STAT_VERY_HAPPY, 0, 0, BLK_UNAVAIL, "0", 0, 0, 0},             // 7 - KAMCHATKA
     {"#CNTRY_21", 58000000, 58000000, 21, 30, 0, STAT_VERY_HAPPY, 0, 0, BLK_UNAVAIL, NULL, 0, 0, 0},            // 8 - YUKON
     {"#CNTRY_01", 48000000, 48000000, 1, 30, 0, STAT_VERY_HAPPY, 0, 0, BLK_UNAVAIL, "4", 0, 0, 0},              // 9 - West Eur.
     {"#CNTRY_15", 50000000, 50000000, 15, 30, 0, STAT_VERY_HAPPY, 0, 0, BLK_UNAVAIL, "11", 0, 0, 0},            // 10 - Central Eur.

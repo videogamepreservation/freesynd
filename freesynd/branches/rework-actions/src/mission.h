@@ -36,7 +36,6 @@
 #include "weapon.h"
 #include "map.h"
 #include "model/leveldata.h"
-//include "model/shot.h"
 #include "core/gameevent.h"
 
 class Vehicle;

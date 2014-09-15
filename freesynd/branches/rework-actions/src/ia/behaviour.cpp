@@ -139,7 +139,6 @@ void PersuaderBehaviourComponent::handleBehaviourEvent(Behaviour::BehaviourEvent
 PanicComponent::PanicComponent():
         BehaviourComponent(), scoutTimer_(500) {
     panicking_ = false;
-    pDefaultAction_ = NULL;
     // this component will be activated by event to
     // lower CPU consumption
     setEnabled(false);
@@ -172,7 +171,7 @@ void PanicComponent::execute(int elapsed, Mission *pMission, PedInstance *pPed) 
         } else if (pAction == NULL) {
             // ped has finished panicking and there no reason to panick
             // so continue walking normaly
-            pPed->addMovementAction(pDefaultAction_, false);
+            pPed->restoreDefaultAction();
             panicking_ = false;
         }
     }
@@ -186,7 +185,7 @@ void PanicComponent::handleBehaviourEvent(Behaviour::BehaviourEvent evtType, Ped
     case Behaviour::kBehvEvtPanicDisabled:
         setEnabled(false);
         if (panicking_) {
-            pPed->addMovementAction(pDefaultAction_, false);
+            pPed->restoreDefaultAction();
             panicking_ = false;
         }
         break;
@@ -234,10 +233,4 @@ void  PanicComponent::runAway(PedInstance *pPed, PedInstance *pArmedPed, fs_acti
     pAction->setmaxDistanceToWalk(kDistanceToRun);
     pPed->addMovementAction(pAction, false);
     panicking_ = true;
-
-    if (pWalkAction != NULL) {
-        // save and reset the default action
-        pDefaultAction_ = pWalkAction;
-        pDefaultAction_->reset();
-    }
 }
