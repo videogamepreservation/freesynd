@@ -33,8 +33,13 @@
 #include "model/shot.h"
 #include "ia/behaviour.h"
 
+//*************************************
+// Constant definition
+//*************************************
 const int PedInstance::kAgentMaxHealth = 16;
 const int PedInstance::kDefaultShootReactionTime = 200;
+const int PedInstance::kMaxDistanceForPersuadotron = 100;
+const uint32 PedInstance::kPlayerGroupId = 1;
 
 Ped::Ped() {
     memset(stand_anims_, 0, sizeof(stand_anims_));
@@ -586,7 +591,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
     }
 #if 0
 #ifdef _DEBUG
-    if ((desc_state_ & pd_smControlled) != 0) {
+    if (isPersuaded()) {
         for (uint32 indx = 0; indx < actions_queue_.size(); ++indx) {
             std::vector <actionQueueGroupType>::iterator it =
                 actions_queue_.begin() + indx;
@@ -1481,7 +1486,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                             it->main_act = std::distance(it->actions.begin(), searched);
                             if (obj_group_def_ == og_dmPolice
                                 // only non controlled will follow and wait
-                                && (desc_state_ & pd_smControlled) == 0)
+                                && !isPersuaded())
                             {
                                 // forcing showing a gun
                                 selectRequiredWeapon();
@@ -2075,7 +2080,7 @@ PedInstance::PedInstance(Ped *ped, uint16 id, int m, bool isOur) :
     obj_group_id_(0), old_obj_group_id_(0),
     drawn_anim_(PedInstance::ad_StandAnim),
     sight_range_(0), in_vehicle_(NULL),
-    owner_(NULL), persuasion_points_(0)
+    owner_(NULL)
 {
     hold_on_.wayFree = 0;
     rcv_damage_def_ = MapObject::ddmg_Ped;
@@ -2096,6 +2101,7 @@ PedInstance::PedInstance(Ped *ped, uint16 id, int m, bool isOur) :
     defaultAction_ = NULL;
     pUseWeaponAction_ = NULL;
     panicImmuned_ = false;
+    totalPersuasionPoints_ = 0;
 }
 
 PedInstance::~PedInstance()
@@ -2653,43 +2659,6 @@ bool PedInstance::handleDeath(Mission *pMission, ShootableMapObject::DamageInfli
     return health_ == 0;
 }
 
-/*!
- * Called when an agent tries to persuad this ped.
- * \param pAgent Agent trying to persuad
- */
-void PedInstance::handlePersuadedBy(PedInstance *pAgent) {
-    if (pAgent->canPersuade(persuasion_points_)) {
-
-        pAgent->addPersuaded(this);
-        setObjGroupID(pAgent->objGroupID());
-        pAgent->cpyEnemyDefs(enemy_group_defs_);
-        dropActQ();
-        owner_ = pAgent;
-        desc_state_ |= pd_smControlled;
-        friends_found_.clear();
-        hostiles_found_.clear();
-        hostile_desc_ = pAgent->hostileDesc();
-
-        // adding following behavior
-        PedInstance::actionQueueGroupType as;
-        as.group_id = 0;
-        as.group_desc = PedInstance::gd_mExclusive;
-        createActQWait(as, 2000);
-        as.main_act = as.actions.size() - 1;
-        as.origin_desc = fs_actions::kOrigEvent;
-        actions_queue_.push_back(as);
-
-        default_actions_.clear();
-        createDefQueue();
-
-        addDefActsToActions();
-
-        setDrawnAnim(PedInstance::ad_PersuadedAnim);
-        setPanicImmuned();
-        g_App.gameSounds().play(snd::PERSUADE);
-    }
-}
-
 bool PedInstance::handleDamage(ShootableMapObject::DamageInflictType *d) {
     if (health_ <= 0 || rcv_damage_def_ == MapObject::ddmg_Invulnerable
         || (d->dtype & rcv_damage_def_) == 0)
@@ -2713,7 +2682,7 @@ bool PedInstance::handleDamage(ShootableMapObject::DamageInflictType *d) {
         clearDestination();
         destroyAllActions(true);
         switchActionStateTo(PedInstance::pa_smDead);
-        if ((desc_state_ & pd_smControlled) != 0 && owner_)
+        if (isPersuaded())
             owner_->rmvPersuaded(this);
 
         switch (d->dtype) {
@@ -2848,7 +2817,7 @@ bool PedInstance::isFriendWith(PedInstance *p) {
         return true;
     if (p->isInEmulatedGroupDef(obj_group_id_, obj_group_def_)) {
         if (obj_group_def_ == og_dmPolice
-            && (desc_state_ & pd_smControlled) == 0)
+            && !isPersuaded())
         {
             friends_not_seen_.insert(p);
         }
@@ -2931,7 +2900,7 @@ int PedInstance::getDefaultSpeed()
         speed_new = (int)((float)speed_new * adrenaline_->getMultiplier());
     }
 
-    if (desc_state_ == PedInstance::pd_smControlled) {
+    if (isPersuaded()) {
         speed_new *= owner_->getSpeedOwnerBoost();
         speed_new >>= 1;
     }
@@ -3053,47 +3022,116 @@ bool PedInstance::hasAccessCard()
         && pMod->getVersion() == Mod::MOD_V3 ? true : false;
 }
 
-bool PedInstance::isPersuaded()
-{
-    return (desc_state_ & pd_smControlled) != 0
-        && obj_group_id_ == g_Session.getMission()->playersGroupID();
-}
-
-bool PedInstance::canPersuade(int points) {
+/*!
+ * Returns the number of points an agent must have to persuade
+ * a ped of given type. Civilians or criminals are always persuaded.
+ * \param type The type of the ped to persuade.
+ */
+uint16 PedInstance::getRequiredPointsToPersuade(PedType type) {
     Mod *pMod = slots_[Mod::MOD_BRAIN];
-    if (pMod) {
-        switch (pMod->getVersion()) {
-            case Mod::MOD_V1:
-                // /=2
-                points >>= 1;
-                break;
-            case Mod::MOD_V2:
-                // *=4
-                points <<= 2;
-                points /= 3;
-                break;
-            case Mod::MOD_V3:
-                // /=4
-                points >>= 2;
-                break;
+    uint16 points = 0;
+    if (type == kPedTypeGuard) {
+        if (!pMod) {
+            points = 4;
+        } else if (pMod->getVersion() == Mod::MOD_V1) {
+            points = 2;
+        } else {
+            points = 1;
         }
-        if (points == 0)
-            ++points;
+    } else if (type == kPedTypePolice) {
+        if (!pMod) {
+            points = 8;
+        } else if (pMod->getVersion() == Mod::MOD_V1) {
+            points = 4;
+        } else if (pMod->getVersion() == Mod::MOD_V2) {
+            points = 3;
+        } else if (pMod->getVersion() == Mod::MOD_V3) {
+            points = 2;
+        }
+    } else if (type == kPedTypeAgent) {
+        if (!pMod) {
+            points = 32;
+        } else if (pMod->getVersion() == Mod::MOD_V1) {
+            points = 16;
+        } else if (pMod->getVersion() == Mod::MOD_V2) {
+            points = 11;
+        } else if (pMod->getVersion() == Mod::MOD_V3) {
+            points = 8;
+        }
     }
-    // always 1
-    int points_avail = 1;
-    for (std::set <PedInstance *>::iterator it = persuadedSet_.begin();
-         it != persuadedSet_.end(); ++it)
-    {
-        // NOTE: mods influence "to persuade" points, but not
-        // of already persuaded
-        points_avail += (*it)->persuasionPoints();
-    }
-    return points <= points_avail;
+
+    return points;
 }
 
+/*!
+ * Return true if this agent can persuade the given ped.
+ * A ped can be persuaded if he's not already persuaded or
+ * if its persuasion points are less or equal than the agent
+ * total persuasion points.
+ * \param pOtherPed Ped to persuade.
+ */
+bool PedInstance::canPersuade(PedInstance *pOtherPed) {
+    if (!pOtherPed->isPersuaded() && pOtherPed->isAlive() &&
+            isCloseTo(pOtherPed, kMaxDistanceForPersuadotron)) {
+        uint16 points = getRequiredPointsToPersuade(pOtherPed->type());
+        return points <= totalPersuasionPoints_;
+    }
+
+    return false;
+}
+
+/*!
+ * Called when an agent tries to persuad this ped.
+ * \param pAgent Agent trying to persuad
+ */
+void PedInstance::handlePersuadedBy(PedInstance *pAgent) {
+    pAgent->addPersuaded(this);
+    setObjGroupID(pAgent->objGroupID());
+    pAgent->cpyEnemyDefs(enemy_group_defs_);
+    dropActQ();
+    owner_ = pAgent;
+    desc_state_ |= pd_smControlled;
+    friends_found_.clear();
+    hostiles_found_.clear();
+    hostile_desc_ = pAgent->hostileDesc();
+
+    // adding following behavior
+    PedInstance::actionQueueGroupType as;
+    as.group_id = 0;
+    as.group_desc = PedInstance::gd_mExclusive;
+    createActQWait(as, 2000);
+    as.main_act = as.actions.size() - 1;
+    as.origin_desc = fs_actions::kOrigEvent;
+    actions_queue_.push_back(as);
+
+    default_actions_.clear();
+    createDefQueue();
+
+    addDefActsToActions();
+
+    setDrawnAnim(PedInstance::ad_PersuadedAnim);
+    setPanicImmuned();
+    g_App.gameSounds().play(snd::PERSUADE);
+}
+
+/*! 
+ * Adds given ped to the list of persuaded peds by this agent.
+ * Increments the persuasion points of this ped depending on the type
+ * of persuaded ped.
+ * \param p Persuaded ped
+ */
 void PedInstance::addPersuaded(PedInstance *p) {
     persuadedSet_.insert(p);
+    switch(p->type()) {
+    case kPedTypeGuard:
+        totalPersuasionPoints_ +=  3;
+    case kPedTypePolice:
+        totalPersuasionPoints_ +=  4;
+    case kPedTypeAgent:
+        totalPersuasionPoints_ +=  32;
+    default:
+        totalPersuasionPoints_ +=  1;
+    }
 }
 
 void PedInstance::rmvPersuaded(PedInstance *p) {
@@ -3110,7 +3148,7 @@ void PedInstance::rmvPersuaded(PedInstance *p) {
  * \param pSquad List of available agents
  */
 void PedInstance::updatePersuadedRelations(Squad *pSquad) {
-    if (IS_FLAG_SET(desc_state_, pd_smControlled) && owner_ != NULL) {
+    if (isPersuaded()) {
         owner_->rmvPersuaded(this);
         owner_ = NULL;
     } else if (isOurAgent()) {

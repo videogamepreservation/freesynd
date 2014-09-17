@@ -854,7 +854,7 @@ void PedInstance::createDefQueue() {
         default_actions_.push_back(as);
     }
     as.actions.clear();
-    if ((desc_state_ & PedInstance::pd_smControlled) != 0) {
+    if (isPersuaded()) {
         createActQCheckOwner(as);
         as.group_desc = PedInstance::gd_mThink | PedInstance::gd_mFire;
         as.group_id = action_grp_id_++;

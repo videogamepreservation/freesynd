@@ -72,7 +72,6 @@ Mission::Mission(const LevelData::MapInfos & map_infos)
     max_y_ = READ_LE_UINT16(map_infos.max_y) / 2;
     cur_objective_ = 0;
     p_minimap_ = NULL;
-    players_group_id_ = 1;
     p_squad_ = new Squad();
 }
 

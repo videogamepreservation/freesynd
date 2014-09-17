@@ -167,6 +167,8 @@ public:
     static const int kAgentMaxHealth;
     //! Default time for a ped between two shoots
     static const int kDefaultShootReactionTime;
+    //! Id of the group for the player's agents
+    static const uint32 kPlayerGroupId;
     /*!
      * Type of Ped.
      */
@@ -279,12 +281,6 @@ public:
     void setSightRange(int new_sight_range) { sight_range_ = new_sight_range; }
     int sightRange() { return sight_range_; }
 
-    void setPersuasionPoints(int points) { persuasion_points_ = points; }
-    int persuasionPoints() {return persuasion_points_; }
-    bool canPersuade(int points);
-    void addPersuaded(PedInstance *p);
-    void rmvPersuaded(PedInstance *p);
-
     void showPath(int scrollX, int scrollY);
 
     bool switchActionStateTo(uint32 as);
@@ -391,7 +387,18 @@ public:
     bool handleDeath(Mission *pMission, ShootableMapObject::DamageInflictType &d);
     bool handleDamage(ShootableMapObject::DamageInflictType *d);
 
-    //! Method called when an agent try to persuad this ped
+    //*************************************
+    // Persuasion
+    //*************************************
+    //! Return true if ped is persuaded
+    bool isPersuaded() { return IS_FLAG_SET(desc_state_, pd_smControlled); }
+    //! Returns true if this ped can persuade that ped
+    bool canPersuade(PedInstance *pOtherPed);
+    //! Adds given ped to the list of persuaded peds by this agent
+    void addPersuaded(PedInstance *p);
+    //! Removes given ped to the list of persuaded peds by this agent
+    void rmvPersuaded(PedInstance *p);
+    //! Method called when an agent persuads this ped
     void handlePersuadedBy(PedInstance *pAgent);
 
     bool inSightRange(MapObject *t);
@@ -874,7 +881,6 @@ public:
 
     void getAccuracy(double &base_acc);
     bool hasAccessCard();
-    bool isPersuaded();
 
     void cpyEnemyDefs(Mmuu32_t &eg_defs) { eg_defs = enemy_group_defs_; }
     bool isArmed() { return (desc_state_ & pd_smArmed) != 0; }
@@ -904,9 +910,14 @@ protected:
     //! Creates and insert a HitAction for the ped
     void insertHitAction(DamageInflictType &d);
 
+    //! Returns the number of points an agent must have to persuade a ped of given type
+    uint16 getRequiredPointsToPersuade(PedType type);
     //! When a ped dies, changes the persuaded owner/persuaded_group relation.
     void updatePersuadedRelations(Squad *pSquad);
 protected:
+    //! Distance to persuade a ped
+    static const int kMaxDistanceForPersuadotron;
+
     Ped *ped_;
     //! Type of Ped
     PedType type_;
@@ -969,8 +980,8 @@ protected:
     //! controller of ped - for persuaded
     PedInstance *owner_;
     targetDescType last_firing_target_;
-    //! points needed to persuade ped
-    int persuasion_points_;
+    //! Points obtained by agents for persuading peds
+    uint16 totalPersuasionPoints_;
     //! The group of peds that this ped has persuaded
     std::set <PedInstance *> persuadedSet_;
     //! Tells whether the panic can react to panic or not

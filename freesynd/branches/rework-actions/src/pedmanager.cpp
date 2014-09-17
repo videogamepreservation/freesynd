@@ -286,7 +286,6 @@ void PedManager::initEnemyAgent(PedInstance *pPed) {
     pPed->addMod(g_gameCtrl.mods().getHighestVersion(Mod::MOD_BRAIN));
     pPed->setTimeBeforeCheck(400);
     pPed->setBaseModAcc(0.5);
-    pPed->setPersuasionPoints(32);
 }
 
 /*!
@@ -301,7 +300,6 @@ void PedManager::initGuard(PedInstance *pPed) {
     pPed->setBaseSpeed(192);
     pPed->setTimeBeforeCheck(300);
     pPed->setBaseModAcc(0.45);
-    pPed->setPersuasionPoints(4);
 }
 
 /*!
@@ -316,7 +314,6 @@ void PedManager::initPolice(PedInstance *pPed) {
     pPed->setBaseSpeed(160);
     pPed->setTimeBeforeCheck(400);
     pPed->setBaseModAcc(0.4);
-    pPed->setPersuasionPoints(8);
 } 
 
 /*!
@@ -332,7 +329,6 @@ void PedManager::initCivilian(PedInstance *pPed) {
     pPed->setBaseSpeed(128);
     pPed->setTimeBeforeCheck(600);
     pPed->setBaseModAcc(0.2);
-    pPed->setPersuasionPoints(1);
 
     pPed->behaviour().addComponent(new PanicComponent());
 } 
@@ -348,5 +344,4 @@ void PedManager::initCriminal(PedInstance *pPed) {
     pPed->setBaseSpeed(128);
     pPed->setTimeBeforeCheck(500);
     pPed->setBaseModAcc(0.2);
-    pPed->setPersuasionPoints(1);
 }

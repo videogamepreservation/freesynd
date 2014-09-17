@@ -250,7 +250,6 @@ public:
         bool checkTileOnly = false, double maxr = -1.0, double * distTo = NULL);
     void getInRangeAll(toDefineXYZ * cp, std::vector<ShootableMapObject *> & targets,
         uint8 mask, bool checkTileOnly = true, double maxr = -1.0);
-    uint32 playersGroupID() { return players_group_id_;}
 
     // map-tile surfaces
     // x + y * mmax_x_ + z * mmax_m_xy
@@ -309,11 +308,11 @@ protected:
 
     /*! Statistics : time, shots, ...*/
     MissionStats stats_;
-    // minimap in colours, map z = 0 tiles transformed based on
-    // walkdata->minimap_colours_ in function createMinimap
+    /*!
+     * minimap in colours, map z = 0 tiles transformed based on
+     * walkdata->minimap_colours_ in function createMinimap
+     */
     MiniMap *p_minimap_;
-   
-    uint32 players_group_id_;
     /*!
      * The squad selected for the mission. It contains only active agents.
      */

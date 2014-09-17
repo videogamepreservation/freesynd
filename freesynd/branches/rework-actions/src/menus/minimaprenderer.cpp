@@ -567,8 +567,7 @@ void GamePlayMinimapRenderer::drawPedestrians(uint8 * a_minimap) {
         {
             int px = mapToMiniMapX(tx + 1, ox);
             int py = mapToMiniMapY(ty + 1, oy);
-            if (p_ped->isPersuaded())
-            {
+            if (p_ped->isPersuaded()) {
                 // col_Yellow circle with a black or lightgreen border (blinking)
                 uint8 borderColor = (mm_timer_ped.state()) ? fs_cmn::kColorLightGreen : fs_cmn::kColorBlack;
                 drawPedCircle(a_minimap, px, py, fs_cmn::kColorYellow, borderColor);

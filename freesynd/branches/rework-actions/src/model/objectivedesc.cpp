@@ -69,8 +69,7 @@ void ObjPersuade::evaluate(Mission *pMission) {
     {
         // Target is dead -> mission is failed
         endObjective(false);
-    } else if (p->isPersuaded())
-    {
+    } else if (p->isPersuaded()) {
         endObjective(true);
     }
 }

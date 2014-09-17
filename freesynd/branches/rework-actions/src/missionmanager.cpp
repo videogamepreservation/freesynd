@@ -596,7 +596,7 @@ void MissionManager::createPeds(const LevelData::LevelDataAll &level_data, DataI
     std::map <uint32, std::string> obj_ids;
     // NOTE: not very useful way of remembering "Who is who"
     obj_ids[0] = "Undefined";
-    obj_ids[pMission->playersGroupID()] = "Players Agents or Persuaded";
+    obj_ids[PedInstance::kPlayerGroupId] = "Players Agents or Persuaded";
     obj_ids[2] = "Enemy Agents";
     obj_ids[3] = "Enemy Guards";
     obj_ids[4] = "Policemen";
@@ -608,7 +608,7 @@ void MissionManager::createPeds(const LevelData::LevelDataAll &level_data, DataI
         const LevelData::People & pedref = level_data.people[i];
         
         PedInstance *p =
-            peds.loadInstance(pedref, i, pMission->mapId(), pMission->playersGroupID());
+            peds.loadInstance(pedref, i, pMission->mapId(), PedInstance::kPlayerGroupId);
         if (p) {
             di.pindx[i] = pMission->numPeds();
             pMission->addPed(p);

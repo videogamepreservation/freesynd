@@ -121,9 +121,6 @@ private:
  */
 class PersuaderBehaviourComponent : public BehaviourComponent {
 public:
-    //! Amount of health regenerated each period
-    static const int kMaxDistanceForPersuadotron;
-
     PersuaderBehaviourComponent();
 
     void execute(int elapsed, Mission *pMission, PedInstance *pPed);

@@ -28,11 +28,11 @@
 #include "ia/behaviour.h"
 #include "ped.h"
 #include "mission.h"
+#include "core/squad.h"
 
 //*************************************
 // Constant definition
 //*************************************
-const int PersuaderBehaviourComponent::kMaxDistanceForPersuadotron = 100;
 const int CommonAgentBehaviourComponent::kRegeratesHealthStep = 1;
 const int PanicComponent::kScoutDistance = 1500;
 const int PanicComponent::kDistanceToRun = 500;
@@ -114,13 +114,11 @@ PersuaderBehaviourComponent::PersuaderBehaviourComponent():
 void PersuaderBehaviourComponent::execute(int elapsed, Mission *pMission, PedInstance *pPed) {
     // Check if Agent has selected his Persuadotron
     if (doUsePersuadotron_) {
-        for (size_t i = 0; i < pMission->numPeds(); i++) {
+        // iterate through all peds except our agents
+        for (size_t i = pMission->getSquad()->size(); i < pMission->numPeds(); i++) {
             PedInstance *pOtherPed = pMission->ped(i);
-            // Agent can only persuad peds from another group
-            if (pPed->objGroupID() != pOtherPed->objGroupID() &&
-                    pOtherPed->isAlive() &&
-                    pPed->isCloseTo(pOtherPed, kMaxDistanceForPersuadotron)) {
-                        pOtherPed->handlePersuadedBy(pPed);
+            if (pPed->canPersuade(pOtherPed)) {
+                pOtherPed->handlePersuadedBy(pPed);
             }
         }
     }
