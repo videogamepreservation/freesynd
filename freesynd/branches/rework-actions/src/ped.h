@@ -262,7 +262,7 @@ public:
         pa_smUsingCar = 0x0200,
         // passenger only
         pa_smInCar = 0x0400,
-        pa_smLeaveCar = 0x0800,
+        pa_smHitByPersuadotron = 0x0800,
         pa_smDead = 0x1000,
         // this object should be ignored in all Ai procedures
         pa_smUnavailable = 0x2000,
@@ -324,7 +324,7 @@ public:
     //! Adds a trigger to the actions
     void addActionTrigger(int32 range, const PathNode &loc);
     //! Adds action to follow a ped
-    void addActionFollowPed(PedInstance *pPed);
+    void addActionFollowPed(fs_actions::CreatOrigin origin, PedInstance *pPed);
     //! Adds action to put down weapon on the ground
     void addActionPutdown(uint8 weaponIndex, bool appendAction);
     //! Adds action to pick up weapon from the ground
@@ -341,6 +341,8 @@ public:
     void addActionShootAt(const PathNode &aimedPt);
     //! Adds action to use medikit
     void addActionUseMedikit();
+    //! Creates and insert a HitAction for the ped
+    void insertHitAction(DamageInflictType &d);
 
     //*************************************
     // Movement management
@@ -849,8 +851,6 @@ public:
         ShootableMapObject *tsmo, int32 dir = -1);
     void createActQUsingCar(actionQueueGroupType &as, PathNode *tpn,
         ShootableMapObject *tsmo);
-    void createActQLeaveCar(actionQueueGroupType &as,
-        ShootableMapObject *tsmo);
     void createActQWait(actionQueueGroupType& as, int tm_wait,
         uint8 desc = 0);
 
@@ -906,9 +906,6 @@ protected:
      * \param wi The selected weapon
      */
     void handleWeaponSelected(WeaponInstance * wi);
-
-    //! Creates and insert a HitAction for the ped
-    void insertHitAction(DamageInflictType &d);
 
     //! Returns the number of points an agent must have to persuade a ped of given type
     uint16 getRequiredPointsToPersuade(PedType type);

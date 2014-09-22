@@ -227,13 +227,7 @@ void SquadSelection::followPed(PedInstance *pPed, bool addAction) {
     {
         PedInstance *pAgent = *it;
         if (!pAgent->inVehicle()) { // Agent must not be in a vehicle
-            /*PedInstance::actionQueueGroupType as;
-            pAgent->createActQFollowing(as, pPed, 0, 192);
-            as.main_act = as.actions.size() - 1;
-            as.group_desc = PedInstance::gd_mStandWalk;
-            as.origin_desc = fs_actions::kOrigUser;
-            pAgent->addAction(as, addAction);*/
-            pAgent->addActionFollowPed(pPed);
+            pAgent->addActionFollowPed(fs_actions::kOrigUser, pPed);
         }
     }
 }

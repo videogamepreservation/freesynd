@@ -227,6 +227,9 @@ bool PedInstance::switchActionStateTo(uint32 as) {
         case pa_smHitByLaser:
             state_ = pa_smHitByLaser;
             break;
+        case pa_smHitByPersuadotron:
+            state_ = pa_smHitByPersuadotron;
+            break;
         case pa_smFiring:
             state_ |= pa_smFiring;
             break;
@@ -251,9 +254,6 @@ bool PedInstance::switchActionStateTo(uint32 as) {
             break;
         case pa_smInCar:
             state_ = pa_smStanding | pa_smInCar;
-            break;
-        case pa_smLeaveCar:
-            state_ = pa_smStanding | pa_smLeaveCar;
             break;
         case pa_smDead:
             state_ = pa_smDead;
@@ -284,6 +284,7 @@ bool PedInstance::switchActionStateFrom(uint32 as) {
             break;
         case pa_smHit:
         case pa_smHitByLaser:
+        case pa_smHitByPersuadotron:
             state_ = pa_smStanding;
             break;
         case pa_smFiring:
@@ -311,9 +312,6 @@ bool PedInstance::switchActionStateFrom(uint32 as) {
             break;
         case pa_smInCar:
             state_ &= pa_smAll ^ (pa_smStanding | pa_smInCar);
-            break;
-        case pa_smLeaveCar:
-            state_ = pa_smStanding;
             break;
         case pa_smDead:
             state_ = pa_smDead;
@@ -359,6 +357,8 @@ void PedInstance::setActionStateToDrawnAnim(void) {
         setDrawnAnim(PedInstance::ad_HitAnim);
     } else if ((state_ & pa_smHitByLaser) != 0) {
         setDrawnAnim(PedInstance::ad_VaporizeAnim);
+    } else if (IS_FLAG_SET(state_, pa_smHitByPersuadotron)) {
+        setDrawnAnim(PedInstance::ad_PersuadedAnim);
     }
 #ifdef _DEBUG
     if (state_ ==  pa_smNone)
@@ -3071,6 +3071,12 @@ uint16 PedInstance::getRequiredPointsToPersuade(PedType type) {
  * \param pOtherPed Ped to persuade.
  */
 bool PedInstance::canPersuade(PedInstance *pOtherPed) {
+    fs_actions::Action *pAction = pOtherPed->currentAction();
+    if (pAction != NULL && pAction->type() == fs_actions::Action::kActTypeHit) {
+        // cannot persuade a ped if he's currently being hit
+        return false;
+    }
+
     if (!pOtherPed->isPersuaded() && pOtherPed->isAlive() &&
             isCloseTo(pOtherPed, kMaxDistanceForPersuadotron)) {
         uint16 points = getRequiredPointsToPersuade(pOtherPed->type());
@@ -3086,32 +3092,23 @@ bool PedInstance::canPersuade(PedInstance *pOtherPed) {
  */
 void PedInstance::handlePersuadedBy(PedInstance *pAgent) {
     pAgent->addPersuaded(this);
+    SET_FLAG(desc_state_, pd_smControlled);
     setObjGroupID(pAgent->objGroupID());
-    pAgent->cpyEnemyDefs(enemy_group_defs_);
-    dropActQ();
     owner_ = pAgent;
-    desc_state_ |= pd_smControlled;
+    setPanicImmuned();
+
+    clearDestination();
+    destroyAllActions(true);
+    // set follow owner as new default
+    addActionFollowPed(fs_actions::kOrigDefault, pAgent);
+    behaviour_.replaceAllcomponentsBy(new PersuadedBehaviourComponent());
+
+    /////////////////// Check if still useful ////////////
+    pAgent->cpyEnemyDefs(enemy_group_defs_);
     friends_found_.clear();
     hostiles_found_.clear();
     hostile_desc_ = pAgent->hostileDesc();
-
-    // adding following behavior
-    PedInstance::actionQueueGroupType as;
-    as.group_id = 0;
-    as.group_desc = PedInstance::gd_mExclusive;
-    createActQWait(as, 2000);
-    as.main_act = as.actions.size() - 1;
-    as.origin_desc = fs_actions::kOrigEvent;
-    actions_queue_.push_back(as);
-
-    default_actions_.clear();
-    createDefQueue();
-
-    addDefActsToActions();
-
-    setDrawnAnim(PedInstance::ad_PersuadedAnim);
-    setPanicImmuned();
-    g_App.gameSounds().play(snd::PERSUADE);
+    //////////////////////////////////////////////////////
 }
 
 /*! 

@@ -38,6 +38,10 @@ const int PanicComponent::kScoutDistance = 1500;
 const int PanicComponent::kDistanceToRun = 500;
 
 Behaviour::~Behaviour() {
+    destroyComponents();
+}
+
+void Behaviour::destroyComponents() {
     while(compLst_.size() != 0) {
         BehaviourComponent *pComp = compLst_.front();
         compLst_.pop_front();
@@ -54,6 +58,14 @@ void Behaviour::handleBehaviourEvent(BehaviourEvent evtType) {
 
 void Behaviour::addComponent(BehaviourComponent *pComp) {
     compLst_.push_back(pComp);
+}
+
+/*!
+ * Destroy existing components and set given one as new one
+ */
+void Behaviour::replaceAllcomponentsBy(BehaviourComponent *pComp) {
+    destroyComponents();
+    addComponent(pComp);
 }
 
 /*!
@@ -118,7 +130,10 @@ void PersuaderBehaviourComponent::execute(int elapsed, Mission *pMission, PedIns
         for (size_t i = pMission->getSquad()->size(); i < pMission->numPeds(); i++) {
             PedInstance *pOtherPed = pMission->ped(i);
             if (pPed->canPersuade(pOtherPed)) {
-                pOtherPed->handlePersuadedBy(pPed);
+                ShootableMapObject::DamageInflictType dmg;
+                dmg.dtype = MapObject::dmg_Persuasion;
+                dmg.d_owner = pPed;
+                pOtherPed->insertHitAction(dmg);
             }
         }
     }
@@ -132,6 +147,25 @@ void PersuaderBehaviourComponent::handleBehaviourEvent(Behaviour::BehaviourEvent
     case Behaviour::kBehvEvtPersuadotronDeactivated:
         doUsePersuadotron_ = false;
     }
+}
+
+PersuadedBehaviourComponent::PersuadedBehaviourComponent():
+        BehaviourComponent(), checkWeaponTimer_(1000) {
+
+}
+
+void PersuadedBehaviourComponent::execute(int elapsed, Mission *pMission, PedInstance *pPed) {
+    // To be completed
+    if (checkWeaponTimer_.update(elapsed)) {
+        WeaponInstance *pWeapon = pPed->selectedWeapon();
+        if (pWeapon && pWeapon->ammoRemaining() == 0) {
+            pPed->addActionPutdown(0, false);
+        }
+    }
+}
+
+void PersuadedBehaviourComponent::handleBehaviourEvent(Behaviour::BehaviourEvent evtType, PedInstance *pPed) {
+
 }
 
 PanicComponent::PanicComponent():

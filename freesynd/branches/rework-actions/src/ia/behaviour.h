@@ -63,10 +63,14 @@ public:
     void setOwner(PedInstance *pPed) { pThisPed_ = pPed; }
     //! Adds a component to the behaviour
     void addComponent(BehaviourComponent *pComp);
+    //! Destroy existing components and set given one as new one
+    void replaceAllcomponentsBy(BehaviourComponent *pComp);
 
     virtual void execute(int elapsed, Mission *pMission);
 
     virtual void handleBehaviourEvent(BehaviourEvent evtType);
+protected:
+    void destroyComponents();
 protected:
     /*! The ped that use this behaviour.*/
     PedInstance *pThisPed_;
@@ -129,6 +133,21 @@ public:
 private:
     /*! Flag to indicate an agent can use his persuadotron.*/
     bool doUsePersuadotron_;
+};
+
+/*!
+ * Component for user of Persuadotron. Only our agents use this component.
+ */
+class PersuadedBehaviourComponent : public BehaviourComponent {
+public:
+    PersuadedBehaviourComponent();
+
+    void execute(int elapsed, Mission *pMission, PedInstance *pPed);
+
+    void handleBehaviourEvent(Behaviour::BehaviourEvent evtType, PedInstance *pPed);
+private:
+    //! used for delaying checking of nearby weapon search
+    fs_utils::Timer checkWeaponTimer_;
 };
 
 /*!

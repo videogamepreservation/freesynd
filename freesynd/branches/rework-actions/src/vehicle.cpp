@@ -804,7 +804,7 @@ bool VehicleInstance::move_vehicle(int elapsed)
  * \param d Damage description
  */
 void VehicleInstance::handleHit(ShootableMapObject::DamageInflictType &d) {
-    if (health_ <= 0 || d.dtype == MapObject::dmg_Persuasion)
+    if (health_ <= 0)
         return;
 
     decreaseHealth(d.dvalue);

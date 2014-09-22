@@ -144,8 +144,8 @@ void PedInstance::addActionTrigger(int32 range, const PathNode & loc) {
     addMovementAction(action, true);
 }
 
-void PedInstance::addActionFollowPed(PedInstance *pPed) {
-    fs_actions::FollowAction *pAction = new fs_actions::FollowAction(pPed);
+void PedInstance::addActionFollowPed(fs_actions::CreatOrigin origin, PedInstance *pPed) {
+    fs_actions::FollowAction *pAction = new fs_actions::FollowAction(origin, pPed);
     addMovementAction(pAction, false);
 }
 
@@ -209,7 +209,7 @@ void PedInstance::insertHitAction(DamageInflictType &d) {
             // it's an explosion : walk and burn
             pHitAct = new fs_actions::WalkBurnHitAction(d);
         }
-    } else if (d.dtype & dmg_Explosion) {
+    } else if (d.dtype == dmg_Explosion) {
         if (hasMinimumVersionOfMod(Mod::MOD_CHEST, Mod::MOD_V2)) {
             pHitAct = new fs_actions::RecoilHitAction(d);
         } else {
@@ -218,11 +218,13 @@ void PedInstance::insertHitAction(DamageInflictType &d) {
     } else if (d.dtype & (dmg_Bullet | dmg_Collision)) {
         // When hit by a bullet or collision, ped is ejected
         pHitAct = new fs_actions::RecoilHitAction(d);
-    } else if (d.dtype & dmg_Burn) {
+    } else if (d.dtype == dmg_Burn) {
         pHitAct = new fs_actions::WalkBurnHitAction(d);
-    } else if (d.dtype & dmg_Laser) {
+    } else if (d.dtype == dmg_Laser) {
         // When hit by a laser, ped is vaporized
         pHitAct = new fs_actions::LaserHitAction(d);
+    } else if (d.dtype == dmg_Persuasion) {
+        pHitAct = new fs_actions::PersuadedHitAction(d);
     }
 
     if (pHitAct != NULL) {
@@ -575,20 +577,6 @@ void PedInstance::createActQUsingCar(actionQueueGroupType &as, PathNode *tpn,
     aq.as = PedInstance::pa_smNone;
     aq.group_desc = PedInstance::gd_mStandWalk;
     aq.act_exec = PedInstance::ai_aUseObject;
-    as.actions.push_back(aq);
-}
-
-void PedInstance::createActQLeaveCar(actionQueueGroupType &as,
-        ShootableMapObject *tsmo)
-{
-    as.state = 1;
-    actionQueueType aq;
-    aq.as = PedInstance::pa_smLeaveCar;
-    aq.act_exec = PedInstance::ai_aLoseControl;
-    aq.state = 1;
-    aq.target.desc = 2;
-    aq.target.t_smo = tsmo;
-    aq.group_desc = PedInstance::gd_mExclusive;
     as.actions.push_back(aq);
 }
 

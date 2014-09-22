@@ -294,7 +294,7 @@ namespace fs_actions {
     class FollowAction : public MovementAction {
     public:
         //! Walt to given point
-        FollowAction(PedInstance *pTarget);
+        FollowAction(fs_actions::CreatOrigin origin, PedInstance *pTarget);
 
     protected:
         void doStart(Mission *pMission, PedInstance *pPed);
@@ -457,6 +457,18 @@ namespace fs_actions {
         int moveDirection_;
         /*! Duration of burning.*/
         fs_utils::Timer burnTimer_;
+    };
+
+    /*!
+     * This action is used to represent a hit by a laser.
+     */
+    class PersuadedHitAction : public HitAction {
+    public:
+        //! 
+        PersuadedHitAction(ShootableMapObject::DamageInflictType &d);
+    protected:
+        void doStart(Mission *pMission, PedInstance *pPed);
+        bool doExecute(int elapsed, Mission *pMission, PedInstance *pPed);
     };
 
     /*!

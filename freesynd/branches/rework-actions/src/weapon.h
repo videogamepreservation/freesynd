@@ -125,10 +125,6 @@ public:
         return (shot_property_ & Weapon::spe_CanShoot) != 0;
     }
 
-    bool doesMentalDmg() {
-        return (dmg_type_ & MapObject::dmg_Persuasion) != 0;
-    }
-
     bool doesPhysicalDmg() {
         return (dmg_type_ & MapObject::dmg_Physical) != 0;
     }
@@ -363,10 +359,6 @@ public:
 
     bool canShoot() {
         return pWeaponClass_->canShoot();
-    }
-
-    bool doesMentalDmg() {
-        return pWeaponClass_->doesMentalDmg();
     }
 
     bool doesPhysicalDmg() {

@@ -26,6 +26,7 @@
  ************************************************************************/
 
 #include "ia/actions.h"
+#include "app.h"
 #include "ped.h"
 #include "weapon.h"
 #include "vehicle.h"
@@ -302,8 +303,8 @@ bool EscapeAction::doExecute(int elapsed, Mission *pMission, PedInstance *pPed) 
  * Class constructor.
  * \param pTarget The ped to follow.
  */
-FollowAction::FollowAction(PedInstance *pTarget) :
-MovementAction(kActTypeUndefined, kOrigUser) {
+FollowAction::FollowAction(fs_actions::CreatOrigin origin, PedInstance *pTarget) :
+MovementAction(kActTypeUndefined, origin) {
     pTarget_ = pTarget;
     targetState_ = PedInstance::pa_smWalking;
 }
@@ -605,6 +606,36 @@ bool WalkBurnHitAction::doExecute(int elapsed, Mission *pMission, PedInstance *p
         }
     }
 
+    return true;
+}
+
+PersuadedHitAction::PersuadedHitAction(ShootableMapObject::DamageInflictType &d) : 
+HitAction(kOrigAction, d) {
+    targetState_ = PedInstance::pa_smHitByPersuadotron;
+}
+
+/*!
+ * 
+ * \param pMission Mission data
+ * \param pPed The ped executing the action.
+ */
+void PersuadedHitAction::doStart(Mission *pMission, PedInstance *pPed) {
+    status_ = kActStatusWaitForAnim;
+    g_App.gameSounds().play(snd::PERSUADE);
+}
+
+/*!
+ * 
+ * \param elapsed Time elapsed since last frame
+ * \param pMission Mission data
+ * \param pPed The ped executing the action.
+ */
+bool PersuadedHitAction::doExecute(int elapsed, Mission *pMission, PedInstance *pPed) {
+    if (status_ == kActStatusRunning) {
+        PedInstance *pAgent = static_cast<PedInstance *>(damage_.d_owner);
+        pPed->handlePersuadedBy(pAgent);
+        setSucceeded();
+    }
     return true;
 }
 
