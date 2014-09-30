@@ -92,6 +92,7 @@ Mission::~Mission()
         delete statics_[i];
     for (unsigned int i = 0; i < objectives_.size(); i++)
         delete objectives_[i];
+    armedPedsVec_.clear();
     clrSurfaces();
 
     if (p_minimap_) {
@@ -106,6 +107,19 @@ Mission::~Mission()
 void Mission::delPrjShot(size_t i) {
     delete prj_shots_[i];
     prj_shots_.erase((prj_shots_.begin() + i));
+}
+
+/*!
+ * Removes given ped from the list of armed peds.
+ * \param pPed The ped to remove
+ */
+void Mission::removeArmedPed(PedInstance *pPed) {
+    for (size_t i = 0; i < armedPedsVec_.size();  i++) {
+        if (pPed == armedPedsVec_[i]) {
+            armedPedsVec_.erase(armedPedsVec_.begin() + i);
+            break;
+        }
+    }
 }
 
 /*!

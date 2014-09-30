@@ -52,10 +52,10 @@ public:
         kBehvEvtPersuadotronDeactivated,
         //! An ped has been hit
         kBehvEvtHit,
-        //! Event to activate the panic component
-        kBehvEvtPanicEnabled,
-        //! Event to deactivate the panic component
-        kBehvEvtPanicDisabled
+        //! A ped has shown his weapon
+        kBehvEvtWeaponOut,
+        //! A ped has cleared his weapon
+        kBehvEvtWeaponCleared
     };
 
     virtual ~Behaviour();
@@ -68,7 +68,7 @@ public:
 
     virtual void execute(int elapsed, Mission *pMission);
 
-    virtual void handleBehaviourEvent(BehaviourEvent evtType);
+    virtual void handleBehaviourEvent(BehaviourEvent evtType, void *pCtxt = NULL);
 protected:
     void destroyComponents();
 protected:
@@ -92,7 +92,7 @@ public:
 
     virtual void execute(int elapsed, Mission *pMission, PedInstance *pPed) = 0;
 
-    virtual void handleBehaviourEvent(Behaviour::BehaviourEvent evtType, PedInstance *pPed){};
+    virtual void handleBehaviourEvent(PedInstance *pPed, Behaviour::BehaviourEvent evtType, void *pCtxt){};
 
 protected:
     bool enabled_;
@@ -112,7 +112,7 @@ public:
 
     void execute(int elapsed, Mission *pMission, PedInstance *pPed);
 
-    void handleBehaviourEvent(Behaviour::BehaviourEvent evtType, PedInstance *pPed);
+    void handleBehaviourEvent(PedInstance *pPed, Behaviour::BehaviourEvent evtType, void *pCtxt);
 private:
     /*! Flag to indicate whether ped can regenerate his health.*/
     bool doRegenerates_;
@@ -129,7 +129,7 @@ public:
 
     void execute(int elapsed, Mission *pMission, PedInstance *pPed);
 
-    void handleBehaviourEvent(Behaviour::BehaviourEvent evtType, PedInstance *pPed);
+    void handleBehaviourEvent(PedInstance *pPed, Behaviour::BehaviourEvent evtType, void *pCtxt);
 private:
     /*! Flag to indicate an agent can use his persuadotron.*/
     bool doUsePersuadotron_;
@@ -144,7 +144,7 @@ public:
 
     void execute(int elapsed, Mission *pMission, PedInstance *pPed);
 
-    void handleBehaviourEvent(Behaviour::BehaviourEvent evtType, PedInstance *pPed);
+    void handleBehaviourEvent(PedInstance *pPed, Behaviour::BehaviourEvent evtType, void *pCtxt);
 private:
     //! used for delaying checking of nearby weapon search
     fs_utils::Timer checkWeaponTimer_;
@@ -167,7 +167,7 @@ public:
 
     void execute(int elapsed, Mission *pMission, PedInstance *pPed);
 
-    void handleBehaviourEvent(Behaviour::BehaviourEvent evtType, PedInstance *pPed);
+    void handleBehaviourEvent(PedInstance *pPed, Behaviour::BehaviourEvent evtType, void *pCtxt);
 private:
     //! Checks whether there is an armed ped next to the ped : returns that ped
     PedInstance * findNearbyArmedPed(Mission *pMission, PedInstance *pPed);

@@ -1475,30 +1475,21 @@ void GameplayMenu::handleGameEvent(GameEvent evt) {
         PedInstance *p_ped = static_cast<PedInstance *> (evt.pCtxt);
         updateSelectionForDeadAgent(p_ped);
     } else if (evt.type == GameEvent::kEvtWeaponOut) {
-        // some ped has shown a weapon, activate panic among civilians
-        cntArmedPed_ += 1;
-        if (cntArmedPed_ == 1) {
-            for (size_t i = 0; i < mission_->numPeds(); i++) {
-                PedInstance *pPed = mission_->ped(i);
-                if (pPed->type() == PedInstance::kPedTypeCivilian &&
-                        !pPed->isPanicImmuned()) {
-                    pPed->behaviour().handleBehaviourEvent(Behaviour::kBehvEvtPanicEnabled);
-                }
+        PedInstance *pPedSource = static_cast<PedInstance *> (evt.pCtxt);
+        mission_->addArmedPed(pPedSource);
+        for (size_t i = 0; i < mission_->numPeds(); i++) {
+            PedInstance *pPed = mission_->ped(i);
+            if (pPed != pPedSource) {
+                pPed->behaviour().handleBehaviourEvent(Behaviour::kBehvEvtWeaponOut, pPedSource);
             }
         }
     } else if (evt.type == GameEvent::kEvtWeaponCleared) {
-        // some ped has put his weapon away, deactivate panic among civilians
-        // we check value just to be sure not to go out of range
-        if (cntArmedPed_ > 1) {
-            cntArmedPed_ -= 1;
-        } else if (cntArmedPed_ == 1) {
-            cntArmedPed_ = 0;
-            for (size_t i = 0; i < mission_->numPeds(); i++) {
-                PedInstance *pPed = mission_->ped(i);
-                if (pPed->type() == PedInstance::kPedTypeCivilian &&
-                        !pPed->isPanicImmuned()) {
-                    pPed->behaviour().handleBehaviourEvent(Behaviour::kBehvEvtPanicDisabled);
-                }
+        PedInstance *pPedSource = static_cast<PedInstance *> (evt.pCtxt);
+        mission_->removeArmedPed(pPedSource);
+        for (size_t i = 0; i < mission_->numPeds(); i++) {
+            PedInstance *pPed = mission_->ped(i);
+            if (pPed != pPedSource) {
+                pPed->behaviour().handleBehaviourEvent(Behaviour::kBehvEvtWeaponCleared, pPedSource);
             }
         }
     }

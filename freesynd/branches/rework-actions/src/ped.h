@@ -901,11 +901,8 @@ protected:
      * \param wi The deselected weapon
      */
     void handleWeaponDeselected(WeaponInstance * wi);
-    /*!
-     * Called when a weapon has been selected.
-     * \param wi The selected weapon
-     */
-    void handleWeaponSelected(WeaponInstance * wi);
+    //! See WeaponHolder::handleWeaponSelected()
+    void handleWeaponSelected(WeaponInstance * wi, WeaponInstance * previousWeapon);
 
     //! Returns the number of points an agent must have to persuade a ped of given type
     uint16 getRequiredPointsToPersuade(PedType type);

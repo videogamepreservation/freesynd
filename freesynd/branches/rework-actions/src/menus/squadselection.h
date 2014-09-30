@@ -42,8 +42,14 @@ class SquadSelection {
       */
      class Iterator {
          public:
-            Iterator(size_t idx, SquadSelection *pSel) : idx_(idx), pSel_(pSel) {}
-            ~Iterator() {}
+            Iterator(size_t idx, SquadSelection *pSel) {
+                idx_ = idx;
+                pSel_ = pSel;
+            }
+
+            ~Iterator() {
+                idx_ = idx_;
+            }
 
             // The assignment and relational operators are straightforward
             Iterator& operator=(const Iterator& other)

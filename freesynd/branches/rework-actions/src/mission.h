@@ -210,6 +210,29 @@ public:
      */
     void delPrjShot(size_t i);
 
+    /*!
+     * Adds the given PedInstance to the list of armed peds.
+     * \param pPed The ped to add
+     */
+    void addArmedPed(PedInstance *pPed) {
+        armedPedsVec_.push_back(pPed);
+    }
+    /*!
+     * Returns the number of currently armed peds.
+     */
+    size_t numArmedPeds() { return armedPedsVec_.size(); }
+    /*!
+     * Return the PedInstance at the given index.
+     * \param i Index of the projectile
+     * \return The ped found.
+     */
+    PedInstance *armedPedAtIndex(size_t i) { return armedPedsVec_[i]; }
+    /*!
+     * Removes given ped from the list of armed peds.
+     * \param pPed The ped to remove
+     */
+    void removeArmedPed(PedInstance *pPed);
+
     /*! Return the mission statistics. */
     MissionStats *stats() { return &stats_; }
 
@@ -284,6 +307,11 @@ protected:
     std::vector<Static *> statics_;
     std::vector<SFXObject *> sfx_objects_;
     std::vector<ProjectileShot *> prj_shots_;
+    /*!
+     * A vector constantly updated with the peds that hold a weapon.
+     * It's used for performance reasons.
+     */
+    std::vector<PedInstance *> armedPedsVec_;
 
     std::vector <ObjectiveDesc *> objectives_;
     //std::vector <ObjectiveDesc> sub_objectives_;

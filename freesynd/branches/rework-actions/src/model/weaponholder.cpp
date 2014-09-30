@@ -116,20 +116,15 @@ void WeaponHolder::removeAllWeapons() {
  * Calls onWeaponDeselected() and onWeaponSelected().
  */
 void WeaponHolder::selectWeapon(uint8 n) {
-    bool noWeaponSelected = selected_weapon_ == kNoWeaponSelected;
     assert(n < weapons_.size());
     WeaponInstance *pNewWeapon = weapons_[n];
     if (canSelectWeapon(pNewWeapon)) {
-        // First deselect current weapon
-        deselectWeapon();
+        // First deselect current weapon if any
+        WeaponInstance *prevSelectedWeapon = deselectWeapon();
 
         selected_weapon_ = n;
-        handleWeaponSelected(pNewWeapon);
+        handleWeaponSelected(pNewWeapon, prevSelectedWeapon);
         updtPreferedWeapon();
-
-        if (noWeaponSelected && selectedWeapon()->canShoot()) {
-            GameEvent::sendEvt(GameEvent::kMission, GameEvent::kEvtWeaponOut);
-        }
     }
 }
 

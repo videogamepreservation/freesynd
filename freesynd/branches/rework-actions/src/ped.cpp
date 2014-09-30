@@ -2299,8 +2299,9 @@ void PedInstance::handleWeaponDeselected(WeaponInstance * wi) {
 /*!
  * Called when a weapon has been selected.
  * \param wi The selected weapon
+ * \param previousWeapon The previous selected weapon (can be null if no weapon was selected)
  */
-void PedInstance::handleWeaponSelected(WeaponInstance * wi) {
+void PedInstance::handleWeaponSelected(WeaponInstance * wi, WeaponInstance * previousWeapon) {
     if (wi->usesAmmo()) {
         if (wi->ammoRemaining() == 0) {
             desc_state_ |= pd_smNoAmmunition;
@@ -2331,6 +2332,14 @@ void PedInstance::handleWeaponSelected(WeaponInstance * wi) {
     case Weapon::Persuadatron:
         behaviour_.handleBehaviourEvent(Behaviour::kBehvEvtPersuadotronActivated);
         break;
+    }
+
+    if (previousWeapon == NULL && selectedWeapon()->canShoot()) {
+        // alert if it's the first time the ped shows a shooting weapon
+        GameEvent::sendEvt(GameEvent::kMission, GameEvent::kEvtWeaponOut, this);
+    } else if (previousWeapon != NULL && previousWeapon->canShoot() && !selectedWeapon()->canShoot()) {
+        // or alert if ped go from a shooting weapon to a no shooting weapon like the persuadotron
+        GameEvent::sendEvt(GameEvent::kMission, GameEvent::kEvtWeaponCleared, this);
     }
 }
 
@@ -2620,7 +2629,7 @@ bool PedInstance::handleDeath(Mission *pMission, ShootableMapObject::DamageInfli
         updatePersuadedRelations(pMission->getSquad());
 
         if (selectedWeapon() && selectedWeapon()->canShoot()) {
-            GameEvent::sendEvt(GameEvent::kMission, GameEvent::kEvtWeaponCleared);
+            GameEvent::sendEvt(GameEvent::kMission, GameEvent::kEvtWeaponCleared, this);
         }
 
         switch (d.dtype) {

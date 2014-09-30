@@ -127,8 +127,9 @@ protected:
     /*!
      * Called when a weapon has been selected.
      * \param wi The selected weapon
+     * \param previousWeapon The previous selected weapon (can be null if no weapon was selected)
      */
-    virtual void handleWeaponSelected(WeaponInstance * wi) {}
+    virtual void handleWeaponSelected(WeaponInstance * wi, WeaponInstance * previousWeapon) {}
     //! Updates the prefered weapon criteria based on current selection
     void updtPreferedWeapon();
 protected:

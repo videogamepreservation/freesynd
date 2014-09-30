@@ -29,6 +29,7 @@
 #include "ped.h"
 #include "mission.h"
 #include "core/squad.h"
+#include "core/gamesession.h"
 
 //*************************************
 // Constant definition
@@ -49,10 +50,10 @@ void Behaviour::destroyComponents() {
     }
 }
 
-void Behaviour::handleBehaviourEvent(BehaviourEvent evtType) {
+void Behaviour::handleBehaviourEvent(BehaviourEvent evtType, void *pCtxt) {
     for (std::list < BehaviourComponent * >::iterator it = compLst_.begin();
             it != compLst_.end(); it++) {
-        (*it)->handleBehaviourEvent(evtType, pThisPed_);
+        (*it)->handleBehaviourEvent(pThisPed_, evtType, pCtxt);
     }
 }
 
@@ -108,7 +109,7 @@ void CommonAgentBehaviourComponent::execute(int elapsed, Mission *pMission, PedI
     }
 }
 
-void CommonAgentBehaviourComponent::handleBehaviourEvent(Behaviour::BehaviourEvent evtType, PedInstance *pPed) {
+void CommonAgentBehaviourComponent::handleBehaviourEvent(PedInstance *pPed, Behaviour::BehaviourEvent evtType, void *pCtxt) {
     switch(evtType) {
     case Behaviour::kBehvEvtHit:
         if (pPed->hasMinimumVersionOfMod(Mod::MOD_CHEST, Mod::MOD_V2)) {
@@ -139,7 +140,7 @@ void PersuaderBehaviourComponent::execute(int elapsed, Mission *pMission, PedIns
     }
 }
 
-void PersuaderBehaviourComponent::handleBehaviourEvent(Behaviour::BehaviourEvent evtType, PedInstance *pPed) {
+void PersuaderBehaviourComponent::handleBehaviourEvent(PedInstance *pPed, Behaviour::BehaviourEvent evtType, void *pCtxt) {
     switch(evtType) {
     case Behaviour::kBehvEvtPersuadotronActivated:
         doUsePersuadotron_ = true;
@@ -164,7 +165,7 @@ void PersuadedBehaviourComponent::execute(int elapsed, Mission *pMission, PedIns
     }
 }
 
-void PersuadedBehaviourComponent::handleBehaviourEvent(Behaviour::BehaviourEvent evtType, PedInstance *pPed) {
+void PersuadedBehaviourComponent::handleBehaviourEvent(PedInstance *pPed, Behaviour::BehaviourEvent evtType, void *pCtxt) {
 
 }
 
@@ -209,32 +210,35 @@ void PanicComponent::execute(int elapsed, Mission *pMission, PedInstance *pPed) 
     }
 }
 
-void PanicComponent::handleBehaviourEvent(Behaviour::BehaviourEvent evtType, PedInstance *pPed) {
+void PanicComponent::handleBehaviourEvent(PedInstance *pPed, Behaviour::BehaviourEvent evtType, void *pCtxt) {
     switch(evtType) {
-    case Behaviour::kBehvEvtPanicEnabled:
-        setEnabled(true);
+    case Behaviour::kBehvEvtWeaponOut:
+        if (!pPed->isPanicImmuned()) {
+            setEnabled(true);
+        }
         break;
-    case Behaviour::kBehvEvtPanicDisabled:
-        setEnabled(false);
-        if (panicking_) {
-            pPed->restoreDefaultAction();
-            panicking_ = false;
+    case Behaviour::kBehvEvtWeaponCleared:
+        if (g_Session.getMission()->numArmedPeds() == 0) {
+            setEnabled(false);
+            if (panicking_) {
+                pPed->restoreDefaultAction();
+                panicking_ = false;
+            }
         }
         break;
     }
 }
 
 /*!
- * Return the first ped that is close to the given ped and who is armed.
+ * Return the first armed ped that is close to the given ped.
  * \param pMission
  * \param pPed
  * \return NULL if no ped is found
  */
 PedInstance * PanicComponent::findNearbyArmedPed(Mission *pMission, PedInstance *pPed) {
-    for (size_t i = 0; i < pMission->numPeds(); i++) {
-        PedInstance *pOtherPed = pMission->ped(i);
-        // Agent can only persuad peds from another group
-        if (pOtherPed->isArmed() && pPed->isCloseTo(pOtherPed, kScoutDistance)) {
+    for (size_t i = 0; i < pMission->numArmedPeds(); i++) {
+        PedInstance *pOtherPed = pMission->armedPedAtIndex(i);
+        if (pPed->isCloseTo(pOtherPed, kScoutDistance)) {
             return pOtherPed;
         }
     }
