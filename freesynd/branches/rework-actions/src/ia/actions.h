@@ -72,14 +72,16 @@ namespace fs_actions {
          * Other actions have type kActTypeUndefined.
          */
         enum ActionType {
-            //! The walk action
-            kActTypeWalk,
+            //! Action of following a ped
+            kActTypeFollow,
             //! For all type of hit action
             kActTypeHit,
-            //! Action of shooting
-            kActTypeShoot,
             //! Action of resetting scripted action
             kActTypeReset,
+            //! Action of shooting
+            kActTypeShoot,
+            //! The walk action
+            kActTypeWalk,
             kActTypeUndefined
         };
 
@@ -295,7 +297,7 @@ namespace fs_actions {
     public:
         //! Walt to given point
         FollowAction(fs_actions::CreatOrigin origin, PedInstance *pTarget);
-
+        void setTarget(PedInstance *pTarget) { pTarget_ = pTarget; }
     protected:
         void doStart(Mission *pMission, PedInstance *pPed);
         bool doExecute(int elapsed, Mission *pMission, PedInstance *pPed);

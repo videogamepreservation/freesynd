@@ -37,6 +37,7 @@
 const int CommonAgentBehaviourComponent::kRegeratesHealthStep = 1;
 const int PanicComponent::kScoutDistance = 1500;
 const int PanicComponent::kDistanceToRun = 500;
+const double PersuadedBehaviourComponent::kMaxRangeForSearchingWeapon = 500.0;
 
 Behaviour::~Behaviour() {
     destroyComponents();
@@ -152,21 +153,75 @@ void PersuaderBehaviourComponent::handleBehaviourEvent(PedInstance *pPed, Behavi
 
 PersuadedBehaviourComponent::PersuadedBehaviourComponent():
         BehaviourComponent(), checkWeaponTimer_(1000) {
-
+    status_ = kPersuadStatusFollow;
 }
 
 void PersuadedBehaviourComponent::execute(int elapsed, Mission *pMission, PedInstance *pPed) {
-    // To be completed
-    if (checkWeaponTimer_.update(elapsed)) {
-        WeaponInstance *pWeapon = pPed->selectedWeapon();
-        if (pWeapon && pWeapon->ammoRemaining() == 0) {
-            pPed->addActionPutdown(0, false);
+    if (status_ == kPersuadStatusLookForWeapon) {
+        if (checkWeaponTimer_.update(elapsed)) {
+            WeaponInstance *pWeapon = findWeaponWithAmmo(pMission, pPed);
+            if (pWeapon) {
+                status_ = kPersuadStatusTakeWeapon;
+                pPed->addActionPickup(pWeapon, false);
+                // add a reset action to automatically restore follow action after picking up weapon
+                pPed->addMovementAction(new fs_actions::ResetScriptedAction(), true);
+            }
         }
     }
 }
 
 void PersuadedBehaviourComponent::handleBehaviourEvent(PedInstance *pPed, Behaviour::BehaviourEvent evtType, void *pCtxt) {
+    if (evtType == Behaviour::kBehvEvtWeaponPickedUp) {
+        // weapon found so back to normal
+        status_ = kPersuadStatusFollow;
+    } else if (evtType == Behaviour::kBehvEvtWeaponOut) {
+        PedInstance *pPedSource = static_cast<PedInstance *> (pCtxt);
+        if (pPedSource == pPed->owner()) {
+            if (pPed->numWeapons() > 0) {
+                pPed->selectWeapon(0);
+            } else {
+                // ped has no weapon -> start looking for some
+                status_ = kPersuadStatusLookForWeapon;
+            }
+        }
+    } else if (evtType == Behaviour::kBehvEvtWeaponCleared) {
+        PedInstance *pPedSource = static_cast<PedInstance *> (pCtxt);
+        if (pPedSource == pPed->owner() && pPed->selectedWeapon()) {
+            pPed->deselectWeapon();
+        }
+    } else if (evtType == Behaviour::kBehvEvtWeaponDropped) {
+        // 
+        status_ = kPersuadStatusLookForWeapon;
+    }
+}
 
+/*!
+ * Look for weapon on the ground with ammo.
+ * The closest weapon within the given range will be return.
+ * \param pMission Mission data
+ * \param pPed The ped searching for the weapon
+ * \return NULL if no weapon is found.
+ */
+WeaponInstance * PersuadedBehaviourComponent::findWeaponWithAmmo(Mission *pMission, PedInstance *pPed) {
+   WeaponInstance *pWeaponFound = NULL;
+   double currentDistance = kMaxRangeForSearchingWeapon;
+
+    int numweapons = pMission->numWeapons();
+    for (int32 i = 0; i < numweapons; ++i) {
+        WeaponInstance *w = pMission->weapon(i);
+        if (w->isIgnored())
+            continue;
+        if (w->canShoot() && w->ammoRemaining() > 0) {
+            double length = 0;
+            if (pMission->getPathLengthBetween(pPed, w, kMaxRangeForSearchingWeapon, &length) == 0) {
+                if (currentDistance > length) {
+                    pWeaponFound = w;
+                    currentDistance = length;
+                }
+            }
+        }
+    }
+    return pWeaponFound;
 }
 
 PanicComponent::PanicComponent():

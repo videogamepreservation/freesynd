@@ -32,6 +32,7 @@
 class Mission;
 class PedInstance;
 class BehaviourComponent;
+class WeaponInstance;
 
 /*!
  * A Behaviour drives the ped's reactions.
@@ -55,7 +56,11 @@ public:
         //! A ped has shown his weapon
         kBehvEvtWeaponOut,
         //! A ped has cleared his weapon
-        kBehvEvtWeaponCleared
+        kBehvEvtWeaponCleared,
+        //! The ped has picked up a weapon
+        kBehvEvtWeaponPickedUp,
+        //! The ped has dropped a weapon
+        kBehvEvtWeaponDropped
     };
 
     virtual ~Behaviour();
@@ -136,7 +141,10 @@ private:
 };
 
 /*!
- * Component for user of Persuadotron. Only our agents use this component.
+ * Component for peds who are persuaded by an agent.
+ * With this component, peds will follow their owner.
+ * When owner has a gun, persuaded will look for a weapon if
+ * he has not one already and will show it.
  */
 class PersuadedBehaviourComponent : public BehaviourComponent {
 public:
@@ -146,6 +154,25 @@ public:
 
     void handleBehaviourEvent(PedInstance *pPed, Behaviour::BehaviourEvent evtType, void *pCtxt);
 private:
+    WeaponInstance * findWeaponWithAmmo(Mission *pMission, PedInstance *pPed);
+
+private:
+    /*!
+     * Status of persuaded.
+     */
+    enum PersuadedStatus {
+        //! Default status : just follow the leada
+        kPersuadStatusFollow,
+        //! Search for a nearby weapon
+        kPersuadStatusLookForWeapon,
+        //! Saw a weapon, go take it
+        kPersuadStatusTakeWeapon
+    };
+
+    static const double kMaxRangeForSearchingWeapon;
+
+    PersuadedStatus status_;
+
     //! used for delaying checking of nearby weapon search
     fs_utils::Timer checkWeaponTimer_;
 };

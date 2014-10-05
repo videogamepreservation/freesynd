@@ -150,6 +150,18 @@ void PedInstance::addActionFollowPed(fs_actions::CreatOrigin origin, PedInstance
 }
 
 /*!
+ * Change the ped that this one is following.
+ * Called when a persuaded changes owner so it assumes following action
+ * is the default action for this ped.
+ */
+void PedInstance::followNewPed(PedInstance *pPed) {
+    if (defaultAction_ != NULL && defaultAction_->type() == fs_actions::Action::kActTypeFollow) {
+        fs_actions::FollowAction *pAction = static_cast<fs_actions::FollowAction *> (defaultAction_);
+        pAction->setTarget(pPed);
+    }
+}
+
+/*!
  * Adds the action to drop weapon.
  * \param weaponIndex The index of the weapon to drop in the agent inventory.
  * \param appendAction If true action is append after all existing actions.
@@ -241,6 +253,7 @@ void PedInstance::insertHitAction(DamageInflictType &d) {
 
 /*!
  * Adds an action of shooting at something/somewhere.
+ * Also adds a shooting action for persuaded if this is an agent.
  * \param aimedPt Where the ped must shoot
  */
 void PedInstance::addActionShootAt(const PathNode &aimedPt) {
@@ -253,6 +266,12 @@ void PedInstance::addActionShootAt(const PathNode &aimedPt) {
             pUseWeaponAction_ = new fs_actions::AutomaticShootAction(fs_actions::kOrigUser, adjAimedPt, pWeapon);
         } else {
             pUseWeaponAction_ = new fs_actions::ShootAction(fs_actions::kOrigUser, adjAimedPt, pWeapon);
+        }
+
+        // notify persuadeds to shoot
+        for (std::set <PedInstance *>::iterator it =  persuadedSet_.begin();
+                it != persuadedSet_.end(); it++) {
+                    (*it)->addActionShootAt(aimedPt);
         }
     }
 }

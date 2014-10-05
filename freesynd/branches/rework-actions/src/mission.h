@@ -273,6 +273,8 @@ public:
         bool checkTileOnly = false, double maxr = -1.0, double * distTo = NULL);
     void getInRangeAll(toDefineXYZ * cp, std::vector<ShootableMapObject *> & targets,
         uint8 mask, bool checkTileOnly = true, double maxr = -1.0);
+    //! Returns the distance between a ped and a object if a path exists between the two
+    uint8 getPathLengthBetween(PedInstance *pPed, ShootableMapObject* objectToReach, double distanceMax, double *length);
 
     // map-tile surfaces
     // x + y * mmax_x_ + z * mmax_m_xy

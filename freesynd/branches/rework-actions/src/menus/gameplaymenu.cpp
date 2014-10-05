@@ -288,7 +288,6 @@ void GameplayMenu::handleShow() {
 
     // init menu internal state
     isButtonSelectAllPressed_ = false;
-    cntArmedPed_ = 0;
     initWorldCoords();
     
     // set graphic palette

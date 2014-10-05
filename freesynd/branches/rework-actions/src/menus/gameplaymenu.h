@@ -130,8 +130,6 @@ protected:
     bool isButtonSelectAllPressed_;
     /*! Flag to store the fact that player is currently shooting.*/
     bool isPlayerShooting_;
-    /*! A counter to keep track of armed ped and to activate panic.*/
-    uint16 cntArmedPed_;
 
     // when ipa is manipulated this represents
     struct IPA_manipulation {

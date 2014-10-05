@@ -325,6 +325,8 @@ public:
     void addActionTrigger(int32 range, const PathNode &loc);
     //! Adds action to follow a ped
     void addActionFollowPed(fs_actions::CreatOrigin origin, PedInstance *pPed);
+    //! Change the ped to follow (used for persuaded)
+    void followNewPed(PedInstance *pPed);
     //! Adds action to put down weapon on the ground
     void addActionPutdown(uint8 weaponIndex, bool appendAction);
     //! Adds action to pick up weapon from the ground
@@ -396,6 +398,8 @@ public:
     bool isPersuaded() { return IS_FLAG_SET(desc_state_, pd_smControlled); }
     //! Returns true if this ped can persuade that ped
     bool canPersuade(PedInstance *pOtherPed);
+    //! Return owner of persuaded
+    PedInstance * owner() { return owner_; }
     //! Adds given ped to the list of persuaded peds by this agent
     void addPersuaded(PedInstance *p);
     //! Removes given ped to the list of persuaded peds by this agent

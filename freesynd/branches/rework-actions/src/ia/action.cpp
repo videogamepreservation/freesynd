@@ -304,7 +304,7 @@ bool EscapeAction::doExecute(int elapsed, Mission *pMission, PedInstance *pPed) 
  * \param pTarget The ped to follow.
  */
 FollowAction::FollowAction(fs_actions::CreatOrigin origin, PedInstance *pTarget) :
-MovementAction(kActTypeUndefined, origin) {
+MovementAction(kActTypeFollow, origin) {
     pTarget_ = pTarget;
     targetState_ = PedInstance::pa_smWalking;
 }
@@ -393,6 +393,10 @@ bool PutdownWeaponAction::doExecute(int elapsed, Mission *pMission, PedInstance 
         if (pPed->selectedWeapon() == NULL && pWeapon->canShoot()) {
             GameEvent::sendEvt(GameEvent::kMission, GameEvent::kEvtWeaponCleared, pPed);
         }
+
+        if (pPed->isPersuaded()) {
+            pPed->behaviour().handleBehaviourEvent(Behaviour::kBehvEvtWeaponDropped);
+        }
         setSucceeded();
     }
 
@@ -423,6 +427,13 @@ bool PickupWeaponAction::doExecute(int elapsed, Mission *pMission, PedInstance *
         pWeapon_->setOwner(pPed);
         pWeapon_->deactivate();
         pPed->addWeapon(pWeapon_);
+
+        if (pPed->isPersuaded()) {
+            pPed->behaviour().handleBehaviourEvent(Behaviour::kBehvEvtWeaponPickedUp);
+            if (pPed->owner()->isArmed()) {
+                pPed->selectWeapon(0);
+            }
+        }
         setSucceeded();
     }
     return true;

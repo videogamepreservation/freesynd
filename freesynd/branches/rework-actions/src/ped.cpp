@@ -491,9 +491,16 @@ bool PedInstance::executeUseWeaponAction(int elapsed, Mission *pMission) {
         // execute action
         updated |= pUseWeaponAction_->execute(elapsed, pMission, this);
         if (pUseWeaponAction_->isFinished()) {
-            // change weapon if empty
             if (selectedWeapon() && selectedWeapon()->ammoRemaining() == 0) {
-                selectNextWeapon();
+                // when weapon is empty persuaded will drop weapon
+                if (isPersuaded()) {
+                    addActionPutdown(0, false);
+                    // add a reset action to automatically restore follow action after picking up weapon
+                    addMovementAction(new fs_actions::ResetScriptedAction(), true);
+                } else {
+                    // others will use another weapon
+                    selectNextWeapon();
+                }
             }
             // erase action
             delete pUseWeaponAction_;
@@ -3167,6 +3174,7 @@ void PedInstance::updatePersuadedRelations(Squad *pSquad) {
                     PedInstance *pPed = *it;
                     persuadedSet_.erase(it);
                     pAgent->addPersuaded(pPed);
+                    pPed->followNewPed(pAgent);
                 }
                 break;
             }

@@ -2884,6 +2884,23 @@ void Mission::getInRangeAll(toDefineXYZ * cp,
     }
 }
 
+/*!
+ * Returns the length of the path between a ped and a object if such a path exists and it is
+ * shorter than the maximum length allowed.
+ * \param pPed The origin of the path
+ * \param objectToReach The end of the path
+ * \param maxLength The length of the path must not exceed this value
+ * \param length The returned length if the path exists
+ * \return 0 if a path exists, else path does not exist so length is not set.
+ */
+uint8 Mission::getPathLengthBetween(PedInstance *pPed, ShootableMapObject* objectToReach, double maxLength, double *length) {
+    toDefineXYZ cur_xyz;
+    pPed->convertPosToXYZ(&cur_xyz);
+    cur_xyz.z += (pPed->sizeZ() >> 1);
+    uint8 res = inRangeCPos(&cur_xyz, &objectToReach, NULL, false, true, maxLength, length);
+    return res == 1 ? 0 : 1;
+}
+
 bool Mission::getShootableTile(int &x, int &y, int &z, int &ox, int &oy,
     int &oz)
 {
