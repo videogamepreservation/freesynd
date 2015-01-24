@@ -38,6 +38,7 @@ const int CommonAgentBehaviourComponent::kRegeratesHealthStep = 1;
 const int PanicComponent::kScoutDistance = 1500;
 const int PanicComponent::kDistanceToRun = 500;
 const double PersuadedBehaviourComponent::kMaxRangeForSearchingWeapon = 500.0;
+const int PoliceBehaviourComponent::kPoliceScoutDistance = 1500;
 
 Behaviour::~Behaviour() {
     destroyComponents();
@@ -324,4 +325,70 @@ void  PanicComponent::runAway(PedInstance *pPed, PedInstance *pArmedPed, fs_acti
     pAction->setmaxDistanceToWalk(kDistanceToRun);
     pPed->addMovementAction(pAction, false);
     panicking_ = true;
+}
+
+PoliceBehaviourComponent::PoliceBehaviourComponent():
+        BehaviourComponent(), scoutTimer_(134) {
+    status_ = kPoliceStatusOnPatrol;
+    pTarget_ = NULL;
+}
+
+void PoliceBehaviourComponent::execute(int elapsed, Mission *pMission, PedInstance *pPed) {
+    if (status_ == kPoliceStatusAlert && scoutTimer_.update(elapsed)) {
+        PedInstance *pArmedGuy = findArmedPedNotPolice(pMission, pPed);
+        if (pArmedGuy != NULL) {
+            status_ = kPoliceStatusFollowAndShoot;
+            followAndShootTarget(pPed, pArmedGuy);
+        }
+    }
+}
+
+void PoliceBehaviourComponent::handleBehaviourEvent(PedInstance *pPed, Behaviour::BehaviourEvent evtType, void *pCtxt) {
+    switch(evtType) {
+    case Behaviour::kBehvEvtWeaponOut:
+        if (status_ == kPoliceStatusOnPatrol && !pPed->inVehicle()) {
+            // When someone get his weapon out, police is on alert
+            status_ = kPoliceStatusAlert;
+        }
+        break;
+    case Behaviour::kBehvEvtWeaponCleared:
+        // When no more enemies have weapons out, patrol again
+        
+        break;
+    }
+}
+
+/*!
+ * Return a ped that has his weapon out and is not a police man and is close to this policeman.
+ */
+PedInstance * PoliceBehaviourComponent::findArmedPedNotPolice(Mission *pMission, PedInstance *pPed) {
+    for (size_t i = 0; i < pMission->numArmedPeds(); i++) {
+        PedInstance *pOtherPed = pMission->armedPedAtIndex(i);
+        if (pPed != pOtherPed && pOtherPed->type() != PedInstance::kPedTypePolice && pPed->isCloseTo(pOtherPed, kPoliceScoutDistance)) {
+            return pOtherPed;
+        }
+    }
+    return NULL;
+}
+
+void PoliceBehaviourComponent::followAndShootTarget(PedInstance *pPed, PedInstance *pArmedGuy) {
+    pTarget_ = pArmedGuy;
+    // Select a loaded weapon for ped
+    WeaponHolder::WeaponSelectCriteria crit;
+    crit.desc = WeaponHolder::WeaponSelectCriteria::kCritLoadedShoot;
+    crit.use_ranks = true;
+    pPed->selectRequiredWeapon(&crit);
+    // stop walking
+    pPed->clearDestination();
+    // quit walking now 
+    // TODO : change state management
+    pPed->leaveState(PedInstance::pa_smWalking);
+    pPed->destroyAllActions(true);
+    // Set new actions
+    fs_actions::WaitAndWarnAction *pWarnAction = new fs_actions::WaitAndWarnAction(pPed);
+    pPed->addMovementAction(pWarnAction, false);
+    //fs_actions::FollowAction *pFollowAction = new fs_actions::FollowAction(fs_actions::kOrigDefault, pPed);
+    //pPed->addMovementAction(pFollowAction, true);
+    //pPed->addActionFollowPed(fs_actions::kOrigDefault, pArmedGuy);
+    pPed->addMovementAction(new fs_actions::ResetScriptedAction(), true);
 }

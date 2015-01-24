@@ -567,6 +567,7 @@ int PedInstance::getTimeBetweenShoots(WeaponInstance *pWeapon) {
 bool PedInstance::useNewAnimation() {
     return isOurAgent() 
         || type() == kPedTypeCivilian
+        || type() == kPedTypePolice
         ;
 }
 
@@ -1540,7 +1541,7 @@ bool PedInstance::animate(int elapsed, Mission *mission) {
                         aqt->multi_var.time_var.desc = 2;
                         aqt->multi_var.time_var.elapsed = 0;
                     }
-                }
+                } // fin de find enemy
                 if ((aqt->act_exec & PedInstance::ai_aFindNonFriend) != 0
                     && (aqt->state & 128) == 0)
                 {

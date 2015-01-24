@@ -208,4 +208,38 @@ private:
     bool panicking_;
 };
 
+class PoliceBehaviourComponent : public BehaviourComponent {
+public:
+    PoliceBehaviourComponent();
+
+    void execute(int elapsed, Mission *pMission, PedInstance *pPed);
+
+    void handleBehaviourEvent(PedInstance *pPed, Behaviour::BehaviourEvent evtType, void *pCtxt);
+private:
+    //! Checks whether there is an armed ped next to the ped : returns that ped
+    PedInstance * findArmedPedNotPolice(Mission *pMission, PedInstance *pPed);
+    //! Initiate the process of following and shooting at a target
+    void followAndShootTarget(PedInstance *pPed, PedInstance *pArmedGuy);
+private:
+    static const int kPoliceScoutDistance;
+    /*!
+     * Status of police behaviour.
+     */
+    enum PoliceStatus {
+        //! Default status
+        kPoliceStatusOnPatrol,
+        //! Search for someone who pulled his gun
+        kPoliceStatusAlert,
+        //! Move closer from target to shoot at him
+        kPoliceStatusFollowAndShoot
+    };
+
+    PoliceStatus status_;
+    /*! This timer is used to delay checking by the ped in order to 
+     * not consume too much CPU.*/
+    fs_utils::Timer scoutTimer_;
+    /*! The ped that the police officer is watching and eventually shooting at.*/
+    PedInstance *pTarget_;
+};
+
 #endif // IA_BEHAVIOUR_H_

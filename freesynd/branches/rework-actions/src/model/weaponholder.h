@@ -58,7 +58,8 @@ public:
             kCritWeaponType = 3,        // wpn_type
             kCritDamageStrict = 4,      // type == dmg_type
             kCritDamageNonStrict = 5,   // type & dmg_type != 0
-            kCritPlayerSelection = 6    // Manage selection from weapon selector
+            kCritPlayerSelection = 6,   // Manage selection from weapon selector
+            kCritLoadedShoot = 7        // select weapon who can shoot and has ammo
         };
         //! Union descriptor
         CriteriaType desc;

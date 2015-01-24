@@ -484,6 +484,27 @@ bool DriveVehicleAction::doExecute(int elapsed, Mission *pMission, PedInstance *
     return true;
 }
 
+WaitAndWarnAction::WaitAndWarnAction(PedInstance *pPed) : 
+MovementAction(kActTypeUndefined, kOrigDefault, true), waitTimer_(1000) {
+    pTarget_ = pPed;
+}
+
+void WaitAndWarnAction::doStart(Mission *pMission, PedInstance *pPed) {
+    waitTimer_.reset();
+    pPed->clearDestination();
+}
+
+bool WaitAndWarnAction::doExecute(int elapsed, Mission *pMission, PedInstance *pPed) {
+    if (waitTimer_.update(elapsed)) {
+        setSucceeded();
+        return true;
+    }
+
+    // TODO : Add warning
+
+    return false;
+}
+
 HitAction::HitAction(CreatOrigin origin, ShootableMapObject::DamageInflictType &d) : 
 MovementAction(kActTypeHit, origin) {
     damage_.aimedLoc = d.aimedLoc;

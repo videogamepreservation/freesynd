@@ -314,6 +314,8 @@ void PedManager::initPolice(PedInstance *pPed) {
     pPed->setBaseSpeed(160);
     pPed->setTimeBeforeCheck(400);
     pPed->setBaseModAcc(0.4);
+
+    pPed->behaviour().addComponent(new PoliceBehaviourComponent());
 } 
 
 /*!

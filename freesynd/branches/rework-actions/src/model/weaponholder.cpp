@@ -280,6 +280,14 @@ bool WeaponHolder::selectRequiredWeapon(WeaponSelectCriteria *pw_to_use) {
                 }
             }
             break;
+        case WeaponSelectCriteria::kCritLoadedShoot:
+            for (uint8 i = 0; i < sz; ++i) {
+                WeaponInstance *pWI = weapons_[i];
+                if (pWI->canShoot() && pWI->ammoRemaining() > 0) {
+                    found_weapons.push_back(std::make_pair(pWI->rank(), i));
+                }
+            }
+            break;
     }
 
     if (!found_weapons.empty()) {

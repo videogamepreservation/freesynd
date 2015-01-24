@@ -382,6 +382,24 @@ namespace fs_actions {
     };
 
     /*!
+     * This action is specific to police.
+     * When executing this action, ped waits then warn player agent.
+     */
+    class WaitAndWarnAction : public MovementAction {
+    public:
+        WaitAndWarnAction(PedInstance *pPed);
+
+    protected:
+        void doStart(Mission *pMission, PedInstance *pPed);
+        bool doExecute(int elapsed, Mission *pMission, PedInstance *pPed);
+    protected:
+        /*! The ped watched by this police ped.*/
+        PedInstance *pTarget_;
+        /*! Duration of waiting.*/
+        fs_utils::Timer waitTimer_;
+    };
+
+    /*!
      * A HitAction is used to implement the reaction of the ped to an impact.
      * When a Ped is hit by a shot, a HitAction is created and inserted directly
      * as the ped's current action but only if current action is not already
