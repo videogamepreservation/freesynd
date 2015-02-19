@@ -58,7 +58,9 @@ public:
         /*! Sent when a ped has shown his weapon.*/
         kEvtWeaponOut,
         /*! Sent when a ped cleared his weapon.*/
-        kEvtWeaponCleared
+        kEvtWeaponCleared,
+        /*! Sent when a policeman warns a player agent.*/
+        kEvtWarnAgent
     };
     //! The stream on which the event is posted
     EEventStream stream;

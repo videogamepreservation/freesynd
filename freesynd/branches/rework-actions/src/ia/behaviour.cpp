@@ -39,6 +39,7 @@ const int PanicComponent::kScoutDistance = 1500;
 const int PanicComponent::kDistanceToRun = 500;
 const double PersuadedBehaviourComponent::kMaxRangeForSearchingWeapon = 500.0;
 const int PoliceBehaviourComponent::kPoliceScoutDistance = 1500;
+const int PoliceBehaviourComponent::kPolicePendingTime = 1500;
 
 Behaviour::~Behaviour() {
     destroyComponents();
@@ -328,7 +329,7 @@ void  PanicComponent::runAway(PedInstance *pPed, PedInstance *pArmedPed, fs_acti
 }
 
 PoliceBehaviourComponent::PoliceBehaviourComponent():
-        BehaviourComponent(), scoutTimer_(134) {
+        BehaviourComponent(), scoutTimer_(200), endFollowTimer_(kPolicePendingTime) {
     status_ = kPoliceStatusOnPatrol;
     pTarget_ = NULL;
 }
@@ -340,6 +341,19 @@ void PoliceBehaviourComponent::execute(int elapsed, Mission *pMission, PedInstan
             status_ = kPoliceStatusFollowAndShoot;
             followAndShootTarget(pPed, pArmedGuy);
         }
+    } else if (status_ == kPoliceStatusPendingEndFollow && endFollowTimer_.update(elapsed)) {
+        if (pMission->numArmedPeds() != 0) {
+            // There are still some armed peds so keep on alert
+            status_ = kPoliceStatusAlert;
+        } else {
+            status_ = kPoliceStatusOnPatrol;
+        }
+        pPed->destroyAllActions(true);
+        pPed->destroyUseWeaponAction();
+        pPed->deselectWeapon();
+        pPed->addMovementAction(
+                new fs_actions::WalkToDirectionAction(fs_actions::kOrigDefault), 
+                true);
     }
 }
 
@@ -352,8 +366,17 @@ void PoliceBehaviourComponent::handleBehaviourEvent(PedInstance *pPed, Behaviour
         }
         break;
     case Behaviour::kBehvEvtWeaponCleared:
-        // When no more enemies have weapons out, patrol again
-        
+        // Someone has dropped his weapon
+        if (pTarget_ == pCtxt) {
+            status_ = kPoliceStatusPendingEndFollow;
+            if (pTarget_->isDead()) {
+                // target dropped his weapon because he's dead
+                // so no need to wait
+                endFollowTimer_.reset(0);
+            } else {
+                endFollowTimer_.reset(kPolicePendingTime);
+            }
+        }
         break;
     }
 }
@@ -373,22 +396,17 @@ PedInstance * PoliceBehaviourComponent::findArmedPedNotPolice(Mission *pMission,
 
 void PoliceBehaviourComponent::followAndShootTarget(PedInstance *pPed, PedInstance *pArmedGuy) {
     pTarget_ = pArmedGuy;
-    // Select a loaded weapon for ped
-    WeaponHolder::WeaponSelectCriteria crit;
-    crit.desc = WeaponHolder::WeaponSelectCriteria::kCritLoadedShoot;
-    crit.use_ranks = true;
-    pPed->selectRequiredWeapon(&crit);
     // stop walking
     pPed->clearDestination();
-    // quit walking now 
-    // TODO : change state management
+    // force quiting walking now because entering standing state does not remove walking state
     pPed->leaveState(PedInstance::pa_smWalking);
     pPed->destroyAllActions(true);
     // Set new actions
-    fs_actions::WaitAndWarnAction *pWarnAction = new fs_actions::WaitAndWarnAction(pPed);
+    fs_actions::WaitAndWarnAction *pWarnAction = new fs_actions::WaitAndWarnAction(pArmedGuy);
     pPed->addMovementAction(pWarnAction, false);
-    //fs_actions::FollowAction *pFollowAction = new fs_actions::FollowAction(fs_actions::kOrigDefault, pPed);
-    //pPed->addMovementAction(pFollowAction, true);
-    //pPed->addActionFollowPed(fs_actions::kOrigDefault, pArmedGuy);
+    fs_actions::FollowToShootAction* pFollowAction = new fs_actions::FollowToShootAction(fs_actions::kOrigDefault, pArmedGuy);
+    pPed->addMovementAction(pFollowAction, true);
+    fs_actions::FireWeaponAction *pFireAction = new fs_actions::FireWeaponAction(pArmedGuy);
+    pPed->addMovementAction(pFireAction, true);
     pPed->addMovementAction(new fs_actions::ResetScriptedAction(), true);
 }

@@ -124,17 +124,29 @@ public:
                     pos.y % 256, pos.z % 128 );
     }
 
-    int tileX() { return tile_x_; }
-    int tileY() { return tile_y_; }
-    int tileZ() { return tile_z_; }
+    /*!
+     * Set the given position to the ped's position.
+     */
+    void getPosition(PathNode *pn) {
+        pn->setTileX(tile_x_);
+        pn->setTileY(tile_y_);
+        pn->setTileZ(tile_z_);
+        pn->setOffX(off_x_);
+        pn->setOffY(off_y_);
+        pn->setOffZ(off_z_);
+    }
+
+    int tileX() const { return tile_x_; }
+    int tileY() const { return tile_y_; }
+    int tileZ() const { return tile_z_; }
 
     void setTileX(int x) { tile_x_ = x; }
     void setTileY(int y) { tile_y_ = y; }
     void setTileZ(int z) { tile_z_ = z; }
 
-    int offX() { return off_x_; }
-    int offY() { return off_y_; }
-    int offZ() { return off_z_; }
+    int offX() const { return off_x_; }
+    int offY() const { return off_y_; }
+    int offZ() const { return off_z_; }
 
     void setOffX(int n);
     void setOffY(int n);
@@ -261,6 +273,8 @@ public:
 
     void setDirection(int dir);
     void setDirection(int posx, int posy, int * dir = NULL);
+    //! Set this ped's direction so that he looks at the given object.
+    void setDirectionTowardObject(const MapObject &object);
 
     int direction() { return dir_;}
     int getDirection(int snum = 8);

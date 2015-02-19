@@ -255,17 +255,22 @@ void PedInstance::insertHitAction(DamageInflictType &d) {
  * Adds an action of shooting at something/somewhere.
  * Also adds a shooting action for persuaded if this is an agent.
  * \param aimedPt Where the ped must shoot
+ * \return kShootActionNotAdded if no action (see canAddUseWeaponAction()),
+ *         
  */
-void PedInstance::addActionShootAt(const PathNode &aimedPt) {
+uint8 PedInstance::addActionShootAt(const PathNode &aimedPt) {
     if (canAddUseWeaponAction()) {
+        uint8 res;
         // adds precision to the shoot
         PathNode adjAimedPt = aimedPt;
         WeaponInstance *pWeapon = selectedWeapon();
         adjustAimedPtWithRangeAndAccuracy(pWeapon->getWeaponClass(), adjAimedPt);
         if (pWeapon->getWeaponClass()->isAutomatic()) {
             pUseWeaponAction_ = new fs_actions::AutomaticShootAction(fs_actions::kOrigUser, adjAimedPt, pWeapon);
+            res = fs_actions::ShootAction::kShootActionAutomaticShoot;
         } else {
             pUseWeaponAction_ = new fs_actions::ShootAction(fs_actions::kOrigUser, adjAimedPt, pWeapon);
+            res = fs_actions::ShootAction::kShootActionSingleShoot;
         }
 
         // notify persuadeds to shoot
@@ -273,7 +278,11 @@ void PedInstance::addActionShootAt(const PathNode &aimedPt) {
                 it != persuadedSet_.end(); it++) {
                     (*it)->addActionShootAt(aimedPt);
         }
+
+        return res;
     }
+
+    return fs_actions::ShootAction::kShootActionNotAdded;
 }
 
 /*!

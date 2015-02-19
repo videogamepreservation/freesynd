@@ -41,6 +41,9 @@ using namespace fs_actions;
 //*************************************
 const int FollowAction::kFollowDistance = 192;
 const int WalkBurnHitAction::kTimeToWalkBurning = 1000;
+const uint8 ShootAction::kShootActionNotAdded = 0;
+const uint8 ShootAction::kShootActionAutomaticShoot = 1;
+const uint8 ShootAction::kShootActionSingleShoot = 2;
 
 /*!
  * Default constructor.
@@ -370,6 +373,70 @@ bool FollowAction::doExecute(int elapsed, Mission *pMission, PedInstance *pPed) 
     return updated;
 }
 
+/*!
+ * Class constructor.
+ * \param pTarget The ped to follow.
+ */
+FollowToShootAction::FollowToShootAction(fs_actions::CreatOrigin origin, PedInstance *pTarget) :
+MovementAction(kActTypeFollow, origin) {
+    pTarget_ = pTarget;
+    targetState_ = PedInstance::pa_smWalking;
+    followDistance_ = 0;
+}
+
+/*!
+ * If the ped's has no weapon, don't follow.
+ * \param pMission Mission data
+ * \param pPed The ped executing the action.
+ */
+void FollowToShootAction::doStart(Mission *pMission, PedInstance *pPed) {
+    if (pPed->selectedWeapon() == NULL) {
+        setFailed();
+        return;
+    } else {
+        followDistance_ = (pPed->selectedWeapon()->range() / 3 ) *2;
+    }
+
+    targetLastPos_.setTileXYZ(0, 0, 0);
+    targetLastPos_.setOffXY(0, 0);
+}
+
+bool FollowToShootAction::doExecute(int elapsed, Mission *pMission, PedInstance *pPed) {
+    bool updated = false;
+
+    if (pTarget_->isDead()) {
+        // target is dead so stop moving and terminate action
+        pPed->clearDestination();
+        setFailed();
+    } else {
+        // target has moved: we use checkCurrPosTileOnly() to give time to ped
+        // to walk away else animation is buggy
+        if (!pTarget_->checkCurrPosTileOnly(targetLastPos_)) {
+            // resetting target position
+            pTarget_->getPosition(&targetLastPos_);
+            if (!pPed->setDestination(pMission, targetLastPos_)) {
+                setFailed();
+                return true;
+            }
+        }
+        
+        toDefineXYZ policeLoc;
+        pPed->convertPosToXYZ(&policeLoc);
+        // police stops walking if the target is in range of fire (ie close enough and not
+        // hiding behing something)
+        if (pPed->isCloseTo(pTarget_, followDistance_) &&
+            pMission->checkBlockedByTile(policeLoc, &targetLastPos_, true, followDistance_) == 1) {
+            // We reached the target so stop moving
+            setSucceeded();
+            pPed->clearDestination();
+        } else {
+            updated = pPed->movementP(pMission, elapsed);
+        }
+        
+    }
+    return updated;
+}
+
 PutdownWeaponAction::PutdownWeaponAction(uint8 weaponIdx) : MovementAction(kActTypeUndefined, kOrigUser, true) {
     weaponIdx_ = weaponIdx;
     targetState_ = PedInstance::pa_smPutDown;
@@ -485,24 +552,87 @@ bool DriveVehicleAction::doExecute(int elapsed, Mission *pMission, PedInstance *
 }
 
 WaitAndWarnAction::WaitAndWarnAction(PedInstance *pPed) : 
-MovementAction(kActTypeUndefined, kOrigDefault, true), waitTimer_(1000) {
+MovementAction(kActTypeUndefined, kOrigDefault, true), waitTimer_(2000) {
     pTarget_ = pPed;
 }
 
+/*!
+ * Select a weapon for the ped if he has no weapon out.
+ * \param pPed The police man.
+ */
+void WaitAndWarnAction::selectWeaponIfNecessary(PedInstance *pPed) {
+    WeaponInstance *pWeapon = pPed->selectedWeapon();
+    if (pWeapon == NULL) {
+        // Select a loaded weapon for ped
+        WeaponHolder::WeaponSelectCriteria crit;
+        crit.desc = WeaponHolder::WeaponSelectCriteria::kCritLoadedShoot;
+        crit.use_ranks = true;
+        pPed->selectRequiredWeapon(&crit);
+    }
+}
+
 void WaitAndWarnAction::doStart(Mission *pMission, PedInstance *pPed) {
-    waitTimer_.reset();
-    pPed->clearDestination();
+    if (pTarget_->isDead()) {
+        setFailed();
+    } else {
+        waitTimer_.reset();
+        pPed->clearDestination();
+        selectWeaponIfNecessary(pPed);
+    }
 }
 
 bool WaitAndWarnAction::doExecute(int elapsed, Mission *pMission, PedInstance *pPed) {
+    // point toward target
+    pPed->setDirectionTowardObject(*pTarget_);
+
     if (waitTimer_.update(elapsed)) {
+        if (pTarget_->isOurAgent()) {
+            // Warn only for player agents
+            GameEvent evt;
+            evt.stream = GameEvent::kMission;
+            evt.type = GameEvent::kEvtWarnAgent;
+            g_gameCtrl.fireGameEvent(evt);
+        }
         setSucceeded();
         return true;
     }
 
-    // TODO : Add warning
-
     return false;
+}
+
+FireWeaponAction::FireWeaponAction(PedInstance *pPed) : 
+MovementAction(kActTypeUndefined, kOrigDefault) {
+    pTarget_ = pPed;
+}
+
+void FireWeaponAction::doStart(Mission *pMission, PedInstance *pPed) {
+    if (pTarget_->isDead()) {
+        setFailed();
+    } else if (pPed->type() == PedInstance::kPedTypePolice && pTarget_->selectedWeapon() == NULL) {
+        // Police man don't shoot on peds that don't have gun out
+        setFailed();
+    } else {
+        PathNode targetLoc;
+        pTarget_->getPosition(&targetLoc);
+
+        shootType_ = pPed->addActionShootAt(targetLoc);
+        if (shootType_ == ShootAction::kShootActionNotAdded) {
+            // failed to shoot because weapon has no ammo
+            setFailed();
+        } else if (shootType_ == ShootAction::kShootActionAutomaticShoot) {
+            // todo :set a timer to controle time shooting
+        }
+    }
+}
+
+bool FireWeaponAction::doExecute(int elapsed, Mission *pMission, PedInstance *pPed) {
+    if (shootType_ == ShootAction::kShootActionSingleShoot) {
+        if (!pPed->isUsingWeapon()) {
+            setSucceeded();
+        }
+    }
+    
+    return true;
 }
 
 HitAction::HitAction(CreatOrigin origin, ShootableMapObject::DamageInflictType &d) : 

@@ -2535,8 +2535,8 @@ void Mission::blockerExists(toDefineXYZ * startXYZ, toDefineXYZ * endXYZ,
         }
     }
     for (unsigned int i = 0; i < peds_.size(); ++i) {
-        MapObject * p_blocker = peds_[i];
-        if (p_blocker->isIgnored())
+        PedInstance * p_blocker = peds_[i];
+        if (p_blocker->isDead() || p_blocker->isIgnored())
             continue;
         if (p_blocker->isBlocker(&copyStartXYZ, &copyEndXYZ, inc_xyz)) {
             int cx = startXYZ->x - copyStartXYZ.x;

@@ -222,6 +222,7 @@ private:
     void followAndShootTarget(PedInstance *pPed, PedInstance *pArmedGuy);
 private:
     static const int kPoliceScoutDistance;
+    static const int kPolicePendingTime;
     /*!
      * Status of police behaviour.
      */
@@ -231,13 +232,17 @@ private:
         //! Search for someone who pulled his gun
         kPoliceStatusAlert,
         //! Move closer from target to shoot at him
-        kPoliceStatusFollowAndShoot
+        kPoliceStatusFollowAndShoot,
+        //! When target drops his weapon, stop follow him
+        kPoliceStatusPendingEndFollow
     };
 
     PoliceStatus status_;
     /*! This timer is used to delay checking by the ped in order to 
      * not consume too much CPU.*/
     fs_utils::Timer scoutTimer_;
+    /*! Police wait for some time before really stopping following.*/
+    fs_utils::Timer endFollowTimer_;
     /*! The ped that the police officer is watching and eventually shooting at.*/
     PedInstance *pTarget_;
 };

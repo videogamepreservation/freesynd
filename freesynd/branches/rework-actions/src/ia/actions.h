@@ -316,6 +316,29 @@ namespace fs_actions {
     };
 
     /*!
+     * This action is used for a policeman to follow a target and when
+     * the target is in shooting range, the action is finished.
+     * The shooting range is 2/3 of the currently selected weapon range.
+     */
+    class FollowToShootAction : public MovementAction {
+    public:
+        //! Constructor
+        FollowToShootAction(fs_actions::CreatOrigin origin, PedInstance *pTarget);
+        void setTarget(PedInstance *pTarget) { pTarget_ = pTarget; }
+    protected:
+        void doStart(Mission *pMission, PedInstance *pPed);
+        bool doExecute(int elapsed, Mission *pMission, PedInstance *pPed);
+
+    protected:
+        /*! The ped to follow.*/
+        PedInstance *pTarget_;
+        /*! To keep track of target position and see if it has moved.*/
+        PathNode targetLastPos_;
+        /*! The distance.*/
+        int followDistance_;
+    };
+
+    /*!
      * This action allows an agent to drop a weapon (identified by its
      * position in the agent's inventory) on the ground.
      * It is only available for our agents (so it's a player action).
@@ -392,11 +415,30 @@ namespace fs_actions {
     protected:
         void doStart(Mission *pMission, PedInstance *pPed);
         bool doExecute(int elapsed, Mission *pMission, PedInstance *pPed);
+
+        void selectWeaponIfNecessary(PedInstance *pPed);
     protected:
         /*! The ped watched by this police ped.*/
         PedInstance *pTarget_;
         /*! Duration of waiting.*/
         fs_utils::Timer waitTimer_;
+    };
+
+    /*!
+     * This action is used to make peds other than the player's agent shoot.
+     */
+    class FireWeaponAction : public MovementAction {
+    public:
+        FireWeaponAction(PedInstance *pPed);
+
+    protected:
+        void doStart(Mission *pMission, PedInstance *pPed);
+        bool doExecute(int elapsed, Mission *pMission, PedInstance *pPed);
+    protected:
+        /*! The ped that is being shot at by the action owner.*/
+        PedInstance *pTarget_;
+        /*! tells if it is a single or automatic shot.*/
+        uint8 shootType_;
     };
 
     /*!
@@ -515,6 +557,14 @@ namespace fs_actions {
      * This action is used to shoot with a one shot gun.
      */
     class ShootAction : public UseWeaponAction {
+    public:
+        //! This constant is returned by Ped::addActionShootAt to indicate no action was added
+        static const uint8 kShootActionNotAdded;
+        //! This constant is returned by Ped::addActionShootAt to indicate that an AutomaticShootAction was added
+        static const uint8 kShootActionAutomaticShoot;
+        //! This constant is returned by Ped::addActionShootAt to indicate that a ShootAction was added
+        static const uint8 kShootActionSingleShoot;
+
     public:
         ShootAction(CreatOrigin origin, PathNode &aimedAt, WeaponInstance *pWeapon);
 

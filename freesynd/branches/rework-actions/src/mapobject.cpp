@@ -191,6 +191,16 @@ void MapObject::setDirection(int posx, int posy, int * dir) {
     }
 }
 
+void MapObject::setDirectionTowardObject(const MapObject &object) {
+    int xb = this->tileX() * 256 + this->offX();
+    int yb = this->tileY() * 256 + this->offY();
+    
+    int txb = object.tileX() * 256 + object.offX();
+    int tyb = object.tileY() * 256 + object.offY();
+
+    this->setDirection(txb - xb, tyb - yb);
+}
+
 /*!
  * @returns direction for selected number of surfaces
  */

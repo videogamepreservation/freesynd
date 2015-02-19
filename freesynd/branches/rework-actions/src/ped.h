@@ -340,7 +340,7 @@ public:
     //! Return true if ped can use a weapon
     bool canAddUseWeaponAction(WeaponInstance *pWeapon = NULL);
     //! Adds action to shoot somewhere
-    void addActionShootAt(const PathNode &aimedPt);
+    uint8 addActionShootAt(const PathNode &aimedPt);
     //! Adds action to use medikit
     void addActionUseMedikit();
     //! Creates and insert a HitAction for the ped

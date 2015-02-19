@@ -130,6 +130,10 @@ protected:
     bool isButtonSelectAllPressed_;
     /*! Flag to store the fact that player is currently shooting.*/
     bool isPlayerShooting_;
+    /*! Flag to play the sound of police warning an agent.*/
+    bool canPlayPoliceWarnSound_;
+    /*! Delay between 2 police warnings.*/
+    fs_utils::Timer warningTimer_;
 
     // when ipa is manipulated this represents
     struct IPA_manipulation {

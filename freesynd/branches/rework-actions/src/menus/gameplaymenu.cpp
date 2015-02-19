@@ -56,11 +56,12 @@ last_motion_x_(320), last_motion_y_(240), mission_hint_ticks_(0),
 mission_hint_(0), mission_(NULL), world_x_(0),
 world_y_(0), selection_(),
 target_(NULL),
-mm_renderer_()
+mm_renderer_(), warningTimer_(20000)
 {
     scroll_x_ = 0;
     scroll_y_ = 0;
     ipa_chng_.ipa_chng = -1;
+    canPlayPoliceWarnSound_ = true;
     g_gameCtrl.addListener(this, GameEvent::kMission);
 }
 
@@ -328,6 +329,11 @@ void GameplayMenu::handleTick(int elapsed)
 
         // Checks mission objectives
         mission_->checkObjectives();
+    }
+
+    if (!canPlayPoliceWarnSound_ && warningTimer_.update(elapsed)) {
+        // wait an amount of time before allowing another warning
+        canPlayPoliceWarnSound_ = true;
     }
 
     // Scroll the map
@@ -1490,6 +1496,12 @@ void GameplayMenu::handleGameEvent(GameEvent evt) {
             if (pPed != pPedSource) {
                 pPed->behaviour().handleBehaviourEvent(Behaviour::kBehvEvtWeaponCleared, pPedSource);
             }
+        }
+    } else if (evt.type == GameEvent::kEvtWarnAgent) {
+        if (canPlayPoliceWarnSound_) {
+            // warn
+            g_App.gameSounds().play(snd::PUTDOWN_WEAPON);
+            canPlayPoliceWarnSound_ = false;
         }
     }
 }
